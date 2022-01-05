@@ -33,19 +33,22 @@ class RoadShieldContentManagerImplTest {
             val cache = mockk<ShieldResultCache>()
             val contentManager = createContentManager(cache)
 
-            val legacyShieldUrl = "url_legacy"
+            val legacyUrl = "url_legacy"
+            val downloadUrl = legacyUrl.plus(".svg")
             val toDownloadLegacy = mockk<RouteShieldToDownload.MapboxLegacy> {
-                every { url } returns legacyShieldUrl
+                every { url } returns downloadUrl
+                every { initialUrl } returns legacyUrl
             }
             val expectedLegacyShield = RouteShield.MapboxLegacyShield(
-                legacyShieldUrl,
-                byteArrayOf()
+                downloadUrl,
+                byteArrayOf(),
+                legacyUrl
             )
             val expectedLegacyResult = RouteShieldResult(
                 expectedLegacyShield,
                 RouteShieldOrigin(
                     isFallback = false,
-                    originalUrl = legacyShieldUrl,
+                    originalUrl = downloadUrl,
                     originalErrorMessage = ""
                 )
             )
@@ -97,19 +100,22 @@ class RoadShieldContentManagerImplTest {
             val cache = mockk<ShieldResultCache>()
             val contentManager = createContentManager(cache)
 
-            val legacyShieldUrl = "url_legacy"
+            val legacyUrl = "url_legacy"
+            val downloadUrl = legacyUrl.plus(".svg")
             val toDownloadLegacy = mockk<RouteShieldToDownload.MapboxLegacy> {
-                every { url } returns legacyShieldUrl
+                every { url } returns downloadUrl
+                every { initialUrl } returns legacyUrl
             }
             val expectedLegacyShield = RouteShield.MapboxLegacyShield(
-                legacyShieldUrl,
-                byteArrayOf()
+                url = downloadUrl,
+                byteArray = byteArrayOf(),
+                initialUrl = legacyUrl
             )
             val expectedLegacyResult = RouteShieldResult(
                 expectedLegacyShield,
                 RouteShieldOrigin(
                     isFallback = false,
-                    originalUrl = legacyShieldUrl,
+                    originalUrl = downloadUrl,
                     originalErrorMessage = ""
                 )
             )
@@ -158,19 +164,22 @@ class RoadShieldContentManagerImplTest {
             val cache = mockk<ShieldResultCache>()
             val contentManager = createContentManager(cache)
 
-            val legacyShieldUrl = "url_legacy"
+            val legacyUrl = "url_legacy"
+            val downloadUrl = legacyUrl.plus(".svg")
             val toDownloadLegacy = mockk<RouteShieldToDownload.MapboxLegacy> {
-                every { url } returns legacyShieldUrl
+                every { url } returns downloadUrl
+                every { initialUrl } returns legacyUrl
             }
             val expectedLegacyShield = RouteShield.MapboxLegacyShield(
-                legacyShieldUrl,
-                byteArrayOf()
+                downloadUrl,
+                byteArrayOf(),
+                legacyUrl
             )
             val expectedLegacyResult = RouteShieldResult(
                 expectedLegacyShield,
                 RouteShieldOrigin(
                     isFallback = false,
-                    originalUrl = legacyShieldUrl,
+                    originalUrl = downloadUrl,
                     originalErrorMessage = ""
                 )
             )
@@ -211,19 +220,22 @@ class RoadShieldContentManagerImplTest {
             val cache = mockk<ShieldResultCache>()
             val contentManager = createContentManager(cache)
 
-            val legacyShieldUrl = "url_legacy"
+            val legacyUrl = "url_legacy"
+            val downloadUrl = legacyUrl.plus(".svg")
             val toDownloadLegacy = mockk<RouteShieldToDownload.MapboxLegacy> {
-                every { url } returns legacyShieldUrl
+                every { url } returns downloadUrl
+                every { initialUrl } returns legacyUrl
             }
             val expectedLegacyShield = RouteShield.MapboxLegacyShield(
-                legacyShieldUrl,
-                byteArrayOf()
+                downloadUrl,
+                byteArrayOf(),
+                legacyUrl
             )
             val expectedLegacyResult = RouteShieldResult(
                 expectedLegacyShield,
                 RouteShieldOrigin(
                     isFallback = false,
-                    originalUrl = legacyShieldUrl,
+                    originalUrl = downloadUrl,
                     originalErrorMessage = ""
                 )
             )
@@ -256,12 +268,20 @@ class RoadShieldContentManagerImplTest {
             val cache = mockk<ShieldResultCache>()
             val contentManager = createContentManager(cache)
 
-            val shieldUrl = "url"
-            val legacyShieldUrl = "legacy_url"
+            val initialUrl = "url_legacy"
+            val downloadUrl = initialUrl.plus(".svg")
             val expectedLegacyShield = RouteShield.MapboxLegacyShield(
-                shieldUrl,
-                byteArrayOf()
+                downloadUrl,
+                byteArrayOf(),
+                initialUrl
             )
+            val legacyToDownload = RouteShieldToDownload.MapboxLegacy(initialUrl)
+            val shieldUrl = "url_design"
+            val toDownload = mockk<RouteShieldToDownload.MapboxDesign> {
+                every { url } returns shieldUrl
+                every { legacyFallback } returns legacyToDownload
+            }
+
             val expectedResult = RouteShieldResult(
                 expectedLegacyShield,
                 RouteShieldOrigin(
@@ -270,12 +290,6 @@ class RoadShieldContentManagerImplTest {
                     originalErrorMessage = "error"
                 )
             )
-            val legacyToDownload = RouteShieldToDownload.MapboxLegacy(legacyShieldUrl)
-            val toDownload = mockk<RouteShieldToDownload.MapboxDesign> {
-                every { url } returns shieldUrl
-                every { legacyFallback } returns legacyToDownload
-            }
-
             coEvery {
                 cache.getOrRequest(toDownload)
             } returns ExpectedFactory.createError("error")
@@ -294,26 +308,25 @@ class RoadShieldContentManagerImplTest {
             val cache = mockk<ShieldResultCache>()
             val contentManager = createContentManager(cache)
 
-            val shieldUrl = "url"
-            val legacyShieldUrl = "legacy_url"
-            val expectedResult = RouteShieldError(
-                shieldUrl,
-                """
-                    |original request failed with:
-                    |url: url
-                    |error: error
-                    |
-                    |fallback request failed with:
-                    |url: legacy_url.svg
-                    |error: error_legacy
-                """.trimMargin()
-            )
-            val legacyToDownload = RouteShieldToDownload.MapboxLegacy(legacyShieldUrl)
+            val legacyUrl = "url_legacy"
+            val legacyToDownload = RouteShieldToDownload.MapboxLegacy(legacyUrl)
+            val shieldUrl = "url_design"
             val toDownload = mockk<RouteShieldToDownload.MapboxDesign> {
                 every { url } returns shieldUrl
                 every { legacyFallback } returns legacyToDownload
             }
-
+            val expectedResult = RouteShieldError(
+                shieldUrl,
+                """
+                    |original request failed with:
+                    |url: url_design
+                    |error: error
+                    |
+                    |fallback request failed with:
+                    |url: url_legacy.svg
+                    |error: error_legacy
+                """.trimMargin()
+            )
             coEvery {
                 cache.getOrRequest(toDownload)
             } returns ExpectedFactory.createError("error")
@@ -331,7 +344,7 @@ class RoadShieldContentManagerImplTest {
         val cache = mockk<ShieldResultCache>()
         val contentManager = createContentManager(cache)
 
-        val shieldUrl = "url"
+        val shieldUrl = "url_design"
         val toDownload = mockk<RouteShieldToDownload.MapboxDesign> {
             every { url } returns shieldUrl
             every { legacyFallback } returns null
@@ -355,7 +368,7 @@ class RoadShieldContentManagerImplTest {
         val cache = mockk<ShieldResultCache>()
         val contentManager = createContentManager(cache)
 
-        val shieldUrl = "url"
+        val shieldUrl = "url_design"
         val mapboxShield = mockk<MapboxShield>()
         val sprite = mockk<ShieldSprite>()
         val toDownload = mockk<RouteShieldToDownload.MapboxDesign> {
@@ -390,11 +403,13 @@ class RoadShieldContentManagerImplTest {
         val cache = mockk<ShieldResultCache>()
         val contentManager = createContentManager(cache)
 
-        val shieldUrl = "url"
-        val toDownload = RouteShieldToDownload.MapboxLegacy(shieldUrl)
+        val initialUrl = "url_legacy"
+        val downloadUrl = initialUrl.plus(".svg")
+        val toDownload = RouteShieldToDownload.MapboxLegacy(initialUrl)
         val expectedShield = RouteShield.MapboxLegacyShield(
-            shieldUrl,
-            byteArrayOf()
+            downloadUrl,
+            byteArrayOf(),
+            initialUrl
         )
         val expectedResult = RouteShieldResult(
             expectedShield,
@@ -419,8 +434,8 @@ class RoadShieldContentManagerImplTest {
         val cache = mockk<ShieldResultCache>()
         val contentManager = createContentManager(cache)
 
-        val shieldUrl = "url"
-        val toDownload = RouteShieldToDownload.MapboxLegacy(shieldUrl)
+        val initialUrl = "url_legacy"
+        val toDownload = RouteShieldToDownload.MapboxLegacy(initialUrl)
         val expectedResult = RouteShieldError(
             toDownload.url,
             "error"

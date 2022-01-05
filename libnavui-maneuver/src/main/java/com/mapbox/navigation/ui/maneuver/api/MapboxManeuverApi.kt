@@ -29,6 +29,8 @@ import com.mapbox.navigation.ui.shield.internal.api.getRouteShieldsFromModels
 import com.mapbox.navigation.ui.shield.internal.model.RouteShieldToDownload
 import com.mapbox.navigation.ui.shield.internal.model.ShieldSpriteToDownload
 import com.mapbox.navigation.ui.shield.model.RouteShield
+import com.mapbox.navigation.ui.shield.model.RouteShieldCallback
+import com.mapbox.navigation.ui.shield.model.RouteShieldError
 import com.mapbox.navigation.ui.shield.model.RouteShieldResult
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.launch
@@ -161,7 +163,9 @@ class MapboxManeuverApi internal constructor(
      * @see MapboxManeuverView.renderManeuverShields
      */
     @Deprecated(
-        message = "The API is incapable of associating multiple shields with a single maneuver id",
+        message = "The API is incapable of delivering Mapbox designed route shields. In cases " +
+            "where an instruction contains multiple shields, the API may only render 1 shield " +
+            "instead of multiple for that maneuver.",
         replaceWith = ReplaceWith(
             "getRoadShields(maneuvers, shieldCallback)",
             "com.mapbox.navigation.ui.maneuver.api"
@@ -182,6 +186,37 @@ class MapboxManeuverApi internal constructor(
     }
 
     /**
+     * Given a list of [Maneuver] the function requests legacy road shields (if available) using
+     * [BannerComponents.imageBaseUrl] associated in [RoadShieldComponentNode].
+     *
+     * If you do not wish to download all of the shields at once,
+     * make sure to pass in only a list of maneuvers that you'd like download the road shields.
+     *
+     * The function is safe to be called repeatably, all the results are cached in-memory
+     * and requests are managed to avoid duplicating network bandwidth usage.
+     *
+     * The function returns list of either [RouteShieldError] or [RouteShieldResult] in
+     * [RouteShieldCallback.onRoadShields] and can be used when displaying [PrimaryManeuver],
+     * [SecondaryManeuver] and [SubManeuver].
+     *
+     * @param maneuvers list of maneuvers
+     * @param shieldCallback invoked with appropriate result
+     * @see MapboxManeuverView.renderManeuverShields
+     */
+    fun getRoadShields(
+        maneuvers: List<Maneuver>,
+        shieldCallback: RouteShieldCallback
+    ) {
+        getRoadShields(
+            null,
+            null,
+            null,
+            maneuvers,
+            shieldCallback
+        )
+    }
+
+    /**
      * Given a list of [Maneuver] the function requests mapbox designed road shields (if available)
      * using [BannerComponents.mapboxShield] associated in [RoadShieldComponentNode]. If for any
      * reason the API fails to download the mapbox designed shields, it fallbacks to use legacy
@@ -193,23 +228,68 @@ class MapboxManeuverApi internal constructor(
      * The function is safe to be called repeatably, all the results are cached in-memory
      * and requests are managed to avoid duplicating network bandwidth usage.
      *
-     * The function returns maps of [String] to [RoadShield] or [String] to [RoadShieldError] in
-     * [RoadShieldCallback.onRoadShields] and can be used when displaying [PrimaryManeuver],
+     * The function returns list of either [RouteShieldError] or [RouteShieldResult] in
+     * [RouteShieldCallback.onRoadShields] and can be used when displaying [PrimaryManeuver],
      * [SecondaryManeuver] and [SubManeuver].
      *
      * @param maneuvers list of maneuvers
-     * @param callback invoked with appropriate result
+     * @param shieldCallback invoked with appropriate result
      * @see MapboxManeuverView.renderManeuverShields
      */
-    @Deprecated(
-        message = "The API is incapable of associating multiple shields with a single maneuver id",
-        replaceWith = ReplaceWith(
-            "getRoadShields(userId, styleId, accessToken, maneuvers, shieldCallback)",
-            "com.mapbox.navigation.ui.maneuver.api"
-        ),
-        level = DeprecationLevel.WARNING
-    )
     fun getRoadShields(
+        userId: String?,
+        styleId: String?,
+        accessToken: String?,
+        maneuvers: List<Maneuver>,
+        shieldCallback: RouteShieldCallback
+    ) {
+        mainJobController.scope.launch {
+            val shields = mutableListOf<Expected<RouteShieldError, RouteShieldResult>>()
+            maneuvers.forEach { maneuver ->
+                routeShieldApi.getRouteShieldsFromModels(
+                    maneuver.primary.componentList.findShieldsToDownload(
+                        accessToken = accessToken,
+                        userId = userId,
+                        styleId = styleId
+                    )
+                ).let { results ->
+                    shields.addAll(results)
+                }
+                maneuver.secondary?.let { secondary ->
+                    routeShieldApi.getRouteShieldsFromModels(
+                        secondary.componentList.findShieldsToDownload(
+                            accessToken = accessToken,
+                            userId = userId,
+                            styleId = styleId
+                        )
+                    ).let { results ->
+                        shields.addAll(results)
+                    }
+                }
+                maneuver.sub?.let { sub ->
+                    routeShieldApi.getRouteShieldsFromModels(
+                        sub.componentList.findShieldsToDownload(
+                            accessToken = accessToken,
+                            userId = userId,
+                            styleId = styleId
+                        )
+                    ).let { results ->
+                        shields.addAll(results)
+                    }
+                }
+            }
+            shieldCallback.onRoadShields(shields = shields)
+        }
+    }
+
+    /**
+     * Invoke the function to cancel any job invoked through other APIs
+     */
+    fun cancel() {
+        routeShieldApi.cancel()
+    }
+
+    internal fun getRoadShields(
         userId: String?,
         styleId: String?,
         accessToken: String?,
@@ -318,173 +398,6 @@ class MapboxManeuverApi internal constructor(
         }
     }
 
-    /**
-     * Given a list of [Maneuver] the function requests legacy road shields (if available) using
-     * [BannerComponents.imageBaseUrl] associated in [RoadShieldComponentNode].
-     *
-     * If you do not wish to download all of the shields at once,
-     * make sure to pass in only a list of maneuvers that you'd like download the road shields.
-     *
-     * The function is safe to be called repeatably, all the results are cached in-memory
-     * and requests are managed to avoid duplicating network bandwidth usage.
-     *
-     * The function returns maps of [String] to [RoadShield] or [String] to [RoadShieldError] in
-     * [RoadShieldsCallback.onRoadShields] and can be used when displaying [PrimaryManeuver],
-     * [SecondaryManeuver] and [SubManeuver].
-     *
-     * @param maneuvers list of maneuvers
-     * @param shieldCallback invoked with appropriate result
-     * @see MapboxManeuverView.renderManeuverShields
-     */
-    fun getRoadShields(
-        maneuvers: List<Maneuver>,
-        shieldCallback: RoadShieldsCallback
-    ) {
-        getRoadShields(
-            null,
-            null,
-            null,
-            maneuvers,
-            shieldCallback
-        )
-    }
-
-    /**
-     * Given a list of [Maneuver] the function requests mapbox designed road shields (if available)
-     * using [BannerComponents.mapboxShield] associated in [RoadShieldComponentNode]. If for any
-     * reason the API fails to download the mapbox designed shields, it fallbacks to use legacy
-     * [BannerComponents.imageBaseUrl] if available.
-     *
-     * If you do not wish to download all of the shields at once,
-     * make sure to pass in only a list of maneuvers that you'd like download the road shields.
-     *
-     * The function is safe to be called repeatably, all the results are cached in-memory
-     * and requests are managed to avoid duplicating network bandwidth usage.
-     *
-     * The function returns maps of [String] to [RoadShield] or [String] to [RoadShieldError] in
-     * [RoadShieldsCallback.onRoadShields] and can be used when displaying [PrimaryManeuver],
-     * [SecondaryManeuver] and [SubManeuver].
-     *
-     * @param maneuvers list of maneuvers
-     * @param shieldCallback invoked with appropriate result
-     * @see MapboxManeuverView.renderManeuverShields
-     */
-    fun getRoadShields(
-        userId: String?,
-        styleId: String?,
-        accessToken: String?,
-        maneuvers: List<Maneuver>,
-        shieldCallback: RoadShieldsCallback
-    ) {
-        mainJobController.scope.launch {
-            val shieldMap = hashMapOf<String, List<RoadShield>>()
-            val errorMap = hashMapOf<String, List<RoadShieldError>>()
-
-            maneuvers.forEach { maneuver ->
-                routeShieldApi.getRouteShieldsFromModels(
-                    maneuver.primary.componentList.findShieldsToDownload(
-                        accessToken = accessToken,
-                        userId = userId,
-                        styleId = styleId
-                    )
-                ).let { results ->
-                    val shields = mutableListOf<RoadShield>()
-                    val errors = mutableListOf<RoadShieldError>()
-                    results.forEach { result ->
-                        result.fold(
-                            { error ->
-                                errors.add(
-                                    RoadShieldError(url = error.url, message = error.errorMessage)
-                                )
-                            },
-                            { routeShieldResult ->
-                                shields.add(getShield(routeShieldResult))
-                            }
-                        )
-                    }
-                    shieldMap[maneuver.primary.id] = shields
-                    if (errors.isNotEmpty()) {
-                        errorMap[maneuver.primary.id] = errors
-                    }
-                }
-                maneuver.secondary?.let { secondary ->
-                    routeShieldApi.getRouteShieldsFromModels(
-                        secondary.componentList.findShieldsToDownload(
-                            accessToken = accessToken,
-                            userId = userId,
-                            styleId = styleId
-                        )
-                    ).let { results ->
-                        val shields = mutableListOf<RoadShield>()
-                        val errors = mutableListOf<RoadShieldError>()
-                        results.forEach { result ->
-                            result.fold(
-                                { error ->
-                                    errors.add(
-                                        RoadShieldError(
-                                            url = error.url,
-                                            message = error.errorMessage
-                                        )
-                                    )
-                                },
-                                { routeShieldResult ->
-                                    shields.add(getShield(routeShieldResult))
-                                }
-                            )
-                        }
-                        shieldMap[secondary.id] = shields
-                        if (errors.isNotEmpty()) {
-                            errorMap[secondary.id] = errors
-                        }
-                    }
-                }
-                maneuver.sub?.let { sub ->
-                    routeShieldApi.getRouteShieldsFromModels(
-                        sub.componentList.findShieldsToDownload(
-                            accessToken = accessToken,
-                            userId = userId,
-                            styleId = styleId
-                        )
-                    ).let { results ->
-                        val shields = mutableListOf<RoadShield>()
-                        val errors = mutableListOf<RoadShieldError>()
-                        results.forEach { result ->
-                            result.fold(
-                                { error ->
-                                    errors.add(
-                                        RoadShieldError(
-                                            url = error.url,
-                                            message = error.errorMessage
-                                        )
-                                    )
-                                },
-                                { routeShieldResult ->
-                                    shields.add(getShield(routeShieldResult))
-                                }
-                            )
-                        }
-                        shieldMap[sub.id] = shields
-                        if (errors.isNotEmpty()) {
-                            errorMap[sub.id] = errors
-                        }
-                    }
-                }
-            }
-            shieldCallback.onRoadShields(
-                maneuvers = maneuvers,
-                shields = shieldMap,
-                errors = errorMap
-            )
-        }
-    }
-
-    /**
-     * Invoke the function to cancel any job invoked through other APIs
-     */
-    fun cancel() {
-        routeShieldApi.cancel()
-    }
-
     private fun List<Component>.findShieldsToDownload(
         accessToken: String? = null,
         userId: String? = null,
@@ -528,16 +441,13 @@ class MapboxManeuverApi internal constructor(
             is RouteShield.MapboxLegacyShield -> {
                 RoadShield(
                     shieldUrl = routeShieldResult.shield.url,
-                    shieldIcon = routeShieldResult.shield.byteArray,
-                    mapboxShield = null
+                    shieldIcon = routeShieldResult.shield.byteArray
                 )
             }
             else -> {
                 RoadShield(
                     shieldUrl = routeShieldResult.shield.url,
-                    shieldIcon = routeShieldResult.shield.byteArray,
-                    mapboxShield =
-                    (routeShieldResult.shield as RouteShield.MapboxDesignedShield).mapboxShield
+                    shieldIcon = routeShieldResult.shield.byteArray
                 )
             }
         }

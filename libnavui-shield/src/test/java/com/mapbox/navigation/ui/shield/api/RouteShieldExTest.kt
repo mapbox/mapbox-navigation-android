@@ -32,7 +32,7 @@ class RouteShieldExTest {
     @Test
     fun `when get mapbox designed shield with default height`() {
         mockkObject(SvgUtil)
-        val mockBitmap = mockk<Bitmap>() {
+        val mockBitmap = mockk<Bitmap> {
             every { width } returns 72
             every { height } returns 24
         }
@@ -40,7 +40,7 @@ class RouteShieldExTest {
             url = "https://shield.mapbox.designed",
             byteArrayOf(1),
             mockk(),
-            mockk() {
+            mockk {
                 every { spriteAttributes().width() } returns 72
                 every { spriteAttributes().height() } returns 24
             }
@@ -65,7 +65,7 @@ class RouteShieldExTest {
             url = "https://shield.mapbox.designed",
             byteArrayOf(1),
             mockk(),
-            mockk() {
+            mockk {
                 every { spriteAttributes().width() } returns 72
                 every { spriteAttributes().height() } returns 24
             }
@@ -87,8 +87,9 @@ class RouteShieldExTest {
             every { height } returns 36
         }
         val mapboxDesignedShield = RouteShield.MapboxLegacyShield(
-            url = "https://shield.mapbox.legacy",
-            byteArrayOf(1)
+            url = "https://shield.mapbox.legacy.svg",
+            byteArrayOf(1),
+            initialUrl = "https://shield.mapbox.legacy",
         )
         every { SvgUtil.renderAsBitmapWithHeight(any(), any(), any()) } returns mockBitmap
 
@@ -107,8 +108,9 @@ class RouteShieldExTest {
             every { height } returns 333
         }
         val mapboxDesignedShield = RouteShield.MapboxLegacyShield(
-            url = "https://shield.mapbox.legacy",
-            byteArrayOf(1)
+            url = "https://shield.mapbox.legacy.svg",
+            byteArrayOf(1),
+            initialUrl = "https://shield.mapbox.legacy",
         )
         every { SvgUtil.renderAsBitmapWithHeight(any(), any(), any()) } returns mockBitmap
 

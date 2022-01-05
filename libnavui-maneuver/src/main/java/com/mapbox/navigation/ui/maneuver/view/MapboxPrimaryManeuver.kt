@@ -8,6 +8,8 @@ import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.model.ManeuverInstructionGenerator
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.RoadShield
+import com.mapbox.navigation.ui.maneuver.model.toRouteShield
+import com.mapbox.navigation.ui.shield.model.RouteShield
 import com.mapbox.navigation.utils.internal.ifNonNull
 
 /**
@@ -61,13 +63,13 @@ class MapboxPrimaryManeuver : AppCompatTextView {
      * @param maneuver PrimaryManeuver
      */
     @Deprecated(
-        message = "The method can only render one shield if an instruction has multiple shields",
+        message = "The method may or may not render multiple shields for a given instruction",
         replaceWith = ReplaceWith("renderManeuver(maneuver, roadShields)")
     )
     @JvmOverloads
     fun render(maneuver: PrimaryManeuver, roadShield: RoadShield? = null) {
         val roadShields = ifNonNull(roadShield) {
-            listOf(it)
+            setOf(it.toRouteShield())
         }
         renderManeuver(maneuver, roadShields)
     }
@@ -76,7 +78,7 @@ class MapboxPrimaryManeuver : AppCompatTextView {
      * Invoke the method to render primary maneuver instructions
      * @param maneuver PrimaryManeuver
      */
-    fun renderManeuver(maneuver: PrimaryManeuver, roadShields: List<RoadShield>?) {
+    fun renderManeuver(maneuver: PrimaryManeuver, routeShields: Set<RouteShield>?) {
         val exitView = MapboxExitText(context)
         exitView.setExitStyle(exitBackground, leftDrawable, rightDrawable)
         val instruction = ManeuverInstructionGenerator.generatePrimary(
@@ -84,7 +86,7 @@ class MapboxPrimaryManeuver : AppCompatTextView {
             lineHeight,
             exitView,
             maneuver,
-            roadShields
+            routeShields
         )
         if (instruction.isNotEmpty()) {
             text = instruction

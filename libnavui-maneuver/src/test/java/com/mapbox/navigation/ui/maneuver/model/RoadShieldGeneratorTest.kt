@@ -3,6 +3,8 @@ package com.mapbox.navigation.ui.maneuver.model
 import android.content.Context
 import android.text.style.ImageSpan
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.ui.shield.model.RouteShieldFactory
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -10,6 +12,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalMapboxNavigationAPI
 @RunWith(RobolectricTestRunner::class)
 class RoadShieldGeneratorTest {
 
@@ -93,29 +96,17 @@ class RoadShieldGeneratorTest {
         val mockShieldText = "880"
         val mockDesiredHeight = 50
         val mockResources = ctx.resources
-        val mockShieldIcon = byteArrayOf()
+        val emptyShieldIcon = byteArrayOf()
 
         val spannable = RoadShieldGenerator.styleAndGetRoadShield(
             mockShieldText,
             mockDesiredHeight,
-            mockResources
-        )
-        val imageSpan = spannable.getSpans(0, spannable.length, ImageSpan::class.java)
-
-        assertTrue(spannable.isNotEmpty())
-        assertTrue(imageSpan.isEmpty())
-    }
-
-    @Test
-    fun `when road shield invalid then spannable has empty image span`() {
-        val mockShieldText = "880"
-        val mockDesiredHeight = 50
-        val mockResources = ctx.resources
-
-        val spannable = RoadShieldGenerator.styleAndGetRoadShield(
-            mockShieldText,
-            mockDesiredHeight,
-            mockResources
+            mockResources,
+            RouteShieldFactory.buildRouteShield(
+                "https://mapbox_legacy_url.svg",
+                emptyShieldIcon,
+                "https://mapbox_legacy_url"
+            )
         )
         val imageSpan = spannable.getSpans(0, spannable.length, ImageSpan::class.java)
 
@@ -133,7 +124,11 @@ class RoadShieldGeneratorTest {
             mockShieldText,
             mockDesiredHeight,
             mockResources,
-            RoadShield("https://this_is_my_url", mockShieldIcon)
+            RouteShieldFactory.buildRouteShield(
+                "https://mapbox_legacy_url.svg",
+                mockShieldIcon,
+                "https://mapbox_legacy_url"
+            )
         )
         val imageSpan = spannable.getSpans(0, spannable.length, ImageSpan::class.java)
 

@@ -8,6 +8,8 @@ import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.model.ManeuverInstructionGenerator
 import com.mapbox.navigation.ui.maneuver.model.RoadShield
 import com.mapbox.navigation.ui.maneuver.model.SubManeuver
+import com.mapbox.navigation.ui.maneuver.model.toRouteShield
+import com.mapbox.navigation.ui.shield.model.RouteShield
 import com.mapbox.navigation.utils.internal.ifNonNull
 
 /**
@@ -61,13 +63,13 @@ class MapboxSubManeuver : AppCompatTextView {
      * @param maneuver SubManeuver
      */
     @Deprecated(
-        message = "The method can only render one shield if an instruction has multiple shields",
+        message = "The method may or may not render multiple shields for a given instruction",
         replaceWith = ReplaceWith("renderManeuver(maneuver, roadShields)")
     )
     @JvmOverloads
     fun render(maneuver: SubManeuver?, roadShield: RoadShield? = null) {
         val roadShields = ifNonNull(roadShield) {
-            listOf(it)
+            setOf(it.toRouteShield())
         }
         renderManeuver(maneuver, roadShields)
     }
@@ -76,7 +78,7 @@ class MapboxSubManeuver : AppCompatTextView {
      * Invoke the method to render sub maneuver instructions
      * @param maneuver SubManeuver
      */
-    fun renderManeuver(maneuver: SubManeuver?, roadShields: List<RoadShield>?) {
+    fun renderManeuver(maneuver: SubManeuver?, routeShields: Set<RouteShield>?) {
         val exitView = MapboxExitText(context)
         exitView.setExitStyle(exitBackground, leftDrawable, rightDrawable)
         val instruction = ManeuverInstructionGenerator.generateSub(
@@ -84,7 +86,7 @@ class MapboxSubManeuver : AppCompatTextView {
             lineHeight,
             exitView,
             maneuver,
-            roadShields
+            routeShields
         )
         text = instruction
     }

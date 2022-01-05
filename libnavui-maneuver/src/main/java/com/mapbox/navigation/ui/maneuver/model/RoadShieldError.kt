@@ -5,6 +5,9 @@ package com.mapbox.navigation.ui.maneuver.model
  * @property url String
  * @property message String
  */
+@Deprecated(
+    message = "The data class is incapable of delivering Mapbox designed route shields."
+)
 data class RoadShieldError internal constructor(
     val url: String,
     val message: String

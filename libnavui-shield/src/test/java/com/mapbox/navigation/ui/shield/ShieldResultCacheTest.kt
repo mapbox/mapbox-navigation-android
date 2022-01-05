@@ -185,7 +185,7 @@ class ShieldResultCacheTest {
         val shieldByteArray = byteArrayOf()
         val shieldUrl = "shield-url"
         val toDownload = mockk<RouteShieldToDownload.MapboxLegacy> {
-            every { url } returns shieldUrl
+            every { initialUrl } returns shieldUrl
             every { url } returns shieldUrl.plus(".svg")
         }
         coEvery {
@@ -194,7 +194,8 @@ class ShieldResultCacheTest {
 
         val expected = RouteShield.MapboxLegacyShield(
             url = toDownload.url,
-            byteArray = shieldByteArray
+            byteArray = shieldByteArray,
+            initialUrl = shieldUrl
         )
         val result = cache.getOrRequest(toDownload)
 
