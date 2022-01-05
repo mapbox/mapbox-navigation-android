@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maneuver.api
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.MapboxShield
+import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -18,6 +19,9 @@ import com.mapbox.navigation.ui.maneuver.model.RoadShieldError
 import com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi
 import com.mapbox.navigation.ui.shield.internal.api.getRouteShieldsFromModels
 import com.mapbox.navigation.ui.shield.model.RouteShield
+import com.mapbox.navigation.ui.shield.model.RouteShieldCallback
+import com.mapbox.navigation.ui.shield.model.RouteShieldError
+import com.mapbox.navigation.ui.shield.model.RouteShieldResult
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -276,21 +280,17 @@ class MapboxManeuverApiTest {
                 )
             )
             val maneuverList = listOf(testManeuvers[0])
-            val callback: RoadShieldsCallback = mockk(relaxed = true)
-            val maneuverSlot = slot<List<Maneuver>>()
-            val shieldSlot = slot<Map<String, List<RoadShield>>>()
-            val errorSlot = slot<Map<String, List<RoadShieldError>>>()
+            val callback: RouteShieldCallback = mockk(relaxed = true)
+            val shieldSlot = slot<List<Expected<RouteShieldError, RouteShieldResult>>>()
 
             mapboxManeuverApi.getRoadShields(maneuverList, callback)
 
             verify(exactly = 1) {
                 callback.onRoadShields(
-                    capture(maneuverSlot),
-                    capture(shieldSlot),
-                    capture(errorSlot)
+                    capture(shieldSlot)
                 )
             }
-            assertEquals(2, errorSlot.captured["primary_0"]!!.size)
+            assertEquals(2, shieldSlot.captured.size)
             unmockkStatic(MapboxRouteShieldApi::getRouteShieldsFromModels)
         }
 
@@ -379,25 +379,21 @@ class MapboxManeuverApiTest {
                 )
             )
             val maneuverList = listOf(testManeuvers[1])
-            val callback: RoadShieldsCallback = mockk(relaxed = true)
-            val maneuverSlot = slot<List<Maneuver>>()
-            val shieldSlot = slot<Map<String, List<RoadShield>>>()
-            val errorSlot = slot<Map<String, List<RoadShieldError>>>()
+            val callback: RouteShieldCallback = mockk(relaxed = true)
+            val shieldSlot = slot<List<Expected<RouteShieldError, RouteShieldResult>>>()
 
             mapboxManeuverApi.getRoadShields(userId, styleId, accessToken, maneuverList, callback)
 
             verify(exactly = 1) {
                 callback.onRoadShields(
-                    capture(maneuverSlot),
-                    capture(shieldSlot),
-                    capture(errorSlot)
+                    capture(shieldSlot)
                 )
             }
-            assertEquals(2, shieldSlot.captured["primary_1"]!!.size)
-            assertEquals(mockByteArray, shieldSlot.captured.values.first()[0].shieldIcon)
+            assertEquals(2, shieldSlot.captured.size)
+            assertEquals(mockByteArray, shieldSlot.captured[0].value?.shield?.byteArray)
             assertEquals(
                 "https://shield.mapbox.com/url2",
-                shieldSlot.captured.values.first()[1].shieldUrl
+                shieldSlot.captured[1].value?.shield?.url
             )
             unmockkStatic(MapboxRouteShieldApi::getRouteShieldsFromModels)
         }

@@ -188,7 +188,8 @@ internal class ShieldResultCache(
         return shieldByteArrayCache.getOrRequest(shieldUrl).mapValue { byteArray ->
             RouteShield.MapboxLegacyShield(
                 toDownload.url,
-                byteArray
+                byteArray,
+                toDownload.initialUrl
             )
         }
     }

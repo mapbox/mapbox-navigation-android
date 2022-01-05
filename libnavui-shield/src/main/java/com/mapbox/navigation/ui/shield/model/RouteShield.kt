@@ -21,10 +21,13 @@ sealed class RouteShield(
      * Type representation of [RouteShield] which is to be used when requesting mapbox legacy shields.
      * @property url used to download the shield
      * @property byteArray shield image returned in the form of svg wrapped in a [ByteArray]
+     * @property initialUrl the original legacy url obtained from directions response pointing to
+     * a shield. This initial url can be used to match the url from the maneuver object.
      */
     class MapboxLegacyShield internal constructor(
         url: String,
         byteArray: ByteArray,
+        val initialUrl: String,
     ) : RouteShield(url = url, byteArray = byteArray) {
 
         /**
@@ -38,6 +41,7 @@ sealed class RouteShield(
 
             if (url != other.url) return false
             if (!byteArray.contentEquals(other.byteArray)) return false
+            if (initialUrl != other.initialUrl) return false
 
             return true
         }
@@ -48,6 +52,7 @@ sealed class RouteShield(
         override fun hashCode(): Int {
             var result = url.hashCode()
             result = 31 * result + byteArray.contentHashCode()
+            result = 31 * result + initialUrl.hashCode()
             return result
         }
 
@@ -57,7 +62,8 @@ sealed class RouteShield(
         override fun toString(): String {
             return "MapboxLegacyShield(" +
                 "url='$url', " +
-                "byteArray=${byteArray.contentToString()}" +
+                "byteArray=${byteArray.contentToString()}, " +
+                "initialUrl=$initialUrl" +
                 ")"
         }
     }

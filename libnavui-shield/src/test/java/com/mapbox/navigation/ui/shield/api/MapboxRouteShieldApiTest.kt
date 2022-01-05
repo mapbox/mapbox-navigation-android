@@ -70,16 +70,19 @@ class MapboxRouteShieldApiTest {
         coroutineRule.runBlockingTest {
             val bannerComponents: BannerComponents = mockk(relaxed = true)
             val bannerComponentsList = listOf(bannerComponents)
+            val initialUrl1 = "https://shield.mapbox.com/url1"
+            val toDownloadUrl1 = "https://shield.mapbox.com/url1.svg"
             val mockResultList = listOf<Expected<RouteShieldError, RouteShieldResult>>(
                 ExpectedFactory.createValue(
                     RouteShieldResult(
                         shield = RouteShield.MapboxLegacyShield(
-                            url = "https://shield.mapbox.com/url1",
-                            byteArray = byteArrayOf(1)
+                            url = toDownloadUrl1,
+                            byteArray = byteArrayOf(1),
+                            initialUrl = initialUrl1
                         ),
                         origin = RouteShieldOrigin(
                             isFallback = false,
-                            originalUrl = "https://shield.mapbox.com/url1",
+                            originalUrl = toDownloadUrl1,
                             originalErrorMessage = ""
                         )
                     )
@@ -95,6 +98,7 @@ class MapboxRouteShieldApiTest {
                 callback.onRoadShields(capture(shieldSlot))
             }
             assertEquals(mockResultList.size, shieldSlot.captured.size)
+            assertEquals(mockResultList[0].value, shieldSlot.captured[0].value)
         }
 
     @Test
@@ -102,23 +106,26 @@ class MapboxRouteShieldApiTest {
         coroutineRule.runBlockingTest {
             val bannerComponents: BannerComponents = mockk(relaxed = true)
             val bannerComponentsList = listOf(bannerComponents)
+            val initialUrl1 = "https://shield.mapbox.com/url1"
+            val toDownloadUrl1 = "https://shield.mapbox.com/url1.svg"
             val mockResultList = listOf<Expected<RouteShieldError, RouteShieldResult>>(
                 ExpectedFactory.createValue(
                     RouteShieldResult(
                         shield = RouteShield.MapboxLegacyShield(
-                            url = "https://shield.mapbox.com/url1",
-                            byteArray = byteArrayOf(1)
+                            url = toDownloadUrl1,
+                            byteArray = byteArrayOf(1),
+                            initialUrl = initialUrl1
                         ),
                         origin = RouteShieldOrigin(
                             isFallback = false,
-                            originalUrl = "https://shield.mapbox.com/url1",
+                            originalUrl = toDownloadUrl1,
                             originalErrorMessage = ""
                         )
                     )
                 ),
                 ExpectedFactory.createError(
                     RouteShieldError(
-                        url = "https://shield.mapbox.com/url2",
+                        url = "https://shield.mapbox.com/url2.svg",
                         errorMessage = "whatever"
                     )
                 )
@@ -135,6 +142,8 @@ class MapboxRouteShieldApiTest {
             assertEquals(mockResultList.size, shieldSlot.captured.size)
             assertNotNull(shieldSlot.captured[0].value)
             assertNotNull(shieldSlot.captured[1].error)
+            assertEquals(mockResultList[0].value, shieldSlot.captured[0].value)
+            assertEquals(mockResultList[1].error, shieldSlot.captured[1].error)
         }
 
     @Test
@@ -142,16 +151,18 @@ class MapboxRouteShieldApiTest {
         coroutineRule.runBlockingTest {
             val bannerComponents: BannerComponents = mockk(relaxed = true)
             val bannerComponentsList = listOf(bannerComponents)
+            val initialUrl1 = "https://shield.mapbox.com/url1"
+            val initialUrl2 = "https://shield.mapbox.com/url2"
             val mockResultList = listOf<Expected<RouteShieldError, RouteShieldResult>>(
                 ExpectedFactory.createError(
                     RouteShieldError(
-                        url = "https://shield.mapbox.com/url1",
+                        url = initialUrl1.plus(".svg"),
                         errorMessage = "whatever"
                     )
                 ),
                 ExpectedFactory.createError(
                     RouteShieldError(
-                        url = "https://shield.mapbox.com/url2",
+                        url = initialUrl2.plus(".svg"),
                         errorMessage = "whatever"
                     )
                 )
@@ -166,6 +177,8 @@ class MapboxRouteShieldApiTest {
                 callback.onRoadShields(capture(shieldSlot))
             }
             assertEquals(mockResultList.size, shieldSlot.captured.size)
+            assertEquals(mockResultList[0].error, shieldSlot.captured[0].error)
+            assertEquals(mockResultList[1].error, shieldSlot.captured[1].error)
         }
 
     @Test
@@ -209,6 +222,7 @@ class MapboxRouteShieldApiTest {
                 callback.onRoadShields(capture(shieldSlot))
             }
             assertEquals(mockResultList.size, shieldSlot.captured.size)
+            assertEquals(mockResultList[0].value, shieldSlot.captured[0].value)
         }
 
     @Test
@@ -260,6 +274,8 @@ class MapboxRouteShieldApiTest {
             assertEquals(mockResultList.size, shieldSlot.captured.size)
             assertNotNull(shieldSlot.captured[0].value)
             assertNotNull(shieldSlot.captured[1].error)
+            assertEquals(mockResultList[0].value, shieldSlot.captured[0].value)
+            assertEquals(mockResultList[1].error, shieldSlot.captured[1].error)
         }
 
     @Test
@@ -300,6 +316,8 @@ class MapboxRouteShieldApiTest {
                 callback.onRoadShields(capture(shieldSlot))
             }
             assertEquals(mockResultList.size, shieldSlot.captured.size)
+            assertEquals(mockResultList[0].error, shieldSlot.captured[0].error)
+            assertEquals(mockResultList[1].error, shieldSlot.captured[1].error)
         }
 
     @Test
@@ -310,6 +328,8 @@ class MapboxRouteShieldApiTest {
             val accessToken = "pk.123"
             val bannerComponents: BannerComponents = mockk(relaxed = true)
             val bannerComponentsList = listOf(bannerComponents)
+            val initialUrl1 = "https://shield.mapbox.com/legacy/url1"
+            val toDownloadUrl1 = "https://shield.mapbox.com/legacy/url1.svg"
             val mockResultList = listOf<Expected<RouteShieldError, RouteShieldResult>>(
                 ExpectedFactory.createValue(
                     RouteShieldResult(
@@ -329,13 +349,14 @@ class MapboxRouteShieldApiTest {
                 ExpectedFactory.createValue(
                     RouteShieldResult(
                         shield = RouteShield.MapboxLegacyShield(
-                            url = "https://shield.mapbox.com/legacy/url1",
-                            byteArray = byteArrayOf(1)
+                            url = toDownloadUrl1,
+                            byteArray = byteArrayOf(1),
+                            initialUrl = initialUrl1
                         ),
                         origin = RouteShieldOrigin(
                             isFallback = true,
-                            originalUrl = "https://shield.mapbox.com/url1",
-                            originalErrorMessage = "placeholder was empty"
+                            originalUrl = toDownloadUrl1,
+                            originalErrorMessage = ""
                         )
                     )
                 )
@@ -358,6 +379,8 @@ class MapboxRouteShieldApiTest {
             assertEquals(mockResultList.size, shieldSlot.captured.size)
             assertFalse(shieldSlot.captured[0].value!!.origin.isFallback)
             assertTrue(shieldSlot.captured[1].value!!.origin.isFallback)
+            assertEquals(mockResultList[0].value, shieldSlot.captured[0].value)
+            assertEquals(mockResultList[1].value, shieldSlot.captured[1].value)
         }
 
     @Test
@@ -407,7 +430,7 @@ class MapboxRouteShieldApiTest {
                         shield = RouteShield.MapboxDesignedShield(
                             url = "https://shields.mapbox.com/mapbox/designed/using/road/2",
                             byteArray = byteArrayOf(1),
-                            mapboxShield = mockMapboxShield1,
+                            mapboxShield = mockMapboxShield2,
                             shieldSprite = mockk()
                         ),
                         origin = RouteShieldOrigin(
@@ -435,32 +458,31 @@ class MapboxRouteShieldApiTest {
             }
             assertEquals(mockResultList.size, shieldSlot.captured.size)
             assertFalse(shieldSlot.captured[0].value!!.origin.isFallback)
-            assertEquals(
-                mockResultList[1].value!!.shield.url,
-                shieldSlot.captured[1].value!!.shield.url
-            )
+            assertEquals(mockResultList[1].value, shieldSlot.captured[1].value)
         }
 
     @Test
     fun `when get legacy shields using road with all shields`() =
         coroutineRule.runBlockingTest {
-            val mockLegacyUrl1 = "https://shields.mapbox.com/mapbox/legacy/using/road/1"
+            val initialUrl1 = "https://shields.mapbox.com/mapbox/legacy/using/road/1"
+            val toDownloadUrl1 = "https://shields.mapbox.com/mapbox/legacy/using/road/1.svg"
             val road = mockk<Road> {
                 every { name } returns "Central Av"
                 every { shieldName } returns "I 880"
-                every { shieldUrl } returns mockLegacyUrl1
+                every { shieldUrl } returns initialUrl1
                 every { mapboxShield } returns null
             }
             val mockResultList = listOf<Expected<RouteShieldError, RouteShieldResult>>(
                 ExpectedFactory.createValue(
                     RouteShieldResult(
                         shield = RouteShield.MapboxLegacyShield(
-                            url = "https://shields.mapbox.com/mapbox/legacy/using/road/1",
-                            byteArray = byteArrayOf(1)
+                            url = toDownloadUrl1,
+                            byteArray = byteArrayOf(1),
+                            initialUrl = initialUrl1
                         ),
                         origin = RouteShieldOrigin(
                             isFallback = false,
-                            originalUrl = "https://shields.mapbox.com/mapbox/designed/using/road/1",
+                            originalUrl = toDownloadUrl1,
                             originalErrorMessage = ""
                         )
                     )
@@ -480,10 +502,7 @@ class MapboxRouteShieldApiTest {
             }
             assertEquals(mockResultList.size, shieldSlot.captured.size)
             assertFalse(shieldSlot.captured[0].value!!.origin.isFallback)
-            assertEquals(
-                mockResultList[0].value!!.shield.url,
-                shieldSlot.captured[0].value!!.shield.url
-            )
+            assertEquals(mockResultList[0].value, shieldSlot.captured[0].value)
         }
 
     @Test
@@ -499,23 +518,25 @@ class MapboxRouteShieldApiTest {
                 .textColor("black")
                 .displayRef("880")
                 .build()
-            val mockLegacyUrl1 = "https://shields.mapbox.com/mapbox/legacy/using/road/1"
+            val initialUrl1 = "https://shields.mapbox.com/mapbox/legacy/using/road/1"
+            val toDownloadUrl1 = "https://shields.mapbox.com/mapbox/legacy/using/road/1.svg"
             val road = mockk<Road> {
                 every { name } returns "Central Av"
                 every { shieldName } returns "I 880"
-                every { shieldUrl } returns mockLegacyUrl1
+                every { shieldUrl } returns initialUrl1
                 every { mapboxShield } returns listOf(mockMapboxShield1)
             }
             val mockResultList = listOf<Expected<RouteShieldError, RouteShieldResult>>(
                 ExpectedFactory.createValue(
                     RouteShieldResult(
                         shield = RouteShield.MapboxLegacyShield(
-                            url = "https://shields.mapbox.com/mapbox/legacy/using/road/1",
-                            byteArray = byteArrayOf(1)
+                            url = toDownloadUrl1,
+                            byteArray = byteArrayOf(1),
+                            initialUrl = initialUrl1
                         ),
                         origin = RouteShieldOrigin(
                             isFallback = false,
-                            originalUrl = "https://shields.mapbox.com/mapbox/designed/using/road/1",
+                            originalUrl = toDownloadUrl1,
                             originalErrorMessage = ""
                         )
                     )
@@ -552,13 +573,7 @@ class MapboxRouteShieldApiTest {
                 callback.onRoadShields(capture(shieldSlot))
             }
             assertEquals(mockResultList.size, shieldSlot.captured.size)
-            assertEquals(
-                mockResultList[0].value!!.shield.url,
-                shieldSlot.captured[0].value!!.shield.url
-            )
-            assertEquals(
-                mockResultList[1].value!!.shield.url,
-                shieldSlot.captured[1].value!!.shield.url
-            )
+            assertEquals(mockResultList[0].value, shieldSlot.captured[0].value)
+            assertEquals(mockResultList[1].value, shieldSlot.captured[1].value)
         }
 }

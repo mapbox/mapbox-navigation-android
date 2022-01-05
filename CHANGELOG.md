@@ -30,6 +30,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v6.0.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0))
 - Mapbox Android Core `v5.0.0`
 - Mapbox Android Telemetry `v8.1.0`
+- Fixed `RoadShield` by reverting the breaking changes and use the new shield callback. [#5302](https://github.com/mapbox/mapbox-navigation-android/pull/5302)
 
 ## Mapbox Navigation SDK 2.2.0-beta.1 - December 17, 2021
 

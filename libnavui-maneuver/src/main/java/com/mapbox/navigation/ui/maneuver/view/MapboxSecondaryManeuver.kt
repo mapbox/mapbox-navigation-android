@@ -61,13 +61,13 @@ class MapboxSecondaryManeuver : AppCompatTextView {
      * @param maneuver SecondaryManeuver
      */
     @Deprecated(
-        message = "The method can only render one shield if an instruction has multiple shields",
+        message = "The method may or may not render multiple shields for a given instruction",
         replaceWith = ReplaceWith("renderManeuver(maneuver, roadShields)")
     )
     @JvmOverloads
     fun render(maneuver: SecondaryManeuver?, roadShield: RoadShield? = null) {
         val roadShields = ifNonNull(roadShield) {
-            listOf(it)
+            setOf(it)
         }
         renderManeuver(maneuver, roadShields)
     }
@@ -76,7 +76,7 @@ class MapboxSecondaryManeuver : AppCompatTextView {
      * Invoke the method to render secondary maneuver instructions
      * @param maneuver SecondaryManeuver
      */
-    fun renderManeuver(maneuver: SecondaryManeuver?, roadShields: List<RoadShield>?) {
+    fun renderManeuver(maneuver: SecondaryManeuver?, roadShields: Set<RoadShield>?) {
         val exitView = MapboxExitText(context)
         exitView.setExitStyle(exitBackground, leftDrawable, rightDrawable)
         val instruction = ManeuverInstructionGenerator.generateSecondary(

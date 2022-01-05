@@ -61,13 +61,13 @@ class MapboxPrimaryManeuver : AppCompatTextView {
      * @param maneuver PrimaryManeuver
      */
     @Deprecated(
-        message = "The method can only render one shield if an instruction has multiple shields",
+        message = "The method may or may not render multiple shields for a given instruction",
         replaceWith = ReplaceWith("renderManeuver(maneuver, roadShields)")
     )
     @JvmOverloads
     fun render(maneuver: PrimaryManeuver, roadShield: RoadShield? = null) {
         val roadShields = ifNonNull(roadShield) {
-            listOf(it)
+            setOf(it)
         }
         renderManeuver(maneuver, roadShields)
     }
@@ -76,7 +76,7 @@ class MapboxPrimaryManeuver : AppCompatTextView {
      * Invoke the method to render primary maneuver instructions
      * @param maneuver PrimaryManeuver
      */
-    fun renderManeuver(maneuver: PrimaryManeuver, roadShields: List<RoadShield>?) {
+    fun renderManeuver(maneuver: PrimaryManeuver, roadShields: Set<RoadShield>?) {
         val exitView = MapboxExitText(context)
         exitView.setExitStyle(exitBackground, leftDrawable, rightDrawable)
         val instruction = ManeuverInstructionGenerator.generatePrimary(
