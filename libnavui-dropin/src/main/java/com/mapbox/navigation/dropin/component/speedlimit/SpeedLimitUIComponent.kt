@@ -4,18 +4,17 @@ import android.location.Location
 import android.view.View
 import android.widget.FrameLayout
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.dropin.component.UIComponent
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.util.MapboxDropInUtils.toVisibility
 import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
+import com.mapbox.navigation.ui.utils.internal.lifecycle.keepExecutingWhenStarted
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
 
 internal sealed interface SpeedLimitUIComponent : UIComponent {
     val container: FrameLayout
@@ -72,7 +71,7 @@ internal class MapboxSpeedLimitUIComponent(
     }
 
     private fun observeSpeedLimitState() {
-        lifecycleOwner.lifecycleScope.launch {
+        lifecycleOwner.keepExecutingWhenStarted {
             viewModel.state.collect { state ->
                 container.visibility = state.isVisible.toVisibility()
                 view.render(state.speedLimit)

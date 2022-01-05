@@ -3,18 +3,17 @@ package com.mapbox.navigation.dropin.component.routeoverview
 import android.view.View
 import android.widget.FrameLayout
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import com.mapbox.navigation.dropin.component.UIComponent
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.util.MapboxDropInUtils.toVisibility
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver
 import com.mapbox.navigation.ui.maps.camera.view.MapboxRouteOverviewButton
+import com.mapbox.navigation.ui.utils.internal.lifecycle.keepExecutingWhenStarted
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
 
 internal sealed interface RouteOverviewUIComponent : UIComponent {
     val container: FrameLayout
@@ -67,7 +66,7 @@ internal class MapboxRouteOverviewUIComponent(
     }
 
     private fun observeRouteOverviewState() {
-        lifecycleOwner.lifecycleScope.launch {
+        lifecycleOwner.keepExecutingWhenStarted {
             viewModel.state.collect { state ->
                 container.visibility = state.isVisible.toVisibility()
             }

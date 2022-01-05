@@ -96,9 +96,13 @@
     </activity>
 
     <activity
-        android:name=".MapboxDropInActivity"
-        android:label="@string/title_drop_in">
+        android:name=".MapboxNavigationViewActivity"
+        android:label="@string/title_navigation_view">
     </activity>
+
+    <activity
+        android:name=".MapboxNavigationViewFragmentActivity"
+        android:label="@string/title_navigation_view"/>
 
     <activity
         android:name="com.mapbox.navigation.examples.MainActivity"

@@ -13,11 +13,12 @@ import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.navigation.examples.core.IndependentRouteGenerationActivity
 import com.mapbox.navigation.examples.core.MapboxBuildingHighlightActivity
 import com.mapbox.navigation.examples.core.MapboxCustomStyleActivity
-import com.mapbox.navigation.examples.core.MapboxDropInActivity
 import com.mapbox.navigation.examples.core.MapboxJunctionActivity
 import com.mapbox.navigation.examples.core.MapboxManeuverActivity
 import com.mapbox.navigation.examples.core.MapboxMultipleArrowActivity
 import com.mapbox.navigation.examples.core.MapboxNavigationActivity
+import com.mapbox.navigation.examples.core.MapboxNavigationViewActivity
+import com.mapbox.navigation.examples.core.MapboxNavigationViewFragmentActivity
 import com.mapbox.navigation.examples.core.MapboxRouteLineAndArrowActivity
 import com.mapbox.navigation.examples.core.MapboxSignboardActivity
 import com.mapbox.navigation.examples.core.MapboxTripProgressActivity
@@ -141,10 +142,15 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 RouteDrawingActivity::class.java
             ),
             SampleItem(
-                getString(R.string.title_drop_in),
-                getString(R.string.description_drop_in),
-                MapboxDropInActivity::class.java
-            )
+                getString(R.string.title_navigation_view),
+                getString(R.string.description_navigation_view),
+                MapboxNavigationViewActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_navigation_view_fragment),
+                getString(R.string.description_navigation_view_fragment),
+                MapboxNavigationViewFragmentActivity::class.java
+            ),
         )
     }
 
