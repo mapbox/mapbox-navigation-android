@@ -44,7 +44,7 @@ class MapboxPrimaryManeuverTest {
         val expected = SpannableString("23 I-880 / Central ")
         val view = MapboxPrimaryManeuver(ctx)
 
-        view.render(state)
+        view.renderManeuver(state, null)
 
         assertEquals(expected.toString(), view.text.toString())
     }
