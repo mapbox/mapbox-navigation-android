@@ -3,18 +3,17 @@ package com.mapbox.navigation.dropin.component.maneuver
 import android.view.View
 import android.widget.FrameLayout
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.dropin.component.UIComponent
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.util.MapboxDropInUtils.toVisibility
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
+import com.mapbox.navigation.ui.utils.internal.lifecycle.keepExecutingWhenStarted
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
 
 internal sealed interface ManeuverUIComponent : UIComponent {
     val container: FrameLayout
@@ -65,7 +64,7 @@ internal class MapboxManeuverUIComponent(
     }
 
     private fun observeManeuverState() {
-        lifecycleOwner.lifecycleScope.launch {
+        lifecycleOwner.keepExecutingWhenStarted {
             viewModel.state.collect { state ->
                 container.visibility = state.isVisible.toVisibility()
                 // view.renderManeuvers(state.maneuver)

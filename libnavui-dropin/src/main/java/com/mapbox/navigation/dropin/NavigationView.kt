@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin
 
+import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
@@ -9,11 +10,13 @@ import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.use
-import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModelStoreOwner
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -74,31 +77,63 @@ import com.mapbox.navigation.ui.maps.camera.view.MapboxRouteOverviewButton
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
 import com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
+import com.mapbox.navigation.ui.utils.internal.extensions.unwrapIfNeeded
+import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
+import com.mapbox.navigation.ui.utils.internal.lifecycle.keepExecutingWhenStarted
 import com.mapbox.navigation.ui.voice.view.MapboxSoundButton
 import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 import java.util.concurrent.CopyOnWriteArraySet
 
-@OptIn(ExperimentalCoroutinesApi::class)
-class NavigationView : ConstraintLayout {
+/**
+ * If the [NavigationView] is used in a [Fragment], you can use the fragment as [LifecycleOwner] and [ViewModelStoreOwner]
+ * to tighten lifecycle and [ViewModel]s memory management to be cleaned up whenever the hosting [Fragment] is destroyed.
+ *
+ * @param lifecycleOwner wrapping lifecycle owner of this [View], by default uses the hosting [Activity].
+ * Internal operations on this [NavigationView] will be run based on this [LifecycleOwner.getLifecycle] merged with
+ * [View.OnAttachStateChangeListener], stopping whenever the view is detached.
+ * @param viewModelStoreOwner provider and scope of the [ViewModel]s used by this view and nested UI components,
+ * by default uses the hosting [Activity].
+ */
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
+class NavigationView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    accessToken: String = attrs.let {
+        attrs?.findAccessToken(context) ?: throw IllegalArgumentException(
+            "Provide access token directly in the constructor or via 'accessToken' layout parameter"
+        )
+    },
+    navigationOptions: NavigationOptions = NavigationOptions.Builder(context.applicationContext)
+        .run {
+            accessToken(accessToken)
+            build()
+        },
+    mapInitializationOptions: MapInitOptions = MapInitOptions(context),
+    navigationViewOptions: NavigationViewOptions = NavigationViewOptions
+        .Builder(context)
+        .build(),
+    lifecycleOwner: LifecycleOwner =
+        context.unwrapIfNeeded() as? LifecycleOwner ?: throw IllegalArgumentException(
+            "Please ensure that the hosting Context is a valid LifecycleOwner"
+        ),
+    private val viewModelStoreOwner: ViewModelStoreOwner =
+        context.unwrapIfNeeded() as? ViewModelStoreOwner ?: throw IllegalArgumentException(
+            "Please ensure that the hosting Context is a valid ViewModelStoreOwner"
+        )
+) : ConstraintLayout(context, attrs), LifecycleOwner {
 
     val navigationViewApi: MapboxNavigationViewApi by lazy {
         MapboxNavigationViewApiImpl(this)
     }
-    private val lifeCycleOwner: LifecycleOwner
-    private val activity: FragmentActivity by lazy {
-        try {
-            context as FragmentActivity
-        } catch (exception: ClassCastException) {
-            throw ClassCastException(
-                "Please ensure that the provided Context is a valid FragmentActivity"
-            )
-        }
-    }
+    private val viewLifecycleRegistry: ViewLifecycleRegistry = ViewLifecycleRegistry(
+        view = this,
+        localLifecycleOwner = this,
+        hostingLifecycleOwner = lifecycleOwner,
+    )
     private val mapView: MapView by lazy {
         MapView(context, mapInitOptions).also {
             it.getMapboxMap().addOnStyleLoadedListener(onStyleLoadedListener)
@@ -109,7 +144,7 @@ class NavigationView : ConstraintLayout {
         LayoutInflater.from(context),
         this
     )
-    lateinit var navigationViewOptions: NavigationViewOptions
+    var navigationViewOptions: NavigationViewOptions = navigationViewOptions
         private set
 
     private val lifecycleObserver = object : DefaultLifecycleObserver {
@@ -159,26 +194,12 @@ class NavigationView : ConstraintLayout {
     // --------------------------------------------------------
     // View Model and dependency definitions
     // --------------------------------------------------------
-    private val mapboxNavigationViewModel: MapboxNavigationViewModel by lazy {
-        ViewModelProvider(activity)[MapboxNavigationViewModel::class.java]
-    }
+    private val mapboxNavigationViewModel: MapboxNavigationViewModel
+    private val routeLineViewModel: RouteLineViewModel
+    private val navigationStateViewModel: NavigationStateViewModel
+    private val cameraViewModel: CameraViewModel
 
-    private val routeLineViewModel: RouteLineViewModel by lazy {
-        ViewModelProvider(
-            activity,
-            RouteLineViewModelFactory(navigationViewOptions.mapboxRouteLineOptions)
-        )[RouteLineViewModel::class.java]
-    }
-
-    private val navigationStateViewModel: NavigationStateViewModel by lazy {
-        ViewModelProvider(activity)[NavigationStateViewModel::class.java]
-    }
-
-    private val cameraViewModel: CameraViewModel by lazy {
-        ViewModelProvider(activity)[CameraViewModel::class.java]
-    }
-
-    private val mapInitOptions: MapInitOptions
+    private val mapInitOptions: MapInitOptions = mapInitializationOptions
     private val navigationLocationProvider = NavigationLocationProvider()
 
     @VisibleForTesting
@@ -194,56 +215,11 @@ class NavigationView : ConstraintLayout {
 
     private val uiComponents: MutableList<UIComponent> = mutableListOf()
 
-    constructor(context: Context, attrs: AttributeSet?) : this(
-        context,
-        attrs,
-        null,
-        MapInitOptions(context),
-        NavigationViewOptions.Builder(context).build()
-    )
-
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-    @JvmOverloads
-    constructor(
-        context: Context,
-        attrs: AttributeSet? = null,
-        navigationOptions: NavigationOptions?,
-        mapInitializationOptions: MapInitOptions = MapInitOptions(context),
-        navigationViewOptions: NavigationViewOptions = NavigationViewOptions
-            .Builder(context)
-            .build()
-    ) : super(context, attrs) {
-        this.mapInitOptions = mapInitializationOptions
-        this.navigationViewOptions = navigationViewOptions
-        this.lifeCycleOwner = context as? LifecycleOwner ?: throw LifeCycleOwnerNotFoundException()
-        this.lifeCycleOwner.lifecycle.addObserver(lifecycleObserver)
-
-        val loadedNavigationOptions = navigationOptions
-            ?: NavigationOptions.Builder(context.applicationContext)
-                .accessToken(styledAccessToken(attrs))
-                .build()
-        MapboxNavigationApp.setup(loadedNavigationOptions)
-            .attach(lifeCycleOwner)
-    }
-
-    private fun styledAccessToken(attrs: AttributeSet?): String {
-        val attrsAccessToken = context.obtainStyledAttributes(
-            attrs,
-            R.styleable.NavigationView,
-            0,
-            0
-        ).use {
-            it.getString(R.styleable.NavigationView_accessToken)
-        }
-        checkNotNull(attrsAccessToken) {
-            "Access token must be provided through xml attributes or constructor injection."
-        }
-        return attrsAccessToken
-    }
+    override fun getLifecycle(): Lifecycle = viewLifecycleRegistry
 
     private fun bindRouteLine() {
         val routeLineViewModel = ViewModelProvider(
-            activity,
+            viewModelStoreOwner,
             RouteLineViewModelFactory(navigationViewOptions.mapboxRouteLineOptions)
         )[RouteLineViewModel::class.java]
         val routeLineComponent = MapboxRouteLineUIComponent(
@@ -255,7 +231,7 @@ class NavigationView : ConstraintLayout {
 
     private fun bindRouteArrow() {
         val routeArrowViewModel = ViewModelProvider(
-            activity,
+            viewModelStoreOwner,
             RouteArrowViewModelFactory(navigationViewOptions.routeArrowOptions)
         )[RouteArrowViewModel::class.java]
         val routeArrowUIComponent = MapboxRouteArrowUIComponent(
@@ -270,14 +246,14 @@ class NavigationView : ConstraintLayout {
             val maneuverView = MapboxManeuverView(context, null)
             binding.maneuverContainer.addView(maneuverView)
             val maneuverViewModel = ViewModelProvider(
-                activity,
+                viewModelStoreOwner,
                 ManeuverViewModel.Factory(navigationViewOptions.distanceFormatter)
             )[ManeuverViewModel::class.java]
             MapboxManeuverUIComponent(
                 container = binding.maneuverContainer,
                 view = maneuverView,
                 viewModel = maneuverViewModel,
-                lifecycleOwner = lifeCycleOwner
+                lifecycleOwner = this
             )
         } else {
             binding.maneuverContainer.addView(view)
@@ -292,12 +268,13 @@ class NavigationView : ConstraintLayout {
         val recenterComponent = if (view == null) {
             val recenterButtonView = MapboxRecenterButton(context, null)
             binding.recenterContainer.addView(recenterButtonView)
-            val recenterViewModel = ViewModelProvider(activity)[RecenterViewModel::class.java]
+            val recenterViewModel =
+                ViewModelProvider(viewModelStoreOwner)[RecenterViewModel::class.java]
             MapboxRecenterUIComponent(
                 container = binding.recenterContainer,
                 view = recenterButtonView,
                 viewModel = recenterViewModel,
-                lifecycleOwner = lifeCycleOwner
+                lifecycleOwner = this
             )
         } else {
             binding.recenterContainer.addView(view)
@@ -313,13 +290,13 @@ class NavigationView : ConstraintLayout {
             val routeOverviewButtonView = MapboxRouteOverviewButton(context, null)
             binding.routeOverviewContainer.addView(routeOverviewButtonView)
             val routeOverviewViewModel = ViewModelProvider(
-                activity
+                viewModelStoreOwner
             )[RouteOverviewViewModel::class.java]
             MapboxRouteOverviewUIComponent(
                 container = binding.routeOverviewContainer,
                 view = routeOverviewButtonView,
                 viewModel = routeOverviewViewModel,
-                lifecycleOwner = lifeCycleOwner
+                lifecycleOwner = this
             )
         } else {
             binding.routeOverviewContainer.addView(view)
@@ -335,13 +312,13 @@ class NavigationView : ConstraintLayout {
             val soundButtonView = MapboxSoundButton(context, null)
             binding.volumeContainer.addView(soundButtonView)
             val soundButtonViewModel = ViewModelProvider(
-                activity
+                viewModelStoreOwner
             )[SoundButtonViewModel::class.java]
             MapboxSoundButtonUIComponent(
                 container = binding.volumeContainer,
                 view = soundButtonView,
                 viewModel = soundButtonViewModel,
-                lifeCycleOwner = lifeCycleOwner
+                lifeCycleOwner = this
             )
         } else {
             binding.volumeContainer.addView(view)
@@ -357,14 +334,14 @@ class NavigationView : ConstraintLayout {
             val speedLimitView = MapboxSpeedLimitView(context, null)
             binding.speedLimitContainer.addView(speedLimitView)
             val speedLimitViewModel = ViewModelProvider(
-                activity,
+                viewModelStoreOwner,
                 SpeedLimitViewModel.Factory(navigationViewOptions.speedLimitFormatter)
             )[SpeedLimitViewModel::class.java]
             MapboxSpeedLimitUIComponent(
                 container = binding.speedLimitContainer,
                 view = speedLimitView,
                 viewModel = speedLimitViewModel,
-                lifecycleOwner = lifeCycleOwner
+                lifecycleOwner = this
             )
         } else {
             binding.speedLimitContainer.addView(view)
@@ -380,14 +357,14 @@ class NavigationView : ConstraintLayout {
             val tripProgressView = MapboxTripProgressView(context, null)
             binding.infoPanelContainer.addView(tripProgressView)
             val tripProgressViewModel = ViewModelProvider(
-                activity,
+                viewModelStoreOwner,
                 TripProgressViewModel.Factory(navigationViewOptions.tripProgressUpdateFormatter)
             )[TripProgressViewModel::class.java]
             MapboxTripProgressUIComponent(
                 container = binding.infoPanelContainer,
                 view = tripProgressView,
                 viewModel = tripProgressViewModel,
-                lifeCycleOwner = lifeCycleOwner
+                lifeCycleOwner = this
             )
         } else {
             binding.infoPanelContainer.addView(view)
@@ -399,7 +376,7 @@ class NavigationView : ConstraintLayout {
     }
 
     private fun observeNavigationState() {
-        lifeCycleOwner.lifecycleScope.launch {
+        keepExecutingWhenStarted {
             navigationStateViewModel.state.collect { state ->
                 uiComponents.forEach {
                     it.onNavigationStateChanged(state)
@@ -409,7 +386,7 @@ class NavigationView : ConstraintLayout {
     }
 
     private fun observeRoutes() {
-        lifeCycleOwner.lifecycleScope.launch {
+        keepExecutingWhenStarted {
             mapboxNavigationViewModel.routesUpdatedResults.collect { result ->
                 externalRoutesObservers.forEach {
                     it.onRoutesChanged(result)
@@ -424,7 +401,7 @@ class NavigationView : ConstraintLayout {
     }
 
     private fun observeRouteResets() {
-        lifeCycleOwner.lifecycleScope.launch {
+        keepExecutingWhenStarted {
             routeLineViewModel.routeResets.collect { routes ->
                 mapboxNavigationViewModel.setRoutes(routes)
             }
@@ -432,7 +409,7 @@ class NavigationView : ConstraintLayout {
     }
 
     private fun observeRouteProgress() {
-        lifeCycleOwner.lifecycleScope.launch {
+        keepExecutingWhenStarted {
             mapboxNavigationViewModel.routeProgressUpdates.collect { routeProgress ->
                 externalRouteProgressObservers.forEach {
                     it.onRouteProgressChanged(routeProgress)
@@ -449,7 +426,7 @@ class NavigationView : ConstraintLayout {
     }
 
     private fun observeLocationMatcherResults() {
-        lifeCycleOwner.lifecycleScope.launch {
+        keepExecutingWhenStarted {
             mapboxNavigationViewModel.newLocationMatcherResults.collect { locationMatcherResult ->
                 externalLocationObservers.forEach {
                     it.onNewLocationMatcherResult(locationMatcherResult)
@@ -470,7 +447,7 @@ class NavigationView : ConstraintLayout {
     }
 
     private fun observeRawLocation() {
-        lifeCycleOwner.lifecycleScope.launch {
+        keepExecutingWhenStarted {
             mapboxNavigationViewModel.rawLocationUpdates.collect { locationUpdate ->
                 externalLocationObservers.forEach {
                     it.onNewRawLocation(locationUpdate)
@@ -481,7 +458,7 @@ class NavigationView : ConstraintLayout {
     }
 
     private fun observeWaypointArrivals() {
-        lifeCycleOwner.lifecycleScope.launch {
+        keepExecutingWhenStarted {
             mapboxNavigationViewModel.wayPointArrivals.collect { routeProgress ->
                 externalArrivalObservers.forEach {
                     it.onWaypointArrival(routeProgress)
@@ -491,7 +468,7 @@ class NavigationView : ConstraintLayout {
     }
 
     private fun observeNextRouteLegStart() {
-        lifeCycleOwner.lifecycleScope.launch {
+        keepExecutingWhenStarted {
             mapboxNavigationViewModel.nextRouteLegStartUpdates.collect { routeLegProgress ->
                 externalArrivalObservers.forEach {
                     it.onNextRouteLegStart(routeLegProgress)
@@ -501,7 +478,7 @@ class NavigationView : ConstraintLayout {
     }
 
     private fun observeFinalDestinationArrivals() {
-        lifeCycleOwner.lifecycleScope.launch {
+        keepExecutingWhenStarted {
             mapboxNavigationViewModel.finalDestinationArrivals.collect { routeProgress ->
                 externalArrivalObservers.forEach {
                     it.onFinalDestinationArrival(routeProgress)
@@ -511,7 +488,7 @@ class NavigationView : ConstraintLayout {
     }
 
     private fun observeVoiceInstructions() {
-        lifeCycleOwner.lifecycleScope.launch {
+        keepExecutingWhenStarted {
             mapboxNavigationViewModel.voiceInstructions.collect { voiceInstructions ->
                 // view models that need voice instruction updates should be added here
                 externalVoiceInstructionsObservers.forEach {
@@ -522,7 +499,7 @@ class NavigationView : ConstraintLayout {
     }
 
     private fun observeBannerInstructions() {
-        lifeCycleOwner.lifecycleScope.launch {
+        keepExecutingWhenStarted {
             mapboxNavigationViewModel.bannerInstructions.collect { bannerInstructions ->
                 externalBannerInstructionObservers.forEach {
                     it.onNewBannerInstructions(bannerInstructions)
@@ -532,7 +509,7 @@ class NavigationView : ConstraintLayout {
     }
 
     private fun observeTripSession() {
-        lifeCycleOwner.lifecycleScope.launch {
+        keepExecutingWhenStarted {
             mapboxNavigationViewModel.tripSessionStateUpdates.collect { tripSessionState ->
                 externalTripSessionStateObservers.forEach {
                     it.onSessionStateChanged(tripSessionState)
@@ -564,7 +541,7 @@ class NavigationView : ConstraintLayout {
         observeFinalDestinationArrivals()
         observeNavigationState()
         observeRouteResets()
-        lifeCycleOwner.lifecycleScope.launch {
+        keepExecutingWhenStarted {
             cameraViewModel.cameraUpdates.collect {
                 mapView.camera.easeTo(it.first, it.second)
             }
@@ -572,7 +549,7 @@ class NavigationView : ConstraintLayout {
     }
 
     private fun performActions() {
-        lifeCycleOwner.lifecycleScope.launch {
+        keepExecutingWhenStarted {
             navigationStateViewModel.consumeAction(
                 flowOf(
                     NavigationStateAction.ToRoutePreview
@@ -694,5 +671,35 @@ class NavigationView : ConstraintLayout {
 
     companion object {
         private val TAG = NavigationView::class.java.simpleName
+    }
+
+    init {
+        mapboxNavigationViewModel = ViewModelProvider(
+            viewModelStoreOwner
+        )[MapboxNavigationViewModel::class.java]
+        routeLineViewModel = ViewModelProvider(
+            viewModelStoreOwner,
+            RouteLineViewModelFactory(navigationViewOptions.mapboxRouteLineOptions)
+        )[RouteLineViewModel::class.java]
+        navigationStateViewModel = ViewModelProvider(
+            viewModelStoreOwner
+        )[NavigationStateViewModel::class.java]
+        cameraViewModel = ViewModelProvider(
+            viewModelStoreOwner
+        )[CameraViewModel::class.java]
+        lifecycle.addObserver(lifecycleObserver)
+        MapboxNavigationApp.setup(navigationOptions)
+            .attach(this)
+    }
+}
+
+private fun AttributeSet.findAccessToken(context: Context): String? {
+    return context.obtainStyledAttributes(
+        this,
+        R.styleable.NavigationView,
+        0,
+        0
+    ).use {
+        it.getString(R.styleable.NavigationView_accessToken)
     }
 }

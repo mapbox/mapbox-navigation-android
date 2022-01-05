@@ -28,6 +28,7 @@ ext {
       mapboxBaseAndroid         : '0.5.0',
       androidXLifecycle         : '2.4.0',
       androidXCoreVersion       : '1.6.0',
+      androidXArchCoreVersion   : '2.1.0',
       androidXAppCompatVersion  : '1.3.1',
       androidXPreferenceVersion : '1.1.0',
       androidXAnnotationVersion : '1.2.0',
@@ -115,11 +116,13 @@ ext {
       androidXPreference        : "androidx.preference:preference-ktx:${version.androidXPreferenceVersion}",
       androidStartup            : "androidx.startup:startup-runtime:${version.androidStartup}",
       androidXFragment          : "androidx.fragment:fragment-ktx:${version.androidXFragmentVersion}",
+      androidXArchCoreTesting   : "androidx.arch.core:core-testing:${version.androidXArchCoreVersion}",
 
       // lifecycle
       androidXLifecycleRuntime  : "androidx.lifecycle:lifecycle-runtime-ktx:${version.androidXLifecycle}",
       androidXLifecycleLivedata : "androidx.lifecycle:lifecycle-livedata-ktx:${version.androidXLifecycle}",
       androidXLifecycleViewmodel: "androidx.lifecycle:lifecycle-viewmodel-ktx:${version.androidXLifecycle}",
+      androidXLifecycleTesting  : "androidx.lifecycle:lifecycle-runtime-testing:${version.androidXLifecycle}",
 
       // square crew
       leakCanaryDebug           : "com.squareup.leakcanary:leakcanary-android:${version.leakCanaryVersion}",

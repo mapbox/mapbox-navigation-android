@@ -38,9 +38,12 @@ dependencies {
     api dependenciesList.svgParser
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.androidXAnnotation
+    implementation dependenciesList.androidXLifecycleRuntime
 
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
     testImplementation(project(':libtesting-utils'))
+    testImplementation dependenciesList.androidXLifecycleTesting
+    testImplementation dependenciesList.androidXArchCoreTesting
 }
 
 apply from: "${rootDir}/gradle/track-public-apis.gradle"

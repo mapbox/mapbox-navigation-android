@@ -3,7 +3,6 @@ package com.mapbox.navigation.instrumentation_tests.ui.navigationview
 import android.location.Location
 import android.widget.FrameLayout
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -169,11 +168,8 @@ class NavigationViewExternalObserversTests :
 
     private fun getNavigationView(): NavigationView {
         return NavigationView(
-            activity,
-            null,
-            NavigationOptions.Builder(activity)
-                .accessToken(getMapboxAccessTokenFromResources(activity))
-                .build(),
+            context = activity,
+            accessToken = getMapboxAccessTokenFromResources(activity)
         ).also {
             activity.findViewById<FrameLayout>(R.id.rootView).addView(it)
             it.navigationViewApi.configureNavigationView(ViewProvider())

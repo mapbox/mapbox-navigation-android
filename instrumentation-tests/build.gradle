@@ -36,6 +36,7 @@ dependencies {
     // Mapbox Navigation SDK
     implementation project(':libnavigation-android')
     implementation project(':libnavui-dropin')
+    implementation project(":libnavui-util")
 
     // test
     androidTestImplementation project(':libtesting-ui')
@@ -54,6 +55,7 @@ dependencies {
     implementation dependenciesList.androidXAppCompat
     implementation dependenciesList.androidXConstraintLayout
     implementation dependenciesList.androidXPreference
+    implementation dependenciesList.androidXLifecycleViewmodel
 
     implementation dependenciesList.gmsLocation
 

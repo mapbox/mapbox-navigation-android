@@ -5,9 +5,13 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.navigation.instrumentation_tests.databinding.ActivityEmptyTestBinding
 
 class EmptyTestActivity : AppCompatActivity() {
+
+    lateinit var binding: ActivityEmptyTestBinding
+        private set
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding = ActivityEmptyTestBinding.inflate(layoutInflater)
+        binding = ActivityEmptyTestBinding.inflate(layoutInflater)
         setContentView(binding.root)
     }
 }
