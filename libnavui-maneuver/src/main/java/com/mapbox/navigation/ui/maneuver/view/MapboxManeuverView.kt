@@ -23,6 +23,7 @@ import com.mapbox.navigation.ui.maneuver.databinding.MapboxSubManeuverLayoutBind
 import com.mapbox.navigation.ui.maneuver.model.Lane
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
+import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.RoadShield
 import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
@@ -43,32 +44,39 @@ import com.mapbox.navigation.utils.internal.ifNonNull
  */
 class MapboxManeuverView : ConstraintLayout {
 
-    /**
-     * Default view to render a maneuver.
-     *
-     * @see MapboxManeuverApi
-     */
-    constructor(context: Context) : super(context)
+    private var maneuverViewOptions = ManeuverViewOptions.Builder().build()
 
     /**
      * Default view to render a maneuver.
      *
      * @see MapboxManeuverApi
      */
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        initAttributes(attrs)
-    }
+    constructor(context: Context) : this(context, null)
 
     /**
      * Default view to render a maneuver.
      *
      * @see MapboxManeuverApi
      */
+    constructor(context: Context, attrs: AttributeSet?) : this(
+        context,
+        attrs,
+        R.style.MapboxStyleManeuverView
+    )
+
+    /**
+     * Default view to render a maneuver.
+     *
+     * @see MapboxManeuverApi
+     */
+    @JvmOverloads
     constructor(
         context: Context,
         attrs: AttributeSet?,
-        defStyleAttr: Int
+        defStyleAttr: Int,
+        options: ManeuverViewOptions = ManeuverViewOptions.Builder().build()
     ) : super(context, attrs, defStyleAttr) {
+        this.maneuverViewOptions = options
         initAttributes(attrs)
     }
 
@@ -125,6 +133,52 @@ class MapboxManeuverView : ConstraintLayout {
                 }
             }
         }
+
+        subLayoutBinding.subManeuverText.updateOptions(
+            maneuverViewOptions.subManeuverOptions
+        )
+        mainLayoutBinding.primaryManeuverText.updateOptions(
+            maneuverViewOptions.primaryManeuverOptions
+        )
+        mainLayoutBinding.secondaryManeuverText.updateOptions(
+            maneuverViewOptions.secondaryManeuverOptions
+        )
+    }
+
+    /**
+     * Invoke the method to change the styling of various [Maneuver] components at runtime.
+     *
+     * @param options ManeuverViewOptions
+     */
+    fun updateManeuverViewOptions(options: ManeuverViewOptions) {
+        this.maneuverViewOptions = options
+        subLayoutBinding.subManeuverText.updateOptions(
+            maneuverViewOptions.subManeuverOptions
+        )
+        mainLayoutBinding.primaryManeuverText.updateOptions(
+            maneuverViewOptions.primaryManeuverOptions
+        )
+        mainLayoutBinding.secondaryManeuverText.updateOptions(
+            maneuverViewOptions.secondaryManeuverOptions
+        )
+        TextViewCompat.setTextAppearance(
+            mainLayoutBinding.primaryManeuverText,
+            maneuverViewOptions.primaryManeuverOptions.textAppearance
+        )
+        TextViewCompat.setTextAppearance(
+            mainLayoutBinding.secondaryManeuverText,
+            maneuverViewOptions.secondaryManeuverOptions.textAppearance
+        )
+        TextViewCompat.setTextAppearance(
+            subLayoutBinding.subManeuverText,
+            maneuverViewOptions.subManeuverOptions.textAppearance
+        )
+        upcomingManeuverAdapter.updateUpcomingPrimaryManeuverTextAppearance(
+            maneuverViewOptions.primaryManeuverOptions.textAppearance
+        )
+        upcomingManeuverAdapter.updateUpcomingSecondaryManeuverTextAppearance(
+            maneuverViewOptions.secondaryManeuverOptions.textAppearance
+        )
     }
 
     /**
@@ -249,6 +303,10 @@ class MapboxManeuverView : ConstraintLayout {
      * @see [TextViewCompat.setTextAppearance]
      * @param style Int
      */
+    @Deprecated(
+        message = "The function is incapable to style the exit text inside a Primary Maneuver.",
+        replaceWith = ReplaceWith("updateOptions(options)")
+    )
     fun updatePrimaryManeuverTextAppearance(@StyleRes style: Int) {
         TextViewCompat.setTextAppearance(mainLayoutBinding.primaryManeuverText, style)
     }
@@ -258,6 +316,10 @@ class MapboxManeuverView : ConstraintLayout {
      * @see [TextViewCompat.setTextAppearance]
      * @param style Int
      */
+    @Deprecated(
+        message = "The function is incapable to style the exit text inside a Secondary Maneuver.",
+        replaceWith = ReplaceWith("updateOptions(options)")
+    )
     fun updateSecondaryManeuverTextAppearance(@StyleRes style: Int) {
         TextViewCompat.setTextAppearance(mainLayoutBinding.secondaryManeuverText, style)
     }
@@ -267,6 +329,10 @@ class MapboxManeuverView : ConstraintLayout {
      * @see [TextViewCompat.setTextAppearance]
      * @param style Int
      */
+    @Deprecated(
+        message = "The function is incapable to style the exit text inside a Sub Maneuver.",
+        replaceWith = ReplaceWith("updateOptions(options)")
+    )
     fun updateSubManeuverTextAppearance(@StyleRes style: Int) {
         TextViewCompat.setTextAppearance(subLayoutBinding.subManeuverText, style)
     }
@@ -285,6 +351,10 @@ class MapboxManeuverView : ConstraintLayout {
      * @see [TextViewCompat.setTextAppearance]
      * @param style Int
      */
+    @Deprecated(
+        message = "The function is incapable to style the exit text inside a Primary Maneuver.",
+        replaceWith = ReplaceWith("updateOptions(options)")
+    )
     fun updateUpcomingPrimaryManeuverTextAppearance(@StyleRes style: Int) {
         upcomingManeuverAdapter.updateUpcomingPrimaryManeuverTextAppearance(style)
     }
@@ -294,6 +364,10 @@ class MapboxManeuverView : ConstraintLayout {
      * @see [TextViewCompat.setTextAppearance]
      * @param style Int
      */
+    @Deprecated(
+        message = "The function is incapable to style the exit text inside a Secondary Maneuver.",
+        replaceWith = ReplaceWith("updateOptions(options)")
+    )
     fun updateUpcomingSecondaryManeuverTextAppearance(@StyleRes style: Int) {
         upcomingManeuverAdapter.updateUpcomingSecondaryManeuverTextAppearance(style)
     }
@@ -368,7 +442,7 @@ class MapboxManeuverView : ConstraintLayout {
         message = "The method is incapable of rendering Mapbox designed route shields. In cases " +
             "where an instruction contains multiple shields, the method may only render 1 shield " +
             "instead of multiple shields for that maneuver.",
-        replaceWith = ReplaceWith("renderPrimary(primary, routeShields)")
+        replaceWith = ReplaceWith("renderPrimary(primary, roadShields)")
     )
     @JvmOverloads
     fun renderPrimaryManeuver(primary: PrimaryManeuver, roadShield: RoadShield? = null) {
@@ -397,7 +471,7 @@ class MapboxManeuverView : ConstraintLayout {
         message = "The method is incapable of rendering Mapbox designed route shields. In cases " +
             "where an instruction contains multiple shields, the method may only render 1 shield " +
             "instead of multiple shields for that maneuver.",
-        replaceWith = ReplaceWith("renderSecondary(secondary, routeShields)")
+        replaceWith = ReplaceWith("renderSecondary(secondary, roadShields)")
     )
     @JvmOverloads
     fun renderSecondaryManeuver(secondary: SecondaryManeuver?, roadShield: RoadShield? = null) {
@@ -425,7 +499,7 @@ class MapboxManeuverView : ConstraintLayout {
         message = "The method is incapable of rendering Mapbox designed route shields. In cases " +
             "where an instruction contains multiple shields, the method may only render 1 shield " +
             "instead of multiple shields for that maneuver.",
-        replaceWith = ReplaceWith("renderSub(sub, routeShields)")
+        replaceWith = ReplaceWith("renderSub(sub, roadShields)")
     )
     @JvmOverloads
     fun renderSubManeuver(sub: SubManeuver?, roadShield: RoadShield? = null) {
