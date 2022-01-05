@@ -43,7 +43,6 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityManeuverBinding
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
-import com.mapbox.navigation.ui.maneuver.api.RoadShieldsCallback
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
@@ -59,6 +58,7 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.shield.model.RouteShieldCallback
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import kotlinx.coroutines.CoroutineScope
@@ -129,16 +129,8 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
-    private val roadShieldCallback = RoadShieldsCallback { _, shieldResult, shieldErrors ->
+    private val roadShieldCallback = RouteShieldCallback { shieldResult ->
         binding.maneuverView.renderManeuverWith(shieldResult)
-        shieldErrors.forEach { (id, errors) ->
-            errors.forEach { error ->
-                LoggerProvider.logger.e(
-                    Tag("MbxManeuverActivity"),
-                    Message("id: $id -- error: ${error.url} - ${error.message}")
-                )
-            }
-        }
     }
 
     private val locationObserver = object : LocationObserver {

@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.res.Resources
 import android.text.SpannableStringBuilder
 import com.mapbox.navigation.ui.maneuver.view.MapboxExitText
+import com.mapbox.navigation.ui.shield.internal.model.getRefLen
+import com.mapbox.navigation.ui.utils.internal.ifNonNull
 
 internal object ManeuverInstructionGenerator {
 
@@ -12,7 +14,7 @@ internal object ManeuverInstructionGenerator {
         desiredHeight: Int,
         exitView: MapboxExitText,
         maneuver: PrimaryManeuver,
-        roadShields: List<RoadShield>? = null
+        roadShields: Set<RoadShield>? = null
     ): SpannableStringBuilder {
         val instructionBuilder = SpannableStringBuilder()
         maneuver.componentList.forEach { component ->
@@ -31,16 +33,11 @@ internal object ManeuverInstructionGenerator {
                     )
                 }
                 is RoadShieldComponentNode -> {
-                    val shield = roadShields?.find {
-                        it.mapboxShield == node.mapboxShield
-                    } ?: roadShields?.find {
-                        it.shieldUrl == node.shieldUrl
-                    }
                     addShieldToBuilder(
                         node.text,
                         desiredHeight,
                         context.resources,
-                        shield,
+                        getShieldToRender(node, roadShields),
                         instructionBuilder
                     )
                 }
@@ -57,7 +54,7 @@ internal object ManeuverInstructionGenerator {
         desiredHeight: Int,
         exitView: MapboxExitText,
         maneuver: SecondaryManeuver?,
-        roadShields: List<RoadShield>? = null
+        roadShields: Set<RoadShield>? = null
     ): SpannableStringBuilder {
         val instructionBuilder = SpannableStringBuilder()
         maneuver?.componentList?.forEach { component ->
@@ -76,16 +73,11 @@ internal object ManeuverInstructionGenerator {
                     )
                 }
                 is RoadShieldComponentNode -> {
-                    val shield = roadShields?.find {
-                        it.mapboxShield == node.mapboxShield
-                    } ?: roadShields?.find {
-                        it.shieldUrl == node.shieldUrl
-                    }
                     addShieldToBuilder(
                         node.text,
                         desiredHeight,
                         context.resources,
-                        shield,
+                        getShieldToRender(node, roadShields),
                         instructionBuilder
                     )
                 }
@@ -102,7 +94,7 @@ internal object ManeuverInstructionGenerator {
         desiredHeight: Int,
         exitView: MapboxExitText,
         maneuver: SubManeuver?,
-        roadShields: List<RoadShield>? = null
+        roadShields: Set<RoadShield>? = null
     ): SpannableStringBuilder {
         val instructionBuilder = SpannableStringBuilder()
         maneuver?.componentList?.forEach { component ->
@@ -121,16 +113,11 @@ internal object ManeuverInstructionGenerator {
                     )
                 }
                 is RoadShieldComponentNode -> {
-                    val shield = roadShields?.find {
-                        it.mapboxShield == node.mapboxShield
-                    } ?: roadShields?.find {
-                        it.shieldUrl == node.shieldUrl
-                    }
                     addShieldToBuilder(
                         node.text,
                         desiredHeight,
                         context.resources,
-                        shield,
+                        getShieldToRender(node, roadShields),
                         instructionBuilder
                     )
                 }
@@ -184,5 +171,21 @@ internal object ManeuverInstructionGenerator {
     private fun addDelimiterToBuilder(text: String, builder: SpannableStringBuilder) {
         builder.append(text)
         builder.append(" ")
+    }
+
+    private fun getShieldToRender(
+        node: RoadShieldComponentNode,
+        roadShields: Set<RoadShield>?
+    ): RoadShield? {
+        return roadShields?.find {
+            ifNonNull(node.mapboxShield) { mbxShield ->
+                val shieldName = mbxShield.name()
+                val displayRefLength = mbxShield.getRefLen()
+                val shieldRequested = shieldName.plus("-$displayRefLength")
+                it.shieldUrl.contains(shieldRequested)
+            } ?: false
+        } ?: roadShields?.find {
+            it.shieldUrl == node.shieldUrl
+        }
     }
 }
