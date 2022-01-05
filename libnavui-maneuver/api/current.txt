@@ -864,6 +864,7 @@ package com.mapbox.navigation.ui.maneuver.view {
     method @Deprecated public void renderSubManeuver(com.mapbox.navigation.ui.maneuver.model.SubManeuver? sub, com.mapbox.navigation.ui.maneuver.model.RoadShield? roadShield = null);
     method @Deprecated public void renderSubManeuver(com.mapbox.navigation.ui.maneuver.model.SubManeuver? sub);
     method public void setUpcomingManeuverRenderingEnabled(boolean value);
+    method public void updateLaneGuidanceIconStyle(@StyleRes int style);
     method public void updatePrimaryManeuverTextAppearance(@StyleRes int style);
     method public void updatePrimaryManeuverTextVisibility(int visibility);
     method public void updateSecondaryManeuverTextAppearance(@StyleRes int style);
