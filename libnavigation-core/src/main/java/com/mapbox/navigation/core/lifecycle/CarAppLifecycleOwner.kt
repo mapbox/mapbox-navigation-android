@@ -127,13 +127,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
             } else {
                 activitiesForegrounded--
                 logger.i(TAG, Message("app onActivityStopped"))
-                if (lifecycleCreated == 0 &&
-                    activitiesCreated == 0 &&
-                    activitiesForegrounded == 0
-                ) {
-                    check(activitiesCreated == 0 && activitiesForegrounded == 0) {
-                        "onActivityStopped when no activities exist"
-                    }
+                if (lifecycleCreated == 0 && activitiesForegrounded == 0) {
                     changeState(Lifecycle.State.STARTED)
                 }
             }
