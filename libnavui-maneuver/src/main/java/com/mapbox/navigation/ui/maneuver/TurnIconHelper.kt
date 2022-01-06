@@ -416,8 +416,8 @@ internal class TurnIconHelper(
 
     private fun isManeuverRoundabout(type: String?): Boolean {
         return when {
-            !type.isNullOrEmpty()
-                && (
+            !type.isNullOrEmpty() &&
+                (
                     type == ROUNDABOUT ||
                         type == ROUNDABOUT_TURN ||
                         type == EXIT_ROUNDABOUT ||
