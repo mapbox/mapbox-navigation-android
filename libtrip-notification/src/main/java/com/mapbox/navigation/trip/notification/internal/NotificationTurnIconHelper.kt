@@ -465,8 +465,8 @@ internal class NotificationTurnIconHelper(
 
     private fun isManeuverRoundabout(type: String?): Boolean {
         return when {
-            !type.isNullOrEmpty()
-                && (
+            !type.isNullOrEmpty() &&
+                (
                     type == StepManeuver.ROUNDABOUT ||
                         type == StepManeuver.ROUNDABOUT_TURN ||
                         type == StepManeuver.EXIT_ROUNDABOUT ||
