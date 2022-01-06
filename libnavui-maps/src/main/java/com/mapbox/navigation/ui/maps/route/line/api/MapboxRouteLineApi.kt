@@ -249,6 +249,7 @@ class MapboxRouteLineApi(
         newRoutes: List<RouteLine>,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
+        cancel()
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 val routes = newRoutes.map(RouteLine::route)
