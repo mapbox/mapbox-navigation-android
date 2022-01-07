@@ -2,6 +2,27 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.5 - January 7, 2022
+This is a patch release on top of `v2.0.x` which does not include changes introduced in `v2.1.x` and later.
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
+- Fixed a small but limitless memory growth when processing location updates. [#5337](https://github.com/mapbox/mapbox-navigation-android/pull/5337)
+- Fixed decoding of OpenLR point along line. [#5337](https://github.com/mapbox/mapbox-navigation-android/pull/5337)
+- Fixed an issue of falling back to the same version of routing tiles that we are currently on. [#5337](https://github.com/mapbox/mapbox-navigation-android/pull/5337)
+- Fixed OOM Exception because of non-limited internal cached of alternative routes. [#5323](https://github.com/mapbox/mapbox-navigation-android/pull/5323)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.0.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.2))
+- Mapbox Navigation Native `v69.0.4`
+- Mapbox Core Common `v20.0.3`
+- Mapbox Java `v6.0.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.0.4 - December 13, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
