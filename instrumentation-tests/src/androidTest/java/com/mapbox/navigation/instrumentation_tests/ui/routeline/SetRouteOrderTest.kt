@@ -74,16 +74,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
         val consumerLongRoute =
             MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { value ->
                 LoggerProvider.logger.e(Tag("SetRouteCancellationTest"), Message("long"))
-                val primaryRoute = routeLineApi.getPrimaryRoute()
-                val contents =
-                    value.value!!.primaryRouteLineData.dynamicData.trafficExpressionProvider!!
-                        .generateExpression().contents as ArrayList<*>
-                assertEquals(
-                    625,
-                    contents.size
-                )
-                assertEquals(longRoute, primaryRoute)
-                myResourceIdler.decrement()
+                throw RuntimeException("Previous set routes call wasn't cancelled as expected.")
             }
 
         val consumerShortRoute =
@@ -101,7 +92,6 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
                 myResourceIdler.decrement()
             }
 
-        myResourceIdler.increment()
         myResourceIdler.increment()
         routeLineApi.setRoutes(longRoutes, consumerLongRoute)
         Timer().schedule(
@@ -124,39 +114,25 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
 
         val consumer =
             MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { value ->
+                // The first call to set routes with the long route should get cancelled
+                // so the short route used for the second call to set routes should be the primary.
                 val primaryRoute = routeLineApi.getPrimaryRoute()
-                // The long route result should come in first even though it takes longer.
-                if (consumerCallCount == 0) {
-                    val contents = value.value!!
-                        .primaryRouteLineData
-                        .dynamicData
-                        .trafficExpressionProvider!!
-                        .generateExpression()
-                        .contents as ArrayList<*>
-                    assertEquals(
-                        625,
-                        contents.size
-                    )
-                    assertEquals(longRoute, primaryRoute)
-                } else {
-                    val contents = value.value!!
-                        .primaryRouteLineData
-                        .dynamicData
-                        .trafficExpressionProvider!!
-                        .generateExpression()
-                        .contents as ArrayList<*>
-                    assertEquals(shortRoute, primaryRoute)
-                    assertEquals(
-                        7,
-                        contents.size
-                    )
-                }
+                val contents = value.value!!
+                    .primaryRouteLineData
+                    .dynamicData
+                    .trafficExpressionProvider!!
+                    .generateExpression()
+                    .contents as ArrayList<*>
+                assertEquals(shortRoute, primaryRoute)
+                assertEquals(
+                    7,
+                    contents.size
+                )
 
                 consumerCallCount += 1
                 myResourceIdler.decrement()
             }
 
-        myResourceIdler.increment()
         myResourceIdler.increment()
         routeLineApi.setRoutes(longRoutes, consumer)
         Timer().schedule(
