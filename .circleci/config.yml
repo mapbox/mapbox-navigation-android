@@ -531,6 +531,7 @@ jobs:
 
   publish-documentation:
     executor: ndk-r22-latest-executor
+    resource_class: medium+
     steps:
       - checkout
       - prepare-mbx-ci
