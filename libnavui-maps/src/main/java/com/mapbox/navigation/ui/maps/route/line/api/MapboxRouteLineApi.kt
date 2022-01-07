@@ -292,14 +292,17 @@ class MapboxRouteLineApi(
     fun updateTraveledRouteLine(
         point: Point
     ): Expected<RouteLineError, RouteLineUpdateValue> {
+        val currentNanoTime = System.nanoTime()
         if (routeLineOptions.vanishingRouteLine?.vanishingPointState ==
-            VanishingPointState.DISABLED || System.nanoTime() - lastIndexUpdateTimeNano >
-            RouteLayerConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO
+            VanishingPointState.DISABLED || currentNanoTime - lastIndexUpdateTimeNano >
+            RouteLayerConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO ||
+            currentNanoTime - lastIndexUpdateTimeNano <
+            routeLineOptions.vanishingRouteLineUpdateIntervalNano
         ) {
             return ExpectedFactory.createError(
                 RouteLineError(
-                    "Vanishing point state is disabled or too much time has " +
-                        "elapsed since last update.",
+                    "Vanishing point state is disabled or the update doesn't fall" +
+                        "within the configured interval window.",
                     null
                 )
             )

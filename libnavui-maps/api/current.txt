@@ -835,6 +835,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public double getSoftGradientTransition();
     method public boolean getStyleInactiveRouteLegsIndependently();
     method public double getTolerance();
+    method public long getVanishingRouteLineUpdateIntervalNano();
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder toBuilder(android.content.Context context);
     property public final android.graphics.drawable.Drawable destinationIcon;
     property public final boolean displayRestrictedRoadSections;
@@ -845,6 +846,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final double softGradientTransition;
     property public final boolean styleInactiveRouteLegsIndependently;
     property public final double tolerance;
+    property public final long vanishingRouteLineUpdateIntervalNano;
   }
 
   public static final class MapboxRouteLineOptions.Builder {
@@ -854,6 +856,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder displaySoftGradientForTraffic(boolean enable);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder softGradientTransition(int transitionDistance);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder styleInactiveRouteLegsIndependently(boolean enable);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder vanishingRouteLineUpdateInterval(long interval = 62500000L);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteLineBelowLayerId(String layerId);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteLineResources(com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources resourceProvider);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteStyleDescriptors(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor> routeStyleDescriptors);

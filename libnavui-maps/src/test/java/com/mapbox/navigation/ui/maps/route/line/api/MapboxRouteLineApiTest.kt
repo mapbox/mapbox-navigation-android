@@ -638,6 +638,7 @@ class MapboxRouteLineApiTest {
         val options = MapboxRouteLineOptions.Builder(ctx)
             .withVanishingRouteLineEnabled(true)
             .displayRestrictedRoadSections(false)
+            .vanishingRouteLineUpdateInterval(0)
             .build()
         val api = MapboxRouteLineApi(options)
         val expectedCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
@@ -694,10 +695,46 @@ class MapboxRouteLineApiTest {
     }
 
     @Test
+    fun updateTraveledRouteLine_updateIntervalBelowAllowedValue() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withVanishingRouteLineEnabled(true)
+            .displayRestrictedRoadSections(false)
+            .build()
+        val api = MapboxRouteLineApi(options)
+        val route = getRoute()
+        val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
+        val routeProgress = mockk<RouteProgress> {
+            every { currentLegProgress } returns mockk {
+                every { legIndex } returns 0
+                every { currentStepProgress } returns mockk {
+                    every { stepPoints } returns PolylineUtils.decode(
+                        route.legs()!![0].steps()!![2].geometry()!!,
+                        6
+                    )
+                    every { distanceTraveled } returns 0f
+                    every { step } returns mockk {
+                        every { distance() } returns route.legs()!![0].steps()!![2].distance()
+                    }
+                    every { stepIndex } returns 2
+                }
+            }
+        }
+
+        api.updateVanishingPointState(RouteProgressState.TRACKING)
+        api.setRoutes(listOf(RouteLine(route, null)))
+        api.updateUpcomingRoutePointIndex(routeProgress)
+
+        val result = api.updateTraveledRouteLine(lineString.coordinates()[1])
+
+        assertTrue(result.isError)
+    }
+
+    @Test
     fun updateTraveledRouteLine_whenRouteHasRestrictions() = coroutineRule.runBlockingTest {
         val options = MapboxRouteLineOptions.Builder(ctx)
             .withVanishingRouteLineEnabled(true)
             .displayRestrictedRoadSections(true)
+            .vanishingRouteLineUpdateInterval(0)
             .build()
         val api = MapboxRouteLineApi(options)
         val expectedRestrictedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0]," +
@@ -750,6 +787,7 @@ class MapboxRouteLineApiTest {
             val options = MapboxRouteLineOptions.Builder(ctx)
                 .withVanishingRouteLineEnabled(true)
                 .displayRestrictedRoadSections(true)
+                .vanishingRouteLineUpdateInterval(0)
                 .build()
             val api = MapboxRouteLineApi(options)
             val route = getRoute()

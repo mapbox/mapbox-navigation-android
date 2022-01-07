@@ -144,12 +144,12 @@ object RouteLayerConstants {
     internal const val MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO = 1500000000.0 // 1.5s
     internal const val DEFAULT_ROUTE_SOURCES_TOLERANCE = 0.375
     internal const val ROUNDED_LINE_CAP = true
-    internal const val RESTRICTED_ROAD_SECTION_SCALE = 10.0
     internal const val SOFT_GRADIENT_STOP_GAP_METERS: Double = 30.0
     internal val TRAFFIC_BACKFILL_ROAD_CLASSES = emptyList<String>()
     internal const val RESTRICTED_ROAD_LINE_OPACITY = 1.0
     internal const val RESTRICTED_ROAD_LINE_WIDTH = 7.0
     internal val RESTRICTED_ROAD_DASH_ARRAY = listOf(.5, 2.0)
+    internal const val DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO = 62_500_000L
 
     internal val LOW_CONGESTION_RANGE = 0..39
 
