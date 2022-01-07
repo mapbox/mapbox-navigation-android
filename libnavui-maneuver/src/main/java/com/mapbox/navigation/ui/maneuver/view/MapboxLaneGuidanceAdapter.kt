@@ -26,7 +26,7 @@ class MapboxLaneGuidanceAdapter(
     private val inflater = LayoutInflater.from(context)
     private val laneIndicatorList = mutableListOf<LaneIndicator>()
     private val laneApi = MapboxLaneIconsApi()
-    @StyleRes private var laneGuidanceStyle: Int = R.style.MapboxStyleTurnIconManeuver
+    private var wrapper = ContextThemeWrapper(context, R.style.MapboxStyleTurnIconManeuver)
 
     /**
      * Binds the given View to the position.
@@ -87,7 +87,8 @@ class MapboxLaneGuidanceAdapter(
      * @param style Int
      */
     fun updateStyle(@StyleRes style: Int) {
-        this.laneGuidanceStyle = style
+        this.wrapper = ContextThemeWrapper(context, style)
+        notifyDataSetChanged()
     }
 
     /**
@@ -107,7 +108,7 @@ class MapboxLaneGuidanceAdapter(
             val laneIcon = laneApi.getTurnLane(laneIndicator)
             viewBinding.itemLaneGuidance.renderLane(
                 laneIcon,
-                ContextThemeWrapper(viewBinding.root.context, laneGuidanceStyle)
+                wrapper
             )
         }
     }

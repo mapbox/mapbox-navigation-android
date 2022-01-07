@@ -215,6 +215,14 @@ class MapboxManeuverView : ConstraintLayout {
     }
 
     /**
+     * Allows you to change the style of lane guidance turn icons in sub maneuver view.
+     * @param style Int
+     */
+    fun updateLaneGuidanceIconStyle(@StyleRes style: Int) {
+        laneGuidanceAdapter.updateStyle(style)
+    }
+
+    /**
      * Allows you to change the text appearance of primary maneuver text.
      * @see [TextViewCompat.setTextAppearance]
      * @param style Int
