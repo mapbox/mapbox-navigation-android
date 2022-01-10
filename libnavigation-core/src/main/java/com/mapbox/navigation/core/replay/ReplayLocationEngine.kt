@@ -4,10 +4,10 @@ import android.app.PendingIntent
 import android.location.Location
 import android.os.Looper
 import android.os.SystemClock
-import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineRequest
-import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.common.location.compat.LocationEngine
+import com.mapbox.common.location.compat.LocationEngineCallback
+import com.mapbox.common.location.compat.LocationEngineRequest
+import com.mapbox.common.location.compat.LocationEngineResult
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
@@ -59,7 +59,9 @@ class ReplayLocationEngine(
      */
     override fun getLastLocation(callback: EngineCallback) {
         if (lastLocationEngineResult != null) {
-            callback.onSuccess(lastLocationEngineResult)
+            lastLocationEngineResult?.let {
+                callback.onSuccess(it)
+            }
         } else {
             lastLocationCallbacks.add(callback)
         }

@@ -2,8 +2,8 @@ package com.mapbox.navigation.base.options
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineRequest
+import com.mapbox.common.location.compat.LocationEngineProvider
+import com.mapbox.common.location.compat.LocationEngineRequest
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS

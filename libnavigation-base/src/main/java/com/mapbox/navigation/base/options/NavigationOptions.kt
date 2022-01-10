@@ -1,9 +1,9 @@
 package com.mapbox.navigation.base.options
 
 import android.content.Context
-import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineRequest
+import com.mapbox.common.location.compat.LocationEngine
+import com.mapbox.common.location.compat.LocationEngineProvider
+import com.mapbox.common.location.compat.LocationEngineRequest
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.route.RouteAlternativesOptions

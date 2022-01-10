@@ -36,6 +36,7 @@ workflows:
               only:
                 - main
                 - release-v.*
+                - tarigo_test_common_location_api
       - release:
           filters:
             tags:

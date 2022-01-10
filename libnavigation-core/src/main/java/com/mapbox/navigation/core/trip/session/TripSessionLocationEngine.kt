@@ -3,10 +3,10 @@ package com.mapbox.navigation.core.trip.session
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Looper
-import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.base.common.logger.model.Message
+import com.mapbox.common.location.compat.LocationEngine
+import com.mapbox.common.location.compat.LocationEngineCallback
+import com.mapbox.common.location.compat.LocationEngineResult
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
@@ -54,7 +54,7 @@ internal class TripSessionLocationEngine constructor(
     }
 
     private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
-        override fun onSuccess(result: LocationEngineResult?) {
+        override fun onSuccess(result: LocationEngineResult) {
             result?.locations?.lastOrNull()?.let {
                 onRawLocationUpdate(it)
             }

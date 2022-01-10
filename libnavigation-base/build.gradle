@@ -27,6 +27,7 @@ dependencies {
     api dependenciesList.mapboxSdkServicesCore
     // Navigator
     implementation dependenciesList.mapboxNavigator
+    implementation dependenciesList.mapboxCommonNative
 
     implementation dependenciesList.androidXAnnotation
     implementation dependenciesList.coroutinesAndroid

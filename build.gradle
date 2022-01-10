@@ -73,6 +73,13 @@ allprojects {
       }
     }
   }
+  configurations {
+    all {
+      resolutionStrategy {
+        force("com.mapbox.common:common:21.1.0-beta.1-ab24d2ac9a4498a42915ee9dfe173a19899fcbf6-SNAPSHOT")
+      }
+    }
+  }
 }
 
 subprojects {
