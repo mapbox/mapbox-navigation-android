@@ -9,7 +9,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue where the `onPause` is not called when the app is backgrounded and the implementation is using `MapboxNavigationApp.attachAllActivities`. [#5329](https://github.com/mapbox/mapbox-navigation-android/pull/5329)
 - Fixed a crash when use non-`driving-traffic` profile with extension `RouteOptions.Builder#applyDefaultNavigationOptions`. [#5322](https://github.com/mapbox/mapbox-navigation-android/pull/5322)
 - Refactored extension `RouteOptions.Builder#applyDefaultNavigationOptions`, might be set profile param explicitly. [#5322](https://github.com/mapbox/mapbox-navigation-android/pull/5322)
-- Exposed a new API `MapboxManeuverView.updateLaneGuidanceIconStyle` that would allow changing the style of `MapboxLaneGuidanceAdapter` at runtime. [#5322](https://github.com/mapbox/mapbox-navigation-android/pull/5334)
+- Exposed a new API `MapboxManeuverView.updateLaneGuidanceIconStyle` that would allow changing the style of `MapboxLaneGuidanceAdapter` at runtime. [#5334](https://github.com/mapbox/mapbox-navigation-android/pull/5334)
+- Fixed a crash when `MapboxNavigationViewportDataSourceDebugger.enabled` is repeatedly set to true. [#5347](https://github.com/mapbox/mapbox-navigation-android/pull/5347)
 
 ## Mapbox Navigation SDK 2.0.5 - January 7, 2022
 This is a patch release on top of `v2.0.x` which does not include changes introduced in `v2.1.x` and later.

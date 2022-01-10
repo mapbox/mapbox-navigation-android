@@ -76,6 +76,7 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
      */
     var enabled = false
         set(value) {
+            if (field == value) return
             field = value
             if (value) {
                 mapView.addView(mapPaddingBorder)
