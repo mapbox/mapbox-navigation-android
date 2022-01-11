@@ -63,7 +63,7 @@ internal object ManeuverProcessor {
             maneuverState.allManeuvers.clear()
             maneuverState.roadShields.clear()
             try {
-                createAllManeuversForRoute(route, maneuverState, distanceFormatter)
+                createAllManeuversForRoute(route, maneuverOptions, maneuverState, distanceFormatter)
             } catch (exception: RuntimeException) {
                 return ManeuverResult.GetManeuverList.Failure(exception.message)
             }
@@ -146,7 +146,12 @@ internal object ManeuverProcessor {
                         maneuverState.route = route
                         maneuverState.allManeuvers.clear()
                         maneuverState.roadShields.clear()
-                        createAllManeuversForRoute(route, maneuverState, distanceFormatter)
+                        createAllManeuversForRoute(
+                            route,
+                            maneuverOptions,
+                            maneuverState,
+                            distanceFormatter
+                        )
                     }
 
                     val legToManeuvers = routeLegIndex.findIn(maneuverState.allManeuvers)
@@ -182,6 +187,7 @@ internal object ManeuverProcessor {
 
     private fun createAllManeuversForRoute(
         route: DirectionsRoute,
+        options: ManeuverOptions,
         maneuverState: ManeuverState,
         distanceFormatter: DistanceFormatter
     ) {
@@ -205,6 +211,7 @@ internal object ManeuverProcessor {
                             bannerInstruction.forEach { banner ->
                                 maneuverList.add(
                                     transformToManeuver(
+                                        options = options,
                                         drivingSide = drivingSide,
                                         bannerInstruction = banner,
                                         maneuverPoint = maneuverPoint,
@@ -298,12 +305,25 @@ internal object ManeuverProcessor {
     private fun transformToManeuver(
         drivingSide: String,
         maneuverPoint: Point,
+        options: ManeuverOptions,
         bannerInstruction: BannerInstructions,
         distanceFormatter: DistanceFormatter
     ): Maneuver {
-        val primaryManeuver = getPrimaryManeuver(drivingSide, bannerInstruction.primary())
-        val secondaryManeuver = getSecondaryManeuver(drivingSide, bannerInstruction.secondary())
-        val subManeuver = getSubManeuverText(drivingSide, bannerInstruction.sub())
+        val primaryManeuver = getPrimaryManeuver(
+            drivingSide,
+            bannerInstruction.primary(),
+            options
+        )
+        val secondaryManeuver = getSecondaryManeuver(
+            drivingSide,
+            bannerInstruction.secondary(),
+            options
+        )
+        val subManeuver = getSubManeuverText(
+            drivingSide,
+            bannerInstruction.sub(),
+            options
+        )
         val laneGuidance = getLaneGuidance(drivingSide, bannerInstruction)
         val totalStepDistance = bannerInstruction.distanceAlongGeometry()
         val stepDistance = StepDistance(distanceFormatter, totalStepDistance, null)
@@ -317,7 +337,11 @@ internal object ManeuverProcessor {
         )
     }
 
-    private fun getPrimaryManeuver(drivingSide: String, bannerText: BannerText): PrimaryManeuver {
+    private fun getPrimaryManeuver(
+        drivingSide: String,
+        bannerText: BannerText,
+        options: ManeuverOptions
+    ): PrimaryManeuver {
         val bannerComponentList = bannerText.components()
         return when (!bannerComponentList.isNullOrEmpty()) {
             true -> {
@@ -328,7 +352,9 @@ internal object ManeuverProcessor {
                     bannerText.degrees(),
                     bannerText.modifier(),
                     bannerText.drivingSide() ?: drivingSide,
-                    createComponents(bannerComponentList)
+                    createComponents(bannerComponentList),
+                    options.mutcdExitProperties,
+                    options.viennaExitProperties
                 )
             }
             else -> {
@@ -339,7 +365,8 @@ internal object ManeuverProcessor {
 
     private fun getSecondaryManeuver(
         drivingSide: String,
-        bannerText: BannerText?
+        bannerText: BannerText?,
+        options: ManeuverOptions
     ): SecondaryManeuver? {
         val bannerComponentList = bannerText?.components()
         return when (!bannerComponentList.isNullOrEmpty()) {
@@ -351,7 +378,9 @@ internal object ManeuverProcessor {
                     bannerText.degrees(),
                     bannerText.modifier(),
                     bannerText.drivingSide() ?: drivingSide,
-                    createComponents(bannerComponentList)
+                    createComponents(bannerComponentList),
+                    options.mutcdExitProperties,
+                    options.viennaExitProperties
                 )
             }
             else -> {
@@ -362,7 +391,8 @@ internal object ManeuverProcessor {
 
     private fun getSubManeuverText(
         drivingSide: String,
-        bannerText: BannerText?
+        bannerText: BannerText?,
+        options: ManeuverOptions
     ): SubManeuver? {
         bannerText?.let { subBanner ->
             if (subBanner.type() != null && subBanner.text().isNotEmpty()) {
@@ -376,7 +406,9 @@ internal object ManeuverProcessor {
                             bannerText.degrees(),
                             bannerText.modifier(),
                             bannerText.drivingSide() ?: drivingSide,
-                            createComponents(bannerComponentList)
+                            createComponents(bannerComponentList),
+                            options.mutcdExitProperties,
+                            options.viennaExitProperties
                         )
                     }
                     else -> {

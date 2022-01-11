@@ -44,7 +44,7 @@ class MapboxSecondaryManeuverTest {
         val expected = SpannableString("23 I-880 / Central ")
         val view = MapboxSecondaryManeuver(ctx)
 
-        view.render(state)
+        view.renderManeuver(state, null)
 
         assertEquals(expected.toString(), view.text.toString())
     }

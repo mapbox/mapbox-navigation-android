@@ -19,6 +19,18 @@ object SubManeuverFactory {
         degrees: Double,
         modifier: String,
         drivingSide: String,
-        componentList: List<Component>
-    ) = SubManeuver(id, text, type, degrees, modifier, drivingSide, componentList)
+        componentList: List<Component>,
+        mutcdExitProperties: MapboxExitProperties.PropertiesMutcd,
+        viennaExitProperties: MapboxExitProperties.PropertiesVienna
+    ) = SubManeuver(
+        id,
+        text,
+        type,
+        degrees,
+        modifier,
+        drivingSide,
+        componentList,
+        mutcdExitProperties,
+        viennaExitProperties
+    )
 }

@@ -11,6 +11,10 @@ import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
  * the timing of when to notify the user about details of an upcoming maneuver.
  * For example, there can a "left turn" [BannerInstructions] available 1000m and 300m before a turn, where only the latter also contains lane information.
  * By setting this flag to `true`, you can filter out those duplicates which improves the presentation in, for example, a scrolling list.
+ * @param mutcdExitProperties Specify the drawables you wish to render for an [ExitComponentNode] component contained
+ * in a [Maneuver]. These properties would be applied to countries following MUTCD convention
+ * @param viennaExitProperties Specify the drawables you wish to render for an [ExitComponentNode] component contained
+ * in a [Maneuver]. These properties would be applied to countries following VIENNA convention
  *
  * The [MapboxManeuverApi] will ensure that no information is lost and the current maneuver is always up-to-date.
  * It's only the upcoming duplicates that are continuously filtered out.
@@ -18,7 +22,9 @@ import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
  * This option defaults to `true`.
  */
 class ManeuverOptions private constructor(
-    val filterDuplicateManeuvers: Boolean
+    val filterDuplicateManeuvers: Boolean,
+    val mutcdExitProperties: MapboxExitProperties.PropertiesMutcd,
+    val viennaExitProperties: MapboxExitProperties.PropertiesVienna,
 ) {
 
     /**
@@ -26,6 +32,8 @@ class ManeuverOptions private constructor(
      */
     fun toBuilder() = Builder()
         .filterDuplicateManeuvers(filterDuplicateManeuvers)
+        .mutcdExitProperties(mutcdExitProperties)
+        .viennaExitProperties(viennaExitProperties)
 
     /**
      * Regenerate whenever a change is made
@@ -37,6 +45,8 @@ class ManeuverOptions private constructor(
         other as ManeuverOptions
 
         if (filterDuplicateManeuvers != other.filterDuplicateManeuvers) return false
+        if (mutcdExitProperties != other.mutcdExitProperties) return false
+        if (viennaExitProperties != other.viennaExitProperties) return false
 
         return true
     }
@@ -45,14 +55,21 @@ class ManeuverOptions private constructor(
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        return filterDuplicateManeuvers.hashCode()
+        var result = filterDuplicateManeuvers.hashCode()
+        result = 31 * result + mutcdExitProperties.hashCode()
+        result = 31 * result + viennaExitProperties.hashCode()
+        return result
     }
 
     /**
      * Regenerate whenever a change is made
      */
     override fun toString(): String {
-        return "ManeuverOptions(filterDuplicateManeuvers=$filterDuplicateManeuvers)"
+        return "ManeuverOptions(" +
+            "filterDuplicateManeuvers=$filterDuplicateManeuvers, " +
+            "mutcdExitProperties=$mutcdExitProperties, " +
+            "viennaExitProperties=$viennaExitProperties" +
+            ")"
     }
 
     /**
@@ -61,6 +78,8 @@ class ManeuverOptions private constructor(
     class Builder {
 
         private var filterDuplicateManeuvers = true
+        private var mutcdExitProperties = MapboxExitProperties.PropertiesMutcd()
+        private var viennaExitProperties = MapboxExitProperties.PropertiesVienna()
 
         /**
          * Guidance instructions returned by the Mapbox Directions API
@@ -82,12 +101,42 @@ class ManeuverOptions private constructor(
         }
 
         /**
+         * Specify the drawables you wish to render for an [ExitComponentNode] component contained
+         * in a [Maneuver]. These properties would be applied to countries following MUTCD
+         * convention
+         *
+         * @param mutcdExitProperties settings to exit properties
+         * @return Builder
+         */
+        fun mutcdExitProperties(
+            mutcdExitProperties: MapboxExitProperties.PropertiesMutcd
+        ) = apply {
+            this.mutcdExitProperties = mutcdExitProperties
+        }
+
+        /**
+         * Specify the drawables you wish to render for an [ExitComponentNode] component contained
+         * in a [Maneuver]. These properties would be applied to countries following MUTCD
+         * convention
+         *
+         * @param viennaExitProperties settings to exit properties
+         * @return Builder
+         */
+        fun viennaExitProperties(
+            viennaExitProperties: MapboxExitProperties.PropertiesVienna
+        ) = apply {
+            this.viennaExitProperties = viennaExitProperties
+        }
+
+        /**
          * Build a new instance of [ManeuverOptions]
          *
          * @return ManeuverOptions
          */
         fun build() = ManeuverOptions(
-            filterDuplicateManeuvers = filterDuplicateManeuvers
+            filterDuplicateManeuvers = filterDuplicateManeuvers,
+            mutcdExitProperties = mutcdExitProperties,
+            viennaExitProperties = viennaExitProperties
         )
     }
 }
