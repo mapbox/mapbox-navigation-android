@@ -17,20 +17,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.ui.maneuver.R
-import com.mapbox.navigation.ui.maneuver.model.Component
-import com.mapbox.navigation.ui.maneuver.model.DelimiterComponentNode
-import com.mapbox.navigation.ui.maneuver.model.ExitComponentNode
-import com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode
-import com.mapbox.navigation.ui.maneuver.model.Lane
-import com.mapbox.navigation.ui.maneuver.model.LaneIndicator
-import com.mapbox.navigation.ui.maneuver.model.Maneuver
-import com.mapbox.navigation.ui.maneuver.model.ManeuverError
-import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
-import com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode
-import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
-import com.mapbox.navigation.ui.maneuver.model.StepDistance
-import com.mapbox.navigation.ui.maneuver.model.SubManeuver
-import com.mapbox.navigation.ui.maneuver.model.TextComponentNode
+import com.mapbox.navigation.ui.maneuver.model.*
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -288,6 +275,8 @@ class MapboxManeuverViewTest {
             every { modifier } returns ManeuverModifier.RIGHT
             every { drivingSide } returns null
             every { componentList } returns listOf()
+            every { exitMutcdProperties } returns MapboxExitProperties.PropertiesMutcd()
+            every { exitViennaProperties } returns MapboxExitProperties.PropertiesVienna()
         }
         val view = MapboxManeuverView(ctx)
         val expected = ""
@@ -343,6 +332,8 @@ class MapboxManeuverViewTest {
             every { modifier } returns ManeuverModifier.RIGHT
             every { drivingSide } returns null
             every { componentList } returns listOf()
+            every { exitMutcdProperties } returns MapboxExitProperties.PropertiesMutcd()
+            every { exitViennaProperties } returns MapboxExitProperties.PropertiesVienna()
         }
         val view = MapboxManeuverView(ctx)
         val expected = ""
@@ -462,6 +453,8 @@ class MapboxManeuverViewTest {
             every { modifier } returns ManeuverModifier.RIGHT
             every { drivingSide } returns null
             every { componentList } returns listOf()
+            every { exitMutcdProperties } returns MapboxExitProperties.PropertiesMutcd()
+            every { exitViennaProperties } returns MapboxExitProperties.PropertiesVienna()
         }
         val view = MapboxManeuverView(ctx)
         val expected = ""
@@ -558,6 +551,8 @@ class MapboxManeuverViewTest {
             every { modifier } returns ManeuverModifier.RIGHT
             every { drivingSide } returns null
             every { componentList } returns listOf(textComponentNode)
+            every { exitMutcdProperties } returns MapboxExitProperties.PropertiesMutcd()
+            every { exitViennaProperties } returns MapboxExitProperties.PropertiesVienna()
         }
     }
 
@@ -595,6 +590,8 @@ class MapboxManeuverViewTest {
             every { componentList } returns listOf(
                 roadShieldNumberComponent, delimiterComponentNode, textComponentNode
             )
+            every { exitMutcdProperties } returns MapboxExitProperties.PropertiesMutcd()
+            every { exitViennaProperties } returns MapboxExitProperties.PropertiesVienna()
         }
     }
 
@@ -650,6 +647,8 @@ class MapboxManeuverViewTest {
                 delimiterComponentNode,
                 textComponentNode
             )
+            every { exitMutcdProperties } returns MapboxExitProperties.PropertiesMutcd()
+            every { exitViennaProperties } returns MapboxExitProperties.PropertiesVienna()
         }
     }
 

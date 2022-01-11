@@ -11,12 +11,7 @@ import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
-import com.mapbox.navigation.ui.maneuver.model.Component
-import com.mapbox.navigation.ui.maneuver.model.Maneuver
-import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
-import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
-import com.mapbox.navigation.ui.maneuver.model.StepDistance
-import com.mapbox.navigation.ui.maneuver.model.TextComponentNode
+import com.mapbox.navigation.ui.maneuver.model.*
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -136,6 +131,8 @@ class MapboxUpcomingManeuverAdapterTest {
                         .build()
                 )
             )
+            every { exitMutcdProperties } returns MapboxExitProperties.PropertiesMutcd()
+            every { exitViennaProperties } returns MapboxExitProperties.PropertiesVienna()
         }
         val secondaryManeuver = mockk<SecondaryManeuver> {
             every { id } returns "abcd1234"
@@ -155,6 +152,8 @@ class MapboxUpcomingManeuverAdapterTest {
                         .build()
                 )
             )
+            every { exitMutcdProperties } returns MapboxExitProperties.PropertiesMutcd()
+            every { exitViennaProperties } returns MapboxExitProperties.PropertiesVienna()
         }
         val maneuver = Maneuver(
             primaryManeuver,
