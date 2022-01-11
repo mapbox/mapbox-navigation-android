@@ -138,17 +138,11 @@ commands:
   verify-changelog:
     steps:
       - run:
-          name: Install python dependencies
-          command: python3 -m pip install requests
+          name: Install js dependencies
+          command: npm install
       - run:
           name: Verify that a changelog entry is present in CHANGELOG.md
-          command: |
-            MBX_CI_GITHUB_TOKEN=$(./mbx-ci github reader token)
-            if [[ -n "$CIRCLE_PULL_REQUEST" ]]; then
-              python3 scripts/validate-changelog.py ${CIRCLE_PULL_REQUEST##*/} ${MBX_CI_GITHUB_TOKEN}
-            else
-              echo "Not a PR, skipping changelog validation."
-            fi
+          command: ./scripts/changelog.js --validate
 
   assemble-module:
     parameters:
