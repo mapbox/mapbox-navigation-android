@@ -1,0 +1,10 @@
+{
+  "name": "mapbox-navigation-android",
+  "version": "0.0.0",
+  "devDependencies": {
+    "@octokit/rest": "^17.1.1",
+    "parse-git-patch": "^1.0.7",
+    "prompts": "^2.4.1",
+    "minimist": "^1.2.5"
+  }
+}
