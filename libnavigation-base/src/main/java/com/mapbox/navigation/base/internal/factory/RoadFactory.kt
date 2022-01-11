@@ -1,8 +1,9 @@
 package com.mapbox.navigation.base.internal.factory
 
-import com.mapbox.api.directions.v5.models.MapboxShield
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.extensions.toMapboxShield
 import com.mapbox.navigation.base.road.model.Road
+import com.mapbox.navigation.base.road.model.RoadComponent
 import com.mapbox.navigator.NavigationStatus
 
 /**
@@ -12,23 +13,13 @@ import com.mapbox.navigator.NavigationStatus
 object RoadFactory {
 
     fun buildRoadObject(navigationStatus: NavigationStatus): Road {
-        val mapboxShields = mutableListOf<MapboxShield>()
-        navigationStatus.shields.forEach { shield ->
-            mapboxShields.add(
-                MapboxShield
-                    .builder()
-                    .name(shield.name)
-                    .baseUrl(shield.baseUrl)
-                    .textColor(shield.textColor)
-                    .displayRef(shield.displayRef)
-                    .build()
+        val components = navigationStatus.roads.map { road ->
+            RoadComponent(
+                text = road.text,
+                shield = road.shield.toMapboxShield(),
+                imageBaseUrl = road.imageBaseUrl,
             )
         }
-        return Road(
-            name = navigationStatus.roadName,
-            shieldUrl = navigationStatus.imageBaseurl,
-            shieldName = navigationStatus.shieldName,
-            mapboxShield = mapboxShields
-        )
+        return Road(components = components)
     }
 }

@@ -4,17 +4,47 @@ import com.mapbox.api.directions.v5.models.MapboxShield
 
 /**
  * Object that holds road properties
- * @property name of the road if available otherwise null
- * @property shieldUrl url for the route shield if available otherwise null
- * @property shieldName name of the route shield if available otherwise null
- * @property mapboxShield mapbox designed shield if available otherwise null
+ * @property components list of the [RoadComponent]
  */
 class Road internal constructor(
-    val name: String? = null,
-    val shieldUrl: String? = null,
-    val shieldName: String? = null,
-    val mapboxShield: List<MapboxShield>? = null
+    val components: List<RoadComponent>
 ) {
+
+    /**
+     * Name of the road.
+     */
+    @Deprecated(
+        message = "Use RoadComponent.text instead.",
+        replaceWith = ReplaceWith("RoadComponent.text")
+    )
+    val name: String? = null
+
+    /**
+     * URL for the route shield.
+     */
+    @Deprecated(
+        message = "Use RoadComponent.shield.baseUrl() instead.",
+        replaceWith = ReplaceWith("RoadComponent.shield.baseUrl()")
+    )
+    val shieldUrl: String? = null
+
+    /**
+     * Name of the route shield.
+     */
+    @Deprecated(
+        message = "Use RoadComponent.shield.name() instead.",
+        replaceWith = ReplaceWith("RoadComponent.shield.name()")
+    )
+    val shieldName: String? = null
+
+    /**
+     * Mapbox designed shield.
+     */
+    @Deprecated(
+        message = "Use RoadComponent.shield instead.",
+        replaceWith = ReplaceWith("RoadComponent.shield")
+    )
+    val mapboxShield: List<MapboxShield>? = null
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -25,10 +55,7 @@ class Road internal constructor(
 
         other as Road
 
-        if (name != other.name) return false
-        if (shieldUrl != other.shieldUrl) return false
-        if (shieldName != other.shieldName) return false
-        if (mapboxShield != other.mapboxShield) return false
+        if (components != other.components) return false
 
         return true
     }
@@ -37,22 +64,13 @@ class Road internal constructor(
      * Returns a hash code value for the object.
      */
     override fun hashCode(): Int {
-        var result = name?.hashCode() ?: 0
-        result = 31 * result + (shieldUrl?.hashCode() ?: 0)
-        result = 31 * result + (shieldName?.hashCode() ?: 0)
-        result = 31 * result + (mapboxShield?.hashCode() ?: 0)
-        return result
+        return components.hashCode()
     }
 
     /**
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "Road(" +
-            "name=$name, " +
-            "shieldUrl=$shieldUrl, " +
-            "shieldName=$shieldName, " +
-            "mapboxShield=$mapboxShield" +
-            ")"
+        return "Road(components=$components)"
     }
 }

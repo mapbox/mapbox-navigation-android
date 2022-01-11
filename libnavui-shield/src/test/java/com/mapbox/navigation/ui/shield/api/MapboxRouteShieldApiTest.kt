@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.models.MapboxShield
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.road.model.Road
+import com.mapbox.navigation.base.road.model.RoadComponent
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.shield.RoadShieldContentManagerContainer
 import com.mapbox.navigation.ui.shield.internal.model.RouteShieldToDownload
@@ -403,11 +404,18 @@ class MapboxRouteShieldApiTest {
                 .textColor("black")
                 .displayRef("680")
                 .build()
+            val roadComponent1 = mockk<RoadComponent> {
+                every { text } returns "Central Av"
+                every { shield } returns mockMapboxShield1
+                every { imageBaseUrl } returns null
+            }
+            val roadComponent2 = mockk<RoadComponent> {
+                every { text } returns "North Av"
+                every { shield } returns mockMapboxShield2
+                every { imageBaseUrl } returns null
+            }
             val road = mockk<Road> {
-                every { name } returns "Central Av"
-                every { shieldName } returns "I 880"
-                every { shieldUrl } returns null
-                every { mapboxShield } returns listOf(mockMapboxShield1, mockMapboxShield2)
+                every { components } returns listOf(roadComponent1, roadComponent2)
             }
             val mockResultList = listOf<Expected<RouteShieldError, RouteShieldResult>>(
                 ExpectedFactory.createValue(
@@ -466,11 +474,13 @@ class MapboxRouteShieldApiTest {
         coroutineRule.runBlockingTest {
             val initialUrl1 = "https://shields.mapbox.com/mapbox/legacy/using/road/1"
             val toDownloadUrl1 = "https://shields.mapbox.com/mapbox/legacy/using/road/1.svg"
+            val roadComponent = mockk<RoadComponent> {
+                every { text } returns "Central Av"
+                every { shield } returns null
+                every { imageBaseUrl } returns initialUrl1
+            }
             val road = mockk<Road> {
-                every { name } returns "Central Av"
-                every { shieldName } returns "I 880"
-                every { shieldUrl } returns initialUrl1
-                every { mapboxShield } returns null
+                every { components } returns listOf(roadComponent)
             }
             val mockResultList = listOf<Expected<RouteShieldError, RouteShieldResult>>(
                 ExpectedFactory.createValue(
@@ -520,11 +530,13 @@ class MapboxRouteShieldApiTest {
                 .build()
             val initialUrl1 = "https://shields.mapbox.com/mapbox/legacy/using/road/1"
             val toDownloadUrl1 = "https://shields.mapbox.com/mapbox/legacy/using/road/1.svg"
+            val roadComponent = mockk<RoadComponent> {
+                every { text } returns "Central Av"
+                every { shield } returns mockMapboxShield1
+                every { imageBaseUrl } returns initialUrl1
+            }
             val road = mockk<Road> {
-                every { name } returns "Central Av"
-                every { shieldName } returns "I 880"
-                every { shieldUrl } returns initialUrl1
-                every { mapboxShield } returns listOf(mockMapboxShield1)
+                every { components } returns listOf(roadComponent)
             }
             val mockResultList = listOf<Expected<RouteShieldError, RouteShieldResult>>(
                 ExpectedFactory.createValue(

@@ -333,14 +333,25 @@ package com.mapbox.navigation.base.options {
 package com.mapbox.navigation.base.road.model {
 
   public final class Road {
-    method public java.util.List<com.mapbox.api.directions.v5.models.MapboxShield>? getMapboxShield();
-    method public String? getName();
-    method public String? getShieldName();
-    method public String? getShieldUrl();
-    property public final java.util.List<com.mapbox.api.directions.v5.models.MapboxShield>? mapboxShield;
-    property public final String? name;
-    property public final String? shieldName;
-    property public final String? shieldUrl;
+    method public java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> getComponents();
+    method @Deprecated public java.util.List<com.mapbox.api.directions.v5.models.MapboxShield>? getMapboxShield();
+    method @Deprecated public String? getName();
+    method @Deprecated public String? getShieldName();
+    method @Deprecated public String? getShieldUrl();
+    property public final java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> components;
+    property @Deprecated public final java.util.List<com.mapbox.api.directions.v5.models.MapboxShield>? mapboxShield;
+    property @Deprecated public final String? name;
+    property @Deprecated public final String? shieldName;
+    property @Deprecated public final String? shieldUrl;
+  }
+
+  public final class RoadComponent {
+    method public String? getImageBaseUrl();
+    method public com.mapbox.api.directions.v5.models.MapboxShield? getShield();
+    method public String getText();
+    property public final String? imageBaseUrl;
+    property public final com.mapbox.api.directions.v5.models.MapboxShield? shield;
+    property public final String text;
   }
 
 }
