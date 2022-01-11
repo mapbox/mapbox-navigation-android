@@ -57,7 +57,7 @@ sealed class MapboxExitProperties(
      */
     class PropertiesMutcd(
         shouldFallbackWithText: Boolean = false,
-        shouldFallbackWithDrawable: Boolean = false,
+        shouldFallbackWithDrawable: Boolean = true,
         @DrawableRes exitBackground: Int = R.drawable.mapbox_exit_board_background,
         @DrawableRes fallbackDrawable: Int = R.drawable.mapbox_ic_exit_arrow_right,
         @DrawableRes exitLeftDrawable: Int = R.drawable.mapbox_ic_exit_arrow_left,

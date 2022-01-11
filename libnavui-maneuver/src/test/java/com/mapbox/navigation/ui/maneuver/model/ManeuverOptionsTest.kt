@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maneuver.model
 
 import com.mapbox.navigation.testing.BuilderTest
+import org.junit.Test
 import kotlin.reflect.KClass
 
 class ManeuverOptionsTest : BuilderTest<ManeuverOptions, ManeuverOptions.Builder>() {
@@ -32,6 +33,7 @@ class ManeuverOptionsTest : BuilderTest<ManeuverOptions, ManeuverOptions.Builder
             )
     }
 
+    @Test
     override fun trigger() {
         // see comments
     }
