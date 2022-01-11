@@ -19,6 +19,18 @@ object SecondaryManeuverFactory {
         degrees: Double,
         modifier: String,
         drivingSide: String,
-        componentList: List<Component>
-    ) = SecondaryManeuver(id, text, type, degrees, modifier, drivingSide, componentList)
+        componentList: List<Component>,
+        mutcdExitProperties: MapboxExitProperties.PropertiesMutcd,
+        viennaExitProperties: MapboxExitProperties.PropertiesVienna
+    ) = SecondaryManeuver(
+        id,
+        text,
+        type,
+        degrees,
+        modifier,
+        drivingSide,
+        componentList,
+        mutcdExitProperties,
+        viennaExitProperties
+    )
 }

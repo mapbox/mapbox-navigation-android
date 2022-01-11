@@ -371,20 +371,51 @@ package com.mapbox.navigation.ui.maneuver.model {
 
   public final class ManeuverOptions {
     method public boolean getFilterDuplicateManeuvers();
+    method public com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesMutcd getMutcdExitProperties();
+    method public com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesVienna getViennaExitProperties();
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverOptions.Builder toBuilder();
     property public final boolean filterDuplicateManeuvers;
+    property public final com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesMutcd mutcdExitProperties;
+    property public final com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesVienna viennaExitProperties;
   }
 
   public static final class ManeuverOptions.Builder {
     ctor public ManeuverOptions.Builder();
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverOptions build();
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverOptions.Builder filterDuplicateManeuvers(boolean filterDuplicateManeuvers);
+    method public com.mapbox.navigation.ui.maneuver.model.ManeuverOptions.Builder mutcdExitProperties(com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesMutcd mutcdExitProperties);
+    method public com.mapbox.navigation.ui.maneuver.model.ManeuverOptions.Builder viennaExitProperties(com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesVienna viennaExitProperties);
+  }
+
+  public abstract sealed class MapboxExitProperties {
+    method public final int getExitBackground();
+    method public final int getExitLeftDrawable();
+    method public final int getExitRightDrawable();
+    method public final int getFallbackDrawable();
+    method public final boolean getShouldFallbackWithDrawable();
+    method public final boolean getShouldFallbackWithText();
+    property public final int exitBackground;
+    property public final int exitLeftDrawable;
+    property public final int exitRightDrawable;
+    property public final int fallbackDrawable;
+    property public final boolean shouldFallbackWithDrawable;
+    property public final boolean shouldFallbackWithText;
+  }
+
+  public static final class MapboxExitProperties.PropertiesMutcd extends com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties {
+    ctor public MapboxExitProperties.PropertiesMutcd(boolean shouldFallbackWithText = false, boolean shouldFallbackWithDrawable = false, @DrawableRes int exitBackground = com.mapbox.navigation.ui.maneuver.R.drawable.mapbox_exit_board_background, @DrawableRes int fallbackDrawable = com.mapbox.navigation.ui.maneuver.R.drawable.mapbox_ic_exit_arrow_right, @DrawableRes int exitLeftDrawable = com.mapbox.navigation.ui.maneuver.R.drawable.mapbox_ic_exit_arrow_left, @DrawableRes int exitRightDrawable = com.mapbox.navigation.ui.maneuver.R.drawable.mapbox_ic_exit_arrow_right);
+  }
+
+  public static final class MapboxExitProperties.PropertiesVienna extends com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties {
+    ctor public MapboxExitProperties.PropertiesVienna(boolean shouldFallbackWithText = false, boolean shouldFallbackWithDrawable = true, @DrawableRes int exitBackground = com.mapbox.navigation.ui.maneuver.R.drawable.mapbox_exit_board_background, @DrawableRes int fallbackDrawable = com.mapbox.navigation.ui.maneuver.R.drawable.mapbox_ic_exit_arrow_right, @DrawableRes int exitLeftDrawable = com.mapbox.navigation.ui.maneuver.R.drawable.mapbox_ic_exit_arrow_left, @DrawableRes int exitRightDrawable = com.mapbox.navigation.ui.maneuver.R.drawable.mapbox_ic_exit_arrow_right);
   }
 
   public final class PrimaryManeuver {
     method public java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> getComponentList();
     method public Double? getDegrees();
     method public String? getDrivingSide();
+    method public com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesMutcd getExitMutcdProperties();
+    method public com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesVienna getExitViennaProperties();
     method public String getId();
     method public String? getModifier();
     method public String getText();
@@ -392,6 +423,8 @@ package com.mapbox.navigation.ui.maneuver.model {
     property public final java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList;
     property public final Double? degrees;
     property public final String? drivingSide;
+    property public final com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesMutcd exitMutcdProperties;
+    property public final com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesVienna exitViennaProperties;
     property public final String id;
     property public final String? modifier;
     property public final String text;
@@ -399,7 +432,7 @@ package com.mapbox.navigation.ui.maneuver.model {
   }
 
   @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class PrimaryManeuverFactory {
-    method public static com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver buildPrimaryManeuver(String id, String text, String type, double degrees, String modifier, String drivingSide, java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList);
+    method public static com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver buildPrimaryManeuver(String id, String text, String type, double degrees, String modifier, String drivingSide, java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList, com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesMutcd mutcdExitProperties, com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesVienna viennaExitProperties);
     field public static final com.mapbox.navigation.ui.maneuver.model.PrimaryManeuverFactory INSTANCE;
   }
 
@@ -447,6 +480,8 @@ package com.mapbox.navigation.ui.maneuver.model {
     method public java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> getComponentList();
     method public Double? getDegrees();
     method public String? getDrivingSide();
+    method public com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesMutcd getExitMutcdProperties();
+    method public com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesVienna getExitViennaProperties();
     method public String getId();
     method public String? getModifier();
     method public String getText();
@@ -454,6 +489,8 @@ package com.mapbox.navigation.ui.maneuver.model {
     property public final java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList;
     property public final Double? degrees;
     property public final String? drivingSide;
+    property public final com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesMutcd exitMutcdProperties;
+    property public final com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesVienna exitViennaProperties;
     property public final String id;
     property public final String? modifier;
     property public final String text;
@@ -461,7 +498,7 @@ package com.mapbox.navigation.ui.maneuver.model {
   }
 
   @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class SecondaryManeuverFactory {
-    method public static com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver buildSecondaryManeuver(String id, String text, String type, double degrees, String modifier, String drivingSide, java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList);
+    method public static com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver buildSecondaryManeuver(String id, String text, String type, double degrees, String modifier, String drivingSide, java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList, com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesMutcd mutcdExitProperties, com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesVienna viennaExitProperties);
     field public static final com.mapbox.navigation.ui.maneuver.model.SecondaryManeuverFactory INSTANCE;
   }
 
@@ -479,6 +516,8 @@ package com.mapbox.navigation.ui.maneuver.model {
     method public java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> getComponentList();
     method public Double? getDegrees();
     method public String? getDrivingSide();
+    method public com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesMutcd getExitMutcdProperties();
+    method public com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesVienna getExitViennaProperties();
     method public String getId();
     method public String? getModifier();
     method public String getText();
@@ -486,6 +525,8 @@ package com.mapbox.navigation.ui.maneuver.model {
     property public final java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList;
     property public final Double? degrees;
     property public final String? drivingSide;
+    property public final com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesMutcd exitMutcdProperties;
+    property public final com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesVienna exitViennaProperties;
     property public final String id;
     property public final String? modifier;
     property public final String text;
@@ -493,7 +534,7 @@ package com.mapbox.navigation.ui.maneuver.model {
   }
 
   @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class SubManeuverFactory {
-    method public static com.mapbox.navigation.ui.maneuver.model.SubManeuver buildSubManeuver(String id, String text, String type, double degrees, String modifier, String drivingSide, java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList);
+    method public static com.mapbox.navigation.ui.maneuver.model.SubManeuver buildSubManeuver(String id, String text, String type, double degrees, String modifier, String drivingSide, java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList, com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesMutcd mutcdExitProperties, com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties.PropertiesVienna viennaExitProperties);
     field public static final com.mapbox.navigation.ui.maneuver.model.SubManeuverFactory INSTANCE;
   }
 
@@ -808,7 +849,8 @@ package com.mapbox.navigation.ui.maneuver.view {
     ctor public MapboxExitText(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
     method public android.graphics.Bitmap getViewAsBitmap();
     method public void setExit(String? modifier, com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode exit);
-    method public void setExitStyle(android.graphics.drawable.Drawable? background, android.graphics.drawable.Drawable? leftDrawable, android.graphics.drawable.Drawable? rightDrawable);
+    method public void setExitProperties(com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties? properties);
+    method @Deprecated public void setExitStyle(android.graphics.drawable.Drawable? background, android.graphics.drawable.Drawable? leftDrawable, android.graphics.drawable.Drawable? rightDrawable);
     method public android.graphics.drawable.Drawable styleExitWith(android.graphics.Bitmap bitmap, int drawableHeight);
   }
 

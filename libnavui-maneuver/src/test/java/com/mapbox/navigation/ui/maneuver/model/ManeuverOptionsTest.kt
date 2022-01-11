@@ -10,6 +10,26 @@ class ManeuverOptionsTest : BuilderTest<ManeuverOptions, ManeuverOptions.Builder
     override fun getFilledUpBuilder(): ManeuverOptions.Builder {
         return ManeuverOptions.Builder()
             .filterDuplicateManeuvers(false)
+            .mutcdExitProperties(
+                MapboxExitProperties.PropertiesMutcd(
+                    shouldFallbackWithDrawable = false,
+                    shouldFallbackWithText = true,
+                    exitBackground = 0,
+                    fallbackDrawable = 1,
+                    exitLeftDrawable = 2,
+                    exitRightDrawable = 3
+                )
+            )
+            .viennaExitProperties(
+                MapboxExitProperties.PropertiesVienna(
+                    shouldFallbackWithDrawable = false,
+                    shouldFallbackWithText = true,
+                    exitBackground = 0,
+                    fallbackDrawable = 1,
+                    exitLeftDrawable = 2,
+                    exitRightDrawable = 3
+                )
+            )
     }
 
     override fun trigger() {

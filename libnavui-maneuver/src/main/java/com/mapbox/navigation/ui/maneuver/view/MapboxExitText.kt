@@ -15,6 +15,8 @@ import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.model.ComponentNode
 import com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode
+import com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties
+import com.mapbox.navigation.ui.utils.internal.ifNonNull
 
 /**
  * Default Exit View that renders exit number in a specific style.
@@ -61,6 +63,7 @@ class MapboxExitText : AppCompatTextView {
     private var exitBackground = ContextCompat.getDrawable(
         context, R.drawable.mapbox_exit_board_background
     )
+    private var exitProperties: MapboxExitProperties? = null
 
     init {
         setTextColor(ContextCompat.getColor(context, R.color.mapbox_exit_text_color))
@@ -75,6 +78,11 @@ class MapboxExitText : AppCompatTextView {
      * @param leftDrawable Drawable? denotes the style for exit sign that is on the left.
      * @param rightDrawable Drawable? denotes the style for exit sign that is on the right.
      */
+    @Deprecated(
+        message = "The API does not handles fallback in case the modifier value from banner " +
+            "component is neither left nor right",
+        replaceWith = ReplaceWith("setExitProperties")
+    )
     fun setExitStyle(
         background: Drawable?,
         leftDrawable: Drawable?,
@@ -86,39 +94,83 @@ class MapboxExitText : AppCompatTextView {
     }
 
     /**
+     * Invoke the method to set the properties you want [MapboxExitText] to use to render
+     * exit.
+     * @param properties MapboxExitProperties
+     */
+    fun setExitProperties(
+        properties: MapboxExitProperties?
+    ) {
+        this.exitProperties = properties
+    }
+
+    /**
      * Invoke the method to set the exit number to the view.
      * @param modifier String? represents either [ManeuverModifier.LEFT] or [ManeuverModifier.RIGHT].
      * Default value is [ManeuverModifier.LEFT]
      * @param exit ExitNumberComponentNode [ComponentNode] of the type [BannerComponents.EXIT_NUMBER]
      */
     fun setExit(modifier: String?, exit: ExitNumberComponentNode) {
-        when (modifier) {
+        val exitText = when (modifier) {
             ManeuverModifier.LEFT -> {
+                val drawable = ifNonNull(this.exitProperties?.exitLeftDrawable) { leftDrawable ->
+                    ContextCompat.getDrawable(context, leftDrawable)
+                } ?: leftDrawable
                 setCompoundDrawablesWithIntrinsicBounds(
-                    leftDrawable,
+                    drawable,
                     null,
                     null,
                     null
                 )
+                exit.text
             }
             ManeuverModifier.RIGHT -> {
+                val drawable = ifNonNull(this.exitProperties?.exitRightDrawable) { rightDrawable ->
+                    ContextCompat.getDrawable(context, rightDrawable)
+                } ?: rightDrawable
                 setCompoundDrawablesWithIntrinsicBounds(
                     null,
                     null,
-                    rightDrawable,
+                    drawable,
                     null
                 )
+                exit.text
             }
             else -> {
-                setCompoundDrawablesWithIntrinsicBounds(
-                    leftDrawable,
-                    null,
-                    null,
-                    null
-                )
+                if (exitProperties == null) {
+                    setCompoundDrawablesWithIntrinsicBounds(
+                        null,
+                        null,
+                        rightDrawable,
+                        null
+                    )
+                    exit.text
+                } else {
+                    val text = when {
+                        exitProperties!!.shouldFallbackWithDrawable -> {
+                            setCompoundDrawablesWithIntrinsicBounds(
+                                null,
+                                null,
+                                ContextCompat.getDrawable(
+                                    context,
+                                    exitProperties!!.fallbackDrawable
+                                ),
+                                null
+                            )
+                            exit.text
+                        }
+                        exitProperties!!.shouldFallbackWithText -> {
+                            "Exit ".plus(exit.text)
+                        }
+                        else -> {
+                            exit.text
+                        }
+                    }
+                    text
+                }
             }
         }
-        text = exit.text
+        text = exitText
         background = exitBackground
     }
 

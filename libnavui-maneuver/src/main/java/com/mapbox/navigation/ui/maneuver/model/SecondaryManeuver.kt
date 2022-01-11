@@ -35,6 +35,10 @@ import java.util.UUID
  * @property drivingSide String? represents which side of the street people drive on
  * in that location. Can be 'left' or 'right'.
  * @property componentList List<Component> a part or element of [BannerComponents]
+ * @property exitMutcdProperties MapboxExitProperties.PropertiesMutcd exit style to be rendered for
+ * countries following MUTCD convention
+ * @property exitViennaProperties MapboxExitProperties.PropertiesVienna exit style to be rendered
+ * for countries following VIENNA convention
  * @constructor
  */
 class SecondaryManeuver internal constructor(
@@ -44,7 +48,11 @@ class SecondaryManeuver internal constructor(
     val degrees: Double? = null,
     val modifier: String? = null,
     val drivingSide: String? = null,
-    val componentList: List<Component> = listOf()
+    val componentList: List<Component> = listOf(),
+    val exitMutcdProperties: MapboxExitProperties.PropertiesMutcd =
+        MapboxExitProperties.PropertiesMutcd(),
+    val exitViennaProperties: MapboxExitProperties.PropertiesVienna =
+        MapboxExitProperties.PropertiesVienna()
 ) {
 
     /**
@@ -63,6 +71,8 @@ class SecondaryManeuver internal constructor(
         if (modifier != other.modifier) return false
         if (drivingSide != other.drivingSide) return false
         if (componentList != other.componentList) return false
+        if (exitMutcdProperties != other.exitMutcdProperties) return false
+        if (exitViennaProperties != other.exitViennaProperties) return false
 
         return true
     }
@@ -78,6 +88,8 @@ class SecondaryManeuver internal constructor(
         result = 31 * result + modifier.hashCode()
         result = 31 * result + drivingSide.hashCode()
         result = 31 * result + componentList.hashCode()
+        result = 31 * result + exitMutcdProperties.hashCode()
+        result = 31 * result + exitViennaProperties.hashCode()
         return result
     }
 
@@ -93,6 +105,8 @@ class SecondaryManeuver internal constructor(
             "modifier=$modifier, " +
             "drivingSide=$drivingSide, " +
             "componentList=$componentList" +
+            "exitMutcdProperties=$exitMutcdProperties, " +
+            "exitViennaProperties=$exitViennaProperties" +
             ")"
     }
 }
