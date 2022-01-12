@@ -46,13 +46,13 @@ class RetainedActiveGuidanceFragment : Fragment() {
             stopView = binding.stop,
             maneuverView = binding.maneuverView,
             tripProgressView = binding.tripProgressView
-        ).also { lifecycle.addObserver(it) }
+        ).also { MapboxNavigationApp.registerObserver(it) }
     }
 
     override fun onDestroyView() {
         // Null and remove. This is needed to avoid memory leaks because multiple views can
         // be created within the Fragment lifecycle.
-        dropInActiveGuidance?.let { lifecycle.removeObserver(it) }
+        dropInActiveGuidance?.let { MapboxNavigationApp.unregisterObserver(it) }
         dropInActiveGuidance = null
 
         super.onDestroyView()

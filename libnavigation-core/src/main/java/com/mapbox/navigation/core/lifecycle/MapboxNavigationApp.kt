@@ -6,6 +6,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
+import kotlin.reflect.KClass
 
 /**
  * Manages a default lifecycle for [MapboxNavigation].
@@ -64,6 +65,13 @@ object MapboxNavigationApp {
      * is stopped. The lifecycle is never destroyed.
      */
     val lifecycleOwner: LifecycleOwner by lazy { mapboxNavigationAppDelegate.lifecycleOwner }
+
+    /**
+     * Indicates whether the [MapboxNavigationApp] has been setup.
+     *
+     * Returns true after [setup] has been called and false after [disable] is called.
+     */
+    fun isSetup(): Boolean = mapboxNavigationAppDelegate.isSetup
 
     /**
      * Call [MapboxNavigationApp.setup] to provide the application with [NavigationOptions].
@@ -129,6 +137,16 @@ object MapboxNavigationApp {
      */
     fun unregisterObserver(mapboxNavigationObserver: MapboxNavigationObserver) = apply {
         mapboxNavigationAppDelegate.unregisterObserver(mapboxNavigationObserver)
+    }
+
+    /**
+     * Provides access to any registered observer instance. If multiple instances of the same
+     * class have been registered, the first observer will be returned.
+     *
+     * @throws IllegalStateException when the class has not been registered.
+     */
+    fun <T : MapboxNavigationObserver> getObserver(kClass: KClass<T>): T {
+        return mapboxNavigationAppDelegate.getObserver(kClass)
     }
 
     /**

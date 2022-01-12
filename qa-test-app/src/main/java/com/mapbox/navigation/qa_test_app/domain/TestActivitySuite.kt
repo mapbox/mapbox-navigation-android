@@ -6,6 +6,7 @@ import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.utils.startActivity
 import com.mapbox.navigation.qa_test_app.view.AlternativeRouteActivity
 import com.mapbox.navigation.qa_test_app.view.AppLifecycleActivity
+import com.mapbox.navigation.qa_test_app.view.DropInNavigationViewActivity
 import com.mapbox.navigation.qa_test_app.view.FeedbackActivity
 import com.mapbox.navigation.qa_test_app.view.IconsPreviewActivity
 import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingActivity
@@ -28,6 +29,12 @@ object TestActivitySuite {
             R.string.mapbox_navigation_app_lifecycle_description
         ) { activity ->
             activity.startActivity<AppLifecycleActivity>()
+        },
+        TestActivityDescription(
+            "DropInNavigationView Testing",
+            R.string.dropin_navigation_view_description
+        ) { activity ->
+            activity.startActivity<DropInNavigationViewActivity>()
         },
         TestActivityDescription(
             "Alternative Route Selection",

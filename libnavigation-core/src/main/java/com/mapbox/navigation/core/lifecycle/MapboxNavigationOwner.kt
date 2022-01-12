@@ -10,6 +10,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.utils.internal.logI
 import java.util.concurrent.CopyOnWriteArraySet
+import kotlin.reflect.KClass
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class MapboxNavigationOwner {
@@ -65,6 +66,14 @@ internal class MapboxNavigationOwner {
     }
 
     fun current(): MapboxNavigation? = mapboxNavigation
+
+    fun <T : MapboxNavigationObserver> getObserver(clazz: KClass<T>): T = getObserver(clazz.java)
+
+    // Java
+    fun <T : MapboxNavigationObserver> getObserver(clazz: Class<T>): T {
+        return services.filterIsInstance(clazz).firstOrNull()
+            ?: error("Class ${clazz.simpleName} is not been registered to MapboxNavigationApp")
+    }
 
     private companion object {
         private val TAG = Tag("MbxNavigationOwner")

@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.utils.internal.logI
+import kotlin.reflect.KClass
 
 /**
  * This is a testable version of [MapboxNavigationApp]. Please refer to the singleton
@@ -17,9 +18,10 @@ import com.mapbox.navigation.utils.internal.logI
 internal class MapboxNavigationAppDelegate {
     private val mapboxNavigationOwner by lazy { MapboxNavigationOwner() }
     private val carAppLifecycleOwner by lazy { CarAppLifecycleOwner() }
-    private var isSetup = false
 
     val lifecycleOwner: LifecycleOwner by lazy { carAppLifecycleOwner }
+
+    var isSetup = false
 
     fun setup(navigationOptions: NavigationOptions) = apply {
         if (carAppLifecycleOwner.isConfigurationChanging()) {
@@ -74,6 +76,12 @@ internal class MapboxNavigationAppDelegate {
     }
 
     fun current(): MapboxNavigation? = mapboxNavigationOwner.current()
+
+    fun <T : MapboxNavigationObserver> getObserver(clazz: Class<T>): T =
+        mapboxNavigationOwner.getObserver(clazz)
+
+    fun <T : MapboxNavigationObserver> getObserver(kClass: KClass<T>): T =
+        mapboxNavigationOwner.getObserver(kClass)
 
     private companion object {
         private val TAG = Tag("MbxMapboxNavigationApp")
