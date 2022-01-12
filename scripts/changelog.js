@@ -143,13 +143,6 @@ async function validate() {
         pull_number: pullNumber
     });
 
-    if (pr.title.match('Release .*')) {
-        // skip this check for release PRs
-        console.log('Skipping changelog check since it is a release PR.');
-        return;
-    }
-
-
     for (const label of pr.labels) {
         if (label.name === "skip changelog") {
             console.log("Found 'skip changelog' label. Skip changelog check.");
