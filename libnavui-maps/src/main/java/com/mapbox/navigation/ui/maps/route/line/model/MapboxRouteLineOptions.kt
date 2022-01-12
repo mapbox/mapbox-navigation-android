@@ -29,6 +29,8 @@ import kotlin.math.abs
  * changes should use a soft gradient appearance or abrupt color change. This is false by default.
  * @param softGradientTransition influences the length of the color transition when the displaySoftGradientForTraffic
  * parameter is true.
+ * @param vanishingRouteLineUpdateIntervalNano can be used to decrease the frequency of the vanishing route
+ * line updates improving the performance at the expense of visual appearance of the vanishing point on the line during navigation.
  */
 class MapboxRouteLineOptions private constructor(
     val resourceProvider: RouteLineResources,
@@ -41,7 +43,9 @@ class MapboxRouteLineOptions private constructor(
     val displayRestrictedRoadSections: Boolean = false,
     val styleInactiveRouteLegsIndependently: Boolean = false,
     val displaySoftGradientForTraffic: Boolean = false,
-    val softGradientTransition: Double = RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS
+    val softGradientTransition: Double = RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS,
+    val vanishingRouteLineUpdateIntervalNano: Long =
+        RouteLayerConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO
 ) {
 
     /**
@@ -61,7 +65,8 @@ class MapboxRouteLineOptions private constructor(
             displayRestrictedRoadSections,
             styleInactiveRouteLegsIndependently,
             displaySoftGradientForTraffic,
-            softGradientTransition
+            softGradientTransition,
+            vanishingRouteLineUpdateIntervalNano
         )
     }
 
@@ -86,6 +91,8 @@ class MapboxRouteLineOptions private constructor(
             return false
         if (displaySoftGradientForTraffic != other.displayRestrictedRoadSections) return false
         if (softGradientTransition != other.softGradientTransition) return false
+        if (vanishingRouteLineUpdateIntervalNano != other.vanishingRouteLineUpdateIntervalNano)
+            return false
 
         return true
     }
@@ -105,6 +112,7 @@ class MapboxRouteLineOptions private constructor(
         result = 31 * result + (styleInactiveRouteLegsIndependently.hashCode())
         result = 31 * result + (displaySoftGradientForTraffic.hashCode())
         result = 31 * result + (softGradientTransition.hashCode())
+        result = 31 * result + (vanishingRouteLineUpdateIntervalNano.hashCode())
         return result
     }
 
@@ -122,7 +130,8 @@ class MapboxRouteLineOptions private constructor(
             "displayRestrictedRoadSections=$displayRestrictedRoadSections, " +
             "styleInactiveRouteLegsIndependently=$styleInactiveRouteLegsIndependently," +
             "displaySoftGradientForTraffic=$displaySoftGradientForTraffic," +
-            "softGradientTransition=$softGradientTransition" +
+            "softGradientTransition=$softGradientTransition," +
+            "vanishingRouteLineUpdateIntervalNano=$vanishingRouteLineUpdateIntervalNano" +
             ")"
     }
 
@@ -144,6 +153,8 @@ class MapboxRouteLineOptions private constructor(
      * one color to the next.
      * @param softGradientTransition this value influences the length of the color transition when
      * the displaySoftGradientForTraffic param is set to true
+     * @param vanishingRouteLineUpdateIntervalNano can be used to decrease the frequency of the vanishing route
+     * line updates improving the performance at the expense of visual appearance of the vanishing point on the line during navigation.
      */
     class Builder internal constructor(
         private val context: Context,
@@ -155,7 +166,8 @@ class MapboxRouteLineOptions private constructor(
         private var displayRestrictedRoadSections: Boolean,
         private var styleInactiveRouteLegsIndependently: Boolean,
         private var displaySoftGradientForTraffic: Boolean,
-        private var softGradientTransition: Double
+        private var softGradientTransition: Double,
+        private var vanishingRouteLineUpdateIntervalNano: Long
     ) {
 
         /**
@@ -173,7 +185,8 @@ class MapboxRouteLineOptions private constructor(
             false,
             false,
             false,
-            RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS
+            RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS,
+            RouteLayerConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO
         )
 
         /**
@@ -278,6 +291,17 @@ class MapboxRouteLineOptions private constructor(
         }
 
         /**
+         * Used for throttling the interval of updates to the vanishing route line.
+         * The default value is [RouteLayerConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO].
+         *
+         * @param interval a value in nano seconds for optimizing the updating of the vanishing route line feature.
+         * @return the builder
+         */
+        fun vanishingRouteLineUpdateInterval(
+            interval: Long = RouteLayerConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO
+        ): Builder = apply { this.vanishingRouteLineUpdateIntervalNano = interval }
+
+        /**
          * @return an instance of [MapboxRouteLineOptions]
          */
         fun build(): MapboxRouteLineOptions {
@@ -321,7 +345,8 @@ class MapboxRouteLineOptions private constructor(
                 displayRestrictedRoadSections,
                 styleInactiveRouteLegsIndependently,
                 displaySoftGradientForTraffic,
-                softGradientTransition
+                softGradientTransition,
+                vanishingRouteLineUpdateIntervalNano
             )
         }
     }

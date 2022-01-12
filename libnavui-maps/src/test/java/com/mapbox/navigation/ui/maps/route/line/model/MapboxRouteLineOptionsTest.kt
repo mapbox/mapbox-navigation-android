@@ -105,6 +105,15 @@ class MapboxRouteLineOptionsTest {
     }
 
     @Test
+    fun vanishingRouteLineUpdateIntervalNano() {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .vanishingRouteLineUpdateInterval(44L)
+            .build()
+
+        assertEquals(44, options.vanishingRouteLineUpdateIntervalNano)
+    }
+
+    @Test
     fun toBuilder() {
         val routeLineResources = RouteLineResources.Builder().build()
         val routeStyleDescriptors =
@@ -120,6 +129,7 @@ class MapboxRouteLineOptionsTest {
             .styleInactiveRouteLegsIndependently(true)
             .displaySoftGradientForTraffic(true)
             .softGradientTransition(77)
+            .vanishingRouteLineUpdateInterval(44L)
             .build()
             .toBuilder(ctx)
             .build()
@@ -133,5 +143,6 @@ class MapboxRouteLineOptionsTest {
         assertTrue(options.styleInactiveRouteLegsIndependently)
         assertTrue(options.displaySoftGradientForTraffic)
         assertEquals(77.0, options.softGradientTransition, 0.0)
+        assertEquals(44, options.vanishingRouteLineUpdateIntervalNano)
     }
 }
