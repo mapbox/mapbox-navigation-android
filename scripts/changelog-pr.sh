@@ -21,6 +21,7 @@ if [[ ! $VERSION =~ $SEMVER_REGEX ]] ; then
     >&2 echo "Error: version $VERSION is not SemVer compatible(https://semver.org/)"
     exit
 fi
+major=${BASH_REMATCH[1]}
 minor=${BASH_REMATCH[2]}
 
 if ! command -v gh &> /dev/null
@@ -43,8 +44,11 @@ fi
 cat > RELEASENOTES.md <<- EOM
 ## Changelog
 EOM
-if [[ $minor == "0" ]]; then
-    echo "This is a patch release on top of v2.0.x which does not include changes introduced in v2.1.x and later." >> RELEASENOTES.md
+if [[ $major == "2" ]]; then
+  if [[ $minor == "0" ]]; then
+      echo "This is a patch release on top of v2.0.x which does not include changes introduced in v2.1.x and later.  " >> RELEASENOTES.md
+  fi
+  echo "For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see 2.0 Navigation SDK Migration Guide.  " >> RELEASENOTES.md
 fi
 
 echo "For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see 2.0 Navigation SDK Migration Guide." >> RELEASENOTES.md
