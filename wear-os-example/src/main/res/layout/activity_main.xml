@@ -11,10 +11,12 @@
         android:layout_height="match_parent" />
 
     <androidx.wear.widget.BoxInsetLayout
+        android:id="@+id/boxInsets"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:id="@+id/boxedContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_boxedEdges="all">
