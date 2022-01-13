@@ -21,4 +21,5 @@ include ':examples',
         ':libnavui-speedlimit',
         ':libnavui-shield',
         ':libnavui-dropin',
-        ':qa-test-app'
+        ':qa-test-app',
+        ':compose'

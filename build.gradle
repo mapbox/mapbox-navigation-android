@@ -1,6 +1,9 @@
 buildscript {
   apply from: "${rootDir}/gradle/dependencies.gradle"
-    repositories {
+  ext {
+    compose_version = '1.0.5'
+  }
+  repositories {
     google()
     mavenCentral()
     jcenter()
@@ -30,6 +33,7 @@ buildscript {
     classpath pluginDependencies.dokka
     classpath pluginDependencies.firebaseCrashlytics
     classpath pluginDependencies.googleServices
+    classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.21'
   }
 }
 
