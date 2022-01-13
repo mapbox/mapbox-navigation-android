@@ -7,28 +7,28 @@ const { getApp, getMetadata, getBranchName, getPullRequestNumber, isBranchProtec
 const parseGitPatch = require('parse-git-patch')
 const prompts = require('prompts');
 
-
-const argv = require("minimist")(process.argv.slice(2), {
-    string: [
-        'ticket',
-        'type',
-        'title'
-    ],
-    boolean: [
-        'compile',
-        'validate',
-        'push',
-        'help'
-    ],
-    alias: {
-        pr: 'ticket',
-        issue: 'ticket',
-        h: 'help'
-    },
-    unknown: function () {
-        usage()
-    }
-});
+const argv = { }
+// const argv = require("minimist")(process.argv.slice(2), {
+//     string: [
+//         'ticket',
+//         'type',
+//         'title'
+//     ],
+//     boolean: [
+//         'compile',
+//         'validate',
+//         'push',
+//         'help'
+//     ],
+//     alias: {
+//         pr: 'ticket',
+//         issue: 'ticket',
+//         h: 'help'
+//     },
+//     unknown: function () {
+//         usage()
+//     }
+// });
 
 // https://keepachangelog.com/en/1.0.0/
 const ENTRY_TYPES = ['added', 'changed', 'fixed', 'removed', 'deprecated', 'security'];
@@ -75,7 +75,7 @@ function processTitle(title) {
     return title.replace(/\n/g, " ");
 }
 
-function compile() {
+function compileChangelog(unreleasedChangeDir) {
     const entries = {};
     for (const type of ENTRY_TYPES) {
         entries[type] = [];
@@ -113,7 +113,7 @@ function compile() {
         }
     }
 
-    console.log(output);
+    return output;
 }
 
 function makeEntryPath(branchName) {
@@ -293,7 +293,7 @@ async function main() {
         process.exit(1);
     }
     if (argv.compile) {
-        compile();
+        console.output(compileChangelog(UNRELEASED_CHANGELOG_DIR));
     } else if (argv.validate) {
         await validate();
     } else {
@@ -301,4 +301,8 @@ async function main() {
     }
 }
 
-main();
+//main();
+
+module.exports = {
+    compileChangelog
+};
