@@ -13,6 +13,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.extensions.toMapboxShield
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
 import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory.buildRouteLegProgressObject
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory.buildRouteProgressObject
@@ -251,11 +252,12 @@ private fun MutableList<BannerComponent>.mapToDirectionsApi(): MutableList<Banne
                 .abbreviationPriority(it.abbrPriority)
                 .active(it.active)
                 .directions(it.directions)
-                .imageBaseUrl(it.imageBaseurl)
+                .imageBaseUrl(it.shield?.baseUrl)
                 .imageUrl(it.imageURL)
                 .text(it.text)
                 .type(it.type)
                 .subType(it.subType?.name?.lowercase())
+                .mapboxShield(it.shield?.toMapboxShield())
                 .build()
         )
     }

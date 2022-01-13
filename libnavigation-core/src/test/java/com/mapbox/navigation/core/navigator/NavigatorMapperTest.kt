@@ -119,8 +119,7 @@ class NavigatorMapperTest {
                     )
                 }
                 every { layer } returns null
-                every { roadName } returns "Central Avenue"
-                every { shieldName } returns "I880"
+                every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
             }
         )
         val expected = LocationMatcherResult(
@@ -162,8 +161,7 @@ class NavigatorMapperTest {
                     )
                 }
                 every { layer } returns null
-                every { roadName } returns "Central Avenue"
-                every { shieldName } returns "I880"
+                every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
             }
         )
         val expected = LocationMatcherResult(
@@ -205,8 +203,7 @@ class NavigatorMapperTest {
                     )
                 }
                 every { layer } returns null
-                every { roadName } returns "Central Avenue"
-                every { shieldName } returns "I880"
+                every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
             }
         )
         val expected = LocationMatcherResult(
@@ -248,8 +245,7 @@ class NavigatorMapperTest {
                     )
                 }
                 every { layer } returns null
-                every { roadName } returns "Central Avenue"
-                every { shieldName } returns "I880"
+                every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
             }
         )
         val expected = LocationMatcherResult(
@@ -284,10 +280,7 @@ class NavigatorMapperTest {
                 every { matches } returns listOf()
             }
             every { layer } returns null
-            every { roadName } returns navigationStatus.roadName
-            every { shieldName } returns navigationStatus.shieldName
-            every { shields } returns navigationStatus.shields
-            every { imageBaseurl } returns navigationStatus.imageBaseurl
+            every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
         }
         val road: Road = RoadFactory.buildRoadObject(navigationStatus)
         val tripStatus = TripStatus(
@@ -333,8 +326,7 @@ class NavigatorMapperTest {
                     )
                 }
                 every { layer } returns 2
-                every { roadName } returns "Central Avenue"
-                every { shieldName } returns "I880"
+                every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
             }
         )
         val expected = LocationMatcherResult(
@@ -538,10 +530,7 @@ class NavigatorMapperTest {
         every { voiceInstruction } returns nativeVoiceInstructions
         every { inTunnel } returns true
         every { upcomingRouteAlerts } returns emptyList()
-        every { roadName } returns "Central Avenue"
-        every { shieldName } returns "I880"
-        every { imageBaseurl } returns "https://mapbox.shields.com/"
-        every { shields } returns listOf()
+        every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
     }
 
     val routeAlertLocation: RouteAlertLocation = mockk()

@@ -16,6 +16,10 @@ internal object RoadNameProcessor {
         // Shield is being passed as null on purpose because this info is not yet available from
         // nav native. The ticket is being tracked here
         // https://github.com/mapbox/mapbox-navigation-native/issues/4325
-        return RoadNameResult.RoadNameLabel(road.name, null, road.shieldName)
+        return RoadNameResult.RoadNameLabel(
+            road.components.joinToString(separator = " ") { it.text },
+            null,
+            null
+        )
     }
 }

@@ -7,8 +7,8 @@ import com.mapbox.navigator.BannerSection
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.MapMatcherOutput
 import com.mapbox.navigator.NavigationStatus
+import com.mapbox.navigator.Road
 import com.mapbox.navigator.RouteState
-import com.mapbox.navigator.Shield
 import com.mapbox.navigator.SpeedLimit
 import com.mapbox.navigator.UpcomingRouteAlert
 import com.mapbox.navigator.VoiceInstruction
@@ -28,10 +28,7 @@ fun createNavigationStatus(
     predicted: Long = 0,
     shapeIndex: Int = 0,
     intersectionIndex: Int = 0,
-    roadName: String = "test road name",
-    shieldName: String = "test shield name",
-    imageBaseUrl: String = "baseUrl",
-    shields: List<Shield> = emptyList(),
+    roads: List<Road> = emptyList(),
     voiceInstruction: VoiceInstruction? = null,
     // default banner instruction workarounds the direct usage of the MapboxNativeNavigatorImpl
     bannerInstruction: BannerInstruction? = createBannerInstruction(),
@@ -57,10 +54,7 @@ fun createNavigationStatus(
         predicted,
         shapeIndex,
         intersectionIndex,
-        roadName,
-        shieldName,
-        imageBaseUrl,
-        shields,
+        roads,
         voiceInstruction,
         bannerInstruction,
         speedLimit,

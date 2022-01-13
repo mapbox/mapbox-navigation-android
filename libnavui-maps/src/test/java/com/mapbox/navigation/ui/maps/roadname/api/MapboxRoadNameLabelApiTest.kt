@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.roadname.api
 
 import com.mapbox.navigation.base.road.model.Road
+import com.mapbox.navigation.base.road.model.RoadComponent
 import com.mapbox.navigation.ui.maps.roadname.RoadNameAction
 import com.mapbox.navigation.ui.maps.roadname.RoadNameProcessor
 import com.mapbox.navigation.ui.maps.roadname.RoadNameResult
@@ -28,21 +29,24 @@ class MapboxRoadNameLabelApiTest {
 
     @Test
     fun `when function invoked return a road label`() {
+        val roadComponent = mockk<RoadComponent> {
+            every { text } returns "Central Av"
+            every { shield } returns null
+            every { imageBaseUrl } returns null
+        }
         val road = mockk<Road> {
-            every { name } returns "Central Avenue"
-            every { shieldUrl } returns ""
-            every { shieldName } returns "101 South"
+            every { components } returns listOf(roadComponent)
         }
         val action = RoadNameAction.GetRoadNameLabel(road)
         every {
             RoadNameProcessor.process(action)
-        } returns RoadNameResult.RoadNameLabel(road.name, null, road.shieldName)
+        } returns RoadNameResult.RoadNameLabel("Central Av", null, null)
         val roadNameApi = MapboxRoadNameLabelApi()
 
-        val expected = roadNameApi.getRoadNameLabel(road)
+        val actual = roadNameApi.getRoadNameLabel(road)
 
-        assertEquals(expected.roadName, road.name)
-        assertNull(expected.shield)
-        assertEquals(expected.shieldName, road.shieldName)
+        assertEquals("Central Av", actual.roadName)
+        assertNull(actual.shield)
+        assertNull(actual.shieldName)
     }
 }

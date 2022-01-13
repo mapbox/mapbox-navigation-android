@@ -228,16 +228,18 @@ class MapboxRouteShieldApi {
         styleId: String?,
     ): List<RouteShieldToDownload> {
         val routeShieldToDownload = mutableListOf<RouteShieldToDownload>()
-        val legacyShieldUrl = shieldUrl
-        val legacy = if (legacyShieldUrl != null) {
-            RouteShieldToDownload.MapboxLegacy(legacyShieldUrl)
-        } else {
-            null
-        }
-        val mapboxDesign = mapboxShield?.mapNotNull { shield ->
-            if (
-                userId != null && styleId != null &&
-                mapboxShield != null && accessToken != null
+        components.forEach { roadComponent ->
+            val legacyShieldUrl = roadComponent.imageBaseUrl
+            val legacy = if (legacyShieldUrl != null) {
+                RouteShieldToDownload.MapboxLegacy(legacyShieldUrl)
+            } else {
+                null
+            }
+            val mapboxDesign = if (
+                userId != null &&
+                styleId != null &&
+                accessToken != null &&
+                roadComponent.shield != null
             ) {
                 RouteShieldToDownload.MapboxDesign(
                     ShieldSpriteToDownload(
@@ -245,17 +247,17 @@ class MapboxRouteShieldApi {
                         styleId = styleId
                     ),
                     accessToken = accessToken,
-                    mapboxShield = shield,
+                    mapboxShield = roadComponent.shield!!,
                     legacyFallback = legacy
                 )
             } else {
                 null
             }
-        }
-        if (!mapboxDesign.isNullOrEmpty()) {
-            routeShieldToDownload.addAll(mapboxDesign)
-        } else if (legacy != null) {
-            routeShieldToDownload.add(legacy)
+            if (mapboxDesign != null) {
+                routeShieldToDownload.add(mapboxDesign)
+            } else if (legacy != null) {
+                routeShieldToDownload.add(legacy)
+            }
         }
         return routeShieldToDownload
     }
