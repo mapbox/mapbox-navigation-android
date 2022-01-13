@@ -3,16 +3,31 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
+
+## Mapbox Navigation SDK 2.2.0-beta.1 - December 17, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+#### Bug fixes and improvements
 - Fixed an issue where calculation of dangerous maneuver avoidance (`RerouteOptions#avoidManeuverSeconds`) during a reroute was resulting in much smaller radius than expected. [#5307](https://github.com/mapbox/mapbox-navigation-android/pull/5307)
 - Fixed a crash when `ReplayLocationEngine`'s location callback removes itself during getting a location update. [#5305](https://github.com/mapbox/mapbox-navigation-android/pull/5305)
 - Fixed `MapboxTripProgressView` landscape layout to handle `tripProgressViewBackgroundColor` attribute. [#5318](https://github.com/mapbox/mapbox-navigation-android/pull/5318)
 - Fixed an issue where the `onPause` is not called when the app is backgrounded and the implementation is using `MapboxNavigationApp.attachAllActivities`. [#5329](https://github.com/mapbox/mapbox-navigation-android/pull/5329)
-- Fixed a crash when use non-`driving-traffic` profile with extension `RouteOptions.Builder#applyDefaultNavigationOptions`. [#5322](https://github.com/mapbox/mapbox-navigation-android/pull/5322)
+- Fixed a crash when non-`driving-traffic` profile uses extension `RouteOptions.Builder#applyDefaultNavigationOptions`. [#5322](https://github.com/mapbox/mapbox-navigation-android/pull/5322)
 - Refactored extension `RouteOptions.Builder#applyDefaultNavigationOptions`, might be set profile param explicitly. [#5322](https://github.com/mapbox/mapbox-navigation-android/pull/5322)
 - Exposed a new API `MapboxManeuverView.updateLaneGuidanceIconStyle` that would allow changing the style of `MapboxLaneGuidanceAdapter` at runtime. [#5334](https://github.com/mapbox/mapbox-navigation-android/pull/5334)
 - Fixed a crash when `MapboxNavigationViewportDataSourceDebugger.enabled` is repeatedly set to true. [#5347](https://github.com/mapbox/mapbox-navigation-android/pull/5347)
 - Implemented vanishing route line feature from 1.x for exposing an option to adjust/limit the frequency of the vanishing route line updates. The MapboxRouteLineOptions.vanishingRouteLineUpdateIntervalNano can reduce the frequency of vanishing route line updates when the value of the option increases. [#5344](https://github.com/mapbox/mapbox-navigation-android/pull/5344)
 - Fixed `RoadShield` by reverting the breaking changes and use the new shield callback. [#5302](https://github.com/mapbox/mapbox-navigation-android/pull/5302)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.2.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.2.0)
+- Mapbox Navigation Native `v83.0.0`
+- Mapbox Core Common `v21.0.1`
+- Mapbox Java `v6.2.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.2.0-beta.2))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
 
 ## Mapbox Navigation SDK 2.0.5 - January 7, 2022
 This is a patch release on top of `v2.0.x` which does not include changes introduced in `v2.1.x` and later.
