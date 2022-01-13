@@ -983,6 +983,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @see [ViewUtils.capture] to capture screenshots
      * @see [FeedbackHelper.encodeScreenshot] to encode screenshots
      */
+    @ExperimentalPreviewMapboxNavigationAPI
     @JvmOverloads
     fun postUserFeedback(
         @FeedbackEvent.Type feedbackType: String,
