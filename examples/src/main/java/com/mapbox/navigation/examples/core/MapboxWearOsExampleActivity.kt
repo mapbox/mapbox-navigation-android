@@ -5,6 +5,10 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.tasks.Tasks
+import com.google.android.gms.wearable.CapabilityClient
+import com.google.android.gms.wearable.CapabilityInfo
+import com.google.android.gms.wearable.Wearable
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -37,6 +41,9 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * The example demonstrates how to build a route of multiple waypoints of different types
@@ -122,6 +129,9 @@ class MapboxWearOsExampleActivity : AppCompatActivity() {
             }
 
             binding.multipleWaypointSendRouteButton.visibility = View.VISIBLE
+            binding.multipleWaypointSendRouteButton.setOnClickListener {
+                send(routeUpdateResult.routes.first())
+            }
         } else {
             binding.multipleWaypointSendRouteButton.visibility = View.GONE
 
@@ -133,6 +143,26 @@ class MapboxWearOsExampleActivity : AppCompatActivity() {
                         style,
                         value
                     )
+                }
+            }
+        }
+    }
+
+    private fun send(route: DirectionsRoute) {
+        GlobalScope.launch(Dispatchers.IO) {
+            val nodes = Tasks.await(
+                Wearable.getNodeClient(this@MapboxWearOsExampleActivity).connectedNodes
+            )
+
+            val node = nodes.firstOrNull { it.isNearby } ?: return@launch
+
+            val encodedRoute = route.toJson().encodeToByteArray()
+            Wearable.getMessageClient(this@MapboxWearOsExampleActivity).sendMessage(node.id, "/route", encodedRoute).apply {
+                addOnSuccessListener {
+                    Log.i("send", "success")
+                }
+                addOnFailureListener {
+                    Log.e("send", "failure")
                 }
             }
         }

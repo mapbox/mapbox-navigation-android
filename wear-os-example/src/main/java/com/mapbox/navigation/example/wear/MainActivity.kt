@@ -7,29 +7,23 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import androidx.wear.widget.BoxInsetLayout
-import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.google.android.gms.wearable.Wearable
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.route.RouterCallback
-import com.mapbox.navigation.base.route.RouterFailure
-import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
-import com.mapbox.navigation.ui.maneuver.view.MapboxPrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.view.MapboxStepDistance
 import com.mapbox.navigation.ui.maneuver.view.MapboxTurnIconManeuver
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
@@ -165,32 +159,8 @@ class MainActivity : AppCompatActivity() {
             routeLineView.initializeLayers(style)
         }
 
-        navigation.requestRoutes(
-            RouteOptions.builder()
-                .applyDefaultNavigationOptions(DirectionsCriteria.PROFILE_WALKING)
-                .coordinates("18.613039,54.410983;18.608832,54.420143;18.602196,54.415626")
-                .build(),
-            object : RouterCallback {
-                override fun onRoutesReady(
-                    routes: List<DirectionsRoute>,
-                    routerOrigin: RouterOrigin
-                ) {
-                    navigation.startTripSession(true)
-                    navigation.setRoutes(routes)
-                }
-
-                override fun onFailure(
-                    reasons: List<RouterFailure>,
-                    routeOptions: RouteOptions
-                ) {
-                    // no impl
-                }
-
-                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
-                    // no impl
-                }
-            }
-        )
+        navigation.startTripSession(true)
+        receive(navigation)
     }
 
     private fun updateManeuverView(maneuverApi: MapboxManeuverApi, routeProgress: RouteProgress) {
@@ -219,5 +189,15 @@ class MainActivity : AppCompatActivity() {
 
         val primaryManeuverDistance = findViewById<MapboxStepDistance>(R.id.primaryManeuverDistance)
         primaryManeuverDistance.renderDistanceRemaining(nextManeuver.stepDistance)
+    }
+
+    private fun receive(navigation: MapboxNavigation) {
+        Wearable.getMessageClient(this).addListener {
+            if (it.path == "/route") {
+                val directionRouteJson = it.data.decodeToString()
+                val directionsRoute = DirectionsRoute.fromJson(directionRouteJson)
+                navigation.setRoutes(listOf(directionsRoute))
+            }
+        }
     }
 }

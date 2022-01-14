@@ -96,6 +96,7 @@ dependencies {
     // Mapbox Navigation SDK
     implementation project(':libnavigation-android')
     implementation project(':libnavui-dropin')
+    implementation 'com.google.android.gms:play-services-wearable:17.1.0'
 
     // test
     androidTestImplementation project(':libtesting-ui')
