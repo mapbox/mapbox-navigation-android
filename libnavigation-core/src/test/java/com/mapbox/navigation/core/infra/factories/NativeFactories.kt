@@ -45,7 +45,6 @@ fun createNavigationStatus(
         routeState,
         stale,
         location,
-        routeSequenceNumber,
         routeIndex,
         legIndex,
         stepIndex,
