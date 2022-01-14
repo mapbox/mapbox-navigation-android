@@ -75,9 +75,9 @@ class MainActivity : AppCompatActivity() {
             mapView.camera,
             viewportDataSource
         )
-        mapView.camera.addCameraAnimationsLifecycleListener(
-            NavigationBasicGesturesHandler(navigationCamera)
-        )
+//        mapView.camera.addCameraAnimationsLifecycleListener(
+//            NavigationBasicGesturesHandler(navigationCamera)
+//        )
         navigationCamera.requestNavigationCameraToFollowing()
 
         navigation.registerLocationObserver(object : LocationObserver {
