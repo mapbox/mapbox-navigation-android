@@ -1,5 +1,6 @@
 package com.mapbox.navigation.example.wear
 
+import android.content.res.Resources
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -10,6 +11,7 @@ import androidx.wear.widget.BoxInsetLayout
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.animation.camera
@@ -67,14 +69,18 @@ class MainActivity : AppCompatActivity() {
             mapView.getMapboxMap()
         )
         // TODO: update viewportDataSource.followingPadding based on boxInsets
+        val pixelDensity = Resources.getSystem().displayMetrics.density
+        viewportDataSource.followingPadding = EdgeInsets(
+            40.0 * pixelDensity,
+            30.0 * pixelDensity,
+            50.0 * pixelDensity,
+            30.0 * pixelDensity
+        )
         val navigationCamera = NavigationCamera(
             mapView.getMapboxMap(),
             mapView.camera,
             viewportDataSource
         )
-//        mapView.camera.addCameraAnimationsLifecycleListener(
-//            NavigationBasicGesturesHandler(navigationCamera)
-//        )
         navigationCamera.requestNavigationCameraToFollowing()
 
         navigation.registerLocationObserver(object : LocationObserver {
