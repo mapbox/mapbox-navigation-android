@@ -30,6 +30,7 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.view.MapboxPrimaryManeuver
+import com.mapbox.navigation.ui.maneuver.view.MapboxStepDistance
 import com.mapbox.navigation.ui.maneuver.view.MapboxTurnIconManeuver
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
@@ -216,7 +217,7 @@ class MainActivity : AppCompatActivity() {
         val primaryManeuverIcon = findViewById<MapboxTurnIconManeuver>(R.id.primaryManeuverIcon)
         primaryManeuverIcon.renderPrimaryTurnIcon(nextManeuver.primary)
 
-        val primaryManeuverDistance = findViewById<MapboxPrimaryManeuver>(R.id.primaryManeuverDistance)
-        primaryManeuverDistance.renderManeuver(nextManeuver.primary, null)
+        val primaryManeuverDistance = findViewById<MapboxStepDistance>(R.id.primaryManeuverDistance)
+        primaryManeuverDistance.renderDistanceRemaining(nextManeuver.stepDistance)
     }
 }

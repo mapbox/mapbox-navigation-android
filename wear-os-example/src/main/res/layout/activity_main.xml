@@ -15,6 +15,8 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/maneuverView"
             android:background="#9037516F"
+            android:visibility="gone"
+            tools:visibility="visible"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top">
@@ -27,7 +29,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.mapbox.navigation.ui.maneuver.view.MapboxPrimaryManeuver
+            <com.mapbox.navigation.ui.maneuver.view.MapboxStepDistance
                 android:id="@+id/primaryManeuverDistance"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
