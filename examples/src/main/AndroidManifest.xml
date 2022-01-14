@@ -101,6 +101,12 @@
     </activity>
 
     <activity
+        android:name=".MapboxWearOsExampleActivity"
+        android:label="@string/title_navigation_view"
+        android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+    </activity>
+
+    <activity
         android:name=".MapboxNavigationViewFragmentActivity"
         android:label="@string/title_navigation_view"/>
 

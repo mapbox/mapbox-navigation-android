@@ -23,6 +23,7 @@ import com.mapbox.navigation.examples.core.MapboxRouteLineAndArrowActivity
 import com.mapbox.navigation.examples.core.MapboxSignboardActivity
 import com.mapbox.navigation.examples.core.MapboxTripProgressActivity
 import com.mapbox.navigation.examples.core.MapboxVoiceActivity
+import com.mapbox.navigation.examples.core.MapboxWearOsExampleActivity
 import com.mapbox.navigation.examples.core.MultiLegRouteExampleActivity
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.ReplayHistoryActivity
@@ -66,6 +67,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
 
     private fun buildSampleList(): List<SampleItem> {
         return listOf(
+            SampleItem(
+                "Wear os example",
+               "Example of wear os app",
+                MapboxWearOsExampleActivity::class.java
+            ),
             SampleItem(
                 getString(R.string.title_navigation),
                 getString(R.string.description_navigation),
