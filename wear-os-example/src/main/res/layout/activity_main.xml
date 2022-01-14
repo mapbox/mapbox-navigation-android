@@ -3,38 +3,44 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <com.mapbox.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <androidx.wear.widget.BoxInsetLayout
-        android:id="@+id/boxInsets"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
-        <androidx.coordinatorlayout.widget.CoordinatorLayout
-            android:id="@+id/boxedContainer"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/maneuverView"
+            android:background="#9037516F"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_boxedEdges="all">
+            android:layout_height="wrap_content"
+            android:layout_gravity="top">
 
-            <TextView
-                android:id="@+id/infoText"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="Hello World!"
-                android:textColor="#ff0000"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
+            <com.mapbox.navigation.ui.maneuver.view.MapboxTurnIconManeuver
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:id="@+id/primaryManeuverIcon"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-        </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-    </androidx.wear.widget.BoxInsetLayout>
+            <com.mapbox.navigation.ui.maneuver.view.MapboxPrimaryManeuver
+                android:id="@+id/primaryManeuverDistance"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.AppCompat.Headline"
+                tools:text="Your destination in on the right"
+                android:gravity="center"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/primaryManeuverIcon"/>
+            
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>
 

@@ -3,34 +3,34 @@ package com.mapbox.navigation.example.wear
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
-import androidx.core.content.ContextCompat
-import androidx.core.view.marginBottom
 import androidx.wear.widget.BoxInsetLayout
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.geojson.Point
-import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
-import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
-import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
+import com.mapbox.navigation.ui.maneuver.model.Maneuver
+import com.mapbox.navigation.ui.maneuver.view.MapboxPrimaryManeuver
+import com.mapbox.navigation.ui.maneuver.view.MapboxTurnIconManeuver
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
-import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
@@ -48,9 +48,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val infoText = findViewById<TextView>(R.id.infoText)
-        val boxedContainer = findViewById<ViewGroup>(R.id.boxedContainer)
-        val boxInsets = findViewById<BoxInsetLayout>(R.id.boxInsets)
 
         val mapView = findViewById<MapView>(R.id.mapView)
         val navigationLocationProvider = NavigationLocationProvider()
@@ -102,6 +99,10 @@ class MainActivity : AppCompatActivity() {
         val routeArrowView = MapboxRouteArrowView(routeArrowOptions)
         val routeArrowAPI: MapboxRouteArrowApi = MapboxRouteArrowApi()
 
+        val maneuverApi = MapboxManeuverApi(
+            MapboxDistanceFormatter(DistanceFormatterOptions.Builder(this).build())
+        )
+
         navigation.registerRoutesObserver { result ->
             if (result.routes.isNotEmpty()) {
                 // generate route geometries asynchronously and render them
@@ -148,6 +149,8 @@ class MainActivity : AppCompatActivity() {
             if (style != null) {
                 routeArrowView.renderManeuverUpdate(style, maneuverArrowResult)
             }
+
+            updateManeuverView(maneuverApi, routeProgress)
         }
 
         // load map style
@@ -155,14 +158,6 @@ class MainActivity : AppCompatActivity() {
             routeLineView.initializeLayers(style)
         }
 
-        fun setRouteAndStartNavigation(route: DirectionsRoute) {
-            navigation.startTripSession(true)
-            navigation.setRoutes(listOf(route))
-            navigation.registerRouteProgressObserver { routeProgress ->
-                infoText.text = "Remaining: ${routeProgress.distanceRemaining}\n" +
-                    "Instruciton: ${routeProgress?.bannerInstructions?.primary()?.text()}"
-            }
-        }
         navigation.requestRoutes(
             RouteOptions.builder()
                 .applyDefaultNavigationOptions(DirectionsCriteria.PROFILE_WALKING)
@@ -173,7 +168,8 @@ class MainActivity : AppCompatActivity() {
                     routes: List<DirectionsRoute>,
                     routerOrigin: RouterOrigin
                 ) {
-                    setRouteAndStartNavigation(routes.first())
+                    navigation.startTripSession(true)
+                    navigation.setRoutes(routes)
                 }
 
                 override fun onFailure(
@@ -188,5 +184,33 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         )
+    }
+
+    private fun updateManeuverView(maneuverApi: MapboxManeuverApi, routeProgress: RouteProgress) {
+        // update top maneuver instructions
+        val maneuvers = maneuverApi.getManeuvers(routeProgress)
+        maneuvers.fold(
+            { error ->
+                Log.e(
+                    "maneuvers",
+                    "error getting maneuvers ${error.errorMessage}",
+                    error.throwable)
+            },
+            {
+                displayManeuvers(it)
+            }
+        )
+    }
+
+    private fun displayManeuvers(maneuvers: List<Maneuver>) {
+        val nextManeuver = maneuvers.firstOrNull() ?: return
+
+        findViewById<ViewGroup>(R.id.maneuverView).visibility = View.VISIBLE
+
+        val primaryManeuverIcon = findViewById<MapboxTurnIconManeuver>(R.id.primaryManeuverIcon)
+        primaryManeuverIcon.renderPrimaryTurnIcon(nextManeuver.primary)
+
+        val primaryManeuverDistance = findViewById<MapboxPrimaryManeuver>(R.id.primaryManeuverDistance)
+        primaryManeuverDistance.renderManeuver(nextManeuver.primary, null)
     }
 }
