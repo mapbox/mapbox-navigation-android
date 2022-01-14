@@ -247,6 +247,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         electronicHorizonOptions,
         pollingConfig,
         incidentsOptions,
+        null,
         null
     )
 
