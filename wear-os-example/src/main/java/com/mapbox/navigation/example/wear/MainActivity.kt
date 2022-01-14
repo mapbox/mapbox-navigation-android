@@ -7,11 +7,16 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.animation.PathInterpolatorCompat
 import com.google.android.gms.wearable.Wearable
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
+import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
+import com.mapbox.maps.plugin.MapProjection
+import com.mapbox.maps.plugin.animation.CameraAnimatorOptions
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
@@ -37,6 +42,7 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import com.mapbox.navigation.ui.utils.internal.extensions.play
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -52,7 +58,14 @@ class MainActivity : AppCompatActivity() {
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }
-        val mapboxMap = mapView.getMapboxMap()
+        val mapboxMap = mapView.getMapboxMap().apply {
+            setCamera(
+                CameraOptions.Builder()
+                    .zoom(0.5)
+                    .build()
+            )
+            setMapProjection(MapProjection.Globe)
+        }
 
         val navigation = MapboxNavigationProvider.create(
             NavigationOptions.Builder(this)
@@ -76,7 +89,6 @@ class MainActivity : AppCompatActivity() {
             mapView.camera,
             viewportDataSource
         )
-        navigationCamera.requestNavigationCameraToFollowing()
 
         navigation.registerLocationObserver(object : LocationObserver {
             override fun onNewRawLocation(rawLocation: Location) { }
@@ -159,8 +171,7 @@ class MainActivity : AppCompatActivity() {
             routeLineView.initializeLayers(style)
         }
 
-        navigation.startTripSession(true)
-        receive(navigation)
+        receive(navigation, navigationCamera, mapboxMap, viewportDataSource, mapView)
     }
 
     private fun updateManeuverView(maneuverApi: MapboxManeuverApi, routeProgress: RouteProgress) {
@@ -191,12 +202,20 @@ class MainActivity : AppCompatActivity() {
         primaryManeuverDistance.renderDistanceRemaining(nextManeuver.stepDistance)
     }
 
-    private fun receive(navigation: MapboxNavigation) {
+    private fun receive(
+        navigation: MapboxNavigation,
+        navigationCamera: NavigationCamera,
+        mapboxMap: MapboxMap,
+        viewportDataSource: MapboxNavigationViewportDataSource,
+        mapView: MapView,
+    ) {
         Wearable.getMessageClient(this).addListener {
             if (it.path == "/route") {
                 val directionRouteJson = it.data.decodeToString()
                 val directionsRoute = DirectionsRoute.fromJson(directionRouteJson)
+                navigation.startTripSession(true)
                 navigation.setRoutes(listOf(directionsRoute))
+                navigationCamera.requestNavigationCameraToFollowing()
             }
         }
     }
