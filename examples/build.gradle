@@ -119,6 +119,10 @@ dependencies {
 
     implementation dependenciesList.multidex
 
+    implementation platform('com.google.firebase:firebase-bom:29.0.0')
+    implementation 'com.google.firebase:firebase-firestore-ktx'
+    implementation 'com.firebase:geofire-android-common:3.1.0'
+
     // Leak Canary
     debugImplementation dependenciesList.leakCanaryDebug
 

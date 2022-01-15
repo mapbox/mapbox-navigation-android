@@ -1,12 +1,21 @@
 package com.mapbox.navigation.examples.util
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
+import android.text.InputType
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.RelativeLayout
+import android.widget.Spinner
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
@@ -27,6 +36,13 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.examples.core.R
+import com.mapbox.navigation.examples.manifesta.ManifestaAPI
+import com.mapbox.navigation.examples.manifesta.model.domain.LocationCollection
+import com.mapbox.navigation.examples.manifesta.model.entity.LocationCollectionEntity
+import com.mapbox.navigation.examples.manifesta.model.entity.ManifestaLocation
+import com.mapbox.navigation.examples.manifesta.model.entity.ManifestaUser
+import com.mapbox.navigation.examples.manifesta.view.LocationCollectionSelectedConsumer
+import com.mapbox.navigation.examples.manifesta.view.LocationsListDialog
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.clearRouteLine
@@ -40,6 +56,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class RouteDrawingActivity : AppCompatActivity() {
 
@@ -49,6 +66,10 @@ class RouteDrawingActivity : AppCompatActivity() {
     private lateinit var mapCamera: CameraAnimationsPlugin
     private lateinit var routeDrawingUtil: RouteDrawingUtil
     private var routeDrawingUtilEnabled = false
+
+    private val manifestAPI by lazy {
+        object : ManifestaAPI {}
+    }
 
     private val routeColorResources: RouteLineColorResources by lazy {
         RouteLineColorResources.Builder()
@@ -105,6 +126,9 @@ class RouteDrawingActivity : AppCompatActivity() {
     private fun init() {
         initStyle()
         initLocation()
+        populateUserSpinner()
+        initSaveLocationsButton()
+        showLocationCollections()
     }
 
     private fun initListeners() {
@@ -132,14 +156,18 @@ class RouteDrawingActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btnClearPoints).setOnClickListener {
-            routeDrawingUtil.clear()
-            CoroutineScope(Dispatchers.Main).launch {
-                routeLineApi.clearRouteLine().apply {
-                    routeLineView.renderClearRouteLineValue(
-                        mapView.getMapboxMap().getStyle()!!,
-                        this
-                    )
-                }
+            clearAllPoints()
+        }
+    }
+
+    private fun clearAllPoints() {
+        routeDrawingUtil.clear()
+        CoroutineScope(Dispatchers.Main).launch {
+            routeLineApi.clearRouteLine().apply {
+                routeLineView.renderClearRouteLineValue(
+                    mapView.getMapboxMap().getStyle()!!,
+                    this
+                )
             }
         }
     }
@@ -229,5 +257,105 @@ class RouteDrawingActivity : AppCompatActivity() {
 
     private fun getMapCamera(): CameraAnimationsPlugin {
         return mapView.camera
+    }
+
+    private var selectedUser: ManifestaUser? = null
+    private fun populateUserSpinner() {
+        findViewById<Spinner>(R.id.usersSpinner)?.apply {
+            val spinnerRef = this
+            CoroutineScope(Dispatchers.Main).launch {
+                val users = manifestAPI.getAllUsers().getValueOrElse { listOf() }.also {
+                    selectedUser = it.firstOrNull()
+                }
+                spinnerRef.adapter = ArrayAdapter(this@RouteDrawingActivity, R.layout.user_spinner_layout, users)
+                spinnerRef.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+                    override fun onNothingSelected(p0: AdapterView<*>?) {}
+                    override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                        selectedUser = users[p2]
+                    }
+                }
+            }
+        }
+    }
+
+    private fun initSaveLocationsButton() {
+        findViewById<ImageButton>(R.id.btnSaveLocations)?.setOnClickListener {
+            if (routeDrawingUtil.touchPoints.isEmpty()) {
+                Toast.makeText(this@RouteDrawingActivity, "There are no locations to save.", Toast.LENGTH_SHORT).show()
+            } else {
+                val input = EditText(this).also { editText ->
+                    editText.hint = "Collection Name"
+                    editText.inputType = InputType.TYPE_CLASS_TEXT
+                }
+
+                AlertDialog.Builder(this).apply {
+                    this.setPositiveButton("Save", DialogInterface.OnClickListener { dialog, _ ->
+                        val loc = LocationCollection(
+                            UUID.randomUUID().toString().replace("-", ""),
+                            input.text.toString(),
+                            routeDrawingUtil.touchPoints.map { point ->
+                                ManifestaLocation(
+                                    UUID.randomUUID().toString().replace("-", ""),
+                                    position = point
+                                )
+                            }
+                        )
+
+                        selectedUser?.let { currentUser ->
+                            CoroutineScope(Dispatchers.Main).launch {
+                                manifestAPI.storeLocationCollection(currentUser.id, loc)
+                            }
+                        }
+
+                        dialog.dismiss()
+                    })
+
+                    this.setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, _ ->
+                        dialog.cancel()
+                    })
+                }.also { dlgBuilder ->
+                    dlgBuilder.setView(input)
+                    dlgBuilder.setTitle("Save Location Collection")
+                    dlgBuilder.create().also { dlg ->
+                        dlg.show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun showLocationCollections() {
+        var locationCollectionDlg: LocationsListDialog? = null
+        val itemSelected: LocationCollectionSelectedConsumer = {
+            locationCollectionDlg?.dismiss()
+            loadLocationCollection(it)
+        }
+        findViewById<ImageButton>(R.id.btnShowLocationCollections)?.setOnClickListener {
+            locationCollectionDlg = LocationsListDialog(itemSelected).also {
+                it.show(supportFragmentManager, "LocationCollectionChooser")
+            }
+            CoroutineScope(Dispatchers.Main).launch {
+                manifestAPI.getLocationCollectionsShallow().getValueOrElse { listOf() }.apply {
+                    locationCollectionDlg?.setLocationCollections(this)
+                }
+            }
+        }
+    }
+
+    private fun loadLocationCollection(locColl: LocationCollectionEntity) {
+        clearAllPoints()
+        CoroutineScope(Dispatchers.Main).launch {
+
+            manifestAPI.getLocations(locColl.locations).apply {
+                if (this.isNotEmpty()) {
+                    val cameraOptions = CameraOptions.Builder().center(this.first().position).zoom(14.0).build()
+                    mapView.getMapboxMap().setCamera(cameraOptions)
+                }
+
+                this.forEach { loc ->
+                    routeDrawingUtil.addPoint(loc.position)
+                }
+            }
+        }
     }
 }

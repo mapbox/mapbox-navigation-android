@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/layoutRoot">
     <RelativeLayout
         android:id="@+id/mapView_container"
         android:layout_width="0dp"
@@ -44,4 +45,30 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btnSaveLocations"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/btnClearPoints"
+        app:layout_constraintStart_toStartOf="parent"
+        android:src="@drawable/ic_baseline_save_24"/>
+
+    <ImageButton
+        android:id="@+id/btnShowLocationCollections"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/btnClearPoints"
+        app:layout_constraintStart_toEndOf="@id/btnSaveLocations"
+        android:src="@drawable/ic_baseline_format_list_bulleted_24"/>
+
+    <Spinner
+        android:id="@+id/usersSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="#a8aaba"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

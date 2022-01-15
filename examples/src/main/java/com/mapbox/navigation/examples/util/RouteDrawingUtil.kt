@@ -59,7 +59,7 @@ import retrofit2.Response
 
 class RouteDrawingUtil(private val mapView: MapView) {
 
-    private val touchPoints = mutableListOf<Point>()
+    val touchPoints = mutableListOf<Point>()
 
     companion object {
         private const val TAG = "RouteDrawingUtil"
