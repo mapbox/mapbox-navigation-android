@@ -142,7 +142,7 @@ commands:
           command: npm install
       - run:
           name: Verify that a changelog entry is present in CHANGELOG.md
-          command: ./scripts/changelog.js --validate
+          command: ./scripts/validate-changelog.js
 
   assemble-module:
     parameters:
