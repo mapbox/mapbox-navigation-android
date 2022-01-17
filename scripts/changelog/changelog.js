@@ -6,6 +6,7 @@ const path = require('path');
 const { getApp, getMetadata, getBranchName, getPullRequestNumber, isBranchProtectedOrRelease } = require('./github');
 const parseGitPatch = require('parse-git-patch')
 const prompts = require('prompts');
+const semver = require('semver')
 
 const argv = { }
 // const argv = require("minimist")(process.argv.slice(2), {
@@ -32,7 +33,8 @@ const argv = { }
 
 // https://keepachangelog.com/en/1.0.0/
 const ENTRY_TYPES = ['added', 'changed', 'fixed', 'removed', 'deprecated', 'security'];
-const REPO_ROOT_DIR = path.join(__dirname, '..')
+
+const REPO_ROOT_DIR = path.join('.')
 const UNRELEASED_CHANGELOG_DIR = path.join(REPO_ROOT_DIR, 'changelogs', 'unreleased');
 
 function findPRNumber() {
@@ -75,7 +77,7 @@ function processTitle(title) {
     return title.replace(/\n/g, " ");
 }
 
-function compileChangelog(unreleasedChangeDir) {
+function compileChangelog() {
     const entries = {};
     for (const type of ENTRY_TYPES) {
         entries[type] = [];
@@ -87,8 +89,7 @@ function compileChangelog(unreleasedChangeDir) {
         const entryFilePath = path.join(UNRELEASED_CHANGELOG_DIR, entryFile);
         const entry = JSON.parse(fs.readFileSync(entryFilePath));
         if (!isValidEntry(entry)) {
-            console.warn(`Cannot use entry "${entryFile}"`);
-            continue;
+            throw `Cannot use entry "${entryFile}"`
         }
         entry['date'] = new Date(execSync(`git log -1 --format=%cd ${entryFilePath}`).toString().trim());
         entries[entry.type].push(entry);
@@ -114,6 +115,23 @@ function compileChangelog(unreleasedChangeDir) {
     }
 
     return output;
+}
+
+function compileReleaseNotesMd(version, dependenciesMd) {
+    var output = "##Changelog  "
+    let major = semver.major(version)
+    let minor = semver.minor(version)
+    if (major == "2") {
+        if (minor == "0") {
+            output += "This is a patch release on top of v2.0.x which does not include changes introduced in v2.1.x and later.  "
+        }
+        output += "For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see 2.0 Navigation SDK Migration Guide.  " 
+    }
+    output += compileChangelog()
+    output += "### Mapbox dependencies  "
+    output += "This release depends on, and has been tested with, the following Mapbox dependencies:  "
+    output += dependenciesMd
+    return output
 }
 
 function makeEntryPath(branchName) {
@@ -304,5 +322,5 @@ async function main() {
 //main();
 
 module.exports = {
-    compileChangelog
+    compileReleaseNotesMd
 };
