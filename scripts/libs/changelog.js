@@ -5,30 +5,6 @@ const prompts = require('prompts');
 const semver = require('semver')
 const { getBranchName } = require('./github');
 
-
-const argv = { }
-// const argv = require("minimist")(process.argv.slice(2), {
-//     string: [
-//         'ticket',
-//         'type',
-//         'title'
-//     ],
-//     boolean: [
-//         'compile',
-//         'validate',
-//         'push',
-//         'help'
-//     ],
-//     alias: {
-//         pr: 'ticket',
-//         issue: 'ticket',
-//         h: 'help'
-//     },
-//     unknown: function () {
-//         usage()
-//     }
-// });
-
 // https://keepachangelog.com/en/1.0.0/
 const ENTRY_TYPES = ['added', 'changed', 'fixed', 'removed', 'deprecated', 'security'];
 
@@ -54,12 +30,6 @@ function lastCommitMessage() {
 
 function isInteger(str) {
     return !isNaN(str) && Number.isInteger(parseFloat(str));
-}
-
-function usage() {
-    console.error('Usage: scripts/changelog [--ticket pr_number] [--type added|fixed|removed|changed] --title [entry title] [--push]');
-    console.error('Or just simply run the tool without arguments and fill all fields interactively.');
-    process.exit(1);
 }
 
 function isValidEntry(entry) {
@@ -171,7 +141,7 @@ async function askQuestions(entry) {
 }
 
 async function createEntry(params) {
-    const title = argv.title;
+    const title = params.title;
 
     if (!isInteger(params.ticket) && params.ticket !== undefined) {
         throw `${params.ticket} is not valid PR/issue number`
