@@ -1,10 +1,10 @@
-#!/usr/bin/env node
-
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const prompts = require('prompts');
 const semver = require('semver')
+const { getBranchName } = require('./github');
+
 
 const argv = { }
 // const argv = require("minimist")(process.argv.slice(2), {
@@ -170,20 +170,18 @@ async function askQuestions(entry) {
     return Object.assign(entry, await prompts(questions));
 }
 
-async function createEntry(push) {
+async function createEntry(params) {
     const title = argv.title;
 
-    if (!isInteger(argv.ticket) && argv.ticket !== undefined) {
-        console.error(`${argv.ticket} is not valid PR/issue number`);
-        usage();
+    if (!isInteger(params.ticket) && params.ticket !== undefined) {
+        throw `${params.ticket} is not valid PR/issue number`
     }
 
-    const ticket = Number(argv.ticket);
-    const type = argv.type;
+    const ticket = Number(params.ticket);
+    const type = params.type;
 
     if (type && !ENTRY_TYPES.includes(type)) {
-        console.error(`${type} is not valid changelog entry type. Valid types: ${ENTRY_TYPES.join(', ')}`);
-        usage();
+        throw `${type} is not valid changelog entry type. Valid types: ${ENTRY_TYPES.join(', ')}`
     }
 
     const entry = await askQuestions({
@@ -194,53 +192,26 @@ async function createEntry(push) {
 
     const branchName = getBranchName();
 
-    if (branchName === 'master') {
-        console.error('Cannot create changelog entry on master branch');
-        process.exit(1);
+    if (branchName === 'main') {
+        throw 'Cannot create changelog entry on master branch'
     }
 
     const entryPath = makeEntryPath(branchName);
-
-    fs.mkdirSync(path.dirname(entryPath), { recursive: true });
-    fs.writeFileSync(entryPath, JSON.stringify(entry, null, 2));
-
-    execSync(`git add ${entryPath}`);
-
-    console.log(`Changelog entry created at ${entryPath}`);
-
-    if (push) {
-        try {
-            execSync(`git commit ${entryPath} -m "Update changelog"`);
-            execSync(`git push`);
-        } catch (e) {
-            console.error(`Cannot push: ${e}`);
-        }
-
-    }
-}
-
-async function main() {
-    if (argv.help) {
-        usage();
-    }
-    if (argv.compile && argv.validate) {
-        console.error('Cannot --compile and --validate at the same time');
-        process.exit(1);
-    }
-    if (argv.compile) {
-        console.output(compileChangelog(UNRELEASED_CHANGELOG_DIR));
-    } else if (argv.validate) {
-        await validate();
+    let changelogPath = path.dirname(entryPath)
+    let changeLogEntryContent = JSON.stringify(entry, null, 2)
+    if (!params.isDryRun) {
+        fs.mkdirSync(changelogPath, { recursive: true });
+        fs.writeFileSync(entryPath, changeLogEntryContent);
     } else {
-        await createEntry(argv.push);
+        console.log(`dry-run: changelog entry created at ${entryPath}`)
+        console.log(`dry-run: changelog entry content: \n ${changeLogEntryContent}`)
     }
 }
-
-//main();
 
 module.exports = {
     compileReleaseNotesMd,
     isValidEntry,
     removeEntries,
-    makeEntryPath
+    makeEntryPath,
+    createEntry
 };
