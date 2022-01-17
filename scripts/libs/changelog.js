@@ -3,7 +3,6 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const parseGitPatch = require('parse-git-patch')
 const prompts = require('prompts');
 const semver = require('semver')
 
@@ -242,5 +241,6 @@ async function main() {
 module.exports = {
     compileReleaseNotesMd,
     isValidEntry,
-    removeEntries
+    removeEntries,
+    makeEntryPath
 };
