@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const semver = require('semver')
-const { compileChangeLog, compileReleaseNotesMd } = require("./changelog/changelog")
+const { compileChangeLog, compileReleaseNotesMd } = require("./libs/changelog")
 const path = require('path');
 const { execSync } = require('child_process');
 const fs = require('fs');
