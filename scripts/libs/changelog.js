@@ -133,6 +133,10 @@ function compileReleaseNotesMd(version, dependenciesMd) {
     return output
 }
 
+function removeEntries() {
+    fs.rmSync(UNRELEASED_CHANGELOG_DIR, { recursive: true, force: true })
+}
+
 function makeEntryPath(branchName) {
     return path.join(UNRELEASED_CHANGELOG_DIR, branchName.replace(/[^a-z0-9]/gi, '-') + '.json');
 }
@@ -237,5 +241,6 @@ async function main() {
 
 module.exports = {
     compileReleaseNotesMd,
-    isValidEntry
+    isValidEntry,
+    removeEntries
 };

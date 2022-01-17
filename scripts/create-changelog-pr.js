@@ -1,17 +1,18 @@
 #!/usr/bin/env node
 
 const semver = require('semver')
-const { compileChangeLog, compileReleaseNotesMd } = require("./libs/changelog")
+const { compileChangeLog, compileReleaseNotesMd, removeEntries } = require("./libs/changelog")
 const path = require('path');
 const { execSync } = require('child_process');
 const fs = require('fs');
 
+let BUILD_DIR = path.join(".", ".build")
 
 try {
     main()
 } catch (err) {
     console.error(err)
-    console.error('Usage: scripts/changelog-pr --version [release version, for example 1.0.0] [--branch main] ');
+    console.error('Usage: scripts/changelog-pr --version [release version, for example 1.0.0] [--branch main] [--dry-run]');
 }
 
 function main() {
@@ -25,16 +26,47 @@ function main() {
 
     console.log("Compiling changelog")
     let changelog = compileReleaseNotesMd(args.version, dependenciesMd)
-    console.log(changelog)
+    
+    let executor = args.isDryRun 
+        ? execSyncDryRun
+        : execSync
+
+    let releaseNotesTempFile = path.join(BUILD_DIR, "RELEASENOTES.md")
+    if (args.isDryRun) {
+        console.log("Dry run. Generated changelog:")
+        console.log(changelog)
+    } else {
+        fs.writeFileSync(releaseNotesTempFile, changelog)
+        removeEntries()
+    } 
+    
+    executor(`git checkout -b add-changelog-${args.version}`)
+    executor(`git add changelogs/unreleased`) //TODO: leak of the path
+    executor(`created changelog for ${args.version}`)
+    executor(`gh config set prompt disabled`)
+    executor(`git push --set-upstream origin add-changelog-${args.version}`)
+    executor(`gh release create ${args.version} --draft --target ${args.branch} --notes-file ${releaseNotesTempFile} --title $VERSION`)
+    executor(`git checkout ${args.branch}`)
+    
+}
+
+function execSyncDryRun(command) {
+    console.log(`dry-run: ${command}`)
 }
 
 function parseArguments() {
     const argv = require("minimist")(process.argv.slice(2), {
         string: [
             'branch',
-            'version',
-            'dependenciesMdFile'
+            'version'
         ],
+        boolean: [
+            'dry-run'
+        ],
+        default : {
+            branch: "main",
+            'dry-run': false
+        },
         unknown: function (name) {
             throw `parameter ${name} isn't supported`
         }
@@ -42,11 +74,8 @@ function parseArguments() {
 
     let result = { }
 
-    if ('branch' in argv) {
-        result.branch = argv.branch
-    } else {
-        result.branch = 'main'
-    }
+    result.isDryRun = argv['dry-run']
+    result.branch = argv.branch
 
     result.version = argv.version
     if (result.version == undefined) {
