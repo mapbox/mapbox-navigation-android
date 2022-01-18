@@ -43,13 +43,13 @@ function main() {
     } 
     
     executor(`git checkout -b add-changelog-${args.version}`)
-    executor(`git add changelogs/unreleased`) //TODO: leak of the path
-    executor(`created changelog for ${args.version}`)
+    executor(`git add changelogs/unreleased CHANGELOG.md`) //TODO: leak of the path
+    executor(`git commit -m "created changelog for ${args.version}"`)
     executor(`gh config set prompt disabled`)
     executor(`git push --set-upstream origin add-changelog-${args.version}`)
+    executor(`gh pr create --base ${args.branch} --title "Release ${args.version}" --body "" --reviewer mapbox/navigation-android`)
     executor(`gh release create ${args.version} --draft --target ${args.branch} --notes-file ${releaseNotesTempFile} --title $VERSION`)
     executor(`git checkout ${args.branch}`)
-    
 }
 
 function updateChangelogMDFile(newReleaseChangelog) {
