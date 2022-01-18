@@ -23,11 +23,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Android Core `v5.0.0`
 - Mapbox Android Telemetry `v8.1.0`
 
-## Mapbox Navigation SDK 2.2.0-rc.1 - January 14, 2021
-
+## Mapbox Navigation SDK 2.3.0-alpha.1 - January 14, 2021
 ### Changelog
 #### Bug fixes and improvements
-- Bump NN, Maps and common dependency versions to 86.0.2, 10.3.0-beta.1 and 21.1.0-beta.1. [#5363](https://github.com/mapbox/mapbox-navigation-android/pull/5363)
 - Add geo deeplink parsing utility `GeoDeeplinkParser`. [#5103](https://github.com/mapbox/mapbox-navigation-android/pull/5103)
 
 ### Mapbox dependencies
