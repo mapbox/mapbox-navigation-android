@@ -48,7 +48,7 @@ function main() {
     executor(`gh config set prompt disabled`)
     executor(`git push --set-upstream origin add-changelog-${args.version}`)
     executor(`gh pr create --base ${args.branch} --title "Release ${args.version}" --body "" --reviewer mapbox/navigation-android`)
-    executor(`gh release create ${args.version} --draft --target ${args.branch} --notes-file ${releaseNotesTempFile} --title $VERSION`)
+    executor(`gh release create ${args.version} --draft --target ${args.branch} --notes-file ${releaseNotesTempFile} --title ${args.version}`)
     executor(`git checkout ${args.branch}`)
 }
 
