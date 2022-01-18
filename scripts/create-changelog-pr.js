@@ -6,7 +6,7 @@ const path = require('path');
 const { execSync } = require('child_process');
 const fs = require('fs');
 
-let BUILD_DIR = path.join(".", ".build")
+let BUILD_DIR = path.join(".", "build")
 const CHANGELOG_PATH = path.join(".", "CHANGELOG.md")
 
 try {
