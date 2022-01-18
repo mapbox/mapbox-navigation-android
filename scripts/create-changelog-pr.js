@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
 const semver = require('semver')
-const { compileChangeLog, compileReleaseNotesMd, removeEntries } = require("./libs/changelog")
+const { compileChangeLog, compileReleaseNotesMd, removeEntries, addReleaseNotesToChangelogMD } = require("./libs/changelog")
 const path = require('path');
 const { execSync } = require('child_process');
 const fs = require('fs');
 
 let BUILD_DIR = path.join(".", ".build")
+const CHANGELOG_PATH = path.join(".", "CHANGELOG.md")
 
 try {
     main()
@@ -38,6 +39,7 @@ function main() {
     } else {
         fs.writeFileSync(releaseNotesTempFile, changelog)
         removeEntries()
+        updateChangelogMDFile(changelog)
     } 
     
     executor(`git checkout -b add-changelog-${args.version}`)
@@ -48,6 +50,12 @@ function main() {
     executor(`gh release create ${args.version} --draft --target ${args.branch} --notes-file ${releaseNotesTempFile} --title $VERSION`)
     executor(`git checkout ${args.branch}`)
     
+}
+
+function updateChangelogMDFile(newReleaseChangelog) {
+    let existingChangelog = fs.readFileSync(CHANGELOG_PATH).toString()
+    let updatedChangelog = addReleaseNotesToChangelogMD(existingChangelog, newReleaseChangelog)
+    fs.writeFileSync(CHANGELOG_PATH, updatedChangelog)
 }
 
 function execSyncDryRun(command) {
