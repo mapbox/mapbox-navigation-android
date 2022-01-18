@@ -2,6 +2,17 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+##Changelog  For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see 2.0 Navigation SDK Migration Guide.  ### Added
+- test 2 [#1234](https://github.com/mapbox/mapbox-navigation-android/pull/1234)
+### Fixed
+- Fixed something [#5338](https://github.com/mapbox/mapbox-navigation-android/pull/5338)
+### Mapbox dependencies  This release depends on, and has been tested with, the following Mapbox dependencies:  - Mapbox Maps SDK v10.2.0 ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.2.0))  
+- Mapbox Navigation Native v82.0.1  
+- Mapbox Core Common v21.0.1  
+- Mapbox Java v6.2.0-beta.2 ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.2.0-beta.2))  
+- Mapbox Android Core v5.0.1  
+- Mapbox Android Telemetry v8.1.1  
+
 ## Unreleased
 - Fixed an issue where calculation of dangerous maneuver avoidance (`RerouteOptions#avoidManeuverSeconds`) during a reroute was resulting in much smaller radius than expected. [#5307](https://github.com/mapbox/mapbox-navigation-android/pull/5307)
 - Fixed a crash when `ReplayLocationEngine`'s location callback removes itself during getting a location update. [#5305](https://github.com/mapbox/mapbox-navigation-android/pull/5305)
