@@ -85,6 +85,15 @@ function compileChangelog() {
     return output;
 }
 
+function addReleaseNotesToChangelogMD(currentChangelogMD, newReleaseChangelog) {
+    let latestReleaseHeaderPosition = currentChangelogMD.indexOf("##")
+    let updatedChangelog = currentChangelogMD.substring(0, latestReleaseHeaderPosition) 
+        + newReleaseChangelog 
+        + "\n\n"
+        + currentChangelogMD.substring(latestReleaseHeaderPosition)
+    return updatedChangelog
+}
+
 function compileReleaseNotesMd(version, dependenciesMd) {
     var output = "##Changelog  "
     let major = semver.major(version)
@@ -183,5 +192,6 @@ module.exports = {
     isValidEntry,
     removeEntries,
     makeEntryPath,
-    createEntry
+    createEntry,
+    addReleaseNotesToChangelogMD
 };
