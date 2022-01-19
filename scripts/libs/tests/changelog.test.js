@@ -6,7 +6,7 @@ const path = require('path')
 
 const testingDataDir = path.join(__dirname, 'testingData')
 
-const { addReleaseNotesToChangelogMD, compileReleaseNotesMd, createEntry } = require('../changelog')
+const { addReleaseNotesToChangelogMD, compileReleaseNotesMd, createEntry, isValidEntry } = require('../changelog')
 
 describe('addReleaseNotesToChangelogMD', function () {
   it('adding new release notes to existing changelog file', function () {
@@ -86,6 +86,21 @@ describe('compile changelog', function () {
     if (!changelog.includes("This is a patch release on top of v2.0.x")) {
       assert.fail("changelog doesn't contain message for 2.0.x release")
     }
+  })
+})
+
+describe("valid entry", function() {
+  it("fixed entry", function(){
+    let result = isValidEntry({ ticket: 1, title: "test", type: "fixed"})
+    assert.equal(result, true)
+  })
+  it("added entry", function(){
+    let result = isValidEntry({ ticket: 4, title: "test", type: "added"})
+    assert.equal(result, true)
+  })
+  it("added entry", function(){
+    let result = isValidEntry({ ticket: 1, title: "test", type: "changed"})
+    assert.equal(result, false)
   })
 })
 

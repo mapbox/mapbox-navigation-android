@@ -7,7 +7,7 @@ const { getBranchName } = require('./github');
 
 // https://keepachangelog.com/en/1.0.0/
 const ENTRY_TYPES = ['fixed', 'added', 'changed', 'removed', 'deprecated', 'security'];
-const SUPPORTED_ENTRY_TYPES = ['added', 'changed']
+const SUPPORTED_ENTRY_TYPES = ['added', 'fixed']
 const HEADERS = {
     'fixed': "Bug fixes and improvements",
     'added': "Features"
@@ -52,7 +52,7 @@ function isInteger(str) {
 }
 
 function isValidEntry(entry) {
-    return entry.title && ENTRY_TYPES.includes(entry.type) && isInteger(entry.ticket);
+    return entry.title && SUPPORTED_ENTRY_TYPES.includes(entry.type) && isInteger(entry.ticket);
 }
 
 String.prototype.capitalize = function () {
@@ -163,7 +163,7 @@ async function askQuestions(entry) {
         });
     }
     if (!entry.type) {
-        const choices = ENTRY_TYPES.map(x => { return { title: x.capitalize(), value: x }; });
+        const choices = SUPPORTED_ENTRY_TYPES.map(x => { return { title: x.capitalize(), value: x }; });
         questions.push({
             type: 'select',
             name: 'type',
