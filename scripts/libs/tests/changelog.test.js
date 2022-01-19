@@ -61,6 +61,32 @@ describe('compile changelog', function () {
       assert.equal(changelog, expectedResult)
     })
   })
+
+  it('display patch warning for 2.0.1', async function () {
+    await mockFileSystem(async function() {
+      await createEntry(
+        {
+          ticket: 1,
+          type: 'fixed',
+          title: 'test ticket'
+        },
+        "test"
+      )
+    })
+    
+    let changelog = compileReleaseNotesMd({
+      version: "2.0.4",
+      dependenciesMd: "TEST_DEPENDENCIES",
+      releaseDate: new Date(2022, 0, 9),
+      fileCreationDataProvider: function (path) {
+        return path.substring(path.length - 1)
+      }
+    })
+    
+    if (!changelog.includes("This is a patch release on top of v2.0.x")) {
+      assert.fail("changelog doesn't contain message for 2.0.x release")
+    }
+  })
 })
 
 async function mockFileSystem(block) {
