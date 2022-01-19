@@ -26,9 +26,12 @@ function main() {
     console.log("Generated dependencies.md")
 
     console.log("Compiling changelog")
-    let changelog = compileReleaseNotesMd(args.version, dependenciesMd)
-    
-    let executor = args.isDryRun 
+    let changelog = compileReleaseNotesMd({
+        version: args.version,
+        dependenciesMd: dependenciesMd
+    })
+
+    let executor = args.isDryRun
         ? execSyncDryRun
         : execSync
 
@@ -40,14 +43,14 @@ function main() {
         fs.writeFileSync(releaseNotesTempFile, changelog)
         removeEntries()
         updateChangelogMDFile(changelog)
-    } 
-    
+    }
+
     executor(`git checkout -b add-changelog-${args.version}`)
     executor(`git add changelogs/unreleased CHANGELOG.md`) //TODO: leak of the path
     executor(`git commit -m "created changelog for ${args.version}"`)
     executor(`gh config set prompt disabled`)
     executor(`git push --set-upstream origin add-changelog-${args.version}`)
-    executor(`gh pr create --base ${args.branch} --title "Release ${args.version}" --body "" --reviewer mapbox/navigation-android`)
+    executor(`gh pr create --base ${args.branch} --title "Changelog for ${args.version}" --body "" --reviewer mapbox/navigation-android`)
     executor(`gh release create ${args.version} --draft --target ${args.branch} --notes-file ${releaseNotesTempFile} --title ${args.version}`)
     executor(`git checkout ${args.branch}`)
 }
@@ -71,7 +74,7 @@ function parseArguments() {
         boolean: [
             'dry-run'
         ],
-        default : {
+        default: {
             branch: "main",
             'dry-run': false
         },
@@ -80,7 +83,7 @@ function parseArguments() {
         }
     });
 
-    let result = { }
+    let result = {}
 
     result.isDryRun = argv['dry-run']
     result.branch = argv.branch
@@ -92,6 +95,6 @@ function parseArguments() {
     if (!semver.valid(result.version)) {
         throw `passed version ${result.version} isn't SemVer compatible`
     }
-    
+
     return result
 }

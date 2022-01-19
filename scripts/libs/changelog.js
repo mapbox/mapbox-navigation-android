@@ -7,6 +7,7 @@ const { getBranchName } = require('./github');
 
 // https://keepachangelog.com/en/1.0.0/
 const ENTRY_TYPES = ['added', 'changed', 'fixed', 'removed', 'deprecated', 'security'];
+const SUPPORTED_ENTRY_TYPES = ['added', 'changed']
 
 const REPO_ROOT_DIR = path.join('.')
 const UNRELEASED_CHANGELOG_DIR = path.join(REPO_ROOT_DIR, 'changelogs', 'unreleased');
@@ -45,12 +46,15 @@ function processTitle(title) {
     return title.replace(/\n/g, " ");
 }
 
-function compileChangelog() {
+function compileChangelog(config) {
     const entries = {};
     for (const type of ENTRY_TYPES) {
         entries[type] = [];
     }
 
+    let fileCreationDataProvider = config.fileCreationDataProvider === undefined
+        ? function(path) { execSync(`git log -1 --format=%cd ${path}`).toString().trim() }
+        : config.fileCreationDataProvider
     for (const entryFile of fs.readdirSync(UNRELEASED_CHANGELOG_DIR)) {
         if (!entryFile.endsWith('.json')) { continue; }
 
@@ -59,7 +63,7 @@ function compileChangelog() {
         if (!isValidEntry(entry)) {
             throw `Cannot use entry "${entryFile}"`
         }
-        entry['date'] = new Date(execSync(`git log -1 --format=%cd ${entryFilePath}`).toString().trim());
+        entry['date'] = new Date(fileCreationDataProvider(entryFilePath));
         entries[entry.type].push(entry);
     }
 
@@ -94,7 +98,8 @@ function addReleaseNotesToChangelogMD(currentChangelogMD, newReleaseChangelog) {
     return updatedChangelog
 }
 
-function compileReleaseNotesMd(version, dependenciesMd) {
+function compileReleaseNotesMd(config) {
+    let version = config.version
     var output = "##Changelog  "
     let major = semver.major(version)
     let minor = semver.minor(version)
@@ -104,10 +109,10 @@ function compileReleaseNotesMd(version, dependenciesMd) {
         }
         output += "For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see 2.0 Navigation SDK Migration Guide.  " 
     }
-    output += compileChangelog()
+    output += compileChangelog(config)
     output += "### Mapbox dependencies  "
     output += "This release depends on, and has been tested with, the following Mapbox dependencies:  "
-    output += dependenciesMd
+    output += config.dependenciesMd
     return output
 }
 
@@ -149,7 +154,7 @@ async function askQuestions(entry) {
     return Object.assign(entry, await prompts(questions));
 }
 
-async function createEntry(params) {
+async function createEntry(params, branchName) {
     const title = params.title;
 
     if (!isInteger(params.ticket) && params.ticket !== undefined) {
@@ -169,7 +174,7 @@ async function createEntry(params) {
         title: title
     });
 
-    const branchName = getBranchName();
+    branchName = branchName === undefined ? getBranchName() : branchName
 
     if (branchName === 'main') {
         throw 'Cannot create changelog entry on master branch'

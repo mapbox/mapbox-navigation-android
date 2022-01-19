@@ -2,7 +2,7 @@
   "name": "mapbox-navigation-android",
   "version": "0.0.0",
   "scripts": {
-    "test": "mocha scripts/**/*.test.js"
+    "test": "mocha scripts/**/*.test.js --inline-diffs"
   },
   "devDependencies": {
     "@octokit/rest": "^17.1.1",
@@ -10,6 +10,7 @@
     "prompts": "^2.4.1",
     "minimist": "^1.2.5",
     "semver": "^7.3.5",
-    "mocha": "9.1.4"
+    "mocha": "9.1.4",
+    "mock-fs": "5.1.2"
   }
 }
