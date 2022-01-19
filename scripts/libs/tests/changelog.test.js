@@ -19,7 +19,7 @@ describe('addReleaseNotesToChangelogMD', function () {
 
 describe('compile changelog', function () {
   it('compile changelog for issues of each type', async function () {
-    let expectedResult = fs.readFileSync(path.join(testingDataDir, "expected-all-issues-types-changelog.md")).toString
+    let expectedResult = fs.readFileSync(path.join(testingDataDir, "expected-all-issues-types-changelog.md")).toString()
     await mockFileSystem(async function () {
       await createEntry(
         {
