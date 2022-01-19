@@ -9,4 +9,8 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 
 #### Features
 - Test ticket 1 [#1](https://github.com/mapbox/mapbox-navigation-android/pull/1)
-- Test ticket 1 [#3](https://github.com/mapbox/mapbox-navigation-android/pull/3)
+- Test ticket 3 [#3](https://github.com/mapbox/mapbox-navigation-android/pull/3)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+TEST_DEPENDENCIES

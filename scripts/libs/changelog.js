@@ -6,8 +6,12 @@ const semver = require('semver')
 const { getBranchName } = require('./github');
 
 // https://keepachangelog.com/en/1.0.0/
-const ENTRY_TYPES = ['added', 'changed', 'fixed', 'removed', 'deprecated', 'security'];
+const ENTRY_TYPES = ['fixed', 'added', 'changed', 'removed', 'deprecated', 'security'];
 const SUPPORTED_ENTRY_TYPES = ['added', 'changed']
+const HEADERS = {
+    'fixed': "Bug fixes and improvements",
+    'added': "Features"
+}
 
 const REPO_ROOT_DIR = path.join('.')
 const UNRELEASED_CHANGELOG_DIR = path.join(REPO_ROOT_DIR, 'changelogs', 'unreleased');
@@ -78,12 +82,13 @@ function compileChangelog(config) {
     for (const type of ENTRY_TYPES) {
         const typeEntries = entries[type];
         if (typeEntries.length === 0) { continue; }
-        output += `### ${type.capitalize()}\n`;
+        output += `#### ${HEADERS[type]}\n`;
 
         for (const entry of typeEntries) {
             const title = processTitle(entry.title);
             output += `- ${title} [#${entry.ticket}](https://github.com/${owner}/${repo}/pull/${entry.ticket})\n`;
         }
+        output += "\n"
     }
 
     return output;
@@ -100,19 +105,21 @@ function addReleaseNotesToChangelogMD(currentChangelogMD, newReleaseChangelog) {
 
 function compileReleaseNotesMd(config) {
     let version = config.version
-    var output = "##Changelog  "
+    var output = "## Mapbox Navigation SDK 2.1.0 - January 9, 2022\n\n"
     let major = semver.major(version)
     let minor = semver.minor(version)
     if (major == "2") {
         if (minor == "0") {
             output += "This is a patch release on top of v2.0.x which does not include changes introduced in v2.1.x and later.  "
         }
-        output += "For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see 2.0 Navigation SDK Migration Guide.  " 
+        output += "For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see 2.0 Navigation SDK Migration Guide.\n\n" 
     }
+    output += "##Changelog\n"
     output += compileChangelog(config)
-    output += "### Mapbox dependencies  "
-    output += "This release depends on, and has been tested with, the following Mapbox dependencies:  "
+    output += "### Mapbox dependencies\n"
+    output += "This release depends on, and has been tested with, the following Mapbox dependencies:\n"
     output += config.dependenciesMd
+    output += '\n'
     return output
 }
 

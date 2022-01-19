@@ -52,7 +52,7 @@ describe('compile changelog', function () {
         "branch4")
       let changelog = compileReleaseNotesMd({
         version: "2.1.0",
-        dependeciesMd: "",
+        dependenciesMd: "TEST_DEPENDENCIES",
         releaseDate: Date(2022, 0, 9),
         fileCreationDataProvider: function (path) {
           return path.substring(path.length - 1)
