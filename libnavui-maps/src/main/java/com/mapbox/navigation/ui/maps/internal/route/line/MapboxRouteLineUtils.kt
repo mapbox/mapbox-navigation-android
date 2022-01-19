@@ -24,13 +24,14 @@ import com.mapbox.maps.extension.style.layers.generated.BackgroundLayer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToLineString
 import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
@@ -51,7 +52,7 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlin.reflect.KProperty1
 
-object MapboxRouteLineUtils {
+internal object MapboxRouteLineUtils {
 
     private const val TAG = "MbxMapboxRouteLineUtils"
     internal const val VANISH_POINT_STOP_GAP = .00000000001
@@ -311,13 +312,13 @@ object MapboxRouteLineUtils {
     }
 
     fun getRouteFeatureDataProvider(
-        directionsRoutes: List<DirectionsRoute>
+        directionsRoutes: List<NavigationRoute>
     ): () -> List<RouteFeatureData> = {
         directionsRoutes.map(::generateFeatureCollection)
     }
 
     fun getRouteLineFeatureDataProvider(
-        directionsRoutes: List<RouteLine>
+        directionsRoutes: List<NavigationRouteLine>
     ): () -> List<RouteFeatureData> = {
         directionsRoutes.map(::generateFeatureCollection)
     }
@@ -504,57 +505,57 @@ object MapboxRouteLineUtils {
     internal val extractRouteData: (
         route: DirectionsRoute,
         trafficCongestionProvider: (RouteLeg) -> List<String>?
-    ) -> List<ExtractedRouteData> = {
-        route: DirectionsRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
-        var runningDistance = 0.0
-        val itemsToReturn = mutableListOf<ExtractedRouteData>()
-        route.legs()?.forEachIndexed { legIndex, leg ->
-            val restrictedRanges = getRestrictedRouteLegRanges(leg).asSequence()
-            val closureRanges = getClosureRanges(leg).asSequence()
-            val intersectionsWithGeometryIndex = getIntersectionsWithGeometryIndex(leg.steps())
-            val roadClassArray = getRoadClassArray(intersectionsWithGeometryIndex)
-            val trafficCongestion = trafficCongestionProvider.invoke(leg)
-            var isLegOrigin = true
+    ) -> List<ExtractedRouteData> =
+        { route: DirectionsRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
+            var runningDistance = 0.0
+            val itemsToReturn = mutableListOf<ExtractedRouteData>()
+            route.legs()?.forEachIndexed { legIndex, leg ->
+                val restrictedRanges = getRestrictedRouteLegRanges(leg).asSequence()
+                val closureRanges = getClosureRanges(leg).asSequence()
+                val intersectionsWithGeometryIndex = getIntersectionsWithGeometryIndex(leg.steps())
+                val roadClassArray = getRoadClassArray(intersectionsWithGeometryIndex)
+                val trafficCongestion = trafficCongestionProvider.invoke(leg)
+                var isLegOrigin = true
 
-            leg.annotation()?.distance()?.forEachIndexed { index, distance ->
-                // If the distance is 0 it offers no value to upstream calculations and in fact
-                // causes problems in creating the traffic expression since the expression
-                // values need to be in strictly ascending order. A value of 0 can be caused
-                // by the first point in a route leg being the same as the last point in the
-                // previous route leg. There may be other causes as well.
-                if (distance > 0.0) {
-                    val percentDistanceTraveled = runningDistance / route.distance()
-                    val isInRestrictedRange = restrictedRanges.any { it.contains(index) }
-                    val isInAClosure = closureRanges.any { it.contains(index) }
-                    val congestionValue: String = when {
-                        isInAClosure -> RouteLayerConstants.CLOSURE_CONGESTION_VALUE
-                        trafficCongestion.isNullOrEmpty() ->
-                            RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
-                        index >= trafficCongestion.size ->
-                            RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
-                        else -> trafficCongestion[index]
-                    }
-                    val roadClass = getRoadClassForIndex(roadClassArray, index)
+                leg.annotation()?.distance()?.forEachIndexed { index, distance ->
+                    // If the distance is 0 it offers no value to upstream calculations and in fact
+                    // causes problems in creating the traffic expression since the expression
+                    // values need to be in strictly ascending order. A value of 0 can be caused
+                    // by the first point in a route leg being the same as the last point in the
+                    // previous route leg. There may be other causes as well.
+                    if (distance > 0.0) {
+                        val percentDistanceTraveled = runningDistance / route.distance()
+                        val isInRestrictedRange = restrictedRanges.any { it.contains(index) }
+                        val isInAClosure = closureRanges.any { it.contains(index) }
+                        val congestionValue: String = when {
+                            isInAClosure -> RouteLayerConstants.CLOSURE_CONGESTION_VALUE
+                            trafficCongestion.isNullOrEmpty() ->
+                                RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
+                            index >= trafficCongestion.size ->
+                                RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
+                            else -> trafficCongestion[index]
+                        }
+                        val roadClass = getRoadClassForIndex(roadClassArray, index)
 
-                    itemsToReturn.add(
-                        ExtractedRouteData(
-                            runningDistance,
-                            percentDistanceTraveled,
-                            isInRestrictedRange,
-                            congestionValue,
-                            roadClass,
-                            legIndex,
-                            isLegOrigin
+                        itemsToReturn.add(
+                            ExtractedRouteData(
+                                runningDistance,
+                                percentDistanceTraveled,
+                                isInRestrictedRange,
+                                congestionValue,
+                                roadClass,
+                                legIndex,
+                                isLegOrigin
+                            )
                         )
-                    )
-                    isLegOrigin = false
-                    runningDistance += distance
+                        isLegOrigin = false
+                        runningDistance += distance
+                    }
                 }
             }
-        }
 
-        itemsToReturn
-    }.cacheResult(3)
+            itemsToReturn
+        }.cacheResult(3)
 
     internal val getRouteLegTrafficNumericCongestionProvider: (
         routeLineColorResources: RouteLineColorResources
@@ -721,7 +722,7 @@ object MapboxRouteLineUtils {
      * @return a RouteFeatureData containing the original route and a FeatureCollection and
      * LineString
      */
-    private fun generateFeatureCollection(route: DirectionsRoute): RouteFeatureData =
+    private fun generateFeatureCollection(route: NavigationRoute): RouteFeatureData =
         generateFeatureCollection(route, null)
 
     /**
@@ -731,7 +732,7 @@ object MapboxRouteLineUtils {
      * @return a RouteFeatureData containing the original route and a FeatureCollection and
      * LineString
      */
-    private fun generateFeatureCollection(route: RouteLine): RouteFeatureData =
+    private fun generateFeatureCollection(route: NavigationRouteLine): RouteFeatureData =
         generateFeatureCollection(route.route, route.identifier)
 
     internal fun calculateRouteGranularDistances(
@@ -761,10 +762,10 @@ object MapboxRouteLineUtils {
     }
 
     private val generateFeatureCollection: (
-        route: DirectionsRoute,
+        route: NavigationRoute,
         identifier: String?
-    ) -> RouteFeatureData = { route: DirectionsRoute, identifier: String? ->
-        val routeGeometry = route.completeGeometryToLineString()
+    ) -> RouteFeatureData = { route: NavigationRoute, identifier: String? ->
+        val routeGeometry = route.directionsRoute.completeGeometryToLineString()
         val randomId = UUID.randomUUID().toString()
         val routeFeature = when (identifier) {
             null -> Feature.fromGeometry(routeGeometry, null, randomId)
@@ -787,40 +788,20 @@ object MapboxRouteLineUtils {
      *
      * @return a [FeatureCollection] representing the waypoints derived from the [DirectionsRoute]
      */
-    internal fun buildWayPointFeatureCollection(route: DirectionsRoute): FeatureCollection {
-        val wayPointFeatures = mutableListOf<Feature>()
-        route.legs()?.forEach {
-            buildWayPointFeatureFromLeg(it, 0)?.let { feature ->
-                wayPointFeatures.add(feature)
-            }
-
-            it.steps()?.let { steps ->
-                buildWayPointFeatureFromLeg(it, steps.lastIndex)?.let { feature ->
-                    wayPointFeatures.add(feature)
+    internal fun buildWayPointFeatureCollection(route: NavigationRoute): FeatureCollection {
+        val waypointFeatures = route.directionsResponse.waypoints()?.mapIndexed { index, waypoint ->
+            waypoint.location().let {
+                Feature.fromGeometry(it).apply {
+                    val propValue = if (index == 0) {
+                        RouteLayerConstants.WAYPOINT_ORIGIN_VALUE
+                    } else {
+                        RouteLayerConstants.WAYPOINT_DESTINATION_VALUE
+                    }
+                    addStringProperty(RouteLayerConstants.WAYPOINT_PROPERTY_KEY, propValue)
                 }
             }
-        }
-        return FeatureCollection.fromFeatures(wayPointFeatures)
-    }
-
-    /**
-     * Builds a [Feature] representing a waypoint for use on a Mapbox [Map].
-     *
-     * @param leg the [RouteLeg] containing the waypoint info.
-     * @param index a value of 0 indicates a property value of origin
-     * will be added to the [Feature] else a value of destination will be used.
-     *
-     * @return a [Feature] representing the waypoint from the [RouteLeg]
-     */
-    private fun buildWayPointFeatureFromLeg(leg: RouteLeg, index: Int): Feature? {
-        return leg.steps()?.get(index)?.maneuver()?.location()?.run {
-            Feature.fromGeometry(Point.fromLngLat(this.longitude(), this.latitude()))
-        }?.also {
-            val propValue =
-                if (index == 0) RouteLayerConstants.WAYPOINT_ORIGIN_VALUE
-                else RouteLayerConstants.WAYPOINT_DESTINATION_VALUE
-            it.addStringProperty(RouteLayerConstants.WAYPOINT_PROPERTY_KEY, propValue)
-        }
+        } ?: emptyList()
+        return FeatureCollection.fromFeatures(waypointFeatures)
     }
 
     internal fun getLayerVisibility(style: Style, layerId: String): Visibility? {

@@ -38,7 +38,7 @@ interface Router {
      * Refresh the traffic annotations for a given [DirectionsRoute]
      *
      * @param route DirectionsRoute the direction route to refresh
-     * @param legIndex Int the index of the current leg in the route
+     * @param legIndex Int the index of the current leg in the route to refresh
      * @param callback Callback that gets notified with the results of the request
      *
      * @return request ID, can be used to cancel the request with [cancelRouteRefreshRequest]

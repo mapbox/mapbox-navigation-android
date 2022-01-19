@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
@@ -78,7 +79,7 @@ class VanishingRouteLineTest {
     @Test
     fun clear() = coroutineRule.runBlockingTest {
         val vanishingRouteLine = VanishingRouteLine().also {
-            it.initWithRoute(loadRoute("short_route.json"))
+            it.initWithRoute(loadRoute("short_route.json").toNavigationRoute())
         }
         assertNotNull(vanishingRouteLine.primaryRoutePoints)
         assertNotNull(vanishingRouteLine.primaryRouteLineGranularDistances)

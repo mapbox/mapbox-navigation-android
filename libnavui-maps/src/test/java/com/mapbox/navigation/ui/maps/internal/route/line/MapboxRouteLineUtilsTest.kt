@@ -13,6 +13,7 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID
@@ -1364,11 +1365,11 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun buildWayPointFeatureCollection() {
-        val route = loadRoute("multileg_route.json")
+        val route = loadRoute("multileg_route.json").toNavigationRoute()
 
         val result = MapboxRouteLineUtils.buildWayPointFeatureCollection(route)
 
-        assertEquals(4, result.features()!!.size)
+        assertEquals(3, result.features()!!.size)
         assertEquals(
             Point.fromLngLat(-77.157347, 38.783004),
             result.features()!![0].geometry() as Point
@@ -1378,12 +1379,8 @@ class MapboxRouteLineUtilsTest {
             result.features()!![1].geometry() as Point
         )
         assertEquals(
-            Point.fromLngLat(-77.167276, 38.775717),
-            result.features()!![2].geometry() as Point
-        )
-        assertEquals(
             Point.fromLngLat(-77.153468, 38.77091),
-            result.features()!![3].geometry() as Point
+            result.features()!![2].geometry() as Point
         )
     }
 

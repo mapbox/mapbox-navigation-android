@@ -94,7 +94,6 @@ object MockRoutesProvider {
         )
     }
 
-
     fun loadDirectionsResponse(context: Context, @IntegerRes routeFileResource: Int): DirectionsResponse {
         val jsonResponse = readRawFileText(context, routeFileResource)
         return DirectionsResponse.fromJson(jsonResponse)

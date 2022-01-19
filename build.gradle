@@ -3,7 +3,6 @@ buildscript {
   repositories {
     google()
     mavenCentral()
-    gradlePluginPortal()
     maven {
       url 'https://api.mapbox.com/downloads/v2/releases/maven'
       authentication {
@@ -14,6 +13,7 @@ buildscript {
         password = project.hasProperty('SDK_REGISTRY_TOKEN') ? project.property('SDK_REGISTRY_TOKEN') : System.getenv('SDK_REGISTRY_TOKEN')
       }
     }
+    gradlePluginPortal()
   }
   dependencies {
     classpath pluginDependencies.gradle
@@ -44,7 +44,6 @@ allprojects {
   repositories {
     google()
     mavenCentral()
-    gradlePluginPortal()
     maven {
       url 'https://api.mapbox.com/downloads/v2/releases/maven'
       authentication {
@@ -72,6 +71,7 @@ allprojects {
         }
       }
     }
+    gradlePluginPortal()
   }
 }
 

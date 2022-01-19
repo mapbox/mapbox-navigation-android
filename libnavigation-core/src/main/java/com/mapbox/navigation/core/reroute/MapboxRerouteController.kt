@@ -2,15 +2,16 @@ package com.mapbox.navigation.core.reroute
 
 import androidx.annotation.MainThread
 import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.options.RerouteOptions
-import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
@@ -29,7 +30,7 @@ internal class MapboxRerouteController(
     private val rerouteOptions: RerouteOptions,
     threadController: ThreadController,
     private val logger: Logger
-) : RerouteController {
+) : NavigationRerouteController {
 
     private val observers = CopyOnWriteArraySet<RerouteController.RerouteStateObserver>()
 
@@ -94,6 +95,14 @@ internal class MapboxRerouteController(
     }
 
     override fun reroute(routesCallback: RerouteController.RoutesCallback) {
+        reroute(
+            NavigationRerouteController.RoutesCallback { routes ->
+                routesCallback.onNewRoutes(routes.toDirectionsRoutes())
+            }
+        )
+    }
+
+    override fun reroute(callback: NavigationRerouteController.RoutesCallback) {
         interrupt()
         state = RerouteState.FetchingRoute
         logger.d(
@@ -115,7 +124,7 @@ internal class MapboxRerouteController(
             .let { routeOptionsResult ->
                 when (routeOptionsResult) {
                     is RouteOptionsUpdater.RouteOptionsResult.Success -> {
-                        request(routesCallback, routeOptionsResult.routeOptions)
+                        request(callback, routeOptionsResult.routeOptions)
                     }
                     is RouteOptionsUpdater.RouteOptionsResult.Error -> {
                         mainJobController.scope.launch {
@@ -159,20 +168,20 @@ internal class MapboxRerouteController(
     }
 
     private fun request(
-        routesCallback: RerouteController.RoutesCallback,
+        callback: NavigationRerouteController.RoutesCallback,
         routeOptions: RouteOptions
     ) {
         requestId = directionsSession.requestRoutes(
             routeOptions,
-            object : RouterCallback {
+            object : NavigationRouterCallback {
                 override fun onRoutesReady(
-                    routes: List<DirectionsRoute>,
+                    routes: List<NavigationRoute>,
                     routerOrigin: RouterOrigin
                 ) {
                     mainJobController.scope.launch {
                         state = RerouteState.RouteFetched(routerOrigin)
                         state = RerouteState.Idle
-                        routesCallback.onNewRoutes(routes)
+                        callback.onNewRoutes(routes)
                     }
                 }
 

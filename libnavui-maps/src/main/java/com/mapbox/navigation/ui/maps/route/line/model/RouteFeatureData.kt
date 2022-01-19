@@ -1,8 +1,8 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
+import com.mapbox.navigation.base.route.NavigationRoute
 
 /**
  * An association between a DirectionsRoute, FeatureCollection
@@ -12,8 +12,8 @@ import com.mapbox.geojson.LineString
  * @param featureCollection a FeatureCollection created using the route
  * @param lineString a LineString derived from the route's geometry.
  */
-data class RouteFeatureData(
-    val route: DirectionsRoute,
+internal data class RouteFeatureData constructor(
+    val route: NavigationRoute,
     val featureCollection: FeatureCollection,
     val lineString: LineString
 )

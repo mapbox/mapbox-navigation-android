@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.models.MapboxShield
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maneuver.ManeuverAction
@@ -124,10 +125,13 @@ class MapboxManeuverApiTest {
 
     @Test
     fun `when get maneuver invoked and processor returns failure`() {
-        val route = mockk<DirectionsRoute>()
+        val dirRoute = mockk<DirectionsRoute>()
+        val route = mockk<NavigationRoute> {
+            every { directionsRoute } returns dirRoute
+        }
         val maneuverState = ManeuverState()
         val action = ManeuverAction.GetManeuverListWithRoute(
-            route,
+            dirRoute,
             null,
             maneuverState,
             maneuverOptions,
@@ -143,10 +147,13 @@ class MapboxManeuverApiTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun `when get maneuver invoked and processor returns inappropriate result`() {
-        val route = mockk<DirectionsRoute>()
+        val dirRoute = mockk<DirectionsRoute>()
+        val route = mockk<NavigationRoute> {
+            every { directionsRoute } returns dirRoute
+        }
         val maneuverState = ManeuverState()
         val action = ManeuverAction.GetManeuverListWithRoute(
-            route,
+            dirRoute,
             null,
             maneuverState,
             maneuverOptions,
@@ -160,10 +167,13 @@ class MapboxManeuverApiTest {
 
     @Test
     fun `when get maneuver invoked and processor returns success`() {
-        val route = mockk<DirectionsRoute>()
+        val dirRoute = mockk<DirectionsRoute>()
+        val route = mockk<NavigationRoute> {
+            every { directionsRoute } returns dirRoute
+        }
         val maneuverState = ManeuverState()
         val action = ManeuverAction.GetManeuverListWithRoute(
-            route,
+            dirRoute,
             null,
             maneuverState,
             maneuverOptions,

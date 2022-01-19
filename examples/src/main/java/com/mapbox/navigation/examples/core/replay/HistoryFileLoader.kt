@@ -5,11 +5,16 @@ import android.content.Context
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayHistoryMapper
+import com.mapbox.navigation.core.replay.history.ReplaySetNavigationRoute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class HistoryFileLoader {
-    private val replayHistoryMapper = ReplayHistoryMapper.Builder().build()
+    private val replayHistoryMapper = ReplayHistoryMapper.Builder().setRouteMapper {
+        ReplaySetNavigationRoute.Builder(eventTimestamp = it.eventTimestamp)
+            .route(it.navigationRoute)
+            .build()
+    }.build()
     private val historyFilesDirectory = HistoryFilesDirectory()
 
     @SuppressLint("MissingPermission")

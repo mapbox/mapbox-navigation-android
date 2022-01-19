@@ -85,7 +85,7 @@ class FeedbackMetadataWrapperTest {
             eventVersion = 100,
             lastLocation = Point.fromLngLat(30.0, 40.0),
             phoneState = phoneState,
-            metricsDirectionsRoute = MetricsDirectionsRoute(directionsRoute = null),
+            metricsDirectionsRoute = MetricsDirectionsRoute(route = null),
             metricsRouteProgress = MetricsRouteProgress(routeProgress = null),
             appMetadata = AppMetadata(
                 name = "APP_METADATA_NAME",

@@ -76,10 +76,12 @@ class ArrivalProgressObserverTest {
         every { tripSession.getRouteProgress() } returns mockk {
             every { stale } returns false
             every { currentState } returns RouteProgressState.TRACKING
-            every { route } returns mockk {
-                mockMultipleLegs()
-                every { currentLegProgress } returns null
+            every { navigationRoute } returns mockk {
+                every { directionsRoute } returns mockk {
+                    mockMultipleLegs()
+                }
             }
+            every { currentLegProgress } returns null
         }
 
         arrivalProgressObserver.navigateNextRouteLeg(legIndexUpdatedCallback)
@@ -92,11 +94,13 @@ class ArrivalProgressObserverTest {
         every { tripSession.getRouteProgress() } returns mockk {
             every { stale } returns false
             every { currentState } returns RouteProgressState.TRACKING
-            every { route } returns mockk {
-                every { legs() } returns emptyList()
-                every { currentLegProgress } returns mockk {
-                    every { legIndex } returns 0
+            every { navigationRoute } returns mockk {
+                every { directionsRoute } returns mockk {
+                    every { legs() } returns emptyList()
                 }
+            }
+            every { currentLegProgress } returns mockk {
+                every { legIndex } returns 0
             }
         }
 
@@ -119,8 +123,10 @@ class ArrivalProgressObserverTest {
             mockk {
                 every { stale } returns false
                 every { currentState } returns RouteProgressState.COMPLETE
-                every { route } returns mockk {
-                    mockMultipleLegs()
+                every { navigationRoute } returns mockk {
+                    every { directionsRoute } returns mockk {
+                        mockMultipleLegs()
+                    }
                 }
                 every { currentLegProgress } returns mockk {
                     every { routeLeg } returns mockk()
@@ -151,10 +157,12 @@ class ArrivalProgressObserverTest {
             mockk {
                 every { stale } returns false
                 every { currentState } returns RouteProgressState.COMPLETE
-                every { route } returns mockk {
-                    mockMultipleLegs()
-                    every { durationRemaining } returns 2.0
-                    every { distanceRemaining } returns 8.0f
+                every { navigationRoute } returns mockk {
+                    every { directionsRoute } returns mockk {
+                        mockMultipleLegs()
+                        every { durationRemaining } returns 2.0
+                        every { distanceRemaining } returns 8.0f
+                    }
                 }
                 every { currentLegProgress } returns mockk {
                     every { routeLeg } returns mockk()
@@ -182,10 +190,12 @@ class ArrivalProgressObserverTest {
         val routeProgress: RouteProgress = mockk {
             every { stale } returns false
             every { currentState } returns RouteProgressState.COMPLETE
-            every { route } returns mockk {
-                mockMultipleLegs()
-                every { durationRemaining } returns 2.0
-                every { distanceRemaining } returns 8.0f
+            every { navigationRoute } returns mockk {
+                every { directionsRoute } returns mockk {
+                    mockMultipleLegs()
+                    every { durationRemaining } returns 2.0
+                    every { distanceRemaining } returns 8.0f
+                }
             }
             every { currentLegProgress } returns mockk {
                 every { routeLeg } returns mockk()
@@ -223,8 +233,10 @@ class ArrivalProgressObserverTest {
                     every { distanceRemaining } returns 15.0f
                     every { legIndex } returns 0
                 }
-                every { route } returns mockk {
-                    mockMultipleLegs()
+                every { navigationRoute } returns mockk {
+                    every { directionsRoute } returns mockk {
+                        mockMultipleLegs()
+                    }
                 }
             }
         )
@@ -248,8 +260,10 @@ class ArrivalProgressObserverTest {
                 every { distanceRemaining } returns 15.0f
                 every { legIndex } returns 0
             }
-            every { route } returns mockk {
-                mockMultipleLegs()
+            every { navigationRoute } returns mockk {
+                every { directionsRoute } returns mockk {
+                    mockMultipleLegs()
+                }
             }
         }
         every { tripSession.getRouteProgress() } returns routeProgress
@@ -273,8 +287,10 @@ class ArrivalProgressObserverTest {
         val routeProgress: RouteProgress = mockk {
             every { stale } returns false
             every { currentState } returns RouteProgressState.COMPLETE
-            every { route } returns mockk {
-                mockMultipleLegs()
+            every { navigationRoute } returns mockk {
+                every { directionsRoute } returns mockk {
+                    mockMultipleLegs()
+                }
             }
             every { currentLegProgress } returns mockk {
                 every { routeLeg } returns mockk()
@@ -311,8 +327,10 @@ class ArrivalProgressObserverTest {
                     every { distanceRemaining } returns 80.0f
                     every { legIndex } returns 0
                 }
-                every { route } returns mockk {
-                    mockMultipleLegs()
+                every { navigationRoute } returns mockk {
+                    every { directionsRoute } returns mockk {
+                        mockMultipleLegs()
+                    }
                 }
             }
         )
@@ -327,14 +345,16 @@ class ArrivalProgressObserverTest {
         val routeProgress: RouteProgress = mockk {
             every { stale } returns false
             every { currentState } returns RouteProgressState.COMPLETE
-            every { route } returns mockk {
-                mockMultipleLegs()
-                every { routeIndex() } returns "0"
-                every { currentLegProgress } returns mockk {
-                    every { routeLeg } returns mockk()
-                    every { legIndex } returns 0
-                    every { durationRemaining } returns 0.0
-                    every { distanceRemaining } returns 0.0f
+            every { navigationRoute } returns mockk {
+                every { directionsRoute } returns mockk {
+                    mockMultipleLegs()
+                    every { routeIndex() } returns "0"
+                    every { currentLegProgress } returns mockk {
+                        every { routeLeg } returns mockk()
+                        every { legIndex } returns 0
+                        every { durationRemaining } returns 0.0
+                        every { distanceRemaining } returns 0.0f
+                    }
                 }
             }
         }
@@ -360,13 +380,15 @@ class ArrivalProgressObserverTest {
         every { tripSession.getRouteProgress() } returns mockk {
             every { stale } returns false
             every { currentState } returns RouteProgressState.COMPLETE
-            every { route } returns mockk {
-                mockMultipleLegs()
-                every { routeIndex() } returns "0"
-                every { currentLegProgress } returns mockk {
-                    every { legIndex } returns 0
-                    every { durationRemaining } returns 0.0
-                    every { distanceRemaining } returns 0.0f
+            every { navigationRoute } returns mockk {
+                every { directionsRoute } returns mockk {
+                    mockMultipleLegs()
+                    every { routeIndex() } returns "0"
+                    every { currentLegProgress } returns mockk {
+                        every { legIndex } returns 0
+                        every { durationRemaining } returns 0.0
+                        every { distanceRemaining } returns 0.0f
+                    }
                 }
             }
         }
@@ -385,11 +407,13 @@ class ArrivalProgressObserverTest {
         every { tripSession.getRouteProgress() } returns mockk {
             every { stale } returns false
             every { currentState } returns RouteProgressState.TRACKING
-            every { route } returns mockk {
-                mockMultipleLegs()
-                every { routeIndex() } returns "0"
-                every { currentLegProgress } returns mockk {
-                    every { legIndex } returns 1
+            every { navigationRoute } returns mockk {
+                every { directionsRoute } returns mockk {
+                    mockMultipleLegs()
+                    every { routeIndex() } returns "0"
+                    every { currentLegProgress } returns mockk {
+                        every { legIndex } returns 1
+                    }
                 }
             }
         }
@@ -409,11 +433,13 @@ class ArrivalProgressObserverTest {
         every { tripSession.getRouteProgress() } returns mockk {
             every { stale } returns false
             every { currentState } returns RouteProgressState.TRACKING
-            every { route } returns mockk {
-                mockMultipleLegs()
-                every { routeIndex() } returns "0"
-                every { currentLegProgress } returns mockk {
-                    every { legIndex } returns 2
+            every { navigationRoute } returns mockk {
+                every { directionsRoute } returns mockk {
+                    mockMultipleLegs()
+                    every { routeIndex() } returns "0"
+                    every { currentLegProgress } returns mockk {
+                        every { legIndex } returns 2
+                    }
                 }
             }
         }
@@ -441,11 +467,13 @@ class ArrivalProgressObserverTest {
         every { tripSession.getRouteProgress() } returns mockk {
             every { stale } returns false
             every { currentState } returns RouteProgressState.TRACKING
-            every { route } returns mockk {
-                mockMultipleLegs()
-                every { routeIndex() } returns "0"
-                every { currentLegProgress } returns mockk {
-                    every { legIndex } returns 1
+            every { navigationRoute } returns mockk {
+                every { directionsRoute } returns mockk {
+                    mockMultipleLegs()
+                    every { routeIndex() } returns "0"
+                    every { currentLegProgress } returns mockk {
+                        every { legIndex } returns 1
+                    }
                 }
             }
         }

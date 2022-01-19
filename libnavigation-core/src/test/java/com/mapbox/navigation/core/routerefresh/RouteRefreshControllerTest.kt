@@ -1,15 +1,14 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.route.RouteRefreshCallback
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.trip.session.TripSession
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl.OFFLINE_UUID
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.Runs
@@ -37,7 +36,7 @@ class RouteRefreshControllerTest {
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
-    private val routeRefreshCallbackSlot = slot<RouteRefreshCallback>()
+    private val routeRefreshCallbackSlot = slot<NavigationRouterRefreshCallback>()
     private val directionsSession: DirectionsSession = mockk(relaxUnitFun = true) {
         every { routes } returns listOf(mockk())
     }
@@ -54,10 +53,10 @@ class RouteRefreshControllerTest {
             coordinatesList()
         } returns listOf(Point.fromLngLat(0.0, 0.0), Point.fromLngLat(1.1, 1.1))
     }
-    private val validRoute: DirectionsRoute = mockk {
-        every { routeOptions() } returns routeOptions
-        every { requestUuid() } returns "test_uuid"
-        every { legs() } returns null
+    private val validRoute: NavigationRoute = mockk {
+        every { routeOptions } returns this@RouteRefreshControllerTest.routeOptions
+        every { directionsResponse.uuid() } returns "test_uuid"
+        every { directionsRoute.legs() } returns null
     }
 
     private val routeRefreshOptions = RouteRefreshOptions.Builder().build()
@@ -144,7 +143,7 @@ class RouteRefreshControllerTest {
     @Test
     fun `should log warning when route is not supported`() = coroutineRule.runBlockingTest {
         every { routeOptions.enableRefresh() } returns true
-        every { validRoute.requestUuid() } returns null
+        every { validRoute.directionsResponse.uuid() } returns null
 
         routeRefreshController.restart(validRoute)
         coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
@@ -175,32 +174,9 @@ class RouteRefreshControllerTest {
     }
 
     @Test
-    fun `do not send a request when route options is null`() {
-        every { validRoute.routeOptions() } returns null
-
-        routeRefreshController.restart(validRoute)
-        coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis * 2)
-        routeRefreshController.stop()
-
-        verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
-    }
-
-    @Test
     fun `do not send a request when uuid is empty`() {
         every { routeOptions.enableRefresh() } returns true
-        every { validRoute.requestUuid() } returns ""
-
-        routeRefreshController.restart(validRoute)
-        coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis * 2)
-        routeRefreshController.stop()
-
-        verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
-    }
-
-    @Test
-    fun `do not send a request when uuid is offline`() {
-        every { routeOptions.enableRefresh() } returns true
-        every { validRoute.requestUuid() } returns OFFLINE_UUID
+        every { validRoute.directionsResponse.uuid() } returns ""
 
         routeRefreshController.restart(validRoute)
         coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis * 2)
@@ -271,10 +247,12 @@ class RouteRefreshControllerTest {
 
         routeRefreshController.restart(validRoute)
         coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis)
-        routeRefreshCallbackSlot.captured.onRefresh(
+        routeRefreshCallbackSlot.captured.onRefreshReady(
             mockk {
-                every { legs() } returns null
-            },
+                every { directionsRoute } returns mockk {
+                    every { legs() } returns null
+                }
+            }
         )
         routeRefreshController.stop()
 
@@ -288,7 +266,7 @@ class RouteRefreshControllerTest {
 
         routeRefreshController.restart(validRoute)
         coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis)
-        routeRefreshCallbackSlot.captured.onError(
+        routeRefreshCallbackSlot.captured.onFailure(
             mockk {
                 every { message } returns "test error"
                 every { throwable } returns mockk()
@@ -301,31 +279,8 @@ class RouteRefreshControllerTest {
     }
 
     @Test
-    fun `should log warning when route options are null`() = coroutineRule.runBlockingTest {
-        every { validRoute.routeOptions() } returns null
-
-        routeRefreshController.restart(validRoute)
-        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
-        routeRefreshController.stop()
-
-        verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
-        verify(exactly = 1) {
-            logger.w(
-                RouteRefreshController.TAG,
-                Message(
-                    """
-                        Unable to refresh the route because routeOptions are missing.
-                        Use #fromJson(json, routeOptions, requestUuid)
-                        when deserializing the route or route response.
-                    """.trimIndent()
-                )
-            )
-        }
-    }
-
-    @Test
     fun `should log route diffs when there is a successful response`() {
-        val newRoute = mockk<DirectionsRoute>()
+        val newRoute = mockk<NavigationRoute>()
         val routeDiffs = listOf(routeDiff1, routeDiff2)
 
         every { routeOptions.enableRefresh() } returns true
@@ -333,7 +288,7 @@ class RouteRefreshControllerTest {
 
         routeRefreshController.restart(validRoute)
         coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis)
-        routeRefreshCallbackSlot.captured.onRefresh(newRoute)
+        routeRefreshCallbackSlot.captured.onRefreshReady(newRoute)
         routeRefreshController.stop()
 
         verify(exactly = 1) {
@@ -344,14 +299,14 @@ class RouteRefreshControllerTest {
 
     @Test
     fun `should log message when there is a successful response without route diffs`() {
-        val newRoute = mockk<DirectionsRoute>()
+        val newRoute = mockk<NavigationRoute>()
 
         every { routeOptions.enableRefresh() } returns true
         every { routeDiffProvider.buildRouteDiffs(validRoute, newRoute, 0) } returns emptyList()
 
         routeRefreshController.restart(validRoute)
         coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis)
-        routeRefreshCallbackSlot.captured.onRefresh(newRoute)
+        routeRefreshCallbackSlot.captured.onRefreshReady(newRoute)
         routeRefreshController.stop()
 
         verify(exactly = 1) {

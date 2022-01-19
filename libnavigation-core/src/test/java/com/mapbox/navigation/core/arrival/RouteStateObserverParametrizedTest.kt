@@ -94,8 +94,10 @@ class RouteStateObserverParametrizedTest(
             mockk {
                 every { currentState } returns routeProgressState
                 every { stale } returns isStale
-                every { route } returns mockk {
-                    mockMultipleLegs()
+                every { navigationRoute } returns mockk {
+                    every { directionsRoute } returns mockk {
+                        mockMultipleLegs()
+                    }
                 }
                 every { currentLegProgress } returns mockk {
                     every { routeLeg } returns mockk()
@@ -126,10 +128,12 @@ class RouteStateObserverParametrizedTest(
             mockk {
                 every { currentState } returns routeProgressState
                 every { stale } returns isStale
-                every { route } returns mockk {
-                    mockMultipleLegs()
-                    every { durationRemaining } returns 2.0
-                    every { distanceRemaining } returns 8.0f
+                every { navigationRoute } returns mockk {
+                    every { directionsRoute } returns mockk {
+                        mockMultipleLegs()
+                        every { durationRemaining } returns 2.0
+                        every { distanceRemaining } returns 8.0f
+                    }
                 }
                 every { currentLegProgress } returns mockk {
                     every { routeLeg } returns mockk()

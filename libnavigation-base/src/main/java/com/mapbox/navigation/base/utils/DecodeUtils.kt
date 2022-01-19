@@ -122,6 +122,9 @@ object DecodeUtils {
         return stepsGeometryDecodeCache.getOrDecode(legStep.geometry(), precision)
     }
 
+    /**
+     * todo Remove inline references to RouteOptions in favor of taking geometry type as an argument or expose the extensions on top of NavigationRoute instead.
+     */
     private fun DirectionsRoute.precision(): Int {
         return if (routeOptions()?.geometries() == DirectionsCriteria.GEOMETRY_POLYLINE) {
             Constants.PRECISION_5

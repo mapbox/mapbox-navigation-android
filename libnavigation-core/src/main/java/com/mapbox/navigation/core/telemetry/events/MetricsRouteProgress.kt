@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core.telemetry.events
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.telemetry.obtainRouteDestination
@@ -78,20 +78,20 @@ internal class MetricsRouteProgress(routeProgress: RouteProgress?) {
     init {
         ifNonNull(
             routeProgress,
-            routeProgress?.route,
+            routeProgress?.navigationRoute,
             routeProgress?.currentLegProgress,
             routeProgress?.distanceRemaining,
             routeProgress?.durationRemaining
-        ) { _routeProgress, _directionsRoute, _currentLegProgress,
+        ) { _routeProgress, _navigationRoute, _currentLegProgress,
             _distanceRemaining, _durationRemaining ->
-            obtainRouteData(_directionsRoute)
+            obtainRouteData(_navigationRoute)
             obtainLegData(_currentLegProgress)
             obtainStepData(_routeProgress)
             distanceRemaining = _distanceRemaining.toInt()
             durationRemaining = _durationRemaining.toInt()
             distanceTraveled = _routeProgress.distanceTraveled.toInt()
             legIndex = _routeProgress.currentLegProgress?.legIndex ?: 0
-            legCount = _directionsRoute.legs()?.size ?: 0
+            legCount = _navigationRoute.directionsRoute.legs()?.size ?: 0
             stepIndex = _currentLegProgress.currentStepProgress?.stepIndex ?: 0
             stepCount = _routeProgress.currentLegProgress?.routeLeg?.steps()?.size ?: 0
         } ?: initDefaultValues()
@@ -111,14 +111,15 @@ internal class MetricsRouteProgress(routeProgress: RouteProgress?) {
         previousStepName = ""
     }
 
-    private fun obtainRouteData(route: DirectionsRoute) {
+    private fun obtainRouteData(navigationRoute: NavigationRoute) {
+        val route = navigationRoute.directionsRoute
         directionsRouteGeometry = route.geometry()
-        directionsRouteRequestIdentifier = route.requestUuid()
+        directionsRouteRequestIdentifier = navigationRoute.directionsResponse.uuid()
         directionsRouteStepCount = obtainStepCount(route)
-        directionsRouteIndex = route.routeIndex()?.toInt() ?: 0
+        directionsRouteIndex = navigationRoute.routeIndex
         directionsRouteDistance = route.distance().toInt()
         directionsRouteDuration = route.duration().toInt()
-        directionsRouteProfile = route.routeOptions()?.profile() ?: DEFAULT_PROFILE
+        directionsRouteProfile = navigationRoute.routeOptions.profile()
         directionsRouteDestination = obtainRouteDestination(route)
     }
 

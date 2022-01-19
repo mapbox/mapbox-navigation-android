@@ -2,10 +2,11 @@ package com.mapbox.navigation.core.directions.session
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.route.RouteRefreshCallback
-import com.mapbox.navigation.base.route.RouteRefreshError
-import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouter
+import com.mapbox.navigation.base.route.NavigationRouterCallback
+import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
+import com.mapbox.navigation.base.route.NavigationRouterRefreshError
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.NavigationComponentProvider
@@ -26,15 +27,16 @@ class MapboxDirectionsSessionTest {
 
     private lateinit var session: MapboxDirectionsSession
 
-    private val router: Router = mockk(relaxUnitFun = true)
+    private val router: NavigationRouter = mockk(relaxUnitFun = true)
     private val routeOptions: RouteOptions = mockk(relaxUnitFun = true)
-    private val routerCallback: RouterCallback = mockk(relaxUnitFun = true)
-    private val routesRefreshRequestCallback: RouteRefreshCallback = mockk(relaxUnitFun = true)
+    private val routerCallback: NavigationRouterCallback = mockk(relaxUnitFun = true)
+    private val routesRefreshRequestCallback: NavigationRouterRefreshCallback =
+        mockk(relaxUnitFun = true)
     private val observer: RoutesObserver = mockk(relaxUnitFun = true)
-    private val route: DirectionsRoute = mockk(relaxUnitFun = true)
-    private val routes: List<DirectionsRoute> = listOf(route)
-    private lateinit var routeCallback: RouterCallback
-    private lateinit var refreshCallback: RouteRefreshCallback
+    private val route: NavigationRoute = mockk(relaxUnitFun = true)
+    private val routes: List<NavigationRoute> = listOf(route)
+    private lateinit var routeCallback: NavigationRouterCallback
+    private lateinit var refreshCallback: NavigationRouterRefreshCallback
 
     private val routeRequestId = 1L
     private val routeRefreshRequestId = 2L
@@ -52,12 +54,12 @@ class MapboxDirectionsSessionTest {
         every { routeOptions.waypointNames() } returns ""
         every { routeOptions.waypointTargets() } returns ""
         val routeBuilder: DirectionsRoute.Builder = mockk(relaxUnitFun = true)
-        every { route.toBuilder() } returns routeBuilder
+        every { route.directionsRoute.toBuilder() } returns routeBuilder
         every { routeBuilder.routeOptions(any()) } returns routeBuilder
-        every { routeBuilder.build() } returns route
+        every { routeBuilder.build() } returns mockk()
 
-        val routeListener = slot<RouterCallback>()
-        val refreshListener = slot<RouteRefreshCallback>()
+        val routeListener = slot<NavigationRouterCallback>()
+        val refreshListener = slot<NavigationRouterRefreshCallback>()
         every { router.getRoute(routeOptions, capture(routeListener)) } answers {
             routeCallback = routeListener.captured
             routeRequestId
@@ -66,7 +68,7 @@ class MapboxDirectionsSessionTest {
             refreshCallback = refreshListener.captured
             routeRefreshRequestId
         }
-        every { routes[0].routeOptions() } returns routeOptions
+        every { route.routeOptions } returns routeOptions
         mockkObject(NavigationComponentProvider)
         every { routerCallback.onRoutesReady(any(), any()) } answers {
             this.value
@@ -122,9 +124,9 @@ class MapboxDirectionsSessionTest {
     @Test
     fun `route refresh response - success`() {
         session.requestRouteRefresh(route, 0, routesRefreshRequestCallback)
-        refreshCallback.onRefresh(route)
+        refreshCallback.onRefreshReady(route)
 
-        verify(exactly = 1) { routesRefreshRequestCallback.onRefresh(route) }
+        verify(exactly = 1) { routesRefreshRequestCallback.onRefreshReady(route) }
     }
 
     @Test
@@ -137,12 +139,12 @@ class MapboxDirectionsSessionTest {
 
     @Test
     fun `route refresh response - failure`() {
-        val error: RouteRefreshError = mockk()
+        val error: NavigationRouterRefreshError = mockk()
         session.requestRouteRefresh(route, 0, routesRefreshRequestCallback)
-        refreshCallback.onError(error)
+        refreshCallback.onFailure(error)
 
         verify(exactly = 1) {
-            routesRefreshRequestCallback.onError(error)
+            routesRefreshRequestCallback.onFailure(error)
         }
     }
 
@@ -193,7 +195,7 @@ class MapboxDirectionsSessionTest {
 
         verify(exactly = 1) { observer.onRoutesChanged(slot.captured) }
         assertEquals(slot.captured.reason, mockReason)
-        assertEquals(slot.captured.routes, routes)
+        assertEquals(slot.captured.navigationRoutes, routes)
     }
 
     @Test
@@ -206,7 +208,7 @@ class MapboxDirectionsSessionTest {
 
         verify(exactly = 1) { observer.onRoutesChanged(slot.captured) }
         assertEquals(slot.captured.reason, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
-        assertEquals(slot.captured.routes, routes)
+        assertEquals(slot.captured.navigationRoutes, routes)
     }
 
     @Test
@@ -220,9 +222,9 @@ class MapboxDirectionsSessionTest {
 
         assertTrue(slot.size == 2)
         assertEquals(slot[0].reason, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
-        assertEquals(slot[0].routes, routes)
+        assertEquals(slot[0].navigationRoutes, routes)
         assertEquals(slot[1].reason, RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
-        assertEquals(slot[1].routes, emptyList<DirectionsRoute>())
+        assertEquals(slot[1].navigationRoutes, emptyList<DirectionsRoute>())
     }
 
     @Test
@@ -232,13 +234,16 @@ class MapboxDirectionsSessionTest {
 
         session.registerRoutesObserver(observer)
         session.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
-        val newRoutes: List<DirectionsRoute> = listOf(mockk())
-        every { newRoutes[0].routeOptions() } returns routeOptions
+        val newRoutes: List<NavigationRoute> = listOf(
+            mockk {
+                every { directionsRoute } returns mockk()
+            }
+        )
         session.setRoutes(newRoutes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
 
         verify(exactly = 1) { observer.onRoutesChanged(slot.captured) }
         assertEquals(slot.captured.reason, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
-        assertEquals(slot.captured.routes, newRoutes)
+        assertEquals(slot.captured.navigationRoutes, newRoutes)
     }
 
     @Test

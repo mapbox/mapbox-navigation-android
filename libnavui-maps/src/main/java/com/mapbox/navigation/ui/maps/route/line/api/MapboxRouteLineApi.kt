@@ -18,6 +18,8 @@ import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPluginImpl
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.navigation.base.internal.utils.isSameRoute
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
@@ -28,6 +30,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
@@ -40,6 +43,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
+import com.mapbox.navigation.ui.maps.route.line.model.toNavigationRouteLines
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
@@ -180,9 +184,9 @@ import kotlin.coroutines.suspendCoroutine
 class MapboxRouteLineApi(
     private val routeLineOptions: MapboxRouteLineOptions
 ) {
-    private var primaryRoute: DirectionsRoute? = null
+    private var primaryRoute: NavigationRoute? = null
     private var routeHasRestrictions = false
-    private val directionsRoutes: MutableList<DirectionsRoute> = mutableListOf()
+    private val routes: MutableList<NavigationRoute> = mutableListOf()
     private var routeLineExpressionData: List<RouteLineExpressionData> = emptyList()
     private var lastIndexUpdateTimeNano: Long = 0
     private var lastPointUpdateTimeNano: Long = 0
@@ -229,12 +233,35 @@ class MapboxRouteLineApi(
     /**
      * @return the routes being used
      */
-    fun getRoutes(): List<DirectionsRoute> = directionsRoutes.toList()
+    @Deprecated(
+        "use #getNavigationRoutes instead",
+        ReplaceWith(
+            "getNavigationRoutes().toDirectionsRoutes()",
+            "com.mapbox.navigation.base.route.toDirectionsRoutes"
+        )
+    )
+    fun getRoutes(): List<DirectionsRoute> = routes.toDirectionsRoutes()
 
     /**
      * @return the primary route or null if there is none
      */
-    fun getPrimaryRoute(): DirectionsRoute? = primaryRoute
+    @Deprecated(
+        "use #getPrimaryNavigationRoute instead",
+        ReplaceWith(
+            "getPrimaryNavigationRoute()?.directionsRoute",
+        )
+    )
+    fun getPrimaryRoute(): DirectionsRoute? = primaryRoute?.directionsRoute
+
+    /**
+     * @return the routes being used
+     */
+    fun getNavigationRoutes(): List<NavigationRoute> = routes
+
+    /**
+     * @return the primary route or null if there is none
+     */
+    fun getPrimaryNavigationRoute(): NavigationRoute? = primaryRoute
 
     /**
      * Sets the routes that will be operated on.
@@ -246,17 +273,63 @@ class MapboxRouteLineApi(
      * the primary route and any additional routes will be alternate routes.
      * @param consumer a method that consumes the result of the operation.
      */
+    @Deprecated(
+        "use #setNavigationRouteLines(List<NavigationRouteLine>) instead",
+        ReplaceWith(
+            "setNavigationRouteLines(newRoutes.toNavigationRouteLines(), consumer)",
+            "com.mapbox.navigation.ui.maps.route.line.model.toNavigationRouteLines"
+        )
+    )
     fun setRoutes(
         newRoutes: List<RouteLine>,
+        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
+    ) {
+        setNavigationRouteLines(newRoutes.toNavigationRouteLines(), consumer)
+    }
+
+    /**
+     * Sets the routes that will be operated on.
+     *
+     * This can be a long running task with long routes.
+     * There is a cancel method which will cancel the background tasks.
+     *
+     * @param newRoutes one or more routes. The first route in the collection will be considered
+     * the primary route and any additional routes will be alternate routes.
+     * @param consumer a method that consumes the result of the operation.
+     */
+    fun setNavigationRoutes(
+        newRoutes: List<NavigationRoute>,
+        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
+    ) {
+        val routeLines = newRoutes.map {
+            NavigationRouteLine(it, null)
+        }
+        setNavigationRouteLines(routeLines, consumer)
+    }
+
+    /**
+     * Sets the routes that will be operated on.
+     *
+     * This can be a long running task with long routes.
+     * There is a cancel method which will cancel the background tasks.
+     *
+     * @param newRoutes one or more routes. The first route in the collection will be considered
+     * the primary route and any additional routes will be alternate routes.
+     * @param consumer a method that consumes the result of the operation.
+     */
+    fun setNavigationRouteLines(
+        newRoutes: List<NavigationRouteLine>,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
         cancel()
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
-                val routes = newRoutes.map(RouteLine::route)
                 val featureDataProvider: () -> List<RouteFeatureData> =
                     MapboxRouteLineUtils.getRouteLineFeatureDataProvider(newRoutes)
-                val routeData = setNewRouteData(routes, featureDataProvider)
+                val routeData = setNewRouteData(
+                    newRoutes.map(NavigationRouteLine::route),
+                    featureDataProvider
+                )
                 consumer.accept(routeData)
             }
         }
@@ -274,7 +347,7 @@ class MapboxRouteLineApi(
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 val featureDataProvider: () -> List<RouteFeatureData> =
-                    MapboxRouteLineUtils.getRouteFeatureDataProvider(directionsRoutes)
+                    MapboxRouteLineUtils.getRouteFeatureDataProvider(routes)
                 val result = buildDrawRoutesState(featureDataProvider)
                 consumer.accept(result)
             }
@@ -316,12 +389,12 @@ class MapboxRouteLineApi(
                 routeLineExpressionData
             }
 
-        val stopGap: Double = ifNonNull(primaryRoute) { route ->
+        val stopGap: Double = ifNonNull(primaryRoute?.directionsRoute) { route ->
             RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS / route.distance()
         } ?: .00000000001 // an arbitrarily small value so Expression values are in ascending order
 
         val restrictedExpressionData: List<ExtractedRouteData>? =
-            ifNonNull(primaryRoute) { route ->
+            ifNonNull(primaryRoute?.directionsRoute) { route ->
                 if (routeLineOptions.displayRestrictedRoadSections && routeHasRestrictions) {
                     MapboxRouteLineUtils.extractRouteData(
                         route,
@@ -408,7 +481,7 @@ class MapboxRouteLineApi(
                 routeLineOptions.vanishingRouteLine?.clear()
                 routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
                 activeLegIndex = INVALID_ACTIVE_LEG_INDEX
-                directionsRoutes.clear()
+                routes.clear()
                 routeFeatureData.clear()
                 routeLineExpressionData = emptyList()
                 routeHasRestrictions = false
@@ -480,30 +553,31 @@ class MapboxRouteLineApi(
                 )
             }
 
-            val restrictedLineExpressionProvider = ifNonNull(primaryRoute) { route ->
-                if (routeLineOptions.displayRestrictedRoadSections && routeHasRestrictions) {
-                    {
-                        val routeData = MapboxRouteLineUtils.extractRouteData(
-                            route,
-                            MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+            val restrictedLineExpressionProvider =
+                ifNonNull(primaryRoute?.directionsRoute) { route ->
+                    if (routeLineOptions.displayRestrictedRoadSections && routeHasRestrictions) {
+                        {
+                            val routeData = MapboxRouteLineUtils.extractRouteData(
                                 route,
-                                routeLineOptions.resourceProvider.routeLineColorResources
+                                MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                                    route,
+                                    routeLineOptions.resourceProvider.routeLineColorResources
+                                )
                             )
-                        )
-                        MapboxRouteLineUtils.getRestrictedLineExpression(
-                            offset,
-                            activeLegIndex,
-                            routeLineOptions
-                                .resourceProvider
-                                .routeLineColorResources
-                                .restrictedRoadColor,
-                            routeData
-                        )
+                            MapboxRouteLineUtils.getRestrictedLineExpression(
+                                offset,
+                                activeLegIndex,
+                                routeLineOptions
+                                    .resourceProvider
+                                    .routeLineColorResources
+                                    .restrictedRoadColor,
+                                routeData
+                            )
+                        }
+                    } else {
+                        null
                     }
-                } else {
-                    null
                 }
-            }
 
             val alternativesProvider = {
                 throw UnsupportedOperationException(
@@ -650,7 +724,7 @@ class MapboxRouteLineApi(
     ) {
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
-                val expected = ifNonNull(primaryRoute?.legs()) { routeLegs ->
+                val expected = ifNonNull(primaryRoute?.directionsRoute?.legs()) { routeLegs ->
                     if (legIndexToHighlight in 0..routeLegs.lastIndex) {
                         val updatedRouteData = alternativelyStyleSegmentsNotInLeg(
                             legIndexToHighlight,
@@ -704,7 +778,7 @@ class MapboxRouteLineApi(
                         val restrictedLineExpressionProvider = if (
                             routeLineOptions.displayRestrictedRoadSections && routeHasRestrictions
                         ) {
-                            ifNonNull(primaryRoute) { route ->
+                            ifNonNull(primaryRoute?.directionsRoute) { route ->
                                 {
                                     val expressionData =
                                         MapboxRouteLineUtils.extractRouteData(
@@ -995,18 +1069,18 @@ class MapboxRouteLineApi(
     }
 
     private suspend fun setNewRouteData(
-        newRoutes: List<DirectionsRoute>,
+        newRoutes: List<NavigationRoute>,
         featureDataProvider: () -> List<RouteFeatureData>
     ): Expected<RouteLineError, RouteSetValue> {
         ifNonNull(newRoutes.firstOrNull()) { primaryRouteCandidate ->
-            if (!primaryRouteCandidate.isSameRoute(primaryRoute)) {
+            if (!primaryRouteCandidate.directionsRoute.isSameRoute(primaryRoute?.directionsRoute)) {
                 routeLineOptions.vanishingRouteLine?.clear()
                 routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
             }
         }
 
-        directionsRoutes.clear()
-        directionsRoutes.addAll(newRoutes)
+        routes.clear()
+        routes.addAll(newRoutes)
         primaryRoute = newRoutes.firstOrNull()
         return buildDrawRoutesState(featureDataProvider)
     }
@@ -1029,12 +1103,14 @@ class MapboxRouteLineApi(
         }
         routeFeatureData.clear()
         routeFeatureData.addAll(routeFeatureDataResult)
-        val partitionedRoutes = routeFeatureData.partition { it.route == directionsRoutes.first() }
+        val partitionedRoutes = routeFeatureData.partition {
+            it.route == routes.first()
+        }
 
         val primaryRouteTrafficLineExpressionProducer =
             partitionedRoutes.first.firstOrNull()?.route?.run {
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
-                    this,
+                    this.directionsRoute,
                     routeLineOptions.resourceProvider.routeLineColorResources,
                     trafficBackfillRoadClasses,
                     true,
@@ -1090,7 +1166,7 @@ class MapboxRouteLineApi(
         val alternateRoute1TrafficExpressionProducer =
             partitionedRoutes.second.firstOrNull()?.route?.run {
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
-                    this,
+                    this.directionsRoute,
                     routeLineOptions.resourceProvider.routeLineColorResources,
                     trafficBackfillRoadClasses,
                     false,
@@ -1107,7 +1183,7 @@ class MapboxRouteLineApi(
 
         val alternateRoute2TrafficExpressionProducer = if (partitionedRoutes.second.size > 1) {
             MapboxRouteLineUtils.getTrafficLineExpressionProducer(
-                partitionedRoutes.second[1].route,
+                partitionedRoutes.second[1].route.directionsRoute,
                 routeLineOptions.resourceProvider.routeLineColorResources,
                 trafficBackfillRoadClasses,
                 false,
@@ -1131,7 +1207,7 @@ class MapboxRouteLineApi(
             partitionedRoutes.first.firstOrNull()?.route?.run {
                 if (routeLineOptions.displayRestrictedRoadSections) {
                     MapboxRouteLineUtils.getRestrictedLineExpressionProducer(
-                        this,
+                        this.directionsRoute,
                         0.0,
                         0,
                         routeLineOptions.resourceProvider.routeLineColorResources
@@ -1172,7 +1248,7 @@ class MapboxRouteLineApi(
                 val routeHasRestrictionsDef =
                     jobControl.scope.async {
                         partitionedRoutes.first.firstOrNull()?.route?.run {
-                            MapboxRouteLineUtils.routeHasRestrictions(this)
+                            MapboxRouteLineUtils.routeHasRestrictions(this.directionsRoute)
                         } ?: false
                     }
                 routeHasRestrictions = routeHasRestrictionsDef.await()
@@ -1189,7 +1265,7 @@ class MapboxRouteLineApi(
                 val segmentsDef = jobControl.scope.async {
                     partitionedRoutes.first.firstOrNull()?.route?.run {
                         MapboxRouteLineUtils.calculateRouteLineSegments(
-                            this,
+                            this.directionsRoute,
                             trafficBackfillRoadClasses,
                             true,
                             routeLineOptions.resourceProvider.routeLineColorResources

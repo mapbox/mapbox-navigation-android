@@ -4,6 +4,8 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigator.GetStatusHistoryRecord
 import com.mapbox.navigator.HistoryRecord
@@ -57,33 +59,47 @@ internal class HistoryEventMapper {
         eventTimestamp: Double,
         setRoute: SetRouteHistoryRecord
     ): HistoryEventSetRoute {
-        val directionsRoute = mapDirectionsRoute(setRoute.routeResponse)
-        val routeOptions = getRouteOptions(
-            requestUrlString = setRoute.routeRequest,
-            route = directionsRoute
-        )
+        // remove mapping after https://github.com/mapbox/mapbox-navigation-native/issues/5142
+        val navigationRoute = mapNavigationRoute(setRoute)
         return HistoryEventSetRoute(
             eventTimestamp = eventTimestamp,
-            directionsRoute = directionsRoute,
+            navigationRoute = navigationRoute,
             routeIndex = setRoute.routeIndex,
             legIndex = setRoute.legIndex,
-            profile = mapToProfile(routeOptions),
-            geometries = mapToGeometry(routeOptions),
-            waypoints = mapToWaypoints(routeOptions)
+            profile = mapToProfile(navigationRoute?.routeOptions),
+            geometries = mapToGeometry(navigationRoute?.routeOptions),
+            waypoints = mapToWaypoints(navigationRoute?.routeOptions)
         )
     }
 
-    private fun mapDirectionsRoute(routeResponse: String?): DirectionsRoute? {
-        return if (routeResponse.isNullOrEmpty() || routeResponse == "{}") {
+    private fun mapNavigationRoute(setRoute: SetRouteHistoryRecord): NavigationRoute? {
+        val response = setRoute.routeResponse
+        return if (response.isNullOrEmpty() || response == "{}") {
             null
         } else {
-            return try {
-                // https://github.com/mapbox/mapbox-navigation-native/issues/4296
-                // TODO we may create a data object separate from DirectionsResponse
-                val directionsResponse = DirectionsResponse.fromJson(routeResponse)
-                directionsResponse.routes().firstOrNull()
+            val noOptionsException = IllegalArgumentException(
+                "request URL or route options of set route history event cannot be null or empty"
+            )
+            try {
+                val directionsResponse = DirectionsResponse.fromJson(response)
+                val routeOptions = setRoute.routeRequest?.let {
+                    RouteOptions.fromUrl(URL(it))
+                } ?: directionsResponse.routes().firstOrNull()?.routeOptions()
+                    ?: throw noOptionsException
+                NavigationRoute(
+                    directionsResponse = directionsResponse,
+                    routeIndex = 0,
+                    routeOptions = routeOptions
+                )
             } catch (t: Throwable) {
-                DirectionsRoute.fromJson(routeResponse)
+                if (t === noOptionsException) {
+                    throw t
+                } else {
+                    DirectionsRoute.fromJson(response).toBuilder()
+                        .routeIndex("0")
+                        .build()
+                        .toNavigationRoute()
+                }
             }
         }
     }
@@ -117,20 +133,6 @@ internal class HistoryEventMapper {
         pushHistoryRecord.type,
         pushHistoryRecord.properties
     )
-
-    private fun getRouteOptions(requestUrlString: String?, route: DirectionsRoute?): RouteOptions? {
-        return if (route != null) {
-            if (requestUrlString == null || requestUrlString.isBlank()) {
-                route.routeOptions() ?: throw IllegalArgumentException(
-                    "request URL or route options of set route event cannot be null or empty"
-                )
-            } else {
-                RouteOptions.fromUrl(URL(requestUrlString))
-            }
-        } else {
-            null
-        }
-    }
 
     private companion object {
         private const val NANOS_PER_SECOND = 1e-9

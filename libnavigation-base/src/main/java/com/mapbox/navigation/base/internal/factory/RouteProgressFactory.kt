@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -42,7 +43,7 @@ object RouteProgressFactory {
      * a lack of confidence in the progress updates being sent.
      */
     fun buildRouteProgressObject(
-        route: DirectionsRoute,
+        route: NavigationRoute,
         bannerInstructions: BannerInstructions?,
         voiceInstructions: VoiceInstructions?,
         currentState: RouteProgressState,
@@ -58,7 +59,7 @@ object RouteProgressFactory {
         stale: Boolean,
     ): RouteProgress {
         return RouteProgress(
-            route = route,
+            navigationRoute = route,
             bannerInstructions = bannerInstructions,
             voiceInstructions = voiceInstructions,
             currentState = currentState,

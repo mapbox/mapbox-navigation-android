@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.telemetry.events
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.telemetry.obtainStepCount
 
 internal data class MetricsDirectionsRoute(
@@ -11,11 +11,11 @@ internal data class MetricsDirectionsRoute(
     val geometry: String?,
 ) {
 
-    constructor(directionsRoute: DirectionsRoute?) : this(
-        obtainStepCount(directionsRoute),
-        distance = directionsRoute?.distance()?.toInt() ?: 0,
-        duration = directionsRoute?.duration()?.toInt() ?: 0,
-        directionsRoute?.requestUuid(),
-        directionsRoute?.geometry(),
+    constructor(route: NavigationRoute?) : this(
+        obtainStepCount(route?.directionsRoute),
+        distance = route?.directionsRoute?.distance()?.toInt() ?: 0,
+        duration = route?.directionsRoute?.duration()?.toInt() ?: 0,
+        route?.directionsResponse?.uuid(),
+        route?.directionsRoute?.geometry(),
     )
 }

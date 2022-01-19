@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 
 /**
@@ -15,7 +16,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
  * The latest route progress object can be obtained through the [RouteProgressObserver].
  * Note that the route progress object's immutable.
  *
- * @param route [DirectionsRoute] the navigation session is currently using. When a reroute occurs and a new
+ * @param navigationRoute [NavigationRoute] the navigation session is currently using. When a reroute occurs and a new
  * directions route gets obtained, with the next location update this directions route should
  * reflect the new route.
  * @param bannerInstructions [BannerInstructions] current instructions for visual guidance.
@@ -38,7 +39,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
  * a lack of confidence in the progress updates being sent.
  */
 class RouteProgress internal constructor(
-    val route: DirectionsRoute,
+    val navigationRoute: NavigationRoute,
     val bannerInstructions: BannerInstructions?,
     val voiceInstructions: VoiceInstructions?,
     val currentState: RouteProgressState,
@@ -55,6 +56,14 @@ class RouteProgress internal constructor(
 ) {
 
     /**
+     * [DirectionsRoute] the navigation session is currently using. When a reroute occurs and a new
+     * directions route gets obtained, with the next location update this directions route should
+     * reflect the new route.
+     */
+    val route: DirectionsRoute
+        get() = navigationRoute.directionsRoute
+
+    /**
      * Indicates whether some other object is "equal to" this one.
      */
     override fun equals(other: Any?): Boolean {
@@ -63,7 +72,7 @@ class RouteProgress internal constructor(
 
         other as RouteProgress
 
-        if (route != other.route) return false
+        if (navigationRoute != other.navigationRoute) return false
         if (bannerInstructions != other.bannerInstructions) return false
         if (voiceInstructions != other.voiceInstructions) return false
         if (currentState != other.currentState) return false
@@ -85,7 +94,7 @@ class RouteProgress internal constructor(
      * Returns a hash code value for the object.
      */
     override fun hashCode(): Int {
-        var result = route.hashCode()
+        var result = navigationRoute.hashCode()
         result = 31 * result + bannerInstructions.hashCode()
         result = 31 * result + voiceInstructions.hashCode()
         result = 31 * result + currentState.hashCode()
@@ -107,7 +116,7 @@ class RouteProgress internal constructor(
      */
     override fun toString(): String {
         return "RouteProgress(" +
-            "route=$route, " +
+            "navigationRoute=$navigationRoute, " +
             "bannerInstructions=$bannerInstructions, " +
             "voiceInstructions=$voiceInstructions, " +
             "currentState=$currentState, " +

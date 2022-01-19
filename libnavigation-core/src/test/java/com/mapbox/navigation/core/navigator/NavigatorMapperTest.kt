@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory
 import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buildRouteStepProgressObject
 import com.mapbox.navigation.base.road.model.Road
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -41,14 +42,21 @@ class NavigatorMapperTest {
 
     private val enhancedLocation: Location = mockk(relaxed = true)
     private val keyPoints: List<Location> = mockk(relaxed = true)
-    private val route: DirectionsRoute = mockk(relaxed = true)
+
+    private val directionsRoute = DirectionsRoute.fromJson(
+        FileUtils.loadJsonFixture("multileg_route.json")
+    )
+
+    private val route: NavigationRoute = mockk(relaxed = true) {
+        every { directionsRoute } returns this@NavigatorMapperTest.directionsRoute
+    }
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     @Test
     fun `route progress result sanity`() {
         val bannerInstructions = nativeBannerInstructions.mapToDirectionsApi()
         val expected = RouteProgressFactory.buildRouteProgressObject(
-            route = directionsRoute,
+            route = route,
             bannerInstructions = bannerInstructions,
             voiceInstructions = navigationStatus.voiceInstruction?.mapToDirectionsApi(),
             currentState = navigationStatus.routeState.convertState(),
@@ -90,7 +98,7 @@ class NavigatorMapperTest {
         )
 
         val result = getRouteProgressFrom(
-            directionsRoute,
+            route,
             navigationStatus,
             remainingWaypoints = 1,
             bannerInstructions,
@@ -373,7 +381,7 @@ class NavigatorMapperTest {
         every { navigationStatus.routeState } returns RouteState.INVALID
 
         val routeProgress = getRouteProgressFrom(
-            directionsRoute,
+            route,
             navigationStatus,
             mockk(relaxed = true),
             mockk(relaxed = true),
@@ -387,7 +395,7 @@ class NavigatorMapperTest {
     @Test
     fun `route progress minimum requirements`() {
         val routeProgress = getRouteProgressFrom(
-            directionsRoute,
+            route,
             navigationStatus,
             mockk(relaxed = true),
             mockk(relaxed = true),
@@ -402,7 +410,7 @@ class NavigatorMapperTest {
     fun `route progress state stale`() {
         every { navigationStatus.stale } returns true
         val routeProgress = getRouteProgressFrom(
-            directionsRoute,
+            route,
             navigationStatus,
             mockk(relaxed = true),
             mockk(relaxed = true),
@@ -417,7 +425,7 @@ class NavigatorMapperTest {
     fun `route progress state not stale`() {
         every { navigationStatus.stale } returns false
         val routeProgress = getRouteProgressFrom(
-            directionsRoute,
+            route,
             navigationStatus,
             mockk(relaxed = true),
             mockk(relaxed = true),
@@ -493,10 +501,6 @@ class NavigatorMapperTest {
             SpeedLimitSign.MUTCD
         )
     }
-
-    private val directionsRoute = DirectionsRoute.fromJson(
-        FileUtils.loadJsonFixture("multileg_route.json")
-    )
 
     private val nativeBannerInstructions = mockk<BannerInstruction> {
         every { remainingStepDistance } returns 111f

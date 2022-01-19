@@ -1,18 +1,18 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegAnnotation
+import com.mapbox.navigation.base.route.NavigationRoute
 import kotlin.math.min
 
 internal class DirectionsRouteDiffProvider {
 
     fun buildRouteDiffs(
-        oldRoute: DirectionsRoute,
-        newRoute: DirectionsRoute,
+        oldRoute: NavigationRoute,
+        newRoute: NavigationRoute,
         currentLegIndex: Int,
     ): List<String> {
-        val oldRouteLegs = oldRoute.legs() ?: return emptyList()
-        val newRouteLegs = newRoute.legs() ?: return emptyList()
+        val oldRouteLegs = oldRoute.directionsRoute.legs() ?: return emptyList()
+        val newRouteLegs = newRoute.directionsRoute.legs() ?: return emptyList()
         val routeDiffs = arrayListOf<String>()
         for (legIndex in currentLegIndex until min(oldRouteLegs.size, newRouteLegs.size)) {
             val oldLegAnnotation = oldRouteLegs[legIndex].annotation()

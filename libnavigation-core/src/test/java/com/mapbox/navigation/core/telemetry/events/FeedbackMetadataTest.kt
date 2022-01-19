@@ -103,7 +103,7 @@ class FeedbackMetadataTest {
                 feedbackId = "FEEDBACK_ID",
                 userId = "USER_ID"
             ),
-            metricsDirectionsRoute = MetricsDirectionsRoute(directionsRoute = null),
+            metricsDirectionsRoute = MetricsDirectionsRoute(route = null),
             metricsRouteProgress = MetricsRouteProgress(routeProgress = null),
             appMetadata = AppMetadata(
                 name = "APP_METADATA_NAME",

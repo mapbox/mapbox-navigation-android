@@ -27,7 +27,7 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
-import com.mapbox.navigation.core.replay.history.ReplaySetRoute
+import com.mapbox.navigation.core.replay.history.ReplaySetNavigationRoute
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -390,15 +390,15 @@ class ReplayHistoryActivity : AppCompatActivity() {
             updateReplayStatus(events)
             events.forEach {
                 when (it) {
-                    is ReplaySetRoute -> setRoute(it)
+                    is ReplaySetNavigationRoute -> setRoute(it)
                 }
             }
         }
     }
 
-    private fun setRoute(replaySetRoute: ReplaySetRoute) {
+    private fun setRoute(replaySetRoute: ReplaySetNavigationRoute) {
         replaySetRoute.route?.let { directionRoute ->
-            mapboxNavigation.setRoutes(Collections.singletonList(directionRoute))
+            mapboxNavigation.setNavigationRoutes(Collections.singletonList(directionRoute))
         }
     }
 }

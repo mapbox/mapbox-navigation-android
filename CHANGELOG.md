@@ -5,6 +5,11 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 
 #### Features
+- Introduced a `NavigationRoute` object and related functions like `NavigationRouterCallback`, `MapboxNavigation#setNavigationRoutes`, etc. `NavigationRoute` is a domain specific wrapper on top of `DirectionsRoute` which provides information (and enforces its presence) about the original `DirectionsResponse` that this route is part of, as well as what `RouteOptions` were used to generate it.
+  Most of the Navigation SDK APIs that rely only on `DirectionsRoute` are now marked as `Deprecated` since there might be features introduced in the future that would require the `NavigationRoute` instances instead.
+  There are `NavigationRoute#toDirectionsRoute()` and `DirectionsRoute#toNavigationRoute()` compatibility extensions available, however, the latter is lossy since `DirectionsRoute` cannot carry as much information as `NavigationRoute` and the recommended migration path is to use `NavigationRouterCallback` instead of the old `RouterCallback` to request routes.
+  This change might require action when integrating if you have hardcoded routes in your test suites that do not have all necessary fields to support `DirectionsRoute` to `NavigationRoute` mapping (mostly `DirectionsRoute#routeIndex`) - in these cases make sure to provide the missing data or regenerate the routes using `MapboxNavigation#requestRoutes`.
+  [#5411](https://github.com/mapbox/mapbox-navigation-android/pull/5411)
 
 #### Bug fixes and improvements
 

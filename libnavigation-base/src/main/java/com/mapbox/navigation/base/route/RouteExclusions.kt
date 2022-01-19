@@ -40,17 +40,26 @@ data class ExclusionViolation(
  * @see [RouteOptions.Builder.exclude]
  */
 fun DirectionsRoute.exclusionViolations(): List<ExclusionViolation> {
+    return toNavigationRoute().exclusionViolations()
+}
+
+/**
+ * Returns all violated exclusions for this route.
+ *
+ * @see [RouteOptions.Builder.exclude]
+ */
+fun NavigationRoute.exclusionViolations(): List<ExclusionViolation> {
     val exclusionViolations = mutableListOf<ExclusionViolation>()
-    val excludeCriteria = ParseUtils.parseToStrings(this.routeOptions()?.exclude(), COMMA_DELIMETER)
+    val excludeCriteria = ParseUtils.parseToStrings(routeOptions.exclude(), COMMA_DELIMETER)
     excludeCriteria?.let {
-        this.legs()?.forEachIndexed { legIndex, leg ->
+        directionsRoute.legs()?.forEachIndexed { legIndex, leg ->
             leg.steps()?.forEachIndexed { stepIndex, step ->
                 step.intersections()?.forEachIndexed { intersectionIndex, intersection ->
                     intersection.classes()?.forEach { classes ->
                         if (excludeCriteria.contains(classes)) {
                             val exclusionViolation = ExclusionViolation(
                                 classes,
-                                this,
+                                directionsRoute,
                                 legIndex,
                                 leg,
                                 stepIndex,

@@ -13,6 +13,7 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin.Offboard
 import com.mapbox.navigation.base.route.RouterOrigin.Onboard
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.mapToRoutingMode
 import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
@@ -30,8 +31,10 @@ import com.mapbox.navigator.RoutingProfile
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkObject
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -237,7 +240,7 @@ class RouterWrapperTests {
                 routerOrigin = Onboard,
                 message = "failed for response: ${routerResultSuccessEmptyRoutes.value}",
                 throwable = IllegalStateException(
-                    "route response should contain at least one route"
+                    "no routes returned, collection is empty"
                 )
             )
 
@@ -265,7 +268,7 @@ class RouterWrapperTests {
                 routerOrigin = Onboard,
                 message = "failed for response: ${routerResultSuccessErroneousValue.value}",
                 throwable = IllegalStateException(
-                    """route response should contain "routes" array"""
+                    """Null routes"""
                 )
             )
 
@@ -324,30 +327,6 @@ class RouterWrapperTests {
     }
 
     @Test
-    fun `route refresh fails with null routeOptions`() {
-        val route: DirectionsRoute = mockk(relaxed = true)
-        every { route.requestUuid() } returns UUID
-        every { route.routeIndex() } returns "1"
-        every { route.routeOptions() } returns null
-
-        routerWrapper.getRouteRefresh(route, 0, routerRefreshCallback)
-
-        val expectedErrorMessage =
-            """
-               Route refresh failed because of a null param:
-               routeOptions = null
-               requestUuid = $UUID
-               routeIndex = 1
-            """.trimIndent()
-
-        val errorSlot = slot<RouteRefreshError>()
-        verify(exactly = 1) { routerRefreshCallback.onError(capture(errorSlot)) }
-        verify(exactly = 0) { router.getRouteRefresh(any(), any(), any()) }
-        assertEquals("Route refresh failed", errorSlot.captured.message)
-        assertEquals(expectedErrorMessage, errorSlot.captured.throwable?.message)
-    }
-
-    @Test
     fun `route refresh fails with null requestUuid`() {
         val route: DirectionsRoute = mockk(relaxed = true)
         every { route.requestUuid() } returns null
@@ -358,34 +337,8 @@ class RouterWrapperTests {
 
         val expectedErrorMessage =
             """
-               Route refresh failed because of a null param:
-               routeOptions = $routerOptions
+               Route refresh failed because of a empty or null param:
                requestUuid = null
-               routeIndex = 1
-            """.trimIndent()
-
-        val errorSlot = slot<RouteRefreshError>()
-        verify(exactly = 1) { routerRefreshCallback.onError(capture(errorSlot)) }
-        verify(exactly = 0) { router.getRouteRefresh(any(), any(), any()) }
-        assertEquals("Route refresh failed", errorSlot.captured.message)
-        assertEquals(expectedErrorMessage, errorSlot.captured.throwable?.message)
-    }
-
-    @Test
-    fun `route refresh fails with null routeIndex`() {
-        val route: DirectionsRoute = mockk(relaxed = true)
-        every { route.requestUuid() } returns UUID
-        every { route.routeIndex() } returns null
-        every { route.routeOptions() } returns routerOptions
-
-        routerWrapper.getRouteRefresh(route, 0, routerRefreshCallback)
-
-        val expectedErrorMessage =
-            """
-               Route refresh failed because of a null param:
-               routeOptions = $routerOptions
-               requestUuid = $UUID
-               routeIndex = null
             """.trimIndent()
 
         val errorSlot = slot<RouteRefreshError>()
@@ -397,10 +350,21 @@ class RouterWrapperTests {
 
     @Test
     fun `route refresh set right params`() {
-        val route: DirectionsRoute = mockk(relaxed = true)
-        every { route.requestUuid() } returns UUID
-        every { route.routeIndex() } returns "1"
-        every { route.routeOptions() } returns routerOptions
+        val route: DirectionsRoute = mockk(relaxed = true) {
+            every { requestUuid() } returns UUID
+            every { routeIndex() } returns "1"
+            every { routeOptions() } returns routerOptions
+            every { distance() } returns 0.0
+            every { duration() } returns 0.0
+        }
+
+        mockkStatic(DirectionsRoute::toNavigationRoute)
+        every { route.toNavigationRoute() } returns mockk {
+            every { directionsResponse.uuid() } returns UUID
+            every { routeOptions } returns routerOptions
+            every { directionsRoute } returns route
+            every { routeIndex } returns 1
+        }
 
         routerWrapper.getRouteRefresh(route, 0, routerRefreshCallback)
 
@@ -418,6 +382,8 @@ class RouterWrapperTests {
                 any()
             )
         }
+
+        unmockkStatic(DirectionsRoute::toNavigationRoute)
     }
 
     @Test
@@ -434,7 +400,7 @@ class RouterWrapperTests {
             testRouteFixtures.loadRefreshedRoute(),
             routerOptions,
             UUID
-        )
+        ).toBuilder().routeIndex("1").build()
 
         verify(exactly = 1) { routerRefreshCallback.onRefresh(expected) }
     }

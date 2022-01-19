@@ -5,17 +5,23 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.route.NavigationRoute
+import io.mockk.every
+import io.mockk.mockk
 
-fun createDirectionsRoute(
+fun createNavigationRoute(
     legs: List<RouteLeg> = listOf(createRouteLeg()), // each route should have at least one leg,
     routeOptions: RouteOptions = createRouteOptions()
-): DirectionsRoute {
-    return DirectionsRoute.builder()
-        .distance(5.0)
-        .duration(9.0)
-        .legs(legs)
-        .routeOptions(routeOptions)
-        .build()
+): NavigationRoute {
+    return mockk {
+        every { this@mockk.routeOptions } returns routeOptions
+        every { directionsRoute } returns DirectionsRoute.builder()
+            .distance(5.0)
+            .duration(9.0)
+            .legs(legs)
+            .routeOptions(routeOptions)
+            .build()
+    }
 }
 
 fun createRouteLeg(): RouteLeg {

@@ -2,12 +2,12 @@ package com.mapbox.navigation.core.directions.session
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.route.RouteRefreshCallback
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouter
+import com.mapbox.navigation.base.route.NavigationRouterCallback
+import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.route.RouterCallback
-import com.mapbox.navigation.base.route.RouterFailure
-import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -17,7 +17,7 @@ import java.util.concurrent.CopyOnWriteArraySet
  * @property routes a list of [DirectionsRoute]. Fetched from [Router] or might be set manually
  */
 internal class MapboxDirectionsSession(
-    private val router: Router,
+    private val router: NavigationRouter,
 ) : DirectionsSession {
 
     private val routesObservers = CopyOnWriteArraySet<RoutesObserver>()
@@ -28,7 +28,7 @@ internal class MapboxDirectionsSession(
      *
      * @see [registerRoutesObserver]
      */
-    override var routes: List<DirectionsRoute> = emptyList()
+    override var routes: List<NavigationRoute> = emptyList()
         private set
 
     private var routesUpdateReason: String = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
@@ -37,7 +37,7 @@ internal class MapboxDirectionsSession(
         private set
 
     override fun setRoutes(
-        routes: List<DirectionsRoute>,
+        routes: List<NavigationRoute>,
         initialLegIndex: Int,
         @RoutesExtra.RoutesUpdateReason routesUpdateReason: String
     ) {
@@ -48,7 +48,12 @@ internal class MapboxDirectionsSession(
         this.routes = routes
         this.routesUpdateReason = routesUpdateReason
         routesObservers.forEach {
-            it.onRoutesChanged(RoutesUpdatedResult(routes, routesUpdateReason))
+            it.onRoutesChanged(
+                RoutesUpdatedResult(
+                    routes,
+                    routesUpdateReason
+                )
+            )
         }
     }
 
@@ -56,7 +61,7 @@ internal class MapboxDirectionsSession(
      * Provide route options for current primary route.
      */
     override fun getPrimaryRouteOptions(): RouteOptions? =
-        routes.getOrNull(MapboxNativeNavigatorImpl.PRIMARY_ROUTE_INDEX)?.routeOptions()
+        routes.firstOrNull()?.routeOptions
 
     /**
      * Interrupts a route-fetching request if one is in progress.
@@ -72,10 +77,11 @@ internal class MapboxDirectionsSession(
      * @param legIndex Int the index of the current leg in the route
      * @param callback Callback that gets notified with the results of the request
      */
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun requestRouteRefresh(
-        route: DirectionsRoute,
+        route: NavigationRoute,
         legIndex: Int,
-        callback: RouteRefreshCallback
+        callback: NavigationRouterRefreshCallback
     ): Long {
         return router.getRouteRefresh(route, legIndex, callback)
     }
@@ -98,27 +104,9 @@ internal class MapboxDirectionsSession(
      */
     override fun requestRoutes(
         routeOptions: RouteOptions,
-        routerCallback: RouterCallback
+        routerCallback: NavigationRouterCallback
     ): Long {
-        return router.getRoute(
-            routeOptions,
-            object : RouterCallback {
-                override fun onRoutesReady(
-                    routes: List<DirectionsRoute>,
-                    routerOrigin: RouterOrigin
-                ) {
-                    routerCallback.onRoutesReady(routes, routerOrigin)
-                }
-
-                override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
-                    routerCallback.onFailure(reasons, routeOptions)
-                }
-
-                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
-                    routerCallback.onCanceled(routeOptions, routerOrigin)
-                }
-            }
-        )
+        return router.getRoute(routeOptions, routerCallback)
     }
 
     override fun cancelRouteRequest(requestId: Long) {

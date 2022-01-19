@@ -13,6 +13,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -191,7 +192,7 @@ internal object MapboxNavigationTelemetry {
                 field = value
                 onRouteDataChanged.invoke()
             }
-        var originalRoute: DirectionsRoute? = null
+        var originalRoute: NavigationRoute? = null
             set(value) {
                 field = value
                 onRouteDataChanged.invoke()
@@ -215,7 +216,7 @@ internal object MapboxNavigationTelemetry {
         get() = telemetryState is NavTelemetryState.Paused
 
     private val routesObserver = RoutesObserver { result ->
-        val routes = result.routes
+        val routes = result.navigationRoutes
         val reason = result.reason
 
         log("onRoutesChanged. Number of routes = ${routes.size}; reason = $reason")
@@ -236,7 +237,7 @@ internal object MapboxNavigationTelemetry {
                 log("alternative routes received")
             }
             reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE -> {
-                handleReroute(routes.first())
+                handleReroute(routes.first().directionsRoute)
             }
             reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
                 routeData.originalRoute = routes.first()

@@ -1,11 +1,13 @@
 package com.mapbox.navigation.core.routealternatives
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.internal.utils.parseNativeDirectionsAlternative
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -21,7 +23,7 @@ import java.util.concurrent.TimeUnit
 
 internal class RouteAlternativesController constructor(
     private val options: RouteAlternativesOptions,
-    private val navigator: MapboxNativeNavigator,
+    navigator: MapboxNativeNavigator,
     private val tripSession: TripSession,
     private val threadController: ThreadController
 ) {
@@ -41,9 +43,41 @@ internal class RouteAlternativesController constructor(
             enableOnEmptyAlternativesRequest(true)
         }
 
-    private val observers = CopyOnWriteArraySet<RouteAlternativesObserver>()
+    private val observers = CopyOnWriteArraySet<NavigationRouteAlternativesObserver>()
+
+    private val legacyObserversMap =
+        hashMapOf<RouteAlternativesObserver, NavigationRouteAlternativesObserver>()
 
     fun register(routeAlternativesObserver: RouteAlternativesObserver) {
+        val observer = object : NavigationRouteAlternativesObserver {
+            override fun onRouteAlternatives(
+                routeProgress: RouteProgress,
+                alternatives: List<NavigationRoute>,
+                routerOrigin: RouterOrigin
+            ) {
+                routeAlternativesObserver.onRouteAlternatives(
+                    routeProgress,
+                    alternatives.toDirectionsRoutes(),
+                    routerOrigin
+                )
+            }
+
+            override fun onRouteAlternativesError(error: RouteAlternativesError) {
+                logE(TAG, Message("Error: ${error.message}"))
+            }
+        }
+        legacyObserversMap[routeAlternativesObserver] = observer
+        register(observer)
+    }
+
+    fun unregister(routeAlternativesObserver: RouteAlternativesObserver) {
+        val observer = legacyObserversMap.remove(routeAlternativesObserver)
+        if (observer != null) {
+            unregister(observer)
+        }
+    }
+
+    fun register(routeAlternativesObserver: NavigationRouteAlternativesObserver) {
         val isStopped = observers.isEmpty()
         observers.add(routeAlternativesObserver)
         if (isStopped) {
@@ -51,36 +85,52 @@ internal class RouteAlternativesController constructor(
         }
     }
 
-    fun unregister(routeAlternativesObserver: RouteAlternativesObserver) {
+    fun unregister(routeAlternativesObserver: NavigationRouteAlternativesObserver) {
         observers.remove(routeAlternativesObserver)
         if (observers.isEmpty()) {
             nativeRouteAlternativesController.removeObserver(nativeObserver)
         }
     }
 
-    fun triggerAlternativeRequest(listener: RouteAlternativesRequestCallback?) {
+    fun triggerAlternativeRequest(listener: NavigationRouteAlternativesRequestCallback?) {
         nativeRouteAlternativesController.refreshImmediately { expected ->
             val routeProgress = tripSession.getRouteProgress()
                 ?: run {
-                    listener?.onRouteAlternativesAborted(
-                        """
-                            |Route progress not available, ignoring alternatives update.
-                            |Continuous alternatives are only available in active guidance.
-                        """.trimMargin()
+                    listener?.onRouteAlternativesRequestError(
+                        RouteAlternativesError(
+                            message =
+                            """
+                                |Route progress not available, ignoring alternatives update.
+                                |Continuous alternatives are only available in active guidance.
+                            """.trimMargin()
+                        )
                     )
                     return@refreshImmediately
                 }
 
             expected.fold(
                 { error ->
-                    listener?.onRouteAlternativesAborted(error)
+                    listener?.onRouteAlternativesRequestError(
+                        // NN should expose origin of a failed alternatives request,
+                        // refs https://github.com/mapbox/mapbox-navigation-native/issues/5401
+                        RouteAlternativesError(
+                            message = error
+                        )
+                    )
                 },
                 { value ->
+                    // NN should wrap alternatives in NavigationRoute
+                    // refs https://github.com/mapbox/mapbox-navigation-native/issues/5142
+                    val options = routeProgress.navigationRoute.routeOptions
                     processRouteAlternatives(
-                        routeProgress,
+                        options,
                         value
-                    ) { progress, alternatives, origin ->
-                        listener?.onRouteAlternativeRequestFinished(progress, alternatives, origin)
+                    ) { alternatives, origin ->
+                        listener?.onRouteAlternativeRequestFinished(
+                            routeProgress,
+                            alternatives,
+                            origin
+                        )
                     }
                 }
             )
@@ -90,6 +140,7 @@ internal class RouteAlternativesController constructor(
     fun unregisterAll() {
         nativeRouteAlternativesController.removeAllObservers()
         observers.clear()
+        legacyObserversMap.clear()
     }
 
     private val nativeObserver = object : com.mapbox.navigator.RouteAlternativesObserver {
@@ -100,12 +151,15 @@ internal class RouteAlternativesController constructor(
             val routeProgress = tripSession.getRouteProgress()
                 ?: return emptyList()
 
+            // NN should expose origin of a failed alternatives request and the used URL,
+            // refs https://github.com/mapbox/mapbox-navigation-native/issues/5401
+            // and https://github.com/mapbox/mapbox-navigation-native/issues/5402
             processRouteAlternatives(
-                routeProgress,
+                routeProgress.navigationRoute.routeOptions,
                 routeAlternatives
-            ) { progress, alternatives, origin ->
+            ) { alternatives, origin ->
                 observers.forEach {
-                    it.onRouteAlternatives(progress, alternatives, origin)
+                    it.onRouteAlternatives(routeProgress, alternatives, origin)
                 }
             }
 
@@ -115,7 +169,14 @@ internal class RouteAlternativesController constructor(
         }
 
         override fun onError(message: String) {
-            logE(TAG, Message("Error: $message"))
+            observers.forEach {
+                // NN should expose origin of a failed alternatives request and the used URL,
+                // refs https://github.com/mapbox/mapbox-navigation-native/issues/5401
+                // and https://github.com/mapbox/mapbox-navigation-native/issues/5402
+                it.onRouteAlternativesError(
+                    RouteAlternativesError(message = message)
+                )
+            }
         }
     }
 
@@ -123,16 +184,16 @@ internal class RouteAlternativesController constructor(
      * @param block invoked with results (on the main thread)
      */
     private fun processRouteAlternatives(
-        routeProgress: RouteProgress,
+        routeOptions: RouteOptions,
         nativeAlternatives: List<RouteAlternative>,
-        block: (RouteProgress, List<DirectionsRoute>, RouterOrigin) -> Unit,
+        block: (List<NavigationRoute>, RouterOrigin) -> Unit,
     ) {
-        val alternatives: List<DirectionsRoute> = runBlocking {
+        val alternatives: List<NavigationRoute> = runBlocking {
             nativeAlternatives.mapIndexedNotNull { index, routeAlternative ->
                 val expected = parseNativeDirectionsAlternative(
                     ThreadController.IODispatcher,
                     routeAlternative.route.response,
-                    routeProgress.route.routeOptions()
+                    routeOptions
                 )
                 if (expected.isValue) {
                     expected.value
@@ -159,7 +220,7 @@ internal class RouteAlternativesController constructor(
                 // assuming all new routes come from the same request
                 it.isNew
             }?.route?.routerOrigin?.mapToSdkRouteOrigin() ?: lastUpdateOrigin
-            block(routeProgress, alternatives, origin)
+            block(alternatives, origin)
             lastUpdateOrigin = origin
         }
     }

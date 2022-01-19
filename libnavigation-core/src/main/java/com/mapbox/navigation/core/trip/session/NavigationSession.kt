@@ -72,7 +72,7 @@ internal class NavigationSession : RoutesObserver, TripSessionStateObserver {
     }
 
     override fun onRoutesChanged(result: RoutesUpdatedResult) {
-        hasRoutes = result.routes.isNotEmpty()
+        hasRoutes = result.navigationRoutes.isNotEmpty()
     }
 
     override fun onSessionStateChanged(tripSessionState: TripSessionState) {

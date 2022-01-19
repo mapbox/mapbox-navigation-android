@@ -1,6 +1,8 @@
 package com.mapbox.navigation.core.directions.session
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.core.MapboxNavigation
 
 /**
@@ -24,10 +26,22 @@ fun interface RoutesObserver {
  *
  * The route at index 0, if exist, will be treated as the primary route for 'Active Guidance'.
  *
- * @param routes list of currently maintained routes
+ * @param navigationRoutes list of currently maintained routes
  * @param reason why the routes have been updated (re-route, refresh route, and etc.)
  */
 class RoutesUpdatedResult internal constructor(
-    val routes: List<DirectionsRoute>,
+    val navigationRoutes: List<NavigationRoute>,
     @RoutesExtra.RoutesUpdateReason val reason: String,
-)
+) {
+    /**
+     * List of currently maintained routes.
+     */
+    @Deprecated(
+        "use #navigationRoutes instead",
+        ReplaceWith(
+            "navigationRoutes.toDirectionsRoutes()",
+            "com.mapbox.navigation.base.route.toDirectionsRoutes"
+        )
+    )
+    val routes: List<DirectionsRoute> = navigationRoutes.toDirectionsRoutes()
+}

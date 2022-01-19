@@ -17,6 +17,7 @@ import com.mapbox.maps.QueryFeaturesCallback
 import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -423,7 +424,7 @@ class MapboxRouteLineApiTest {
 
             api.setRoutes(routes)
 
-            verify(exactly = 0) { vanishingRouteLine.initWithRoute(route) }
+            verify(exactly = 0) { vanishingRouteLine.initWithRoute(route.toNavigationRoute()) }
         }
 
     @Test
@@ -450,7 +451,7 @@ class MapboxRouteLineApiTest {
 
             api.setRoutes(routes)
 
-            verify { vanishingRouteLine.initWithRoute(route) }
+            verify { vanishingRouteLine.initWithRoute(route.toNavigationRoute()) }
         }
 
     @Test
@@ -950,17 +951,29 @@ class MapboxRouteLineApiTest {
         unmockkStatic(UUID::class)
     }
 
+    /**
+     * todo refactor this test to remove the dependency on the exact order of UUID.randomUUID() invocations across the SDK
+     */
     @ExperimentalCoroutinesApi
     @Test
     fun findClosestRoute_whenPrimaryRoute() = runBlockingTest {
-        val uuids = listOf(UUID.randomUUID(), UUID.randomUUID())
+        // this test depends on the order of the calls to UUID.randomUUID()
+        // and assumes that specific calls will be used by the MapboxRouteLineApi
+        // however, if there are any other new calls to UUID.randomUUID() added,
+        // they can interfere with this assumption
+        val uuids = listOf(
+            UUID.randomUUID(), // used for NavigationRoute#id of first route
+            UUID.randomUUID(), // used for NavigationRoute#id of second route
+            UUID.randomUUID(), // used for the first line created by the API
+            UUID.randomUUID() // used for the second line created by the API
+        )
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returnsMany uuids
         val feature1 = mockk<QueriedFeature> {
-            every { feature.id() } returns uuids[0].toString()
+            every { feature.id() } returns uuids[2].toString()
         }
         val feature2 = mockk<QueriedFeature> {
-            every { feature.id() } returns uuids[1].toString()
+            every { feature.id() } returns uuids[3].toString()
         }
         val route1 = loadRoute("short_route.json")
         val route2 = loadRoute("short_route.json")

@@ -10,12 +10,21 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouter
+import com.mapbox.navigation.base.route.NavigationRouterCallback
+import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
+import com.mapbox.navigation.base.route.NavigationRouterRefreshError
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
-import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterFactory
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.route.toDirectionsRoutes
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.navigator.internal.mapToRoutingMode
 import com.mapbox.navigation.navigator.internal.mapToSdkRouteOrigin
 import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
@@ -36,11 +45,11 @@ class RouterWrapper(
     private val accessToken: String,
     private val router: RouterInterface,
     private val threadController: ThreadController,
-) : Router {
+) : NavigationRouter {
 
     private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
 
-    override fun getRoute(routeOptions: RouteOptions, callback: RouterCallback): Long {
+    override fun getRoute(routeOptions: RouteOptions, callback: NavigationRouterCallback): Long {
         val routeUrl = routeOptions.toUrl(accessToken).toString()
 
         return router.getRoute(routeUrl) { result, origin ->
@@ -90,9 +99,7 @@ class RouterWrapper(
                             ThreadController.IODispatcher,
                             it,
                             routeOptions
-                        ) {
-                            logI(TAG, Message("Response metadata: $it"))
-                        }.fold(
+                        ).fold(
                             { throwable ->
                                 callback.onFailure(
                                     listOf(
@@ -106,8 +113,23 @@ class RouterWrapper(
                                     routeOptions
                                 )
                             },
-                            { routes ->
-                                callback.onRoutesReady(routes, origin.mapToSdkRouteOrigin())
+                            { response ->
+                                logI(TAG, Message("Response metadata: ${response.metadata()}"))
+                                val navigationRoutes = mutableListOf<NavigationRoute>()
+                                for (i in 0 until response.routes().size) {
+                                    navigationRoutes.add(
+                                        i,
+                                        NavigationRoute(
+                                            directionsResponse = response,
+                                            routeIndex = i,
+                                            routeOptions = routeOptions
+                                        )
+                                    )
+                                }
+                                callback.onRoutesReady(
+                                    navigationRoutes,
+                                    origin.mapToSdkRouteOrigin()
+                                )
                             }
                         )
                     }
@@ -116,27 +138,51 @@ class RouterWrapper(
         }
     }
 
+    override fun getRoute(routeOptions: RouteOptions, callback: RouterCallback): Long {
+        return getRoute(
+            routeOptions,
+            object : NavigationRouterCallback {
+                override fun onRoutesReady(
+                    routes: List<NavigationRoute>,
+                    routerOrigin: RouterOrigin
+                ) {
+                    callback.onRoutesReady(routes.toDirectionsRoutes(), routerOrigin)
+                }
+
+                override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
+                    callback.onFailure(reasons, routeOptions)
+                }
+
+                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
+                    callback.onCanceled(routeOptions, routerOrigin)
+                }
+            }
+        )
+    }
+
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun getRouteRefresh(
-        route: DirectionsRoute,
+        route: NavigationRoute,
         legIndex: Int,
-        callback: RouteRefreshCallback
+        callback: NavigationRouterRefreshCallback
     ): Long {
-        val routeOptions = route.routeOptions()
-        val requestUuid = route.requestUuid()
-        val routeIndex = route.routeIndex()?.toIntOrNull()
-        if (routeOptions == null || requestUuid == null || routeIndex == null) {
+        val routeOptions = route.routeOptions
+        val requestUuid = route.directionsResponse.uuid()
+        val routeIndex = route.routeIndex
+        if (requestUuid == null || requestUuid.isBlank()) {
             val errorMessage =
                 """
-                   Route refresh failed because of a null param:
-                   routeOptions = $routeOptions
+                   Route refresh failed because of a empty or null param:
                    requestUuid = $requestUuid
-                   routeIndex = $routeIndex
                 """.trimIndent()
 
             logW(TAG, Message(errorMessage))
 
-            callback.onError(
-                RouteRefreshError("Route refresh failed", Exception(errorMessage))
+            callback.onFailure(
+                RouterFactory.buildNavigationRouterRefreshError(
+                    "Route refresh failed",
+                    Exception(errorMessage)
+                )
             )
 
             return REQUEST_FAILURE
@@ -149,7 +195,10 @@ class RouterWrapper(
             RoutingProfile(routeOptions.profile().mapToRoutingMode(), routeOptions.user())
         )
 
-        return router.getRouteRefresh(refreshOptions, route.toJson()) { result, _ ->
+        return router.getRouteRefresh(
+            refreshOptions,
+            route.directionsRoute.toJson()
+        ) { result, _ ->
             result.fold(
                 {
                     mainJobControl.scope.launch {
@@ -165,26 +214,63 @@ class RouterWrapper(
 
                         logW(TAG, Message(errorMessage))
 
-                        callback.onError(
-                            RouteRefreshError("Route refresh failed", Exception(errorMessage))
+                        callback.onFailure(
+                            RouterFactory.buildNavigationRouterRefreshError(
+                                "Route refresh failed", Exception(errorMessage)
+                            )
                         )
                     }
                 },
                 {
                     mainJobControl.scope.launch {
-                        val refreshedRoute =
+                        val refreshedDirectionsRoute =
                             withContext(ThreadController.IODispatcher) {
                                 DirectionsRoute.fromJson(
                                     it,
                                     routeOptions,
-                                    route.requestUuid()
+                                    route.directionsResponse.uuid()
                                 )
                             }
-                        callback.onRefresh(refreshedRoute)
+                        val refreshedNavigationRoute = NavigationRoute(
+                            route.directionsResponse
+                                .toBuilder()
+                                .routes(
+                                    route.directionsResponse.routes().apply {
+                                        removeAt(route.routeIndex)
+                                        add(route.routeIndex, refreshedDirectionsRoute)
+                                    }
+                                )
+                                .build(),
+                            route.routeIndex,
+                            routeOptions
+                        )
+                        callback.onRefreshReady(refreshedNavigationRoute)
                     }
                 }
             )
         }
+    }
+
+    override fun getRouteRefresh(
+        route: DirectionsRoute,
+        legIndex: Int,
+        callback: RouteRefreshCallback
+    ): Long {
+        return getRouteRefresh(
+            route.toNavigationRoute(),
+            legIndex,
+            object : NavigationRouterRefreshCallback {
+                override fun onRefreshReady(route: NavigationRoute) {
+                    callback.onRefresh(route.directionsRoute)
+                }
+
+                override fun onFailure(error: NavigationRouterRefreshError) {
+                    callback.onError(
+                        RouteRefreshError(error.message, error.throwable)
+                    )
+                }
+            }
+        )
     }
 
     override fun cancelRouteRequest(requestId: Long) {
@@ -205,7 +291,6 @@ class RouterWrapper(
 
     private companion object {
         private val TAG = Tag("MbxRouterWrapper")
-        private const val ROUTES_LIST_EMPTY = "routes list is empty"
         private const val REQUEST_FAILURE = -1L
     }
 }
