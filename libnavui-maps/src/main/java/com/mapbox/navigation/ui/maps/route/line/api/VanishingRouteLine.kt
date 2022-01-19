@@ -1,10 +1,10 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.parseRoutePoints
@@ -45,6 +45,7 @@ internal class VanishingRouteLine {
     internal fun setJobControl(jobControl: JobControl) {
         this.jobControl = jobControl
     }
+
     /**
      * the route points for the indicated primary route
      */
@@ -73,12 +74,12 @@ internal class VanishingRouteLine {
     /**
      * Initializes this class with the active primary route.
      */
-    fun initWithRoute(route: DirectionsRoute) {
+    fun initWithRoute(route: NavigationRoute) {
         clear()
         jobControl.job.cancelChildren()
         jobControl.scope.launch(Dispatchers.Main) {
             val parsedRoutePointsDef = jobControl.scope.async {
-                parseRoutePoints(route)
+                parseRoutePoints(route.directionsRoute)
             }
             val parsedRoutePoints = parsedRoutePointsDef.await()
 

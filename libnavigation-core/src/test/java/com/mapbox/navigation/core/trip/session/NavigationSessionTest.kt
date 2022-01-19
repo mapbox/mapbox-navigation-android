@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.trip.session
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance
@@ -20,7 +20,10 @@ import org.junit.Test
 
 class NavigationSessionTest {
 
-    private val route: DirectionsRoute = mockk()
+    private val route: NavigationRoute = mockk {
+        every { routeOptions } returns mockk()
+        every { directionsRoute } returns mockk()
+    }
     private val stateObserver: NavigationSessionStateObserver = mockk()
     private val navigationSessionStateSlot = slot<NavigationSessionState>()
 
@@ -46,7 +49,7 @@ class NavigationSessionTest {
 
     @Test
     fun stateObserverImmediateActiveGuidance() {
-        val routes = mutableListOf<DirectionsRoute>()
+        val routes = mutableListOf<NavigationRoute>()
         val navigationSession = NavigationSession()
         routes.add(route)
         navigationSession.onRoutesChanged(
@@ -94,7 +97,7 @@ class NavigationSessionTest {
 
     @Test
     fun stateObserverActiveGuidance() {
-        val routes = mutableListOf<DirectionsRoute>()
+        val routes = mutableListOf<NavigationRoute>()
         val navigationSession = NavigationSession()
         navigationSession.registerNavigationSessionStateObserver(stateObserver)
 
@@ -143,7 +146,7 @@ class NavigationSessionTest {
 
     @Test
     fun stateObserverUnregisterActiveGuidance() {
-        val routes = mutableListOf<DirectionsRoute>()
+        val routes = mutableListOf<NavigationRoute>()
         val navigationSession = NavigationSession()
         navigationSession.registerNavigationSessionStateObserver(stateObserver)
         clearMocks(stateObserver)
@@ -240,7 +243,7 @@ class NavigationSessionTest {
                 )
             )
         } just runs
-        val routes = mutableListOf<DirectionsRoute>()
+        val routes = mutableListOf<NavigationRoute>()
         val navigationSession = NavigationSession()
         navigationSession.registerNavigationSessionStateObserver(mockedStateObserver)
 
@@ -265,14 +268,19 @@ class NavigationSessionTest {
                 )
             )
         } just runs
-        val routes = mutableListOf<DirectionsRoute>()
+        val routes = mutableListOf<NavigationRoute>()
         val navigationSession = NavigationSession()
         navigationSession.registerNavigationSessionStateObserver(mockedStateObserver)
 
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
         val one = navigationSessionStateSlots[1].sessionId
         navigationSession.onSessionStateChanged(TripSessionState.STOPPED)
-        routes.add(mockk())
+        routes.add(
+            mockk {
+                every { routeOptions } returns mockk()
+                every { directionsRoute } returns mockk()
+            }
+        )
         navigationSession.onRoutesChanged(
             RoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )

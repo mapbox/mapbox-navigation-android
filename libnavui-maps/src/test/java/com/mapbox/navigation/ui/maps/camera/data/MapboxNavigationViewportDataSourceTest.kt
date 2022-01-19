@@ -11,6 +11,7 @@ import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
 import com.mapbox.navigation.base.internal.utils.isSameRoute
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
@@ -59,7 +60,9 @@ class MapboxNavigationViewportDataSourceTest {
     )
     private val smoothedBearing = 333.0
     private val pitchFromProgress = 45.0
-    private val route: DirectionsRoute = mockk()
+    private val route: DirectionsRoute = mockk(relaxed = true) {
+        every { routeIndex() } returns "0"
+    }
     private val routeProgress: RouteProgress = mockk()
     private val completeRoutePoints: List<List<List<Point>>> =
         // legs
@@ -119,6 +122,11 @@ class MapboxNavigationViewportDataSourceTest {
 
     @Before
     fun setup() {
+        mockkStatic(DirectionsRoute::toNavigationRoute)
+        every { route.toNavigationRoute() } returns mockk {
+            every { routeOptions } returns route.routeOptions()!!
+            every { directionsRoute } returns route
+        }
         every { mapboxMap.cameraState } returns emptyCameraState
         every { mapboxMap.getSize() } returns mapSize
 
@@ -1231,6 +1239,7 @@ class MapboxNavigationViewportDataSourceTest {
     @After
     fun tearDown() {
         unmockkObject(ViewportDataSourceProcessor)
+        unmockkStatic(DirectionsRoute::toNavigationRoute)
     }
 
     private fun createLocation(

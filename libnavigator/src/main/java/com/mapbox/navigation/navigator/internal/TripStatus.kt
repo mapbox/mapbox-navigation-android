@@ -1,6 +1,6 @@
 package com.mapbox.navigation.navigator.internal
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigator.NavigationStatus
 
 /**
@@ -10,6 +10,6 @@ import com.mapbox.navigator.NavigationStatus
  * @param navigationStatus
  */
 data class TripStatus(
-    val route: DirectionsRoute?,
+    val route: NavigationRoute?,
     val navigationStatus: NavigationStatus
 )

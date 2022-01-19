@@ -10,7 +10,6 @@ import android.telephony.TelephonyManager
 import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.MapboxTelemetryConstants
 import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -20,6 +19,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState.OFF_ROUTE
@@ -97,13 +97,13 @@ class MapboxNavigationTelemetryTest {
         private const val ORIGINAL_ROUTE_GEOMETRY = ""
         private const val ORIGINAL_ROUTE_DISTANCE = 1.1
         private const val ORIGINAL_ROUTE_DURATION = 2.2
-        private const val ORIGINAL_ROUTE_ROUTE_INDEX = "10"
+        private const val ORIGINAL_ROUTE_ROUTE_INDEX = 10
 
         private const val ORIGINAL_ROUTE_OPTIONS_PROFILE = "original_profile"
         private const val ORIGINAL_ROUTE_OPTIONS_REQUEST_UUID = "original_requestUuid"
 
         private const val ANOTHER_ROUTE_GEOMETRY = ""
-        private const val ANOTHER_ROUTE_ROUTE_INDEX = "1"
+        private const val ANOTHER_ROUTE_ROUTE_INDEX = 1
         private const val ANOTHER_ROUTE_DISTANCE = 123.1
         private const val ANOTHER_ROUTE_DURATION = 235.2
 
@@ -147,8 +147,8 @@ class MapboxNavigationTelemetryTest {
     private val navigationOptions: NavigationOptions = mockk(relaxed = true)
     private val locationsCollector: LocationsCollector = mockk()
     private val routeProgress = mockk<RouteProgress>()
-    private val originalRoute = mockk<DirectionsRoute>()
-    private val anotherRoute = mockk<DirectionsRoute>()
+    private val originalRoute = mockk<NavigationRoute>()
+    private val anotherRoute = mockk<NavigationRoute>()
     private val lastLocation = mockk<Location>()
     private val originalRouteOptions = mockk<RouteOptions>()
     private val anotherRouteOptions = mockk<RouteOptions>()
@@ -159,7 +159,7 @@ class MapboxNavigationTelemetryTest {
     private val originalRouteSteps = listOf(originalRouteStep)
     private val progressRouteSteps = listOf(anotherRouteStep)
     private val originalRouteLegs = listOf(originalRouteLeg)
-    private val progressRouteLegs = listOf(anotherRouteLeg)
+    private val anotherRouteLegs = listOf(anotherRouteLeg)
     private val originalStepManeuver = mockk<StepManeuver>()
     private val anotherStepManeuver = mockk<StepManeuver>()
     private val originalStepManeuverLocation = mockk<Point>()
@@ -242,6 +242,7 @@ class MapboxNavigationTelemetryTest {
     @Test
     fun `telemetry idle after call destroy`() {
         baseMock()
+        mockAnotherRoute()
 
         initTelemetry()
         resetTelemetry()
@@ -677,7 +678,7 @@ class MapboxNavigationTelemetryTest {
             eventVersion = eventVersion,
             lastLocation = lastLocation,
             phoneState = phoneState,
-            metricsDirectionsRoute = MetricsDirectionsRoute(directionsRoute = null),
+            metricsDirectionsRoute = MetricsDirectionsRoute(route = null),
             metricsRouteProgress = MetricsRouteProgress(routeProgress = null),
             appMetadata = appMetadata,
         )
@@ -769,7 +770,7 @@ class MapboxNavigationTelemetryTest {
         baseMock()
         mockAnotherRoute()
         mockRouteProgress()
-        every { routeProgress.route } returns anotherRoute
+        every { routeProgress.navigationRoute } returns anotherRoute
         val events = captureMetricsReporter()
 
         baseInitialization()
@@ -1207,7 +1208,7 @@ class MapboxNavigationTelemetryTest {
     }
 
     private fun updateRoute(
-        route: DirectionsRoute,
+        route: NavigationRoute,
         @RoutesExtra.RoutesUpdateReason reason: String =
             RoutesExtra.ROUTES_UPDATE_REASON_NEW,
     ) {
@@ -1260,12 +1261,13 @@ class MapboxNavigationTelemetryTest {
     }
 
     private fun mockOriginalRoute() {
-        every { originalRoute.geometry() } returns ORIGINAL_ROUTE_GEOMETRY
-        every { originalRoute.legs() } returns originalRouteLegs
-        every { originalRoute.distance() } returns ORIGINAL_ROUTE_DISTANCE
-        every { originalRoute.duration() } returns ORIGINAL_ROUTE_DURATION
-        every { originalRoute.routeOptions() } returns originalRouteOptions
-        every { originalRoute.routeIndex() } returns ORIGINAL_ROUTE_ROUTE_INDEX
+        every { originalRoute.directionsRoute.geometry() } returns ORIGINAL_ROUTE_GEOMETRY
+        every { originalRoute.directionsRoute.legs() } returns originalRouteLegs
+        every { originalRoute.directionsRoute.distance() } returns ORIGINAL_ROUTE_DISTANCE
+        every { originalRoute.directionsRoute.duration() } returns ORIGINAL_ROUTE_DURATION
+        every { originalRoute.directionsRoute.routeOptions() } returns originalRouteOptions
+        every { originalRoute.routeOptions } returns originalRouteOptions
+        every { originalRoute.routeIndex } returns ORIGINAL_ROUTE_ROUTE_INDEX
         every { originalRouteOptions.profile() } returns ORIGINAL_ROUTE_OPTIONS_PROFILE
         every { originalRouteOptions.geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE6
         every { originalRouteLeg.steps() } returns originalRouteSteps
@@ -1275,20 +1277,21 @@ class MapboxNavigationTelemetryTest {
             ORIGINAL_STEP_MANEUVER_LOCATION_LATITUDE
         every { originalStepManeuverLocation.longitude() } returns
             ORIGINAL_STEP_MANEUVER_LOCATION_LONGITUDE
-        every { originalRoute.requestUuid() } returns
+        every { originalRoute.directionsResponse.uuid() } returns
             ORIGINAL_ROUTE_OPTIONS_REQUEST_UUID
     }
 
     private fun mockAnotherRoute() {
-        every { anotherRoute.geometry() } returns ANOTHER_ROUTE_GEOMETRY
-        every { anotherRoute.distance() } returns ANOTHER_ROUTE_DISTANCE
-        every { anotherRoute.duration() } returns ANOTHER_ROUTE_DURATION
-        every { anotherRoute.legs() } returns progressRouteLegs
-        every { anotherRoute.routeIndex() } returns ANOTHER_ROUTE_ROUTE_INDEX
-        every { anotherRoute.routeOptions() } returns anotherRouteOptions
+        every { anotherRoute.directionsRoute.geometry() } returns ANOTHER_ROUTE_GEOMETRY
+        every { anotherRoute.directionsRoute.distance() } returns ANOTHER_ROUTE_DISTANCE
+        every { anotherRoute.directionsRoute.duration() } returns ANOTHER_ROUTE_DURATION
+        every { anotherRoute.directionsRoute.legs() } returns anotherRouteLegs
+        every { anotherRoute.directionsRoute.routeOptions() } returns anotherRouteOptions
+        every { anotherRoute.routeIndex } returns ANOTHER_ROUTE_ROUTE_INDEX
+        every { anotherRoute.routeOptions } returns anotherRouteOptions
         every { anotherRouteOptions.profile() } returns ANOTHER_ROUTE_OPTIONS_PROFILE
         every { anotherRouteOptions.geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE6
-        every { anotherRoute.requestUuid() } returns ANOTHER_ROUTE_OPTIONS_REQUEST_UUID
+        every { anotherRoute.directionsResponse.uuid() } returns ANOTHER_ROUTE_OPTIONS_REQUEST_UUID
         every { anotherRouteLeg.steps() } returns progressRouteSteps
         every { anotherRouteStep.maneuver() } returns anotherStepManeuver
         every { anotherStepManeuver.location() } returns anotherStepManeuverLocation
@@ -1299,7 +1302,7 @@ class MapboxNavigationTelemetryTest {
     }
 
     private fun mockRouteProgress() {
-        every { routeProgress.route } returns originalRoute
+        every { routeProgress.navigationRoute } returns originalRoute
         every { routeProgress.currentState } returns TRACKING
         every { routeProgress.currentLegProgress } returns legProgress
         every { routeProgress.distanceRemaining } returns ROUTE_PROGRESS_DISTANCE_REMAINING
@@ -1409,7 +1412,7 @@ class MapboxNavigationTelemetryTest {
             phoneState = PhoneState(
                 1, 2, 3, true, "connectivity", "audioType", "appState", "01-01-2000", "5", "6"
             ),
-            metricsDirectionsRoute = MetricsDirectionsRoute(directionsRoute = null),
+            metricsDirectionsRoute = MetricsDirectionsRoute(route = null),
             metricsRouteProgress = MetricsRouteProgress(routeProgress = null),
         )
     ) {
@@ -1478,13 +1481,19 @@ class MapboxNavigationTelemetryTest {
         }
     }
 
-    private fun checkOriginalParams(event: NavigationEvent, currentRoute: DirectionsRoute) {
+    private fun checkOriginalParams(event: NavigationEvent, currentRoute: NavigationRoute) {
         assertEquals(SDK_IDENTIFIER, event.sdkIdentifier)
-        assertEquals(obtainStepCount(originalRoute), event.originalStepCount)
-        assertEquals(originalRoute.distance().toInt(), event.originalEstimatedDistance)
-        assertEquals(originalRoute.duration().toInt(), event.originalEstimatedDuration)
-        assertEquals(originalRoute.requestUuid(), event.originalRequestIdentifier)
-        assertEquals(originalRoute.geometry(), event.originalGeometry)
+        assertEquals(obtainStepCount(originalRoute.directionsRoute), event.originalStepCount)
+        assertEquals(
+            originalRoute.directionsRoute.distance().toInt(),
+            event.originalEstimatedDistance
+        )
+        assertEquals(
+            originalRoute.directionsRoute.duration().toInt(),
+            event.originalEstimatedDuration
+        )
+        assertEquals(originalRoute.directionsResponse.uuid(), event.originalRequestIdentifier)
+        assertEquals(originalRoute.directionsRoute.geometry(), event.originalGeometry)
         assertEquals(locationsCollector.lastLocation?.latitude, event.lat)
         assertEquals(locationsCollector.lastLocation?.longitude, event.lng)
         assertEquals(false, event.simulation)
@@ -1496,28 +1505,37 @@ class MapboxNavigationTelemetryTest {
         )
         assertEquals(routeProgress.distanceRemaining.toInt(), event.distanceRemaining)
         assertEquals(routeProgress.durationRemaining.toInt(), event.durationRemaining)
-        assertEquals(currentRoute.geometry(), event.geometry)
-        assertEquals(currentRoute.routeOptions()?.profile(), event.profile)
-        assertEquals(currentRoute.routeIndex()?.toInt(), event.legIndex)
-        assertEquals(obtainStepCount(currentRoute), event.stepCount)
-        assertEquals(currentRoute.legs()?.size, event.legCount)
+        assertEquals(currentRoute.directionsRoute.geometry(), event.geometry)
+        assertEquals(currentRoute.routeOptions.profile(), event.profile)
+        assertEquals(currentRoute.routeIndex.toInt(), event.legIndex)
+        assertEquals(obtainStepCount(currentRoute.directionsRoute), event.stepCount)
+        assertEquals(currentRoute.directionsRoute.legs()?.size, event.legCount)
 
         if (event is NavigationRerouteEvent) {
-            assertEquals(anotherRoute.distance().toInt(), event.newDistanceRemaining)
-            assertEquals(anotherRoute.duration().toInt(), event.newDurationRemaining)
-            assertEquals(anotherRoute.geometry(), event.newGeometry)
+            assertEquals(
+                anotherRoute.directionsRoute.distance().toInt(),
+                event.newDistanceRemaining
+            )
+            assertEquals(
+                anotherRoute.directionsRoute.duration().toInt(),
+                event.newDurationRemaining
+            )
+            assertEquals(anotherRoute.directionsRoute.geometry(), event.newGeometry)
             assertEquals(1, event.rerouteCount)
         } else {
             assertEquals(0, event.rerouteCount)
         }
 
         assertEquals(
-            obtainAbsoluteDistance(lastLocation, obtainRouteDestination(currentRoute)),
+            obtainAbsoluteDistance(
+                lastLocation,
+                obtainRouteDestination(currentRoute.directionsRoute)
+            ),
             event.absoluteDistanceToDestination
         )
-        assertEquals(currentRoute.distance().toInt(), event.estimatedDistance)
-        assertEquals(currentRoute.duration().toInt(), event.estimatedDuration)
-        assertEquals(obtainStepCount(currentRoute), event.totalStepCount)
+        assertEquals(currentRoute.directionsRoute.distance().toInt(), event.estimatedDistance)
+        assertEquals(currentRoute.directionsRoute.duration().toInt(), event.estimatedDuration)
+        assertEquals(obtainStepCount(currentRoute.directionsRoute), event.totalStepCount)
     }
 
     /**

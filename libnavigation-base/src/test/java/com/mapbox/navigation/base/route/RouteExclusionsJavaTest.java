@@ -30,6 +30,7 @@ public class RouteExclusionsJavaTest {
                 .coordinatesList(coordinates)
         ).build();
     DirectionsRoute directionsRoute = DirectionsRoute.builder()
+        .routeIndex("0")
         .routeOptions(routeOptionsWithoutExclusions)
         .distance(183888.609)
         .duration(10697.573)

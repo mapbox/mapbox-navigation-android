@@ -3,7 +3,6 @@ package com.mapbox.navigation.core.trip.session
 import android.location.Location
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.BannerInstructions
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
@@ -11,6 +10,7 @@ import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadFactory
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
@@ -74,7 +74,7 @@ internal class MapboxTripSession(
         CopyOnWriteArraySet<NativeRouteProcessingListener>()
 
     @VisibleForTesting
-    internal var routes: List<DirectionsRoute> = emptyList()
+    internal var routes: List<NavigationRoute> = emptyList()
 
     private companion object {
         private val TAG = Tag("MbxTripSession")
@@ -82,7 +82,7 @@ internal class MapboxTripSession(
     }
 
     override fun setRoutes(
-        routes: List<DirectionsRoute>,
+        routes: List<NavigationRoute>,
         legIndex: Int,
         @RoutesExtra.RoutesUpdateReason reason: String
     ) {
@@ -111,9 +111,7 @@ internal class MapboxTripSession(
             RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
                 threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
                     if (routes.isNotEmpty()) {
-                        navigator.updateAnnotations(
-                            routes[MapboxNativeNavigatorImpl.PRIMARY_ROUTE_INDEX]
-                        )
+                        navigator.updateAnnotations(routes.first())
                         this@MapboxTripSession.routes = routes
                     } else {
                         logger.w(
@@ -261,10 +259,7 @@ internal class MapboxTripSession(
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     private val navigatorObserver = object : NavigatorObserver {
         override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
-            val tripStatus = status.getTripStatusFrom(
-                routes,
-                MapboxNativeNavigatorImpl.PRIMARY_ROUTE_INDEX
-            )
+            val tripStatus = status.getTripStatusFrom(routes)
             val enhancedLocation = tripStatus.navigationStatus.location.toLocation()
             val keyPoints = tripStatus.navigationStatus.keyPoints.toLocations()
             val road = RoadFactory.buildRoadObject(tripStatus.navigationStatus)
@@ -318,7 +313,7 @@ internal class MapboxTripSession(
         }
 
         private fun calculateRemainingWaypoints(tripStatus: TripStatus): Int {
-            val routeCoordinates = tripStatus.route?.routeOptions()?.coordinatesList()
+            val routeCoordinates = tripStatus.route?.routeOptions?.coordinatesList()
             return if (routeCoordinates != null) {
                 val waypointsCount = routeCoordinates.size
                 val nextWaypointIndex = normalizeNextWaypointIndex(

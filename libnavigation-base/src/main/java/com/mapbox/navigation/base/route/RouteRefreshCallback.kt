@@ -3,9 +3,8 @@ package com.mapbox.navigation.base.route
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 
 /**
- * Callback for refresh route
+ * Interface definition for a callback associated with routes refresh.
  */
-// todo move to core and make internal
 interface RouteRefreshCallback {
     /**
      * Called when the [DirectionsRoute] has been refreshed

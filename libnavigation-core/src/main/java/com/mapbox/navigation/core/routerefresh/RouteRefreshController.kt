@@ -1,16 +1,15 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
-import com.mapbox.navigation.base.route.RouteRefreshCallback
-import com.mapbox.navigation.base.route.RouteRefreshError
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
+import com.mapbox.navigation.base.route.NavigationRouterRefreshError
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.trip.session.TripSession
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.utils.internal.MapboxTimer
 import com.mapbox.navigation.utils.internal.ThreadController
 
@@ -43,23 +42,12 @@ internal class RouteRefreshController(
      * If route refresh is enabled, attach a refresh poller.
      * Cancel old timers, and cancel pending requests.
      */
-    fun restart(route: DirectionsRoute) {
+    fun restart(route: NavigationRoute) {
         stop()
-        if (route.routeOptions()?.enableRefresh() == true) {
+        if (route.routeOptions.enableRefresh() == true) {
             routerRefreshTimer.startTimer {
                 refreshRoute(route)
             }
-        } else if (route.routeOptions() == null) {
-            logger.w(
-                TAG,
-                Message(
-                    """
-                        Unable to refresh the route because routeOptions are missing.
-                        Use #fromJson(json, routeOptions, requestUuid)
-                        when deserializing the route or route response.
-                    """.trimIndent()
-                )
-            )
         }
     }
 
@@ -74,8 +62,9 @@ internal class RouteRefreshController(
         }
     }
 
-    private fun refreshRoute(route: DirectionsRoute) {
-        val isValid = route.routeOptions()?.enableRefresh() == true && route.isUuidValidForRefresh()
+    private fun refreshRoute(route: NavigationRoute) {
+        val isValid = route.routeOptions.enableRefresh() == true &&
+            route.directionsResponse.uuid()?.isNotBlank() == true
         if (isValid) {
             val legIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0
             currentRequestId?.let { directionsSession.cancelRouteRefreshRequest(it) }
@@ -92,7 +81,8 @@ internal class RouteRefreshController(
                         The route is not qualified for route refresh feature.
                         See com.mapbox.navigation.base.extensions.supportsRouteRefresh
                         extension for details.
-                        ${route.routeOptions()}
+                        routeOptions: ${route.routeOptions}
+                        uuid: ${route.directionsResponse.uuid()}
                     """.trimIndent()
                 )
             )
@@ -100,15 +90,15 @@ internal class RouteRefreshController(
     }
 
     private fun createRouteRefreshCallback(
-        oldDirectionsRoute: DirectionsRoute,
+        oldRoute: NavigationRoute,
         currentLegIndex: Int,
-    ) = object : RouteRefreshCallback {
+    ) = object : NavigationRouterRefreshCallback {
 
-        override fun onRefresh(directionsRoute: DirectionsRoute) {
+        override fun onRefreshReady(route: NavigationRoute) {
             logger.i(TAG, msg = Message("Successful route refresh"))
             val routeDiffs = routeDiffProvider.buildRouteDiffs(
-                oldDirectionsRoute,
-                directionsRoute,
+                oldRoute,
+                route,
                 currentLegIndex,
             )
             if (routeDiffs.isEmpty()) {
@@ -120,7 +110,7 @@ internal class RouteRefreshController(
             }
             val directionsSessionRoutes = directionsSession.routes.toMutableList()
             if (directionsSessionRoutes.isNotEmpty()) {
-                directionsSessionRoutes[0] = directionsRoute
+                directionsSessionRoutes[0] = route
                 directionsSession.setRoutes(
                     directionsSessionRoutes,
                     routesUpdateReason = RoutesExtra.ROUTES_UPDATE_REASON_REFRESH,
@@ -129,7 +119,7 @@ internal class RouteRefreshController(
             currentRequestId = null
         }
 
-        override fun onError(error: RouteRefreshError) {
+        override fun onFailure(error: NavigationRouterRefreshError) {
             logger.e(
                 TAG,
                 msg = Message("Route refresh error: ${error.message}"),
@@ -138,15 +128,4 @@ internal class RouteRefreshController(
             currentRequestId = null
         }
     }
-
-    /**
-     * Check if uuid is valid:
-     * - [DirectionsRoute] is not **null**;
-     * - uuid is not empty;
-     * - uuid is not equal to [MapboxNativeNavigatorImpl.OFFLINE_UUID].
-     */
-    private fun DirectionsRoute?.isUuidValidForRefresh(): Boolean =
-        this?.requestUuid()
-            ?.let { uuid -> uuid.isNotEmpty() && uuid != MapboxNativeNavigatorImpl.OFFLINE_UUID }
-            ?: false
 }

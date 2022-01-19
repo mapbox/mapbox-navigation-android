@@ -7,6 +7,8 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.maneuver.ManeuverAction
@@ -83,12 +85,40 @@ class MapboxManeuverApi internal constructor(
      * @see getRoadShields
      */
     @JvmOverloads
+    @Deprecated(
+        "use #getManeuvers(NavigationRoute) instead",
+        ReplaceWith(
+            "getManeuvers(route.toNavigationRoute())",
+            "com.mapbox.navigation.base.route.toNavigationRoute"
+        )
+    )
     fun getManeuvers(
         route: DirectionsRoute,
         routeLegIndex: Int? = null
     ): Expected<ManeuverError, List<Maneuver>> {
+        return getManeuvers(route.toNavigationRoute(), routeLegIndex)
+    }
+
+    /**
+     * Returns a list of [Maneuver]s which are wrappers on top of [BannerInstructions] that are in the provided route.
+     *
+     * If a [RouteLeg] param is provided, the returned list will only contain [Maneuver]s for the [RouteLeg] provided as param,
+     * otherwise, the returned list will only contain [Maneuver]s for the first [RouteLeg] in a [DirectionsRoute].
+     *
+     * @param route route for which to generate maneuver objects
+     * @param routeLegIndex specify to inform the API of the index of [RouteLeg] you wish to get the list of [Maneuver].
+     * By default the API returns the list of maneuvers for the first [RouteLeg] in a [DirectionsRoute].
+     * @return Expected with [Maneuver]s if success and an error if failure.
+     * @see MapboxManeuverView.renderManeuvers
+     * @see getRoadShields
+     */
+    @JvmOverloads
+    fun getManeuvers(
+        route: NavigationRoute,
+        routeLegIndex: Int? = null
+    ): Expected<ManeuverError, List<Maneuver>> {
         val action = ManeuverAction.GetManeuverListWithRoute(
-            route,
+            route.directionsRoute,
             routeLegIndex,
             maneuverState,
             maneuverOptions,

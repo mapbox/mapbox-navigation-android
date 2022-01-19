@@ -6,9 +6,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.navigation.base.utils.ifNonNull
 
-fun DirectionsRoute.isSameUuid(compare: DirectionsRoute?): Boolean =
-    this.requestUuid() == compare?.requestUuid()
-
 /**
  * Compare routes as geometries (if exist) or as a names of [LegStep] of the [DirectionsRoute].
  *

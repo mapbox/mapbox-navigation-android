@@ -7,7 +7,6 @@ import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.api.directions.v5.models.BannerView
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
@@ -19,6 +18,7 @@ import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory.build
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory.buildRouteProgressObject
 import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buildRouteStepProgressObject
 import com.mapbox.navigation.base.road.model.Road
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -59,7 +59,7 @@ internal fun getRouteInitInfo(routeInfo: RouteInfo?) = routeInfo.toRouteInitInfo
  * Builds [RouteProgress] object based on [NavigationStatus] returned by [Navigator]
  */
 internal fun getRouteProgressFrom(
-    directionsRoute: DirectionsRoute?,
+    route: NavigationRoute?,
     status: NavigationStatus,
     remainingWaypoints: Int,
     bannerInstructions: BannerInstructions?,
@@ -67,7 +67,7 @@ internal fun getRouteProgressFrom(
     lastVoiceInstruction: VoiceInstructions?,
 ): RouteProgress? {
     return status.getRouteProgress(
-        directionsRoute,
+        route,
         remainingWaypoints,
         bannerInstructions,
         instructionIndex,
@@ -76,17 +76,16 @@ internal fun getRouteProgressFrom(
 }
 
 internal fun NavigationStatus.getTripStatusFrom(
-    routes: List<DirectionsRoute>,
-    routeIndex: Int
+    routes: List<NavigationRoute>
 ): TripStatus =
     TripStatus(
-        routes.getOrNull(routeIndex),
+        routes.firstOrNull(),
         this
     )
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
 private fun NavigationStatus.getRouteProgress(
-    route: DirectionsRoute?,
+    route: NavigationRoute?,
     remainingWaypoints: Int,
     bannerInstructions: BannerInstructions?,
     instructionIndex: Int?,
@@ -119,7 +118,7 @@ private fun NavigationStatus.getRouteProgress(
         var routeProgressDurationRemaining = 0.0
         var routeProgressFractionTraveled = 0f
 
-        ifNonNull(route.legs(), activeGuidanceInfo) { legs, activeGuidanceInfo ->
+        ifNonNull(route.directionsRoute.legs(), activeGuidanceInfo) { legs, activeGuidanceInfo ->
             if (legIndex < legs.size) {
                 currentLeg = legs[legIndex]
 
@@ -145,7 +144,9 @@ private fun NavigationStatus.getRouteProgress(
             ifNonNull(currentLeg?.steps()) { steps ->
                 if (stepIndex < steps.size) {
                     currentLegStep = steps[stepIndex].also { legStep ->
-                        stepPoints = legStep.geometry()?.let { route.stepGeometryToPoints(legStep) }
+                        stepPoints = legStep.geometry()?.let {
+                            route.directionsRoute.stepGeometryToPoints(legStep)
+                        }
                         routeProgressCurrentState = routeState.convertState()
                     }
 
@@ -160,7 +161,8 @@ private fun NavigationStatus.getRouteProgress(
                     routeLegProgressUpcomingStep = upcomingStep
 
                     upcomingStep.geometry()?.let {
-                        routeProgressUpcomingStepPoints = route.stepGeometryToPoints(upcomingStep)
+                        routeProgressUpcomingStepPoints =
+                            route.directionsRoute.stepGeometryToPoints(upcomingStep)
                     }
                 }
 

@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
@@ -95,7 +96,7 @@ interface MapboxNativeNavigator {
      * Otherwise, it returns null.
      */
     suspend fun setRoute(
-        routes: List<DirectionsRoute>,
+        routes: List<NavigationRoute>,
         legIndex: Int
     ): RouteInfo?
 
@@ -105,7 +106,7 @@ interface MapboxNativeNavigator {
      *
      * @param route [DirectionsRoute]
      */
-    suspend fun updateAnnotations(route: DirectionsRoute)
+    suspend fun updateAnnotations(route: NavigationRoute)
 
     /**
      * Gets the current banner. If there is no

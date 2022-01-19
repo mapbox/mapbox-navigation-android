@@ -90,7 +90,7 @@ class RouteFetchComponentTest {
             MapboxDropInRouteRequester.fetchAndSetRoute(points)
         }
 
-        verify { mockMapboxNavigation.requestRoutes(any(), any()) }
+        verify { mockMapboxNavigation.requestRoutes(any(), any<RouterCallback>()) }
     }
 
     @Test
@@ -102,7 +102,7 @@ class RouteFetchComponentTest {
             MapboxDropInRouteRequester.fetchAndSetRoute(routeOptions)
         }
 
-        verify { mockMapboxNavigation.requestRoutes(routeOptions, any()) }
+        verify { mockMapboxNavigation.requestRoutes(routeOptions, any<RouterCallback>()) }
     }
 
     @Test
@@ -131,7 +131,7 @@ class RouteFetchComponentTest {
         val requestCode = 333L
         val routeOptions = mockk<RouteOptions>()
         val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true) {
-            every { requestRoutes(any(), any()) } returns requestCode
+            every { requestRoutes(any(), any<RouterCallback>()) } returns requestCode
         }
         val component = RouteFetchComponent(context).also {
             it.onAttached(mockMapboxNavigation)
@@ -172,7 +172,7 @@ class RouteFetchComponentTest {
             MapboxDropInRouteRequester.fetchAndSetRoute(points)
         }
 
-        verify { mockMapboxNavigation.requestRoutes(capture(optionsSlot), any()) }
+        verify { mockMapboxNavigation.requestRoutes(capture(optionsSlot), any<RouterCallback>()) }
         assertEquals(points.first(), optionsSlot.captured.coordinatesList().first())
         assertEquals(points[1], optionsSlot.captured.coordinatesList()[1])
         assertTrue(optionsSlot.captured.alternatives()!!)

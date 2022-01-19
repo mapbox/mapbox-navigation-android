@@ -299,7 +299,7 @@ class MapboxNavigationViewModelTest {
 
         viewModel.fetchAndSetRoute(options)
 
-        verify { mockMapboxNavigation.requestRoutes(options, any()) }
+        verify { mockMapboxNavigation.requestRoutes(options, any<RouterCallback>()) }
     }
 
     @Test
@@ -320,7 +320,12 @@ class MapboxNavigationViewModelTest {
 
         viewModel.fetchAndSetRoute(options)
 
-        verify { mockMapboxNavigation.requestRoutes(capture(optionsSlot), any()) }
+        verify {
+            mockMapboxNavigation.requestRoutes(
+                capture(optionsSlot),
+                any<RouterCallback>()
+            )
+        }
         assertEquals(99, optionsSlot.captured.layersList()!!.first())
     }
 
@@ -347,7 +352,7 @@ class MapboxNavigationViewModelTest {
 
         viewModel.fetchAndSetRoute(options)
 
-        verify { mockMapboxNavigation.requestRoutes(options, any()) }
+        verify { mockMapboxNavigation.requestRoutes(options, any<RouterCallback>()) }
         verify { mockMapboxNavigation.setRoutes(routes) }
     }
 }

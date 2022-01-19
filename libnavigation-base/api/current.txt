@@ -566,6 +566,51 @@ package com.mapbox.navigation.base.route {
     property public final String type;
   }
 
+  public final class NavigationRoute {
+    ctor public NavigationRoute(com.mapbox.api.directions.v5.models.DirectionsResponse directionsResponse, int routeIndex, com.mapbox.api.directions.v5.models.RouteOptions routeOptions, String id = UUID.randomUUID().toString());
+    method public com.mapbox.api.directions.v5.models.DirectionsResponse getDirectionsResponse();
+    method public com.mapbox.api.directions.v5.models.DirectionsRoute getDirectionsRoute();
+    method public String getId();
+    method public int getRouteIndex();
+    method public com.mapbox.api.directions.v5.models.RouteOptions getRouteOptions();
+    property public final com.mapbox.api.directions.v5.models.DirectionsResponse directionsResponse;
+    property public final com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute;
+    property public final String id;
+    property public final int routeIndex;
+    property public final com.mapbox.api.directions.v5.models.RouteOptions routeOptions;
+  }
+
+  public final class NavigationRouteEx {
+    method public static java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> toDirectionsRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute>);
+    method public static com.mapbox.navigation.base.route.NavigationRoute toNavigationRoute(com.mapbox.api.directions.v5.models.DirectionsRoute);
+    method public static java.util.List<com.mapbox.navigation.base.route.NavigationRoute> toNavigationRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute>);
+  }
+
+  public interface NavigationRouter extends com.mapbox.navigation.base.route.Router {
+    method public long getRoute(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.NavigationRouterCallback callback);
+    method public long getRouteRefresh(com.mapbox.navigation.base.route.NavigationRoute route, int legIndex, com.mapbox.navigation.base.route.NavigationRouterRefreshCallback callback);
+  }
+
+  public interface NavigationRouterCallback {
+    method public void onCanceled(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
+    method public void onFailure(java.util.List<com.mapbox.navigation.base.route.RouterFailure> reasons, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public void onRoutesReady(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
+  }
+
+  public interface NavigationRouterRefreshCallback {
+    method public void onFailure(com.mapbox.navigation.base.route.NavigationRouterRefreshError error);
+    method public void onRefreshReady(com.mapbox.navigation.base.route.NavigationRoute route);
+  }
+
+  public final class NavigationRouterRefreshError {
+    method public String? getMessage();
+    method public com.mapbox.navigation.base.route.RouterFailure? getRouterFailure();
+    method public Throwable? getThrowable();
+    property public final String? message;
+    property public final com.mapbox.navigation.base.route.RouterFailure? routerFailure;
+    property public final Throwable? throwable;
+  }
+
   public final class RouteAlternativesOptions {
     method public int getAvoidManeuverSeconds();
     method public long getIntervalMillis();
@@ -583,6 +628,7 @@ package com.mapbox.navigation.base.route {
 
   public final class RouteExclusions {
     method public static java.util.List<com.mapbox.navigation.base.route.ExclusionViolation> exclusionViolations(com.mapbox.api.directions.v5.models.DirectionsRoute);
+    method public static java.util.List<com.mapbox.navigation.base.route.ExclusionViolation> exclusionViolations(com.mapbox.navigation.base.route.NavigationRoute);
   }
 
   public interface RouteRefreshCallback {
@@ -626,6 +672,14 @@ package com.mapbox.navigation.base.route {
     method public void onCanceled(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
     method public void onFailure(java.util.List<com.mapbox.navigation.base.route.RouterFailure> reasons, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
     method public void onRoutesReady(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class RouterFactory {
+    method public com.mapbox.navigation.base.route.NavigationRouterRefreshError buildNavigationRouterRefreshError(String? message = null, Throwable? throwable = null, com.mapbox.navigation.base.route.RouterFailure? routerFailure = null);
+    method public com.mapbox.navigation.base.route.NavigationRouterRefreshError buildNavigationRouterRefreshError(String? message = null, Throwable? throwable = null);
+    method public com.mapbox.navigation.base.route.NavigationRouterRefreshError buildNavigationRouterRefreshError(String? message = null);
+    method public com.mapbox.navigation.base.route.NavigationRouterRefreshError buildNavigationRouterRefreshError();
+    field public static final com.mapbox.navigation.base.route.RouterFactory INSTANCE;
   }
 
   public final class RouterFailure {
@@ -736,6 +790,7 @@ package com.mapbox.navigation.base.trip.model {
     method public double getDurationRemaining();
     method public float getFractionTraveled();
     method public boolean getInTunnel();
+    method public com.mapbox.navigation.base.route.NavigationRoute getNavigationRoute();
     method public int getRemainingWaypoints();
     method public com.mapbox.api.directions.v5.models.DirectionsRoute getRoute();
     method public boolean getStale();
@@ -750,6 +805,7 @@ package com.mapbox.navigation.base.trip.model {
     property public final double durationRemaining;
     property public final float fractionTraveled;
     property public final boolean inTunnel;
+    property public final com.mapbox.navigation.base.route.NavigationRoute navigationRoute;
     property public final int remainingWaypoints;
     property public final com.mapbox.api.directions.v5.models.DirectionsRoute route;
     property public final boolean stale;

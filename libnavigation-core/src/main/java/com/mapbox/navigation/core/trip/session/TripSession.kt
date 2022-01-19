@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core.trip.session
 
 import android.location.Location
-import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.trip.NativeRouteProcessingListener
@@ -13,7 +13,7 @@ internal interface TripSession {
 
     val tripService: TripService
     fun setRoutes(
-        routes: List<DirectionsRoute>,
+        routes: List<NavigationRoute>,
         legIndex: Int,
         @RoutesExtra.RoutesUpdateReason reason: String
     )
@@ -57,9 +57,11 @@ internal interface TripSession {
     fun registerRoadObjectsOnRouteObserver(
         roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
     )
+
     fun unregisterRoadObjectsOnRouteObserver(
         roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
     )
+
     fun unregisterAllRoadObjectsOnRouteObservers()
 
     fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver)
@@ -73,8 +75,10 @@ internal interface TripSession {
     fun registerNativeRouteProcessingListener(
         nativeRouteProcessingListener: NativeRouteProcessingListener
     )
+
     fun unregisterNativeRouteProcessingListener(
         nativeRouteProcessingListener: NativeRouteProcessingListener
     )
+
     fun unregisterAllNativeRouteProcessingListeners()
 }

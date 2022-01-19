@@ -10,7 +10,6 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
@@ -36,7 +35,8 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
@@ -62,11 +62,10 @@ import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.clearRouteLine
-import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setRoutes
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRoutes
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.CoroutineScope
@@ -200,13 +199,13 @@ class MapboxCameraAnimationsActivity :
     private val routesObserver = RoutesObserver { result ->
         if (result.routes.isNotEmpty()) {
             CoroutineScope(Dispatchers.Main).launch {
-                routeLineAPI?.setRoutes(listOf(RouteLine(result.routes[0], null)))?.apply {
+                routeLineAPI?.setNavigationRoutes(result.navigationRoutes)?.apply {
                     ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
                         view.renderRouteDrawData(style, this)
                     }
                 }
             }
-            startSimulation(result.routes[0])
+            startSimulation(result.navigationRoutes[0])
             viewportDataSource.onRouteChanged(result.routes.first())
             viewportDataSource.overviewPadding = overviewEdgeInsets
             viewportDataSource.evaluate()
@@ -415,11 +414,11 @@ class MapboxCameraAnimationsActivity :
         mapboxReplayer.play()
     }
 
-    private fun startSimulation(route: DirectionsRoute) {
+    private fun startSimulation(route: NavigationRoute) {
         mapboxReplayer.stop()
         mapboxReplayer.clearEvents()
         mapboxReplayer.pushRealLocation(this, 0.0)
-        val replayEvents = replayRouteMapper.mapDirectionsRouteGeometry(route)
+        val replayEvents = replayRouteMapper.mapDirectionsRouteGeometry(route.directionsRoute)
         mapboxReplayer.pushEvents(replayEvents)
         mapboxReplayer.seekTo(replayEvents.first())
         mapboxReplayer.play()
@@ -546,7 +545,7 @@ class MapboxCameraAnimationsActivity :
                 }
             }
             AnimationType.RemoveRoute -> {
-                mapboxNavigation.setRoutes(emptyList())
+                mapboxNavigation.setNavigationRoutes(emptyList())
             }
         }
     }
@@ -562,18 +561,15 @@ class MapboxCameraAnimationsActivity :
 
         mapboxNavigation.requestRoutes(
             routeOptions,
-            object : RouterCallback {
+            object : NavigationRouterCallback {
                 override fun onRoutesReady(
-                    routes: List<DirectionsRoute>,
+                    routes: List<NavigationRoute>,
                     routerOrigin: RouterOrigin
                 ) {
-                    mapboxNavigation.setRoutes(routes)
+                    mapboxNavigation.setNavigationRoutes(routes)
                 }
 
-                override fun onFailure(
-                    reasons: List<RouterFailure>,
-                    routeOptions: RouteOptions
-                ) {
+                override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
                     // no impl
                 }
 

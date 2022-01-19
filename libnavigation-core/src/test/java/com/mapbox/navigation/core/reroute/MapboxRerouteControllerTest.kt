@@ -1,12 +1,13 @@
 package com.mapbox.navigation.core.reroute
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.options.RerouteOptions
-import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -92,7 +93,7 @@ class MapboxRerouteControllerTest {
     @Test
     fun initial_state() {
         assertEquals(RerouteState.Idle, rerouteController.state)
-        verify(exactly = 0) { rerouteController.reroute(any()) }
+        verify(exactly = 0) { rerouteController.reroute(any<RerouteController.RoutesCallback>()) }
         verify(exactly = 0) { rerouteController.interrupt() }
     }
 
@@ -107,7 +108,7 @@ class MapboxRerouteControllerTest {
     @Test
     fun reroute_get_from_inputs() {
         mockRouteOptionsResult(successFromResult)
-        val routeRequestCallback = slot<RouterCallback>()
+        val routeRequestCallback = slot<NavigationRouterCallback>()
         every {
             directionsSession.requestRoutes(
                 routeOptionsFromSuccessResult,
@@ -133,9 +134,13 @@ class MapboxRerouteControllerTest {
     fun reroute_success() {
         mockRouteOptionsResult(successFromResult)
         addRerouteStateObserver()
-        val routes = listOf(mockk<DirectionsRoute>())
+        val routes = listOf(
+            mockk<NavigationRoute> {
+                every { directionsRoute } returns mockk()
+            }
+        )
         val origin = mockk<RouterOrigin>()
-        val routeRequestCallback = slot<RouterCallback>()
+        val routeRequestCallback = slot<NavigationRouterCallback>()
         every {
             directionsSession.requestRoutes(
                 routeOptionsFromSuccessResult,
@@ -146,7 +151,8 @@ class MapboxRerouteControllerTest {
         rerouteController.reroute(routeCallback)
         routeRequestCallback.captured.onRoutesReady(routes, origin)
 
-        verify(exactly = 1) { routeCallback.onNewRoutes(routes) }
+        val expectedRoutes = routes.toDirectionsRoutes()
+        verify(exactly = 1) { routeCallback.onNewRoutes(expectedRoutes) }
         verify(exactly = 1) {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
         }
@@ -168,7 +174,7 @@ class MapboxRerouteControllerTest {
     fun reroute_unsuccess() {
         addRerouteStateObserver()
         mockRouteOptionsResult(successFromResult)
-        val routeRequestCallback = slot<RouterCallback>()
+        val routeRequestCallback = slot<NavigationRouterCallback>()
         every {
             directionsSession.requestRoutes(
                 routeOptionsFromSuccessResult,
@@ -200,7 +206,7 @@ class MapboxRerouteControllerTest {
     fun reroute_request_canceled_external() {
         mockRouteOptionsResult(successFromResult)
         addRerouteStateObserver()
-        val routeRequestCallback = slot<RouterCallback>()
+        val routeRequestCallback = slot<NavigationRouterCallback>()
         every {
             directionsSession.requestRoutes(
                 routeOptionsFromSuccessResult,
@@ -231,7 +237,7 @@ class MapboxRerouteControllerTest {
     @Test
     fun reroute_calls_interrupt_if_currently_fetching() {
         mockRouteOptionsResult(successFromResult)
-        val routeRequestCallback = slot<RouterCallback>()
+        val routeRequestCallback = slot<NavigationRouterCallback>()
         every {
             directionsSession.requestRoutes(
                 routeOptionsFromSuccessResult,
@@ -249,7 +255,7 @@ class MapboxRerouteControllerTest {
     @Test
     fun reroute_only_calls_interrupt_if_currently_fetching() {
         mockRouteOptionsResult(successFromResult)
-        val routeRequestCallback = slot<RouterCallback>()
+        val routeRequestCallback = slot<NavigationRouterCallback>()
         every {
             directionsSession.requestRoutes(
                 routeOptionsFromSuccessResult,
@@ -268,7 +274,7 @@ class MapboxRerouteControllerTest {
     fun interrupt_route_request() {
         mockRouteOptionsResult(successFromResult)
         addRerouteStateObserver()
-        val routeRequestCallback = slot<RouterCallback>()
+        val routeRequestCallback = slot<NavigationRouterCallback>()
         every {
             directionsSession.requestRoutes(
                 routeOptionsFromSuccessResult,
@@ -328,7 +334,7 @@ class MapboxRerouteControllerTest {
 
     @Test
     fun reroute_options_seconds_to_meters_radius() {
-        val routeRequestCallback = slot<RouterCallback>()
+        val routeRequestCallback = slot<NavigationRouterCallback>()
         every {
             directionsSession.requestRoutes(
                 routeOptionsFromSuccessResult,
@@ -376,7 +382,7 @@ class MapboxRerouteControllerTest {
 
     @Test
     fun reroute_options_avoid_maneuvers_only_driving() {
-        val routeRequestCallback = slot<RouterCallback>()
+        val routeRequestCallback = slot<NavigationRouterCallback>()
         every {
             directionsSession.requestRoutes(
                 routeOptionsFromSuccessResult,

@@ -20,9 +20,11 @@ import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.options.IncidentsOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.TripNotification
@@ -112,7 +114,9 @@ class MapboxNavigationTest {
     private val navigationSession: NavigationSession = mockk(relaxed = true)
     private val billingController: BillingController = mockk(relaxUnitFun = true)
     private val logger: Logger = mockk(relaxUnitFun = true)
-    private val rerouteController: RerouteController = mockk(relaxUnitFun = true)
+    private val rerouteController: RerouteController = mockk(relaxUnitFun = true) {
+        every { state } returns RerouteState.Idle
+    }
     private val tripSessionLocationEngine: TripSessionLocationEngine = mockk(relaxUnitFun = true)
     private lateinit var navigationOptions: NavigationOptions
     private val arrivalProgressObserver: ArrivalProgressObserver = mockk(relaxUnitFun = true)
@@ -256,7 +260,7 @@ class MapboxNavigationTest {
     @Test
     fun `trip session route is restored after trip session is restarted`() {
         createMapboxNavigation()
-        val primary = mockk<DirectionsRoute>()
+        val primary = mockk<NavigationRoute>()
         val routes = listOf(primary, mockk())
         val currentLegIndex = 3
         every { directionsSession.routes } returns routes
@@ -577,8 +581,12 @@ class MapboxNavigationTest {
     @Test
     fun internalRouteObserver_notEmpty() {
         createMapboxNavigation()
-        val primary: DirectionsRoute = mockk()
-        val secondary: DirectionsRoute = mockk()
+        val primary: NavigationRoute = mockk {
+            every { directionsRoute } returns mockk()
+        }
+        val secondary: NavigationRoute = mockk {
+            every { directionsRoute } returns mockk()
+        }
         val routes = listOf(primary, secondary)
         val reason = RoutesExtra.ROUTES_UPDATE_REASON_NEW
         val initialLegIndex = 2
@@ -598,7 +606,7 @@ class MapboxNavigationTest {
     @Test
     fun internalRouteObserver_empty() {
         createMapboxNavigation()
-        val routes = emptyList<DirectionsRoute>()
+        val routes = emptyList<NavigationRoute>()
         val reason = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
         val initialLegIndex = 0
         val routeObserversSlot = mutableListOf<RoutesObserver>()
@@ -617,10 +625,17 @@ class MapboxNavigationTest {
     @Test
     fun `trip session route is delayed till trip session is started`() {
         createMapboxNavigation()
-        val primary = mockk<DirectionsRoute>()
-        val routes = listOf(primary, mockk())
+        val routes = listOf<NavigationRoute>(
+            mockk {
+                every { directionsRoute } returns mockk()
+            },
+            mockk {
+                every { directionsRoute } returns mockk()
+            }
+        )
         val initialLegIndex = 2
         val routeObserversSlot = mutableListOf<RoutesObserver>()
+
         every { tripSession.getState() } returns TripSessionState.STOPPED
         every { directionsSession.routes } returns routes
         every { directionsSession.initialLegIndex } returns initialLegIndex
@@ -648,7 +663,7 @@ class MapboxNavigationTest {
         createMapboxNavigation()
         mapboxNavigation.setRerouteController(rerouteController)
         every { directionsSession.requestRoutes(any(), any()) } returns 1L
-        mapboxNavigation.requestRoutes(mockk(), mockk())
+        mapboxNavigation.requestRoutes(mockk(), mockk<NavigationRouterCallback>())
 
         verify(exactly = 0) { rerouteController.interrupt() }
     }
@@ -666,7 +681,9 @@ class MapboxNavigationTest {
     fun interrupt_reroute_process_when_new_reroute_controller_has_been_set() {
         createMapboxNavigation()
         mapboxNavigation.setRerouteController(rerouteController)
-        val newRerouteController: RerouteController = mockk(relaxUnitFun = true)
+        val newRerouteController: RerouteController = mockk(relaxUnitFun = true) {
+            every { state } returns RerouteState.Idle
+        }
         val observers = mutableListOf<OffRouteObserver>()
         verify { tripSession.registerOffRouteObserver(capture(observers)) }
         every { rerouteController.state } returns RerouteState.FetchingRoute
@@ -819,18 +836,18 @@ class MapboxNavigationTest {
     @Test
     fun `setRoute pushes the route to the directions session`() {
         createMapboxNavigation()
-        val route: DirectionsRoute = mockk()
+        val route: NavigationRoute = mockk()
         val routeOptions: RouteOptions = mockk()
-        every { route.routeOptions() } returns routeOptions
-        every { route.geometry() } returns "geometry"
-        every { route.legs() } returns emptyList()
+        every { route.routeOptions } returns routeOptions
+        every { route.directionsRoute.geometry() } returns "geometry"
+        every { route.directionsRoute.legs() } returns emptyList()
         every { routeOptions.overview() } returns "full"
         every { routeOptions.annotationsList() } returns emptyList()
 
         val routes = listOf(route)
         val initialLegIndex = 2
 
-        mapboxNavigation.setRoutes(routes, initialLegIndex)
+        mapboxNavigation.setNavigationRoutes(routes, initialLegIndex)
 
         verify(exactly = 1) {
             directionsSession.setRoutes(
@@ -843,7 +860,7 @@ class MapboxNavigationTest {
     fun `requestRoutes pushes the request to the directions session`() {
         createMapboxNavigation()
         val options = mockk<RouteOptions>()
-        val callback = mockk<RouterCallback>()
+        val callback = mockk<NavigationRouterCallback>()
         every { directionsSession.requestRoutes(options, callback) } returns 1L
 
         mapboxNavigation.requestRoutes(options, callback)
@@ -855,7 +872,7 @@ class MapboxNavigationTest {
         createMapboxNavigation()
         val expected = 1L
         val options = mockk<RouteOptions>()
-        val callback = mockk<RouterCallback>()
+        val callback = mockk<NavigationRouterCallback>()
         every { directionsSession.requestRoutes(options, callback) } returns expected
 
         val actual = mapboxNavigation.requestRoutes(options, callback)
@@ -866,13 +883,16 @@ class MapboxNavigationTest {
     @Test
     fun `requestRoutes doesn't pushes the route to the directions session automatically`() {
         createMapboxNavigation()
-        val routes = listOf(mockk<DirectionsRoute>())
+        val routes = listOf(mockk<NavigationRoute>())
         val options = mockk<RouteOptions>()
-        val possibleInternalCallbackSlot = slot<RouterCallback>()
+        val possibleInternalCallbackSlot = slot<NavigationRouterCallback>()
         val origin = mockk<RouterOrigin>()
         every { directionsSession.requestRoutes(options, any()) } returns 1L
 
-        mapboxNavigation.requestRoutes(options, mockk(relaxUnitFun = true))
+        mapboxNavigation.requestRoutes(
+            options,
+            mockk<NavigationRouterCallback>(relaxUnitFun = true)
+        )
         verify { directionsSession.requestRoutes(options, capture(possibleInternalCallbackSlot)) }
         possibleInternalCallbackSlot.captured.onRoutesReady(routes, origin)
 
@@ -1017,7 +1037,7 @@ class MapboxNavigationTest {
         every {
             tripSession.registerFallbackVersionsObserver(capture(fallbackObserverSlot))
         } just Runs
-        val routes: List<DirectionsRoute> = listOf(mockk())
+        val routes: List<NavigationRoute> = listOf(mockk())
         val routeProgress: RouteProgress = mockk()
         val legProgress: RouteLegProgress = mockk()
         val index = 137
@@ -1111,9 +1131,9 @@ class MapboxNavigationTest {
     @Test
     fun `external route is first provided to the billing controller before directions session`() {
         createMapboxNavigation()
-        val routes = listOf(mockk<DirectionsRoute>())
+        val routes = listOf(mockk<NavigationRoute>())
 
-        mapboxNavigation.setRoutes(routes)
+        mapboxNavigation.setNavigationRoutes(routes)
 
         verifyOrder {
             billingController.onExternalRouteSet(routes.first())
@@ -1126,9 +1146,15 @@ class MapboxNavigationTest {
     @Test
     fun `adding or removing alternative routes creates alternative reason`() {
         createMapboxNavigation()
-        val primaryRoute = mockk<DirectionsRoute>()
-        val alternativeRoute = mockk<DirectionsRoute>()
-        every { directionsSession.routes } returns listOf(primaryRoute)
+        val primaryRoute = mockk<DirectionsRoute>(relaxed = true) {
+            every { routeIndex() } returns "0"
+            every { routeOptions() } returns mockk()
+        }
+        val alternativeRoute = mockk<DirectionsRoute>(relaxed = true) {
+            every { routeIndex() } returns "0"
+            every { routeOptions() } returns mockk()
+        }
+        every { directionsSession.routes } returns listOf(primaryRoute.toNavigationRoute())
 
         mapboxNavigation.setRoutes(listOf(primaryRoute, alternativeRoute))
         mapboxNavigation.setRoutes(listOf(primaryRoute))

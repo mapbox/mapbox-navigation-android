@@ -2,12 +2,13 @@ package com.mapbox.navigation.core.history.model
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.route.NavigationRoute
 
 /**
  * Historical event that represents when a route was set.
  *
  * @param eventTimestamp timestamp of event seconds
- * @param directionsRoute the route that was set, `null` when it cleared
+ * @param navigationRoute the route that was set, `null` when it cleared
  * @param routeIndex the index of this route
  * @param legIndex the current leg index when the route was set
  * @param profile the routing profile to use
@@ -16,13 +17,24 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
  */
 class HistoryEventSetRoute internal constructor(
     override val eventTimestamp: Double,
-    val directionsRoute: DirectionsRoute?,
+    val navigationRoute: NavigationRoute?,
     val routeIndex: Int,
     val legIndex: Int,
     @DirectionsCriteria.ProfileCriteria val profile: String,
     @DirectionsCriteria.GeometriesCriteria val geometries: String,
     val waypoints: List<HistoryWaypoint>
 ) : HistoryEvent {
+
+    /**
+     * The route that was set, `null` when it cleared.
+     */
+    @Deprecated(
+        "use #navigationRoute instead",
+        ReplaceWith(
+            "navigationRoute?.directionsRoute"
+        )
+    )
+    val directionsRoute: DirectionsRoute? = navigationRoute?.directionsRoute
 
     /**
      * Regenerate whenever a change is made
@@ -33,7 +45,7 @@ class HistoryEventSetRoute internal constructor(
 
         other as HistoryEventSetRoute
 
-        if (directionsRoute != other.directionsRoute) return false
+        if (navigationRoute != other.navigationRoute) return false
         if (routeIndex != other.routeIndex) return false
         if (legIndex != other.legIndex) return false
         if (profile != other.profile) return false
@@ -47,7 +59,7 @@ class HistoryEventSetRoute internal constructor(
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        var result = directionsRoute.hashCode()
+        var result = navigationRoute.hashCode()
         result = 31 * result + routeIndex
         result = 31 * result + legIndex
         result = 31 * result + profile.hashCode()
@@ -61,7 +73,7 @@ class HistoryEventSetRoute internal constructor(
      */
     override fun toString(): String {
         return "SetRouteHistoryEvent(" +
-            "directionsResponse=$directionsRoute, " +
+            "navigationRoute=$navigationRoute, " +
             "routeIndex=$routeIndex, " +
             "legIndex=$legIndex, " +
             "profile='$profile', " +

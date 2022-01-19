@@ -4,7 +4,6 @@
 
 package com.mapbox.navigation.core.accounts
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.common.BillingServiceError
@@ -13,6 +12,7 @@ import com.mapbox.common.BillingSessionStatus
 import com.mapbox.common.SessionSKUIdentifier
 import com.mapbox.common.UserSKUIdentifier
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.arrival.ArrivalObserver
@@ -274,13 +274,13 @@ internal class BillingController(
      * A route is considered the same if the waypoints count is the same and each pair of [`old waypoint` and `new waypoint`] are within [MAX_WAYPOINTS_DISTANCE_DIFF_METERS] of each other.
      * This method is also accounting for progress - if there's a multi-leg route, we'll only compare remaining legs of the current route against the new route.
      */
-    fun onExternalRouteSet(directionsRoute: DirectionsRoute) {
+    fun onExternalRouteSet(navigationRoute: NavigationRoute) {
         val runningSessionSkuId = getRunningOrPausedSessionSkuId()
         if (runningSessionSkuId == SessionSKUIdentifier.NAV2_SES_TRIP) {
             val currentRemainingWaypoints = getRemainingWaypointsOnRoute(
                 tripSession.getRouteProgress()
             )
-            val newWaypoints = getWaypointsOnRoute(directionsRoute)
+            val newWaypoints = getWaypointsOnRoute(navigationRoute)
 
             if (!waypointsWithinRange(currentRemainingWaypoints, newWaypoints)) {
                 val wasSessionPaused = billingService.getSessionStatus(
@@ -384,20 +384,12 @@ internal class BillingController(
      * ignoring origin and silent waypoints.
      */
     private fun getRemainingWaypointsOnRoute(routeProgress: RouteProgress?): List<Point>? {
-        return routeProgress?.route?.let { route ->
-            routeProgress.remainingWaypoints.let { remainingWaypointsCount ->
-                val coordinates = route.routeOptions()?.coordinatesList()
-                coordinates?.mapIndexed { index, point ->
-                    Waypoint(index, point)
-                }?.filterIndexed { index, _ ->
-                    index >= coordinates.size - remainingWaypointsCount.coerceAtMost(
-                        // ensures that we drop the origin point
-                        coordinates.size - 1
-                    )
-                }?.filter { waypoint ->
-                    val waypointIndices = route.routeOptions()?.waypointIndicesList()
-                    waypointIndices?.contains(waypoint.index) ?: true
-                }?.map { it.point }
+        return routeProgress?.navigationRoute?.let { route ->
+            val waypoints = route.directionsResponse.waypoints()
+            waypoints?.drop(
+                (waypoints.size - routeProgress.remainingWaypoints).coerceAtLeast(1)
+            )?.map {
+                it.location()
             }
         }
     }
@@ -406,14 +398,9 @@ internal class BillingController(
      * Returns a list of [Point]s that mark ends of legs on the route,
      * ignoring origin and silent waypoints.
      */
-    private fun getWaypointsOnRoute(directionsRoute: DirectionsRoute): List<Point>? {
-        val waypointIndices = directionsRoute.routeOptions()?.waypointIndicesList()
-        return directionsRoute.routeOptions()?.coordinatesList()?.filterIndexed { index, _ ->
-            if (index == 0) {
-                false
-            } else {
-                waypointIndices?.contains(index) ?: true
-            }
+    private fun getWaypointsOnRoute(navigationRoute: NavigationRoute): List<Point>? {
+        return navigationRoute.directionsResponse.waypoints()?.drop(1)?.map {
+            it.location()
         }
     }
 

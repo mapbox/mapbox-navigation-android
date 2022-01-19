@@ -2,9 +2,10 @@ package com.mapbox.navigation.core.directions.session
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.route.RouteRefreshCallback
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouterCallback
+import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.route.RouterCallback
 
 internal interface DirectionsSession {
 
@@ -14,12 +15,12 @@ internal interface DirectionsSession {
      *
      * @see [registerRoutesObserver]
      */
-    val routes: List<DirectionsRoute>
+    val routes: List<NavigationRoute>
 
     val initialLegIndex: Int
 
     fun setRoutes(
-        routes: List<DirectionsRoute>,
+        routes: List<NavigationRoute>,
         initialLegIndex: Int = 0,
         @RoutesExtra.RoutesUpdateReason routesUpdateReason: String,
     )
@@ -39,7 +40,7 @@ internal interface DirectionsSession {
      */
     fun requestRoutes(
         routeOptions: RouteOptions,
-        routerCallback: RouterCallback
+        routerCallback: NavigationRouterCallback
     ): Long
 
     /**
@@ -55,9 +56,9 @@ internal interface DirectionsSession {
      * @param callback Callback that gets notified with the results of the request
      */
     fun requestRouteRefresh(
-        route: DirectionsRoute,
+        route: NavigationRoute,
         legIndex: Int,
-        callback: RouteRefreshCallback
+        callback: NavigationRouterRefreshCallback
     ): Long
 
     /**

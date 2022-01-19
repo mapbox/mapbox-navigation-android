@@ -36,7 +36,6 @@ import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -129,8 +128,8 @@ abstract class SimpleMapViewNavigationTest :
             routeLineApi = MapboxRouteLineApi(options)
 
             mapboxNavigation.registerRoutesObserver {
-                routeLineApi.setRoutes(
-                    listOf(RouteLine(mockRoute.routeResponse.routes()[0], null))
+                routeLineApi.setNavigationRoutes(
+                    it.navigationRoutes
                 ) { result ->
                     routeLineView.renderRouteDrawData(
                         activity.mapboxMap.getStyle()!!,

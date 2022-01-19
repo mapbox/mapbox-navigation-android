@@ -14,6 +14,8 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.toCameraOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.utils.isSameRoute
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
@@ -118,8 +120,8 @@ import kotlin.math.min
  * #### Show route overview with padding
  * ```kotlin
  * private val routesObserver = object : RoutesObserver {
- *     override fun onRoutesChanged(routes: List<DirectionsRoute>) {
- *         if (routes.isNotEmpty()) {
+ *     override fun onRoutesChanged(result: RoutesUpdatedResult) {
+ *         if (result.navigationRoutes.isNotEmpty()) {
  *             viewportDataSource.onRouteChanged(routes.first())
  *             viewportDataSource.overviewPadding = overviewEdgeInsets
  *             viewportDataSource.evaluate()
@@ -221,7 +223,7 @@ class MapboxNavigationViewportDataSource(
      */
     val options = MapboxNavigationViewportDataSourceOptions()
 
-    private var route: DirectionsRoute? = null
+    private var navigationRoute: NavigationRoute? = null
     private var completeRoutePoints: List<List<List<Point>>> = emptyList()
     private var simplifiedCompleteRoutePoints: List<List<List<Point>>> = emptyList()
     private var postManeuverFramingPoints: List<List<List<Point>>> = emptyList()
@@ -391,11 +393,30 @@ class MapboxNavigationViewportDataSource(
      * @see [clearRouteData]
      * @see [evaluate]
      */
+    @Deprecated(
+        "use #onRouteChanged(NavigationRoute) instead",
+        ReplaceWith(
+            "onRouteChanged(route.toNavigationRoute())",
+            "com.mapbox.navigation.base.route.toNavigationRoute"
+        )
+    )
     fun onRouteChanged(route: DirectionsRoute) {
-        if (!route.isSameRoute(this.route)) {
+        onRouteChanged(route.toNavigationRoute())
+    }
+
+    /**
+     * Call whenever the primary route changes.
+     * This produces and stores geometries that need to be framed for overview.
+     *
+     * @see [MapboxNavigation.registerRoutesObserver]
+     * @see [clearRouteData]
+     * @see [evaluate]
+     */
+    fun onRouteChanged(route: NavigationRoute) {
+        if (!route.directionsRoute.isSameRoute(navigationRoute?.directionsRoute)) {
             clearRouteData()
-            this.route = route
-            completeRoutePoints = processRoutePoints(route)
+            this.navigationRoute = route
+            completeRoutePoints = processRoutePoints(route.directionsRoute)
             simplifiedCompleteRoutePoints = simplifyCompleteRoutePoints(
                 options.overviewFrameOptions.geometrySimplification.enabled,
                 options.overviewFrameOptions.geometrySimplification.simplificationFactor,
@@ -407,7 +428,7 @@ class MapboxNavigationViewportDataSource(
                 averageIntersectionDistancesOnRoute = processRouteIntersections(
                     enabled,
                     minimumDistanceBetweenIntersections,
-                    route,
+                    route.directionsRoute,
                     completeRoutePoints
                 )
             }
@@ -417,7 +438,7 @@ class MapboxNavigationViewportDataSource(
                     enabled,
                     distanceToCoalesceCompoundManeuvers,
                     distanceToFrameAfterManeuver,
-                    route,
+                    route.directionsRoute,
                     completeRoutePoints
                 )
             }
@@ -438,7 +459,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun onRouteProgressChanged(routeProgress: RouteProgress) {
-        val currentRoute = this.route
+        val currentRoute = this.navigationRoute
         if (currentRoute == null) {
             LoggerProvider.logger.w(
                 Tag(TAG),
@@ -448,7 +469,7 @@ class MapboxNavigationViewportDataSource(
             )
             clearProgressData()
             return
-        } else if (!currentRoute.isSameRoute(routeProgress.route)) {
+        } else if (!currentRoute.directionsRoute.isSameRoute(routeProgress.route)) {
             LoggerProvider.logger.e(
                 Tag(TAG),
                 Message(
@@ -529,7 +550,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun clearRouteData() {
-        route = null
+        navigationRoute = null
         completeRoutePoints = emptyList()
         postManeuverFramingPoints = emptyList()
         simplifiedCompleteRoutePoints = emptyList()

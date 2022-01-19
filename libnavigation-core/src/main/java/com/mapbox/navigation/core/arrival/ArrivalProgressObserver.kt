@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core.arrival
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -16,7 +16,7 @@ internal class ArrivalProgressObserver(
 
     private var arrivalController: ArrivalController = AutoArrivalController()
     private val arrivalObservers = CopyOnWriteArraySet<ArrivalObserver>()
-    private var routeArrived: DirectionsRoute? = null
+    private var routeArrived: NavigationRoute? = null
     private var routeLegArrived: RouteLeg? = null
 
     fun attach(arrivalController: ArrivalController) {
@@ -37,7 +37,7 @@ internal class ArrivalProgressObserver(
 
     fun navigateNextRouteLeg(callback: LegIndexUpdatedCallback?) {
         val routeProgress = tripSession.getRouteProgress()
-        val numberOfLegs = routeProgress?.route?.legs()?.size
+        val numberOfLegs = routeProgress?.navigationRoute?.directionsRoute?.legs()?.size
 
         if (numberOfLegs == null) {
             callback?.onLegIndexUpdatedCallback(false)
@@ -82,7 +82,7 @@ internal class ArrivalProgressObserver(
 
     private fun hasMoreLegs(routeProgress: RouteProgress): Boolean {
         val currentLegIndex = routeProgress.currentLegProgress?.legIndex
-        val lastLegIndex = routeProgress.route.legs()?.lastIndex
+        val lastLegIndex = routeProgress.navigationRoute.directionsRoute.legs()?.lastIndex
         return (currentLegIndex != null && lastLegIndex != null) && currentLegIndex < lastLegIndex
     }
 
@@ -101,8 +101,8 @@ internal class ArrivalProgressObserver(
     }
 
     private fun doFinalDestinationArrival(routeProgress: RouteProgress) {
-        if (routeArrived != routeProgress.route) {
-            routeArrived = routeProgress.route
+        if (routeArrived != routeProgress.navigationRoute) {
+            routeArrived = routeProgress.navigationRoute
             arrivalObservers.forEach { it.onFinalDestinationArrival(routeProgress) }
         }
     }

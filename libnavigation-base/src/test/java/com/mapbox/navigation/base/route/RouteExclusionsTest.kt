@@ -21,6 +21,7 @@ class RouteExclusionsTest {
             .build()
         val directionsRoute = DirectionsRoute.builder()
             .routeOptions(routeOptionsWithoutExclusions)
+            .routeIndex("0")
             .distance(183888.609)
             .duration(10697.573)
             .build()

@@ -11,8 +11,10 @@ package com.mapbox.navigation.ui.maneuver.api {
     ctor public MapboxManeuverApi(com.mapbox.navigation.base.formatter.DistanceFormatter formatter, com.mapbox.navigation.ui.maneuver.model.ManeuverOptions maneuverOptions = ManeuverOptions.<init>().build());
     ctor public MapboxManeuverApi(com.mapbox.navigation.base.formatter.DistanceFormatter formatter);
     method public void cancel();
-    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> getManeuvers(com.mapbox.api.directions.v5.models.DirectionsRoute route, Integer? routeLegIndex = null);
-    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> getManeuvers(com.mapbox.api.directions.v5.models.DirectionsRoute route);
+    method @Deprecated public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> getManeuvers(com.mapbox.api.directions.v5.models.DirectionsRoute route, Integer? routeLegIndex = null);
+    method @Deprecated public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> getManeuvers(com.mapbox.api.directions.v5.models.DirectionsRoute route);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> getManeuvers(com.mapbox.navigation.base.route.NavigationRoute route, Integer? routeLegIndex = null);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> getManeuvers(com.mapbox.navigation.base.route.NavigationRoute route);
     method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> getManeuvers(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
     method @Deprecated public void getRoadShields(java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver> maneuvers, com.mapbox.navigation.ui.maneuver.api.RoadShieldCallback callback);
     method public void getRoadShields(java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver> maneuvers, com.mapbox.navigation.ui.shield.model.RouteShieldCallback shieldCallback);

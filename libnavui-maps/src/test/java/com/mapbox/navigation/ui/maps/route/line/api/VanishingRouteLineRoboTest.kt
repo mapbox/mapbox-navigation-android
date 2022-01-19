@@ -4,6 +4,7 @@ import android.graphics.Color
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
@@ -54,7 +55,7 @@ class VanishingRouteLineRoboTest {
 
     @Test
     fun initWithRoute() = coroutineRule.runBlockingTest {
-        val route = loadRoute("short_route.json")
+        val route = loadRoute("short_route.json").toNavigationRoute()
 
         val vanishingRouteLine = VanishingRouteLine().also {
             it.initWithRoute(route)
@@ -73,7 +74,7 @@ class VanishingRouteLineRoboTest {
 
     @Test
     fun initWithRoute_clearState() = coroutineRule.runBlockingTest {
-        val route = loadRoute("short_route.json")
+        val route = loadRoute("short_route.json").toNavigationRoute()
         val vanishingRouteLine = VanishingRouteLine()
         vanishingRouteLine.setJobControl(testJobControl)
         vanishingRouteLine.initWithRoute(route)
@@ -86,7 +87,9 @@ class VanishingRouteLineRoboTest {
         vanishingRouteLine.setJobControl(jobControl)
 
         Runnable {
-            vanishingRouteLine.initWithRoute(loadRoute("cross-country-route.json"))
+            vanishingRouteLine.initWithRoute(
+                loadRoute("cross-country-route.json").toNavigationRoute()
+            )
         }.run()
         jobControl.job.cancel()
 
@@ -107,8 +110,10 @@ class VanishingRouteLineRoboTest {
             .routeUnknownCongestionColor(-1)
             .build()
 
-        val route = loadRoute("short_route.json")
-        val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
+        val route = loadRoute("short_route.json").toNavigationRoute()
+        val lineString = LineString.fromPolyline(
+            route.directionsRoute.geometry() ?: "", Constants.PRECISION_6
+        )
         val vanishingRouteLine = VanishingRouteLine()
         vanishingRouteLine.initWithRoute(route)
         vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
@@ -155,8 +160,10 @@ class VanishingRouteLineRoboTest {
             .restrictedRoadColor(Color.CYAN)
             .build()
 
-        val route = loadRoute("route-with-restrictions.json")
-        val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
+        val route = loadRoute("route-with-restrictions.json").toNavigationRoute()
+        val lineString = LineString.fromPolyline(
+            route.directionsRoute.geometry() ?: "", Constants.PRECISION_6
+        )
         val vanishingRouteLine = VanishingRouteLine()
         vanishingRouteLine.initWithRoute(route)
         vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
@@ -168,7 +175,7 @@ class VanishingRouteLineRoboTest {
                 colorResources
             )
         val restrictedSegments = MapboxRouteLineUtils.extractRouteData(
-            route,
+            route.directionsRoute,
             MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
         )
 
@@ -202,8 +209,10 @@ class VanishingRouteLineRoboTest {
             .routeUnknownCongestionColor(-1)
             .build()
 
-        val route = loadRoute("short_route.json")
-        val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
+        val route = loadRoute("short_route.json").toNavigationRoute()
+        val lineString = LineString.fromPolyline(
+            route.directionsRoute.geometry() ?: "", Constants.PRECISION_6
+        )
         val vanishingRouteLine = VanishingRouteLine()
         vanishingRouteLine.initWithRoute(route)
         vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
@@ -252,7 +261,7 @@ class VanishingRouteLineRoboTest {
         val expectedCasingExp = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0]," +
             " 0.13240839439705454, [rgba, 47.0, 122.0, 198.0, 1.0], 0.4891841628737826," +
             " [rgba, 0.0, 0.0, 0.0, 0.0]]"
-        val route = loadRoute("multileg-route-two-legs.json")
+        val route = loadRoute("multileg-route-two-legs.json").toNavigationRoute()
         val vanishingRouteLine = VanishingRouteLine()
         vanishingRouteLine.initWithRoute(route)
         vanishingRouteLine.primaryRouteRemainingDistancesIndex = 7
