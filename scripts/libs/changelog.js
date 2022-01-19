@@ -12,6 +12,20 @@ const HEADERS = {
     'fixed': "Bug fixes and improvements",
     'added': "Features"
 }
+const MONTHS = {
+    0: 'January',
+    1: 'February',
+    2: 'March',
+    3: 'April',
+    4: 'May',
+    5: 'June',
+    6: 'July',
+    7: 'August',
+    8: 'September',
+    9: 'October',
+    10: 'November',
+    11: 'December'
+  }
 
 const REPO_ROOT_DIR = path.join('.')
 const UNRELEASED_CHANGELOG_DIR = path.join(REPO_ROOT_DIR, 'changelogs', 'unreleased');
@@ -105,7 +119,14 @@ function addReleaseNotesToChangelogMD(currentChangelogMD, newReleaseChangelog) {
 
 function compileReleaseNotesMd(config) {
     let version = config.version
-    var output = "## Mapbox Navigation SDK 2.1.0 - January 9, 2022\n\n"
+    if (version == undefined) {
+        throw "specify release version"
+    }
+    let releaseDate = config.releaseDate
+    if (releaseDate == undefined) {
+        throw "specify release date"
+    }
+    var output = `## Mapbox Navigation SDK ${version} - ${MONTHS[releaseDate.getMonth()]} ${releaseDate.getDate()}, ${releaseDate.getFullYear()}\n\n`
     let major = semver.major(version)
     let minor = semver.minor(version)
     if (major == "2") {

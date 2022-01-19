@@ -53,7 +53,7 @@ describe('compile changelog', function () {
       let changelog = compileReleaseNotesMd({
         version: "2.1.0",
         dependenciesMd: "TEST_DEPENDENCIES",
-        releaseDate: Date(2022, 0, 9),
+        releaseDate: new Date(2022, 0, 9),
         fileCreationDataProvider: function (path) {
           return path.substring(path.length - 1)
         }
