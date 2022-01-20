@@ -3,9 +3,25 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
+
+## Mapbox Navigation SDK 2.2.0 - January 20, 2022
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
 - Exposed `ManeuverExitOptions`, `ManeuverPrimaryOptions`, `ManeuverSecondaryOptions`, `ManeuverSubOptions`, `MapboxExitProperties` to define the style for `MapboxPrimaryManeuver`, `MapboxSecondaryManeuver`, `MapboxSubManeuver` and associated `MapboxExitText` for each of these maneuvers. [#5357](https://github.com/mapbox/mapbox-navigation-android/pull/5357)
 - Refactored the exit text logic to handle the drawable size based on the size of text associated in `MapboxExitText`. [#5357](https://github.com/mapbox/mapbox-navigation-android/pull/5357)
 - Deprecated `MapboxRoadNameLabelView` and introduced `MapboxRoadNameView` to render mapbox designed shields in the current road name label. [#5310](https://github.com/mapbox/mapbox-navigation-android/pull/5310)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK v10.2.0 ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.2.0))
+- Mapbox Navigation Native v83.0.0
+- Mapbox Core Common v21.0.1
+- Mapbox Java v6.2.0 ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.2.0))
+- Mapbox Android Core v5.0.1
+- Mapbox Android Telemetry v8.1.1
 
 ## Mapbox Navigation SDK 2.2.0-rc.1 - January 13, 2021
 
