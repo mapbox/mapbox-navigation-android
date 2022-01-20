@@ -12,6 +12,7 @@ import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingWithRestrictio
 import com.mapbox.navigation.qa_test_app.view.MapboxRouteLineActivity
 import com.mapbox.navigation.qa_test_app.view.RouteRestrictionsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteTrafficUpdateActivity
+import com.mapbox.navigation.qa_test_app.view.StatusActivity
 import com.mapbox.navigation.qa_test_app.view.TrafficGradientActivity
 import com.mapbox.navigation.qa_test_app.view.util.RouteDrawingActivity
 
@@ -81,6 +82,12 @@ object TestActivitySuite {
             R.string.route_drawing_utility
         ) { activity ->
             activity.startActivity<RouteDrawingActivity>()
-        }
+        },
+        TestActivityDescription(
+            "Status View",
+            R.string.status_activity_description
+        ) { activity ->
+            activity.startActivity<StatusActivity>()
+        },
     )
 }
