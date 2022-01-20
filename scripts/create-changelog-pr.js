@@ -56,7 +56,11 @@ function main() {
     if (args.branch != "main") {
         executor(`git checkout main`)
         executor(`git checkout -b add-changelog-${args.version}-update-main`)
-        updateChangelogMDFile(changelog)
+        if (args.isDryRun) {
+            console.log("updating changelog at main branch")
+        } else {
+            updateChangelogMDFile(changelog)
+        }
         executor(`git add .`)
         executor(`git commit -m "Changelog for ${args.version}"`)
         executor(`git push origin add-changelog-${args.version}-update-main`)
