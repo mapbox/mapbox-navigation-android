@@ -6,7 +6,7 @@ const path = require('path')
 
 const testingDataDir = path.join(__dirname, 'testingData')
 
-const { addReleaseNotesToChangelogMD, compileReleaseNotesMd, createEntry, isValidEntry } = require('../changelog')
+const { addReleaseNotesToChangelogMD, compileReleaseNotesMd, createEntry, isValidChangelogEntries } = require('../changelog')
 
 describe('addReleaseNotesToChangelogMD', function () {
   it('adding new release notes to existing changelog file', function () {
@@ -128,19 +128,19 @@ describe('compile changelog', function () {
 
 describe("validate entry", function () {
   it("fixed entry", function () {
-    let result = isValidEntry([{ ticket: 1, title: "test", type: "fixed" }])
+    let result = isValidChangelogEntries([{ ticket: 1, title: "test", type: "fixed" }])
     assert.equal(result, true)
   })
   it("added entry", function () {
-    let result = isValidEntry([{ ticket: 4, title: "test", type: "added" }])
+    let result = isValidChangelogEntries([{ ticket: 4, title: "test", type: "added" }])
     assert.equal(result, true)
   })
   it("changed and added entries", function () {
-    let result = isValidEntry([{ ticket: 4, title: "test", type: "added" }, { ticket: 1, title: "test", type: "changed" }])
+    let result = isValidChangelogEntries([{ ticket: 4, title: "test", type: "added" }, { ticket: 1, title: "test", type: "changed" }])
     assert.equal(result, false)
   })
   it("not array entry", function () {
-    let result = isValidEntry({ ticket: 4, title: "test", type: "added" })
+    let result = isValidChangelogEntries({ ticket: 4, title: "test", type: "added" })
     assert.equal(result, false)
   })
 })

@@ -51,12 +51,12 @@ function isInteger(str) {
     return !isNaN(str) && Number.isInteger(parseFloat(str));
 }
 
-function isValidEntry(entry) {
-    if (!Array.isArray(entry)){
+function isValidChangelogEntries(entries) {
+    if (!Array.isArray(entries)){
         return false
     }
-    for (const item of entry) {
-        let isValid = item.title && SUPPORTED_ENTRY_TYPES.includes(item.type) && isInteger(item.ticket)
+    for (const entry of entries) {
+        let isValid = entry.title && SUPPORTED_ENTRY_TYPES.includes(entry.type) && isInteger(entry.ticket)
         if (!isValid) {
             return false
         }
@@ -74,32 +74,30 @@ function processTitle(title) {
 }
 
 function compileChangelog(config) {
-    const entries = {};
+    const allEntries = {};
     for (const type of ENTRY_TYPES) {
-        entries[type] = [];
+        allEntries[type] = [];
     }
 
     let fileCreationDataProvider = config.fileCreationDataProvider === undefined
         ? function(path) { execSync(`git log -1 --format=%cd ${path}`).toString().trim() }
         : config.fileCreationDataProvider
-    for (const entryFile of fs.readdirSync(UNRELEASED_CHANGELOG_DIR)) {
-        if (!entryFile.endsWith('.json')) { continue; }
+    for (const entriesFile of fs.readdirSync(UNRELEASED_CHANGELOG_DIR)) {
+        if (!entriesFile.endsWith('.json')) { continue; }
 
-        const entryFilePath = path.join(UNRELEASED_CHANGELOG_DIR, entryFile);
-        const entry = JSON.parse(fs.readFileSync(entryFilePath));
-        if (!isValidEntry(entry)) {
-            throw `Cannot use entry "${entryFile}"`
+        const entriesFilePath = path.join(UNRELEASED_CHANGELOG_DIR, entriesFile);
+        const entries = JSON.parse(fs.readFileSync(entriesFilePath));
+        if (!isValidChangelogEntries(entries)) {
+            throw `Cannot use entry "${entriesFile}"`
         }
-        if (Array.isArray(entry)) {
-            entry.forEach(function(e) {
-                entry['date'] = new Date(fileCreationDataProvider(entryFilePath));
-                entries[e.type].push(e);
-            })
-        }  
+        entries.forEach(function(e) {
+            e['date'] = new Date(fileCreationDataProvider(entriesFilePath));
+            allEntries[e.type].push(e);
+        })
     }
 
-    for (const type of Object.keys(entries)) {
-        entries[type].sort((a, b) => b.date - a.date);
+    for (const type of Object.keys(allEntries)) {
+        allEntries[type].sort((a, b) => b.date - a.date);
     }
 
     const owner = 'mapbox';
@@ -107,7 +105,7 @@ function compileChangelog(config) {
 
     let output = '';
     for (const type of ENTRY_TYPES) {
-        const typeEntries = entries[type];
+        const typeEntries = allEntries[type];
         if (typeEntries.length === 0) { continue; }
         output += `#### ${HEADERS[type]}\n`;
 
@@ -239,7 +237,8 @@ async function createEntry(params, branchName) {
 
 module.exports = {
     compileReleaseNotesMd,
-    isValidEntry,
+    isValidChangelogEntries
+,
     removeEntries,
     makeEntryPath,
     createEntry,

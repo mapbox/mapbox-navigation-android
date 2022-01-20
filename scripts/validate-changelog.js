@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const { getApp, getMetadata, getBranchName, getPullRequestNumber, isBranchProtectedOrRelease } = require('./libs/github');
-const { isValidEntry, makeEntryPath } = require("./libs/changelog");
+const { isValidChangelogEntries, makeEntryPath } = require("./libs/changelog");
 const parseGitPatch = require('parse-git-patch')
 const fs = require('fs');
 
@@ -71,7 +71,7 @@ async function main() {
     }
 
     const entry = JSON.parse(fs.readFileSync(entryPath));
-    if (!isValidEntry(entry)) {
+    if (!isValidChangelogEntries(entry)) {
         console.error(`Found changelog entry at ${entryPath}, but it has invalid format. Use ${__filename} script to generate it.`);
         process.exit(1);
     }
