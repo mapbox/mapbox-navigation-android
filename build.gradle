@@ -1,10 +1,9 @@
 buildscript {
   apply from: "${rootDir}/gradle/dependencies.gradle"
-    repositories {
+  repositories {
     google()
     mavenCentral()
-    jcenter()
-    maven { url 'https://plugins.gradle.org/m2' }
+    gradlePluginPortal()
     maven {
       url 'https://api.mapbox.com/downloads/v2/releases/maven'
       authentication {
@@ -45,8 +44,7 @@ allprojects {
   repositories {
     google()
     mavenCentral()
-    jcenter()
-    maven { url 'https://plugins.gradle.org/m2' }
+    gradlePluginPortal()
     maven {
       url 'https://api.mapbox.com/downloads/v2/releases/maven'
       authentication {

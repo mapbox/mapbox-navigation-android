@@ -2,8 +2,8 @@ buildscript {
     apply from: "${rootDir}/gradle/dependencies.gradle"
 
     repositories {
-        jcenter()
         google()
+        mavenCentral()
     }
 
     dependencies {
