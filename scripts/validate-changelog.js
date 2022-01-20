@@ -70,22 +70,24 @@ async function main() {
         process.exit(1);
     }
 
-    const entry = JSON.parse(fs.readFileSync(entryPath));
-    if (!isValidChangelogEntries(entry)) {
+    const entries = JSON.parse(fs.readFileSync(entryPath));
+    if (!isValidChangelogEntries(entries)) {
         console.error(`Found changelog entry at ${entryPath}, but it has invalid format. Use ${__filename} script to generate it.`);
         process.exit(1);
     }
 
     // check that ticket exists
-    try {
-        await app.issues.get({
-            owner,
-            repo,
-            issue_number: entry.ticket
-        });
-    } catch (e) {
-        console.error(`Ticket #${entry.ticket} does not exist on github from changelog entry at ${entryPath}.`);
-        process.exit(1);
+    for(const entry of entries) {
+        try {
+            await app.issues.get({
+                owner,
+                repo,
+                issue_number: entry.ticket
+            });
+        } catch (e) {
+            console.error(`Ticket #${entry.ticket} does not exist on github from changelog entry at ${entryPath}.`);
+            process.exit(1);
+        }
     }
 
     console.log("All good. You have added changelog entry.");
