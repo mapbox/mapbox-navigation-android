@@ -35,7 +35,7 @@ describe('compile changelog', function () {
           type: 'fixed',
           title: 'Test ticket 2'
         },
-        "branch2")
+        "branch1")
       await createEntry(
         {
           ticket: 3,
@@ -63,7 +63,7 @@ describe('compile changelog', function () {
   })
 
   it('display patch warning for 2.0.1', async function () {
-    await mockFileSystem(async function() {
+    await mockFileSystem(async function () {
       await createEntry(
         {
           ticket: 1,
@@ -72,34 +72,75 @@ describe('compile changelog', function () {
         },
         "test"
       )
-    })
-    
-    let changelog = compileReleaseNotesMd({
-      version: "2.0.4",
-      dependenciesMd: "TEST_DEPENDENCIES",
-      releaseDate: new Date(2022, 0, 9),
-      fileCreationDataProvider: function (path) {
-        return path.substring(path.length - 1)
+
+      let changelog = compileReleaseNotesMd({
+        version: "2.0.4",
+        dependenciesMd: "TEST_DEPENDENCIES",
+        releaseDate: new Date(2022, 0, 9),
+        fileCreationDataProvider: function (path) {
+          return path.substring(path.length - 1)
+        }
+      })
+
+      if (!changelog.includes("This is a patch release on top of v2.0.x")) {
+        assert.fail(`changelog doesn't contain message for 2.0.x release.\n ${changelog}`)
       }
     })
-    
-    if (!changelog.includes("This is a patch release on top of v2.0.x")) {
-      assert.fail("changelog doesn't contain message for 2.0.x release")
-    }
+  })
+
+  it('few release entries for one PR', async function () {
+    await mockFileSystem(async function () {
+      await createEntry(
+        {
+          ticket: 7,
+          type: 'fixed',
+          title: 'test fix'
+        },
+        "test"
+      )
+      await createEntry(
+        {
+          ticket: 7,
+          type: 'added',
+          title: 'test feature'
+        },
+        "test"
+      )
+
+      let changelog = compileReleaseNotesMd({
+        version: "2.1.8",
+        dependenciesMd: "TEST_DEPENDENCIES",
+        releaseDate: new Date(2022, 0, 9),
+        fileCreationDataProvider: function (path) {
+          return path.substring(path.length - 1)
+        }
+      })
+
+      if (!changelog.includes("test feature")) {
+        assert.fail(`changelog doesn't contain message for test feature entry:\n${changelog}`)
+      }
+      if (!changelog.includes("test fix")) {
+        assert.fail(`changelog doesn't contain message for test fix entry:\n${changelog}`)
+      }
+    })
   })
 })
 
-describe("valid entry", function() {
-  it("fixed entry", function(){
-    let result = isValidEntry({ ticket: 1, title: "test", type: "fixed"})
+describe("validate entry", function () {
+  it("fixed entry", function () {
+    let result = isValidEntry([{ ticket: 1, title: "test", type: "fixed" }])
     assert.equal(result, true)
   })
-  it("added entry", function(){
-    let result = isValidEntry({ ticket: 4, title: "test", type: "added"})
+  it("added entry", function () {
+    let result = isValidEntry([{ ticket: 4, title: "test", type: "added" }])
     assert.equal(result, true)
   })
-  it("added entry", function(){
-    let result = isValidEntry({ ticket: 1, title: "test", type: "changed"})
+  it("changed and added entries", function () {
+    let result = isValidEntry([{ ticket: 4, title: "test", type: "added" }, { ticket: 1, title: "test", type: "changed" }])
+    assert.equal(result, false)
+  })
+  it("not array entry", function () {
+    let result = isValidEntry({ ticket: 4, title: "test", type: "added" })
     assert.equal(result, false)
   })
 })

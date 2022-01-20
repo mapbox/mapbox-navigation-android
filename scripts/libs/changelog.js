@@ -52,7 +52,16 @@ function isInteger(str) {
 }
 
 function isValidEntry(entry) {
-    return entry.title && SUPPORTED_ENTRY_TYPES.includes(entry.type) && isInteger(entry.ticket);
+    if (!Array.isArray(entry)){
+        return false
+    }
+    for (const item of entry) {
+        let isValid = item.title && SUPPORTED_ENTRY_TYPES.includes(item.type) && isInteger(item.ticket)
+        if (!isValid) {
+            return false
+        }
+    }
+    return true
 }
 
 String.prototype.capitalize = function () {
@@ -81,8 +90,12 @@ function compileChangelog(config) {
         if (!isValidEntry(entry)) {
             throw `Cannot use entry "${entryFile}"`
         }
-        entry['date'] = new Date(fileCreationDataProvider(entryFilePath));
-        entries[entry.type].push(entry);
+        if (Array.isArray(entry)) {
+            entry.forEach(function(e) {
+                entry['date'] = new Date(fileCreationDataProvider(entryFilePath));
+                entries[e.type].push(e);
+            })
+        }  
     }
 
     for (const type of Object.keys(entries)) {
@@ -207,10 +220,14 @@ async function createEntry(params, branchName) {
     if (branchName === 'main') {
         throw 'Cannot create changelog entry on master branch'
     }
-
+    
     const entryPath = makeEntryPath(branchName);
+    let existingEntry = fs.existsSync(entryPath)
+        ? JSON.parse(fs.readFileSync(entryPath))
+        : []
+    existingEntry.push(entry)
     let changelogPath = path.dirname(entryPath)
-    let changeLogEntryContent = JSON.stringify(entry, null, 2)
+    let changeLogEntryContent = JSON.stringify(existingEntry, null, 2)
     if (!params.isDryRun) {
         fs.mkdirSync(changelogPath, { recursive: true });
         fs.writeFileSync(entryPath, changeLogEntryContent);

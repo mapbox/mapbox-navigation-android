@@ -1,5 +1,7 @@
-{
-  "ticket": 1234,
-  "type": "added",
-  "title": "test 2"
-}
+[
+  {
+    "ticket": 1234,
+    "type": "added",
+    "title": "test 2"
+  }
+]
