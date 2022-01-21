@@ -386,13 +386,16 @@ package com.mapbox.navigation.base.route {
   }
 
   public final class RouteAlternativesOptions {
+    method public int getAvoidManeuverSeconds();
     method public long getIntervalMillis();
     method public com.mapbox.navigation.base.route.RouteAlternativesOptions.Builder toBuilder();
+    property public final int avoidManeuverSeconds;
     property public final long intervalMillis;
   }
 
   public static final class RouteAlternativesOptions.Builder {
     ctor public RouteAlternativesOptions.Builder();
+    method public com.mapbox.navigation.base.route.RouteAlternativesOptions.Builder avoidManeuverSeconds(int avoidManeuverSeconds);
     method public com.mapbox.navigation.base.route.RouteAlternativesOptions build();
     method public com.mapbox.navigation.base.route.RouteAlternativesOptions.Builder intervalMillis(long intervalMillis);
   }

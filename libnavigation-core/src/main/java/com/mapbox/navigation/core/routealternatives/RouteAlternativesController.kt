@@ -20,6 +20,7 @@ import com.mapbox.navigator.RouteAlternative
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CopyOnWriteArraySet
+import java.util.concurrent.TimeUnit
 
 internal class RouteAlternativesController constructor(
     private val options: RouteAlternativesOptions,
@@ -49,8 +50,8 @@ internal class RouteAlternativesController constructor(
         .apply {
             setRouteAlternativesOptions(
                 com.mapbox.navigator.RouteAlternativesOptions(
-                    options.intervalMillis * SECONDS_PER_MILLIS,
-                    MIN_TIME_BEFORE_MANEUVER_SECONDS
+                    TimeUnit.MILLISECONDS.toSeconds(options.intervalMillis).toDouble(),
+                    options.avoidManeuverSeconds.toDouble()
                 )
             )
             enableOnEmptyAlternativesRequest(true)
@@ -196,7 +197,5 @@ internal class RouteAlternativesController constructor(
 
     private companion object {
         private val TAG = Tag("MbxRouteAlternativesController")
-        private const val MIN_TIME_BEFORE_MANEUVER_SECONDS = 1.0
-        private const val SECONDS_PER_MILLIS = 0.001
     }
 }

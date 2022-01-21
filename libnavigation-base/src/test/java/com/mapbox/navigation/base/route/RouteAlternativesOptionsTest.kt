@@ -11,6 +11,7 @@ class RouteAlternativesOptionsTest :
 
     override fun getFilledUpBuilder() = RouteAlternativesOptions.Builder()
         .intervalMillis(TimeUnit.SECONDS.toMillis(30))
+        .avoidManeuverSeconds(5)
 
     @Test
     override fun trigger() {
