@@ -65,8 +65,29 @@ class RouteAlternativesControllerTest {
 
         // Verify the conversion was accurate
         assertEquals(
-            59.135,
+            59.0,
             nativeOptions.captured.requestIntervalSeconds,
+            0.001
+        )
+    }
+
+    @Test
+    fun `should set minTimeBeforeManeuverSeconds from options`() {
+        // Capture the route options set
+        val nativeOptions = slot<com.mapbox.navigator.RouteAlternativesOptions>()
+        every { controllerInterface.setRouteAlternativesOptions(capture(nativeOptions)) } just runs
+
+        // Construct a native route alternatives interface
+        createRouteAlternativesController(
+            options = RouteAlternativesOptions.Builder()
+                .avoidManeuverSeconds(15)
+                .build()
+        )
+
+        // Verify the conversion was accurate
+        assertEquals(
+            15.0,
+            nativeOptions.captured.minTimeBeforeManeuverSeconds,
             0.001
         )
     }
