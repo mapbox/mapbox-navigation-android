@@ -9,10 +9,49 @@ Mapbox welcomes participation and contributions from everyone.
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
 
 ### Changelog
+[Changes between v2.1.2 and v2.2.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.1.2...v2.2.0):
+
+#### Features
+- Added support for Mapbox designed route shields. [#5145](https://github.com/mapbox/mapbox-navigation-android/pull/5145)
+    - To access the newly introduced `MapboxRouteShieldApi` independently of the `MapboxManeuverApi`, add the dependency to your project:
+      ```
+      implementation "com.mapbox.navigation:ui-shields:{nav_sdk_version}"
+      ```
+- Added methods in `MapboxRouteLineView` to change the visibility of the route traffic layers. [#5283](https://github.com/mapbox/mapbox-navigation-android/pull/5283)
 #### Bug fixes and improvements
 - Exposed `ManeuverExitOptions`, `ManeuverPrimaryOptions`, `ManeuverSecondaryOptions`, `ManeuverSubOptions`, `MapboxExitProperties` to define the style for `MapboxPrimaryManeuver`, `MapboxSecondaryManeuver`, `MapboxSubManeuver` and associated `MapboxExitText` for each of these maneuvers. [#5357](https://github.com/mapbox/mapbox-navigation-android/pull/5357)
 - Refactored the exit text logic to handle the drawable size based on the size of text associated in `MapboxExitText`. [#5357](https://github.com/mapbox/mapbox-navigation-android/pull/5357)
 - Deprecated `MapboxRoadNameLabelView` and introduced `MapboxRoadNameView` to render mapbox designed shields in the current road name label. [#5310](https://github.com/mapbox/mapbox-navigation-android/pull/5310)
+- Fixed an issue where calculation of dangerous maneuver avoidance (`RerouteOptions#avoidManeuverSeconds`) during a reroute was resulting in much smaller radius than expected. [#5307](https://github.com/mapbox/mapbox-navigation-android/pull/5307)
+- Fixed a crash when `ReplayLocationEngine`'s location callback removes itself during getting a location update. [#5305](https://github.com/mapbox/mapbox-navigation-android/pull/5305)
+- Fixed `MapboxTripProgressView` landscape layout to handle `tripProgressViewBackgroundColor` attribute. [#5318](https://github.com/mapbox/mapbox-navigation-android/pull/5318)
+- Fixed an issue where the `onPause` is not called when the app is backgrounded and the implementation is using `MapboxNavigationApp.attachAllActivities`. [#5329](https://github.com/mapbox/mapbox-navigation-android/pull/5329)
+- Fixed a crash when non-`driving-traffic` profile uses extension `RouteOptions.Builder#applyDefaultNavigationOptions`. [#5322](https://github.com/mapbox/mapbox-navigation-android/pull/5322)
+- Refactored extension `RouteOptions.Builder#applyDefaultNavigationOptions`, might be set profile param explicitly. [#5322](https://github.com/mapbox/mapbox-navigation-android/pull/5322)
+- Exposed a new API `MapboxManeuverView.updateLaneGuidanceIconStyle` that would allow changing the style of `MapboxLaneGuidanceAdapter` at runtime. [#5334](https://github.com/mapbox/mapbox-navigation-android/pull/5334)
+- Fixed a crash when `MapboxNavigationViewportDataSourceDebugger.enabled` is repeatedly set to true. [#5347](https://github.com/mapbox/mapbox-navigation-android/pull/5347)
+- Implemented vanishing route line feature from 1.x for exposing an option to adjust/limit the frequency of the vanishing route line updates. The MapboxRouteLineOptions.vanishingRouteLineUpdateIntervalNano can reduce the frequency of vanishing route line updates when the value of the option increases. [#5344](https://github.com/mapbox/mapbox-navigation-android/pull/5344)
+- Fixed: crashes and waypoints accumulation during rerouting. [#5261](https://github.com/mapbox/mapbox-navigation-android/pull/5261)
+- Added `MapboxDistanceUtil` which moves some of the implementation from `MapboxDistanceFormatter` so that the calculation of the distance rounding and the accompanying text is separated from the SpannableString construction done in  `MapboxDistanceFormatter`. [#5182](https://github.com/mapbox/mapbox-navigation-android/pull/5182)
+- Bumped `targetSdkVersion` to `31`. [#5259](https://github.com/mapbox/mapbox-navigation-android/pull/5259)
+- Fixed empty profile in feedback events. [#5256](https://github.com/mapbox/mapbox-navigation-android/pull/5256)
+- Added support for orientation changes for granular `LifecycleOwner`s to the `MapboxNavigationApp`. [#5234](https://github.com/mapbox/mapbox-navigation-android/pull/5234)
+- Refactored `RouteProgress.voiceInstructions` property to always keep the last value and never become `null`. [#5126](https://github.com/mapbox/mapbox-navigation-android/pull/5126)
+- Added `MapboxNavigationApp` and `MapboxNavigationObserver` to handle `MapboxNavigation` lifecycles. [#5112](https://github.com/mapbox/mapbox-navigation-android/pull/5112)
+- Added a new object `NavigationStyles` that exposes links to default navigation day and night styles. [#5153](https://github.com/mapbox/mapbox-navigation-android/pull/5153)
+- Fixed notification appearance on Android 12.[#5159](https://github.com/mapbox/mapbox-navigation-android/pull/5159)
+- Add checkIsLanguageAvailable flag to VoiceInstructionsPlayerOptions. [#5166](https://github.com/mapbox/mapbox-navigation-android/pull/5166)
+- Fixed an issue where the origin of new alternative routes was always reported as `Onboard`. [#5167](https://github.com/mapbox/mapbox-navigation-android/pull/5167)
+- Added support for `include` route request parameter for onboard router. [#5167](https://github.com/mapbox/mapbox-navigation-android/pull/5167)
+- Added support for `exclude_cash_only_tolls` route request parameter for onboard router. [#5167](https://github.com/mapbox/mapbox-navigation-android/pull/5167)
+- Fixed issue where off-route might not have been detected on complex overpass roads. [#5167](https://github.com/mapbox/mapbox-navigation-android/pull/5167)
+- Fixed an issue where toll and motorway route exclusions were not respected for onboard router. [#5167](https://github.com/mapbox/mapbox-navigation-android/pull/5167)
+- Fixed an issue where `IncidentInfo#id` might've been incorrect when the incident was part of the route response.[#5167](https://github.com/mapbox/mapbox-navigation-android/pull/5167)
+- Added support for `ShieldSprites`, `ShieldSprite` and `ShieldSpriteAttribute` for mapbox designed route shields.[#5184](https://github.com/mapbox/mapbox-navigation-android/pull/5184)
+- Exposed a callback for `MapboxNavigation#requestAlternativeRoutes` to track progress of the on-demand alternative routes request.[#5189](https://github.com/mapbox/mapbox-navigation-android/pull/5189)
+- Fixed an issue where route request failure (due to incorrect parameters) led to a parsing error and runtime crash instead of failure callback. [#5139](https://github.com/mapbox/mapbox-navigation-android/pull/5139)
+- Fixed an issue where reroute controller attempted to add request parameters unsuitable for the selected profile. [#5140](https://github.com/mapbox/mapbox-navigation-android/pull/5140)
+- Added `RerouteOptions` to define reroute params for default `RereouteController`. [#5056](https://github.com/mapbox/mapbox-navigation-android/pull/5056)
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
