@@ -334,12 +334,10 @@ package com.mapbox.navigation.base.road.model {
 
   public final class Road {
     method public java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> getComponents();
-    method @Deprecated public java.util.List<com.mapbox.api.directions.v5.models.MapboxShield>? getMapboxShield();
     method @Deprecated public String? getName();
     method @Deprecated public String? getShieldName();
     method @Deprecated public String? getShieldUrl();
     property public final java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> components;
-    property @Deprecated public final java.util.List<com.mapbox.api.directions.v5.models.MapboxShield>? mapboxShield;
     property @Deprecated public final String? name;
     property @Deprecated public final String? shieldName;
     property @Deprecated public final String? shieldUrl;

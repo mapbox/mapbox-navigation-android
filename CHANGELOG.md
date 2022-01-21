@@ -3,6 +3,9 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
+#### Features
+
+#### Bug fixes and improvements
 
 ## Mapbox Navigation SDK 2.2.0 - January 20, 2022
 
