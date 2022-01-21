@@ -20,6 +20,11 @@ object RoadFactory {
                 imageBaseUrl = road.imageBaseUrl,
             )
         }
-        return Road(components = components)
+        return Road(
+            components = components,
+            name = navigationStatus.roads.firstOrNull()?.text,
+            shieldName = navigationStatus.roads.firstOrNull()?.shield?.name,
+            shieldUrl = navigationStatus.roads.firstOrNull()?.imageBaseUrl,
+        )
     }
 }

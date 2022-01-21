@@ -3,6 +3,10 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
+#### Features
+
+#### Bug fixes and improvements
+- Fixed an issue where deprecated fields in `Road` type were always returning `null`s instead of the correct values. [#5396](https://github.com/mapbox/mapbox-navigation-android/pull/5396)
 
 ## Mapbox Navigation SDK 2.2.0 - January 20, 2022
 

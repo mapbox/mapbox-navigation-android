@@ -476,6 +476,16 @@ class NavigatorMapperTest {
         )
     }
 
+    @Test
+    fun `banner components mapper correctly sets legacy shield url`() {
+        val result = nativeBannerInstructions.mapToDirectionsApi()
+
+        assertEquals(
+            "legacyShieldUrl",
+            result.primary().components()!!.first().imageBaseUrl()
+        )
+    }
+
     private fun createSpeedLimit(): com.mapbox.navigator.SpeedLimit {
         return com.mapbox.navigator.SpeedLimit(
             10,
@@ -491,7 +501,14 @@ class NavigatorMapperTest {
     private val nativeBannerInstructions = mockk<BannerInstruction> {
         every { remainingStepDistance } returns 111f
         every { primary } returns mockk {
-            every { components } returns listOf()
+            every { components } returns listOf(
+                mockk(relaxed = true) {
+                    every { imageBaseUrl } returns "legacyShieldUrl"
+                    every { shield } returns mockk(relaxed = true) {
+                        every { baseUrl } returns "designBaseUrl"
+                    }
+                }
+            )
             every { degrees } returns 45
             every { drivingSide } returns "drivingSide"
             every { modifier } returns "modifier"

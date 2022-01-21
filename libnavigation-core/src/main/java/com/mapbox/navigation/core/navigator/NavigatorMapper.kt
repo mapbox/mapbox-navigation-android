@@ -252,7 +252,7 @@ private fun MutableList<BannerComponent>.mapToDirectionsApi(): MutableList<Banne
                 .abbreviationPriority(it.abbrPriority)
                 .active(it.active)
                 .directions(it.directions)
-                .imageBaseUrl(it.shield?.baseUrl)
+                .imageBaseUrl(it.imageBaseUrl)
                 .imageUrl(it.imageURL)
                 .text(it.text)
                 .type(it.type)
