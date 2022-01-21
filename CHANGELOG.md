@@ -36,7 +36,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Implemented vanishing route line feature from 1.x for exposing an option to adjust/limit the frequency of the vanishing route line updates. The MapboxRouteLineOptions.vanishingRouteLineUpdateIntervalNano can reduce the frequency of vanishing route line updates when the value of the option increases. [#5344](https://github.com/mapbox/mapbox-navigation-android/pull/5344)
 - Fixed: crashes and waypoints accumulation during rerouting. [#5261](https://github.com/mapbox/mapbox-navigation-android/pull/5261)
 - Added `MapboxDistanceUtil` which moves some of the implementation from `MapboxDistanceFormatter` so that the calculation of the distance rounding and the accompanying text is separated from the SpannableString construction done in  `MapboxDistanceFormatter`. [#5182](https://github.com/mapbox/mapbox-navigation-android/pull/5182)
-- Bumped `targetSdkVersion` to `31`. [#5259](https://github.com/mapbox/mapbox-navigation-android/pull/5259)
+- Switched `targetSdkVersion` to `31`. [#5259](https://github.com/mapbox/mapbox-navigation-android/pull/5259)
 - Fixed empty profile in feedback events. [#5256](https://github.com/mapbox/mapbox-navigation-android/pull/5256)
 - Added support for orientation changes for granular `LifecycleOwner`s to the `MapboxNavigationApp`. [#5234](https://github.com/mapbox/mapbox-navigation-android/pull/5234)
 - Refactored `RouteProgress.voiceInstructions` property to always keep the last value and never become `null`. [#5126](https://github.com/mapbox/mapbox-navigation-android/pull/5126)
