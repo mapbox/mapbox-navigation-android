@@ -844,6 +844,8 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public boolean getStyleInactiveRouteLegsIndependently();
     method public double getTolerance();
     method public long getVanishingRouteLineUpdateIntervalNano();
+    method public com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor getWaypointLayerIconAnchor();
+    method public java.util.List<java.lang.Double> getWaypointLayerIconOffset();
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder toBuilder(android.content.Context context);
     property public final android.graphics.drawable.Drawable destinationIcon;
     property public final boolean displayRestrictedRoadSections;
@@ -855,6 +857,8 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final boolean styleInactiveRouteLegsIndependently;
     property public final double tolerance;
     property public final long vanishingRouteLineUpdateIntervalNano;
+    property public final com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor waypointLayerIconAnchor;
+    property public final java.util.List<java.lang.Double> waypointLayerIconOffset;
   }
 
   public static final class MapboxRouteLineOptions.Builder {
@@ -865,6 +869,8 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder softGradientTransition(int transitionDistance);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder styleInactiveRouteLegsIndependently(boolean enable);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder vanishingRouteLineUpdateInterval(long interval = 62500000L);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder waypointLayerIconAnchor(com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor iconAnchor = IconAnchor.CENTER);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder waypointLayerIconOffset(java.util.List<java.lang.Double> iconOffset = listOf(0.0, 0.0));
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteLineBelowLayerId(String layerId);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteLineResources(com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources resourceProvider);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteStyleDescriptors(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor> routeStyleDescriptors);

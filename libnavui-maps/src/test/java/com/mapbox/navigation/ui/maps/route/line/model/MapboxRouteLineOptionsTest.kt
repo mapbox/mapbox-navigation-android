@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.route.line.model
 import android.content.Context
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -114,6 +115,26 @@ class MapboxRouteLineOptionsTest {
     }
 
     @Test
+    fun waypointLayerIconOffset() {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .waypointLayerIconOffset(listOf(3.0, 4.4))
+            .build()
+
+        assertEquals(3.0, options.waypointLayerIconOffset.first(), 0.0)
+        assertEquals(4.4, options.waypointLayerIconOffset.component2(), 0.0)
+        assertEquals(2, options.waypointLayerIconOffset.size)
+    }
+
+    @Test
+    fun waypointLayerIconAnchor() {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .waypointLayerIconAnchor(IconAnchor.BOTTOM_LEFT)
+            .build()
+
+        assertEquals(IconAnchor.BOTTOM_LEFT, options.waypointLayerIconAnchor)
+    }
+
+    @Test
     fun toBuilder() {
         val routeLineResources = RouteLineResources.Builder().build()
         val routeStyleDescriptors =
@@ -130,6 +151,8 @@ class MapboxRouteLineOptionsTest {
             .displaySoftGradientForTraffic(true)
             .softGradientTransition(77)
             .vanishingRouteLineUpdateInterval(44L)
+            .waypointLayerIconOffset(listOf(3.0, 4.4))
+            .waypointLayerIconAnchor(IconAnchor.BOTTOM)
             .build()
             .toBuilder(ctx)
             .build()
@@ -144,5 +167,9 @@ class MapboxRouteLineOptionsTest {
         assertTrue(options.displaySoftGradientForTraffic)
         assertEquals(77.0, options.softGradientTransition, 0.0)
         assertEquals(44, options.vanishingRouteLineUpdateIntervalNano)
+        assertEquals(3.0, options.waypointLayerIconOffset.first(), 0.0)
+        assertEquals(4.4, options.waypointLayerIconOffset.component2(), 0.0)
+        assertEquals(2, options.waypointLayerIconOffset.size)
+        assertEquals(IconAnchor.BOTTOM, options.waypointLayerIconAnchor)
     }
 }

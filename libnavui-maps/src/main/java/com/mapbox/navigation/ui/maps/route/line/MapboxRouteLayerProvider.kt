@@ -9,6 +9,7 @@ import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.switchCase
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
+import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
 import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
 import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
@@ -205,7 +206,9 @@ internal class MapboxRouteLayerProvider(
     fun buildWayPointLayer(
         style: Style,
         originIcon: Drawable,
-        destinationIcon: Drawable
+        destinationIcon: Drawable,
+        iconOffset: List<Double>,
+        iconAnchor: IconAnchor
     ): SymbolLayer {
         if (style.styleLayerExists(RouteLayerConstants.WAYPOINT_LAYER_ID)) {
             style.removeStyleLayer(RouteLayerConstants.WAYPOINT_LAYER_ID)
@@ -228,23 +231,25 @@ internal class MapboxRouteLayerProvider(
         return SymbolLayer(
             RouteLayerConstants.WAYPOINT_LAYER_ID,
             RouteLayerConstants.WAYPOINT_SOURCE_ID
-        ).iconImage(
-            match {
-                toString {
-                    get { literal(RouteLayerConstants.WAYPOINT_PROPERTY_KEY) }
-                }
-                literal(RouteLayerConstants.WAYPOINT_ORIGIN_VALUE)
-                stop {
-                    RouteLayerConstants.WAYPOINT_ORIGIN_VALUE
-                    literal(RouteLayerConstants.ORIGIN_MARKER_NAME)
-                }
-                stop {
-                    RouteLayerConstants.WAYPOINT_DESTINATION_VALUE
-                    literal(RouteLayerConstants.DESTINATION_MARKER_NAME)
-                }
-            }
         )
-            .iconSize(
+            .iconOffset(iconOffset)
+            .iconAnchor(iconAnchor)
+            .iconImage(
+                match {
+                    toString {
+                        get { literal(RouteLayerConstants.WAYPOINT_PROPERTY_KEY) }
+                    }
+                    literal(RouteLayerConstants.WAYPOINT_ORIGIN_VALUE)
+                    stop {
+                        RouteLayerConstants.WAYPOINT_ORIGIN_VALUE
+                        literal(RouteLayerConstants.ORIGIN_MARKER_NAME)
+                    }
+                    stop {
+                        RouteLayerConstants.WAYPOINT_DESTINATION_VALUE
+                        literal(RouteLayerConstants.DESTINATION_MARKER_NAME)
+                    }
+                }
+            ).iconSize(
                 interpolate {
                     exponential { literal(1.5) }
                     zoom()

@@ -1050,7 +1050,9 @@ object MapboxRouteLineUtils {
         options.routeLayerProvider.buildWayPointLayer(
             style,
             options.originIcon,
-            options.destinationIcon
+            options.destinationIcon,
+            options.waypointLayerIconOffset,
+            options.waypointLayerIconAnchor
         ).let {
             style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
         }
