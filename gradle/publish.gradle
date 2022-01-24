@@ -69,6 +69,8 @@ sdkNameMap["libnavui-speedlimit"] = "mobile-navigation-ui-speedlimit"
 sdkNameMap["libnavui-shield"] = "mobile-navigation-ui-shield"
 //sdkNameMap["libnavui-dropin"] = "mobile-navigation-ui-dropin"
 
+sdkNameMap["libnavigation-android-coroutines"] = "mobile-navigation-android-coroutines"
+
 registry {
     sdkName = sdkNameMap[project.name]
     production = true

@@ -22,3 +22,12 @@ include ':examples',
         ':libnavui-shield',
         ':libnavui-dropin',
         ':qa-test-app'
+
+def module(String path) {
+    int i = path.lastIndexOf('/')
+    def name = path.substring(i + 1)
+    include(name)
+    project(":$name").projectDir = file(path)
+}
+
+module('integration/libnavigation-android-coroutines')
