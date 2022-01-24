@@ -81,7 +81,7 @@ class MapboxPrimaryManeuver : AppCompatTextView {
         val exitView = MapboxExitText(context)
         exitView.updateTextAppearance(options.exitOptions.textAppearance)
         // TODO: write when to check the type and pass MUTCD or VIENNA when the data is available
-        exitView.updateExitProperties(options.exitOptions.viennaExitProperties)
+        exitView.updateExitProperties(options.exitOptions.mutcdExitProperties)
         val instruction = ManeuverInstructionGenerator.generatePrimary(
             context,
             lineHeight,
