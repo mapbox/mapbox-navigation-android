@@ -2,6 +2,8 @@ package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.Configuration
+import android.content.res.Resources
 import android.location.Location
 import android.os.Bundle
 import android.view.View
@@ -9,13 +11,10 @@ import android.widget.Button
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.Style
 import com.mapbox.maps.extension.observable.eventdata.MapLoadingErrorEventData
 import com.mapbox.maps.plugin.LocationPuck2D
-import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
@@ -39,6 +38,7 @@ import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
+import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
@@ -56,6 +56,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.Collections
 
+private const val DEFAULT_INITIAL_ZOOM = 15.0
+
 class ReplayHistoryActivity : AppCompatActivity() {
 
     private var loadNavigationJob: Job? = null
@@ -67,6 +69,44 @@ class ReplayHistoryActivity : AppCompatActivity() {
     private lateinit var navigationCamera: NavigationCamera
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
     private lateinit var binding: ActivityReplayHistoryLayoutBinding
+    private var isLocationInitialized = false
+    private val pixelDensity = Resources.getSystem().displayMetrics.density
+    private val overviewPadding: EdgeInsets by lazy {
+        EdgeInsets(
+            140.0 * pixelDensity,
+            40.0 * pixelDensity,
+            120.0 * pixelDensity,
+            40.0 * pixelDensity
+        )
+    }
+    private val landscapeOverviewPadding: EdgeInsets by lazy {
+        EdgeInsets(
+            30.0 * pixelDensity,
+            380.0 * pixelDensity,
+            20.0 * pixelDensity,
+            20.0 * pixelDensity
+        )
+    }
+    private val followingPadding: EdgeInsets by lazy {
+        EdgeInsets(
+            180.0 * pixelDensity,
+            40.0 * pixelDensity,
+            150.0 * pixelDensity,
+            40.0 * pixelDensity
+        )
+    }
+    private val landscapeFollowingPadding: EdgeInsets by lazy {
+        EdgeInsets(
+            30.0 * pixelDensity,
+            380.0 * pixelDensity,
+            110.0 * pixelDensity,
+            40.0 * pixelDensity
+        )
+    }
+
+    private val initialCameraOptions: CameraOptions? = CameraOptions.Builder()
+        .zoom(DEFAULT_INITIAL_ZOOM)
+        .build()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,6 +127,17 @@ class ReplayHistoryActivity : AppCompatActivity() {
             startActivityForResult(activityIntent, HistoryFilesActivity.REQUEST_CODE)
         }
         setupReplayControls()
+
+        if (this.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            viewportDataSource.overviewPadding = landscapeOverviewPadding
+        } else {
+            viewportDataSource.overviewPadding = overviewPadding
+        }
+        if (this.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            viewportDataSource.followingPadding = landscapeFollowingPadding
+        } else {
+            viewportDataSource.followingPadding = followingPadding
+        }
     }
 
     override fun onStart() {
@@ -124,9 +175,11 @@ class ReplayHistoryActivity : AppCompatActivity() {
         viewportDataSource = MapboxNavigationViewportDataSource(
             binding.mapView.getMapboxMap()
         )
-        binding.mapView.getMapboxMap().loadStyleUri(
+        val mapboxMap = binding.mapView.getMapboxMap()
+        initialCameraOptions?.let { mapboxMap.setCamera(it) }
+        mapboxMap.loadStyleUri(
             NavigationStyles.NAVIGATION_DAY_STYLE,
-            { style: Style ->
+            {
                 locationComponent = binding.mapView.location.apply {
                     this.locationPuck = LocationPuck2D(
                         bearingImage = ContextCompat.getDrawable(
@@ -139,11 +192,10 @@ class ReplayHistoryActivity : AppCompatActivity() {
                 }
                 locationComponent.addOnIndicatorPositionChangedListener(onPositionChangedListener)
                 navigationCamera = NavigationCamera(
-                    binding.mapView.getMapboxMap(),
+                    mapboxMap,
                     binding.mapView.camera,
                     viewportDataSource
                 )
-
                 viewportDataSource.evaluate()
             },
             object : OnMapLoadErrorListener {
@@ -157,27 +209,23 @@ class ReplayHistoryActivity : AppCompatActivity() {
     private val locationObserver = object : LocationObserver {
         override fun onNewRawLocation(rawLocation: Location) {}
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+            viewportDataSource.onLocationChanged(locationMatcherResult.enhancedLocation)
+            viewportDataSource.evaluate()
+            if (!isLocationInitialized) {
+                isLocationInitialized = true
+                val instantTransition = NavigationCameraTransitionOptions.Builder()
+                    .maxDuration(0)
+                    .build()
+                navigationCamera.requestNavigationCameraToOverview(
+                    stateTransitionOptions = instantTransition,
+                )
+            }
+
             navigationLocationProvider.changePosition(
                 locationMatcherResult.enhancedLocation,
                 locationMatcherResult.keyPoints,
             )
-            updateCamera(locationMatcherResult.enhancedLocation)
         }
-    }
-
-    private fun updateCamera(location: Location) {
-        val mapAnimationOptionsBuilder = MapAnimationOptions.Builder()
-            .duration(1500L)
-        binding.mapView.camera.easeTo(
-            CameraOptions.Builder()
-                .center(Point.fromLngLat(location.longitude, location.latitude))
-                .bearing(location.bearing.toDouble())
-                .pitch(45.0)
-                .zoom(17.0)
-                .padding(EdgeInsets(1000.0, 0.0, 0.0, 0.0))
-                .build(),
-            mapAnimationOptionsBuilder.build()
-        )
     }
 
     /** Rendering the set route event **/
@@ -217,6 +265,13 @@ class ReplayHistoryActivity : AppCompatActivity() {
     }
 
     private val routesObserver: RoutesObserver = RoutesObserver { result ->
+        if (result.routes.isEmpty()) {
+            viewportDataSource.clearRouteData()
+        } else {
+            viewportDataSource.onRouteChanged(result.routes.first())
+        }
+        viewportDataSource.evaluate()
+
         val routeLines = result.routes.map { RouteLine(it, null) }
         routeLineApi.setRoutes(
             routeLines
@@ -228,6 +283,9 @@ class ReplayHistoryActivity : AppCompatActivity() {
     }
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+        viewportDataSource.evaluate()
+
         routeLineApi.updateWithRouteProgress(routeProgress) { result ->
             binding.mapView.getMapboxMap().getStyle()?.apply {
                 routeLineView.renderRouteLineUpdate(this, result)
@@ -284,6 +342,8 @@ class ReplayHistoryActivity : AppCompatActivity() {
             mapboxReplayer.pushEvents(events)
             binding.playReplay.visibility = View.VISIBLE
             mapboxNavigation.resetTripSession()
+            mapboxNavigation.setRoutes(emptyList())
+            isLocationInitialized = false
             mapboxReplayer.playFirstLocation()
         }
     }
@@ -323,6 +383,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
         binding.playReplay.setOnClickListener {
             mapboxReplayer.play()
             binding.playReplay.visibility = View.GONE
+            navigationCamera.requestNavigationCameraToFollowing()
         }
 
         mapboxReplayer.registerObserver { events ->
