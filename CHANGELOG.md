@@ -96,6 +96,10 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Android Telemetry `v8.1.0`
 
 ## Mapbox Navigation SDK 2.3.0-alpha.1 - January 14, 2021
+
+### Known issues
+- The `RouteAlternativesObserver` and `RouteAlternativesRequestCallback` fail to deliver any alternatives due to an unrecognized parameter in the native controller.
+
 ### Changelog
 #### Bug fixes and improvements
 - Add geo deeplink parsing utility `GeoDeeplinkParser`. [#5103](https://github.com/mapbox/mapbox-navigation-android/pull/5103)
