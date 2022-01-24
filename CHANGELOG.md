@@ -6,10 +6,21 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
+- Fixed an issue found in `v2.3.0-alpha.1` where deprecated fields in `Road` type were always returning `null`s instead of the correct values. [#5396](https://github.com/mapbox/mapbox-navigation-android/pull/5396)
+
+## Mapbox Navigation SDK 2.2.1 - January 24, 2022
+### Changelog
+[Changes between v2.2.0 and v2.2.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.2.0...v2.2.1):
+
+#### Bug fixes and improvements
+- Fixed an issue where the _Onboard_ Router (used in offline scenarios) couldn't dispatch routes with tiles versions after and including `2021_12_25-03_00_00`.
 
 ## Mapbox Navigation SDK 2.2.0 - January 20, 2022
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Known issues
+- :exclamation: The _Onboard_ Router (used in offline scenarios) can't dispatch routes with tiles versions after and including `2021_12_25-03_00_00`. If a tiles version is left unspecified, Navigation SDK will download the latest version. Therefore, in order to work around this, the tiles version needs to be manually specified to any version before `2021_12_25-03_00_00` (e.g. `2021_02_14-03_00_00`). This can be done specifying the tiles version in the routing tiles options `RoutingTilesOptions#tilesVersion` and adding those options to the navigation options `NavigationOptions#routingTilesOptions`.
 
 ### Changelog
 [Changes between v2.1.2 and v2.2.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.1.2...v2.2.0):
