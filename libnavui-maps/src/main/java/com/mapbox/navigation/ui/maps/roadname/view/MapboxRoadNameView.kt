@@ -45,14 +45,13 @@ class MapboxRoadNameView : AppCompatTextView {
 
     /**
      * Invoke the method to render the view with road name.
+     * It's recommended to hide this view if [Road] has no data to show.
      *
      * @param road Road
      */
     fun renderRoadName(road: Road) {
-        if (road.components.isNotEmpty()) {
-            roadComponents.clear()
-            roadComponents.addAll(road.components)
-        }
+        roadComponents.clear()
+        roadComponents.addAll(road.components)
         renderRoadNameLabel()
     }
 
