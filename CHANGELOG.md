@@ -2,7 +2,8 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
-## Unreleased
+## Unreleased 
+- Added options to the MapboxRouteLineOptions class to control the icon anchor and icon offset for the route line related waypoint icons including the origin and destination points. [#5409](https://github.com/mapbox/mapbox-navigation-android/pull/5409)
 #### Features
 - Added `avoidManeuverSeconds` param to `RouteAlternativesOptions`. [#5394](https://github.com/mapbox/mapbox-navigation-android/pull/5394)
 

@@ -20,6 +20,7 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.extension.style.layers.getLayer
+import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
@@ -71,6 +72,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.ArrayList
 
 @RunWith(RobolectricTestRunner::class)
 class MapboxRouteLineUtilsTest {
@@ -446,6 +448,8 @@ class MapboxRouteLineUtilsTest {
         val options = MapboxRouteLineOptions.Builder(ctx)
             .withRouteLineBelowLayerId(LocationComponentConstants.MODEL_LAYER)
             .displayRestrictedRoadSections(true)
+            .waypointLayerIconAnchor(IconAnchor.BOTTOM_RIGHT)
+            .waypointLayerIconOffset(listOf(33.3, 44.4))
             .build()
         val waypointSourceValueSlots = mutableListOf<Value>()
         val primaryRouteSourceValueSlots = mutableListOf<Value>()
@@ -693,6 +697,24 @@ class MapboxRouteLineUtilsTest {
         assertEquals(
             "mapbox-navigation-waypoint-layer",
             (addStyleLayerSlots[12].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "bottom-right",
+            (addStyleLayerSlots[12].contents as HashMap<String, Value>)["icon-anchor"]!!.contents
+        )
+        assertEquals(
+            33.3,
+            (
+                (addStyleLayerSlots[12].contents as HashMap<String, Value>)["icon-offset"]
+                !!.contents as ArrayList<Value>
+                ).first().contents
+        )
+        assertEquals(
+            44.4,
+            (
+                (addStyleLayerSlots[12].contents as HashMap<String, Value>)["icon-offset"]
+                !!.contents as ArrayList<Value>
+                ).component2().contents
         )
         assertEquals(
             LocationComponentConstants.MODEL_LAYER,

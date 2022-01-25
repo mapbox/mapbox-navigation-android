@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.route.line.model
 import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.appcompat.content.res.AppCompatResources
+import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
@@ -31,6 +32,8 @@ import kotlin.math.abs
  * parameter is true.
  * @param vanishingRouteLineUpdateIntervalNano can be used to decrease the frequency of the vanishing route
  * line updates improving the performance at the expense of visual appearance of the vanishing point on the line during navigation.
+ * @param waypointLayerIconOffset the list of offset values for waypoint icons
+ * @param waypointLayerIconAnchor the anchor value, the default is [IconAnchor.CENTER]
  */
 class MapboxRouteLineOptions private constructor(
     val resourceProvider: RouteLineResources,
@@ -45,7 +48,9 @@ class MapboxRouteLineOptions private constructor(
     val displaySoftGradientForTraffic: Boolean = false,
     val softGradientTransition: Double = RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS,
     val vanishingRouteLineUpdateIntervalNano: Long =
-        RouteLayerConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO
+        RouteLayerConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO,
+    val waypointLayerIconOffset: List<Double> = listOf(0.0, 0.0),
+    val waypointLayerIconAnchor: IconAnchor = IconAnchor.CENTER
 ) {
 
     /**
@@ -66,7 +71,9 @@ class MapboxRouteLineOptions private constructor(
             styleInactiveRouteLegsIndependently,
             displaySoftGradientForTraffic,
             softGradientTransition,
-            vanishingRouteLineUpdateIntervalNano
+            vanishingRouteLineUpdateIntervalNano,
+            waypointLayerIconOffset,
+            waypointLayerIconAnchor
         )
     }
 
@@ -93,6 +100,8 @@ class MapboxRouteLineOptions private constructor(
         if (softGradientTransition != other.softGradientTransition) return false
         if (vanishingRouteLineUpdateIntervalNano != other.vanishingRouteLineUpdateIntervalNano)
             return false
+        if (waypointLayerIconOffset != other.waypointLayerIconOffset) return false
+        if (waypointLayerIconAnchor != other.waypointLayerIconAnchor) return false
 
         return true
     }
@@ -113,6 +122,8 @@ class MapboxRouteLineOptions private constructor(
         result = 31 * result + (displaySoftGradientForTraffic.hashCode())
         result = 31 * result + (softGradientTransition.hashCode())
         result = 31 * result + (vanishingRouteLineUpdateIntervalNano.hashCode())
+        result = 31 * result + (waypointLayerIconOffset.hashCode())
+        result = 31 * result + (waypointLayerIconAnchor.hashCode())
         return result
     }
 
@@ -131,7 +142,9 @@ class MapboxRouteLineOptions private constructor(
             "styleInactiveRouteLegsIndependently=$styleInactiveRouteLegsIndependently," +
             "displaySoftGradientForTraffic=$displaySoftGradientForTraffic," +
             "softGradientTransition=$softGradientTransition," +
-            "vanishingRouteLineUpdateIntervalNano=$vanishingRouteLineUpdateIntervalNano" +
+            "vanishingRouteLineUpdateIntervalNano=$vanishingRouteLineUpdateIntervalNano," +
+            "waypointLayerIconOffset=$waypointLayerIconOffset," +
+            "waypointLayerIconAnchor=$waypointLayerIconAnchor" +
             ")"
     }
 
@@ -167,7 +180,9 @@ class MapboxRouteLineOptions private constructor(
         private var styleInactiveRouteLegsIndependently: Boolean,
         private var displaySoftGradientForTraffic: Boolean,
         private var softGradientTransition: Double,
-        private var vanishingRouteLineUpdateIntervalNano: Long
+        private var vanishingRouteLineUpdateIntervalNano: Long,
+        private var iconOffset: List<Double>,
+        private var iconAnchor: IconAnchor
     ) {
 
         /**
@@ -186,7 +201,9 @@ class MapboxRouteLineOptions private constructor(
             false,
             false,
             RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS,
-            RouteLayerConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO
+            RouteLayerConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO,
+            listOf(0.0, 0.0),
+            IconAnchor.CENTER
         )
 
         /**
@@ -302,6 +319,32 @@ class MapboxRouteLineOptions private constructor(
         ): Builder = apply { this.vanishingRouteLineUpdateIntervalNano = interval }
 
         /**
+         * Determines the icon offset for the [SymbolLayer] that hosts the waypoint icons
+         * including the icons for the origin and destination points.
+         *
+         * Offset distance of icon from its anchor. Positive values indicate right and down,
+         * while negative values indicate left and up. Each component is multiplied by the
+         * value of icon-size to obtain the final offset in pixels.
+         * When combined with icon-rotate the offset will be as if the rotated direction was up.
+         *
+         * @param iconOffset the list of offset values
+         * @return the builder
+         */
+        fun waypointLayerIconOffset(iconOffset: List<Double> = listOf(0.0, 0.0)): Builder =
+            apply { this.iconOffset = iconOffset }
+
+        /**
+         * Determines the icon anchor for the [SymbolLayer] that hosts the waypoint icons
+         * including the icons for the origin and destination points.
+         *
+         * Part of the icon placed closest to the anchor
+         *
+         * @param iconAnchor the anchor value, the default is [IconAnchor.CENTER]
+         */
+        fun waypointLayerIconAnchor(iconAnchor: IconAnchor = IconAnchor.CENTER): Builder =
+            apply { this.iconAnchor = iconAnchor }
+
+        /**
          * @return an instance of [MapboxRouteLineOptions]
          */
         fun build(): MapboxRouteLineOptions {
@@ -346,7 +389,9 @@ class MapboxRouteLineOptions private constructor(
                 styleInactiveRouteLegsIndependently,
                 displaySoftGradientForTraffic,
                 softGradientTransition,
-                vanishingRouteLineUpdateIntervalNano
+                vanishingRouteLineUpdateIntervalNano,
+                iconOffset,
+                iconAnchor
             )
         }
     }
