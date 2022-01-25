@@ -5,7 +5,6 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.core.trip.NativeRouteProcessingListener
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.FileUtils
@@ -13,7 +12,6 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteAlternativesControllerInterface
-import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -248,68 +246,6 @@ class RouteAlternativesControllerTest {
         assertEquals(
             originalCoordinates, alternativesSlot.captured[0].routeOptions()?.coordinates()
         )
-    }
-
-    /**
-     * workaround for a problem in Nav Native where calling #setRoute invokes alternative observer
-     */
-    @Test
-    fun `should not broadcast alternative routes right after routes are set`() {
-        val routeProcessingListenerSlot = slot<NativeRouteProcessingListener>()
-        every {
-            tripSession.registerNativeRouteProcessingListener(capture(routeProcessingListenerSlot))
-        } just Runs
-        val routeAlternativesController = createRouteAlternativesController()
-        val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
-        every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-        val routeProgress = mockk<RouteProgress> {
-            every { route } returns mockk(relaxed = true)
-        }
-        every { tripSession.getRouteProgress() } returns routeProgress
-
-        val firstObserver: RouteAlternativesObserver = mockk(relaxed = true)
-        val secondObserver: RouteAlternativesObserver = mockk(relaxed = true)
-        routeAlternativesController.register(firstObserver)
-        routeAlternativesController.register(secondObserver)
-        val alternativeRouteJson = FileUtils.loadJsonFixture(
-            "route_alternative_from_native.json"
-        )
-
-        routeProcessingListenerSlot.captured.onNativeRouteProcessingStarted()
-        nativeObserver.captured.onRouteAlternativesChanged(
-            listOf(
-                mockk {
-                    mockk {
-                        every { route.response } returns alternativeRouteJson
-                        every {
-                            route.routerOrigin
-                        } returns com.mapbox.navigator.RouterOrigin.ONBOARD
-                        every { isNew } returns true
-                    }
-                }
-            ),
-            emptyList()
-        )
-        verify(exactly = 0) { firstObserver.onRouteAlternatives(routeProgress, any(), any()) }
-        verify(exactly = 0) { secondObserver.onRouteAlternatives(routeProgress, any(), any()) }
-
-        // subsequent updates should go through
-        nativeObserver.captured.onRouteAlternativesChanged(
-            listOf(
-                mockk {
-                    mockk {
-                        every { route.response } returns alternativeRouteJson
-                        every {
-                            route.routerOrigin
-                        } returns com.mapbox.navigator.RouterOrigin.ONLINE
-                        every { isNew } returns true
-                    }
-                }
-            ),
-            emptyList()
-        )
-        verify(exactly = 1) { firstObserver.onRouteAlternatives(routeProgress, any(), any()) }
-        verify(exactly = 1) { secondObserver.onRouteAlternatives(routeProgress, any(), any()) }
     }
 
     @Test

@@ -7,13 +7,10 @@ import com.mapbox.navigation.base.internal.utils.parseNativeDirectionsAlternativ
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.trip.NativeRouteProcessingListener
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.mapToSdkRouteOrigin
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigator.RouteAlternative
@@ -27,19 +24,6 @@ internal class RouteAlternativesController constructor(
     private val tripSession: TripSession,
     private val threadController: ThreadController
 ) {
-
-    /**
-     * Works around the problem of an endless loop of alternatives updates.
-     *
-     * We deliver new routes to developers in [RouteAlternativesObserver.onRouteAlternatives] and
-     * developers set the selected alternatives back with [MapboxNavigation] which in turn triggers
-     * [MapboxNativeNavigator.setRoute] and that calls [com.mapbox.navigator.RouteAlternativesObserver]
-     * which would lock us in a loop.
-     *
-     * To break out of this loop, we ignore the first [com.mapbox.navigator.RouteAlternativesObserver]
-     * after setting a route.
-     */
-    private var inhibitNextUpdate = false
 
     private var lastUpdateOrigin: RouterOrigin = RouterOrigin.Onboard
 
@@ -58,19 +42,10 @@ internal class RouteAlternativesController constructor(
 
     private val observers = CopyOnWriteArraySet<RouteAlternativesObserver>()
 
-    private val nativeRouteProcessingListener = NativeRouteProcessingListener {
-        inhibitNextUpdate = true
-    }
-
-    init {
-        tripSession.registerNativeRouteProcessingListener(nativeRouteProcessingListener)
-    }
-
     fun register(routeAlternativesObserver: RouteAlternativesObserver) {
         val isStopped = observers.isEmpty()
         observers.add(routeAlternativesObserver)
         if (isStopped) {
-            inhibitNextUpdate = false
             nativeRouteAlternativesController.addObserver(nativeObserver)
         }
     }
@@ -121,12 +96,6 @@ internal class RouteAlternativesController constructor(
             routeAlternatives: List<RouteAlternative>,
             removed: List<RouteAlternative>
         ): List<Int> {
-            if (inhibitNextUpdate) {
-                logD(TAG, Message("update skipped because alternatives were reset with #setRoutes"))
-                inhibitNextUpdate = false
-                return emptyList()
-            }
-
             val routeProgress = tripSession.getRouteProgress()
                 ?: return emptyList()
 
