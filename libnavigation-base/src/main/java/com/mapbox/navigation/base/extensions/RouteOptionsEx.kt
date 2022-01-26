@@ -105,31 +105,6 @@ fun RouteOptions.Builder.coordinates(
     return this
 }
 
-internal fun RouteOptions.areRequiredArgumentsInPlace(): Boolean {
-    val defaultArgumentsOnly = RouteOptions.builder()
-        .coordinates(coordinates())
-        .applyDefaultNavigationOptions(profile())
-        .build()
-    if (overview() != defaultArgumentsOnly.overview()) {
-        return false
-    }
-    if (annotationsList()?.containsAll(defaultArgumentsOnly.annotationsList()!!)?.not() ?: false) {
-        return false
-    }
-    if (roundaboutExits() != true) {
-        return false
-    }
-    if (voiceInstructions() != true) {
-        return false
-    }
-    if (bannerInstructions() != true) {
-        return false
-    }
-    if (continueStraight() != defaultArgumentsOnly.continueStraight()) {
-        return false
-    }
-    if (enableRefresh() != defaultArgumentsOnly.enableRefresh()) {
-        return false
-    }
-    return true
+internal fun RouteOptions.areCompatibleWithSDK(): Boolean {
+    return steps() == true
 }

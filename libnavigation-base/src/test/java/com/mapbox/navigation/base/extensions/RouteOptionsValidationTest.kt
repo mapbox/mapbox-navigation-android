@@ -11,11 +11,11 @@ class RouteOptionsValidationTest {
     @Test
     fun `calling applyDefaultNavigationOptions for driving makes options valid`() {
         val options = minimalValidOptionsBuilder().build()
-        assertTrue(options.areRequiredArgumentsInPlace())
+        assertTrue(options.areCompatibleWithSDK())
     }
 
     @Test
-    fun `calling applyDefaultNavigationOptions for all profiles makes options valid`() {
+    fun `calling applyDefaultNavigationOptions for all profiles makes options compatible`() {
         val allProfiles = listOf(
             DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
             DirectionsCriteria.PROFILE_DRIVING,
@@ -26,96 +26,25 @@ class RouteOptionsValidationTest {
             val options = minimalValidOptionsBuilder(profile).build()
             assertTrue(
                 "$profile profile isn't valid with default options",
-                options.areRequiredArgumentsInPlace()
+                options.areCompatibleWithSDK()
             )
         }
     }
 
     @Test
-    fun `route options for driving without all required annotations is invalid`() {
-        val options = minimalValidOptionsBuilder()
-            .annotations(DirectionsCriteria.ANNOTATION_DISTANCE)
-            .build()
-        assertFalse(options.areRequiredArgumentsInPlace())
+    fun `route options with steps aren't compatible with SDK`() {
+        val options = minimalValidOptionsBuilder().steps(false).build()
+        assertFalse(options.areCompatibleWithSDK())
     }
 
     @Test
-    fun `route options for cycling without all required annotations is invalid`() {
-        val options = minimalValidOptionsBuilder(DirectionsCriteria.PROFILE_CYCLING)
-            .annotations(DirectionsCriteria.ANNOTATION_MAXSPEED)
-            .build()
-        assertFalse(options.areRequiredArgumentsInPlace())
-    }
-
-    @Test
-    fun `driving profile without full overview is invalid`() {
-        val options = minimalValidOptionsBuilder()
+    fun `wrong options could be compatible with SDK`() {
+        val options = minimalValidOptionsBuilder(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
             .overview(DirectionsCriteria.OVERVIEW_FALSE)
             .build()
-        val result = options.areRequiredArgumentsInPlace()
-        assertFalse(result)
+        assertTrue(options.areCompatibleWithSDK())
     }
-
-    @Test
-    fun `options without roundabout exits aren't valid`() {
-        val options = minimalValidOptionsBuilder()
-            .roundaboutExits(false)
-            .build()
-        assertFalse(options.areRequiredArgumentsInPlace())
-    }
-
-    @Test
-    fun `options without voice instructions aren't valid`() {
-        val options = minimalValidOptionsBuilder()
-            .voiceInstructions(false)
-            .build()
-        assertFalse(options.areRequiredArgumentsInPlace())
-    }
-
-    @Test
-    fun `options without banner instructions aren't valid`() {
-        val options = minimalValidOptionsBuilder()
-            .bannerInstructions(false)
-            .build()
-        assertFalse(options.areRequiredArgumentsInPlace())
-    }
-
-    @Test
-    fun `driving profile isn't valid without continue straight option`() {
-        val options = minimalValidOptionsBuilder()
-            .continueStraight(false)
-            .build()
-        assertFalse(options.areRequiredArgumentsInPlace())
-    }
-
-    @Test
-    fun `options for cycling profile aren't valid with continue straight option`() {
-        val options = minimalValidOptionsBuilder(DirectionsCriteria.PROFILE_CYCLING)
-            .continueStraight(true)
-            .build()
-        assertFalse(options.areRequiredArgumentsInPlace())
-    }
-
-    @Test
-    fun `options for driving profile aren't valid without refresh`() {
-        val options = minimalValidOptionsBuilder()
-            .enableRefresh(false)
-            .build()
-        assertFalse(options.areRequiredArgumentsInPlace())
-    }
-
-    @Test
-    fun `options for walking profile aren't valid with refresh`() {
-        val options = minimalValidOptionsBuilder(DirectionsCriteria.PROFILE_WALKING)
-            .enableRefresh(true)
-            .build()
-        assertFalse(options.areRequiredArgumentsInPlace())
-    }
-
-    fun `optional options doesn't make request invalid`() {
-
-    }
-}
+ }
 
 private fun minimalValidOptionsBuilder(
     @DirectionsCriteria.ProfileCriteria profile: String =
