@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MapboxStatusView">
+        <!-- The animation used when a StatusView is being shown. -->
+        <attr name="statusViewShowAnimator" format="reference" />
+        <!-- The animation used when a StatusView is being hidden. -->
+        <attr name="statusViewHideAnimator" format="reference" />
+
+        <!-- Drawable used for the indeterminate progress indicator. -->
+        <attr name="statusViewProgressBarDrawable" format="reference" />
+        <!-- Tint to apply to the indeterminate progress indicator. -->
+        <attr name="statusViewProgressBarTint" format="reference|color" />
+
+        <!-- Tint to apply to the icon drawable. -->
+        <attr name="statusViewIconTint" format="reference|color" />
+
+        <!-- Appearance of a text message. -->
+        <attr name="statusViewTextAppearance" format="reference" />
+    </declare-styleable>
+</resources>

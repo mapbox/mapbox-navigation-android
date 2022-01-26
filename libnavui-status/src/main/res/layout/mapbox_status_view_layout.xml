@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    tools:elevation="4dp"
+    tools:background="@drawable/mapbox_bg_rounded"
+    tools:parentTag="android.widget.FrameLayout">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/mapbox_statusView_padding_v"
+        android:paddingBottom="@dimen/mapbox_statusView_padding_v"
+        android:paddingStart="@dimen/mapbox_statusView_padding_h"
+        android:paddingEnd="@dimen/mapbox_statusView_padding_h">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/messageText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="0dp"
+            android:ellipsize="end"
+            android:lines="1"
+            android:gravity="start|center_vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="Rerouting" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iconImage"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginEnd="@dimen/mapbox_statusView_spacing"
+            android:visibility="gone"
+            app:layout_constraintStart_toEndOf="@+id/progressBar"
+            app:layout_constraintEnd_toStartOf="@id/messageText"
+            app:layout_constraintTop_toTopOf="@+id/messageText"
+            app:layout_constraintBottom_toBottomOf="@+id/messageText"
+            app:layout_constraintDimensionRatio="1:1"
+            tools:visibility="visible"
+            tools:src="@android:drawable/ic_secure" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:indeterminate="true"
+            android:layout_marginEnd="@dimen/mapbox_statusView_spacing"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/iconImage"
+            app:layout_constraintTop_toTopOf="@+id/messageText"
+            app:layout_constraintBottom_toBottomOf="@+id/messageText"
+            app:layout_constraintDimensionRatio="1:1"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</merge>

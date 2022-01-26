@@ -33,6 +33,7 @@ dependencies {
     api project(":libnavui-speedlimit")
     api project(":libnavui-tripprogress")
     api project(":libnavui-voice")
+    api project(":libnavui-status")
 }
 
 apply from: "${rootDir}/gradle/track-public-apis.gradle"

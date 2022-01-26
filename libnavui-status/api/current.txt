@@ -1,0 +1,56 @@
+// Signature format: 3.0
+package com.mapbox.navigation.ui.status.model {
+
+  public final class Status {
+    ctor public Status(String message, long duration = 0, boolean animated = true, boolean spinner = false, @DrawableRes int icon = 0);
+    method public String component1();
+    method public long component2();
+    method public boolean component3();
+    method public boolean component4();
+    method public int component5();
+    method public com.mapbox.navigation.ui.status.model.Status copy(String message, long duration, boolean animated, boolean spinner, int icon);
+    method public boolean getAnimated();
+    method public long getDuration();
+    method public int getIcon();
+    method public String getMessage();
+    method public boolean getSpinner();
+    property public final boolean animated;
+    property public final long duration;
+    property public final int icon;
+    property public final String message;
+    property public final boolean spinner;
+  }
+
+}
+
+package com.mapbox.navigation.ui.status.view {
+
+  public final class MapboxStatusView extends android.widget.FrameLayout {
+    ctor public MapboxStatusView(android.content.Context context);
+    ctor public MapboxStatusView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxStatusView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    ctor public MapboxStatusView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr, int defStyleRes);
+    method @UiThread public void cancel(Boolean? animated = null);
+    method public androidx.constraintlayout.widget.ConstraintLayout getContainerView();
+    method public com.mapbox.navigation.ui.status.model.Status? getCurrentStatus();
+    method public int getHideAnimRes();
+    method public androidx.appcompat.widget.AppCompatImageView getIconImage();
+    method public androidx.appcompat.widget.AppCompatTextView getMessageTextView();
+    method public int getShowAnimRes();
+    method public android.widget.ProgressBar getSpinnerProgressBar();
+    method public boolean isRendered();
+    method @UiThread public void render(com.mapbox.navigation.ui.status.model.Status? status);
+    method public void setHideAnimRes(int p);
+    method public void setShowAnimRes(int p);
+    property public final androidx.constraintlayout.widget.ConstraintLayout containerView;
+    property public final com.mapbox.navigation.ui.status.model.Status? currentStatus;
+    property public final int hideAnimRes;
+    property public final androidx.appcompat.widget.AppCompatImageView iconImage;
+    property public final boolean isRendered;
+    property public final androidx.appcompat.widget.AppCompatTextView messageTextView;
+    property public final int showAnimRes;
+    property public final android.widget.ProgressBar spinnerProgressBar;
+  }
+
+}
+

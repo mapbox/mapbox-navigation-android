@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="MapboxStyleStatusView">
+        <item name="android:elevation">4dp</item>
+        <item name="android:background">@drawable/mapbox_bg_rounded</item>
+        <item name="statusViewShowAnimator">@android:animator/fade_in</item>
+        <item name="statusViewHideAnimator">@android:animator/fade_out</item>
+        <item name="statusViewProgressBarDrawable">@null</item>
+        <item name="statusViewProgressBarTint">@color/mapbox_status_view_foreground</item>
+        <item name="statusViewIconTint">@color/mapbox_status_view_foreground</item>
+        <item name="statusViewTextAppearance">@style/MapboxStyleStatusView.TextAppearance</item>
+    </style>
+
+    <style name="MapboxStyleStatusView.TextAppearance">
+        <item name="android:textColor">@color/mapbox_status_view_foreground</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+</resources>
