@@ -1,5 +1,6 @@
 package com.mapbox.navigation.route.internal
 
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -204,6 +205,17 @@ class RouterWrapperTests {
 
         verify { router.getRoute(routeUrl, any()) }
         verify { routerCallback.onFailure(expected, routerOptions) }
+    }
+
+    @Test
+    fun `route wrapper fails fast when options are incompatible with SDK`() {
+        val notCompatibleRouteOptions = RouteOptions.builder()
+            .coordinates(Point.fromLngLat(.0, .0), null, Point.fromLngLat(.0, .0))
+            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+            .build()
+        routerWrapper.getRoute(notCompatibleRouteOptions, routerCallback)
+
+        verify { routerCallback.onFailure(any(), eq(notCompatibleRouteOptions)) }
     }
 
     @Test

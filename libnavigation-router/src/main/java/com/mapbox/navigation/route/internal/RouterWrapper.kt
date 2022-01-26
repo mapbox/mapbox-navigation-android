@@ -10,12 +10,9 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.navigation.base.extensions.areCompatibleWithSDK
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
-import com.mapbox.navigation.base.route.RouteRefreshCallback
-import com.mapbox.navigation.base.route.RouteRefreshError
-import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.route.RouterCallback
-import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.*
 import com.mapbox.navigation.navigator.internal.mapToRoutingMode
 import com.mapbox.navigation.navigator.internal.mapToSdkRouteOrigin
 import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
@@ -42,9 +39,22 @@ class RouterWrapper(
 
     override fun getRoute(routeOptions: RouteOptions, callback: RouterCallback): Long {
         val routeUrl = routeOptions.toUrl(accessToken).toString()
+        if (!routeOptions.areCompatibleWithSDK()) {
+            callback.onFailure(
+                listOf(RouterFailure(
+                    removeToken(routeUrl),
+                    RouterOrigin.Custom(),
+                    "route options are incompatible with the SDK. " +
+                        "Make sure you called the applyDefaultNavigationOptions " +
+                        "before requesting a route."
+                )),
+                routeOptions
+            )
+            return -1
+        }
 
         return router.getRoute(routeUrl) { result, origin ->
-            val urlWithoutToken = URL(routeUrl.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM))
+            val urlWithoutToken = removeToken(routeUrl)
             result.fold(
                 {
                     mainJobControl.scope.launch {
@@ -115,6 +125,9 @@ class RouterWrapper(
             )
         }
     }
+
+    private fun removeToken(routeUrl: String) =
+        URL(routeUrl.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM))
 
     override fun getRouteRefresh(
         route: DirectionsRoute,

@@ -105,6 +105,6 @@ fun RouteOptions.Builder.coordinates(
     return this
 }
 
-internal fun RouteOptions.areCompatibleWithSDK(): Boolean {
+fun RouteOptions.areCompatibleWithSDK(): Boolean {
     return steps() == true
 }
