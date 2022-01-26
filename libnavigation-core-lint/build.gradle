@@ -11,6 +11,8 @@ dependencies {
     testImplementation dependenciesList.junit
     testImplementation "com.android.tools.lint:lint:${lint_version}"
     testImplementation "com.android.tools.lint:lint-tests:${lint_version}"
+
+    testImplementation dependenciesList.mapboxSdkDirectionsModels
 }
 
 jar{
