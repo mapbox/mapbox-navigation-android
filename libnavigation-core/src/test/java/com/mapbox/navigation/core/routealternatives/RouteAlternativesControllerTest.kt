@@ -35,7 +35,7 @@ class RouteAlternativesControllerTest {
 
     private val controllerInterface: RouteAlternativesControllerInterface = mockk(relaxed = true)
     private val navigator: MapboxNativeNavigator = mockk {
-        every { createRouteAlternativesController() } returns controllerInterface
+        every { routeAlternativesController } returns controllerInterface
     }
     private val tripSession: TripSession = mockk(relaxUnitFun = true)
 

@@ -281,7 +281,7 @@ class RouterWrapperTests {
 
     @Test
     fun `check callback called on cancel`() = coroutineRule.runBlockingTest {
-        every { router.cancelRequest(any()) } answers {
+        every { router.cancelRouteRequest(any()) } answers {
             getRouteSlot.captured.run(routerResultCancelled, nativeOriginOnboard)
         }
 
@@ -310,17 +310,17 @@ class RouterWrapperTests {
         val refreshIdOne = 3L
         val refreshIdTwo = 4L
 
-        verify(exactly = 0) { router.cancelRequest(any()) }
+        verify(exactly = 0) { router.cancelRouteRequest(any()) }
 
         routerWrapper.cancelRouteRequest(requestIdOne)
         routerWrapper.cancelRouteRequest(requestIdTwo)
         routerWrapper.cancelRouteRequest(refreshIdOne)
         routerWrapper.cancelRouteRequest(refreshIdTwo)
 
-        verify(exactly = 1) { router.cancelRequest(requestIdOne) }
-        verify(exactly = 1) { router.cancelRequest(requestIdTwo) }
-        verify(exactly = 1) { router.cancelRequest(refreshIdOne) }
-        verify(exactly = 1) { router.cancelRequest(refreshIdTwo) }
+        verify(exactly = 1) { router.cancelRouteRequest(requestIdOne) }
+        verify(exactly = 1) { router.cancelRouteRequest(requestIdTwo) }
+        verify(exactly = 1) { router.cancelRouteRequest(refreshIdOne) }
+        verify(exactly = 1) { router.cancelRouteRequest(refreshIdTwo) }
     }
 
     @Test

@@ -219,7 +219,7 @@ interface MapboxNativeNavigator {
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions
     ): PredictiveCacheController
 
-    fun createRouteAlternativesController(): RouteAlternativesControllerInterface
+    val routeAlternativesController: RouteAlternativesControllerInterface
 
     val graphAccessor: GraphAccessor?
 
