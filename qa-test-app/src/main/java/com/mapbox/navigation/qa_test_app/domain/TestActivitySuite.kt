@@ -7,6 +7,7 @@ import com.mapbox.navigation.qa_test_app.utils.startActivity
 import com.mapbox.navigation.qa_test_app.view.AlternativeRouteActivity
 import com.mapbox.navigation.qa_test_app.view.AppLifecycleActivity
 import com.mapbox.navigation.qa_test_app.view.FeedbackActivity
+import com.mapbox.navigation.qa_test_app.view.IconsPreviewActivity
 import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingActivity
 import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingWithRestrictionsActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxRouteLineActivity
@@ -88,6 +89,12 @@ object TestActivitySuite {
             R.string.status_activity_description
         ) { activity ->
             activity.startActivity<StatusActivity>()
+        },
+        TestActivityDescription(
+            "Icons Preview",
+            R.string.icons_preview_activity_description
+        ) { activity ->
+            activity.startActivity<IconsPreviewActivity>()
         },
     )
 }

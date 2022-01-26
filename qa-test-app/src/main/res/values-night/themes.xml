@@ -13,6 +13,13 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
         <item name="actionBarStyle">@style/ActionBar</item>
+
+    </style>
+
+    <style name="Theme.IconsPreviewActivity" parent="Theme.Mapboxnavigationandroid">
+        <item name="actionBarStyle">@style/ActionBar</item>
+        <item name="maneuverTurnIconColor">@color/colorOnSurface</item>
+        <item name="maneuverTurnIconShadowColor">#aaa</item>
     </style>
 
     <!-- Action Bar Styles -->
