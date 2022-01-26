@@ -36,9 +36,7 @@ import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouterError
-import com.mapbox.navigator.RouterFactory
 import com.mapbox.navigator.RouterInterface
-import com.mapbox.navigator.RouterType
 import com.mapbox.navigator.Routes
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.CoroutineDispatcher
@@ -71,6 +69,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override lateinit var experimental: Experimental
     override lateinit var cache: CacheHandle
     override lateinit var router: RouterInterface
+    override lateinit var routeAlternativesController: RouteAlternativesControllerInterface
     private var logger: Logger? = null
     private val nativeNavigatorRecreationObservers =
         CopyOnWriteArraySet<NativeNavigatorRecreationObserver>()
@@ -108,7 +107,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         roadObjectsStore = nativeComponents.navigator.roadObjectStore()
         experimental = nativeComponents.navigator.experimental
         cache = nativeComponents.cache
-        router = RouterFactory.build(RouterType.HYBRID, cache, historyRecorderHandle)
+        router = nativeComponents.router
+        routeAlternativesController = nativeComponents.routeAlternativesController
         this.logger = logger
         this.accessToken = accessToken
         return this
@@ -412,8 +412,4 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS,
             0
         )
-
-    override fun createRouteAlternativesController(): RouteAlternativesControllerInterface {
-        return navigator!!.createRouteAlternativesController()
-    }
 }

@@ -20,6 +20,10 @@ import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
 import com.mapbox.navigator.RoadObjectMatcher
+import com.mapbox.navigator.RouteAlternativesControllerInterface
+import com.mapbox.navigator.RouterFactory
+import com.mapbox.navigator.RouterInterface
+import com.mapbox.navigator.RouterType
 import com.mapbox.navigator.SettingsProfile
 import com.mapbox.navigator.TilesConfig
 
@@ -42,10 +46,16 @@ internal object NavigatorLoader {
         )
         val historyRecorder = buildHistoryRecorder(historyDir, config)
         val cache = CacheFactory.build(tilesConfig, config, historyRecorder)
+        val router = RouterFactory.build(
+            RouterType.HYBRID,
+            cache,
+            historyRecorder
+        )
         val navigator = Navigator(
             config,
             cache,
-            historyRecorder
+            historyRecorder,
+            router,
         )
         val graphAccessor = GraphAccessor(cache)
         val roadObjectMatcher = RoadObjectMatcher(cache)
@@ -55,7 +65,9 @@ internal object NavigatorLoader {
             historyRecorder,
             graphAccessor,
             cache,
-            roadObjectMatcher
+            roadObjectMatcher,
+            router,
+            navigator.routeAlternativesController
         )
     }
 
@@ -151,5 +163,7 @@ internal object NavigatorLoader {
         val graphAccessor: GraphAccessor,
         val cache: CacheHandle,
         val roadObjectMatcher: RoadObjectMatcher,
+        val router: RouterInterface,
+        val routeAlternativesController: RouteAlternativesControllerInterface,
     )
 }

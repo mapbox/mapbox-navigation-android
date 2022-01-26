@@ -30,7 +30,7 @@ internal class RouteAlternativesController constructor(
 
     private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
 
-    private val nativeRouteAlternativesController = navigator.createRouteAlternativesController()
+    private val nativeRouteAlternativesController = navigator.routeAlternativesController
         .apply {
             setRouteAlternativesOptions(
                 com.mapbox.navigator.RouteAlternativesOptions(

@@ -248,7 +248,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         pollingConfig,
         incidentsOptions,
         null,
-        null
+        null,
+        false,
     )
 
     private var notificationChannelField: Field? = null

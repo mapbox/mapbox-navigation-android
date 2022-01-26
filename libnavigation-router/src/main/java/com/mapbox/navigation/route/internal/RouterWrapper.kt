@@ -188,11 +188,11 @@ class RouterWrapper(
     }
 
     override fun cancelRouteRequest(requestId: Long) {
-        router.cancelRequest(requestId)
+        router.cancelRouteRequest(requestId)
     }
 
     override fun cancelRouteRefreshRequest(requestId: Long) {
-        router.cancelRequest(requestId)
+        router.cancelRouteRefreshRequest(requestId)
     }
 
     override fun cancelAll() {
