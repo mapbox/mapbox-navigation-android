@@ -22,3 +22,4 @@ include ':examples',
         ':libnavui-shield',
         ':libnavui-dropin',
         ':qa-test-app'
+include ':libnavigation-core-lint'

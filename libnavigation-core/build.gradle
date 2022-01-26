@@ -66,6 +66,8 @@ dependencies {
     testImplementation project(':libtrip-notification')
 
     androidTestImplementation project(':libtesting-ui')
+
+    lintPublish project(':libnavigation-core-lint')
 }
 
 dokkaHtml {

@@ -1,0 +1,20 @@
+apply plugin: 'java-library'
+apply plugin: 'kotlin'
+
+def (agp_major, agp_minor, agp_patch) = pluginVersion.gradle.split("\\.").collect { it.toInteger() }
+def lint_version = "${agp_major + 23}.${agp_minor}.${agp_patch}"
+
+dependencies {
+    compileOnly dependenciesList.kotlinStdLib
+    compileOnly "com.android.tools.lint:lint-api:${lint_version}"
+    compileOnly "com.android.tools.lint:lint-checks:${lint_version}"
+    testImplementation dependenciesList.junit
+    testImplementation "com.android.tools.lint:lint:${lint_version}"
+    testImplementation "com.android.tools.lint:lint-tests:${lint_version}"
+}
+
+jar{
+    manifest{
+        attributes 'Lint-Registry-V2': 'com.mapbox.navigation.core.lint.IssueRegistry'
+    }
+}
