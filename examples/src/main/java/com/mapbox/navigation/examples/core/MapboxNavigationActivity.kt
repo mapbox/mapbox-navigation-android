@@ -10,8 +10,7 @@ import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.RouteOptions
+import androidx.lifecycle.lifecycleScope
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -22,17 +21,15 @@ import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
-import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
-import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.EventsAppMetadata
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.route.RouterCallback
-import com.mapbox.navigation.base.route.RouterFailure
-import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.RequestRoutesResult
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -459,43 +456,23 @@ class MapboxNavigationActivity : AppCompatActivity() {
         voiceInstructionsPlayer.shutdown()
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun findRoute(destination: Point) {
-        val origin = navigationLocationProvider.lastLocation?.let {
-            Point.fromLngLat(it.longitude, it.latitude)
-        } ?: return
-
-        mapboxNavigation.requestRoutes(
-            RouteOptions.builder()
-                .applyDefaultNavigationOptions()
-                .applyLanguageAndVoiceUnitOptions(this)
-                .coordinatesList(listOf(origin, destination))
-                .layersList(listOf(mapboxNavigation.getZLevel(), null))
-                .build(),
-            object : RouterCallback {
-                override fun onRoutesReady(
-                    routes: List<DirectionsRoute>,
-                    routerOrigin: RouterOrigin
-                ) {
-                    setRouteAndStartNavigation(routes.first())
-                }
-
-                override fun onFailure(
-                    reasons: List<RouterFailure>,
-                    routeOptions: RouteOptions
-                ) {
-                    // no impl
-                }
-
-                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
-                    // no impl
-                }
+        lifecycleScope.launchWhenCreated {
+            val result = mapboxNavigation.requestRoutes { builder ->
+                builder
+                    .fromCurrentLocation()
+                    .toDestination(destination)
             }
-        )
+            if (result is RequestRoutesResult.Successful) {
+                setRouteAndStartNavigation(result.routes.first())
+            }
+        }
     }
 
-    private fun setRouteAndStartNavigation(route: DirectionsRoute) {
+    private fun setRouteAndStartNavigation(route: NavigationRoute) {
         // set route
-        mapboxNavigation.setRoutes(listOf(route))
+        mapboxNavigation.setNavigationRoutes(listOf(route))
 
         // show UI elements
         binding.soundButton.visibility = VISIBLE

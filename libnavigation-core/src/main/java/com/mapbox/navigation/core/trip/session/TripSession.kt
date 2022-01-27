@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core.trip.session
 
-import android.location.Location
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.directions.session.RoutesExtra
@@ -8,7 +7,7 @@ import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigator.FallbackVersionsObserver
 
-internal interface TripSession {
+internal interface TripSession : TripSessionLocationProvider {
 
     val tripService: TripService
     fun setRoutes(
@@ -17,19 +16,12 @@ internal interface TripSession {
         @RoutesExtra.RoutesUpdateReason reason: String
     )
 
-    fun getRawLocation(): Location?
-    val zLevel: Int?
-    val locationMatcherResult: LocationMatcherResult?
     fun getRouteProgress(): RouteProgress?
     fun getState(): TripSessionState
 
     fun start(withTripService: Boolean, withReplayEnabled: Boolean = false)
     fun stop()
     fun isRunningWithForegroundService(): Boolean
-
-    fun registerLocationObserver(locationObserver: LocationObserver)
-    fun unregisterLocationObserver(locationObserver: LocationObserver)
-    fun unregisterAllLocationObservers()
 
     fun registerRouteProgressObserver(routeProgressObserver: RouteProgressObserver)
     fun unregisterRouteProgressObserver(routeProgressObserver: RouteProgressObserver)
@@ -56,11 +48,9 @@ internal interface TripSession {
     fun registerRoadObjectsOnRouteObserver(
         roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
     )
-
     fun unregisterRoadObjectsOnRouteObserver(
         roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
     )
-
     fun unregisterAllRoadObjectsOnRouteObservers()
 
     fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver)

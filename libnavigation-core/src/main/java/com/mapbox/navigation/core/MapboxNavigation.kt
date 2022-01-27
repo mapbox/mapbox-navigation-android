@@ -69,6 +69,10 @@ import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesRequestCallback
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
+import com.mapbox.navigation.core.routeoptions.builder.LocationFromTripSessionProvider
+import com.mapbox.navigation.core.routeoptions.builder.NavRouteOptionsBuilder
+import com.mapbox.navigation.core.routeoptions.builder.NoWaypointsOptionsBuilder
+import com.mapbox.navigation.core.routeoptions.builder.RouteOptionsBuilderWithWaypoints
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
@@ -120,8 +124,10 @@ import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.lang.reflect.Field
 import java.util.Locale
+import kotlin.coroutines.resume
 
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER =
@@ -707,6 +713,61 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         callback: NavigationRouterCallback
     ): Long {
         return directionsSession.requestRoutes(routeOptions, callback)
+    }
+
+    @ExperimentalPreviewMapboxNavigationAPI
+    suspend fun requestRoutes(
+        optionsBlock: (NoWaypointsOptionsBuilder) -> RouteOptionsBuilderWithWaypoints
+    ): RequestRoutesResult {
+        if (tripSession.getState() != TripSessionState.STARTED) {
+            error("trip session should be started")
+        }
+        val builder = NavRouteOptionsBuilder(LocationFromTripSessionProvider(tripSession))
+        optionsBlock(builder)
+        builder.applyLanguageAndVoiceUnitOptions(navigationOptions.applicationContext)
+        val routeOptions = builder.build()
+        return suspendCancellableCoroutine { continuation ->
+            val requestId = requestRoutes(
+                routeOptions,
+                object : NavigationRouterCallback {
+                    override fun onRoutesReady(
+                        routes: List<NavigationRoute>,
+                        routerOrigin: RouterOrigin
+                    ) {
+                        continuation.resume(
+                            RequestRoutesResult.Successful(
+                                routes,
+                                routerOrigin
+                            )
+                        )
+                    }
+
+                    override fun onFailure(
+                        reasons: List<RouterFailure>,
+                        routeOptions: RouteOptions
+                    ) {
+                        continuation.resume(
+                            RequestRoutesResult.Failed(
+                                reasons,
+                                routeOptions
+                            )
+                        )
+                    }
+
+                    override fun onCanceled(
+                        routeOptions: RouteOptions,
+                        routerOrigin: RouterOrigin
+                    ) {
+                        if (!continuation.isCancelled) {
+                            error("request was unexpectedly cancelled from outside")
+                        }
+                    }
+                }
+            )
+            continuation.invokeOnCancellation {
+                cancelRouteRequest(requestId)
+            }
+        }
     }
 
     /**

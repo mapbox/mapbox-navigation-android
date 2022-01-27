@@ -17,8 +17,13 @@ fun runOnMainSync(runnable: Runnable) =
 /**
  * Runs the code block on the app's main thread and blocks until the block returns.
  */
-fun runOnMainSync(fn: () -> Unit) =
-    InstrumentationRegistry.getInstrumentation().runOnMainSync(fn)
+fun <T> runOnMainSync(fn: () -> T): T {
+    var result: T? = null
+    InstrumentationRegistry.getInstrumentation().runOnMainSync {
+        result = fn()
+    }
+    return result ?: error("got no result")
+}
 
 fun Int.loopFor(millis: Long) {
     Espresso.onView(ViewMatchers.withId(this)).perform(

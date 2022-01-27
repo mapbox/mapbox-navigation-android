@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 
 #### Features
+- Added `MapboxNavigation:requestRoutes` that is an experimentation API to safely request a route. [#5427](https://github.com/mapbox/mapbox-navigation-android/pull/5427)
 
 #### Bug fixes and improvements
 - Fixed `HistoryEventMapper#mapNavigationRoute` for when `SetRouteHistoryRecord` has empty `routeRequest`. [#5614](https://github.com/mapbox/mapbox-navigation-android/pull/5614)
