@@ -2,17 +2,19 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
-## Unreleased 
-- Added options to the MapboxRouteLineOptions class to control the icon anchor and icon offset for the route line related waypoint icons including the origin and destination points. [#5409](https://github.com/mapbox/mapbox-navigation-android/pull/5409)
+## Unreleased
+#### Features
 - Added new `StatusView` component for displaying SDK status messages. [#5403](https://github.com/mapbox/mapbox-navigation-android/pull/5403)
 
-#### Features
-- Added `avoidManeuverSeconds` param to `RouteAlternativesOptions`. [#5394](https://github.com/mapbox/mapbox-navigation-android/pull/5394)
-
 #### Bug fixes and improvements
+- Added options to the `MapboxRouteLineOptions` class to control the icon anchor and icon offset for the route line related waypoint icons including the origin and destination points. [#5409](https://github.com/mapbox/mapbox-navigation-android/pull/5409)
+- Fixed an issue where `RouteAlternativesObserver` and `RouteAlternativesRequestCallback` failed to deliver any alternatives due to an unrecognized `"closure"` annotation parameter in the native controller. [#5421](https://github.com/mapbox/mapbox-navigation-android/pull/5421)
+- Fixed an issue where a reference to the registered `RouteAlternativesObserver` was not released after unsubscribing or destroying `MapboxNavigation`. [#5421](https://github.com/mapbox/mapbox-navigation-android/pull/5421)
+- Improved `RouteAlternativesObserver` to ensure that alternative routes request is fired on each new leg start. [#5421](https://github.com/mapbox/mapbox-navigation-android/pull/5421)
+- Added `avoidManeuverSeconds` param to `RouteAlternativesOptions`. [#5394](https://github.com/mapbox/mapbox-navigation-android/pull/5394)
 - Fixed an issue found in `v2.3.0-alpha.1` where deprecated fields in `Road` type were always returning `null`s instead of the correct values. [#5396](https://github.com/mapbox/mapbox-navigation-android/pull/5396)
-- Fixed an issue found in `v2.3.0-alpha.1` where `MapboxPrimaryManeuver` defaults to using exit signs based on VIENNA convention instead of MUTCD. [#5413](https://github.com/mapbox/mapbox-navigation-android/pull/5413)
-- Fixed an issue found in `v2.3.0-alpha.1` where `MapboxRoadNameView` would continue to show previous road name in case the current `Road` has no data to show. [#5417](https://github.com/mapbox/mapbox-navigation-android/pull/5417)
+- Fixed an issue where `MapboxPrimaryManeuver` defaults to using exit signs based on VIENNA convention instead of MUTCD. [#5413](https://github.com/mapbox/mapbox-navigation-android/pull/5413)
+- Fixed an issue where `MapboxRoadNameView` would continue to show previous road name in case the current `Road` has no data to show. [#5417](https://github.com/mapbox/mapbox-navigation-android/pull/5417)
 
 ## Mapbox Navigation SDK 2.2.1 - January 24, 2022
 ### Changelog
