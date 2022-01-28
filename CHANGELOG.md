@@ -4,6 +4,12 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+
+#### Bug fixes and improvements
+
+
+## Mapbox Navigation SDK 2.3.0-beta.1 - January 28, 2022
+#### Features
 - Added new `StatusView` component for displaying SDK status messages. [#5403](https://github.com/mapbox/mapbox-navigation-android/pull/5403)
 
 #### Bug fixes and improvements
