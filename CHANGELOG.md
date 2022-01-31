@@ -7,6 +7,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 #### Bug fixes and improvements
 - Fixed an issue found in `v2.3.0-alpha.1` where deprecated fields in `Road` type were always returning `null`s instead of the correct values. [#5396](https://github.com/mapbox/mapbox-navigation-android/pull/5396)
+- Fixed an issue where `MapboxManeuverView` or `MapboxRoadNameView` displayed wrong shield. [#5426](https://github.com/mapbox/mapbox-navigation-android/pull/5426)
 
 ## Mapbox Navigation SDK 2.2.1 - January 24, 2022
 ### Changelog
