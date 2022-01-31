@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.util.TypedValue
 import com.mapbox.api.directions.v5.models.MapboxShield
 import com.mapbox.api.directions.v5.models.ShieldSprite
-import com.mapbox.navigation.ui.shield.internal.model.getRefLen
 import com.mapbox.navigation.ui.utils.internal.SvgUtil
 import java.io.ByteArrayInputStream
 
@@ -195,17 +194,12 @@ sealed class RouteShield(
         }
 
         /**
-         * Invoke the method to compare two shields based on whether the shield url contains the
-         * shield name from [other]
+         * Invoke the method to compare two shields based on shield data
          *
          * @param other mapbox designed shield
          */
         fun compareWith(other: MapboxShield?): Boolean {
-            if (other == null) { return false }
-            val shieldName = other.name()
-            val displayRefLength = other.getRefLen()
-            val shieldRequested = shieldName.plus("-$displayRefLength")
-            return this.url.contains(shieldRequested)
+            return mapboxShield == other
         }
     }
 }
