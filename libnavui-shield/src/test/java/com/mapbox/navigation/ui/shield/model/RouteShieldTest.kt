@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.api.directions.v5.models.MapboxShield
 import com.mapbox.navigation.ui.utils.internal.SvgUtil
 import io.mockk.every
 import io.mockk.mockk
@@ -185,26 +186,26 @@ class RouteShieldTest {
         val mapboxDesignedShield = RouteShield.MapboxDesignedShield(
             url = "https://shield.mapbox.designed.us-interstate-3",
             byteArrayOf(1),
-            mockk {
-                every { name() } returns "us-interstate"
-                every { textColor() } returns "white"
-                every { baseUrl() } returns "https://api.mapbox.com/styles/v1"
-                every { displayRef() } returns "880"
-            },
+            MapboxShield.builder()
+                .name("us-interstate")
+                .textColor("white")
+                .baseUrl("https://api.mapbox.com/styles/v1")
+                .displayRef("880")
+                .build(),
             mockk {
                 every { spriteAttributes().width() } returns 72
                 every { spriteAttributes().height() } returns 24
             }
         )
         val otherDesignedShield = RouteShield.MapboxDesignedShield(
-            url = "https://shield.mapbox.designed",
+            url = "https://shield.mapbox.designed.us-interstate-3",
             byteArrayOf(1),
-            mockk {
-                every { name() } returns "us-interstate"
-                every { textColor() } returns "white"
-                every { baseUrl() } returns "https://api.mapbox.com/styles/v1"
-                every { displayRef() } returns "880"
-            },
+            MapboxShield.builder()
+                .name("us-interstate")
+                .textColor("white")
+                .baseUrl("https://api.mapbox.com/styles/v1")
+                .displayRef("880")
+                .build(),
             mockk {
                 every { spriteAttributes().width() } returns 72
                 every { spriteAttributes().height() } returns 24
@@ -219,28 +220,28 @@ class RouteShieldTest {
     @Test
     fun `when compare two mapbox designed shields that don't have same same shields`() {
         val mapboxDesignedShield = RouteShield.MapboxDesignedShield(
-            url = "https://shield.mapbox.designed",
+            url = "https://shield.mapbox.designed.us-interstate-3",
             byteArrayOf(1),
-            mockk {
-                every { name() } returns "us-interstate"
-                every { textColor() } returns "white"
-                every { baseUrl() } returns "https://api.mapbox.com/styles/v1"
-                every { displayRef() } returns "880"
-            },
+            MapboxShield.builder()
+                .name("us-interstate")
+                .textColor("white")
+                .baseUrl("https://api.mapbox.com/styles/v1")
+                .displayRef("880")
+                .build(),
             mockk {
                 every { spriteAttributes().width() } returns 72
                 every { spriteAttributes().height() } returns 24
             }
         )
         val otherDesignedShield = RouteShield.MapboxDesignedShield(
-            url = "https://shield.mapbox.designed",
+            url = "https://shield.mapbox.designed.us-interstate-3",
             byteArrayOf(1),
-            mockk {
-                every { name() } returns "rectangle-yellow"
-                every { textColor() } returns "white"
-                every { baseUrl() } returns "https://api.mapbox.com/styles/v1"
-                every { displayRef() } returns "880"
-            },
+            MapboxShield.builder()
+                .name("us-interstate")
+                .textColor("white")
+                .baseUrl("https://api.mapbox.com/styles/v1")
+                .displayRef("990")
+                .build(),
             mockk {
                 every { spriteAttributes().width() } returns 72
                 every { spriteAttributes().height() } returns 24
