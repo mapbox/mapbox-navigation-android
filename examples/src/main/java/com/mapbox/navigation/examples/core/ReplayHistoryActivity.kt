@@ -176,6 +176,11 @@ class ReplayHistoryActivity : AppCompatActivity() {
             binding.mapView.getMapboxMap()
         )
         val mapboxMap = binding.mapView.getMapboxMap()
+        navigationCamera = NavigationCamera(
+            mapboxMap,
+            binding.mapView.camera,
+            viewportDataSource
+        )
         initialCameraOptions?.let { mapboxMap.setCamera(it) }
         mapboxMap.loadStyleUri(
             NavigationStyles.NAVIGATION_DAY_STYLE,
@@ -191,11 +196,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
                     enabled = true
                 }
                 locationComponent.addOnIndicatorPositionChangedListener(onPositionChangedListener)
-                navigationCamera = NavigationCamera(
-                    mapboxMap,
-                    binding.mapView.camera,
-                    viewportDataSource
-                )
                 viewportDataSource.evaluate()
             },
             object : OnMapLoadErrorListener {
