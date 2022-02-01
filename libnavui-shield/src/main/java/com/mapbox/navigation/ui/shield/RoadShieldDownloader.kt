@@ -4,6 +4,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.HttpMethod
 import com.mapbox.common.HttpRequest
+import com.mapbox.common.HttpServiceFactory
 import com.mapbox.common.UAComponents
 import com.mapbox.common.core.module.CommonSingletonModuleProvider
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -21,7 +22,7 @@ internal object RoadShieldDownloader {
 
     suspend fun download(urlToDownload: String): Expected<String, ByteArray> =
         suspendCancellableCoroutine { continuation ->
-            val id = CommonSingletonModuleProvider.createHttpService().request(
+            val id = HttpServiceFactory.getInstance().request(
                 getHttpRequest(urlToDownload)
             ) { response ->
                 when {

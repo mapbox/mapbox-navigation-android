@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.shield
 
+import android.util.LruCache
 import com.google.gson.JsonSyntaxException
 import com.mapbox.api.directions.v5.models.ShieldSprites
 import com.mapbox.api.directions.v5.models.ShieldSvg
@@ -13,13 +14,13 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
-internal abstract class ResourceCache<Argument, Value> {
+internal abstract class ResourceCache<Argument, Value>(cacheSize: Int) {
 
     internal companion object {
         internal const val CANCELED_MESSAGE = "canceled"
     }
 
-    private val cache = hashMapOf<Argument, Expected<String, Value>>()
+    private val cache = LruCache<Argument, Expected<String, Value>>(cacheSize)
     private val ongoingRequest = mutableSetOf<Argument>()
     private val awaitingCallbacks = mutableListOf<() -> Boolean>()
 
@@ -41,7 +42,7 @@ internal abstract class ResourceCache<Argument, Value> {
      * Calls to this function should be executed from a single thread, it's not thread safe.
      */
     suspend fun getOrRequest(argument: Argument): Expected<String, Value> {
-        return cache[argument]?.value?.let { ExpectedFactory.createValue(it) } ?: run {
+        return cache.get(argument)?.value?.let { ExpectedFactory.createValue(it) } ?: run {
             if (ongoingRequest.contains(argument)) {
                 suspendCancellableCoroutine { continuation ->
                     /**
@@ -50,7 +51,7 @@ internal abstract class ResourceCache<Argument, Value> {
                      */
                     val callback = {
                         check(!continuation.isCancelled)
-                        cache[argument]?.let {
+                        cache.get(argument)?.let {
                             continuation.resume(it)
                             true
                         } ?: false
@@ -72,14 +73,14 @@ internal abstract class ResourceCache<Argument, Value> {
                 try {
                     ongoingRequest.add(argument)
                     val result = obtainResource(argument)
-                    cache[argument] = result
+                    cache.put(argument, result)
                     ongoingRequest.remove(argument)
                     invalidate()
                     result
                 } catch (ex: CancellationException) {
                     ongoingRequest.remove(argument)
                     val result = ExpectedFactory.createError<String, Value>(CANCELED_MESSAGE)
-                    cache[argument] = result
+                    cache.put(argument, result)
                     invalidate()
                     result
                 }
@@ -109,7 +110,7 @@ internal abstract class ResourceCache<Argument, Value> {
 internal class ShieldResultCache(
     private val shieldSpritesCache: ShieldSpritesCache = ShieldSpritesCache(),
     private val shieldByteArrayCache: ShieldByteArrayCache = ShieldByteArrayCache(),
-) : ResourceCache<RouteShieldToDownload, RouteShield>() {
+) : ResourceCache<RouteShieldToDownload, RouteShield>(40) {
     override suspend fun obtainResource(
         argument: RouteShieldToDownload
     ): Expected<String, RouteShield> {
@@ -195,7 +196,7 @@ internal class ShieldResultCache(
     }
 }
 
-internal class ShieldSpritesCache : ResourceCache<String, ShieldSprites>() {
+internal class ShieldSpritesCache : ResourceCache<String, ShieldSprites>(8) {
     override suspend fun obtainResource(argument: String): Expected<String, ShieldSprites> {
         val result = RoadShieldDownloader.download(argument)
         return try {
@@ -217,7 +218,7 @@ internal class ShieldSpritesCache : ResourceCache<String, ShieldSprites>() {
     }
 }
 
-internal class ShieldByteArrayCache : ResourceCache<String, ByteArray>() {
+internal class ShieldByteArrayCache : ResourceCache<String, ByteArray>(15) {
     override suspend fun obtainResource(argument: String): Expected<String, ByteArray> {
         return RoadShieldDownloader.download(argument)
     }
