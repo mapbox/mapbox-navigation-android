@@ -7,6 +7,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 #### Bug fixes and improvements
 - Refactored `Status` class to POJO and decreased its constructor visibility. Introduced `StatusFactory` class for public use. [#5432](https://github.com/mapbox/mapbox-navigation-android/pull/5432)   
+- Fixed an issue where setting a custom `MapboxRouteLineOptions#vanishingRouteLineUpdateIntervalNano` that happened to be longer than the typical rate of `RouteProgress` updates delivered via `mapboxRouteLineApi#updateWithRouteProgress`, the traveled portion of the route wouldn't vanish at all. [#5435](https://github.com/mapbox/mapbox-navigation-android/pull/5435)
 
 ## Mapbox Navigation SDK 2.3.0-beta.1 - January 28, 2022
 #### Features

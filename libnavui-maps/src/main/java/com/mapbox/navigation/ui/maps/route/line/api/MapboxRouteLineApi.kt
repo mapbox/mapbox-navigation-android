@@ -185,6 +185,7 @@ class MapboxRouteLineApi(
     private val directionsRoutes: MutableList<DirectionsRoute> = mutableListOf()
     private var routeLineExpressionData: List<RouteLineExpressionData> = emptyList()
     private var lastIndexUpdateTimeNano: Long = 0
+    private var lastPointUpdateTimeNano: Long = 0
     private val routeFeatureData: MutableList<RouteFeatureData> = mutableListOf()
     private val jobControl = InternalJobControlFactory.createDefaultScopeJobControl()
     private val mutex = Mutex()
@@ -296,7 +297,7 @@ class MapboxRouteLineApi(
         if (routeLineOptions.vanishingRouteLine?.vanishingPointState ==
             VanishingPointState.DISABLED || currentNanoTime - lastIndexUpdateTimeNano >
             RouteLayerConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO ||
-            currentNanoTime - lastIndexUpdateTimeNano <
+            currentNanoTime - lastPointUpdateTimeNano <
             routeLineOptions.vanishingRouteLineUpdateIntervalNano
         ) {
             return ExpectedFactory.createError(
@@ -345,6 +346,7 @@ class MapboxRouteLineApi(
                 routeLineOptions.displaySoftGradientForTraffic
             )
 
+        lastPointUpdateTimeNano = System.nanoTime()
         return when (routeLineExpressionProviders) {
             null -> {
                 ExpectedFactory.createError(

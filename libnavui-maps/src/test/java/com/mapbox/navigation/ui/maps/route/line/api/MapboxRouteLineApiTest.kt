@@ -69,6 +69,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -695,39 +696,52 @@ class MapboxRouteLineApiTest {
     }
 
     @Test
-    fun updateTraveledRouteLine_updateIntervalBelowAllowedValue() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx)
-            .withVanishingRouteLineEnabled(true)
-            .displayRestrictedRoadSections(false)
-            .build()
-        val api = MapboxRouteLineApi(options)
-        val route = getRoute()
-        val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
-        val routeProgress = mockk<RouteProgress> {
-            every { currentLegProgress } returns mockk {
-                every { legIndex } returns 0
-                every { currentStepProgress } returns mockk {
-                    every { stepPoints } returns PolylineUtils.decode(
-                        route.legs()!![0].steps()!![2].geometry()!!,
-                        6
-                    )
-                    every { distanceTraveled } returns 0f
-                    every { step } returns mockk {
-                        every { distance() } returns route.legs()!![0].steps()!![2].distance()
+    fun updateTraveledRouteLine_pointUpdateIntervalRespected() =
+        coroutineRule.runBlockingTest {
+            val options = MapboxRouteLineOptions.Builder(ctx)
+                .withVanishingRouteLineEnabled(true)
+                .displayRestrictedRoadSections(false)
+                .vanishingRouteLineUpdateInterval(TimeUnit.MILLISECONDS.toNanos(1200))
+                .build()
+            val api = MapboxRouteLineApi(options)
+            val route = getRoute()
+            val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
+            val routeProgress = mockk<RouteProgress> {
+                every { currentLegProgress } returns mockk {
+                    every { legIndex } returns 0
+                    every { currentStepProgress } returns mockk {
+                        every { stepPoints } returns PolylineUtils.decode(
+                            route.legs()!![0].steps()!![2].geometry()!!,
+                            6
+                        )
+                        every { distanceTraveled } returns 0f
+                        every { step } returns mockk {
+                            every { distance() } returns route.legs()!![0].steps()!![2].distance()
+                        }
+                        every { stepIndex } returns 2
                     }
-                    every { stepIndex } returns 2
                 }
             }
+
+            api.updateVanishingPointState(RouteProgressState.TRACKING)
+            api.setRoutes(listOf(RouteLine(route, null)))
+            api.updateUpcomingRoutePointIndex(routeProgress)
+
+            pauseDispatcher {
+                val result1 = api.updateTraveledRouteLine(lineString.coordinates()[1])
+                assertTrue(result1.isValue)
+
+                Thread.sleep(1000L)
+                api.updateUpcomingRoutePointIndex(routeProgress) // only update the progress
+                Thread.sleep(300L) // in summary we've waited for 1.3s since last point update
+                val result2 = api.updateTraveledRouteLine(lineString.coordinates()[1])
+                assertTrue(result2.isValue) // should succeed because threshold was 1.2s
+
+                Thread.sleep(500L) // wait less than threshold
+                val result3 = api.updateTraveledRouteLine(lineString.coordinates()[1])
+                assertTrue(result3.isError)
+            }
         }
-
-        api.updateVanishingPointState(RouteProgressState.TRACKING)
-        api.setRoutes(listOf(RouteLine(route, null)))
-        api.updateUpcomingRoutePointIndex(routeProgress)
-
-        val result = api.updateTraveledRouteLine(lineString.coordinates()[1])
-
-        assertTrue(result.isError)
-    }
 
     @Test
     fun updateTraveledRouteLine_whenRouteHasRestrictions() = coroutineRule.runBlockingTest {
