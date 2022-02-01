@@ -2,13 +2,6 @@
 package com.mapbox.navigation.ui.status.model {
 
   public final class Status {
-    ctor public Status(String message, long duration = 0, boolean animated = true, boolean spinner = false, @DrawableRes int icon = 0);
-    method public String component1();
-    method public long component2();
-    method public boolean component3();
-    method public boolean component4();
-    method public int component5();
-    method public com.mapbox.navigation.ui.status.model.Status copy(String message, long duration, boolean animated, boolean spinner, int icon);
     method public boolean getAnimated();
     method public long getDuration();
     method public int getIcon();
@@ -19,6 +12,15 @@ package com.mapbox.navigation.ui.status.model {
     property public final int icon;
     property public final String message;
     property public final boolean spinner;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class StatusFactory {
+    method public static com.mapbox.navigation.ui.status.model.Status buildStatus(String message, long duration = 0, boolean animated = true, boolean spinner = false, @DrawableRes int icon = 0);
+    method public static com.mapbox.navigation.ui.status.model.Status buildStatus(String message, long duration = 0, boolean animated = true, boolean spinner = false);
+    method public static com.mapbox.navigation.ui.status.model.Status buildStatus(String message, long duration = 0, boolean animated = true);
+    method public static com.mapbox.navigation.ui.status.model.Status buildStatus(String message, long duration = 0);
+    method public static com.mapbox.navigation.ui.status.model.Status buildStatus(String message);
+    field public static final com.mapbox.navigation.ui.status.model.StatusFactory INSTANCE;
   }
 
 }
