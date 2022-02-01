@@ -23,6 +23,7 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.extensions.coordinates
@@ -67,6 +68,7 @@ import com.mapbox.navigation.utils.internal.LoggerProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.mapbox.navigation.ui.status.model.StatusFactory.buildStatus as status
 
 /**
  * This activity demonstrates the usage of the [MapboxManeuverApi]. There is boiler plate
@@ -77,6 +79,7 @@ import kotlinx.coroutines.launch
  * attention to its usage. Long press anywhere on the map to set a destination and trigger
  * navigation.
  */
+@OptIn(ExperimentalMapboxNavigationAPI::class)
 class StatusActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private lateinit var mapboxMap: MapboxMap
@@ -364,12 +367,12 @@ class StatusActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val testStatuses by lazy {
         mutableListOf<Status>(
-            Status(message = "3 sec status", duration = 3000),
-            Status(message = "2 sec status", duration = 2000),
-            Status(message = "1 sec status", duration = 1000),
-            Status(message = "sticky"),
-            Status(message = "sticky + no anim + spinner", animated = false, spinner = true),
-            Status(
+            status(message = "3 sec status", duration = 3000),
+            status(message = "2 sec status", duration = 2000),
+            status(message = "1 sec status", duration = 1000),
+            status(message = "sticky"),
+            status(message = "sticky + no anim + spinner", animated = false, spinner = true),
+            status(
                 message = "sticky + no anim + icon",
                 animated = false,
                 icon = R.drawable.ic_layers_24dp,

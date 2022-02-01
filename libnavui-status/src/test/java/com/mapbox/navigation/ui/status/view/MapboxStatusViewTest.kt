@@ -4,8 +4,8 @@ import android.content.Context
 import android.os.Build
 import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.ui.status.R
-import com.mapbox.navigation.ui.status.model.Status
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -15,7 +15,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowLooper
+import com.mapbox.navigation.ui.status.model.StatusFactory.buildStatus as status
 
+@OptIn(ExperimentalMapboxNavigationAPI::class)
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
 @RunWith(RobolectricTestRunner::class)
 class MapboxStatusViewTest {
@@ -48,7 +50,7 @@ class MapboxStatusViewTest {
 
     @Test
     fun `render - should update isRendered and currentState`() {
-        val status = Status("message", animated = false)
+        val status = status("message", animated = false)
 
         sut.render(status)
 
@@ -58,7 +60,7 @@ class MapboxStatusViewTest {
 
     @Test
     fun `render - should update message text`() {
-        val status = Status("message", animated = false)
+        val status = status("message", animated = false)
 
         sut.render(status)
 
@@ -67,7 +69,7 @@ class MapboxStatusViewTest {
 
     @Test
     fun `render - should update spinner`() {
-        val status = Status("message", animated = false, spinner = true)
+        val status = status("message", animated = false, spinner = true)
 
         sut.render(status)
 
@@ -76,7 +78,7 @@ class MapboxStatusViewTest {
 
     @Test
     fun `render - should update icon`() {
-        val status = Status("message", animated = false, icon = android.R.drawable.ic_secure)
+        val status = status("message", animated = false, icon = android.R.drawable.ic_secure)
 
         sut.render(status)
 
@@ -85,7 +87,7 @@ class MapboxStatusViewTest {
 
     @Test
     fun `cancel - should hide the view`() {
-        val status = Status("message", animated = true, icon = android.R.drawable.ic_secure)
+        val status = status("message", animated = true, icon = android.R.drawable.ic_secure)
         sut.render(status)
         sut.cancel()
 

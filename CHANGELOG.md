@@ -6,7 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
-
+- Refactored `Status` class to POJO and decreased its constructor visibility. Introduced `StatusFactory` class for public use. [#5432](https://github.com/mapbox/mapbox-navigation-android/pull/5432)   
 
 ## Mapbox Navigation SDK 2.3.0-beta.1 - January 28, 2022
 #### Features
