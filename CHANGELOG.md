@@ -6,11 +6,25 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.3.0-beta.2 - February 2, 2022
+### Changelog
+[Changes between v2.3.0-beta.1 and v2.3.0-beta.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.3.0-beta.1...v2.3.0-beta.2)
+
+#### Bug fixes and improvements
 - Refactored `Status` class to POJO and decreased its constructor visibility. Introduced `StatusFactory` class for public use. [#5432](https://github.com/mapbox/mapbox-navigation-android/pull/5432)   
-- Fixed an issue where setting a custom `MapboxRouteLineOptions#vanishingRouteLineUpdateIntervalNano` that happened to be longer than the typical rate of `RouteProgress` updates delivered via `mapboxRouteLineApi#updateWithRouteProgress`, the traveled portion of the route wouldn't vanish at all. [#5435](https://github.com/mapbox/mapbox-navigation-android/pull/5435)
-- Fixed an issue where `MapboxManeuverView` or `MapboxRoadNameView` displayed wrong shield. [#5426](https://github.com/mapbox/mapbox-navigation-android/pull/5426)
+- Fixed an issue where setting a custom `MapboxRouteLineOptions#vanishingRouteLineUpdateIntervalNano` that happened to be longer than the typical rate of `RouteProgress` updates delivered via `mapboxRouteLineApi#updateWithRouteProgress` would result in the traveled portion of the route not vanishing at all. [#5435](https://github.com/mapbox/mapbox-navigation-android/pull/5435)
+- Fixed an issue where `MapboxManeuverView` or `MapboxRoadNameView` displayed wrong shields. [#5426](https://github.com/mapbox/mapbox-navigation-android/pull/5426)
 - Updated the turn icons used in Mapbox Android Nav SDK. [#5430](https://github.com/mapbox/mapbox-navigation-android/pull/5430)
 
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.3.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.3.0-rc.1))
+- Mapbox Navigation Native `v87.0.2`
+- Mapbox Core Common `v21.1.0-rc.1`
+- Mapbox Java `v6.3.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.3.0-beta.1))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
 
 ## Mapbox Navigation SDK 2.3.0-beta.1 - January 28, 2022
 #### Features
