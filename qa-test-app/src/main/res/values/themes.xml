@@ -15,9 +15,15 @@
         <item name="actionBarStyle">@style/ActionBar</item>
     </style>
 
+    <style name="Theme.IconsPreviewActivity" parent="Theme.Mapboxnavigationandroid">
+        <item name="maneuverTurnIconColor">@color/colorOnSurface</item>
+        <item name="maneuverTurnIconShadowColor">#aaa</item>
+    </style>
+
     <!-- Action Bar Styles -->
     <style name="ActionBar" parent="@style/Widget.AppCompat.ActionBar">
         <item name="background">@color/primary</item>
         <item name="android:background">@color/primary</item>
     </style>
+
 </resources>

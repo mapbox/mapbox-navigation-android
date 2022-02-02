@@ -12,4 +12,5 @@
     <string name="traffic_gradient_styling_description" translatable="false">The line used for representing traffic congestion can display a gradient transition between colors or hard stops between colors. \n\nThis activity lets you toggle between the two styles. \n\nWhen selecting between hard and soft gradients you should see the traffic line change, reflecting the option chosen.</string>
     <string name="feedback_activity_description" translatable="false">Screen to test feedback in ActiveGuidance and FreeDrive. Click on "START NAVIGATION" button to start FreeDrive session or long click on the map to get a route from current location to tapped and then click "START NAVIGATION" button to start ActiveGuidance session. Then you can observe in logcat how feedback is sent by clicking on `Feedback` button on the screen.</string>
     <string name="status_activity_description" translatable="false">Screen to test StatusView.</string>
+    <string name="icons_preview_activity_description" translatable="false">Screen for viewing SDK icons.</string>
 </resources>
