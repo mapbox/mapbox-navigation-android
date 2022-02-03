@@ -19,12 +19,14 @@ import io.mockk.unmockkAll
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.lang.IllegalStateException
 
 @ExperimentalPreviewMapboxNavigationAPI
 @RunWith(RobolectricTestRunner::class)
@@ -306,6 +308,58 @@ class MapboxNavigationAppDelegateTest {
         assertNotNull(mapboxNavigationApp.current())
     }
 
+    @Test
+    fun `verify getObserver will return the registered observer`() {
+        val observer = ExampleObserverA()
+        mapboxNavigationApp.registerObserver(observer)
+
+        val retrieved = mapboxNavigationApp.getObserver(ExampleObserverA::class)
+        assertEquals(observer, retrieved)
+    }
+
+    @Test
+    fun `verify getObserver will return first registered observer`() {
+        val observerFirst = ExampleObserverA()
+        val observerSecond = ExampleObserverA()
+        mapboxNavigationApp.registerObserver(observerFirst)
+        mapboxNavigationApp.registerObserver(observerSecond)
+
+        val retrieved = mapboxNavigationApp.getObserver(ExampleObserverA::class)
+        assertEquals(observerFirst, retrieved)
+    }
+
+    @Test
+    fun `verify getObserver will return the same registered class`() {
+        val observerFirst = ExampleObserverA()
+        val observerSecond = ExampleObserverB()
+        mapboxNavigationApp.registerObserver(observerFirst)
+        mapboxNavigationApp.registerObserver(observerSecond)
+
+        val retrieved = mapboxNavigationApp.getObserver(ExampleObserverB::class)
+        assertEquals(observerSecond, retrieved)
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun `verify getObserver will crash when the observer is not registered`() {
+        val observer = ExampleObserverA()
+        mapboxNavigationApp.registerObserver(observer)
+
+        // Should crash
+        mapboxNavigationApp.getObserver(ExampleObserverB::class)
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun `verify getObserver will crash when the observer is removed`() {
+        val observerFirst = ExampleObserverA()
+        val observerSecond = ExampleObserverB()
+        mapboxNavigationApp.registerObserver(observerFirst)
+        mapboxNavigationApp.registerObserver(observerSecond)
+        mapboxNavigationApp.unregisterObserver(observerFirst)
+
+        // Should crash
+        mapboxNavigationApp.getObserver(ExampleObserverA::class)
+    }
+
     private fun mockActivityLifecycle(): Pair<ComponentActivity, LifecycleRegistry> {
         val activity = mockk<ComponentActivity> {
             every { isChangingConfigurations } returns false
@@ -314,5 +368,31 @@ class MapboxNavigationAppDelegateTest {
             .also { it.currentState = Lifecycle.State.INITIALIZED }
         every { activity.lifecycle } returns lifecycle
         return Pair(activity, lifecycle)
+    }
+
+    /**
+     * Used for the [MapboxNavigationApp.getObserver] tests because they require a class definition.
+     */
+    private class ExampleObserverA : MapboxNavigationObserver {
+        override fun onAttached(mapboxNavigation: MapboxNavigation) {
+            // no op
+        }
+
+        override fun onDetached(mapboxNavigation: MapboxNavigation) {
+            // no op
+        }
+    }
+
+    /**
+     * Used for the [MapboxNavigationApp.getObserver] tests because they require a class definition.
+     */
+    private class ExampleObserverB : MapboxNavigationObserver {
+        override fun onAttached(mapboxNavigation: MapboxNavigation) {
+            // no op
+        }
+
+        override fun onDetached(mapboxNavigation: MapboxNavigation) {
+            // no op
+        }
     }
 }

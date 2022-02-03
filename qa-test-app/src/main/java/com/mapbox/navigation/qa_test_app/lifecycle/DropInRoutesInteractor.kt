@@ -1,13 +1,12 @@
 package com.mapbox.navigation.qa_test_app.lifecycle
 
 import android.location.Location
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import com.mapbox.android.gestures.Utils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
+import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
@@ -18,6 +17,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInLocationViewModel
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
@@ -30,7 +30,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class DropInRoutesInteractor(val mapView: MapView) : DefaultLifecycleObserver {
+class DropInRoutesInteractor(
+    val locationViewModel: DropInLocationViewModel,
+    val mapView: MapView
+) : MapboxNavigationObserver {
     private val routeClickPadding = Utils.dpToPx(30f)
 
     private val routeLineResources: RouteLineResources by lazy {
@@ -54,6 +57,7 @@ class DropInRoutesInteractor(val mapView: MapView) : DefaultLifecycleObserver {
 
     private val routesObserver = RoutesObserver { result ->
         val routeLines = result.routes.map { RouteLine(it, null) }
+        // TODO this should be attached to a lifecycle scope
         CoroutineScope(Dispatchers.Main).launch {
             routeLineApi.setRoutes(routeLines).let { routeDrawData ->
                 mapView.getMapboxMap().getStyle { style ->
@@ -63,27 +67,31 @@ class DropInRoutesInteractor(val mapView: MapView) : DefaultLifecycleObserver {
         }
     }
 
-    override fun onResume(owner: LifecycleOwner) {
-        MapboxNavigationApp.registerObserver(navigationObserver)
-    }
-
-    override fun onPause(owner: LifecycleOwner) {
-        MapboxNavigationApp.unregisterObserver(navigationObserver)
-    }
-
-    private val navigationObserver = object : MapboxNavigationObserver {
-        override fun onAttached(mapboxNavigation: MapboxNavigation) {
-            mapboxNavigation.registerRoutesObserver(routesObserver)
+    override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        // Setup a long press to find a route.
+        mapView.gestures.addOnMapLongClickListener { point ->
+            val originLocation = locationViewModel.locationLiveData.value
+            findRoute(originLocation, point)
+            false
         }
 
-        override fun onDetached(mapboxNavigation: MapboxNavigation) {
-            mapboxNavigation.unregisterRoutesObserver(routesObserver)
-            routeLineApi.cancel()
-            routeLineView.cancel()
+        // Setup the map press to select alternative routes.
+        mapView.gestures.addOnMapClickListener { point ->
+            selectRoute(point)
+            false
         }
+
+        mapboxNavigation.registerRoutesObserver(routesObserver)
+    }
+
+    override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        mapboxNavigation.unregisterRoutesObserver(routesObserver)
+        routeLineApi.cancel()
+        routeLineView.cancel()
     }
 
     fun selectRoute(point: Point) {
+        // TODO this should be attached to a lifecycle scope
         CoroutineScope(Dispatchers.Main).launch {
             val result = routeLineApi.findClosestRoute(
                 point,

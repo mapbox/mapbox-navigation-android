@@ -4,33 +4,32 @@ import android.annotation.SuppressLint
 import android.graphics.Rect
 import android.location.Location
 import android.view.ViewTreeObserver
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.mapbox.maps.CameraOptions
+import com.mapbox.android.gestures.MoveGestureDetector
+import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.plugin.gestures.OnMoveListener
+import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.dropin.lifecycle.DropInComponent
+import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInLocationViewModel
+import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInNavigationCameraViewModel
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 
-private const val DEFAULT_INITIAL_ZOOM = 15.0
-
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DropInNavigationCamera(
-    val mapView: MapView,
-    private val cameraMode: DropInCameraMode,
-    private val dropInLocationViewModel: DropInLocationViewModel,
-    private val initialCameraOptions: CameraOptions? = CameraOptions.Builder()
-        .zoom(DEFAULT_INITIAL_ZOOM)
-        .build(),
-) : DefaultLifecycleObserver {
+    private val cameraViewModel: DropInNavigationCameraViewModel,
+    private val locationViewModel: DropInLocationViewModel,
+    private val lifecycleOwner: LifecycleOwner,
+    private val mapView: MapView,
+) : DropInComponent() {
     private lateinit var navigationCamera: NavigationCamera
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
 
@@ -44,9 +43,26 @@ class DropInNavigationCamera(
         visibleAreaChanged(visibleArea, edgeInsets)
     }
 
-    override fun onCreate(owner: LifecycleOwner) {
-        initialCameraOptions?.let { mapView.getMapboxMap().setCamera(it) }
+    private val triggerIdleCameraOnMoveListener = object : OnMoveListener {
+        override fun onMove(detector: MoveGestureDetector): Boolean {
+            return false
+        }
 
+        override fun onMoveBegin(detector: MoveGestureDetector) {
+            if (cameraViewModel.triggerIdleCameraOnMoveListener) {
+                cameraViewModel.cameraMode.value = DropInCameraMode.IDLE
+            }
+        }
+
+        override fun onMoveEnd(detector: MoveGestureDetector) {
+            // No op
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        super.onAttached(mapboxNavigation)
+        mapView.gestures.addOnMoveListener(triggerIdleCameraOnMoveListener)
         viewportDataSource = MapboxNavigationViewportDataSource(
             mapView.getMapboxMap()
         )
@@ -59,39 +75,38 @@ class DropInNavigationCamera(
         check(mapView.viewTreeObserver.isAlive) { "Make sure the map is alive" }
         mapView.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
 
-        dropInLocationViewModel.locationLiveData.observe(owner) {
-            updateCamera(it)
+        locationViewModel.locationLiveData.observe(lifecycleOwner) {
+            // TODO we don't really want to do this. But it have not found a good way to restore
+            //   the camera state when orientation is changing. see isLocationInitialized
+            updateCamera(cameraViewModel.cameraMode(), it)
         }
-    }
-
-    override fun onDestroy(owner: LifecycleOwner) {
-        mapView.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
-    }
-
-    override fun onResume(owner: LifecycleOwner) {
-        MapboxNavigationApp.registerObserver(navigationObserver)
-    }
-
-    override fun onPause(owner: LifecycleOwner) {
-        MapboxNavigationApp.unregisterObserver(navigationObserver)
-    }
-
-    private val navigationObserver = object : MapboxNavigationObserver {
-        @SuppressLint("MissingPermission")
-        override fun onAttached(mapboxNavigation: MapboxNavigation) {
-            mapboxNavigation.apply {
-                registerRoutesObserver(routeObserver)
-                registerRouteProgressObserver(routeProgressObserver)
+        cameraViewModel.cameraOptions.value?.let { builder ->
+            mapView.getMapboxMap().setCamera(builder.build())
+        }
+        cameraViewModel.cameraMode.observe(lifecycleOwner) { cameraMode ->
+            if (!isLocationInitialized) return@observe
+            when (cameraMode) {
+                DropInCameraMode.IDLE -> navigationCamera.requestNavigationCameraToIdle()
+                DropInCameraMode.FOLLOWING -> navigationCamera.requestNavigationCameraToFollowing()
+                DropInCameraMode.OVERVIEW -> navigationCamera.requestNavigationCameraToOverview()
+                null -> { /** no op */ }
             }
         }
 
-        override fun onDetached(mapboxNavigation: MapboxNavigation) {
-            mapboxNavigation.apply {
-                unregisterRoutesObserver(routeObserver)
-                unregisterRouteProgressObserver(routeProgressObserver)
-            }
-            isLocationInitialized = false
+        mapboxNavigation.apply {
+            registerRoutesObserver(routeObserver)
+            registerRouteProgressObserver(routeProgressObserver)
         }
+    }
+
+    override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        super.onDetached(mapboxNavigation)
+        mapView.gestures.removeOnMoveListener(triggerIdleCameraOnMoveListener)
+        mapboxNavigation.apply {
+            unregisterRoutesObserver(routeObserver)
+            unregisterRouteProgressObserver(routeProgressObserver)
+        }
+        isLocationInitialized = false
     }
 
     private fun visibleAreaChanged(visibleArea: Rect, edgeInsets: EdgeInsets) {
@@ -114,7 +129,7 @@ class DropInNavigationCamera(
         viewportDataSource.evaluate()
     }
 
-    private fun updateCamera(enhancedLocation: Location) {
+    private fun updateCamera(cameraMode: DropInCameraMode, enhancedLocation: Location) {
         // Initialize the camera at the current location. The next location will
         // transition into the following or overview mode.
         viewportDataSource.onLocationChanged(enhancedLocation)
@@ -125,7 +140,19 @@ class DropInNavigationCamera(
                 .maxDuration(0)
                 .build()
             when (cameraMode) {
-                DropInCameraMode.IDLE -> navigationCamera.requestNavigationCameraToIdle()
+                DropInCameraMode.IDLE -> {
+                    // TODO When changing orientation, the state can be idle but haven't found
+                    //   a way to save the previous state. This is not quite correct because the
+                    //   viewportDataSource depends on the Map and has to be refreshed outside of
+                    //   the view model.
+                    cameraViewModel.cameraOptions.value?.let { builder ->
+                        val cameraOptions = builder.center(
+                            Point.fromLngLat(enhancedLocation.longitude, enhancedLocation.latitude)
+                        ).build()
+                        mapView.getMapboxMap().setCamera(cameraOptions)
+                    }
+                    navigationCamera.requestNavigationCameraToIdle()
+                }
                 DropInCameraMode.FOLLOWING -> navigationCamera.requestNavigationCameraToFollowing(
                     stateTransitionOptions = instantTransition
                 )
@@ -150,7 +177,7 @@ class DropInNavigationCamera(
         viewportDataSource.evaluate()
     }
 
-    private companion object {
+    companion object {
         /**
          * While following the location puck, inset the bottom by 1/3 of the screen.
          */

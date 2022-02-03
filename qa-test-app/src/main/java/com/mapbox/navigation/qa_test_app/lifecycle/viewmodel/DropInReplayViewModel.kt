@@ -1,5 +1,6 @@
-package com.mapbox.navigation.qa_test_app.lifecycle
+package com.mapbox.navigation.qa_test_app.lifecycle.viewmodel
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -7,8 +8,8 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
-import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 
+@SuppressLint("MissingPermission")
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DropInReplayViewModel : ViewModel() {
 
@@ -18,12 +19,13 @@ class DropInReplayViewModel : ViewModel() {
 
         override fun onAttached(mapboxNavigation: MapboxNavigation) {
             val context = mapboxNavigation.navigationOptions.applicationContext
+            val mapboxReplayer = mapboxNavigation.mapboxReplayer
             routesObserver = RoutesObserver { result ->
                 if (result.routes.isEmpty()) {
-                    mapboxNavigation.mapboxReplayer.clearEvents()
+                    mapboxReplayer.clearEvents()
                     mapboxNavigation.resetTripSession()
-                    mapboxNavigation.mapboxReplayer.pushRealLocation(context, 0.0)
-                    mapboxNavigation.mapboxReplayer.play()
+                    mapboxReplayer.pushRealLocation(context, 0.0)
+                    mapboxReplayer.play()
                 }
             }
             replayProgressObserver = ReplayProgressObserver(mapboxNavigation.mapboxReplayer)
@@ -31,9 +33,9 @@ class DropInReplayViewModel : ViewModel() {
             mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
             mapboxNavigation.registerRoutesObserver(routesObserver)
 
-            mapboxNavigation.mapboxReplayer.pushRealLocation(context, 0.0)
-            mapboxNavigation.mapboxReplayer.playbackSpeed(1.5)
-            mapboxNavigation.mapboxReplayer.play()
+            mapboxReplayer.pushRealLocation(context, 0.0)
+            mapboxReplayer.playbackSpeed(1.5)
+            mapboxReplayer.play()
         }
 
         override fun onDetached(mapboxNavigation: MapboxNavigation) {
@@ -43,16 +45,13 @@ class DropInReplayViewModel : ViewModel() {
         }
     }
 
-    fun startSimulation() = MapboxNavigationApp.current()?.apply {
-        val route = MapboxNavigationApp.current()?.getRoutes()?.get(0)
-        checkNotNull(route) { "Current route should not be null" }
-        mapboxReplayer.stop()
-        mapboxReplayer.clearEvents()
-        val replayData = ReplayRouteMapper().mapDirectionsRouteGeometry(route)
-        mapboxReplayer.pushEvents(replayData)
-        mapboxReplayer.seekTo(replayData[0])
-        mapboxReplayer.play()
-        startReplayTripSession()
+    fun startSimulation() {
+        with(MapboxNavigationApp.current() ?: return) {
+            mapboxReplayer.clearEvents()
+            resetTripSession()
+            mapboxReplayer.pushRealLocation(navigationOptions.applicationContext, 0.0)
+            mapboxReplayer.play()
+        }
     }
 
     init {

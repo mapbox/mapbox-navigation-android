@@ -1,12 +1,14 @@
-package com.mapbox.navigation.qa_test_app.lifecycle
+package com.mapbox.navigation.qa_test_app.lifecycle.viewmodel
 
 import android.annotation.SuppressLint
 import android.location.Location
-import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -14,12 +16,16 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
+import com.mapbox.navigation.utils.internal.LoggerProvider.logger
 
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DropInLocationViewModel : ViewModel() {
+
     val navigationLocationProvider = NavigationLocationProvider()
-    val locationLiveData = MutableLiveData<Location>()
+
+    private val _locationLiveData = MutableLiveData<Location>()
+    val locationLiveData: LiveData<Location> = _locationLiveData
 
     private val locationObserver: LocationObserver = object : LocationObserver {
         override fun onNewRawLocation(rawLocation: Location) {
@@ -31,7 +37,7 @@ class DropInLocationViewModel : ViewModel() {
                 locationMatcherResult.enhancedLocation,
                 locationMatcherResult.keyPoints
             )
-            locationLiveData.value = locationMatcherResult.enhancedLocation
+            _locationLiveData.value = locationMatcherResult.enhancedLocation
         }
     }
 
@@ -42,11 +48,15 @@ class DropInLocationViewModel : ViewModel() {
                 override fun onSuccess(result: LocationEngineResult) {
                     result.lastLocation?.let {
                         navigationLocationProvider.changePosition(it, emptyList())
-                        locationLiveData.value = it
+                        _locationLiveData.value = it
                     }
                 }
                 override fun onFailure(exception: Exception) {
-                    Log.e("kyle_fail", "what is it", exception)
+                    logger.e(
+                        Tag("MbxDropInLocationObserver"),
+                        Message("Failed to get immediate location"),
+                        exception
+                    )
                 }
             })
 

@@ -2,12 +2,9 @@ package com.mapbox.navigation.qa_test_app.lifecycle
 
 import android.view.View
 import android.widget.Toast
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -30,14 +27,10 @@ class DropInActiveGuidance(
     private val stopView: View,
     private val maneuverView: MapboxManeuverView,
     private val tripProgressView: MapboxTripProgressView
-) : DefaultLifecycleObserver {
+) : MapboxNavigationObserver {
 
-    private val distanceFormatterOptions = MapboxNavigationProvider.retrieve()
-        .navigationOptions.distanceFormatterOptions
-
-    private val maneuverApi: MapboxManeuverApi = MapboxManeuverApi(
-        MapboxDistanceFormatter(distanceFormatterOptions)
-    )
+    // Set when attached
+    private var maneuverApi: MapboxManeuverApi? = null
 
     private val tripSessionStateObserver = TripSessionStateObserver {
         // Another solution here is to create a flowable or livedata stream. That way we can
@@ -66,29 +59,47 @@ class DropInActiveGuidance(
 
     // The onAttached will happen after onStart when it is added to the MapboxNavigationApp
     // MapboxNavigationApp.registerObserver(navigationObserver)
-    private val navigationObserver = object : MapboxNavigationObserver {
-        private lateinit var routeProgressObserver: RouteProgressObserver
+    private lateinit var routeProgressObserver: RouteProgressObserver
 
-        override fun onAttached(mapboxNavigation: MapboxNavigation) {
-            routeProgressObserver = createBannerRouteProgressObserver(mapboxNavigation)
-            mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-            mapboxNavigation.registerRoutesObserver(routesObserver)
-            mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
+    override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        updateVisibility(false)
+        stopView.setOnClickListener {
+            mapboxNavigation.setRoutes(listOf())
+            mapboxNavigation.stopTripSession()
         }
+        val maneuverApi = MapboxManeuverApi(
+            MapboxDistanceFormatter(
+                mapboxNavigation.navigationOptions.distanceFormatterOptions
+            )
+        )
+        routeProgressObserver = createBannerRouteProgressObserver(mapboxNavigation, maneuverApi)
+        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.registerRoutesObserver(routesObserver)
+        mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
 
-        override fun onDetached(mapboxNavigation: MapboxNavigation) {
-            mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-            mapboxNavigation.unregisterRoutesObserver(routesObserver)
-            mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
-        }
+        this.maneuverApi = maneuverApi
+    }
+
+    override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.unregisterRoutesObserver(routesObserver)
+        mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
+
+        maneuverApi?.cancel()
+        maneuverApi = null
     }
 
     private fun createBannerRouteProgressObserver(
-        mapboxNavigation: MapboxNavigation
+        mapboxNavigation: MapboxNavigation,
+        maneuverApi: MapboxManeuverApi,
     ): RouteProgressObserver {
         val applicationContext = mapboxNavigation.navigationOptions.applicationContext
         val tripProgressUpdateFormatter = TripProgressUpdateFormatter.Builder(applicationContext)
-            .distanceRemainingFormatter(DistanceRemainingFormatter(distanceFormatterOptions))
+            .distanceRemainingFormatter(
+                DistanceRemainingFormatter(
+                    mapboxNavigation.navigationOptions.distanceFormatterOptions
+                )
+            )
             .timeRemainingFormatter(TimeRemainingFormatter(applicationContext))
             .percentRouteTraveledFormatter(PercentDistanceTraveledFormatter())
             .estimatedTimeToArrivalFormatter(
@@ -117,21 +128,5 @@ class DropInActiveGuidance(
                 tripProgressApi.getTripProgress(routeProgress)
             )
         }
-    }
-
-    override fun onCreate(owner: LifecycleOwner) {
-        updateVisibility(false)
-        stopView.setOnClickListener {
-            MapboxNavigationApp.current()?.setRoutes(listOf())
-        }
-    }
-
-    override fun onStart(owner: LifecycleOwner) {
-        MapboxNavigationApp.registerObserver(navigationObserver)
-    }
-
-    override fun onStop(owner: LifecycleOwner) {
-        MapboxNavigationApp.unregisterObserver(navigationObserver)
-        maneuverApi.cancel()
     }
 }
