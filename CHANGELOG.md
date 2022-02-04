@@ -8,6 +8,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
+- Updated `MapboxManeuverView` or `MapboxRoadNameView` to prefer Mapbox designed shields over legacy ones. [#5445](https://github.com/mapbox/mapbox-navigation-android/pull/5445)
 
 ## Mapbox Navigation SDK 2.3.0-beta.2 - February 2, 2022
 ### Changelog

@@ -72,26 +72,10 @@ class MapboxRoadNameView : AppCompatTextView {
     private fun renderRoadNameLabel() {
         val roadNameLabel = SpannableStringBuilder()
         roadComponents.forEach { component ->
-            val routeShield = when {
-                component.shield != null || component.imageBaseUrl != null -> {
-                    val routeShield = shields.find {
-                        when (it) {
-                            is RouteShield.MapboxDesignedShield -> {
-                                it.compareWith(other = component.shield)
-                            }
-                            is RouteShield.MapboxLegacyShield -> {
-                                it.compareWith(other = component.imageBaseUrl)
-                            }
-                            else -> {
-                                false
-                            }
-                        }
-                    }
-                    routeShield
-                }
-                else -> {
-                    null
-                }
+            val routeShield = component.shield?.let { shield ->
+                shields.find { it is RouteShield.MapboxDesignedShield && it.compareWith(shield) }
+            } ?: component.imageBaseUrl?.let { baseUrl ->
+                shields.find { it is RouteShield.MapboxLegacyShield && it.compareWith(baseUrl) }
             }
             roadNameLabel.renderRoadName(
                 text = component.text,
