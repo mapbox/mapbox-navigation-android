@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Collections
+import java.util.zip.GZIPOutputStream
 
 class HistoryFilesViewController(
     private val historyFileDirectory: String?
@@ -61,7 +62,7 @@ class HistoryFilesViewController(
         val historyFiles: List<String> = context.assets.list("")?.toList()
             ?: Collections.emptyList()
 
-        historyFiles.filter { it.endsWith(".json") }
+        historyFiles.filter { it.endsWith(".json") or it.endsWith(".pbf") }
             .map { fileName ->
                 ReplayPath(
                     title = context.getString(R.string.history_local_history_file),
@@ -117,9 +118,16 @@ class HistoryFilesViewController(
     ) {
         CoroutineScope(Dispatchers.IO).launch {
             val inputStream = context.assets.open(replayPath.path)
-            val outputFile = historyFilesRepository.outputFile(context, replayPath.path)
+            val shouldBeZipped = replayPath.path.endsWith("pbf")
+            val path = if (shouldBeZipped) {
+                replayPath.path + ".gz"
+            } else replayPath.path
+            val outputFile = historyFilesRepository.outputFile(context, path)
             outputFile.outputStream().use { fileOut ->
-                inputStream.copyTo(fileOut)
+                val output = if (shouldBeZipped) {
+                    GZIPOutputStream(fileOut)
+                } else fileOut
+                inputStream.copyTo(output)
             }
             val reader = MapboxHistoryReader(outputFile.absolutePath)
             withContext(Dispatchers.Main) {
