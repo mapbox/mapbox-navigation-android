@@ -5,7 +5,6 @@ import android.content.res.Resources
 import android.text.SpannableStringBuilder
 import com.mapbox.navigation.ui.maneuver.view.MapboxExitText
 import com.mapbox.navigation.ui.shield.model.RouteShield
-import com.mapbox.navigation.ui.utils.internal.ifNonNull
 
 internal object ManeuverInstructionGenerator {
 
@@ -177,17 +176,10 @@ internal object ManeuverInstructionGenerator {
         node: RoadShieldComponentNode,
         roadShields: Set<RouteShield>?
     ): RouteShield? {
-        return roadShields?.find {
-            when (it) {
-                is RouteShield.MapboxDesignedShield -> {
-                    ifNonNull(node.mapboxShield) { mbxShield ->
-                        it.compareWith(other = mbxShield)
-                    } ?: false
-                }
-                is RouteShield.MapboxLegacyShield -> {
-                    it.compareWith(node.shieldUrl)
-                }
-            }
+        return node.mapboxShield?.let { shield ->
+            roadShields?.find { it is RouteShield.MapboxDesignedShield && it.compareWith(shield) }
+        } ?: node.shieldUrl?.let { shieldUrl ->
+            roadShields?.find { it is RouteShield.MapboxLegacyShield && it.compareWith(shieldUrl) }
         }
     }
 }
