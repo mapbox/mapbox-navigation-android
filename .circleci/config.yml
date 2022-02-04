@@ -19,6 +19,7 @@ jobs:
     executor: ndk-r22-latest-executor
     steps:
       - prepare-mbx-ci
+      - checkout
       - trigger-publisher
 
 commands:
