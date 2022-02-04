@@ -15,6 +15,8 @@ import com.mapbox.api.directions.v5.models.StepManeuver.FORK
 import com.mapbox.api.directions.v5.models.StepManeuver.MERGE
 import com.mapbox.api.directions.v5.models.StepManeuver.OFF_RAMP
 import com.mapbox.api.directions.v5.models.StepManeuver.ON_RAMP
+import com.mapbox.api.directions.v5.models.StepManeuver.ROUNDABOUT
+import com.mapbox.api.directions.v5.models.StepManeuver.ROUNDABOUT_TURN
 import com.mapbox.api.directions.v5.models.StepManeuver.TURN
 import com.mapbox.navigation.base.internal.maneuver.ManeuverTurnIcon
 import com.mapbox.navigation.ui.maneuver.model.TurnIconResources
@@ -1129,7 +1131,9 @@ class TurnIconHelperTest {
         )
 
         assertEquals(expected, actual)
-    } @Test
+    }
+
+    @Test
     fun `generate turn icon with turn type and right modifier`() {
         val mockType: String = TURN
         val mockDegrees: Float? = null
@@ -1333,6 +1337,56 @@ class TurnIconHelperTest {
             mockDrivingSide
         )
 
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `generate roundabout icon`() {
+        val actual = turnIconHelper.retrieveTurnIcon(ROUNDABOUT, 210f, SLIGHT_RIGHT, "right")
+
+        val expected =
+            ManeuverTurnIcon(210f, "right", false, R.drawable.mapbox_ic_roundabout_slight_left)
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `DRIVING SIDE LEFT - should flip UTURN icon`() {
+        val actual = turnIconHelper.retrieveTurnIcon(TURN, null, UTURN, "left")
+
+        val expected = ManeuverTurnIcon(null, "left", true, R.drawable.mapbox_ic_uturn)
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `DRIVING SIDE LEFT - should flip FORK icon`() {
+        val actual = turnIconHelper.retrieveTurnIcon(FORK, null, null, "left")
+
+        val expected = ManeuverTurnIcon(null, "left", true, R.drawable.mapbox_ic_fork)
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `DRIVING SIDE LEFT - should flip FORK STRAIGHT icon`() {
+        val actual = turnIconHelper.retrieveTurnIcon(FORK, null, STRAIGHT, "left")
+
+        val expected = ManeuverTurnIcon(null, "left", true, R.drawable.mapbox_ic_fork_straight)
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `DRIVING SIDE LEFT - should flip OFF_RAMP icon`() {
+        val actual = turnIconHelper.retrieveTurnIcon(OFF_RAMP, null, null, "left")
+
+        val expected = ManeuverTurnIcon(null, "left", true, R.drawable.mapbox_ic_off_ramp)
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `DRIVING SIDE LEFT - should flip roundabout icon`() {
+        val actual = turnIconHelper.retrieveTurnIcon(ROUNDABOUT_TURN, 34f, SHARP_RIGHT, "left")
+
+        val expected =
+            ManeuverTurnIcon(34f, "left", true, R.drawable.mapbox_ic_roundabout_sharp_right)
         assertEquals(expected, actual)
     }
 }
