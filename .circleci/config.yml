@@ -1,0 +1,47 @@
+version: 2.1
+
+executors:
+  ndk-r22-latest-executor:
+    docker:
+      - image: mbgl/android-ndk-r22:latest
+    working_directory: ~/code
+    environment:
+      MBX_CI_DOMAIN: o619qyc20d.execute-api.us-east-1.amazonaws.com
+
+workflows:
+  version: 2
+  trigger-publisher-workflow:
+    jobs:
+      - trigger-publisher
+
+jobs:
+  trigger-publisher:
+    executor: ndk-r22-latest-executor
+    steps:
+      prepare-mbx-ci
+      trigger-publisher
+
+commands:
+  prepare-mbx-ci:
+    steps:
+      - run:
+          name: Install mbx-ci
+          command: |
+            curl -Ls https://mapbox-release-engineering.s3.amazonaws.com/mbx-ci/latest/mbx-ci-linux-amd64 > mbx-ci && chmod 755 ./mbx-ci
+  
+  trigger-publisher:
+    steps:
+      - run:
+          name: trigger-publisher
+          command: |
+            GITHUB_WRITER_TOKEN=$(./mbx-ci github writer public token)
+            git remote set-url origin "https://x-access-token:$GITHUB_WRITER_TOKEN@github.com/mapbox/mapbox-navigation-android"
+            git config --global user.email no-reply@mapbox.com && git config --global user.name mapbox-ci
+            readonly TRIGGER_PUBLISHER_COMMIT_MESSAGE="trigger-publisher"
+            COMMIT_MESSAGE=`git show --pretty=format:%s -s HEAD`
+            if [[ "$COMMIT_MESSAGE" != "$TRIGGER_PUBLISHER_COMMIT_MESSAGE" ]]; then
+              git commit -m $TRIGGER_PUBLISHER_COMMIT_MESSAGE --allow-empty
+              git push origin HEAD
+            else
+              echo "publisher already triggered"
+            fi
