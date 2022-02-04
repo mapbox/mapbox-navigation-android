@@ -799,4 +799,20 @@ class MapboxRouteLineUtilsRoboTest {
         assertTrue(result.isEmpty())
         verify(exactly = 1) { route.legs() }
     }
+
+    @Test
+    fun resetExtractRouteDataCache() {
+        val route1 = mockk<DirectionsRoute> {
+            every { legs() } returns null
+        }
+        val trafficCongestionProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        MapboxRouteLineUtils.extractRouteData(route1, trafficCongestionProvider)
+        MapboxRouteLineUtils.extractRouteData(route1, trafficCongestionProvider)
+        verify(exactly = 1) { route1.legs() }
+
+        MapboxRouteLineUtils.resetCache()
+        MapboxRouteLineUtils.extractRouteData(route1, trafficCongestionProvider)
+
+        verify(exactly = 2) { route1.legs() }
+    }
 }

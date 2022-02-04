@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.util
 
+import android.util.LruCache
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -58,5 +59,21 @@ class CacheResultUtilsTest {
 
         assertEquals(8, result)
         assertEquals(3, counter)
+    }
+
+    @Test
+    fun cacheResultWithProvidedCache() {
+        val cache: LruCache<CacheResultUtils.CacheResultKey1<Int, Int>, Int> = LruCache(1)
+        var counter = 0
+        val testFun: (a: Int) -> Int = { a: Int ->
+            counter += 1
+            a + counter
+        }.cacheResult(cache)
+        testFun(5)
+        testFun(5)
+
+        testFun(5)
+
+        assertEquals(1, cache.size())
     }
 }

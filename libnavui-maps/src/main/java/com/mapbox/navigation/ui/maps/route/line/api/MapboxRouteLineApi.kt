@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
+import android.util.LruCache
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
@@ -44,6 +45,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.route.line.model.toNavigationRouteLines
+import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
@@ -196,6 +198,12 @@ class MapboxRouteLineApi(
     internal var activeLegIndex = INVALID_ACTIVE_LEG_INDEX
         private set
     private val trafficBackfillRoadClasses = CopyOnWriteArrayList<String>()
+    private val alternativelyStyleSegmentsNotInLegCache: LruCache<
+        CacheResultUtils.CacheResultKey2<
+            Int, List<RouteLineExpressionData>,
+            List<RouteLineExpressionData>
+            >,
+        List<RouteLineExpressionData>> by lazy { LruCache(2) }
 
     companion object {
         private const val INVALID_ACTIVE_LEG_INDEX = -1
@@ -485,6 +493,7 @@ class MapboxRouteLineApi(
                 routeFeatureData.clear()
                 routeLineExpressionData = emptyList()
                 routeHasRestrictions = false
+                resetCaches()
 
                 consumer.accept(
                     ExpectedFactory.createValue(
@@ -1082,6 +1091,7 @@ class MapboxRouteLineApi(
         routes.clear()
         routes.addAll(newRoutes)
         primaryRoute = newRoutes.firstOrNull()
+        resetCaches()
         return buildDrawRoutesState(featureDataProvider)
     }
 
@@ -1326,6 +1336,11 @@ class MapboxRouteLineApi(
         )
     }
 
+    private fun resetCaches() {
+        MapboxRouteLineUtils.resetCache()
+        alternativelyStyleSegmentsNotInLegCache.evictAll()
+    }
+
     internal val alternativelyStyleSegmentsNotInLeg: (
         activeLegIndex: Int,
         segments: List<RouteLineExpressionData>
@@ -1346,5 +1361,5 @@ class MapboxRouteLineApi(
                 },
                 jobControl.scope
             )
-        }.cacheResult(2)
+        }.cacheResult(alternativelyStyleSegmentsNotInLegCache)
 }

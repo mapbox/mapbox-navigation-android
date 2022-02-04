@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.internal.route.line
 
 import android.graphics.Color
+import android.util.LruCache
 import android.util.SparseArray
 import androidx.annotation.ColorInt
 import com.mapbox.api.directions.v5.DirectionsCriteria
@@ -37,6 +38,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
+import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
@@ -53,6 +55,13 @@ internal object MapboxRouteLineUtils {
 
     private const val LOG_CATEGORY = "MapboxRouteLineUtils"
     internal const val VANISH_POINT_STOP_GAP = .00000000001
+
+    private val extractRouteDataCache: LruCache<
+        CacheResultUtils.CacheResultKey2<
+            DirectionsRoute, (RouteLeg) -> List<String>?,
+            List<ExtractedRouteData>
+            >,
+        List<ExtractedRouteData>> by lazy { LruCache(3) }
 
     /**
      * Creates an [Expression] that can be applied to the layer style changing the appearance of
@@ -492,7 +501,7 @@ internal object MapboxRouteLineUtils {
                     else -> true
                 }
             }
-        }.cacheResult(3)
+        }.cacheResult(extractRouteDataCache)
 
     /**
      * Extracts data from the [DirectionsRoute] in a format more useful to the route line
@@ -551,7 +560,7 @@ internal object MapboxRouteLineUtils {
             }
 
             itemsToReturn
-        }.cacheResult(3)
+        }.cacheResult(extractRouteDataCache)
 
     internal val getRouteLegTrafficNumericCongestionProvider: (
         routeLineColorResources: RouteLineColorResources
@@ -725,7 +734,7 @@ internal object MapboxRouteLineUtils {
 
     /**
      * Generates a FeatureCollection and LineString based on the @param route.
-     * @param route the DirectionsRoute to used to derive the result
+     * @param route the [NavigationRoute] to used to derive the result
      *
      * @return a RouteFeatureData containing the original route and a FeatureCollection and
      * LineString
@@ -735,7 +744,7 @@ internal object MapboxRouteLineUtils {
 
     /**
      * Generates a FeatureCollection and LineString based on the @param route.
-     * @param route the DirectionsRoute to used to derive the result
+     * @param route the [NavigationRouteLine] to used to derive the result
      *
      * @return a RouteFeatureData containing the original route and a FeatureCollection and
      * LineString
@@ -790,11 +799,11 @@ internal object MapboxRouteLineUtils {
     }
 
     /**
-     * Builds a [FeatureCollection] representing waypoints from a [DirectionsRoute]
+     * Builds a [FeatureCollection] representing waypoints from a [NavigationRoute]
      *
      * @param route the route to use for generating the waypoints [FeatureCollection]
      *
-     * @return a [FeatureCollection] representing the waypoints derived from the [DirectionsRoute]
+     * @return a [FeatureCollection] representing the waypoints derived from the [NavigationRoute]
      */
     internal fun buildWayPointFeatureCollection(route: NavigationRoute): FeatureCollection {
         val waypointFeatures = route.directionsResponse.waypoints()?.mapIndexed { index, waypoint ->
@@ -1199,6 +1208,12 @@ internal object MapboxRouteLineUtils {
         }?.any { stepIntersection ->
             stepIntersection.classes()?.contains("restricted") ?: false
         } ?: false
+    }
+
+    internal fun resetCache() {
+        synchronized(extractRouteDataCache) {
+            extractRouteDataCache.evictAll()
+        }
     }
 
     private fun projectX(x: Double): Double {
