@@ -33,7 +33,7 @@ class MapboxTurnIconManeuver @JvmOverloads constructor(
 
     private var contextThemeWrapper: ContextThemeWrapper =
         ContextThemeWrapper(context, R.style.MapboxStyleTurnIconManeuver)
-    private var turnIconResources = TurnIconResources.Builder().build()
+    private var turnIconResources = TurnIconResources.defaultIconSet()
     private val turnIconsApi = MapboxTurnIconsApi(turnIconResources)
 
     /**

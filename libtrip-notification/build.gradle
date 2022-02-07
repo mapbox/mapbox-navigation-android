@@ -33,6 +33,7 @@ dependencies {
 
     implementation dependenciesList.kotlinStdLib
     implementation project(':libnavigation-util')
+    implementation project(':libnavui-base')
 
     implementation dependenciesList.androidXCore
 
