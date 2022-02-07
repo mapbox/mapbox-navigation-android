@@ -17,8 +17,7 @@ import com.mapbox.navigation.qa_test_app.lifecycle.DropInNavigationCamera
 import com.mapbox.navigation.qa_test_app.lifecycle.DropInRoutesInteractor
 import com.mapbox.navigation.qa_test_app.lifecycle.DropInStartReplayButton
 import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInLocationViewModel
-import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInNavigationCameraViewModel
-import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInReplayViewModel
+import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInNavigationViewModel
 import com.mapbox.navigation.qa_test_app.utils.Utils.getMapboxAccessToken
 import com.mapbox.navigation.ui.maps.NavigationStyles
 
@@ -29,8 +28,7 @@ class AppLifecycleActivity : AppCompatActivity() {
         AppLifecycleActivityLayoutBinding.inflate(layoutInflater)
     }
 
-    private val replayViewModel: DropInReplayViewModel by viewModels()
-    private val cameraViewModel: DropInNavigationCameraViewModel by viewModels()
+    private val viewModel: DropInNavigationViewModel by viewModels()
     private val locationViewModel: DropInLocationViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,14 +66,14 @@ class AppLifecycleActivity : AppCompatActivity() {
         /**
          * Idea for interaction customization.
          */
-        cameraViewModel.triggerIdleCameraOnMoveListener = false
+        viewModel.triggerIdleCameraOnMoveListener = false
 
         attachResumed(
             DropInLocationPuck(locationViewModel, binding.mapView),
             DropInRoutesInteractor(locationViewModel, binding.mapView),
-            DropInNavigationCamera(cameraViewModel, locationViewModel, this, binding.mapView),
+            DropInNavigationCamera(viewModel, locationViewModel, this, binding.mapView),
             DropInContinuousRoutes(),
-            DropInStartReplayButton(replayViewModel, binding.startNavigation),
+            DropInStartReplayButton(binding.startNavigation),
         )
 
         // Add active guidance banner with maneuverView and trip progress in a Fragment.

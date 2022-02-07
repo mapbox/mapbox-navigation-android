@@ -3,10 +3,11 @@ package com.mapbox.navigation.qa_test_app.lifecycle
 import android.view.View
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.dropin.lifecycle.DropInComponent
 import com.mapbox.navigation.dropin.lifecycle.flowTripSessionState
-import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInReplayViewModel
+import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInReplayComponent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -16,7 +17,6 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DropInStartReplayButton(
-    private val dropInReplayViewModel: DropInReplayViewModel,
     private val view: View,
 ) : DropInComponent() {
 
@@ -27,7 +27,7 @@ class DropInStartReplayButton(
 
         coroutineScope.launch {
             view.clicks().collect {
-                dropInReplayViewModel.startSimulation()
+                MapboxNavigationApp.getObserver(DropInReplayComponent::class).startSimulation()
                 mapboxNavigation.startReplayTripSession()
             }
         }
