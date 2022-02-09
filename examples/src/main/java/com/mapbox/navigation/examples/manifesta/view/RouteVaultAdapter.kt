@@ -34,7 +34,7 @@ class RouteVaultAdapter: RecyclerView.Adapter<RouteVaultViewHolder>() {
 }
 class RouteVaultViewHolder constructor(itemView: View): RecyclerView.ViewHolder(itemView) {
     fun bind(record: StoredRouteRecord) {
-        itemView.findViewById<TextView>(R.id.routeAliasLabel)
+        itemView.findViewById<TextView>(R.id.routeAliasLabel).text = record.alias
         //viewBinding.routeAliasLabel.text = record.alias
     }
 }

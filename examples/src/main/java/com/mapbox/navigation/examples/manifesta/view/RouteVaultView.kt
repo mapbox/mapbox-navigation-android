@@ -26,7 +26,7 @@ class RouteVaultView(private val routeVaultApi: RouteVaultApi): DialogFragment()
     //
     // }
 
-    private val adapter: RouteVaultAdapter by lazy {
+    private val routeVaultAdapter: RouteVaultAdapter by lazy {
         RouteVaultAdapter()
     }
 
@@ -36,7 +36,7 @@ class RouteVaultView(private val routeVaultApi: RouteVaultApi): DialogFragment()
         routeView.findViewById<RecyclerView>(R.id.routeList).apply {
             val layoutManager = LinearLayoutManager(context)
             this.layoutManager = layoutManager
-            this.adapter = adapter
+            this.adapter = routeVaultAdapter
             this.addItemDecoration(
                 DividerItemDecoration(context, layoutManager.orientation)
             )
@@ -54,7 +54,7 @@ class RouteVaultView(private val routeVaultApi: RouteVaultApi): DialogFragment()
             routeVaultApi.getRoutes().fold({
                 Log.e(TAG, "Exception loading route records, ${it.message}")
             },{
-                adapter.setData(it)
+                routeVaultAdapter.setData(it)
             })
         }
     }
