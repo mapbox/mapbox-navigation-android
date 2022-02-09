@@ -636,7 +636,7 @@ package com.mapbox.navigation.ui.maneuver.model {
     property public final String? type;
   }
 
-  public final class TurnIconResources implements com.mapbox.navigation.base.maneuver.model.TurnIconResources {
+  public final class TurnIconResources implements com.mapbox.navigation.base.maneuver.model.BaseTurnIconResources {
     method public static com.mapbox.navigation.ui.maneuver.model.TurnIconResources defaultIconSet();
     method public int getTurnIconArrive();
     method public int getTurnIconArriveLeft();

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maneuver.model
 
 import androidx.annotation.DrawableRes
+import com.mapbox.navigation.base.maneuver.model.BaseTurnIconResources
 import com.mapbox.navigation.ui.maneuver.R
 
 /**
@@ -181,7 +182,7 @@ class TurnIconResources private constructor(
     @DrawableRes override val turnIconTurnSharpLeft: Int,
     @DrawableRes override val turnIconTurnSharpRight: Int,
     @DrawableRes override val turnIconUturn: Int
-) : com.mapbox.navigation.base.maneuver.model.TurnIconResources {
+) : BaseTurnIconResources {
 
     companion object {
         /**

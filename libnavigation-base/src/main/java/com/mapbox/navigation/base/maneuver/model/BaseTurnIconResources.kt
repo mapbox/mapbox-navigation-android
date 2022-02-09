@@ -3,7 +3,7 @@ package com.mapbox.navigation.base.maneuver.model
 /**
  * An interface describing all maneuver icons.
  */
-interface TurnIconResources {
+interface BaseTurnIconResources {
     /** The Arrive icon resource ID **/
     val turnIconArrive: Int
 

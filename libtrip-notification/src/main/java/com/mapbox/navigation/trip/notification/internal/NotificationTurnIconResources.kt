@@ -1,9 +1,10 @@
 package com.mapbox.navigation.trip.notification.internal
 
 import androidx.annotation.DrawableRes
+import com.mapbox.navigation.base.maneuver.model.BaseTurnIconResources
 import com.mapbox.navigation.trip.notification.R
 
-class TurnIconResources private constructor(
+class NotificationTurnIconResources private constructor(
     @DrawableRes override val turnIconArrive: Int,
     @DrawableRes override val turnIconArriveLeft: Int,
     @DrawableRes override val turnIconArriveRight: Int,
@@ -91,14 +92,14 @@ class TurnIconResources private constructor(
     @DrawableRes override val turnIconTurnSharpLeft: Int,
     @DrawableRes override val turnIconTurnSharpRight: Int,
     @DrawableRes override val turnIconUturn: Int
-) : com.mapbox.navigation.base.maneuver.model.TurnIconResources {
+) : BaseTurnIconResources {
 
     companion object {
         /**
          * Returns default icon set used by Notifications module.
          */
         @JvmStatic
-        fun defaultIconSet(): TurnIconResources = Builder().build()
+        fun defaultIconSet(): NotificationTurnIconResources = Builder().build()
     }
 
     /**
@@ -296,7 +297,7 @@ class TurnIconResources private constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as TurnIconResources
+        other as NotificationTurnIconResources
 
         if (turnIconArrive != other.turnIconArrive) return false
         if (turnIconArriveLeft != other.turnIconArriveLeft) return false
@@ -485,7 +486,7 @@ class TurnIconResources private constructor(
     }
 
     /**
-     * Build a new [TurnIconResources]
+     * Build a new [NotificationTurnIconResources]
      * @property turnIconArrive Int
      * @property turnIconArriveLeft Int
      * @property turnIconArriveRight Int
@@ -1409,11 +1410,11 @@ class TurnIconResources private constructor(
             apply { this.turnIconUturn = turnIconUturn }
 
         /**
-         * Build the [TurnIconResources].
+         * Build the [NotificationTurnIconResources].
          * @return NotificationTurnIconResources
          */
-        fun build(): TurnIconResources {
-            return TurnIconResources(
+        fun build(): NotificationTurnIconResources {
+            return NotificationTurnIconResources(
                 turnIconArrive,
                 turnIconArriveLeft,
                 turnIconArriveRight,

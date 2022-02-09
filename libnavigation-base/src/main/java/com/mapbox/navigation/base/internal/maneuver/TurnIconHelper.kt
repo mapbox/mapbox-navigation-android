@@ -21,14 +21,14 @@ import com.mapbox.api.directions.v5.models.StepManeuver.ROTARY
 import com.mapbox.api.directions.v5.models.StepManeuver.ROUNDABOUT
 import com.mapbox.api.directions.v5.models.StepManeuver.ROUNDABOUT_TURN
 import com.mapbox.api.directions.v5.models.StepManeuver.TURN
-import com.mapbox.navigation.base.maneuver.model.TurnIconResources
+import com.mapbox.navigation.base.maneuver.model.BaseTurnIconResources
 import kotlin.math.roundToInt
 
 /**
  * Shared Helper class that maps Maneuver to Icon.
  */
 class TurnIconHelper(
-    turnIconResources: TurnIconResources
+    turnIconResources: BaseTurnIconResources
 ) {
 
     private val defaultTurnIcon = icon(turnIconResources.turnIconTurnStraight)
