@@ -6,7 +6,6 @@ import com.mapbox.common.HttpMethod
 import com.mapbox.common.HttpRequest
 import com.mapbox.common.HttpServiceFactory
 import com.mapbox.common.UAComponents
-import com.mapbox.common.core.module.CommonSingletonModuleProvider
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
@@ -72,7 +71,7 @@ internal object RoadShieldDownloader {
                 }
             }
             continuation.invokeOnCancellation {
-                CommonSingletonModuleProvider.httpServiceInstance.cancelRequest(id) {}
+                HttpServiceFactory.getInstance().cancelRequest(id) {}
             }
         }
 
