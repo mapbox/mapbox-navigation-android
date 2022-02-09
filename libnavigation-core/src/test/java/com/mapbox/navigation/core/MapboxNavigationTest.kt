@@ -6,12 +6,14 @@ import android.content.Context
 import android.net.ConnectivityManager
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.telemetry.MapboxTelemetryConstants.MAPBOX_SHARED_PREFERENCES
+import com.mapbox.android.telemetry.TelemetryEnabler
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.common.MapboxSDKCommon
 import com.mapbox.common.module.provider.MapboxModuleProvider
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
@@ -65,6 +67,7 @@ import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.unmockkObject
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -201,6 +204,8 @@ class MapboxNavigationTest {
         } returns arrivalProgressObserver
 
         every { navigator.create(any(), any(), any(), any(), any(), any()) } returns navigator
+        mockkStatic(TelemetryEnabler::class)
+        every { TelemetryEnabler.isEventsEnabled(any()) } returns true
     }
 
     @After
@@ -216,6 +221,7 @@ class MapboxNavigationTest {
         unmockkObject(RouteRefreshControllerProvider)
         unmockkObject(RouteAlternativesControllerProvider)
         unmockkObject(MapboxNavigationTelemetry)
+        unmockkStatic(TelemetryEnabler::class)
 
         threadController.cancelAllNonUICoroutines()
         threadController.cancelAllUICoroutines()
@@ -453,6 +459,42 @@ class MapboxNavigationTest {
         mapboxNavigation.onDestroy()
 
         verify(exactly = 1) { navigationSession.unregisterAllNavigationSessionStateObservers() }
+    }
+
+    @Test
+    fun telemetryIsDisabled() {
+        every { TelemetryEnabler.isEventsEnabled(any()) } returns false
+
+        createMapboxNavigation()
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 0) {
+            MapboxNavigationTelemetry.initialize(any(), any(), any(), any(), any())
+        }
+        verify(exactly = 0) { MapboxNavigationTelemetry.destroy(any()) }
+    }
+
+    @ExperimentalPreviewMapboxNavigationAPI
+    @Test(expected = IllegalStateException::class)
+    fun telemetryIsDisabledTryToGetFeedbackMetadataWrapper() {
+        every { TelemetryEnabler.isEventsEnabled(any()) } returns false
+
+        createMapboxNavigation()
+        mapboxNavigation.provideFeedbackMetadataWrapper()
+    }
+
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun telemetryIsDisabledTryToPostFeedback() {
+        every { TelemetryEnabler.isEventsEnabled(any()) } returns false
+
+        createMapboxNavigation()
+
+        mapboxNavigation.postUserFeedback(mockk(), mockk(), mockk(), mockk(), mockk())
+        mapboxNavigation.postUserFeedback(mockk(), mockk(), mockk(), mockk(), mockk(), mockk())
+
+        verify(exactly = 0) {
+            MapboxNavigationTelemetry.postUserFeedback(any(), any(), any(), any(), any(), any())
+        }
     }
 
     @Test
