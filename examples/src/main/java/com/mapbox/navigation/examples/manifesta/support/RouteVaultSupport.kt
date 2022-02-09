@@ -1,20 +1,21 @@
 package com.mapbox.navigation.examples.manifesta.support
 
 import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.Query
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.examples.manifesta.RouteVaultApi
+import com.mapbox.navigation.examples.manifesta.model.entity.StoredRouteEntity
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 object RouteVaultSupport {
 
-    fun getFirestore(): FirebaseFirestore {
+    private fun getFirestore(): FirebaseFirestore {
         val fsSettings = FirebaseFirestoreSettings.Builder().setPersistenceEnabled(false).build()
         return FirebaseFirestore.getInstance().also {
             it.firestoreSettings = fsSettings
@@ -36,16 +37,6 @@ object RouteVaultSupport {
                 }
         }
     }
-
-    // suspend fun getDocumentFromCloudStore(docReference: DocumentReference): Expected<Throwable, Map<String, Any>> {
-    //     return suspendCoroutine { continuation ->
-    //         docReference.get()
-    //             .addOnFailureListener { throwable -> continuation.resume(ExpectedFactory.createError(throwable)) }
-    //             .addOnSuccessListener {
-    //                 continuation.resume(ExpectedFactory.createValue(it.data ?: mapOf()))
-    //             }
-    //     }
-    // }
 
     suspend fun deleteEntity(entityId: String, collectionName: String, organizationId: String): Expected<Throwable, String> = suspendCancellableCoroutine { continuation ->
         getCollectionRef(collectionName)
@@ -79,6 +70,14 @@ object RouteVaultSupport {
                 val result = f(firstItem)
                 mapListOperator(items.drop(1), resultList.plus(result), f)
             }
+        }
+    }
+
+    fun StoredRouteEntity.toDirectionsRoute(): Expected<Throwable, DirectionsRoute> {
+        return try {
+            ExpectedFactory.createValue(DirectionsRoute.fromJson(this.routeAsJson))
+        } catch (ex: Exception) {
+            ExpectedFactory.createError(ex)
         }
     }
 }

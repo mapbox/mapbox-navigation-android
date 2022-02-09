@@ -50,6 +50,7 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityRoutelineExampleBinding
 import com.mapbox.navigation.examples.manifesta.RouteVaultApi
 import com.mapbox.navigation.examples.manifesta.model.entity.StoredRouteEntity
+import com.mapbox.navigation.examples.manifesta.support.RouteVaultSupport.toDirectionsRoute
 import com.mapbox.navigation.examples.manifesta.view.RouteVaultView
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
@@ -443,7 +444,8 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
         viewBinding.startNavigation.setOnClickListener {
             val api = RouteVaultApi("navSDKTeam")
             RouteVaultView(api) {
-                //todo
+                Log.e("foobar", "got entity with id ${it.id}")
+                it.toDirectionsRoute()
             }.show(supportFragmentManager, "RouteVaultView")
 
             CoroutineScope(Dispatchers.Main).launch {
