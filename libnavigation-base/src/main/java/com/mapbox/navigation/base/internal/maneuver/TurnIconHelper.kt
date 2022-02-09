@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.base.internal
+package com.mapbox.navigation.base.internal.maneuver
 
 import com.mapbox.api.directions.v5.models.ManeuverModifier.LEFT
 import com.mapbox.api.directions.v5.models.ManeuverModifier.RIGHT
@@ -21,9 +21,7 @@ import com.mapbox.api.directions.v5.models.StepManeuver.ROTARY
 import com.mapbox.api.directions.v5.models.StepManeuver.ROUNDABOUT
 import com.mapbox.api.directions.v5.models.StepManeuver.ROUNDABOUT_TURN
 import com.mapbox.api.directions.v5.models.StepManeuver.TURN
-import com.mapbox.navigation.base.internal.maneuver.ManeuverTurnIcon
-import com.mapbox.navigation.base.internal.maneuver.ManeuverTypeModifierPair
-import com.mapbox.navigation.ui.base.model.TurnIconResources
+import com.mapbox.navigation.base.maneuver.model.TurnIconResources
 import kotlin.math.roundToInt
 
 /**

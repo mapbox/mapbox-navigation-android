@@ -5,7 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.navigation.base.internal.maneuver.ManeuverTurnIcon
-import com.mapbox.navigation.ui.base.internal.TurnIconHelper
+import com.mapbox.navigation.base.internal.maneuver.TurnIconHelper
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.SubManeuver

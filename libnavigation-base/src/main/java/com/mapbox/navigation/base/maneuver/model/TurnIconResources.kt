@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.base.model
+package com.mapbox.navigation.base.maneuver.model
 
 /**
  * An interface describing all maneuver icons.

@@ -2,7 +2,6 @@ package com.mapbox.navigation.trip.notification.internal
 
 import androidx.annotation.DrawableRes
 import com.mapbox.navigation.trip.notification.R
-import com.mapbox.navigation.ui.base.model.TurnIconResources as BaseTurnIconResources
 
 class TurnIconResources private constructor(
     @DrawableRes override val turnIconArrive: Int,
@@ -92,7 +91,7 @@ class TurnIconResources private constructor(
     @DrawableRes override val turnIconTurnSharpLeft: Int,
     @DrawableRes override val turnIconTurnSharpRight: Int,
     @DrawableRes override val turnIconUturn: Int
-) : BaseTurnIconResources {
+) : com.mapbox.navigation.base.maneuver.model.TurnIconResources {
 
     companion object {
         /**

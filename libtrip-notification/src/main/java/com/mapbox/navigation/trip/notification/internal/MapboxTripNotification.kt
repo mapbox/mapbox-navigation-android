@@ -36,7 +36,7 @@ import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.trip.notification.MapboxTripNotificationView
 import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
 import com.mapbox.navigation.trip.notification.R
-import com.mapbox.navigation.ui.base.internal.TurnIconHelper
+import com.mapbox.navigation.base.internal.maneuver.TurnIconHelper
 import com.mapbox.navigation.utils.internal.END_NAVIGATION_ACTION
 import com.mapbox.navigation.utils.internal.NAVIGATION_NOTIFICATION_CHANNEL
 import com.mapbox.navigation.utils.internal.NOTIFICATION_CHANNEL
