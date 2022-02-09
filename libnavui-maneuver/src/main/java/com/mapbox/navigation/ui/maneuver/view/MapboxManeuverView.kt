@@ -230,10 +230,10 @@ class MapboxManeuverView : ConstraintLayout {
         replaceWith = ReplaceWith("renderManeuverWith(shields)")
     )
     fun renderManeuverShields(shieldMap: Map<String, RoadShield?>) {
-        shieldMap.forEach { entry ->
-            ifNonNull(entry.value) { value ->
-                routeShields.add(value.toRouteShield())
-            }
+        val shields = shieldMap.values.filterNotNull().map(RoadShield::toRouteShield)
+        synchronized(routeShields) {
+            routeShields.clear()
+            routeShields.addAll(shields)
         }
         renderManeuvers()
     }
@@ -251,18 +251,21 @@ class MapboxManeuverView : ConstraintLayout {
      * @param shields the map of maneuver IDs to available list of shields
      */
     fun renderManeuverWith(shields: List<Expected<RouteShieldError, RouteShieldResult>>) {
-        shields.forEach { shield ->
-            shield.fold(
-                { error ->
-                    LoggerProvider.logger.e(
-                        Tag("MbxManeuverView"),
-                        Message("id: $id -- error: ${error.url} - ${error.errorMessage}")
-                    )
-                },
-                { result ->
-                    routeShields.add(result.shield)
-                }
+        val partitionedList = shields.partition { it.isError }
+        partitionedList.first.forEach { errorExpected ->
+            LoggerProvider.logger.e(
+                Tag("MbxManeuverView"),
+                Message(
+                    "id: $id -- error: ${errorExpected.error?.url} - " +
+                        "${errorExpected.error?.errorMessage}"
+                )
             )
+        }
+        partitionedList.second.mapNotNull { it.value }.map { it.shield }.apply {
+            synchronized(routeShields) {
+                routeShields.clear()
+                routeShields.addAll(this)
+            }
         }
         renderManeuvers()
     }

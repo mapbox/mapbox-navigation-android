@@ -19,6 +19,8 @@ import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 private typealias Result = Expected<String, ByteArray>
 
@@ -28,6 +30,7 @@ private const val RequestDelay = 500L
  * This tests the entire logic of [ResourceCache] since [ShieldByteArrayCache] is the simplest implementation.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
 class ShieldByteArrayCacheTest {
 
     @get:Rule
