@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 - Add `MapboxNavigationApp.isSetup` to ensure views do not reset `MapboxNavigation`. Add `MapboxNavigationApp.getObserver` to be able to access registered observers. [#5358](https://github.com/mapbox/mapbox-navigation-android/pull/5358)
+- Refactored maneuver implementation to return a new `Maneuver` instance whenever the data in an existing `Maneuver` object needs to be modified [#5453](https://github.com/mapbox/mapbox-navigation-android/pull/5453)
 
 #### Features
 

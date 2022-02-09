@@ -50,4 +50,13 @@ class Maneuver internal constructor(
         result = 31 * result + maneuverPoint.hashCode()
         return result
     }
+
+    internal fun copy(
+        primary: PrimaryManeuver = this.primary,
+        stepDistance: StepDistance = this.stepDistance,
+        secondary: SecondaryManeuver? = this.secondary,
+        sub: SubManeuver? = this.sub,
+        laneGuidance: Lane? = this.laneGuidance,
+        maneuverPoint: Point = this.maneuverPoint,
+    ) = Maneuver(primary, stepDistance, secondary, sub, laneGuidance, maneuverPoint)
 }
