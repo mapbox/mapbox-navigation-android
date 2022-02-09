@@ -154,10 +154,9 @@ internal object ManeuverProcessor {
                     val stepToManeuvers = stepIndex.findIn(stepsToManeuvers)
                     val indexOfStepToManeuvers = stepsToManeuvers.indexOf(stepToManeuvers)
 
-                    updateDistanceRemainingForCurrentManeuver(
-                        stepToManeuvers,
-                        currentInstructionIndex,
-                        stepDistanceRemaining
+                    stepToManeuvers.updateDistanceRemainingForCurrentManeuver(
+                        currentInstructionIndex = currentInstructionIndex,
+                        stepDistanceRemaining = stepDistanceRemaining
                     )
 
                     val maneuverList = if (maneuverOptions.filterDuplicateManeuvers) {
@@ -240,13 +239,22 @@ internal object ManeuverProcessor {
         } ?: throw RuntimeException("Could not find step with index $this")
     }
 
-    private fun updateDistanceRemainingForCurrentManeuver(
-        stepToManeuvers: StepIndexToManeuvers,
+    private fun StepIndexToManeuvers.updateDistanceRemainingForCurrentManeuver(
         currentInstructionIndex: Int,
         stepDistanceRemaining: Double
     ) {
-        stepToManeuvers.maneuverList[currentInstructionIndex].stepDistance.distanceRemaining =
-            stepDistanceRemaining
+        val maneuverAtCurrentIndex = maneuverList[currentInstructionIndex]
+        val maneuverWithUpdatedDistRemaining = maneuverAtCurrentIndex.copy(
+            stepDistance = StepDistance(
+                distanceFormatter = maneuverAtCurrentIndex.stepDistance.distanceFormatter,
+                totalDistance = maneuverAtCurrentIndex.stepDistance.totalDistance,
+                distanceRemaining = stepDistanceRemaining
+            )
+        )
+        maneuverList.set(
+            index = currentInstructionIndex,
+            element = maneuverWithUpdatedDistRemaining
+        )
     }
 
     private fun List<StepIndexToManeuvers>.getManeuversForStepsAndFilter(): List<Maneuver> {
