@@ -231,10 +231,8 @@ class MapboxManeuverView : ConstraintLayout {
     )
     fun renderManeuverShields(shieldMap: Map<String, RoadShield?>) {
         val shields = shieldMap.values.filterNotNull().map(RoadShield::toRouteShield)
-        synchronized(routeShields) {
-            routeShields.clear()
-            routeShields.addAll(shields)
-        }
+        routeShields.clear()
+        routeShields.addAll(shields)
         renderManeuvers()
     }
 
@@ -262,10 +260,8 @@ class MapboxManeuverView : ConstraintLayout {
             )
         }
         partitionedList.second.mapNotNull { it.value }.map { it.shield }.apply {
-            synchronized(routeShields) {
-                routeShields.clear()
-                routeShields.addAll(this)
-            }
+            routeShields.clear()
+            routeShields.addAll(this)
         }
         renderManeuvers()
     }

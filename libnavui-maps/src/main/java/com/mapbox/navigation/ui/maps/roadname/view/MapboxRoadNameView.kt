@@ -62,10 +62,8 @@ class MapboxRoadNameView : AppCompatTextView {
      */
     fun renderRoadNameWith(expectedShields: List<Expected<RouteShieldError, RouteShieldResult>>) {
         expectedShields.mapNotNull { it.value }.map { it.shield }.apply {
-            synchronized(shields) {
-                shields.clear()
-                shields.addAll(this)
-            }
+            shields.clear()
+            shields.addAll(this)
         }
         renderRoadNameLabel()
     }
