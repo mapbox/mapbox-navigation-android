@@ -48,6 +48,9 @@ import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityRoutelineExampleBinding
+import com.mapbox.navigation.examples.manifesta.RouteVaultApi
+import com.mapbox.navigation.examples.manifesta.model.entity.StoredRouteEntity
+import com.mapbox.navigation.examples.manifesta.view.RouteVaultView
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
@@ -60,7 +63,11 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
+import java.util.UUID
 
 /**
  * This class demonstrates the usage of the route line and route arrow API's. There is
@@ -434,20 +441,42 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
     @SuppressLint("MissingPermission")
     private fun initListeners() {
         viewBinding.startNavigation.setOnClickListener {
-            val route = mapboxNavigation.getRoutes().firstOrNull()
-            if (route != null) {
-                mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-                mapboxNavigation.startTripSession()
-                viewBinding.startNavigation.visibility = View.INVISIBLE
-                locationComponent.addOnIndicatorPositionChangedListener(onPositionChangedListener)
+            val api = RouteVaultApi("navSDKTeam")
+            RouteVaultView(api).show(supportFragmentManager, "RouteVaultView")
 
-                // RouteLine: Hiding the alternative routes when navigation starts.
-                mapboxMap.getStyle()?.apply {
-                    routeLineView.hideAlternativeRoutes(this)
-                }
+            CoroutineScope(Dispatchers.Main).launch {
 
-                startSimulation(route)
+                // api.storeRoute(StoredRouteEntity(
+                //     "foobar",
+                //     "testRouteX",
+                //     "routeJson"
+                // ))
+
+                // api.getRoutes().fold({
+                //     it
+                // },{
+                //     it
+                // })
+
+                //api.deleteRoute("foobar")
             }
+
+
+
+            // val route = mapboxNavigation.getRoutes().firstOrNull()
+            // if (route != null) {
+            //     mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+            //     mapboxNavigation.startTripSession()
+            //     viewBinding.startNavigation.visibility = View.INVISIBLE
+            //     locationComponent.addOnIndicatorPositionChangedListener(onPositionChangedListener)
+            //
+            //     // RouteLine: Hiding the alternative routes when navigation starts.
+            //     mapboxMap.getStyle()?.apply {
+            //         routeLineView.hideAlternativeRoutes(this)
+            //     }
+            //
+            //     startSimulation(route)
+            // }
         }
         viewBinding.mapView.gestures.addOnMapClickListener(mapClickListener)
     }
