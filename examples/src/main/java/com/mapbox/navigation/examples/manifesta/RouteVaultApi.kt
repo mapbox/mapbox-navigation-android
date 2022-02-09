@@ -42,15 +42,18 @@ class RouteVaultApi(private val organizationId: String) {
         )
     }
 
-    suspend fun getRoute(routeRecordId: String): Expected<Throwable, List<StoredRouteEntity>> {
+    suspend fun getRoute(routeRecordId: String): Expected<Throwable, StoredRouteEntity> {
         val query = getRoutesCollection().whereEqualTo(ROUTE_VAULT_FIELD_ID, routeRecordId)
-        return queryCloudStore(query).fold(
-            {
+        return queryCloudStore(query)
+            .mapValue { it.mapList(::mapToStoredRouteEntity) }
+            .fold({
                 ExpectedFactory.createError(it)
             },{
-                ExpectedFactory.createValue(it.mapList(::mapToStoredRouteEntity))
-            }
-        )
+                when (it.isEmpty()) {
+                    true -> ExpectedFactory.createError(NoSuchElementException())
+                    false -> ExpectedFactory.createValue(it.first())
+                }
+            })
     }
 
     suspend fun deleteRoute(routeRecordId: String): Expected<Throwable, String> =

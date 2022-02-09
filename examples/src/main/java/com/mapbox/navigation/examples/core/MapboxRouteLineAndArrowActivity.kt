@@ -442,7 +442,9 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
     private fun initListeners() {
         viewBinding.startNavigation.setOnClickListener {
             val api = RouteVaultApi("navSDKTeam")
-            RouteVaultView(api).show(supportFragmentManager, "RouteVaultView")
+            RouteVaultView(api) {
+                //todo
+            }.show(supportFragmentManager, "RouteVaultView")
 
             CoroutineScope(Dispatchers.Main).launch {
 

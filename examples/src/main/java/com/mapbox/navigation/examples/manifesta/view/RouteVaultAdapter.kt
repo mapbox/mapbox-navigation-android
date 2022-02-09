@@ -1,28 +1,31 @@
 package com.mapbox.navigation.examples.manifesta.view
 
+import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.databinding.LayoutRouteVaultRecordBinding
 import com.mapbox.navigation.examples.manifesta.model.entity.StoredRouteRecord
 
-class RouteVaultAdapter: RecyclerView.Adapter<RouteVaultViewHolder>() {
+class RouteVaultAdapter(private val itemSelectedFun: (StoredRouteRecord) -> Unit): RecyclerView.Adapter<RouteVaultViewHolder>() {
     private val routeRecords = mutableListOf<StoredRouteRecord>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RouteVaultViewHolder {
-        val v = LayoutInflater.from(parent.context).inflate(R.layout.layout_route_vault_record, parent, false)
-
-        //val viewBinding = LayoutRouteVaultRecordBinding.inflate(LayoutInflater.from(parent.context))
-        return RouteVaultViewHolder(v)
+        val viewBinding = LayoutRouteVaultRecordBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return RouteVaultViewHolder(viewBinding)
     }
 
     override fun getItemCount(): Int = routeRecords.size
 
     override fun onBindViewHolder(holder: RouteVaultViewHolder, position: Int) {
-        holder.bind(routeRecords[position])
+        holder.itemView.setOnClickListener {
+            itemSelectedFun(routeRecords[position])
+        }
+        holder.bind(routeRecords[position], ::deleteItemClicked)
     }
 
     fun setData(items: List<StoredRouteRecord>) {
@@ -31,10 +34,18 @@ class RouteVaultAdapter: RecyclerView.Adapter<RouteVaultViewHolder>() {
         notifyDataSetChanged()
     }
 
+    private fun deleteItemClicked(record: StoredRouteRecord) {
+        Log.e("foobar", "delete clicked")
+    }
+
 }
-class RouteVaultViewHolder constructor(itemView: View): RecyclerView.ViewHolder(itemView) {
-    fun bind(record: StoredRouteRecord) {
-        itemView.findViewById<TextView>(R.id.routeAliasLabel).text = record.alias
-        //viewBinding.routeAliasLabel.text = record.alias
+class RouteVaultViewHolder constructor(
+    private val viewBinding: LayoutRouteVaultRecordBinding
+): RecyclerView.ViewHolder(viewBinding.root) {
+    fun bind(record: StoredRouteRecord, itemDeleteHandler: (StoredRouteRecord) -> Unit) {
+        viewBinding.routeAliasLabel.text = record.alias
+        viewBinding.btnDeleteRecord.setOnClickListener {
+            itemDeleteHandler(record)
+        }
     }
 }

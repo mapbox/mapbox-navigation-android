@@ -2,49 +2,47 @@ package com.mapbox.navigation.examples.manifesta.view
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Context
-import android.graphics.Point
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
-import android.view.View
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.databinding.LayoutRouteVaultViewBinding
 import com.mapbox.navigation.examples.manifesta.RouteVaultApi
+import com.mapbox.navigation.examples.manifesta.model.entity.StoredRouteEntity
+import com.mapbox.navigation.examples.manifesta.model.entity.StoredRouteRecord
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class RouteVaultView(private val routeVaultApi: RouteVaultApi): DialogFragment() {
+class RouteVaultView(
+    private val routeVaultApi: RouteVaultApi,
+    private val routeSelectedFun: (StoredRouteEntity) -> Unit
+    ): DialogFragment() {
 
-    // private val viewBinding: LayoutRouteVaultViewBinding by lazy {
-    //     LayoutRouteVaultViewBinding.inflate(layoutInflater)
-    //
-    // }
+    private val viewBinding: LayoutRouteVaultViewBinding by lazy {
+        LayoutRouteVaultViewBinding.inflate(layoutInflater)
+
+    }
 
     private val routeVaultAdapter: RouteVaultAdapter by lazy {
-        RouteVaultAdapter()
+        RouteVaultAdapter(::recordSelectedFun)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val routeView = layoutInflater.inflate(R.layout.layout_route_vault_view, null)
+        val layoutManager = LinearLayoutManager(context)
+        viewBinding.routeList.layoutManager = layoutManager
+        viewBinding.routeList.adapter = routeVaultAdapter
+        viewBinding.routeList.addItemDecoration(
+            DividerItemDecoration(context, layoutManager.orientation)
+        )
 
-        routeView.findViewById<RecyclerView>(R.id.routeList).apply {
-            val layoutManager = LinearLayoutManager(context)
-            this.layoutManager = layoutManager
-            this.adapter = routeVaultAdapter
-            this.addItemDecoration(
-                DividerItemDecoration(context, layoutManager.orientation)
-            )
+        viewBinding.btnClose.setOnClickListener {
+            dismiss()
         }
 
-
         return AlertDialog.Builder(activity).also {
-            it.setView(routeView)
+            it.setView(viewBinding.root)
         }.create()
     }
 
@@ -56,6 +54,15 @@ class RouteVaultView(private val routeVaultApi: RouteVaultApi): DialogFragment()
             },{
                 routeVaultAdapter.setData(it)
             })
+        }
+    }
+
+    private fun recordSelectedFun(record: StoredRouteRecord) {
+        CoroutineScope(Dispatchers.Main).launch {
+            routeVaultApi.getRoute(record.id).value?.apply {
+                routeSelectedFun(this)
+                dismiss()
+            }
         }
     }
 
