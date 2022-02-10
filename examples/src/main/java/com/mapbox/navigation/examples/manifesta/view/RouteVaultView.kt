@@ -26,7 +26,7 @@ class RouteVaultView(
     }
 
     private val routeVaultAdapter: RouteVaultAdapter by lazy {
-        RouteVaultAdapter(::recordSelectedFun)
+        RouteVaultAdapter(::recordSelected, ::deleteRecord)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -51,18 +51,30 @@ class RouteVaultView(
         CoroutineScope(Dispatchers.Main).launch {
             routeVaultApi.getRoutes().fold({
                 Log.e(TAG, "Exception loading route records, ${it.message}")
-            },{
-                routeVaultAdapter.setData(it)
+            },{ routeRecord ->
+                routeVaultAdapter.setData(routeRecord.sortedBy { it.alias })
             })
         }
     }
 
-    private fun recordSelectedFun(record: StoredRouteRecord) {
+    private fun recordSelected(record: StoredRouteRecord) {
         CoroutineScope(Dispatchers.Main).launch {
             routeVaultApi.getRoute(record.id).value?.apply {
                 routeSelectedFun(this)
                 dismiss()
             }
+        }
+    }
+
+    private fun deleteRecord(record: StoredRouteRecord) {
+        CoroutineScope(Dispatchers.Main).launch {
+            routeVaultApi.deleteRoute(record.id).fold({
+                Log.e(TAG, "Error deleting stored route record, ${it.message}")
+            },{
+                routeVaultAdapter.cloneData().filter { it.id != record.id }.apply {
+                    routeVaultAdapter.setData(this)
+                }
+            })
         }
     }
 

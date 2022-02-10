@@ -7,7 +7,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mapbox.navigation.examples.core.databinding.LayoutRouteVaultRecordBinding
 import com.mapbox.navigation.examples.manifesta.model.entity.StoredRouteRecord
 
-class RouteVaultAdapter(private val itemSelectedFun: (StoredRouteRecord) -> Unit): RecyclerView.Adapter<RouteVaultViewHolder>() {
+class RouteVaultAdapter(
+    private val itemSelectedFun: (StoredRouteRecord) -> Unit,
+    private val deleteItemFun: (StoredRouteRecord) -> Unit
+): RecyclerView.Adapter<RouteVaultViewHolder>() {
+
     private val routeRecords = mutableListOf<StoredRouteRecord>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RouteVaultViewHolder {
@@ -34,8 +38,12 @@ class RouteVaultAdapter(private val itemSelectedFun: (StoredRouteRecord) -> Unit
         notifyDataSetChanged()
     }
 
+    fun cloneData(): List<StoredRouteRecord> = routeRecords.toList()
+
     private fun deleteItemClicked(record: StoredRouteRecord) {
-        Log.e("foobar", "delete clicked")
+
+
+        //deleteItemFun(record)
     }
 
 }
