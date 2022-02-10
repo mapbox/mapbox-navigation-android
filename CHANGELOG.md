@@ -11,6 +11,12 @@ Mapbox welcomes participation and contributions from everyone.
 - Updated `MapboxManeuverView` or `MapboxRoadNameView` to prefer Mapbox designed shields over legacy ones. [#5445](https://github.com/mapbox/mapbox-navigation-android/pull/5445)
 - Fixed `Nav Telemetry` to not run if `Telemetry events` is disabled. [#5455](https://github.com/mapbox/mapbox-navigation-android/pull/5455)
 - Updated `MapboxNavigtation#provideFeedbackMetadataWrapper` to throw `IllegalStateException` if `Telemetry events` is disabled. [#5455](https://github.com/mapbox/mapbox-navigation-android/pull/5455)
+- Fixed an issue where `off-route` was always false if there are no routing tiles available. [#5457](https://github.com/mapbox/mapbox-navigation-android/pull/5457)
+- Added a default timeout for `Online` route requests (60 seconds). [#5457](https://github.com/mapbox/mapbox-navigation-android/pull/5457)
+- Fixed an issue where an alternative route was equal a current route. [#5457](https://github.com/mapbox/mapbox-navigation-android/pull/5457)
+- Added delay before alternatives request if we get a deviation point behind. [#5457](https://github.com/mapbox/mapbox-navigation-android/pull/5457)
+- Fixed parsing coordinates from `URL` with `.json` postfix. [#5457](https://github.com/mapbox/mapbox-navigation-android/pull/5457)
+
 ## Mapbox Navigation SDK 2.3.0-beta.2 - February 2, 2022
 ### Changelog
 [Changes between v2.3.0-beta.1 and v2.3.0-beta.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.3.0-beta.1...v2.3.0-beta.2)
