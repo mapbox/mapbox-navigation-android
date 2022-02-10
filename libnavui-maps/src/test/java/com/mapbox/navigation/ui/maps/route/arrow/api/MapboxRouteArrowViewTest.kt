@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.arrow.api
 
 import android.content.Context
-import androidx.test.core.app.ApplicationProvider
+import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Feature
@@ -38,20 +38,24 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class MapboxRouteArrowViewTest {
 
-    lateinit var ctx: Context
+    private val ctx: Context = mockk()
 
     @Before
     fun setUp() {
-        ctx = ApplicationProvider.getApplicationContext()
+        mockkStatic(AppCompatResources::class)
+        every { AppCompatResources.getDrawable(any(), any()) } returns mockk(relaxed = true)
+    }
+
+    @After
+    fun cleanUp() {
+        unmockkStatic(AppCompatResources::class)
     }
 
     @Test

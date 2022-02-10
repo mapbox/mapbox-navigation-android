@@ -2,7 +2,8 @@ package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.content.Context
 import android.graphics.Color
-import androidx.test.core.app.ApplicationProvider
+import android.graphics.drawable.Drawable
+import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Feature
@@ -58,11 +59,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import java.util.UUID
 
-@RunWith(RobolectricTestRunner::class)
 class MapboxRouteLineViewTest {
 
     @get:Rule
@@ -70,12 +68,13 @@ class MapboxRouteLineViewTest {
     private val parentJob = SupervisorJob()
     private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
 
-    lateinit var ctx: Context
+    private val ctx: Context = mockk()
 
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
-        ctx = ApplicationProvider.getApplicationContext()
+        mockkStatic(AppCompatResources::class)
+        every { AppCompatResources.getDrawable(any(), any()) } returns mockk<Drawable>()
         mockkObject(InternalJobControlFactory)
         every {
             InternalJobControlFactory.createDefaultScopeJobControl()
@@ -84,6 +83,7 @@ class MapboxRouteLineViewTest {
 
     @After
     fun cleanUp() {
+        unmockkStatic(AppCompatResources::class)
         unmockkObject(InternalJobControlFactory)
     }
 

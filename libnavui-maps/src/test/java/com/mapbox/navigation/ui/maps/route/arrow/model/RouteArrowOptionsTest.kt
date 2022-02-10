@@ -1,25 +1,35 @@
 package com.mapbox.navigation.ui.maps.route.arrow.model
 
 import android.content.Context
-import androidx.test.core.app.ApplicationProvider
+import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class RouteArrowOptionsTest {
 
-    lateinit var ctx: Context
+    private val ctx: Context = mockk()
 
     @Before
     fun setUp() {
-        ctx = ApplicationProvider.getApplicationContext()
+        mockkStatic(AppCompatResources::class)
+        every { AppCompatResources.getDrawable(any(), any()) } returns mockk(relaxed = true) {
+            every { intrinsicWidth } returns 24
+            every { intrinsicHeight } returns 24
+        }
+    }
+
+    @After
+    fun cleanUp() {
+        unmockkStatic(AppCompatResources::class)
     }
 
     @Test

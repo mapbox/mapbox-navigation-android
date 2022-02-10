@@ -3,12 +3,10 @@ package com.mapbox.navigation.ui.maps.route.arrow
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import androidx.test.core.app.ApplicationProvider
+import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
 import com.mapbox.maps.Image
-import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
@@ -22,29 +20,35 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_SOURCE
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_SHAFT_SOURCE_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import io.mockk.verify
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 @OptIn(MapboxExperimental::class)
-@RunWith(RobolectricTestRunner::class)
 class RouteArrowUtilsTest {
 
-    lateinit var ctx: Context
+    private val ctx: Context = mockk()
 
     @Before
     fun setUp() {
-        ctx = ApplicationProvider.getApplicationContext()
+        mockkStatic(AppCompatResources::class)
+        every { AppCompatResources.getDrawable(any(), any()) } returns mockk(relaxed = true) {
+            every { intrinsicWidth } returns 24
+            every { intrinsicHeight } returns 24
+        }
+    }
+
+    @After
+    fun cleanUp() {
+        unmockkStatic(AppCompatResources::class)
     }
 
     @Test
@@ -185,328 +189,6 @@ class RouteArrowUtilsTest {
 
         verify(exactly = 0) { style.styleLayers }
         verify(exactly = 0) { style.addStyleSource(any(), any()) }
-    }
-
-    @Test
-    fun initializeLayers() {
-        val options = RouteArrowOptions.Builder(ctx).build()
-        val shaftSourceValueSlots = mutableListOf<Value>()
-        val headSourceValueSlots = mutableListOf<Value>()
-        val addStyleLayerSlots = mutableListOf<Value>()
-        val addStyleLayerPositionSlots = mutableListOf<LayerPosition>()
-        val mockImage = mockk<Image>(relaxed = true)
-
-        val style = mockk<Style>(relaxed = true) {
-            every { styleLayers } returns listOf()
-            every { styleSourceExists(ARROW_SHAFT_SOURCE_ID) } returns false
-            every { styleSourceExists(ARROW_HEAD_SOURCE_ID) } returns false
-            every {
-                styleLayerExists(ARROW_SHAFT_CASING_LINE_LAYER_ID)
-            } returns true
-            every { styleLayerExists(ARROW_HEAD_CASING_LAYER_ID) } returns true
-            every { styleLayerExists(ARROW_SHAFT_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(ARROW_HEAD_LAYER_ID) } returns true
-            every { styleLayerExists(options.aboveLayerId) } returns true
-            every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
-            every {
-                addStyleSource(ARROW_SHAFT_SOURCE_ID, any())
-            } returns ExpectedFactory.createNone()
-            every {
-                addStyleSource(ARROW_HEAD_SOURCE_ID, any())
-            } returns ExpectedFactory.createNone()
-            every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns mockImage
-            every { getStyleImage(ARROW_HEAD_ICON) } returns mockImage
-        }
-
-        RouteArrowUtils.initializeLayers(style, options)
-
-        verify {
-            style.addStyleSource(
-                ARROW_SHAFT_SOURCE_ID,
-                capture(shaftSourceValueSlots),
-            )
-        }
-        assertEquals(
-            "geojson",
-            (shaftSourceValueSlots.last().contents as HashMap<String, Value>)["type"]!!.contents,
-        )
-        assertEquals(
-            16L,
-            (shaftSourceValueSlots.last().contents as HashMap<String, Value>)["maxzoom"]!!.contents,
-        )
-        assertEquals(
-            "",
-            (shaftSourceValueSlots.last().contents as HashMap<String, Value>)["data"]!!.contents,
-        )
-        assertEquals(
-            DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            (shaftSourceValueSlots.last().contents as HashMap<String, Value>)
-            ["tolerance"]!!.contents
-        )
-
-        verify {
-            style.addStyleSource(ARROW_HEAD_SOURCE_ID, capture(headSourceValueSlots))
-        }
-        assertEquals(
-            "geojson",
-            (headSourceValueSlots.last().contents as HashMap<String, Value>)["type"]!!.contents,
-        )
-        assertEquals(
-            16L,
-            (headSourceValueSlots.last().contents as HashMap<String, Value>)["maxzoom"]!!.contents,
-        )
-        assertEquals(
-            "",
-            (headSourceValueSlots.last().contents as HashMap<String, Value>)["data"]!!
-                .contents.toString()
-        )
-        assertEquals(
-            DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            (headSourceValueSlots.last().contents as HashMap<String, Value>)
-            ["tolerance"]!!.contents
-        )
-
-        verify { style.removeStyleImage(ARROW_HEAD_ICON_CASING) }
-        verify { style.addImage(ARROW_HEAD_ICON_CASING, any<Bitmap>()) }
-
-        verify { style.removeStyleImage(ARROW_HEAD_ICON) }
-        verify { style.addImage(ARROW_HEAD_ICON, any<Bitmap>()) }
-
-        verify { style.removeStyleLayer(ARROW_SHAFT_CASING_LINE_LAYER_ID) }
-        verify { style.removeStyleLayer(ARROW_HEAD_CASING_LAYER_ID) }
-        verify { style.removeStyleLayer(ARROW_SHAFT_LINE_LAYER_ID) }
-        verify { style.removeStyleLayer(ARROW_HEAD_LAYER_ID) }
-
-        verify {
-            style.addPersistentStyleLayer(
-                capture(addStyleLayerSlots),
-                capture(addStyleLayerPositionSlots)
-            )
-        }
-        assertEquals(
-            "mapbox-navigation-arrow-shaft-casing-layer",
-            (addStyleLayerSlots[0].contents as HashMap<String, Value>)["id"]!!.contents
-        )
-        assertEquals(
-            "mapbox-navigation-arrow-head-casing-layer",
-            (addStyleLayerSlots[1].contents as HashMap<String, Value>)["id"]!!.contents
-        )
-        assertEquals(
-            "mapbox-navigation-arrow-shaft-layer",
-            (addStyleLayerSlots[2].contents as HashMap<String, Value>)["id"]!!.contents
-        )
-        assertEquals(
-            "mapbox-navigation-arrow-head-layer",
-            (addStyleLayerSlots[3].contents as HashMap<String, Value>)["id"]!!.contents
-        )
-        assertEquals(
-            "mapbox-top-level-route-layer",
-            addStyleLayerPositionSlots[0].above
-        )
-        assertEquals(
-            "mapbox-navigation-arrow-shaft-casing-layer",
-            addStyleLayerPositionSlots[1].above
-        )
-        assertEquals(
-            "mapbox-navigation-arrow-head-casing-layer",
-            addStyleLayerPositionSlots[2].above
-        )
-        assertEquals(
-            "mapbox-navigation-arrow-shaft-layer",
-            addStyleLayerPositionSlots[3].above
-        )
-    }
-
-    @Test
-    fun initializeLayers_whenCustomAboveLayerConfigured() {
-        val options = RouteArrowOptions.Builder(ctx).withAboveLayerId("foobar").build()
-        val shaftSourceValueSlots = mutableListOf<Value>()
-        val addStyleLayerSlots = mutableListOf<Value>()
-        val addStyleLayerPositionSlots = mutableListOf<LayerPosition>()
-        val mockImage = mockk<Image>(relaxed = true)
-
-        val style = mockk<Style>(relaxed = true) {
-            every { styleLayers } returns listOf()
-            every { styleSourceExists(ARROW_SHAFT_SOURCE_ID) } returns false
-            every { styleSourceExists(ARROW_HEAD_SOURCE_ID) } returns false
-            every {
-                styleLayerExists(ARROW_SHAFT_CASING_LINE_LAYER_ID)
-            } returns true
-            every { styleLayerExists(ARROW_HEAD_CASING_LAYER_ID) } returns true
-            every { styleLayerExists(ARROW_SHAFT_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(ARROW_HEAD_LAYER_ID) } returns true
-            every { styleLayerExists(PRIMARY_ROUTE_TRAFFIC_LAYER_ID) } returns true
-            every { styleLayerExists(RESTRICTED_ROAD_LAYER_ID) } returns true
-            every { styleLayerExists(options.aboveLayerId) } returns true
-            every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
-            every {
-                addStyleSource(ARROW_SHAFT_SOURCE_ID, any())
-            } returns ExpectedFactory.createNone()
-            every {
-                addStyleSource(ARROW_HEAD_SOURCE_ID, any())
-            } returns ExpectedFactory.createNone()
-            every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns mockImage
-            every { getStyleImage(ARROW_HEAD_ICON) } returns mockImage
-        }
-
-        RouteArrowUtils.initializeLayers(style, options)
-
-        verify {
-            style.addStyleSource(
-                ARROW_SHAFT_SOURCE_ID,
-                capture(shaftSourceValueSlots),
-            )
-        }
-        verify {
-            style.addPersistentStyleLayer(
-                capture(addStyleLayerSlots),
-                capture(addStyleLayerPositionSlots)
-            )
-        }
-        assertEquals(
-            "foobar",
-            addStyleLayerPositionSlots[0].above
-        )
-        assertEquals(
-            "mapbox-navigation-arrow-shaft-casing-layer",
-            addStyleLayerPositionSlots[1].above
-        )
-        assertEquals(
-            "mapbox-navigation-arrow-head-casing-layer",
-            addStyleLayerPositionSlots[2].above
-        )
-        assertEquals(
-            "mapbox-navigation-arrow-shaft-layer",
-            addStyleLayerPositionSlots[3].above
-        )
-    }
-
-    @Test
-    fun initializeLayers_whenAboveLayerNotExists() {
-        val mockImage = mockk<Image>(relaxed = true)
-        val options = RouteArrowOptions.Builder(ctx).build()
-        val shaftSourceValueSlots = mutableListOf<Value>()
-        val headSourceValueSlots = mutableListOf<Value>()
-        val addStyleLayerSlots = mutableListOf<Value>()
-        val addStyleLayerPositionSlots = mutableListOf<LayerPosition>()
-        val style = mockk<Style>(relaxed = true) {
-            every { styleLayers } returns listOf()
-            every { styleSourceExists(ARROW_SHAFT_SOURCE_ID) } returns false
-            every { styleSourceExists(ARROW_HEAD_SOURCE_ID) } returns false
-            every {
-                styleLayerExists(ARROW_SHAFT_CASING_LINE_LAYER_ID)
-            } returns true
-            every { styleLayerExists(ARROW_HEAD_CASING_LAYER_ID) } returns true
-            every { styleLayerExists(ARROW_SHAFT_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(ARROW_HEAD_LAYER_ID) } returns true
-            every { styleLayerExists(options.aboveLayerId) } returns false
-            every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
-            every {
-                addStyleSource(ARROW_SHAFT_SOURCE_ID, any())
-            } returns ExpectedFactory.createNone()
-            every {
-                addStyleSource(ARROW_HEAD_SOURCE_ID, any())
-            } returns ExpectedFactory.createNone()
-            every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns mockImage
-            every { getStyleImage(ARROW_HEAD_ICON) } returns mockImage
-        }
-
-        RouteArrowUtils.initializeLayers(style, options)
-
-        verify {
-            style.addStyleSource(
-                ARROW_SHAFT_SOURCE_ID,
-                capture(shaftSourceValueSlots),
-            )
-        }
-        assertEquals(
-            "geojson",
-            (shaftSourceValueSlots.last().contents as HashMap<String, Value>)["type"]!!.contents,
-        )
-        assertEquals(
-            16L,
-            (shaftSourceValueSlots.last().contents as HashMap<String, Value>)["maxzoom"]!!.contents,
-        )
-        assertEquals(
-            "",
-            (shaftSourceValueSlots.last().contents as HashMap<String, Value>)["data"]!!.contents,
-        )
-        assertEquals(
-            DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            (shaftSourceValueSlots.last().contents as HashMap<String, Value>)
-            ["tolerance"]!!.contents
-        )
-
-        verify {
-            style.addStyleSource(ARROW_HEAD_SOURCE_ID, capture(headSourceValueSlots))
-        }
-        assertEquals(
-            "geojson",
-            (headSourceValueSlots.last().contents as HashMap<String, Value>)["type"]!!.contents,
-        )
-        assertEquals(
-            16L,
-            (headSourceValueSlots.last().contents as HashMap<String, Value>)["maxzoom"]!!.contents,
-        )
-        assertEquals(
-            "",
-            (headSourceValueSlots.last().contents as HashMap<String, Value>)["data"]!!.contents,
-        )
-        assertEquals(
-            DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            (headSourceValueSlots.last().contents as HashMap<String, Value>)
-            ["tolerance"]!!.contents
-        )
-
-        verify { style.removeStyleImage(ARROW_HEAD_ICON_CASING) }
-        verify { style.addImage(ARROW_HEAD_ICON_CASING, any<Bitmap>()) }
-
-        verify { style.removeStyleImage(ARROW_HEAD_ICON) }
-        verify { style.addImage(ARROW_HEAD_ICON, any<Bitmap>()) }
-
-        verify { style.removeStyleLayer(ARROW_SHAFT_CASING_LINE_LAYER_ID) }
-        verify { style.removeStyleLayer(ARROW_HEAD_CASING_LAYER_ID) }
-        verify { style.removeStyleLayer(ARROW_SHAFT_LINE_LAYER_ID) }
-        verify { style.removeStyleLayer(ARROW_HEAD_LAYER_ID) }
-
-        verify {
-            style.addPersistentStyleLayer(
-                capture(addStyleLayerSlots),
-                capture(addStyleLayerPositionSlots)
-            )
-        }
-        assertEquals(
-            "mapbox-navigation-arrow-shaft-casing-layer",
-            (addStyleLayerSlots[0].contents as HashMap<String, Value>)["id"]!!.contents
-        )
-        assertEquals(
-            "mapbox-navigation-arrow-head-casing-layer",
-            (addStyleLayerSlots[1].contents as HashMap<String, Value>)["id"]!!.contents
-        )
-        assertEquals(
-            "mapbox-navigation-arrow-shaft-layer",
-            (addStyleLayerSlots[2].contents as HashMap<String, Value>)["id"]!!.contents
-        )
-        assertEquals(
-            "mapbox-navigation-arrow-head-layer",
-            (addStyleLayerSlots[3].contents as HashMap<String, Value>)["id"]!!.contents
-        )
-        assertEquals(
-            null,
-            addStyleLayerPositionSlots[0].above
-        )
-        assertEquals(
-            "mapbox-navigation-arrow-shaft-casing-layer",
-            addStyleLayerPositionSlots[1].above
-        )
-        assertEquals(
-            "mapbox-navigation-arrow-head-casing-layer",
-            addStyleLayerPositionSlots[2].above
-        )
-        assertEquals(
-            "mapbox-navigation-arrow-shaft-layer",
-            addStyleLayerPositionSlots[3].above
-        )
     }
 
     @Test
