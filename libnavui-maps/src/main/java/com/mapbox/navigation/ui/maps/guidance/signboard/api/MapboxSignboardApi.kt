@@ -6,7 +6,6 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.HttpResponse
-import com.mapbox.common.core.module.CommonSingletonModuleProvider
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardAction
 import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardProcessor
@@ -15,6 +14,7 @@ import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOpt
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardRequest
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue
+import com.mapbox.navigation.utils.internal.HttpServiceFactoryWrapper
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
@@ -66,7 +66,7 @@ class MapboxSignboardApi @JvmOverloads constructor(
                 )
                 val signboardRequest = SignboardProcessor.process(requestAction)
                 val httpRequest = (signboardRequest as SignboardResult.SignboardRequest).request
-                val requestId = CommonSingletonModuleProvider.httpServiceInstance.request(
+                val requestId = HttpServiceFactoryWrapper.getInstance().request(
                     httpRequest
                 ) { httpResponse ->
                     mainJobController.scope.launch {
@@ -97,7 +97,7 @@ class MapboxSignboardApi @JvmOverloads constructor(
      */
     fun cancelAll() {
         requestList.forEach {
-            CommonSingletonModuleProvider.httpServiceInstance.cancelRequest(it.requestId) {
+            HttpServiceFactoryWrapper.getInstance().cancelRequest(it.requestId) {
             }
         }
         requestList.clear()
