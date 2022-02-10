@@ -41,6 +41,7 @@ import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.RouteState
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
@@ -99,7 +100,7 @@ internal class MapboxTripSession(
                 updateLegIndexJob?.cancel()
                 updateRouteProgressJob?.cancel()
 
-                threadController.getMainScopeAndRootJob().scope.launch {
+                threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
                     nativeRouteProcessingListeners.forEach { it.onNativeRouteProcessingStarted() }
                     navigator.setRoute(routes, legIndex)?.let {
                         roadObjects = getRouteInitInfo(it)?.roadObjects ?: emptyList()
@@ -108,7 +109,7 @@ internal class MapboxTripSession(
                 }
             }
             RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
-                threadController.getMainScopeAndRootJob().scope.launch {
+                threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
                     if (routes.isNotEmpty()) {
                         navigator.updateAnnotations(
                             routes[MapboxNativeNavigatorImpl.PRIMARY_ROUTE_INDEX]
@@ -279,7 +280,7 @@ internal class MapboxTripSession(
             }
 
             updateRouteProgressJob?.cancel()
-            updateRouteProgressJob = mainJobController.scope.launch {
+            updateRouteProgressJob = mainJobController.scope.launch(Dispatchers.Main.immediate) {
                 var triggerObserver = false
                 if (tripStatus.navigationStatus.routeState != RouteState.INVALID) {
                     val nativeBannerInstruction: BannerInstruction? =

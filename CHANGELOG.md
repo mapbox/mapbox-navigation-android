@@ -14,6 +14,10 @@ Mapbox welcomes participation and contributions from everyone.
 - Updated `MapboxNavigtation#provideFeedbackMetadataWrapper` to throw `IllegalStateException` if `Telemetry events` is disabled. [#5455](https://github.com/mapbox/mapbox-navigation-android/pull/5455)
 - Fixed an issue where some resource requests dispatched by Nav SDK (namely junction images and shields) were not wired through the same HTTP client instance that can be interacted with using `HttpServiceFactory.getInstance()`. Note: `MapboxSpeechApi` requests are still wired through an independent HTTP client. [#5459](https://github.com/mapbox/mapbox-navigation-android/pull/5459)
 - Updated maneuver icons for notifications. [#5449](https://github.com/mapbox/mapbox-navigation-android/pull/5449)
+- Fixed an issue where `off-route` was always false if there are no routing tiles available. [#5457](https://github.com/mapbox/mapbox-navigation-android/pull/5457)
+- Added a default timeout for `Online` route requests (60 seconds). [#5457](https://github.com/mapbox/mapbox-navigation-android/pull/5457)
+- Fixed an issue where an alternative route was equal a current route. [#5457](https://github.com/mapbox/mapbox-navigation-android/pull/5457)
+- Added delay before re-attempting to request alternatives in case the first attempt resulted in the deviation point behind the current position. [#5457](https://github.com/mapbox/mapbox-navigation-android/pull/5457)
 
 ## Mapbox Navigation SDK 2.3.0-beta.2 - February 2, 2022
 ### Changelog
