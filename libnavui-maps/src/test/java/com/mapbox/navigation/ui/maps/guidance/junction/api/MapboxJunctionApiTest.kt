@@ -11,7 +11,6 @@ import com.mapbox.common.HttpResponse
 import com.mapbox.common.HttpResponseCallback
 import com.mapbox.common.HttpResponseData
 import com.mapbox.common.HttpServiceInterface
-import com.mapbox.common.core.module.CommonSingletonModuleProvider
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionAction
@@ -19,6 +18,7 @@ import com.mapbox.navigation.ui.maps.guidance.junction.JunctionProcessor
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionResult
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue
+import com.mapbox.navigation.utils.internal.HttpServiceFactoryWrapper
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -52,13 +52,13 @@ class MapboxJunctionApiTest {
     @Before
     fun setUp() {
         mockkObject(JunctionProcessor)
-        mockkObject(CommonSingletonModuleProvider)
+        mockkObject(HttpServiceFactoryWrapper)
     }
 
     @After
     fun tearDown() {
         unmockkObject(JunctionProcessor)
-        unmockkObject(CommonSingletonModuleProvider)
+        unmockkObject(HttpServiceFactoryWrapper)
     }
 
     @Test
@@ -105,7 +105,7 @@ class MapboxJunctionApiTest {
         val mockHttpService = mockk<HttpServiceInterface> {
             every { request(mockRequest, capture(httpResponseCallbackSlot)) } returns 0
         }
-        every { CommonSingletonModuleProvider.httpServiceInstance } returns mockHttpService
+        every { HttpServiceFactoryWrapper.getInstance() } returns mockHttpService
         every {
             JunctionProcessor.process(
                 JunctionAction.CheckJunctionAvailability(bannerInstructions)
@@ -147,7 +147,7 @@ class MapboxJunctionApiTest {
         val mockHttpService = mockk<HttpServiceInterface> {
             every { request(mockRequest, capture(httpResponseCallbackSlot)) } returns 0
         }
-        every { CommonSingletonModuleProvider.httpServiceInstance } returns mockHttpService
+        every { HttpServiceFactoryWrapper.getInstance() } returns mockHttpService
         every {
             JunctionProcessor.process(
                 JunctionAction.CheckJunctionAvailability(bannerInstructions)
@@ -195,7 +195,7 @@ class MapboxJunctionApiTest {
         val mockHttpService = mockk<HttpServiceInterface> {
             every { request(mockRequest, capture(httpResponseCallbackSlot)) } returns 0
         }
-        every { CommonSingletonModuleProvider.httpServiceInstance } returns mockHttpService
+        every { HttpServiceFactoryWrapper.getInstance() } returns mockHttpService
         every {
             JunctionProcessor.process(
                 JunctionAction.CheckJunctionAvailability(bannerInstructions)
@@ -251,7 +251,7 @@ class MapboxJunctionApiTest {
         val mockHttpService = mockk<HttpServiceInterface> {
             every { request(mockRequest, capture(httpResponseCallbackSlot)) } returns 0
         }
-        every { CommonSingletonModuleProvider.httpServiceInstance } returns mockHttpService
+        every { HttpServiceFactoryWrapper.getInstance() } returns mockHttpService
         every {
             JunctionProcessor.process(
                 JunctionAction.CheckJunctionAvailability(bannerInstructions)

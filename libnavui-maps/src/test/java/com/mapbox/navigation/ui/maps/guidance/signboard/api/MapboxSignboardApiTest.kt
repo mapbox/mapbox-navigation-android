@@ -10,7 +10,6 @@ import com.mapbox.common.HttpResponse
 import com.mapbox.common.HttpResponseCallback
 import com.mapbox.common.HttpResponseData
 import com.mapbox.common.HttpServiceInterface
-import com.mapbox.common.core.module.CommonSingletonModuleProvider
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardAction
@@ -19,6 +18,7 @@ import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardResult
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue
+import com.mapbox.navigation.utils.internal.HttpServiceFactoryWrapper
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -53,13 +53,13 @@ class MapboxSignboardApiTest {
     @Before
     fun setUp() {
         mockkObject(SignboardProcessor)
-        mockkObject(CommonSingletonModuleProvider)
+        mockkObject(HttpServiceFactoryWrapper)
     }
 
     @After
     fun tearDown() {
         unmockkObject(SignboardProcessor)
-        unmockkObject(CommonSingletonModuleProvider)
+        unmockkObject(HttpServiceFactoryWrapper)
     }
 
     @Test
@@ -106,7 +106,7 @@ class MapboxSignboardApiTest {
         val mockHttpService = mockk<HttpServiceInterface>() {
             every { request(mockRequest, capture(httpResponseCallbackSlot)) } returns 0
         }
-        every { CommonSingletonModuleProvider.httpServiceInstance } returns mockHttpService
+        every { HttpServiceFactoryWrapper.getInstance() } returns mockHttpService
         every {
             SignboardProcessor.process(
                 SignboardAction.CheckSignboardAvailability(bannerInstructions)
@@ -148,7 +148,7 @@ class MapboxSignboardApiTest {
         val mockHttpService = mockk<HttpServiceInterface>() {
             every { request(mockRequest, capture(httpResponseCallbackSlot)) } returns 0
         }
-        every { CommonSingletonModuleProvider.httpServiceInstance } returns mockHttpService
+        every { HttpServiceFactoryWrapper.getInstance() } returns mockHttpService
         every {
             SignboardProcessor.process(
                 SignboardAction.CheckSignboardAvailability(bannerInstructions)
@@ -194,7 +194,7 @@ class MapboxSignboardApiTest {
         val mockHttpService = mockk<HttpServiceInterface>() {
             every { request(mockRequest, capture(httpResponseCallbackSlot)) } returns 0
         }
-        every { CommonSingletonModuleProvider.httpServiceInstance } returns mockHttpService
+        every { HttpServiceFactoryWrapper.getInstance() } returns mockHttpService
         every {
             SignboardProcessor.process(
                 SignboardAction.CheckSignboardAvailability(bannerInstructions)
@@ -249,7 +249,7 @@ class MapboxSignboardApiTest {
         val mockHttpService = mockk<HttpServiceInterface>() {
             every { request(mockRequest, capture(httpResponseCallbackSlot)) } returns 0
         }
-        every { CommonSingletonModuleProvider.httpServiceInstance } returns mockHttpService
+        every { HttpServiceFactoryWrapper.getInstance() } returns mockHttpService
         every {
             SignboardProcessor.process(
                 SignboardAction.CheckSignboardAvailability(bannerInstructions)
