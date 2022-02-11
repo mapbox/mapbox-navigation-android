@@ -27,6 +27,7 @@ import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver.StepManeuverType
 import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.base.internal.maneuver.TurnIconHelper
 import com.mapbox.navigation.base.internal.time.TimeFormatter.formatTime
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -87,9 +88,7 @@ class MapboxTripNotification constructor(
     private val notificationReceiver = NotificationActionReceiver()
     private lateinit var notification: Notification
     private lateinit var notificationManager: NotificationManager
-    private val turnIconHelper = NotificationTurnIconHelper(
-        NotificationTurnIconResources.Builder().build()
-    )
+    private val turnIconHelper = TurnIconHelper(NotificationTurnIconResources.defaultIconSet())
 
     private var notificationView: MapboxTripNotificationView
     private val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

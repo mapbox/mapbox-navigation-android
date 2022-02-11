@@ -3,15 +3,14 @@ package com.mapbox.navigation.trip.notification.internal
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.navigation.base.internal.maneuver.ManeuverTurnIcon
+import com.mapbox.navigation.base.internal.maneuver.TurnIconHelper
 import com.mapbox.navigation.trip.notification.R
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class NotificationTurnIconHelperTest {
 
-    private val turnIconHelper = NotificationTurnIconHelper(
-        NotificationTurnIconResources.Builder().build()
-    )
+    private val turnIconHelper = TurnIconHelper(NotificationTurnIconResources.defaultIconSet())
 
     @Test
     fun `generate turn icon when type and modifier is null`() {
