@@ -69,8 +69,7 @@ class MapboxTripProgressView : FrameLayout {
     /**
      * Applies the necessary view side effects based on the input.
      *
-     * @param result a [Expected<TripProgressUpdateValue, TripProgressUpdateError>]
-     * containing the data that should be rendered.
+     * @param result a [TripProgressUpdateValue] containing the data that should be rendered.
      */
     fun render(result: TripProgressUpdateValue) {
         binding.distanceRemainingText.setText(
