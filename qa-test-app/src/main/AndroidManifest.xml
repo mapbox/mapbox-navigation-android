@@ -37,6 +37,7 @@
         <activity
             android:name=".view.IconsPreviewActivity"
             android:theme="@style/Theme.IconsPreviewActivity" />
+        <activity android:name=".view.DropInButtonsActivity" />
     </application>
 
 </manifest>

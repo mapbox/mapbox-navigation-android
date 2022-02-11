@@ -12,25 +12,37 @@ private const val slideDuration = 300L
 
 class ExtendableButtonHelper(
     private val buttonText: TextView,
-    private val shrunkWidth: Int,
-    private val minExtendedWidth: Float,
+    private val measureShrunkWidth: () -> Int,
+    private val measureExtendedWidth: (text: String) -> Int,
 ) {
-
     private val mainHandler = Handler(Looper.getMainLooper())
     var isAnimationRunning = false
         private set
 
+    constructor(
+        buttonText: TextView,
+        shrunkWidth: Int,
+        minExtendedWidth: Float,
+    ) : this(
+        buttonText,
+        { shrunkWidth },
+        { text ->
+            (buttonText.measureTextWidth(text) + shrunkWidth)
+                .coerceAtLeast(minExtendedWidth).toInt()
+        }
+    )
+
     fun showTextAndExtend(text: String, duration: Long) {
         isAnimationRunning = true
-        val extendedWidth = (buttonText.measureTextWidth(text) + shrunkWidth)
-            .coerceAtLeast(minExtendedWidth)
-        getAnimator(shrunkWidth, extendedWidth.toInt()).play(
+        val shrunkWidth = measureShrunkWidth()
+        val extendedWidth = measureExtendedWidth(text)
+        getAnimator(shrunkWidth, extendedWidth).play(
             doOnStart = {
                 buttonText.text = text
                 buttonText.visibility = View.VISIBLE
                 mainHandler.postDelayed(
                     {
-                        getAnimator(extendedWidth.toInt(), shrunkWidth).play(
+                        getAnimator(extendedWidth, shrunkWidth).play(
                             doOnStart = {
                                 buttonText.text = null
                             },
