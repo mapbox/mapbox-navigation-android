@@ -18,7 +18,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_baseline_delete"
-        android:background="@null"/>
+        android:background="@null"
+        android:visibility="invisible"/>
 
 </LinearLayout>
 

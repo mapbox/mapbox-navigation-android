@@ -22,7 +22,6 @@ class RouteVaultView(
 
     private val viewBinding: LayoutRouteVaultViewBinding by lazy {
         LayoutRouteVaultViewBinding.inflate(layoutInflater)
-
     }
 
     private val routeVaultAdapter: RouteVaultAdapter by lazy {

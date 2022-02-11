@@ -51,6 +51,7 @@ import com.mapbox.navigation.examples.core.databinding.LayoutActivityRoutelineEx
 import com.mapbox.navigation.examples.manifesta.RouteVaultApi
 import com.mapbox.navigation.examples.manifesta.model.entity.StoredRouteEntity
 import com.mapbox.navigation.examples.manifesta.support.RouteVaultSupport.toDirectionsRoute
+import com.mapbox.navigation.examples.manifesta.view.RouteLibraryStorageView
 import com.mapbox.navigation.examples.manifesta.view.RouteVaultView
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
@@ -412,6 +413,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
             if (routes.isNotEmpty()) {
                 viewBinding.routeLoadingProgressBar.visibility = View.INVISIBLE
                 viewBinding.startNavigation.visibility = View.VISIBLE
+                viewBinding.btnSaveRoute.visibility = View.VISIBLE
             }
         }
 
@@ -441,14 +443,19 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
 
     @SuppressLint("MissingPermission")
     private fun initListeners() {
+        val api = RouteVaultApi("navSDKTeam")
         viewBinding.startNavigation.setOnClickListener {
-            val api = RouteVaultApi("navSDKTeam")
             RouteVaultView(api) {
                 Log.e("foobar", "got entity with id ${it.id}")
-                it.toDirectionsRoute()
+                it.toDirectionsRoute().onValue { route ->
+                    mapboxNavigation.setRoutes(listOf(route))
+                }
             }.show(supportFragmentManager, "RouteVaultView")
 
-            CoroutineScope(Dispatchers.Main).launch {
+
+
+
+            //CoroutineScope(Dispatchers.Main).launch {
 
                 // api.storeRoute(StoredRouteEntity(
                 //     "foobar",
@@ -463,7 +470,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
                 // })
 
                 //api.deleteRoute("foobar")
-            }
+            //}
 
 
 
@@ -483,6 +490,12 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
             // }
         }
         viewBinding.mapView.gestures.addOnMapClickListener(mapClickListener)
+
+        viewBinding.btnSaveRoute.setOnClickListener {
+            if (mapboxNavigation.getRoutes().isNotEmpty()) {
+                RouteLibraryStorageView(api, mapboxNavigation.getRoutes().first()).show(supportFragmentManager, "RouteLibraryStorageView")
+            }
+        }
     }
 
     // Starts the navigation simulator

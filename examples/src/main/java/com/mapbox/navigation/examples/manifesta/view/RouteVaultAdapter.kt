@@ -1,7 +1,7 @@
 package com.mapbox.navigation.examples.manifesta.view
 
-import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.mapbox.navigation.examples.core.databinding.LayoutRouteVaultRecordBinding
@@ -29,6 +29,10 @@ class RouteVaultAdapter(
         holder.itemView.setOnClickListener {
             itemSelectedFun(routeRecords[position])
         }
+        holder.itemView.setOnLongClickListener {
+            holder.toggleDeleteButtonVisibility()
+            true
+        }
         holder.bind(routeRecords[position], ::deleteItemClicked)
     }
 
@@ -41,9 +45,7 @@ class RouteVaultAdapter(
     fun cloneData(): List<StoredRouteRecord> = routeRecords.toList()
 
     private fun deleteItemClicked(record: StoredRouteRecord) {
-
-
-        //deleteItemFun(record)
+        deleteItemFun(record)
     }
 
 }
@@ -54,6 +56,15 @@ class RouteVaultViewHolder constructor(
         viewBinding.routeAliasLabel.text = record.alias
         viewBinding.btnDeleteRecord.setOnClickListener {
             itemDeleteHandler(record)
+        }
+        viewBinding.btnDeleteRecord.visibility = View.INVISIBLE
+    }
+
+    fun toggleDeleteButtonVisibility() {
+        viewBinding.btnDeleteRecord.visibility = when (viewBinding.btnDeleteRecord.visibility) {
+            View.VISIBLE -> View.INVISIBLE
+            View.INVISIBLE -> View.VISIBLE
+            else -> View.INVISIBLE
         }
     }
 }
