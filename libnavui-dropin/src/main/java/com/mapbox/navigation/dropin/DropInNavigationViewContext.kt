@@ -14,4 +14,6 @@ internal class DropInNavigationViewContext(
     val viewModel: DropInNavigationViewModel,
     val mapView: MapView,
     val viewGroup: ViewGroup,
-)
+) {
+    var uiBinders = NavigationUIBinders()
+}

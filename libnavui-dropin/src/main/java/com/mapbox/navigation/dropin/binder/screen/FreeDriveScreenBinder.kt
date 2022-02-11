@@ -15,7 +15,6 @@ import com.mapbox.navigation.dropin.component.location.DropInLocationPuck
 import com.mapbox.navigation.dropin.component.location.DropInLocationState
 import com.mapbox.navigation.dropin.component.replay.DropInReplayButton
 import com.mapbox.navigation.dropin.component.routeline.DropInRouteLine
-import com.mapbox.navigation.dropin.component.speedlimit.DropInSpeedLimitComponent
 import com.mapbox.navigation.dropin.databinding.MapboxScreenFreeDriveLayoutBinding
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -23,7 +22,8 @@ internal class FreeDriveScreenBinder(
     private val navigationViewContext: DropInNavigationViewContext
 ) : UIBinder {
 
-    val cameraState = navigationViewContext.viewModel.cameraState
+    private val cameraState = navigationViewContext.viewModel.cameraState
+    private val speedLimitBinder = navigationViewContext.uiBinders.speedLimit
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
@@ -45,7 +45,7 @@ internal class FreeDriveScreenBinder(
                 navigationViewContext.viewModel.cameraState,
                 navigationViewContext.mapView
             ),
-            DropInSpeedLimitComponent(binding.speedLimitView),
+            speedLimitBinder.bind(binding.speedLimitLayout),
             DropInLocationPuck(locationState, navigationViewContext.mapView),
             DropInReplayButton(navigationViewContext, binding.startNavigation)
         )

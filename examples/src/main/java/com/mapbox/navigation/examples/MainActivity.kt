@@ -18,6 +18,7 @@ import com.mapbox.navigation.examples.core.MapboxManeuverActivity
 import com.mapbox.navigation.examples.core.MapboxMultipleArrowActivity
 import com.mapbox.navigation.examples.core.MapboxNavigationActivity
 import com.mapbox.navigation.examples.core.MapboxNavigationViewActivity
+import com.mapbox.navigation.examples.core.MapboxNavigationViewCustomizedActivity
 import com.mapbox.navigation.examples.core.MapboxNavigationViewFragmentActivity
 import com.mapbox.navigation.examples.core.MapboxRouteLineAndArrowActivity
 import com.mapbox.navigation.examples.core.MapboxSignboardActivity
@@ -145,6 +146,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_navigation_view),
                 getString(R.string.description_navigation_view),
                 MapboxNavigationViewActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_navigation_view_customized),
+                getString(R.string.description_navigation_view_customized),
+                MapboxNavigationViewCustomizedActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_navigation_view_fragment),

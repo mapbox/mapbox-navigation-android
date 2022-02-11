@@ -6,11 +6,15 @@ import com.mapbox.navigation.examples.core.databinding.LayoutActivityNavigationV
 
 class MapboxNavigationViewActivity : AppCompatActivity() {
 
-    private lateinit var binding: LayoutActivityNavigationViewBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = LayoutActivityNavigationViewBinding.inflate(layoutInflater)
+        val binding = LayoutActivityNavigationViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        /**
+         * This activity is demonstrating default behavior. Do not add anything to this class.
+         *
+         * Customized behavior can be demonstrated in [MapboxNavigationViewCustomizedActivity]
+         */
     }
 }

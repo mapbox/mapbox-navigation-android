@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
 import com.mapbox.navigation.dropin.extensions.attachStarted
 import com.mapbox.navigation.ui.maps.NavigationStyles
@@ -58,6 +59,13 @@ class DropInNavigationView @JvmOverloads constructor(
         mapView = binding.mapView,
         viewGroup = binding.viewGroup,
     )
+
+    /**
+     * Customize the views by implementing your own [UIBinder] components.
+     */
+    fun customize(navigationUIBinders: NavigationUIBinders) {
+        navigationContext.uiBinders = navigationUIBinders
+    }
 
     init {
 
