@@ -3,21 +3,36 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
-- Add `MapboxNavigationApp.isSetup` to ensure views do not reset `MapboxNavigation`. Add `MapboxNavigationApp.getObserver` to be able to access registered observers. [#5358](https://github.com/mapbox/mapbox-navigation-android/pull/5358)
-- Refactored maneuver implementation to return a new `Maneuver` instance whenever the data in an existing `Maneuver` object needs to be modified [#5453](https://github.com/mapbox/mapbox-navigation-android/pull/5453)
 
 #### Features
 
 #### Bug fixes and improvements
-- Updated `MapboxManeuverView` or `MapboxRoadNameView` to prefer Mapbox designed shields over legacy ones. [#5445](https://github.com/mapbox/mapbox-navigation-android/pull/5445)
+
+## Mapbox Navigation SDK 2.3.0-beta.3 - February 11, 2022
+### Changelog
+[Changes between v2.3.0-beta.2 and v2.3.0-beta.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.3.0-beta.2...v2.3.0-beta.3)
+
+#### Bug fixes and improvements
+- Added `MapboxNavigationApp.isSetup` to ensure views do not reset `MapboxNavigation`. Added `MapboxNavigationApp.getObserver` to be able to access registered observers. [#5358](https://github.com/mapbox/mapbox-navigation-android/pull/5358)
+- Refactored maneuver implementation to return a new `Maneuver` instance whenever the data in an existing `Maneuver` object needs to be modified. [#5453](https://github.com/mapbox/mapbox-navigation-android/pull/5453)
+- Updated `MapboxManeuverView` / `MapboxRoadNameView` to prefer Mapbox designed shields over legacy ones. [#5445](https://github.com/mapbox/mapbox-navigation-android/pull/5445)
 - Fixed `Nav Telemetry` to not run if `Telemetry events` is disabled. [#5455](https://github.com/mapbox/mapbox-navigation-android/pull/5455)
-- Updated `MapboxNavigtation#provideFeedbackMetadataWrapper` to throw `IllegalStateException` if `Telemetry events` is disabled. [#5455](https://github.com/mapbox/mapbox-navigation-android/pull/5455)
+- Updated `MapboxNavigation#provideFeedbackMetadataWrapper` to throw `IllegalStateException` if `Telemetry events` is disabled. [#5455](https://github.com/mapbox/mapbox-navigation-android/pull/5455)
 - Fixed an issue where some resource requests dispatched by Nav SDK (namely junction images and shields) were not wired through the same HTTP client instance that can be interacted with using `HttpServiceFactory.getInstance()`. Note: `MapboxSpeechApi` requests are still wired through an independent HTTP client. [#5459](https://github.com/mapbox/mapbox-navigation-android/pull/5459)
 - Updated maneuver icons for notifications. [#5449](https://github.com/mapbox/mapbox-navigation-android/pull/5449)
 - Fixed an issue where `off-route` was always false if there are no routing tiles available. [#5457](https://github.com/mapbox/mapbox-navigation-android/pull/5457)
 - Added a default timeout for `Online` route requests (60 seconds). [#5457](https://github.com/mapbox/mapbox-navigation-android/pull/5457)
 - Fixed an issue where an alternative route was equal a current route. [#5457](https://github.com/mapbox/mapbox-navigation-android/pull/5457)
 - Added delay before re-attempting to request alternatives in case the first attempt resulted in the deviation point behind the current position. [#5457](https://github.com/mapbox/mapbox-navigation-android/pull/5457)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.3.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.3.0-rc.1))
+- Mapbox Navigation Native `v87.0.5`
+- Mapbox Core Common `v21.1.0-rc.1`
+- Mapbox Java `v6.3.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.3.0-beta.1))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
 
 ## Mapbox Navigation SDK 2.3.0-beta.2 - February 2, 2022
 ### Changelog
