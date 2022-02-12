@@ -16,7 +16,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <FrameLayout
-        android:id="@+id/topBanner"
+        android:id="@+id/guidanceLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
@@ -24,17 +24,17 @@
         app:layout_constraintTop_toTopOf="parent"
         />
 
-    <com.mapbox.navigation.ui.maps.camera.view.MapboxRecenterButton
-        android:id="@+id/recenter"
-        android:layout_width="wrap_content"
+    <FrameLayout
+        android:id="@+id/actionList"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintRight_toLeftOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/bottomSheet"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         />
 
     <FrameLayout
-        android:id="@+id/bottomSheet"
+        android:id="@+id/infoPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"

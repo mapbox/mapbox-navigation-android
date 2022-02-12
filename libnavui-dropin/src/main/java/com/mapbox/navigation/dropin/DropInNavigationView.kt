@@ -1,11 +1,11 @@
-package com.mapbox.navigation.qa_test_app.lifecycle
+package com.mapbox.navigation.dropin
 
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import androidx.constraintlayout.widget.ConstraintLayout
+import android.widget.FrameLayout
 import androidx.core.content.res.use
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -15,26 +15,17 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.dropin.lifecycle.attachCreated
-import com.mapbox.navigation.dropin.lifecycle.attachResumed
+import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
 import com.mapbox.navigation.dropin.lifecycle.attachStarted
-import com.mapbox.navigation.qa_test_app.R
-import com.mapbox.navigation.qa_test_app.databinding.DropInNavigationViewBinding
-import com.mapbox.navigation.qa_test_app.lifecycle.backstack.BackStackBinding
-import com.mapbox.navigation.qa_test_app.lifecycle.bottomsheet.BottomSheetCoordinator
-import com.mapbox.navigation.qa_test_app.lifecycle.topbanner.TopBannerCoordinator
-import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInLocationViewModel
-import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInNavigationViewModel
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DropInNavigationView @JvmOverloads constructor(
     context: Context,
-    attrs: AttributeSet? = null
-) : ConstraintLayout(context, attrs), LifecycleOwner {
-
-    private val accessToken = attrs.navigationViewAccessToken(context)
+    attrs: AttributeSet? = null,
+    accessToken: String = attrs.navigationViewAccessToken(context),
+) : FrameLayout(context, attrs), LifecycleOwner {
 
     private val binding: DropInNavigationViewBinding = DropInNavigationViewBinding.inflate(
         LayoutInflater.from(context),
@@ -51,11 +42,28 @@ class DropInNavigationView @JvmOverloads constructor(
         ViewModelProvider(context.toViewModelStoreOwner())
     }
 
-    private val cameraViewModel: DropInNavigationViewModel by lazyViewModel()
-    private val locationViewModel: DropInLocationViewModel by lazyViewModel()
+    /**
+     * The one and only view model for [DropInNavigationView]. If you need state
+     * to survive orientation changes, put it in the [DropInNavigationViewModel].
+     */
+    private val viewModel: DropInNavigationViewModel by lazyViewModel()
+
+    /**
+     * This is a top level object to share data with all state view holders. If you need state
+     * to survive orientation changes, put it in the [DropInNavigationViewModel].
+     */
+    private val navigationContext = DropInNavigationViewContext(
+        lifecycleOwner = this,
+        viewModel = viewModel,
+        mapView = binding.mapView,
+        viewGroup = binding.viewGroup,
+    )
 
     init {
-        // Load the map.
+
+        /**
+         * Load the map as soon as possible.
+         */
         binding.mapView.getMapboxMap().loadStyleUri(
             NavigationStyles.NAVIGATION_DAY_STYLE
         ) {
@@ -64,7 +72,7 @@ class DropInNavigationView @JvmOverloads constructor(
 
         /**
          * Default setup for MapboxNavigationApp. The developer can customize this by
-         * setting up the MapboxNavigationApp before this view is constructed.
+         * setting up the MapboxNavigationApp before the view is constructed.
          */
         if (!MapboxNavigationApp.isSetup()) {
             MapboxNavigationApp.setup(
@@ -75,31 +83,16 @@ class DropInNavigationView @JvmOverloads constructor(
         }
 
         /**
-         * Attach this lifecycle to the MapboxNavigationApp. If the developer wants to remember
-         * MapboxNavigation state over orientation changes they need to attach the Fragment or
-         * Activity lifecycle owner.
+         * Attach the lifecycle to mapbox navigation. This ensures that all
+         * MapboxNavigationObservers will be attached.
          */
         MapboxNavigationApp.attach(this)
 
-        // This should have some state available from a ViewModel
-        attachCreated(BackStackBinding(binding.root))
-
-        // Attach coordinators
-        attachStarted(
-            TopBannerCoordinator(binding.topBanner),
-            BottomSheetCoordinator(binding.bottomSheet),
-        )
-
         /**
-         * Features for this view. Observers that are part of the created event, can be seen by
-         * the components that are part of the started and resumed states.
+         * Single point of entry for the Mapbox Navigation View.
          */
-        attachResumed(
-            DropInLocationPuck(locationViewModel, binding.mapView),
-            DropInRoutesInteractor(locationViewModel, binding.mapView),
-            DropInNavigationCamera(cameraViewModel, locationViewModel, this, binding.mapView),
-            DropInRecenterButton(cameraViewModel, this, binding.recenter),
-            DropInContinuousRoutes(),
+        attachStarted(
+            DropInNavigationViewCoordinator(navigationContext)
         )
     }
 
@@ -109,6 +102,13 @@ class DropInNavigationView @JvmOverloads constructor(
         viewModelProvider[T::class.java]
     }
 }
+
+private fun recursiveUnwrap(context: Context): Context =
+    if (context !is Activity && context is ContextWrapper) {
+        recursiveUnwrap(context.baseContext)
+    } else {
+        context
+    }
 
 private fun AttributeSet?.navigationViewAccessToken(context: Context): String {
     val accessToken = context.obtainStyledAttributes(
@@ -122,13 +122,6 @@ private fun AttributeSet?.navigationViewAccessToken(context: Context): String {
     }
     return accessToken
 }
-
-private fun recursiveUnwrap(context: Context): Context =
-    if (context !is Activity && context is ContextWrapper) {
-        recursiveUnwrap(context.baseContext)
-    } else {
-        context
-    }
 
 private fun Context.toLifecycleOwner(): LifecycleOwner {
     val lifecycleOwner = recursiveUnwrap(this) as? LifecycleOwner

@@ -108,6 +108,7 @@ dependencies {
     implementation dependenciesList.androidXCardView
     implementation dependenciesList.androidXConstraintLayout
     implementation dependenciesList.androidXFragment
+    implementation dependenciesList.androidXLifecycleLivedata
 
     implementation dependenciesList.gmsLocation
 

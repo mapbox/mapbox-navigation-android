@@ -1,10 +1,10 @@
-package com.mapbox.navigation.qa_test_app.lifecycle
+package com.mapbox.navigation.dropin.component.camera
 
 import android.annotation.SuppressLint
 import android.graphics.Rect
 import android.location.Location
 import android.view.ViewTreeObserver
-import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.asFlow
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
@@ -16,18 +16,18 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.dropin.component.location.DropInLocationState
 import com.mapbox.navigation.dropin.lifecycle.DropInComponent
-import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInLocationViewModel
-import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInNavigationViewModel
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DropInNavigationCamera(
-    private val viewModel: DropInNavigationViewModel,
-    private val locationViewModel: DropInLocationViewModel,
-    private val lifecycleOwner: LifecycleOwner,
+    private val locationState: DropInLocationState,
+    private val cameraState: DropInCameraState,
     private val mapView: MapView,
 ) : DropInComponent() {
     private lateinit var navigationCamera: NavigationCamera
@@ -49,8 +49,8 @@ class DropInNavigationCamera(
         }
 
         override fun onMoveBegin(detector: MoveGestureDetector) {
-            if (viewModel.triggerIdleCameraOnMoveListener) {
-                viewModel.cameraMode.value = DropInCameraMode.IDLE
+            if (cameraState.triggerIdleCameraOnMoveListener) {
+                cameraState.cameraMode.value = DropInCameraMode.IDLE
             }
         }
 
@@ -75,21 +75,30 @@ class DropInNavigationCamera(
         check(mapView.viewTreeObserver.isAlive) { "Make sure the map is alive" }
         mapView.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
 
-        locationViewModel.locationLiveData.observe(lifecycleOwner) {
-            // TODO we don't really want to do this. But it have not found a good way to restore
-            //   the camera state when orientation is changing. see isLocationInitialized
-            updateCamera(viewModel.cameraMode(), it)
+        coroutineScope.launch {
+            locationState.locationLiveData.asFlow().collect {
+                // TODO we don't really want to do this. isLocationInitialized is also attempting
+                //    to create the correct initialization experience.
+                updateCamera(cameraState.cameraMode(), it)
+            }
         }
-        viewModel.cameraOptions.value?.let { builder ->
+
+        cameraState.cameraOptions.value?.let { builder ->
             mapView.getMapboxMap().setCamera(builder.build())
         }
-        viewModel.cameraMode.observe(lifecycleOwner) { cameraMode ->
-            if (!isLocationInitialized) return@observe
-            when (cameraMode) {
-                DropInCameraMode.IDLE -> navigationCamera.requestNavigationCameraToIdle()
-                DropInCameraMode.FOLLOWING -> navigationCamera.requestNavigationCameraToFollowing()
-                DropInCameraMode.OVERVIEW -> navigationCamera.requestNavigationCameraToOverview()
-                null -> { /** no op */ }
+
+        coroutineScope.launch {
+            cameraState.cameraMode.asFlow().collect { cameraMode ->
+                if (!isLocationInitialized) return@collect
+                when (cameraMode) {
+                    DropInCameraMode.IDLE ->
+                        navigationCamera.requestNavigationCameraToIdle()
+                    DropInCameraMode.FOLLOWING ->
+                        navigationCamera.requestNavigationCameraToFollowing()
+                    DropInCameraMode.OVERVIEW ->
+                        navigationCamera.requestNavigationCameraToOverview()
+                    null -> { /** no op */ }
+                }
             }
         }
 
@@ -145,7 +154,7 @@ class DropInNavigationCamera(
                     //   a way to save the previous state. This is not quite correct because the
                     //   viewportDataSource depends on the Map and has to be refreshed outside of
                     //   the view model.
-                    viewModel.cameraOptions.value?.let { builder ->
+                    cameraState.cameraOptions.value?.let { builder ->
                         val cameraOptions = builder.center(
                             Point.fromLngLat(enhancedLocation.longitude, enhancedLocation.latitude)
                         ).build()
