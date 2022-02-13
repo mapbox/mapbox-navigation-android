@@ -31,7 +31,8 @@ class DropInNavigationView @JvmOverloads constructor(
 
     private val binding: DropInNavigationViewBinding = DropInNavigationViewBinding.inflate(
         LayoutInflater.from(context),
-        this
+        this,
+        true
     )
 
     private val viewLifecycleRegistry: ViewLifecycleRegistry = ViewLifecycleRegistry(
@@ -58,7 +59,8 @@ class DropInNavigationView @JvmOverloads constructor(
         lifecycleOwner = this,
         viewModel = viewModel,
         mapView = binding.mapView,
-        viewGroup = binding.viewGroup
+        viewGroup = binding.viewGroup,
+        infoPanelViewGroup = binding.infoPanelViewGroup,
     )
 
     /**
@@ -111,7 +113,8 @@ class DropInNavigationView @JvmOverloads constructor(
          * Single point of entry for the Mapbox Navigation View.
          */
         attachStarted(
-            DropInNavigationViewCoordinator(navigationContext)
+            DropInNavigationViewCoordinator(navigationContext),
+            DropInInfoPanelCoordinator(navigationContext),
         )
     }
 
