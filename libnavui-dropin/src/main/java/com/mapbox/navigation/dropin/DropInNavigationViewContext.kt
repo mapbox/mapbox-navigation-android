@@ -16,6 +16,7 @@ internal class DropInNavigationViewContext(
     val viewModel: DropInNavigationViewModel,
     val mapView: MapView,
     val viewGroup: ViewGroup,
+    val infoPanelViewGroup: ViewGroup,
 ) {
     var uiBinders = NavigationUIBinders()
     var routeLineOptions: MapboxRouteLineOptions = MapboxRouteLineOptions.Builder(viewGroup.context)

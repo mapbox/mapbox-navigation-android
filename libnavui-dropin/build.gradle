@@ -46,6 +46,7 @@ dependencies {
     implementation project(":libnavui-resources")
     implementation project(":libnavui-util")
 
+    implementation dependenciesList.materialDesign
     implementation dependenciesList.androidXCardView
     implementation dependenciesList.androidXRecyclerView
     implementation dependenciesList.androidXCoreKtx
