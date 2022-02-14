@@ -47,7 +47,7 @@ internal class FreeDriveScreenBinder(
             ),
             speedLimitBinder.bind(binding.speedLimitLayout),
             DropInLocationPuck(locationState, navigationViewContext.mapView),
-            DropInReplayButton(navigationViewContext, binding.startNavigation)
+            DropInReplayButton(navigationViewContext, binding.startNavigation),
         )
     }
 }

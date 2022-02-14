@@ -10,10 +10,12 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
+import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.channelFlow
 
 /**
  * TODO note that each of these creates a new subscription. A concern may be that we want to have
@@ -67,4 +69,11 @@ fun MapboxNavigation.flowLocationMatcherResult(): Flow<LocationMatcherResult> = 
     }
     registerLocationObserver(observer)
     awaitClose { unregisterLocationObserver(observer) }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+fun MapboxNavigation.flowVoiceInstructions() = channelFlow {
+    val voiceInstructionsObserver = VoiceInstructionsObserver { trySend(it) }
+    registerVoiceInstructionsObserver(voiceInstructionsObserver)
+    awaitClose { unregisterVoiceInstructionsObserver(voiceInstructionsObserver) }
 }

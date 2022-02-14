@@ -8,6 +8,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
+import com.mapbox.navigation.dropin.binder.action.ActiveGuidanceActionBinder
 import com.mapbox.navigation.dropin.binder.navigationListOf
 import com.mapbox.navigation.dropin.component.camera.DropInCameraMode
 import com.mapbox.navigation.dropin.component.camera.DropInNavigationCamera
@@ -39,6 +40,7 @@ internal class ActiveGuidanceScreenBinder(
         val locationState = DropInLocationState()
         return navigationListOf(
             locationState,
+            ActiveGuidanceActionBinder().bind(binding.actionList),
             DropInRouteLine(navigationViewContext, locationState),
             DropInNavigationCamera(
                 locationState,
