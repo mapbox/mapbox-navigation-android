@@ -1,4 +1,4 @@
-package com.mapbox.navigation.dropin.lifecycle
+package com.mapbox.navigation.dropin.extensions
 
 import android.location.Location
 import com.mapbox.navigation.base.trip.model.RouteProgress

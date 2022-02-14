@@ -6,9 +6,9 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
-import com.mapbox.navigation.dropin.lifecycle.DropInComponent
-import com.mapbox.navigation.dropin.lifecycle.flowRoutesUpdated
-import com.mapbox.navigation.dropin.lifecycle.flowTripSessionState
+import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
+import com.mapbox.navigation.dropin.extensions.flowTripSessionState
+import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 internal class DropInReplayButton(
     dropInNavigationViewContext: DropInNavigationViewContext,
     private val startNavigation: View,
-) : DropInComponent() {
+) : UIComponent() {
     private val replayComponent = dropInNavigationViewContext.viewModel.replayComponent
     private val viewModel = dropInNavigationViewContext.viewModel
 

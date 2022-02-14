@@ -5,19 +5,20 @@ import androidx.annotation.CallSuper
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.dropin.binder.UIBinder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 /**
- * Attach a DropInViewCoordinator to a [ViewGroup] of your choosing. When you implement this class
- * you will need to build a [Flow] with [DropInViewBinder]. There can only be one view binder
+ * Attach a UICoordinator to a [ViewGroup] of your choosing. When you implement this class
+ * you will need to build a [Flow] with [Binder]. There can only be one view binder
  * attached at a time for the [ViewGroup].
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-abstract class DropInViewCoordinator(
+abstract class UICoordinator(
     private val viewGroup: ViewGroup
-) : DropInComponent() {
+) : UIComponent() {
 
     @CallSuper
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
@@ -42,8 +43,8 @@ abstract class DropInViewCoordinator(
     }
 
     /**
-     * Create your flowable [DropInViewBinder]. This allows you to use a flowable state to
+     * Create your flowable [UIBinder]. This allows you to use a flowable state to
      * determine what is being shown in the [viewGroup].
      */
-    abstract fun MapboxNavigation.flowViewBinders(): Flow<DropInViewBinder>
+    abstract fun MapboxNavigation.flowViewBinders(): Flow<UIBinder>
 }

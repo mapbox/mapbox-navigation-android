@@ -1,4 +1,4 @@
-package com.mapbox.navigation.dropin.statebinder
+package com.mapbox.navigation.dropin.binder.screen
 
 import android.transition.Scene
 import android.transition.TransitionManager
@@ -7,6 +7,8 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.R
+import com.mapbox.navigation.dropin.binder.UIBinder
+import com.mapbox.navigation.dropin.binder.navigationListOf
 import com.mapbox.navigation.dropin.component.camera.DropInCameraMode
 import com.mapbox.navigation.dropin.component.camera.DropInNavigationCamera
 import com.mapbox.navigation.dropin.component.location.DropInLocationPuck
@@ -15,13 +17,11 @@ import com.mapbox.navigation.dropin.component.replay.DropInReplayButton
 import com.mapbox.navigation.dropin.component.routeline.DropInRouteLine
 import com.mapbox.navigation.dropin.component.speedlimit.DropInSpeedLimitComponent
 import com.mapbox.navigation.dropin.databinding.DropInStateFreeDriveBinding
-import com.mapbox.navigation.dropin.lifecycle.DropInViewBinder
-import com.mapbox.navigation.dropin.lifecycle.navigationListOf
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal class FreeDriveViewBinder(
+internal class FreeDriveScreenBinder(
     private val navigationViewContext: DropInNavigationViewContext
-) : DropInViewBinder {
+) : UIBinder {
 
     val cameraState = navigationViewContext.viewModel.cameraState
 

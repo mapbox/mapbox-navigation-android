@@ -1,17 +1,18 @@
-package com.mapbox.navigation.dropin.lifecycle
+package com.mapbox.navigation.dropin.binder
 
 import android.view.ViewGroup
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.dropin.lifecycle.UICoordinator
 
 /**
- * This interface works with the [DropInViewCoordinator]. Implementations of this class represent
+ * This interface works with the [UICoordinator]. Implementations of this class represent
  * are responsible for transitioning a view(s) into the [ViewGroup]. They are also responsible for
  * deciding what components should be part of the view.
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-interface DropInViewBinder {
+interface UIBinder {
 
     /**
      * Triggered when this view binder instance is attached. The [viewGroup] returns a
@@ -21,7 +22,7 @@ interface DropInViewBinder {
 }
 
 /**
- * When returning an observer from [DropInViewBinder.bind], you can use this extension to return
+ * When returning an observer from [UIBinder.bind], you can use this extension to return
  * a list of observers. This will attach one to many observers to your view binder.
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)

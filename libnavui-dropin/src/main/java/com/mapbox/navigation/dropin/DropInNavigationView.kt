@@ -16,7 +16,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
-import com.mapbox.navigation.dropin.lifecycle.attachStarted
+import com.mapbox.navigation.dropin.extensions.attachStarted
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
 

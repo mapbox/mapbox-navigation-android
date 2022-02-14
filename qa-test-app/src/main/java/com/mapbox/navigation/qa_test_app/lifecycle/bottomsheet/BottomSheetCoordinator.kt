@@ -4,18 +4,18 @@ import android.view.ViewGroup
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.TripSessionState
-import com.mapbox.navigation.dropin.lifecycle.DropInViewBinder
-import com.mapbox.navigation.dropin.lifecycle.DropInViewCoordinator
-import com.mapbox.navigation.dropin.lifecycle.flowRoutesUpdated
-import com.mapbox.navigation.dropin.lifecycle.flowTripSessionState
-import com.mapbox.navigation.dropin.statebinder.EmptyViewBinder
+import com.mapbox.navigation.dropin.binder.UIBinder
+import com.mapbox.navigation.dropin.binder.screen.EmptyScreenBinder
+import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
+import com.mapbox.navigation.dropin.extensions.flowTripSessionState
+import com.mapbox.navigation.dropin.lifecycle.UICoordinator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class BottomSheetCoordinator(viewGroup: ViewGroup) : DropInViewCoordinator(viewGroup) {
+class BottomSheetCoordinator(viewGroup: ViewGroup) : UICoordinator(viewGroup) {
 
-    override fun MapboxNavigation.flowViewBinders(): Flow<DropInViewBinder> =
+    override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> =
         combine(
             flowTripSessionState(), flowRoutesUpdated()
         ) { tripSessionState, routesUpdatedResult ->
@@ -30,7 +30,7 @@ class BottomSheetCoordinator(viewGroup: ViewGroup) : DropInViewCoordinator(viewG
                 }
                 // TODO add new view builders for different states
                 else -> {
-                    EmptyViewBinder()
+                    EmptyScreenBinder()
                 }
             }
         }
