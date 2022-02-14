@@ -17,7 +17,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.dropin.component.location.DropInLocationState
-import com.mapbox.navigation.dropin.lifecycle.DropInComponent
+import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
@@ -29,7 +29,7 @@ class DropInNavigationCamera(
     private val locationState: DropInLocationState,
     private val cameraState: DropInCameraState,
     private val mapView: MapView,
-) : DropInComponent() {
+) : UIComponent() {
     private lateinit var navigationCamera: NavigationCamera
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
 

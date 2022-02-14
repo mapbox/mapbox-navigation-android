@@ -3,10 +3,10 @@ package com.mapbox.navigation.dropin
 import androidx.lifecycle.ViewModel
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.dropin.binder.navigationListOf
 import com.mapbox.navigation.dropin.component.camera.DropInCameraState
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.replay.DropInReplayComponent
-import com.mapbox.navigation.dropin.lifecycle.navigationListOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 

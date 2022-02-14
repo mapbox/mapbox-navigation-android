@@ -11,9 +11,9 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
-import com.mapbox.navigation.dropin.lifecycle.attachStarted
-import com.mapbox.navigation.dropin.lifecycle.flowRoutesUpdated
-import com.mapbox.navigation.dropin.lifecycle.flowTripSessionState
+import com.mapbox.navigation.dropin.extensions.attachStarted
+import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
+import com.mapbox.navigation.dropin.extensions.flowTripSessionState
 import com.mapbox.navigation.qa_test_app.databinding.FragmentActiveGuidanceBinding
 import com.mapbox.navigation.qa_test_app.lifecycle.bottomsheet.DropInTripProgress
 import com.mapbox.navigation.qa_test_app.lifecycle.topbanner.DropInManeuver

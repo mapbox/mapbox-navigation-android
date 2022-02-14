@@ -15,9 +15,9 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.dropin.lifecycle.attachCreated
-import com.mapbox.navigation.dropin.lifecycle.attachResumed
-import com.mapbox.navigation.dropin.lifecycle.attachStarted
+import com.mapbox.navigation.dropin.extensions.attachCreated
+import com.mapbox.navigation.dropin.extensions.attachResumed
+import com.mapbox.navigation.dropin.extensions.attachStarted
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.DropInNavigationViewBinding
 import com.mapbox.navigation.qa_test_app.lifecycle.backstack.BackStackBinding

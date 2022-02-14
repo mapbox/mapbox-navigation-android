@@ -7,12 +7,12 @@ import androidx.transition.TransitionManager
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
-import com.mapbox.navigation.dropin.lifecycle.DropInViewBinder
+import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.DropInRoutePreviewBinding
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class RoutePreviewViewBinder(val routes: List<DirectionsRoute>) : DropInViewBinder {
+class RoutePreviewViewBinder(val routes: List<DirectionsRoute>) : UIBinder {
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
             viewGroup,

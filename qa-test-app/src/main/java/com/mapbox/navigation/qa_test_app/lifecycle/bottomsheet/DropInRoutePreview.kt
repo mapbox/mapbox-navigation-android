@@ -12,7 +12,7 @@ import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.dropin.lifecycle.DropInComponent
+import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInReplayComponent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,7 +27,7 @@ class DropInRoutePreview(
     private val routesContainer: LinearLayout,
     private val clear: ImageView,
     private val startNavigation: View
-) : DropInComponent() {
+) : UIComponent() {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun View.clicks() = callbackFlow {

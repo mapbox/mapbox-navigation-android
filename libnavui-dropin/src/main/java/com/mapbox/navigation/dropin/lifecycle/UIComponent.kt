@@ -9,12 +9,12 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 
 /**
- * Using the [DropInComponent] gives you access to a [coroutineScope]. All coroutines that you
+ * Using the [UIComponent] gives you access to a [coroutineScope]. All coroutines that you
  * launch inside onAttached will be canceled when the observer is detached. You do not need to
  * implement onDetached for your flowable components.
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-open class DropInComponent : MapboxNavigationObserver {
+open class UIComponent : MapboxNavigationObserver {
 
     lateinit var coroutineScope: CoroutineScope
 
