@@ -122,7 +122,7 @@ class DropInNavigationView @JvmOverloads constructor(
     }
 }
 
-private fun recursiveUnwrap(context: Context): Context =
+private tailrec fun recursiveUnwrap(context: Context): Context =
     if (context !is Activity && context is ContextWrapper) {
         recursiveUnwrap(context.baseContext)
     } else {

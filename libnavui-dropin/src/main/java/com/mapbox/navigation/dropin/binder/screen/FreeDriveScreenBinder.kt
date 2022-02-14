@@ -24,6 +24,7 @@ internal class FreeDriveScreenBinder(
 
     private val cameraState = navigationViewContext.viewModel.cameraState
     private val speedLimitBinder = navigationViewContext.uiBinders.speedLimit
+    private val roadNameBinder = navigationViewContext.uiBinders.roadName
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
@@ -52,6 +53,7 @@ internal class FreeDriveScreenBinder(
             speedLimitBinder.bind(binding.speedLimitLayout),
             DropInLocationPuck(locationState, navigationViewContext.mapView),
             DropInReplayButton(navigationViewContext, binding.startNavigation),
+            roadNameBinder.bind(binding.roadNameLayout),
         )
     }
 }
