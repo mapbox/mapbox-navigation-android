@@ -15,7 +15,7 @@ import com.mapbox.navigation.dropin.component.location.DropInLocationPuck
 import com.mapbox.navigation.dropin.component.location.DropInLocationState
 import com.mapbox.navigation.dropin.component.routeline.DropInRouteLine
 import com.mapbox.navigation.dropin.component.speedlimit.DropInSpeedLimitComponent
-import com.mapbox.navigation.dropin.databinding.DropInStateActiveGuidanceBinding
+import com.mapbox.navigation.dropin.databinding.MapboxScreenActiveGuidanceLayoutBinding
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class ActiveGuidanceScreenBinder(
@@ -27,11 +27,11 @@ internal class ActiveGuidanceScreenBinder(
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
             viewGroup,
-            R.layout.drop_in_state_active_guidance,
+            R.layout.mapbox_screen_active_guidance_layout,
             viewGroup.context
         )
         TransitionManager.go(scene)
-        val binding = DropInStateActiveGuidanceBinding.bind(viewGroup)
+        val binding = MapboxScreenActiveGuidanceLayoutBinding.bind(viewGroup)
 
         cameraState.cameraMode.value = DropInCameraMode.FOLLOWING
 
