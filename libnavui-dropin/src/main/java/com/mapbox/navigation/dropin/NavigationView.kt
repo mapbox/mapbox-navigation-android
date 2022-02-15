@@ -43,9 +43,6 @@ import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.dropin.component.UIComponent
 import com.mapbox.navigation.dropin.component.camera.CameraViewModel
-import com.mapbox.navigation.dropin.component.maneuver.CustomManeuverUIComponent
-import com.mapbox.navigation.dropin.component.maneuver.ManeuverViewModel
-import com.mapbox.navigation.dropin.component.maneuver.MapboxManeuverUIComponent
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationStateAction
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationStateViewModel
 import com.mapbox.navigation.dropin.component.recenter.CustomRecenterUIComponent
@@ -68,7 +65,6 @@ import com.mapbox.navigation.dropin.component.tripprogress.MapboxTripProgressUIC
 import com.mapbox.navigation.dropin.component.tripprogress.TripProgressViewModel
 import com.mapbox.navigation.dropin.databinding.MapboxLayoutDropInViewBinding
 import com.mapbox.navigation.dropin.util.MapboxDropInUtils
-import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
 import com.mapbox.navigation.ui.maps.camera.view.MapboxRecenterButton
 import com.mapbox.navigation.ui.maps.camera.view.MapboxRouteOverviewButton
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
@@ -235,29 +231,6 @@ class NavigationView @JvmOverloads constructor(
             viewModel = routeArrowViewModel
         )
         uiComponents.add(routeArrowUIComponent)
-    }
-
-    private fun bindManeuverView(view: View?) {
-        val maneuverComponent = if (view == null) {
-            val maneuverView = MapboxManeuverView(context, null)
-            binding.maneuverContainer.addView(maneuverView)
-            val maneuverViewModel = ViewModelProvider(
-                viewModelStoreOwner,
-                ManeuverViewModel.Factory(navigationViewOptions.distanceFormatter)
-            )[ManeuverViewModel::class.java]
-            MapboxManeuverUIComponent(
-                container = binding.maneuverContainer,
-                view = maneuverView,
-                viewModel = maneuverViewModel,
-                lifecycleOwner = this
-            )
-        } else {
-            binding.maneuverContainer.addView(view)
-            CustomManeuverUIComponent(
-                container = binding.maneuverContainer
-            )
-        }
-        uiComponents.add(maneuverComponent)
     }
 
     private fun bindRecenterButtonView(view: View?) {
@@ -541,7 +514,6 @@ class NavigationView @JvmOverloads constructor(
         binding.mapContainer.addView(mapView)
         bindRouteLine()
         bindRouteArrow()
-        bindManeuverView(viewProvider.maneuverProvider?.invoke())
         bindSoundButtonView(viewProvider.soundButtonProvider?.invoke())
         bindTripProgressView(viewProvider.tripProgressProvider?.invoke())
         bindRecenterButtonView(viewProvider.recenterButtonProvider?.invoke())

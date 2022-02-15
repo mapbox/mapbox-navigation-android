@@ -22,6 +22,7 @@ internal class ActiveGuidanceScreenBinder(
 ) : UIBinder {
 
     private val cameraState = navigationViewContext.viewModel.cameraState
+    private val maneuverBinder = navigationViewContext.uiBinders.maneuver
     private val speedLimitBinder = navigationViewContext.uiBinders.speedLimit
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
@@ -44,7 +45,8 @@ internal class ActiveGuidanceScreenBinder(
                 cameraState,
                 navigationViewContext.mapView
             ),
-            speedLimitBinder.bind(binding.speedLimitView),
+            maneuverBinder.bind(binding.guidanceLayout),
+            speedLimitBinder.bind(binding.speedLimitLayout),
             DropInLocationPuck(locationState, navigationViewContext.mapView),
         )
     }
