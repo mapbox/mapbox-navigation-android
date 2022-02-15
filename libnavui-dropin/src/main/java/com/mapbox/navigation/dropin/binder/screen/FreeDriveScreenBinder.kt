@@ -16,7 +16,7 @@ import com.mapbox.navigation.dropin.component.location.DropInLocationState
 import com.mapbox.navigation.dropin.component.replay.DropInReplayButton
 import com.mapbox.navigation.dropin.component.routeline.DropInRouteLine
 import com.mapbox.navigation.dropin.component.speedlimit.DropInSpeedLimitComponent
-import com.mapbox.navigation.dropin.databinding.DropInStateFreeDriveBinding
+import com.mapbox.navigation.dropin.databinding.MapboxScreenFreeDriveLayoutBinding
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class FreeDriveScreenBinder(
@@ -28,11 +28,11 @@ internal class FreeDriveScreenBinder(
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
             viewGroup,
-            R.layout.drop_in_state_free_drive,
+            R.layout.mapbox_screen_free_drive_layout,
             viewGroup.context
         )
         TransitionManager.go(scene)
-        val binding = DropInStateFreeDriveBinding.bind(viewGroup)
+        val binding = MapboxScreenFreeDriveLayoutBinding.bind(viewGroup)
 
         cameraState.cameraMode.value = DropInCameraMode.OVERVIEW
 
