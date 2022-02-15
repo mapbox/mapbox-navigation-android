@@ -15,9 +15,8 @@
         app:layout_constraintTop_toTopOf="parent"
         />
 
-    <com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
+    <FrameLayout
         android:id="@+id/speedLimitView"
-        style="@style/MapboxStyleSpeedLimit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"

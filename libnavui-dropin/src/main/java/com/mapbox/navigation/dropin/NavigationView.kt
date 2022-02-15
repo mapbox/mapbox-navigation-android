@@ -63,9 +63,6 @@ import com.mapbox.navigation.dropin.component.routeoverview.RouteOverviewViewMod
 import com.mapbox.navigation.dropin.component.sound.CustomSoundButtonUIComponent
 import com.mapbox.navigation.dropin.component.sound.MapboxSoundButtonUIComponent
 import com.mapbox.navigation.dropin.component.sound.SoundButtonViewModel
-import com.mapbox.navigation.dropin.component.speedlimit.CustomSpeedLimitUIComponent
-import com.mapbox.navigation.dropin.component.speedlimit.MapboxSpeedLimitUIComponent
-import com.mapbox.navigation.dropin.component.speedlimit.SpeedLimitViewModel
 import com.mapbox.navigation.dropin.component.tripprogress.CustomTripProgressUIComponent
 import com.mapbox.navigation.dropin.component.tripprogress.MapboxTripProgressUIComponent
 import com.mapbox.navigation.dropin.component.tripprogress.TripProgressViewModel
@@ -75,7 +72,6 @@ import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
 import com.mapbox.navigation.ui.maps.camera.view.MapboxRecenterButton
 import com.mapbox.navigation.ui.maps.camera.view.MapboxRouteOverviewButton
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
-import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
 import com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
 import com.mapbox.navigation.ui.utils.internal.extensions.unwrapIfNeeded
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
@@ -329,29 +325,6 @@ class NavigationView @JvmOverloads constructor(
         uiComponents.add(soundComponent)
     }
 
-    private fun bindSpeedLimitView(view: View?) {
-        val speedLimitComponent = if (view == null) {
-            val speedLimitView = MapboxSpeedLimitView(context, null)
-            binding.speedLimitContainer.addView(speedLimitView)
-            val speedLimitViewModel = ViewModelProvider(
-                viewModelStoreOwner,
-                SpeedLimitViewModel.Factory(navigationViewOptions.speedLimitFormatter)
-            )[SpeedLimitViewModel::class.java]
-            MapboxSpeedLimitUIComponent(
-                container = binding.speedLimitContainer,
-                view = speedLimitView,
-                viewModel = speedLimitViewModel,
-                lifecycleOwner = this
-            )
-        } else {
-            binding.speedLimitContainer.addView(view)
-            CustomSpeedLimitUIComponent(
-                container = binding.speedLimitContainer
-            )
-        }
-        uiComponents.add(speedLimitComponent)
-    }
-
     private fun bindTripProgressView(view: View?) {
         val tripProgressComponent = if (view == null) {
             val tripProgressView = MapboxTripProgressView(context, null)
@@ -569,7 +542,6 @@ class NavigationView @JvmOverloads constructor(
         bindRouteLine()
         bindRouteArrow()
         bindManeuverView(viewProvider.maneuverProvider?.invoke())
-        bindSpeedLimitView(viewProvider.speedLimitProvider?.invoke())
         bindSoundButtonView(viewProvider.soundButtonProvider?.invoke())
         bindTripProgressView(viewProvider.tripProgressProvider?.invoke())
         bindRecenterButtonView(viewProvider.recenterButtonProvider?.invoke())

@@ -39,6 +39,9 @@
     <string name="title_navigation_view" translatable="false">Navigation View test</string>
     <string name="description_navigation_view" translatable="false">Utility for testing Drop-In UI.</string>
 
+    <string name="title_navigation_view_customized" translatable="false">Customized navigation View test</string>
+    <string name="description_navigation_view_customized" translatable="false">Utility for testing customized Drop-In UI.</string>
+
     <string name="title_navigation_view_fragment" translatable="false">Navigation View in a Fragment test</string>
     <string name="description_navigation_view_fragment" translatable="false">Utility for testing Drop-In UI in a fragment.</string>
 

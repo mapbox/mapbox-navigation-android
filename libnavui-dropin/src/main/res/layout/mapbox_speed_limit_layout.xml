@@ -6,21 +6,13 @@
     android:layout_height="match_parent"
     tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
 
-    <FrameLayout
-        android:id="@+id/speedLimitLayout"
+    <com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
+        android:id="@+id/speedLimitView"
+        style="@style/MapboxStyleSpeedLimit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/startNavigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:text="Start Navigation"
-        android:background="@color/colorOnPrimary"/>
 </merge>

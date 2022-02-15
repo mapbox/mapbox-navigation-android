@@ -4,7 +4,6 @@ import android.view.ViewGroup
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
-import com.mapbox.navigation.dropin.lifecycle.UICoordinator
 
 /**
  * This interface works with the [UICoordinator]. Implementations of this class represent

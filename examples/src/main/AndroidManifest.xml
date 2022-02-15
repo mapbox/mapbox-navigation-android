@@ -101,6 +101,11 @@
     </activity>
 
     <activity
+        android:name=".MapboxNavigationViewCustomizedActivity"
+        android:label="@string/title_navigation_view">
+    </activity>
+
+    <activity
         android:name=".MapboxNavigationViewFragmentActivity"
         android:label="@string/title_navigation_view"/>
 
