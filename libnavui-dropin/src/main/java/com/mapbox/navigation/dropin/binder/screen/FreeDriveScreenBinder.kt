@@ -39,7 +39,11 @@ internal class FreeDriveScreenBinder(
         val locationState = DropInLocationState()
         return navigationListOf(
             locationState,
-            DropInRouteLine(navigationViewContext, locationState),
+            DropInRouteLine(
+                navigationViewContext.mapView,
+                navigationViewContext.routeLineOptions,
+                locationState
+            ),
             DropInNavigationCamera(
                 locationState,
                 navigationViewContext.viewModel.cameraState,
