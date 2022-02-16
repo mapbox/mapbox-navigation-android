@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="MapboxStyleCameraModeButton">
+        <item name="android:elevation">0dp</item>
+        <item name="android:background">@drawable/mapbox_bg_button</item>
+        <item name="cameraModeButtonIconTint">@color/mapbox_button_fg_color</item>
+        <item name="cameraModeButtonFollowIcon">@drawable/mapbox_ic_camera_follow</item>
+        <item name="cameraModeButtonOverviewIcon">@drawable/mapbox_ic_camera_overview</item>
+        <item name="cameraModeButtonTextAppearance">@style/MapboxStyleCameraModeButton.TextAppearance</item>
+        <item name="cameraModeButtonFollowText">@string/mapbox_route_follow</item>
+        <item name="cameraModeButtonOverviewText">@string/mapbox_route_overview</item>
+    </style>
+
+    <style name="MapboxStyleCameraModeButton.TextAppearance">
+        <item name="android:textColor">@color/mapbox_button_fg_color</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+</resources>

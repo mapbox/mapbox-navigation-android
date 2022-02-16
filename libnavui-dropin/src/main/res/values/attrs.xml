@@ -4,4 +4,19 @@
         <!-- Defines the mapbox access token. -->
         <attr name="accessToken" format="string"/>
     </declare-styleable>
+
+    <declare-styleable name="MapboxCameraModeButton">
+        <!-- Tint to apply to the icon drawable. -->
+        <attr name="cameraModeButtonIconTint" format="reference|color" />
+        <!-- Follow mode icon drawable -->
+        <attr name="cameraModeButtonFollowIcon" format="reference" />
+        <!-- Overview mode icon drawable -->
+        <attr name="cameraModeButtonOverviewIcon" format="reference" />
+        <!-- Appearance of a text message. -->
+        <attr name="cameraModeButtonTextAppearance" format="reference" />
+        <!-- Follow mode text -->
+        <attr name="cameraModeButtonOverviewText" format="string" localization="suggested" />
+        <!-- Overview mode text -->
+        <attr name="cameraModeButtonFollowText" format="string" localization="suggested" />
+    </declare-styleable>
 </resources>

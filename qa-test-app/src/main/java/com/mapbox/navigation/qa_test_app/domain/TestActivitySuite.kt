@@ -6,6 +6,7 @@ import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.utils.startActivity
 import com.mapbox.navigation.qa_test_app.view.AlternativeRouteActivity
 import com.mapbox.navigation.qa_test_app.view.AppLifecycleActivity
+import com.mapbox.navigation.qa_test_app.view.DropInButtonsActivity
 import com.mapbox.navigation.qa_test_app.view.DropInNavigationViewActivity
 import com.mapbox.navigation.qa_test_app.view.FeedbackActivity
 import com.mapbox.navigation.qa_test_app.view.IconsPreviewActivity
@@ -102,6 +103,12 @@ object TestActivitySuite {
             R.string.icons_preview_activity_description
         ) { activity ->
             activity.startActivity<IconsPreviewActivity>()
+        },
+        TestActivityDescription(
+            "Drop In Buttons",
+            R.string.drop_in_buttons_activity_description
+        ) { activity ->
+            activity.startActivity<DropInButtonsActivity>()
         },
     )
 }
