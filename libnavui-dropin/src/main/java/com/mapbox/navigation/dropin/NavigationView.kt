@@ -57,9 +57,6 @@ import com.mapbox.navigation.dropin.component.routeline.RouteLineViewModelFactor
 import com.mapbox.navigation.dropin.component.routeoverview.CustomRouteOverviewUIComponent
 import com.mapbox.navigation.dropin.component.routeoverview.MapboxRouteOverviewUIComponent
 import com.mapbox.navigation.dropin.component.routeoverview.RouteOverviewViewModel
-import com.mapbox.navigation.dropin.component.sound.CustomSoundButtonUIComponent
-import com.mapbox.navigation.dropin.component.sound.MapboxSoundButtonUIComponent
-import com.mapbox.navigation.dropin.component.sound.SoundButtonViewModel
 import com.mapbox.navigation.dropin.component.tripprogress.CustomTripProgressUIComponent
 import com.mapbox.navigation.dropin.component.tripprogress.MapboxTripProgressUIComponent
 import com.mapbox.navigation.dropin.component.tripprogress.TripProgressViewModel
@@ -72,7 +69,6 @@ import com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
 import com.mapbox.navigation.ui.utils.internal.extensions.unwrapIfNeeded
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
 import com.mapbox.navigation.ui.utils.internal.lifecycle.keepExecutingWhenStarted
-import com.mapbox.navigation.ui.voice.view.MapboxSoundButton
 import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -274,28 +270,6 @@ class NavigationView @JvmOverloads constructor(
             )
         }
         uiComponents.add(routeOverviewComponent)
-    }
-
-    private fun bindSoundButtonView(view: View?) {
-        val soundComponent = if (view == null) {
-            val soundButtonView = MapboxSoundButton(context, null)
-            binding.volumeContainer.addView(soundButtonView)
-            val soundButtonViewModel = ViewModelProvider(
-                viewModelStoreOwner
-            )[SoundButtonViewModel::class.java]
-            MapboxSoundButtonUIComponent(
-                container = binding.volumeContainer,
-                view = soundButtonView,
-                viewModel = soundButtonViewModel,
-                lifeCycleOwner = this
-            )
-        } else {
-            binding.volumeContainer.addView(view)
-            CustomSoundButtonUIComponent(
-                container = binding.volumeContainer
-            )
-        }
-        uiComponents.add(soundComponent)
     }
 
     private fun bindTripProgressView(view: View?) {
@@ -514,7 +488,6 @@ class NavigationView @JvmOverloads constructor(
         binding.mapContainer.addView(mapView)
         bindRouteLine()
         bindRouteArrow()
-        bindSoundButtonView(viewProvider.soundButtonProvider?.invoke())
         bindTripProgressView(viewProvider.tripProgressProvider?.invoke())
         bindRecenterButtonView(viewProvider.recenterButtonProvider?.invoke())
         bindRouteOverviewButtonView(viewProvider.recenterButtonProvider?.invoke())
