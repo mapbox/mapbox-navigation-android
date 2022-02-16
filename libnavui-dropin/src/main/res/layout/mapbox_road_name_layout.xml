@@ -1,0 +1,19 @@
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    >
+
+    <com.mapbox.navigation.ui.maps.roadname.view.MapboxRoadNameView
+        android:id="@+id/roadNameView"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:background="@drawable/mapbox_road_name_view_background"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:maxLines="1"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="2dp"
+        android:visibility="invisible"/>
+
+</merge>

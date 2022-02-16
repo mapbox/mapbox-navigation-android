@@ -25,6 +25,7 @@ internal class ActiveGuidanceScreenBinder(
     private val cameraState = navigationViewContext.viewModel.cameraState
     private val maneuverBinder = navigationViewContext.uiBinders.maneuver
     private val speedLimitBinder = navigationViewContext.uiBinders.speedLimit
+    private val roadNameBinder = navigationViewContext.uiBinders.roadName
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
@@ -54,6 +55,7 @@ internal class ActiveGuidanceScreenBinder(
             maneuverBinder.bind(binding.guidanceLayout),
             speedLimitBinder.bind(binding.speedLimitLayout),
             DropInLocationPuck(locationState, navigationViewContext.mapView),
+            roadNameBinder.bind(binding.roadNameLayout)
         )
     }
 }

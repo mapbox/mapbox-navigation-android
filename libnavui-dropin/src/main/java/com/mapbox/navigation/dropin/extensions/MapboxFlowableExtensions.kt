@@ -1,3 +1,5 @@
+@file:JvmName("MapboxNavigationEx")
+
 package com.mapbox.navigation.dropin.extensions
 
 import android.location.Location
