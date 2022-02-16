@@ -25,6 +25,7 @@ import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
 import com.mapbox.navigation.dropin.extensions.attachStarted
 import com.mapbox.navigation.ui.maps.NavigationStyles
+import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
 
@@ -82,6 +83,16 @@ class DropInNavigationView @JvmOverloads constructor(
      */
     fun customize(options: MapboxRouteLineOptions) {
         navigationContext.routeLineOptions = options
+    }
+
+    /**
+     * Provide custom route arrow options to override the default options. This must be called
+     * before your activity or fragment's onStart() in order to take effect.
+     *
+     * @param options the [RouteArrowOptions] to use.
+     */
+    fun customize(options: RouteArrowOptions) {
+        navigationContext.routeArrowOptions = options
     }
 
     init {
