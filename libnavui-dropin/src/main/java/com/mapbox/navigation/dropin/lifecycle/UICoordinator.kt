@@ -5,6 +5,7 @@ import androidx.annotation.CallSuper
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.dropin.binder.Binder
 import com.mapbox.navigation.dropin.binder.UIBinder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -16,8 +17,8 @@ import kotlinx.coroutines.launch
  * attached at a time for the [ViewGroup].
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-abstract class UICoordinator(
-    private val viewGroup: ViewGroup
+abstract class UICoordinator<T : ViewGroup>(
+    private val viewGroup: T
 ) : UIComponent() {
 
     @CallSuper
@@ -46,5 +47,5 @@ abstract class UICoordinator(
      * Create your flowable [UIBinder]. This allows you to use a flowable state to
      * determine what is being shown in the [viewGroup].
      */
-    abstract fun MapboxNavigation.flowViewBinders(): Flow<UIBinder>
+    abstract fun MapboxNavigation.flowViewBinders(): Flow<Binder<T>>
 }

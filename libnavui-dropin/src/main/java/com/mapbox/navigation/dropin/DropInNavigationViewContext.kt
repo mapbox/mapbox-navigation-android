@@ -1,8 +1,7 @@
 package com.mapbox.navigation.dropin
 
-import android.view.ViewGroup
+import android.content.Context
 import androidx.lifecycle.LifecycleOwner
-import com.mapbox.maps.MapView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 
@@ -12,14 +11,12 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
  * If your data should survive orientation changes, place it inside [DropInNavigationViewModel].
  */
 internal class DropInNavigationViewContext(
+    val context: Context,
     val lifecycleOwner: LifecycleOwner,
     val viewModel: DropInNavigationViewModel,
-    val mapView: MapView,
-    val viewGroup: ViewGroup,
-    val infoPanelViewGroup: ViewGroup,
 ) {
     var uiBinders = NavigationUIBinders()
-    var routeLineOptions: MapboxRouteLineOptions = MapboxRouteLineOptions.Builder(viewGroup.context)
+    var routeLineOptions: MapboxRouteLineOptions = MapboxRouteLineOptions.Builder(context)
         .withRouteLineResources(RouteLineResources.Builder().build())
         .withRouteLineBelowLayerId("road-label-navigation")
         .build()

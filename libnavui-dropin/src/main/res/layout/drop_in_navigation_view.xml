@@ -1,37 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-  <com.mapbox.maps.MapView
-      android:id="@+id/mapView"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"/>
+    <com.mapbox.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
-  <androidx.constraintlayout.widget.ConstraintLayout
-      android:id="@+id/viewGroup"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      />
+    <FrameLayout
+        android:id="@+id/guidanceLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top" />
 
-  <View
-      android:id="@+id/shadow"
-      android:layout_width="match_parent"
-      android:layout_height="16dp"
-      android:background="@drawable/mapbox_bg_info_panel_shadow"
-      app:layout_anchor="@id/infoPanelViewGroup" />
+    <FrameLayout
+        android:id="@+id/speedLimitLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_anchor="@id/guidanceLayout" />
 
-  <FrameLayout
-      android:id="@+id/infoPanelViewGroup"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:background="@drawable/mapbox_bg_info_panel"
-      app:behavior_hideable="false"
-      app:behavior_peekHeight="100dp"
-      app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
+    <LinearLayout
+        android:id="@+id/actionListLayout"
+        android:layout_width="@dimen/mapbox_actionList_width"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="@dimen/mapbox_actionList_padding" />
+
+    <View
+        android:id="@+id/shadow"
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:background="@drawable/mapbox_bg_info_panel_shadow"
+        app:layout_anchor="@id/info_panel_layout" />
+
+    <FrameLayout
+        android:id="@+id/info_panel_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/mapbox_bg_info_panel"
+        app:behavior_hideable="false"
+        app:behavior_peekHeight="100dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

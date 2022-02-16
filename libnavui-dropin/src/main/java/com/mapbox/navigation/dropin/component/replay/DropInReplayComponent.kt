@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 
@@ -39,14 +38,5 @@ class DropInReplayComponent : MapboxNavigationObserver {
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.mapboxReplayer.finish()
-    }
-
-    fun startSimulation() {
-        with(MapboxNavigationApp.current() ?: return) {
-            mapboxReplayer.clearEvents()
-            resetTripSession()
-            mapboxReplayer.pushRealLocation(navigationOptions.applicationContext, 0.0)
-            mapboxReplayer.play()
-        }
     }
 }

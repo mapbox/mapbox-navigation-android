@@ -26,7 +26,7 @@ internal class FreeDriveInfoPanelBinder(
         TransitionManager.go(scene)
         val binding = MapboxInfoPanelFreeDriveLayoutBinding.bind(viewGroup)
         return navigationListOf(
-            InfoPanelFreeDriveComponent(binding.root)
+            InfoPanelFreeDriveComponent(navigationViewContext, binding.startNavigation)
         )
     }
 }

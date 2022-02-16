@@ -26,7 +26,7 @@ internal class ActiveGuidanceInfoPanelBinder(
         TransitionManager.go(scene)
         val binding = MapboxInfoPanelActiveGuidanceLayoutBinding.bind(viewGroup)
         return navigationListOf(
-            InfoPanelActiveGuidanceComponent(binding.root)
+            InfoPanelActiveGuidanceComponent(navigationViewContext, binding.endNavigation)
         )
     }
 }

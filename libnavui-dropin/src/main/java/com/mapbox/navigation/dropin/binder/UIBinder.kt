@@ -11,14 +11,22 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
  * deciding what components should be part of the view.
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-interface UIBinder {
+interface Binder<T> {
 
     /**
      * Triggered when this view binder instance is attached. The [viewGroup] returns a
      * [MapboxNavigationObserver] which gives this view a simple lifecycle.
      */
-    fun bind(viewGroup: ViewGroup): MapboxNavigationObserver
+    fun bind(value: T): MapboxNavigationObserver
 }
+
+/**
+ * This interface works with the [UICoordinator]. Implementations of this class represent
+ * are responsible for transitioning a view(s) into the [ViewGroup]. They are also responsible for
+ * deciding what components should be part of the view.
+ */
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+interface UIBinder : Binder<ViewGroup>
 
 /**
  * When returning an observer from [UIBinder.bind], you can use this extension to return

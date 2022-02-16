@@ -7,20 +7,22 @@ import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.R
 
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DropInLocationPuck(
-    private val locationState: DropInLocationState,
     private val mapView: MapView
 ) : MapboxNavigationObserver {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        val locationStateManager = MapboxNavigationApp.getObserver(LocationBehavior::class)
+
         mapView.getMapboxMap().getStyle {
             mapView.location.apply {
-                setLocationProvider(locationState.navigationLocationProvider)
+                setLocationProvider(locationStateManager.navigationLocationProvider)
                 enabled = true
                 locationPuck = LocationPuck2D(
                     bearingImage = ContextCompat.getDrawable(
