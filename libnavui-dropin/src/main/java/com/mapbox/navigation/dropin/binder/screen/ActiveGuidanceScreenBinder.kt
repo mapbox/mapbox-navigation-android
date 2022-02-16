@@ -41,7 +41,11 @@ internal class ActiveGuidanceScreenBinder(
         return navigationListOf(
             locationState,
             ActiveGuidanceActionBinder().bind(binding.actionList),
-            DropInRouteLine(navigationViewContext, locationState),
+            DropInRouteLine(
+                navigationViewContext.mapView,
+                navigationViewContext.routeLineOptions,
+                locationState
+            ),
             DropInNavigationCamera(
                 locationState,
                 cameraState,

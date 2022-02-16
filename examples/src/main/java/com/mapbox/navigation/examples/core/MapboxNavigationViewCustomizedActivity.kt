@@ -14,12 +14,23 @@ import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityNavigationViewCustomizedBinding
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.util.Locale
 
 class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
+
+    private val routeLineOptions: MapboxRouteLineOptions by lazy {
+        MapboxRouteLineOptions.Builder(this)
+            .withRouteLineResources(RouteLineResources.Builder().build())
+            .withRouteLineBelowLayerId("road-label-navigation")
+            .withVanishingRouteLineEnabled(true)
+            .displaySoftGradientForTraffic(true)
+            .build()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +42,8 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
                 speedLimit = CustomSpeedLimitViewBinder()
             )
         )
+
+        binding.navigationView.customize(routeLineOptions)
     }
 }
 

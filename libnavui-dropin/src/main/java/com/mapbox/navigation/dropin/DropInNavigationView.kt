@@ -19,6 +19,7 @@ import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
 import com.mapbox.navigation.dropin.extensions.attachStarted
 import com.mapbox.navigation.ui.maps.NavigationStyles
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -57,7 +58,7 @@ class DropInNavigationView @JvmOverloads constructor(
         lifecycleOwner = this,
         viewModel = viewModel,
         mapView = binding.mapView,
-        viewGroup = binding.viewGroup,
+        viewGroup = binding.viewGroup
     )
 
     /**
@@ -65,6 +66,16 @@ class DropInNavigationView @JvmOverloads constructor(
      */
     fun customize(navigationUIBinders: NavigationUIBinders) {
         navigationContext.uiBinders = navigationUIBinders
+    }
+
+    /**
+     * Provide custom route line options to override the default options. This must be called
+     * before your activity or fragment's onStart() in order to take effect.
+     *
+     * @param options the [MapboxRouteLineOptions] to use.
+     */
+    fun customize(options: MapboxRouteLineOptions) {
+        navigationContext.routeLineOptions = options
     }
 
     init {
