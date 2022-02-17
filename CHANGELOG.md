@@ -8,6 +8,20 @@ Mapbox welcomes participation and contributions from everyone.
 
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.3.0-rc.1 - February 17, 2022
+
+#### Bug fixes and improvements
+- Fixed using `POST` for long requests [#5480](https://github.com/mapbox/mapbox-navigation-android/pull/5480)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.3.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.3.0))
+- Mapbox Navigation Native `v88.0.0`
+- Mapbox Core Common `v21.1.0`
+- Mapbox Java `v6.3.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.3.0-beta.1))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
+
 ## Mapbox Navigation SDK 2.3.0-beta.3 - February 11, 2022
 ### Changelog
 [Changes between v2.3.0-beta.2 and v2.3.0-beta.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.3.0-beta.2...v2.3.0-beta.3)
