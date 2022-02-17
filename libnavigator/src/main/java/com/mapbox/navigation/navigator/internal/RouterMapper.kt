@@ -10,6 +10,8 @@ fun RouterOrigin.mapToSdkRouteOrigin(): com.mapbox.navigation.base.route.RouterO
     return when (this) {
         RouterOrigin.ONLINE -> Offboard
         RouterOrigin.ONBOARD -> Onboard
+        // not actual till integrate sdk Router to NN
+        RouterOrigin.CUSTOM -> com.mapbox.navigation.base.route.RouterOrigin.Custom()
     }
 }
 
