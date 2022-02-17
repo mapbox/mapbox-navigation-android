@@ -12,10 +12,16 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import com.mapbox.maps.extension.style.style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.binder.UIBinder
+import com.mapbox.navigation.dropin.coordinator.ActionListCoordinator
+import com.mapbox.navigation.dropin.coordinator.GuidanceCoordinator
+import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
+import com.mapbox.navigation.dropin.coordinator.MapCoordinator
+import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
 import com.mapbox.navigation.dropin.extensions.attachStarted
 import com.mapbox.navigation.ui.maps.NavigationStyles
@@ -56,11 +62,9 @@ class DropInNavigationView @JvmOverloads constructor(
      * to survive orientation changes, put it in the [DropInNavigationViewModel].
      */
     private val navigationContext = DropInNavigationViewContext(
+        context = context,
         lifecycleOwner = this,
         viewModel = viewModel,
-        mapView = binding.mapView,
-        viewGroup = binding.viewGroup,
-        infoPanelViewGroup = binding.infoPanelViewGroup,
     )
 
     /**
@@ -81,15 +85,12 @@ class DropInNavigationView @JvmOverloads constructor(
     }
 
     init {
-
-        /**
-         * Load the map as soon as possible.
-         */
-        binding.mapView.getMapboxMap().loadStyleUri(
-            NavigationStyles.NAVIGATION_DAY_STYLE
-        ) {
-            // no op
-        }
+        binding.mapView.getMapboxMap().loadStyle(
+            style(NavigationStyles.NAVIGATION_DAY_STYLE) {
+                // TODO allow for customization.
+                // +skyLayer(...)
+            }
+        )
 
         /**
          * Default setup for MapboxNavigationApp. The developer can customize this by
@@ -113,8 +114,11 @@ class DropInNavigationView @JvmOverloads constructor(
          * Single point of entry for the Mapbox Navigation View.
          */
         attachStarted(
-            DropInNavigationViewCoordinator(navigationContext),
-            DropInInfoPanelCoordinator(navigationContext),
+            MapCoordinator(navigationContext, binding.mapView),
+            GuidanceCoordinator(navigationContext, binding.guidanceLayout),
+            InfoPanelCoordinator(navigationContext, binding.infoPanelLayout),
+            ActionListCoordinator(navigationContext, binding.actionListLayout),
+            SpeedLimitCoordinator(navigationContext, binding.speedLimitLayout),
         )
     }
 

@@ -18,7 +18,7 @@ import com.mapbox.navigation.utils.internal.LoggerProvider.logger
 
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class DropInLocationState : MapboxNavigationObserver {
+class LocationBehavior : MapboxNavigationObserver {
 
     val navigationLocationProvider = NavigationLocationProvider()
 

@@ -21,7 +21,7 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.dropin.component.location.DropInLocationState
+import com.mapbox.navigation.dropin.component.location.LocationBehavior
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
@@ -36,7 +36,6 @@ import kotlinx.coroutines.launch
 internal class DropInRouteLine(
     private val mapView: MapView,
     private val options: MapboxRouteLineOptions,
-    val dropInLocationState: DropInLocationState,
 ) : MapboxNavigationObserver {
 
     private val routeClickPadding = Utils.dpToPx(30f)
@@ -82,8 +81,9 @@ internal class DropInRouteLine(
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         // Setup a long press to find a route.
+        val locationStateManager = MapboxNavigationApp.getObserver(LocationBehavior::class)
         mapView.gestures.addOnMapLongClickListener { point ->
-            val originLocation = dropInLocationState.locationLiveData.value
+            val originLocation = locationStateManager.locationLiveData.value
             findRoute(originLocation, point)
             false
         }

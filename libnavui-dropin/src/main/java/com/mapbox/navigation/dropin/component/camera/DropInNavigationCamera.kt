@@ -15,8 +15,9 @@ import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.dropin.component.location.DropInLocationState
+import com.mapbox.navigation.dropin.component.location.LocationBehavior
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
@@ -26,7 +27,6 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DropInNavigationCamera(
-    private val locationState: DropInLocationState,
     private val cameraState: DropInCameraState,
     private val mapView: MapView,
 ) : UIComponent() {
@@ -61,6 +61,7 @@ class DropInNavigationCamera(
 
     @SuppressLint("MissingPermission")
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        val locationStateManager = MapboxNavigationApp.getObserver(LocationBehavior::class)
         super.onAttached(mapboxNavigation)
         mapView.gestures.addOnMoveListener(triggerIdleCameraOnMoveListener)
         viewportDataSource = MapboxNavigationViewportDataSource(
@@ -76,7 +77,7 @@ class DropInNavigationCamera(
         mapView.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
 
         coroutineScope.launch {
-            locationState.locationLiveData.asFlow().collect {
+            locationStateManager.locationLiveData.asFlow().collect {
                 // TODO we don't really want to do this. isLocationInitialized is also attempting
                 //    to create the correct initialization experience.
                 updateCamera(cameraState.cameraMode(), it)
