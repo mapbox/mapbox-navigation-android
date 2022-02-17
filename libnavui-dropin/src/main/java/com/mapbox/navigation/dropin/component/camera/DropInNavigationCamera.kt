@@ -17,6 +17,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.dropin.component.camera.DropInCameraState.CameraUpdateEvent
 import com.mapbox.navigation.dropin.component.location.LocationBehavior
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
@@ -86,6 +87,14 @@ class DropInNavigationCamera(
 
         cameraState.cameraOptions.value?.let { builder ->
             mapView.getMapboxMap().setCamera(builder.build())
+        }
+
+        cameraState.cameraUpdateEvent.observe {
+            when (it) {
+                is CameraUpdateEvent.EaseTo -> mapView.camera.easeTo(it.cameraOptions)
+                is CameraUpdateEvent.FlyTo -> mapView.camera.flyTo(it.cameraOptions)
+                is CameraUpdateEvent.SetTo -> mapView.getMapboxMap().setCamera(it.cameraOptions)
+            }
         }
 
         coroutineScope.launch {

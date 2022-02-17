@@ -7,6 +7,9 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 /**
  * Using the [UIComponent] gives you access to a [coroutineScope]. All coroutines that you
@@ -26,5 +29,9 @@ open class UIComponent : MapboxNavigationObserver {
     @CallSuper
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         coroutineScope.cancel()
+    }
+
+    protected inline fun <T> Flow<T>.observe(crossinline action: suspend (value: T) -> Unit) {
+        coroutineScope.launch { collect(action) }
     }
 }

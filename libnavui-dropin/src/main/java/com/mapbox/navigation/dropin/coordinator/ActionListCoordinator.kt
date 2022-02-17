@@ -6,6 +6,7 @@ import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.binder.action.ActiveGuidanceActionBinder
 import com.mapbox.navigation.dropin.binder.action.EmptyActionBinder
+import com.mapbox.navigation.dropin.binder.action.FreeDriveActionBinder
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.lifecycle.UICoordinator
 import kotlinx.coroutines.flow.Flow
@@ -26,7 +27,7 @@ internal class ActionListCoordinator(
                 NavigationState.RoutePreview,
                 NavigationState.ActiveNavigation -> ActiveGuidanceActionBinder()
                 NavigationState.Arrival,
-                NavigationState.FreeDrive,
+                NavigationState.FreeDrive -> FreeDriveActionBinder()
                 NavigationState.Empty -> EmptyActionBinder()
             }
         }
