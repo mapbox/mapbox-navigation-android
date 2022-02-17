@@ -49,7 +49,8 @@ internal object NavigatorLoader {
         val router = RouterFactory.build(
             RouterType.HYBRID,
             cache,
-            historyRecorder
+            config,
+            historyRecorder,
         )
         val navigator = Navigator(
             config,
