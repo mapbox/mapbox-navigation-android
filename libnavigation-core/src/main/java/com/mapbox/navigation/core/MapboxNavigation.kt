@@ -16,11 +16,9 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.common.module.provider.MapboxModuleProvider
-import com.mapbox.common.module.provider.ModuleProviderArgument
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
-import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -48,11 +46,13 @@ import com.mapbox.navigation.core.directions.LegacyRouterAdapter
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.ReachabilityService
 import com.mapbox.navigation.core.internal.utils.InternalUtils
+import com.mapbox.navigation.core.internal.utils.ModuleParams
+import com.mapbox.navigation.core.internal.utils.isInternalImplementation
+import com.mapbox.navigation.core.internal.utils.paramsProvider
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.reroute.LegacyRerouteControllerAdapter
@@ -100,7 +100,8 @@ import com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcher
 import com.mapbox.navigation.core.trip.session.eh.RoadObjectsStore
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
+import com.mapbox.navigation.navigator.internal.NavigatorLoader
+import com.mapbox.navigation.navigator.internal.router.RouterInterfaceAdapter
 import com.mapbox.navigation.utils.internal.ConnectivityHandler
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -238,6 +239,38 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         navigationOptions.eHorizonOptions.minTimeDeltaBetweenUpdates
     )
 
+    // native Router Interface
+    private val nativeRouter: RouterInterface by lazy {
+        NavigatorLoader.createNativeRouterInterface(
+            navigationOptions.deviceProfile,
+            navigatorConfig,
+            createTilesConfig(
+                isFallback = false,
+                tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
+            ),
+            historyRecorder.fileDirectory(),
+        )
+    }
+
+    // Router provided via @Modules, might be outer
+    private val moduleRouter: NavigationRouter by lazy {
+        val result = MapboxModuleProvider.createModule<Router>(MapboxModuleType.NavigationRouter) {
+            paramsProvider(
+                ModuleParams.NavigationRoute(
+                    accessToken
+                        ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER),
+                    nativeRouter,
+                    threadController
+                )
+            )
+        }
+        if (result is NavigationRouter) {
+            result
+        } else {
+            LegacyRouterAdapter(result)
+        }
+    }
+
     private val incidentsOptions: IncidentsOptions? = navigationOptions.incidentsOptions.run {
         if (graph.isNotEmpty() || apiUrl.isNotEmpty()) {
             IncidentsOptions(graph, apiUrl)
@@ -362,12 +395,26 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ),
             historyRecorder.fileDirectory(),
             navigationOptions.accessToken ?: "",
+            if (moduleRouter.isInternalImplementation()) {
+                nativeRouter
+            } else {
+                RouterInterfaceAdapter(moduleRouter)
+            },
         )
         historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
         navigationSession = NavigationComponentProvider.createNavigationSession()
 
         val notification: TripNotification = MapboxModuleProvider
-            .createModule(MapboxModuleType.NavigationTripNotification, ::paramsProvider)
+            .createModule(
+                MapboxModuleType.NavigationTripNotification
+            ) {
+                paramsProvider(
+                    ModuleParams.NavigationTripNotification(
+                        navigationOptions,
+                        navigationOptions.distanceFormatterOptions
+                    )
+                )
+            }
         if (notification.javaClass.name == MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME) {
             notificationChannelField =
                 notification.javaClass.getDeclaredField(MAPBOX_NOTIFICATION_ACTION_CHANNEL).apply {
@@ -391,18 +438,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
         tripSession.registerStateObserver(navigationSession)
 
-        directionsSession = NavigationComponentProvider.createDirectionsSession(
-            MapboxModuleProvider.createModule<Router>(
-                MapboxModuleType.NavigationRouter,
-                ::paramsProvider
-            ).let {
-                if (it is NavigationRouter) {
-                    it
-                } else {
-                    LegacyRouterAdapter(it)
-                }
-            },
-        )
+        directionsSession = NavigationComponentProvider.createDirectionsSession(moduleRouter)
         if (reachabilityObserverId == null) {
             reachabilityObserverId = ReachabilityService.addReachabilityObserver(
                 connectivityHandler
@@ -1405,6 +1441,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 createTilesConfig(isFallback, tilesVersion),
                 historyRecorder.fileDirectory(),
                 navigationOptions.accessToken ?: "",
+                if (moduleRouter.isInternalImplementation()) {
+                    nativeRouter
+                } else {
+                    RouterInterfaceAdapter(moduleRouter)
+                },
             )
             historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
 
@@ -1449,41 +1490,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 }
             }
         )
-    }
-
-    /**
-     * Provides parameters for Mapbox default modules, recursively if a module depends on other Mapbox modules.
-     */
-    private fun paramsProvider(type: MapboxModuleType): Array<ModuleProviderArgument> {
-        return when (type) {
-            MapboxModuleType.NavigationRouter -> arrayOf(
-                ModuleProviderArgument(
-                    String::class.java,
-                    accessToken ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER)
-                ),
-                ModuleProviderArgument(
-                    RouterInterface::class.java,
-                    MapboxNativeNavigatorImpl.router
-                ),
-                ModuleProviderArgument(
-                    ThreadController::class.java,
-                    threadController
-                )
-            )
-            MapboxModuleType.NavigationTripNotification -> arrayOf(
-                ModuleProviderArgument(NavigationOptions::class.java, navigationOptions),
-                ModuleProviderArgument(
-                    DistanceFormatter::class.java,
-                    MapboxDistanceFormatter(navigationOptions.distanceFormatterOptions)
-                ),
-            )
-            MapboxModuleType.CommonLogger -> arrayOf()
-            MapboxModuleType.CommonLibraryLoader ->
-                throw IllegalArgumentException("not supported: $type")
-            MapboxModuleType.CommonHttpClient ->
-                throw IllegalArgumentException("not supported: $type")
-            MapboxModuleType.MapTelemetry -> throw IllegalArgumentException("not supported: $type")
-        }
     }
 
     private fun createTilesConfig(

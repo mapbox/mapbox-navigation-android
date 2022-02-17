@@ -708,11 +708,11 @@ package com.mapbox.navigation.base.route {
   }
 
   public static final class RouterOrigin.Custom extends com.mapbox.navigation.base.route.RouterOrigin {
-    ctor public RouterOrigin.Custom(Object? obj = null);
+    ctor @Deprecated public RouterOrigin.Custom(Object? obj = null);
     method public Object? component1();
     method public com.mapbox.navigation.base.route.RouterOrigin.Custom copy(Object? obj);
-    method public Object? getObj();
-    property public final Object? obj;
+    method @Deprecated public Object? getObj();
+    property @Deprecated public final Object? obj;
   }
 
   public static final class RouterOrigin.Offboard extends com.mapbox.navigation.base.route.RouterOrigin {

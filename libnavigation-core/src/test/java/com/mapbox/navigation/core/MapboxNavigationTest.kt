@@ -50,6 +50,7 @@ import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -156,6 +157,11 @@ class MapboxNavigationTest {
 
     @Before
     fun setUp() {
+        mockkObject(NavigatorLoader)
+        every {
+            NavigatorLoader.createNativeRouterInterface(any(), any(), any(), any())
+        } returns mockk()
+
         mockkObject(MapboxSDKCommon)
         every {
             MapboxSDKCommon.getContext().getSystemService(Context.CONNECTIVITY_SERVICE)
@@ -205,7 +211,7 @@ class MapboxNavigationTest {
             NavigationComponentProvider.createArrivalProgressObserver(tripSession)
         } returns arrivalProgressObserver
 
-        every { navigator.create(any(), any(), any(), any(), any()) } returns navigator
+        every { navigator.create(any(), any(), any(), any(), any(), any()) } returns navigator
         mockkStatic(TelemetryEnabler::class)
         every { TelemetryEnabler.isEventsEnabled(any()) } returns true
     }
@@ -216,6 +222,7 @@ class MapboxNavigationTest {
             mapboxNavigation.onDestroy()
         }
 
+        unmockkObject(NavigatorLoader)
         unmockkObject(MapboxSDKCommon)
         unmockkObject(MapboxModuleProvider)
         unmockkObject(NavigationComponentProvider)
@@ -734,7 +741,7 @@ class MapboxNavigationTest {
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), any(), capture(slot), any(), any()
+                any(), any(), capture(slot), any(), any(), any()
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -752,7 +759,7 @@ class MapboxNavigationTest {
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), any(), capture(slot), any(), any()
+                any(), any(), capture(slot), any(), any(), any()
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -775,7 +782,7 @@ class MapboxNavigationTest {
         val slot = slot<NavigatorConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), capture(slot), any(), any(), any()
+                any(), capture(slot), any(), any(), any(), any()
             )
         } returns navigator
 
@@ -790,7 +797,7 @@ class MapboxNavigationTest {
         val slot = slot<NavigatorConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), capture(slot), any(), any(), any()
+                any(), capture(slot), any(), any(), any(), any()
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -813,7 +820,7 @@ class MapboxNavigationTest {
         val slot = slot<NavigatorConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), capture(slot), any(), any(), any()
+                any(), capture(slot), any(), any(), any(), any()
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -942,7 +949,7 @@ class MapboxNavigationTest {
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), any(), capture(slot), any(), any()
+                any(), any(), capture(slot), any(), any(), any()
             )
         } returns navigator
         val tilesVersion = "tilesVersion"
@@ -980,7 +987,8 @@ class MapboxNavigationTest {
                 any(),
                 capture(tileConfigSlot),
                 any(),
-                any()
+                any(),
+                any(),
             )
         } just Runs
 
@@ -1014,7 +1022,8 @@ class MapboxNavigationTest {
                 any(),
                 capture(tileConfigSlot),
                 any(),
-                any()
+                any(),
+                any(),
             )
         } just Runs
 
@@ -1189,7 +1198,8 @@ class MapboxNavigationTest {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
+                any(),
             )
         } returns navigator
     }

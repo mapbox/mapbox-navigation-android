@@ -17,10 +17,22 @@ sealed class RouterOrigin {
     object Onboard : RouterOrigin()
 
     /**
-     * Can be used as a router origin of custom routes source, different from [Offboard] and [Onboard]. The
-     * SDK doesn't operate with [obj], it might be used to spread any additional data.
-     *
+     * Can be used as a router origin of custom routes source, different from [Offboard] and [Onboard].
      * @param obj is used to provide additional data with [Custom] router origin
      */
-    data class Custom @JvmOverloads constructor(val obj: Any? = null) : RouterOrigin()
+    data class Custom
+    @Deprecated(
+        "`Nullable obj` is not supported anymore, `obj` becomes `null` when " +
+            "it's passed in custom Router.",
+        ReplaceWith("RouterOrigin.Custom()")
+    )
+    constructor(
+        @Deprecated(
+            "`obj` is not supported anymore, it becomes `null` when passed " +
+                "in custom Router."
+        )
+        val obj: Any? = null
+    ) : RouterOrigin() {
+        constructor() : this(null)
+    }
 }

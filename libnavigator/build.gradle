@@ -12,10 +12,15 @@ android {
     }
 
     defaultConfig {
+        testApplicationId "com.mapbox.navigation.navigator.test"
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro"
+    }
+
+    testOptions {
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
     }
 
     testOptions {
@@ -43,6 +48,10 @@ dependencies {
 
     testImplementation(project(':libtesting-utils'))
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
+    // instrumentation tests
+    androidTestImplementation project(':libtesting-ui')
+    androidTestImplementation dependenciesList.testRunner
+    androidTestUtil dependenciesList.testOrchestrator
 }
 
 apply from: "${rootDir}/gradle/track-public-apis.gradle"

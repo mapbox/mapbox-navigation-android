@@ -76,6 +76,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         tilesConfig: TilesConfig,
         historyDir: String?,
         accessToken: String,
+        router: RouterInterface,
     ): MapboxNativeNavigator {
         navigator?.shutdown()
 
@@ -84,6 +85,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             navigatorConfig,
             tilesConfig,
             historyDir,
+            router,
         )
         navigator = nativeComponents.navigator
         historyRecorderHandle = nativeComponents.historyRecorderHandle
@@ -92,7 +94,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         roadObjectsStore = nativeComponents.navigator.roadObjectStore()
         experimental = nativeComponents.navigator.experimental
         cache = nativeComponents.cache
-        router = nativeComponents.router
+        this.router = nativeComponents.router
         routeAlternativesController = nativeComponents.routeAlternativesController
         this.accessToken = accessToken
         return this
@@ -107,8 +109,16 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         tilesConfig: TilesConfig,
         historyDir: String?,
         accessToken: String,
+        router: RouterInterface,
     ) {
-        create(deviceProfile, navigatorConfig, tilesConfig, historyDir, accessToken)
+        create(
+            deviceProfile,
+            navigatorConfig,
+            tilesConfig,
+            historyDir,
+            accessToken,
+            router,
+        )
         nativeNavigatorRecreationObservers.forEach {
             it.onNativeNavigatorRecreated()
         }
@@ -157,21 +167,13 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     ): RouteInfo? =
         suspendCancellableCoroutine { continuation ->
             if (routes.isNotEmpty()) {
-                /*
-                 * Until https://github.com/mapbox/mapbox-navigation-native/issues/5142 is resolved,
-                 * we'll keep providing injected routes into the first response.
-                 */
-                val primaryRoute = routes.first()
-                val directionsResponse = primaryRoute.directionsResponse.toBuilder()
-                    .routes(routes.map { it.directionsRoute })
-                    .build()
-                    .toJson()
+                val directionsResponse = routes.mapToDirectionsResponse().toJson()
                 navigator!!.setRoutes(
                     Routes(
                         directionsResponse,
                         PRIMARY_ROUTE_INDEX,
                         legIndex,
-                        primaryRoute.routeOptions.toUrl(accessToken).toString()
+                        routes.first().routeOptions.toUrl(accessToken).toString()
                     )
                 ) {
                     continuation.resume(it.value)

@@ -20,6 +20,7 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.NavigatorConfig
+import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.TilesConfig
 
 internal object NavigationComponentProvider {
@@ -33,12 +34,14 @@ internal object NavigationComponentProvider {
         tilesConfig: TilesConfig,
         historyDir: String?,
         accessToken: String,
+        routerInterface: RouterInterface,
     ): MapboxNativeNavigator = MapboxNativeNavigatorImpl.create(
         deviceProfile,
         navigatorConfig,
         tilesConfig,
         historyDir,
         accessToken,
+        routerInterface,
     )
 
     fun createTripService(
