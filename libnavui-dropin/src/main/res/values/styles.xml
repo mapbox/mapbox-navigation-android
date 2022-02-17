@@ -15,4 +15,16 @@
         <item name="android:textColor">@color/mapbox_button_fg_color</item>
         <item name="android:textSize">14sp</item>
     </style>
+
+    <style name="MapboxStyleExpandableButton">
+        <item name="android:elevation">0dp</item>
+        <item name="android:background">@drawable/mapbox_bg_button</item>
+        <item name="extendableButtonIconTint">@color/mapbox_button_fg_color</item>
+        <item name="extendableButtonTextAppearance">@style/MapboxStyleExpandableButton.TextAppearance</item>
+    </style>
+
+    <style name="MapboxStyleExpandableButton.TextAppearance">
+        <item name="android:textColor">@color/mapbox_button_fg_color</item>
+        <item name="android:textSize">14sp</item>
+    </style>
 </resources>

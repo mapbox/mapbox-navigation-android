@@ -3,13 +3,18 @@ package com.mapbox.navigation.dropin.component.camera
 import androidx.lifecycle.MutableLiveData
 import com.mapbox.maps.CameraOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.dropin.util.logD
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DropInCameraState {
-    val cameraMode = MutableLiveData(defaultCameraMode)
+    private val _cameraMode = MutableStateFlow(defaultCameraMode)
+    val cameraMode = _cameraMode.asStateFlow()
+
     val cameraOptions = MutableLiveData(defaultCameraOptions)
     var triggerIdleCameraOnMoveListener: Boolean = true
 
@@ -20,11 +25,16 @@ class DropInCameraState {
     )
     val cameraUpdateEvent = _cameraUpdateEvent.asSharedFlow()
 
+    fun setCameraMode(mode: DropInCameraMode) {
+        if (_cameraMode.value == mode) return
+
+        logD("DropInCameraState", "cameraMode = $mode")
+        _cameraMode.value = mode
+    }
+
     fun requestCameraUpdate(event: CameraUpdateEvent) {
         _cameraUpdateEvent.tryEmit(event)
     }
-
-    fun cameraMode() = cameraMode.value ?: defaultCameraMode
 
     companion object {
         val defaultCameraMode: DropInCameraMode = DropInCameraMode.FOLLOWING

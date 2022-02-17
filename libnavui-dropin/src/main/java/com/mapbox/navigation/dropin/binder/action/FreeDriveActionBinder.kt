@@ -22,7 +22,7 @@ internal class FreeDriveActionBinder : UIBinder {
         val binding = MapboxActionFreeDriveLayoutBinding.bind(viewGroup)
 
         return navigationListOf(
-            RecenterButtonComponent(binding.recenterButton)
+            RecenterButtonComponent(binding.recenterButton),
             // TODO add other actions here
         )
     }

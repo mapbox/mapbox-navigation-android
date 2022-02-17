@@ -19,4 +19,13 @@
         <!-- Overview mode text -->
         <attr name="cameraModeButtonFollowText" format="string" localization="suggested" />
     </declare-styleable>
+
+    <declare-styleable name="MapboxExtendableButton">
+        <!-- Default icon drawable -->
+        <attr name="extendableButtonIcon" format="reference" />
+        <!-- Tint to apply to the icon drawable. -->
+        <attr name="extendableButtonIconTint" format="reference|color" />
+        <!-- Appearance of a text message. -->
+        <attr name="extendableButtonTextAppearance" format="reference" />
+    </declare-styleable>
 </resources>

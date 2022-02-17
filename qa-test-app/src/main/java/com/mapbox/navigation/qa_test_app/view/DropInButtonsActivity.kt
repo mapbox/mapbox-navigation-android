@@ -3,9 +3,11 @@ package com.mapbox.navigation.qa_test_app.view
 import android.os.Bundle
 import android.view.View
 import com.mapbox.navigation.dropin.view.MapboxCameraModeButton
+import com.mapbox.navigation.dropin.view.MapboxExtendableButton
 import com.mapbox.navigation.qa_test_app.databinding.LayoutActivityDropinButtonsBinding
 import com.mapbox.navigation.qa_test_app.view.base.BaseNavigationActivity
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
+import com.mapbox.navigation.dropin.R as Mapbox_R
 
 class DropInButtonsActivity : BaseNavigationActivity() {
 
@@ -30,6 +32,36 @@ class DropInButtonsActivity : BaseNavigationActivity() {
 
         binding.cameraModeButton.setOnClickListener(this::onCameraModeButtonClick)
         binding.customCameraModeButton.setOnClickListener(this::onCameraModeButtonClick)
+
+        binding.extButton.doOnClick {
+            toggleState = !toggleState
+            if (toggleState) it.setState(stateOverviewWithText)
+            else it.setState(stateFollowingWithText)
+        }
+        binding.extButton2.doOnClick {
+            toggleState = !toggleState
+            if (toggleState) it.setState(stateOverview)
+            else it.setState(stateFollowing)
+        }
+    }
+
+    private val stateOverview =
+        MapboxExtendableButton.State(Mapbox_R.drawable.mapbox_ic_camera_overview)
+    private val stateFollowing = MapboxExtendableButton.State(
+        Mapbox_R.drawable.mapbox_ic_camera_follow
+    )
+    private val stateOverviewWithText = stateOverview.copy(
+        text = "Overview",
+        duration = 2000
+    )
+    private val stateFollowingWithText = stateFollowing.copy(
+        text = "Following",
+        duration = 2000
+    )
+    private var toggleState = false
+
+    private inline fun <T : View> T.doOnClick(crossinline action: (v: T) -> Unit) {
+        setOnClickListener { action(this) }
     }
 
     private fun onCameraModeButtonClick(v: View) {

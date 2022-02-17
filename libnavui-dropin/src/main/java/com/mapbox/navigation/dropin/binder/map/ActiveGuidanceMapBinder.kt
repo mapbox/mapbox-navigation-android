@@ -18,7 +18,7 @@ internal class ActiveGuidanceMapBinder(
     private val cameraState = navigationViewContext.viewModel.cameraState
 
     override fun bind(mapView: MapView): MapboxNavigationObserver {
-        cameraState.cameraMode.value = DropInCameraMode.FOLLOWING
+        cameraState.setCameraMode(DropInCameraMode.FOLLOWING)
         return navigationListOf(
             LocationPuck(mapView),
             RouteLineComponent(mapView, navigationViewContext.routeLineOptions),
