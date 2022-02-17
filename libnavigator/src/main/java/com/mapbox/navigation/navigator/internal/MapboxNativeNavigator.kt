@@ -44,6 +44,7 @@ interface MapboxNativeNavigator {
         tilesConfig: TilesConfig,
         historyDir: String?,
         accessToken: String,
+        router: RouterInterface,
     ): MapboxNativeNavigator
 
     /**
@@ -55,6 +56,7 @@ interface MapboxNativeNavigator {
         tilesConfig: TilesConfig,
         historyDir: String?,
         accessToken: String,
+        router: RouterInterface,
     )
 
     /**

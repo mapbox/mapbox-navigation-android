@@ -29,13 +29,14 @@ import com.mapbox.navigator.TilesConfig
  * This class is expected to gain more responsibility as we define [customConfig].
  * The custom config can be exposed through the [DeviceProfile]
  */
-internal object NavigatorLoader {
+object NavigatorLoader {
 
-    fun createNavigator(
+    internal fun createNavigator(
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
-        historyDir: String?
+        historyDir: String?,
+        router: RouterInterface,
     ): NativeComponents {
         val config = ConfigFactory.build(
             settingsProfile(deviceProfile),
@@ -44,12 +45,6 @@ internal object NavigatorLoader {
         )
         val historyRecorder = buildHistoryRecorder(historyDir, config)
         val cache = CacheFactory.build(tilesConfig, config, historyRecorder)
-        val router = RouterFactory.build(
-            RouterType.HYBRID,
-            cache,
-            config,
-            historyRecorder,
-        )
         val navigator = Navigator(
             config,
             cache,
@@ -67,6 +62,27 @@ internal object NavigatorLoader {
             roadObjectMatcher,
             router,
             navigator.routeAlternativesController
+        )
+    }
+
+    fun createNativeRouterInterface(
+        deviceProfile: DeviceProfile,
+        navigatorConfig: NavigatorConfig,
+        tilesConfig: TilesConfig,
+        historyDir: String?,
+    ): RouterInterface {
+        val config = ConfigFactory.build(
+            settingsProfile(deviceProfile),
+            navigatorConfig,
+            customConfig(deviceProfile)
+        )
+        val historyRecorder = buildHistoryRecorder(historyDir, config)
+        val cache = CacheFactory.build(tilesConfig, config, historyRecorder)
+        return RouterFactory.build(
+            RouterType.HYBRID,
+            cache,
+            config,
+            historyRecorder,
         )
     }
 

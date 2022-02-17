@@ -9,6 +9,7 @@ import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.route.InternalRouter
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouter
@@ -43,7 +44,7 @@ class RouterWrapper(
     private val accessToken: String,
     private val router: RouterInterface,
     private val threadController: ThreadController,
-) : NavigationRouter {
+) : NavigationRouter, InternalRouter {
 
     private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
 

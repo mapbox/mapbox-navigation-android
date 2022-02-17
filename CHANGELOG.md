@@ -3,6 +3,7 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
+- :warning: Deprecated `RouterOrigin.Custom(obj: Any?)`. The SDK doesn't keep `RouteOrigin.Custom#obj` anymore, it always becomes `null` when the `obj` returns in `RoutesObserver`. [#5500](https://github.com/mapbox/mapbox-navigation-android/pull/5500)
 
 #### Features
 - Exposed option in MapboxRouteLineOptions to change the default icon pitch alignment for waypoint icons. [#5531](https://github.com/mapbox/mapbox-navigation-android/pull/5531)
