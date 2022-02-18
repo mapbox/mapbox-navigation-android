@@ -7,8 +7,8 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
-import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -53,7 +53,7 @@ class MapboxNavigationViewModelTest {
     fun setup() {
         mockkObject(MapboxNavigationApp)
         every {
-            MapboxNavigationApp.setup(any())
+            MapboxNavigationApp.setup(any<NavigationOptions>())
         } returns MapboxNavigationApp
         every {
             MapboxNavigationApp.registerObserver(capture(mapboxNavigationObserver))
@@ -344,7 +344,7 @@ class MapboxNavigationViewModelTest {
         val callbackSlot = slot<RouterCallback>()
         val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true) {
             every { requestRoutes(options, capture(callbackSlot)) } answers {
-                callbackSlot.captured.onRoutesReady(routes, mockk<RouterOrigin>())
+                callbackSlot.captured.onRoutesReady(routes, mockk())
                 0L
             }
         }

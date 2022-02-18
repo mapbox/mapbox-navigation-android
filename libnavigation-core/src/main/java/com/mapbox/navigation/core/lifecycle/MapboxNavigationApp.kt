@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.lifecycle
 
 import android.app.Activity
+import android.app.Application
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -80,15 +81,26 @@ object MapboxNavigationApp {
      * [Activity.isChangingConfigurations].
      */
     fun setup(navigationOptions: NavigationOptions) = apply {
-        mapboxNavigationAppDelegate.setup(navigationOptions)
+        mapboxNavigationAppDelegate.setup { navigationOptions }
+    }
+
+    /**
+     * Call [MapboxNavigationApp.setup] to provide the application with [NavigationOptionsProvider].
+     * New [NavigationOptions] will be created for every [MapboxNavigation] instance.
+     *
+     * This call is a no-op if an attached activity is changing configurations
+     * [Activity.isChangingConfigurations].
+     */
+    fun setup(navigationOptionsProvider: NavigationOptionsProvider) = apply {
+        mapboxNavigationAppDelegate.setup(navigationOptionsProvider)
     }
 
     /**
      * Detect when any Activity is in the foreground. Use [attach] and [detach] for
      * granular control of which lifecycle is used for creating [MapboxNavigation].
      */
-    fun attachAllActivities() = apply {
-        mapboxNavigationAppDelegate.attachAllActivities()
+    fun attachAllActivities(application: Application) = apply {
+        mapboxNavigationAppDelegate.attachAllActivities(application)
     }
 
     /**

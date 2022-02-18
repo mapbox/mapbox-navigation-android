@@ -5,7 +5,6 @@ package com.mapbox.navigation.core.lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import io.mockk.every
@@ -16,15 +15,17 @@ import io.mockk.unmockkAll
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
 @ExperimentalPreviewMapboxNavigationAPI
 class MapboxNavigationOwnerTest {
 
-    private val mapboxNavigation: MapboxNavigation = mockk()
-    private val navigationOptions: NavigationOptions = mockk {
-        every { accessToken } returns "test_access_token"
+    private val navigationOptionsProvider = mockk<NavigationOptionsProvider> {
+        every { createNavigationOptions() } returns mockk {
+            every { accessToken } returns "test_access_token"
+        }
     }
 
     private val mapboxNavigationOwner = MapboxNavigationOwner()
@@ -34,8 +35,11 @@ class MapboxNavigationOwnerTest {
         mockkStatic(MapboxNavigationProvider::class)
         mockkObject(LoggerProvider)
         every { LoggerProvider.logger } returns mockk(relaxUnitFun = true)
-        every { MapboxNavigationProvider.create(navigationOptions) } returns mapboxNavigation
-        every { MapboxNavigationProvider.retrieve() } returns mapboxNavigation
+        every { MapboxNavigationProvider.create(any()) } answers {
+            mockk {
+                every { navigationOptions } returns firstArg()
+            }
+        }
     }
 
     @After
@@ -56,7 +60,7 @@ class MapboxNavigationOwnerTest {
 
     @Test
     fun `full lifecycle will attach and detach MapboxNavigation`() {
-        mapboxNavigationOwner.setup(navigationOptions)
+        mapboxNavigationOwner.setup(navigationOptionsProvider)
         val mapboxNavigationObserver = mockk<MapboxNavigationObserver>(relaxUnitFun = true)
         mapboxNavigationOwner.register(mapboxNavigationObserver)
 
@@ -76,7 +80,7 @@ class MapboxNavigationOwnerTest {
 
     @Test
     fun `attach and detach multiple times`() {
-        mapboxNavigationOwner.setup(navigationOptions)
+        mapboxNavigationOwner.setup(navigationOptionsProvider)
         val mapboxNavigationObserver = mockk<MapboxNavigationObserver>(relaxUnitFun = true)
         mapboxNavigationOwner.register(mapboxNavigationObserver)
 
@@ -96,7 +100,7 @@ class MapboxNavigationOwnerTest {
 
     @Test
     fun `notify multiple observers in the order they were registered`() {
-        mapboxNavigationOwner.setup(navigationOptions)
+        mapboxNavigationOwner.setup(navigationOptionsProvider)
         val firstObserver = mockk<MapboxNavigationObserver>(relaxUnitFun = true)
         val secondObserver = mockk<MapboxNavigationObserver>(relaxUnitFun = true)
         mapboxNavigationOwner.register(firstObserver)
@@ -116,7 +120,7 @@ class MapboxNavigationOwnerTest {
 
     @Test
     fun `attach and detach observer when navigation is started`() {
-        mapboxNavigationOwner.setup(navigationOptions)
+        mapboxNavigationOwner.setup(navigationOptionsProvider)
         val lifecycleOwner: LifecycleOwner = mockk()
         mapboxNavigationOwner.carAppLifecycleObserver.onStart(lifecycleOwner)
 
@@ -132,7 +136,7 @@ class MapboxNavigationOwnerTest {
 
     @Test
     fun `do not attach and detach when navigation is not started`() {
-        mapboxNavigationOwner.setup(navigationOptions)
+        mapboxNavigationOwner.setup(navigationOptionsProvider)
 
         val observer = mockk<MapboxNavigationObserver>(relaxUnitFun = true)
         mapboxNavigationOwner.register(observer)
@@ -140,5 +144,34 @@ class MapboxNavigationOwnerTest {
 
         verify(exactly = 0) { observer.onAttached(any()) }
         verify(exactly = 0) { observer.onDetached(any()) }
+    }
+
+    @Test
+    fun `navigation options are not created before car app lifecycle is started`() {
+        mapboxNavigationOwner.setup(navigationOptionsProvider)
+
+        verify(exactly = 0) { navigationOptionsProvider.createNavigationOptions() }
+
+        mapboxNavigationOwner.carAppLifecycleObserver.onStart(mockk())
+
+        verify(exactly = 1) { navigationOptionsProvider.createNavigationOptions() }
+    }
+
+    @Test
+    fun `navigation options are not reused for different mapbox navigation instances`() {
+        mapboxNavigationOwner.setup(navigationOptionsProvider)
+        val lifecycleOwner = mockk<LifecycleOwner>()
+        val navigationOptionsA = mockk<NavigationOptions>()
+        every { navigationOptionsProvider.createNavigationOptions() } returns navigationOptionsA
+        mapboxNavigationOwner.carAppLifecycleObserver.onStart(lifecycleOwner)
+
+        assertEquals(navigationOptionsA, mapboxNavigationOwner.current()?.navigationOptions)
+
+        mapboxNavigationOwner.carAppLifecycleObserver.onStop(lifecycleOwner)
+        val navigationOptionsB = mockk<NavigationOptions>()
+        every { navigationOptionsProvider.createNavigationOptions() } returns navigationOptionsB
+        mapboxNavigationOwner.carAppLifecycleObserver.onStart(lifecycleOwner)
+
+        assertEquals(navigationOptionsB, mapboxNavigationOwner.current()?.navigationOptions)
     }
 }
