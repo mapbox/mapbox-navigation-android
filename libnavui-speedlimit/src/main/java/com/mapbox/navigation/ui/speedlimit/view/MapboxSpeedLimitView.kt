@@ -90,12 +90,14 @@ class MapboxSpeedLimitView : AppCompatTextView {
                 if (sign != null) {
                     val speedLimitSpan = when (sign) {
                         SpeedLimitSign.MUTCD -> {
+                            background = getViewDrawable(SpeedLimitSign.MUTCD)
                             getSpeedLimitSpannable(
                                 sign,
                                 context.getString(R.string.max_speed_no_value),
                             )
                         }
                         SpeedLimitSign.VIENNA -> {
+                            background = getViewDrawable(SpeedLimitSign.VIENNA)
                             getSpeedLimitSpannable(sign, "--")
                         }
                     }

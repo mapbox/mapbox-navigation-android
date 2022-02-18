@@ -48,12 +48,6 @@ import com.mapbox.navigation.dropin.component.navigationstate.NavigationStateVie
 import com.mapbox.navigation.dropin.component.recenter.CustomRecenterUIComponent
 import com.mapbox.navigation.dropin.component.recenter.MapboxRecenterUIComponent
 import com.mapbox.navigation.dropin.component.recenter.RecenterViewModel
-import com.mapbox.navigation.dropin.component.routearrow.MapboxRouteArrowUIComponent
-import com.mapbox.navigation.dropin.component.routearrow.RouteArrowViewModel
-import com.mapbox.navigation.dropin.component.routearrow.RouteArrowViewModelFactory
-import com.mapbox.navigation.dropin.component.routeline.MapboxRouteLineUIComponent
-import com.mapbox.navigation.dropin.component.routeline.RouteLineViewModel
-import com.mapbox.navigation.dropin.component.routeline.RouteLineViewModelFactory
 import com.mapbox.navigation.dropin.component.routeoverview.CustomRouteOverviewUIComponent
 import com.mapbox.navigation.dropin.component.routeoverview.MapboxRouteOverviewUIComponent
 import com.mapbox.navigation.dropin.component.routeoverview.RouteOverviewViewModel
@@ -183,7 +177,6 @@ class NavigationView @JvmOverloads constructor(
     // View Model and dependency definitions
     // --------------------------------------------------------
     private val mapboxNavigationViewModel: MapboxNavigationViewModel
-    private val routeLineViewModel: RouteLineViewModel
     private val navigationStateViewModel: NavigationStateViewModel
     private val cameraViewModel: CameraViewModel
 
@@ -204,30 +197,6 @@ class NavigationView @JvmOverloads constructor(
     private val uiComponents: MutableList<UIComponent> = mutableListOf()
 
     override fun getLifecycle(): Lifecycle = viewLifecycleRegistry
-
-    private fun bindRouteLine() {
-        val routeLineViewModel = ViewModelProvider(
-            viewModelStoreOwner,
-            RouteLineViewModelFactory(navigationViewOptions.mapboxRouteLineOptions)
-        )[RouteLineViewModel::class.java]
-        val routeLineComponent = MapboxRouteLineUIComponent(
-            view = mapView,
-            viewModel = routeLineViewModel
-        )
-        uiComponents.add(routeLineComponent)
-    }
-
-    private fun bindRouteArrow() {
-        val routeArrowViewModel = ViewModelProvider(
-            viewModelStoreOwner,
-            RouteArrowViewModelFactory(navigationViewOptions.routeArrowOptions)
-        )[RouteArrowViewModel::class.java]
-        val routeArrowUIComponent = MapboxRouteArrowUIComponent(
-            view = mapView,
-            viewModel = routeArrowViewModel
-        )
-        uiComponents.add(routeArrowUIComponent)
-    }
 
     private fun bindRecenterButtonView(view: View?) {
         val recenterComponent = if (view == null) {
@@ -316,14 +285,6 @@ class NavigationView @JvmOverloads constructor(
                         is RoutesObserver -> uiComponent.onRoutesChanged(result)
                     }
                 }
-            }
-        }
-    }
-
-    private fun observeRouteResets() {
-        keepExecutingWhenStarted {
-            routeLineViewModel.routeResets.collect { routes ->
-                mapboxNavigationViewModel.setRoutes(routes)
             }
         }
     }
@@ -460,7 +421,6 @@ class NavigationView @JvmOverloads constructor(
         observeLocationMatcherResults()
         observeFinalDestinationArrivals()
         observeNavigationState()
-        observeRouteResets()
         keepExecutingWhenStarted {
             cameraViewModel.cameraUpdates.collect {
                 mapView.camera.easeTo(it.first, it.second)
@@ -486,8 +446,6 @@ class NavigationView @JvmOverloads constructor(
 
     internal fun configure(viewProvider: ViewProvider) {
         binding.mapContainer.addView(mapView)
-        bindRouteLine()
-        bindRouteArrow()
         bindTripProgressView(viewProvider.tripProgressProvider?.invoke())
         bindRecenterButtonView(viewProvider.recenterButtonProvider?.invoke())
         bindRouteOverviewButtonView(viewProvider.recenterButtonProvider?.invoke())
@@ -594,10 +552,6 @@ class NavigationView @JvmOverloads constructor(
         mapboxNavigationViewModel = ViewModelProvider(
             viewModelStoreOwner
         )[MapboxNavigationViewModel::class.java]
-        routeLineViewModel = ViewModelProvider(
-            viewModelStoreOwner,
-            RouteLineViewModelFactory(navigationViewOptions.mapboxRouteLineOptions)
-        )[RouteLineViewModel::class.java]
         navigationStateViewModel = ViewModelProvider(
             viewModelStoreOwner
         )[NavigationStateViewModel::class.java]

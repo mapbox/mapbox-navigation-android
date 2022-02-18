@@ -9,7 +9,7 @@ import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @SuppressLint("MissingPermission")
-class DropInReplayComponent : MapboxNavigationObserver {
+class ReplayComponent : MapboxNavigationObserver {
     private lateinit var replayProgressObserver: ReplayProgressObserver
     private lateinit var routesObserver: RoutesObserver
 
