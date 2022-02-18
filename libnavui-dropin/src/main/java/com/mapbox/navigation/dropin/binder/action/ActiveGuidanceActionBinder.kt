@@ -16,6 +16,7 @@ import com.mapbox.navigation.dropin.databinding.MapboxActionActiveGuidanceLayout
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class ActiveGuidanceActionBinder : UIBinder {
+
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
             viewGroup,
@@ -23,6 +24,7 @@ internal class ActiveGuidanceActionBinder : UIBinder {
             viewGroup.context
         )
         TransitionManager.go(scene, Slide(Gravity.RIGHT))
+
         val binding = MapboxActionActiveGuidanceLayoutBinding.bind(viewGroup)
         return navigationListOf(
             SoundButtonAction(binding.soundButton),
