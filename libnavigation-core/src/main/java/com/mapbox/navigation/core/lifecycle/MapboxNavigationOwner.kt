@@ -5,7 +5,6 @@ import androidx.lifecycle.LifecycleOwner
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.utils.internal.logI
@@ -14,8 +13,8 @@ import kotlin.reflect.KClass
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class MapboxNavigationOwner {
-    internal lateinit var navigationOptions: NavigationOptions
-        private set
+
+    private lateinit var navigationOptionsProvider: NavigationOptionsProvider
 
     private val services = CopyOnWriteArraySet<MapboxNavigationObserver>()
     private var mapboxNavigation: MapboxNavigation? = null
@@ -28,6 +27,7 @@ internal class MapboxNavigationOwner {
             check(!MapboxNavigationProvider.isCreated()) {
                 "MapboxNavigation should only be created by the MapboxNavigationOwner"
             }
+            val navigationOptions = navigationOptionsProvider.createNavigationOptions()
             val mapboxNavigation = MapboxNavigationProvider.create(navigationOptions)
             this@MapboxNavigationOwner.mapboxNavigation = mapboxNavigation
             attached = true
@@ -43,8 +43,8 @@ internal class MapboxNavigationOwner {
         }
     }
 
-    fun setup(navigationOptions: NavigationOptions) {
-        this.navigationOptions = navigationOptions
+    fun setup(navigationOptionsProvider: NavigationOptionsProvider) {
+        this.navigationOptionsProvider = navigationOptionsProvider
     }
 
     fun register(mapboxNavigationObserver: MapboxNavigationObserver) = apply {

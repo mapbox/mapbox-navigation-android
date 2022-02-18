@@ -26,7 +26,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.lang.IllegalStateException
 
 @ExperimentalPreviewMapboxNavigationAPI
 @RunWith(RobolectricTestRunner::class)
@@ -55,7 +54,7 @@ class MapboxNavigationAppDelegateTest {
 
     @Test
     fun `verify onAttached and onDetached when multiple lifecycles have started`() {
-        mapboxNavigationApp.setup(navigationOptions)
+        mapboxNavigationApp.setup { navigationOptions }
 
         val testLifecycleOwnerA = CarAppLifecycleOwnerTest.TestLifecycleOwner()
         val testLifecycleOwnerB = CarAppLifecycleOwnerTest.TestLifecycleOwner()
@@ -77,7 +76,7 @@ class MapboxNavigationAppDelegateTest {
 
     @Test
     fun `verify onAttached is called when LifecycleOwner is started`() {
-        mapboxNavigationApp.setup(navigationOptions)
+        mapboxNavigationApp.setup { navigationOptions }
 
         val firstObserver = mockk<MapboxNavigationObserver>(relaxUnitFun = true)
         val secondObserver = mockk<MapboxNavigationObserver>(relaxUnitFun = true)
@@ -106,7 +105,7 @@ class MapboxNavigationAppDelegateTest {
         mapboxNavigationApp.attach(testLifecycleOwner)
 
         testLifecycleOwner.lifecycleRegistry.currentState = Lifecycle.State.RESUMED
-        mapboxNavigationApp.setup(navigationOptions)
+        mapboxNavigationApp.setup { navigationOptions }
 
         verify(exactly = 1) { firstObserver.onAttached(any()) }
         verify(exactly = 1) { secondObserver.onAttached(any()) }
@@ -116,7 +115,7 @@ class MapboxNavigationAppDelegateTest {
 
     @Test
     fun `verify multiple setup calls are ignored`() {
-        mapboxNavigationApp.setup(navigationOptions)
+        mapboxNavigationApp.setup { navigationOptions }
         val firstObserver = mockk<MapboxNavigationObserver>(relaxUnitFun = true)
         val secondObserver = mockk<MapboxNavigationObserver>(relaxUnitFun = true)
         mapboxNavigationApp.registerObserver(firstObserver)
@@ -124,9 +123,9 @@ class MapboxNavigationAppDelegateTest {
 
         val testLifecycleOwner = CarAppLifecycleOwnerTest.TestLifecycleOwner()
         mapboxNavigationApp.attach(testLifecycleOwner)
-        mapboxNavigationApp.setup(navigationOptions)
+        mapboxNavigationApp.setup { navigationOptions }
         testLifecycleOwner.lifecycleRegistry.currentState = Lifecycle.State.RESUMED
-        mapboxNavigationApp.setup(navigationOptions)
+        mapboxNavigationApp.setup { navigationOptions }
 
         verify(exactly = 1) { firstObserver.onAttached(any()) }
         verify(exactly = 1) { secondObserver.onAttached(any()) }
@@ -143,7 +142,7 @@ class MapboxNavigationAppDelegateTest {
 
         val (portraitActivity, portraitLifecycle) = mockActivityLifecycle()
         portraitLifecycle.currentState = Lifecycle.State.RESUMED
-        mapboxNavigationApp.setup(navigationOptions)
+        mapboxNavigationApp.setup { navigationOptions }
         mapboxNavigationApp.attach(portraitActivity)
         every { portraitActivity.isChangingConfigurations } returns true
         portraitLifecycle.currentState = Lifecycle.State.DESTROYED
@@ -152,7 +151,7 @@ class MapboxNavigationAppDelegateTest {
         landscapeLifecycle.currentState = Lifecycle.State.RESUMED
         every { landscapeActivity.isChangingConfigurations } returns false
         landscapeLifecycle.currentState = Lifecycle.State.RESUMED
-        mapboxNavigationApp.setup(navigationOptions)
+        mapboxNavigationApp.setup { navigationOptions }
         mapboxNavigationApp.attach(landscapeActivity)
 
         verify(exactly = 1) { firstObserver.onAttached(any()) }
@@ -207,7 +206,7 @@ class MapboxNavigationAppDelegateTest {
 
     @Test
     fun `verify detaching all LifecycleOwners detaches all observers`() {
-        mapboxNavigationApp.setup(navigationOptions)
+        mapboxNavigationApp.setup { navigationOptions }
 
         val testLifecycleOwnerA = CarAppLifecycleOwnerTest.TestLifecycleOwner()
         val testLifecycleOwnerB = CarAppLifecycleOwnerTest.TestLifecycleOwner()
@@ -235,7 +234,7 @@ class MapboxNavigationAppDelegateTest {
 
     @Test
     fun `verify disable will call observers onDetached`() {
-        mapboxNavigationApp.setup(navigationOptions)
+        mapboxNavigationApp.setup { navigationOptions }
 
         val testLifecycleOwnerA = CarAppLifecycleOwnerTest.TestLifecycleOwner()
         val testLifecycleOwnerB = CarAppLifecycleOwnerTest.TestLifecycleOwner()
@@ -262,7 +261,7 @@ class MapboxNavigationAppDelegateTest {
 
     @Test
     fun `verify disable will prevent mapboxNavigation from restarting`() {
-        mapboxNavigationApp.setup(navigationOptions)
+        mapboxNavigationApp.setup { navigationOptions }
 
         val testLifecycleOwner = CarAppLifecycleOwnerTest.TestLifecycleOwner()
         mapboxNavigationApp.attach(testLifecycleOwner)
@@ -281,7 +280,7 @@ class MapboxNavigationAppDelegateTest {
 
     @Test
     fun `verify current is null when all lifecycle owners are destroyed`() {
-        mapboxNavigationApp.setup(navigationOptions)
+        mapboxNavigationApp.setup { navigationOptions }
 
         val testLifecycleOwner = CarAppLifecycleOwnerTest.TestLifecycleOwner()
         mapboxNavigationApp.attach(testLifecycleOwner)
@@ -296,7 +295,7 @@ class MapboxNavigationAppDelegateTest {
 
     @Test
     fun `verify current is set after LifecycleOwner is created`() {
-        mapboxNavigationApp.setup(navigationOptions)
+        mapboxNavigationApp.setup { navigationOptions }
 
         val testLifecycleOwner = CarAppLifecycleOwnerTest.TestLifecycleOwner()
         mapboxNavigationApp.attach(testLifecycleOwner)

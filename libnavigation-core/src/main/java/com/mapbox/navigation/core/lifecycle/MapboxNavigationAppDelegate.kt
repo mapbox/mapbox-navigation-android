@@ -5,7 +5,6 @@ import androidx.lifecycle.LifecycleOwner
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.utils.internal.logI
 import kotlin.reflect.KClass
@@ -23,7 +22,7 @@ internal class MapboxNavigationAppDelegate {
 
     var isSetup = false
 
-    fun setup(navigationOptions: NavigationOptions) = apply {
+    fun setup(navigationOptionsProvider: NavigationOptionsProvider) = apply {
         if (carAppLifecycleOwner.isConfigurationChanging()) {
             return this
         }
@@ -43,13 +42,12 @@ internal class MapboxNavigationAppDelegate {
             return this
         }
 
-        mapboxNavigationOwner.setup(navigationOptions)
+        mapboxNavigationOwner.setup(navigationOptionsProvider)
         carAppLifecycleOwner.lifecycle.addObserver(mapboxNavigationOwner.carAppLifecycleObserver)
         isSetup = true
     }
 
-    fun attachAllActivities() {
-        val application = mapboxNavigationOwner.navigationOptions.applicationContext as Application
+    fun attachAllActivities(application: Application) {
         carAppLifecycleOwner.attachAllActivities(application)
     }
 

@@ -8,6 +8,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 #### Bug fixes and improvements
 - Added a workaround for [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://issuetracker.google.com/issues/175055271). [#5492](https://github.com/mapbox/mapbox-navigation-android/pull/5492)
+- Added `MapboxNavigationApp.setup` overload, that accepts `NavigationOptionsProvider` instead of prebuilt `NavigationOptions`. [#5490](https://github.com/mapbox/mapbox-navigation-android/pull/5490)
 
 ## Mapbox Navigation SDK 2.3.0-rc.1 - February 17, 2022
 

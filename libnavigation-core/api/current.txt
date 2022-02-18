@@ -269,7 +269,7 @@ package com.mapbox.navigation.core.lifecycle {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxNavigationApp {
     method public com.mapbox.navigation.core.lifecycle.MapboxNavigationApp attach(androidx.lifecycle.LifecycleOwner lifecycleOwner);
-    method public com.mapbox.navigation.core.lifecycle.MapboxNavigationApp attachAllActivities();
+    method public com.mapbox.navigation.core.lifecycle.MapboxNavigationApp attachAllActivities(android.app.Application application);
     method public com.mapbox.navigation.core.MapboxNavigation? current();
     method public com.mapbox.navigation.core.lifecycle.MapboxNavigationApp detach(androidx.lifecycle.LifecycleOwner lifecycleOwner);
     method public com.mapbox.navigation.core.lifecycle.MapboxNavigationApp disable();
@@ -278,6 +278,7 @@ package com.mapbox.navigation.core.lifecycle {
     method public boolean isSetup();
     method public com.mapbox.navigation.core.lifecycle.MapboxNavigationApp registerObserver(com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver mapboxNavigationObserver);
     method public com.mapbox.navigation.core.lifecycle.MapboxNavigationApp setup(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
+    method public com.mapbox.navigation.core.lifecycle.MapboxNavigationApp setup(com.mapbox.navigation.core.lifecycle.NavigationOptionsProvider navigationOptionsProvider);
     method public com.mapbox.navigation.core.lifecycle.MapboxNavigationApp unregisterObserver(com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver mapboxNavigationObserver);
     property public final androidx.lifecycle.LifecycleOwner lifecycleOwner;
     field public static final com.mapbox.navigation.core.lifecycle.MapboxNavigationApp INSTANCE;
@@ -286,6 +287,10 @@ package com.mapbox.navigation.core.lifecycle {
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface MapboxNavigationObserver {
     method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface NavigationOptionsProvider {
+    method public com.mapbox.navigation.base.options.NavigationOptions createNavigationOptions();
   }
 
 }
