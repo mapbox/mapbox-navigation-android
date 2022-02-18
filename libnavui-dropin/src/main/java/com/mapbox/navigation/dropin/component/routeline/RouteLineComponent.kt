@@ -33,7 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal class DropInRouteLine(
+internal class RouteLineComponent(
     private val mapView: MapView,
     private val options: MapboxRouteLineOptions,
 ) : MapboxNavigationObserver {
@@ -166,6 +166,6 @@ internal class DropInRouteLine(
     }
 
     private companion object {
-        private val TAG = DropInRouteLine::class.java.simpleName
+        private val TAG = RouteLineComponent::class.java.simpleName
     }
 }

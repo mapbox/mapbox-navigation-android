@@ -38,8 +38,7 @@ class DropInNavigationView @JvmOverloads constructor(
 
     private val binding: DropInNavigationViewBinding = DropInNavigationViewBinding.inflate(
         LayoutInflater.from(context),
-        this,
-        true
+        this
     )
 
     private val viewLifecycleRegistry: ViewLifecycleRegistry = ViewLifecycleRegistry(

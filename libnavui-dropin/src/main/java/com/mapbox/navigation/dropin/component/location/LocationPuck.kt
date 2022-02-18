@@ -13,7 +13,7 @@ import com.mapbox.navigation.dropin.R
 
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class DropInLocationPuck(
+class LocationPuck(
     private val mapView: MapView
 ) : MapboxNavigationObserver {
 

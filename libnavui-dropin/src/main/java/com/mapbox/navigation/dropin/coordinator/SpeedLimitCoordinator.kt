@@ -6,18 +6,20 @@ import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.lifecycle.UICoordinator
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * Coordinator for the speed limit view.
  * This will include camera, location puck, and route line.
  */
 internal class SpeedLimitCoordinator(
-    private val navigationViewContext: DropInNavigationViewContext,
-    actionListLayout: ViewGroup
-) : UICoordinator<ViewGroup>(actionListLayout) {
+    navigationViewContext: DropInNavigationViewContext,
+    speedLimitLayout: ViewGroup
+) : UICoordinator<ViewGroup>(speedLimitLayout) {
+
+    val stateFlow = MutableStateFlow(navigationViewContext.uiBinders.speedLimit)
 
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
-        return flowOf(navigationViewContext.uiBinders.speedLimit)
+        return stateFlow
     }
 }

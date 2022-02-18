@@ -2,7 +2,9 @@
 <resources>
     <dimen name="mapbox_cameraModeButton_paddingStart">20dp</dimen>
 
-    <!-- This width is mapbox_button_size + padding * 2. mapbox_button_size is 56 -->
-    <dimen name="mapbox_actionList_width">76dp</dimen>
-    <dimen name="mapbox_actionList_padding">10dp</dimen>
+    <!-- This width is mapbox_button_size -->
+    <dimen name="mapbox_actionList_width">56dp</dimen>
+
+    <!-- Main layout container sizes -->
+    <dimen name="mapbox_info_panel_shadow_height">16dp</dimen>
 </resources>

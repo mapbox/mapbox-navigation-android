@@ -8,8 +8,8 @@ import com.mapbox.navigation.dropin.binder.Binder
 import com.mapbox.navigation.dropin.binder.navigationListOf
 import com.mapbox.navigation.dropin.component.camera.DropInCameraMode
 import com.mapbox.navigation.dropin.component.camera.DropInNavigationCamera
-import com.mapbox.navigation.dropin.component.location.DropInLocationPuck
-import com.mapbox.navigation.dropin.component.routeline.DropInRouteLine
+import com.mapbox.navigation.dropin.component.location.LocationPuck
+import com.mapbox.navigation.dropin.component.routeline.RouteLineComponent
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class FreeDriveMapBinder(
@@ -21,8 +21,8 @@ internal class FreeDriveMapBinder(
     override fun bind(mapView: MapView): MapboxNavigationObserver {
         cameraState.cameraMode.value = DropInCameraMode.OVERVIEW
         return navigationListOf(
-            DropInLocationPuck(mapView),
-            DropInRouteLine(mapView, navigationViewContext.routeLineOptions),
+            LocationPuck(mapView),
+            RouteLineComponent(mapView, navigationViewContext.routeLineOptions),
             DropInNavigationCamera(
                 navigationViewContext.viewModel.cameraState,
                 mapView
