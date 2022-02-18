@@ -14,6 +14,8 @@ import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityNavigationViewCustomizedBinding
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +34,12 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
             .build()
     }
 
+    private val routeArrowOptions by lazy {
+        RouteArrowOptions.Builder(this)
+            .withAboveLayerId(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+            .build()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = LayoutActivityNavigationViewCustomizedBinding.inflate(layoutInflater)
@@ -44,6 +52,7 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
         )
 
         binding.navigationView.customize(routeLineOptions)
+        binding.navigationView.customize(routeArrowOptions)
     }
 }
 
