@@ -4,7 +4,6 @@ import android.view.ViewGroup
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.binder.action.ActiveGuidanceActionBinder
 import com.mapbox.navigation.dropin.binder.action.EmptyActionBinder
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.lifecycle.UICoordinator
@@ -16,17 +15,17 @@ import kotlinx.coroutines.flow.map
  * This is the side panel for a portrait view.
  */
 internal class ActionListCoordinator(
-    private val navigationViewContext: DropInNavigationViewContext,
+    private val navContext: DropInNavigationViewContext,
     actionList: ViewGroup
 ) : UICoordinator<ViewGroup>(actionList) {
 
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
-        return navigationViewContext.viewModel.navigationState.map { navigationState ->
+        return navContext.viewModel.navigationState.map { navigationState ->
             when (navigationState) {
                 NavigationState.RoutePreview,
-                NavigationState.ActiveNavigation -> ActiveGuidanceActionBinder()
+                NavigationState.ActiveNavigation -> navContext.uiBinders.activeGuidanceActions
                 NavigationState.Arrival,
-                NavigationState.FreeDrive,
+                NavigationState.FreeDrive -> navContext.uiBinders.freeDriveActionBinder
                 NavigationState.Empty -> EmptyActionBinder()
             }
         }

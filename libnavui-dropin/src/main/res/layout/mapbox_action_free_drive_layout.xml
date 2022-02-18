@@ -6,16 +6,9 @@
     tools:orientation="vertical"
     tools:parentTag="android.widget.LinearLayout">
 
-    <com.mapbox.navigation.ui.voice.view.MapboxSoundButton
-        android:id="@+id/soundButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        />
-
     <com.mapbox.navigation.ui.maps.camera.view.MapboxRecenterButton
         android:id="@+id/recenterButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp" />
+        android:layout_height="wrap_content" />
 
 </merge>
