@@ -8,9 +8,12 @@ import com.mapbox.navigation.dropin.binder.EmptyBinder
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
 import com.mapbox.navigation.dropin.extensions.flowTripSessionState
+import com.mapbox.navigation.dropin.flowUiBinder
 import com.mapbox.navigation.dropin.lifecycle.UICoordinator
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
 /**
@@ -22,17 +25,15 @@ internal class GuidanceCoordinator(
     guidanceLayout: ViewGroup
 ) : UICoordinator<ViewGroup>(guidanceLayout) {
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
         return combine(
-            flowTripSessionState(), flowRoutesUpdated().map { it.routes }
+            flowTripSessionState(), flowRoutesUpdated().map { it.navigationRoutes }
         ) { tripSessionState, routes ->
-            when {
-                tripSessionState == TripSessionState.STARTED && routes.isNotEmpty() -> {
-                    navigationViewContext.uiBinders.maneuver
-                }
-                else -> {
-                    EmptyBinder()
-                }
+            tripSessionState == TripSessionState.STARTED && routes.isNotEmpty()
+        }.flatMapLatest { showManeuvers ->
+            navigationViewContext.flowUiBinder {
+                if (showManeuvers) it.maneuver else EmptyBinder()
             }
         }
     }
