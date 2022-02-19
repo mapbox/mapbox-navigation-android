@@ -9,6 +9,7 @@ import com.mapbox.navigation.dropin.binder.navigationListOf
 import com.mapbox.navigation.dropin.component.camera.DropInCameraMode
 import com.mapbox.navigation.dropin.component.camera.DropInNavigationCamera
 import com.mapbox.navigation.dropin.component.location.LocationPuck
+import com.mapbox.navigation.dropin.component.routeline.RouteLineComponent
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class FreeDriveMapBinder(
@@ -21,6 +22,12 @@ internal class FreeDriveMapBinder(
         cameraState.setCameraMode(DropInCameraMode.OVERVIEW)
         return navigationListOf(
             LocationPuck(mapView),
+            RouteLineComponent(
+                mapView.getMapboxMap(),
+                navigationViewContext.routeLineOptions,
+                navigationViewContext.mapEventProducer,
+                navigationViewContext.viewModel.routesViewModel
+            ),
             DropInNavigationCamera(
                 navigationViewContext.viewModel.cameraState,
                 mapView

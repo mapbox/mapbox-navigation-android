@@ -23,6 +23,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.binder.UIBinder
+import com.mapbox.navigation.dropin.component.map.MapEventProducer
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.coordinator.ActionListCoordinator
 import com.mapbox.navigation.dropin.coordinator.GuidanceCoordinator
@@ -74,6 +75,7 @@ class DropInNavigationView @JvmOverloads constructor(
         context = context,
         lifecycleOwner = this,
         viewModel = viewModel,
+        mapEventProducer = MapEventProducer(binding.mapView)
     )
 
     /**
@@ -110,6 +112,7 @@ class DropInNavigationView @JvmOverloads constructor(
                 // +skyLayer(...)
             }
         )
+        this.lifecycle.addObserver(navigationContext.mapEventProducer)
 
         /**
          * Default setup for MapboxNavigationApp. The developer can customize this by

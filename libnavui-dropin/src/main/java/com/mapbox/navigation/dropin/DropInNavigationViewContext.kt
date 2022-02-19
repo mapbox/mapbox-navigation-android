@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin
 import android.content.Context
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.dropin.binder.UIBinder
+import com.mapbox.navigation.dropin.component.map.MapEventProducer
 import com.mapbox.navigation.dropin.lifecycle.UICoordinator
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
@@ -22,11 +23,13 @@ internal class DropInNavigationViewContext(
     val context: Context,
     val lifecycleOwner: LifecycleOwner,
     val viewModel: DropInNavigationViewModel,
+    val mapEventProducer: MapEventProducer
 ) {
     val uiBinders = MutableStateFlow(NavigationUIBinders())
     var routeLineOptions: MapboxRouteLineOptions = MapboxRouteLineOptions.Builder(context)
         .withRouteLineResources(RouteLineResources.Builder().build())
         .withRouteLineBelowLayerId("road-label-navigation")
+        .withVanishingRouteLineEnabled(true)
         .build()
     var routeArrowOptions: RouteArrowOptions = RouteArrowOptions.Builder(context)
         .withAboveLayerId(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
