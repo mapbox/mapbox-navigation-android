@@ -51,15 +51,11 @@ import com.mapbox.navigation.dropin.component.recenter.RecenterViewModel
 import com.mapbox.navigation.dropin.component.routeoverview.CustomRouteOverviewUIComponent
 import com.mapbox.navigation.dropin.component.routeoverview.MapboxRouteOverviewUIComponent
 import com.mapbox.navigation.dropin.component.routeoverview.RouteOverviewViewModel
-import com.mapbox.navigation.dropin.component.tripprogress.CustomTripProgressUIComponent
-import com.mapbox.navigation.dropin.component.tripprogress.MapboxTripProgressUIComponent
-import com.mapbox.navigation.dropin.component.tripprogress.TripProgressViewModel
 import com.mapbox.navigation.dropin.databinding.MapboxLayoutDropInViewBinding
 import com.mapbox.navigation.dropin.util.MapboxDropInUtils
 import com.mapbox.navigation.ui.maps.camera.view.MapboxRecenterButton
 import com.mapbox.navigation.ui.maps.camera.view.MapboxRouteOverviewButton
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
-import com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
 import com.mapbox.navigation.ui.utils.internal.extensions.unwrapIfNeeded
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
 import com.mapbox.navigation.ui.utils.internal.lifecycle.keepExecutingWhenStarted
@@ -239,29 +235,6 @@ class NavigationView @JvmOverloads constructor(
             )
         }
         uiComponents.add(routeOverviewComponent)
-    }
-
-    private fun bindTripProgressView(view: View?) {
-        val tripProgressComponent = if (view == null) {
-            val tripProgressView = MapboxTripProgressView(context, null)
-            binding.infoPanelContainer.addView(tripProgressView)
-            val tripProgressViewModel = ViewModelProvider(
-                viewModelStoreOwner,
-                TripProgressViewModel.Factory(navigationViewOptions.tripProgressUpdateFormatter)
-            )[TripProgressViewModel::class.java]
-            MapboxTripProgressUIComponent(
-                container = binding.infoPanelContainer,
-                view = tripProgressView,
-                viewModel = tripProgressViewModel,
-                lifeCycleOwner = this
-            )
-        } else {
-            binding.infoPanelContainer.addView(view)
-            CustomTripProgressUIComponent(
-                container = binding.infoPanelContainer
-            )
-        }
-        uiComponents.add(tripProgressComponent)
     }
 
     private fun observeNavigationState() {
@@ -446,7 +419,6 @@ class NavigationView @JvmOverloads constructor(
 
     internal fun configure(viewProvider: ViewProvider) {
         binding.mapContainer.addView(mapView)
-        bindTripProgressView(viewProvider.tripProgressProvider?.invoke())
         bindRecenterButtonView(viewProvider.recenterButtonProvider?.invoke())
         bindRouteOverviewButtonView(viewProvider.recenterButtonProvider?.invoke())
 

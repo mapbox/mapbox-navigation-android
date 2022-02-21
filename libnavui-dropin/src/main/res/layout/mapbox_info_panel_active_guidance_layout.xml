@@ -13,19 +13,13 @@
         android:padding="8dp"
         >
 
-        <TextView
-            android:id="@+id/routePreview"
+        <com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
+            android:id="@+id/tripProgressView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingEnd="8dp"
-            android:text="Active Guidance"
-            android:textColor="@color/colorOnSurface"
-            android:textSize="16sp"
-            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/endNavigation"
@@ -46,7 +40,7 @@
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/routePreview"
+            app:layout_constraintTop_toBottomOf="@id/tripProgressView"
             />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </merge>

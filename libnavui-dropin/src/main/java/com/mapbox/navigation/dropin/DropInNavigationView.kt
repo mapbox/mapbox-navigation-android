@@ -28,6 +28,7 @@ import com.mapbox.navigation.dropin.coordinator.ActionListCoordinator
 import com.mapbox.navigation.dropin.coordinator.GuidanceCoordinator
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
 import com.mapbox.navigation.dropin.coordinator.MapCoordinator
+import com.mapbox.navigation.dropin.coordinator.RoadNameLabelCoordinator
 import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
 import com.mapbox.navigation.dropin.extensions.attachStarted
@@ -138,6 +139,7 @@ class DropInNavigationView @JvmOverloads constructor(
             InfoPanelCoordinator(navigationContext, binding.infoPanelLayout),
             ActionListCoordinator(navigationContext, binding.actionListLayout),
             SpeedLimitCoordinator(navigationContext, binding.speedLimitLayout),
+            RoadNameLabelCoordinator(navigationContext, binding.roadNameLayout),
         )
 
         initMapLongClickListener()
