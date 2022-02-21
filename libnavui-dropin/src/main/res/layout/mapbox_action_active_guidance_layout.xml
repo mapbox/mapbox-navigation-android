@@ -19,4 +19,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp" />
 
+    <com.mapbox.navigation.dropin.view.MapboxExtendableButton
+        android:id="@+id/recenterButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        app:extendableButtonIcon="@drawable/mapbox_ic_camera_recenter" />
+
 </merge>
