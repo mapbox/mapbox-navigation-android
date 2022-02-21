@@ -1,65 +1,64 @@
-def navigatorModuleName = "libnavigator"
-def moduleNames = ["libnavigation-core", navigatorModuleName]
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
-task verifyCommonSdkVersion {
-    moduleNames.each { moduleName ->
-        dependsOn ":" + moduleName + ":generateDependencyReportFile"
-    }
+task generateDependencyReportFile(type: DependencyReportTask) {
+    outputFile = file("build/reports/dependencies_report.txt")
+}
+
+/**
+ * Task that verifies that Nav SDK and all transitive dependencies use the same major and minor versions of the Common SDK.
+ * Different patch versions are allowed.
+ */
+task verifyCommonSdkVersion(dependsOn: generateDependencyReportFile) {
     doLast {
-        def moduleDependencyMap = [:]
-        moduleNames.each { moduleName ->
-            String commonDependency
-            if (moduleName == navigatorModuleName) {
-                commonDependency = parseNavigatorCommonLibDependency()
-            } else {
-                commonDependency = parseCommonLibDependency(moduleName)
+        File dependenciesFile = new File(projectDir.toString() + "/build/reports/dependencies_report.txt")
+        // find main classpath
+        int startIndex = dependenciesFile.text.indexOf("releaseCompileClasspath")
+        // find the end of the classpath definition
+        int lastIndex = dependenciesFile.text.indexOf("\n\n", startIndex)
+        String dependenciesString = dependenciesFile.text.substring(startIndex, lastIndex)
+
+        // find all Common SDK versions
+        Set<String> commonVersions = new ArrayList<>()
+        Pattern p = Pattern.compile("com.mapbox.common:common:\\d+\\.\\d+\\.\\d+")
+        Matcher m = p.matcher(dependenciesString)
+        while (m.find()) {
+            String[] elements = m.group().split(":")
+            commonVersions.add(elements[elements.length - 1])
+        }
+
+        if (commonVersions.size() > 1) {
+            // verify that major and minor versions are consistent
+            String mismatchArea = null
+
+            // splitting up each versioning component and counting distinct occurrences
+            // example of versionComponents with mismatched MINOR version: [[21, 2, 0], [21, 1, 0]]
+            String[][] versionComponents = commonVersions.stream().map({ it.split("\\.") }).toArray()
+            if (Arrays.stream(versionComponents).map({ it[0] }).distinct().count() != 1) {
+                mismatchArea = "MAJOR"
+            } else if (Arrays.stream(versionComponents).map({ it[1] }).distinct().count() != 1) {
+                mismatchArea = "MINOR"
             }
-            moduleDependencyMap[moduleName] = commonDependency
-        }
-        moduleNames.each { moduleName ->
-            if (moduleName != navigatorModuleName
-                    && moduleDependencyMap[moduleName] != moduleDependencyMap[navigatorModuleName]) {
-                throw new GradleException(moduleName + " (" + moduleDependencyMap[moduleName] + ") " +
-                        "and " + navigatorModuleName + " (" + moduleDependencyMap[navigatorModuleName] + ") " +
-                        "have different versions of Common SDK library. " +
-                        "Please align Common SDK version in both SDKs before push changes.")
+
+            if (mismatchArea != null) {
+                println("Dependencies for " + project.toString() + ":")
+                println(dependenciesString)
+                throw new IllegalArgumentException(
+                        mismatchArea + " Common SDK versions across dependencies are mismatched."
+                                + " All projects should use the same major and minor versions of the Common SDK.\n"
+                                + " Found versions: " + commonVersions
+                )
+            } else if (Arrays.stream(versionComponents).map({ it[2] }).distinct().count() != 1) {
+                println(
+                        "INFO: Common SDK versions across all dependencies use different patches (which is acceptable).\n"
+                                + "Found versions: " + commonVersions
+                )
             }
-        }
-        println("Common SDK versions are equal for Navigation SDK and for Navigation Native")
-        println(moduleDependencyMap)
-    }
-}
-
-allprojects.findAll {it.name in moduleNames}.each { p ->
-    configure(p) {
-        task generateDependencyReportFile(type: DependencyReportTask) {
-            outputFile = file("build/reports/dependencies_report.txt")
+        } else {
+            println(
+                    "Common SDK version is consistent across all dependencies.\n"
+                            + "Found version: " + commonVersions
+            )
         }
     }
-}
-
-static def parseCommonLibDependency(String moduleName) {
-    File dependenciesFile = new File(moduleName + "/build/reports/dependencies_report.txt")
-    int startSearchIndex = dependenciesFile.text.indexOf("releaseCompileClasspath")
-    return getCommonLibDependency(dependenciesFile, startSearchIndex)
-}
-
-static def parseNavigatorCommonLibDependency() {
-    File dependenciesFile = new File("libnavigator/build/reports/dependencies_report.txt")
-    int configurationStartIndex = dependenciesFile.text.indexOf("releaseCompileClasspath")
-    int startSearchIndex = dependenciesFile.text.indexOf(
-            "com.mapbox.navigator:mapbox-navigation-native",
-            configurationStartIndex
-    )
-    return getCommonLibDependency(dependenciesFile, startSearchIndex)
-}
-
-static def getCommonLibDependency(File dependenciesFile, int startSearchIndex) {
-    int firstIndexCommonLib = dependenciesFile.text.indexOf("com.mapbox.common:common:", startSearchIndex)
-    int lastIndexCommonLib = Math.min(
-            dependenciesFile.text.indexOf("\n", firstIndexCommonLib),
-            dependenciesFile.text.indexOf(" ", firstIndexCommonLib)
-    )
-    String commonLibDependency = dependenciesFile.text.substring(firstIndexCommonLib, lastIndexCommonLib)
-    return commonLibDependency
 }
