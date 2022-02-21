@@ -1,0 +1,42 @@
+package com.mapbox.navigation.dropin.component.tripprogress
+
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.extensions.flowRouteProgress
+import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
+import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
+import com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter
+import com.mapbox.navigation.ui.tripprogress.model.TimeRemainingFormatter
+import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter
+import com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+
+class TripProgressComponent(val tripProgressView: MapboxTripProgressView) : UIComponent() {
+
+    override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        super.onAttached(mapboxNavigation)
+        val distanceFormatterOptions =
+            DistanceFormatterOptions.Builder(tripProgressView.context).build()
+        val tripProgressFormatter = TripProgressUpdateFormatter
+            .Builder(tripProgressView.context)
+            .distanceRemainingFormatter(
+                DistanceRemainingFormatter(distanceFormatterOptions)
+            )
+            .timeRemainingFormatter(
+                TimeRemainingFormatter(tripProgressView.context)
+            )
+            .estimatedTimeToArrivalFormatter(
+                EstimatedTimeToArrivalFormatter(tripProgressView.context)
+            )
+            .build()
+        val tripProgressApi = MapboxTripProgressApi(tripProgressFormatter)
+        coroutineScope.launch {
+            mapboxNavigation.flowRouteProgress().collect {
+                val value = tripProgressApi.getTripProgress(it)
+                tripProgressView.render(value)
+            }
+        }
+    }
+}
