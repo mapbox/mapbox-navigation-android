@@ -1,35 +1,27 @@
 package com.mapbox.navigation.dropin.component.routeline
 
-import android.location.Location
 import android.util.Log
 import com.mapbox.android.gestures.Utils
-import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
+import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
-import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
-import com.mapbox.navigation.base.route.RouterCallback
-import com.mapbox.navigation.base.route.RouterFailure
-import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.dropin.component.location.LocationBehavior
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -39,6 +31,7 @@ internal class RouteLineComponent(
 ) : MapboxNavigationObserver {
 
     private val routeClickPadding = Utils.dpToPx(30f)
+    private val jobControl = InternalJobControlFactory.createMainScopeJobControl()
 
     private val routeLineView by lazy {
         MapboxRouteLineView(options)
@@ -50,14 +43,18 @@ internal class RouteLineComponent(
 
     private val routesObserver = RoutesObserver { result ->
         val routeLines = result.routes.map { RouteLine(it, null) }
-        // TODO this should be attached to a lifecycle scope
-        CoroutineScope(Dispatchers.Main).launch {
+        jobControl.scope.launch {
             routeLineApi.setRoutes(routeLines).let { routeDrawData ->
                 mapView.getMapboxMap().getStyle { style ->
                     routeLineView.renderRouteDrawData(style, routeDrawData)
                 }
             }
         }
+    }
+
+    private val onMapClickListener = OnMapClickListener { point ->
+        selectRoute(point)
+        false
     }
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
@@ -80,19 +77,8 @@ internal class RouteLineComponent(
     }
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
-        // Setup a long press to find a route.
-        val locationStateManager = MapboxNavigationApp.getObserver(LocationBehavior::class)
-        mapView.gestures.addOnMapLongClickListener { point ->
-            val originLocation = locationStateManager.locationLiveData.value
-            findRoute(originLocation, point)
-            false
-        }
-
         // Setup the map press to select alternative routes.
-        mapView.gestures.addOnMapClickListener { point ->
-            selectRoute(point)
-            false
-        }
+        mapView.gestures.addOnMapClickListener(onMapClickListener)
 
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
@@ -103,13 +89,13 @@ internal class RouteLineComponent(
         mapView.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
+        jobControl.job.cancelChildren()
         routeLineApi.cancel()
         routeLineView.cancel()
     }
 
-    fun selectRoute(point: Point) {
-        // TODO this should be attached to a lifecycle scope
-        CoroutineScope(Dispatchers.Main).launch {
+    private fun selectRoute(point: Point) {
+        jobControl.scope.launch {
             val result = routeLineApi.findClosestRoute(
                 point,
                 mapView.getMapboxMap(),
@@ -127,42 +113,6 @@ internal class RouteLineComponent(
                 MapboxNavigationApp.current()?.setRoutes(reOrderedRoutes)
             }
         }
-    }
-
-    fun findRoute(originLocation: Location?, destination: Point) {
-        val origin = originLocation?.run { Point.fromLngLat(longitude, latitude) }
-            ?: return
-
-        val mapboxNavigation: MapboxNavigation = MapboxNavigationApp.current() ?: return
-        val routeOptions = RouteOptions.builder()
-            .applyDefaultNavigationOptions()
-            .applyLanguageAndVoiceUnitOptions(mapView.context)
-            .coordinatesList(listOf(origin, destination))
-            .layersList(listOf(mapboxNavigation.getZLevel(), null))
-            .alternatives(true)
-            .build()
-        mapboxNavigation.requestRoutes(
-            routeOptions,
-            object : RouterCallback {
-                override fun onRoutesReady(
-                    routes: List<DirectionsRoute>,
-                    routerOrigin: RouterOrigin
-                ) {
-                    mapboxNavigation.setRoutes(routes.reversed())
-                }
-
-                override fun onFailure(
-                    reasons: List<RouterFailure>,
-                    routeOptions: RouteOptions
-                ) {
-                    // no impl
-                }
-
-                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
-                    // no impl
-                }
-            }
-        )
     }
 
     private companion object {
