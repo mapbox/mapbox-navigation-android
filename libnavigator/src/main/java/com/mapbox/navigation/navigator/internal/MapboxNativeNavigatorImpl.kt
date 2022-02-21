@@ -211,13 +211,11 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             .routes(routes.toMutableList())
             .code("Ok")
             .waypoints(
-                coordinatesList().mapIndexed { index, point ->
-                    val waypointBuilder = DirectionsWaypoint.builder()
+                coordinatesList().map { point ->
+                    DirectionsWaypoint.builder()
                         .rawLocation(doubleArrayOf(point.longitude(), point.latitude()))
-                    waypointNamesList()?.getOrNull(index)?.let { name ->
-                        waypointBuilder.name(name)
-                    }
-                    waypointBuilder.build()
+                        .name("")
+                        .build()
                 }
             )
             .build()
