@@ -1,4 +1,4 @@
-CORE_MODULES = \
+RELEASED_CORE_MODULES = \
 libnavigation-router \
 libnavigation-base \
 libnavigation-metrics \
@@ -7,7 +7,9 @@ libnavigator \
 libtrip-notification \
 libnavigation-core \
 
-UI_MODULES = \
+CORE_MODULES = $(RELEASED_CORE_MODULES)
+
+RELEASED_UI_MODULES = \
 libnavui-maps \
 libnavui-base \
 libnavui-util \
@@ -19,7 +21,11 @@ libnavigation-android \
 libnavui-speedlimit \
 libnavui-shield \
 libnavui-status \
+
+NOT_RELEASED_UI_MODULES = \
 libnavui-dropin \
+
+UI_MODULES = $(RELEASED_UI_MODULES)$(NOT_RELEASED_UI_MODULES)
 
 APPLICATION_MODULES = \
 qa-test-app \
