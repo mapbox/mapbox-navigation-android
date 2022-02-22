@@ -9,13 +9,13 @@ import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.binder.navigationListOf
-import com.mapbox.navigation.dropin.component.infopanel.activeguidance.InfoPanelActiveGuidanceComponent
+import com.mapbox.navigation.dropin.component.infopanel.InfoPanelActiveGuidanceComponent
 import com.mapbox.navigation.dropin.component.tripprogress.TripProgressComponent
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelActiveGuidanceLayoutBinding
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class ActiveGuidanceInfoPanelBinder(
-    private val navigationViewContext: DropInNavigationViewContext
+    private val context: DropInNavigationViewContext
 ) : UIBinder {
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
@@ -27,8 +27,12 @@ internal class ActiveGuidanceInfoPanelBinder(
         TransitionManager.go(scene)
         val binding = MapboxInfoPanelActiveGuidanceLayoutBinding.bind(viewGroup)
         return navigationListOf(
-            TripProgressComponent(binding.tripProgressView),
-            InfoPanelActiveGuidanceComponent(navigationViewContext, binding.endNavigation)
+            TripProgressComponent(binding.tripProgressView.root),
+            InfoPanelActiveGuidanceComponent(
+                context.stopActiveGuidanceUseCase(),
+                viewGroup,
+                binding.endNavigation
+            )
         )
     }
 }

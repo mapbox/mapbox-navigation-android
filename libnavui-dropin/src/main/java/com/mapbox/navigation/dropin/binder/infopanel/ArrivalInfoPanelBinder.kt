@@ -9,7 +9,7 @@ import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.binder.navigationListOf
-import com.mapbox.navigation.dropin.component.infopanel.arrival.InfoPanelArrivalComponent
+import com.mapbox.navigation.dropin.component.infopanel.InfoPanelArrivalComponent
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelArrivalLayoutBinding
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)

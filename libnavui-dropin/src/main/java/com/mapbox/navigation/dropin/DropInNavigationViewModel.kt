@@ -10,7 +10,11 @@ import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.recenter.RecenterButtonBehaviour
 import com.mapbox.navigation.dropin.component.replay.ReplayComponent
 import com.mapbox.navigation.dropin.component.sound.MapboxAudioBehavior
+import com.mapbox.navigation.dropin.model.Destination
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
@@ -22,6 +26,20 @@ internal class DropInNavigationViewModel : ViewModel() {
     private val _navigationState = MutableStateFlow<NavigationState>(NavigationState.FreeDrive)
     val navigationState = _navigationState.asStateFlow()
     val cameraState: DropInCameraState = DropInCameraState()
+
+    private val _destination = MutableStateFlow<Destination?>(null)
+    val destination = _destination.asStateFlow()
+
+    @Suppress("PropertyName")
+    val _activeNavigationStarted = MutableStateFlow(false)
+    val activeNavigationStarted = _activeNavigationStarted.asStateFlow()
+
+    private val _onBackPressedEvent = MutableSharedFlow<Unit>(
+        replay = 0,
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val onBackPressedEvent = _onBackPressedEvent.asSharedFlow()
 
     /**
      * These classes are accessible through MapboxNavigationApp.getObserver(..)
@@ -42,6 +60,14 @@ internal class DropInNavigationViewModel : ViewModel() {
 
     fun updateState(state: NavigationState) {
         _navigationState.value = state
+    }
+
+    fun updateDestination(destination: Destination?) {
+        _destination.value = destination
+    }
+
+    fun onBackPressed() {
+        _onBackPressedEvent.tryEmit(Unit)
     }
 
     init {

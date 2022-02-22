@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        style="@style/MapboxStyle.DropIn.InfoPanelHeadline"
+        android:id="@+id/duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2h 15m" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="5dp"
+        tools:showIn="@layout/mapbox_info_panel_route_preview_layout">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_gravity="center"
+            app:tint="#000"
+            app:srcCompat="@drawable/mapbox_map_pin_hole" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            style="@style/MapboxStyle.DropIn.InfoPanelSubtitle"
+            android:id="@+id/distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:text="182mi" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginLeft="10dp"
+            android:layout_gravity="center_vertical"
+            app:tint="#000"
+            app:srcCompat="@drawable/mapbox_ic_time" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            style="@style/MapboxStyle.DropIn.InfoPanelSubtitle"
+            android:id="@+id/eta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:text="12:23 pm" />
+    </LinearLayout>
+</LinearLayout>

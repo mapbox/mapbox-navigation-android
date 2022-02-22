@@ -9,25 +9,33 @@ import com.mapbox.navigation.dropin.binder.navigationListOf
 import com.mapbox.navigation.dropin.component.camera.DropInCameraMode
 import com.mapbox.navigation.dropin.component.camera.DropInNavigationCamera
 import com.mapbox.navigation.dropin.component.location.LocationPuck
-import com.mapbox.navigation.dropin.component.routefetch.RouteFetchComponent
+import com.mapbox.navigation.dropin.component.marker.MapMarkersComponent
 import com.mapbox.navigation.dropin.component.routeline.RouteLineComponent
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class ActiveGuidanceMapBinder(
-    private val navigationViewContext: DropInNavigationViewContext,
+    private val context: DropInNavigationViewContext,
 ) : Binder<MapView> {
-    private val cameraState = navigationViewContext.viewModel.cameraState
+
+    private val viewModel = context.viewModel
 
     override fun bind(mapView: MapView): MapboxNavigationObserver {
-        cameraState.setCameraMode(DropInCameraMode.FOLLOWING)
+        viewModel.cameraState.setCameraMode(DropInCameraMode.FOLLOWING)
         return navigationListOf(
             LocationPuck(mapView),
-            RouteLineComponent(mapView, navigationViewContext.routeLineOptions),
             DropInNavigationCamera(
-                navigationViewContext.viewModel.cameraState,
+                viewModel.cameraState,
                 mapView
             ),
-            RouteFetchComponent(mapView.context),
+            MapMarkersComponent(
+                mapView,
+                context.mapAnnotationFactory(),
+                viewModel
+            ),
+            RouteLineComponent(
+                mapView,
+                context.routeLineOptions
+            ),
         )
     }
 }

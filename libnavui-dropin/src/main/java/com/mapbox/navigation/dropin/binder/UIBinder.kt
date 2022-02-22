@@ -18,6 +18,8 @@ interface Binder<T> {
      * [MapboxNavigationObserver] which gives this view a simple lifecycle.
      */
     fun bind(value: T): MapboxNavigationObserver
+
+    fun unbind(value: T) = Unit
 }
 
 /**

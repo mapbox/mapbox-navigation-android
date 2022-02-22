@@ -9,12 +9,12 @@ import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.binder.navigationListOf
-import com.mapbox.navigation.dropin.component.infopanel.freedrive.InfoPanelFreeDriveComponent
+import com.mapbox.navigation.dropin.component.infopanel.InfoPanelFreeDriveComponent
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelFreeDriveLayoutBinding
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class FreeDriveInfoPanelBinder(
-    private val navigationViewContext: DropInNavigationViewContext
+    private val context: DropInNavigationViewContext
 ) : UIBinder {
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
@@ -24,9 +24,17 @@ internal class FreeDriveInfoPanelBinder(
             viewGroup.context
         )
         TransitionManager.go(scene)
+
         val binding = MapboxInfoPanelFreeDriveLayoutBinding.bind(viewGroup)
         return navigationListOf(
-            InfoPanelFreeDriveComponent(navigationViewContext, binding.startNavigation)
+            InfoPanelFreeDriveComponent(
+                context.viewModel,
+                context.fetchAndSetRouteUseCase(),
+                context.startActiveGuidanceUseCase(),
+                viewGroup,
+                binding.routePreview,
+                binding.startNavigation
+            )
         )
     }
 }

@@ -11,30 +11,35 @@ import com.mapbox.navigation.dropin.component.camera.DropInNavigationCamera
 import com.mapbox.navigation.dropin.component.location.LocationPuck
 import com.mapbox.navigation.dropin.component.marker.LongPressMapComponent
 import com.mapbox.navigation.dropin.component.marker.MapMarkersComponent
+import com.mapbox.navigation.dropin.component.routeline.RouteLineComponent
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal class FreeDriveMapBinder(
+internal class RoutePreviewMapBinder(
     private val context: DropInNavigationViewContext,
 ) : Binder<MapView> {
 
-    private val viewModel = context.viewModel
+    private val cameraState = context.viewModel.cameraState
 
     override fun bind(mapView: MapView): MapboxNavigationObserver {
-        viewModel.cameraState.setCameraMode(DropInCameraMode.OVERVIEW)
+        cameraState.setCameraMode(DropInCameraMode.OVERVIEW)
         return navigationListOf(
             LocationPuck(mapView),
             DropInNavigationCamera(
-                viewModel.cameraState,
+                context.viewModel.cameraState,
                 mapView
             ),
             MapMarkersComponent(
                 mapView,
                 context.mapAnnotationFactory(),
-                viewModel
+                context.viewModel
             ),
             LongPressMapComponent(
                 mapView,
-                viewModel
+                context.viewModel,
+            ),
+            RouteLineComponent(
+                mapView,
+                context.routeLineOptions
             ),
         )
     }
