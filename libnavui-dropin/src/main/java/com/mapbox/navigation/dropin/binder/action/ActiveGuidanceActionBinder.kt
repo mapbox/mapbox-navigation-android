@@ -10,6 +10,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.binder.navigationListOf
+import com.mapbox.navigation.dropin.component.cameramode.CameraModeButtonComponent
 import com.mapbox.navigation.dropin.component.recenter.RecenterButtonComponent
 import com.mapbox.navigation.dropin.component.sound.SoundButtonAction
 import com.mapbox.navigation.dropin.databinding.MapboxActionActiveGuidanceLayoutBinding
@@ -28,8 +29,8 @@ internal class ActiveGuidanceActionBinder : UIBinder {
         val binding = MapboxActionActiveGuidanceLayoutBinding.bind(viewGroup)
         return navigationListOf(
             SoundButtonAction(binding.soundButton),
+            CameraModeButtonComponent(binding.cameraModeButton),
             RecenterButtonComponent(binding.recenterButton)
-            // TODO add other actions here
         )
     }
 }

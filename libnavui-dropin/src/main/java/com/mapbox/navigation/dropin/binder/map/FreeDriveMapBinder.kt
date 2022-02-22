@@ -19,7 +19,7 @@ internal class FreeDriveMapBinder(
     private val cameraState = navigationViewContext.viewModel.cameraState
 
     override fun bind(mapView: MapView): MapboxNavigationObserver {
-        cameraState.cameraMode.value = DropInCameraMode.OVERVIEW
+        cameraState.setCameraMode(DropInCameraMode.OVERVIEW)
         return navigationListOf(
             LocationPuck(mapView),
             DropInNavigationCamera(

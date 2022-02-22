@@ -7,6 +7,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.binder.navigationListOf
+import com.mapbox.navigation.dropin.component.cameramode.CameraModeButtonComponent
 import com.mapbox.navigation.dropin.component.recenter.RecenterButtonComponent
 import com.mapbox.navigation.dropin.databinding.MapboxActionFreeDriveLayoutBinding
 
@@ -22,7 +23,8 @@ internal class FreeDriveActionBinder : UIBinder {
         val binding = MapboxActionFreeDriveLayoutBinding.bind(viewGroup)
 
         return navigationListOf(
-            RecenterButtonComponent(binding.recenterButton)
+            CameraModeButtonComponent(binding.cameraModeButton),
+            RecenterButtonComponent(binding.recenterButton),
             // TODO add other actions here
         )
     }

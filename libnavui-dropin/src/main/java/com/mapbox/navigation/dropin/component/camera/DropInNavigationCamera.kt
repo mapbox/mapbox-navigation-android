@@ -19,9 +19,11 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.dropin.component.camera.DropInCameraState.CameraUpdateEvent
 import com.mapbox.navigation.dropin.component.location.LocationBehavior
+import com.mapbox.navigation.dropin.extensions.flowNavigationCameraState
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
+import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -51,7 +53,7 @@ class DropInNavigationCamera(
 
         override fun onMoveBegin(detector: MoveGestureDetector) {
             if (cameraState.triggerIdleCameraOnMoveListener) {
-                cameraState.cameraMode.value = DropInCameraMode.IDLE
+                cameraState.setCameraMode(DropInCameraMode.IDLE)
             }
         }
 
@@ -81,7 +83,7 @@ class DropInNavigationCamera(
             locationStateManager.locationLiveData.asFlow().collect {
                 // TODO we don't really want to do this. isLocationInitialized is also attempting
                 //    to create the correct initialization experience.
-                updateCamera(cameraState.cameraMode(), it)
+                updateCamera(cameraState.cameraMode.value, it)
             }
         }
 
@@ -98,7 +100,7 @@ class DropInNavigationCamera(
         }
 
         coroutineScope.launch {
-            cameraState.cameraMode.asFlow().collect { cameraMode ->
+            cameraState.cameraMode.collect { cameraMode ->
                 if (!isLocationInitialized) return@collect
                 when (cameraMode) {
                     DropInCameraMode.IDLE ->
@@ -110,6 +112,17 @@ class DropInNavigationCamera(
                     null -> { /** no op */ }
                 }
             }
+        }
+
+        navigationCamera.flowNavigationCameraState().observe {
+            val mode = when (it) {
+                NavigationCameraState.TRANSITION_TO_OVERVIEW,
+                NavigationCameraState.OVERVIEW -> DropInCameraMode.OVERVIEW
+                NavigationCameraState.TRANSITION_TO_FOLLOWING,
+                NavigationCameraState.FOLLOWING -> DropInCameraMode.FOLLOWING
+                else -> DropInCameraMode.IDLE
+            }
+            cameraState.setCameraMode(mode)
         }
 
         mapboxNavigation.apply {

@@ -25,4 +25,24 @@
         android:layout_marginEnd="10dp"
         android:layout_marginTop="20dp" />
 
+    <com.mapbox.navigation.dropin.view.MapboxExtendableButton
+        android:id="@+id/extButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/customCameraModeButton"
+        app:extendableButtonIcon="@drawable/mapbox_ic_camera_follow"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="20dp" />
+
+    <com.mapbox.navigation.dropin.view.MapboxExtendableButton
+        android:id="@+id/extButton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/extButton"
+        app:extendableButtonIcon="@drawable/mapbox_ic_camera_follow"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="20dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
