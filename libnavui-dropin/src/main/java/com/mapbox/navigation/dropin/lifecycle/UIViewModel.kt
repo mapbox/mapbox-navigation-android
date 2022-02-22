@@ -21,10 +21,15 @@ import kotlinx.coroutines.launch
  * Behaviors have a lifecycle, contain state, and process actions. [UIComponent] will respond
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-abstract class UIViewModel<State, Action>(initialState: State) : MapboxNavigationObserver {
+abstract class UIViewModel<State, Action>(
+    mutableState: MutableStateFlow<State>
+) : MapboxNavigationObserver {
+
+    constructor(initialState: State) : this(MutableStateFlow(initialState))
+
     private val _action = MutableSharedFlow<Action>(extraBufferCapacity = 1)
     val action: Flow<Action> = _action
-    private val _state = MutableStateFlow(initialState)
+    private val _state: MutableStateFlow<State> = mutableState
     val state: StateFlow<State> = _state
 
     lateinit var mainJobControl: JobControl

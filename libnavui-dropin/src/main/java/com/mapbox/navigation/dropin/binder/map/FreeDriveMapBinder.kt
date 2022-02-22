@@ -8,6 +8,8 @@ import com.mapbox.navigation.dropin.binder.Binder
 import com.mapbox.navigation.dropin.binder.navigationListOf
 import com.mapbox.navigation.dropin.component.camera.CameraComponent
 import com.mapbox.navigation.dropin.component.location.LocationPuck
+import com.mapbox.navigation.dropin.component.marker.LongPressMapComponent
+import com.mapbox.navigation.dropin.component.marker.MapMarkersComponent
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class FreeDriveMapBinder(
@@ -21,6 +23,11 @@ internal class FreeDriveMapBinder(
                 mapView,
                 navigationViewContext.viewModel.locationViewModel,
                 navigationViewContext.viewModel.cameraViewModel,
+            ),
+            MapMarkersComponent(mapView, navigationViewContext),
+            LongPressMapComponent(
+                mapView,
+                navigationViewContext,
             ),
         )
     }

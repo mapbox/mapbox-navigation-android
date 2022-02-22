@@ -11,6 +11,8 @@ class MapboxNavigationViewActivity : AppCompatActivity() {
         val binding = LayoutActivityNavigationViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        onBackPressedDispatcher.addCallback(this, binding.root.getOnBackPressedCallback())
+
         /**
          * This activity is demonstrating default behavior. Do not add anything to this class.
          *

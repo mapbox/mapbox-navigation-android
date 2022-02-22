@@ -22,7 +22,7 @@ internal class ActionListCoordinator(
 ) : UICoordinator<ViewGroup>(actionList) {
 
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
-        return navContext.viewModel.navigationState.map { navigationState ->
+        return navContext.navigationState.map { navigationState ->
             when (navigationState) {
                 NavigationState.RoutePreview,
                 NavigationState.ActiveNavigation -> ActiveGuidanceActionBinder(navContext)

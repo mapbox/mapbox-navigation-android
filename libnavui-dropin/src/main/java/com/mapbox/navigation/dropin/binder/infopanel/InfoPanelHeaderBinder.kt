@@ -9,24 +9,28 @@ import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.binder.navigationListOf
-import com.mapbox.navigation.dropin.component.infopanel.arrival.InfoPanelArrivalComponent
-import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelArrivalLayoutBinding
+import com.mapbox.navigation.dropin.component.infopanel.InfoPanelHeaderComponent
+import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderLayoutBinding
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal class ArrivalInfoPanelBinder(
-    private val navigationViewContext: DropInNavigationViewContext
+internal class InfoPanelHeaderBinder(
+    private val context: DropInNavigationViewContext
 ) : UIBinder {
+
+    private val tripProgressBinder get() = context.uiBinders.value.infoPanelTripProgressBinder
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
             viewGroup,
-            R.layout.mapbox_info_panel_arrival_layout,
+            R.layout.mapbox_info_panel_header_layout,
             viewGroup.context
         )
         TransitionManager.go(scene)
-        val binding = MapboxInfoPanelArrivalLayoutBinding.bind(viewGroup)
+
+        val binding = MapboxInfoPanelHeaderLayoutBinding.bind(viewGroup)
         return navigationListOf(
-            InfoPanelArrivalComponent(binding.root)
+            InfoPanelHeaderComponent(binding, context),
+            tripProgressBinder.bind(binding.tripProgressLayout),
         )
     }
 }
