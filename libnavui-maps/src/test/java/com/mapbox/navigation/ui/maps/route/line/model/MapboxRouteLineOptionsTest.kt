@@ -2,24 +2,32 @@ package com.mapbox.navigation.ui.maps.route.line.model
 
 import android.content.Context
 import android.graphics.Color
-import androidx.test.core.app.ApplicationProvider
+import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class MapboxRouteLineOptionsTest {
 
-    lateinit var ctx: Context
+    private val ctx: Context = mockk()
 
     @Before
     fun setUp() {
-        ctx = ApplicationProvider.getApplicationContext()
+        mockkStatic(AppCompatResources::class)
+        every { AppCompatResources.getDrawable(any(), any()) } returns mockk(relaxed = true)
+    }
+
+    @After
+    fun cleanUp() {
+        unmockkStatic(AppCompatResources::class)
     }
 
     @Test
