@@ -1,0 +1,1 @@
+sourceset_dependencies = '{":libnavui-status:dokkaHtml/androidTestRelease": [], ":libnavui-status:dokkaHtml/debug": [], ":libnavui-status:dokkaHtml/main": [], ":libnavui-status:dokkaHtml/release": []}'
