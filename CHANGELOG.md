@@ -5,6 +5,14 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 
 #### Features
+
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.4.0-alpha.1 - February 24, 2022
+### Changelog
+[Changes between v2.3.0-rc.3 and v2.4.0-alpha.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.3.0-rc.3...v2.4.0-alpha.1)
+
+#### Features
 - Introduced a `NavigationRoute` object and related functions like `NavigationRouterCallback`, `MapboxNavigation#setNavigationRoutes`, etc. `NavigationRoute` is a domain specific wrapper on top of `DirectionsRoute` which provides information (and enforces its presence) about the original `DirectionsResponse` that this route is part of, as well as what `RouteOptions` were used to generate it.
   Most of the Navigation SDK APIs that rely only on `DirectionsRoute` are now marked as `Deprecated` since there might be features introduced in the future that would require the `NavigationRoute` instances instead.
   There are `NavigationRoute#toDirectionsRoute()` and `DirectionsRoute#toNavigationRoute()` compatibility extensions available, however, the latter is lossy since `DirectionsRoute` cannot carry as much information as `NavigationRoute` and the recommended migration path is to use `NavigationRouterCallback` instead of the old `RouterCallback` to request routes.
@@ -12,6 +20,16 @@ Mapbox welcomes participation and contributions from everyone.
   [#5411](https://github.com/mapbox/mapbox-navigation-android/pull/5411)
 
 #### Bug fixes and improvements
+- Added `MapboxNavigationApp.setup` overload, that accepts `NavigationOptionsProvider` instead of prebuilt `NavigationOptions`. [#5490](https://github.com/mapbox/mapbox-navigation-android/pull/5490)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.3.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.3.0))
+- Mapbox Navigation Native `v88.0.0`
+- Mapbox Core Common `v21.1.1`
+- Mapbox Java `v6.4.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.4.0-beta.1))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
 
 ## Mapbox Navigation SDK 2.3.0-rc.3 - February 24, 2022
 This release is a re-tag of the `v2.3.0-rc.2` to correct the commit which should represent the state of the codebase. There are no functional differences between these releases.
@@ -36,7 +54,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 #### Bug fixes and improvements
 - Added a workaround for [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://issuetracker.google.com/issues/175055271). [#5492](https://github.com/mapbox/mapbox-navigation-android/pull/5492)
-- Added `MapboxNavigationApp.setup` overload, that accepts `NavigationOptionsProvider` instead of prebuilt `NavigationOptions`. [#5490](https://github.com/mapbox/mapbox-navigation-android/pull/5490)
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
