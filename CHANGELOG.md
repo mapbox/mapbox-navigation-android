@@ -7,7 +7,20 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.3.0-rc.3 - February 24, 2022
+
+#### Bug fixes and improvements
 - Added a workaround for [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://issuetracker.google.com/issues/175055271). [#5492](https://github.com/mapbox/mapbox-navigation-android/pull/5492)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.3.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.3.0))
+- Mapbox Navigation Native `v88.0.0`
+- Mapbox Core Common `v21.1.0`
+- Mapbox Java `v6.3.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.3.0))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
 
 ## Mapbox Navigation SDK 2.3.0-rc.1 - February 17, 2022
 
