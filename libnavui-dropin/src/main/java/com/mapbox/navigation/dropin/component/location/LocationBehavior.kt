@@ -2,8 +2,6 @@ package com.mapbox.navigation.dropin.component.location
 
 import android.annotation.SuppressLint
 import android.location.Location
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.base.common.logger.model.Message
@@ -15,6 +13,8 @@ import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.utils.internal.LoggerProvider.logger
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -22,8 +22,8 @@ class LocationBehavior : MapboxNavigationObserver {
 
     val navigationLocationProvider = NavigationLocationProvider()
 
-    private val _locationLiveData = MutableLiveData<Location>()
-    val locationLiveData: LiveData<Location> = _locationLiveData
+    private val _locationStateFlow = MutableStateFlow<Location?>(null)
+    val locationStateFlow = _locationStateFlow.asStateFlow()
 
     private val locationObserver: LocationObserver = object : LocationObserver {
         override fun onNewRawLocation(rawLocation: Location) {
@@ -35,7 +35,7 @@ class LocationBehavior : MapboxNavigationObserver {
                 locationMatcherResult.enhancedLocation,
                 locationMatcherResult.keyPoints
             )
-            _locationLiveData.value = locationMatcherResult.enhancedLocation
+            _locationStateFlow.value = locationMatcherResult.enhancedLocation
         }
     }
 
@@ -45,7 +45,7 @@ class LocationBehavior : MapboxNavigationObserver {
             override fun onSuccess(result: LocationEngineResult) {
                 result.lastLocation?.let {
                     navigationLocationProvider.changePosition(it, emptyList())
-                    _locationLiveData.value = it
+                    _locationStateFlow.value = it
                 }
             }
             override fun onFailure(exception: Exception) {

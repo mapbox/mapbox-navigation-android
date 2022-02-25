@@ -13,7 +13,7 @@ internal class RecenterButtonBehaviour(
 ) : UIComponent() {
 
     fun onButtonClick() {
-        locationBehavior.locationLiveData.value?.also {
+        locationBehavior.locationStateFlow.value?.also {
             val cameraOptions = CameraOptions.Builder()
                 .center(it.toPoint())
                 .build()

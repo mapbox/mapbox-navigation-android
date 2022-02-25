@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.graphics.Rect
 import android.location.Location
 import android.view.ViewTreeObserver
-import androidx.lifecycle.asFlow
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
@@ -80,10 +79,12 @@ class DropInNavigationCamera(
         mapView.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
 
         coroutineScope.launch {
-            locationStateManager.locationLiveData.asFlow().collect {
-                // TODO we don't really want to do this. isLocationInitialized is also attempting
-                //    to create the correct initialization experience.
-                updateCamera(cameraState.cameraMode.value, it)
+            locationStateManager.locationStateFlow.collect {
+                if (it != null) {
+                    // TODO we don't really want to do this. isLocationInitialized is also attempting
+                    //    to create the correct initialization experience.
+                    updateCamera(cameraState.cameraMode.value, it)
+                }
             }
         }
 

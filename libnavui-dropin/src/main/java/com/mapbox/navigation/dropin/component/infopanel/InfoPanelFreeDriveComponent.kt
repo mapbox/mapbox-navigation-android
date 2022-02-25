@@ -2,7 +2,6 @@ package com.mapbox.navigation.dropin.component.infopanel
 
 import android.annotation.SuppressLint
 import android.view.View
-import android.view.ViewGroup
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.DropInNavigationViewModel

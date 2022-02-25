@@ -19,7 +19,7 @@ class GetCurrentLocationUseCase(
 ) : UseCase<Unit, Location>(dispatcher) {
 
     override suspend fun execute(parameters: Unit): Location {
-        var location = locationBehavior.locationLiveData.value
+        var location = locationBehavior.locationStateFlow.value
         if (location != null) return location
 
         val locationEngine = navigation.navigationOptions.locationEngine
