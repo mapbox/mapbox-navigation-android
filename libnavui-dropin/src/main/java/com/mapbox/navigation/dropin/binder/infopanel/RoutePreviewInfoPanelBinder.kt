@@ -30,7 +30,6 @@ internal class RoutePreviewInfoPanelBinder(
             TripProgressComponent(binding.tripProgressView.root),
             InfoPanelRoutePreviewComponent(
                 context.startActiveGuidanceUseCase(),
-                binding.root,
                 binding.startNavigation
             )
         )

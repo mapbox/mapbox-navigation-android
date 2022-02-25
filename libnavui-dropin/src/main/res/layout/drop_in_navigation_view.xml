@@ -87,7 +87,8 @@
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
             app:behavior_hideable="true"
             app:behavior_fitToContents="true"
-            tools:layout_height="100dp" />
+            app:behavior_peekHeight="@dimen/mapbox_infoPanel_peekHeight"
+            tools:layout_height="@dimen/mapbox_infoPanel_peekHeight" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

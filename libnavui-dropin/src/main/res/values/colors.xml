@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="mapbox_drop_in_primary">#373674</color>
+    <color name="mapbox_drop_in_primary">@color/colorSecondary</color>
     <color name="mapbox_drop_in_surface">#fff</color>
     <color name="mapbox_drop_in_onSurface">#3C3E3E</color>
     <color name="mapbox_drop_in_accent">#CDD0D0</color>

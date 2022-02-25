@@ -30,7 +30,6 @@ internal class ActiveGuidanceInfoPanelBinder(
             TripProgressComponent(binding.tripProgressView.root),
             InfoPanelActiveGuidanceComponent(
                 context.stopActiveGuidanceUseCase(),
-                viewGroup,
                 binding.endNavigation
             )
         )

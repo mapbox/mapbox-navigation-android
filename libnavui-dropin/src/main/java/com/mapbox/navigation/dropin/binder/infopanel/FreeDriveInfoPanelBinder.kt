@@ -31,7 +31,6 @@ internal class FreeDriveInfoPanelBinder(
                 context.viewModel,
                 context.fetchAndSetRouteUseCase(),
                 context.startActiveGuidanceUseCase(),
-                viewGroup,
                 binding.routePreview,
                 binding.startNavigation
             )

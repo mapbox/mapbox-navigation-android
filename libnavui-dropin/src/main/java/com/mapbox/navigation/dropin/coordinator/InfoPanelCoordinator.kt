@@ -30,14 +30,21 @@ internal class InfoPanelCoordinator(
 ) : UICoordinator<ViewGroup>(infoPanel) {
 
     private val viewModel = context.viewModel
+    private val behavior = BottomSheetBehavior.from(infoPanel)
+
+    init {
+        behavior.hide()
+    }
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
         val behavior = BottomSheetBehavior.from(viewGroup)
         behavior.addBottomSheetCallback(updateGuideline)
-        behavior.isHideable = true
-        behavior.state = BottomSheetBehavior.STATE_HIDDEN
+        viewModel.destination.observe { destination ->
+            if (destination != null) behavior.collapse()
+            else behavior.hide()
+        }
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
@@ -45,6 +52,7 @@ internal class InfoPanelCoordinator(
         BottomSheetBehavior.from(viewGroup).removeBottomSheetCallback(updateGuideline)
     }
 
+    // Content Binders
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
         return viewModel.navigationState.map { navigationState ->
             when (navigationState) {
@@ -55,6 +63,16 @@ internal class InfoPanelCoordinator(
                 else -> EmptyInfoPanelBinder()
             }
         }
+    }
+
+    private fun <V : View> BottomSheetBehavior<V>.collapse() {
+        state = BottomSheetBehavior.STATE_COLLAPSED
+        isHideable = false
+    }
+
+    private fun <V : View> BottomSheetBehavior<V>.hide() {
+        isHideable = true
+        state = BottomSheetBehavior.STATE_HIDDEN
     }
 
     private val updateGuideline = object : BottomSheetBehavior.BottomSheetCallback() {
