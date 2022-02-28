@@ -2,7 +2,6 @@ package com.mapbox.navigation.core.reroute
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.options.RerouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -13,6 +12,7 @@ import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -49,9 +49,6 @@ class MapboxRerouteControllerTest {
     private lateinit var rerouteOptions: RerouteOptions
 
     @MockK
-    private lateinit var logger: Logger
-
-    @MockK
     private lateinit var successFromResult: RouteOptionsUpdater.RouteOptionsResult.Success
 
     @MockK
@@ -67,6 +64,8 @@ class MapboxRerouteControllerTest {
     lateinit var primaryRerouteObserver: RerouteController.RerouteStateObserver
 
     @get:Rule
+    val mockLoggerTestRule = MockLoggerRule()
+    @get:Rule
     var coroutineRule = MainCoroutineRule()
 
     @Before
@@ -78,8 +77,7 @@ class MapboxRerouteControllerTest {
                 tripSession,
                 routeOptionsUpdater,
                 rerouteOptions,
-                ThreadController(),
-                logger
+                ThreadController()
             )
         )
         every { successFromResult.routeOptions } returns routeOptionsFromSuccessResult

@@ -1,8 +1,6 @@
 package com.mapbox.navigation.core.routealternatives
 
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.internal.utils.parseNativeDirectionsAlternative
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
@@ -63,7 +61,7 @@ internal class RouteAlternativesController constructor(
             }
 
             override fun onRouteAlternativesError(error: RouteAlternativesError) {
-                logE(TAG, Message("Error: ${error.message}"))
+                logE(TAG, "Error: ${error.message}")
             }
         }
         legacyObserversMap[routeAlternativesObserver] = observer
@@ -200,19 +198,16 @@ internal class RouteAlternativesController constructor(
                 } else {
                     logE(
                         TAG,
-                        Message(
-                            """
-                                    |unable to parse alternative at index $index;
-                                    |failure for response: ${routeAlternative.route.response}
-                                """.trimMargin()
-                        ),
-                        expected.error
+                        """
+                            |unable to parse alternative at index $index;
+                            |failure for response: ${routeAlternative.route.response}
+                        """.trimMargin()
                     )
                     null
                 }
             }
         }
-        logI(TAG, Message("${alternatives.size} alternatives available"))
+        logI(TAG, "${alternatives.size} alternatives available")
 
         mainJobControl.scope.launch {
             val origin = nativeAlternatives.find {
@@ -226,6 +221,6 @@ internal class RouteAlternativesController constructor(
     }
 
     private companion object {
-        private val TAG = Tag("MbxRouteAlternativesController")
+        private const val TAG = "MbxRouteAlternativesController"
     }
 }

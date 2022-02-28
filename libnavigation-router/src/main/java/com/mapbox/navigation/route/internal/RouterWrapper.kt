@@ -8,8 +8,6 @@ import com.mapbox.annotation.module.MapboxModule
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -60,13 +58,11 @@ class RouterWrapper(
                         if (it.type == RouterErrorType.REQUEST_CANCELLED) {
                             logI(
                                 TAG,
-                                Message(
-                                    """
-                                        Route request cancelled:
-                                        $routeOptions
-                                        $origin
-                                    """.trimIndent()
-                                )
+                                """
+                                    Route request cancelled:
+                                    $routeOptions
+                                    $origin
+                                """.trimIndent()
                             )
                             callback.onCanceled(routeOptions, origin.mapToSdkRouteOrigin())
                         } else {
@@ -81,12 +77,10 @@ class RouterWrapper(
 
                             logW(
                                 TAG,
-                                Message(
-                                    """
-                                        Route request failed with:
-                                        $failureReasons
-                                    """.trimIndent()
-                                )
+                                """
+                                    Route request failed with:
+                                    $failureReasons
+                                """.trimIndent()
                             )
 
                             callback.onFailure(failureReasons, routeOptions)
@@ -114,7 +108,7 @@ class RouterWrapper(
                                 )
                             },
                             { response ->
-                                logI(TAG, Message("Response metadata: ${response.metadata()}"))
+                                logI(TAG, "Response metadata: ${response.metadata()}")
                                 val navigationRoutes = mutableListOf<NavigationRoute>()
                                 for (i in 0 until response.routes().size) {
                                     navigationRoutes.add(
@@ -176,7 +170,7 @@ class RouterWrapper(
                    requestUuid = $requestUuid
                 """.trimIndent()
 
-            logW(TAG, Message(errorMessage))
+            logW(TAG, errorMessage)
 
             callback.onFailure(
                 RouterFactory.buildNavigationRouterRefreshError(
@@ -212,7 +206,7 @@ class RouterWrapper(
                                legIndex = $legIndex
                             """.trimIndent()
 
-                        logW(TAG, Message(errorMessage))
+                        logW(TAG, errorMessage)
 
                         callback.onFailure(
                             RouterFactory.buildNavigationRouterRefreshError(
@@ -290,7 +284,7 @@ class RouterWrapper(
     }
 
     private companion object {
-        private val TAG = Tag("MbxRouterWrapper")
+        private const val TAG = "MbxRouterWrapper"
         private const val REQUEST_FAILURE = -1L
     }
 }

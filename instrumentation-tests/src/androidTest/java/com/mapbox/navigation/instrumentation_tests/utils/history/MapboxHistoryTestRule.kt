@@ -1,8 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.utils.history
 
 import android.os.Environment
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
 import com.mapbox.navigation.utils.internal.logE
@@ -61,7 +59,7 @@ class MapboxHistoryTestRule : TestWatcher() {
             runOnMainSync {
                 val countDownLatch = CountDownLatch(1)
                 historyRecorder.stopRecording {
-                    logE(Tag("DEBUG"), Message("$message history path=$it"))
+                    logE("DEBUG", "$message history path=$it")
                     countDownLatch.countDown()
                 }
                 countDownLatch.await()

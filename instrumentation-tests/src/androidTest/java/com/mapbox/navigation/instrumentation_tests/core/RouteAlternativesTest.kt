@@ -4,8 +4,6 @@ import android.location.Location
 import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -109,7 +107,7 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         runOnMainSync {
             val countDownLatch = CountDownLatch(1)
             mapboxNavigation.historyRecorder.stopRecording {
-                logE(Tag("RouteAlternativesTest"), Message("history path=$it"))
+                logE("RouteAlternativesTest", "history path=$it")
                 countDownLatch.countDown()
             }
             countDownLatch.await()

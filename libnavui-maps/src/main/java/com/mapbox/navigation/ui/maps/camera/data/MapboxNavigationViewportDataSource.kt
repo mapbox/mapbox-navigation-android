@@ -4,8 +4,6 @@ import android.location.Location
 import androidx.annotation.UiThread
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -32,8 +30,9 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.pro
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.simplifyCompleteRoutePoints
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.ui.maps.camera.utils.normalizeBearing
-import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.toPoint
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.math.max
@@ -461,22 +460,18 @@ class MapboxNavigationViewportDataSource(
     fun onRouteProgressChanged(routeProgress: RouteProgress) {
         val currentRoute = this.navigationRoute
         if (currentRoute == null) {
-            LoggerProvider.logger.w(
-                Tag(TAG),
-                Message(
-                    "You're calling #onRouteProgressChanged but you didn't call #onRouteChanged."
-                )
+            logW(
+                TAG,
+                "You're calling #onRouteProgressChanged but you didn't call #onRouteChanged."
             )
             clearProgressData()
             return
         } else if (!currentRoute.directionsRoute.isSameRoute(routeProgress.route)) {
-            LoggerProvider.logger.e(
-                Tag(TAG),
-                Message(
-                    "Provided route (#onRouteChanged) and navigated route " +
-                        "(#onRouteProgressChanged) are not the same. " +
-                        "Aborting framed geometry updates based on route progress."
-                )
+            logE(
+                TAG,
+                "Provided route (#onRouteChanged) and navigated route " +
+                    "(#onRouteProgressChanged) are not the same. " +
+                    "Aborting framed geometry updates based on route progress."
             )
             clearProgressData()
             return
@@ -521,11 +516,9 @@ class MapboxNavigationViewportDataSource(
                 currentStepProgress
             )
         } ?: run {
-            LoggerProvider.logger.e(
-                Tag(TAG),
-                Message(
-                    "You're calling #onRouteProgressChanged with empty leg or step progress."
-                )
+            logE(
+                TAG,
+                "You're calling #onRouteProgressChanged with empty leg or step progress."
             )
             clearProgressData()
         }

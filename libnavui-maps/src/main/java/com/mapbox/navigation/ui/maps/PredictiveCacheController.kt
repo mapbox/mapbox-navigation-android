@@ -1,7 +1,5 @@
 package com.mapbox.navigation.ui.maps
 
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.Value
 import com.mapbox.common.TileStore
@@ -15,7 +13,7 @@ import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.PredictiveCache
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logE
 import java.util.HashMap
 
 private const val TAG = "MbxPredictiveCache"
@@ -200,7 +198,7 @@ class PredictiveCacheController @JvmOverloads constructor(
     }
 
     private fun handleError(error: String?) {
-        LoggerProvider.logger.e(Tag(TAG), Message(error ?: "null"))
+        logE(TAG, error ?: "null")
         predictiveCacheControllerErrorHandler?.onError(error)
     }
 

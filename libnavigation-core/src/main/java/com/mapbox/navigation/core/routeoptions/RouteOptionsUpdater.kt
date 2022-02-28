@@ -3,14 +3,12 @@ package com.mapbox.navigation.core.routeoptions
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logE
 import kotlin.math.min
 
 private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
@@ -39,10 +37,7 @@ class RouteOptionsUpdater {
         if (routeOptions == null || routeProgress == null || locationMatcherResult == null) {
             val msg = "Cannot combine RouteOptions, invalid inputs. routeOptions, " +
                 "routeProgress and locationMatcherResult cannot be null"
-            LoggerProvider.logger.e(
-                Tag(TAG),
-                Message(msg)
-            )
+            logE(TAG, msg)
             return RouteOptionsResult.Error(Throwable(msg))
         }
 
@@ -57,10 +52,7 @@ class RouteOptionsUpdater {
                 locationMatcherResult=$locationMatcherResult
                 routeProgress=$routeProgress
             """.trimIndent()
-            LoggerProvider.logger.e(
-                Tag(TAG),
-                Message(msg)
-            )
+            logE(TAG, msg)
             return RouteOptionsResult.Error(Throwable(msg))
         }
 
@@ -156,18 +148,9 @@ class RouteOptionsUpdater {
             optionsBuilder.arriveBy(null)
             optionsBuilder.departAt(null)
         } catch (e: Exception) {
-            LoggerProvider.logger.e(
-                Tag(TAG),
-                Message("routeOptions=[$routeOptions]")
-            )
-            LoggerProvider.logger.e(
-                Tag(TAG),
-                Message("locationMatcherResult=[$locationMatcherResult]")
-            )
-            LoggerProvider.logger.e(
-                Tag(TAG),
-                Message("routeProgress=[$routeProgress]")
-            )
+            logE(TAG, "routeOptions=[$routeOptions]")
+            logE(TAG, "locationMatcherResult=[$locationMatcherResult]")
+            logE(TAG, "routeProgress=[$routeProgress]")
             throw e
         }
 

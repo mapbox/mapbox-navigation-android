@@ -1,8 +1,6 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
@@ -10,10 +8,11 @@ import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.navigation.utils.internal.ThreadController
-import io.mockk.Runs
+import com.mapbox.navigation.utils.internal.logI
+import com.mapbox.navigation.utils.internal.logW
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
@@ -34,6 +33,8 @@ private const val routeDiff2 = "Updated duration, speed, maxSpeed, congestion at
 class RouteRefreshControllerTest {
 
     @get:Rule
+    val mockLoggerTestRule = MockLoggerRule()
+    @get:Rule
     val coroutineRule = MainCoroutineRule()
 
     private val routeRefreshCallbackSlot = slot<NavigationRouterRefreshCallback>()
@@ -41,12 +42,6 @@ class RouteRefreshControllerTest {
         every { routes } returns listOf(mockk())
     }
     private val tripSession: TripSession = mockk()
-    private val logger: Logger = mockk {
-        every { w(any(), any()) } just Runs
-        every { i(any(), any()) } just Runs
-        every { e(any(), any()) } just Runs
-        every { e(any(), any(), any()) } just Runs
-    }
     private val routeDiffProvider = mockk<DirectionsRouteDiffProvider>()
     private val routeOptions: RouteOptions = mockk {
         every {
@@ -66,7 +61,6 @@ class RouteRefreshControllerTest {
         routeRefreshOptions,
         directionsSession,
         tripSession,
-        logger,
         threadController,
         routeDiffProvider,
     )
@@ -105,7 +99,6 @@ class RouteRefreshControllerTest {
                 .build(),
             directionsSession,
             tripSession,
-            logger,
             threadController,
         )
         every { routeOptions.enableRefresh() } returns true
@@ -151,7 +144,7 @@ class RouteRefreshControllerTest {
 
         verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
         verify(exactly = 1) {
-            logger.w(RouteRefreshController.TAG, any())
+            logW(RouteRefreshController.TAG, any())
         }
     }
 
@@ -292,8 +285,8 @@ class RouteRefreshControllerTest {
         routeRefreshController.stop()
 
         verify(exactly = 1) {
-            logger.i(RouteRefreshController.TAG, Message(routeDiff1))
-            logger.i(RouteRefreshController.TAG, Message(routeDiff2))
+            logI(RouteRefreshController.TAG, routeDiff1)
+            logI(RouteRefreshController.TAG, routeDiff2)
         }
     }
 
@@ -310,7 +303,7 @@ class RouteRefreshControllerTest {
         routeRefreshController.stop()
 
         verify(exactly = 1) {
-            logger.i(RouteRefreshController.TAG, Message("No changes to route annotations"))
+            logI(RouteRefreshController.TAG, "No changes to route annotations")
         }
     }
 

@@ -4,11 +4,9 @@ import android.content.Context
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import androidx.annotation.VisibleForTesting
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logE
 import java.util.Locale
 
 /**
@@ -61,9 +59,9 @@ internal class VoiceInstructionsTextPlayer(
         if (isLanguageSupported && announcement.isNotBlank()) {
             play(announcement)
         } else {
-            LoggerProvider.logger.e(
-                Tag(TAG),
-                Message("$LANGUAGE_NOT_SUPPORTED or announcement from state is blank")
+            logE(
+                TAG,
+                "$LANGUAGE_NOT_SUPPORTED or announcement from state is blank"
             )
             donePlaying()
         }
@@ -110,7 +108,7 @@ internal class VoiceInstructionsTextPlayer(
             true
         }
         if (!isLanguageSupported) {
-            LoggerProvider.logger.e(Tag(TAG), Message(LANGUAGE_NOT_SUPPORTED))
+            logE(TAG, LANGUAGE_NOT_SUPPORTED)
             return
         }
         textToSpeech.language = language
@@ -121,12 +119,12 @@ internal class VoiceInstructionsTextPlayer(
 
             override fun onError(utteranceId: String?) {
                 // Deprecated, may be called due to https://issuetracker.google.com/issues/138321382
-                LoggerProvider.logger.e(Tag(TAG), Message("Unexpected TextToSpeech error"))
+                logE(TAG, "Unexpected TextToSpeech error")
                 donePlaying()
             }
 
             override fun onError(utteranceId: String?, errorCode: Int) {
-                LoggerProvider.logger.e(Tag(TAG), Message("TextToSpeech error: $errorCode"))
+                logE(TAG, "TextToSpeech error: $errorCode")
                 donePlaying()
             }
 

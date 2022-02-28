@@ -1,8 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -19,7 +17,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineExpressi
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
@@ -126,9 +124,9 @@ internal class VanishingRouteLine {
         ) { granularDistances, index ->
             val upcomingIndex = granularDistances.distancesArray[index]
             if (upcomingIndex == null) {
-                LoggerProvider.logger.d(
-                    Tag("MbxVanishingRouteLine"),
-                    Message("Upcoming route line index is null.")
+                logD(
+                    "MbxVanishingRouteLine",
+                    "Upcoming route line index is null."
                 )
                 return null
             }

@@ -7,8 +7,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -16,7 +14,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
-import com.mapbox.navigation.utils.internal.LoggerProvider.logger
+import com.mapbox.navigation.utils.internal.logE
 
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -52,10 +50,9 @@ class DropInLocationViewModel : ViewModel() {
                     }
                 }
                 override fun onFailure(exception: Exception) {
-                    logger.e(
-                        Tag("MbxDropInLocationObserver"),
-                        Message("Failed to get immediate location"),
-                        exception
+                    logE(
+                        "MbxDropInLocationObserver",
+                        "Failed to get immediate location exception=$exception"
                     )
                 }
             })

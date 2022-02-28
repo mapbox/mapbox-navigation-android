@@ -5,24 +5,23 @@ package com.mapbox.navigation.core.navigator
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.FixLocation
 import java.lang.reflect.Method
 import java.util.Date
+import kotlin.collections.HashMap
+import kotlin.collections.set
 
 internal typealias FixLocationExtras = HashMap<String, Value>
 
-private val TAG = Tag("MbxLocationEx")
+private const val TAG = "MbxLocationEx"
 private val setIsFromMockProviderMethod: Method? by lazy {
     val printError: (Exception) -> Unit = {
-        LoggerProvider.logger.e(
+        logE(
             TAG,
-            Message("Unable to find method for setting mock provider"),
-            it
+            "Unable to find method for setting mock provider exception=$it"
         )
     }
     try {

@@ -487,7 +487,7 @@ package com.mapbox.navigation.core.replay.route {
 
   public final class ReplayRouteMapper {
     ctor public ReplayRouteMapper(com.mapbox.navigation.core.replay.route.ReplayRouteOptions options = ReplayRouteOptions.<init>().build());
-    ctor public ReplayRouteMapper(com.mapbox.navigation.core.replay.route.ReplayRouteOptions options = ReplayRouteOptions.<init>().build(), com.mapbox.base.common.logger.Logger logger);
+    ctor @Deprecated public ReplayRouteMapper(com.mapbox.navigation.core.replay.route.ReplayRouteOptions options = ReplayRouteOptions.<init>().build(), com.mapbox.base.common.logger.Logger logger);
     method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions getOptions();
     method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapDirectionsRouteGeometry(com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute);
     method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapDirectionsRouteLegAnnotation(com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute);

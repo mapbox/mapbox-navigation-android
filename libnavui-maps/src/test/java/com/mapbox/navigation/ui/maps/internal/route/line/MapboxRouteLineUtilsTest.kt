@@ -6,6 +6,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.Logger
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
@@ -43,7 +44,9 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
@@ -452,6 +455,8 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun getBelowLayerIdToUse_whenLayerIdNotFoundReturnsNull() {
+        mockkStatic(Logger::class)
+        every { Logger.e(any(), any()) } just Runs
         val style = mockk<Style> {
             every { styleLayerExists("foobar") } returns false
         }
@@ -459,6 +464,7 @@ class MapboxRouteLineUtilsTest {
         val result = MapboxRouteLineUtils.getBelowLayerIdToUse("foobar", style)
 
         assertNull(result)
+        unmockkStatic(Logger::class)
     }
 
     @Test

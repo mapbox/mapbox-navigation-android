@@ -1,14 +1,11 @@
 package com.mapbox.navigation.core.telemetry
 
 import android.location.Location
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.TAG
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
+import com.mapbox.navigation.utils.internal.logD
 
-internal class LocationsCollectorImpl(
-    private val logger: Logger?
-) : LocationsCollector {
+internal class LocationsCollectorImpl : LocationsCollector {
 
     companion object {
         private const val LOCATION_BUFFER_MAX_SIZE = 20
@@ -55,7 +52,7 @@ internal class LocationsCollectorImpl(
     }
 
     override fun flushBuffers() {
-        logger?.d(TAG, Message("flush buffer. Pending events = ${eventsLocationsBuffer.size}"))
+        logD(TAG, "flush buffer. Pending events = ${eventsLocationsBuffer.size}")
         eventsLocationsBuffer.forEach { it.onBufferFull() }
         eventsLocationsBuffer.clear()
     }
@@ -63,7 +60,8 @@ internal class LocationsCollectorImpl(
     override fun flushBufferFor(
         locationsCollectorListener: LocationsCollector.LocationsCollectorListener
     ) {
-        logger?.d(TAG, Message("flush buffer for only one observer"))
+
+        logD(TAG, "flush buffer for only one observer")
         eventsLocationsBuffer.find {
             it.locationsCollectorListener === locationsCollectorListener
         }?.also {

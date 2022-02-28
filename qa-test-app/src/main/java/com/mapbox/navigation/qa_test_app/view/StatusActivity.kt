@@ -10,8 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -64,7 +62,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.shield.model.RouteShieldCallback
 import com.mapbox.navigation.ui.status.model.Status
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -182,7 +180,7 @@ class StatusActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private fun renderManeuvers(maneuvers: Expected<ManeuverError, List<Maneuver>>) {
         maneuvers.onError { error ->
-            LoggerProvider.logger.e(Tag("MbxManeuverActivity"), Message(error.errorMessage!!))
+            logE("MbxManeuverActivity", error.errorMessage!!)
         }
         maneuvers.onValue {
             if (binding.maneuverView.visibility == INVISIBLE) {

@@ -3,8 +3,7 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.api
 import android.content.res.AssetManager
 import android.graphics.Typeface
 import com.caverock.androidsvg.SVGExternalFileResolver
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logE
 
 /**
  * Mapbox implementation of the [SVGExternalFileResolver] to better support font resolution.
@@ -52,18 +51,18 @@ open class MapboxExternalFileResolver(
         try {
             return getTypeface(fontFamily, fontWeight, fontStyle, ".ttf")
         } catch (exception: RuntimeException) {
-            LoggerProvider.logger.e(
+            logE(
                 null,
-                Message("MapboxExternalFileResolver exception: $exception")
+                "MapboxExternalFileResolver exception: $exception"
             )
         }
 
         return try {
             getTypeface(fontFamily, fontWeight, fontStyle, ".otf")
         } catch (exception: RuntimeException) {
-            LoggerProvider.logger.e(
+            logE(
                 null,
-                Message("MapboxExternalFileResolver exception: $exception")
+                "MapboxExternalFileResolver exception: $exception"
             )
             null
         }

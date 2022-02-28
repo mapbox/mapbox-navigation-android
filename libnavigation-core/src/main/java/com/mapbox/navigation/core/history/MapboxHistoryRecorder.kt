@@ -1,11 +1,9 @@
 package com.mapbox.navigation.core.history
 
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigator.HistoryRecorderHandle
 
 /**
@@ -17,10 +15,9 @@ import com.mapbox.navigator.HistoryRecorderHandle
  */
 class MapboxHistoryRecorder internal constructor(
     navigationOptions: NavigationOptions,
-    private val logger: Logger
 ) {
     private val historyRecorderOptions = navigationOptions.historyRecorderOptions
-    private val historyFiles = HistoryFiles(navigationOptions.applicationContext, logger)
+    private val historyFiles = HistoryFiles(navigationOptions.applicationContext)
 
     internal var historyRecorderHandle: HistoryRecorderHandle? = null
 
@@ -82,7 +79,7 @@ class MapboxHistoryRecorder internal constructor(
 
     private fun checkRecorderInitialized() {
         if (historyRecorderHandle == null) {
-            logger.w(Tag("MbxHistoryRecorder"), Message("The history recorder is not initialized"))
+            logW("MbxHistoryRecorder", "The history recorder is not initialized")
         }
     }
 }

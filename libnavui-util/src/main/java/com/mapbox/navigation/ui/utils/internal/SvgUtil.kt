@@ -6,11 +6,8 @@ import com.caverock.androidsvg.RenderOptions
 import com.caverock.androidsvg.SVG
 import com.caverock.androidsvg.SVGExternalFileResolver
 import com.caverock.androidsvg.SVGParseException
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logE
 import java.io.ByteArrayInputStream
-import kotlin.jvm.Throws
 
 object SvgUtil {
 
@@ -33,16 +30,10 @@ object SvgUtil {
                 renderBitmap(svg, desiredWidth, desiredHeight, cssStyles)
             }
         } catch (exception: SVGParseException) {
-            LoggerProvider.logger.e(
-                Tag(TAG),
-                Message("${exception.message}")
-            )
+            logE(TAG, "${exception.message}")
             null
         } catch (exception: IllegalArgumentException) {
-            LoggerProvider.logger.e(
-                Tag(TAG),
-                Message("${exception.message}")
-            )
+            logE(TAG, "${exception.message}")
             null
         }
     }
@@ -65,16 +56,10 @@ object SvgUtil {
                 renderBitmap(svg, calculatedWidth, desiredHeight, cssStyles)
             }
         } catch (exception: SVGParseException) {
-            LoggerProvider.logger.e(
-                Tag(TAG),
-                Message("${exception.message}")
-            )
+            logE(TAG, "${exception.message}")
             null
         } catch (exception: IllegalArgumentException) {
-            LoggerProvider.logger.e(
-                Tag(TAG),
-                Message("${exception.message}")
-            )
+            logE(TAG, "${exception.message}")
             null
         }
     }

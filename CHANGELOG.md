@@ -3,6 +3,7 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
+- Use native logger backend instead of the Android instance directly. [#5520](https://github.com/mapbox/mapbox-navigation-android/pull/5520)
 
 #### Features
 
