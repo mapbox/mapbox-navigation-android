@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
 import android.os.Bundle
+import android.os.SystemClock
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -92,9 +94,26 @@ class MapboxJunctionActivity : AppCompatActivity(), OnMapLongClickListener {
      * containing either a success in the form of [JunctionValue] or failure in the form of
      * [JunctionError].
      */
+
+    private var junctionEndTime = -1L
+
     private val junctionCallback =
         MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>> { value ->
             // The data obtained must be rendered by [MapboxJunctionView]
+
+            junctionEndTime = System.currentTimeMillis()
+
+            Log.d("qwerty", "TIME = ${junctionEndTime - junctionStartTime}")
+
+
+            if (value.isValue) {
+                //Log.d("qwerty", "junction size = ${value.value!!.bitmap.byteCount} bytes")
+                Log.d("qwerty", "SIZE = ${value.value!!.bitmap.byteCount / (1000 * 1000)} MB")
+            }
+
+            Log.d("qwerty", "*********************")
+
+
             binding.junctionView.render(value)
         }
 
@@ -155,10 +174,13 @@ class MapboxJunctionActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
+    private var junctionStartTime = -1L
+
     private val bannerInstructionsObserver = BannerInstructionsObserver { bannerInstructions ->
         // The junction component is driven by banner instructions updates.
         // Passing the instructions to the MapboxJunctionApi generates the data
         // for updating the view.
+        junctionStartTime = System.currentTimeMillis()
         junctionApi.generateJunction(bannerInstructions, junctionCallback)
     }
 
@@ -191,6 +213,7 @@ class MapboxJunctionActivity : AppCompatActivity(), OnMapLongClickListener {
     private fun startSimulation(route: DirectionsRoute) {
         mapboxReplayer.stop()
         mapboxReplayer.clearEvents()
+        mapboxReplayer.playbackSpeed(6.0)
         mapboxReplayer.pushRealLocation(this, 0.0)
         val replayEvents = ReplayRouteMapper().mapDirectionsRouteGeometry(route)
         mapboxReplayer.pushEvents(replayEvents)
@@ -203,7 +226,7 @@ class MapboxJunctionActivity : AppCompatActivity(), OnMapLongClickListener {
             RouteOptions.builder()
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
-                .coordinatesList(listOf(origin, destination))
+                .coordinatesList(listOf(origin, destination, origin, destination))
                 .alternatives(true)
                 .build(),
             object : RouterCallback {
@@ -313,8 +336,12 @@ class MapboxJunctionActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onMapLongClick(point: Point): Boolean {
         ifNonNull(navigationLocationProvider.lastLocation) {
-            val or = Point.fromLngLat(139.7745686, 35.677573)
-            val de = Point.fromLngLat(139.784915, 35.680960)
+//            val or = Point.fromLngLat(139.7745686, 35.677573)
+//            val de = Point.fromLngLat(139.784915, 35.680960)
+
+            val or = Point.fromLngLat(-3.5870, 40.5719)
+            val de = Point.fromLngLat(-3.607835, 40.551486)
+
             findRoute(or, de)
         }
         return false

@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.guidance.junction.api
 
+import android.util.Log
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.bindgen.Expected
@@ -85,10 +86,15 @@ class MapboxJunctionApi(
         )
         val junctionRequest = JunctionProcessor.process(requestAction)
         val httpRequest = (junctionRequest as JunctionResult.JunctionRequest).request
+
+        val requestStart = System.currentTimeMillis()
         val requestId = HttpServiceFactoryWrapper.getInstance().request(
             httpRequest
         ) { httpResponse ->
+
             mainJobController.scope.launch {
+                Log.d("qwerty", "request time = ${System.currentTimeMillis() - requestStart}")
+
                 onJunctionResponse(httpResponse, consumer)
             }
         }
@@ -137,8 +143,11 @@ class MapboxJunctionApi(
         consumer: MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>
     ) {
         val action = JunctionAction.ParseRasterToBitmap(data)
+        val parsingStart = System.currentTimeMillis()
         when (val result = JunctionProcessor.process(action)) {
             is JunctionResult.JunctionBitmap.Success -> {
+                Log.d("qwerty", "bitmap parsing time = ${System.currentTimeMillis() - parsingStart}")
+
                 consumer.accept(ExpectedFactory.createValue(JunctionValue(result.junction)))
             }
             is JunctionResult.JunctionBitmap.Failure -> {
