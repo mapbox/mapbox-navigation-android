@@ -7,6 +7,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
+- Fixed `MapboxNavigationApp` issue, that caused unexpected `MapboxNavigation` destroy, when one of the attached lifecycles is destroyed and the other one is stopped. [#5518](https://github.com/mapbox/mapbox-navigation-android/pull/5518)
 
 ## Mapbox Navigation SDK 2.3.0-rc.3 - February 24, 2022
 This release is a re-tag of the `v2.3.0-rc.2` to correct the commit which should represent the state of the codebase. There are no functional differences between these releases.
