@@ -108,29 +108,31 @@ class CarAppLifecycleOwnerTest {
 
     @Test
     fun `verify the lifecycle is not stopped when the activities are destroyed`() {
+        val activity = mockActivity()
         carAppLifecycleOwner.startedReferenceCounter.apply {
             onCreate(carAppLifecycleOwner)
             onStart(carAppLifecycleOwner)
         }
         carAppLifecycleOwner.activityLifecycleCallbacks.apply {
-            val activity: Activity = mockActivity()
             onActivityCreated(activity, mockk())
             onActivityStarted(activity)
             onActivityStopped(activity)
-            onActivityDestroyed(activity)
         }
+        carAppLifecycleOwner.startedReferenceCounter.onStop(carAppLifecycleOwner)
+        carAppLifecycleOwner.activityLifecycleCallbacks.onActivityDestroyed(activity)
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
         verify(exactly = 1) { testLifecycleObserver.onStart(any()) }
         verify(exactly = 1) { testLifecycleObserver.onResume(any()) }
+        verify(exactly = 1) { testLifecycleObserver.onPause(any()) }
         verify(exactly = 0) { testLifecycleObserver.onStop(any()) }
         verify(exactly = 0) { testLifecycleObserver.onDestroy(any()) }
     }
 
     @Test
     fun `verify the lifecycle is not stopped when the car session is destroyed`() {
+        val activity = mockActivity()
         carAppLifecycleOwner.activityLifecycleCallbacks.apply {
-            val activity: Activity = mockActivity()
             onActivityCreated(activity, mockk())
             onActivityStarted(activity)
             onActivityResumed(activity)
@@ -141,12 +143,37 @@ class CarAppLifecycleOwnerTest {
             onResume(carAppLifecycleOwner)
             onPause(carAppLifecycleOwner)
             onStop(carAppLifecycleOwner)
-            onDestroy(carAppLifecycleOwner)
         }
+        carAppLifecycleOwner.activityLifecycleCallbacks.onActivityStopped(activity)
+        carAppLifecycleOwner.startedReferenceCounter.onDestroy(carAppLifecycleOwner)
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
         verify(exactly = 1) { testLifecycleObserver.onStart(any()) }
         verify(exactly = 1) { testLifecycleObserver.onResume(any()) }
+        verify(exactly = 1) { testLifecycleObserver.onPause(any()) }
+        verify(exactly = 0) { testLifecycleObserver.onStop(any()) }
+        verify(exactly = 0) { testLifecycleObserver.onDestroy(any()) }
+    }
+
+    @Test
+    fun `verify the lifecycle is not stopped when only one attached lifecycle is destroyed`() {
+        val testLifecycleOwnerA = TestLifecycleOwner()
+        val testLifecycleOwnerB = TestLifecycleOwner()
+        carAppLifecycleOwner.startedReferenceCounter.onCreate(testLifecycleOwnerA)
+        carAppLifecycleOwner.startedReferenceCounter.onStart(testLifecycleOwnerA)
+        carAppLifecycleOwner.startedReferenceCounter.onResume(testLifecycleOwnerA)
+        carAppLifecycleOwner.startedReferenceCounter.onCreate(testLifecycleOwnerB)
+        carAppLifecycleOwner.startedReferenceCounter.onStart(testLifecycleOwnerB)
+        carAppLifecycleOwner.startedReferenceCounter.onResume(testLifecycleOwnerB)
+        carAppLifecycleOwner.startedReferenceCounter.onPause(testLifecycleOwnerB)
+        carAppLifecycleOwner.startedReferenceCounter.onStop(testLifecycleOwnerB)
+        carAppLifecycleOwner.startedReferenceCounter.onStop(testLifecycleOwnerA)
+        carAppLifecycleOwner.startedReferenceCounter.onDestroy(testLifecycleOwnerB)
+
+        verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
+        verify(exactly = 1) { testLifecycleObserver.onStart(any()) }
+        verify(exactly = 1) { testLifecycleObserver.onResume(any()) }
+        verify(exactly = 1) { testLifecycleObserver.onPause(any()) }
         verify(exactly = 0) { testLifecycleObserver.onStop(any()) }
         verify(exactly = 0) { testLifecycleObserver.onDestroy(any()) }
     }
