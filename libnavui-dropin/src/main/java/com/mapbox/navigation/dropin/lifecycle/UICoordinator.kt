@@ -7,6 +7,9 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.binder.Binder
 import com.mapbox.navigation.dropin.binder.UIBinder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -19,13 +22,15 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 abstract class UICoordinator<T : ViewGroup>(
     private val viewGroup: T
-) : UIComponent() {
+) : MapboxNavigationObserver {
+
+    lateinit var coroutineScope: CoroutineScope
 
     @CallSuper
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         var attachedObserver: MapboxNavigationObserver? = null
+        coroutineScope = MainScope()
 
-        super.onAttached(mapboxNavigation)
         coroutineScope.launch {
             mapboxNavigation.flowViewBinders().collect { viewBinder ->
                 attachedObserver?.onDetached(mapboxNavigation)
@@ -40,7 +45,7 @@ abstract class UICoordinator<T : ViewGroup>(
 
     @CallSuper
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
-        super.onDetached(mapboxNavigation)
+        coroutineScope.cancel()
     }
 
     /**

@@ -23,7 +23,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.component.routefetch.MapboxDropInRouteRequester
+import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.coordinator.ActionListCoordinator
 import com.mapbox.navigation.dropin.coordinator.GuidanceCoordinator
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
@@ -37,7 +37,6 @@ import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
 import com.mapbox.navigation.utils.internal.ifNonNull
-import java.lang.Exception
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DropInNavigationView @JvmOverloads constructor(
@@ -158,17 +157,19 @@ class DropInNavigationView @JvmOverloads constructor(
     private fun initMapLongClickListener() {
         binding.mapView.gestures.addOnMapLongClickListener { clickPoint ->
             ifNonNull(MapboxNavigationApp.current()) { mapboxNavigation ->
-                mapboxNavigation.navigationOptions.locationEngine.getLastLocation(object :
-                        LocationEngineCallback<LocationEngineResult> {
+                mapboxNavigation.navigationOptions.locationEngine.getLastLocation(
+                    object : LocationEngineCallback<LocationEngineResult> {
                         override fun onSuccess(result: LocationEngineResult?) {
                             ifNonNull(result?.lastLocation) { lastLocation ->
-                                MapboxDropInRouteRequester.fetchAndSetRoute(
-                                    listOf(
-                                        Point.fromLngLat(
-                                            lastLocation.longitude,
-                                            lastLocation.latitude
-                                        ),
-                                        clickPoint
+                                viewModel.routesViewModel.invoke(
+                                    RoutesAction.FetchPoints(
+                                        listOf(
+                                            Point.fromLngLat(
+                                                lastLocation.longitude,
+                                                lastLocation.latitude
+                                            ),
+                                            clickPoint
+                                        )
                                     )
                                 )
                             }

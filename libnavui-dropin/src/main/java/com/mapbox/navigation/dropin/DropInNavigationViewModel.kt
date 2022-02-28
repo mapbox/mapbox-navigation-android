@@ -9,6 +9,7 @@ import com.mapbox.navigation.dropin.component.location.LocationBehavior
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.recenter.RecenterButtonBehaviour
 import com.mapbox.navigation.dropin.component.replay.ReplayComponent
+import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.component.sound.MapboxAudioBehavior
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,12 +32,14 @@ internal class DropInNavigationViewModel : ViewModel() {
     val locationBehavior = LocationBehavior()
     val recenterBehavior = RecenterButtonBehaviour(cameraState, locationBehavior)
     val cameraModeBehavior = CameraModeButtonBehaviour(cameraState)
+    val routesViewModel = RoutesViewModel()
     val navigationObservers = listOf(
         replayComponent,
         audioGuidanceComponent,
         locationBehavior,
         recenterBehavior,
         cameraModeBehavior,
+        routesViewModel,
         // TODO can add more mapbox navigation observers here
     )
 

@@ -13,10 +13,10 @@ internal class RecenterButtonComponent(
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
-        val behaviour = MapboxNavigationApp.getObserver(RecenterButtonBehaviour::class)
+        val recenterBehaviour = MapboxNavigationApp.getObserver(RecenterButtonBehaviour::class)
 
         recenterButton.setOnClickListener {
-            behaviour.onButtonClick()
+            recenterBehaviour.onButtonClick()
         }
     }
 
