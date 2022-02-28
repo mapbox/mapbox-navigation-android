@@ -40,7 +40,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
             } else {
                 lifecycleCreated++
                 logger.i(TAG, Message("LifecycleOwner ($owner) onCreate"))
-                if (activitiesCreated == 0 && lifecycleCreated > 0 && lifecycleForegrounded == 0) {
+                if (activitiesCreated == 0 && lifecycleCreated == 1) {
                     changeState(Lifecycle.State.STARTED)
                 }
             }
@@ -52,7 +52,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
             } else {
                 lifecycleForegrounded++
                 logger.i(TAG, Message("LifecycleOwner ($owner) onStart"))
-                if (activitiesCreated == 0 && lifecycleForegrounded > 0) {
+                if (activitiesForegrounded == 0 && lifecycleForegrounded == 1) {
                     changeState(Lifecycle.State.RESUMED)
                 }
             }
@@ -76,7 +76,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
             } else {
                 lifecycleCreated--
                 logger.i(TAG, Message("LifecycleOwner ($owner) onDestroy"))
-                if (activitiesForegrounded == 0 && lifecycleForegrounded == 0) {
+                if (activitiesCreated == 0 && lifecycleCreated == 0) {
                     changeState(Lifecycle.State.CREATED)
                 }
             }
@@ -107,7 +107,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
             } else {
                 activitiesForegrounded++
                 logger.i(TAG, Message("app onActivityStarted"))
-                if (lifecycleCreated == 0 && activitiesForegrounded == 1) {
+                if (lifecycleForegrounded == 0 && activitiesForegrounded == 1) {
                     changeState(Lifecycle.State.RESUMED)
                 }
             }
@@ -127,7 +127,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
             } else {
                 activitiesForegrounded--
                 logger.i(TAG, Message("app onActivityStopped"))
-                if (lifecycleCreated == 0 && activitiesForegrounded == 0) {
+                if (lifecycleForegrounded == 0 && activitiesForegrounded == 0) {
                     changeState(Lifecycle.State.STARTED)
                 }
             }
