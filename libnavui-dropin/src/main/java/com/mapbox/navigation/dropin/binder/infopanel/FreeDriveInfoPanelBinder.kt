@@ -5,16 +5,16 @@ import android.transition.TransitionManager
 import android.view.ViewGroup
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.binder.navigationListOf
 import com.mapbox.navigation.dropin.component.infopanel.InfoPanelFreeDriveComponent
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelFreeDriveLayoutBinding
+import javax.inject.Inject
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal class FreeDriveInfoPanelBinder(
-    private val context: DropInNavigationViewContext
+internal class FreeDriveInfoPanelBinder @Inject constructor(
+    private val freeDriveComponentFactory: InfoPanelFreeDriveComponent.Factory
 ) : UIBinder {
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
@@ -27,13 +27,7 @@ internal class FreeDriveInfoPanelBinder(
 
         val binding = MapboxInfoPanelFreeDriveLayoutBinding.bind(viewGroup)
         return navigationListOf(
-            InfoPanelFreeDriveComponent(
-                context.viewModel,
-                context.fetchAndSetRouteUseCase(),
-                context.startActiveGuidanceUseCase(),
-                binding.routePreview,
-                binding.startNavigation
-            )
+            freeDriveComponentFactory.create(binding)
         )
     }
 }

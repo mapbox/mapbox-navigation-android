@@ -12,9 +12,10 @@ import com.mapbox.navigation.dropin.binder.navigationListOf
 import com.mapbox.navigation.dropin.component.infopanel.InfoPanelRoutePreviewComponent
 import com.mapbox.navigation.dropin.component.tripprogress.TripProgressComponent
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelRoutePreviewLayoutBinding
+import javax.inject.Inject
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal class RoutePreviewInfoPanelBinder(
+internal class RoutePreviewInfoPanelBinder @Inject constructor(
     private val context: DropInNavigationViewContext
 ) : UIBinder {
 

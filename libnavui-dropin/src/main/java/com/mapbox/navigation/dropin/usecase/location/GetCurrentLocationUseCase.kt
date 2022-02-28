@@ -4,18 +4,20 @@ import android.annotation.SuppressLint
 import android.location.Location
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.location.LocationBehavior
+import com.mapbox.navigation.dropin.di.DispatcherDefault
 import com.mapbox.navigation.dropin.extensions.coroutines.getLastLocation
 import com.mapbox.navigation.dropin.usecase.UseCase
 import kotlinx.coroutines.CoroutineDispatcher
+import javax.inject.Inject
 
 /**
  * Use case for retrieving latest device location.
  */
 @SuppressLint("MissingPermission")
-internal class GetCurrentLocationUseCase(
+internal class GetCurrentLocationUseCase @Inject constructor(
     private val navigation: MapboxNavigation,
     private val locationBehavior: LocationBehavior,
-    dispatcher: CoroutineDispatcher
+    @DispatcherDefault dispatcher: CoroutineDispatcher
 ) : UseCase<Unit, Location>(dispatcher) {
 
     override suspend fun execute(parameters: Unit): Location {

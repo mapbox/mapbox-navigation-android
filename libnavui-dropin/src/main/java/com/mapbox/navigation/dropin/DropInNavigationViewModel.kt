@@ -19,13 +19,14 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
 
 /**
  * There is a single ViewModel for the navigation view. Use this class to store state that should
  * survive orientation changes.
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal class DropInNavigationViewModel : ViewModel() {
+internal class DropInNavigationViewModel @Inject constructor() : ViewModel() {
     private val _navigationState = MutableStateFlow<NavigationState>(NavigationState.FreeDrive)
     val navigationState = _navigationState.asStateFlow()
     val cameraState: DropInCameraState = DropInCameraState()

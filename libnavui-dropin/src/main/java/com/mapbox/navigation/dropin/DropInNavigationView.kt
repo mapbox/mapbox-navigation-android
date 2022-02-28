@@ -28,12 +28,15 @@ import com.mapbox.navigation.dropin.coordinator.RoadNameLabelCoordinator
 import com.mapbox.navigation.dropin.coordinator.RouteManager
 import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
+import com.mapbox.navigation.dropin.di.DaggerDropInUiInjector
+import com.mapbox.navigation.dropin.di.DropInUiInjector
 import com.mapbox.navigation.dropin.extensions.attachCreated
 import com.mapbox.navigation.dropin.extensions.attachStarted
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
+import javax.inject.Inject
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DropInNavigationView @JvmOverloads constructor(
@@ -63,15 +66,27 @@ class DropInNavigationView @JvmOverloads constructor(
      */
     private val viewModel: DropInNavigationViewModel by lazyViewModel()
 
-    /**
-     * This is a top level object to share data with all state view holders. If you need state
-     * to survive orientation changes, put it in the [DropInNavigationViewModel].
-     */
-    private val navigationContext = DropInNavigationViewContext(
-        context = context,
-        lifecycleOwner = this,
-        viewModel = viewModel,
-    )
+    @Inject
+    internal lateinit var infoPanelCoordinator: InfoPanelCoordinator
+
+    @Inject
+    internal lateinit var navigationStateManager: NavigationStateManager
+
+    @Inject
+    internal lateinit var routeManager: RouteManager
+
+    @Inject
+    internal lateinit var backPressManager: BackPressManager
+
+    @Inject
+    internal lateinit var navigationContext: DropInNavigationViewContext
+
+    private var injector: DropInUiInjector = DaggerDropInUiInjector.builder()
+        .context(context)
+        .lifecycleOwner(this)
+        .viewModel(viewModel)
+        .rootViewBinding(binding)
+        .build()
 
     /**
      * Retrieve the [OnBackPressedCallback] that can be registered with OnBackPressedDispatcher
@@ -107,6 +122,8 @@ class DropInNavigationView @JvmOverloads constructor(
     }
 
     init {
+        injector.inject(this)
+
         binding.mapView.getMapboxMap().loadStyle(
             style(NavigationStyles.NAVIGATION_DAY_STYLE) {
                 // TODO allow for customization.
@@ -133,9 +150,9 @@ class DropInNavigationView @JvmOverloads constructor(
         MapboxNavigationApp.attach(this)
 
         attachCreated(
-            NavigationStateManager(navigationContext),
-            RouteManager(navigationContext),
-            BackPressManager(navigationContext)
+            navigationStateManager,
+            routeManager,
+            backPressManager
         )
 
         /**
@@ -144,14 +161,10 @@ class DropInNavigationView @JvmOverloads constructor(
         attachStarted(
             MapCoordinator(navigationContext, binding.mapView),
             GuidanceCoordinator(navigationContext, binding.guidanceLayout),
-            InfoPanelCoordinator(
-                navigationContext,
-                binding.infoPanelLayout,
-                binding.guidelineBottom
-            ),
+            infoPanelCoordinator,
             ActionListCoordinator(navigationContext, binding.actionListLayout),
             SpeedLimitCoordinator(navigationContext, binding.speedLimitLayout),
-            RoadNameLabelCoordinator(navigationContext, binding.roadNameLayout)
+            RoadNameLabelCoordinator(navigationContext, binding.roadNameLayout),
         )
     }
 

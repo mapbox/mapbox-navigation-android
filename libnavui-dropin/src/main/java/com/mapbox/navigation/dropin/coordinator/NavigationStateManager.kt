@@ -3,13 +3,14 @@ package com.mapbox.navigation.dropin.coordinator
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
+import com.mapbox.navigation.dropin.DropInNavigationViewModel
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.extensions.flowOnFinalDestinationArrival
 import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Destination
 import kotlinx.coroutines.flow.combine
+import javax.inject.Inject
 
 /**
  * Class that manages NavigationState as following:
@@ -29,11 +30,9 @@ import kotlinx.coroutines.flow.combine
  *                                       ┗━━━━━━━━━━[ Arrival ]━━━━━━━━━━━━━━━━━┛
  * ```
  */
-internal class NavigationStateManager(
-    context: DropInNavigationViewContext
+internal class NavigationStateManager @Inject constructor(
+    private val viewModel: DropInNavigationViewModel
 ) : UIComponent() {
-
-    private val viewModel = context.viewModel
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)

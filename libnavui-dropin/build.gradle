@@ -60,6 +60,8 @@ dependencies {
     implementation dependenciesList.kotlinStdLib
 
     implementation dependenciesList.coroutinesAndroid
+    implementation "com.google.dagger:dagger:2.41"
+    kapt "com.google.dagger:dagger-compiler:2.41"
 
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
     testImplementation(project(':libtesting-utils'))

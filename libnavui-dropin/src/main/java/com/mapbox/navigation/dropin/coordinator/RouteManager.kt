@@ -1,21 +1,24 @@
 package com.mapbox.navigation.dropin.coordinator
 
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
+import com.mapbox.navigation.dropin.DropInNavigationViewModel
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.usecase.route.FetchAndSetRouteUseCase
+import javax.inject.Inject
+import javax.inject.Provider
 
 /**
  * Class that fetches and sets new route on destination change when in RoutePreview.
  */
-internal class RouteManager(
-    private val context: DropInNavigationViewContext
+internal class RouteManager @Inject constructor(
+    private val viewModel: DropInNavigationViewModel,
+    private val fetchAndSetRouteUseCaseProvider: Provider<FetchAndSetRouteUseCase>
 ) : UIComponent() {
 
-    private val viewModel = context.viewModel
-    private val fetchAndSetRouteUseCase get() = context.fetchAndSetRouteUseCase()
-
     private val enabledInStates = listOf(NavigationState.RoutePreview)
+    private val fetchAndSetRouteUseCase: FetchAndSetRouteUseCase
+        get() = fetchAndSetRouteUseCaseProvider.get()
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
