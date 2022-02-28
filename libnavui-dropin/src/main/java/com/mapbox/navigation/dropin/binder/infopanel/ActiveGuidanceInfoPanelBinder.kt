@@ -27,7 +27,7 @@ internal class ActiveGuidanceInfoPanelBinder(
         TransitionManager.go(scene)
         val binding = MapboxInfoPanelActiveGuidanceLayoutBinding.bind(viewGroup)
         return navigationListOf(
-            TripProgressComponent(binding.tripProgressView.root),
+            TripProgressComponent(binding.tripProgressView),
             InfoPanelActiveGuidanceComponent(
                 context.stopActiveGuidanceUseCase(),
                 binding.endNavigation

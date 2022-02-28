@@ -12,7 +12,7 @@ import kotlinx.coroutines.CoroutineDispatcher
  * Use case for retrieving latest device location.
  */
 @SuppressLint("MissingPermission")
-class GetCurrentLocationUseCase(
+internal class GetCurrentLocationUseCase(
     private val navigation: MapboxNavigation,
     private val locationBehavior: LocationBehavior,
     dispatcher: CoroutineDispatcher

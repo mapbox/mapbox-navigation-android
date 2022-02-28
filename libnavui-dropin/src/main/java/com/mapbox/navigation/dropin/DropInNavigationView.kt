@@ -19,13 +19,13 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.coordinator.ActionListCoordinator
-import com.mapbox.navigation.dropin.coordinator.BackPressCoordinator
+import com.mapbox.navigation.dropin.coordinator.BackPressManager
 import com.mapbox.navigation.dropin.coordinator.GuidanceCoordinator
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
 import com.mapbox.navigation.dropin.coordinator.MapCoordinator
-import com.mapbox.navigation.dropin.coordinator.NavigationStateCoordinator
+import com.mapbox.navigation.dropin.coordinator.NavigationStateManager
 import com.mapbox.navigation.dropin.coordinator.RoadNameLabelCoordinator
-import com.mapbox.navigation.dropin.coordinator.RouteCoordinator
+import com.mapbox.navigation.dropin.coordinator.RouteManager
 import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
 import com.mapbox.navigation.dropin.extensions.attachStarted
@@ -137,13 +137,17 @@ class DropInNavigationView @JvmOverloads constructor(
         attachStarted(
             MapCoordinator(navigationContext, binding.mapView),
             GuidanceCoordinator(navigationContext, binding.guidanceLayout),
-            InfoPanelCoordinator(navigationContext, binding.infoPanelLayout, binding.guideBottom),
+            InfoPanelCoordinator(
+                navigationContext,
+                binding.infoPanelLayout,
+                binding.guidelineBottom
+            ),
             ActionListCoordinator(navigationContext, binding.actionListLayout),
             SpeedLimitCoordinator(navigationContext, binding.speedLimitLayout),
             RoadNameLabelCoordinator(navigationContext, binding.roadNameLayout),
-            NavigationStateCoordinator(navigationContext),
-            RouteCoordinator(navigationContext),
-            BackPressCoordinator(navigationContext)
+            NavigationStateManager(navigationContext),
+            RouteManager(navigationContext),
+            BackPressManager(navigationContext)
         )
     }
 

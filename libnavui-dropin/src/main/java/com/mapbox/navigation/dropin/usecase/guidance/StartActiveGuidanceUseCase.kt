@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @SuppressLint("MissingPermission")
-class StartActiveGuidanceUseCase(
+internal class StartActiveGuidanceUseCase(
     private val navigation: MapboxNavigation,
     private val activeNavigationStarted: MutableStateFlow<Boolean>,
     dispatcher: CoroutineDispatcher

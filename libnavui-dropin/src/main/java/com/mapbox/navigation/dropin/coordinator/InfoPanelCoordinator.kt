@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.map
 internal class InfoPanelCoordinator(
     private val context: DropInNavigationViewContext,
     infoPanel: ViewGroup,
-    private val guideBottom: Guideline
+    private val guidelineBottom: Guideline
 ) : UICoordinator<ViewGroup>(infoPanel) {
 
     private val viewModel = context.viewModel
@@ -39,7 +39,6 @@ internal class InfoPanelCoordinator(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        val behavior = BottomSheetBehavior.from(viewGroup)
         behavior.addBottomSheetCallback(updateGuideline)
         viewModel.destination.observe { destination ->
             if (destination != null) behavior.collapse()
@@ -77,11 +76,11 @@ internal class InfoPanelCoordinator(
 
     private val updateGuideline = object : BottomSheetBehavior.BottomSheetCallback() {
         override fun onStateChanged(bottomSheet: View, newState: Int) {
-            guideBottom.setGuidelineEnd(offsetBottom())
+            guidelineBottom.setGuidelineEnd(offsetBottom())
         }
 
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
-            guideBottom.setGuidelineEnd(offsetBottom())
+            guidelineBottom.setGuidelineEnd(offsetBottom())
         }
 
         private fun offsetBottom() = (viewGroup.parent as ViewGroup).height - viewGroup.top

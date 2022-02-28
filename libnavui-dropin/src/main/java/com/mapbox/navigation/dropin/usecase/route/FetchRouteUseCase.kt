@@ -10,7 +10,7 @@ import com.mapbox.navigation.dropin.usecase.location.GetCurrentLocationUseCase
 import com.mapbox.navigation.utils.internal.toPoint
 import kotlinx.coroutines.CoroutineDispatcher
 
-class FetchRouteUseCase(
+internal class FetchRouteUseCase(
     private val navigation: MapboxNavigation,
     private val routeOptionsBuilder: () -> RouteOptions.Builder,
     private val getCurrentLocation: GetCurrentLocationUseCase,

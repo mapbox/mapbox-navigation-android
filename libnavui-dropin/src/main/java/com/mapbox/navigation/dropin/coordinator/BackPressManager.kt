@@ -6,17 +6,15 @@ import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 
 /**
- * Coordinator that manages onBackPressedCallback enabled state
+ * Class that manages onBackPressedCallback enabled state
  * and handles onBackPressed event for each NavigationState.
  */
-internal class BackPressCoordinator(
+internal class BackPressManager(
     private val context: DropInNavigationViewContext
 ) : UIComponent() {
 
     private val viewModel = context.viewModel
-    private val stopActiveGuidanceUseCase by lazy {
-        context.stopActiveGuidanceUseCase()
-    }
+    private val stopActiveGuidanceUseCase get() = context.stopActiveGuidanceUseCase()
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)

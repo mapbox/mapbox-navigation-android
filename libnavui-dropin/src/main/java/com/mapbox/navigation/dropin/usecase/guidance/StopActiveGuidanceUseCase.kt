@@ -7,7 +7,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class StopActiveGuidanceUseCase(
+internal class StopActiveGuidanceUseCase(
     private val navigation: MapboxNavigation,
     private val activeNavigationStarted: MutableStateFlow<Boolean>,
     dispatcher: CoroutineDispatcher

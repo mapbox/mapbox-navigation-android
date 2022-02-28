@@ -5,7 +5,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.usecase.UseCase
 import kotlinx.coroutines.CoroutineDispatcher
 
-class FetchAndSetRouteUseCase(
+internal class FetchAndSetRouteUseCase(
     private val navigation: MapboxNavigation,
     private val findRoutesUseCase: FetchRouteUseCase,
     dispatcher: CoroutineDispatcher

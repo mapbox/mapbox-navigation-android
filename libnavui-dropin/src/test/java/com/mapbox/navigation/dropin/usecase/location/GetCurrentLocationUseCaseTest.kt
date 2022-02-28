@@ -26,7 +26,7 @@ import org.robolectric.RobolectricTestRunner
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
-class GetCurrentLocationUseCaseTest {
+internal class GetCurrentLocationUseCaseTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()

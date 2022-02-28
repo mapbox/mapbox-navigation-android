@@ -21,7 +21,7 @@
             android:layout_height="match_parent">
 
             <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideBottom"
+                android:id="@+id/guidelineBottom"
                 android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -71,7 +71,7 @@
                 tools:background="#eee"
                 tools:layout_height="52dp"
                 tools:layout_width="140dp"
-                app:layout_constraintBottom_toTopOf="@+id/guideBottom"
+                app:layout_constraintBottom_toTopOf="@+id/guidelineBottom"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginBottom="15dp" />

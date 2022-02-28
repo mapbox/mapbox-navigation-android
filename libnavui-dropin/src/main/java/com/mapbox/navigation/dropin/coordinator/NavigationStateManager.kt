@@ -8,7 +8,7 @@ import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import kotlinx.coroutines.flow.combine
 
 /**
- * Coordinator that updates NavigationState as following:
+ * Class that manages NavigationState as following:
  *
  * ```
  *  [ FreeDrive ]━━( destination != null )━━━━>>[ RoutePreview ]<<━━━━━━━━━━━━┓
@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.combine
  *       ┗━━━━( routes empty        )━━━━┻━━━[ ActiveNavigation ] ━━━━━━━━━━━━┛
  * ```
  */
-internal class NavigationStateCoordinator(
+internal class NavigationStateManager(
     context: DropInNavigationViewContext
 ) : UIComponent() {
 

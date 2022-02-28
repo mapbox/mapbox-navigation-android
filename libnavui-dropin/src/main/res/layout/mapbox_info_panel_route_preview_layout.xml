@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/mapbox_infoPanel_peekHeight">
 
-        <include layout="@layout/mapbox_partial_trip_progress"
+        <com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
             android:id="@+id/tripProgressView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

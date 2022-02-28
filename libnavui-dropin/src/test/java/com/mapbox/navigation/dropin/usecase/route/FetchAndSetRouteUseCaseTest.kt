@@ -15,7 +15,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class FetchAndSetRouteUseCaseTest {
+internal class FetchAndSetRouteUseCaseTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()

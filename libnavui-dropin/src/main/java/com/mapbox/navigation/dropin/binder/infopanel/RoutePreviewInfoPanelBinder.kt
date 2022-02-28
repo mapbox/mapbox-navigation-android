@@ -27,7 +27,7 @@ internal class RoutePreviewInfoPanelBinder(
         TransitionManager.go(scene)
         val binding = MapboxInfoPanelRoutePreviewLayoutBinding.bind(viewGroup)
         return navigationListOf(
-            TripProgressComponent(binding.tripProgressView.root),
+            TripProgressComponent(binding.tripProgressView),
             InfoPanelRoutePreviewComponent(
                 context.startActiveGuidanceUseCase(),
                 binding.startNavigation

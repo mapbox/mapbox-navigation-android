@@ -54,12 +54,12 @@
     <!-- Text -->
 
     <style name="MapboxStyle.DropIn.TextAppearance.Regular" parent="">
-        <item name="android:textColor">@color/mapbox_drop_in_onSurface</item>
+        <item name="android:textColor">@color/colorOnSurface</item>
         <item name="android:textStyle">normal</item>
     </style>
 
     <style name="MapboxStyle.DropIn.TextAppearance.Primary" parent="">
-        <item name="android:textColor">@color/mapbox_drop_in_primary</item>
+        <item name="android:textColor">@color/colorSecondary</item>
         <item name="android:textStyle">normal</item>
     </style>
 

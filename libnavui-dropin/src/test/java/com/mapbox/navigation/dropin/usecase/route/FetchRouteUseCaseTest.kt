@@ -30,7 +30,7 @@ import org.robolectric.RobolectricTestRunner
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
-class FetchRouteUseCaseTest {
+internal class FetchRouteUseCaseTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()

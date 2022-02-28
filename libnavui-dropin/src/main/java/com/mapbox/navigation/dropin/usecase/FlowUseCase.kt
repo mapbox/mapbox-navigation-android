@@ -34,7 +34,7 @@ import kotlinx.coroutines.flow.flowOn
  * [Result<R>].
  * Handling an exception (emit [Result.failure] to the result) is the subclasses responsibility.
  */
-abstract class FlowUseCase<in P, R>(private val coroutineDispatcher: CoroutineDispatcher) {
+internal abstract class FlowUseCase<in P, R>(private val coroutineDispatcher: CoroutineDispatcher) {
     operator fun invoke(parameters: P): Flow<Result<R>> = execute(parameters)
         .catch { e -> emit(Result.failure(Exception(e))) }
         .flowOn(coroutineDispatcher)
