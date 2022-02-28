@@ -22,14 +22,14 @@ class LocationPuck(
 
         mapView.getMapboxMap().getStyle {
             mapView.location.apply {
-                setLocationProvider(locationStateManager.navigationLocationProvider)
-                enabled = true
                 locationPuck = LocationPuck2D(
                     bearingImage = ContextCompat.getDrawable(
                         mapView.context,
                         R.drawable.mapbox_navigation_puck_icon
                     )
                 )
+                setLocationProvider(locationStateManager.navigationLocationProvider)
+                enabled = true
             }
         }
     }

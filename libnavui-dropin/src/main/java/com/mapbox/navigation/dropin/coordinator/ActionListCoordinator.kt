@@ -23,9 +23,9 @@ internal class ActionListCoordinator(
         return navContext.viewModel.navigationState.map { navigationState ->
             when (navigationState) {
                 NavigationState.RoutePreview,
-                NavigationState.ActiveNavigation -> navContext.uiBinders.activeGuidanceActions
+                NavigationState.ActiveNavigation -> navContext.uiBinders.value.activeGuidanceActions
                 NavigationState.Arrival,
-                NavigationState.FreeDrive -> navContext.uiBinders.freeDriveActionBinder
+                NavigationState.FreeDrive -> navContext.uiBinders.value.freeDriveActionBinder
                 NavigationState.Empty -> EmptyActionBinder()
             }
         }

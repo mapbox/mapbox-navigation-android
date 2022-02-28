@@ -1,8 +1,9 @@
 package com.mapbox.navigation.dropin.component.speedlimit
 
-import android.transition.Scene
-import android.transition.TransitionManager
 import android.view.ViewGroup
+import androidx.transition.Fade
+import androidx.transition.Scene
+import androidx.transition.TransitionManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.R
@@ -17,7 +18,7 @@ class SpeedLimitViewBinder : UIBinder {
             R.layout.mapbox_speed_limit_layout,
             viewGroup.context
         )
-        TransitionManager.go(scene)
+        TransitionManager.go(scene, Fade())
         val binding = MapboxSpeedLimitLayoutBinding.bind(viewGroup)
 
         return SpeedLimitComponent(binding.speedLimitView)

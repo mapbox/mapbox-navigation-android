@@ -6,6 +6,9 @@ import android.util.TypedValue
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.MutableLiveData
+import androidx.transition.Fade
+import androidx.transition.TransitionManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -34,6 +37,8 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
             .build()
     }
 
+    private val showCustomViews = MutableLiveData(true)
+
     private val routeArrowOptions by lazy {
         RouteArrowOptions.Builder(this)
             .withAboveLayerId(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
@@ -45,11 +50,23 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
         val binding = LayoutActivityNavigationViewCustomizedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.navigationView.customize(
-            NavigationUIBinders(
-                speedLimit = CustomSpeedLimitViewBinder()
-            )
-        )
+        // This demonstrates that you can customize views at any time. You can also reset to
+        // the default views.
+        showCustomViews.observe(this) { showCustomViews ->
+            if (showCustomViews) {
+                binding.navigationView.customize(
+                    NavigationUIBinders(
+                        speedLimit = CustomSpeedLimitViewBinder()
+                    )
+                )
+            } else {
+                // Reset defaults
+                binding.navigationView.customize(NavigationUIBinders())
+            }
+        }
+        binding.toggleCustomViews.setOnClickListener {
+            showCustomViews.value = showCustomViews.value?.not()
+        }
 
         binding.navigationView.customize(routeLineOptions)
         binding.navigationView.customize(routeArrowOptions)
@@ -62,6 +79,8 @@ private class CustomSpeedLimitViewBinder : UIBinder {
         val textView = TextView(viewGroup.context)
         textView.setBackgroundColor(Color.RED)
         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30.0f)
+        TransitionManager.beginDelayedTransition(viewGroup, Fade())
+        viewGroup.removeAllViews()
         viewGroup.addView(textView)
         return navigationCoroutine { mapboxNavigation ->
             mapboxNavigation.flowLocationMatcherResult().collect {
@@ -73,7 +92,7 @@ private class CustomSpeedLimitViewBinder : UIBinder {
                         "You're not moving"
                     speedLimitKph == null && currentSpeed > 0.0 ->
                         "Current speed: ${currentSpeed.formatSpeed()}"
-                    speedLimitKph != null && currentSpeed > 0.0 -> """
+                    speedLimitKph != null && currentSpeed >= 0.0 -> """
                         Current speed: ${currentSpeed.formatSpeed()}
                         Speed limit: $speedLimitKph kmh
                     """.trimIndent()

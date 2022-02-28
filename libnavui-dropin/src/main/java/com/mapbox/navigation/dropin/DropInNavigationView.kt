@@ -81,7 +81,7 @@ class DropInNavigationView @JvmOverloads constructor(
      * Customize the views by implementing your own [UIBinder] components.
      */
     fun customize(navigationUIBinders: NavigationUIBinders) {
-        navigationContext.uiBinders = navigationUIBinders
+        navigationContext.uiBinders.value = navigationUIBinders
     }
 
     /**
