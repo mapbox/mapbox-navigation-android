@@ -10,6 +10,7 @@ import com.mapbox.navigation.ui.shield.internal.model.RouteShieldToDownload
 import com.mapbox.navigation.ui.shield.internal.model.generateSpriteSheetUrl
 import com.mapbox.navigation.ui.shield.internal.model.getSpriteFrom
 import com.mapbox.navigation.ui.shield.model.RouteShield
+import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
@@ -50,9 +51,10 @@ internal abstract class ResourceCache<Argument, Value>(cacheSize: Int) {
                      * Returns if true or keeps waiting if false.
                      */
                     val callback = {
-                        check(!continuation.isCancelled)
-                        cache.get(argument)?.let {
-                            continuation.resume(it)
+                        ifNonNull(cache.get(argument)) { expected ->
+                            if (!continuation.isCancelled) {
+                                continuation.resume(expected)
+                            }
                             true
                         } ?: false
                     }
