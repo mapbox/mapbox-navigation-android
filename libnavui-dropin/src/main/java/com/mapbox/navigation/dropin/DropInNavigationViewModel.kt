@@ -1,6 +1,8 @@
 package com.mapbox.navigation.dropin
 
 import androidx.lifecycle.ViewModel
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.component.camera.DropInCameraState
@@ -11,6 +13,7 @@ import com.mapbox.navigation.dropin.component.recenter.RecenterButtonBehaviour
 import com.mapbox.navigation.dropin.component.replay.ReplayComponent
 import com.mapbox.navigation.dropin.component.sound.MapboxAudioBehavior
 import com.mapbox.navigation.dropin.model.Destination
+import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,6 +62,12 @@ internal class DropInNavigationViewModel : ViewModel() {
     )
 
     fun updateState(state: NavigationState) {
+        if (_navigationState.value == state) return
+
+        logD(
+            Tag(this.javaClass.simpleName),
+            Message("navigationState: ${_navigationState.value} -> $state")
+        )
         _navigationState.value = state
     }
 

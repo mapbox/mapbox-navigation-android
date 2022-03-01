@@ -2,11 +2,14 @@ package com.mapbox.navigation.dropin.lifecycle
 
 import android.view.ViewGroup
 import androidx.annotation.CallSuper
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.binder.Binder
 import com.mapbox.navigation.dropin.binder.UIBinder
+import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -27,6 +30,10 @@ abstract class UICoordinator<T : ViewGroup>(
         super.onAttached(mapboxNavigation)
 
         mapboxNavigation.flowViewBinders().observe { binder ->
+            logD(
+                Tag(this.javaClass.simpleName),
+                Message("binder: $viewBinder -> $binder")
+            )
             attachedObserver?.onDetached(mapboxNavigation)
             viewBinder?.also { unbind(it, viewGroup) }
 

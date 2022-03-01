@@ -6,4 +6,6 @@ sealed class NavigationState {
     object RoutePreview : NavigationState()
     object ActiveNavigation : NavigationState()
     object Arrival : NavigationState()
+
+    override fun toString(): String = "NavigationState.${this::class.java.simpleName}"
 }

@@ -28,6 +28,7 @@ import com.mapbox.navigation.dropin.coordinator.RoadNameLabelCoordinator
 import com.mapbox.navigation.dropin.coordinator.RouteManager
 import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
+import com.mapbox.navigation.dropin.extensions.attachCreated
 import com.mapbox.navigation.dropin.extensions.attachStarted
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
@@ -131,6 +132,12 @@ class DropInNavigationView @JvmOverloads constructor(
          */
         MapboxNavigationApp.attach(this)
 
+        attachCreated(
+            NavigationStateManager(navigationContext),
+            RouteManager(navigationContext),
+            BackPressManager(navigationContext)
+        )
+
         /**
          * Single point of entry for the Mapbox Navigation View.
          */
@@ -144,10 +151,7 @@ class DropInNavigationView @JvmOverloads constructor(
             ),
             ActionListCoordinator(navigationContext, binding.actionListLayout),
             SpeedLimitCoordinator(navigationContext, binding.speedLimitLayout),
-            RoadNameLabelCoordinator(navigationContext, binding.roadNameLayout),
-            NavigationStateManager(navigationContext),
-            RouteManager(navigationContext),
-            BackPressManager(navigationContext)
+            RoadNameLabelCoordinator(navigationContext, binding.roadNameLayout)
         )
     }
 

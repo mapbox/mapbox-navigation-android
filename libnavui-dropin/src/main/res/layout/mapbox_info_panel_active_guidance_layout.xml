@@ -32,6 +32,22 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
+            <androidx.appcompat.widget.AppCompatTextView
+                style="@style/MapboxStyle.DropIn.InfoPanelHeadline"
+                android:id="@+id/arrivedText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:paddingEnd="8dp"
+                android:text="@string/mapbox_drop_in_arrived"
+                android:maxLines="2"
+                android:ellipsize="end"
+                app:layout_constraintTop_toTopOf="@+id/endNavigation"
+                app:layout_constraintBottom_toBottomOf="@+id/endNavigation"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5" />
+
             <com.mapbox.navigation.dropin.view.MapboxExtendableButton
                 style="@style/MapboxStyle.DropIn.ExitButton"
                 android:id="@+id/endNavigation"

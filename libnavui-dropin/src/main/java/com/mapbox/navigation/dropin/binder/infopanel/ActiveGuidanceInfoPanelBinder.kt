@@ -10,6 +10,7 @@ import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.binder.navigationListOf
 import com.mapbox.navigation.dropin.component.infopanel.InfoPanelActiveGuidanceComponent
+import com.mapbox.navigation.dropin.component.infopanel.InfoPanelArrivalComponent
 import com.mapbox.navigation.dropin.component.tripprogress.TripProgressComponent
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelActiveGuidanceLayoutBinding
 
@@ -31,6 +32,11 @@ internal class ActiveGuidanceInfoPanelBinder(
             InfoPanelActiveGuidanceComponent(
                 context.stopActiveGuidanceUseCase(),
                 binding.endNavigation
+            ),
+            InfoPanelArrivalComponent(
+                context.viewModel,
+                binding.arrivedText,
+                binding.tripProgressView
             )
         )
     }

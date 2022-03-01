@@ -2,8 +2,10 @@ package com.mapbox.navigation.dropin.coordinator
 
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
+import com.mapbox.navigation.dropin.DropInNavigationViewModel
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.usecase.guidance.StopActiveGuidanceUseCase
 
 /**
  * Class that manages onBackPressedCallback enabled state
@@ -13,8 +15,9 @@ internal class BackPressManager(
     private val context: DropInNavigationViewContext
 ) : UIComponent() {
 
-    private val viewModel = context.viewModel
-    private val stopActiveGuidanceUseCase get() = context.stopActiveGuidanceUseCase()
+    private val viewModel: DropInNavigationViewModel = context.viewModel
+    private val stopActiveGuidanceUseCase: StopActiveGuidanceUseCase
+        get() = context.stopActiveGuidanceUseCase()
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
@@ -31,7 +34,8 @@ internal class BackPressManager(
                 NavigationState.RoutePreview -> {
                     mapboxNavigation.setRoutes(emptyList())
                 }
-                NavigationState.ActiveNavigation -> {
+                NavigationState.ActiveNavigation,
+                NavigationState.Arrival -> {
                     stopActiveGuidanceUseCase(Unit)
                 }
                 else -> Unit

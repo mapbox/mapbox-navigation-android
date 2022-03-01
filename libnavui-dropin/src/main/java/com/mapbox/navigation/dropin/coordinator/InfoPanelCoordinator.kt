@@ -9,7 +9,6 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.binder.infopanel.ActiveGuidanceInfoPanelBinder
-import com.mapbox.navigation.dropin.binder.infopanel.ArrivalInfoPanelBinder
 import com.mapbox.navigation.dropin.binder.infopanel.EmptyInfoPanelBinder
 import com.mapbox.navigation.dropin.binder.infopanel.FreeDriveInfoPanelBinder
 import com.mapbox.navigation.dropin.binder.infopanel.RoutePreviewInfoPanelBinder
@@ -57,8 +56,8 @@ internal class InfoPanelCoordinator(
             when (navigationState) {
                 NavigationState.FreeDrive -> FreeDriveInfoPanelBinder(context)
                 NavigationState.RoutePreview -> RoutePreviewInfoPanelBinder(context)
-                NavigationState.ActiveNavigation -> ActiveGuidanceInfoPanelBinder(context)
-                NavigationState.Arrival -> ArrivalInfoPanelBinder(context)
+                NavigationState.ActiveNavigation,
+                NavigationState.Arrival -> ActiveGuidanceInfoPanelBinder(context)
                 else -> EmptyInfoPanelBinder()
             }
         }
