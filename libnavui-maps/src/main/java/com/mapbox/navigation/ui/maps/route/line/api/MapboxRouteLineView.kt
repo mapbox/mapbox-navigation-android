@@ -22,7 +22,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvide
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
-import kotlinx.coroutines.CoroutineScope
+import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
@@ -83,87 +83,137 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                 Log.e(TAG, error.errorMessage)
             },
             { value ->
+                val baseExpressionDeferred = jobControl.scope.async {
+                    value.primaryRouteLineData
+                        .dynamicData
+                        .baseExpressionProvider
+                        .generateExpression()
+                }
+                val casingExpressionDeferred = jobControl.scope.async {
+                    value.primaryRouteLineData
+                        .dynamicData
+                        .casingExpressionProvider
+                        .generateExpression()
+                }
+                val trafficExpressionDeferred = jobControl.scope.async {
+                    value.primaryRouteLineData
+                        .dynamicData
+                        .trafficExpressionProvider
+                        ?.generateExpression()
+                }
+                val restrictedSectionExpressionDeferred = jobControl.scope.async {
+                    value.primaryRouteLineData
+                        .dynamicData
+                        .restrictedSectionExpressionProvider
+                        ?.generateExpression()
+                }
+                val alternativeRouteLinesData1Deferred = jobControl.scope.async {
+                    value.alternativeRouteLinesData[0]
+                        .dynamicData
+                        .trafficExpressionProvider
+                        ?.generateExpression()
+                }
+                val alternativeRouteLinesData2Deferred = jobControl.scope.async {
+                    value.alternativeRouteLinesData[1]
+                        .dynamicData
+                        .trafficExpressionProvider
+                        ?.generateExpression()
+                }
+
                 jobControl.scope.launch(Dispatchers.Main) {
                     mutex.withLock {
+                        // The gradients are set to transparent first so that when the route line
+                        // layer sources are updated they don't initially reflect the wrong traffic
+                        // gradient. The gradients are set on the layers not the feature collections.
+                        // The set gradient call is asynchronous in the Maps SDK but the update source
+                        // is not.  Setting the gradients to transparent means the traffic isn't
+                        // visible with the layer sources are updated. The traffic is calculated and
+                        // applied later.
                         updateLineGradient(
                             style,
                             RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
                             Expression.color(Color.TRANSPARENT)
                         )
+
                         updateLineGradient(
                             style,
                             RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
                             Expression.color(Color.TRANSPARENT)
                         )
+
                         updateLineGradient(
                             style,
                             RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
                             Expression.color(Color.TRANSPARENT)
                         )
+
                         updateLineGradient(
                             style,
                             RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
                             Expression.color(Color.TRANSPARENT)
                         )
 
-                        value.primaryRouteLineData.also {
-                            updateSource(
-                                style,
-                                RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID,
-                                it.featureCollection
-                            )
-                            updateLineGradientAsync(
-                                jobControl.scope,
-                                style,
-                                RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
-                                it.dynamicData.baseExpressionProvider
-                            )
-                            updateLineGradientAsync(
-                                jobControl.scope,
-                                style,
-                                RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
-                                it.dynamicData.casingExpressionProvider
-                            )
-                            updateLineGradientAsync(
-                                jobControl.scope,
+                        updateSource(
+                            style,
+                            RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID,
+                            value.primaryRouteLineData.featureCollection
+                        )
+
+                        updateSource(
+                            style,
+                            RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
+                            value.alternativeRouteLinesData[0].featureCollection
+                        )
+
+                        updateSource(
+                            style,
+                            RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                            value.alternativeRouteLinesData[1].featureCollection
+                        )
+
+                        updateLineGradient(
+                            style,
+                            RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
+                            baseExpressionDeferred.await()
+                        )
+
+                        updateLineGradient(
+                            style,
+                            RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+                            casingExpressionDeferred.await()
+                        )
+
+                        ifNonNull(trafficExpressionDeferred.await()) {
+                            updateLineGradient(
                                 style,
                                 RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
-                                it.dynamicData.trafficExpressionProvider
-                            )
-                            updateLineGradientAsync(
-                                jobControl.scope,
-                                style,
-                                RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
-                                it.dynamicData.restrictedSectionExpressionProvider
-                            )
-                        }
-                        // SBNOTE: In the future let's find a better way to
-                        // match the items in the list with the alt. route layer ID's.
-                        value.alternativeRouteLinesData[0].also {
-                            updateSource(
-                                style,
-                                RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
-                                it.featureCollection
-                            )
-                            updateLineGradientAsync(
-                                jobControl.scope,
-                                style,
-                                RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
-                                it.dynamicData.trafficExpressionProvider
+                                it
                             )
                         }
 
-                        value.alternativeRouteLinesData[1].also {
-                            updateSource(
+                        ifNonNull(restrictedSectionExpressionDeferred.await()) {
+                            updateLineGradient(
                                 style,
-                                RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
-                                it.featureCollection
+                                RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
+                                it
                             )
-                            updateLineGradientAsync(
-                                jobControl.scope,
+                        }
+
+                        // SBNOTE: In the future let's find a better way to
+                        // match the items in the list with the alt. route layer ID's.
+                        ifNonNull(alternativeRouteLinesData1Deferred.await()) {
+                            updateLineGradient(
+                                style,
+                                RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
+                                it
+                            )
+                        }
+
+                        ifNonNull(alternativeRouteLinesData2Deferred.await()) {
+                            updateLineGradient(
                                 style,
                                 RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
-                                it.dynamicData.trafficExpressionProvider
+                                it
                             )
                         }
 
@@ -513,26 +563,6 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
     private fun updateSource(style: Style, sourceId: String, featureCollection: FeatureCollection) {
         style.getSource(sourceId)?.let {
             (it as GeoJsonSource).featureCollection(featureCollection)
-        }
-    }
-
-    private suspend fun updateLineGradientAsync(
-        coroutineScope: CoroutineScope,
-        style: Style,
-        layerId: String,
-        expressionProvider: RouteLineExpressionProvider?
-    ) {
-        if (expressionProvider != null) {
-            val gradientExpression = coroutineScope.async {
-                expressionProvider.generateExpression()
-            }
-            gradientExpression.await().apply {
-                updateLineGradient(
-                    style,
-                    layerId,
-                    this
-                )
-            }
         }
     }
 
