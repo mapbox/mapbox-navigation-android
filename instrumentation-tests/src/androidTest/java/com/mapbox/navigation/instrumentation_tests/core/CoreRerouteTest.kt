@@ -5,8 +5,6 @@ import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
@@ -143,14 +141,14 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
                         reasons: List<RouterFailure>,
                         routeOptions: RouteOptions
                     ) {
-                        logE(Tag("DEBUG"), Message("onFailure reasons=$reasons"))
+                        logE("DEBUG", "onFailure reasons=$reasons")
                     }
 
                     override fun onCanceled(
                         routeOptions: RouteOptions,
                         routerOrigin: RouterOrigin
                     ) {
-                        logE(Tag("DEBUG"), Message("onCanceled"))
+                        logE("DEBUG", "onCanceled")
                     }
                 }
             )
@@ -184,7 +182,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         runOnMainSync {
             val countDownLatch = CountDownLatch(1)
             mapboxNavigation.historyRecorder.stopRecording {
-                logE(Tag("DEBUG"), Message("history path=$it"))
+                logE("DEBUG", "history path=$it")
                 countDownLatch.countDown()
             }
             countDownLatch.await()

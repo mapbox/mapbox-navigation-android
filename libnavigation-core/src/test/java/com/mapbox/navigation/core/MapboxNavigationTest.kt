@@ -10,7 +10,6 @@ import com.mapbox.android.telemetry.TelemetryEnabler
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.common.MapboxSDKCommon
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -52,7 +51,7 @@ import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigatorConfig
@@ -98,6 +97,8 @@ import java.util.Locale
 class MapboxNavigationTest {
 
     @get:Rule
+    val mockLoggerTestRule = MockLoggerRule()
+    @get:Rule
     var coroutineRule = MainCoroutineRule()
 
     private val accessToken = "pk.1234"
@@ -113,7 +114,6 @@ class MapboxNavigationTest {
     private val routeProgress: RouteProgress = mockk(relaxed = true)
     private val navigationSession: NavigationSession = mockk(relaxed = true)
     private val billingController: BillingController = mockk(relaxUnitFun = true)
-    private val logger: Logger = mockk(relaxUnitFun = true)
     private val rerouteController: RerouteController = mockk(relaxUnitFun = true) {
         every { state } returns RerouteState.Idle
     }
@@ -169,8 +169,6 @@ class MapboxNavigationTest {
                 any()
             )
         } returns hybridRouter
-        mockkObject(LoggerProvider)
-        every { LoggerProvider.logger } returns logger
         every {
             MapboxModuleProvider.createModule<TripNotification>(
                 MapboxModuleType.NavigationTripNotification,
@@ -182,7 +180,7 @@ class MapboxNavigationTest {
         mockkObject(RouteRefreshControllerProvider)
         every {
             RouteRefreshControllerProvider.createRouteRefreshController(
-                any(), any(), any(), any(), threadController,
+                any(), any(), any(), threadController,
             )
         } returns routeRefreshController
         mockkObject(RouteAlternativesControllerProvider)
@@ -207,7 +205,7 @@ class MapboxNavigationTest {
             NavigationComponentProvider.createArrivalProgressObserver(tripSession)
         } returns arrivalProgressObserver
 
-        every { navigator.create(any(), any(), any(), any(), any(), any()) } returns navigator
+        every { navigator.create(any(), any(), any(), any(), any()) } returns navigator
         mockkStatic(TelemetryEnabler::class)
         every { TelemetryEnabler.isEventsEnabled(any()) } returns true
     }
@@ -220,7 +218,6 @@ class MapboxNavigationTest {
 
         unmockkObject(MapboxSDKCommon)
         unmockkObject(MapboxModuleProvider)
-        unmockkObject(LoggerProvider)
         unmockkObject(NavigationComponentProvider)
         unmockkObject(RouteRefreshControllerProvider)
         unmockkObject(RouteAlternativesControllerProvider)
@@ -473,7 +470,7 @@ class MapboxNavigationTest {
         mapboxNavigation.onDestroy()
 
         verify(exactly = 0) {
-            MapboxNavigationTelemetry.initialize(any(), any(), any(), any(), any())
+            MapboxNavigationTelemetry.initialize(any(), any(), any(), any())
         }
         verify(exactly = 0) { MapboxNavigationTelemetry.destroy(any()) }
     }
@@ -737,7 +734,7 @@ class MapboxNavigationTest {
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), any(), capture(slot), any(), any(), any()
+                any(), any(), capture(slot), any(), any()
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -755,7 +752,7 @@ class MapboxNavigationTest {
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), any(), capture(slot), any(), any(), any()
+                any(), any(), capture(slot), any(), any()
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -778,7 +775,7 @@ class MapboxNavigationTest {
         val slot = slot<NavigatorConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), capture(slot), any(), any(), any(), any()
+                any(), capture(slot), any(), any(), any()
             )
         } returns navigator
 
@@ -793,7 +790,7 @@ class MapboxNavigationTest {
         val slot = slot<NavigatorConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), capture(slot), any(), any(), any(), any()
+                any(), capture(slot), any(), any(), any()
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -816,7 +813,7 @@ class MapboxNavigationTest {
         val slot = slot<NavigatorConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), capture(slot), any(), any(), any(), any()
+                any(), capture(slot), any(), any(), any()
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -945,7 +942,7 @@ class MapboxNavigationTest {
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), any(), capture(slot), any(), any(), any()
+                any(), any(), capture(slot), any(), any()
             )
         } returns navigator
         val tilesVersion = "tilesVersion"
@@ -983,8 +980,7 @@ class MapboxNavigationTest {
                 any(),
                 capture(tileConfigSlot),
                 any(),
-                any(),
-                any(),
+                any()
             )
         } just Runs
 
@@ -1018,8 +1014,7 @@ class MapboxNavigationTest {
                 any(),
                 capture(tileConfigSlot),
                 any(),
-                any(),
-                any(),
+                any()
             )
         } just Runs
 
@@ -1194,8 +1189,7 @@ class MapboxNavigationTest {
                 any(),
                 any(),
                 any(),
-                any(),
-                any(),
+                any()
             )
         } returns navigator
     }
@@ -1205,7 +1199,6 @@ class MapboxNavigationTest {
             NavigationComponentProvider.createTripService(
                 applicationContext,
                 any(),
-                logger,
                 threadController,
             )
         } returns tripService
@@ -1224,7 +1217,6 @@ class MapboxNavigationTest {
                 tripSessionLocationEngine = tripSessionLocationEngine,
                 navigator = navigator,
                 threadController,
-                logger = logger,
             )
         } returns tripSession
         every { tripSession.getRouteProgress() } returns routeProgress
@@ -1246,7 +1238,7 @@ class MapboxNavigationTest {
 
     private fun mockNavTelemetry() {
         mockkObject(MapboxNavigationTelemetry)
-        every { MapboxNavigationTelemetry.initialize(any(), any(), any(), any(), any()) } just runs
+        every { MapboxNavigationTelemetry.initialize(any(), any(), any(), any()) } just runs
         every { MapboxNavigationTelemetry.destroy(any()) } just runs
         every {
             MapboxNavigationTelemetry.postUserFeedback(any(), any(), any(), any(), any(), any())

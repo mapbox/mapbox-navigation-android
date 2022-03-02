@@ -6,9 +6,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
@@ -16,6 +13,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
+import com.mapbox.navigation.utils.internal.logW
 
 /**
  * This class converts a [DirectionsRoute] into events that can be
@@ -28,19 +26,18 @@ class ReplayRouteMapper @JvmOverloads constructor(
     var options: ReplayRouteOptions = ReplayRouteOptions.Builder().build()
 ) {
 
-    private val tag = Tag("MbxReplayRouteMapper")
     private val replayRouteDriver = ReplayRouteDriver()
-    private var logger: Logger? = null
 
     /**
      * @see ReplayRouteMapper
      */
+    @Deprecated(
+        message = "Setting a Logger has no effect, logging is handled internally."
+    )
     constructor(
         options: ReplayRouteOptions = ReplayRouteOptions.Builder().build(),
-        logger: Logger
-    ) : this(options) {
-        this.logger = logger
-    }
+        logger: com.mapbox.base.common.logger.Logger
+    ) : this(options)
 
     /**
      * Take a [DirectionsRoute] and map it to events that can be replayed by the [MapboxReplayer].
@@ -54,9 +51,9 @@ class ReplayRouteMapper @JvmOverloads constructor(
         val geometries = directionsRoute.routeOptions()?.geometries()
         val usesPolyline6 = geometries?.contains(DirectionsCriteria.GEOMETRY_POLYLINE6) ?: false
         if (!usesPolyline6) {
-            logger?.w(
-                tag,
-                Message("Make sure that the route's geometry is encoded with polyline6'")
+            logW(
+                TAG,
+                "Make sure that the route's geometry is encoded with polyline6'"
             )
         }
         directionsRoute.geometry() ?: return emptyList()
@@ -123,6 +120,7 @@ class ReplayRouteMapper @JvmOverloads constructor(
     }
 
     companion object {
+        private const val TAG = "MbxReplayRouteMapper"
         private const val REPLAY_ROUTE_ACCURACY_HORIZONTAL = 3.0
 
         /**

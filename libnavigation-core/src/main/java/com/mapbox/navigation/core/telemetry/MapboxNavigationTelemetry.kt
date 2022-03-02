@@ -6,9 +6,6 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.TelemetryUtils.generateCreateDateFormatted
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsReporter
@@ -53,9 +50,11 @@ import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEvent
 import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.toPoint
 import java.util.Date
+import kotlin.collections.LinkedHashMap
 
 /**
  * Session metadata when telemetry is on Pause.
@@ -151,7 +150,7 @@ Initialization may be called multiple times, the call is idempotent.
 The class has two public methods, postUserFeedback() and initialize().
  */
 internal object MapboxNavigationTelemetry {
-    internal val TAG = Tag("MbxNavigationTelemetry")
+    internal const val TAG = "MbxNavigationTelemetry"
 
     private const val ONE_SECOND = 1000
     internal const val MOCK_PROVIDER = "com.mapbox.navigation.core.replay.ReplayLocationEngine"
@@ -169,7 +168,7 @@ internal object MapboxNavigationTelemetry {
             }
             field = value
             ifNonNull(value) { app ->
-                logger?.d(TAG, Message("Lifecycle monitor created"))
+                logD(TAG, "Lifecycle monitor created")
                 lifecycleMonitor = ApplicationLifecycleMonitor(app)
             }
         }
@@ -177,7 +176,6 @@ internal object MapboxNavigationTelemetry {
     private var locationEngineNameExternal: String = LocationEngine::javaClass.name
     private lateinit var locationsCollector: LocationsCollector
     private lateinit var sdkIdentifier: String
-    private var logger: Logger? = null
     private val feedbackEventCacheMap = LinkedHashMap<String, NavigationFeedbackEvent>()
 
     private var sessionState: NavigationSessionState = Idle
@@ -244,7 +242,7 @@ internal object MapboxNavigationTelemetry {
             }
             else -> logW(
                 TAG,
-                Message("Unknown route update reason: [$reason]"),
+                "Unknown route update reason: [$reason]",
             )
         }
     }
@@ -335,12 +333,10 @@ internal object MapboxNavigationTelemetry {
         mapboxNavigation: MapboxNavigation,
         options: NavigationOptions,
         reporter: MetricsReporter,
-        logger: Logger?,
-        locationsCollector: LocationsCollector = LocationsCollectorImpl(logger),
+        locationsCollector: LocationsCollector = LocationsCollectorImpl(),
     ) {
         resetLocalVariables()
         sessionState = Idle
-        this.logger = logger
         this.locationsCollector = locationsCollector
         navigationOptions = options
         applicationContext = options.applicationContext
@@ -860,7 +856,7 @@ internal object MapboxNavigationTelemetry {
         }
 
     private fun log(message: String) {
-        logger?.d(TAG, Message(message))
+        logD(TAG, message)
     }
 
     private sealed class NavTelemetryState {

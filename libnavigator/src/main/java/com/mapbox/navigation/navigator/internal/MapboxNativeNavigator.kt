@@ -1,7 +1,6 @@
 package com.mapbox.navigation.navigator.internal
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
@@ -44,7 +43,6 @@ interface MapboxNativeNavigator {
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
         historyDir: String?,
-        logger: Logger,
         accessToken: String,
     ): MapboxNativeNavigator
 
@@ -56,7 +54,6 @@ interface MapboxNativeNavigator {
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
         historyDir: String?,
-        logger: Logger,
         accessToken: String,
     )
 

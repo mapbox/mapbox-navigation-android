@@ -14,8 +14,6 @@ import com.mapbox.android.telemetry.TelemetryEnabler
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.common.module.provider.ModuleProviderArgument
@@ -104,9 +102,9 @@ import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.utils.internal.ConnectivityHandler
-import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import com.mapbox.navigator.ElectronicHorizonOptions
 import com.mapbox.navigator.FallbackVersionsObserver
@@ -129,6 +127,7 @@ private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER =
 private const val MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME =
     "com.mapbox.navigation.trip.notification.internal.MapboxTripNotification"
 private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButtonChannel"
+
 /**
  * ## Mapbox Navigation Core SDK
  * An entry point for interacting with the Mapbox Navigation SDK.
@@ -222,9 +221,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val navigationSession: NavigationSession
     private val tripSessionLocationEngine: TripSessionLocationEngine
     private val billingController: BillingController
-    private val logger = LoggerProvider.logger
     private val connectivityHandler: ConnectivityHandler = ConnectivityHandler(
-        logger,
         Channel(Channel.CONFLATED)
     )
     private val internalRoutesObserver: RoutesObserver
@@ -317,7 +314,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @see [HistoryRecorderOptions] to enable and customize the directory
      * @see [MapboxHistoryReader] to read the files
      */
-    val historyRecorder = MapboxHistoryRecorder(navigationOptions, logger)
+    val historyRecorder = MapboxHistoryRecorder(navigationOptions)
 
     /**
      * **THIS IS AN EXPERIMENTAL API, DO NOT USE IN A PRODUCTION ENVIRONMENT.**
@@ -364,7 +361,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
             ),
             historyRecorder.fileDirectory(),
-            logger,
             navigationOptions.accessToken ?: "",
         )
         historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
@@ -381,7 +377,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripService = NavigationComponentProvider.createTripService(
             navigationOptions.applicationContext,
             notification,
-            logger,
             threadController,
         )
         tripSessionLocationEngine = NavigationComponentProvider.createTripSessionLocationEngine(
@@ -392,7 +387,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             tripSessionLocationEngine = tripSessionLocationEngine,
             navigator = navigator,
             threadController,
-            logger = logger,
         )
 
         tripSession.registerStateObserver(navigationSession)
@@ -430,9 +424,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
         ifNonNull(accessToken) { token ->
             runInTelemetryContext { telemetry ->
-                logger.d(
+                logD(
                     telemetry.TAG,
-                    Message("MapboxMetricsReporter.init from MapboxNavigation main")
+                    "MapboxMetricsReporter.init from MapboxNavigation main"
                 )
                 MapboxMetricsReporter.init(
                     navigationOptions.applicationContext,
@@ -444,7 +438,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                     this,
                     navigationOptions,
                     MapboxMetricsReporter,
-                    logger,
                 )
             }
         }
@@ -461,7 +454,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigationOptions.routeRefreshOptions,
             directionsSession,
             tripSession,
-            logger,
             threadController,
         )
 
@@ -471,7 +463,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             routeOptionsProvider,
             navigationOptions.rerouteOptions,
             threadController,
-            logger
         )
         rerouteController = defaultRerouteController
 
@@ -828,7 +819,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     fun onDestroy() {
         if (isDestroyed) return
-        logger.d(TAG, Message("MapboxNavigation onDestroy"))
+        logD(TAG, "MapboxNavigation onDestroy")
         billingController.onDestroy()
         directionsSession.shutdown()
         directionsSession.unregisterAllRoutesObservers()
@@ -1379,12 +1370,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                     it.onSwitchToFallbackVersion(tilesVersion)
                 }
             } else {
-                logger.d(
+                logD(
                     TAG,
-                    Message(
-                        "FallbackVersionsObserver.onFallbackVersionsFound called with an empty " +
-                            "versions list, navigator can't be recreated."
-                    )
+                    "FallbackVersionsObserver.onFallbackVersionsFound called with an empty " +
+                        "versions list, navigator can't be recreated."
                 )
             }
         }
@@ -1403,12 +1392,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     private fun recreateNavigatorInstance(isFallback: Boolean, tilesVersion: String) {
-        logger.d(
+        logD(
             TAG,
-            Message(
-                "recreateNavigatorInstance(). " +
-                    "isFallback = $isFallback, tilesVersion = $tilesVersion"
-            )
+            "recreateNavigatorInstance(). " +
+                "isFallback = $isFallback, tilesVersion = $tilesVersion"
         )
 
         mainJobController.scope.launch {
@@ -1417,7 +1404,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 navigatorConfig,
                 createTilesConfig(isFallback, tilesVersion),
                 historyRecorder.fileDirectory(),
-                logger,
                 navigationOptions.accessToken ?: "",
             )
             historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
@@ -1505,7 +1491,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tilesVersion: String
     ): TilesConfig {
         // TODO StrictMode may report a violation as we're creating a File from the Main
-        val offlineFilesPath = RoutingTilesFiles(navigationOptions.applicationContext, logger)
+        val offlineFilesPath = RoutingTilesFiles(navigationOptions.applicationContext)
             .absolutePath(navigationOptions.routingTilesOptions)
         val dataset = StringBuilder().apply {
             append(navigationOptions.routingTilesOptions.tilesDataset)
@@ -1553,7 +1539,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         @Volatile
         private var hasInstance = false
 
-        private val TAG = Tag("MbxNavigation")
+        private const val TAG = "MbxNavigation"
         private const val USER_AGENT: String = "MapboxNavigationNative"
         private const val THREADS_COUNT = 2
         private const val ONE_SECOND_IN_MILLIS = 1000.0

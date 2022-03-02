@@ -3,9 +3,6 @@ package com.mapbox.navigation.core.reroute
 import androidx.annotation.MainThread
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.options.RerouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -17,6 +14,7 @@ import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -29,7 +27,6 @@ internal class MapboxRerouteController(
     private val routeOptionsUpdater: RouteOptionsUpdater,
     private val rerouteOptions: RerouteOptions,
     threadController: ThreadController,
-    private val logger: Logger
 ) : NavigationRerouteController {
 
     private val observers = CopyOnWriteArraySet<RerouteController.RerouteStateObserver>()
@@ -105,9 +102,9 @@ internal class MapboxRerouteController(
     override fun reroute(callback: NavigationRerouteController.RoutesCallback) {
         interrupt()
         state = RerouteState.FetchingRoute
-        logger.d(
-            Tag(TAG),
-            Message("Fetching route")
+        logD(
+            TAG,
+            "Fetching route"
         )
 
         val routeOptions = directionsSession.getPrimaryRouteOptions()
@@ -145,9 +142,9 @@ internal class MapboxRerouteController(
             val id = requestId
             checkNotNull(id)
             directionsSession.cancelRouteRequest(id)
-            logger.d(
-                Tag(TAG),
-                Message("Route request interrupted")
+            logD(
+                TAG,
+                "Route request interrupted"
             )
         }
     }

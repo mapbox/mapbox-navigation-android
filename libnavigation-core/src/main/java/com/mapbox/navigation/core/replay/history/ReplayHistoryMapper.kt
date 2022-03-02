@@ -1,7 +1,5 @@
 package com.mapbox.navigation.core.replay.history
 
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.history.model.HistoryEvent
@@ -11,7 +9,7 @@ import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
 import com.mapbox.navigation.core.history.model.HistoryEventUpdateLocation
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logW
 
 /**
  * Mapper that can be used with [ReplayHistoryMapper].
@@ -133,13 +131,11 @@ class ReplayHistoryMapper private constructor(
          */
         fun build(): ReplayHistoryMapper {
             if (setRouteMapper === DefaultSetRouteMapper) {
-                LoggerProvider.logger.w(
-                    Tag("ReplayHistoryMapper"),
-                    Message(
-                        "Mapper uses a deprecated default `setRouteMapper` based on " +
-                            "`ReplaySetRoute` type. Consider switching to a mapper based on " +
-                            "`ReplayNavigationSetRoute`."
-                    )
+                logW(
+                    "ReplayHistoryMapper",
+                    "Mapper uses a deprecated default `setRouteMapper` based on " +
+                        "`ReplaySetRoute` type. Consider switching to a mapper based on " +
+                        "`ReplayNavigationSetRoute`."
                 )
             }
             return ReplayHistoryMapper(

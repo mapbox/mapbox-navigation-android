@@ -6,11 +6,10 @@ import android.os.Looper
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
-import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logD
 
 /**
  * This class is only intended to be used by the [MapboxTripSession].
@@ -61,10 +60,11 @@ internal class TripSessionLocationEngine constructor(
         }
 
         override fun onFailure(exception: Exception) {
-            LoggerProvider.logger.d(
-                msg = Message("location on failure"),
-                tr = exception
-            )
+            logD(TAG, "location on failure exception=$exception")
         }
+    }
+
+    private companion object {
+        private const val TAG = "MbxTripSessionLocationEngine"
     }
 }

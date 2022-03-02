@@ -5,11 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.SystemClock
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.trip.model.TripNotificationState
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -22,17 +21,16 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @param tripNotification provide contract to communicate with notification
  * @param initializeLambda called when [TripService] has started
  * @param terminateLambda called when [TripService] has stopped
- * @param logger interface for logging any events
  */
 internal class MapboxTripService(
     private val tripNotification: TripNotification,
     private val initializeLambda: () -> Unit,
     private val terminateLambda: () -> Unit,
-    private val logger: Logger,
     threadController: ThreadController,
 ) : TripService {
 
     companion object {
+        private const val TAG = "MbxTripService"
 
         private var currentTripNotification: TripNotification? = null
 
@@ -59,7 +57,6 @@ internal class MapboxTripService(
         applicationContext: Context,
         tripNotification: TripNotification,
         intent: Intent,
-        logger: Logger,
         threadController: ThreadController,
     ) : this(
         tripNotification,
@@ -77,7 +74,6 @@ internal class MapboxTripService(
         {
             applicationContext.stopService(intent)
         },
-        logger,
         threadController,
     )
 
@@ -86,18 +82,15 @@ internal class MapboxTripService(
      *
      * @param applicationContext Context
      * @param tripNotification provide contract to communicate with notification
-     * @param logger interface for logging any events
      */
     constructor(
         applicationContext: Context,
         tripNotification: TripNotification,
-        logger: Logger,
         threadController: ThreadController,
     ) : this(
         applicationContext,
         tripNotification,
         Intent(applicationContext, NavigationNotificationService::class.java),
-        logger,
         threadController,
     )
 
@@ -129,7 +122,7 @@ internal class MapboxTripService(
                 allowedNotificationTime = SystemClock.elapsedRealtime() + 500
             }
             false -> {
-                logger.i(msg = Message("service already started"))
+                logI(TAG, "service already started")
             }
         }
     }
@@ -146,7 +139,7 @@ internal class MapboxTripService(
                 tripNotification.onTripSessionStopped()
             }
             false -> {
-                logger.i(msg = Message("Service is not started yet"))
+                logI(TAG, "Service is not started yet")
             }
         }
     }

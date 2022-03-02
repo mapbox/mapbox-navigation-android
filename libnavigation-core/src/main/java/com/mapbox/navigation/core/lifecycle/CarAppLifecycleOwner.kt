@@ -9,10 +9,8 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.utils.internal.LoggerProvider.logger
+import com.mapbox.navigation.utils.internal.logI
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class CarAppLifecycleOwner : LifecycleOwner {
@@ -39,7 +37,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
                 createdChangingConfiguration--
             } else {
                 lifecycleCreated++
-                logger.i(TAG, Message("LifecycleOwner ($owner) onCreate"))
+                logI(TAG, "LifecycleOwner ($owner) onCreate")
                 if (activitiesCreated == 0 && lifecycleCreated == 1) {
                     changeState(Lifecycle.State.STARTED)
                 }
@@ -51,7 +49,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
                 foregroundedChangingConfiguration--
             } else {
                 lifecycleForegrounded++
-                logger.i(TAG, Message("LifecycleOwner ($owner) onStart"))
+                logI(TAG, "LifecycleOwner ($owner) onStart")
                 if (activitiesForegrounded == 0 && lifecycleForegrounded == 1) {
                     changeState(Lifecycle.State.RESUMED)
                 }
@@ -63,7 +61,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
                 foregroundedChangingConfiguration++
             } else {
                 lifecycleForegrounded--
-                logger.i(TAG, Message("LifecycleOwner ($owner) onStop"))
+                logI(TAG, "LifecycleOwner ($owner) onStop")
                 if (activitiesForegrounded == 0 && lifecycleForegrounded == 0) {
                     changeState(Lifecycle.State.STARTED)
                 }
@@ -75,7 +73,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
                 createdChangingConfiguration++
             } else {
                 lifecycleCreated--
-                logger.i(TAG, Message("LifecycleOwner ($owner) onDestroy"))
+                logI(TAG, "LifecycleOwner ($owner) onDestroy")
                 if (activitiesCreated == 0 && lifecycleCreated == 0) {
                     changeState(Lifecycle.State.CREATED)
                 }
@@ -94,7 +92,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
                 createdChangingConfiguration--
             } else {
                 activitiesCreated++
-                logger.i(TAG, Message("app onActivityCreated"))
+                logI(TAG, "app onActivityCreated")
                 if (lifecycleCreated == 0 && activitiesCreated == 1) {
                     changeState(Lifecycle.State.STARTED)
                 }
@@ -106,7 +104,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
                 foregroundedChangingConfiguration--
             } else {
                 activitiesForegrounded++
-                logger.i(TAG, Message("app onActivityStarted"))
+                logI(TAG, "app onActivityStarted")
                 if (lifecycleForegrounded == 0 && activitiesForegrounded == 1) {
                     changeState(Lifecycle.State.RESUMED)
                 }
@@ -114,11 +112,11 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
         }
 
         override fun onActivityResumed(activity: Activity) {
-            logger.i(TAG, Message("app onActivityResumed"))
+            logI(TAG, "app onActivityResumed")
         }
 
         override fun onActivityPaused(activity: Activity) {
-            logger.i(TAG, Message("app onActivityPaused"))
+            logI(TAG, "app onActivityPaused")
         }
 
         override fun onActivityStopped(activity: Activity) {
@@ -126,7 +124,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
                 foregroundedChangingConfiguration++
             } else {
                 activitiesForegrounded--
-                logger.i(TAG, Message("app onActivityStopped"))
+                logI(TAG, "app onActivityStopped")
                 if (lifecycleForegrounded == 0 && activitiesForegrounded == 0) {
                     changeState(Lifecycle.State.STARTED)
                 }
@@ -134,7 +132,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
         }
 
         override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
-            logger.i(TAG, Message("app onActivitySaveInstanceState"))
+            logI(TAG, "app onActivitySaveInstanceState")
         }
 
         override fun onActivityDestroyed(activity: Activity) {
@@ -142,7 +140,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
                 createdChangingConfiguration++
             } else {
                 activitiesCreated--
-                logger.i(TAG, Message("app onActivityDestroyed"))
+                logI(TAG, "app onActivityDestroyed")
                 if (lifecycleCreated == 0 && activitiesCreated == 0) {
                     changeState(Lifecycle.State.CREATED)
                 }
@@ -153,25 +151,25 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
     private fun changeState(state: Lifecycle.State) {
         if (lifecycleRegistry.currentState != state) {
             lifecycleRegistry.currentState = state
-            logger.i(TAG, Message("changeState ${lifecycleRegistry.currentState}"))
+            logI(TAG, "changeState ${lifecycleRegistry.currentState}")
         }
     }
 
     override fun getLifecycle(): Lifecycle = lifecycleRegistry
 
     internal fun attachAllActivities(application: Application) {
-        logger.i(TAG, Message("attachAllActivities"))
+        logI(TAG, "attachAllActivities")
         application.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
         application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks)
     }
 
     fun attach(lifecycleOwner: LifecycleOwner) {
-        logger.i(TAG, Message("attach"))
+        logI(TAG, "attach")
         lifecycleOwner.lifecycle.addObserver(startedReferenceCounter)
     }
 
     fun detach(lifecycleOwner: LifecycleOwner) {
-        logger.i(TAG, Message("detach"))
+        logI(TAG, "detach")
         lifecycleOwner.lifecycle.removeObserver(startedReferenceCounter)
         val currentState = lifecycleOwner.lifecycle.currentState
         if (currentState.isAtLeast(Lifecycle.State.RESUMED)) {
@@ -189,6 +187,6 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
         createdChangingConfiguration > 0 || foregroundedChangingConfiguration > 0
 
     private companion object {
-        private val TAG = Tag("MbxCarAppLifecycleOwner")
+        private const val TAG = "MbxCarAppLifecycleOwner"
     }
 }

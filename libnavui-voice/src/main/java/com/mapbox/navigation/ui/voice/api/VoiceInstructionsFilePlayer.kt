@@ -3,11 +3,9 @@ package com.mapbox.navigation.ui.voice.api
 import android.content.Context
 import android.media.MediaPlayer
 import androidx.annotation.VisibleForTesting
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logE
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -56,9 +54,9 @@ internal class VoiceInstructionsFilePlayer(
         if (file != null && file.canRead()) {
             play(file)
         } else {
-            LoggerProvider.logger.e(
-                Tag(TAG),
-                Message("Announcement file from state can't be null and needs to be accessible")
+            logE(
+                TAG,
+                "Announcement file from state can't be null and needs to be accessible"
             )
             donePlaying(mediaPlayer)
         }
@@ -116,9 +114,9 @@ internal class VoiceInstructionsFilePlayer(
     private fun addListeners() {
         mediaPlayer?.run {
             setOnErrorListener { _, what, extra ->
-                LoggerProvider.logger.e(
-                    Tag(TAG),
-                    Message("MediaPlayer error: $what - extra: $extra")
+                logE(
+                    TAG,
+                    "MediaPlayer error: $what - extra: $extra"
                 )
                 false
             }

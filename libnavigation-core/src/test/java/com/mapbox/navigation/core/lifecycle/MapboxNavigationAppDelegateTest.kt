@@ -10,10 +10,9 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.testing.MockLoggerRule
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import io.mockk.verify
@@ -23,6 +22,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -31,6 +31,8 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class MapboxNavigationAppDelegateTest {
 
+    @get:Rule
+    val mockLoggerTestRule = MockLoggerRule()
     private val mapboxNavigation: MapboxNavigation = mockk()
     private val navigationOptions: NavigationOptions = mockk {
         every { accessToken } returns "test_access_token"
@@ -41,8 +43,6 @@ class MapboxNavigationAppDelegateTest {
     @Before
     fun setup() {
         mockkStatic(MapboxNavigationProvider::class)
-        mockkObject(LoggerProvider)
-        every { LoggerProvider.logger } returns mockk(relaxUnitFun = true)
         every { MapboxNavigationProvider.create(navigationOptions) } returns mapboxNavigation
         every { MapboxNavigationProvider.retrieve() } returns mapboxNavigation
     }

@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.model.Message
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -70,7 +69,7 @@ import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -265,16 +264,8 @@ class MapboxNavigationActivity : AppCompatActivity() {
     }
 
     private val navigationSessionStateObserver = NavigationSessionStateObserver {
-        LoggerProvider.logger.d(
-            msg = Message(
-                "NavigationSessionState=$it"
-            )
-        )
-        LoggerProvider.logger.d(
-            msg = Message(
-                "sessionId=${mapboxNavigation.getNavigationSessionState().sessionId}"
-            )
-        )
+        logD(TAG, "NavigationSessionState=$it")
+        logD(TAG, "sessionId=${mapboxNavigation.getNavigationSessionState().sessionId}")
     }
 
     @SuppressLint("MissingPermission")
@@ -530,5 +521,9 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     private fun getMapboxAccessTokenFromResources(): String {
         return Utils.getMapboxAccessToken(this)
+    }
+
+    private companion object {
+        private const val TAG = "MbxNavigationActivity"
     }
 }

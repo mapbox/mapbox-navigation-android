@@ -7,8 +7,6 @@ import androidx.test.espresso.Espresso
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.BasicNavigationViewActivity
@@ -22,7 +20,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logE
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -73,13 +71,13 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
 
         val consumerLongRoute =
             MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { value ->
-                LoggerProvider.logger.e(Tag("SetRouteCancellationTest"), Message("long"))
+                logE("SetRouteCancellationTest", "long")
                 throw RuntimeException("Previous set routes call wasn't cancelled as expected.")
             }
 
         val consumerShortRoute =
             MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { value ->
-                LoggerProvider.logger.e(Tag("SetRouteCancellationTest"), Message("short"))
+                logE("SetRouteCancellationTest", "short")
                 val primaryRoute = routeLineApi.getPrimaryRoute()
                 val contents =
                     value.value!!.primaryRouteLineData.dynamicData.trafficExpressionProvider!!

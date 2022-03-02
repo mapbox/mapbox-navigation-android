@@ -8,8 +8,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.StepIntersection
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
@@ -42,7 +40,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMisc
 import java.util.UUID
@@ -822,12 +820,10 @@ internal object MapboxRouteLineUtils {
             else -> when (style.styleLayerExists(belowLayerId)) {
                 true -> belowLayerId
                 false -> {
-                    LoggerProvider.logger.e(
-                        Tag(TAG),
-                        Message(
-                            "Layer $belowLayerId not found. Route line related layers will be " +
-                                "placed at top of the map stack."
-                        )
+                    logE(
+                        TAG,
+                        "Layer $belowLayerId not found. Route line related layers will be " +
+                            "placed at top of the map stack."
                     )
                     null
                 }

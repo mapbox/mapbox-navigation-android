@@ -1,8 +1,6 @@
 package com.mapbox.navigation.ui.maps.camera.data
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
@@ -12,7 +10,7 @@ import com.mapbox.maps.Size
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMeasurement
@@ -54,9 +52,9 @@ internal object ViewportDataSourceProcessor {
                 val stepsPoints = completeRoutePoints[legIndex]
 
                 if (legSteps.size != stepsPoints.size) {
-                    LoggerProvider.logger.e(
-                        Tag(TAG),
-                        Message("Unable to calculate geometry after maneuvers. Invalid route.")
+                    logE(
+                        TAG,
+                        "Unable to calculate geometry after maneuvers. Invalid route."
                     )
                     return emptyList()
                 }
@@ -136,9 +134,9 @@ internal object ViewportDataSourceProcessor {
         }
 
         if (simplificationFactor <= 0) {
-            LoggerProvider.logger.e(
-                Tag(TAG),
-                Message("overview simplification factor should be a positive integer")
+            logE(
+                TAG,
+                "overview simplification factor should be a positive integer"
             )
             return completeRoutePoints
         }
@@ -198,7 +196,7 @@ internal object ViewportDataSourceProcessor {
                 maxAngleDifferenceForGeometrySlicing
             )
         } catch (e: TurfException) {
-            LoggerProvider.logger.e(Tag(TAG), Message(e.message.toString()))
+            logE(TAG, e.message.toString())
             emptyList()
         }
     }
@@ -323,15 +321,14 @@ internal object ViewportDataSourceProcessor {
                 left + right > mapSize.width
             ) {
                 val fallbackPadding = EdgeInsets(0.0, 0.0, 0.0, 0.0)
-                LoggerProvider.logger.e(
-                    Tag(TAG),
-                    Message(
-                        """Provided following padding does not fit the map size:
+                logE(
+                    TAG,
+                    """
+                        |Provided following padding does not fit the map size:
                         |mapSize: $mapSize
                         |padding: $padding
                         |Using an empty fallback padding instead: $padding
                     """.trimMargin()
-                    )
                 )
                 return fallbackPadding
             }

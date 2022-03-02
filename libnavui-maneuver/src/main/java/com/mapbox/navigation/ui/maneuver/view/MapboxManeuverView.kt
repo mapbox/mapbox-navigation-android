@@ -12,8 +12,6 @@ import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
@@ -34,8 +32,8 @@ import com.mapbox.navigation.ui.maneuver.model.toRouteShield
 import com.mapbox.navigation.ui.shield.model.RouteShield
 import com.mapbox.navigation.ui.shield.model.RouteShieldError
 import com.mapbox.navigation.ui.shield.model.RouteShieldResult
-import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.logE
 
 /**
  * Default view to render a maneuver.
@@ -251,12 +249,10 @@ class MapboxManeuverView : ConstraintLayout {
     fun renderManeuverWith(shields: List<Expected<RouteShieldError, RouteShieldResult>>) {
         val partitionedList = shields.partition { it.isError }
         partitionedList.first.forEach { errorExpected ->
-            LoggerProvider.logger.e(
-                Tag("MbxManeuverView"),
-                Message(
-                    "id: $id -- error: ${errorExpected.error?.url} - " +
-                        "${errorExpected.error?.errorMessage}"
-                )
+            logE(
+                "MbxManeuverView",
+                "id: $id -- error: ${errorExpected.error?.url} - " +
+                    "${errorExpected.error?.errorMessage}"
             )
         }
         partitionedList.second.mapNotNull { it.value }.map { it.shield }.apply {

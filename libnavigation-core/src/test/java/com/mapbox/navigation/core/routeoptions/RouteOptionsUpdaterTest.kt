@@ -8,6 +8,7 @@ import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
+import com.mapbox.navigation.testing.MockLoggerRule
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.mockk
@@ -15,11 +16,15 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 class RouteOptionsUpdaterTest {
+
+    @get:Rule
+    val mockLoggerTestRule = MockLoggerRule()
 
     private lateinit var routeRefreshAdapter: RouteOptionsUpdater
     private lateinit var locationMatcherResult: LocationMatcherResult

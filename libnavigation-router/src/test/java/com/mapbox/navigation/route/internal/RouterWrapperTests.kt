@@ -20,6 +20,7 @@ import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
 import com.mapbox.navigation.route.internal.util.TestRouteFixtures
 import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouteRefreshOptions
 import com.mapbox.navigator.RouterError
@@ -56,6 +57,8 @@ import org.robolectric.annotation.Config
 @Config(manifest = Config.NONE)
 class RouterWrapperTests {
 
+    @get:Rule
+    val mockLoggerTestRule = MockLoggerRule()
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 

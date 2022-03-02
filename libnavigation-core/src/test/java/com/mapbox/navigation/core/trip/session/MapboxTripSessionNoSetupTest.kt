@@ -323,7 +323,6 @@ private fun buildTripSession(
         TripSessionLocationEngine(navigationOptions),
         nativeNavigator,
         threadController,
-        logger = mockk(relaxed = true),
         eHorizonSubscriptionManager = mockk(relaxed = true),
     )
 }

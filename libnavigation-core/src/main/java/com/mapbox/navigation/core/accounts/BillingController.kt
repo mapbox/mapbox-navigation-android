@@ -4,8 +4,6 @@
 
 package com.mapbox.navigation.core.accounts
 
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.common.BillingServiceError
 import com.mapbox.common.BillingServiceErrorCode
 import com.mapbox.common.BillingSessionStatus
@@ -22,7 +20,7 @@ import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.TripSession
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.turf.TurfConstants.UNIT_METRES
 import com.mapbox.turf.TurfMeasurement
 import java.util.concurrent.TimeUnit
@@ -190,7 +188,7 @@ internal class BillingController(
 ) {
 
     private companion object {
-        private val tag = Tag("MbxNavBillingController")
+        private const val tag = "MbxNavBillingController"
         private const val MAX_WAYPOINTS_DISTANCE_DIFF_METERS = 100.0
     }
 
@@ -317,9 +315,9 @@ internal class BillingController(
             billingService.resumeBillingSession(runningSessionSkuId) {
                 handlerError(it)
                 if (it.code == BillingServiceErrorCode.RESUME_FAILED) {
-                    LoggerProvider.logger.w(
+                    logW(
                         tag,
-                        Message("Session resumption failed, starting a new one instead.")
+                        "Session resumption failed, starting a new one instead."
                     )
                     beginBillingSession(skuId, validity)
                 }
@@ -430,9 +428,9 @@ internal class BillingController(
             }
             BillingServiceErrorCode.RESUME_FAILED,
             BillingServiceErrorCode.TOKEN_VALIDATION_FAILED -> {
-                LoggerProvider.logger.w(
+                logW(
                     tag,
-                    Message(error.toString())
+                    error.toString()
                 )
             }
         }

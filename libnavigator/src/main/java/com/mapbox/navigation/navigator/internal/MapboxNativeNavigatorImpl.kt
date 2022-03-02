@@ -1,9 +1,6 @@
 package com.mapbox.navigation.navigator.internal
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
@@ -12,6 +9,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.CacheHandle
@@ -48,7 +46,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     const val PRIMARY_ROUTE_INDEX = 0
 
-    private val TAG = Tag("MbxNativeNavigatorImpl")
+    private const val TAG = "MbxNativeNavigatorImpl"
 
     // TODO: What should be the default value? Should we expose it publicly?
     private const val MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS = 2
@@ -62,7 +60,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override lateinit var cache: CacheHandle
     override lateinit var router: RouterInterface
     override lateinit var routeAlternativesController: RouteAlternativesControllerInterface
-    private var logger: Logger? = null
     private val nativeNavigatorRecreationObservers =
         CopyOnWriteArraySet<NativeNavigatorRecreationObserver>()
     private lateinit var accessToken: String
@@ -78,7 +75,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
         historyDir: String?,
-        logger: Logger,
         accessToken: String,
     ): MapboxNativeNavigator {
         navigator?.shutdown()
@@ -98,7 +94,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         cache = nativeComponents.cache
         router = nativeComponents.router
         routeAlternativesController = nativeComponents.routeAlternativesController
-        this.logger = logger
         this.accessToken = accessToken
         return this
     }
@@ -111,10 +106,9 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
         historyDir: String?,
-        logger: Logger,
         accessToken: String,
     ) {
-        create(deviceProfile, navigatorConfig, tilesConfig, historyDir, logger, accessToken)
+        create(deviceProfile, navigatorConfig, tilesConfig, historyDir, accessToken)
         nativeNavigatorRecreationObservers.forEach {
             it.onNativeNavigatorRecreated()
         }
@@ -200,12 +194,10 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             suspendCancellableCoroutine<Unit> { continuation ->
                 routeLeg.annotation()?.toJson()?.let { annotations ->
                     navigator!!.updateAnnotations(annotations, PRIMARY_ROUTE_INDEX, index) {
-                        logger?.d(
-                            tag = TAG,
-                            msg = Message(
-                                "Annotation updated successfully=$it, for leg " +
-                                    "index $index, annotations: [$annotations]"
-                            )
+                        logD(
+                            TAG,
+                            "Annotation updated successfully=$it, for leg " +
+                                "index $index, annotations: [$annotations]"
                         )
 
                         continuation.resume(Unit)

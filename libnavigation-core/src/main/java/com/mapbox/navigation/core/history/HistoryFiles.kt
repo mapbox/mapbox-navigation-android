@@ -1,10 +1,9 @@
 package com.mapbox.navigation.core.history
 
 import android.content.Context
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
+import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logI
 import java.io.File
 
 /**
@@ -13,7 +12,6 @@ import java.io.File
  */
 internal class HistoryFiles(
     val applicationContext: Context,
-    val logger: Logger
 ) {
 
     fun absolutePath(options: HistoryRecorderOptions): String? {
@@ -23,15 +21,13 @@ internal class HistoryFiles(
             historyFile.mkdirs()
         }
         return if (historyFile.exists()) {
-            logger.i(loggerTag, Message("Initial size is ${historyFile.length()} bytes"))
+            logI(TAG, "Initial size is ${historyFile.length()} bytes")
             historyFile.absolutePath
         } else {
-            logger.e(
-                loggerTag,
-                Message(
-                    "Unable to create a file, check the HistoryRecorderOptions " +
-                        historyFile.absolutePath
-                )
+            logE(
+                TAG,
+                "Unable to create a file, " +
+                    "check the HistoryRecorderOptions ${historyFile.absolutePath}"
             )
             null
         }
@@ -42,7 +38,7 @@ internal class HistoryFiles(
     }
 
     private companion object {
-        private val loggerTag = Tag("MbxHistoryRecorder")
+        private const val TAG = "MbxHistoryRecorder"
         private const val TILES_PATH_SUB_DIR = "mbx_nav/history"
     }
 }

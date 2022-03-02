@@ -2,8 +2,6 @@ package com.mapbox.navigation.core.lifecycle
 
 import android.app.Application
 import androidx.lifecycle.LifecycleOwner
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.utils.internal.logI
@@ -30,14 +28,12 @@ internal class MapboxNavigationAppDelegate {
         if (isSetup) {
             logI(
                 TAG,
-                Message(
-                    """
-                MapboxNavigationApp.setup was ignored because it has already been setup.
-                If you want to use new NavigationOptions, you must first call
-                MapboxNavigationApp.disable() and then call MapboxNavigationApp.setup(..).
-                Calling setup multiple times, is harmless otherwise.
-                    """.trimIndent()
-                )
+                """
+                    MapboxNavigationApp.setup was ignored because it has already been setup.
+                    If you want to use new NavigationOptions, you must first call
+                    MapboxNavigationApp.disable() and then call MapboxNavigationApp.setup(..).
+                    Calling setup multiple times, is harmless otherwise.
+                """.trimIndent()
             )
             return this
         }
@@ -82,6 +78,6 @@ internal class MapboxNavigationAppDelegate {
         mapboxNavigationOwner.getObserver(kClass)
 
     private companion object {
-        private val TAG = Tag("MbxMapboxNavigationApp")
+        private const val TAG = "MbxMapboxNavigationApp"
     }
 }

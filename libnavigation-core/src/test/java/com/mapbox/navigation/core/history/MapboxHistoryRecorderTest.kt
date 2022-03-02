@@ -2,12 +2,13 @@ package com.mapbox.navigation.core.history
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
-import io.mockk.mockk
+import com.mapbox.navigation.testing.MockLoggerRule
+import com.mapbox.navigation.utils.internal.logW
 import io.mockk.verify
 import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -16,14 +17,15 @@ import java.io.File
 @RunWith(RobolectricTestRunner::class)
 class MapboxHistoryRecorderTest {
 
+    @get:Rule
+    val mockLoggerTestRule = MockLoggerRule()
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val navigationOptionsBuilder = NavigationOptions.Builder(context)
-    private val logger: Logger = mockk(relaxUnitFun = true)
 
     @Test
     fun `historyRecorder fileDirectory is default when no options provided`() {
         val navigationOptions = navigationOptionsBuilder.build()
-        val historyRecorder = MapboxHistoryRecorder(navigationOptions, logger)
+        val historyRecorder = MapboxHistoryRecorder(navigationOptions)
 
         val defaultDirectory = historyRecorder.fileDirectory()!!
 
@@ -40,7 +42,7 @@ class MapboxHistoryRecorderTest {
                     .build()
             )
             .build()
-        val historyRecorder = MapboxHistoryRecorder(navigationOptions, logger)
+        val historyRecorder = MapboxHistoryRecorder(navigationOptions)
 
         val defaultDirectory = historyRecorder.fileDirectory()!!
 
@@ -56,7 +58,7 @@ class MapboxHistoryRecorderTest {
                     .build()
             )
             .build()
-        val historyRecorder = MapboxHistoryRecorder(navigationOptions, logger)
+        val historyRecorder = MapboxHistoryRecorder(navigationOptions)
 
         val fileDirectory = historyRecorder.fileDirectory()!!
 
@@ -69,12 +71,12 @@ class MapboxHistoryRecorderTest {
         val navigationOptions = navigationOptionsBuilder
             .historyRecorderOptions(HistoryRecorderOptions.Builder().build())
             .build()
-        val historyRecorder = MapboxHistoryRecorder(navigationOptions, logger)
+        val historyRecorder = MapboxHistoryRecorder(navigationOptions)
 
         historyRecorder.stopRecording {
             // do nothing
         }
 
-        verify { logger.w(any(), any()) }
+        verify { logW(any(), any()) }
     }
 }

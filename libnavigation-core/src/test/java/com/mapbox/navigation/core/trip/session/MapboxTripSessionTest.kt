@@ -7,7 +7,6 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -111,7 +110,6 @@ class MapboxTripSessionTest {
     private val tripStatus: TripStatus = mockk(relaxUnitFun = true)
     private val navigationStatusOrigin: NavigationStatusOrigin = mockk()
     private val navigationStatus: NavigationStatus = mockk(relaxed = true)
-    private val logger: Logger = mockk(relaxUnitFun = true)
     private val routeProgress: RouteProgress = mockk()
     private val threadController = spyk<ThreadController>()
 
@@ -179,7 +177,6 @@ class MapboxTripSessionTest {
             tripSessionLocationEngine,
             navigator,
             threadController,
-            logger,
             eHorizonSubscriptionManager,
         )
     }

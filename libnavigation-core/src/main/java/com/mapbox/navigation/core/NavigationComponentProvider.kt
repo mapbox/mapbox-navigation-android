@@ -1,7 +1,6 @@
 package com.mapbox.navigation.core
 
 import android.content.Context
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRouter
@@ -33,26 +32,22 @@ internal object NavigationComponentProvider {
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
         historyDir: String?,
-        logger: Logger,
         accessToken: String,
     ): MapboxNativeNavigator = MapboxNativeNavigatorImpl.create(
         deviceProfile,
         navigatorConfig,
         tilesConfig,
         historyDir,
-        logger,
         accessToken,
     )
 
     fun createTripService(
         applicationContext: Context,
         tripNotification: TripNotification,
-        logger: Logger,
         threadController: ThreadController,
     ): TripService = MapboxTripService(
         applicationContext,
         tripNotification,
-        logger,
         threadController,
     )
 
@@ -65,13 +60,11 @@ internal object NavigationComponentProvider {
         tripSessionLocationEngine: TripSessionLocationEngine,
         navigator: MapboxNativeNavigator,
         threadController: ThreadController,
-        logger: Logger,
     ): TripSession = MapboxTripSession(
         tripService,
         tripSessionLocationEngine,
         navigator = navigator,
         threadController,
-        logger = logger,
         EHorizonSubscriptionManagerImpl(navigator, threadController),
     )
 

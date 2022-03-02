@@ -4,9 +4,6 @@ import android.location.Location
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadFactory
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
@@ -55,14 +52,12 @@ import kotlin.math.max
  * @param tripSessionLocationEngine the location engine
  * @param navigator Native navigator
  * @param threadController controller for main/io jobs
- * @param logger interface for logging any events
  */
 internal class MapboxTripSession(
     override val tripService: TripService,
     private val tripSessionLocationEngine: TripSessionLocationEngine,
     private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl,
     private val threadController: ThreadController,
-    private val logger: Logger,
     private val eHorizonSubscriptionManager: EHorizonSubscriptionManager
 ) : TripSession {
 
@@ -77,7 +72,7 @@ internal class MapboxTripSession(
     internal var routes: List<NavigationRoute> = emptyList()
 
     private companion object {
-        private val TAG = Tag("MbxTripSession")
+        private const val TAG = "MbxTripSession"
         private const val INDEX_OF_INITIAL_LEG_TARGET = 1
     }
 
@@ -114,17 +109,14 @@ internal class MapboxTripSession(
                         navigator.updateAnnotations(routes.first())
                         this@MapboxTripSession.routes = routes
                     } else {
-                        logger.w(
-                            TAG,
-                            Message("Cannot refresh route. Route can't be null"),
-                        )
+                        logW(TAG, "Cannot refresh route. Route can't be null")
                     }
                 }
             }
             else -> null.also {
                 logW(
                     TAG,
-                    Message("Unsupported route update reason: $reason")
+                    "Unsupported route update reason: $reason"
                 )
             }
         }
@@ -180,7 +172,7 @@ internal class MapboxTripSession(
         private set
 
     private val nativeFallbackVersionsObserver =
-        object : com.mapbox.navigator.FallbackVersionsObserver {
+        object : FallbackVersionsObserver {
             override fun onFallbackVersionsFound(versions: MutableList<String>) {
                 mainJobController.scope.launch {
                     fallbackVersionsObservers.forEach {

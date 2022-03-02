@@ -1,15 +1,13 @@
 package com.mapbox.navigation.core
 
 import android.content.Context
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logI
 import java.io.File
 
 internal class RoutingTilesFiles(
     val applicationContext: Context,
-    val logger: Logger
 ) {
 
     fun absolutePath(options: RoutingTilesOptions): String {
@@ -19,15 +17,12 @@ internal class RoutingTilesFiles(
             tileDir.mkdirs()
         }
         return if (tileDir.exists()) {
-            logger.i(loggerTag, Message("Initial size is ${tileDir.length()} bytes"))
+            logI(TAG, "Initial size is ${tileDir.length()} bytes")
             tileDir.absolutePath
         } else {
-            logger.e(
-                loggerTag,
-                Message(
-                    "Unable to create a file, check the RoutingTilesOptions " +
-                        tileDir.absolutePath
-                )
+            logE(
+                TAG,
+                "Unable to create a file, check the RoutingTilesOptions ${tileDir.absolutePath}"
             )
             ""
         }
@@ -38,7 +33,7 @@ internal class RoutingTilesFiles(
     }
 
     internal companion object {
-        private val loggerTag = Tag("MbxRoutingTilesOptions")
+        private const val TAG = "MbxRoutingTilesOptions"
         internal const val TILES_PATH_SUB_DIR = "mbx_nav/tiles"
     }
 }

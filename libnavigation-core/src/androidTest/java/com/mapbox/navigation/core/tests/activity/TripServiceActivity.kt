@@ -4,9 +4,6 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.annotation.module.MapboxModuleType
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.common.module.provider.ModuleProviderArgument
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
@@ -30,17 +27,6 @@ internal class TripServiceActivity : AppCompatActivity() {
     private lateinit var tripNotification: TripNotification
     private lateinit var mapboxTripService: MapboxTripService
     private var textUpdateJob: Job = Job()
-    private val dummyLogger = object : Logger {
-        override fun d(tag: Tag?, msg: Message, tr: Throwable?) {}
-
-        override fun e(tag: Tag?, msg: Message, tr: Throwable?) {}
-
-        override fun i(tag: Tag?, msg: Message, tr: Throwable?) {}
-
-        override fun v(tag: Tag?, msg: Message, tr: Throwable?) {}
-
-        override fun w(tag: Tag?, msg: Message, tr: Throwable?) {}
-    }
     private lateinit var startService: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,7 +41,7 @@ internal class TripServiceActivity : AppCompatActivity() {
         )
 
         mapboxTripService =
-            MapboxTripService(applicationContext, tripNotification, dummyLogger, threadController)
+            MapboxTripService(applicationContext, tripNotification, threadController)
 
         startService.setOnClickListener {
             if (mapboxTripService.hasServiceStarted()) {

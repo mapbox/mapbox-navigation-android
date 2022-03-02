@@ -3,8 +3,6 @@ package com.mapbox.navigation.navigator.internal
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.navigator.internal.NavigatorLoader.customConfig
@@ -80,8 +78,8 @@ internal object NavigatorLoader {
             val historyRecorderHandle = HistoryRecorderHandle.build(historyDir, config)
             if (historyRecorderHandle == null) {
                 logE(
-                    Tag("MbxHistoryRecorder"),
-                    Message("Could not create directory directory to write events")
+                    "MbxHistoryRecorder",
+                    "Could not create directory directory to write events"
                 )
             }
             historyRecorderHandle

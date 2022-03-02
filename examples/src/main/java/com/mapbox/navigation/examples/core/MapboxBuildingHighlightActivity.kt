@@ -6,8 +6,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -57,7 +55,7 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -102,9 +100,9 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
         MapboxNavigationConsumer<Expected<BuildingError, BuildingValue>> { expected ->
             expected.fold(
                 {
-                    LoggerProvider.logger.e(
-                        Tag("MbxBuildingHighlightActivity"),
-                        Message("error: ${it.errorMessage}")
+                    logE(
+                        "MbxBuildingHighlightActivity",
+                        "error: ${it.errorMessage}"
                     )
                 },
                 { value ->

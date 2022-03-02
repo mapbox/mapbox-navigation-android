@@ -1,8 +1,5 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshError
@@ -12,6 +9,9 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.MapboxTimer
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logI
+import com.mapbox.navigation.utils.internal.logW
 
 /**
  * This class is responsible for refreshing the current direction route's traffic.
@@ -23,13 +23,12 @@ internal class RouteRefreshController(
     private val routeRefreshOptions: RouteRefreshOptions,
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession,
-    private val logger: Logger,
     threadController: ThreadController,
     private val routeDiffProvider: DirectionsRouteDiffProvider = DirectionsRouteDiffProvider(),
 ) {
 
     internal companion object {
-        internal val TAG = Tag("MbxRouteRefreshController")
+        internal const val TAG = "MbxRouteRefreshController"
     }
 
     private val routerRefreshTimer = MapboxTimer(threadController).apply {
@@ -74,17 +73,15 @@ internal class RouteRefreshController(
                 createRouteRefreshCallback(route, legIndex),
             )
         } else {
-            logger.w(
+            logW(
                 TAG,
-                Message(
-                    """
-                        The route is not qualified for route refresh feature.
-                        See com.mapbox.navigation.base.extensions.supportsRouteRefresh
-                        extension for details.
-                        routeOptions: ${route.routeOptions}
-                        uuid: ${route.directionsResponse.uuid()}
-                    """.trimIndent()
-                )
+                """
+                    The route is not qualified for route refresh feature.
+                    See com.mapbox.navigation.base.extensions.supportsRouteRefresh
+                    extension for details.
+                    routeOptions: ${route.routeOptions}
+                    uuid: ${route.directionsResponse.uuid()}
+                """.trimIndent()
             )
         }
     }
@@ -95,17 +92,17 @@ internal class RouteRefreshController(
     ) = object : NavigationRouterRefreshCallback {
 
         override fun onRefreshReady(route: NavigationRoute) {
-            logger.i(TAG, msg = Message("Successful route refresh"))
+            logI(TAG, "Successful route refresh")
             val routeDiffs = routeDiffProvider.buildRouteDiffs(
                 oldRoute,
                 route,
                 currentLegIndex,
             )
             if (routeDiffs.isEmpty()) {
-                logger.i(TAG, msg = Message("No changes to route annotations"))
+                logI(TAG, "No changes to route annotations")
             } else {
                 for (diff in routeDiffs) {
-                    logger.i(TAG, msg = Message(diff))
+                    logI(TAG, diff)
                 }
             }
             val directionsSessionRoutes = directionsSession.routes.toMutableList()
@@ -120,10 +117,9 @@ internal class RouteRefreshController(
         }
 
         override fun onFailure(error: NavigationRouterRefreshError) {
-            logger.e(
+            logE(
                 TAG,
-                msg = Message("Route refresh error: ${error.message}"),
-                tr = error.throwable
+                "Route refresh error: ${error.message} throwable=${error.throwable}",
             )
             currentRequestId = null
         }

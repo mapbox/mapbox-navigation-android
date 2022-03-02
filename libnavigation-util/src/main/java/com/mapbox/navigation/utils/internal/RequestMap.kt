@@ -1,8 +1,5 @@
 package com.mapbox.navigation.utils.internal
 
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
-
 class RequestMap<T> {
     private val requestIdGenerator = RequestIdGenerator()
     private val requests = mutableMapOf<Long, T>()
@@ -41,16 +38,16 @@ private class RequestIdGenerator {
 
 fun <T> RequestMap<T>.cancelRequest(
     requestId: Long,
-    tag: Tag,
+    tag: String,
     cancellationFn: (T) -> Unit
 ) {
     val request = this.remove(requestId)
     if (request != null) {
         cancellationFn(request)
     } else {
-        LoggerProvider.logger.w(
+        logW(
             tag,
-            Message("Trying to cancel non-existing route request with id '$requestId'")
+            "Trying to cancel non-existing route request with id '$requestId'"
         )
     }
 }
