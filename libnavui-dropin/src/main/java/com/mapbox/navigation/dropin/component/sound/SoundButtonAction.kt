@@ -15,15 +15,15 @@ class SoundButtonAction(
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
-        val audioGuidance = MapboxNavigationApp.getObserver(MapboxAudioBehavior::class)
+        val audioViewModel = MapboxNavigationApp.getObserver(MapboxAudioViewModel::class)
 
-        audioGuidance.audioState.observe {
+        audioViewModel.state.observe {
             if (it.isMuted) soundButton.setState(MUTED)
             else soundButton.setState(UN_MUTED)
         }
 
         soundButton.setOnClickListener {
-            audioGuidance.toggle()
+            audioViewModel.invoke(AudioAction.Toggle)
         }
     }
 
