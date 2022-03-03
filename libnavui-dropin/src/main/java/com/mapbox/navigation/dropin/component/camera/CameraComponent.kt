@@ -7,6 +7,7 @@ import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.component.location.LocationViewModel
 import com.mapbox.navigation.dropin.extensions.flowNavigationCameraState
 import com.mapbox.navigation.dropin.extensions.flowRouteProgress
 import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
@@ -15,10 +16,12 @@ import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 internal class CameraComponent constructor(
     private val mapView: MapView,
+    private val locationViewModel: LocationViewModel,
     private val cameraViewModel: CameraViewModel,
 ) : UIComponent() {
 
@@ -109,6 +112,11 @@ internal class CameraComponent constructor(
                         cameraViewModel.invoke(CameraAction.ToIdle)
                     }
                 }
+            }
+        }
+        coroutineScope.launch {
+            locationViewModel.state.filterNotNull().collect {
+                cameraViewModel.invoke(CameraAction.UpdateLocation(it))
             }
         }
     }

@@ -2,53 +2,69 @@ package com.mapbox.navigation.dropin.component.location
 
 import android.annotation.SuppressLint
 import android.location.Location
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.dropin.lifecycle.UIViewModel
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.utils.internal.logE
 
+sealed class LocationAction {
+    data class Update(val location: Location) : LocationAction()
+}
+
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class LocationBehavior : MapboxNavigationObserver {
-
+class LocationViewModel : UIViewModel<Location?, LocationAction>(null) {
     val navigationLocationProvider = NavigationLocationProvider()
 
-    private val _locationLiveData = MutableLiveData<Location>()
-    val locationLiveData: LiveData<Location> = _locationLiveData
+    val lastPoint: Point?
+        get() = navigationLocationProvider.lastLocation?.run {
+            Point.fromLngLat(longitude, latitude)
+        }
 
     private val locationObserver: LocationObserver = object : LocationObserver {
         override fun onNewRawLocation(rawLocation: Location) {
-            // no op
+            // We are not sending LocationAction.UpdateRaw here, because we are expecting to
+            // receive locationMatcherResult
         }
 
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             navigationLocationProvider.changePosition(
-                locationMatcherResult.enhancedLocation,
-                locationMatcherResult.keyPoints
+                location = locationMatcherResult.enhancedLocation,
+                keyPoints = locationMatcherResult.keyPoints,
             )
-            _locationLiveData.value = locationMatcherResult.enhancedLocation
+            invoke(LocationAction.Update(locationMatcherResult.enhancedLocation))
+        }
+    }
+
+    override fun process(
+        mapboxNavigation: MapboxNavigation,
+        state: Location?,
+        action: LocationAction
+    ): Location {
+        return when (action) {
+            is LocationAction.Update -> action.location
         }
     }
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        super.onAttached(mapboxNavigation)
         val locationEngine = mapboxNavigation.navigationOptions.locationEngine
         locationEngine.getLastLocation(object : LocationEngineCallback<LocationEngineResult> {
             override fun onSuccess(result: LocationEngineResult) {
                 result.lastLocation?.let {
                     navigationLocationProvider.changePosition(it, emptyList())
-                    _locationLiveData.value = it
+                    invoke(LocationAction.Update(it))
                 }
             }
             override fun onFailure(exception: Exception) {
                 logE(
-                    "MbxDropInLocationObserver",
+                    "MbxLocationViewModel",
                     "Failed to get immediate location exception=$exception"
                 )
             }
@@ -59,5 +75,6 @@ class LocationBehavior : MapboxNavigationObserver {
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         mapboxNavigation.unregisterLocationObserver(locationObserver)
+        super.onDetached(mapboxNavigation)
     }
 }

@@ -19,7 +19,11 @@ internal class ActiveGuidanceMapBinder(
         return navigationListOf(
             LocationPuck(mapView),
             RouteLineComponent(mapView, navigationViewContext.routeLineOptions),
-            CameraComponent(mapView, navigationViewContext.viewModel.cameraViewModel),
+            CameraComponent(
+                mapView,
+                navigationViewContext.viewModel.locationViewModel,
+                navigationViewContext.viewModel.cameraViewModel,
+            ),
         )
     }
 }

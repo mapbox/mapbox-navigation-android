@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.component.camera.CameraViewModel
-import com.mapbox.navigation.dropin.component.location.LocationBehavior
+import com.mapbox.navigation.dropin.component.location.LocationViewModel
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.replay.ReplayViewModel
 import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
@@ -26,13 +26,13 @@ internal class DropInNavigationViewModel : ViewModel() {
      */
     val replayViewModel = ReplayViewModel()
     val audioGuidanceViewModel = MapboxAudioViewModel()
-    val locationBehavior = LocationBehavior()
+    val locationViewModel = LocationViewModel()
     val routesViewModel = RoutesViewModel()
-    val cameraViewModel = CameraViewModel(locationBehavior)
+    val cameraViewModel = CameraViewModel()
     val navigationObservers = listOf(
         replayViewModel,
         audioGuidanceViewModel,
-        locationBehavior,
+        locationViewModel,
         routesViewModel,
         cameraViewModel,
         // TODO can add more mapbox navigation observers here
