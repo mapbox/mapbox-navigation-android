@@ -21,7 +21,11 @@ internal class ActiveGuidanceMapBinder(
         cameraState.setCameraMode(DropInCameraMode.FOLLOWING)
         return navigationListOf(
             LocationPuck(mapView),
-            RouteLineComponent(mapView, navigationViewContext.routeLineOptions),
+            RouteLineComponent(
+                mapView,
+                navigationViewContext.viewModel.commandDispatcher,
+                navigationViewContext.routeLineOptions,
+            ),
             DropInNavigationCamera(
                 navigationViewContext.viewModel.cameraState,
                 mapView

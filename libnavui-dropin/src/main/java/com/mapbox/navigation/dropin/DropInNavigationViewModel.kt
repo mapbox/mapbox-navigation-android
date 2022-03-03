@@ -9,8 +9,12 @@ import com.mapbox.navigation.dropin.component.location.LocationBehavior
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.recenter.RecenterButtonBehaviour
 import com.mapbox.navigation.dropin.component.replay.ReplayComponent
+import com.mapbox.navigation.dropin.component.routefetch.RouteViewModel
 import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
+import com.mapbox.navigation.dropin.component.routeline.RouteLineViewModel
+import com.mapbox.navigation.dropin.component.routeline.RouteProgressBehavior
 import com.mapbox.navigation.dropin.component.sound.MapboxAudioBehavior
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -27,19 +31,29 @@ internal class DropInNavigationViewModel : ViewModel() {
     /**
      * These classes are accessible through MapboxNavigationApp.getObserver(..)
      */
+    val commandDispatcher = UICommandDispatcher()
     val replayComponent = ReplayComponent()
     val audioGuidanceComponent = MapboxAudioBehavior()
     val locationBehavior = LocationBehavior()
+    val routeProgressBehavior = RouteProgressBehavior()
     val recenterBehavior = RecenterButtonBehaviour(cameraState, locationBehavior)
     val cameraModeBehavior = CameraModeButtonBehaviour(cameraState)
-    val routesViewModel = RoutesViewModel()
+    val routesViewModel = RouteViewModel(locationBehavior, commandDispatcher)
+    /*val routeLineViewModel = RouteLineViewModel(
+        commandDispatcher,
+        routeLineApi,
+        routeProgressBehavior
+    )*/
     val navigationObservers = listOf(
+        commandDispatcher,
         replayComponent,
         audioGuidanceComponent,
+        routeProgressBehavior,
         locationBehavior,
         recenterBehavior,
         cameraModeBehavior,
         routesViewModel,
+        //routeLineViewModel,
         // TODO can add more mapbox navigation observers here
     )
 

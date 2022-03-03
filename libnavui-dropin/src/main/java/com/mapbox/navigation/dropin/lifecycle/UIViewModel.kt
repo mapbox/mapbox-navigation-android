@@ -20,38 +20,13 @@ import kotlinx.coroutines.launch
  * Behaviors have a lifecycle, contain state, and process actions. [UIComponent] will respond
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-abstract class UIViewModel<State, Action>(initialState: State) : MapboxNavigationObserver {
-    private val _action = MutableSharedFlow<Action>()
-    val action: Flow<Action> = _action
-    private val _state = MutableStateFlow(initialState)
-    val state: Flow<State> = _state
+abstract class UIViewModel : MapboxNavigationObserver {
 
     lateinit var mainJobControl: JobControl
-
-    /**
-     * Invoke an action for the behavior.
-     */
-    fun invoke(action: Action) {
-        mainJobControl.scope.launch {
-            _action.emit(action)
-        }
-    }
-
-    /**
-     * When you create a behavior, implement how the behavior should process actions and update
-     * state. If there is no state associated with the behavior, use Unit.
-     */
-    abstract fun process(mapboxNavigation: MapboxNavigation, state: State, action: Action): State
 
     @CallSuper
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         mainJobControl = InternalJobControlFactory.createMainScopeJobControl()
-
-        mainJobControl.scope.launch {
-            action.collect {
-                _state.value = process(mapboxNavigation, _state.value, it)
-            }
-        }
     }
 
     @CallSuper

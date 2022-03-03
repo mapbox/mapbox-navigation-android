@@ -23,7 +23,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.coordinator.ActionListCoordinator
 import com.mapbox.navigation.dropin.coordinator.GuidanceCoordinator
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
@@ -161,7 +160,7 @@ class DropInNavigationView @JvmOverloads constructor(
                     object : LocationEngineCallback<LocationEngineResult> {
                         override fun onSuccess(result: LocationEngineResult?) {
                             ifNonNull(result?.lastLocation) { lastLocation ->
-                                viewModel.routesViewModel.invoke(
+                                /*viewModel.routesViewModel.invoke(
                                     RoutesAction.FetchPoints(
                                         listOf(
                                             Point.fromLngLat(
@@ -171,7 +170,7 @@ class DropInNavigationView @JvmOverloads constructor(
                                             clickPoint
                                         )
                                     )
-                                )
+                                )*/
                             }
                         }
 

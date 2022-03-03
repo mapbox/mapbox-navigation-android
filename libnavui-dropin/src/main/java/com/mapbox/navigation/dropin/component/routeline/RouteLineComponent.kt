@@ -14,6 +14,8 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.dropin.UICommandDispatcher
+import com.mapbox.navigation.dropin.lifecycle.UICommand
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
@@ -25,8 +27,9 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal class RouteLineComponent(
+class RouteLineComponent(
     private val mapView: MapView,
+    private val dispatcher: UICommandDispatcher,
     private val options: MapboxRouteLineOptions,
 ) : MapboxNavigationObserver {
 
@@ -53,7 +56,13 @@ internal class RouteLineComponent(
     }
 
     private val onMapClickListener = OnMapClickListener { point ->
-        selectRoute(point)
+        dispatcher.dispatch(
+            UICommand.MapCommand.OnMapClicked(
+                point = point,
+                map = mapView.getMapboxMap(),
+                padding = routeClickPadding
+            )
+        )
         false
     }
 
@@ -92,27 +101,6 @@ internal class RouteLineComponent(
         jobControl.job.cancelChildren()
         routeLineApi.cancel()
         routeLineView.cancel()
-    }
-
-    private fun selectRoute(point: Point) {
-        jobControl.scope.launch {
-            val result = routeLineApi.findClosestRoute(
-                point,
-                mapView.getMapboxMap(),
-                routeClickPadding
-            )
-
-            val routeFound = result.value?.route
-            if (routeFound != null && routeFound != routeLineApi.getPrimaryRoute()) {
-                val reOrderedRoutes = routeLineApi.getRoutes()
-                    .filter { it != routeFound }
-                    .toMutableList()
-                    .also {
-                        it.add(0, routeFound)
-                    }
-                MapboxNavigationApp.current()?.setRoutes(reOrderedRoutes)
-            }
-        }
     }
 
     private companion object {
