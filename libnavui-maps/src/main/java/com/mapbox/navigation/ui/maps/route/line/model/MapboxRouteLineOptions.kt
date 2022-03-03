@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
+import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
@@ -34,6 +35,7 @@ import kotlin.math.abs
  * line updates improving the performance at the expense of visual appearance of the vanishing point on the line during navigation.
  * @param waypointLayerIconOffset the list of offset values for waypoint icons
  * @param waypointLayerIconAnchor the anchor value, the default is [IconAnchor.CENTER]
+ * @param iconPitchAlignment the pitch alignment value used for waypoint icons. The default is [IconPitchAlignment.MAP]
  */
 class MapboxRouteLineOptions private constructor(
     val resourceProvider: RouteLineResources,
@@ -50,7 +52,8 @@ class MapboxRouteLineOptions private constructor(
     val vanishingRouteLineUpdateIntervalNano: Long =
         RouteLayerConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO,
     val waypointLayerIconOffset: List<Double> = listOf(0.0, 0.0),
-    val waypointLayerIconAnchor: IconAnchor = IconAnchor.CENTER
+    val waypointLayerIconAnchor: IconAnchor = IconAnchor.CENTER,
+    val iconPitchAlignment: IconPitchAlignment = IconPitchAlignment.MAP
 ) {
 
     /**
@@ -73,7 +76,8 @@ class MapboxRouteLineOptions private constructor(
             softGradientTransition,
             vanishingRouteLineUpdateIntervalNano,
             waypointLayerIconOffset,
-            waypointLayerIconAnchor
+            waypointLayerIconAnchor,
+            iconPitchAlignment
         )
     }
 
@@ -102,6 +106,7 @@ class MapboxRouteLineOptions private constructor(
             return false
         if (waypointLayerIconOffset != other.waypointLayerIconOffset) return false
         if (waypointLayerIconAnchor != other.waypointLayerIconAnchor) return false
+        if (iconPitchAlignment != other.iconPitchAlignment) return false
 
         return true
     }
@@ -124,6 +129,7 @@ class MapboxRouteLineOptions private constructor(
         result = 31 * result + (vanishingRouteLineUpdateIntervalNano.hashCode())
         result = 31 * result + (waypointLayerIconOffset.hashCode())
         result = 31 * result + (waypointLayerIconAnchor.hashCode())
+        result = 31 * result + (iconPitchAlignment.hashCode())
         return result
     }
 
@@ -144,7 +150,8 @@ class MapboxRouteLineOptions private constructor(
             "softGradientTransition=$softGradientTransition," +
             "vanishingRouteLineUpdateIntervalNano=$vanishingRouteLineUpdateIntervalNano," +
             "waypointLayerIconOffset=$waypointLayerIconOffset," +
-            "waypointLayerIconAnchor=$waypointLayerIconAnchor" +
+            "waypointLayerIconAnchor=$waypointLayerIconAnchor," +
+            "iconPitchAlignment=$iconPitchAlignment" +
             ")"
     }
 
@@ -168,6 +175,7 @@ class MapboxRouteLineOptions private constructor(
      * the displaySoftGradientForTraffic param is set to true
      * @param vanishingRouteLineUpdateIntervalNano can be used to decrease the frequency of the vanishing route
      * line updates improving the performance at the expense of visual appearance of the vanishing point on the line during navigation.
+     * @param iconPitchAlignment the pitch alignment value used for waypoint icons. The default is [IconPitchAlignment.MAP]
      */
     class Builder internal constructor(
         private val context: Context,
@@ -182,7 +190,8 @@ class MapboxRouteLineOptions private constructor(
         private var softGradientTransition: Double,
         private var vanishingRouteLineUpdateIntervalNano: Long,
         private var iconOffset: List<Double>,
-        private var iconAnchor: IconAnchor
+        private var iconAnchor: IconAnchor,
+        private var iconPitchAlignment: IconPitchAlignment
     ) {
 
         /**
@@ -203,7 +212,8 @@ class MapboxRouteLineOptions private constructor(
             RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS,
             RouteLayerConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO,
             listOf(0.0, 0.0),
-            IconAnchor.CENTER
+            IconAnchor.CENTER,
+            IconPitchAlignment.MAP
         )
 
         /**
@@ -340,9 +350,19 @@ class MapboxRouteLineOptions private constructor(
          * Part of the icon placed closest to the anchor
          *
          * @param iconAnchor the anchor value, the default is [IconAnchor.CENTER]
+         * @return the builder
          */
         fun waypointLayerIconAnchor(iconAnchor: IconAnchor = IconAnchor.CENTER): Builder =
             apply { this.iconAnchor = iconAnchor }
+
+        /**
+         * Orientation of waypoint icons when map is pitched.
+         *
+         * @param iconPitchAlignment the pitch value to use. The default is [IconPitchAlignment.MAP]
+         * @return the builder
+         */
+        fun iconPitchAlignment(iconPitchAlignment: IconPitchAlignment): Builder =
+            apply { this.iconPitchAlignment = iconPitchAlignment }
 
         /**
          * @return an instance of [MapboxRouteLineOptions]
@@ -391,7 +411,8 @@ class MapboxRouteLineOptions private constructor(
                 softGradientTransition,
                 vanishingRouteLineUpdateIntervalNano,
                 iconOffset,
-                iconAnchor
+                iconAnchor,
+                iconPitchAlignment
             )
         }
     }

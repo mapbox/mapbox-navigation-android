@@ -6,6 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Use native logger backend instead of the Android instance directly. [#5520](https://github.com/mapbox/mapbox-navigation-android/pull/5520)
 
 #### Features
+- Exposed option in MapboxRouteLineOptions to change the default icon pitch alignment for waypoint icons. [#5531](https://github.com/mapbox/mapbox-navigation-android/pull/5531)
 
 #### Bug fixes and improvements
 - Fixed uncaught exception in the `ShieldsCache` class. [#5524](https://github.com/mapbox/mapbox-navigation-android/pull/5524)
