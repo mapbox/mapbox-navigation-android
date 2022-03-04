@@ -3,12 +3,28 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
-- Use native logger backend instead of the Android instance directly. [#5520](https://github.com/mapbox/mapbox-navigation-android/pull/5520)
 
 #### Features
 
 #### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.4.0-alpha.2 - March 4, 2022
+### Changelog
+[Changes between v2.4.0-alpha.1 and v2.4.0-alpha.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.4.0-alpha.1...v2.4.0-alpha.2)
+
+#### Bug fixes and improvements
+- Fixed `MapboxNavigationApp` issue, that caused unexpected `MapboxNavigation` destroy, when one of the attached lifecycles is destroyed and the other one is stopped. [#5518](https://github.com/mapbox/mapbox-navigation-android/pull/5518)
 - Fixed uncaught exception in the `ShieldsCache` class. [#5524](https://github.com/mapbox/mapbox-navigation-android/pull/5524)
+- Use native logger backend instead of the Android instance directly. [#5520](https://github.com/mapbox/mapbox-navigation-android/pull/5520)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.3.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.3.0))
+- Mapbox Navigation Native `v88.0.0`
+- Mapbox Core Common `v21.1.1`
+- Mapbox Java `v6.4.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.4.0-beta.1))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
 
 ## Mapbox Navigation SDK 2.3.0 - March 2, 2022
 ### Changelog
