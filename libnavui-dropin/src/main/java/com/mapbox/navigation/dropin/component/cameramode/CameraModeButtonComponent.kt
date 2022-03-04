@@ -2,27 +2,52 @@ package com.mapbox.navigation.dropin.component.cameramode
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.dropin.component.camera.DropInCameraMode
+import com.mapbox.navigation.dropin.component.camera.CameraAction
+import com.mapbox.navigation.dropin.component.camera.CameraMode
+import com.mapbox.navigation.dropin.component.camera.CameraViewModel
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.view.MapboxCameraModeButton
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class CameraModeButtonComponent(
-    private val cameraModeButton: MapboxCameraModeButton
+    private val cameraViewModel: CameraViewModel,
+    private val cameraModeButton: MapboxCameraModeButton,
 ) : UIComponent() {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
-        val behaviour = MapboxNavigationApp.getObserver(CameraModeButtonBehaviour::class)
 
-        behaviour.cameraMode.observe {
-            cameraModeButton.setState(buttonState(it))
+        coroutineScope.launch {
+            cameraViewModel.state.collect {
+                when (it.cameraMode) {
+                    CameraMode.FOLLOWING -> {
+                        cameraModeButton.setState(NavigationCameraState.FOLLOWING)
+                    }
+                    CameraMode.OVERVIEW -> {
+                        cameraModeButton.setState(NavigationCameraState.OVERVIEW)
+                    }
+                    else -> {
+                        // no op
+                    }
+                }
+            }
         }
 
         cameraModeButton.setOnClickListener {
-            behaviour.onButtonClick()
+            when (cameraViewModel.state.value.cameraMode) {
+                CameraMode.FOLLOWING -> {
+                    cameraViewModel.invoke(CameraAction.ToOverview)
+                }
+                CameraMode.OVERVIEW -> {
+                    cameraViewModel.invoke(CameraAction.ToFollowing)
+                }
+                else -> {
+                    // no op
+                }
+            }
         }
     }
 
@@ -30,8 +55,4 @@ internal class CameraModeButtonComponent(
         super.onDetached(mapboxNavigation)
         cameraModeButton.setOnClickListener(null)
     }
-
-    private fun buttonState(cameraMode: DropInCameraMode): NavigationCameraState =
-        if (cameraMode == DropInCameraMode.FOLLOWING) NavigationCameraState.FOLLOWING
-        else NavigationCameraState.OVERVIEW
 }

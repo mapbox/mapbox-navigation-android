@@ -1,33 +1,69 @@
 package com.mapbox.navigation.dropin.component.camera
 
 import android.location.Location
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.asFlow
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.plugin.animation.MapAnimationOptions
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
+import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.component.location.LocationBehavior
+import com.mapbox.navigation.dropin.lifecycle.UIViewModel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-// This might be temporary just to test some camera stuff
-internal class CameraViewModel : ViewModel() {
+sealed class CameraAction {
+    data class UpdateLocation(val location: Location) : CameraAction()
+    data class OnRecenterClicked(val animation: CameraAnimate) : CameraAction()
+    object ToIdle : CameraAction()
+    object ToOverview : CameraAction()
+    object ToFollowing : CameraAction()
+}
 
-    // todo change this from a pair to a more explicit type
-    private val _cameraUpdates: MutableSharedFlow<Pair<CameraOptions, MapAnimationOptions>> =
-        MutableSharedFlow()
+class CameraViewModel(
+    private val locationBehavior: LocationBehavior,
+) : UIViewModel<CameraState, CameraAction>(CameraState.initial()) {
 
-    val cameraUpdates: Flow<Pair<CameraOptions, MapAnimationOptions>> = _cameraUpdates
+    override fun process(
+        mapboxNavigation: MapboxNavigation,
+        state: CameraState,
+        action: CameraAction
+    ): CameraState {
 
-    fun consumeLocationUpdate(location: Location) = viewModelScope.launch {
-        val animationOptions = MapAnimationOptions.Builder().duration(1500L).build()
-        val cameraOptions = CameraOptions.Builder()
-            .center(Point.fromLngLat(location.longitude, location.latitude))
-            .bearing(location.bearing.toDouble())
-            .zoom(15.0)
-            .padding(EdgeInsets(1000.0, 0.0, 0.0, 0.0))
-            .build()
-        _cameraUpdates.emit(Pair(cameraOptions, animationOptions))
+        return when (action) {
+            is CameraAction.OnRecenterClicked -> {
+                state.location?.let {
+                    val options = CameraOptions
+                        .Builder()
+                        .center(Point.fromLngLat(it.longitude, it.latitude))
+                        .build()
+                    state.copy(
+                        cameraOptions = options,
+                        cameraMode = state.recenterTo,
+                        cameraAnimation = action.animation,
+                    )
+                } ?: state
+            }
+            is CameraAction.ToIdle -> {
+                state.copy(recenterTo = state.cameraMode, cameraMode = CameraMode.IDLE)
+            }
+            is CameraAction.ToOverview -> {
+                state.copy(cameraMode = CameraMode.OVERVIEW)
+            }
+            is CameraAction.ToFollowing -> {
+                state.copy(cameraMode = CameraMode.FOLLOWING)
+            }
+            is CameraAction.UpdateLocation -> {
+                state.copy(location = action.location)
+            }
+        }
+    }
+
+    override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        super.onAttached(mapboxNavigation)
+
+        mainJobControl.scope.launch {
+            locationBehavior.locationLiveData.asFlow().collect {
+                invoke(CameraAction.UpdateLocation(it))
+            }
+        }
     }
 }

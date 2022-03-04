@@ -4,7 +4,9 @@ import android.view.ViewGroup
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.binder.UIBinder
+import com.mapbox.navigation.dropin.binder.action.ActiveGuidanceActionBinder
 import com.mapbox.navigation.dropin.binder.action.EmptyActionBinder
+import com.mapbox.navigation.dropin.binder.action.FreeDriveActionBinder
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.lifecycle.UICoordinator
 import kotlinx.coroutines.flow.Flow
@@ -23,9 +25,9 @@ internal class ActionListCoordinator(
         return navContext.viewModel.navigationState.map { navigationState ->
             when (navigationState) {
                 NavigationState.RoutePreview,
-                NavigationState.ActiveNavigation -> navContext.uiBinders.value.activeGuidanceActions
+                NavigationState.ActiveNavigation -> ActiveGuidanceActionBinder(navContext)
                 NavigationState.Arrival,
-                NavigationState.FreeDrive -> navContext.uiBinders.value.freeDriveActionBinder
+                NavigationState.FreeDrive -> FreeDriveActionBinder(navContext)
                 NavigationState.Empty -> EmptyActionBinder()
             }
         }
