@@ -10,6 +10,7 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -21,10 +22,10 @@ import kotlinx.coroutines.launch
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 abstract class UIViewModel<State, Action>(initialState: State) : MapboxNavigationObserver {
-    private val _action = MutableSharedFlow<Action>()
+    private val _action = MutableSharedFlow<Action>(extraBufferCapacity = 1)
     val action: Flow<Action> = _action
     private val _state = MutableStateFlow(initialState)
-    val state: Flow<State> = _state
+    val state: StateFlow<State> = _state
 
     lateinit var mainJobControl: JobControl
 
@@ -32,9 +33,7 @@ abstract class UIViewModel<State, Action>(initialState: State) : MapboxNavigatio
      * Invoke an action for the behavior.
      */
     fun invoke(action: Action) {
-        mainJobControl.scope.launch {
-            _action.emit(action)
-        }
+        _action.tryEmit(action)
     }
 
     /**
