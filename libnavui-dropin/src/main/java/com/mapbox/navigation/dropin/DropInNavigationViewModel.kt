@@ -3,11 +3,9 @@ package com.mapbox.navigation.dropin
 import androidx.lifecycle.ViewModel
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.dropin.component.camera.DropInCameraState
-import com.mapbox.navigation.dropin.component.cameramode.CameraModeButtonBehaviour
+import com.mapbox.navigation.dropin.component.camera.CameraViewModel
 import com.mapbox.navigation.dropin.component.location.LocationBehavior
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
-import com.mapbox.navigation.dropin.component.recenter.RecenterButtonBehaviour
 import com.mapbox.navigation.dropin.component.replay.ReplayViewModel
 import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.component.sound.MapboxAudioViewModel
@@ -22,7 +20,6 @@ import kotlinx.coroutines.flow.asStateFlow
 internal class DropInNavigationViewModel : ViewModel() {
     private val _navigationState = MutableStateFlow<NavigationState>(NavigationState.FreeDrive)
     val navigationState = _navigationState.asStateFlow()
-    val cameraState: DropInCameraState = DropInCameraState()
 
     /**
      * These classes are accessible through MapboxNavigationApp.getObserver(..)
@@ -30,16 +27,14 @@ internal class DropInNavigationViewModel : ViewModel() {
     val replayViewModel = ReplayViewModel()
     val audioGuidanceViewModel = MapboxAudioViewModel()
     val locationBehavior = LocationBehavior()
-    val recenterBehavior = RecenterButtonBehaviour(cameraState, locationBehavior)
-    val cameraModeBehavior = CameraModeButtonBehaviour(cameraState)
     val routesViewModel = RoutesViewModel()
+    val cameraViewModel = CameraViewModel(locationBehavior)
     val navigationObservers = listOf(
         replayViewModel,
         audioGuidanceViewModel,
         locationBehavior,
-        recenterBehavior,
-        cameraModeBehavior,
         routesViewModel,
+        cameraViewModel,
         // TODO can add more mapbox navigation observers here
     )
 
