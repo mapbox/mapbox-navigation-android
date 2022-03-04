@@ -25,7 +25,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.MapInitOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.LocationPuck2D
-import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
@@ -42,18 +41,13 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.dropin.component.UIComponent
-import com.mapbox.navigation.dropin.component.camera.CameraViewModel
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationStateAction
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationStateViewModel
-import com.mapbox.navigation.dropin.component.recenter.CustomRecenterUIComponent
-import com.mapbox.navigation.dropin.component.recenter.MapboxRecenterUIComponent
-import com.mapbox.navigation.dropin.component.recenter.RecenterViewModel
 import com.mapbox.navigation.dropin.component.routeoverview.CustomRouteOverviewUIComponent
 import com.mapbox.navigation.dropin.component.routeoverview.MapboxRouteOverviewUIComponent
 import com.mapbox.navigation.dropin.component.routeoverview.RouteOverviewViewModel
 import com.mapbox.navigation.dropin.databinding.MapboxLayoutDropInViewBinding
 import com.mapbox.navigation.dropin.util.MapboxDropInUtils
-import com.mapbox.navigation.ui.maps.camera.view.MapboxRecenterButton
 import com.mapbox.navigation.ui.maps.camera.view.MapboxRouteOverviewButton
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.utils.internal.extensions.unwrapIfNeeded
@@ -160,7 +154,6 @@ class NavigationView @JvmOverloads constructor(
                                     null,
                                     null
                                 )
-                                cameraViewModel.consumeLocationUpdate(this)
                             }
                         }
                     )
@@ -174,7 +167,6 @@ class NavigationView @JvmOverloads constructor(
     // --------------------------------------------------------
     private val mapboxNavigationViewModel: MapboxNavigationViewModel
     private val navigationStateViewModel: NavigationStateViewModel
-    private val cameraViewModel: CameraViewModel
 
     private val mapInitOptions: MapInitOptions = mapInitializationOptions
     private val navigationLocationProvider = NavigationLocationProvider()
@@ -193,27 +185,6 @@ class NavigationView @JvmOverloads constructor(
     private val uiComponents: MutableList<UIComponent> = mutableListOf()
 
     override fun getLifecycle(): Lifecycle = viewLifecycleRegistry
-
-    private fun bindRecenterButtonView(view: View?) {
-        val recenterComponent = if (view == null) {
-            val recenterButtonView = MapboxRecenterButton(context, null)
-            binding.recenterContainer.addView(recenterButtonView)
-            val recenterViewModel =
-                ViewModelProvider(viewModelStoreOwner)[RecenterViewModel::class.java]
-            MapboxRecenterUIComponent(
-                container = binding.recenterContainer,
-                view = recenterButtonView,
-                viewModel = recenterViewModel,
-                lifecycleOwner = this
-            )
-        } else {
-            binding.recenterContainer.addView(view)
-            CustomRecenterUIComponent(
-                container = binding.recenterContainer
-            )
-        }
-        uiComponents.add(recenterComponent)
-    }
 
     private fun bindRouteOverviewButtonView(view: View?) {
         val routeOverviewComponent = if (view == null) {
@@ -306,7 +277,6 @@ class NavigationView @JvmOverloads constructor(
                 externalLocationObservers.forEach {
                     it.onNewRawLocation(locationUpdate)
                 }
-                cameraViewModel.consumeLocationUpdate(locationUpdate)
             }
         }
     }
@@ -394,11 +364,6 @@ class NavigationView @JvmOverloads constructor(
         observeLocationMatcherResults()
         observeFinalDestinationArrivals()
         observeNavigationState()
-        keepExecutingWhenStarted {
-            cameraViewModel.cameraUpdates.collect {
-                mapView.camera.easeTo(it.first, it.second)
-            }
-        }
     }
 
     private fun performActions() {
@@ -419,7 +384,6 @@ class NavigationView @JvmOverloads constructor(
 
     internal fun configure(viewProvider: ViewProvider) {
         binding.mapContainer.addView(mapView)
-        bindRecenterButtonView(viewProvider.recenterButtonProvider?.invoke())
         bindRouteOverviewButtonView(viewProvider.recenterButtonProvider?.invoke())
 
         renderStateMutations()
@@ -527,9 +491,6 @@ class NavigationView @JvmOverloads constructor(
         navigationStateViewModel = ViewModelProvider(
             viewModelStoreOwner
         )[NavigationStateViewModel::class.java]
-        cameraViewModel = ViewModelProvider(
-            viewModelStoreOwner
-        )[CameraViewModel::class.java]
         lifecycle.addObserver(lifecycleObserver)
         MapboxNavigationApp.setup(navigationOptions)
             .attach(this)
