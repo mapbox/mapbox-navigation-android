@@ -833,6 +833,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public android.graphics.drawable.Drawable getDestinationIcon();
     method public boolean getDisplayRestrictedRoadSections();
     method public boolean getDisplaySoftGradientForTraffic();
+    method public com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment getIconPitchAlignment();
     method public android.graphics.drawable.Drawable getOriginIcon();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources getResourceProvider();
     method public String? getRouteLineBelowLayerId();
@@ -846,6 +847,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final android.graphics.drawable.Drawable destinationIcon;
     property public final boolean displayRestrictedRoadSections;
     property public final boolean displaySoftGradientForTraffic;
+    property public final com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment iconPitchAlignment;
     property public final android.graphics.drawable.Drawable originIcon;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources resourceProvider;
     property public final String? routeLineBelowLayerId;
@@ -862,6 +864,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions build();
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder displayRestrictedRoadSections(boolean displayRestrictedRoadSections);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder displaySoftGradientForTraffic(boolean enable);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder iconPitchAlignment(com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment iconPitchAlignment);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder softGradientTransition(int transitionDistance);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder styleInactiveRouteLegsIndependently(boolean enable);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder vanishingRouteLineUpdateInterval(long interval = 62500000L);

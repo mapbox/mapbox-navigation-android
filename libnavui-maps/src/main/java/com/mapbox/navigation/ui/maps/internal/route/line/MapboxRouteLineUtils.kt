@@ -1029,7 +1029,8 @@ internal object MapboxRouteLineUtils {
             options.originIcon,
             options.destinationIcon,
             options.waypointLayerIconOffset,
-            options.waypointLayerIconAnchor
+            options.waypointLayerIconAnchor,
+            options.iconPitchAlignment
         ).let {
             style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
         }

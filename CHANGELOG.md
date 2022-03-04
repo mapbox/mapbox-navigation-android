@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 
 #### Features
+- Exposed option in MapboxRouteLineOptions to change the default icon pitch alignment for waypoint icons. [#5531](https://github.com/mapbox/mapbox-navigation-android/pull/5531)
 
 #### Bug fixes and improvements
 

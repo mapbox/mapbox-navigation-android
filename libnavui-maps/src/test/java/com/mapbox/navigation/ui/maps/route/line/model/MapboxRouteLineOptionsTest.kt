@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
+import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -143,6 +144,15 @@ class MapboxRouteLineOptionsTest {
     }
 
     @Test
+    fun iconPitchAlignment() {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .iconPitchAlignment(IconPitchAlignment.AUTO)
+            .build()
+
+        assertEquals(IconPitchAlignment.AUTO, options.iconPitchAlignment)
+    }
+
+    @Test
     fun toBuilder() {
         val routeLineResources = RouteLineResources.Builder().build()
         val routeStyleDescriptors =
@@ -161,6 +171,7 @@ class MapboxRouteLineOptionsTest {
             .vanishingRouteLineUpdateInterval(44L)
             .waypointLayerIconOffset(listOf(3.0, 4.4))
             .waypointLayerIconAnchor(IconAnchor.BOTTOM)
+            .iconPitchAlignment(IconPitchAlignment.AUTO)
             .build()
             .toBuilder(ctx)
             .build()
@@ -179,5 +190,6 @@ class MapboxRouteLineOptionsTest {
         assertEquals(4.4, options.waypointLayerIconOffset.component2(), 0.0)
         assertEquals(2, options.waypointLayerIconOffset.size)
         assertEquals(IconAnchor.BOTTOM, options.waypointLayerIconAnchor)
+        assertEquals(IconPitchAlignment.AUTO, options.iconPitchAlignment)
     }
 }

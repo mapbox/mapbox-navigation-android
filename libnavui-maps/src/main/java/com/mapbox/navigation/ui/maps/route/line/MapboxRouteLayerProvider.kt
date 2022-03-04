@@ -208,7 +208,8 @@ internal class MapboxRouteLayerProvider(
         originIcon: Drawable,
         destinationIcon: Drawable,
         iconOffset: List<Double>,
-        iconAnchor: IconAnchor
+        iconAnchor: IconAnchor,
+        iconPitchAlignment: IconPitchAlignment
     ): SymbolLayer {
         if (style.styleLayerExists(RouteLayerConstants.WAYPOINT_LAYER_ID)) {
             style.removeStyleLayer(RouteLayerConstants.WAYPOINT_LAYER_ID)
@@ -271,7 +272,7 @@ internal class MapboxRouteLayerProvider(
                     }
                 }
             )
-            .iconPitchAlignment(IconPitchAlignment.MAP)
+            .iconPitchAlignment(iconPitchAlignment)
             .iconAllowOverlap(true)
             .iconIgnorePlacement(true)
             .iconKeepUpright(true)

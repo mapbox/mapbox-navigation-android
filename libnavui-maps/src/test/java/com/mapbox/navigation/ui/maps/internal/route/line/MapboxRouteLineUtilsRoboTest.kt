@@ -17,6 +17,7 @@ import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
+import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID
@@ -73,6 +74,7 @@ class MapboxRouteLineUtilsRoboTest {
             .displayRestrictedRoadSections(true)
             .waypointLayerIconAnchor(IconAnchor.BOTTOM_RIGHT)
             .waypointLayerIconOffset(listOf(33.3, 44.4))
+            .iconPitchAlignment(IconPitchAlignment.VIEWPORT)
             .build()
         val waypointSourceValueSlots = mutableListOf<Value>()
         val primaryRouteSourceValueSlots = mutableListOf<Value>()
@@ -338,6 +340,11 @@ class MapboxRouteLineUtilsRoboTest {
                 (addStyleLayerSlots[12].contents as HashMap<String, Value>)["icon-offset"]
                 !!.contents as ArrayList<Value>
                 ).component2().contents
+        )
+        assertEquals(
+            "viewport",
+            (addStyleLayerSlots[12].contents as HashMap<String, Value>)["icon-pitch-alignment"]
+            !!.contents
         )
         assertEquals(
             LocationComponentConstants.MODEL_LAYER,
