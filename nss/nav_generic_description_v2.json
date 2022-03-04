@@ -1,0 +1,22 @@
+{
+  "version": "1.3",
+  "name": "My system description",
+  "active_guidance": {
+    "recenter_button": {
+      "icon": {
+        "uri": "mapbox://defaults.icon.recenter"
+      },
+      "background_color": "red"
+    },
+    "speed_limit": {
+    }
+  },
+  "arrival": {
+    "recenter_button": {
+      "icon": {
+        "uri": "mapbox://defaults.icon.recenter"
+      },
+      "background_color": "red"
+    }
+  }
+}
