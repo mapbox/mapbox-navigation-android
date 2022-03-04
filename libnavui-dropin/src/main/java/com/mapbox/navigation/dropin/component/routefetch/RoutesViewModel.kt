@@ -20,7 +20,7 @@ sealed class RoutesAction {
 }
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal class RoutesViewModel : UIViewModel<Unit, RoutesAction>(Unit) {
+class RoutesViewModel : UIViewModel<Unit, RoutesAction>(Unit) {
     private var routeRequestId: Long? = null
 
     override fun process(

@@ -22,6 +22,11 @@ internal class FreeDriveMapBinder(
                 navigationViewContext.viewModel.locationViewModel,
                 navigationViewContext.viewModel.cameraViewModel,
             ),
+            MapLongClickRoutesComponent(
+                mapView,
+                navigationViewContext.viewModel.locationViewModel,
+                navigationViewContext.viewModel.routesViewModel,
+            )
         )
     }
 }
