@@ -18,7 +18,7 @@ class LocationPuck(
 ) : MapboxNavigationObserver {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
-        val locationStateManager = MapboxNavigationApp.getObserver(LocationBehavior::class)
+        val locationStateManager = MapboxNavigationApp.getObserver(LocationViewModel::class)
 
         mapView.getMapboxMap().getStyle {
             mapView.location.apply {

@@ -1,14 +1,10 @@
 package com.mapbox.navigation.dropin.component.camera
 
 import android.location.Location
-import androidx.lifecycle.asFlow
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.component.location.LocationBehavior
 import com.mapbox.navigation.dropin.lifecycle.UIViewModel
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
 sealed class CameraAction {
     data class UpdateLocation(val location: Location) : CameraAction()
@@ -20,9 +16,7 @@ sealed class CameraAction {
     object ToFollowing : CameraAction()
 }
 
-class CameraViewModel(
-    private val locationBehavior: LocationBehavior,
-) : UIViewModel<CameraState, CameraAction>(CameraState.initial()) {
+class CameraViewModel : UIViewModel<CameraState, CameraAction>(CameraState.initial()) {
 
     override fun process(
         mapboxNavigation: MapboxNavigation,
@@ -61,16 +55,6 @@ class CameraViewModel(
             }
             is CameraAction.UpdateLocation -> {
                 state.copy(location = action.location)
-            }
-        }
-    }
-
-    override fun onAttached(mapboxNavigation: MapboxNavigation) {
-        super.onAttached(mapboxNavigation)
-
-        mainJobControl.scope.launch {
-            locationBehavior.locationLiveData.asFlow().collect {
-                invoke(CameraAction.UpdateLocation(it))
             }
         }
     }

@@ -17,7 +17,11 @@ internal class FreeDriveMapBinder(
     override fun bind(mapView: MapView): MapboxNavigationObserver {
         return navigationListOf(
             LocationPuck(mapView),
-            CameraComponent(mapView, navigationViewContext.viewModel.cameraViewModel),
+            CameraComponent(
+                mapView,
+                navigationViewContext.viewModel.locationViewModel,
+                navigationViewContext.viewModel.cameraViewModel,
+            ),
         )
     }
 }
