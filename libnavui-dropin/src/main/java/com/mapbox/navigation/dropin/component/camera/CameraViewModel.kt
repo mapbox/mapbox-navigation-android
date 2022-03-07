@@ -1,22 +1,16 @@
 package com.mapbox.navigation.dropin.component.camera
 
-import android.location.Location
-import com.mapbox.geojson.Point
-import com.mapbox.maps.CameraOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.lifecycle.UIViewModel
 
 sealed class CameraAction {
-    data class UpdateLocation(val location: Location) : CameraAction()
-    data class OnRecenterClicked(val animation: CameraAnimate) : CameraAction()
-    data class OnOverviewClicked(val transitionTo: CameraTransition) : CameraAction()
-    data class OnFollowingClicked(val transitionTo: CameraTransition) : CameraAction()
+    data class InitializeCamera(val target: TargetCameraMode) : CameraAction()
     object ToIdle : CameraAction()
     object ToOverview : CameraAction()
     object ToFollowing : CameraAction()
 }
 
-class CameraViewModel : UIViewModel<CameraState, CameraAction>(CameraState.initial()) {
+class CameraViewModel : UIViewModel<CameraState, CameraAction>(CameraState()) {
 
     override fun process(
         mapboxNavigation: MapboxNavigation,
@@ -25,36 +19,17 @@ class CameraViewModel : UIViewModel<CameraState, CameraAction>(CameraState.initi
     ): CameraState {
 
         return when (action) {
-            is CameraAction.OnRecenterClicked -> {
-                state.location?.let {
-                    val options = CameraOptions
-                        .Builder()
-                        .center(Point.fromLngLat(it.longitude, it.latitude))
-                        .build()
-                    state.copy(
-                        cameraOptions = options,
-                        cameraMode = state.recenterTo,
-                        cameraAnimation = action.animation,
-                    )
-                } ?: state
-            }
-            is CameraAction.OnOverviewClicked -> {
-                state.copy(cameraTransition = action.transitionTo)
-            }
-            is CameraAction.OnFollowingClicked -> {
-                state.copy(cameraTransition = action.transitionTo)
+            is CameraAction.InitializeCamera -> {
+                state.copy(isCameraInitialized = true, cameraMode = action.target)
             }
             is CameraAction.ToIdle -> {
-                state.copy(recenterTo = state.cameraMode, cameraMode = CameraMode.IDLE)
+                state.copy(cameraMode = TargetCameraMode.Idle)
             }
             is CameraAction.ToOverview -> {
-                state.copy(cameraMode = CameraMode.OVERVIEW)
+                state.copy(cameraMode = TargetCameraMode.Overview)
             }
             is CameraAction.ToFollowing -> {
-                state.copy(cameraMode = CameraMode.FOLLOWING)
-            }
-            is CameraAction.UpdateLocation -> {
-                state.copy(location = action.location)
+                state.copy(cameraMode = TargetCameraMode.Following)
             }
         }
     }

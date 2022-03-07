@@ -1,147 +1,221 @@
 package com.mapbox.navigation.dropin.component.camera
 
-import android.location.Location
-import com.mapbox.android.gestures.MoveGestureDetector
+import com.mapbox.android.gestures.Utils
+import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.animation.camera
-import com.mapbox.maps.plugin.gestures.OnMoveListener
-import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.location.LocationViewModel
+import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
+import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.extensions.flowNavigationCameraState
 import com.mapbox.navigation.dropin.extensions.flowRouteProgress
 import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
+import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
+import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 internal class CameraComponent constructor(
     private val mapView: MapView,
-    private val locationViewModel: LocationViewModel,
     private val cameraViewModel: CameraViewModel,
+    private val locationViewModel: LocationViewModel,
+    private val navigationStateViewModel: NavigationStateViewModel,
+    private val viewportDataSource: MapboxNavigationViewportDataSource =
+        MapboxNavigationViewportDataSource(
+            mapboxMap = mapView.getMapboxMap()
+        ),
+    private val navigationCamera: NavigationCamera =
+        NavigationCamera(
+            mapboxMap = mapView.getMapboxMap(),
+            cameraPlugin = mapView.camera,
+            viewportDataSource = viewportDataSource
+        ),
 ) : UIComponent() {
 
-    private var isLocationInitialized = false
-    private lateinit var navigationCamera: NavigationCamera
-    private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
+    // TODO: Remove or improve to calculate the viewport size at runtime
+    private val overviewEdgeInsets = EdgeInsets(
+        Utils.dpToPx(180f).toDouble(),
+        Utils.dpToPx(80f).toDouble(),
+        Utils.dpToPx(180f).toDouble(),
+        Utils.dpToPx(80f).toDouble(),
+    )
+    private val followingEdgeInsets = EdgeInsets(
+        Utils.dpToPx(0f).toDouble(),
+        Utils.dpToPx(0f).toDouble(),
+        Utils.dpToPx(200f).toDouble(),
+        Utils.dpToPx(0f).toDouble(),
+    )
 
-    private val onMoveListener = object : OnMoveListener {
-        override fun onMove(detector: MoveGestureDetector): Boolean {
-            return false
-        }
-
-        override fun onMoveBegin(detector: MoveGestureDetector) {
-            cameraViewModel.invoke(CameraAction.ToIdle)
-        }
-
-        override fun onMoveEnd(detector: MoveGestureDetector) {
-            // no op
-        }
-    }
+    private val gesturesHandler = NavigationBasicGesturesHandler(navigationCamera)
+    // To determine if [$this] is a fresh instantiation and is garbage collected upon onDetached
+    private var isFirstAttached: Boolean = true
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
-        viewportDataSource = MapboxNavigationViewportDataSource(mapView.getMapboxMap())
-        navigationCamera = NavigationCamera(
-            mapView.getMapboxMap(),
-            mapView.camera,
-            viewportDataSource
-        )
-        mapView.gestures.addOnMoveListener(onMoveListener)
+        mapView.camera.addCameraAnimationsLifecycleListener(gesturesHandler)
+        viewportDataSource.overviewPadding = overviewEdgeInsets
+        viewportDataSource.followingPadding = followingEdgeInsets
+        viewportDataSource.evaluate()
+
+        controlCameraFrameOverrides()
+        updateCameraFrame()
+        updateCameraLocation()
+        onNavigationCameraStateChanged()
+        onRouteProgressUpdates(mapboxNavigation)
+        onRouteUpdates(mapboxNavigation)
+    }
+
+    override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        super.onDetached(mapboxNavigation)
+        mapView.camera.removeCameraAnimationsLifecycleListener(gesturesHandler)
+    }
+
+    private fun controlCameraFrameOverrides() {
         coroutineScope.launch {
-            cameraViewModel.state.collect {
-                when (it.cameraAnimation) {
-                    is CameraAnimate.EaseTo -> {
-                        mapView.camera.easeTo(it.cameraOptions)
+            navigationStateViewModel.state.collect {
+                when (it) {
+                    is NavigationState.FreeDrive -> {
+                        viewportDataSource.followingZoomPropertyOverride(FOLLOWING_ZOOM_OVERRIDE)
+                        viewportDataSource.overviewZoomPropertyOverride(OVERVIEW_ZOOM_OVERRIDE)
                     }
-                    is CameraAnimate.FlyTo -> {
-                        mapView.camera.flyTo(it.cameraOptions)
-                    }
-                    is CameraAnimate.SetTo -> {
-                        mapView.getMapboxMap().setCamera(it.cameraOptions)
+                    else -> {
+                        viewportDataSource.clearFollowingOverrides()
+                        viewportDataSource.clearOverviewOverrides()
                     }
                 }
-                it.location?.let { enhancedLocation ->
-                    updateCamera(it.cameraMode, enhancedLocation)
-                }
-                when (it.cameraTransition) {
-                    is CameraTransition.ToFollowing -> {
-                        navigationCamera.requestNavigationCameraToFollowing()
-                    }
-                    is CameraTransition.ToOverview -> {
-                        navigationCamera.requestNavigationCameraToOverview()
-                    }
-                    is CameraTransition.ToIdle -> {
-                        navigationCamera.requestNavigationCameraToIdle()
+                viewportDataSource.evaluate()
+            }
+        }
+    }
+
+    private fun updateCameraFrame() {
+        coroutineScope.launch {
+            cameraViewModel.state.collect { state ->
+                if (state.isCameraInitialized) {
+                    if (!isFirstAttached) {
+                        requestCameraModeTo(cameraMode = state.cameraMode)
+                    } else {
+                        isFirstAttached = false
                     }
                 }
             }
         }
+    }
+
+    private fun updateCameraLocation() {
+        coroutineScope.launch {
+            combine(
+                cameraViewModel.state,
+                locationViewModel.state,
+                navigationStateViewModel.state
+            ) { cameraState, location, navigationState, ->
+                location?.let {
+                    viewportDataSource.onLocationChanged(it)
+                    viewportDataSource.evaluate()
+                    if (!cameraState.isCameraInitialized) {
+                        when (navigationState) {
+                            NavigationState.ActiveNavigation,
+                            NavigationState.Arrival -> {
+                                navigationCamera.requestNavigationCameraToFollowing(
+                                    stateTransitionOptions = NavigationCameraTransitionOptions
+                                        .Builder()
+                                        .maxDuration(0) // instant transition
+                                        .build()
+                                )
+                                cameraViewModel.invoke(
+                                    CameraAction.InitializeCamera(TargetCameraMode.Following)
+                                )
+                            }
+                            else -> {
+                                navigationCamera.requestNavigationCameraToOverview(
+                                    stateTransitionOptions = NavigationCameraTransitionOptions
+                                        .Builder()
+                                        .maxDuration(0) // instant transition
+                                        .build()
+                                )
+                                cameraViewModel.invoke(
+                                    CameraAction.InitializeCamera(TargetCameraMode.Overview)
+                                )
+                            }
+                        }
+                    }
+                }
+            }.collect()
+        }
+    }
+
+    private fun onNavigationCameraStateChanged() {
+        coroutineScope.launch {
+            navigationCamera.flowNavigationCameraState().collect {
+                when (it) {
+                    NavigationCameraState.IDLE -> {
+                        cameraViewModel.invoke(CameraAction.ToIdle)
+                    }
+                    else -> {
+                        // no op
+                    }
+                }
+            }
+        }
+    }
+
+    private fun onRouteProgressUpdates(mapboxNavigation: MapboxNavigation) {
         coroutineScope.launch {
             mapboxNavigation.flowRouteProgress().collect { routeProgress ->
                 viewportDataSource.onRouteProgressChanged(routeProgress)
                 viewportDataSource.evaluate()
             }
         }
+    }
+
+    private fun onRouteUpdates(mapboxNavigation: MapboxNavigation) {
         coroutineScope.launch {
-            mapboxNavigation.flowRoutesUpdated().collect { result ->
-                if (result.routes.isEmpty()) {
-                    viewportDataSource.clearRouteData()
+            combine(
+                mapboxNavigation.flowRoutesUpdated(),
+                navigationStateViewModel.state
+            ) { routeUpdate, navigationState ->
+                if (routeUpdate.navigationRoutes.isNotEmpty()) {
+                    viewportDataSource.onRouteChanged(routeUpdate.navigationRoutes.first())
+                    viewportDataSource.evaluate()
+                    when (navigationState) {
+                        NavigationState.ActiveNavigation,
+                        NavigationState.Arrival -> {
+                            cameraViewModel.invoke(CameraAction.ToFollowing)
+                        }
+                        else -> {
+                            cameraViewModel.invoke(CameraAction.ToOverview)
+                        }
+                    }
                 } else {
-                    viewportDataSource.onRouteChanged(result.routes.first())
+                    viewportDataSource.clearRouteData()
+                    viewportDataSource.evaluate()
                 }
-                viewportDataSource.evaluate()
-            }
+            }.collect()
         }
-        coroutineScope.launch {
-            navigationCamera.flowNavigationCameraState().collect {
-                when (it) {
-                    NavigationCameraState.TRANSITION_TO_FOLLOWING,
-                    NavigationCameraState.FOLLOWING -> {
-                        cameraViewModel.invoke(CameraAction.ToFollowing)
-                    }
-                    NavigationCameraState.TRANSITION_TO_OVERVIEW,
-                    NavigationCameraState.OVERVIEW -> {
-                        cameraViewModel.invoke(CameraAction.ToOverview)
-                    }
-                    NavigationCameraState.IDLE -> {
-                        cameraViewModel.invoke(CameraAction.ToIdle)
-                    }
-                }
+    }
+
+    private fun requestCameraModeTo(cameraMode: TargetCameraMode) {
+        when (cameraMode) {
+            is TargetCameraMode.Idle -> {
+                navigationCamera.requestNavigationCameraToIdle()
             }
-        }
-        coroutineScope.launch {
-            locationViewModel.state.filterNotNull().collect {
-                cameraViewModel.invoke(CameraAction.UpdateLocation(it))
+            is TargetCameraMode.Overview -> {
+                navigationCamera.requestNavigationCameraToOverview()
+            }
+            is TargetCameraMode.Following -> {
+                navigationCamera.requestNavigationCameraToFollowing()
             }
         }
     }
 
-    override fun onDetached(mapboxNavigation: MapboxNavigation) {
-        mapView.gestures.removeOnMoveListener(onMoveListener)
-        super.onDetached(mapboxNavigation)
-    }
-
-    private fun updateCamera(cameraMode: CameraMode, enhancedLocation: Location) {
-        viewportDataSource.onLocationChanged(enhancedLocation)
-        viewportDataSource.evaluate()
-        if (!isLocationInitialized) {
-            isLocationInitialized = true
-            when (cameraMode) {
-                CameraMode.IDLE -> {
-                    navigationCamera.requestNavigationCameraToIdle()
-                }
-                CameraMode.FOLLOWING -> {
-                    navigationCamera.requestNavigationCameraToFollowing()
-                }
-                CameraMode.OVERVIEW -> {
-                    navigationCamera.requestNavigationCameraToOverview()
-                }
-            }
-        }
+    companion object {
+        private const val OVERVIEW_ZOOM_OVERRIDE = 16.5
+        private const val FOLLOWING_ZOOM_OVERRIDE = 16.5
     }
 }

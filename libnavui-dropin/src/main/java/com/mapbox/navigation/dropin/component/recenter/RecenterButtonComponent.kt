@@ -5,9 +5,8 @@ import android.view.View.VISIBLE
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.camera.CameraAction
-import com.mapbox.navigation.dropin.component.camera.CameraAnimate
-import com.mapbox.navigation.dropin.component.camera.CameraMode
 import com.mapbox.navigation.dropin.component.camera.CameraViewModel
+import com.mapbox.navigation.dropin.component.camera.TargetCameraMode
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.view.MapboxExtendableButton
 import kotlinx.coroutines.flow.collect
@@ -24,7 +23,7 @@ internal class RecenterButtonComponent(
 
         coroutineScope.launch {
             cameraViewModel.state.collect {
-                if (it.cameraMode == CameraMode.IDLE) {
+                if (it.cameraMode == TargetCameraMode.Idle) {
                     recenterButton.visibility = VISIBLE
                 } else {
                     recenterButton.visibility = GONE
@@ -33,7 +32,7 @@ internal class RecenterButtonComponent(
         }
         recenterButton.setOnClickListener {
             cameraViewModel.invoke(
-                CameraAction.OnRecenterClicked(animation = CameraAnimate.EaseTo)
+                CameraAction.ToFollowing
             )
         }
     }

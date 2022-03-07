@@ -1,0 +1,77 @@
+package com.mapbox.navigation.dropin.component.camera
+
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.testing.MainCoroutineRule
+import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+class CameraViewModelTest {
+
+    @get:Rule
+    var coroutineRule = MainCoroutineRule()
+
+    @Test
+    fun `default state is idle`() {
+        val cameraViewModel = CameraViewModel()
+
+        val cameraState = cameraViewModel.state.value
+
+        assertEquals(TargetCameraMode.Idle, cameraState.cameraMode)
+    }
+
+    @Test
+    fun `when action initialize update camera mode`() = coroutineRule.runBlockingTest {
+        val cameraViewModel = CameraViewModel()
+        val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        cameraViewModel.onAttached(mockMapboxNavigation)
+        cameraViewModel.invoke(CameraAction.InitializeCamera(TargetCameraMode.Overview))
+
+        val cameraState = cameraViewModel.state.value
+
+        assertTrue(cameraState.isCameraInitialized)
+        assertEquals(TargetCameraMode.Overview, cameraState.cameraMode)
+    }
+
+    @Test
+    fun `when action toIdle updates camera mode`() = coroutineRule.runBlockingTest {
+        val cameraViewModel = CameraViewModel()
+        val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        cameraViewModel.onAttached(mockMapboxNavigation)
+        cameraViewModel.invoke(CameraAction.ToIdle)
+
+        val cameraState = cameraViewModel.state.value
+
+        assertEquals(TargetCameraMode.Idle, cameraState.cameraMode)
+    }
+
+    @Test
+    fun `when action toOverview updates camera mode`() = coroutineRule.runBlockingTest {
+        val cameraViewModel = CameraViewModel()
+        val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        cameraViewModel.onAttached(mockMapboxNavigation)
+        cameraViewModel.invoke(CameraAction.ToOverview)
+
+        val cameraState = cameraViewModel.state.value
+
+        assertEquals(TargetCameraMode.Overview, cameraState.cameraMode)
+    }
+
+    @Test
+    fun `when action toFollowing updates camera mode and zoomUpdatesAllowed`() =
+        coroutineRule.runBlockingTest {
+            val cameraViewModel = CameraViewModel()
+            val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+            cameraViewModel.onAttached(mockMapboxNavigation)
+            cameraViewModel.invoke(CameraAction.ToFollowing)
+
+            val cameraState = cameraViewModel.state.value
+
+            assertEquals(TargetCameraMode.Following, cameraState.cameraMode)
+        }
+}
