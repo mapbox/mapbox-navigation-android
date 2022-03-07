@@ -8,6 +8,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Exposed option in MapboxRouteLineOptions to change the default icon pitch alignment for waypoint icons. [#5531](https://github.com/mapbox/mapbox-navigation-android/pull/5531)
 
 #### Bug fixes and improvements
+- Changed internal road class calculations used by the `MapboxRouteLineApi` to fail gracefully and log instead of crashing when invalid route `geometry_index` is provided in the route object.. [#5542](https://github.com/mapbox/mapbox-navigation-android/pull/5542)
 
 ## Mapbox Navigation SDK 2.4.0-alpha.2 - March 4, 2022
 ### Changelog

@@ -7,7 +7,6 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
-import com.mapbox.api.directions.v5.models.StepIntersection
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
@@ -510,8 +509,7 @@ internal object MapboxRouteLineUtils {
             route.legs()?.forEachIndexed { legIndex, leg ->
                 val restrictedRanges = getRestrictedRouteLegRanges(leg).asSequence()
                 val closureRanges = getClosureRanges(leg).asSequence()
-                val intersectionsWithGeometryIndex = getIntersectionsWithGeometryIndex(leg.steps())
-                val roadClassArray = getRoadClassArray(intersectionsWithGeometryIndex)
+                val roadClassArray = getRoadClassArray(leg.steps())
                 val trafficCongestion = trafficCongestionProvider.invoke(leg)
                 var isLegOrigin = true
 
@@ -616,29 +614,41 @@ internal object MapboxRouteLineUtils {
         return ranges
     }
 
-    private fun getIntersectionsWithGeometryIndex(steps: List<LegStep>?): List<StepIntersection> {
-        return steps
+    private fun getRoadClassArray(
+        steps: List<LegStep>?
+    ): Array<String?> {
+        val intersectionsWithGeometryIndex = steps
             ?.mapNotNull { it.intersections() }
             ?.flatten()
             ?.filter {
                 it.geometryIndex() != null
             }?.toList() ?: listOf()
-    }
 
-    private fun getRoadClassArray(
-        intersectionsWithGeometryIndex: List<StepIntersection>
-    ): Array<String?> {
-        return if (intersectionsWithGeometryIndex.isNotEmpty()) {
-            arrayOfNulls<String>(
-                intersectionsWithGeometryIndex.last().geometryIndex()!! + 1
-            ).apply {
-                intersectionsWithGeometryIndex.forEach {
-                    this[it.geometryIndex()!!] = it.mapboxStreetsV8()?.roadClass()
-                        ?: "intersection_without_class_fallback"
+        return when (intersectionsWithGeometryIndex.isNotEmpty()) {
+            true -> {
+                arrayOfNulls<String>(
+                    intersectionsWithGeometryIndex.last().geometryIndex()!! + 1
+                ).apply {
+                    intersectionsWithGeometryIndex.forEach {
+                        val roadClass: String =
+                            it.mapboxStreetsV8()?.roadClass()
+                                ?: "intersection_without_class_fallback"
+                        if (it.geometryIndex()!! < this.size) {
+                            this[it.geometryIndex()!!] = roadClass
+                        } else {
+                            logE(
+                                TAG,
+                                "Geometry index for step intersection unexpected or " +
+                                    "incorrect. There is a risk of incorrect " +
+                                    "road class styling applied to the route line."
+                            )
+                        }
+                    }
                 }
             }
-        } else {
-            arrayOfNulls(0)
+            false -> {
+                arrayOfNulls(0)
+            }
         }
     }
 
