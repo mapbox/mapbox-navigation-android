@@ -16,16 +16,17 @@ internal class ActiveGuidanceMapBinder(
     private val navigationViewContext: DropInNavigationViewContext,
 ) : Binder<MapView> {
 
-    override fun bind(mapView: MapView): MapboxNavigationObserver {
+    override fun bind(value: MapView): MapboxNavigationObserver {
         return navigationListOf(
-            LocationPuck(mapView),
-            RouteLineComponent(mapView, navigationViewContext.routeLineOptions),
+            LocationPuck(value),
+            RouteLineComponent(value, navigationViewContext.routeLineOptions),
             CameraComponent(
-                mapView,
-                navigationViewContext.viewModel.locationViewModel,
+                value,
                 navigationViewContext.viewModel.cameraViewModel,
+                navigationViewContext.viewModel.locationViewModel,
+                navigationViewContext.viewModel.navigationStateViewModel,
             ),
-            MapMarkersComponent(mapView, navigationViewContext),
+            MapMarkersComponent(value, navigationViewContext),
         )
     }
 }

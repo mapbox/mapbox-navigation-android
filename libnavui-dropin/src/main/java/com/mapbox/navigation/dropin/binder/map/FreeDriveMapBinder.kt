@@ -16,17 +16,18 @@ internal class FreeDriveMapBinder(
     private val navigationViewContext: DropInNavigationViewContext,
 ) : Binder<MapView> {
 
-    override fun bind(mapView: MapView): MapboxNavigationObserver {
+    override fun bind(value: MapView): MapboxNavigationObserver {
         return navigationListOf(
-            LocationPuck(mapView),
+            LocationPuck(value),
             CameraComponent(
-                mapView,
-                navigationViewContext.viewModel.locationViewModel,
+                value,
                 navigationViewContext.viewModel.cameraViewModel,
+                navigationViewContext.viewModel.locationViewModel,
+                navigationViewContext.viewModel.navigationStateViewModel,
             ),
-            MapMarkersComponent(mapView, navigationViewContext),
+            MapMarkersComponent(value, navigationViewContext),
             LongPressMapComponent(
-                mapView,
+                value,
                 navigationViewContext,
             ),
         )
