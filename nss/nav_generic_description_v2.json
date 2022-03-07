@@ -1,22 +1,117 @@
 {
   "version": "1.3",
-  "name": "My system description",
-  "active_guidance": {
-    "recenter_button": {
-      "icon": {
-        "uri": "mapbox://defaults.icon.recenter"
-      },
-      "background_color": "red"
+  "name": "My navigation system description",
+  "free_drive": {
+    "use_location_keypoints": true,
+    "show_speed_limit_while_stopped": false,
+    "map_long_click_to_navigate": true,
+    "reverse_geocode": true,
+    "location_indicator": {
+      "icon_uri": "mapbox://defaults.icon.location_indicator"
+    },
+    "navigation_camera": {
+      "viewport_options": {
+        "following": {
+          "pitch": 45.0,
+          "max_zoom": 17.10,
+          "zoom_override": 17.10
+        }
+      }
+    },
+    "camera_mode_following_button": {
+      "icon_uri": "mapbox://defaults.icon.following"
+    },
+    "camera_mode_overview_button": {
+      "icon_uri": "mapbox://defaults.icon.overview"
+    },
+    "camera_mode_recenter_button": {
+      "icon_uri": "mapbox://defaults.icon.recenter"
+    },
+    "road_name": {
+      "use_abbreviation": true
     },
     "speed_limit": {
+      "unit": "kph",
+      "sign": "MUTCD"
+    },
+    "free_drive_info_panel": {
+      "start_navigation_button_color": "blue"
+    },
+    "waypoint_marker": {
+      "icon_uri": "mapbox://defaults.icon.destination",
+      "icon_pitch_alignment": "map"
     }
   },
-  "arrival": {
-    "recenter_button": {
-      "icon": {
-        "uri": "mapbox://defaults.icon.recenter"
-      },
-      "background_color": "red"
+  "active_guidance": {
+    "use_location_keypoints": true,
+    "show_speed_limit_while_stopped": false,
+    "info_panel_extendable": true,
+    "location_indicator": {
+      "icon_uri": "mapbox://defaults.icon.location_indicator"
+    },
+    "navigation_camera": {
+      "viewport_options": {
+        "following": {
+          "pitch": 45.0,
+          "max_zoom": 17.10,
+          "zoom_override": 17.10,
+          "padding": [
+            0.0,
+            100.0,
+            50.0,
+            0.0
+          ]
+        },
+        "overview": {
+          "padding": [
+            25.0,
+            25.0,
+            25.0,
+            25.0
+          ]
+        }
+      }
+    },
+    "camera_mode_following_button": {
+      "icon_uri": "mapbox://defaults.icon.following"
+    },
+    "camera_mode_overview_button": {
+      "icon_uri": "mapbox://defaults.icon.overview"
+    },
+    "camera_mode_recenter_button": {
+      "icon_uri": "mapbox://defaults.icon.recenter"
+    },
+    "voice_instructions_button": {
+      "enabled_icon_uri": "mapbox://defaults.icon.voice_enabled",
+      "disabled_icon_uri": "mapbox://defaults.icon.voice_disabled"
+    },
+    "voice_instructions": {},
+    "road_name": {
+      "use_abbreviation": true
+    },
+    "speed_limit": {
+      "unit": "kph",
+      "sign": "MUTCD"
+    },
+    "active_guidance_info_panel": {
+      "finish_navigation_button_color": "white",
+      "show_eta": true,
+      "show_distance_remaining": true,
+      "show_time_remaining": true,
+      "show_distance_traveled": false
+    },
+    "waypoint_marker": {
+      "icon_uri": "mapbox://defaults.icon.destination",
+      "icon_pitch_alignment": "map"
+    },
+    "route_line": {
+      "style_traveled_portion": true,
+      "traveled_portion_color": "transparent",
+      "primary_route_color": "blue"
+    },
+    "guidance": {
+      "show_maneuver_list_on_tap": false,
+      "background_color": "dark_blue"
     }
   }
 }

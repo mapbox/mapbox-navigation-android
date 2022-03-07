@@ -1,0 +1,327 @@
+{
+  "$version": "1.4",
+  "$temp_description": "Base spec.",
+  "$root": {
+    "version": {
+      "required": true,
+      "type": "enum",
+      "values": [
+        "0.1",
+        "1.0",
+        "1.1",
+        "1.2",
+        "1.3",
+        "1.4"
+      ]
+    },
+    "name": {
+      "type": "string",
+      "doc": "A human-readable name for the navigation system description."
+    },
+    "free_drive": {
+      "type": "object",
+      "use_location_keypoints": {
+        "required": true,
+        "type": "boolean"
+      },
+      "show_speed_limit_while_stopped": {
+        "required": true,
+        "type": "boolean"
+      },
+      "map_long_click_to_navigate": {
+        "required": true,
+        "type": "boolean"
+      },
+      "reverse_geocode": {
+        "required": true,
+        "type": "boolean"
+      },
+      "location_indicator": {
+        "type": "object",
+        "icon_uri": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "navigation_camera": {
+        "type": "object",
+        "viewport_options": {
+          "required": true,
+          "type": "object",
+          "following": {
+            "required": true,
+            "type": "object",
+            "pitch": {
+              "required": true,
+              "type": "number"
+            },
+            "max_zoom": {
+              "required": true,
+              "type": "number"
+            },
+            "zoom_override": {
+              "required": true,
+              "type": "number"
+            }
+          }
+        }
+      },
+      "camera_mode_following_button": {
+        "type": "object",
+        "icon_uri": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "camera_mode_overview_button": {
+        "type": "object",
+        "icon_uri": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "camera_mode_recenter_button": {
+        "type": "object",
+        "icon_uri": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "road_name": {
+        "type": "object",
+        "use_abbreviation": {
+          "required": true,
+          "type": "boolean"
+        }
+      },
+      "speed_limit": {
+        "type": "object",
+        "unit": {
+          "required": true,
+          "type": "string"
+        },
+        "sign": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "free_drive_info_panel": {
+        "type": "object",
+        "start_navigation_button_color": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "waypoint_marker": {
+        "type": "object",
+        "icon_uri": {
+          "required": true,
+          "type": "string"
+        },
+        "icon_pitch_alignment": {
+          "required": true,
+          "type": "string"
+        }
+      }
+    },
+    "active_guidance": {
+      "type": "object",
+      "use_location_keypoints": {
+        "required": true,
+        "type": "boolean"
+      },
+      "show_speed_limit_while_stopped": {
+        "required": true,
+        "type": "boolean"
+      },
+      "info_panel_extendable": {
+        "required": true,
+        "type": "boolean"
+      },
+      "location_indicator": {
+        "type": "object",
+        "icon_uri": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "navigation_camera": {
+        "type": "object",
+        "viewport_options": {
+          "required": true,
+          "type": "object",
+          "following": {
+            "required": true,
+            "type": "object",
+            "pitch": {
+              "required": true,
+              "type": "number"
+            },
+            "max_zoom": {
+              "required": true,
+              "type": "number"
+            },
+            "zoom_override": {
+              "required": true,
+              "type": "number"
+            },
+            "padding": {
+              "required": true,
+              "type": "array",
+              "items": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          "overview": {
+            "required": true,
+            "type": "object",
+            "padding": {
+              "required": true,
+              "type": "array",
+              "items": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "camera_mode_following_button": {
+        "type": "object",
+        "icon_uri": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "camera_mode_overview_button": {
+        "type": "object",
+        "icon_uri": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "camera_mode_recenter_button": {
+        "type": "object",
+        "icon_uri": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "voice_instructions_button": {
+        "type": "object",
+        "enabled_icon_uri": {
+          "required": true,
+          "type": "string"
+        },
+        "disabled_icon_uri": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "voice_instructions": {
+        "required": true,
+        "type": "object"
+      },
+      "road_name": {
+        "type": "object",
+        "use_abbreviation": {
+          "required": true,
+          "type": "boolean"
+        }
+      },
+      "speed_limit": {
+        "type": "object",
+        "unit": {
+          "required": true,
+          "type": "string"
+        },
+        "sign": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "active_guidance_info_panel": {
+        "type": "object",
+        "finish_navigation_button_color": {
+          "required": true,
+          "type": "string"
+        },
+        "show_eta": {
+          "required": true,
+          "type": "boolean"
+        },
+        "show_distance_remaining": {
+          "required": true,
+          "type": "boolean"
+        },
+        "show_time_remaining": {
+          "required": true,
+          "type": "boolean"
+        },
+        "show_distance_traveled": {
+          "required": true,
+          "type": "boolean"
+        }
+      },
+      "waypoint_marker": {
+        "type": "object",
+        "icon_uri": {
+          "required": true,
+          "type": "string"
+        },
+        "icon_pitch_alignment": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "route_line": {
+        "type": "object",
+        "style_traveled_portion": {
+          "required": true,
+          "type": "boolean"
+        },
+        "traveled_portion_color": {
+          "required": true,
+          "type": "string"
+        },
+        "primary_route_color": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "guidance": {
+        "type": "object",
+        "show_maneuver_list_on_tap": {
+          "required": true,
+          "type": "boolean"
+        },
+        "background_color": {
+          "required": true,
+          "type": "string"
+        }
+      }
+    }
+  }
+}
