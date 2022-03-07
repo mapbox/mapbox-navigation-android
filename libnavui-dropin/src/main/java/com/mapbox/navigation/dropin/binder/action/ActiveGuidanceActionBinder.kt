@@ -11,9 +11,9 @@ import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.binder.navigationListOf
+import com.mapbox.navigation.dropin.component.audioguidance.AudioGuidanceButtonComponent
 import com.mapbox.navigation.dropin.component.cameramode.CameraModeButtonComponent
 import com.mapbox.navigation.dropin.component.recenter.RecenterButtonComponent
-import com.mapbox.navigation.dropin.component.sound.SoundButtonAction
 import com.mapbox.navigation.dropin.databinding.MapboxActionActiveGuidanceLayoutBinding
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -31,7 +31,10 @@ internal class ActiveGuidanceActionBinder(
 
         val binding = MapboxActionActiveGuidanceLayoutBinding.bind(viewGroup)
         return navigationListOf(
-            SoundButtonAction(binding.soundButton),
+            AudioGuidanceButtonComponent(
+                navigationViewContext.viewModel.audioGuidanceViewModel,
+                binding.soundButton,
+            ),
             CameraModeButtonComponent(
                 navigationViewContext.viewModel.cameraViewModel,
                 binding.cameraModeButton
