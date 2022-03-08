@@ -15,6 +15,7 @@ import androidx.annotation.StyleRes
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import com.mapbox.bindgen.Expected
+import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 import com.mapbox.navigation.ui.speedlimit.R
 import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi
@@ -30,7 +31,7 @@ class MapboxSpeedLimitView : AppCompatTextView {
     private var speedLimitBackgroundColor: Int = 0
     private var speedLimitViennaBorderColor: Int = 0
     private var speedLimitMutcdBorderColor: Int = 0
-    private var speedLimitSign: SpeedLimitSign? = null
+    private var speedLimitSign: SpeedLimitSign = getSignBasedOnLocale(context)
 
     /**
      *
@@ -86,23 +87,20 @@ class MapboxSpeedLimitView : AppCompatTextView {
     fun render(expected: Expected<UpdateSpeedLimitError, UpdateSpeedLimitValue>) {
         expected.fold(
             { // error
-                val sign = speedLimitSign
-                if (sign != null) {
-                    val speedLimitSpan = when (sign) {
-                        SpeedLimitSign.MUTCD -> {
-                            background = getViewDrawable(SpeedLimitSign.MUTCD)
-                            getSpeedLimitSpannable(
-                                sign,
-                                context.getString(R.string.max_speed_no_value),
-                            )
-                        }
-                        SpeedLimitSign.VIENNA -> {
-                            background = getViewDrawable(SpeedLimitSign.VIENNA)
-                            getSpeedLimitSpannable(sign, "--")
-                        }
+                val speedLimitSpan = when (speedLimitSign) {
+                    SpeedLimitSign.MUTCD -> {
+                        background = getViewDrawable(SpeedLimitSign.MUTCD)
+                        getSpeedLimitSpannable(
+                            speedLimitSign,
+                            context.getString(R.string.max_speed_no_value),
+                        )
                     }
-                    setText(speedLimitSpan, BufferType.SPANNABLE)
+                    SpeedLimitSign.VIENNA -> {
+                        background = getViewDrawable(SpeedLimitSign.VIENNA)
+                        getSpeedLimitSpannable(speedLimitSign, "--")
+                    }
                 }
+                setText(speedLimitSpan, BufferType.SPANNABLE)
             },
             { value ->
                 speedLimitSign = value.signFormat
@@ -289,6 +287,15 @@ class MapboxSpeedLimitView : AppCompatTextView {
                 width = (65 * density).toInt()
                 height = (65 * density).toInt()
             }
+        }
+    }
+
+    private fun getSignBasedOnLocale(context: Context): SpeedLimitSign {
+        return when (context.inferDeviceLocale().country) {
+            "PR" -> SpeedLimitSign.MUTCD
+            "US" -> SpeedLimitSign.MUTCD
+            "CA" -> SpeedLimitSign.MUTCD
+            else -> SpeedLimitSign.VIENNA
         }
     }
 
