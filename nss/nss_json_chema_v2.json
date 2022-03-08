@@ -1,0 +1,426 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "$ref": "#/definitions/Welcome6",
+  "definitions": {
+    "Welcome6": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "free_drive": {
+          "$ref": "#/definitions/FreeDrive"
+        },
+        "active_guidance": {
+          "$ref": "#/definitions/ActiveGuidance"
+        }
+      },
+      "required": [
+        "active_guidance",
+        "free_drive",
+        "name",
+        "version"
+      ],
+      "title": "Welcome6"
+    },
+    "ActiveGuidance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "use_location_keypoints": {
+          "type": "boolean"
+        },
+        "show_speed_limit_while_stopped": {
+          "type": "boolean"
+        },
+        "info_panel_extendable": {
+          "type": "boolean"
+        },
+        "location_indicator": {
+          "$ref": "#/definitions/CameraModeFollowingButton"
+        },
+        "navigation_camera": {
+          "$ref": "#/definitions/ActiveGuidanceNavigationCamera"
+        },
+        "camera_mode_following_button": {
+          "$ref": "#/definitions/CameraModeFollowingButton"
+        },
+        "camera_mode_overview_button": {
+          "$ref": "#/definitions/CameraModeFollowingButton"
+        },
+        "camera_mode_recenter_button": {
+          "$ref": "#/definitions/CameraModeFollowingButton"
+        },
+        "voice_instructions_button": {
+          "$ref": "#/definitions/VoiceInstructionsButton"
+        },
+        "voice_instructions": {
+          "$ref": "#/definitions/VoiceInstructions"
+        },
+        "road_name": {
+          "$ref": "#/definitions/RoadName"
+        },
+        "speed_limit": {
+          "$ref": "#/definitions/SpeedLimit"
+        },
+        "active_guidance_info_panel": {
+          "$ref": "#/definitions/ActiveGuidanceInfoPanel"
+        },
+        "waypoint_marker": {
+          "$ref": "#/definitions/WaypointMarker"
+        },
+        "route_line": {
+          "$ref": "#/definitions/RouteLine"
+        },
+        "guidance": {
+          "$ref": "#/definitions/Guidance"
+        }
+      },
+      "required": [
+        "active_guidance_info_panel",
+        "camera_mode_following_button",
+        "camera_mode_overview_button",
+        "camera_mode_recenter_button",
+        "guidance",
+        "info_panel_extendable",
+        "location_indicator",
+        "navigation_camera",
+        "road_name",
+        "route_line",
+        "show_speed_limit_while_stopped",
+        "speed_limit",
+        "use_location_keypoints",
+        "voice_instructions",
+        "voice_instructions_button",
+        "waypoint_marker"
+      ],
+      "title": "ActiveGuidance"
+    },
+    "ActiveGuidanceInfoPanel": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "finish_navigation_button_color": {
+          "type": "string"
+        },
+        "show_eta": {
+          "type": "boolean"
+        },
+        "show_distance_remaining": {
+          "type": "boolean"
+        },
+        "show_time_remaining": {
+          "type": "boolean"
+        },
+        "show_distance_traveled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "finish_navigation_button_color",
+        "show_distance_remaining",
+        "show_distance_traveled",
+        "show_eta",
+        "show_time_remaining"
+      ],
+      "title": "ActiveGuidanceInfoPanel"
+    },
+    "CameraModeFollowingButton": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "icon_uri": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "icon_uri"
+      ],
+      "title": "CameraModeFollowingButton"
+    },
+    "Guidance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "show_maneuver_list_on_tap": {
+          "type": "boolean"
+        },
+        "background_color": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "background_color",
+        "show_maneuver_list_on_tap"
+      ],
+      "title": "Guidance"
+    },
+    "ActiveGuidanceNavigationCamera": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "viewport_options": {
+          "$ref": "#/definitions/PurpleViewportOptions"
+        }
+      },
+      "required": [
+        "viewport_options"
+      ],
+      "title": "ActiveGuidanceNavigationCamera"
+    },
+    "PurpleViewportOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "following": {
+          "$ref": "#/definitions/Following"
+        },
+        "overview": {
+          "$ref": "#/definitions/Overview"
+        }
+      },
+      "required": [
+        "following",
+        "overview"
+      ],
+      "title": "PurpleViewportOptions"
+    },
+    "Following": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pitch": {
+          "type": "number"
+        },
+        "max_zoom": {
+          "type": "number"
+        },
+        "zoom_override": {
+          "type": "number"
+        },
+        "padding": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        }
+      },
+      "required": [
+        "max_zoom",
+        "pitch",
+        "zoom_override"
+      ],
+      "title": "Following"
+    },
+    "Overview": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "padding": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        }
+      },
+      "required": [
+        "padding"
+      ],
+      "title": "Overview"
+    },
+    "RoadName": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "use_abbreviation": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "use_abbreviation"
+      ],
+      "title": "RoadName"
+    },
+    "RouteLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "style_traveled_portion": {
+          "type": "boolean"
+        },
+        "traveled_portion_color": {
+          "type": "string"
+        },
+        "primary_route_color": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "primary_route_color",
+        "style_traveled_portion",
+        "traveled_portion_color"
+      ],
+      "title": "RouteLine"
+    },
+    "SpeedLimit": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "unit": {
+          "type": "string"
+        },
+        "sign": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "sign",
+        "unit"
+      ],
+      "title": "SpeedLimit"
+    },
+    "VoiceInstructions": {
+      "type": "object",
+      "additionalProperties": false,
+      "title": "VoiceInstructions"
+    },
+    "VoiceInstructionsButton": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled_icon_uri": {
+          "type": "string"
+        },
+        "disabled_icon_uri": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "disabled_icon_uri",
+        "enabled_icon_uri"
+      ],
+      "title": "VoiceInstructionsButton"
+    },
+    "WaypointMarker": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "icon_uri": {
+          "type": "string"
+        },
+        "icon_pitch_alignment": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "icon_pitch_alignment",
+        "icon_uri"
+      ],
+      "title": "WaypointMarker"
+    },
+    "FreeDrive": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "use_location_keypoints": {
+          "type": "boolean"
+        },
+        "show_speed_limit_while_stopped": {
+          "type": "boolean"
+        },
+        "map_long_click_to_navigate": {
+          "type": "boolean"
+        },
+        "reverse_geocode": {
+          "type": "boolean"
+        },
+        "location_indicator": {
+          "$ref": "#/definitions/CameraModeFollowingButton"
+        },
+        "navigation_camera": {
+          "$ref": "#/definitions/FreeDriveNavigationCamera"
+        },
+        "camera_mode_following_button": {
+          "$ref": "#/definitions/CameraModeFollowingButton"
+        },
+        "camera_mode_overview_button": {
+          "$ref": "#/definitions/CameraModeFollowingButton"
+        },
+        "camera_mode_recenter_button": {
+          "$ref": "#/definitions/CameraModeFollowingButton"
+        },
+        "road_name": {
+          "$ref": "#/definitions/RoadName"
+        },
+        "speed_limit": {
+          "$ref": "#/definitions/SpeedLimit"
+        },
+        "free_drive_info_panel": {
+          "$ref": "#/definitions/FreeDriveInfoPanel"
+        },
+        "waypoint_marker": {
+          "$ref": "#/definitions/WaypointMarker"
+        }
+      },
+      "required": [
+        "camera_mode_following_button",
+        "camera_mode_overview_button",
+        "camera_mode_recenter_button",
+        "free_drive_info_panel",
+        "location_indicator",
+        "map_long_click_to_navigate",
+        "navigation_camera",
+        "reverse_geocode",
+        "road_name",
+        "show_speed_limit_while_stopped",
+        "speed_limit",
+        "use_location_keypoints",
+        "waypoint_marker"
+      ],
+      "title": "FreeDrive"
+    },
+    "FreeDriveInfoPanel": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "start_navigation_button_color": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "start_navigation_button_color"
+      ],
+      "title": "FreeDriveInfoPanel"
+    },
+    "FreeDriveNavigationCamera": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "viewport_options": {
+          "$ref": "#/definitions/FluffyViewportOptions"
+        }
+      },
+      "required": [
+        "viewport_options"
+      ],
+      "title": "FreeDriveNavigationCamera"
+    },
+    "FluffyViewportOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "following": {
+          "$ref": "#/definitions/Following"
+        }
+      },
+      "required": [
+        "following"
+      ],
+      "title": "FluffyViewportOptions"
+    }
+  }
+}
