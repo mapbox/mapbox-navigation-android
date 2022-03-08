@@ -167,21 +167,23 @@
             },
             "padding": {
               "required": true,
-              "type": "array",
-              "items": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "number"
-                }
-              ]
+              "type": "object",
+              "top": {
+                "required": true,
+                "type": "number"
+              },
+              "right": {
+                "required": true,
+                "type": "number"
+              },
+              "bottom": {
+                "required": true,
+                "type": "number"
+              },
+              "left": {
+                "required": true,
+                "type": "number"
+              }
             }
           },
           "overview": {
@@ -189,21 +191,23 @@
             "type": "object",
             "padding": {
               "required": true,
-              "type": "array",
-              "items": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "number"
-                }
-              ]
+              "type": "object",
+              "top": {
+                "required": true,
+                "type": "number"
+              },
+              "right": {
+                "required": true,
+                "type": "number"
+              },
+              "bottom": {
+                "required": true,
+                "type": "number"
+              },
+              "left": {
+                "required": true,
+                "type": "number"
+              }
             }
           }
         }
