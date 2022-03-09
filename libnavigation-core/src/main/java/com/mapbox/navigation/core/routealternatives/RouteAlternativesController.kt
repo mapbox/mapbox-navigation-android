@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core.routealternatives
 
-import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.internal.utils.parseNativeDirectionsAlternative
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
@@ -117,13 +116,7 @@ internal class RouteAlternativesController constructor(
                     )
                 },
                 { value ->
-                    // NN should wrap alternatives in NavigationRoute
-                    // refs https://github.com/mapbox/mapbox-navigation-native/issues/5142
-                    val options = routeProgress.navigationRoute.routeOptions
-                    processRouteAlternatives(
-                        options,
-                        value
-                    ) { alternatives, origin ->
+                    processRouteAlternatives(value) { alternatives, origin ->
                         listener?.onRouteAlternativeRequestFinished(
                             routeProgress,
                             alternatives,
@@ -149,13 +142,7 @@ internal class RouteAlternativesController constructor(
             val routeProgress = tripSession.getRouteProgress()
                 ?: return emptyList()
 
-            // NN should expose origin of a failed alternatives request and the used URL,
-            // refs https://github.com/mapbox/mapbox-navigation-native/issues/5401
-            // and https://github.com/mapbox/mapbox-navigation-native/issues/5402
-            processRouteAlternatives(
-                routeProgress.navigationRoute.routeOptions,
-                routeAlternatives
-            ) { alternatives, origin ->
+            processRouteAlternatives(routeAlternatives) { alternatives, origin ->
                 observers.forEach {
                     it.onRouteAlternatives(routeProgress, alternatives, origin)
                 }
@@ -182,7 +169,6 @@ internal class RouteAlternativesController constructor(
      * @param block invoked with results (on the main thread)
      */
     private fun processRouteAlternatives(
-        routeOptions: RouteOptions,
         nativeAlternatives: List<RouteAlternative>,
         block: (List<NavigationRoute>, RouterOrigin) -> Unit,
     ) {
@@ -190,8 +176,7 @@ internal class RouteAlternativesController constructor(
             nativeAlternatives.mapIndexedNotNull { index, routeAlternative ->
                 val expected = parseNativeDirectionsAlternative(
                     ThreadController.IODispatcher,
-                    routeAlternative.route.response,
-                    routeOptions
+                    routeAlternative
                 )
                 if (expected.isValue) {
                     expected.value

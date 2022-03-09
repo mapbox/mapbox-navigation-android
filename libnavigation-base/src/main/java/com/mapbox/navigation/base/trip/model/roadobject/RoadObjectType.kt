@@ -14,6 +14,7 @@ import androidx.annotation.IntDef
  * - [RoadObjectType.BRIDGE]
  * - [RoadObjectType.INCIDENT]
  * - [RoadObjectType.CUSTOM]
+ * - [RoadObjectType.RAILWAY_CROSSING]
  */
 object RoadObjectType {
 
@@ -58,6 +59,11 @@ object RoadObjectType {
     const val CUSTOM = 7
 
     /**
+     * Type of the [RAILWAY_CROSSING].
+     */
+    const val RAILWAY_CROSSING = 8
+
+    /**
      * Retention policy for the RoadObjectType
      */
     @Retention(AnnotationRetention.BINARY)
@@ -70,6 +76,7 @@ object RoadObjectType {
         BRIDGE,
         INCIDENT,
         CUSTOM,
+        RAILWAY_CROSSING,
     )
     annotation class Type
 }

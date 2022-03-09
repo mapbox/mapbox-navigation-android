@@ -1128,13 +1128,14 @@ package com.mapbox.navigation.base.trip.model.roadobject {
     field public static final int CUSTOM = 7; // 0x7
     field public static final int INCIDENT = 6; // 0x6
     field public static final com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType INSTANCE;
+    field public static final int RAILWAY_CROSSING = 8; // 0x8
     field public static final int RESTRICTED_AREA = 4; // 0x4
     field public static final int REST_STOP = 3; // 0x3
     field public static final int TOLL_COLLECTION = 2; // 0x2
     field public static final int TUNNEL = 0; // 0x0
   }
 
-  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TUNNEL, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.COUNTRY_BORDER_CROSSING, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TOLL_COLLECTION, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.REST_STOP, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RESTRICTED_AREA, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.BRIDGE, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.INCIDENT, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.CUSTOM}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface RoadObjectType.Type {
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TUNNEL, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.COUNTRY_BORDER_CROSSING, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TOLL_COLLECTION, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.REST_STOP, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RESTRICTED_AREA, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.BRIDGE, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.INCIDENT, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.CUSTOM, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RAILWAY_CROSSING}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface RoadObjectType.Type {
   }
 
   public final class UpcomingRoadObject {
@@ -1460,6 +1461,18 @@ package com.mapbox.navigation.base.trip.model.roadobject.location {
     property public final java.util.Map<java.lang.Long,com.mapbox.navigation.base.trip.model.roadobject.location.SubgraphEdge> edges;
     property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition> entries;
     property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition> exits;
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing {
+
+  public final class RailwayCrossing extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossingInfo getInfo();
+    property public final com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossingInfo info;
+  }
+
+  public final class RailwayCrossingInfo {
   }
 
 }

@@ -3,6 +3,13 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
+#### Features
+- Added a new `RailwayCrossing` type to `RoadObject`s. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
+- Added point exclusion option for onboard router. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
+
+#### Bug fixes and improvements
+- Fixed an issue where a route refresh would only refresh annotations for the current leg of a route instead of for all remaining legs of a route. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
+- Fixed an issue where alternative routes would hold a reference to the original route's `RouteOptions` instead of the correct ones that were used to generate the alternative. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
 
 ## Mapbox Navigation SDK 2.4.0-beta.1 - March 11, 2022
 ### Changelog
@@ -11,7 +18,7 @@ Mapbox welcomes participation and contributions from everyone.
 - :warning: Deprecated `RouterOrigin.Custom(obj: Any?)`. The SDK doesn't keep `RouteOrigin.Custom#obj` anymore, it always becomes `null` when the `obj` returns in `RoutesObserver`. [#5500](https://github.com/mapbox/mapbox-navigation-android/pull/5500)
 
 #### Features
-- Exposed option in MapboxRouteLineOptions to change the default icon pitch alignment for waypoint icons. [#5531](https://github.com/mapbox/mapbox-navigation-android/pull/5531)
+- Exposed option in `MapboxRouteLineOptions` to change the default icon pitch alignment for waypoint icons. [#5531](https://github.com/mapbox/mapbox-navigation-android/pull/5531)
 
 #### Bug fixes and improvements
 - Changed internal road class calculations used by the `MapboxRouteLineApi` to fail gracefully and log instead of crashing when invalid route `geometry_index` is provided in the route object.. [#5542](https://github.com/mapbox/mapbox-navigation-android/pull/5542)

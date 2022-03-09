@@ -59,6 +59,7 @@ class RouterWrapperTests {
 
     @get:Rule
     val mockLoggerTestRule = MockLoggerRule()
+
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
@@ -142,7 +143,18 @@ class RouterWrapperTests {
     private val routerRefreshSuccess: Expected<RouterError, String> = mockk {
         every { isValue } returns true
         every { isError } returns false
-        every { value } returns testRouteFixtures.loadRefreshedRoute()
+        every { value } returns testRouteFixtures.loadRefreshForMultiLegRoute()
+        every { error } returns null
+
+        val valueSlot = slot<Expected.Transformer<String, Unit>>()
+        every { fold(any(), capture(valueSlot)) } answers {
+            valueSlot.captured.invoke(this@mockk.value!!)
+        }
+    }
+    private val routerRefreshSuccessSecondLeg: Expected<RouterError, String> = mockk {
+        every { isValue } returns true
+        every { isError } returns false
+        every { value } returns testRouteFixtures.loadRefreshForMultiLegRouteSecondLeg()
         every { error } returns null
 
         val valueSlot = slot<Expected.Transformer<String, Unit>>()
@@ -162,7 +174,7 @@ class RouterWrapperTests {
 
         every { mapboxNativeNavigator.router } returns router
         every { router.getRoute(any(), capture(getRouteSlot)) } returns 0L
-        every { router.getRouteRefresh(any(), any(), capture(refreshRouteSlot)) } returns 0L
+        every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns 0L
 
         every { route.requestUuid() } returns UUID
         every { route.routeIndex() } returns "index"
@@ -346,7 +358,7 @@ class RouterWrapperTests {
 
         val errorSlot = slot<RouteRefreshError>()
         verify(exactly = 1) { routerRefreshCallback.onError(capture(errorSlot)) }
-        verify(exactly = 0) { router.getRouteRefresh(any(), any(), any()) }
+        verify(exactly = 0) { router.getRouteRefresh(any(), any()) }
         assertEquals("Route refresh failed", errorSlot.captured.message)
         assertEquals(expectedErrorMessage, errorSlot.captured.throwable?.message)
     }
@@ -381,7 +393,6 @@ class RouterWrapperTests {
         verify(exactly = 1) {
             router.getRouteRefresh(
                 expectedRefreshOptions,
-                route.toJson(),
                 any()
             )
         }
@@ -391,19 +402,58 @@ class RouterWrapperTests {
 
     @Test
     fun `route refresh successful`() = runBlockingTest {
-        val route: DirectionsRoute = mockk(relaxed = true)
-        every { route.requestUuid() } returns UUID
-        every { route.routeIndex() } returns "1"
-        every { route.routeOptions() } returns routerOptions
+        val options = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .coordinatesList(
+                listOf(
+                    Point.fromLngLat(17.035958238636283, 51.123073179658476),
+                    Point.fromLngLat(17.033342297413395, 51.11608871549779),
+                    Point.fromLngLat(17.030364743939824, 51.11309150868635),
+                    Point.fromLngLat(17.032132688234814, 51.10720758039439)
+                )
+            )
+            .build()
+        val route: DirectionsRoute = DirectionsResponse.fromJson(
+            testRouteFixtures.loadMultiLegRouteForRefresh(),
+            options
+        ).routes().first()
 
         routerWrapper.getRouteRefresh(route, 0, routerRefreshCallback)
         refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard)
 
-        val expected = DirectionsRoute.fromJson(
-            testRouteFixtures.loadRefreshedRoute(),
-            routerOptions,
-            UUID
-        ).toBuilder().routeIndex("1").build()
+        val expected = DirectionsResponse.fromJson(
+            testRouteFixtures.loadRefreshedMultiLegRoute(),
+            options
+        ).routes().first()
+
+        verify(exactly = 1) { routerRefreshCallback.onRefresh(expected) }
+    }
+
+    @Test
+    fun `route refresh successful starting from second leg`() = runBlockingTest {
+        val options = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .coordinatesList(
+                listOf(
+                    Point.fromLngLat(17.035958238636283, 51.123073179658476),
+                    Point.fromLngLat(17.033342297413395, 51.11608871549779),
+                    Point.fromLngLat(17.030364743939824, 51.11309150868635),
+                    Point.fromLngLat(17.032132688234814, 51.10720758039439)
+                )
+            )
+            .build()
+        val route: DirectionsRoute = DirectionsResponse.fromJson(
+            testRouteFixtures.loadMultiLegRouteForRefresh(),
+            options
+        ).routes().first()
+
+        routerWrapper.getRouteRefresh(route, 1, routerRefreshCallback)
+        refreshRouteSlot.captured.run(routerRefreshSuccessSecondLeg, nativeOriginOnboard)
+
+        val expected = DirectionsResponse.fromJson(
+            testRouteFixtures.loadRefreshedMultiLegRouteSecondLeg(),
+            options
+        ).routes().first()
 
         verify(exactly = 1) { routerRefreshCallback.onRefresh(expected) }
     }

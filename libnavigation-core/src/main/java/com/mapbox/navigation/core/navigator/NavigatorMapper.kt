@@ -48,6 +48,7 @@ private val SUPPORTED_ROAD_OBJECTS = arrayOf(
     RoadObjectType.SERVICE_AREA,
     RoadObjectType.BRIDGE,
     RoadObjectType.CUSTOM,
+    RoadObjectType.RAILWAY_CROSSING,
 )
 
 private const val ONE_INDEX = 1

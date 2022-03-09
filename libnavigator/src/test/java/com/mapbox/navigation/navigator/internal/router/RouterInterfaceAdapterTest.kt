@@ -170,7 +170,15 @@ class RouterInterfaceAdapterTest {
 
     @Test
     fun routeRefreshSuccess() {
-        val routerInterface = provideRouteInterfaceDelegate(mockRouter)
+        val originalNavigationRoute = provideNavigationRoute(
+            directionsResponse = provideDirectionsResponse(
+                uuid = "refresh_uuid"
+            ),
+            routeIndex = 0
+        )
+        val routerInterface = provideRouteInterfaceDelegate(mockRouter) {
+            listOf(originalNavigationRoute)
+        }
         val routerRefreshCallback = slot<NavigationRouterRefreshCallback>()
         val requestId = 5L
         every { RouteOptions.fromUrl(any()) } returns mockk()
@@ -182,6 +190,8 @@ class RouterInterfaceAdapterTest {
         ) = provideNativeRouteRefreshCallbackWithSlots()
         val mockRouteOptions = mockk<com.mapbox.navigator.RouteRefreshOptions> {
             every { legIndex } returns 0
+            every { getRequestId() } returns "refresh_uuid"
+            every { routeIndex } returns 0
         }
         every {
             DirectionsRoute.fromJson(any())
@@ -189,7 +199,7 @@ class RouterInterfaceAdapterTest {
         val navigationRoute = provideNavigationRoute()
 
         routerInterface
-            .getRouteRefresh(mockRouteOptions, "route_json", nativeRouterRefreshCallback)
+            .getRouteRefresh(mockRouteOptions, nativeRouterRefreshCallback)
         routerRefreshCallback.captured.onRefreshReady(navigationRoute)
 
         assertNotNull(slotNativeRouterRefreshCallback.captured)
@@ -202,7 +212,15 @@ class RouterInterfaceAdapterTest {
 
     @Test
     fun routeRefreshFailure() {
-        val routerInterface = provideRouteInterfaceDelegate(mockRouter)
+        val originalNavigationRoute = provideNavigationRoute(
+            directionsResponse = provideDirectionsResponse(
+                uuid = "refresh_uuid"
+            ),
+            routeIndex = 0
+        )
+        val routerInterface = provideRouteInterfaceDelegate(mockRouter) {
+            listOf(originalNavigationRoute)
+        }
         val routerRefreshCallback = slot<NavigationRouterRefreshCallback>()
         val requestId = 5L
         every { RouteOptions.fromUrl(any()) } returns mockk()
@@ -214,13 +232,15 @@ class RouterInterfaceAdapterTest {
         ) = provideNativeRouteRefreshCallbackWithSlots()
         val mockRouteOptions = mockk<com.mapbox.navigator.RouteRefreshOptions> {
             every { legIndex } returns 0
+            every { getRequestId() } returns "refresh_uuid"
+            every { routeIndex } returns 0
         }
         every {
             DirectionsRoute.fromJson(any())
         } returns provideDirectionsResponse().routes().first()
 
         val receivedRequestId = routerInterface
-            .getRouteRefresh(mockRouteOptions, "route_json", nativeRouterRefreshCallback)
+            .getRouteRefresh(mockRouteOptions, nativeRouterRefreshCallback)
         routerRefreshCallback.captured.onFailure(mockk(relaxed = true))
 
         assertNotNull(slotNativeRouterRefreshCallback.captured)
@@ -271,20 +291,22 @@ class RouterInterfaceAdapterTest {
     private fun provideNavigationRoute(
         directionsResponse: DirectionsResponse = provideDirectionsResponse(),
         routeOptions: RouteOptions = provideRouteOptions(),
+        routeIndex: Int = 0,
     ): NavigationRoute {
-        val routeOptions =
-            return NavigationRoute(
-                directionsResponse,
-                0,
-                routeOptions
-            )
+        return NavigationRoute(
+            directionsResponse,
+            routeIndex,
+            routeOptions
+        )
     }
 
     private fun provideDirectionsResponse(
-        routeOptions: RouteOptions = provideRouteOptions()
+        routeOptions: RouteOptions = provideRouteOptions(),
+        uuid: String = "uuid",
     ): DirectionsResponse =
         DirectionsResponse.builder()
             .code("Ok")
+            .uuid(uuid)
             .routes(
                 listOf(
                     DirectionsRoute.builder()
@@ -309,7 +331,8 @@ class RouterInterfaceAdapterTest {
             .build()
 
     private fun provideRouteInterfaceDelegate(
-        router: NavigationRouter
+        router: NavigationRouter,
+        getCurrentRoutesFun: () -> List<NavigationRoute> = { listOf(provideNavigationRoute()) },
     ): RouterInterfaceAdapter =
-        RouterInterfaceAdapter(router)
+        RouterInterfaceAdapter(router, getCurrentRoutesFun)
 }
