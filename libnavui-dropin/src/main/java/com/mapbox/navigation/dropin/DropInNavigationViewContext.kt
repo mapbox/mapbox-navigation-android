@@ -5,6 +5,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.binder.UIBinder
+import com.mapbox.navigation.dropin.component.maneuver.ManeuverViewBinder
 import com.mapbox.navigation.dropin.component.marker.MapMarkerFactory
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
@@ -32,8 +33,13 @@ internal class DropInNavigationViewContext(
     val context: Context,
     val lifecycleOwner: LifecycleOwner,
     val viewModel: DropInNavigationViewModel,
+    val accessToken: String,
 ) {
-    val uiBinders = MutableStateFlow(NavigationUIBinders())
+    val uiBinders = MutableStateFlow(
+        NavigationUIBinders(
+            maneuver = ManeuverViewBinder(accessToken)
+        )
+    )
     var routeLineOptions: MapboxRouteLineOptions = MapboxRouteLineOptions.Builder(context)
         .withRouteLineResources(RouteLineResources.Builder().build())
         .withRouteLineBelowLayerId("road-label-navigation")
