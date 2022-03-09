@@ -61,7 +61,7 @@ internal class MapboxRerouteController(
         /**
          * Max dangerous maneuvers radius meters. See [RouteOptions.avoidManeuverRadius]
          */
-        private const val MAX_DANGEROUS_MANEUVERS_RADIUS = 1000
+        private const val MAX_DANGEROUS_MANEUVERS_RADIUS = 1000.0
 
         /**
          * Apply reroute options. Speed must be provided as **m/s**
@@ -80,7 +80,7 @@ internal class MapboxRerouteController(
                 this.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
             ) {
                 val avoidManeuverRadius = rerouteOptions.avoidManeuverSeconds
-                    .let { speed * it }.toInt()
+                    .let { speed * it }.toDouble()
                     .takeIf { it >= 1 }
                     ?.coerceAtMost(MAX_DANGEROUS_MANEUVERS_RADIUS)
 

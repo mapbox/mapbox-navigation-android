@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCros
 import com.mapbox.navigation.base.trip.model.roadobject.bridge.Bridge
 import com.mapbox.navigation.base.trip.model.roadobject.custom.Custom
 import com.mapbox.navigation.base.trip.model.roadobject.incident.Incident
+import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossing
 import com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea
 import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop
 import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStopType
@@ -19,6 +20,7 @@ import com.mapbox.navigator.IncidentCongestion
 import com.mapbox.navigator.IncidentImpact
 import com.mapbox.navigator.IncidentInfo
 import com.mapbox.navigator.IncidentType
+import com.mapbox.navigator.RailwayCrossingInfo
 import com.mapbox.navigator.RoadObjectType
 import com.mapbox.navigator.ServiceAreaInfo
 import com.mapbox.navigator.ServiceAreaType
@@ -43,6 +45,9 @@ internal typealias SDKIncidentCongestion =
 
 internal typealias SDKTunnelInfo =
     com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo
+
+internal typealias SDKRailwayCrossingInfo =
+    com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossingInfo
 
 internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
     val location = location.mapToRoadObjectLocation()
@@ -98,6 +103,14 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
             )
         RoadObjectType.BRIDGE -> Bridge(id, length, location, provider, this)
         RoadObjectType.CUSTOM -> Custom(id, length, location, provider, this)
+        RoadObjectType.RAILWAY_CROSSING -> RailwayCrossing(
+            id,
+            metadata.railwayCrossingInfo.toRailwayCrossingInfo(),
+            length,
+            location,
+            provider,
+            this
+        )
         else -> throw IllegalArgumentException("unsupported type: $type")
     }
 }
@@ -174,3 +187,6 @@ private fun IncidentImpact.toIncidentImpact(): String =
         IncidentImpact.MINOR -> SDKIncidentImpact.MINOR
         IncidentImpact.LOW -> SDKIncidentImpact.LOW
     }
+
+private fun RailwayCrossingInfo.toRailwayCrossingInfo() =
+    SDKRailwayCrossingInfo()

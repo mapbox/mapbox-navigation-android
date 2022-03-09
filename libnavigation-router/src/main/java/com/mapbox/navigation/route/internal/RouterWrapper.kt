@@ -8,6 +8,7 @@ import com.mapbox.annotation.module.MapboxModule
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.InternalRouter
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
@@ -191,8 +192,7 @@ class RouterWrapper(
         )
 
         return router.getRouteRefresh(
-            refreshOptions,
-            route.directionsRoute.toJson()
+            refreshOptions
         ) { result, _ ->
             result.fold(
                 {
@@ -218,27 +218,36 @@ class RouterWrapper(
                 },
                 {
                     mainJobControl.scope.launch {
-                        val refreshedDirectionsRoute =
-                            withContext(ThreadController.IODispatcher) {
-                                DirectionsRoute.fromJson(
-                                    it,
-                                    routeOptions,
-                                    route.directionsResponse.uuid()
-                                )
-                            }
-                        val refreshedNavigationRoute = NavigationRoute(
-                            route.directionsResponse
-                                .toBuilder()
-                                .routes(
-                                    route.directionsResponse.routes().apply {
-                                        removeAt(route.routeIndex)
-                                        add(route.routeIndex, refreshedDirectionsRoute)
+                        val refreshedNavigationRoute = withContext(ThreadController.IODispatcher) {
+                            val refreshResponse = DirectionsRefreshResponse.fromJson(it)
+                            val updateLegs =
+                                route.directionsRoute.legs()?.mapIndexed { index, routeLeg ->
+                                    if (index < refreshOptions.legIndex) {
+                                        routeLeg
+                                    } else {
+                                        routeLeg.toBuilder().annotation(
+                                            refreshResponse.route()?.legs()?.get(index)
+                                                ?.annotation()
+                                        ).build()
                                     }
-                                )
-                                .build(),
-                            route.routeIndex,
-                            routeOptions
-                        )
+                                }
+                            val refreshedRoute = route.directionsRoute.toBuilder()
+                                .legs(updateLegs)
+                                .build()
+                            NavigationRoute(
+                                route.directionsResponse
+                                    .toBuilder()
+                                    .routes(
+                                        route.directionsResponse.routes().apply {
+                                            removeAt(route.routeIndex)
+                                            add(route.routeIndex, refreshedRoute)
+                                        }
+                                    )
+                                    .build(),
+                                route.routeIndex,
+                                routeOptions
+                            )
+                        }
                         callback.onRefreshReady(refreshedNavigationRoute)
                     }
                 }

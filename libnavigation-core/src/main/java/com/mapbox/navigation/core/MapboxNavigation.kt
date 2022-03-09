@@ -398,7 +398,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             if (moduleRouter.isInternalImplementation()) {
                 nativeRouter
             } else {
-                RouterInterfaceAdapter(moduleRouter)
+                RouterInterfaceAdapter(moduleRouter, ::getNavigationRoutes)
             },
         )
         historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
@@ -1444,7 +1444,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 if (moduleRouter.isInternalImplementation()) {
                     nativeRouter
                 } else {
-                    RouterInterfaceAdapter(moduleRouter)
+                    RouterInterfaceAdapter(moduleRouter, ::getNavigationRoutes)
                 },
             )
             historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()

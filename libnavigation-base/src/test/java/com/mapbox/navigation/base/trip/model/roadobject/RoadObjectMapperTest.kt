@@ -11,6 +11,8 @@ import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongest
 import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact
 import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo
 import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType
+import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossing
+import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossingInfo
 import com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea
 import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop
 import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStopType
@@ -230,6 +232,27 @@ class RoadObjectMapperTest {
         assertEquals(RoadObjectType.INCIDENT, roadObject.objectType)
     }
 
+    @Test
+    fun `railway crossing alert is parsed correctly`() {
+        val nativeObject = railwayCrossing
+
+        val expected = RailwayCrossing(
+            ID,
+            RailwayCrossingInfo(),
+            LENGTH,
+            location,
+            SDKRoadObjectProvider.MAPBOX,
+            nativeObject
+        )
+
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
+
+        assertEquals(expected, roadObject)
+        assertEquals(expected.hashCode(), roadObject.hashCode())
+        assertEquals(expected.toString(), roadObject.toString())
+        assertEquals(RoadObjectType.RAILWAY_CROSSING, roadObject.objectType)
+    }
+
     private val incident = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.INCIDENT,
         incidentInfo = com.mapbox.navigator.IncidentInfo(
@@ -258,6 +281,11 @@ class RoadObjectMapperTest {
     private val tunnel = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.TUNNEL,
         tunnelInfo = com.mapbox.navigator.TunnelInfo(TUNNEL_NAME)
+    )
+
+    private val railwayCrossing = createRoadObject(
+        type = com.mapbox.navigator.RoadObjectType.RAILWAY_CROSSING,
+        railwayCrossingInfo = com.mapbox.navigator.RailwayCrossingInfo(true)
     )
 
     private val countryBorderCrossing = createRoadObject(
@@ -306,7 +334,8 @@ class RoadObjectMapperTest {
         tunnelInfo: com.mapbox.navigator.TunnelInfo? = null,
         countryBorderCrossingInfo: com.mapbox.navigator.BorderCrossingInfo? = null,
         tollCollectionInfo: com.mapbox.navigator.TollCollectionInfo? = null,
-        serviceAreaInfo: com.mapbox.navigator.ServiceAreaInfo? = null
+        serviceAreaInfo: com.mapbox.navigator.ServiceAreaInfo? = null,
+        railwayCrossingInfo: com.mapbox.navigator.RailwayCrossingInfo? = null,
     ): RoadObject {
         val metadata = when (type) {
             com.mapbox.navigator.RoadObjectType.INCIDENT ->
@@ -319,6 +348,8 @@ class RoadObjectMapperTest {
                 RoadObjectMetadata.valueOf(tollCollectionInfo!!)
             com.mapbox.navigator.RoadObjectType.SERVICE_AREA ->
                 RoadObjectMetadata.valueOf(serviceAreaInfo!!)
+            com.mapbox.navigator.RoadObjectType.RAILWAY_CROSSING ->
+                RoadObjectMetadata.valueOf(railwayCrossingInfo!!)
             else -> mockk()
         }
 

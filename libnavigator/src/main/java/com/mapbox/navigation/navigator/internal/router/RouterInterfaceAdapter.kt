@@ -1,7 +1,6 @@
 package com.mapbox.navigation.navigator.internal.router
 
 import androidx.annotation.VisibleForTesting
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
@@ -10,16 +9,15 @@ import com.mapbox.navigation.base.route.NavigationRouter
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshError
-import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.navigator.internal.mapToDirectionsResponse
 import com.mapbox.navigation.navigator.internal.mapToNativeRouteOrigin
 import com.mapbox.navigator.RouteRefreshOptions
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterErrorType
 import com.mapbox.navigator.RouterInterface
+import com.mapbox.navigator.RouterRefreshCallback
 import java.net.URL
 
 private typealias NativeRouterCallback = com.mapbox.navigator.RouterCallback
@@ -27,7 +25,8 @@ private typealias NativeRouterRefreshCallback = com.mapbox.navigator.RouterRefre
 private typealias NativeRouterOrigin = com.mapbox.navigator.RouterOrigin
 
 class RouterInterfaceAdapter(
-    private val router: NavigationRouter
+    private val router: NavigationRouter,
+    private val getCurrentRoutesFun: () -> List<NavigationRoute>,
 ) : RouterInterface {
 
     @VisibleForTesting
@@ -124,12 +123,39 @@ class RouterInterfaceAdapter(
 
     override fun getRouteRefresh(
         options: RouteRefreshOptions,
-        route: String,
+        callback: RouterRefreshCallback
+    ): Long {
+        val route = getCurrentRoutesFun().find {
+            it.directionsResponse.uuid() == options.requestId &&
+                it.routeIndex == options.routeIndex
+        }
+        if (route != null) {
+            return getRouteRefresh(options, route, callback)
+        } else {
+            callback.run(
+                ExpectedFactory.createError(
+                    RouterError(
+                        "There is no route that matches $options, nothing to refresh.",
+                        ROUTE_REFRESH_FAILED_DEFAULT_CODE,
+                        RouterErrorType.UNKNOWN,
+                        -1
+                    )
+
+                ),
+                com.mapbox.navigator.RouterOrigin.CUSTOM
+            )
+            return -1
+        }
+    }
+
+    private fun getRouteRefresh(
+        options: RouteRefreshOptions,
+        route: NavigationRoute,
         callback: NativeRouterRefreshCallback
     ): Long {
         var requestId = -1L
         requestId = router.getRouteRefresh(
-            DirectionsRoute.fromJson(route).toNavigationRoute(),
+            route,
             options.legIndex,
             object : NavigationRouterRefreshCallback {
                 override fun onRefreshReady(route: NavigationRoute) {

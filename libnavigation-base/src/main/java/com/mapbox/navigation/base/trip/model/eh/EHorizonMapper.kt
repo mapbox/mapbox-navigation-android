@@ -270,6 +270,7 @@ internal fun RoadObjectType.mapToRoadObjectType(): Int {
         RoadObjectType.SERVICE_AREA -> SDKRoadObjectType.REST_STOP
         RoadObjectType.BRIDGE -> SDKRoadObjectType.BRIDGE
         RoadObjectType.CUSTOM -> SDKRoadObjectType.CUSTOM
+        RoadObjectType.RAILWAY_CROSSING -> SDKRoadObjectType.RAILWAY_CROSSING
     }
 }
 
