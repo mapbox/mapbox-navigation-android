@@ -295,12 +295,11 @@ commands:
           command: |
             if [[ -n "$CIRCLE_TAG" ]]; then
               if [[ $CIRCLE_TAG == v* ]]; then
-                POM_VERSION_NAME=`echo $CIRCLE_TAG | sed s/v//`
+                sed -i -e "s/^VERSION_NAME=.*/VERSION_NAME=${CIRCLE_TAG:1}/" gradle.properties
               else
                 echo "Exiting the job as this is not a release TAG"
                 exit 1
               fi
-              echo "export POM_VERSION_NAME=$POM_VERSION_NAME" >> $BASH_ENV
             fi
 
   generate-google-services-json:
