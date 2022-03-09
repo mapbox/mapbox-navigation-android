@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 import com.mapbox.navigation.base.speed.model.SpeedLimitUnit
 import com.mapbox.navigation.ui.speedlimit.R
 import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter
+import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError
 import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -165,5 +166,35 @@ class MapboxSpeedLimitViewTest {
         val result = view.getSizeSpanStartIndex(SpeedLimitSign.VIENNA, "whatever")
 
         assertEquals(0, result)
+    }
+
+    @Test
+    @Config(qualifiers = "es-rPR")
+    fun defaultSpeedLimitSignLocalePuertoRico() {
+        val view = MapboxSpeedLimitView(ctx).also {
+            it.render(ExpectedFactory.createError(UpdateSpeedLimitError("oops", null)))
+        }
+
+        assertEquals("MAX\n--", view.text.toString())
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS")
+    fun defaultSpeedLimitSignLocaleUS() {
+        val view = MapboxSpeedLimitView(ctx).also {
+            it.render(ExpectedFactory.createError(UpdateSpeedLimitError("oops", null)))
+        }
+
+        assertEquals("MAX\n--", view.text.toString())
+    }
+
+    @Test
+    @Config(qualifiers = "en-rCA")
+    fun defaultSpeedLimitSignLocaleCanada() {
+        val view = MapboxSpeedLimitView(ctx).also {
+            it.render(ExpectedFactory.createError(UpdateSpeedLimitError("oops", null)))
+        }
+
+        assertEquals("MAX\n--", view.text.toString())
     }
 }
