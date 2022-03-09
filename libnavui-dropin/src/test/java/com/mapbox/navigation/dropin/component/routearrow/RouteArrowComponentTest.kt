@@ -6,8 +6,10 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError
@@ -19,11 +21,18 @@ import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkStatic
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteArrowComponentTest {
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @get:Rule
+    var coroutineRule = MainCoroutineRule()
 
     private val context = mockk<Context>()
     private val routeArrowOptions by lazy { RouteArrowOptions.Builder(context).build() }
@@ -40,24 +49,6 @@ class RouteArrowComponentTest {
     @After
     fun tearDown() {
         unmockkStatic(AppCompatResources::class)
-    }
-
-    @Test
-    fun `onAttached registers route progress observer`() {
-        val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-
-        RouteArrowComponent(mockk(), routeArrowOptions).onAttached(mockMapboxNavigation)
-
-        verify { mockMapboxNavigation.registerRouteProgressObserver(any()) }
-    }
-
-    @Test
-    fun `onDetached unregisters route progress observer`() {
-        val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-
-        RouteArrowComponent(mockk(), routeArrowOptions).onDetached(mockMapboxNavigation)
-
-        verify { mockMapboxNavigation.unregisterRouteProgressObserver(any()) }
     }
 
     @Test

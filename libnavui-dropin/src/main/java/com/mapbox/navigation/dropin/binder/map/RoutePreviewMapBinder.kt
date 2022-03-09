@@ -23,7 +23,11 @@ internal class RoutePreviewMapBinder(
                 value,
                 navigationViewContext.viewModel.locationViewModel,
             ),
-            RouteLineComponent(value, navigationViewContext.routeLineOptions),
+            RouteLineComponent(
+                value,
+                navigationViewContext.routeLineOptions,
+                navigationViewContext.viewModel.routesViewModel
+            ),
             CameraComponent(
                 value,
                 navigationViewContext.viewModel.cameraViewModel,
