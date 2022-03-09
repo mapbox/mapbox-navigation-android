@@ -31,7 +31,7 @@ import com.mapbox.navigation.dropin.coordinator.MapCoordinator
 import com.mapbox.navigation.dropin.coordinator.RoadNameLabelCoordinator
 import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
-import com.mapbox.navigation.dropin.extensions.attachStarted
+import com.mapbox.navigation.dropin.extensions.attachCreated
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -132,7 +132,7 @@ class DropInNavigationView @JvmOverloads constructor(
         /**
          * Single point of entry for the Mapbox Navigation View.
          */
-        attachStarted(
+        attachCreated(
             MapCoordinator(navigationContext, binding.mapView),
             GuidanceCoordinator(navigationContext, binding.guidanceLayout),
             InfoPanelCoordinator(navigationContext, binding.infoPanelLayout),
