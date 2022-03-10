@@ -23,7 +23,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".view.AppLifecycleActivity" />
-        <activity android:name=".view.DropInNavigationViewActivity"/>
         <activity android:name=".view.AlternativeRouteActivity" />
         <activity android:name=".view.MapboxRouteLineActivity" />
         <activity android:name=".view.util.RouteDrawingActivity" />
@@ -37,7 +36,9 @@
         <activity
             android:name=".view.IconsPreviewActivity"
             android:theme="@style/Theme.IconsPreviewActivity" />
-        <activity android:name=".view.DropInButtonsActivity" />
+        <activity android:name=".view.MapboxNavigationViewActivity" />
+        <activity android:name=".view.MapboxNavigationViewCustomizedActivity" />
+        <activity android:name=".view.MapboxNavigationViewFragmentActivity" />
     </application>
 
 </manifest>
