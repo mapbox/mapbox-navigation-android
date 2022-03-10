@@ -39,7 +39,6 @@ abstract class UICoordinator<T : ViewGroup>(
             }
         }.invokeOnCompletion {
             attachedObserver?.onDetached(mapboxNavigation)
-            viewGroup.removeAllViews()
         }
     }
 
