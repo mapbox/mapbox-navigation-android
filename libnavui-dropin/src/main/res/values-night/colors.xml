@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Accent color used for drag handles and button borders -->
+    <color name="mapbox_drop_in_accent">#CDD0D0</color>
+
     <color name="mapbox_button_fg_color">@color/colorOnSurface</color>
     <color name="mapbox_button_bg_color">@color/colorSurface</color>
-    <color name="mapbox_button_border_color">#CDD0D0</color>
+    <color name="mapbox_button_border_color">@color/mapbox_drop_in_accent</color>
+
+    <color name="mapbox_button_primary_fg_color">@color/colorOnSecondary</color>
+    <color name="mapbox_button_primary_bg_color">@color/colorSecondary</color>
 </resources>

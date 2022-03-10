@@ -4,8 +4,10 @@ package com.mapbox.navigation.dropin.extensions
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -52,6 +54,7 @@ fun MapboxNavigation.flowNewRawLocation(): Flow<Location> = callbackFlow {
         override fun onNewRawLocation(rawLocation: Location) {
             trySend(rawLocation)
         }
+
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             // use the flowLocationMatcherResult
         }
@@ -66,6 +69,7 @@ fun MapboxNavigation.flowLocationMatcherResult(): Flow<LocationMatcherResult> = 
         override fun onNewRawLocation(rawLocation: Location) {
             // use the flowNewRawLocation
         }
+
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             trySend(locationMatcherResult)
         }
@@ -79,4 +83,17 @@ fun MapboxNavigation.flowVoiceInstructions(): Flow<VoiceInstructions> = channelF
     val voiceInstructionsObserver = VoiceInstructionsObserver { trySend(it) }
     registerVoiceInstructionsObserver(voiceInstructionsObserver)
     awaitClose { unregisterVoiceInstructionsObserver(voiceInstructionsObserver) }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+fun MapboxNavigation.flowOnFinalDestinationArrival(): Flow<RouteProgress> = callbackFlow {
+    val observer = object : ArrivalObserver {
+        override fun onWaypointArrival(routeProgress: RouteProgress) = Unit
+        override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) = Unit
+        override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
+            trySend(routeProgress)
+        }
+    }
+    registerArrivalObserver(observer)
+    awaitClose { unregisterArrivalObserver(observer) }
 }

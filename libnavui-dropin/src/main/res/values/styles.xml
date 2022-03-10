@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Buttons -->
+
     <style name="MapboxStyleCameraModeButton">
         <item name="android:elevation">0dp</item>
         <item name="android:background">@drawable/mapbox_bg_button</item>
@@ -22,9 +24,62 @@
         <item name="extendableButtonIconTint">@color/mapbox_button_fg_color</item>
         <item name="extendableButtonTextAppearance">@style/MapboxStyleExpandableButton.TextAppearance</item>
     </style>
-
     <style name="MapboxStyleExpandableButton.TextAppearance">
         <item name="android:textColor">@color/mapbox_button_fg_color</item>
         <item name="android:textSize">14sp</item>
     </style>
+
+    <style name="MapboxStyleExpandableButton.Primary">
+        <item name="android:background">@drawable/mapbox_bg_button_primary</item>
+        <item name="extendableButtonIconTint">@color/mapbox_button_primary_fg_color</item>
+        <item name="extendableButtonTextAppearance">@style/MapboxStyleExpandableButton.Primary.TextAppearance</item>
+    </style>
+    <style name="MapboxStyleExpandableButton.Primary.TextAppearance">
+        <item name="android:textColor">@color/mapbox_button_primary_fg_color</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="MapboxStyle.DropIn.StartButton" parent="MapboxStyleExpandableButton.Primary">
+        <item name="extendableButtonIcon">@drawable/mapbox_ic_puck</item>
+    </style>
+
+    <style name="MapboxStyle.DropIn.PreviewButton" parent="MapboxStyleExpandableButton">
+        <item name="extendableButtonIcon">@drawable/mapbox_ic_route</item>
+    </style>
+
+    <style name="MapboxStyle.DropIn.ExitButton" parent="MapboxStyleExpandableButton">
+        <item name="extendableButtonIcon">@drawable/mapbox_ic_close</item>
+    </style>
+
+    <!-- Text -->
+
+    <style name="MapboxStyle.DropIn.TextAppearance.Regular" parent="">
+        <item name="android:textColor">@color/colorOnSurface</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="MapboxStyle.DropIn.TextAppearance.Primary" parent="">
+        <item name="android:textColor">@color/colorSecondary</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="MapboxStyle.DropIn.InfoPanelHeadline" parent="">
+        <item name="android:textAppearance">@style/MapboxStyle.DropIn.TextAppearance.Primary</item>
+        <item name="android:textSize">27sp</item>
+    </style>
+
+    <style name="MapboxStyle.DropIn.InfoPanelSubtitle" parent="">
+        <item name="android:textAppearance">@style/MapboxStyle.DropIn.TextAppearance.Regular</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <!-- Accessory -->
+
+    <style name="MapboxStyle.DropIn.DragHandle" parent="">
+        <item name="android:layout_width">78dp</item>
+        <item name="android:layout_height">5dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:background">@drawable/mapbox_bg_handle</item>
+    </style>
+
 </resources>

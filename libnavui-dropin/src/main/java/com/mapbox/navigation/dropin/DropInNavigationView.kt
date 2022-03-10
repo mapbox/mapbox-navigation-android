@@ -1,30 +1,25 @@
 package com.mapbox.navigation.dropin
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.res.use
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineResult
-import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.style.style
-import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.coordinator.ActionListCoordinator
+import com.mapbox.navigation.dropin.coordinator.BackPressManager
 import com.mapbox.navigation.dropin.coordinator.GuidanceCoordinator
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
 import com.mapbox.navigation.dropin.coordinator.MapCoordinator
@@ -36,7 +31,6 @@ import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
-import com.mapbox.navigation.utils.internal.ifNonNull
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DropInNavigationView @JvmOverloads constructor(
@@ -75,6 +69,12 @@ class DropInNavigationView @JvmOverloads constructor(
         lifecycleOwner = this,
         viewModel = viewModel,
     )
+
+    /**
+     * Retrieve the [OnBackPressedCallback] that can be registered with OnBackPressedDispatcher
+     * to allow [androidx.activity.ComponentActivity#onBackPressed()] handling in DropIn UI .
+     */
+    fun getOnBackPressedCallback(): OnBackPressedCallback = navigationContext.onBackPressedCallback
 
     /**
      * Customize the views by implementing your own [UIBinder] components.
@@ -133,59 +133,24 @@ class DropInNavigationView @JvmOverloads constructor(
          * Single point of entry for the Mapbox Navigation View.
          */
         attachCreated(
+            BackPressManager(navigationContext),
             MapCoordinator(navigationContext, binding.mapView),
             GuidanceCoordinator(navigationContext, binding.guidanceLayout),
-            InfoPanelCoordinator(navigationContext, binding.infoPanelLayout),
+            InfoPanelCoordinator(
+                navigationContext,
+                binding.infoPanelLayout,
+                binding.guidelineBottom
+            ),
             ActionListCoordinator(navigationContext, binding.actionListLayout),
             SpeedLimitCoordinator(navigationContext, binding.speedLimitLayout),
-            RoadNameLabelCoordinator(navigationContext, binding.roadNameLayout),
+            RoadNameLabelCoordinator(navigationContext, binding.roadNameLayout)
         )
-
-        initMapLongClickListener()
     }
 
     override fun getLifecycle(): Lifecycle = viewLifecycleRegistry
 
     private inline fun <reified T : ViewModel> lazyViewModel(): Lazy<T> = lazy {
         viewModelProvider[T::class.java]
-    }
-
-    // todo At the moment this seems like the most logical place to put this since the
-    // navigation view owns the map. Putting this here now decouples it from other components
-    // and is easily portable to a more appropriate place in the near future.
-    @SuppressLint("MissingPermission")
-    private fun initMapLongClickListener() {
-        binding.mapView.gestures.addOnMapLongClickListener { clickPoint ->
-            ifNonNull(MapboxNavigationApp.current()) { mapboxNavigation ->
-                mapboxNavigation.navigationOptions.locationEngine.getLastLocation(
-                    object : LocationEngineCallback<LocationEngineResult> {
-                        override fun onSuccess(result: LocationEngineResult?) {
-                            ifNonNull(result?.lastLocation) { lastLocation ->
-                                viewModel.routesViewModel.invoke(
-                                    RoutesAction.FetchPoints(
-                                        listOf(
-                                            Point.fromLngLat(
-                                                lastLocation.longitude,
-                                                lastLocation.latitude
-                                            ),
-                                            clickPoint
-                                        )
-                                    )
-                                )
-                            }
-                        }
-
-                        override fun onFailure(exception: Exception) {
-                            Log.e(
-                                "DropInNavigationView",
-                                "Failed to get last location on map long click."
-                            )
-                        }
-                    }
-                )
-            }
-            false
-        }
     }
 }
 

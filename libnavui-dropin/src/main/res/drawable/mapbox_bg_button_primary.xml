@@ -3,8 +3,7 @@
     android:color="?android:attr/colorControlHighlight">
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="@color/mapbox_button_bg_color" />
-            <stroke android:color="@color/mapbox_button_border_color" android:width="2dp" />
+            <solid android:color="@color/mapbox_button_primary_bg_color" />
             <corners android:radius="10dp" />
         </shape>
     </item>
