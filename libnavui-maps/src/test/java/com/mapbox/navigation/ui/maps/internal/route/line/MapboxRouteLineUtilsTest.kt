@@ -1690,6 +1690,21 @@ class MapboxRouteLineUtilsTest {
         )
     }
 
+    @Test
+    fun `getRoadClassArray when route has step intersections with incorrect geometry indexes`() {
+        mockkStatic(Logger::class)
+        every { Logger.e(any(), any()) } returns Unit
+        val route = loadRoute("route-with-incorrect-geometry-indexes.json")
+
+        val result = MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
+            route,
+            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        )
+
+        assertEquals(0, result.size)
+        unmockkStatic(Logger::class)
+    }
+
     private fun <T> listElementsAreEqual(
         first: List<T>,
         second: List<T>,
