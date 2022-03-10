@@ -3,12 +3,12 @@ package com.mapbox.navigation.dropin
 import androidx.lifecycle.ViewModel
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.dropin.component.audioguidance.AudioGuidanceViewModel
 import com.mapbox.navigation.dropin.component.camera.CameraViewModel
 import com.mapbox.navigation.dropin.component.location.LocationViewModel
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.replay.ReplayViewModel
 import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
-import com.mapbox.navigation.dropin.component.sound.MapboxAudioViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -25,7 +25,7 @@ internal class DropInNavigationViewModel : ViewModel() {
      * These classes are accessible through MapboxNavigationApp.getObserver(..)
      */
     val replayViewModel = ReplayViewModel()
-    val audioGuidanceViewModel = MapboxAudioViewModel()
+    val audioGuidanceViewModel = AudioGuidanceViewModel()
     val locationViewModel = LocationViewModel()
     val routesViewModel = RoutesViewModel()
     val cameraViewModel = CameraViewModel()

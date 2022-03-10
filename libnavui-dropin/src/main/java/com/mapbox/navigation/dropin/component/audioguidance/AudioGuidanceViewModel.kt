@@ -1,4 +1,4 @@
-package com.mapbox.navigation.dropin.component.sound
+package com.mapbox.navigation.dropin.component.audioguidance
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -16,16 +16,20 @@ sealed class AudioAction {
     object Toggle : AudioAction()
 }
 
+/**
+ * This class is responsible for playing voice instructions. Use the [AudioAction] to turning the
+ * audio on or off.
+ */
 @ExperimentalPreviewMapboxNavigationAPI
-class MapboxAudioViewModel(
-    default: MapboxAudioState = MapboxAudioState()
-) : UIViewModel<MapboxAudioState, AudioAction>(default) {
+class AudioGuidanceViewModel(
+    default: AudioGuidanceState = AudioGuidanceState()
+) : UIViewModel<AudioGuidanceState, AudioAction>(default) {
 
     override fun process(
         mapboxNavigation: MapboxNavigation,
-        state: MapboxAudioState,
+        state: AudioGuidanceState,
         action: AudioAction
-    ): MapboxAudioState {
+    ): AudioGuidanceState {
         return when (action) {
             is AudioAction.Mute -> state.copy(isMuted = true)
             is AudioAction.Unmute -> state.copy(isMuted = false)
@@ -37,12 +41,13 @@ class MapboxAudioViewModel(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
+        val audioGuidanceApi = AudioGuidanceApi.create(mapboxNavigation, AudioGuidanceServices())
         mainJobControl.scope.launch {
             state.map { it.isMuted }.flatMapLatest { isMuted ->
                 if (isMuted) {
                     emptyFlow()
                 } else {
-                    MapboxAudioApi.create(mapboxNavigation).speakVoiceInstructions()
+                    audioGuidanceApi.speakVoiceInstructions()
                 }
             }.collect()
         }

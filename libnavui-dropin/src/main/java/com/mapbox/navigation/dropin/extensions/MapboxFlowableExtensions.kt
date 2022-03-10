@@ -3,6 +3,7 @@
 package com.mapbox.navigation.dropin.extensions
 
 import android.location.Location
+import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -74,7 +75,7 @@ fun MapboxNavigation.flowLocationMatcherResult(): Flow<LocationMatcherResult> = 
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-fun MapboxNavigation.flowVoiceInstructions() = channelFlow {
+fun MapboxNavigation.flowVoiceInstructions(): Flow<VoiceInstructions> = channelFlow {
     val voiceInstructionsObserver = VoiceInstructionsObserver { trySend(it) }
     registerVoiceInstructionsObserver(voiceInstructionsObserver)
     awaitClose { unregisterVoiceInstructionsObserver(voiceInstructionsObserver) }

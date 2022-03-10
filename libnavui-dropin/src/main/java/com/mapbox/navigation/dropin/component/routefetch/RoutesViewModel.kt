@@ -20,7 +20,7 @@ sealed class RoutesAction {
 }
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal class RoutesViewModel : UIViewModel<Unit, RoutesAction>(Unit) {
+class RoutesViewModel : UIViewModel<Unit, RoutesAction>(Unit) {
     private var routeRequestId: Long? = null
 
     override fun process(
@@ -50,6 +50,7 @@ internal class RoutesViewModel : UIViewModel<Unit, RoutesAction>(Unit) {
     }
 
     private fun fetchRoute(options: RouteOptions, mapboxNavigation: MapboxNavigation) {
+        routeRequestId?.let { mapboxNavigation.cancelRouteRequest(it) }
         routeRequestId = mapboxNavigation.requestRoutes(
             options,
             object : NavigationRouterCallback {
