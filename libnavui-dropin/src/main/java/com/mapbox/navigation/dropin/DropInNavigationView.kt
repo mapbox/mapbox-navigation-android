@@ -1,12 +1,15 @@
 package com.mapbox.navigation.dropin
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.pm.PackageManager
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.activity.OnBackPressedCallback
+import androidx.core.app.ActivityCompat
 import androidx.core.content.res.use
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -31,6 +34,7 @@ import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
+import com.mapbox.navigation.utils.internal.logW
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DropInNavigationView @JvmOverloads constructor(
@@ -121,6 +125,7 @@ class DropInNavigationView @JvmOverloads constructor(
                     .accessToken(accessToken)
                     .build()
             )
+            startTripSession()
         }
 
         /**
@@ -151,6 +156,32 @@ class DropInNavigationView @JvmOverloads constructor(
 
     private inline fun <reified T : ViewModel> lazyViewModel(): Lazy<T> = lazy {
         viewModelProvider[T::class.java]
+    }
+
+    private fun startTripSession() {
+        val fineLocPermGranted = ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        val coarseLocPermGranted = ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (fineLocPermGranted && coarseLocPermGranted) {
+            MapboxNavigationApp.current()?.startTripSession()
+        } else {
+            logW(
+                TAG,
+                "Cannot startTripSession. Missing location permissions: " +
+                    Manifest.permission.ACCESS_FINE_LOCATION + ", " +
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        }
+    }
+
+    companion object {
+        private val TAG = DropInNavigationView::class.java.simpleName
     }
 }
 
