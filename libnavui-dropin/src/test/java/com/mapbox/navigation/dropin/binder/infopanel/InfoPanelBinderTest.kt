@@ -1,14 +1,11 @@
 package com.mapbox.navigation.dropin.binder.infopanel
 
 import android.content.Context
-import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.binder.EmptyBinder
 import io.mockk.MockKAnnotations
-import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.SpyK
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,27 +27,23 @@ internal class InfoPanelBinderTest {
     @SpyK
     var contentBinder = EmptyBinder()
 
-    @MockK
-    lateinit var mockViewGroup: ViewGroup
-
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true)
         ctx = ApplicationProvider.getApplicationContext()
         sut = InfoPanelBinder(headerBinder, contentBinder)
-        every { mockViewGroup.findViewById<ViewGroup>(any()) } returns FrameLayout(ctx)
     }
 
     @Test
     fun `bind should call headerBinder`() {
-        sut.bind(mockViewGroup)
+        sut.bind(FrameLayout(ctx))
 
         verify { headerBinder.bind(allAny()) }
     }
 
     @Test
     fun `bind should call contentBinder`() {
-        sut.bind(mockViewGroup)
+        sut.bind(FrameLayout(ctx))
 
         verify { contentBinder.bind(allAny()) }
     }

@@ -18,10 +18,18 @@ import kotlinx.coroutines.launch
  * Attach a UICoordinator to a [ViewGroup] of your choosing. When you implement this class
  * you will need to build a [Flow] with [Binder]. There can only be one view binder
  * attached at a time for the [ViewGroup].
+ *
+ * If you have [Binder]s that do not add or remove views, you can set the parameter
+ * removeViewsOnDetached to true. This allows you to coordinate data in views.
+ *
+ * @param viewGroup provide a view group that will be passed to [Binder.bind]
+ * @param removeViewsOnDetached by default an empty view group is assumed,
+ *    if false the view group not remove the views on detached.
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 abstract class UICoordinator<T : ViewGroup>(
-    private val viewGroup: T
+    private val viewGroup: T,
+    private val removeViewsOnDetached: Boolean = true
 ) : MapboxNavigationObserver {
 
     lateinit var coroutineScope: CoroutineScope
@@ -39,7 +47,9 @@ abstract class UICoordinator<T : ViewGroup>(
             }
         }.invokeOnCompletion {
             attachedObserver?.onDetached(mapboxNavigation)
-            viewGroup.removeAllViews()
+            if (removeViewsOnDetached) {
+                viewGroup.removeAllViews()
+            }
         }
     }
 
