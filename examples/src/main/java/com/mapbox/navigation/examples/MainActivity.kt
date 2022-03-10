@@ -17,9 +17,6 @@ import com.mapbox.navigation.examples.core.MapboxJunctionActivity
 import com.mapbox.navigation.examples.core.MapboxManeuverActivity
 import com.mapbox.navigation.examples.core.MapboxMultipleArrowActivity
 import com.mapbox.navigation.examples.core.MapboxNavigationActivity
-import com.mapbox.navigation.examples.core.MapboxNavigationViewActivity
-import com.mapbox.navigation.examples.core.MapboxNavigationViewCustomizedActivity
-import com.mapbox.navigation.examples.core.MapboxNavigationViewFragmentActivity
 import com.mapbox.navigation.examples.core.MapboxRouteLineAndArrowActivity
 import com.mapbox.navigation.examples.core.MapboxSignboardActivity
 import com.mapbox.navigation.examples.core.MapboxTripProgressActivity
@@ -141,21 +138,6 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_draw_utility),
                 getString(R.string.description_draw_utility),
                 RouteDrawingActivity::class.java
-            ),
-            SampleItem(
-                getString(R.string.title_navigation_view),
-                getString(R.string.description_navigation_view),
-                MapboxNavigationViewActivity::class.java
-            ),
-            SampleItem(
-                getString(R.string.title_navigation_view_customized),
-                getString(R.string.description_navigation_view_customized),
-                MapboxNavigationViewCustomizedActivity::class.java
-            ),
-            SampleItem(
-                getString(R.string.title_navigation_view_fragment),
-                getString(R.string.description_navigation_view_fragment),
-                MapboxNavigationViewFragmentActivity::class.java
             ),
         )
     }

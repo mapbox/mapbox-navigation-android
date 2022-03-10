@@ -1,4 +1,4 @@
-package com.mapbox.navigation.examples.core
+package com.mapbox.navigation.qa_test_app.view
 
 import android.graphics.Color
 import android.os.Bundle
@@ -17,7 +17,8 @@ import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.component.maneuver.ManeuverViewBinder
 import com.mapbox.navigation.dropin.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
-import com.mapbox.navigation.examples.core.databinding.LayoutActivityNavigationViewCustomizedBinding
+import com.mapbox.navigation.qa_test_app.R
+import com.mapbox.navigation.qa_test_app.databinding.LayoutActivityNavigationViewCustomizedBinding
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions

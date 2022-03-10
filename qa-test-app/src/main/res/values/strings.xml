@@ -1,7 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" tools:ignore="MissingTranslation">Kaizen</string>
     <string name="mapbox_navigation_app_lifecycle_description" tools:ignore="MissingTranslation">Test the usage of MapboxNavigationApp which can manage lifecycles between a car and app.</string>
-    <string name="dropin_navigation_view_description" tools:ignore="MissingTranslation">Testing ideas for a drop in navigation view variation.</string>
     <string name="alternative_route_selection_description" tools:ignore="MissingTranslation">Tests the selecting of an alternative route line. \n\n1. Long press a point on the map in order to get a primary route and at least one alternative route. \n\n2. Select an alternative route by touching it. The touched route should appear as the primary route and the previous primary route should appear as an alternative. \n\n3. Click start navigation and make sure the puck follows the selected route.</string>
     <string name="routeline_activity" translatable="false">Internal Development Activity</string>
     <string name="label_start_navigation" translatable="false">Start Navigation</string>
@@ -14,5 +13,8 @@
     <string name="feedback_activity_description" translatable="false">Screen to test feedback in ActiveGuidance and FreeDrive. Click on "START NAVIGATION" button to start FreeDrive session or long click on the map to get a route from current location to tapped and then click "START NAVIGATION" button to start ActiveGuidance session. Then you can observe in logcat how feedback is sent by clicking on `Feedback` button on the screen.</string>
     <string name="status_activity_description" translatable="false">Screen to test StatusView.</string>
     <string name="icons_preview_activity_description" translatable="false">Screen for viewing SDK icons.</string>
-    <string name="drop_in_buttons_activity_description" translatable="false">Screen for viewing SDK buttons.</string>
+
+    <string name="navigation_view_description" translatable="false">Utility for testing Drop-In UI.</string>
+    <string name="navigation_view_customized_description" translatable="false">Utility for testing customized Drop-In UI.</string>
+    <string name="navigation_view_fragment_description" translatable="false">Utility for testing Drop-In UI in a fragment.</string>
 </resources>

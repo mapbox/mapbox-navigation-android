@@ -1,8 +1,8 @@
-package com.mapbox.navigation.examples.core
+package com.mapbox.navigation.qa_test_app.view
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.navigation.examples.core.databinding.LayoutActivityNavigationViewBinding
+import com.mapbox.navigation.qa_test_app.databinding.LayoutActivityNavigationViewBinding
 
 class MapboxNavigationViewActivity : AppCompatActivity() {
 

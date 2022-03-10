@@ -6,12 +6,13 @@ import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.utils.startActivity
 import com.mapbox.navigation.qa_test_app.view.AlternativeRouteActivity
 import com.mapbox.navigation.qa_test_app.view.AppLifecycleActivity
-import com.mapbox.navigation.qa_test_app.view.DropInButtonsActivity
-import com.mapbox.navigation.qa_test_app.view.DropInNavigationViewActivity
 import com.mapbox.navigation.qa_test_app.view.FeedbackActivity
 import com.mapbox.navigation.qa_test_app.view.IconsPreviewActivity
 import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingActivity
 import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingWithRestrictionsActivity
+import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewActivity
+import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewCustomizedActivity
+import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewFragmentActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxRouteLineActivity
 import com.mapbox.navigation.qa_test_app.view.RouteRestrictionsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteTrafficUpdateActivity
@@ -30,12 +31,6 @@ object TestActivitySuite {
             R.string.mapbox_navigation_app_lifecycle_description
         ) { activity ->
             activity.startActivity<AppLifecycleActivity>()
-        },
-        TestActivityDescription(
-            "DropInNavigationView Testing",
-            R.string.dropin_navigation_view_description
-        ) { activity ->
-            activity.startActivity<DropInNavigationViewActivity>()
         },
         TestActivityDescription(
             "Alternative Route Selection",
@@ -105,10 +100,16 @@ object TestActivitySuite {
             activity.startActivity<IconsPreviewActivity>()
         },
         TestActivityDescription(
-            "Drop In Buttons",
-            R.string.drop_in_buttons_activity_description
-        ) { activity ->
-            activity.startActivity<DropInButtonsActivity>()
-        },
+            "Navigation View test",
+            R.string.navigation_view_description
+        ) { activity -> activity.startActivity<MapboxNavigationViewActivity>() },
+        TestActivityDescription(
+            "Customized navigation View test",
+            R.string.navigation_view_customized_description
+        ) { activity -> activity.startActivity<MapboxNavigationViewCustomizedActivity>() },
+        TestActivityDescription(
+            "Navigation View in a Fragment test",
+            R.string.navigation_view_fragment_description
+        ) { activity -> activity.startActivity<MapboxNavigationViewFragmentActivity>() },
     )
 }
