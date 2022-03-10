@@ -18,18 +18,16 @@ import kotlinx.coroutines.launch
  * Implement your version of a behavior. Behaviors do not reference android ui elements directly,
  * this is because their lifecycle will survive beyond a view or activity.
  *
- * Behaviors have a lifecycle, contain state, and process actions. [UIComponent] will respond
+ * UIViewModels have a lifecycle, contain state, and process actions.
+ *
+ * @param initialState used to initialize the [state]
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-abstract class UIViewModel<State, Action>(
-    mutableState: MutableStateFlow<State>
-) : MapboxNavigationObserver {
-
-    constructor(initialState: State) : this(MutableStateFlow(initialState))
+abstract class UIViewModel<State, Action>(initialState: State) : MapboxNavigationObserver {
 
     private val _action = MutableSharedFlow<Action>(extraBufferCapacity = 1)
     val action: Flow<Action> = _action
-    private val _state: MutableStateFlow<State> = mutableState
+    private val _state: MutableStateFlow<State> = MutableStateFlow(initialState)
     val state: StateFlow<State> = _state
 
     lateinit var mainJobControl: JobControl

@@ -38,7 +38,6 @@ internal class RoutesViewModelTest {
 
     lateinit var navigationStateViewModel: NavigationStateViewModel
     lateinit var navigationStateFlow: MutableStateFlow<NavigationState>
-    lateinit var routesStateFlow: MutableStateFlow<RoutesState>
     lateinit var locationViewModel: LocationViewModel
 
     lateinit var sut: RoutesViewModel
@@ -48,7 +47,6 @@ internal class RoutesViewModelTest {
     @Before
     fun setUp() {
         mockkStatic("com.mapbox.navigation.base.internal.extensions.ContextEx")
-        routesStateFlow = MutableStateFlow(RoutesState.INITIAL_STATE)
         navigationStateFlow = MutableStateFlow(NavigationState.FreeDrive)
         navigationStateViewModel = mockk {
             every { state } returns navigationStateFlow
@@ -56,7 +54,11 @@ internal class RoutesViewModelTest {
         locationViewModel = mockk(relaxed = true) {
             every { lastPoint } returns currentLoc
         }
-        sut = RoutesViewModel(navigationStateViewModel, locationViewModel, routesStateFlow)
+        sut = RoutesViewModel(
+            navigationStateViewModel,
+            locationViewModel,
+            RoutesState.INITIAL_STATE
+        )
     }
 
     @After
@@ -191,10 +193,11 @@ internal class RoutesViewModelTest {
     @Test
     fun `should fetch and set new route on FetchAndSet action`() =
         coroutineRule.runBlockingTest {
-            routesStateFlow.value = RoutesState(
+            val initialState = RoutesState(
                 Destination(Point.fromLngLat(1.0, 2.0)),
                 false
             )
+            sut = RoutesViewModel(navigationStateViewModel, locationViewModel, initialState)
             val mapboxNavigation = mockMapboxNavigation()
 
             sut.onAttached(mapboxNavigation)
@@ -221,10 +224,11 @@ internal class RoutesViewModelTest {
     @Test
     fun `should set navigationStarted to FALSE on DidStartNavigation`() =
         coroutineRule.runBlockingTest {
-            routesStateFlow.value = RoutesState(
+            val initialState = RoutesState(
                 Destination(Point.fromLngLat(1.0, 2.0)),
                 true
             )
+            sut = RoutesViewModel(navigationStateViewModel, locationViewModel, initialState)
             val mapboxNavigation = mockMapboxNavigation()
 
             sut.onAttached(mapboxNavigation)
