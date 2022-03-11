@@ -2,9 +2,10 @@ package com.mapbox.navigation.dropin.coordinator
 
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
+import com.mapbox.navigation.dropin.component.destination.DestinationAction
+import com.mapbox.navigation.dropin.component.destination.DestinationState
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
-import com.mapbox.navigation.dropin.component.routefetch.RoutesState
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Destination
 import kotlinx.coroutines.flow.SharedFlow
@@ -26,21 +27,21 @@ internal class BackPressManager(
     private val context: DropInNavigationViewContext
 ) : UIComponent() {
 
-    private val routesState: StateFlow<RoutesState> = context.routesState
+    private val destinationState: StateFlow<DestinationState> = context.destinationState
     private val onBackPressedEvent: SharedFlow<Unit> = context.viewModel.onBackPressedEvent
     private val navigationState: StateFlow<NavigationState> = context.navigationState
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        routesState.map { it.destination }.observe { d: Destination? ->
+        destinationState.map { it.destination }.observe { d: Destination? ->
             context.onBackPressedCallback.isEnabled = d != null
         }
 
         onBackPressedEvent.observe {
             when (navigationState.value) {
                 NavigationState.FreeDrive -> {
-                    context.dispatch(RoutesAction.SetDestination(null))
+                    context.dispatch(DestinationAction.SetDestination(null))
                 }
                 NavigationState.RoutePreview -> {
                     context.dispatch(RoutesAction.SetRoutes(emptyList(), 0))

@@ -7,6 +7,8 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.dropin.component.destination.DestinationState
+import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction.Update
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState.ActiveNavigation
@@ -42,6 +44,7 @@ internal class NavigationStateComponentTest {
 
     lateinit var sut: NavigationStateComponent
     lateinit var navigationStateFlow: MutableStateFlow<NavigationState>
+    lateinit var destinationStateFlow: MutableStateFlow<DestinationState>
     lateinit var routesStateFlow: MutableStateFlow<RoutesState>
     lateinit var flowRoutesUpdated: MutableSharedFlow<RoutesUpdatedResult>
     lateinit var flowOnFinalDestinationArrival: MutableSharedFlow<RouteProgress>
@@ -53,6 +56,9 @@ internal class NavigationStateComponentTest {
     lateinit var mockRoutesViewModel: RoutesViewModel
 
     @MockK
+    lateinit var mockDestinationViewModel: DestinationViewModel
+
+    @MockK
     lateinit var mockMapboxNavigation: MapboxNavigation
 
     @Before
@@ -60,11 +66,13 @@ internal class NavigationStateComponentTest {
         mockkStatic("com.mapbox.navigation.dropin.extensions.MapboxNavigationEx")
         MockKAnnotations.init(this, relaxUnitFun = true)
         navigationStateFlow = MutableStateFlow(FreeDrive)
-        routesStateFlow = MutableStateFlow(RoutesState.INITIAL_STATE)
+        routesStateFlow = MutableStateFlow(RoutesState())
+        destinationStateFlow = MutableStateFlow(DestinationState())
         flowRoutesUpdated = MutableSharedFlow()
         flowOnFinalDestinationArrival = MutableSharedFlow()
 
         every { mockNavigationStateViewModel.state } returns navigationStateFlow
+        every { mockDestinationViewModel.state } returns destinationStateFlow
         every { mockRoutesViewModel.state } returns routesStateFlow
         every { mockMapboxNavigation.flowRoutesUpdated() } returns flowRoutesUpdated
         every {
@@ -73,7 +81,8 @@ internal class NavigationStateComponentTest {
 
         sut = NavigationStateComponent(
             mockNavigationStateViewModel,
-            mockRoutesViewModel
+            mockDestinationViewModel,
+            mockRoutesViewModel,
         )
     }
 
@@ -160,7 +169,8 @@ internal class NavigationStateComponentTest {
         navigationStarted: Boolean,
         routesList: List<DirectionsRoute>
     ) {
-        routesStateFlow.value = RoutesState(destination, navigationStarted)
+        destinationStateFlow.value = DestinationState(destination)
+        routesStateFlow.value = RoutesState(navigationStarted)
         every { mockMapboxNavigation.getRoutes() } returns routesList
     }
 
