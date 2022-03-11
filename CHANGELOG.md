@@ -3,6 +3,11 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
+
+## Mapbox Navigation SDK 2.4.0-beta.1 - March 11, 2022
+### Changelog
+[Changes between v2.4.0-alpha.2 and v2.4.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.4.0-alpha.2...v2.4.0-beta.1)
+
 - :warning: Deprecated `RouterOrigin.Custom(obj: Any?)`. The SDK doesn't keep `RouteOrigin.Custom#obj` anymore, it always becomes `null` when the `obj` returns in `RoutesObserver`. [#5500](https://github.com/mapbox/mapbox-navigation-android/pull/5500)
 
 #### Features
