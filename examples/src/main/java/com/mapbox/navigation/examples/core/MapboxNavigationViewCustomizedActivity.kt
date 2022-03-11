@@ -14,6 +14,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.NavigationUIBinders
 import com.mapbox.navigation.dropin.binder.UIBinder
+import com.mapbox.navigation.dropin.component.maneuver.ManeuverViewBinder
 import com.mapbox.navigation.dropin.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityNavigationViewCustomizedBinding
@@ -58,12 +59,21 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
             if (showCustomViews) {
                 binding.navigationView.customize(
                     NavigationUIBinders(
-                        speedLimit = CustomSpeedLimitViewBinder()
+                        speedLimit = CustomSpeedLimitViewBinder(),
+                        maneuver = ManeuverViewBinder(
+                            getString(R.string.mapbox_access_token)
+                        )
                     )
                 )
             } else {
                 // Reset defaults
-                binding.navigationView.customize(NavigationUIBinders())
+                binding.navigationView.customize(
+                    NavigationUIBinders(
+                        maneuver = ManeuverViewBinder(
+                            getString(R.string.mapbox_access_token)
+                        )
+                    )
+                )
             }
         }
         binding.toggleCustomViews.setOnClickListener {

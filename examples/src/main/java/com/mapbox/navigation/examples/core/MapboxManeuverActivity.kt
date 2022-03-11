@@ -184,7 +184,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
             maneuverApi.getRoadShields(
                 DirectionsCriteria.PROFILE_DEFAULT_USER,
                 NAVIGATION_DAY_STYLE_ID,
-                getMapboxAccessToken("mapbox_access_token"),
+                getString(R.string.mapbox_access_token),
                 it,
                 roadShieldCallback
             )
@@ -199,7 +199,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
     @SuppressLint("MissingPermission")
     private fun initNavigation() {
         val navigationOptions = NavigationOptions.Builder(this)
-            .accessToken(getMapboxAccessToken("mapbox_access_token_signboard"))
+            .accessToken(getString(R.string.mapbox_access_token))
             .locationEngine(ReplayLocationEngine(mapboxReplayer))
             .build()
         mapboxNavigation = MapboxNavigationProvider.create(navigationOptions)
@@ -230,16 +230,6 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxMap.loadStyleUri(NAVIGATION_DAY_STYLE) { style ->
             routeLineView.initializeLayers(style)
             binding.mapView.gestures.addOnMapLongClickListener(this)
-        }
-    }
-
-    private fun getMapboxAccessToken(resourceName: String): String {
-        val tokenResId = resources
-            .getIdentifier(resourceName, "string", packageName)
-        return if (tokenResId != 0) {
-            getString(tokenResId)
-        } else {
-            getString(this.resources.getIdentifier("mapbox_access_token", "string", packageName))
         }
     }
 

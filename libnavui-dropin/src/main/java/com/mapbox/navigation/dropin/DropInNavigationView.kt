@@ -68,6 +68,7 @@ class DropInNavigationView @JvmOverloads constructor(
         context = context,
         lifecycleOwner = this,
         viewModel = viewModel,
+        accessToken = accessToken
     )
 
     /**
