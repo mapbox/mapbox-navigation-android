@@ -16,14 +16,13 @@ import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewMode
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.lifecycle.UIViewModel
 import com.mapbox.navigation.dropin.model.Destination
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class RoutesViewModel(
     private val navigationStateViewModel: NavigationStateViewModel,
     private val locationViewModel: LocationViewModel,
-    state: MutableStateFlow<RoutesState> = MutableStateFlow(RoutesState.INITIAL_STATE)
-) : UIViewModel<RoutesState, RoutesAction>(state) {
+    initialState: RoutesState = RoutesState.INITIAL_STATE
+) : UIViewModel<RoutesState, RoutesAction>(initialState) {
 
     private var routeRequestId: Long? = null
 
