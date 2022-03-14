@@ -129,7 +129,7 @@ createPullRequest() {
 
     echo "create pull request"
 
-    GITHUB_TOKEN=$GITHUB_PR_ACCESS_TOKEN gh pr create \
+    LINK_TO_DOCS_PR=$(GITHUB_TOKEN=$GITHUB_PR_ACCESS_TOKEN gh pr create \
         --title "Docs ${TAG}" \
         --body "**Docs ${TAG}**
         <br/>**Staging**:
@@ -138,7 +138,20 @@ createPullRequest() {
         - staging docs ${TAG} https://docs.tilestream.net/android/navigation/api/${VERSION_NUMBER}/-modules.html
         <br/>**cc** @mapbox/navigation-android" \
         --base ${DOCS_BASE_BRANCH_NAME_PRODUCTION} \
-        --head ${BRANCH_NAME}
+        --head ${BRANCH_NAME})
+    echo $LINK_TO_DOCS_PR
+
+    # workaround to trigger publisher-production deployment
+    TRIGGER_BRANCH_NAME="trigger-publisher-production-for-${BRANCH_NAME}"
+    git checkout -b $TRIGGER_BRANCH_NAME
+    git commit -m "empty commit to trigger publisher production" --allow-empty
+    git push origin HEAD -u
+    gh pr create \
+        --title "Trigger publisher production" \
+        --body "This PR contains an empty commit to trigger deployment from the publisher-production branch.
+        Should be **squashed** after ${LINK_TO_DOCS_PR}" \
+        --base $BRANCH_NAME \
+        --head $TRIGGER_BRANCH_NAME
 
     popd > /dev/null
 }
