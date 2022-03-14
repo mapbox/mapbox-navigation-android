@@ -147,7 +147,7 @@ class LocationExTest {
         private const val VERTICAL_ACCURACY = 70f
         private val EXTRAS = { ->
             val extras = FixLocationExtras()
-            extras.put("satelites", Value(42))
+            extras.put("satellites", Value(42))
             extras.put("string", Value("str42"))
             extras
         }()
