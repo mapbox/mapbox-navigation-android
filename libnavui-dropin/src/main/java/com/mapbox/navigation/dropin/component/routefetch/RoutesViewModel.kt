@@ -11,6 +11,7 @@ import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.component.destination.DestinationAction
 import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
 import com.mapbox.navigation.dropin.component.location.LocationViewModel
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
@@ -64,13 +65,10 @@ internal class RoutesViewModel(
             }
             is RoutesAction.StopNavigation -> {
                 stopNavigation(mapboxNavigation)
+                return state.copy(navigationStarted = false)
             }
-
             is RoutesAction.DidStartNavigation -> {
                 return state.copy(navigationStarted = true)
-            }
-            is RoutesAction.DidStopNavigation -> {
-                return state.copy(navigationStarted = false)
             }
         }
         return state
@@ -110,11 +108,12 @@ internal class RoutesViewModel(
 
     private fun stopNavigation(mapboxNavigation: MapboxNavigation) {
         with(mapboxNavigation) {
+            setNavigationRoutes(listOf())
+            destinationViewModel.invoke(DestinationAction.SetDestination(null))
             // Stop replay here
             mapboxReplayer.clearEvents()
             resetTripSession()
         }
-        invoke(RoutesAction.DidStopNavigation)
     }
 
     private fun shouldReloadRoute(

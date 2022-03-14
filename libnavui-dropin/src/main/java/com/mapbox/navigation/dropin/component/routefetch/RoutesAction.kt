@@ -14,5 +14,4 @@ sealed class RoutesAction {
     data class SetRoutes(val routes: List<NavigationRoute>, val legIndex: Int = 0) : RoutesAction()
 
     object DidStartNavigation : RoutesAction()
-    object DidStopNavigation : RoutesAction()
 }
