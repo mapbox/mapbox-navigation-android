@@ -1,3 +1,5 @@
+@file:JvmName("RouterMapper")
+
 package com.mapbox.navigation.navigator.internal
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
@@ -23,7 +25,7 @@ fun String.mapToRoutingMode(): RoutingMode {
  *
  * @throws IllegalStateException if list is empty
  */
-internal fun List<NavigationRoute>.mapToDirectionsResponse(): DirectionsResponse {
+fun List<NavigationRoute>.mapToDirectionsResponse(): DirectionsResponse {
     val primaryRoute = this.firstOrNull()
         ?: throw IllegalStateException("List of NavigationRoute mustn't be empty")
     return primaryRoute.directionsResponse.toBuilder()

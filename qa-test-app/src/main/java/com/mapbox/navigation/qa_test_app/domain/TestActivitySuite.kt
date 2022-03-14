@@ -18,6 +18,7 @@ import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewFragmentActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxRouteLineActivity
 import com.mapbox.navigation.qa_test_app.view.NavigationViewFragmentLifecycleActivity
+import com.mapbox.navigation.qa_test_app.view.RerouteActivity
 import com.mapbox.navigation.qa_test_app.view.RoadObjectsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteLineFeaturesActivity
 import com.mapbox.navigation.qa_test_app.view.RouteNumericTrafficUpdateActivity
@@ -36,6 +37,12 @@ object TestActivitySuite {
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     val testActivities = listOf(
         TestActivityDescription(
+            "MapboxNavigation Lifecycle",
+            R.string.mapbox_navigation_app_lifecycle_description
+        ) { activity ->
+            activity.startActivity<AppLifecycleActivity>()
+        },
+        TestActivityDescription(
             "Components install via MapboxNavigationApp",
             R.string.experimental_components_install,
         ) { activity ->
@@ -48,10 +55,10 @@ object TestActivitySuite {
             activity.startActivity<ComponentsAltActivity>()
         },
         TestActivityDescription(
-            "MapboxNavigation Lifecycle",
-            R.string.mapbox_navigation_app_lifecycle_description,
+            "Reroute Activity",
+            R.string.reroute_activity_descriptor,
         ) { activity ->
-            activity.startActivity<AppLifecycleActivity>()
+            activity.startActivity<RerouteActivity>()
         },
         TestActivityDescription(
             "Display Road Objects",

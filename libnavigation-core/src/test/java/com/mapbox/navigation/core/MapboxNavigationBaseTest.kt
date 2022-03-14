@@ -11,6 +11,7 @@ import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.MapboxSDKCommon
 import com.mapbox.common.module.provider.MapboxModuleProvider
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
@@ -25,6 +26,7 @@ import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.reroute.RerouteController
+import com.mapbox.navigation.core.reroute.RerouteControllersManager
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
@@ -53,6 +55,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.runs
+import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import org.json.JSONObject
@@ -91,6 +94,8 @@ internal open class MapboxNavigationBaseTest {
     val arrivalProgressObserver: ArrivalProgressObserver = mockk(relaxUnitFun = true)
     val historyRecordingStateHandler: HistoryRecordingStateHandler = mockk(relaxUnitFun = true)
     val threadController = ThreadController()
+    val rerouteControllersManager: RerouteControllersManager = mockk(relaxUnitFun = true)
+    val slotSdkRerouteObserver = slot<RerouteControllersManager.Observer>()
     val currentIndicesProvider = mockk<CurrentIndicesProvider>(relaxed = true)
 
     val applicationContext: Context = mockk(relaxed = true) {
@@ -177,6 +182,7 @@ internal open class MapboxNavigationBaseTest {
         mockDirectionSession()
         mockNavigationSession()
         mockNavTelemetry()
+        mockRerouteManager()
         every {
             NavigationComponentProvider.createBillingController(any(), any(), any(), any())
         } returns billingController
@@ -238,6 +244,7 @@ internal open class MapboxNavigationBaseTest {
         unmockkObject(MapboxNavigationTelemetry)
         unmockkStatic(TelemetryEnabler::class)
         unmockkObject(NativeRouteParserWrapper)
+        unmockkObject(RerouteControllersManager.Companion)
 
         threadController.cancelAllNonUICoroutines()
         threadController.cancelAllUICoroutines()
@@ -262,6 +269,7 @@ internal open class MapboxNavigationBaseTest {
             createSetRouteResult()
         }
         every { navigator.cache } returns cache
+        every { navigator.getRerouteControllerInterface() } returns mockk(relaxUnitFun = true)
     }
 
     private fun mockTripService() {
@@ -310,6 +318,7 @@ internal open class MapboxNavigationBaseTest {
         every { navigationSession.state } returns NavigationSessionState.Idle
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun mockNavTelemetry() {
         mockkObject(MapboxNavigationTelemetry)
         every { MapboxNavigationTelemetry.initialize(any(), any(), any(), any()) } just runs
@@ -319,6 +328,13 @@ internal open class MapboxNavigationBaseTest {
                 any(), any(), any(), any(), any(), any(), any(),
             )
         } just runs
+    }
+
+    private fun mockRerouteManager() {
+        mockkObject(RerouteControllersManager.Companion)
+        every {
+            RerouteControllersManager(any(), capture(slotSdkRerouteObserver), any())
+        } returns rerouteControllersManager
     }
 
     fun provideNavigationOptions() =

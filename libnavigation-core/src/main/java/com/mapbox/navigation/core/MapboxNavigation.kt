@@ -67,9 +67,10 @@ import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.reroute.LegacyRerouteControllerAdapter
-import com.mapbox.navigation.core.reroute.MapboxRerouteController
+import com.mapbox.navigation.core.reroute.MapboxRerouteControllerFacade
 import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
+import com.mapbox.navigation.core.reroute.RerouteControllersManager
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
@@ -80,7 +81,6 @@ import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerP
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesRequestCallback
-import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
@@ -254,7 +254,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     )
     private val tripNotificationInterceptorOwner = TripNotificationInterceptorOwner()
     private val internalRoutesObserver: RoutesObserver
-    private val internalOffRouteObserver: OffRouteObserver
     private val internalFallbackVersionsObserver: FallbackVersionsObserver
     private val routeAlternativesController: RouteAlternativesController
     private val routeRefreshController: RouteRefreshController
@@ -336,11 +335,17 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private var notificationChannelField: Field? = null
 
+    private val reroutesObserver = RerouteControllersManager.Observer { newRoutes ->
+        internalSetNavigationRoutes(
+            newRoutes,
+            RerouteRoutesInfo()
+        )
+    }
+
     /**
-     * Reroute controller, by default uses [defaultRerouteController].
+     * Reroute Controllers Manager handles native and platform reroute controllers
      */
-    private var rerouteController: NavigationRerouteController?
-    private val defaultRerouteController: NavigationRerouteController
+    private val rerouteControllersManager: RerouteControllersManager
 
     /**
      * [NavigationVersionSwitchObserver] is notified when navigation switches tiles version.
@@ -524,8 +529,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             }
         }
 
-        val routeOptionsProvider = RouteOptionsUpdater()
-
         routeAlternativesController = RouteAlternativesControllerProvider.create(
             navigationOptions.routeAlternativesOptions,
             navigator,
@@ -538,19 +541,12 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             currentIndicesProvider,
         )
 
-        defaultRerouteController = MapboxRerouteController(
-            directionsSession,
-            tripSession,
-            routeOptionsProvider,
-            navigationOptions.rerouteOptions,
-            threadController,
+        rerouteControllersManager = RerouteControllersManager(
+            accessToken, reroutesObserver, navigator
         )
-        rerouteController = defaultRerouteController
 
         internalRoutesObserver = createInternalRoutesObserver()
-        internalOffRouteObserver = createInternalOffRouteObserver()
         internalFallbackVersionsObserver = createInternalFallbackVersionsObserver()
-        tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerFallbackVersionsObserver(internalFallbackVersionsObserver)
         registerRoutesObserver(internalRoutesObserver)
 
@@ -864,7 +860,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         setRoutesInfo: SetRoutesInfo,
         callback: RoutesSetCallback? = null,
     ) {
-        rerouteController?.interrupt()
+        rerouteControllersManager.interruptReroute()
         restartRouteScope()
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
@@ -1218,33 +1214,34 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     /**
      * Set [RerouteController] that's automatically invoked when user is off-route.
      *
-     * By default [MapboxRerouteController] is used.
+     * By default uses [MapboxRerouteControllerFacade].
      * Pass `null` to disable automatic reroute.
      * A user will stay in `OFF_ROUTE` state until a new route is set or the user gets back to the route.
      */
     fun setRerouteController(rerouteController: RerouteController?) {
-        setRerouteController(
-            rerouteController?.let { LegacyRerouteControllerAdapter(it) }
-        )
+        setRerouteController(rerouteController?.let { LegacyRerouteControllerAdapter(it) })
     }
 
     /**
      * Set [NavigationRerouteController] that's automatically invoked when user is off-route.
      *
-     * By default [MapboxRerouteController] is used.
+     * By default [MapboxRerouteControllerFacade] is used.
      * Pass `null` to disable automatic reroute.
      * A user will stay in `OFF_ROUTE` state until a new route is set or the user gets back to the route.
      */
-    @JvmOverloads
-    fun setRerouteController(
-        rerouteController: NavigationRerouteController? = defaultRerouteController
-    ) {
-        val oldController = this.rerouteController
-        this.rerouteController = rerouteController
-        if (oldController?.state == RerouteState.FetchingRoute) {
-            oldController.interrupt()
-            reroute()
+    fun setRerouteController(rerouteController: NavigationRerouteController?) {
+        if (rerouteController == null) {
+            rerouteControllersManager.disableReroute()
+        } else {
+            rerouteControllersManager.setOuterRerouteController(rerouteController)
         }
+    }
+
+    /**
+     * Reset Reroute Controller to default implementation
+     */
+    fun setRerouteController() {
+        rerouteControllersManager.resetToDefaultRerouteController()
     }
 
     /**
@@ -1254,8 +1251,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun setRerouteOptionsAdapter(
         rerouteOptionsAdapter: RerouteOptionsAdapter?
     ) {
-        (rerouteController as? MapboxRerouteController)
-            ?.setRerouteOptionsAdapter(rerouteOptionsAdapter)
+        rerouteControllersManager.setRerouteOptionsAdapter(rerouteOptionsAdapter)
     }
 
     /**
@@ -1263,7 +1259,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *
      * @see setRerouteController
      */
-    fun getRerouteController(): NavigationRerouteController? = rerouteController
+    fun getRerouteController(): NavigationRerouteController? =
+        rerouteControllersManager.rerouteControllerInterface
 
     /**
      * Registers [ArrivalObserver]. Monitor arrival at stops and destinations. For more control
@@ -1631,12 +1628,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         }
     }
 
-    private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->
-        if (offRoute) {
-            reroute()
-        }
-    }
-
     private fun createInternalFallbackVersionsObserver() = object : FallbackVersionsObserver {
         override fun onFallbackVersionsFound(versions: List<String>) {
             if (versions.isNotEmpty()) {
@@ -1689,6 +1680,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 },
             )
             historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
+            rerouteControllersManager.onNavigatorRecreated()
 
             val routes = directionsSession.routes
             if (routes.isNotEmpty()) {
@@ -1698,15 +1690,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                     alternatives = routes.drop(1)
                 )
             }
-        }
-    }
-
-    private fun reroute() {
-        rerouteController?.reroute { routes, _ ->
-            internalSetNavigationRoutes(
-                routes,
-                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
-            )
         }
     }
 

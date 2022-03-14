@@ -15,6 +15,7 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.BasicSetRoutesInfo
+import com.mapbox.navigation.core.RerouteRoutesInfo
 import com.mapbox.navigation.core.SetAlternativeRoutesInfo
 import com.mapbox.navigation.core.SetRefreshedRoutesInfo
 import com.mapbox.navigation.core.SetRoutesInfo
@@ -87,7 +88,7 @@ internal class MapboxTripSession(
         )
         isUpdatingRoute = true
         val result = when (setRoutesInfo) {
-            is BasicSetRoutesInfo -> {
+            is BasicSetRoutesInfo, is RerouteRoutesInfo -> {
                 setRouteToNativeNavigator(routes, setRoutesInfo.legIndex)
             }
             is SetAlternativeRoutesInfo -> {

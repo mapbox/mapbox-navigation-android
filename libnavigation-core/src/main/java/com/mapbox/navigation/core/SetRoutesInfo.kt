@@ -91,3 +91,7 @@ internal class SetRefreshedRoutesInfo(
             ""
     }
 }
+
+internal class RerouteRoutesInfo: SetRoutesInfo(
+    RoutesExtra.ROUTES_UPDATE_REASON_REROUTE, 0
+)

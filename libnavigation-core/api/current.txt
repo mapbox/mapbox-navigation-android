@@ -56,7 +56,7 @@ package com.mapbox.navigation.core {
     method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, int initialLegIndex = 0);
     method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
     method public void setRerouteController(com.mapbox.navigation.core.reroute.RerouteController? rerouteController);
-    method public void setRerouteController(com.mapbox.navigation.core.reroute.NavigationRerouteController? rerouteController = com.mapbox.navigation.core.MapboxNavigation.defaultRerouteController);
+    method public void setRerouteController(com.mapbox.navigation.core.reroute.NavigationRerouteController? rerouteController);
     method public void setRerouteController();
     method public void setRerouteOptionsAdapter(com.mapbox.navigation.core.reroute.RerouteOptionsAdapter? rerouteOptionsAdapter);
     method @Deprecated public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes, int initialLegIndex = 0);
@@ -606,6 +606,9 @@ package com.mapbox.navigation.core.reroute {
     method public void onNewRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
   }
 
+  public final class RerouteControllersManagerKt {
+  }
+
   public interface RerouteOptionsAdapter {
     method public com.mapbox.api.directions.v5.models.RouteOptions onRouteOptions(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
   }
@@ -647,10 +650,6 @@ package com.mapbox.navigation.core.reroute {
     method public com.mapbox.navigation.core.reroute.RerouteState.RouteFetched copy(com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
     method public com.mapbox.navigation.base.route.RouterOrigin getRouterOrigin();
     property public final com.mapbox.navigation.base.route.RouterOrigin routerOrigin;
-  }
-
-  public fun interface RerouteStateObserver {
-    method public void onRerouteStateChanged(com.mapbox.navigation.core.reroute.RerouteState rerouteState);
   }
 
 }

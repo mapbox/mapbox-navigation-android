@@ -34,10 +34,11 @@ object NavigatorLoader {
         historyDir: String?,
         router: RouterInterface,
     ): NativeComponents {
+
         val config = ConfigFactory.build(
             settingsProfile(deviceProfile),
             navigatorConfig,
-            deviceProfile.customConfig
+            customConfig(deviceProfile)
         )
         val historyRecorder = buildHistoryRecorder(historyDir, config)
         val cache = CacheFactory.build(tilesConfig, config, historyRecorder)
@@ -67,11 +68,13 @@ object NavigatorLoader {
         tilesConfig: TilesConfig,
         historyRecorder: HistoryRecorderHandle?,
     ): RouterInterface {
+
         val config = ConfigFactory.build(
             settingsProfile(deviceProfile),
             navigatorConfig,
-            deviceProfile.customConfig
+            customConfig(deviceProfile)
         )
+
         val cache = CacheFactory.build(tilesConfig, config, historyRecorder)
         return RouterFactory.build(
             RouterType.HYBRID,
@@ -98,6 +101,10 @@ object NavigatorLoader {
             null
         }
     }
+
+    // TODO Remove after NN enable internal reroute by default
+    private fun customConfig(deviceProfile: DeviceProfile): String =
+        deviceProfile.customConfig.customConfigEnableNativeRerouteInterface()
 
     private fun settingsProfile(deviceProfile: DeviceProfile): SettingsProfile {
         return when (deviceProfile.deviceType) {
