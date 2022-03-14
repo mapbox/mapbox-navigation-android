@@ -14,7 +14,9 @@ import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewMode
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.model.Destination
 import com.mapbox.navigation.testing.MainCoroutineRule
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
@@ -228,9 +230,13 @@ internal class RoutesViewModelTest {
         }
 
     @Test
-    fun `should set navigationStarted to FALSE on DidStartNavigation`() =
+    fun `should set navigationStarted to FALSE on StopNavigation`() =
         coroutineRule.runBlockingTest {
+            every {
+                destinationViewModel.invoke(any())
+            } just Runs
             val initialState = RoutesState(true)
+            val destination = null
             sut = RoutesViewModel(
                 navigationStateViewModel,
                 locationViewModel,
@@ -240,9 +246,33 @@ internal class RoutesViewModelTest {
             val mapboxNavigation = mockMapboxNavigation()
 
             sut.onAttached(mapboxNavigation)
-            sut.invoke(RoutesAction.DidStopNavigation)
+            destinationStateFlow.value = DestinationState(destination)
+            sut.invoke(RoutesAction.StopNavigation)
 
             assertFalse(sut.state.value.navigationStarted)
+        }
+
+    @Test
+    fun `navigation routes are set to empty on StopNavigation`() =
+        coroutineRule.runBlockingTest {
+            val mapboxNavigation = mockMapboxNavigation()
+            every {
+                destinationViewModel.invoke(any())
+            } just Runs
+            val initialState = RoutesState(true)
+            sut = RoutesViewModel(
+                navigationStateViewModel,
+                locationViewModel,
+                destinationViewModel,
+                initialState
+            )
+
+            sut.onAttached(mapboxNavigation)
+            sut.invoke(RoutesAction.StopNavigation)
+
+            verify(exactly = 1) {
+                mapboxNavigation.setNavigationRoutes(listOf())
+            }
         }
 
     private fun verifyFetchAndSet(
