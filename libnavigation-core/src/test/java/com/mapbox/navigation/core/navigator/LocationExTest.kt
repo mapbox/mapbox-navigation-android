@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.navigator
 
 import android.location.Location
 import android.os.Bundle
+import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.FixLocation
 import org.junit.Assert.assertEquals
@@ -103,7 +104,7 @@ class LocationExTest {
             NULL_VALUE,
             NULL_VALUE,
             NULL_VALUE,
-            EMPTY_EXTRAS,
+            EXTRAS,
             IS_MOCK,
         )
 
@@ -144,16 +145,16 @@ class LocationExTest {
         private const val BEARING_ACCURACY = 50f
         private const val SPEED_ACCURACY = 60f
         private const val VERTICAL_ACCURACY = 70f
-        private val EXTRAS = {
+        private val EXTRAS = { ->
             val extras = FixLocationExtras()
-            extras.put("satellites", Value(42))
+            extras.put("satelites", Value(42))
             extras.put("string", Value("str42"))
             return extras
-        }
-        private val BUNDLE = {
+        }()
+        private val BUNDLE = { ->
             val bundle = Bundle()
-            bundle.putShort("satellites", 42);
-            bundle.putString("string", "str42");
+            bundle.putShort("satellites", 42)
+            bundle.putString("string", "str42")
             return bundle
         }
         private const val IS_MOCK = true
