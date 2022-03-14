@@ -6,11 +6,14 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
+import com.mapbox.navigation.dropin.component.destination.DestinationState
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderLayoutBinding
+import com.mapbox.navigation.dropin.model.Destination
 import com.mapbox.navigation.dropin.testutil.DispatchRegistry
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.MockKAnnotations
@@ -19,6 +22,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -39,6 +43,7 @@ internal class InfoPanelHeaderComponentTest {
     private lateinit var binding: MapboxInfoPanelHeaderLayoutBinding
     private lateinit var dispatchRegistry: DispatchRegistry
     private lateinit var navigationState: MutableStateFlow<NavigationState>
+    private lateinit var destinationState: MutableStateFlow<DestinationState>
 
     @MockK
     lateinit var mockNavContext: DropInNavigationViewContext
@@ -54,8 +59,10 @@ internal class InfoPanelHeaderComponentTest {
 
         dispatchRegistry = DispatchRegistry()
         navigationState = MutableStateFlow(NavigationState.FreeDrive)
+        destinationState = MutableStateFlow(DestinationState())
         every { mockNavContext.dispatch } returns { dispatchRegistry(it) }
         every { mockNavContext.navigationState } returns navigationState
+        every { mockNavContext.destinationState } returns destinationState
 
         sut = InfoPanelHeaderComponent(binding, mockNavContext)
     }
@@ -117,6 +124,24 @@ internal class InfoPanelHeaderComponentTest {
             assertGone("tripProgressLayout", binding.tripProgressLayout)
             assertVisible("arrivedText", binding.arrivedText)
         }
+
+    @Test
+    fun `should update poiName text`() {
+        val featurePlaceName = "POI NAME"
+        val newDestination = Destination(
+            Point.fromLngLat(1.0, 2.0),
+            listOf(
+                mockk {
+                    every { placeName() } returns featurePlaceName
+                }
+            )
+        )
+        sut.onAttached(mockk())
+
+        destinationState.tryEmit(DestinationState(newDestination))
+
+        assertEquals(binding.poiName.text, featurePlaceName)
+    }
 
     @Test
     fun `onClick routePreview should dispatch FetchAndSetRoute action`() {

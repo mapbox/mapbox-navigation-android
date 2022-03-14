@@ -8,6 +8,7 @@ import com.mapbox.navigation.dropin.binder.Binder
 import com.mapbox.navigation.dropin.binder.navigationListOf
 import com.mapbox.navigation.dropin.component.camera.CameraComponent
 import com.mapbox.navigation.dropin.component.location.LocationComponent
+import com.mapbox.navigation.dropin.component.marker.GeocodingComponent
 import com.mapbox.navigation.dropin.component.marker.LongPressMapComponent
 import com.mapbox.navigation.dropin.component.marker.MapMarkersComponent
 
@@ -33,6 +34,9 @@ internal class FreeDriveMapBinder(
                 value,
                 navigationViewContext,
             ),
+            GeocodingComponent(
+                navigationViewContext.viewModel.destinationViewModel
+            )
         )
     }
 }

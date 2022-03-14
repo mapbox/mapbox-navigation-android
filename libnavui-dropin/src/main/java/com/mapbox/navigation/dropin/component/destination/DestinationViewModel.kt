@@ -18,6 +18,15 @@ internal class DestinationViewModel(
             is DestinationAction.SetDestination -> {
                 return state.copy(destination = action.destination)
             }
+            is DestinationAction.DidReverseGeocode -> {
+                if (state.destination?.point == action.point) {
+                    val destWithFeatures = state.destination.copy(
+                        features = action.features
+                    )
+                    return state.copy(destination = destWithFeatures)
+                }
+            }
         }
+        return state
     }
 }
