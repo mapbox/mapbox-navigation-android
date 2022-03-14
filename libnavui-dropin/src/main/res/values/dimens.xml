@@ -14,4 +14,7 @@
     <dimen name="mapbox_extendableButton_minWidth">72dp</dimen>
     <dimen name="mapbox_extendableButton_iconSize">32dp</dimen>
     <dimen name="mapbox_extendableButton_spacing">8dp</dimen>
+
+    <!-- Maneuver view -->
+    <dimen name="mapbox_maneuver_view_padding">4dp</dimen>
 </resources>

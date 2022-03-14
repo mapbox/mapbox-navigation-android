@@ -3,8 +3,13 @@ package com.mapbox.navigation.dropin.component.maneuver
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.trip.session.TripSessionState
+import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.dropin.extensions.flowRouteProgress
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
@@ -62,27 +67,132 @@ class ManeuverComponentTest {
         } returns Unit
     }
     private val maneuverView: MapboxManeuverView = mockk(relaxed = true)
-    private val mockNavigation = mockk<MapboxNavigation>()
+    private val mockNavigation = mockk<MapboxNavigation>() {
+        every { navigationOptions } returns mockk {
+            every { accessToken } returns "token"
+        }
+    }
     private val routeProgress = mockk<RouteProgress>()
 
     @Test
-    fun maneuversAreRendered() = coroutineRule.runBlockingTest {
-        val maneuverComponent = ManeuverComponent(maneuverView, "token", mockManeuverApi)
+    fun `maneuvers are rendered when trip session has started and route is available`() =
+        coroutineRule.runBlockingTest {
+            val mockNavigationRoute: List<NavigationRoute> = listOf(
+                mockk {
+                    every { directionsRoute } returns mockk()
+                },
+                mockk()
+            )
+            val mockRoutesUpdatedResult: RoutesUpdatedResult = mockk {
+                every { navigationRoutes } returns mockNavigationRoute
+            }
+            every {
+                mockNavigation.registerRoutesObserver(any())
+            } answers {
+                firstArg<RoutesObserver>().onRoutesChanged(mockRoutesUpdatedResult)
+            }
+            every {
+                mockNavigation.registerTripSessionStateObserver(any())
+            } answers {
+                firstArg<TripSessionStateObserver>().onSessionStateChanged(TripSessionState.STARTED)
+            }
+            val maneuverComponent = ManeuverComponent(maneuverView, mockManeuverApi)
 
-        maneuverComponent.onAttached(mockNavigation)
+            maneuverComponent.onAttached(mockNavigation)
 
-        verify { maneuverView.renderManeuvers(expectedManeuvers) }
-    }
-
-    @Test
-    fun roadShieldsAreRendered() {
-        val expectedList: List<Expected<RouteShieldError, RouteShieldResult>> = listOf()
-        val maneuverComponent = ManeuverComponent(maneuverView, "token", mockManeuverApi)
-
-        maneuverComponent.onAttached(mockNavigation).also {
-            callbackSlot.captured.onRoadShields(expectedList)
+            verify { maneuverView.renderManeuvers(expectedManeuvers) }
         }
 
-        verify { maneuverView.renderManeuverWith(expectedList) }
-    }
+    @Test
+    fun `road shields are rendered when trip session has started and route is available`() =
+        coroutineRule.runBlockingTest {
+            val mockNavigationRoute: List<NavigationRoute> = listOf(
+                mockk {
+                    every { directionsRoute } returns mockk()
+                },
+                mockk()
+            )
+            val mockRoutesUpdatedResult: RoutesUpdatedResult = mockk {
+                every { navigationRoutes } returns mockNavigationRoute
+            }
+            every {
+                mockNavigation.registerRoutesObserver(any())
+            } answers {
+                firstArg<RoutesObserver>().onRoutesChanged(mockRoutesUpdatedResult)
+            }
+            every {
+                mockNavigation.registerTripSessionStateObserver(any())
+            } answers {
+                firstArg<TripSessionStateObserver>().onSessionStateChanged(TripSessionState.STARTED)
+            }
+            val expectedList: List<Expected<RouteShieldError, RouteShieldResult>> = listOf()
+            val maneuverComponent = ManeuverComponent(maneuverView, mockManeuverApi)
+
+            maneuverComponent.onAttached(mockNavigation).also {
+                callbackSlot.captured.onRoadShields(expectedList)
+            }
+
+            verify { maneuverView.renderManeuverWith(expectedList) }
+        }
+
+    @Test
+    fun `maneuvers and shields are not rendered when trip session has stopped`() =
+        coroutineRule.runBlockingTest {
+            val mockNavigationRoute: List<NavigationRoute> = listOf(
+                mockk {
+                    every { directionsRoute } returns mockk()
+                },
+                mockk()
+            )
+            val mockRoutesUpdatedResult: RoutesUpdatedResult = mockk {
+                every { navigationRoutes } returns mockNavigationRoute
+            }
+            every {
+                mockNavigation.registerRoutesObserver(any())
+            } answers {
+                firstArg<RoutesObserver>().onRoutesChanged(mockRoutesUpdatedResult)
+            }
+            every {
+                mockNavigation.registerTripSessionStateObserver(any())
+            } answers {
+                firstArg<TripSessionStateObserver>().onSessionStateChanged(TripSessionState.STOPPED)
+            }
+
+            val maneuverComponent = ManeuverComponent(maneuverView, mockManeuverApi)
+
+            maneuverComponent.onAttached(mockNavigation)
+
+            verify(exactly = 0) {
+                maneuverView.renderManeuvers(any())
+                maneuverView.renderManeuverWith(any())
+            }
+        }
+
+    @Test
+    fun `maneuvers and shields are not rendered when there is no route`() =
+        coroutineRule.runBlockingTest {
+            every {
+                mockNavigation.registerRoutesObserver(any())
+            } answers {
+                firstArg<RoutesObserver>().onRoutesChanged(
+                    mockk {
+                        every { navigationRoutes } returns listOf()
+                    }
+                )
+            }
+            every {
+                mockNavigation.registerTripSessionStateObserver(any())
+            } answers {
+                firstArg<TripSessionStateObserver>().onSessionStateChanged(TripSessionState.STARTED)
+            }
+
+            val maneuverComponent = ManeuverComponent(maneuverView, mockManeuverApi)
+
+            maneuverComponent.onAttached(mockNavigation)
+
+            verify(exactly = 0) {
+                maneuverView.renderManeuvers(any())
+                maneuverView.renderManeuverWith(any())
+            }
+        }
 }

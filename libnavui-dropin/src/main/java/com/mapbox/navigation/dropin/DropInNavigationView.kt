@@ -20,8 +20,8 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.coordinator.ActionListCoordinator
 import com.mapbox.navigation.dropin.coordinator.BackPressManager
-import com.mapbox.navigation.dropin.coordinator.GuidanceCoordinator
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
+import com.mapbox.navigation.dropin.coordinator.ManeuverCoordinator
 import com.mapbox.navigation.dropin.coordinator.MapCoordinator
 import com.mapbox.navigation.dropin.coordinator.RoadNameLabelCoordinator
 import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
@@ -68,7 +68,6 @@ class DropInNavigationView @JvmOverloads constructor(
         context = context,
         lifecycleOwner = this,
         viewModel = viewModel,
-        accessToken = accessToken
     )
 
     /**
@@ -136,7 +135,7 @@ class DropInNavigationView @JvmOverloads constructor(
         attachCreated(
             BackPressManager(navigationContext),
             MapCoordinator(navigationContext, binding.mapView),
-            GuidanceCoordinator(navigationContext, binding.guidanceLayout),
+            ManeuverCoordinator(navigationContext, binding.guidanceLayout),
             InfoPanelCoordinator(
                 navigationContext,
                 binding.infoPanelLayout,

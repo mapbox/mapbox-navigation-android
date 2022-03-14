@@ -11,7 +11,6 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.SpyK
-import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,7 +41,6 @@ internal class InfoPanelHeaderBinderTest {
         every { mockNavContext.uiBinders } returns MutableStateFlow(
             NavigationUIBinders(
                 infoPanelTripProgressBinder = tripProgressBinder,
-                maneuver = mockk()
             )
         )
         every { mockNavContext.dispatch } returns {}

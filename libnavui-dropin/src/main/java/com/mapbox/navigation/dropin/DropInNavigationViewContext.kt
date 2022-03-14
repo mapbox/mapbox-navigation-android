@@ -7,7 +7,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
 import com.mapbox.navigation.dropin.component.destination.DestinationState
-import com.mapbox.navigation.dropin.component.maneuver.ManeuverViewBinder
 import com.mapbox.navigation.dropin.component.marker.MapMarkerFactory
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
@@ -35,12 +34,9 @@ internal class DropInNavigationViewContext(
     val context: Context,
     val lifecycleOwner: LifecycleOwner,
     val viewModel: DropInNavigationViewModel,
-    val accessToken: String,
 ) {
     val uiBinders = MutableStateFlow(
-        NavigationUIBinders(
-            maneuver = ManeuverViewBinder(accessToken)
-        )
+        NavigationUIBinders()
     )
     var routeLineOptions: MapboxRouteLineOptions = MapboxRouteLineOptions.Builder(context)
         .withRouteLineResources(RouteLineResources.Builder().build())
