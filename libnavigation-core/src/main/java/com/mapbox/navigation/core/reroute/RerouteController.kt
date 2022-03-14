@@ -89,7 +89,7 @@ sealed class RerouteState {
      * - [MapboxNavigation.setRoutes];
      * - [MapboxNavigation.requestRoutes];
      * - from the SDK internally if another route request has been requested (only when using the default
-     * implementation [MapboxRerouteController]).
+     * implementation [MapboxRerouteControllerFacade]).
      *
      */
     object Interrupted : RerouteState()

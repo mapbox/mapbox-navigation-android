@@ -1,3 +1,5 @@
+@file:JvmName("RouterEx")
+
 package com.mapbox.navigation.base.internal.utils
 
 import com.mapbox.navigator.RouterOrigin

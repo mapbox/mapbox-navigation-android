@@ -11,6 +11,7 @@ import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.MapboxSDKCommon
 import com.mapbox.common.module.provider.MapboxModuleProvider
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
@@ -302,6 +303,7 @@ internal open class MapboxNavigationBaseTest {
         every { navigationSession.state } returns NavigationSessionState.Idle
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun mockNavTelemetry() {
         mockkObject(MapboxNavigationTelemetry)
         every { MapboxNavigationTelemetry.initialize(any(), any(), any(), any()) } just runs

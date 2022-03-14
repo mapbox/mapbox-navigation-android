@@ -6,7 +6,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.reroute.MapboxRerouteController
+import com.mapbox.navigation.core.reroute.MapboxRerouteControllerFacade
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.utils.internal.logE
@@ -18,7 +18,7 @@ private const val LOG_CATEGORY = "RouteOptionsUpdater"
 /**
  * The updater can be used to create a new set of route request options to the existing destination, accounting for the progress along the route.
  *
- * It's used by the default [MapboxRerouteController] (see [OffRouteObserver] and [MapboxNavigation.setRerouteController]).
+ * It's used by the default [MapboxRerouteControllerFacade] (see [OffRouteObserver] and [MapboxNavigation.setRerouteController]).
  */
 class RouteOptionsUpdater {
 

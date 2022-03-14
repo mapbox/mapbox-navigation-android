@@ -1,0 +1,3 @@
+package com.mapbox.navigation.navigator.internal
+
+interface MapboxNativeRerouteObserverHandler

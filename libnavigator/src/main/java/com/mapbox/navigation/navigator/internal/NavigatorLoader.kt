@@ -27,6 +27,8 @@ import com.mapbox.navigator.TilesConfig
  */
 object NavigatorLoader {
 
+    private var configHandle: ConfigHandle? = null
+
     internal fun createNavigator(
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
@@ -34,11 +36,14 @@ object NavigatorLoader {
         historyDir: String?,
         router: RouterInterface,
     ): NativeComponents {
-        val config = ConfigFactory.build(
-            settingsProfile(deviceProfile),
-            navigatorConfig,
-            deviceProfile.customConfig
-        )
+
+        val config = configHandle
+            ?: ConfigFactory.build(
+                settingsProfile(deviceProfile),
+                navigatorConfig,
+                customConfig(deviceProfile),
+            ).also { configHandle = it }
+
         val historyRecorder = buildHistoryRecorder(historyDir, config)
         val cache = CacheFactory.build(tilesConfig, config, historyRecorder)
         val navigator = Navigator(
@@ -67,11 +72,14 @@ object NavigatorLoader {
         tilesConfig: TilesConfig,
         historyRecorder: HistoryRecorderHandle?,
     ): RouterInterface {
-        val config = ConfigFactory.build(
-            settingsProfile(deviceProfile),
-            navigatorConfig,
-            deviceProfile.customConfig
-        )
+
+        val config = configHandle
+            ?: ConfigFactory.build(
+                settingsProfile(deviceProfile),
+                navigatorConfig,
+                customConfig(deviceProfile),
+            ).also { configHandle = it }
+
         val cache = CacheFactory.build(tilesConfig, config, historyRecorder)
         return RouterFactory.build(
             RouterType.HYBRID,
@@ -97,6 +105,18 @@ object NavigatorLoader {
         } else {
             null
         }
+    }
+
+    // TODO Remove after NN enable internal reroute by default
+    private fun customConfig(deviceProfile: DeviceProfile): String {
+        val userInternalReroute = """
+            {
+                "features": {
+                    "useInternalReroute": true
+                }
+            }
+        """.trimIndent()
+        return userInternalReroute
     }
 
     private fun settingsProfile(deviceProfile: DeviceProfile): SettingsProfile {

@@ -12,14 +12,12 @@ import com.mapbox.navigation.dropin.component.infopanel.InfoPanelHeaderComponent
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderLayoutBinding
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class InfoPanelHeaderBinder(
     private val context: NavigationViewContext
 ) : UIBinder {
 
-    @ExperimentalCoroutinesApi
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
             viewGroup,
