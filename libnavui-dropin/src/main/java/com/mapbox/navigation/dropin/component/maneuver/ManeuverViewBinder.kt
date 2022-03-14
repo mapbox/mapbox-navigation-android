@@ -10,16 +10,16 @@ import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.databinding.MapboxManeuverGuidanceLayoutBinding
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class ManeuverViewBinder(private val accessToken: String) : UIBinder {
-    override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
+class ManeuverViewBinder : UIBinder {
+    override fun bind(value: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
-            viewGroup,
+            value,
             R.layout.mapbox_maneuver_guidance_layout,
-            viewGroup.context
+            value.context
         )
         TransitionManager.go(scene)
-        val binding = MapboxManeuverGuidanceLayoutBinding.bind(viewGroup)
+        val binding = MapboxManeuverGuidanceLayoutBinding.bind(value)
 
-        return ManeuverComponent(binding.maneuverView, accessToken)
+        return ManeuverComponent(binding.maneuverView)
     }
 }

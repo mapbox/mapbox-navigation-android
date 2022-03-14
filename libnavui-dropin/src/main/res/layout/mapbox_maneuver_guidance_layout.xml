@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     tools:parentTag="android.widget.FrameLayout">
@@ -9,6 +8,7 @@
     <com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
         android:id="@+id/maneuverView"
         style="@style/MapboxStyleManeuverView"
+        android:padding="@dimen/mapbox_maneuver_view_padding"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
