@@ -8,7 +8,7 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
-import com.mapbox.navigation.dropin.component.routefetch.RoutesState
+import com.mapbox.navigation.dropin.component.destination.DestinationState
 import com.mapbox.navigation.dropin.model.Destination
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.MockKAnnotations
@@ -29,7 +29,7 @@ internal class MapMarkersComponentTest {
     var coroutineRule = MainCoroutineRule()
 
     private lateinit var sut: MapMarkersComponent
-    private lateinit var routesStateFlow: MutableStateFlow<RoutesState>
+    private lateinit var destinationStateFlow: MutableStateFlow<DestinationState>
 
     @MockK
     lateinit var mockAnnotationFactory: MapMarkerFactory
@@ -40,14 +40,14 @@ internal class MapMarkersComponentTest {
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true)
-        routesStateFlow = MutableStateFlow(RoutesState.INITIAL_STATE)
+        destinationStateFlow = MutableStateFlow(DestinationState())
         val mapView = mockk<MapView> {
             every { annotations } returns mockk {
                 every { createPointAnnotationManager() } returns mockAnnotationManager
             }
         }
         val navContext = mockk<DropInNavigationViewContext> {
-            every { routesState } returns routesStateFlow
+            every { destinationState } returns destinationStateFlow
             every { mapAnnotationFactory() } returns mockAnnotationFactory
         }
 
@@ -59,7 +59,7 @@ internal class MapMarkersComponentTest {
         coroutineRule.runBlockingTest {
             val annotation = mockk<PointAnnotationOptions>()
             val point = Point.fromLngLat(10.0, 11.0)
-            routesStateFlow.value = RoutesState(Destination(point), false)
+            destinationStateFlow.value = DestinationState(Destination(point))
             every { mockAnnotationFactory.createPin(point) } returns annotation
 
             sut.onAttached(mockk())

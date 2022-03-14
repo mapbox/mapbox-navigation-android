@@ -16,13 +16,13 @@ internal open class MapMarkersComponent(
     protected val context: DropInNavigationViewContext
 ) : UIComponent() {
     private val mapAnnotationFactory = context.mapAnnotationFactory()
-    private val routesState = context.routesState
+    private val destinationState = context.destinationState
     private var annotationManager = mapView.annotations.createPointAnnotationManager()
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        routesState.map { it.destination }.observe { destination ->
+        destinationState.map { it.destination }.observe { destination ->
             annotationManager.deleteAll()
             if (destination != null) {
                 val annotation = mapAnnotationFactory.createPin(destination.point)

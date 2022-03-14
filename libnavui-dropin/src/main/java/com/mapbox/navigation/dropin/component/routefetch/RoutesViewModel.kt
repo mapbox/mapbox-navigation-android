@@ -11,17 +11,22 @@ import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
 import com.mapbox.navigation.dropin.component.location.LocationViewModel
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.lifecycle.UIViewModel
 import com.mapbox.navigation.dropin.model.Destination
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class RoutesViewModel(
     private val navigationStateViewModel: NavigationStateViewModel,
     private val locationViewModel: LocationViewModel,
-    initialState: RoutesState = RoutesState.INITIAL_STATE
+    private val destinationViewModel: DestinationViewModel,
+    initialState: RoutesState = RoutesState()
 ) : UIViewModel<RoutesState, RoutesAction>(initialState) {
 
     private var routeRequestId: Long? = null
@@ -32,14 +37,9 @@ internal class RoutesViewModel(
         action: RoutesAction
     ): RoutesState {
         when (action) {
-            is RoutesAction.SetDestination -> {
-                if (shouldReloadRoute(state.destination, action.destination)) {
-                    fetchAndSetRoute(mapboxNavigation, action.destination)
-                }
-                return state.copy(destination = action.destination)
-            }
             is RoutesAction.FetchAndSetRoute -> {
-                fetchAndSetRoute(mapboxNavigation, state.destination)
+                val destination = destinationViewModel.state.value.destination
+                fetchAndSetRoute(mapboxNavigation, destination)
             }
             is RoutesAction.FetchPoints -> {
                 val routeOptions = getDefaultOptions(mapboxNavigation, action.points)
@@ -54,7 +54,8 @@ internal class RoutesViewModel(
             is RoutesAction.StartNavigation -> {
                 if (mapboxNavigation.getNavigationRoutes().isEmpty()) {
                     // fetching route if started from free drive
-                    fetchAndSetRoute(mapboxNavigation, state.destination) {
+                    val destination = destinationViewModel.state.value.destination
+                    fetchAndSetRoute(mapboxNavigation, destination) {
                         startNavigation(mapboxNavigation)
                     }
                 } else {
@@ -73,6 +74,18 @@ internal class RoutesViewModel(
             }
         }
         return state
+    }
+
+    override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        super.onAttached(mapboxNavigation)
+
+        mainJobControl.scope.launch {
+            destinationViewModel.state.map { it.destination }.collect { destination ->
+                if (shouldReloadRoute(destination)) {
+                    fetchAndSetRoute(mapboxNavigation, destination)
+                }
+            }
+        }
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
@@ -105,10 +118,8 @@ internal class RoutesViewModel(
     }
 
     private fun shouldReloadRoute(
-        oldDestination: Destination?,
         newDestination: Destination?
-    ) = oldDestination != newDestination &&
-        newDestination != null &&
+    ) = newDestination != null &&
         navigationStateViewModel.state.value == NavigationState.RoutePreview
 
     private fun fetchAndSetRoute(

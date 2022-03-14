@@ -5,6 +5,8 @@ import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.binder.UIBinder
+import com.mapbox.navigation.dropin.component.destination.DestinationAction
+import com.mapbox.navigation.dropin.component.destination.DestinationState
 import com.mapbox.navigation.dropin.component.maneuver.ManeuverViewBinder
 import com.mapbox.navigation.dropin.component.marker.MapMarkerFactory
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
@@ -55,11 +57,13 @@ internal class DropInNavigationViewContext(
     val dispatch: (action: Any) -> Unit = { action ->
         when (action) {
             is RoutesAction -> viewModel.routesViewModel.invoke(action)
+            is DestinationAction -> viewModel.destinationViewModel.invoke(action)
         }
     }
 
     val navigationState: StateFlow<NavigationState> get() = viewModel.navigationStateViewModel.state
     val routesState: StateFlow<RoutesState> get() = viewModel.routesViewModel.state
+    val destinationState: StateFlow<DestinationState> get() = viewModel.destinationViewModel.state
 
     //region Builders & Factories
 

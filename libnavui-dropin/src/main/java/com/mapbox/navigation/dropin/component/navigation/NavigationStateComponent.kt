@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin.component.navigation
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.extensions.flowOnFinalDestinationArrival
@@ -10,6 +11,7 @@ import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Destination
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 /**
@@ -33,6 +35,7 @@ import kotlinx.coroutines.launch
  */
 internal class NavigationStateComponent(
     private val navigationStateViewModel: NavigationStateViewModel,
+    private val destinationViewModel: DestinationViewModel,
     private val routesViewModel: RoutesViewModel,
 ) : UIComponent() {
 
@@ -40,20 +43,22 @@ internal class NavigationStateComponent(
         super.onAttached(mapboxNavigation)
 
         coroutineScope.launch {
-            routesViewModel.state.collect {
-                val state = getNavigationState(
-                    it.destination,
-                    it.navigationStarted,
+            combine(
+                destinationViewModel.state,
+                routesViewModel.state
+            ) { destinationState, routesState ->
+                getNavigationState(
+                    destinationState.destination,
+                    routesState.navigationStarted,
                     mapboxNavigation.getRoutes()
                 )
-                updateState(state)
-            }
+            }.collect { updateState(it) }
         }
 
         coroutineScope.launch {
             mapboxNavigation.flowRoutesUpdated().collect {
                 val state = getNavigationState(
-                    routesViewModel.state.value.destination,
+                    destinationViewModel.state.value.destination,
                     routesViewModel.state.value.navigationStarted,
                     it.routes
                 )
