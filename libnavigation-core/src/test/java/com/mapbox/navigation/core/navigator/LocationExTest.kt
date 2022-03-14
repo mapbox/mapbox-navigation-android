@@ -28,7 +28,7 @@ class LocationExTest {
             bearingAccuracyDegrees = BEARING_ACCURACY
             speedAccuracyMetersPerSecond = SPEED_ACCURACY
             verticalAccuracyMeters = VERTICAL_ACCURACY
-            extras = Bundle()
+            extras = BUNDLE
         }
         Location::class.java.getDeclaredMethod(
             "setIsFromMockProvider",
@@ -48,7 +48,7 @@ class LocationExTest {
             assertEquals(BEARING_ACCURACY, bearingAccuracy!!, .0f)
             assertEquals(SPEED_ACCURACY, speedAccuracy!!, .0f)
             assertEquals(VERTICAL_ACCURACY, verticalAccuracy!!, .0f)
-            assertEquals(EMPTY_EXTRAS, extras.toMap())
+            assertEquals(EXTRAS, extras.toMap())
             assertEquals(IS_MOCK, isMock)
         }
     }
@@ -67,7 +67,7 @@ class LocationExTest {
             BEARING_ACCURACY,
             SPEED_ACCURACY,
             VERTICAL_ACCURACY,
-            EMPTY_EXTRAS,
+            EXTRAS,
             IS_MOCK,
         )
 
@@ -84,7 +84,7 @@ class LocationExTest {
             assertEquals(BEARING_ACCURACY, bearingAccuracyDegrees, .0f)
             assertEquals(SPEED_ACCURACY, speedAccuracyMetersPerSecond, .0f)
             assertEquals(VERTICAL_ACCURACY, verticalAccuracyMeters, .0f)
-            assertEquals(EMPTY_BUNDLE.toString(), EMPTY_EXTRAS.toBundle().toString())
+            assertEquals(BUNDLE.toString(), EXTRAS.toBundle().toString())
             assertEquals(IS_MOCK, isFromMockProvider)
         }
     }
@@ -123,7 +123,7 @@ class LocationExTest {
             assertEquals(ZERO_VALUE, bearingAccuracyDegrees, .0f)
             assertEquals(ZERO_VALUE, speedAccuracyMetersPerSecond, .0f)
             assertEquals(ZERO_VALUE, verticalAccuracyMeters, .0f)
-            assertEquals(EMPTY_BUNDLE.toString(), extras.toString())
+            assertEquals(EXTRAS.toString(), extras.toString())
             assertEquals(IS_MOCK, isFromMockProvider)
         }
     }
@@ -144,8 +144,18 @@ class LocationExTest {
         private const val BEARING_ACCURACY = 50f
         private const val SPEED_ACCURACY = 60f
         private const val VERTICAL_ACCURACY = 70f
-        private val EMPTY_EXTRAS = FixLocationExtras()
-        private val EMPTY_BUNDLE = Bundle()
+        private val EXTRAS = {
+            val extras = FixLocationExtras()
+            extras.put("satellites", Value(42))
+            extras.put("string", Value("str42"))
+            return extras
+        }
+        private val BUNDLE = {
+            val bundle = Bundle()
+            bundle.putShort("satellites", 42);
+            bundle.putString("string", "str42");
+            return bundle
+        }
         private const val IS_MOCK = true
     }
 }
