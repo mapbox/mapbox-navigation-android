@@ -9,6 +9,7 @@ import com.mapbox.navigation.dropin.binder.navigationListOf
 import com.mapbox.navigation.dropin.component.camera.CameraComponent
 import com.mapbox.navigation.dropin.component.location.LocationComponent
 import com.mapbox.navigation.dropin.component.marker.MapMarkersComponent
+import com.mapbox.navigation.dropin.component.routearrow.RouteArrowComponent
 import com.mapbox.navigation.dropin.component.routeline.RouteLineComponent
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -22,7 +23,15 @@ internal class ActiveGuidanceMapBinder(
                 value,
                 navigationViewContext.viewModel.locationViewModel,
             ),
-            RouteLineComponent(value, navigationViewContext.routeLineOptions),
+            RouteLineComponent(
+                value,
+                navigationViewContext.routeLineOptions,
+                navigationViewContext.viewModel.routesViewModel
+            ),
+            RouteArrowComponent(
+                value,
+                navigationViewContext.routeArrowOptions
+            ),
             CameraComponent(
                 value,
                 navigationViewContext.viewModel.cameraViewModel,

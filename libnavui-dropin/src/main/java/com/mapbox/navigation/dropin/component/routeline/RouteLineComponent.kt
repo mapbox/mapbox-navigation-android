@@ -9,64 +9,37 @@ import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.route.toNavigationRoutes
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
-import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
+import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
+import com.mapbox.navigation.dropin.extensions.flowRouteProgress
+import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
+import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
-import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setRoutes
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRouteLines
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
-import com.mapbox.navigation.utils.internal.InternalJobControlFactory
-import kotlinx.coroutines.cancelChildren
+import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
+import com.mapbox.navigation.utils.internal.ifNonNull
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class RouteLineComponent(
     private val mapView: MapView,
     private val options: MapboxRouteLineOptions,
-) : MapboxNavigationObserver {
+    private val routesViewModel: RoutesViewModel,
+    private val routeLineApi: MapboxRouteLineApi = MapboxRouteLineApi(options),
+    private val routeLineView: MapboxRouteLineView = MapboxRouteLineView(options)
+) : UIComponent() {
 
     private val routeClickPadding = Utils.dpToPx(30f)
-    private val jobControl = InternalJobControlFactory.createMainScopeJobControl()
-
-    private val routeLineView by lazy {
-        MapboxRouteLineView(options)
-    }
-
-    private val routeLineApi: MapboxRouteLineApi by lazy {
-        MapboxRouteLineApi(options)
-    }
-
-    private val routesObserver = RoutesObserver { result ->
-        val routeLines = result.routes.map { RouteLine(it, null) }
-        jobControl.scope.launch {
-            routeLineApi.setRoutes(routeLines).let { routeDrawData ->
-                mapView.getMapboxMap().getStyle { style ->
-                    routeLineView.renderRouteDrawData(style, routeDrawData)
-                }
-            }
-        }
-    }
 
     private val onMapClickListener = OnMapClickListener { point ->
         selectRoute(point)
         false
-    }
-
-    private val routeProgressObserver = RouteProgressObserver { routeProgress ->
-        mapView.getMapboxMap().getStyle { style ->
-            routeLineApi.updateWithRouteProgress(routeProgress) { result ->
-                routeLineView.renderRouteLineUpdate(style, result).also {
-                    result.error?.let {
-                        Log.e(TAG, it.errorMessage, it.throwable)
-                    }
-                }
-            }
-        }
     }
 
     private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
@@ -77,40 +50,65 @@ internal class RouteLineComponent(
     }
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
-        // Setup the map press to select alternative routes.
+        super.onAttached(mapboxNavigation)
         mapView.gestures.addOnMapClickListener(onMapClickListener)
-
-        mapboxNavigation.registerRoutesObserver(routesObserver)
-        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapView.location.addOnIndicatorPositionChangedListener(onPositionChangedListener)
+
+        coroutineScope.launch {
+            mapboxNavigation.flowRouteProgress().collect { routeProgress ->
+                ifNonNull(mapView.getMapboxMap().getStyle()) { style ->
+                    routeLineApi.updateWithRouteProgress(routeProgress) { result ->
+                        routeLineView.renderRouteLineUpdate(style, result).also {
+                            result.error?.let {
+                                Log.e(TAG, it.errorMessage, it.throwable)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        coroutineScope.launch {
+            mapboxNavigation.flowRoutesUpdated().collect { result ->
+                val routeLines = result.navigationRoutes.map {
+                    NavigationRouteLine(it, null)
+                }
+                routeLineApi.setNavigationRouteLines(routeLines).let { routeDrawData ->
+                    ifNonNull(mapView.getMapboxMap().getStyle()) { style ->
+                        routeLineView.renderRouteDrawData(style, routeDrawData)
+                    }
+                }
+            }
+        }
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        super.onDetached(mapboxNavigation)
         mapView.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
-        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.unregisterRoutesObserver(routesObserver)
-        jobControl.job.cancelChildren()
         routeLineApi.cancel()
         routeLineView.cancel()
     }
 
     private fun selectRoute(point: Point) {
-        jobControl.scope.launch {
+        coroutineScope.launch {
             val result = routeLineApi.findClosestRoute(
                 point,
                 mapView.getMapboxMap(),
                 routeClickPadding
             )
 
-            val routeFound = result.value?.route
-            if (routeFound != null && routeFound != routeLineApi.getPrimaryRoute()) {
-                val reOrderedRoutes = routeLineApi.getRoutes()
-                    .filter { it != routeFound }
-                    .toMutableList()
-                    .also {
-                        it.add(0, routeFound)
-                    }
-                MapboxNavigationApp.current()?.setRoutes(reOrderedRoutes)
+            result.onValue { resultValue ->
+                if (resultValue.route != routeLineApi.getPrimaryRoute()) {
+                    val reOrderedRoutes = routeLineApi.getRoutes()
+                        .filter { it != resultValue.route }
+                        .toMutableList()
+                        .also {
+                            it.add(0, resultValue.route)
+                        }
+                    routesViewModel.invoke(
+                        RoutesAction.SetRoutes(reOrderedRoutes.toNavigationRoutes())
+                    )
+                }
             }
         }
     }
