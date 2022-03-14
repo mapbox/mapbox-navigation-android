@@ -149,14 +149,14 @@ class LocationExTest {
             val extras = FixLocationExtras()
             extras.put("satelites", Value(42))
             extras.put("string", Value("str42"))
-            return extras
+            extras
         }()
         private val BUNDLE = { ->
             val bundle = Bundle()
             bundle.putShort("satellites", 42)
             bundle.putString("string", "str42")
-            return bundle
-        }
+            bundle
+        }()
         private const val IS_MOCK = true
     }
 }
