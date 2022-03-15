@@ -1,9 +1,9 @@
 package com.mapbox.navigation.dropin.component.camera
 
-import com.mapbox.android.gestures.Utils
-import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
+import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.location.LocationViewModel
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
@@ -14,13 +14,16 @@ import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
+import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
+@OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)
 internal class CameraComponent constructor(
     private val mapView: MapView,
     private val cameraViewModel: CameraViewModel,
@@ -38,30 +41,35 @@ internal class CameraComponent constructor(
         ),
 ) : UIComponent() {
 
-    // TODO: Remove or improve to calculate the viewport size at runtime
-    private val overviewEdgeInsets = EdgeInsets(
-        Utils.dpToPx(180f).toDouble(),
-        Utils.dpToPx(80f).toDouble(),
-        Utils.dpToPx(180f).toDouble(),
-        Utils.dpToPx(80f).toDouble(),
-    )
-    private val followingEdgeInsets = EdgeInsets(
-        Utils.dpToPx(0f).toDouble(),
-        Utils.dpToPx(0f).toDouble(),
-        Utils.dpToPx(200f).toDouble(),
-        Utils.dpToPx(0f).toDouble(),
-    )
-
     private val gesturesHandler = NavigationBasicGesturesHandler(navigationCamera)
+
     // To determine if [$this] is a fresh instantiation and is garbage collected upon onDetached
     private var isFirstAttached: Boolean = true
 
+    private val debug = false
+    private val debugger by lazy {
+        MapboxNavigationViewportDataSourceDebugger(
+            context = mapView.context,
+            mapView = mapView,
+            layerAbove = "road-label"
+        )
+    }
+
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
+        if (debug) {
+            debugger.enabled = true
+            navigationCamera.debugger = debugger
+            viewportDataSource.debugger = debugger
+        }
+
         mapView.camera.addCameraAnimationsLifecycleListener(gesturesHandler)
-        viewportDataSource.overviewPadding = overviewEdgeInsets
-        viewportDataSource.followingPadding = followingEdgeInsets
-        viewportDataSource.evaluate()
+
+        cameraViewModel.state.map { it.cameraPadding }.observe {
+            viewportDataSource.overviewPadding = it
+            viewportDataSource.followingPadding = it
+            viewportDataSource.evaluate()
+        }
 
         controlCameraFrameOverrides()
         updateCameraFrame()
@@ -114,7 +122,7 @@ internal class CameraComponent constructor(
                 cameraViewModel.state,
                 locationViewModel.state,
                 navigationStateViewModel.state
-            ) { cameraState, location, navigationState, ->
+            ) { cameraState, location, navigationState ->
                 location?.let {
                     viewportDataSource.onLocationChanged(it)
                     viewportDataSource.evaluate()

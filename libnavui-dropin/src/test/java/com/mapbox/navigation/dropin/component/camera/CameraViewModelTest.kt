@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.component.camera
 
+import com.mapbox.maps.EdgeInsets
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -73,5 +74,18 @@ class CameraViewModelTest {
             val cameraState = cameraViewModel.state.value
 
             assertEquals(TargetCameraMode.Following, cameraState.cameraMode)
+        }
+
+    @Test
+    fun `when action UpdatePadding updates cameraPadding`() =
+        coroutineRule.runBlockingTest {
+            val padding = EdgeInsets(1.0, 2.0, 3.0, 4.0)
+            val cameraViewModel = CameraViewModel()
+            val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+            cameraViewModel.onAttached(mockMapboxNavigation)
+
+            cameraViewModel.invoke(CameraAction.UpdatePadding(padding))
+
+            assertEquals(padding, cameraViewModel.state.value.cameraPadding)
         }
 }

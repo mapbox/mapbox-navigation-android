@@ -27,4 +27,8 @@
 
     <!-- Maneuver view -->
     <dimen name="mapbox_maneuver_view_padding">4dp</dimen>
+
+    <!-- Overview camera padding to ensure location puck and target pin are not clipped -->
+    <dimen name="mapbox_camera_overview_padding_v">50dp</dimen>
+    <dimen name="mapbox_camera_overview_padding_h">50dp</dimen>
 </resources>
