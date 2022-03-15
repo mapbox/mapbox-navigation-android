@@ -1,19 +1,21 @@
 package com.mapbox.navigation.dropin.component.cameramode
 
+import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.camera.CameraAction
 import com.mapbox.navigation.dropin.component.camera.CameraViewModel
 import com.mapbox.navigation.dropin.component.camera.TargetCameraMode
+import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
+import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.view.MapboxCameraModeButton
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class CameraModeButtonComponent(
     private val cameraViewModel: CameraViewModel,
+    private val navigationStateViewModel: NavigationStateViewModel,
     private val cameraModeButton: MapboxCameraModeButton,
 ) : UIComponent() {
 
@@ -22,22 +24,24 @@ internal class CameraModeButtonComponent(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        coroutineScope.launch {
-            cameraViewModel.state.collect {
-                when (it.cameraMode) {
-                    TargetCameraMode.Following -> {
-                        buttonIconState = TargetCameraMode.Overview
-                        cameraModeButton.setState(NavigationCameraState.FOLLOWING)
-                    }
-                    TargetCameraMode.Overview -> {
-                        buttonIconState = TargetCameraMode.Following
-                        cameraModeButton.setState(NavigationCameraState.OVERVIEW)
-                    }
-                    else -> {
-                        // no op
-                    }
+        cameraViewModel.state.observe {
+            when (it.cameraMode) {
+                TargetCameraMode.Following -> {
+                    buttonIconState = TargetCameraMode.Overview
+                    cameraModeButton.setState(NavigationCameraState.FOLLOWING)
+                }
+                TargetCameraMode.Overview -> {
+                    buttonIconState = TargetCameraMode.Following
+                    cameraModeButton.setState(NavigationCameraState.OVERVIEW)
+                }
+                else -> {
+                    // no op
                 }
             }
+        }
+
+        navigationStateViewModel.state.observe {
+            cameraModeButton.isVisible = it != NavigationState.RoutePreview
         }
 
         cameraModeButton.setOnClickListener {

@@ -18,7 +18,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.coordinator.ActionListCoordinator
+import com.mapbox.navigation.dropin.coordinator.ActionButtonsCoordinator
 import com.mapbox.navigation.dropin.coordinator.BackPressManager
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
 import com.mapbox.navigation.dropin.coordinator.ManeuverCoordinator
@@ -141,7 +141,7 @@ class DropInNavigationView @JvmOverloads constructor(
                 binding.infoPanelLayout,
                 binding.guidelineBottom
             ),
-            ActionListCoordinator(navigationContext, binding.actionListLayout),
+            ActionButtonsCoordinator(navigationContext, binding.actionListLayout),
             SpeedLimitCoordinator(navigationContext, binding.speedLimitLayout),
             RoadNameLabelCoordinator(navigationContext, binding.roadNameLayout)
         )
