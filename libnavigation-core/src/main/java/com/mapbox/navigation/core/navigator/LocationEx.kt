@@ -127,7 +127,8 @@ internal fun Bundle.toMap(): FixLocationExtras {
             is Short -> map[key] = Value(value.toLong())
             is String -> map[key] = Value(value)
             else -> {
-                Log.w(TAG, "Unsupported type in location extras `${value?.javaClass?.kotlin?.simpleName}`")
+                Log.w(TAG, "Unsupported type in location extras " +
+                    "`${value?.javaClass?.kotlin?.simpleName}`")
             }
         }
     }
