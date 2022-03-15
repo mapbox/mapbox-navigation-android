@@ -14,12 +14,16 @@ internal object BuildingProcessor {
      * Source layer that includes building height.
      */
     private const val BUILDING_LAYER_ID = "building"
+    private const val BUILDING_EXTRUSION_LAYER_ID = "building-extrusion"
 
     suspend fun queryBuilding(
         action: BuildingAction.QueryBuilding
     ): BuildingResult.QueriedBuildings = suspendCoroutine { continuation ->
         val screenCoordinate = action.mapboxMap.pixelForCoordinate(action.point)
-        val queryOptions = RenderedQueryOptions(listOf(BUILDING_LAYER_ID), null)
+        val queryOptions = RenderedQueryOptions(
+            listOf(BUILDING_LAYER_ID, BUILDING_EXTRUSION_LAYER_ID),
+            null
+        )
         action.mapboxMap.queryRenderedFeatures(screenCoordinate, queryOptions) { expected ->
             expected.fold(
                 { error ->
