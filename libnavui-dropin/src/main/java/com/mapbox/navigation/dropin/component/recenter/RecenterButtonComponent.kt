@@ -1,39 +1,45 @@
 package com.mapbox.navigation.dropin.component.recenter
 
-import android.view.View.GONE
-import android.view.View.VISIBLE
+import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.camera.CameraAction
 import com.mapbox.navigation.dropin.component.camera.CameraViewModel
 import com.mapbox.navigation.dropin.component.camera.TargetCameraMode
+import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
+import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.view.MapboxExtendableButton
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class RecenterButtonComponent(
     private val cameraViewModel: CameraViewModel,
+    private val navigationStateViewModel: NavigationStateViewModel,
     private val recenterButton: MapboxExtendableButton,
 ) : UIComponent() {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        coroutineScope.launch {
-            cameraViewModel.state.collect {
-                if (it.cameraMode == TargetCameraMode.Idle) {
-                    recenterButton.visibility = VISIBLE
-                } else {
-                    recenterButton.visibility = GONE
-                }
-            }
-        }
         recenterButton.setOnClickListener {
             cameraViewModel.invoke(
                 CameraAction.ToFollowing
             )
+        }
+
+        coroutineScope.launch {
+            combine(
+                cameraViewModel.state,
+                navigationStateViewModel.state
+            ) { cameraState, navigationState ->
+                navigationState != NavigationState.RoutePreview &&
+                    cameraState.cameraMode == TargetCameraMode.Idle
+            }.collect { visible ->
+                recenterButton.isVisible = visible
+            }
         }
     }
 

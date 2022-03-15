@@ -12,5 +12,6 @@ class NavigationUIBinders(
     val roadName: UIBinder = RoadNameViewBinder(),
     val infoPanelTripProgressBinder: UIBinder = InfoPanelTripProgressBinder(),
     val infoPanelHeaderBinder: UIBinder? = null,
-    val infoPanelContentBinder: UIBinder? = null
+    val infoPanelContentBinder: UIBinder? = null,
+    val actionButtonsBinder: UIBinder? = null,
 )

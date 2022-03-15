@@ -1,4 +1,4 @@
-package com.mapbox.navigation.dropin.binder.action
+package com.mapbox.navigation.dropin.binder
 
 import android.transition.Scene
 import android.transition.Slide
@@ -9,38 +9,39 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.binder.navigationListOf
 import com.mapbox.navigation.dropin.component.audioguidance.AudioGuidanceButtonComponent
 import com.mapbox.navigation.dropin.component.cameramode.CameraModeButtonComponent
 import com.mapbox.navigation.dropin.component.recenter.RecenterButtonComponent
-import com.mapbox.navigation.dropin.databinding.MapboxActionActiveGuidanceLayoutBinding
+import com.mapbox.navigation.dropin.databinding.MapboxActionButtonsLayoutBinding
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal class ActiveGuidanceActionBinder(
+internal class ActionButtonBinder(
     private val navigationViewContext: DropInNavigationViewContext
 ) : UIBinder {
 
-    override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
+    override fun bind(value: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
-            viewGroup,
-            R.layout.mapbox_action_active_guidance_layout,
-            viewGroup.context
+            value,
+            R.layout.mapbox_action_buttons_layout,
+            value.context
         )
         TransitionManager.go(scene, Slide(Gravity.RIGHT))
 
-        val binding = MapboxActionActiveGuidanceLayoutBinding.bind(viewGroup)
+        val binding = MapboxActionButtonsLayoutBinding.bind(value)
         return navigationListOf(
             AudioGuidanceButtonComponent(
                 navigationViewContext.viewModel.audioGuidanceViewModel,
+                navigationViewContext.viewModel.navigationStateViewModel,
                 binding.soundButton,
             ),
             CameraModeButtonComponent(
                 navigationViewContext.viewModel.cameraViewModel,
+                navigationViewContext.viewModel.navigationStateViewModel,
                 binding.cameraModeButton
             ),
             RecenterButtonComponent(
                 navigationViewContext.viewModel.cameraViewModel,
+                navigationViewContext.viewModel.navigationStateViewModel,
                 binding.recenterButton
             )
         )
