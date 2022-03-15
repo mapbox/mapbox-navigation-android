@@ -120,7 +120,7 @@ class LocationExTest {
             NULL_VALUE,
             NULL_VALUE,
             NULL_VALUE,
-            EXTRAS,
+            EMPTY_EXTRAS,
             IS_MOCK,
         )
 
@@ -140,7 +140,7 @@ class LocationExTest {
             assertEquals(ZERO_VALUE, bearingAccuracyDegrees, .0f)
             assertEquals(ZERO_VALUE, speedAccuracyMetersPerSecond, .0f)
             assertEquals(ZERO_VALUE, verticalAccuracyMeters, .0f)
-            assertEquals(EXTRAS.toString(), extras.toMap().toString())
+            assertEquals(EMPTY_EXTRAS.toString(), extras.toMap().toString())
             assertEquals(IS_MOCK, isFromMockProvider)
         }
     }
@@ -173,6 +173,7 @@ class LocationExTest {
             bundle.putString("string", "str42")
             bundle
         }()
+        private val EMPTY_EXTRAS = FixLocationExtras()
         private const val IS_MOCK = true
     }
 }
