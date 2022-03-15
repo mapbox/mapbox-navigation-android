@@ -5,6 +5,7 @@ package com.mapbox.navigation.core.navigator
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.utils.internal.logE
@@ -116,12 +117,17 @@ internal fun Bundle.toMap(): FixLocationExtras {
     while (iterator.hasNext()) {
         val key = iterator.next()
         when (val value = this.get(key)) {
-            is Double -> map[key] = Value(value)
-            is Long -> map[key] = Value(value)
             is Boolean -> map[key] = Value(value)
+            is Byte -> map[key] = Value(value.toLong())
+            is Char -> map[key] = Value(value.toString())
+            is Double -> map[key] = Value(value)
+            is Float -> map[key] = Value(value.toDouble())
+            is Int -> map[key] = Value(value.toLong())
+            is Long -> map[key] = Value(value)
+            is Short -> map[key] = Value(value.toLong())
             is String -> map[key] = Value(value)
             else -> {
-                // do nothing
+                Log.w(TAG, "Unsupported type in location extras `${value?.javaClass?.kotlin?.simpleName}`")
             }
         }
     }

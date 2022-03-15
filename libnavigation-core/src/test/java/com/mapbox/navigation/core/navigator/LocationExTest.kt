@@ -5,6 +5,7 @@ import android.os.Bundle
 import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.FixLocation
+import io.mockk.InternalPlatformDsl.toStr
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Test
@@ -14,6 +15,22 @@ import java.util.Date
 
 @RunWith(RobolectricTestRunner::class)
 class LocationExTest {
+
+    @Test
+    fun bundleToMap() {
+        val expected = Bundle()
+
+        expected.putBoolean("bool", true)
+        expected.putByte("byte", 55)
+        expected.putChar("char", 'a')
+        expected.putDouble("double", 11.0)
+        expected.putFloat("float", 22.0f)
+        expected.putInt("int", 33)
+        expected.putShort("short", 44)
+        expected.putString("str", "strValue")
+        val actual = expected.toMap().toBundle()
+        assertEquals(expected.toString(), actual.toString())
+    }
 
     @Test
     fun toFixLocation() {
@@ -153,7 +170,7 @@ class LocationExTest {
         }()
         private val BUNDLE = { ->
             val bundle = Bundle()
-            bundle.putShort("satellites", 42)
+            bundle.putInt("satellites", 42)
             bundle.putString("string", "str42")
             bundle
         }()
