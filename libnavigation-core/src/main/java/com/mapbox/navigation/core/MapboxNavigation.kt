@@ -59,6 +59,7 @@ import com.mapbox.navigation.core.reroute.LegacyRerouteControllerAdapter
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
 import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
+import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesRequestCallback
@@ -1054,9 +1055,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     /**
-     * Set [NavigationRerouteController] that's automatically invoked when user is off-route.
-     *
-     * By default uses [MapboxRerouteController]. Setting to `null` disables auto-reroute.
+     * Set [RerouteOptionsAdapter]. It allows to modify [RouteOptions] before a reroute request
+     * is sent if the default reroute controller is used. Pass `null` to clear the adapter.
      */
     @JvmOverloads
     fun setRerouteController(
@@ -1067,6 +1067,17 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             rerouteController.interrupt()
             reroute()
         }
+    }
+
+    /**
+     * Set [RerouteOptionsAdapter]. It allows modify [RouteOptions] of default implementation of
+     * [NavigationRerouteController] ([RerouteController])
+     */
+    fun setRerouteOptionsAdapter(
+        rerouteOptionsAdapter: RerouteOptionsAdapter?
+    ) {
+        (rerouteController as? MapboxRerouteController)
+            ?.setRerouteOptionsAdapter(rerouteOptionsAdapter)
     }
 
     /**
@@ -1460,7 +1471,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun reroute() {
         rerouteController?.reroute(
-            NavigationRerouteController.RoutesCallback { routes ->
+            NavigationRerouteController.RoutesCallback { routes, _ ->
                 directionsSession.setRoutes(
                     routes,
                     routesUpdateReason = RoutesExtra.ROUTES_UPDATE_REASON_REROUTE

@@ -35,6 +35,8 @@ internal class MapboxRerouteController(
 
     private var requestId: Long? = null
 
+    private var rerouteOptionsAdapter: RerouteOptionsAdapter? = null
+
     override var state: RerouteState = RerouteState.Idle
         private set(value) {
             if (field == value) {
@@ -93,7 +95,7 @@ internal class MapboxRerouteController(
 
     override fun reroute(routesCallback: RerouteController.RoutesCallback) {
         reroute(
-            NavigationRerouteController.RoutesCallback { routes ->
+            NavigationRerouteController.RoutesCallback { routes, _ ->
                 routesCallback.onNewRoutes(routes.toDirectionsRoutes())
             }
         )
@@ -121,7 +123,10 @@ internal class MapboxRerouteController(
             .let { routeOptionsResult ->
                 when (routeOptionsResult) {
                     is RouteOptionsUpdater.RouteOptionsResult.Success -> {
-                        request(callback, routeOptionsResult.routeOptions)
+                        val modifiedRerouteOption = rerouteOptionsAdapter
+                            ?.onRouteOptions(routeOptionsResult.routeOptions)
+                            ?: routeOptionsResult.routeOptions
+                        request(callback, modifiedRerouteOption)
                     }
                     is RouteOptionsUpdater.RouteOptionsResult.Error -> {
                         mainJobController.scope.launch {
@@ -178,7 +183,7 @@ internal class MapboxRerouteController(
                     mainJobController.scope.launch {
                         state = RerouteState.RouteFetched(routerOrigin)
                         state = RerouteState.Idle
-                        callback.onNewRoutes(routes)
+                        callback.onNewRoutes(routes, routerOrigin)
                     }
                 }
 
@@ -200,5 +205,9 @@ internal class MapboxRerouteController(
                 }
             }
         )
+    }
+
+    internal fun setRerouteOptionsAdapter(rerouteOptionsAdapter: RerouteOptionsAdapter?) {
+        this.rerouteOptionsAdapter = rerouteOptionsAdapter
     }
 }

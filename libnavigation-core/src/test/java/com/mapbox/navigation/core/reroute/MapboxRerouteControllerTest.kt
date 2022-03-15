@@ -65,6 +65,7 @@ class MapboxRerouteControllerTest {
 
     @get:Rule
     val mockLoggerTestRule = MockLoggerRule()
+
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
@@ -444,6 +445,32 @@ class MapboxRerouteControllerTest {
         rerouteStateObserver: RerouteController.RerouteStateObserver = primaryRerouteObserver
     ): Boolean {
         return rerouteController.registerRerouteStateObserver(rerouteStateObserver)
+    }
+
+    @Test
+    fun uses_route_options_delegate() {
+        mockRouteOptionsResult(successFromResult)
+        val mockNewRouteOptions = mockk<RouteOptions>()
+        val mockRerouteOptionsDelegateManger = mockk<RerouteOptionsAdapter> {
+            every { onRouteOptions(any()) } returns mockNewRouteOptions
+        }
+        val routeOptionsSlot = slot<RouteOptions>()
+        val routeRequestCallback = slot<NavigationRouterCallback>()
+        every {
+            directionsSession.requestRoutes(
+                capture(routeOptionsSlot),
+                capture(routeRequestCallback)
+            )
+        } returns 1L
+
+        rerouteController.setRerouteOptionsAdapter(mockRerouteOptionsDelegateManger)
+        rerouteController.reroute(routeCallback)
+        routeRequestCallback.captured.onRoutesReady(mockk(), mockk())
+
+        verify(exactly = 1) {
+            mockRerouteOptionsDelegateManger.onRouteOptions(routeOptionsFromSuccessResult)
+        }
+        assertEquals(mockNewRouteOptions, routeOptionsSlot.captured)
     }
 
     private fun mockRouteOptionsResult(
