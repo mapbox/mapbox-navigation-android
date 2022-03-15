@@ -10,6 +10,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Fixed an issue where a route refresh would only refresh annotations for the current leg of a route instead of for all remaining legs of a route. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
 - Fixed an issue where alternative routes would hold a reference to the original route's `RouteOptions` instead of the correct ones that were used to generate the alternative. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
+- Fixed an issue related to highlighting buildings via the MapboxBuildingsApi by adding the building-extrusion layer as one of the layers queried. [#5433](https://github.com/mapbox/mapbox-navigation-android/pull/5433)
 
 ## Mapbox Navigation SDK 2.4.0-beta.1 - March 11, 2022
 ### Changelog
