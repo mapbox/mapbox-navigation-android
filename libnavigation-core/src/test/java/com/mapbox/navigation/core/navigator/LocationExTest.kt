@@ -5,7 +5,6 @@ import android.os.Bundle
 import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.FixLocation
-import io.mockk.InternalPlatformDsl.toStr
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Test
