@@ -19,6 +19,6 @@ class RoadNameViewBinder : UIBinder {
         )
         TransitionManager.go(scene)
         val binding = MapboxRoadNameLayoutBinding.bind(viewGroup)
-        return RoadNameComponent(binding.roadNameView)
+        return RoadNameLabelComponent(binding.roadNameView)
     }
 }

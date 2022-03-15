@@ -30,6 +30,6 @@ class RoadNameViewBinderTest {
 
         val result = RoadNameViewBinder().bind(viewGroup)
 
-        assertTrue(result is RoadNameComponent)
+        assertTrue(result is RoadNameLabelComponent)
     }
 }
