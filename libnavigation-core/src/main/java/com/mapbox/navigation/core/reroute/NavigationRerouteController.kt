@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.reroute
 
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 
@@ -27,6 +28,6 @@ interface NavigationRerouteController : RerouteController {
          * Called whenever new route(s) has been fetched.
          * @see [MapboxNavigation.setRoutes]
          */
-        fun onNewRoutes(routes: List<NavigationRoute>)
+        fun onNewRoutes(routes: List<NavigationRoute>, routerOrigin: RouterOrigin)
     }
 }

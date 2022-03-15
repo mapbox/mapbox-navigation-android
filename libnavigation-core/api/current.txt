@@ -54,6 +54,7 @@ package com.mapbox.navigation.core {
     method public void setRerouteController(com.mapbox.navigation.core.reroute.RerouteController rerouteController);
     method public void setRerouteController(com.mapbox.navigation.core.reroute.NavigationRerouteController? rerouteController = com.mapbox.navigation.core.MapboxNavigation.defaultRerouteController);
     method public void setRerouteController();
+    method public void setRerouteOptionsAdapter(com.mapbox.navigation.core.reroute.RerouteOptionsAdapter? rerouteOptionsAdapter);
     method @Deprecated public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes, int initialLegIndex = 0);
     method @Deprecated public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void startReplayTripSession(boolean withForegroundService = true);
@@ -540,7 +541,7 @@ package com.mapbox.navigation.core.reroute {
   }
 
   public static fun interface NavigationRerouteController.RoutesCallback {
-    method public void onNewRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    method public void onNewRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
   }
 
   public interface RerouteController {
@@ -558,6 +559,10 @@ package com.mapbox.navigation.core.reroute {
 
   public static fun interface RerouteController.RoutesCallback {
     method public void onNewRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
+  }
+
+  public interface RerouteOptionsAdapter {
+    method public com.mapbox.api.directions.v5.models.RouteOptions onRouteOptions(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
   }
 
   public abstract sealed class RerouteState {
