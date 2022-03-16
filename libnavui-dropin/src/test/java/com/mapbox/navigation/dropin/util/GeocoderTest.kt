@@ -56,12 +56,12 @@ internal class GeocoderTest {
     }
 
     @Test
-    fun `reverseGeocode should correctly configure MapboxGeocoding`() =
+    fun `findAddresses should correctly configure MapboxGeocoding`() =
         coroutineRule.runBlockingTest {
             val point = Point.fromLngLat(10.0, 11.0)
             givenGeocodingResponse(response(emptyList()))
 
-            sut.reverseGeocode(point, GeocodingCriteria.TYPE_ADDRESS)
+            sut.findAddresses(point)
 
             verify { spyMapboxGeocodingBuilder.accessToken("ACCESS_TOKEN") }
             verify { spyMapboxGeocodingBuilder.query(point) }
@@ -75,7 +75,7 @@ internal class GeocoderTest {
             val features = listOf<CarmenFeature>()
             givenGeocodingResponse(response(features))
 
-            val result = sut.findAddresses(point)
+            val result = sut.findAddresses(point).getOrNull()
 
             assertEquals(features, result)
         }

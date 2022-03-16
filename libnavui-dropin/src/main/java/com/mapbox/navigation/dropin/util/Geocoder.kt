@@ -19,10 +19,11 @@ import kotlin.coroutines.resumeWithException
 internal class Geocoder(
     private val accessToken: String
 ) {
-    suspend fun findAddresses(point: Point): List<CarmenFeature> =
+    suspend fun findAddresses(point: Point): Result<List<CarmenFeature>> = runCatching {
         reverseGeocode(point, GeocodingCriteria.TYPE_ADDRESS)?.features() ?: emptyList()
+    }
 
-    suspend fun reverseGeocode(
+    private suspend fun reverseGeocode(
         point: Point,
         @GeocodingTypeCriteria criteria: String
     ): GeocodingResponse? =

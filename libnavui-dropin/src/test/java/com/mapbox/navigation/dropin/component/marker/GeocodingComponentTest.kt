@@ -66,7 +66,9 @@ internal class GeocodingComponentTest {
     fun `should reverse geocode new Destination`() = coroutineRule.runBlockingTest {
         val newDestination = Destination(Point.fromLngLat(11.0, 22.0))
         val features: List<CarmenFeature> = listOf(mockk())
-        coEvery { mockGeocoder.findAddresses(newDestination.point) } returns features
+        coEvery {
+            mockGeocoder.findAddresses(newDestination.point)
+        } returns Result.success(features)
 
         sut.onAttached(mockNavigation)
         destinationStateFlow.tryEmit(DestinationState(newDestination))

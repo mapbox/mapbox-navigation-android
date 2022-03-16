@@ -29,10 +29,9 @@ internal class GeocodingComponent(
             .mapNotNull { it.destination?.point }
             .distinctUntilChanged()
             .observe { point: Point ->
-                try {
-                    val features = geocoder.findAddresses(point)
+                geocoder.findAddresses(point).onSuccess { features ->
                     destinationViewModel.invoke(DidReverseGeocode(point, features))
-                } catch (e: Throwable) {
+                }.onFailure { e ->
                     logW(TAG, "Failed to find address for point= $point; error=$e")
                 }
             }
