@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.navigator
 
 import android.location.Location
 import android.os.Bundle
+import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.FixLocation
 import org.junit.Assert.assertEquals
@@ -13,6 +14,23 @@ import java.util.Date
 
 @RunWith(RobolectricTestRunner::class)
 class LocationExTest {
+
+    @Test
+    fun bundleToMap() {
+        val expected = Bundle()
+        expected.putBoolean("bool", true)
+        expected.putByte("byte", 55)
+        expected.putChar("char", 'a')
+        expected.putDouble("double", 11.0)
+        expected.putFloat("float", 22.0f)
+        expected.putInt("int", 33)
+        expected.putShort("short", 44)
+        expected.putString("str", "strValue")
+
+        val actual = expected.toMap().toBundle()
+
+        assertEquals(expected.toString(), actual.toString())
+    }
 
     @Test
     fun toFixLocation() {
@@ -28,7 +46,7 @@ class LocationExTest {
             bearingAccuracyDegrees = BEARING_ACCURACY
             speedAccuracyMetersPerSecond = SPEED_ACCURACY
             verticalAccuracyMeters = VERTICAL_ACCURACY
-            extras = Bundle()
+            extras = BUNDLE
         }
         Location::class.java.getDeclaredMethod(
             "setIsFromMockProvider",
@@ -48,7 +66,7 @@ class LocationExTest {
             assertEquals(BEARING_ACCURACY, bearingAccuracy!!, .0f)
             assertEquals(SPEED_ACCURACY, speedAccuracy!!, .0f)
             assertEquals(VERTICAL_ACCURACY, verticalAccuracy!!, .0f)
-            assertEquals(EMPTY_EXTRAS, extras.toMap())
+            assertEquals(EXTRAS, extras.toMap())
             assertEquals(IS_MOCK, isMock)
         }
     }
@@ -67,7 +85,7 @@ class LocationExTest {
             BEARING_ACCURACY,
             SPEED_ACCURACY,
             VERTICAL_ACCURACY,
-            EMPTY_EXTRAS,
+            EXTRAS,
             IS_MOCK,
         )
 
@@ -84,7 +102,7 @@ class LocationExTest {
             assertEquals(BEARING_ACCURACY, bearingAccuracyDegrees, .0f)
             assertEquals(SPEED_ACCURACY, speedAccuracyMetersPerSecond, .0f)
             assertEquals(VERTICAL_ACCURACY, verticalAccuracyMeters, .0f)
-            assertEquals(EMPTY_BUNDLE.toString(), EMPTY_EXTRAS.toBundle().toString())
+            assertEquals(BUNDLE.toString(), EXTRAS.toBundle().toString())
             assertEquals(IS_MOCK, isFromMockProvider)
         }
     }
@@ -123,7 +141,7 @@ class LocationExTest {
             assertEquals(ZERO_VALUE, bearingAccuracyDegrees, .0f)
             assertEquals(ZERO_VALUE, speedAccuracyMetersPerSecond, .0f)
             assertEquals(ZERO_VALUE, verticalAccuracyMeters, .0f)
-            assertEquals(EMPTY_BUNDLE.toString(), extras.toString())
+            assertEquals(EMPTY_EXTRAS.toString(), extras.toMap().toString())
             assertEquals(IS_MOCK, isFromMockProvider)
         }
     }
@@ -144,8 +162,19 @@ class LocationExTest {
         private const val BEARING_ACCURACY = 50f
         private const val SPEED_ACCURACY = 60f
         private const val VERTICAL_ACCURACY = 70f
+        private val EXTRAS = { ->
+            val extras = FixLocationExtras()
+            extras.put("satellites", Value(42))
+            extras.put("string", Value("str42"))
+            extras
+        }()
+        private val BUNDLE = { ->
+            val bundle = Bundle()
+            bundle.putInt("satellites", 42)
+            bundle.putString("string", "str42")
+            bundle
+        }()
         private val EMPTY_EXTRAS = FixLocationExtras()
-        private val EMPTY_BUNDLE = Bundle()
         private const val IS_MOCK = true
     }
 }

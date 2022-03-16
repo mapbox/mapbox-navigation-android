@@ -8,6 +8,7 @@ import android.os.Bundle
 import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigator.FixLocation
 import java.lang.reflect.Method
 import java.util.Date
@@ -116,12 +117,20 @@ internal fun Bundle.toMap(): FixLocationExtras {
     while (iterator.hasNext()) {
         val key = iterator.next()
         when (val value = this.get(key)) {
-            is Double -> map[key] = Value(value)
-            is Long -> map[key] = Value(value)
             is Boolean -> map[key] = Value(value)
+            is Byte -> map[key] = Value(value.toLong())
+            is Char -> map[key] = Value(value.toString())
+            is Double -> map[key] = Value(value)
+            is Float -> map[key] = Value(value.toDouble())
+            is Int -> map[key] = Value(value.toLong())
+            is Long -> map[key] = Value(value)
+            is Short -> map[key] = Value(value.toLong())
             is String -> map[key] = Value(value)
             else -> {
-                // do nothing
+                logW(
+                    TAG,
+                    "Unsupported type in location extras"
+                )
             }
         }
     }
