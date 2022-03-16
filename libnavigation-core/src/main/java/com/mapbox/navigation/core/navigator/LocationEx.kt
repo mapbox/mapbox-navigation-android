@@ -129,8 +129,7 @@ internal fun Bundle.toMap(): FixLocationExtras {
             else -> {
                 logW(
                     TAG,
-                    "Unsupported type in location extras " +
-                        "`${value?.javaClass?.kotlin?.simpleName}`"
+                    "Unsupported type in location extras"
                 )
             }
         }
