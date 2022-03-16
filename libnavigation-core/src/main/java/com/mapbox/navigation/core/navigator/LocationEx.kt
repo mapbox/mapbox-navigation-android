@@ -14,6 +14,7 @@ import java.lang.reflect.Method
 import java.util.Date
 import kotlin.collections.HashMap
 import kotlin.collections.set
+import com.mapbox.navigation.utils.internal.logW
 
 internal typealias FixLocationExtras = HashMap<String, Value>
 
@@ -127,7 +128,7 @@ internal fun Bundle.toMap(): FixLocationExtras {
             is Short -> map[key] = Value(value.toLong())
             is String -> map[key] = Value(value)
             else -> {
-                Log.w(
+                logW(
                     TAG,
                     "Unsupported type in location extras " +
                         "`${value?.javaClass?.kotlin?.simpleName}`"
