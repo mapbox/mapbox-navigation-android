@@ -28,6 +28,7 @@ class LocationExTest {
         expected.putString("str", "strValue")
 
         val actual = expected.toMap().toBundle()
+        
         assertEquals(expected.toString(), actual.toString())
     }
 
