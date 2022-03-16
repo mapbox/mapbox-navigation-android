@@ -5,16 +5,15 @@ package com.mapbox.navigation.core.navigator
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigator.FixLocation
 import java.lang.reflect.Method
 import java.util.Date
 import kotlin.collections.HashMap
 import kotlin.collections.set
-import com.mapbox.navigation.utils.internal.logW
 
 internal typealias FixLocationExtras = HashMap<String, Value>
 
