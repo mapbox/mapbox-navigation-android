@@ -18,7 +18,6 @@ class LocationExTest {
     @Test
     fun bundleToMap() {
         val expected = Bundle()
-
         expected.putBoolean("bool", true)
         expected.putByte("byte", 55)
         expected.putChar("char", 'a')
