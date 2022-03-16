@@ -17,7 +17,7 @@ internal class InfoPanelHeaderBinder(
     private val context: DropInNavigationViewContext
 ) : UIBinder {
 
-    private val tripProgressBinder get() = context.uiBinders.value.infoPanelTripProgressBinder
+    private val tripProgressBinder get() = context.uiBinders.infoPanelTripProgressBinder.value
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(

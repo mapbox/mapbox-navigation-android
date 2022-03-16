@@ -28,8 +28,8 @@ internal class ManeuverCoordinator(
             .navigationStateViewModel
             .state
             .flatMapLatest { state ->
-                navigationViewContext.flowUiBinder {
-                    if (state == NavigationState.ActiveNavigation) it.maneuver else EmptyBinder()
+                navigationViewContext.flowUiBinder({ it.maneuver }) { maneuverBinder ->
+                    if (state == NavigationState.ActiveNavigation) maneuverBinder else EmptyBinder()
                 }
             }
     }

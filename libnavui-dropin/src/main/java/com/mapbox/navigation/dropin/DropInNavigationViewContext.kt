@@ -19,9 +19,7 @@ import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.map
 
 /**
@@ -35,9 +33,7 @@ internal class DropInNavigationViewContext(
     val lifecycleOwner: LifecycleOwner,
     val viewModel: DropInNavigationViewModel,
 ) {
-    val uiBinders = MutableStateFlow(
-        NavigationUIBinders()
-    )
+    val uiBinders = NavigationUIBinders()
     var routeLineOptions: MapboxRouteLineOptions = MapboxRouteLineOptions.Builder(context)
         .withRouteLineResources(RouteLineResources.Builder().build())
         .withRouteLineBelowLayerId("road-label-navigation")
@@ -69,6 +65,11 @@ internal class DropInNavigationViewContext(
     )
 
     //endregion
+
+    fun applyCustomization(action: ViewBinderCustomization.() -> Unit) {
+        val customization = ViewBinderCustomization().apply(action)
+        uiBinders.applyCustomization(customization)
+    }
 }
 
 /**
@@ -76,5 +77,8 @@ internal class DropInNavigationViewContext(
  * Uses a distinct by class to prevent refreshing views of the same type of [UIBinder].
  */
 internal fun <T : UIBinder> DropInNavigationViewContext.flowUiBinder(
-    mapper: suspend (value: NavigationUIBinders) -> T
-): Flow<T> = this.uiBinders.map(mapper).distinctUntilChangedBy { it.javaClass }
+    selector: (value: NavigationUIBinders) -> StateFlow<T>,
+    mapper: suspend (value: T) -> T = { it }
+): Flow<T> {
+    return selector(this.uiBinders).map(mapper)
+}

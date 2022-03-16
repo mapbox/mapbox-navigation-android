@@ -13,6 +13,7 @@ import com.mapbox.navigation.dropin.binder.infopanel.InfoPanelHeaderBinder
 import com.mapbox.navigation.dropin.lifecycle.UICoordinator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -52,10 +53,13 @@ internal class InfoPanelCoordinator(
     }
 
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
-        return context.uiBinders.map { uiBinders ->
+        return combine(
+            context.uiBinders.infoPanelHeaderBinder,
+            context.uiBinders.infoPanelContentBinder
+        ) { headerBinder, contentBinder ->
             InfoPanelBinder(
-                uiBinders.infoPanelHeaderBinder ?: InfoPanelHeaderBinder(context),
-                uiBinders.infoPanelContentBinder
+                headerBinder ?: InfoPanelHeaderBinder(context),
+                contentBinder
             )
         }
     }

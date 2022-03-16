@@ -19,8 +19,8 @@ internal class ActionButtonsCoordinator(
 ) : UICoordinator<ViewGroup>(actionList) {
 
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
-        return navContext.uiBinders.map { uiBinders ->
-            uiBinders.actionButtonsBinder ?: ActionButtonBinder(navContext)
+        return navContext.uiBinders.actionButtonsBinder.map {
+            it ?: ActionButtonBinder(navContext)
         }
     }
 }
