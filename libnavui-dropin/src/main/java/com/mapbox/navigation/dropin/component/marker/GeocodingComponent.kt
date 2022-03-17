@@ -19,12 +19,13 @@ internal class GeocodingComponent(
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
-
-        val accessToken = checkNotNull(mapboxNavigation.navigationOptions.accessToken) {
-            "Missing AccessToken in MapboxNavigation"
+        val accessToken = mapboxNavigation.navigationOptions.accessToken
+        if (accessToken == null) {
+            logW(TAG, "GeocodingComponent disabled. Missing AccessToken in MapboxNavigation")
+            return
         }
-        val geocoder = Geocoder.create(accessToken)
 
+        val geocoder = Geocoder.create(accessToken)
         destinationViewModel.state
             .mapNotNull { it.destination?.point }
             .distinctUntilChanged()
