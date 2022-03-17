@@ -7,11 +7,10 @@ import com.mapbox.navigation.dropin.component.audioguidance.AudioGuidanceViewMod
 import com.mapbox.navigation.dropin.component.camera.CameraViewModel
 import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
 import com.mapbox.navigation.dropin.component.location.LocationViewModel
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateComponent
+import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
-import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
-import com.mapbox.navigation.dropin.component.replay.ReplayViewModel
 import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
+import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterViewModel
 
 /**
  * There is a single ViewModel for the navigation view. Use this class to store state that should
@@ -23,32 +22,21 @@ internal class DropInNavigationViewModel : ViewModel() {
     /**
      * These classes are accessible through MapboxNavigationApp.getObserver(..)
      */
-    val replayViewModel = ReplayViewModel()
-    val audioGuidanceViewModel = AudioGuidanceViewModel()
-    val locationViewModel = LocationViewModel()
-
-    val cameraViewModel = CameraViewModel()
     val navigationStateViewModel = NavigationStateViewModel(NavigationState.FreeDrive)
+    val locationViewModel = LocationViewModel()
+    val tripSessionStarterViewModel = TripSessionStarterViewModel(navigationStateViewModel)
+    val audioGuidanceViewModel = AudioGuidanceViewModel(navigationStateViewModel)
+    val cameraViewModel = CameraViewModel()
     val destinationViewModel = DestinationViewModel()
-    val routesViewModel = RoutesViewModel(
-        navigationStateViewModel,
-        locationViewModel,
-        destinationViewModel,
-    )
-    val navigationStateComponent = NavigationStateComponent(
-        navigationStateViewModel,
-        destinationViewModel,
-        routesViewModel
-    )
+    val routesViewModel = RoutesViewModel()
     private val navigationObservers = listOf(
         destinationViewModel,
-        replayViewModel,
+        tripSessionStarterViewModel,
         audioGuidanceViewModel,
         locationViewModel,
         routesViewModel,
         cameraViewModel,
         navigationStateViewModel,
-        navigationStateComponent,
         // TODO can add more mapbox navigation observers here
     )
 

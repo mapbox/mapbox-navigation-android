@@ -1,9 +1,10 @@
 package com.mapbox.navigation.dropin.component.navigationstate
 
 import com.mapbox.navigation.dropin.component.DropInViewModel
+import com.mapbox.navigation.dropin.component.navigation.NavigationState
 
 internal class NavigationStateViewModel : DropInViewModel<NavigationState, NavigationStateAction>(
-    initialState = NavigationState.Empty
+    initialState = NavigationState.FreeDrive
 ) {
 
     override suspend fun process(
@@ -13,7 +14,7 @@ internal class NavigationStateViewModel : DropInViewModel<NavigationState, Navig
         return when (value) {
             NavigationStateAction.ToActiveNavigation -> NavigationState.ActiveNavigation
             NavigationStateAction.ToArrival -> NavigationState.Arrival
-            NavigationStateAction.ToEmpty -> NavigationState.Empty
+            NavigationStateAction.ToEmpty -> NavigationState.FreeDrive
             NavigationStateAction.ToFreeDrive -> NavigationState.FreeDrive
             NavigationStateAction.ToRoutePreview -> NavigationState.RoutePreview
         }

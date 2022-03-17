@@ -9,7 +9,6 @@ import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.route.toNavigationRoutes
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
@@ -108,15 +107,15 @@ internal class RouteLineComponent(
             )
 
             result.onValue { resultValue ->
-                if (resultValue.route != routeLineApi.getPrimaryRoute()) {
-                    val reOrderedRoutes = routeLineApi.getRoutes()
-                        .filter { it != resultValue.route }
+                if (resultValue.navigationRoute != routeLineApi.getPrimaryNavigationRoute()) {
+                    val reOrderedRoutes = routeLineApi.getNavigationRoutes()
+                        .filter { it != resultValue.navigationRoute }
                         .toMutableList()
                         .also {
-                            it.add(0, resultValue.route)
+                            it.add(0, resultValue.navigationRoute)
                         }
                     routesViewModel.invoke(
-                        RoutesAction.SetRoutes(reOrderedRoutes.toNavigationRoutes())
+                        RoutesAction.SetRoutes(reOrderedRoutes)
                     )
                 }
             }

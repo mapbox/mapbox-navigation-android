@@ -14,7 +14,7 @@ import com.mapbox.navigation.dropin.binder.map.ActiveGuidanceMapBinder
 import com.mapbox.navigation.dropin.binder.map.FreeDriveMapBinder
 import com.mapbox.navigation.dropin.binder.map.RoutePreviewMapBinder
 import com.mapbox.navigation.dropin.component.camera.CameraAction
-import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
+import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
 import com.mapbox.navigation.dropin.lifecycle.UICoordinator
 import kotlinx.coroutines.flow.Flow
@@ -36,7 +36,7 @@ internal class MapCoordinator(
     private val hPadding =
         resources.getDimensionPixelSize(R.dimen.mapbox_camera_overview_padding_h).toDouble()
     private val viewModel = navigationViewContext.viewModel.cameraViewModel
-    private val navigationState get() = navigationViewContext.navigationState
+    private val navigationStateViewModel = navigationViewContext.viewModel.navigationStateViewModel
 
     init {
         binding.mapView.compass.enabled = false
@@ -58,8 +58,8 @@ internal class MapCoordinator(
     }
 
     private fun getOverlayEdgeInsets(): EdgeInsets {
-        return when (navigationState.value) {
-            is NavigationState.Empty,
+        return when (navigationStateViewModel.state.value) {
+            is NavigationState.DestinationPreview,
             is NavigationState.FreeDrive,
             is NavigationState.RoutePreview -> {
                 val bottom = vPadding + (binding.mapView.height - binding.infoPanelLayout.top)
@@ -80,10 +80,10 @@ internal class MapCoordinator(
 
     // Temporarily flow to wire the map states
     override fun MapboxNavigation.flowViewBinders(): Flow<Binder<MapView>> {
-        return navigationViewContext.navigationState.map { navigationState ->
+        return navigationStateViewModel.state.map { navigationState ->
             when (navigationState) {
-                NavigationState.Empty,
-                NavigationState.FreeDrive -> FreeDriveMapBinder(navigationViewContext)
+                NavigationState.FreeDrive,
+                NavigationState.DestinationPreview -> FreeDriveMapBinder(navigationViewContext)
                 NavigationState.RoutePreview -> RoutePreviewMapBinder(navigationViewContext)
                 NavigationState.ActiveNavigation,
                 NavigationState.Arrival -> ActiveGuidanceMapBinder(navigationViewContext)

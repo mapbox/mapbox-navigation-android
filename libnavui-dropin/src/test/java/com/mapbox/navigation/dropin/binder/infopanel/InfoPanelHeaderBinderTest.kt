@@ -12,6 +12,7 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.SpyK
+import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
@@ -46,6 +47,7 @@ internal class InfoPanelHeaderBinderTest {
             )
         }
         every { mockNavContext.dispatch } returns {}
+        every { mockNavContext.viewModel } returns mockk(relaxed = true)
     }
 
     @Test

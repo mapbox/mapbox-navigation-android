@@ -7,8 +7,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.camera.CameraState
 import com.mapbox.navigation.dropin.component.camera.CameraViewModel
 import com.mapbox.navigation.dropin.component.camera.TargetCameraMode
+import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
-import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.view.MapboxCameraModeButton
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState

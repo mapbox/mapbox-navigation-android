@@ -7,9 +7,7 @@ import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
 import com.mapbox.navigation.dropin.component.destination.DestinationState
 import com.mapbox.navigation.dropin.component.marker.MapMarkerFactory
-import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
-import com.mapbox.navigation.dropin.component.routefetch.RoutesState
 import com.mapbox.navigation.dropin.lifecycle.UICoordinator
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache.Companion.MB_IN_BYTES
@@ -38,8 +36,6 @@ internal class DropInNavigationViewContext(
         }
     }
 
-    val navigationState: StateFlow<NavigationState> get() = viewModel.navigationStateViewModel.state
-    val routesState: StateFlow<RoutesState> get() = viewModel.routesViewModel.state
     val destinationState: StateFlow<DestinationState> get() = viewModel.destinationViewModel.state
 
     //region Builders & Factories

@@ -1,6 +1,6 @@
 package com.mapbox.navigation.dropin.component.routeoverview
 
-import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
+import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -50,7 +50,7 @@ class RouteOverviewViewModelTest {
         val viewModelResult = def.await()
 
         assertFalse(viewModelResult.isVisible)
-        assertEquals(NavigationState.Empty, viewModelResult.navigationState)
+        assertEquals(NavigationState.FreeDrive, viewModelResult.navigationState)
         assertEquals(NavigationCameraState.FOLLOWING, viewModelResult.cameraState)
     }
 }

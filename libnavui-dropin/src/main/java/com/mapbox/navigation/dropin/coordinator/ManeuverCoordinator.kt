@@ -5,7 +5,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.binder.EmptyBinder
 import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
+import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.flowUiBinder
 import com.mapbox.navigation.dropin.lifecycle.UICoordinator
 import kotlinx.coroutines.ExperimentalCoroutinesApi

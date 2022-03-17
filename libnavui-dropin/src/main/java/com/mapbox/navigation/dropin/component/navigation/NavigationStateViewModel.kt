@@ -1,12 +1,17 @@
 package com.mapbox.navigation.dropin.component.navigation
 
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.lifecycle.UIViewModel
 
-internal class NavigationStateViewModel(
+class NavigationStateViewModel(
     default: NavigationState
 ) : UIViewModel<NavigationState, NavigationStateAction>(default) {
+
+    // TODO get destination and navigation route for initial state
+//    override fun onAttached(mapboxNavigation: MapboxNavigation) {
+//        super.onAttached(mapboxNavigation)
+//
+//    }
 
     override fun process(
         mapboxNavigation: MapboxNavigation,

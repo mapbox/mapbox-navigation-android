@@ -1,6 +1,6 @@
 package com.mapbox.navigation.dropin.component.routeoverview
 
-import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
+import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 
 internal data class RouteOverviewState(
@@ -11,7 +11,7 @@ internal data class RouteOverviewState(
     companion object {
         fun initial(): RouteOverviewState = RouteOverviewState(
             isVisible = false,
-            navigationState = NavigationState.Empty,
+            navigationState = NavigationState.FreeDrive,
             cameraState = NavigationCameraState.IDLE
         )
     }
