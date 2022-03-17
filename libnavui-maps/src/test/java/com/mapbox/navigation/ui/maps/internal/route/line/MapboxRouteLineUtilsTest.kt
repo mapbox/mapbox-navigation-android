@@ -6,6 +6,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.Logger
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
@@ -14,6 +15,7 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
+import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID
@@ -44,13 +46,16 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
+import com.mapbox.navigator.RouteInterface
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import io.mockk.verify
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -1371,6 +1376,22 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun buildWayPointFeatureCollection() {
+        mockkObject(NativeRouteParserWrapper)
+        every {
+            NativeRouteParserWrapper.parseDirectionsResponse(any(), any())
+        } answers {
+            val routesCount =
+                JSONObject(this.firstArg<String>())
+                    .getJSONArray("routes")
+                    .length()
+            val nativeRoutes = mutableListOf<RouteInterface>().apply {
+                repeat(routesCount) {
+                    add(mockk())
+                }
+            }
+            ExpectedFactory.createValue(nativeRoutes)
+        }
+
         val route = loadRoute("multileg_route.json").toNavigationRoute()
 
         val result = MapboxRouteLineUtils.buildWayPointFeatureCollection(route)

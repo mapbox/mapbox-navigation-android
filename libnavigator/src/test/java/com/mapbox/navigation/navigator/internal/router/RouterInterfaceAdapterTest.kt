@@ -171,10 +171,10 @@ class RouterInterfaceAdapterTest {
     @Test
     fun routeRefreshSuccess() {
         val originalNavigationRoute = provideNavigationRoute(
-            directionsResponse = provideDirectionsResponse(
+            _directionsResponse = provideDirectionsResponse(
                 uuid = "refresh_uuid"
             ),
-            routeIndex = 0
+            _routeIndex = 0
         )
         val routerInterface = provideRouteInterfaceDelegate(mockRouter) {
             listOf(originalNavigationRoute)
@@ -213,10 +213,10 @@ class RouterInterfaceAdapterTest {
     @Test
     fun routeRefreshFailure() {
         val originalNavigationRoute = provideNavigationRoute(
-            directionsResponse = provideDirectionsResponse(
+            _directionsResponse = provideDirectionsResponse(
                 uuid = "refresh_uuid"
             ),
-            routeIndex = 0
+            _routeIndex = 0
         )
         val routerInterface = provideRouteInterfaceDelegate(mockRouter) {
             listOf(originalNavigationRoute)
@@ -289,15 +289,16 @@ class RouterInterfaceAdapterTest {
     }
 
     private fun provideNavigationRoute(
-        directionsResponse: DirectionsResponse = provideDirectionsResponse(),
-        routeOptions: RouteOptions = provideRouteOptions(),
-        routeIndex: Int = 0,
+        _directionsResponse: DirectionsResponse = provideDirectionsResponse(),
+        _routeOptions: RouteOptions = provideRouteOptions(),
+        _routeIndex: Int = 0,
     ): NavigationRoute {
-        return NavigationRoute(
-            directionsResponse,
-            routeIndex,
-            routeOptions
-        )
+        return mockk {
+            every { directionsResponse } returns _directionsResponse
+            every { routeOptions } returns _routeOptions
+            every { routeIndex } returns _routeIndex
+            every { directionsRoute } returns _directionsResponse.routes()[_routeIndex]
+        }
     }
 
     private fun provideDirectionsResponse(

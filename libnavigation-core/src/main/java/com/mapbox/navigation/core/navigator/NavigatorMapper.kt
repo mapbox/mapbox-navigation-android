@@ -77,10 +77,10 @@ internal fun getRouteProgressFrom(
 }
 
 internal fun NavigationStatus.getTripStatusFrom(
-    routes: List<NavigationRoute>
+    route: NavigationRoute?
 ): TripStatus =
     TripStatus(
-        routes.firstOrNull(),
+        route,
         this
     )
 

@@ -20,7 +20,6 @@ import com.mapbox.navigation.core.navigator.mapToDirectionsApi
 import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
-import com.mapbox.navigation.core.trip.NativeRouteProcessingListener
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
@@ -61,15 +60,12 @@ internal class MapboxTripSession(
     private val eHorizonSubscriptionManager: EHorizonSubscriptionManager
 ) : TripSession {
 
-    private var updateRouteJob: Job? = null
+    private var updatePrimaryRouteJob: Job? = null
     private var updateLegIndexJob: Job? = null
     private var updateRouteProgressJob: Job? = null
 
-    private val nativeRouteProcessingListeners =
-        CopyOnWriteArraySet<NativeRouteProcessingListener>()
-
     @VisibleForTesting
-    internal var routes: List<NavigationRoute> = emptyList()
+    internal var primaryRoute: NavigationRoute? = null
 
     private companion object {
         private const val LOG_CATEGORY = "MapboxTripSession"
@@ -81,44 +77,52 @@ internal class MapboxTripSession(
         legIndex: Int,
         @RoutesExtra.RoutesUpdateReason reason: String
     ) {
-
-        isOffRoute = false
-        invalidateLatestInstructions()
-        roadObjects = emptyList()
-        routeProgress = null
-
-        updateRouteJob = when (reason) {
+        when (reason) {
             RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
             RoutesExtra.ROUTES_UPDATE_REASON_NEW,
-            RoutesExtra.ROUTES_UPDATE_REASON_REROUTE,
-            RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE -> {
+            RoutesExtra.ROUTES_UPDATE_REASON_REROUTE -> {
+                isOffRoute = false
+                invalidateLatestInstructions()
+                roadObjects = emptyList()
+                routeProgress = null
                 updateLegIndexJob?.cancel()
                 updateRouteProgressJob?.cancel()
 
-                threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
-                    nativeRouteProcessingListeners.forEach { it.onNativeRouteProcessingStarted() }
-                    navigator.setRoute(routes, legIndex)?.let {
+                updatePrimaryRouteJob = threadController.getMainScopeAndRootJob().scope.launch(
+                    Dispatchers.Main.immediate
+                ) {
+                    val newPrimaryRoute = routes.firstOrNull()
+                    navigator.setPrimaryRoute(
+                        if (newPrimaryRoute != null) {
+                            Pair(newPrimaryRoute, legIndex)
+                        } else {
+                            null
+                        }
+                    )?.let {
                         roadObjects = getRouteInitInfo(it)?.roadObjects ?: emptyList()
                     }
-                    this@MapboxTripSession.routes = routes
+                    this@MapboxTripSession.primaryRoute = newPrimaryRoute
+                }
+                threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
+                    navigator.setAlternativeRoutes(routes.drop(1))
+                }
+            }
+            RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE -> {
+                threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
+                    navigator.setAlternativeRoutes(routes.drop(1))
                 }
             }
             RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
                 threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
                     if (routes.isNotEmpty()) {
                         navigator.updateAnnotations(routes.first())
-                        this@MapboxTripSession.routes = routes
+                        this@MapboxTripSession.primaryRoute = routes.first()
                     } else {
                         logW("Cannot refresh route. Route can't be null", LOG_CATEGORY)
                     }
                 }
             }
-            else -> null.also {
-                logW(
-                    "Unsupported route update reason: $reason",
-                    LOG_CATEGORY
-                )
-            }
+            else -> throw IllegalArgumentException("Unsupported route update reason: $reason")
         }
     }
 
@@ -251,7 +255,7 @@ internal class MapboxTripSession(
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     private val navigatorObserver = object : NavigatorObserver {
         override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
-            val tripStatus = status.getTripStatusFrom(routes)
+            val tripStatus = status.getTripStatusFrom(primaryRoute)
             val enhancedLocation = tripStatus.navigationStatus.location.toLocation()
             val keyPoints = tripStatus.navigationStatus.keyPoints.toLocations()
             val road = RoadFactory.buildRoadObject(tripStatus.navigationStatus)
@@ -262,7 +266,7 @@ internal class MapboxTripSession(
 
             // we should skip RouteProgress, BannerInstructions, isOffRoute state updates while
             // setting a new route
-            if (updateRouteJob?.isActive == true) {
+            if (updatePrimaryRouteJob?.isActive == true) {
                 return
             }
 
@@ -593,22 +597,6 @@ internal class MapboxTripSession(
     override fun unregisterAllFallbackVersionsObservers() {
         fallbackVersionsObservers.clear()
         navigator.setFallbackVersionsObserver(null)
-    }
-
-    override fun registerNativeRouteProcessingListener(
-        nativeRouteProcessingListener: NativeRouteProcessingListener
-    ) {
-        nativeRouteProcessingListeners.add(nativeRouteProcessingListener)
-    }
-
-    override fun unregisterNativeRouteProcessingListener(
-        nativeRouteProcessingListener: NativeRouteProcessingListener
-    ) {
-        nativeRouteProcessingListeners.remove(nativeRouteProcessingListener)
-    }
-
-    override fun unregisterAllNativeRouteProcessingListeners() {
-        nativeRouteProcessingListeners.clear()
     }
 
     private fun updateLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {

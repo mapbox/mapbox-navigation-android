@@ -24,4 +24,5 @@ dependencies {
     implementation dependenciesList.kotlinReflect
     implementation dependenciesList.mapboxCommonNative
     implementation dependenciesList.mockk
+    implementation 'org.json:json:20210307'
 }

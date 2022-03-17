@@ -2,11 +2,11 @@ package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.util.SparseArray
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
@@ -17,6 +17,7 @@ import com.mapbox.maps.QueryFeaturesCallback
 import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
+import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -40,6 +41,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
+import com.mapbox.navigator.RouteInterface
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.mockk
@@ -55,6 +57,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.test.runBlockingTest
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -66,6 +69,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.util.UUID
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class MapboxRouteLineApiTest {
 
     @get:Rule
@@ -82,13 +86,30 @@ class MapboxRouteLineApiTest {
             InternalJobControlFactory.createDefaultScopeJobControl()
         } returns JobControl(parentJob, testScope)
         mockkStatic(AppCompatResources::class)
-        every { AppCompatResources.getDrawable(any(), any()) } returns mockk<Drawable>()
+        every { AppCompatResources.getDrawable(any(), any()) } returns mockk()
+
+        mockkObject(NativeRouteParserWrapper)
+        every {
+            NativeRouteParserWrapper.parseDirectionsResponse(any(), any())
+        } answers {
+            val routesCount =
+                JSONObject(this.firstArg<String>())
+                    .getJSONArray("routes")
+                    .length()
+            val nativeRoutes = mutableListOf<RouteInterface>().apply {
+                repeat(routesCount) {
+                    add(mockk())
+                }
+            }
+            ExpectedFactory.createValue(nativeRoutes)
+        }
     }
 
     @After
     fun cleanUp() {
         unmockkStatic(AppCompatResources::class)
         unmockkObject(InternalJobControlFactory)
+        unmockkObject(NativeRouteParserWrapper)
     }
 
     @Test
@@ -424,7 +445,8 @@ class MapboxRouteLineApiTest {
 
             api.setRoutes(routes)
 
-            verify(exactly = 0) { vanishingRouteLine.initWithRoute(route.toNavigationRoute()) }
+            val navRoute = route.toNavigationRoute()
+            verify(exactly = 0) { vanishingRouteLine.initWithRoute(navRoute) }
         }
 
     @Test
@@ -451,7 +473,8 @@ class MapboxRouteLineApiTest {
 
             api.setRoutes(routes)
 
-            verify { vanishingRouteLine.initWithRoute(route.toNavigationRoute()) }
+            val navRoute = route.toNavigationRoute()
+            verify { vanishingRouteLine.initWithRoute(navRoute) }
         }
 
     @Test
@@ -957,23 +980,14 @@ class MapboxRouteLineApiTest {
     @ExperimentalCoroutinesApi
     @Test
     fun findClosestRoute_whenPrimaryRoute() = runBlockingTest {
-        // this test depends on the order of the calls to UUID.randomUUID()
-        // and assumes that specific calls will be used by the MapboxRouteLineApi
-        // however, if there are any other new calls to UUID.randomUUID() added,
-        // they can interfere with this assumption
-        val uuids = listOf(
-            UUID.randomUUID(), // used for NavigationRoute#id of first route
-            UUID.randomUUID(), // used for NavigationRoute#id of second route
-            UUID.randomUUID(), // used for the first line created by the API
-            UUID.randomUUID() // used for the second line created by the API
-        )
+        val uuids = listOf(UUID.randomUUID(), UUID.randomUUID())
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returnsMany uuids
         val feature1 = mockk<QueriedFeature> {
-            every { feature.id() } returns uuids[2].toString()
+            every { feature.id() } returns uuids[0].toString()
         }
         val feature2 = mockk<QueriedFeature> {
-            every { feature.id() } returns uuids[3].toString()
+            every { feature.id() } returns uuids[1].toString()
         }
         val route1 = loadRoute("short_route.json")
         val route2 = loadRoute("short_route.json")

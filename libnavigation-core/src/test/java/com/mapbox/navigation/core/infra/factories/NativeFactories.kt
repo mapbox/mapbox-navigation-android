@@ -17,7 +17,7 @@ import java.util.Date
 
 fun createNavigationStatus(
     routeState: RouteState = RouteState.TRACKING,
-    locatedAlternativeId: Int? = null,
+    locatedAlternativeId: String? = null,
     stale: Boolean = false,
     location: FixLocation = createFixedLocation(),
     routeSequenceNumber: Int = 0,

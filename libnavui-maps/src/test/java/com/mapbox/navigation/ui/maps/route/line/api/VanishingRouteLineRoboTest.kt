@@ -1,9 +1,11 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
@@ -13,6 +15,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
+import com.mapbox.navigator.RouteInterface
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -20,6 +23,7 @@ import io.mockk.unmockkObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -46,11 +50,28 @@ class VanishingRouteLineRoboTest {
             InternalJobControlFactory.createDefaultScopeJobControl()
         } returns JobControl(parentJob, testScope)
         testJobControl = InternalJobControlFactory.createDefaultScopeJobControl()
+
+        mockkObject(NativeRouteParserWrapper)
+        every {
+            NativeRouteParserWrapper.parseDirectionsResponse(any(), any())
+        } answers {
+            val routesCount =
+                JSONObject(this.firstArg<String>())
+                    .getJSONArray("routes")
+                    .length()
+            val nativeRoutes = mutableListOf<RouteInterface>().apply {
+                repeat(routesCount) {
+                    add(mockk())
+                }
+            }
+            ExpectedFactory.createValue(nativeRoutes)
+        }
     }
 
     @After
     fun cleanUp() {
         unmockkObject(InternalJobControlFactory)
+        unmockkObject(NativeRouteParserWrapper)
     }
 
     @Test

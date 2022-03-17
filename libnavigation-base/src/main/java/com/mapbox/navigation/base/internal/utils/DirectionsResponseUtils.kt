@@ -9,7 +9,6 @@ import com.mapbox.navigator.RouteAlternative
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import org.json.JSONException
-import java.net.URL
 
 suspend fun parseDirectionsResponse(
     dispatcher: CoroutineDispatcher,
@@ -41,14 +40,10 @@ suspend fun parseNativeDirectionsAlternative(
 ): Expected<Throwable, NavigationRoute> =
     withContext(dispatcher) {
         return@withContext try {
-            val routeOptions = RouteOptions.fromUrl(URL(routeAlternative.route.request))
-            val navigationRoute = NavigationRoute(
-                directionsResponse = DirectionsResponse.fromJson(
-                    routeAlternative.route.response, routeOptions
-                ),
-                routeIndex = routeAlternative.route.index,
-                routeOptions = routeOptions,
-            )
+            val navigationRoute = NavigationRoute.create(
+                directionsResponseJson = routeAlternative.route.response,
+                routeRequestUrl = routeAlternative.route.request
+            )[routeAlternative.route.index]
             ExpectedFactory.createValue(navigationRoute)
         } catch (ex: Exception) {
             when (ex) {
@@ -59,5 +54,3 @@ suspend fun parseNativeDirectionsAlternative(
             }
         }
     }
-
-private const val ROUTES_RESPONSE_FIELD = "routes"

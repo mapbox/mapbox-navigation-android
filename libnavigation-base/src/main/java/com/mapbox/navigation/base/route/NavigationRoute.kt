@@ -5,27 +5,113 @@ package com.mapbox.navigation.base.route
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
+import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
-import java.util.UUID
+import com.mapbox.api.directions.v5.models.StepIntersection
+import com.mapbox.api.directions.v5.models.StepManeuver
+import com.mapbox.geojson.LineString
+import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
+import com.mapbox.navigation.base.internal.SDKRouteParser
+import com.mapbox.navigator.RouteInterface
+import java.net.URL
 
 /**
  * Wraps a route object used across the Navigation SDK features.
- *
  * @param directionsResponse the original response that returned this route object.
  * @param routeIndex the index of the route that this wrapper tracks
  * from the collection of routes returned in the original response.
  * @param routeOptions options used to generate the [directionsResponse]
- * @param id unique ID of this route entity used for matching it against additional metadata.
- * Unique ID doesn't mean that the underlying [directionsRoute] is unique.
- * Multiple [NavigationRoute]s can represent similar or equal [DirectionsRoute].
  */
-class NavigationRoute(
+class NavigationRoute internal constructor(
     val directionsResponse: DirectionsResponse,
     val routeIndex: Int,
     val routeOptions: RouteOptions,
-    val id: String = UUID.randomUUID().toString()
+    internal val nativeRoute: RouteInterface,
 ) {
+
+    companion object {
+        /**
+         * Creates new instances of [NavigationRoute] based on the routes found in the [directionsResponse].
+         *
+         * Should not be called from UI thread. Contains serialisation and deserialisation under the hood.
+         *
+         * @param directionsResponse response to be parsed into [NavigationRoute]s
+         * @param routeOptions options used to generate the [directionsResponse]
+         */
+        fun create(
+            directionsResponse: DirectionsResponse,
+            routeOptions: RouteOptions,
+        ): List<NavigationRoute> {
+            return create(
+                directionsResponse,
+                directionsResponseJson = directionsResponse.toJson(),
+                routeOptions,
+                routeOptionsUrlString = routeOptions.toUrl("").toString()
+            )
+        }
+
+        /**
+         * Creates new instances of [NavigationRoute] based on the routes found in the [directionsResponseJson].
+         *
+         * Should not be called from UI thread. Contains serialisation and deserialisation under the hood.
+         *
+         * @param directionsResponseJson response to be parsed into [NavigationRoute]s
+         * @param routeRequestUrl URL used to generate the [directionsResponse]
+         */
+        fun create(
+            directionsResponseJson: String,
+            routeRequestUrl: String,
+        ): List<NavigationRoute> {
+            return create(
+                DirectionsResponse.fromJson(directionsResponseJson),
+                directionsResponseJson = directionsResponseJson,
+                RouteOptions.fromUrl(URL(routeRequestUrl)),
+                routeOptionsUrlString = routeRequestUrl
+            )
+        }
+
+        internal fun create(
+            directionsResponse: DirectionsResponse,
+            routeOptions: RouteOptions,
+            routeParser: SDKRouteParser,
+        ): List<NavigationRoute> {
+            return create(
+                directionsResponse,
+                directionsResponseJson = directionsResponse.toJson(),
+                routeOptions,
+                routeOptionsUrlString = routeOptions.toUrl("").toString(),
+                routeParser
+            )
+        }
+
+        private fun create(
+            directionsResponse: DirectionsResponse,
+            directionsResponseJson: String,
+            routeOptions: RouteOptions,
+            routeOptionsUrlString: String,
+            routeParser: SDKRouteParser = NativeRouteParserWrapper
+        ): List<NavigationRoute> {
+            return routeParser.parseDirectionsResponse(
+                directionsResponseJson, routeOptionsUrlString
+            ).fold(
+                { error ->
+                    throw RuntimeException("Failed to parse a route. Reason: $error")
+                },
+                { value ->
+                    value.mapIndexed { index, routeInterface ->
+                        NavigationRoute(
+                            directionsResponse,
+                            index,
+                            routeOptions,
+                            routeInterface
+                        )
+                    }
+                }
+            )
+        }
+    }
 
     /**
      * [DirectionsRoute] that this [NavigationRoute] represents.
@@ -78,9 +164,16 @@ class NavigationRoute(
             "directionsResponse=$directionsResponse, " +
             "routeIndex=$routeIndex, " +
             "routeOptions=$routeOptions, " +
-            "id=$id, " +
+            "nativeRoute=$nativeRoute, " +
             ")"
     }
+
+    internal fun copy(
+        directionsResponse: DirectionsResponse = this.directionsResponse,
+        routeIndex: Int = this.routeIndex,
+        routeOptions: RouteOptions = this.routeOptions,
+        nativeRoute: RouteInterface = this.nativeRoute,
+    ): NavigationRoute = NavigationRoute(directionsResponse, routeIndex, routeOptions, nativeRoute)
 }
 
 /**
@@ -98,6 +191,9 @@ fun List<NavigationRoute>.toDirectionsRoutes() = map { it.directionsRoute }
  *
  * This is a lossy mapping since the [DirectionsRoute] cannot carry the same amount of information as [NavigationRoute].
  *
+ * This compatibility extension is blocking and can now take a significant amount of time to return (in order of hundreds of milliseconds for long routes).
+ * To avoid potential slowdowns, try not using the compatibility layer and work with [NavigationRoute] and [NavigationRouterCallback] were possible (look for deprecation warnings and refactor).
+ *
  * **Avoid using this mapper and instead try using APIs that accept [NavigationRoute] type where possible.**
  */
 fun List<DirectionsRoute>.toNavigationRoutes() = map { it.toNavigationRoute() }
@@ -107,8 +203,19 @@ fun List<DirectionsRoute>.toNavigationRoutes() = map { it.toNavigationRoute() }
  *
  * This mapping tries to fulfill some of the required [NavigationRoute] data points from the nested features of the [DirectionsRoute],
  * or supplies them with fake supplements to the best of its ability.
+ *
+ * This is a lossy mapping since the [DirectionsRoute] cannot carry the same amount of information as [NavigationRoute].
+ *
+ * This compatibility extension is blocking and can now take a significant amount of time to return (in order of hundreds of milliseconds for long routes).
+ * To avoid potential slowdowns, try not using the compatibility layer and work with [NavigationRoute] and [NavigationRouterCallback] were possible (look for deprecation warnings and refactor).
+ *
+ * **Avoid using this mapper and instead try using APIs that accept [NavigationRoute] type where possible.**
  */
-fun DirectionsRoute.toNavigationRoute(): NavigationRoute {
+fun DirectionsRoute.toNavigationRoute(): NavigationRoute = this.toNavigationRoute(
+    NativeRouteParserWrapper
+)
+
+internal fun DirectionsRoute.toNavigationRoute(sdkRouteParser: SDKRouteParser): NavigationRoute {
     val options = requireNotNull(routeOptions()) {
         """
             Provided DirectionsRoute has to have #routeOptions property set.
@@ -127,11 +234,14 @@ fun DirectionsRoute.toNavigationRoute(): NavigationRoute {
 
     val routes = Array(routeIndex + 1) { arrIndex ->
         if (arrIndex != routeIndex) {
-            // build a fake route to fill up the index gap in the response
-            DirectionsRoute.builder()
+            /**
+             *  build a fake route to fill up the index gap in the response
+             *  This is needed, so that calling NavigationRoute#directionsResponse#routes().get(routeIndex) always returns a correct value.
+             *  Without padding the response with fake routes, the DirectionsRoute that we're wrapping would be at a wrong index in the response.
+             */
+            fakeDirectionsRoute
+                .toBuilder()
                 .routeIndex(arrIndex.toString())
-                .distance(distance())
-                .duration(duration())
                 .build()
         } else {
             this
@@ -146,7 +256,7 @@ fun DirectionsRoute.toNavigationRoute(): NavigationRoute {
         .waypoints(waypoints)
         .uuid(requestUuid())
         .build()
-    return NavigationRoute(response, routeIndex, options)
+    return NavigationRoute.create(response, options, sdkRouteParser)[routeIndex]
 }
 
 /**
@@ -200,4 +310,42 @@ private fun buildWaypointsFromOptions(
             .rawLocation(doubleArrayOf(it.longitude(), it.latitude()))
             .build()
     }
+}
+
+private val fakeDirectionsRoute: DirectionsRoute by lazy {
+    val fakeIntersection = StepIntersection.builder()
+        .rawLocation(doubleArrayOf(0.0, 0.0))
+        .build()
+    val fakeManeuver = StepManeuver.builder()
+        .rawLocation(doubleArrayOf(0.0, 0.0))
+        .type(StepManeuver.END_OF_ROAD)
+        .build()
+    val fakeSteps = listOf(
+        LegStep.builder()
+            .distance(0.0)
+            .duration(0.0)
+            .mode("fake")
+            .maneuver(fakeManeuver)
+            .weight(0.0)
+            .geometry(
+                LineString.fromLngLats(
+                    listOf(
+                        Point.fromLngLat(0.0, 0.0),
+                        Point.fromLngLat(0.0, 0.0)
+                    )
+                ).toPolyline(6)
+            )
+            .intersections(listOf(fakeIntersection))
+            .build()
+    )
+    val fakeLegs = listOf(
+        RouteLeg.builder()
+            .steps(fakeSteps)
+            .build()
+    )
+    DirectionsRoute.builder()
+        .distance(0.0)
+        .duration(0.0)
+        .legs(fakeLegs)
+        .build()
 }

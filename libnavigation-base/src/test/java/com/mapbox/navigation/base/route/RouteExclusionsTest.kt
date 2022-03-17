@@ -2,14 +2,47 @@ package com.mapbox.navigation.base.route
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.testing.FileUtils
+import com.mapbox.navigator.RouteInterface
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import org.json.JSONObject
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 
 class RouteExclusionsTest {
+
+    @Before
+    fun setup() {
+        mockkObject(NativeRouteParserWrapper)
+        every {
+            NativeRouteParserWrapper.parseDirectionsResponse(any(), any())
+        } answers {
+            val routesCount = JSONObject(this.firstArg<String>())
+                .getJSONArray("routes")
+                .length()
+            val nativeRoutes = mutableListOf<RouteInterface>().apply {
+                repeat(routesCount) {
+                    add(mockk())
+                }
+            }
+            ExpectedFactory.createValue(nativeRoutes)
+        }
+    }
+
+    @After
+    fun tearDown() {
+        unmockkObject(NativeRouteParserWrapper)
+    }
 
     @Test
     fun `empty exclusion violations if no exclude RouteOptions added`() {

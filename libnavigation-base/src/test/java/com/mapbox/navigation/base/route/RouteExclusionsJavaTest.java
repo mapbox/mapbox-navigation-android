@@ -1,21 +1,47 @@
 package com.mapbox.navigation.base.route;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static java.util.stream.Collectors.groupingBy;
+
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
+import com.mapbox.bindgen.ExpectedFactory;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigation.base.extensions.RouteOptionsExtensions;
+import com.mapbox.navigation.base.internal.SDKRouteParser;
+import com.mapbox.navigation.base.internal.route.NavigationRouteExKt;
 import com.mapbox.navigation.testing.FileUtils;
+import com.mapbox.navigator.RouteInterface;
+
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.stream.Collectors.groupingBy;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
+@RunWith(MockitoJUnitRunner.class)
 public class RouteExclusionsJavaTest {
+
+  @Mock
+  private SDKRouteParser parser;
+
+  @Before
+  public void setup() {
+    List<RouteInterface> nativeRoutes = new ArrayList<>();
+    nativeRoutes.add(Mockito.mock(RouteInterface.class));
+    Mockito.doReturn(
+        ExpectedFactory.createValue(nativeRoutes)
+    ).when(parser).parseDirectionsResponse(
+        ArgumentMatchers.anyString(), ArgumentMatchers.anyString()
+    );
+  }
 
   @Test
   public void emptyExclusionViolationsIfNoExcludeRouteOptionsAdded() {
@@ -35,9 +61,12 @@ public class RouteExclusionsJavaTest {
         .distance(183888.609)
         .duration(10697.573)
         .build();
+    NavigationRoute navigationRoute = NavigationRouteExKt.createNavigationRoute(
+        directionsRoute, parser
+    );
 
     List<ExclusionViolation> exclusionViolations =
-        RouteExclusions.exclusionViolations(directionsRoute);
+        RouteExclusions.exclusionViolations(navigationRoute);
 
     assertEquals(0, exclusionViolations.size());
   }
@@ -45,11 +74,14 @@ public class RouteExclusionsJavaTest {
   @Test
   public void tollAndFerryExclusionViolationsSize() {
     DirectionsRoute directionsRoute = DirectionsRoute.fromJson(
-            FileUtils.INSTANCE.loadJsonFixture("toll_and_ferry_directions_route.json")
+        FileUtils.INSTANCE.loadJsonFixture("toll_and_ferry_directions_route.json")
+    );
+    NavigationRoute navigationRoute = NavigationRouteExKt.createNavigationRoute(
+        directionsRoute, parser
     );
 
     List<ExclusionViolation> exclusionViolations =
-        RouteExclusions.exclusionViolations(directionsRoute);
+        RouteExclusions.exclusionViolations(navigationRoute);
 
     assertEquals(77, exclusionViolations.size());
   }
@@ -57,11 +89,14 @@ public class RouteExclusionsJavaTest {
   @Test
   public void tollAndFerryExclusionViolationsType() {
     DirectionsRoute directionsRoute = DirectionsRoute.fromJson(
-            FileUtils.INSTANCE.loadJsonFixture("toll_and_ferry_directions_route.json")
+        FileUtils.INSTANCE.loadJsonFixture("toll_and_ferry_directions_route.json")
+    );
+    NavigationRoute navigationRoute = NavigationRouteExKt.createNavigationRoute(
+        directionsRoute, parser
     );
 
     Map<String, List<ExclusionViolation>> tollAndFerryExclusionViolations =
-        RouteExclusions.exclusionViolations(directionsRoute)
+        RouteExclusions.exclusionViolations(navigationRoute)
             .stream()
             .collect(groupingBy(ExclusionViolation::getType));
 

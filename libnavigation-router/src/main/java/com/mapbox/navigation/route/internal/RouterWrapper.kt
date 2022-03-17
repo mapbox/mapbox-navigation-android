@@ -11,6 +11,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.InternalRouter
+import com.mapbox.navigation.base.internal.route.updateLegAnnotations
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouter
@@ -110,22 +111,18 @@ class RouterWrapper(
                                 )
                             },
                             { response ->
-                                logI("Response metadata: ${response.metadata()}", LOG_CATEGORY)
-                                val navigationRoutes = mutableListOf<NavigationRoute>()
-                                for (i in 0 until response.routes().size) {
-                                    navigationRoutes.add(
-                                        i,
-                                        NavigationRoute(
-                                            directionsResponse = response,
-                                            routeIndex = i,
-                                            routeOptions = routeOptions
-                                        )
+                                this.launch {
+                                    val navigationRoutes = withContext(
+                                        ThreadController.IODispatcher
+                                    ) {
+                                        NavigationRoute.create(it, routeUrl)
+                                    }
+                                    logI("Response metadata: ${response.metadata()}", LOG_CATEGORY)
+                                    callback.onRoutesReady(
+                                        navigationRoutes,
+                                        origin.mapToSdkRouteOrigin()
                                     )
                                 }
-                                callback.onRoutesReady(
-                                    navigationRoutes,
-                                    origin.mapToSdkRouteOrigin()
-                                )
                             }
                         )
                     }
@@ -220,32 +217,11 @@ class RouterWrapper(
                     mainJobControl.scope.launch {
                         val refreshedNavigationRoute = withContext(ThreadController.IODispatcher) {
                             val refreshResponse = DirectionsRefreshResponse.fromJson(it)
-                            val updateLegs =
-                                route.directionsRoute.legs()?.mapIndexed { index, routeLeg ->
-                                    if (index < refreshOptions.legIndex) {
-                                        routeLeg
-                                    } else {
-                                        routeLeg.toBuilder().annotation(
-                                            refreshResponse.route()?.legs()?.get(index)
-                                                ?.annotation()
-                                        ).build()
-                                    }
+                            route.updateLegAnnotations(
+                                initialLegIndex = refreshOptions.legIndex,
+                                legAnnotations = refreshResponse.route()?.legs()?.map {
+                                    it.annotation()
                                 }
-                            val refreshedRoute = route.directionsRoute.toBuilder()
-                                .legs(updateLegs)
-                                .build()
-                            NavigationRoute(
-                                route.directionsResponse
-                                    .toBuilder()
-                                    .routes(
-                                        route.directionsResponse.routes().apply {
-                                            removeAt(route.routeIndex)
-                                            add(route.routeIndex, refreshedRoute)
-                                        }
-                                    )
-                                    .build(),
-                                route.routeIndex,
-                                routeOptions
                             )
                         }
                         callback.onRefreshReady(refreshedNavigationRoute)
