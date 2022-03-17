@@ -10,7 +10,7 @@ import com.mapbox.navigator.RouterInterface
 
 internal fun paramsProvider(moduleParams: ModuleParams): Array<ModuleProviderArgument> =
     when (moduleParams) {
-        is ModuleParams.NavigationRoute -> arrayOf(
+        is ModuleParams.NavigationRouter -> arrayOf(
             ModuleProviderArgument(
                 String::class.java,
                 moduleParams.accessToken
@@ -37,7 +37,7 @@ internal fun paramsProvider(moduleParams: ModuleParams): Array<ModuleProviderArg
     }
 
 internal sealed class ModuleParams {
-    class NavigationRoute(
+    class NavigationRouter(
         val accessToken: String,
         val nativeRouter: RouterInterface,
         val threadController: ThreadController,

@@ -63,6 +63,7 @@ dependencies {
 
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
     testImplementation(project(':libtesting-utils'))
+    testImplementation(dependenciesList.mapboxNavigator)
 }
 
 apply from: "${rootDir}/gradle/track-public-apis.gradle"

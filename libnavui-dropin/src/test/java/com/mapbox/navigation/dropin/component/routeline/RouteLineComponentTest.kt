@@ -13,6 +13,7 @@ import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -34,14 +35,18 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
+import com.mapbox.navigator.RouteInterface
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -81,12 +86,29 @@ class RouteLineComponentTest {
             every { intrinsicHeight } returns 24
             every { intrinsicWidth } returns 24
         }
+
+        mockkObject(NativeRouteParserWrapper)
+        every {
+            NativeRouteParserWrapper.parseDirectionsResponse(any(), any())
+        } answers {
+            val routesCount =
+                JSONObject(this.firstArg<String>())
+                    .getJSONArray("routes")
+                    .length()
+            val nativeRoutes = mutableListOf<RouteInterface>().apply {
+                repeat(routesCount) {
+                    add(mockk())
+                }
+            }
+            ExpectedFactory.createValue(nativeRoutes)
+        }
     }
 
     @After
     fun tearDown() {
         unmockkStatic(AppCompatResources::class)
         unmockkStatic(Utils::class)
+        unmockkObject(NativeRouteParserWrapper)
     }
 
     @Test

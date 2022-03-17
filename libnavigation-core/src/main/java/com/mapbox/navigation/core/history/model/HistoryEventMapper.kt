@@ -13,6 +13,7 @@ import com.mapbox.navigator.HistoryRecordType
 import com.mapbox.navigator.PushHistoryRecord
 import com.mapbox.navigator.SetRouteHistoryRecord
 import com.mapbox.navigator.UpdateLocationHistoryRecord
+import kotlinx.coroutines.runBlocking
 import java.net.URL
 
 internal class HistoryEventMapper {
@@ -86,11 +87,9 @@ internal class HistoryEventMapper {
                     RouteOptions.fromUrl(URL(it))
                 } ?: directionsResponse.routes().firstOrNull()?.routeOptions()
                     ?: throw noOptionsException
-                NavigationRoute(
-                    directionsResponse = directionsResponse,
-                    routeIndex = 0,
-                    routeOptions = routeOptions
-                )
+                runBlocking {
+                    NavigationRoute.create(directionsResponse, routeOptions).first()
+                }
             } catch (t: Throwable) {
                 if (t === noOptionsException) {
                     throw t

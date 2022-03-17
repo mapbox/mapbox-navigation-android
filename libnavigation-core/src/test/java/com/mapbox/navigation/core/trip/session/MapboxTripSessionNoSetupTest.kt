@@ -250,7 +250,7 @@ class MapboxTripSessionNoSetupTest {
         // arrange
         val nativeNavigator = createNativeNavigatorMock()
         coEvery {
-            nativeNavigator.setRoute(any(), any())
+            nativeNavigator.setPrimaryRoute(any())
         } returns null
         val navigatorObservers = recordNavigatorObservers(nativeNavigator)
         val tripSession = buildTripSession(
@@ -383,7 +383,7 @@ object StatusWithVoiceInstructionUpdateUtil {
 private fun createNativeNavigatorMock(): MapboxNativeNavigator {
     val nativeNavigator = mockk<MapboxNativeNavigator>(relaxed = true)
     coEvery {
-        nativeNavigator.setRoute(any(), any())
+        nativeNavigator.setPrimaryRoute(any())
     } returns mockk(relaxed = true)
     return nativeNavigator
 }

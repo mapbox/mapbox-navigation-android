@@ -4,9 +4,11 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.coordinates
+import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.RouterCallback
@@ -22,6 +24,7 @@ import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteRefreshOptions
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterErrorType
@@ -41,6 +44,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -180,6 +184,22 @@ class RouterWrapperTests {
         every { route.routeIndex() } returns "index"
         every { route.routeOptions() } returns routerOptions
 
+        mockkObject(NativeRouteParserWrapper)
+        every {
+            NativeRouteParserWrapper.parseDirectionsResponse(any(), any())
+        } answers {
+            val routesCount =
+                JSONObject(this.firstArg<String>())
+                    .getJSONArray("routes")
+                    .length()
+            val nativeRoutes = mutableListOf<RouteInterface>().apply {
+                repeat(routesCount) {
+                    add(io.mockk.mockk())
+                }
+            }
+            ExpectedFactory.createValue(nativeRoutes)
+        }
+
         routerWrapper = RouterWrapper(
             accessToken,
             mapboxNativeNavigator.router,
@@ -190,6 +210,7 @@ class RouterWrapperTests {
     @After
     fun cleanUp() {
         unmockkObject(ThreadController)
+        unmockkObject(NativeRouteParserWrapper)
     }
 
     @Test

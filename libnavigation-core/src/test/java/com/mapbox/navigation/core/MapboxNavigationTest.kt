@@ -10,11 +10,13 @@ import com.mapbox.android.telemetry.TelemetryEnabler
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.MapboxSDKCommon
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.options.IncidentsOptions
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -57,6 +59,7 @@ import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigatorConfig
+import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.TilesConfig
 import io.mockk.Ordering
 import io.mockk.Runs
@@ -76,6 +79,7 @@ import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -90,6 +94,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.File
+import java.net.URL
 import java.util.Locale
 
 @Config(shadows = [ShadowReachabilityFactory::class])
@@ -217,6 +222,22 @@ class MapboxNavigationTest {
         every { navigator.create(any(), any(), any(), any(), any(), any()) } returns navigator
         mockkStatic(TelemetryEnabler::class)
         every { TelemetryEnabler.isEventsEnabled(any()) } returns true
+
+        mockkObject(NativeRouteParserWrapper)
+        every {
+            NativeRouteParserWrapper.parseDirectionsResponse(any(), any())
+        } answers {
+            val routesCount =
+                JSONObject(this.firstArg<String>())
+                    .getJSONArray("routes")
+                    .length()
+            val nativeRoutes = mutableListOf<RouteInterface>().apply {
+                repeat(routesCount) {
+                    add(mockk())
+                }
+            }
+            ExpectedFactory.createValue(nativeRoutes)
+        }
     }
 
     @After
@@ -234,6 +255,7 @@ class MapboxNavigationTest {
         unmockkObject(RouteAlternativesControllerProvider)
         unmockkObject(MapboxNavigationTelemetry)
         unmockkStatic(TelemetryEnabler::class)
+        unmockkObject(NativeRouteParserWrapper)
 
         threadController.cancelAllNonUICoroutines()
         threadController.cancelAllUICoroutines()
@@ -940,14 +962,6 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun `unregisterAllNativeRouteProcessingListeners on destroy`() {
-        createMapboxNavigation()
-        mapboxNavigation.onDestroy()
-
-        verify(exactly = 1) { tripSession.unregisterAllNativeRouteProcessingListeners() }
-    }
-
-    @Test
     fun `verify tile config tilesVersion and isFallback on init`() {
         threadController.cancelAllUICoroutines()
         val slot = slot<TilesConfig>()
@@ -1045,7 +1059,9 @@ class MapboxNavigationTest {
         every {
             tripSession.registerFallbackVersionsObserver(capture(fallbackObserverSlot))
         } just Runs
-        val routes: List<NavigationRoute> = listOf(mockk())
+        val primaryRoute: NavigationRoute = mockk()
+        val alternativeRoute: NavigationRoute = mockk()
+        val routes: List<NavigationRoute> = listOf(primaryRoute, alternativeRoute)
         val routeProgress: RouteProgress = mockk()
         val legProgress: RouteLegProgress = mockk()
         val index = 137
@@ -1053,14 +1069,19 @@ class MapboxNavigationTest {
         every { tripSession.getRouteProgress() } returns routeProgress
         every { routeProgress.currentLegProgress } returns legProgress
         every { legProgress.legIndex } returns index
-        coEvery { navigator.setRoute(any(), any()) } returns mockk()
+        coEvery { navigator.setPrimaryRoute(any()) } answers {
+            assertEquals(primaryRoute, this.firstArg<Pair<NavigationRoute, Int>>().first)
+            mockk()
+        }
+        coEvery { navigator.setAlternativeRoutes(any()) } just Runs
 
         mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
 
         fallbackObserverSlot.captured.onFallbackVersionsFound(listOf("version"))
 
         coVerify {
-            navigator.setRoute(routes, index)
+            navigator.setPrimaryRoute(Pair(primaryRoute, index))
+            navigator.setAlternativeRoutes(listOf(alternativeRoute))
         }
     }
 
@@ -1156,11 +1177,15 @@ class MapboxNavigationTest {
         createMapboxNavigation()
         val primaryRoute = mockk<DirectionsRoute>(relaxed = true) {
             every { routeIndex() } returns "0"
-            every { routeOptions() } returns mockk()
+            every { routeOptions() } returns mockk {
+                every { toUrl(any()) } returns URL("https://test.com")
+            }
         }
         val alternativeRoute = mockk<DirectionsRoute>(relaxed = true) {
             every { routeIndex() } returns "0"
-            every { routeOptions() } returns mockk()
+            every { routeOptions() } returns mockk {
+                every { toUrl(any()) } returns URL("https://test.com")
+            }
         }
         every { directionsSession.routes } returns listOf(primaryRoute.toNavigationRoute())
 

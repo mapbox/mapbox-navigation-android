@@ -54,31 +54,28 @@ class NavigatorTest {
     }
 
     private fun provideDirectionsRouteAndRouteOptions(): List<NavigationRoute> =
-        listOf(
-            NavigationRoute(
-                DirectionsResponse.fromJson(
-                    readRawFileText(
-                        InstrumentationRegistry.getInstrumentation().targetContext,
-                        DIRECTIONS_RESPONSE,
-                    )
-                ),
-                0,
-                RouteOptions.builder()
-                    .profile(DirectionsCriteria.PROFILE_DRIVING)
-                    .coordinatesList(
-                        listOf(
-                            Point.fromLngLat(-77.063888, 38.798979),
-                            Point.fromLngLat(-77.078234, 38.894377),
-                            Point.fromLngLat(-77.028263, 38.962309),
-                        )
-                    )
-                    .waypointNamesList(
-                        listOf(
-                            "", "North Quinn Street", ""
-                        )
-                    )
-                    .build()
+        NavigationRoute.create(
+            DirectionsResponse.fromJson(
+                readRawFileText(
+                    InstrumentationRegistry.getInstrumentation().targetContext,
+                    DIRECTIONS_RESPONSE,
+                )
             ),
+            RouteOptions.builder()
+                .profile(DirectionsCriteria.PROFILE_DRIVING)
+                .coordinatesList(
+                    listOf(
+                        Point.fromLngLat(-77.063888, 38.798979),
+                        Point.fromLngLat(-77.078234, 38.894377),
+                        Point.fromLngLat(-77.028263, 38.962309),
+                    )
+                )
+                .waypointNamesList(
+                    listOf(
+                        "", "North Quinn Street", ""
+                    )
+                )
+                .build()
         )
 
     private fun provideNavigator(

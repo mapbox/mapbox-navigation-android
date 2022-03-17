@@ -258,7 +258,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val moduleRouter: NavigationRouter by lazy {
         val result = MapboxModuleProvider.createModule<Router>(MapboxModuleType.NavigationRouter) {
             paramsProvider(
-                ModuleParams.NavigationRoute(
+                ModuleParams.NavigationRouter(
                     accessToken
                         ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER),
                     nativeRouter,
@@ -873,7 +873,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.unregisterAllRoadObjectsOnRouteObservers()
         tripSession.unregisterAllEHorizonObservers()
         tripSession.unregisterAllFallbackVersionsObservers()
-        tripSession.unregisterAllNativeRouteProcessingListeners()
         routeAlternativesController.unregisterAll()
         routeRefreshController.stop()
         directionsSession.setRoutes(
@@ -1463,24 +1462,27 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             )
             historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
 
-            directionsSession.routes.firstOrNull()?.let {
-                navigator.setRoute(
-                    routes = directionsSession.routes,
-                    tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0
+            directionsSession.routes.firstOrNull()?.let { route ->
+                navigator.setPrimaryRoute(
+                    Pair(
+                        route,
+                        tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0
+                    )
                 )
+            }
+            directionsSession.routes.drop(1).let {
+                navigator.setAlternativeRoutes(it)
             }
         }
     }
 
     private fun reroute() {
-        rerouteController?.reroute(
-            NavigationRerouteController.RoutesCallback { routes, _ ->
-                directionsSession.setRoutes(
-                    routes,
-                    routesUpdateReason = RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
-                )
-            }
-        )
+        rerouteController?.reroute { routes, _ ->
+            directionsSession.setRoutes(
+                routes,
+                routesUpdateReason = RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+            )
+        }
     }
 
     private inline fun <T> runInTelemetryContext(func: (MapboxNavigationTelemetry) -> T): T? {

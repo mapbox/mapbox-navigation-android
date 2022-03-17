@@ -38,7 +38,7 @@ fun String.mapToRoutingMode(): RoutingMode {
 /**
  * Map list of [NavigationRoute] to [DirectionsResponse]
  *
- * Until [mapbox-navigation-native#5142](https://github.com/mapbox/mapbox-navigation-native/issues/5142) is resolved,
+ * Until https://github.com/mapbox/mapbox-navigation-native/issues/5554 is resolved,
  * we'll keep providing injected routes into the first response.
  *
  * @throws IllegalStateException if list is empty

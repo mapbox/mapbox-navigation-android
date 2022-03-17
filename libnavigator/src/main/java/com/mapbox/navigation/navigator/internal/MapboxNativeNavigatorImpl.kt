@@ -4,12 +4,14 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
+import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.utils.internal.logD
+import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.CacheHandle
@@ -33,7 +35,6 @@ import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterInterface
-import com.mapbox.navigator.Routes
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.CopyOnWriteArraySet
@@ -43,8 +44,6 @@ import kotlin.coroutines.resume
  * Default implementation of [MapboxNativeNavigator] interface.
  */
 object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
-
-    const val PRIMARY_ROUTE_INDEX = 0
 
     private const val LOG_CATEGORY = "MapboxNativeNavigatorImpl"
 
@@ -150,38 +149,37 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     // Routing
 
-    /**
-     * Sets the route path for the navigator to process.
-     * Returns initialized route state if no errors occurred.
-     * Otherwise, it returns a invalid route state.
-     *
-     * @param routes [DirectionsRoute]s to follow.
-     * @param legIndex Which leg to follow
-     *
-     * @return a [RouteInfo] route state if no errors occurred.
-     * Otherwise, it returns null.
-     */
-    override suspend fun setRoute(
-        routes: List<NavigationRoute>,
-        legIndex: Int
-    ): RouteInfo? =
-        suspendCancellableCoroutine { continuation ->
-            if (routes.isNotEmpty()) {
-                val directionsResponse = routes.mapToDirectionsResponse().toJson()
-                navigator!!.setRoutes(
-                    Routes(
-                        directionsResponse,
-                        PRIMARY_ROUTE_INDEX,
-                        legIndex,
-                        routes.first().routeOptions.toUrl(accessToken).toString()
+    override suspend fun setPrimaryRoute(
+        routeWithStartingLeg: Pair<NavigationRoute, Int>?
+    ): RouteInfo? = suspendCancellableCoroutine { continuation ->
+        navigator!!.setPrimaryRoute(
+            routeWithStartingLeg?.first?.nativeRoute(),
+            routeWithStartingLeg?.second ?: 0
+        ) { result ->
+            result.onError {
+                logE(
+                    "Failed to set primary route, " +
+                        "active guidance session will not function correctly. Reason: $it",
+                    LOG_CATEGORY
+                )
+            }
+            continuation.resume(result.value)
+        }
+    }
+
+    override suspend fun setAlternativeRoutes(routes: List<NavigationRoute>) =
+        suspendCancellableCoroutine<Unit> { continuation ->
+            navigator!!.setAlternativeRoutes(
+                routes.map { it.nativeRoute() }
+            ) { result ->
+                result.onError {
+                    logE(
+                        "Failed to set alternative routes, " +
+                            "alternatives will be ignored. Reason: $it",
+                        LOG_CATEGORY
                     )
-                ) {
-                    continuation.resume(it.value)
                 }
-            } else {
-                navigator!!.setRoutes(null) {
-                    continuation.resume(it.value)
-                }
+                continuation.resume(Unit)
             }
         }
 
@@ -195,7 +193,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         route.directionsRoute.legs()?.forEachIndexed { index, routeLeg ->
             suspendCancellableCoroutine<Unit> { continuation ->
                 routeLeg.annotation()?.toJson()?.let { annotations ->
-                    navigator!!.updateAnnotations(annotations, PRIMARY_ROUTE_INDEX, index) {
+                    navigator!!.updateAnnotations(annotations, route.nativeRoute().routeId, index) {
                         logD(
                             "Annotation updated successfully=$it, for leg " +
                                 "index $index, annotations: [$annotations]",
@@ -233,7 +231,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      */
     override suspend fun updateLegIndex(legIndex: Int): Boolean =
         suspendCancellableCoroutine { continuation ->
-            navigator!!.changeRouteLeg(PRIMARY_ROUTE_INDEX, legIndex) {
+            navigator!!.changeLeg(legIndex) {
                 continuation.resume(it)
             }
         }

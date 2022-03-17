@@ -82,22 +82,13 @@ interface MapboxNativeNavigator {
     fun removeNavigatorObserver(navigatorObserver: NavigatorObserver)
 
     // Routing
-
-    /**
-     * Sets the route path for the navigator to process.
-     * Returns initialized route state if no errors occurred.
-     * Otherwise, it returns a invalid route state.
-     *
-     * @param routes [DirectionsRoute] list of routes to follow.
-     * @param legIndex Which leg to follow
-     *
-     * @return a [RouteInfo] route state if no errors occurred.
-     * Otherwise, it returns null.
-     */
-    suspend fun setRoute(
-        routes: List<NavigationRoute>,
-        legIndex: Int
+    suspend fun setPrimaryRoute(
+        routeWithStartingLeg: Pair<NavigationRoute, Int>?
     ): RouteInfo?
+
+    suspend fun setAlternativeRoutes(
+        routes: List<NavigationRoute>
+    )
 
     /**
      * Updates annotations so that subsequent calls to getStatus will
