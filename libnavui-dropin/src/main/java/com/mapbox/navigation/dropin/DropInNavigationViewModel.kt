@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.component.audioguidance.AudioGuidanceViewModel
+import com.mapbox.navigation.dropin.component.backstack.BackPressManager
 import com.mapbox.navigation.dropin.component.camera.CameraViewModel
 import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
 import com.mapbox.navigation.dropin.component.location.LocationViewModel
@@ -12,9 +13,6 @@ import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewMode
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.replay.ReplayViewModel
 import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 
 /**
  * There is a single ViewModel for the navigation view. Use this class to store state that should
@@ -22,13 +20,6 @@ import kotlinx.coroutines.flow.asSharedFlow
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class DropInNavigationViewModel : ViewModel() {
-
-    private val _onBackPressedEvent = MutableSharedFlow<Unit>(
-        replay = 0,
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-    val onBackPressedEvent = _onBackPressedEvent.asSharedFlow()
 
     /**
      * These classes are accessible through MapboxNavigationApp.getObserver(..)
@@ -50,6 +41,11 @@ internal class DropInNavigationViewModel : ViewModel() {
         destinationViewModel,
         routesViewModel
     )
+    val backPressManager = BackPressManager(
+        navigationStateViewModel,
+        destinationViewModel,
+        routesViewModel
+    )
     private val navigationObservers = listOf(
         destinationViewModel,
         replayViewModel,
@@ -59,12 +55,9 @@ internal class DropInNavigationViewModel : ViewModel() {
         cameraViewModel,
         navigationStateViewModel,
         navigationStateComponent,
+        backPressManager
         // TODO can add more mapbox navigation observers here
     )
-
-    fun onBackPressed() {
-        _onBackPressedEvent.tryEmit(Unit)
-    }
 
     init {
         navigationObservers.forEach { MapboxNavigationApp.registerObserver(it) }

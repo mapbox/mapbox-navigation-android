@@ -1,7 +1,6 @@
 package com.mapbox.navigation.dropin
 
 import android.content.Context
-import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.binder.UIBinder
@@ -45,10 +44,6 @@ internal class DropInNavigationViewContext(
     var routeArrowOptions: RouteArrowOptions = RouteArrowOptions.Builder(context)
         .withAboveLayerId(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
         .build()
-
-    val onBackPressedCallback = object : OnBackPressedCallback(true) {
-        override fun handleOnBackPressed() = viewModel.onBackPressed()
-    }
 
     val dispatch: (action: Any) -> Unit = { action ->
         when (action) {

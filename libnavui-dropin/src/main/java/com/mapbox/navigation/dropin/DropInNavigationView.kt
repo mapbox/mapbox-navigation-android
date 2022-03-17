@@ -4,9 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.util.AttributeSet
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.widget.FrameLayout
-import androidx.activity.OnBackPressedCallback
 import androidx.core.content.res.use
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -19,7 +19,6 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.coordinator.ActionButtonsCoordinator
-import com.mapbox.navigation.dropin.coordinator.BackPressManager
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
 import com.mapbox.navigation.dropin.coordinator.ManeuverCoordinator
 import com.mapbox.navigation.dropin.coordinator.MapCoordinator
@@ -71,12 +70,6 @@ class DropInNavigationView @JvmOverloads constructor(
     )
 
     /**
-     * Retrieve the [OnBackPressedCallback] that can be registered with OnBackPressedDispatcher
-     * to allow [androidx.activity.ComponentActivity#onBackPressed()] handling in DropIn UI .
-     */
-    fun getOnBackPressedCallback(): OnBackPressedCallback = navigationContext.onBackPressedCallback
-
-    /**
      * Customize the views by implementing your own [UIBinder] components.
      */
     fun customize(navigationUIBinders: NavigationUIBinders) {
@@ -104,6 +97,10 @@ class DropInNavigationView @JvmOverloads constructor(
     }
 
     init {
+        isEnabled = true
+        isFocusableInTouchMode = true
+        requestFocus()
+
         binding.mapView.getMapboxMap().loadStyle(
             style(NavigationStyles.NAVIGATION_DAY_STYLE) {
                 // TODO allow for customization.
@@ -133,7 +130,7 @@ class DropInNavigationView @JvmOverloads constructor(
          * Single point of entry for the Mapbox Navigation View.
          */
         attachCreated(
-            BackPressManager(navigationContext),
+            // BackPressCoordinator(navigationContext, this),
             MapCoordinator(navigationContext, binding.mapView),
             ManeuverCoordinator(navigationContext, binding.guidanceLayout),
             InfoPanelCoordinator(
@@ -148,6 +145,13 @@ class DropInNavigationView @JvmOverloads constructor(
     }
 
     override fun getLifecycle(): Lifecycle = viewLifecycleRegistry
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
+        if (event.action == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK) {
+            return viewModel.backPressManager.handleOnBackPressed()
+        }
+        return super.onKeyUp(keyCode, event)
+    }
 
     private inline fun <reified T : ViewModel> lazyViewModel(): Lazy<T> = lazy {
         viewModelProvider[T::class.java]
