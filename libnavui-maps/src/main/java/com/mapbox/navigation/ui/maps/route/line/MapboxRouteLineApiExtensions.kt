@@ -1,17 +1,23 @@
 package com.mapbox.navigation.ui.maps.route.line
 
+import androidx.annotation.ColorInt
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
@@ -156,5 +162,97 @@ object MapboxRouteLineApiExtensions {
                 continuation.resume(value)
             }
         }
+    }
+
+    /**
+     * Overrides the color [Expression] for the primary traffic line with the color indicated.
+     * The entire traffic line will take on the color provided. If the [Expected] is an error
+     * the same [Expected] object is returned.
+     *
+     * @param color the color to use for the primary traffic line.
+     * @return an [Expected] with the color mutation applied
+     */
+    fun Expected<RouteLineError, RouteSetValue>.setPrimaryTrafficColor(@ColorInt color: Int):
+        Expected<RouteLineError, RouteSetValue> {
+        return this.fold({
+            this
+        }, {
+            val expression = MapboxRouteLineUtils.getRouteLineExpression(0.0, color, color)
+            this.setPrimaryTrafficColor(expression)
+        })
+    }
+
+    /**
+     * Overrides the color [Expression] for the primary traffic line with the [Expression] provided.
+     * If the [Expected] is an error the same [Expected] object is returned.
+     *
+     * @param expression the [Expression] to use for the primary traffic line.
+     * @return an [Expected] with the expression mutation applied
+     */
+    fun Expected<RouteLineError, RouteSetValue>.setPrimaryTrafficColor(expression: Expression):
+        Expected<RouteLineError, RouteSetValue> {
+        return this.fold({
+            this
+        }, { routeSetValue ->
+            val updatedValue = routeSetValue.toMutableValue().also {
+                it.primaryRouteLineData = replaceColorExpression(
+                    routeSetValue.primaryRouteLineData,
+                    expression
+                )
+            }.toImmutableValue()
+            ExpectedFactory.createValue(updatedValue)
+        })
+    }
+
+    /**
+     * Overrides the color [Expression] for the alternative traffic lines with the color indicated.
+     * The entire traffic line will take on the color provided. If the [Expected] is an error
+     * the same [Expected] object is returned.
+     *
+     * @param color the color to use for the alternative traffic lines.
+     * @return an [Expected] with the color mutation applied
+     */
+    fun Expected<RouteLineError, RouteSetValue>.setAlternativeTrafficColor(@ColorInt color: Int):
+        Expected<RouteLineError, RouteSetValue> {
+        return this.fold({
+            this
+        }, {
+            val expression = MapboxRouteLineUtils.getRouteLineExpression(0.0, color, color)
+            this.setAlternativeTrafficColor(expression)
+        })
+    }
+
+    /**
+     * Overrides the color [Expression] for the alternative traffic lines with the [Expression] provided.
+     * If the [Expected] is an error the same [Expected] object is returned.
+     *
+     * @param expression the [Expression] to use for the alternative traffic lines.
+     * @return an [Expected] with the expression mutation applied
+     */
+    fun Expected<RouteLineError, RouteSetValue>.setAlternativeTrafficColor(expression: Expression):
+        Expected<RouteLineError, RouteSetValue> {
+        return this.fold({
+            this
+        }, { routeSetValue ->
+            val updatedValue = routeSetValue.toMutableValue().also {
+                it.alternativeRouteLinesData = it.alternativeRouteLinesData.map { routeLineData ->
+                    replaceColorExpression(routeLineData, expression)
+                }
+            }.toImmutableValue()
+            ExpectedFactory.createValue(updatedValue)
+        })
+    }
+
+    private fun replaceColorExpression(routeLineData: RouteLineData, expression: Expression):
+        RouteLineData {
+        val updatedDynamicData = routeLineData.dynamicData.toMutableValue().also {
+            it.trafficExpressionProvider = RouteLineExpressionProvider {
+                expression
+            }
+        }.toImmutableValue()
+
+        return routeLineData.toMutableValue().also {
+            it.dynamicData = updatedDynamicData
+        }.toImmutableValue()
     }
 }
