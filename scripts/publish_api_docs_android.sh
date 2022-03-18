@@ -146,7 +146,7 @@ createPullRequest() {
     git checkout -b $TRIGGER_BRANCH_NAME
     git commit -m "empty commit to trigger publisher production" --allow-empty
     git push origin HEAD -u
-    gh pr create \
+    GITHUB_TOKEN=$GITHUB_PR_ACCESS_TOKEN gh pr create \
         --title "Trigger publisher production" \
         --body "This PR contains an empty commit to trigger deployment from the publisher-production branch.
         Should be **squashed** after ${LINK_TO_DOCS_PR}" \
