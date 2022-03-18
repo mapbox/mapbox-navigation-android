@@ -6,8 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Mapbox Navigation SDK 2.4.0-beta.2 - March 18, 2022
 ### Changelog
-
-- :warning: This version regresses the fix for [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://github.com/mapbox/mapbox-navigation-android/pull/5492).
+- :warning: This version regresses the fix for [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://github.com/mapbox/mapbox-navigation-android/pull/5492) which will be addressed again in the upcoming release.
 
 #### Features
 - Added a new `RailwayCrossing` type to `RoadObject`s. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
