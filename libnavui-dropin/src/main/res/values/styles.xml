@@ -1,85 +1,197 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Buttons -->
 
-    <style name="MapboxStyleCameraModeButton">
-        <item name="android:elevation">0dp</item>
-        <item name="android:background">@drawable/mapbox_bg_button</item>
-        <item name="cameraModeButtonIconTint">@color/mapbox_button_fg_color</item>
-        <item name="cameraModeButtonFollowIcon">@drawable/mapbox_ic_camera_follow</item>
-        <item name="cameraModeButtonOverviewIcon">@drawable/mapbox_ic_camera_overview</item>
-        <item name="cameraModeButtonTextAppearance">@style/MapboxStyleCameraModeButton.TextAppearance</item>
-        <item name="cameraModeButtonFollowText">@string/mapbox_route_follow</item>
-        <item name="cameraModeButtonOverviewText">@string/mapbox_route_overview</item>
+    <style name="MapboxStyleNavigationView">
+        <item name="maneuverView">@style/DropInStyleManeuverView</item>
+        <item name="speedLimitView">@style/DropInStyleSpeedLimit</item>
+        <item name="tripProgressView">@style/DropInStyleTripProgressView</item>
+        <item name="roadNameBackground">@drawable/mapbox_road_name_view_background</item>
+        <item name="infoPanelBackground">@drawable/mapbox_bg_info_panel</item>
+        <item name="dragHandle">@style/DropInStyleDragHandle</item>
+        <item name="cameraModeButton">@style/MapboxStyleCameraModeButton</item>
+        <item name="recenterButton">@style/DropInStyleRecenterButton</item>
+        <item name="endNavigationButton">@style/DropInStyleExitButton</item>
+        <item name="audioGuidanceOn">@style/DropInStyleAudioGuidanceOnButton</item>
+        <item name="audioGuidanceOff">@style/DropInStyleAudioGuidanceOffButton</item>
+        <item name="routePreviewButton">@style/DropInStylePreviewButton</item>
+        <item name="startNavigationButton">@style/DropInStyleStartButton</item>
+        <item name="infoPanelPoiTitleTextAppearance">@style/DropInInfoPanelHeadlineTextAppearance</item>
     </style>
 
-    <style name="MapboxStyleCameraModeButton.TextAppearance">
-        <item name="android:textColor">@color/mapbox_button_fg_color</item>
-        <item name="android:textSize">14sp</item>
+    <!-- Maneuver view styling -->
+    <style name="DropInStyleTurnIconManeuver" parent="MapboxStyleTurnIconManeuver">
+        <item name="maneuverTurnIconColor">@android:color/white</item>
+        <item name="maneuverTurnIconShadowColor">@color/colorSecondary</item>
     </style>
 
-    <style name="MapboxStyleExpandableButton">
-        <item name="android:elevation">0dp</item>
-        <item name="android:background">@drawable/mapbox_bg_button</item>
-        <item name="extendableButtonIconTint">@color/mapbox_button_fg_color</item>
-        <item name="extendableButtonTextAppearance">@style/MapboxStyleExpandableButton.TextAppearance</item>
-    </style>
-    <style name="MapboxStyleExpandableButton.TextAppearance">
-        <item name="android:textColor">@color/mapbox_button_fg_color</item>
-        <item name="android:textSize">14sp</item>
+    <style name="DropInStyleManeuverView" parent="MapboxStyleManeuverView">
+        <item name="maneuverViewBackgroundColor">@color/colorPrimary</item>
+        <item name="subManeuverViewBackgroundColor">@color/colorPrimaryVariant</item>
+        <item name="maneuverViewIconStyle">@style/DropInStyleTurnIconManeuver</item>
+        <item name="laneGuidanceManeuverIconStyle">@style/DropInStyleTurnIconManeuver</item>
     </style>
 
-    <style name="MapboxStyleExpandableButton.Primary">
-        <item name="android:background">@drawable/mapbox_bg_button_primary</item>
-        <item name="extendableButtonIconTint">@color/mapbox_button_primary_fg_color</item>
-        <item name="extendableButtonTextAppearance">@style/MapboxStyleExpandableButton.Primary.TextAppearance</item>
-    </style>
-    <style name="MapboxStyleExpandableButton.Primary.TextAppearance">
-        <item name="android:textColor">@color/mapbox_button_primary_fg_color</item>
-        <item name="android:textSize">14sp</item>
+    <style name="MapboxStylePrimaryManeuver">
+        <item name="android:textColor">@color/colorOnPrimary</item>
+        <item name="android:textSize">@dimen/mapbox_maneuver_view_primary_text_regular</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textDirection">locale</item>
+        <item name="android:ellipsize">end</item>
     </style>
 
-    <style name="MapboxStyle.DropIn.StartButton" parent="MapboxStyleExpandableButton.Primary">
-        <item name="extendableButtonIcon">@drawable/mapbox_ic_puck</item>
+    <style name="MapboxStyleSecondaryManeuver">
+        <item name="android:textColor">@color/colorOnPrimary</item>
+        <item name="android:textSize">@dimen/mapbox_maneuver_view_secondary_text_regular</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textDirection">locale</item>
+        <item name="android:ellipsize">end</item>
     </style>
 
-    <style name="MapboxStyle.DropIn.PreviewButton" parent="MapboxStyleExpandableButton">
-        <item name="extendableButtonIcon">@drawable/mapbox_ic_route</item>
+    <style name="MapboxStyleSubManeuver">
+        <item name="android:textColor">@color/colorOnPrimaryVariant</item>
+        <item name="android:textSize">@dimen/mapbox_maneuver_view_sub_text_regular</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textDirection">locale</item>
+        <item name="android:ellipsize">end</item>
     </style>
 
-    <style name="MapboxStyle.DropIn.ExitButton" parent="MapboxStyleExpandableButton">
-        <item name="extendableButtonIcon">@drawable/mapbox_ic_close</item>
+    <style name="MapboxStyleExitTextForPrimary">
+        <item name="android:textSize">@dimen/mapbox_maneuver_view_primary_text_regular</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/colorOnSecondaryVariant</item>
     </style>
 
-    <!-- Text -->
+    <style name="MapboxStyleExitTextForSecondary">
+        <item name="android:textSize">@dimen/mapbox_maneuver_view_secondary_text_regular</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/colorOnSecondaryVariant</item>
+    </style>
 
-    <style name="MapboxStyle.DropIn.TextAppearance.Regular" parent="">
+    <style name="MapboxStyleExitTextForSub">
+        <item name="android:textSize">@dimen/mapbox_maneuver_view_sub_text_regular</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/colorOnSecondaryVariant</item>
+    </style>
+
+    <style name="MapboxStyleStepDistance">
+        <item name="android:textColor">@color/colorOnPrimary</item>
+        <item name="android:textSize">@dimen/mapbox_maneuver_step_distance_text_regular</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <!-- Trip progress view styling -->
+    <style name="DropInStyleTripProgressView" parent="MapboxStyleTripProgressView">
+        <item name="tripProgressTextColor">@color/colorOnSurface</item>
+        <item name="tripProgressDividerColor">@color/colorSecondaryVariant</item>
+        <item name="tripProgressViewBackgroundColor">@color/colorSurface</item>
+    </style>
+
+    <style name="DropInTripProgressViewTextAppearance" parent="TextAppearance.AppCompat">
         <item name="android:textColor">@color/colorOnSurface</item>
-        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">@dimen/mapbox_trip_progress_text_regular</item>
     </style>
 
-    <style name="MapboxStyle.DropIn.TextAppearance.Primary" parent="">
-        <item name="android:textColor">@color/colorSecondary</item>
-        <item name="android:textStyle">normal</item>
+    <!-- Speed limit view styling -->
+    <style name="DropInStyleSpeedLimit" parent="MapboxStyleSpeedLimit">
+        <item name="speedLimitTextColor">@color/colorOnSurface</item>
+        <item name="speedLimitMutcdBorderColor">@color/colorOnSecondaryVariant</item>
+        <item name="speedLimitBackgroundColor">@color/colorSurface</item>
+        <item name="speedLimitViennaBorderColor">@color/mapbox_speed_limit_view_vienna_border</item>
     </style>
 
-    <style name="MapboxStyle.DropIn.InfoPanelHeadline" parent="">
-        <item name="android:textAppearance">@style/MapboxStyle.DropIn.TextAppearance.Primary</item>
-        <item name="android:textSize">27sp</item>
+    <style name="DropInSpeedLimitTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/colorOnSurface</item>
+        <item name="android:textSize">@dimen/mapbox_speed_limit_text_regular</item>
     </style>
 
-    <style name="MapboxStyle.DropIn.InfoPanelSubtitle" parent="">
-        <item name="android:textAppearance">@style/MapboxStyle.DropIn.TextAppearance.Regular</item>
-        <item name="android:textSize">15sp</item>
+    <!-- Road name view styling -->
+    <style name="DropInRoadNameViewTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/colorOnSurface</item>
+        <item name="android:textSize">@dimen/mapbox_road_name_text_regular</item>
     </style>
 
-    <!-- Accessory -->
-
-    <style name="MapboxStyle.DropIn.DragHandle" parent="">
-        <item name="android:layout_width">78dp</item>
+    <!-- Drag handle styling -->
+    <style name="DropInStyleDragHandle" parent="">
+        <item name="android:layout_width">48dp</item>
         <item name="android:layout_height">5dp</item>
         <item name="android:layout_marginTop">10dp</item>
         <item name="android:background">@drawable/mapbox_bg_handle</item>
     </style>
 
+    <!-- Info panel styling -->
+    <style name="DropInInfoPanelHeadlineTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/colorOnSurface</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">@dimen/mapbox_infoPanel_text_headline</item>
+    </style>
+
+    <!-- Start navigation button -->
+    <style name="DropInStartButtonTextAppearance" parent="">
+        <item name="android:textColor">@color/colorOnPrimary</item>
+        <item name="android:textSize">@dimen/mapbox_button_text_regular</item>
+    </style>
+
+    <style name="DropInStyleStartButton" parent="MapboxStyleExtendableButton">
+        <item name="extendableButtonIcon">@drawable/mapbox_ic_puck</item>
+        <item name="extendableButtonIconTint">@color/colorOnPrimary</item>
+        <item name="android:background">@drawable/mapbox_bg_button_primary</item>
+        <item name="extendableButtonTextAppearance">@style/DropInStartButtonTextAppearance</item>
+    </style>
+
+    <!-- Preview button -->
+    <style name="DropInStylePreviewButton" parent="MapboxStyleExtendableButton">
+        <item name="extendableButtonIcon">@drawable/mapbox_ic_route</item>
+    </style>
+
+    <!-- Stop navigation button -->
+    <style name="DropInStyleExitButton" parent="MapboxStyleExtendableButton">
+        <item name="extendableButtonIcon">@drawable/mapbox_ic_close</item>
+    </style>
+
+    <!-- Audio guidance button -->
+    <style name="DropInStyleAudioGuidanceOnButton" parent="MapboxStyleExtendableButton">
+        <item name="extendableButtonIcon">@drawable/mapbox_ic_sound_on</item>
+    </style>
+
+    <style name="DropInStyleAudioGuidanceOffButton" parent="MapboxStyleExtendableButton">
+        <item name="extendableButtonIcon">@drawable/mapbox_ic_sound_off</item>
+    </style>
+
+    <!-- Recenter button -->
+    <style name="DropInStyleRecenterButton" parent="MapboxStyleExtendableButton">
+        <item name="extendableButtonIcon">@drawable/mapbox_ic_camera_recenter</item>
+    </style>
+
+    <!-- Camera mode button -->
+    <style name="MapboxCameraModeButtonTextAppearance">
+        <item name="android:textColor">@color/colorOnSurface</item>
+        <item name="android:textSize">@dimen/mapbox_button_text_regular</item>
+    </style>
+
+    <style name="MapboxStyleCameraModeButton">
+        <item name="android:elevation">0dp</item>
+        <item name="android:background">@drawable/mapbox_bg_button</item>
+        <item name="cameraModeButtonIconTint">@color/colorOnSurface</item>
+        <item name="cameraModeButtonFollowIcon">@drawable/mapbox_ic_camera_follow</item>
+        <item name="cameraModeButtonOverviewIcon">@drawable/mapbox_ic_camera_overview</item>
+        <item name="cameraModeButtonTextAppearance">@style/MapboxCameraModeButtonTextAppearance</item>
+        <item name="cameraModeButtonFollowText">@string/mapbox_route_follow</item>
+        <item name="cameraModeButtonOverviewText">@string/mapbox_route_overview</item>
+    </style>
+
+    <!-- Extendable button -->
+    <style name="MapboxExtendableButtonTextAppearance">
+        <item name="android:textColor">@color/colorOnSurface</item>
+        <item name="android:textSize">@dimen/mapbox_button_text_regular</item>
+    </style>
+
+    <style name="MapboxStyleExtendableButton">
+        <item name="android:elevation">0dp</item>
+        <item name="android:background">@drawable/mapbox_bg_button</item>
+        <item name="extendableButtonIconTint">@color/colorOnSurface</item>
+        <item name="extendableButtonTextAppearance">@style/MapboxExtendableButtonTextAppearance</item>
+    </style>
 </resources>

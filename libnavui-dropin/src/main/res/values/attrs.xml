@@ -3,6 +3,20 @@
     <declare-styleable name="NavigationView">
         <!-- Defines the mapbox access token. -->
         <attr name="accessToken" format="string"/>
+        <attr name="maneuverView" format="reference"/>
+        <attr name="speedLimitView" format="reference"/>
+        <attr name="tripProgressView" format="reference"/>
+        <attr name="roadNameBackground" format="reference"/>
+        <attr name="infoPanelBackground" format="reference"/>
+        <attr name="dragHandle" format="reference" />
+        <attr name="recenterButton" format="reference" />
+        <attr name="audioGuidanceOn" format="reference" />
+        <attr name="audioGuidanceOff" format="reference" />
+        <attr name="cameraModeButton" format="reference" />
+        <attr name="routePreviewButton" format="reference" />
+        <attr name="endNavigationButton" format="reference" />
+        <attr name="startNavigationButton" format="reference" />
+        <attr name="infoPanelPoiTitleTextAppearance" format="reference"/>
     </declare-styleable>
 
     <declare-styleable name="MapboxCameraModeButton">

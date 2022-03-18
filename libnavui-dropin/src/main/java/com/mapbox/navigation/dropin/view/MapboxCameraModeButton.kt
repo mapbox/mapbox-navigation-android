@@ -104,7 +104,7 @@ class MapboxCameraModeButton : FrameLayout {
                 }
                 getResourceId(
                     R.styleable.MapboxCameraModeButton_cameraModeButtonTextAppearance,
-                    R.style.MapboxStyleCameraModeButton_TextAppearance
+                    R.style.MapboxCameraModeButtonTextAppearance
                 ).also {
                     // setTextAppearance is not deprecated in AppCompatTextView
                     textView.setTextAppearance(context, it)

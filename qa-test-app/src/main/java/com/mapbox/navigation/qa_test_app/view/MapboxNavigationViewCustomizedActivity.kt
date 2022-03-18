@@ -1,11 +1,13 @@
 package com.mapbox.navigation.qa_test_app.view
 
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.MutableLiveData
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
@@ -49,6 +51,8 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
         val binding = LayoutActivityNavigationViewCustomizedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.getDefaultNightMode())
+
         // This demonstrates that you can customize views at any time. You can also reset to
         // the default views.
         showCustomViews.observe(this) { showCustomViews ->
@@ -67,8 +71,25 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
             showCustomViews.value = showCustomViews.value?.not()
         }
 
+        when (resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
+            Configuration.UI_MODE_NIGHT_YES -> { binding.toggleTheme.isChecked = true }
+            else -> { binding.toggleTheme.isChecked = false }
+        }
+
+        binding.toggleTheme.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                toggleTheme(AppCompatDelegate.MODE_NIGHT_YES)
+            } else {
+                toggleTheme(AppCompatDelegate.MODE_NIGHT_NO)
+            }
+        }
+
         binding.navigationView.customize(routeLineOptions)
         binding.navigationView.customize(routeArrowOptions)
+    }
+
+    private fun toggleTheme(themeMode: Int) {
+        AppCompatDelegate.setDefaultNightMode(themeMode)
     }
 }
 

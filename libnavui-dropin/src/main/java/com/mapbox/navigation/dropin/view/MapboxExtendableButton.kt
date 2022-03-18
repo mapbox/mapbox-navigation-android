@@ -50,7 +50,7 @@ class MapboxExtendableButton : FrameLayout {
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
-        this(context, attrs, defStyleAttr, R.style.MapboxStyleExpandableButton)
+        this(context, attrs, defStyleAttr, R.style.MapboxStyleExtendableButton)
 
     constructor(
         context: Context,
@@ -78,7 +78,7 @@ class MapboxExtendableButton : FrameLayout {
                 }
                 getResourceId(
                     R.styleable.MapboxExtendableButton_extendableButtonTextAppearance,
-                    R.style.MapboxStyleExpandableButton_TextAppearance
+                    R.style.MapboxExtendableButtonTextAppearance
                 ).also {
                     // setTextAppearance is not deprecated in AppCompatTextView
                     textView.setTextAppearance(context, it)

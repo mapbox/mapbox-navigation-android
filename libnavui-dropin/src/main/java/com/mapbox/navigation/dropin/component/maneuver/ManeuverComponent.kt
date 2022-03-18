@@ -26,7 +26,7 @@ class ManeuverComponent(
 ) : UIComponent() {
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
-
+        maneuverView.upcomingManeuverRenderingEnabled = false
         coroutineScope.launch {
             combine(
                 mapboxNavigation.flowRoutesUpdated(),

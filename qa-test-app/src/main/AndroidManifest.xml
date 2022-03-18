@@ -36,9 +36,18 @@
         <activity
             android:name=".view.IconsPreviewActivity"
             android:theme="@style/Theme.IconsPreviewActivity" />
-        <activity android:name=".view.MapboxNavigationViewActivity" />
-        <activity android:name=".view.MapboxNavigationViewCustomizedActivity" />
-        <activity android:name=".view.MapboxNavigationViewFragmentActivity" />
+        <activity
+            android:name=".view.MapboxNavigationViewActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            />
+        <activity
+            android:name=".view.MapboxNavigationViewCustomizedActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            />
+        <activity
+            android:name=".view.MapboxNavigationViewFragmentActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            />
     </application>
 
 </manifest>

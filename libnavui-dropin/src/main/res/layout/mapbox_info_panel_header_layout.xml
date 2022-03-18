@@ -12,7 +12,7 @@
         android:layout_height="@dimen/mapbox_infoPanel_peekHeight">
 
         <View
-            style="@style/MapboxStyle.DropIn.DragHandle"
+            style="@style/DropInStyleDragHandle"
             android:id="@+id/handle"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -28,7 +28,7 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            style="@style/MapboxStyle.DropIn.InfoPanelHeadline"
+            style="@style/DropInInfoPanelHeadlineTextAppearance"
             android:id="@+id/arrivedText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -44,7 +44,7 @@
             app:layout_constraintHorizontal_bias="0.5" />
 
         <com.mapbox.navigation.dropin.view.MapboxExtendableButton
-            style="@style/MapboxStyle.DropIn.ExitButton"
+            style="@style/DropInStyleExitButton"
             android:id="@+id/endNavigation"
             android:layout_width="72dp"
             android:layout_height="52dp"
@@ -54,7 +54,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            style="@style/MapboxStyle.DropIn.InfoPanelHeadline"
+            style="@style/DropInInfoPanelHeadlineTextAppearance"
             android:id="@+id/poiName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -70,7 +70,7 @@
             app:layout_constraintEnd_toStartOf="@+id/routePreview" />
 
         <com.mapbox.navigation.dropin.view.MapboxExtendableButton
-            style="@style/MapboxStyle.DropIn.PreviewButton"
+            style="@style/DropInStylePreviewButton"
             android:id="@+id/routePreview"
             android:layout_width="72dp"
             android:layout_height="52dp"
@@ -80,7 +80,7 @@
             app:layout_constraintTop_toTopOf="@+id/startNavigation" />
 
         <com.mapbox.navigation.dropin.view.MapboxExtendableButton
-            style="@style/MapboxStyle.DropIn.StartButton"
+            style="@style/DropInStyleStartButton"
             android:id="@+id/startNavigation"
             android:layout_width="72dp"
             android:layout_height="52dp"
