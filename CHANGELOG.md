@@ -3,6 +3,11 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
+
+## Mapbox Navigation SDK 2.4.0-beta.2 - March 18, 2022
+### Changelog
+- :warning: This version regresses the fix for [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://github.com/mapbox/mapbox-navigation-android/pull/5492) which will be addressed again in the upcoming release.
+
 #### Features
 - Added a new `RailwayCrossing` type to `RoadObject`s. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
 - Added point exclusion option for onboard router. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
@@ -11,6 +16,15 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue where a route refresh would only refresh annotations for the current leg of a route instead of for all remaining legs of a route. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
 - Fixed an issue where alternative routes would hold a reference to the original route's `RouteOptions` instead of the correct ones that were used to generate the alternative. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
 - Fixed an issue related to highlighting buildings via the MapboxBuildingsApi by adding the building-extrusion layer as one of the layers queried. [#5433](https://github.com/mapbox/mapbox-navigation-android/pull/5433)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.4.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.4.0-beta.1))
+- Mapbox Navigation Native `v90.0.1`
+- Mapbox Core Common `21.2.0-beta.1`
+- Mapbox Java `6.4.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.4.0-beta.2))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
 
 ## Mapbox Navigation SDK 2.4.0-beta.1 - March 11, 2022
 ### Changelog
