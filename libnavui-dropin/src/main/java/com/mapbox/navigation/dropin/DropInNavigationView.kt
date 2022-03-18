@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.res.Configuration
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
@@ -97,8 +98,13 @@ class DropInNavigationView @JvmOverloads constructor(
     }
 
     init {
+        val style = if (isNightModeEnabled()) {
+            NavigationStyles.NAVIGATION_NIGHT_STYLE
+        } else {
+            NavigationStyles.NAVIGATION_DAY_STYLE
+        }
         binding.mapView.getMapboxMap().loadStyle(
-            style(NavigationStyles.NAVIGATION_DAY_STYLE) {
+            style(style) {
                 // TODO allow for customization.
                 // +skyLayer(...)
             }
@@ -141,6 +147,14 @@ class DropInNavigationView @JvmOverloads constructor(
     }
 
     override fun getLifecycle(): Lifecycle = viewLifecycleRegistry
+
+    private fun retrieveCurrentUiMode(): Int {
+        return resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)
+    }
+
+    private fun isNightModeEnabled(): Boolean {
+        return retrieveCurrentUiMode() == Configuration.UI_MODE_NIGHT_YES
+    }
 
     private inline fun <reified T : ViewModel> lazyViewModel(): Lazy<T> = lazy {
         viewModelProvider[T::class.java]

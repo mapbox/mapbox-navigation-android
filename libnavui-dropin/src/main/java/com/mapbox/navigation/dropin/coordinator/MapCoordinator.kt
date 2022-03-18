@@ -1,6 +1,8 @@
 package com.mapbox.navigation.dropin.coordinator
 
 import com.mapbox.maps.MapView
+import com.mapbox.maps.plugin.compass.compass
+import com.mapbox.maps.plugin.scalebar.scalebar
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.binder.Binder
@@ -20,6 +22,11 @@ internal class MapCoordinator(
     private val navigationViewContext: DropInNavigationViewContext,
     mapView: MapView,
 ) : UICoordinator<MapView>(mapView) {
+
+    init {
+        mapView.compass.enabled = false
+        mapView.scalebar.enabled = false
+    }
 
     // Temporarily flow to wire the map states
     override fun MapboxNavigation.flowViewBinders(): Flow<Binder<MapView>> {
