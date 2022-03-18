@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.NavigationUIBinders
+import com.mapbox.navigation.dropin.ViewBinderCustomization
 import com.mapbox.navigation.dropin.binder.EmptyBinder
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -13,7 +14,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.SpyK
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,11 +38,13 @@ internal class InfoPanelHeaderBinderTest {
         ctx = ApplicationProvider.getApplicationContext()
         sut = InfoPanelHeaderBinder(mockNavContext)
 
-        every { mockNavContext.uiBinders } returns MutableStateFlow(
-            NavigationUIBinders(
-                infoPanelTripProgressBinder = tripProgressBinder,
+        every { mockNavContext.uiBinders } returns NavigationUIBinders().apply {
+            applyCustomization(
+                ViewBinderCustomization().apply {
+                    infoPanelTripProgressBinder = tripProgressBinder
+                }
             )
-        )
+        }
         every { mockNavContext.dispatch } returns {}
     }
 

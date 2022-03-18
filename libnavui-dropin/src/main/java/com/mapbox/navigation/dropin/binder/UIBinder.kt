@@ -26,7 +26,17 @@ interface Binder<T> {
  * deciding what components should be part of the view.
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-interface UIBinder : Binder<ViewGroup>
+fun interface UIBinder : Binder<ViewGroup> {
+    companion object {
+        val USE_DEFAULT: UIBinder = UIBinder { NoOpMapboxNavigationObserver }
+    }
+}
+
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+internal object NoOpMapboxNavigationObserver : MapboxNavigationObserver {
+    override fun onAttached(mapboxNavigation: MapboxNavigation) = Unit
+    override fun onDetached(mapboxNavigation: MapboxNavigation) = Unit
+}
 
 /**
  * When returning an observer from [UIBinder.bind], you can use this extension to return

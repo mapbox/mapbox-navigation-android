@@ -12,7 +12,6 @@ import androidx.transition.TransitionManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
-import com.mapbox.navigation.dropin.NavigationUIBinders
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
@@ -56,16 +55,14 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
         // the default views.
         showCustomViews.observe(this) { showCustomViews ->
             if (showCustomViews) {
-                binding.navigationView.customize(
-                    NavigationUIBinders(
-                        speedLimit = CustomSpeedLimitViewBinder(),
-                    )
-                )
+                binding.navigationView.customizeViewBinders {
+                    speedLimit = CustomSpeedLimitViewBinder()
+                }
             } else {
                 // Reset defaults
-                binding.navigationView.customize(
-                    NavigationUIBinders()
-                )
+                binding.navigationView.customizeViewBinders {
+                    speedLimit = UIBinder.USE_DEFAULT
+                }
             }
         }
         binding.toggleCustomViews.setOnClickListener {

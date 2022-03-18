@@ -14,6 +14,6 @@ internal class RoadNameLabelCoordinator(
 ) : UICoordinator<ViewGroup>(roadNameLabelLayout) {
 
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
-        return navigationViewContext.flowUiBinder { it.roadName }
+        return navigationViewContext.flowUiBinder({ it.roadName })
     }
 }

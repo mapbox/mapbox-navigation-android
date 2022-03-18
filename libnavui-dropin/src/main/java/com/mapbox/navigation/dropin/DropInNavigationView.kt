@@ -77,10 +77,10 @@ class DropInNavigationView @JvmOverloads constructor(
     fun getOnBackPressedCallback(): OnBackPressedCallback = navigationContext.onBackPressedCallback
 
     /**
-     * Customize the views by implementing your own [UIBinder] components.
+     * Customize view by providing your own [UIBinder] components and options.
      */
-    fun customize(navigationUIBinders: NavigationUIBinders) {
-        navigationContext.uiBinders.value = navigationUIBinders
+    fun customizeViewBinders(action: ViewBinderCustomization.() -> Unit) {
+        navigationContext.applyCustomization(action)
     }
 
     /**

@@ -18,6 +18,6 @@ internal class SpeedLimitCoordinator(
 ) : UICoordinator<ViewGroup>(speedLimitLayout) {
 
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
-        return navigationViewContext.flowUiBinder { it.speedLimit }
+        return navigationViewContext.flowUiBinder({ it.speedLimit })
     }
 }
