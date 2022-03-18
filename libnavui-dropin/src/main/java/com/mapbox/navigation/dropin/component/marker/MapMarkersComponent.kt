@@ -6,6 +6,7 @@ import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /**
@@ -22,13 +23,16 @@ internal open class MapMarkersComponent(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        destinationState.map { it.destination }.observe { destination ->
-            annotationManager.deleteAll()
-            if (destination != null) {
-                val annotation = mapAnnotationFactory.createPin(destination.point)
-                annotationManager.create(annotation)
+        destinationState
+            .map { it.destination?.point }
+            .distinctUntilChanged()
+            .observe { point ->
+                annotationManager.deleteAll()
+                if (point != null) {
+                    val annotation = mapAnnotationFactory.createPin(point)
+                    annotationManager.create(annotation)
+                }
             }
-        }
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {

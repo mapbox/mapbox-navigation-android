@@ -3,6 +3,8 @@ package com.mapbox.navigation.dropin.component.infopanel
 import androidx.core.view.isVisible
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
+import com.mapbox.navigation.dropin.R
+import com.mapbox.navigation.dropin.component.destination.DestinationState
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderLayoutBinding
@@ -16,7 +18,9 @@ internal class InfoPanelHeaderComponent(
 
     private val navigationState: StateFlow<NavigationState>
         get() = context.navigationState
-
+    private val destinationState: StateFlow<DestinationState>
+        get() = context.destinationState
+    private val resources get() = binding.root.resources
     private val dispatch = context.dispatch
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
@@ -33,6 +37,12 @@ internal class InfoPanelHeaderComponent(
             binding.tripProgressLayout.isVisible = it == NavigationState.ActiveNavigation ||
                 it == NavigationState.RoutePreview
             binding.arrivedText.isVisible = it == NavigationState.Arrival
+        }
+
+        destinationState.observe {
+            val placeName = it.destination?.features?.firstOrNull()?.placeName()
+            binding.poiName.text =
+                placeName ?: resources.getString(R.string.mapbox_drop_in_dropped_pin)
         }
 
         binding.routePreview.setOnClickListener {
