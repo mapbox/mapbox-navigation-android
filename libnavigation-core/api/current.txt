@@ -480,6 +480,7 @@ package com.mapbox.navigation.core.replay.history {
 package com.mapbox.navigation.core.replay.route {
 
   public final class ReplayProgressObserver implements com.mapbox.navigation.core.trip.session.RouteProgressObserver {
+    ctor public ReplayProgressObserver(com.mapbox.navigation.core.replay.MapboxReplayer mapboxReplayer, com.mapbox.navigation.core.replay.route.ReplayRouteMapper replayRouteMapper = ReplayRouteMapper());
     ctor public ReplayProgressObserver(com.mapbox.navigation.core.replay.MapboxReplayer mapboxReplayer);
     method public void onRouteProgressChanged(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
     method public com.mapbox.navigation.core.replay.route.ReplayProgressObserver updateOptions(com.mapbox.navigation.core.replay.route.ReplayRouteOptions options);
