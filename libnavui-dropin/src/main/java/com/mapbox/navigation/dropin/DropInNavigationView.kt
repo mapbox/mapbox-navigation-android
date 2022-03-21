@@ -6,7 +6,6 @@ import android.content.ContextWrapper
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
-import androidx.activity.OnBackPressedCallback
 import androidx.core.content.res.use
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -18,8 +17,8 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.binder.UIBinder
+import com.mapbox.navigation.dropin.component.backpress.OnKeyListenerComponent
 import com.mapbox.navigation.dropin.coordinator.ActionButtonsCoordinator
-import com.mapbox.navigation.dropin.coordinator.BackPressManager
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
 import com.mapbox.navigation.dropin.coordinator.ManeuverCoordinator
 import com.mapbox.navigation.dropin.coordinator.MapCoordinator
@@ -69,12 +68,6 @@ class DropInNavigationView @JvmOverloads constructor(
         lifecycleOwner = this,
         viewModel = viewModel,
     )
-
-    /**
-     * Retrieve the [OnBackPressedCallback] that can be registered with OnBackPressedDispatcher
-     * to allow [androidx.activity.ComponentActivity#onBackPressed()] handling in DropIn UI .
-     */
-    fun getOnBackPressedCallback(): OnBackPressedCallback = navigationContext.onBackPressedCallback
 
     /**
      * Customize view by providing your own [UIBinder] components and options.
@@ -133,7 +126,7 @@ class DropInNavigationView @JvmOverloads constructor(
          * Single point of entry for the Mapbox Navigation View.
          */
         attachCreated(
-            BackPressManager(navigationContext),
+            OnKeyListenerComponent(navigationContext, this),
             MapCoordinator(navigationContext, binding.mapView),
             ManeuverCoordinator(navigationContext, binding.guidanceLayout),
             InfoPanelCoordinator(

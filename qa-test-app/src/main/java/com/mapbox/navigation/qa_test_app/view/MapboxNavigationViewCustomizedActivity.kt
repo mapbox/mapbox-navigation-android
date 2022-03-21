@@ -49,8 +49,6 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
         val binding = LayoutActivityNavigationViewCustomizedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        onBackPressedDispatcher.addCallback(this, binding.navigationView.getOnBackPressedCallback())
-
         // This demonstrates that you can customize views at any time. You can also reset to
         // the default views.
         showCustomViews.observe(this) { showCustomViews ->
