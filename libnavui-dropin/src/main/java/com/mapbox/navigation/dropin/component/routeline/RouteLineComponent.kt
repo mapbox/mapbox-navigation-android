@@ -23,7 +23,10 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
 import com.mapbox.navigation.utils.internal.ifNonNull
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -69,14 +72,21 @@ internal class RouteLineComponent(
         }
 
         coroutineScope.launch {
-            mapboxNavigation.flowRoutesUpdated().collect { result ->
-                val routeLines = result.navigationRoutes.map {
-                    NavigationRouteLine(it, null)
-                }
-                routeLineApi.setNavigationRouteLines(routeLines).let { routeDrawData ->
-                    ifNonNull(mapView.getMapboxMap().getStyle()) { style ->
-                        routeLineView.renderRouteDrawData(style, routeDrawData)
+            val routesFlow = mapboxNavigation.flowRoutesUpdated()
+                .map { it.navigationRoutes }
+                .stateIn(
+                    this,
+                    SharingStarted.WhileSubscribed(),
+                    mapboxNavigation.getNavigationRoutes()
+                )
+
+            routesFlow.collect { navigationRoutes ->
+                mapView.getMapboxMap().getStyle()?.also { style ->
+                    val routeLines = navigationRoutes.map {
+                        NavigationRouteLine(it, null)
                     }
+                    val routeDrawData = routeLineApi.setNavigationRouteLines(routeLines)
+                    routeLineView.renderRouteDrawData(style, routeDrawData)
                 }
             }
         }

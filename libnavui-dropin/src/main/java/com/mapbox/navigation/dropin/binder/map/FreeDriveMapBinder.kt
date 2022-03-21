@@ -11,6 +11,7 @@ import com.mapbox.navigation.dropin.component.location.LocationComponent
 import com.mapbox.navigation.dropin.component.marker.GeocodingComponent
 import com.mapbox.navigation.dropin.component.marker.LongPressMapComponent
 import com.mapbox.navigation.dropin.component.marker.MapMarkersComponent
+import com.mapbox.navigation.dropin.component.routeline.RouteLineComponent
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class FreeDriveMapBinder(
@@ -22,6 +23,11 @@ internal class FreeDriveMapBinder(
             LocationComponent(
                 value,
                 navigationViewContext.viewModel.locationViewModel,
+            ),
+            RouteLineComponent(
+                value,
+                navigationViewContext.routeLineOptions,
+                navigationViewContext.viewModel.routesViewModel
             ),
             CameraComponent(
                 value,

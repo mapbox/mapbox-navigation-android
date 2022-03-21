@@ -28,10 +28,6 @@ internal class ActiveGuidanceMapBinder(
                 navigationViewContext.routeLineOptions,
                 navigationViewContext.viewModel.routesViewModel
             ),
-            RouteArrowComponent(
-                value,
-                navigationViewContext.routeArrowOptions
-            ),
             CameraComponent(
                 value,
                 navigationViewContext.viewModel.cameraViewModel,
@@ -39,6 +35,10 @@ internal class ActiveGuidanceMapBinder(
                 navigationViewContext.viewModel.navigationStateViewModel,
             ),
             MapMarkersComponent(value, navigationViewContext),
+            RouteArrowComponent(
+                value,
+                navigationViewContext.routeArrowOptions
+            ),
         )
     }
 }
