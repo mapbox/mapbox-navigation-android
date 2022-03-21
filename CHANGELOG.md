@@ -11,6 +11,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 - Added a new `RailwayCrossing` type to `RoadObject`s. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
 - Added point exclusion option for onboard router. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
+- Improved capabilities to replay route alternatives with the `ReplayProgressObserver` by respecting the current distance traveled. This fixes the jump to the beginning of the alternative route upon the switch. [#5586](https://github.com/mapbox/mapbox-navigation-android/pull/5586)
 
 #### Bug fixes and improvements
 - Fixed an issue where a route refresh would only refresh annotations for the current leg of a route instead of for all remaining legs of a route. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
