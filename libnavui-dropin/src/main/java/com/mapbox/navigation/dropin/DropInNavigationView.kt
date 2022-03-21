@@ -13,7 +13,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import com.mapbox.maps.extension.style.style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -27,9 +26,6 @@ import com.mapbox.navigation.dropin.coordinator.RoadNameLabelCoordinator
 import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
 import com.mapbox.navigation.dropin.extensions.attachCreated
-import com.mapbox.navigation.ui.maps.NavigationStyles
-import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
-import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -71,44 +67,26 @@ class DropInNavigationView @JvmOverloads constructor(
     )
 
     /**
-     * Customize view by providing your own [UIBinder] components and options.
+     * Customize view by providing your own [UIBinder] components.
      */
     fun customizeViewBinders(action: ViewBinderCustomization.() -> Unit) {
-        navigationContext.applyCustomization(action)
+        navigationContext.applyBinderCustomization(action)
     }
 
     /**
-     * Provide custom route line options to override the default options. This must be called
-     * before your activity or fragment's onStart() in order to take effect.
-     *
-     * @param options the [MapboxRouteLineOptions] to use.
+     * Provide custom map styles, route line and arrow options.
      */
-    fun customize(options: MapboxRouteLineOptions) {
-        navigationContext.routeLineOptions = options
-    }
-
-    /**
-     * Provide custom route arrow options to override the default options. This must be called
-     * before your activity or fragment's onStart() in order to take effect.
-     *
-     * @param options the [RouteArrowOptions] to use.
-     */
-    fun customize(options: RouteArrowOptions) {
-        navigationContext.routeArrowOptions = options
+    fun customizeViewOptions(action: ViewOptionsCustomization.() -> Unit) {
+        navigationContext.applyOptionsCustomization(action)
     }
 
     init {
         val style = if (isNightModeEnabled()) {
-            NavigationStyles.NAVIGATION_NIGHT_STYLE
+            navigationContext.options.mapStyleUriNight.value
         } else {
-            NavigationStyles.NAVIGATION_DAY_STYLE
+            navigationContext.options.mapStyleUriDay.value
         }
-        binding.mapView.getMapboxMap().loadStyle(
-            style(style) {
-                // TODO allow for customization.
-                // +skyLayer(...)
-            }
-        )
+        binding.mapView.getMapboxMap().loadStyleUri(style)
 
         /**
          * Default setup for MapboxNavigationApp. The developer can customize this by

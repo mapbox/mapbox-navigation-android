@@ -85,7 +85,7 @@ class NavigationView @JvmOverloads constructor(
             build()
         },
     mapInitializationOptions: MapInitOptions = MapInitOptions(context),
-    navigationViewOptions: NavigationViewOptions = NavigationViewOptions
+    navigationViewOptions: LegacyNavigationViewOptions = LegacyNavigationViewOptions
         .Builder(context)
         .build(),
     lifecycleOwner: LifecycleOwner =
@@ -116,7 +116,7 @@ class NavigationView @JvmOverloads constructor(
         LayoutInflater.from(context),
         this
     )
-    var navigationViewOptions: NavigationViewOptions = navigationViewOptions
+    var navigationViewOptions: LegacyNavigationViewOptions = navigationViewOptions
         private set
 
     private val lifecycleObserver = object : DefaultLifecycleObserver {
@@ -378,7 +378,7 @@ class NavigationView @JvmOverloads constructor(
 
     internal fun retrieveMapView(): MapView = mapView
 
-    internal fun updateNavigationViewOptions(navigationViewOptions: NavigationViewOptions) {
+    internal fun updateNavigationViewOptions(navigationViewOptions: LegacyNavigationViewOptions) {
         this.navigationViewOptions = navigationViewOptions
     }
 

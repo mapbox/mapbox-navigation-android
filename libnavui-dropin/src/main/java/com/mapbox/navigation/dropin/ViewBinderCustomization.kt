@@ -3,7 +3,7 @@ package com.mapbox.navigation.dropin
 import com.mapbox.navigation.dropin.binder.UIBinder
 
 /**
- * DropInNavigationView customizations.
+ * DropInNavigationView Binder customizations.
  */
 class ViewBinderCustomization {
 
