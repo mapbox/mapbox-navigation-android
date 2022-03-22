@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.component.camera
 
+import com.mapbox.maps.EdgeInsets
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.lifecycle.UIViewModel
 
@@ -8,6 +9,7 @@ sealed class CameraAction {
     object ToIdle : CameraAction()
     object ToOverview : CameraAction()
     object ToFollowing : CameraAction()
+    data class UpdatePadding(val padding: EdgeInsets) : CameraAction()
 }
 
 class CameraViewModel : UIViewModel<CameraState, CameraAction>(CameraState()) {
@@ -30,6 +32,9 @@ class CameraViewModel : UIViewModel<CameraState, CameraAction>(CameraState()) {
             }
             is CameraAction.ToFollowing -> {
                 state.copy(cameraMode = TargetCameraMode.Following)
+            }
+            is CameraAction.UpdatePadding -> {
+                state.copy(cameraPadding = action.padding)
             }
         }
     }

@@ -1,6 +1,5 @@
 package com.mapbox.navigation.dropin.component.camera
 
-import android.content.Context
 import android.location.Location
 import com.mapbox.android.gestures.Utils
 import com.mapbox.maps.MapView
@@ -44,7 +43,6 @@ class CameraComponentTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
-    private val mockContext: Context = mockk()
     private val mockCamera: CameraAnimationsPlugin = mockk(relaxUnitFun = true) {
         every { addCameraAnimationsLifecycleListener(any()) } just Runs
     }
@@ -55,7 +53,8 @@ class CameraComponentTest {
     private val mockMapView: MapView = mockk(relaxed = true) {
         every { camera } returns mockCamera
         every { getMapboxMap() } returns mockMapboxMap
-        every { context } returns mockContext
+        every { context } returns mockk(relaxed = true)
+        every { resources } returns mockk(relaxed = true)
     }
     private val mockLocation: Location = mockk {
         every { longitude } returns -121.4567
