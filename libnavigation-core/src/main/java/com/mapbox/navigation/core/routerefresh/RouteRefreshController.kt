@@ -28,7 +28,7 @@ internal class RouteRefreshController(
 ) {
 
     internal companion object {
-        internal const val TAG = "MbxRouteRefreshController"
+        internal const val LOG_CATEGORY = "RouteRefreshController"
     }
 
     private val routerRefreshTimer = MapboxTimer(threadController).apply {
@@ -74,14 +74,14 @@ internal class RouteRefreshController(
             )
         } else {
             logW(
-                TAG,
                 """
                     The route is not qualified for route refresh feature.
                     See com.mapbox.navigation.base.extensions.supportsRouteRefresh
                     extension for details.
                     routeOptions: ${route.routeOptions}
                     uuid: ${route.directionsResponse.uuid()}
-                """.trimIndent()
+                """.trimIndent(),
+                LOG_CATEGORY
             )
         }
     }
@@ -92,17 +92,17 @@ internal class RouteRefreshController(
     ) = object : NavigationRouterRefreshCallback {
 
         override fun onRefreshReady(route: NavigationRoute) {
-            logI(TAG, "Successful route refresh")
+            logI("Successful route refresh", LOG_CATEGORY)
             val routeDiffs = routeDiffProvider.buildRouteDiffs(
                 oldRoute,
                 route,
                 currentLegIndex,
             )
             if (routeDiffs.isEmpty()) {
-                logI(TAG, "No changes to route annotations")
+                logI("No changes to route annotations", LOG_CATEGORY)
             } else {
                 for (diff in routeDiffs) {
-                    logI(TAG, diff)
+                    logI(diff, LOG_CATEGORY)
                 }
             }
             val directionsSessionRoutes = directionsSession.routes.toMutableList()
@@ -118,8 +118,8 @@ internal class RouteRefreshController(
 
         override fun onFailure(error: NavigationRouterRefreshError) {
             logE(
-                TAG,
                 "Route refresh error: ${error.message} throwable=${error.throwable}",
+                LOG_CATEGORY
             )
             currentRequestId = null
         }

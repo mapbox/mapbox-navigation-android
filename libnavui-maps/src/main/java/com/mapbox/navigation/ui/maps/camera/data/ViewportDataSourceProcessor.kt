@@ -19,7 +19,7 @@ import kotlin.math.abs
 
 internal object ViewportDataSourceProcessor {
 
-    private const val TAG = "MbxViewportDataSource"
+    private const val LOG_CATEGORY = "ViewportDataSourceProcessor"
 
     private const val maxAngleDifferenceForGeometrySlicing: Double = 100.0
 
@@ -53,8 +53,8 @@ internal object ViewportDataSourceProcessor {
 
                 if (legSteps.size != stepsPoints.size) {
                     logE(
-                        TAG,
-                        "Unable to calculate geometry after maneuvers. Invalid route."
+                        "Unable to calculate geometry after maneuvers. Invalid route.",
+                        LOG_CATEGORY
                     )
                     return emptyList()
                 }
@@ -135,8 +135,8 @@ internal object ViewportDataSourceProcessor {
 
         if (simplificationFactor <= 0) {
             logE(
-                TAG,
-                "overview simplification factor should be a positive integer"
+                "overview simplification factor should be a positive integer",
+                LOG_CATEGORY
             )
             return completeRoutePoints
         }
@@ -196,7 +196,7 @@ internal object ViewportDataSourceProcessor {
                 maxAngleDifferenceForGeometrySlicing
             )
         } catch (e: TurfException) {
-            logE(TAG, e.message.toString())
+            logE(e.message.toString(), LOG_CATEGORY)
             emptyList()
         }
     }
@@ -322,13 +322,13 @@ internal object ViewportDataSourceProcessor {
             ) {
                 val fallbackPadding = EdgeInsets(0.0, 0.0, 0.0, 0.0)
                 logE(
-                    TAG,
                     """
                         |Provided following padding does not fit the map size:
                         |mapSize: $mapSize
                         |padding: $padding
                         |Using an empty fallback padding instead: $padding
-                    """.trimMargin()
+                    """.trimMargin(),
+                    LOG_CATEGORY
                 )
                 return fallbackPadding
             }

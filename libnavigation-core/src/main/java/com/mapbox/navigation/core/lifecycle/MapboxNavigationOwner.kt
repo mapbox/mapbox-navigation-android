@@ -21,7 +21,7 @@ internal class MapboxNavigationOwner {
     internal val carAppLifecycleObserver = object : DefaultLifecycleObserver {
 
         override fun onStart(owner: LifecycleOwner) {
-            logI(TAG, "onStart")
+            logI("onStart", LOG_CATEGORY)
             check(!MapboxNavigationProvider.isCreated()) {
                 "MapboxNavigation should only be created by the MapboxNavigationOwner"
             }
@@ -33,7 +33,7 @@ internal class MapboxNavigationOwner {
         }
 
         override fun onStop(owner: LifecycleOwner) {
-            logI(TAG, "onStop")
+            logI("onStop", LOG_CATEGORY)
             attached = false
             services.forEach { it.onDetached(mapboxNavigation!!) }
             MapboxNavigationProvider.destroy()
@@ -74,6 +74,6 @@ internal class MapboxNavigationOwner {
     }
 
     private companion object {
-        private const val TAG = "MbxNavigationOwner"
+        private const val LOG_CATEGORY = "MapboxNavigationOwner"
     }
 }

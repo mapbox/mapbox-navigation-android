@@ -59,12 +59,12 @@ class RouterWrapper(
                     mainJobControl.scope.launch {
                         if (it.type == RouterErrorType.REQUEST_CANCELLED) {
                             logI(
-                                TAG,
                                 """
                                     Route request cancelled:
                                     $routeOptions
                                     $origin
-                                """.trimIndent()
+                                """.trimIndent(),
+                                LOG_CATEGORY
                             )
                             callback.onCanceled(routeOptions, origin.mapToSdkRouteOrigin())
                         } else {
@@ -78,11 +78,11 @@ class RouterWrapper(
                             )
 
                             logW(
-                                TAG,
                                 """
                                     Route request failed with:
                                     $failureReasons
-                                """.trimIndent()
+                                """.trimIndent(),
+                                LOG_CATEGORY
                             )
 
                             callback.onFailure(failureReasons, routeOptions)
@@ -110,7 +110,7 @@ class RouterWrapper(
                                 )
                             },
                             { response ->
-                                logI(TAG, "Response metadata: ${response.metadata()}")
+                                logI("Response metadata: ${response.metadata()}", LOG_CATEGORY)
                                 val navigationRoutes = mutableListOf<NavigationRoute>()
                                 for (i in 0 until response.routes().size) {
                                     navigationRoutes.add(
@@ -172,7 +172,7 @@ class RouterWrapper(
                    requestUuid = $requestUuid
                 """.trimIndent()
 
-            logW(TAG, errorMessage)
+            logW(errorMessage, LOG_CATEGORY)
 
             callback.onFailure(
                 RouterFactory.buildNavigationRouterRefreshError(
@@ -207,7 +207,7 @@ class RouterWrapper(
                                legIndex = $legIndex
                             """.trimIndent()
 
-                        logW(TAG, errorMessage)
+                        logW(errorMessage, LOG_CATEGORY)
 
                         callback.onFailure(
                             RouterFactory.buildNavigationRouterRefreshError(
@@ -294,7 +294,7 @@ class RouterWrapper(
     }
 
     private companion object {
-        private const val TAG = "MbxRouterWrapper"
+        private const val LOG_CATEGORY = "RouterWrapper"
         private const val REQUEST_FAILURE = -1L
     }
 }

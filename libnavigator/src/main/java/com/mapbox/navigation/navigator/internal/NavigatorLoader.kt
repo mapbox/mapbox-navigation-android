@@ -94,8 +94,8 @@ object NavigatorLoader {
             val historyRecorderHandle = HistoryRecorderHandle.build(historyDir, config)
             if (historyRecorderHandle == null) {
                 logE(
-                    "MbxHistoryRecorder",
-                    "Could not create directory directory to write events"
+                    "Could not create directory directory to write events",
+                    "NavigatorLoader"
                 )
             }
             historyRecorderHandle

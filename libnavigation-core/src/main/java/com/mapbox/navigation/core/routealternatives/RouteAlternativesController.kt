@@ -60,7 +60,7 @@ internal class RouteAlternativesController constructor(
             }
 
             override fun onRouteAlternativesError(error: RouteAlternativesError) {
-                logE(TAG, "Error: ${error.message}")
+                logE("Error: ${error.message}", LOG_CATEGORY)
             }
         }
         legacyObserversMap[routeAlternativesObserver] = observer
@@ -182,17 +182,17 @@ internal class RouteAlternativesController constructor(
                     expected.value
                 } else {
                     logE(
-                        TAG,
                         """
                             |unable to parse alternative at index $index;
                             |failure for response: ${routeAlternative.route.response}
-                        """.trimMargin()
+                        """.trimMargin(),
+                        LOG_CATEGORY
                     )
                     null
                 }
             }
         }
-        logI(TAG, "${alternatives.size} alternatives available")
+        logI("${alternatives.size} alternatives available", LOG_CATEGORY)
 
         mainJobControl.scope.launch {
             val origin = nativeAlternatives.find {
@@ -206,6 +206,6 @@ internal class RouteAlternativesController constructor(
     }
 
     private companion object {
-        private const val TAG = "MbxRouteAlternativesController"
+        private const val LOG_CATEGORY = "RouteAlternativesController"
     }
 }

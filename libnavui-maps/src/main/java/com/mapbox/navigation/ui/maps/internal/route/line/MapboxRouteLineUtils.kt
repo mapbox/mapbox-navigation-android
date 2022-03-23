@@ -51,7 +51,7 @@ import kotlin.reflect.KProperty1
 
 internal object MapboxRouteLineUtils {
 
-    private const val TAG = "MbxMapboxRouteLineUtils"
+    private const val LOG_CATEGORY = "MapboxRouteLineUtils"
     internal const val VANISH_POINT_STOP_GAP = .00000000001
 
     /**
@@ -637,10 +637,10 @@ internal object MapboxRouteLineUtils {
                             this[it.geometryIndex()!!] = roadClass
                         } else {
                             logE(
-                                TAG,
                                 "Geometry index for step intersection unexpected or " +
                                     "incorrect. There is a risk of incorrect " +
-                                    "road class styling applied to the route line."
+                                    "road class styling applied to the route line.",
+                                LOG_CATEGORY
                             )
                         }
                     }
@@ -831,9 +831,9 @@ internal object MapboxRouteLineUtils {
                 true -> belowLayerId
                 false -> {
                     logE(
-                        TAG,
                         "Layer $belowLayerId not found. Route line related layers will be " +
-                            "placed at top of the map stack."
+                            "placed at top of the map stack.",
+                        LOG_CATEGORY
                     )
                     null
                 }

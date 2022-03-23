@@ -72,7 +72,7 @@ internal class MapboxTripSession(
     internal var routes: List<NavigationRoute> = emptyList()
 
     private companion object {
-        private const val TAG = "MbxTripSession"
+        private const val LOG_CATEGORY = "MapboxTripSession"
         private const val INDEX_OF_INITIAL_LEG_TARGET = 1
     }
 
@@ -109,14 +109,14 @@ internal class MapboxTripSession(
                         navigator.updateAnnotations(routes.first())
                         this@MapboxTripSession.routes = routes
                     } else {
-                        logW(TAG, "Cannot refresh route. Route can't be null")
+                        logW("Cannot refresh route. Route can't be null", LOG_CATEGORY)
                     }
                 }
             }
             else -> null.also {
                 logW(
-                    TAG,
-                    "Unsupported route update reason: $reason"
+                    "Unsupported route update reason: $reason",
+                    LOG_CATEGORY
                 )
             }
         }

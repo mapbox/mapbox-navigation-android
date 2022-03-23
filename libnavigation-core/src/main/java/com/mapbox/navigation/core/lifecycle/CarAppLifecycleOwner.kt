@@ -37,7 +37,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
                 createdChangingConfiguration--
             } else {
                 lifecycleCreated++
-                logI(TAG, "LifecycleOwner ($owner) onCreate")
+                logI("LifecycleOwner ($owner) onCreate", LOG_CATEGORY)
                 if (activitiesCreated == 0 && lifecycleCreated == 1) {
                     changeState(Lifecycle.State.STARTED)
                 }
@@ -49,7 +49,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
                 foregroundedChangingConfiguration--
             } else {
                 lifecycleForegrounded++
-                logI(TAG, "LifecycleOwner ($owner) onStart")
+                logI("LifecycleOwner ($owner) onStart", LOG_CATEGORY)
                 if (activitiesForegrounded == 0 && lifecycleForegrounded == 1) {
                     changeState(Lifecycle.State.RESUMED)
                 }
@@ -61,7 +61,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
                 foregroundedChangingConfiguration++
             } else {
                 lifecycleForegrounded--
-                logI(TAG, "LifecycleOwner ($owner) onStop")
+                logI("LifecycleOwner ($owner) onStop", LOG_CATEGORY)
                 if (activitiesForegrounded == 0 && lifecycleForegrounded == 0) {
                     changeState(Lifecycle.State.STARTED)
                 }
@@ -73,7 +73,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
                 createdChangingConfiguration++
             } else {
                 lifecycleCreated--
-                logI(TAG, "LifecycleOwner ($owner) onDestroy")
+                logI("LifecycleOwner ($owner) onDestroy", LOG_CATEGORY)
                 if (activitiesCreated == 0 && lifecycleCreated == 0) {
                     changeState(Lifecycle.State.CREATED)
                 }
@@ -92,7 +92,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
                 createdChangingConfiguration--
             } else {
                 activitiesCreated++
-                logI(TAG, "app onActivityCreated")
+                logI("app onActivityCreated", LOG_CATEGORY)
                 if (lifecycleCreated == 0 && activitiesCreated == 1) {
                     changeState(Lifecycle.State.STARTED)
                 }
@@ -104,7 +104,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
                 foregroundedChangingConfiguration--
             } else {
                 activitiesForegrounded++
-                logI(TAG, "app onActivityStarted")
+                logI("app onActivityStarted", LOG_CATEGORY)
                 if (lifecycleForegrounded == 0 && activitiesForegrounded == 1) {
                     changeState(Lifecycle.State.RESUMED)
                 }
@@ -112,11 +112,11 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
         }
 
         override fun onActivityResumed(activity: Activity) {
-            logI(TAG, "app onActivityResumed")
+            logI("app onActivityResumed", LOG_CATEGORY)
         }
 
         override fun onActivityPaused(activity: Activity) {
-            logI(TAG, "app onActivityPaused")
+            logI("app onActivityPaused", LOG_CATEGORY)
         }
 
         override fun onActivityStopped(activity: Activity) {
@@ -124,7 +124,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
                 foregroundedChangingConfiguration++
             } else {
                 activitiesForegrounded--
-                logI(TAG, "app onActivityStopped")
+                logI("app onActivityStopped", LOG_CATEGORY)
                 if (lifecycleForegrounded == 0 && activitiesForegrounded == 0) {
                     changeState(Lifecycle.State.STARTED)
                 }
@@ -132,7 +132,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
         }
 
         override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
-            logI(TAG, "app onActivitySaveInstanceState")
+            logI("app onActivitySaveInstanceState", LOG_CATEGORY)
         }
 
         override fun onActivityDestroyed(activity: Activity) {
@@ -140,7 +140,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
                 createdChangingConfiguration++
             } else {
                 activitiesCreated--
-                logI(TAG, "app onActivityDestroyed")
+                logI("app onActivityDestroyed", LOG_CATEGORY)
                 if (lifecycleCreated == 0 && activitiesCreated == 0) {
                     changeState(Lifecycle.State.CREATED)
                 }
@@ -151,25 +151,25 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
     private fun changeState(state: Lifecycle.State) {
         if (lifecycleRegistry.currentState != state) {
             lifecycleRegistry.currentState = state
-            logI(TAG, "changeState ${lifecycleRegistry.currentState}")
+            logI("changeState ${lifecycleRegistry.currentState}", LOG_CATEGORY)
         }
     }
 
     override fun getLifecycle(): Lifecycle = lifecycleRegistry
 
     internal fun attachAllActivities(application: Application) {
-        logI(TAG, "attachAllActivities")
+        logI("attachAllActivities", LOG_CATEGORY)
         application.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
         application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks)
     }
 
     fun attach(lifecycleOwner: LifecycleOwner) {
-        logI(TAG, "attach")
+        logI("attach", LOG_CATEGORY)
         lifecycleOwner.lifecycle.addObserver(startedReferenceCounter)
     }
 
     fun detach(lifecycleOwner: LifecycleOwner) {
-        logI(TAG, "detach")
+        logI("detach", LOG_CATEGORY)
         lifecycleOwner.lifecycle.removeObserver(startedReferenceCounter)
         val currentState = lifecycleOwner.lifecycle.currentState
         if (currentState.isAtLeast(Lifecycle.State.RESUMED)) {
@@ -187,6 +187,6 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
         createdChangingConfiguration > 0 || foregroundedChangingConfiguration > 0
 
     private companion object {
-        private const val TAG = "MbxCarAppLifecycleOwner"
+        private const val LOG_CATEGORY = "CarAppLifecycleOwner"
     }
 }

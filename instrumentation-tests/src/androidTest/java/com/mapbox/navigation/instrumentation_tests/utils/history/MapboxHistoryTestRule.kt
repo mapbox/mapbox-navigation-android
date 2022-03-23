@@ -59,7 +59,7 @@ class MapboxHistoryTestRule : TestWatcher() {
             runOnMainSync {
                 val countDownLatch = CountDownLatch(1)
                 historyRecorder.stopRecording {
-                    logE("DEBUG", "$message history path=$it")
+                    logE("$message history path=$it", "DEBUG")
                     countDownLatch.countDown()
                 }
                 countDownLatch.await()

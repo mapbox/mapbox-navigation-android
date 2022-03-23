@@ -17,12 +17,12 @@ internal class RoutingTilesFiles(
             tileDir.mkdirs()
         }
         return if (tileDir.exists()) {
-            logI(TAG, "Initial size is ${tileDir.length()} bytes")
+            logI("Initial size is ${tileDir.length()} bytes", LOG_CATEGORY)
             tileDir.absolutePath
         } else {
             logE(
-                TAG,
-                "Unable to create a file, check the RoutingTilesOptions ${tileDir.absolutePath}"
+                "Unable to create a file, check the RoutingTilesOptions ${tileDir.absolutePath}",
+                LOG_CATEGORY
             )
             ""
         }
@@ -33,7 +33,7 @@ internal class RoutingTilesFiles(
     }
 
     internal companion object {
-        private const val TAG = "MbxRoutingTilesOptions"
+        private const val LOG_CATEGORY = "RoutingTilesFiles"
         internal const val TILES_PATH_SUB_DIR = "mbx_nav/tiles"
     }
 }

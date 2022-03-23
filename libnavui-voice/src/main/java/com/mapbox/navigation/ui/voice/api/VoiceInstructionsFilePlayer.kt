@@ -55,8 +55,8 @@ internal class VoiceInstructionsFilePlayer(
             play(file)
         } else {
             logE(
-                TAG,
-                "Announcement file from state can't be null and needs to be accessible"
+                "Announcement file from state can't be null and needs to be accessible",
+                LOG_CATEGORY
             )
             donePlaying(mediaPlayer)
         }
@@ -115,8 +115,8 @@ internal class VoiceInstructionsFilePlayer(
         mediaPlayer?.run {
             setOnErrorListener { _, what, extra ->
                 logE(
-                    TAG,
-                    "MediaPlayer error: $what - extra: $extra"
+                    "MediaPlayer error: $what - extra: $extra",
+                    LOG_CATEGORY
                 )
                 false
             }
@@ -148,7 +148,7 @@ internal class VoiceInstructionsFilePlayer(
 
     private companion object {
 
-        private const val TAG = "MbxFilePlayer"
+        private const val LOG_CATEGORY = "VoiceInstructionsFilePlayer"
         private const val DEFAULT_VOLUME_LEVEL = 1.0f
     }
 }

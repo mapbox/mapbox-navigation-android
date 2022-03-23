@@ -132,10 +132,10 @@ class ReplayHistoryMapper private constructor(
         fun build(): ReplayHistoryMapper {
             if (setRouteMapper === DefaultSetRouteMapper) {
                 logW(
-                    "ReplayHistoryMapper",
                     "Mapper uses a deprecated default `setRouteMapper` based on " +
                         "`ReplaySetRoute` type. Consider switching to a mapper based on " +
-                        "`ReplayNavigationSetRoute`."
+                        "`ReplayNavigationSetRoute`.",
+                    "ReplayHistoryMapper"
                 )
             }
             return ReplayHistoryMapper(

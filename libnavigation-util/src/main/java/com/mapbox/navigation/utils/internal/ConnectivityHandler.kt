@@ -14,19 +14,19 @@ class ConnectivityHandler(
     override fun run(status: NetworkStatus) {
         when (status) {
             NetworkStatus.NOT_REACHABLE -> {
-                logD(TAG, "NetworkStatus=$status")
+                logD("NetworkStatus=$status", LOG_CATEGORY)
                 networkStatusChannel.trySend(false).isSuccess
             }
             NetworkStatus.REACHABLE_VIA_WI_FI,
             NetworkStatus.REACHABLE_VIA_ETHERNET,
             NetworkStatus.REACHABLE_VIA_WWAN -> {
-                logD(TAG, "NetworkStatus=$status")
+                logD("NetworkStatus=$status", LOG_CATEGORY)
                 networkStatusChannel.trySend(true).isSuccess
             }
         }
     }
 
     private companion object {
-        private const val TAG = "MbxConnectivityHandler"
+        private const val LOG_CATEGORY = "ConnectivityHandler"
     }
 }

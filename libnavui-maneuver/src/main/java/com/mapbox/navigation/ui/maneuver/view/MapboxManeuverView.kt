@@ -250,9 +250,9 @@ class MapboxManeuverView : ConstraintLayout {
         val partitionedList = shields.partition { it.isError }
         partitionedList.first.forEach { errorExpected ->
             logE(
-                "MbxManeuverView",
                 "id: $id -- error: ${errorExpected.error?.url} - " +
-                    "${errorExpected.error?.errorMessage}"
+                    "${errorExpected.error?.errorMessage}",
+                "MapboxManeuverView"
             )
         }
         partitionedList.second.mapNotNull { it.value }.map { it.shield }.apply {

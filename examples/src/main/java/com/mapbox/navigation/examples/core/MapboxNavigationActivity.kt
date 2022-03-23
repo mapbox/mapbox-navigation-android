@@ -264,8 +264,8 @@ class MapboxNavigationActivity : AppCompatActivity() {
     }
 
     private val navigationSessionStateObserver = NavigationSessionStateObserver {
-        logD(TAG, "NavigationSessionState=$it")
-        logD(TAG, "sessionId=${mapboxNavigation.getNavigationSessionState().sessionId}")
+        logD("NavigationSessionState=$it", LOG_CATEGORY)
+        logD("sessionId=${mapboxNavigation.getNavigationSessionState().sessionId}", LOG_CATEGORY)
     }
 
     @SuppressLint("MissingPermission")
@@ -524,6 +524,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
     }
 
     private companion object {
-        private const val TAG = "MbxNavigationActivity"
+        private const val LOG_CATEGORY = "MapboxNavigationActivity"
     }
 }

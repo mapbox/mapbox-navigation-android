@@ -2,10 +2,10 @@ package com.mapbox.navigation.core.history
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.common.Logger
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.testing.MockLoggerRule
-import com.mapbox.navigation.utils.internal.logW
 import io.mockk.verify
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -77,6 +77,6 @@ class MapboxHistoryRecorderTest {
             // do nothing
         }
 
-        verify { logW(any(), any()) }
+        verify { Logger.w(any(), any()) }
     }
 }

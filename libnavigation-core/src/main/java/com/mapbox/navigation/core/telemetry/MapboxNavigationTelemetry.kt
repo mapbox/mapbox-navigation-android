@@ -150,7 +150,7 @@ Initialization may be called multiple times, the call is idempotent.
 The class has two public methods, postUserFeedback() and initialize().
  */
 internal object MapboxNavigationTelemetry {
-    internal const val TAG = "MbxNavigationTelemetry"
+    internal const val LOG_CATEGORY = "MapboxNavigationTelemetry"
 
     private const val ONE_SECOND = 1000
     internal const val MOCK_PROVIDER = "com.mapbox.navigation.core.replay.ReplayLocationEngine"
@@ -168,7 +168,7 @@ internal object MapboxNavigationTelemetry {
             }
             field = value
             ifNonNull(value) { app ->
-                logD(TAG, "Lifecycle monitor created")
+                logD("Lifecycle monitor created", LOG_CATEGORY)
                 lifecycleMonitor = ApplicationLifecycleMonitor(app)
             }
         }
@@ -241,8 +241,8 @@ internal object MapboxNavigationTelemetry {
                 routeData.originalRoute = routes.first()
             }
             else -> logW(
-                TAG,
                 "Unknown route update reason: [$reason]",
+                LOG_CATEGORY
             )
         }
     }
@@ -856,7 +856,7 @@ internal object MapboxNavigationTelemetry {
         }
 
     private fun log(message: String) {
-        logD(TAG, message)
+        logD(message, LOG_CATEGORY)
     }
 
     private sealed class NavTelemetryState {

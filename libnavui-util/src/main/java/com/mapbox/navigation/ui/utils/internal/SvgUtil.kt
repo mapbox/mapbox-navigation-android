@@ -11,7 +11,7 @@ import java.io.ByteArrayInputStream
 
 object SvgUtil {
 
-    private const val TAG = "MbxSvgUtil"
+    private const val LOG_CATEGORY = "SvgUtil"
 
     fun renderAsBitmapWith(
         stream: ByteArrayInputStream,
@@ -30,10 +30,10 @@ object SvgUtil {
                 renderBitmap(svg, desiredWidth, desiredHeight, cssStyles)
             }
         } catch (exception: SVGParseException) {
-            logE(TAG, "${exception.message}")
+            logE("${exception.message}", LOG_CATEGORY)
             null
         } catch (exception: IllegalArgumentException) {
-            logE(TAG, "${exception.message}")
+            logE("${exception.message}", LOG_CATEGORY)
             null
         }
     }
@@ -56,10 +56,10 @@ object SvgUtil {
                 renderBitmap(svg, calculatedWidth, desiredHeight, cssStyles)
             }
         } catch (exception: SVGParseException) {
-            logE(TAG, "${exception.message}")
+            logE("${exception.message}", LOG_CATEGORY)
             null
         } catch (exception: IllegalArgumentException) {
-            logE(TAG, "${exception.message}")
+            logE("${exception.message}", LOG_CATEGORY)
             null
         }
     }

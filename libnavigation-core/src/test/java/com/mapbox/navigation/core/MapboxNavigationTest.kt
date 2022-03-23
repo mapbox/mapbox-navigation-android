@@ -53,6 +53,7 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.MockLoggerRule
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigatorConfig
@@ -157,6 +158,8 @@ class MapboxNavigationTest {
 
     @Before
     fun setUp() {
+        mockkObject(LoggerProvider)
+        every { LoggerProvider.initialize() } just Runs
         mockkObject(NavigatorLoader)
         every {
             NavigatorLoader.createNativeRouterInterface(any(), any(), any(), any())
@@ -222,6 +225,7 @@ class MapboxNavigationTest {
             mapboxNavigation.onDestroy()
         }
 
+        unmockkObject(LoggerProvider)
         unmockkObject(NavigatorLoader)
         unmockkObject(MapboxSDKCommon)
         unmockkObject(MapboxModuleProvider)

@@ -180,7 +180,7 @@ class StatusActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private fun renderManeuvers(maneuvers: Expected<ManeuverError, List<Maneuver>>) {
         maneuvers.onError { error ->
-            logE("MbxManeuverActivity", error.errorMessage!!)
+            logE(error.errorMessage!!, "StatusActivity")
         }
         maneuvers.onValue {
             if (binding.maneuverView.visibility == INVISIBLE) {

@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core.telemetry
 
 import android.location.Location
-import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.TAG
+import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.LOG_CATEGORY
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.utils.internal.logD
 
@@ -52,7 +52,7 @@ internal class LocationsCollectorImpl : LocationsCollector {
     }
 
     override fun flushBuffers() {
-        logD(TAG, "flush buffer. Pending events = ${eventsLocationsBuffer.size}")
+        logD("flush buffer. Pending events = ${eventsLocationsBuffer.size}", LOG_CATEGORY)
         eventsLocationsBuffer.forEach { it.onBufferFull() }
         eventsLocationsBuffer.clear()
     }
@@ -61,7 +61,7 @@ internal class LocationsCollectorImpl : LocationsCollector {
         locationsCollectorListener: LocationsCollector.LocationsCollectorListener
     ) {
 
-        logD(TAG, "flush buffer for only one observer")
+        logD("flush buffer for only one observer", LOG_CATEGORY)
         eventsLocationsBuffer.find {
             it.locationsCollectorListener === locationsCollectorListener
         }?.also {

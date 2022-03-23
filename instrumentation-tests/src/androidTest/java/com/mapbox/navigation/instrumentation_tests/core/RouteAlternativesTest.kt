@@ -107,7 +107,7 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         runOnMainSync {
             val countDownLatch = CountDownLatch(1)
             mapboxNavigation.historyRecorder.stopRecording {
-                logE("RouteAlternativesTest", "history path=$it")
+                logE("history path=$it", "DEBUG")
                 countDownLatch.countDown()
             }
             countDownLatch.await()

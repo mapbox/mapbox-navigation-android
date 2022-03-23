@@ -21,7 +21,10 @@ internal class GeocodingComponent(
         super.onAttached(mapboxNavigation)
         val accessToken = mapboxNavigation.navigationOptions.accessToken
         if (accessToken == null) {
-            logW(TAG, "GeocodingComponent disabled. Missing AccessToken in MapboxNavigation")
+            logW(
+                "GeocodingComponent disabled. Missing AccessToken in MapboxNavigation",
+                LOG_CATEGORY
+            )
             return
         }
 
@@ -33,12 +36,13 @@ internal class GeocodingComponent(
                 geocoder.findAddresses(point).onSuccess { features ->
                     destinationViewModel.invoke(DidReverseGeocode(point, features))
                 }.onFailure { e ->
-                    logW(TAG, "Failed to find address for point= $point; error=$e")
+                    logW("Failed to find address for point= $point; error=$e", LOG_CATEGORY)
                 }
             }
     }
 
     companion object {
-        private val TAG = GeocodingComponent::class.java.simpleName
+
+        private const val LOG_CATEGORY = "GeocodingComponent"
     }
 }

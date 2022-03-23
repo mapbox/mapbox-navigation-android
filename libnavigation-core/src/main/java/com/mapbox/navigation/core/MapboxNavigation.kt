@@ -104,6 +104,7 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.navigator.internal.router.RouterInterfaceAdapter
 import com.mapbox.navigation.utils.internal.ConnectivityHandler
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
@@ -376,6 +377,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         private set
 
     init {
+        // Instantiate LoggerProvider explicitly so that NavigationLogBackend is set
+        LoggerProvider.initialize()
         if (hasInstance) {
             throw IllegalStateException(
                 """
@@ -462,8 +465,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         ifNonNull(accessToken) { token ->
             runInTelemetryContext { telemetry ->
                 logD(
-                    telemetry.TAG,
-                    "MapboxMetricsReporter.init from MapboxNavigation main"
+                    "MapboxMetricsReporter.init from MapboxNavigation main",
+                    telemetry.LOG_CATEGORY
                 )
                 MapboxMetricsReporter.init(
                     navigationOptions.applicationContext,
@@ -856,7 +859,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     fun onDestroy() {
         if (isDestroyed) return
-        logD(TAG, "MapboxNavigation onDestroy")
+        logD("onDestroy", LOG_CATEGORY)
         billingController.onDestroy()
         directionsSession.shutdown()
         directionsSession.unregisterAllRoutesObservers()
@@ -1418,9 +1421,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 }
             } else {
                 logD(
-                    TAG,
                     "FallbackVersionsObserver.onFallbackVersionsFound called with an empty " +
-                        "versions list, navigator can't be recreated."
+                        "versions list, navigator can't be recreated.",
+                    LOG_CATEGORY
                 )
             }
         }
@@ -1440,9 +1443,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun recreateNavigatorInstance(isFallback: Boolean, tilesVersion: String) {
         logD(
-            TAG,
             "recreateNavigatorInstance(). " +
-                "isFallback = $isFallback, tilesVersion = $tilesVersion"
+                "isFallback = $isFallback, tilesVersion = $tilesVersion",
+            LOG_CATEGORY
         )
 
         mainJobController.scope.launch {
@@ -1556,7 +1559,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         @Volatile
         private var hasInstance = false
 
-        private const val TAG = "MbxNavigation"
+        private const val LOG_CATEGORY = "MapboxNavigation"
         private const val USER_AGENT: String = "MapboxNavigationNative"
         private const val THREADS_COUNT = 2
         private const val ONE_SECOND_IN_MILLIS = 1000.0

@@ -21,13 +21,13 @@ internal class HistoryFiles(
             historyFile.mkdirs()
         }
         return if (historyFile.exists()) {
-            logI(TAG, "Initial size is ${historyFile.length()} bytes")
+            logI("Initial size is ${historyFile.length()} bytes", LOG_CATEGORY)
             historyFile.absolutePath
         } else {
             logE(
-                TAG,
                 "Unable to create a file, " +
-                    "check the HistoryRecorderOptions ${historyFile.absolutePath}"
+                    "check the HistoryRecorderOptions ${historyFile.absolutePath}",
+                LOG_CATEGORY
             )
             null
         }
@@ -38,7 +38,7 @@ internal class HistoryFiles(
     }
 
     private companion object {
-        private const val TAG = "MbxHistoryRecorder"
+        private const val LOG_CATEGORY = "HistoryFiles"
         private const val TILES_PATH_SUB_DIR = "mbx_nav/history"
     }
 }

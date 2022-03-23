@@ -71,13 +71,13 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
 
         val consumerLongRoute =
             MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { value ->
-                logE("SetRouteCancellationTest", "long")
+                logE("long", "SetRouteCancellationTest")
                 throw RuntimeException("Previous set routes call wasn't cancelled as expected.")
             }
 
         val consumerShortRoute =
             MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { value ->
-                logE("SetRouteCancellationTest", "short")
+                logE("short", "SetRouteCancellationTest")
                 val primaryRoute = routeLineApi.getPrimaryRoute()
                 val contents =
                     value.value!!.primaryRouteLineData.dynamicData.trafficExpressionProvider!!

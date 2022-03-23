@@ -34,7 +34,7 @@ import com.mapbox.navigation.utils.internal.logE
 class MapboxRouteArrowView(private val options: RouteArrowOptions) {
 
     private companion object {
-        private val TAG = "Mbx${MapboxRouteArrowView::class.simpleName}"
+        private const val LOG_CATEGORY = "MapboxRouteArrowView"
     }
 
     /**
@@ -66,7 +66,7 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
         initializeLayers(style, options)
 
         expectedValue.onError {
-            logE(TAG, it.errorMessage)
+            logE(it.errorMessage, LOG_CATEGORY)
         }
         expectedValue.onValue { value ->
             value.layerVisibilityModifications.forEach {
@@ -111,7 +111,7 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
     fun render(style: Style, expectedValue: Expected<InvalidPointError, ArrowAddedValue>) {
         expectedValue.fold(
             { error ->
-                logE(TAG, error.errorMessage)
+                logE(error.errorMessage, LOG_CATEGORY)
             },
             { value ->
                 render(style, value)

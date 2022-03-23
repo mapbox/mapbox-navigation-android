@@ -113,7 +113,7 @@ class LocationViewModelTest {
         locationViewModel.onAttached(mapboxNavigation)
 
         assertNull(locationViewModel.state.value)
-        verify(exactly = 1) { Logger.e("MbxLocationViewModel", any()) }
+        verify(exactly = 1) { Logger.e(any(), any()) }
     }
 
     @Test

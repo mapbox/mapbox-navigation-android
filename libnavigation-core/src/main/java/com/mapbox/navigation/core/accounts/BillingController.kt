@@ -188,7 +188,7 @@ internal class BillingController(
 ) {
 
     private companion object {
-        private const val tag = "MbxNavBillingController"
+        private const val logCategory = "BillingController"
         private const val MAX_WAYPOINTS_DISTANCE_DIFF_METERS = 100.0
     }
 
@@ -316,8 +316,8 @@ internal class BillingController(
                 handlerError(it)
                 if (it.code == BillingServiceErrorCode.RESUME_FAILED) {
                     logW(
-                        tag,
-                        "Session resumption failed, starting a new one instead."
+                        "Session resumption failed, starting a new one instead.",
+                        logCategory
                     )
                     beginBillingSession(skuId, validity)
                 }
@@ -429,8 +429,8 @@ internal class BillingController(
             BillingServiceErrorCode.RESUME_FAILED,
             BillingServiceErrorCode.TOKEN_VALIDATION_FAILED -> {
                 logW(
-                    tag,
-                    error.toString()
+                    error.toString(),
+                    logCategory
                 )
             }
         }

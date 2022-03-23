@@ -52,8 +52,8 @@ open class MapboxExternalFileResolver(
             return getTypeface(fontFamily, fontWeight, fontStyle, ".ttf")
         } catch (exception: RuntimeException) {
             logE(
-                null,
-                "MapboxExternalFileResolver exception: $exception"
+                "exception: $exception",
+                LOG_CATEGORY
             )
         }
 
@@ -61,8 +61,8 @@ open class MapboxExternalFileResolver(
             getTypeface(fontFamily, fontWeight, fontStyle, ".otf")
         } catch (exception: RuntimeException) {
             logE(
-                null,
-                "MapboxExternalFileResolver exception: $exception"
+                "exception: $exception",
+                LOG_CATEGORY
             )
             null
         }
@@ -105,8 +105,10 @@ open class MapboxExternalFileResolver(
     }
 
     private companion object {
+
         private const val BOLD = "Bold"
         private const val ITALIC = "Italic"
         private const val OBLIQUE = "Oblique"
+        private const val LOG_CATEGORY = "MapboxExternalFileResolver"
     }
 }

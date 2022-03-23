@@ -66,8 +66,8 @@ class LocationViewModel : UIViewModel<Location?, LocationAction>(null) {
             }
             override fun onFailure(exception: Exception) {
                 logE(
-                    "MbxLocationViewModel",
-                    "Failed to get immediate location exception=$exception"
+                    "Failed to get immediate location exception=$exception",
+                    "LocationViewModel"
                 )
             }
         })

@@ -15,7 +15,7 @@ class BackStackBinding(val view: View) : MapboxNavigationObserver {
         view.requestFocus()
         view.setOnKeyListener { _, keyCode, event ->
             if (event.action == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK) {
-                logE(TAG, "TODO handle back pressed")
+                logE("TODO handle back pressed", LOG_CATEGORY)
                 false
             } else {
                 false
@@ -29,6 +29,6 @@ class BackStackBinding(val view: View) : MapboxNavigationObserver {
     }
 
     private companion object {
-        private const val TAG = "MbxNavigationBackStack"
+        private const val LOG_CATEGORY = "BackStackBinding"
     }
 }

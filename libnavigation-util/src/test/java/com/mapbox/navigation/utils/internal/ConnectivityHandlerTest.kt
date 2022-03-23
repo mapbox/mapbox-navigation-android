@@ -62,8 +62,8 @@ class ConnectivityHandlerTest {
 
         verify {
             logD(
-                "MbxConnectivityHandler",
-                "NetworkStatus=${NetworkStatus.NOT_REACHABLE}"
+                "NetworkStatus=${NetworkStatus.NOT_REACHABLE}",
+                "ConnectivityHandler"
             )
         }
     }
@@ -77,8 +77,8 @@ class ConnectivityHandlerTest {
 
         verify {
             logD(
-                "MbxConnectivityHandler",
-                "NetworkStatus=${NetworkStatus.REACHABLE_VIA_WI_FI}"
+                "NetworkStatus=${NetworkStatus.REACHABLE_VIA_WI_FI}",
+                "ConnectivityHandler"
             )
         }
     }
@@ -92,8 +92,8 @@ class ConnectivityHandlerTest {
 
         verify {
             logD(
-                "MbxConnectivityHandler",
-                "NetworkStatus=${NetworkStatus.REACHABLE_VIA_ETHERNET}"
+                "NetworkStatus=${NetworkStatus.REACHABLE_VIA_ETHERNET}",
+                "ConnectivityHandler"
             )
         }
     }
@@ -107,8 +107,8 @@ class ConnectivityHandlerTest {
 
         verify {
             logD(
-                "MbxConnectivityHandler",
-                "NetworkStatus=${NetworkStatus.REACHABLE_VIA_WWAN}"
+                "NetworkStatus=${NetworkStatus.REACHABLE_VIA_WWAN}",
+                "ConnectivityHandler"
             )
         }
     }

@@ -125,8 +125,8 @@ internal class VanishingRouteLine {
             val upcomingIndex = granularDistances.distancesArray[index]
             if (upcomingIndex == null) {
                 logD(
-                    "MbxVanishingRouteLine",
-                    "Upcoming route line index is null."
+                    "Upcoming route line index is null.",
+                    "VanishingRouteLine"
                 )
                 return null
             }

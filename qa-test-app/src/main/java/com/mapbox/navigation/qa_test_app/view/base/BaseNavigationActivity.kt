@@ -247,7 +247,7 @@ abstract class BaseNavigationActivity : AppCompatActivity(), OnMapLongClickListe
 
     private fun renderManeuvers(maneuvers: Expected<ManeuverError, List<Maneuver>>) {
         maneuvers.onError { error ->
-            logE("MbxManeuverActivity", error.errorMessage!!)
+            logE(error.errorMessage!!, "BaseNavigationActivity")
         }
         maneuvers.onValue {
             if (baseBinding.maneuverView.visibility == View.INVISIBLE) {
