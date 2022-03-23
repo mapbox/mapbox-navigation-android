@@ -12,6 +12,7 @@ import com.mapbox.navigation.dropin.util.Geocoder
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
@@ -76,5 +77,19 @@ internal class GeocodingComponentTest {
         verify {
             mockDestinationViewModel.invoke(DidReverseGeocode(newDestination.point, features))
         }
+    }
+
+    @Test
+    fun `should NOT reverse geocode Destinations with already set features list`() {
+        coEvery { mockGeocoder.findAddresses(any()) } returns Result.success(listOf(mockk()))
+        val destination = Destination(
+            point = Point.fromLngLat(22.0, 33.0),
+            features = listOf(mockk())
+        )
+        destinationStateFlow.tryEmit(DestinationState(destination))
+
+        sut.onAttached(mockNavigation)
+
+        coVerify(exactly = 0) { mockGeocoder.findAddresses(destination.point) }
     }
 }

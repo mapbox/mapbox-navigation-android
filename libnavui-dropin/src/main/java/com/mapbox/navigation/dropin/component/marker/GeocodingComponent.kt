@@ -8,6 +8,7 @@ import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.util.Geocoder
 import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapNotNull
 
 /**
@@ -27,6 +28,7 @@ internal class GeocodingComponent(
 
         val geocoder = Geocoder.create(accessToken)
         destinationViewModel.state
+            .filter { it.destination?.features == null }
             .mapNotNull { it.destination?.point }
             .distinctUntilChanged()
             .observe { point: Point ->
