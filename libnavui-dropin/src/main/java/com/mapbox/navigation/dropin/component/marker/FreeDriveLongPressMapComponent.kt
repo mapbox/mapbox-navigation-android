@@ -13,6 +13,7 @@ import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Destination
+import com.mapbox.navigation.dropin.util.HapticFeedback
 
 internal class FreeDriveLongPressMapComponent(
     private val mapView: MapView,
@@ -21,14 +22,19 @@ internal class FreeDriveLongPressMapComponent(
     private val destinationViewModel: DestinationViewModel,
 ) : UIComponent() {
 
+    private var hapticFeedback: HapticFeedback? = null
+
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
+        hapticFeedback =
+            HapticFeedback.create(mapboxNavigation.navigationOptions.applicationContext)
         mapView.gestures.addOnMapLongClickListener(longClickListener)
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         super.onDetached(mapboxNavigation)
         mapView.gestures.removeOnMapLongClickListener(longClickListener)
+        hapticFeedback = null
     }
 
     private val longClickListener = OnMapLongClickListener { point ->
@@ -41,6 +47,7 @@ internal class FreeDriveLongPressMapComponent(
         navigationStateViewModel.invoke(
             NavigationStateAction.Update(NavigationState.DestinationPreview)
         )
+        hapticFeedback?.tick()
         false
     }
 }
