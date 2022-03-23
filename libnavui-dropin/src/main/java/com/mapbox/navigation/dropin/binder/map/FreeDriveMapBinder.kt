@@ -12,6 +12,7 @@ import com.mapbox.navigation.dropin.component.marker.GeocodingComponent
 import com.mapbox.navigation.dropin.component.marker.LongPressMapComponent
 import com.mapbox.navigation.dropin.component.marker.MapMarkersComponent
 import com.mapbox.navigation.dropin.component.routeline.RouteLineComponent
+import com.mapbox.navigation.dropin.lifecycle.reloadOnChange
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class FreeDriveMapBinder(
@@ -24,11 +25,13 @@ internal class FreeDriveMapBinder(
                 value,
                 navigationViewContext.viewModel.locationViewModel,
             ),
-            RouteLineComponent(
-                value,
-                navigationViewContext.routeLineOptions,
-                navigationViewContext.viewModel.routesViewModel
-            ),
+            reloadOnChange(navigationViewContext.options.routeLineOptions) { lineOptions ->
+                RouteLineComponent(
+                    value,
+                    lineOptions,
+                    navigationViewContext.viewModel.routesViewModel
+                )
+            },
             CameraComponent(
                 value,
                 navigationViewContext.viewModel.cameraViewModel,

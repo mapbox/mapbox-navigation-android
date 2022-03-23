@@ -13,10 +13,6 @@ import com.mapbox.navigation.dropin.component.routefetch.RoutesState
 import com.mapbox.navigation.dropin.lifecycle.UICoordinator
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache.Companion.MB_IN_BYTES
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
-import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
-import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -33,13 +29,7 @@ internal class DropInNavigationViewContext(
     val viewModel: DropInNavigationViewModel,
 ) {
     val uiBinders = NavigationUIBinders()
-    var routeLineOptions: MapboxRouteLineOptions = MapboxRouteLineOptions.Builder(context)
-        .withRouteLineResources(RouteLineResources.Builder().build())
-        .withRouteLineBelowLayerId("road-label-navigation")
-        .build()
-    var routeArrowOptions: RouteArrowOptions = RouteArrowOptions.Builder(context)
-        .withAboveLayerId(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
-        .build()
+    val options = NavigationViewOptions(context)
 
     val dispatch: (action: Any) -> Unit = { action ->
         when (action) {
@@ -61,9 +51,14 @@ internal class DropInNavigationViewContext(
 
     //endregion
 
-    fun applyCustomization(action: ViewBinderCustomization.() -> Unit) {
+    fun applyBinderCustomization(action: ViewBinderCustomization.() -> Unit) {
         val customization = ViewBinderCustomization().apply(action)
         uiBinders.applyCustomization(customization)
+    }
+
+    fun applyOptionsCustomization(action: ViewOptionsCustomization.() -> Unit) {
+        val customization = ViewOptionsCustomization().apply(action)
+        options.applyCustomization(customization)
     }
 }
 

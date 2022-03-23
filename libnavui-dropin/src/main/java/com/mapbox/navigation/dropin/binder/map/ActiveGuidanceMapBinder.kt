@@ -11,6 +11,7 @@ import com.mapbox.navigation.dropin.component.location.LocationComponent
 import com.mapbox.navigation.dropin.component.marker.MapMarkersComponent
 import com.mapbox.navigation.dropin.component.routearrow.RouteArrowComponent
 import com.mapbox.navigation.dropin.component.routeline.RouteLineComponent
+import com.mapbox.navigation.dropin.lifecycle.reloadOnChange
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class ActiveGuidanceMapBinder(
@@ -23,11 +24,13 @@ internal class ActiveGuidanceMapBinder(
                 value,
                 navigationViewContext.viewModel.locationViewModel,
             ),
-            RouteLineComponent(
-                value,
-                navigationViewContext.routeLineOptions,
-                navigationViewContext.viewModel.routesViewModel
-            ),
+            reloadOnChange(navigationViewContext.options.routeLineOptions) { routeLineOptions ->
+                RouteLineComponent(
+                    value,
+                    routeLineOptions,
+                    navigationViewContext.viewModel.routesViewModel
+                )
+            },
             CameraComponent(
                 value,
                 navigationViewContext.viewModel.cameraViewModel,
@@ -35,10 +38,9 @@ internal class ActiveGuidanceMapBinder(
                 navigationViewContext.viewModel.navigationStateViewModel,
             ),
             MapMarkersComponent(value, navigationViewContext),
-            RouteArrowComponent(
-                value,
-                navigationViewContext.routeArrowOptions
-            ),
+            reloadOnChange(navigationViewContext.options.routeArrowOptions) { routeArrowOptions ->
+                RouteArrowComponent(value, routeArrowOptions)
+            }
         )
     }
 }

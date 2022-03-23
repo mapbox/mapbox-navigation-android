@@ -32,10 +32,10 @@ interface MapboxNavigationViewApi {
     fun removeTripSessionStateObserver(observer: TripSessionStateObserver)
     fun addVoiceInstructionsObserver(observer: VoiceInstructionsObserver)
     fun removeVoiceInstructionsObserver(observer: VoiceInstructionsObserver)
-    fun update(navigationViewOptions: NavigationViewOptions)
+    fun update(navigationViewOptions: LegacyNavigationViewOptions)
     fun getMapView(): MapView
     fun configureNavigationView(viewProvider: ViewProvider)
-    fun getOptions(): NavigationViewOptions
+    fun getOptions(): LegacyNavigationViewOptions
     fun setRoutes(routes: List<DirectionsRoute>)
     fun fetchAndSetRoute(points: List<Point>)
     fun fetchAndSetRoute(routeOptions: RouteOptions)
@@ -147,7 +147,7 @@ internal class MapboxNavigationViewApiImpl(
     /**
      * Invoke to update options associated with the [NavigationView].
      */
-    override fun update(navigationViewOptions: NavigationViewOptions) {
+    override fun update(navigationViewOptions: LegacyNavigationViewOptions) {
         navigationView.updateNavigationViewOptions(navigationViewOptions)
     }
 
@@ -176,7 +176,7 @@ internal class MapboxNavigationViewApiImpl(
     /**
      * @return the NavigationViewOptions
      */
-    override fun getOptions(): NavigationViewOptions {
+    override fun getOptions(): LegacyNavigationViewOptions {
         return navigationView.navigationViewOptions
     }
 

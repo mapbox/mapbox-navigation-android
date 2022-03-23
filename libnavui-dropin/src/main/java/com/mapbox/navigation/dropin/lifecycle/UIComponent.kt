@@ -35,3 +35,33 @@ open class UIComponent : MapboxNavigationObserver {
         coroutineScope.launch { collect(action) }
     }
 }
+
+/**
+ * Return UIComponent that gets re-created using [factory] when [value] changes.
+ *
+ * eg.
+ * ```
+ *   reloadOnChange(myFlowValue) { value ->
+ *      MyComponent(value)
+ *   }
+ * ```
+ */
+fun <T> reloadOnChange(value: Flow<T>, factory: (value: T) -> UIComponent): UIComponent =
+    object : UIComponent() {
+        private var childComponent: UIComponent? = null
+
+        override fun onAttached(mapboxNavigation: MapboxNavigation) {
+            super.onAttached(mapboxNavigation)
+            value.observe {
+                childComponent?.onDetached(mapboxNavigation)
+                childComponent = factory(it)
+                childComponent?.onAttached(mapboxNavigation)
+            }
+        }
+
+        override fun onDetached(mapboxNavigation: MapboxNavigation) {
+            super.onDetached(mapboxNavigation)
+            childComponent?.onDetached(mapboxNavigation)
+            childComponent = null
+        }
+    }

@@ -14,6 +14,7 @@ import androidx.transition.TransitionManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
@@ -21,6 +22,7 @@ import com.mapbox.navigation.qa_test_app.databinding.LayoutActivityNavigationVie
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
@@ -31,7 +33,16 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
 
     private val routeLineOptions: MapboxRouteLineOptions by lazy {
         MapboxRouteLineOptions.Builder(this)
-            .withRouteLineResources(RouteLineResources.Builder().build())
+            .withRouteLineResources(
+                RouteLineResources.Builder()
+                    .routeLineColorResources(
+                        RouteLineColorResources.Builder()
+                            .routeLowCongestionColor(Color.YELLOW)
+                            .routeCasingColor(Color.RED)
+                            .build()
+                    )
+                    .build()
+            )
             .withRouteLineBelowLayerId("road-label-navigation")
             .withVanishingRouteLineEnabled(true)
             .displaySoftGradientForTraffic(true)
@@ -43,6 +54,7 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
     private val routeArrowOptions by lazy {
         RouteArrowOptions.Builder(this)
             .withAboveLayerId(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+            .withArrowColor(Color.RED)
             .build()
     }
 
@@ -60,10 +72,16 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
                 binding.navigationView.customizeViewBinders {
                     speedLimit = CustomSpeedLimitViewBinder()
                 }
+                binding.navigationView.customizeViewOptions {
+                    routeLineOptions = this@MapboxNavigationViewCustomizedActivity.routeLineOptions
+                }
             } else {
                 // Reset defaults
                 binding.navigationView.customizeViewBinders {
                     speedLimit = UIBinder.USE_DEFAULT
+                }
+                binding.navigationView.customizeViewOptions {
+                    routeLineOptions = defaultRouteLineOptions(applicationContext)
                 }
             }
         }
@@ -72,8 +90,12 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
         }
 
         when (resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
-            Configuration.UI_MODE_NIGHT_YES -> { binding.toggleTheme.isChecked = true }
-            else -> { binding.toggleTheme.isChecked = false }
+            Configuration.UI_MODE_NIGHT_YES -> {
+                binding.toggleTheme.isChecked = true
+            }
+            else -> {
+                binding.toggleTheme.isChecked = false
+            }
         }
 
         binding.toggleTheme.setOnCheckedChangeListener { _, isChecked ->
@@ -84,8 +106,9 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
             }
         }
 
-        binding.navigationView.customize(routeLineOptions)
-        binding.navigationView.customize(routeArrowOptions)
+        binding.navigationView.customizeViewOptions {
+            routeArrowOptions = this@MapboxNavigationViewCustomizedActivity.routeArrowOptions
+        }
     }
 
     private fun toggleTheme(themeMode: Int) {
