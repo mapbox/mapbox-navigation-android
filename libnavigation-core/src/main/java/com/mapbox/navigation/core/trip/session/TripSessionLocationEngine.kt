@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.trip.session
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Looper
+import android.os.SystemClock
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
@@ -10,6 +11,8 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.utils.internal.logD
+import com.mapbox.navigation.utils.internal.logW
+import java.util.concurrent.TimeUnit
 
 /**
  * This class is only intended to be used by the [MapboxTripSession].
@@ -23,6 +26,7 @@ import com.mapbox.navigation.utils.internal.logD
 internal class TripSessionLocationEngine constructor(
     val navigationOptions: NavigationOptions
 ) {
+
     val mapboxReplayer: MapboxReplayer by lazy { MapboxReplayer() }
 
     private val replayLocationEngine: ReplayLocationEngine by lazy {
@@ -55,6 +59,7 @@ internal class TripSessionLocationEngine constructor(
     private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
         override fun onSuccess(result: LocationEngineResult?) {
             result?.locations?.lastOrNull()?.let {
+                logIfLocationIsNotFreshEnough(it)
                 onRawLocationUpdate(it)
             }
         }
@@ -64,7 +69,21 @@ internal class TripSessionLocationEngine constructor(
         }
     }
 
+    private fun logIfLocationIsNotFreshEnough(location: Location) {
+        val currentTime = SystemClock.elapsedRealtimeNanos()
+        val locationAgeNanoSeconds = currentTime - location.elapsedRealtimeNanos
+        val locationAgeMilliseconds = TimeUnit.MILLISECONDS.convert(
+            locationAgeNanoSeconds,
+            TimeUnit.NANOSECONDS
+        )
+        if (locationAgeMilliseconds > DELAYED_LOCATION_WARNING_THRESHOLD_MS) {
+            logW("Got an obsolete location: age = $locationAgeMilliseconds ms", LOG_CATEGORY)
+        }
+    }
+
     private companion object {
+
+        private const val DELAYED_LOCATION_WARNING_THRESHOLD_MS = 500 // 0.5s
         private const val LOG_CATEGORY = "TripSessionLocationEngine"
     }
 }
