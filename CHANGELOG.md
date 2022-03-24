@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 - Added `RerouteOptionsAdapter`. It allows to modify `RouteOptions` on reroute for default implementation of `RerouteController` via `MapboxNavigation#setRerouteOptionsAdapter`. [#5573](https://github.com/mapbox/mapbox-navigation-android/pull/5573)
+- Added `LocationMatcherResult#isDegradedMapMatching` which allows to understand if current matched location was produced using limited map matching approach(e.g. due to lack of map data). [#5606](https://github.com/mapbox/mapbox-navigation-android/pull/5606)
 
 ## Mapbox Navigation SDK 2.4.0-beta.2 - March 18, 2022
 ### Changelog
