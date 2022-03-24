@@ -22,7 +22,8 @@ import com.mapbox.navigation.base.speed.model.SpeedLimit
  * @param roadEdgeMatchProbability when map matcher snaps to a road, this is the confidence in the chosen edge from all nearest edges.
  * @param zLevel [Int] current Z-level. Can be used to build a route from a proper level of a road.
  * @param road Road can be used to get information about the [Road] including name, shield name and shield url.
- * @param isDegradedMapMatching whether map matching was running in "degraded" mode, i.e. can have worse quality(usually happens due to the lack of map data)
+ * @param isDegradedMapMatching whether map matching was running in "degraded" mode, i.e. can have worse quality(usually happens due to the lack of map data).
+ * In practice "degraded" mode means raw location in free drive and worse off-route experience in case of route set.
  */
 class LocationMatcherResult internal constructor(
     val enhancedLocation: Location,
