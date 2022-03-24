@@ -1,0 +1,1244 @@
+{
+  "weight_name": "auto",
+  "weight": 323.418,
+  "duration": 356.013,
+  "distance": 9820.312,
+  "legs": [
+    {
+      "via_waypoints": [],
+      "annotation": {
+        "congestion": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "speed": [
+          29.2,
+          29.2,
+          29.2,
+          29.2,
+          29.2,
+          29.2,
+          29.2,
+          29.2,
+          29.2,
+          29.2,
+          29.2,
+          29.2,
+          29.2,
+          29.2,
+          29.2,
+          26.7,
+          26.1,
+          25.8,
+          25.8,
+          25.6,
+          25.6,
+          24.7,
+          24.7,
+          24.7,
+          24.7,
+          24.7,
+          24.7,
+          24.7,
+          24.7,
+          24.7,
+          24.7,
+          24.4,
+          25,
+          25,
+          25,
+          25.6,
+          25.6,
+          25.6,
+          25.6,
+          33.3,
+          33.3,
+          33.3,
+          33.3,
+          33.3,
+          33.3,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          28.1,
+          27.2
+        ],
+        "distance": [
+          1.7,
+          107.1,
+          80.9,
+          60.8,
+          67.8,
+          63.2,
+          49.7,
+          61.7,
+          84.8,
+          53.3,
+          43.9,
+          68.9,
+          86.1,
+          85.6,
+          1275.6,
+          145.2,
+          167.6,
+          210.8,
+          209.7,
+          130.7,
+          92.8,
+          74.1,
+          76.6,
+          56.6,
+          57.1,
+          42.9,
+          48.3,
+          44.8,
+          37.7,
+          44.3,
+          65.7,
+          52.2,
+          227.5,
+          815.8,
+          107.9,
+          114.9,
+          137.1,
+          131.1,
+          37.7,
+          82.8,
+          99.9,
+          81,
+          7.9,
+          149,
+          191,
+          15.1,
+          100,
+          69.5,
+          69.6,
+          72.6,
+          61.5,
+          57.5,
+          51.3,
+          41.1,
+          52,
+          50.2,
+          78.5,
+          73.6,
+          57.5,
+          63.9,
+          57.8,
+          391,
+          116.7,
+          504.5,
+          115.2,
+          44,
+          40.8,
+          37.7,
+          30.6,
+          30.7,
+          61.3,
+          61.3,
+          61.4,
+          61.2,
+          61.3,
+          49.6,
+          35.8,
+          34.9,
+          28.3,
+          31,
+          31.7,
+          33.2,
+          60,
+          70.1,
+          74.1,
+          56.5,
+          75.6,
+          51.5,
+          66.5,
+          55.1,
+          38.7,
+          44.2,
+          39.1,
+          41.8,
+          37.2,
+          39.4,
+          36.3,
+          48,
+          79.5,
+          138.5
+        ],
+        "duration": [
+          0.06,
+          3.671,
+          2.774,
+          2.083,
+          2.324,
+          2.167,
+          1.706,
+          2.117,
+          2.906,
+          1.827,
+          1.504,
+          2.364,
+          2.951,
+          2.934,
+          43.733,
+          5.447,
+          6.419,
+          8.161,
+          8.119,
+          5.116,
+          3.632,
+          2.998,
+          3.098,
+          2.287,
+          2.312,
+          1.736,
+          1.953,
+          1.811,
+          1.525,
+          1.792,
+          2.656,
+          2.136,
+          9.102,
+          32.633,
+          4.315,
+          4.495,
+          5.365,
+          5.132,
+          1.475,
+          2.485,
+          2.996,
+          2.431,
+          0.238,
+          4.47,
+          5.731,
+          0.539,
+          3.564,
+          2.477,
+          2.479,
+          2.589,
+          2.19,
+          2.049,
+          1.827,
+          1.466,
+          1.855,
+          1.788,
+          2.798,
+          2.625,
+          2.051,
+          2.278,
+          2.06,
+          13.937,
+          4.159,
+          17.983,
+          4.107,
+          1.57,
+          1.454,
+          1.344,
+          1.092,
+          1.096,
+          2.184,
+          2.185,
+          2.187,
+          2.182,
+          2.187,
+          1.768,
+          1.277,
+          1.245,
+          1.01,
+          1.104,
+          1.129,
+          1.184,
+          2.137,
+          2.497,
+          2.642,
+          2.013,
+          2.695,
+          1.835,
+          2.372,
+          1.965,
+          1.378,
+          1.574,
+          1.394,
+          1.491,
+          1.328,
+          1.405,
+          1.294,
+          1.711,
+          2.833,
+          5.087
+        ]
+      },
+      "admins": [
+        {
+          "iso_3166_1_alpha3": "DEU",
+          "iso_3166_1": "DE"
+        }
+      ],
+      "weight": 323.418,
+      "duration": 356.013,
+      "steps": [
+        {
+          "intersections": [
+            {
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                true
+              ],
+              "bearings": [
+                222
+              ],
+              "duration": 6.509,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 6.021,
+              "geometry_index": 0,
+              "location": [
+                9.484914,
+                51.228828
+              ]
+            },
+            {
+              "entry": [
+                false,
+                true
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 0,
+              "bearings": [
+                39,
+                218
+              ],
+              "duration": 68.606,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 1,
+              "weight": 63.46,
+              "geometry_index": 3,
+              "location": [
+                9.483132,
+                51.22754
+              ]
+            },
+            {
+              "entry": [
+                false,
+                true
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 0,
+              "bearings": [
+                21,
+                201
+              ],
+              "duration": 5.438,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 1,
+              "weight": 5.03,
+              "geometry_index": 15,
+              "location": [
+                9.471636,
+                51.211137
+              ]
+            },
+            {
+              "entry": [
+                false,
+                true
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 0,
+              "bearings": [
+                21,
+                201
+              ],
+              "duration": 6.434,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 1,
+              "weight": 5.951,
+              "geometry_index": 16,
+              "location": [
+                9.470885,
+                51.20992
+              ]
+            },
+            {
+              "entry": [
+                false,
+                true
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 0,
+              "bearings": [
+                21,
+                201
+              ],
+              "duration": 8.168,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 1,
+              "weight": 7.555,
+              "geometry_index": 17,
+              "location": [
+                9.470009,
+                51.208518
+              ]
+            },
+            {
+              "entry": [
+                false,
+                true
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 0,
+              "bearings": [
+                21,
+                201
+              ],
+              "duration": 8.129,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 1,
+              "weight": 7.519,
+              "geometry_index": 18,
+              "location": [
+                9.468921,
+                51.206751
+              ]
+            },
+            {
+              "lanes": [
+                {
+                  "indications": [
+                    "straight"
+                  ],
+                  "valid_indication": "straight",
+                  "valid": true,
+                  "active": true
+                },
+                {
+                  "indications": [
+                    "straight"
+                  ],
+                  "valid_indication": "straight",
+                  "valid": true,
+                  "active": true
+                },
+                {
+                  "indications": [
+                    "straight"
+                  ],
+                  "valid_indication": "straight",
+                  "valid": true,
+                  "active": true
+                },
+                {
+                  "indications": [
+                    "slight right"
+                  ],
+                  "valid": false,
+                  "active": false
+                }
+              ],
+              "location": [
+                9.467843,
+                51.204992
+              ],
+              "geometry_index": 19,
+              "admin_index": 0,
+              "weight": 8.108,
+              "is_urban": false,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "duration": 8.786,
+              "bearings": [
+                21,
+                199,
+                211
+              ],
+              "out": 1,
+              "in": 0,
+              "turn_duration": 0.021,
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                false,
+                true,
+                true
+              ]
+            },
+            {
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "location": [
+                9.466894,
+                51.203075
+              ],
+              "geometry_index": 21,
+              "admin_index": 0,
+              "weight": 21.004,
+              "is_urban": false,
+              "turn_weight": 0.5,
+              "duration": 22.194,
+              "bearings": [
+                15,
+                189,
+                359
+              ],
+              "out": 1,
+              "in": 0,
+              "turn_duration": 0.028,
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                false,
+                true,
+                false
+              ]
+            },
+            {
+              "entry": [
+                true,
+                false
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 1,
+              "bearings": [
+                163,
+                344
+              ],
+              "duration": 2.127,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 1.968,
+              "geometry_index": 31,
+              "location": [
+                9.467427,
+                51.198221
+              ]
+            },
+            {
+              "entry": [
+                true,
+                false
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 1,
+              "bearings": [
+                164,
+                343
+              ],
+              "duration": 9.12,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 8.436,
+              "geometry_index": 32,
+              "location": [
+                9.467643,
+                51.197772
+              ]
+            },
+            {
+              "entry": [
+                true,
+                false
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 1,
+              "bearings": [
+                163,
+                344
+              ],
+              "duration": 36.96,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 34.188,
+              "geometry_index": 33,
+              "location": [
+                9.468569,
+                51.195812
+              ]
+            },
+            {
+              "entry": [
+                true,
+                false
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 1,
+              "bearings": [
+                163,
+                344
+              ],
+              "duration": 4.5,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 4.163,
+              "geometry_index": 35,
+              "location": [
+                9.472435,
+                51.187876
+              ]
+            },
+            {
+              "entry": [
+                true,
+                false
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 1,
+              "bearings": [
+                165,
+                343
+              ],
+              "duration": 10.487,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 9.7,
+              "geometry_index": 36,
+              "location": [
+                9.47291,
+                51.186888
+              ]
+            },
+            {
+              "entry": [
+                true,
+                false
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 1,
+              "bearings": [
+                175,
+                352
+              ],
+              "duration": 1.487,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 1.375,
+              "geometry_index": 38,
+              "location": [
+                9.473679,
+                51.184531
+              ]
+            },
+            {
+              "entry": [
+                true,
+                false
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 1,
+              "bearings": [
+                176,
+                355
+              ],
+              "duration": 7.92,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 7.128,
+              "geometry_index": 39,
+              "location": [
+                9.47373,
+                51.184194
+              ]
+            },
+            {
+              "entry": [
+                false,
+                true
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 0,
+              "bearings": [
+                3,
+                187
+              ],
+              "duration": 4.71,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 1,
+              "weight": 4.239,
+              "geometry_index": 42,
+              "location": [
+                9.473739,
+                51.181828
+              ]
+            },
+            {
+              "entry": [
+                false,
+                true
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 0,
+              "bearings": [
+                8,
+                188
+              ],
+              "duration": 5.73,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 1,
+              "weight": 5.157,
+              "geometry_index": 44,
+              "location": [
+                9.473438,
+                51.180431
+              ]
+            },
+            {
+              "lanes": [
+                {
+                  "indications": [
+                    "straight"
+                  ],
+                  "valid_indication": "straight",
+                  "valid": true,
+                  "active": true
+                },
+                {
+                  "indications": [
+                    "straight"
+                  ],
+                  "valid_indication": "straight",
+                  "valid": true,
+                  "active": true
+                },
+                {
+                  "indications": [
+                    "straight"
+                  ],
+                  "valid_indication": "straight",
+                  "valid": true,
+                  "active": true
+                },
+                {
+                  "indications": [
+                    "slight right"
+                  ],
+                  "valid": false,
+                  "active": false
+                }
+              ],
+              "location": [
+                9.473064,
+                51.178731
+              ],
+              "geometry_index": 45,
+              "admin_index": 0,
+              "weight": 14.307,
+              "is_urban": false,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "duration": 15.904,
+              "bearings": [
+                8,
+                189,
+                197
+              ],
+              "out": 1,
+              "in": 0,
+              "turn_duration": 0.007,
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                false,
+                true,
+                true
+              ]
+            },
+            {
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "location": [
+                9.472614,
+                51.174746
+              ],
+              "geometry_index": 52,
+              "admin_index": 0,
+              "weight": 6.755,
+              "is_urban": false,
+              "turn_weight": 0.5,
+              "duration": 6.973,
+              "bearings": [
+                175,
+                346,
+                358
+              ],
+              "out": 0,
+              "in": 2,
+              "turn_duration": 0.022,
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                true,
+                false,
+                false
+              ]
+            },
+            {
+              "entry": [
+                true,
+                false
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 1,
+              "bearings": [
+                167,
+                351
+              ],
+              "duration": 5.418,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 4.741,
+              "geometry_index": 56,
+              "location": [
+                9.472959,
+                51.173012
+              ]
+            },
+            {
+              "entry": [
+                true,
+                false
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 1,
+              "bearings": [
+                162,
+                345
+              ],
+              "duration": 20.317,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 17.777,
+              "geometry_index": 58,
+              "location": [
+                9.473486,
+                51.171686
+              ]
+            },
+            {
+              "entry": [
+                true,
+                false
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 1,
+              "bearings": [
+                157,
+                337
+              ],
+              "duration": 61.735,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 54.018,
+              "geometry_index": 62,
+              "location": [
+                9.476557,
+                51.166941
+              ]
+            },
+            {
+              "entry": [
+                false,
+                true
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 0,
+              "bearings": [
+                32,
+                211
+              ],
+              "duration": 8.875,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 1,
+              "weight": 7.766,
+              "geometry_index": 86,
+              "location": [
+                9.477918,
+                51.152539
+              ]
+            },
+            {
+              "entry": [
+                false,
+                true
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 0,
+              "bearings": [
+                20,
+                197
+              ],
+              "duration": 14.4,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 1,
+              "weight": 12.6,
+              "geometry_index": 90,
+              "location": [
+                9.476364,
+                51.150534
+              ]
+            },
+            {
+              "bearings": [
+                1,
+                181
+              ],
+              "entry": [
+                false,
+                true
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "in": 0,
+              "mapbox_streets_v8": {
+                "class": "motorway"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 1,
+              "geometry_index": 99,
+              "location": [
+                9.475593,
+                51.146953
+              ]
+            }
+          ],
+          "destinations": "Frankfurt, Würzburg, Erfurt",
+          "maneuver": {
+            "type": "depart",
+            "instruction": "Drive southwest on A 7/E 45.",
+            "bearing_after": 222,
+            "bearing_before": 0,
+            "location": [
+              9.484914,
+              51.228828
+            ]
+          },
+          "name": "",
+          "duration": 356.013,
+          "distance": 9820.312,
+          "driving_side": "right",
+          "weight": 323.418,
+          "mode": "driving",
+          "ref": "A 7; E 45",
+          "geometry": "whwu`Bcf|aQV`@pk@l_Adb@zl@zYp`@~]fb@n\\n^tVrVt\\p[|h@|b@rYxTjUlOnb@rWzk@r[xk@tZh{SzyK`kA|m@rvAvu@lmB~bA|lBjbAldA~d@jq@hT`h@xIvi@jFv^J`_@{@~VoBzYsDvWaFtSeF`WaIjb@qO`[oLnyB{x@ztLmuEby@eZv|@u\\liAi^zgAwO`TeBjm@uD`w@t@ll@lBlCPzqAfQfiBjVjGdApv@xKve@fFze@|Dvg@rAna@Of_@eAt[wB|UgC|[mExZcF|i@{N|f@aPt]cOt`@uR~\\wRdiEkgCd{@gh@~cGqnDpz@gg@dVuLvTmJjSeHxOwD|OiDba@{Eja@uAla@n@da@tDz`@|HvYhK`RfIjQ|IvMnHtN|JvNdLdOvMj[z[t_@za@va@nc@|YtYnc@pa@rXhTda@~V~[fPvSbIxV~IpTrEdV~DrSnD~TvBhSxA|Yr@rk@VvlAdA"
+        },
+        {
+          "intersections": [
+            {
+              "bearings": [
+                1
+              ],
+              "entry": [
+                true
+              ],
+              "in": 0,
+              "admin_index": 0,
+              "geometry_index": 100,
+              "location": [
+                9.475558,
+                51.145709
+              ]
+            }
+          ],
+          "maneuver": {
+            "type": "arrive",
+            "instruction": "You have arrived at your destination.",
+            "bearing_after": 0,
+            "bearing_before": 181,
+            "location": [
+              9.475558,
+              51.145709
+            ]
+          },
+          "name": "",
+          "duration": 0,
+          "distance": 0,
+          "driving_side": "right",
+          "weight": 0,
+          "mode": "driving",
+          "ref": "A 7; E 45",
+          "geometry": "y}tp`Bk}iaQ??"
+        }
+      ],
+      "distance": 9820.312,
+      "summary": "A 7"
+    }
+  ],
+  "geometry": "whwu`Bcf|aQV`@pk@l_Adb@zl@zYp`@~]fb@n\\n^tVrVt\\p[|h@|b@rYxTjUlOnb@rWzk@r[xk@tZh{SzyK`kA|m@rvAvu@lmB~bA|lBjbAldA~d@jq@hT`h@xIvi@jFv^J`_@{@~VoBzYsDvWaFtSeF`WaIjb@qO`[oLnyB{x@ztLmuEby@eZv|@u\\liAi^zgAwO`TeBjm@uD`w@t@ll@lBlCPzqAfQfiBjVjGdApv@xKve@fFze@|Dvg@rAna@Of_@eAt[wB|UgC|[mExZcF|i@{N|f@aPt]cOt`@uR~\\wRdiEkgCd{@gh@~cGqnDpz@gg@dVuLvTmJjSeHxOwD|OiDba@{Eja@uAla@n@da@tDz`@|HvYhK`RfIjQ|IvMnHtN|JvNdLdOvMj[z[t_@za@va@nc@|YtYnc@pa@rXhTda@~V~[fPvSbIxV~IpTrEdV~DrSnD~TvBhSxA|Yr@rk@VvlAdA"
+}

@@ -107,12 +107,18 @@ internal class ReplayRouteInterpolator {
     ) {
         for (i in 1 until smoothLocations.lastIndex) {
             val deltaBearing = abs(smoothLocations[i - 1].bearing - smoothLocations[i].bearing)
-            val speedMps = if (deltaBearing > 150) {
-                options.uTurnSpeedMps
-            } else {
-                val velocityFraction = (1.0 - min(1.0, deltaBearing / 90.0)).pow(2.0)
-                val offsetToMaxVelocity = options.maxSpeedMps - options.turnSpeedMps
-                (options.turnSpeedMps + (velocityFraction * offsetToMaxVelocity))
+            val speedMps = when (deltaBearing) {
+                in maxSpeedBearingRange -> {
+                    options.maxSpeedMps
+                }
+                in uTurnBearingRange -> {
+                    options.uTurnSpeedMps
+                }
+                else -> {
+                    val velocityFraction = (1.0 - min(1.0, deltaBearing / 90.0)).pow(2.0)
+                    val offsetToMaxVelocity = options.maxSpeedMps - options.turnSpeedMps
+                    (options.turnSpeedMps + (velocityFraction * offsetToMaxVelocity))
+                }
             }
             smoothLocations[i].speedMps = speedMps
         }
@@ -238,5 +244,17 @@ internal class ReplayRouteInterpolator {
 
     private companion object {
         private const val SMOOTH_THRESHOLD_METERS = 3.0
+
+        /*
+         * The road curvature used to determine
+         * when the driver will drive a [ReplayRouteOptions.maxSpeedMps].
+         */
+        private val maxSpeedBearingRange: ClosedRange<Double> = 0.0..20.0
+
+        /*
+         * The road curvature used to determine
+         * when the driver will drive the [ReplayRouteOptions.uTurnSpeedMps].
+         */
+        private val uTurnBearingRange: ClosedRange<Double> = 150.0..200.0
     }
 }
