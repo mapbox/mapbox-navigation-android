@@ -22,6 +22,7 @@ import com.mapbox.navigation.base.speed.model.SpeedLimit
  * @param roadEdgeMatchProbability when map matcher snaps to a road, this is the confidence in the chosen edge from all nearest edges.
  * @param zLevel [Int] current Z-level. Can be used to build a route from a proper level of a road.
  * @param road Road can be used to get information about the [Road] including name, shield name and shield url.
+ * @param isDegradedMapMatching whether map matching was running in "degraded" mode, i.e. can have worse quality(usually happens due to the lack of map data)
  */
 class LocationMatcherResult internal constructor(
     val enhancedLocation: Location,
@@ -33,6 +34,7 @@ class LocationMatcherResult internal constructor(
     val roadEdgeMatchProbability: Float,
     val zLevel: Int?,
     val road: Road,
+    val isDegradedMapMatching: Boolean
 ) {
 
     /**
@@ -52,7 +54,7 @@ class LocationMatcherResult internal constructor(
         if (speedLimit != other.speedLimit) return false
         if (roadEdgeMatchProbability != other.roadEdgeMatchProbability) return false
         if (road != other.road) return false
-
+        if (isDegradedMapMatching != other.isDegradedMapMatching) return false
         return true
     }
 
@@ -68,6 +70,7 @@ class LocationMatcherResult internal constructor(
         result = 31 * result + speedLimit.hashCode()
         result = 31 * result + roadEdgeMatchProbability.hashCode()
         result = 31 * result + road.hashCode()
+        result = 31 * result + isDegradedMapMatching.hashCode()
         return result
     }
 
@@ -78,6 +81,7 @@ class LocationMatcherResult internal constructor(
         return "LocationMatcherResult(enhancedLocation=$enhancedLocation, " +
             "keyPoints=$keyPoints, isOffRoad=$isOffRoad, offRoadProbability=$offRoadProbability, " +
             "isTeleport=$isTeleport, speedLimit=$speedLimit, " +
-            "roadEdgeMatchProbability=$roadEdgeMatchProbability, road=$road)"
+            "roadEdgeMatchProbability=$roadEdgeMatchProbability, road=$road, " +
+            "isDegradedMapMatching=$isDegradedMapMatching)"
     }
 }

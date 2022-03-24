@@ -321,7 +321,8 @@ internal fun TripStatus.getLocationMatcherResult(
         navigationStatus.prepareSpeedLimit(),
         navigationStatus.mapMatcherOutput.matches.firstOrNull()?.proba ?: 0f,
         navigationStatus.layer,
-        road
+        road,
+        navigationStatus.isFallback
     )
 }
 
