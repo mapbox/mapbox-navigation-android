@@ -79,7 +79,7 @@ class MapboxHistoryRecorder internal constructor(
 
     private fun checkRecorderInitialized() {
         if (historyRecorderHandle == null) {
-            logW("MbxHistoryRecorder", "The history recorder is not initialized")
+            logW("The history recorder is not initialized", "MapboxHistoryRecorder")
         }
     }
 }

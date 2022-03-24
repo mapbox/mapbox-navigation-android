@@ -13,7 +13,7 @@ class LoggerProviderTest {
 
     @Test
     fun `alias log V (called lvl D, Logger doesn't provide V)`() {
-        logV("any_tag", "any_message")
+        logV("any_message", "any_clz_name")
 
         verify(exactly = 1) {
             Logger.d(any(), any())
@@ -22,7 +22,7 @@ class LoggerProviderTest {
 
     @Test
     fun `alias log D`() {
-        logD("any_tag", "any_message")
+        logD("any_message", "any_clz_name")
 
         verify(exactly = 1) {
             Logger.d(any(), any())
@@ -31,7 +31,7 @@ class LoggerProviderTest {
 
     @Test
     fun `alias log I`() {
-        logI("any_tag", "any_message")
+        logI("any_message", "any_clz_name")
 
         verify(exactly = 1) {
             Logger.i(any(), any())
@@ -40,7 +40,7 @@ class LoggerProviderTest {
 
     @Test
     fun `alias log W`() {
-        logW("any_tag", "any_message")
+        logW("any_message", "any_clz_name")
 
         verify(exactly = 1) {
             Logger.w(any(), any())
@@ -49,7 +49,7 @@ class LoggerProviderTest {
 
     @Test
     fun `alias log E`() {
-        logE("any_tag", "any_message")
+        logE("any_message", "any_clz_name")
 
         verify(exactly = 1) {
             Logger.e(any(), any())

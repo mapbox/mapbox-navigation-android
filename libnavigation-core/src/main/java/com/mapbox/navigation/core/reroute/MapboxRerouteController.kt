@@ -58,7 +58,7 @@ internal class MapboxRerouteController(
         }
 
     private companion object {
-        private const val TAG = "MbxRerouteController"
+        private const val LOG_CATEGORY = "MapboxRerouteController"
 
         /**
          * Max dangerous maneuvers radius meters. See [RouteOptions.avoidManeuverRadius]
@@ -105,8 +105,8 @@ internal class MapboxRerouteController(
         interrupt()
         state = RerouteState.FetchingRoute
         logD(
-            TAG,
-            "Fetching route"
+            "Fetching route",
+            LOG_CATEGORY
         )
 
         val routeOptions = directionsSession.getPrimaryRouteOptions()
@@ -148,8 +148,8 @@ internal class MapboxRerouteController(
             checkNotNull(id)
             directionsSession.cancelRouteRequest(id)
             logD(
-                TAG,
-                "Route request interrupted"
+                "Route request interrupted",
+                LOG_CATEGORY
             )
         }
     }

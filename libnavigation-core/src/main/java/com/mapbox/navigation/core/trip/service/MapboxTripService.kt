@@ -30,7 +30,7 @@ internal class MapboxTripService(
 ) : TripService {
 
     companion object {
-        private const val TAG = "MbxTripService"
+        private const val LOG_CATEGORY = "MapboxTripService"
 
         private var currentTripNotification: TripNotification? = null
 
@@ -122,7 +122,7 @@ internal class MapboxTripService(
                 allowedNotificationTime = SystemClock.elapsedRealtime() + 500
             }
             false -> {
-                logI(TAG, "service already started")
+                logI("service already started", LOG_CATEGORY)
             }
         }
     }
@@ -139,7 +139,7 @@ internal class MapboxTripService(
                 tripNotification.onTripSessionStopped()
             }
             false -> {
-                logI(TAG, "Service is not started yet")
+                logI("Service is not started yet", LOG_CATEGORY)
             }
         }
     }

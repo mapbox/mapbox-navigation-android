@@ -16,7 +16,7 @@ import com.mapbox.navigation.core.internal.PredictiveCache
 import com.mapbox.navigation.utils.internal.logE
 import java.util.HashMap
 
-private const val TAG = "MbxPredictiveCache"
+private const val LOG_CATEGORY = "PredictiveCacheController"
 private const val MAPBOX_URL_PREFIX = "mapbox://"
 private const val VECTOR_SOURCE_TYPE = "vector"
 private const val RASTER_SOURCE_TYPE = "raster"
@@ -198,7 +198,7 @@ class PredictiveCacheController @JvmOverloads constructor(
     }
 
     private fun handleError(error: String?) {
-        logE(TAG, error ?: "null")
+        logE(error ?: "null", LOG_CATEGORY)
         predictiveCacheControllerErrorHandler?.onError(error)
     }
 

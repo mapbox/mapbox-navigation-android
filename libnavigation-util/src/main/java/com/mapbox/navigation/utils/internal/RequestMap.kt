@@ -46,8 +46,8 @@ fun <T> RequestMap<T>.cancelRequest(
         cancellationFn(request)
     } else {
         logW(
-            tag,
-            "Trying to cancel non-existing route request with id '$requestId'"
+            "Trying to cancel non-existing route request with id '$requestId'",
+            tag
         )
     }
 }

@@ -202,7 +202,7 @@ class MapboxNavigationViewportDataSource(
 ) : ViewportDataSource {
 
     internal companion object {
-        private const val TAG = "MbxViewportDataSource"
+        private const val LOG_CATEGORY = "MapboxNavigationViewportDataSource"
         internal val NULL_ISLAND_POINT = Point.fromLngLat(0.0, 0.0)
         internal val EMPTY_EDGE_INSETS = EdgeInsets(0.0, 0.0, 0.0, 0.0)
         internal const val ZERO_PITCH = 0.0
@@ -461,17 +461,17 @@ class MapboxNavigationViewportDataSource(
         val currentRoute = this.navigationRoute
         if (currentRoute == null) {
             logW(
-                TAG,
-                "You're calling #onRouteProgressChanged but you didn't call #onRouteChanged."
+                "You're calling #onRouteProgressChanged but you didn't call #onRouteChanged.",
+                LOG_CATEGORY
             )
             clearProgressData()
             return
         } else if (!currentRoute.directionsRoute.isSameRoute(routeProgress.route)) {
             logE(
-                TAG,
                 "Provided route (#onRouteChanged) and navigated route " +
                     "(#onRouteProgressChanged) are not the same. " +
-                    "Aborting framed geometry updates based on route progress."
+                    "Aborting framed geometry updates based on route progress.",
+                LOG_CATEGORY
             )
             clearProgressData()
             return
@@ -517,8 +517,8 @@ class MapboxNavigationViewportDataSource(
             )
         } ?: run {
             logE(
-                TAG,
-                "You're calling #onRouteProgressChanged with empty leg or step progress."
+                "You're calling #onRouteProgressChanged with empty leg or step progress.",
+                LOG_CATEGORY
             )
             clearProgressData()
         }

@@ -46,7 +46,7 @@ internal fun NavigationEvent.populate(
     eventVersion: Int,
     appMetadata: AppMetadata?,
 ) {
-    logD("MbxNavigationTelemetry", "populateNavigationEvent")
+    logD("populateNavigationEvent", "MapboxNavigationTelemetry")
 
     this.sdkIdentifier = sdkIdentifier
 

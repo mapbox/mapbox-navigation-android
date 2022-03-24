@@ -3,6 +3,7 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
+- Adopted Common SDK log messages parsing logic so it's consistent across Mapbox SDKs. As an example, this is how the logs would look like `D/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`. [#5604](https://github.com/mapbox/mapbox-navigation-android/pull/5604)
 - Added `RerouteOptionsAdapter`. It allows to modify `RouteOptions` on reroute for default implementation of `RerouteController` via `MapboxNavigation#setRerouteOptionsAdapter`. [#5573](https://github.com/mapbox/mapbox-navigation-android/pull/5573)
 
 ## Mapbox Navigation SDK 2.4.0-beta.2 - March 18, 2022

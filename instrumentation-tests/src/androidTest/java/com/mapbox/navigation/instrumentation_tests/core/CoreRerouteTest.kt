@@ -141,14 +141,14 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
                         reasons: List<RouterFailure>,
                         routeOptions: RouteOptions
                     ) {
-                        logE("DEBUG", "onFailure reasons=$reasons")
+                        logE("onFailure reasons=$reasons", "DEBUG")
                     }
 
                     override fun onCanceled(
                         routeOptions: RouteOptions,
                         routerOrigin: RouterOrigin
                     ) {
-                        logE("DEBUG", "onCanceled")
+                        logE("onCanceled", "DEBUG")
                     }
                 }
             )
@@ -182,7 +182,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         runOnMainSync {
             val countDownLatch = CountDownLatch(1)
             mapboxNavigation.historyRecorder.stopRecording {
-                logE("DEBUG", "history path=$it")
+                logE("history path=$it", "DEBUG")
                 countDownLatch.countDown()
             }
             countDownLatch.await()

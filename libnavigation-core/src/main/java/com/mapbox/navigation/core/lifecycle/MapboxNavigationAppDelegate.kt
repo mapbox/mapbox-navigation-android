@@ -27,13 +27,13 @@ internal class MapboxNavigationAppDelegate {
 
         if (isSetup) {
             logI(
-                TAG,
                 """
                     MapboxNavigationApp.setup was ignored because it has already been setup.
                     If you want to use new NavigationOptions, you must first call
                     MapboxNavigationApp.disable() and then call MapboxNavigationApp.setup(..).
                     Calling setup multiple times, is harmless otherwise.
-                """.trimIndent()
+                """.trimIndent(),
+                LOG_CATEGORY
             )
             return this
         }
@@ -78,6 +78,6 @@ internal class MapboxNavigationAppDelegate {
         mapboxNavigationOwner.getObserver(kClass)
 
     private companion object {
-        private const val TAG = "MbxMapboxNavigationApp"
+        private const val LOG_CATEGORY = "MapboxNavigationAppDelegate"
     }
 }

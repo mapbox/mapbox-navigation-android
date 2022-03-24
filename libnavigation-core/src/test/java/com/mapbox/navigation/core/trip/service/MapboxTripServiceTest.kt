@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.trip.service
 
 import android.app.Notification
+import com.mapbox.common.Logger
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.TripNotificationState
@@ -8,7 +9,6 @@ import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigation.utils.internal.logI
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -76,7 +76,7 @@ class MapboxTripServiceTest {
         service.startService()
 
         verify(exactly = 1) { tripNotification.onTripSessionStarted() }
-        verify(exactly = 1) { logI(any(), "service already started") }
+        verify(exactly = 1) { Logger.i(any(), "[MapboxTripService] service already started") }
     }
 
     @Test
@@ -109,7 +109,7 @@ class MapboxTripServiceTest {
         service.stopService()
 
         verify(exactly = 1) { tripNotification.onTripSessionStopped() }
-        verify(exactly = 1) { logI(any(), "Service is not started yet") }
+        verify(exactly = 1) { Logger.i(any(), "[MapboxTripService] Service is not started yet") }
     }
 
     @Test

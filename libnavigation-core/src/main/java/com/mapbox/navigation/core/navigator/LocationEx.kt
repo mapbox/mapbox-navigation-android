@@ -17,12 +17,12 @@ import kotlin.collections.set
 
 internal typealias FixLocationExtras = HashMap<String, Value>
 
-private const val TAG = "MbxLocationEx"
+private const val LOG_CATEGORY = "LocationEx"
 private val setIsFromMockProviderMethod: Method? by lazy {
     val printError: (Exception) -> Unit = {
         logE(
-            TAG,
-            "Unable to find method for setting mock provider exception=$it"
+            "Unable to find method for setting mock provider exception=$it",
+            LOG_CATEGORY
         )
     }
     try {
@@ -128,8 +128,8 @@ internal fun Bundle.toMap(): FixLocationExtras {
             is String -> map[key] = Value(value)
             else -> {
                 logW(
-                    TAG,
-                    "Unsupported type in location extras"
+                    "Unsupported type in location extras",
+                    LOG_CATEGORY
                 )
             }
         }

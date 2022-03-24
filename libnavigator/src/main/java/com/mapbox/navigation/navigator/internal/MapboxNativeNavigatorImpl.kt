@@ -46,7 +46,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     const val PRIMARY_ROUTE_INDEX = 0
 
-    private const val TAG = "MbxNativeNavigatorImpl"
+    private const val LOG_CATEGORY = "MapboxNativeNavigatorImpl"
 
     // TODO: What should be the default value? Should we expose it publicly?
     private const val MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS = 2
@@ -197,9 +197,9 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 routeLeg.annotation()?.toJson()?.let { annotations ->
                     navigator!!.updateAnnotations(annotations, PRIMARY_ROUTE_INDEX, index) {
                         logD(
-                            TAG,
                             "Annotation updated successfully=$it, for leg " +
-                                "index $index, annotations: [$annotations]"
+                                "index $index, annotations: [$annotations]",
+                            LOG_CATEGORY
                         )
 
                         continuation.resume(Unit)

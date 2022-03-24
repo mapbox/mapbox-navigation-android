@@ -60,11 +60,11 @@ internal class TripSessionLocationEngine constructor(
         }
 
         override fun onFailure(exception: Exception) {
-            logD(TAG, "location on failure exception=$exception")
+            logD("location on failure exception=$exception", LOG_CATEGORY)
         }
     }
 
     private companion object {
-        private const val TAG = "MbxTripSessionLocationEngine"
+        private const val LOG_CATEGORY = "TripSessionLocationEngine"
     }
 }

@@ -101,8 +101,8 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
             expected.fold(
                 {
                     logE(
-                        "MbxBuildingHighlightActivity",
-                        "error: ${it.errorMessage}"
+                        "error: ${it.errorMessage}",
+                        "MapboxBuildingHighlightActivity"
                     )
                 },
                 { value ->

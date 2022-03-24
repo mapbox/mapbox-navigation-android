@@ -60,8 +60,8 @@ internal class VoiceInstructionsTextPlayer(
             play(announcement)
         } else {
             logE(
-                TAG,
-                "$LANGUAGE_NOT_SUPPORTED or announcement from state is blank"
+                "$LANGUAGE_NOT_SUPPORTED or announcement from state is blank",
+                LOG_CATEGORY
             )
             donePlaying()
         }
@@ -108,7 +108,7 @@ internal class VoiceInstructionsTextPlayer(
             true
         }
         if (!isLanguageSupported) {
-            logE(TAG, LANGUAGE_NOT_SUPPORTED)
+            logE(LANGUAGE_NOT_SUPPORTED, LOG_CATEGORY)
             return
         }
         textToSpeech.language = language
@@ -119,12 +119,12 @@ internal class VoiceInstructionsTextPlayer(
 
             override fun onError(utteranceId: String?) {
                 // Deprecated, may be called due to https://issuetracker.google.com/issues/138321382
-                logE(TAG, "Unexpected TextToSpeech error")
+                logE("Unexpected TextToSpeech error", LOG_CATEGORY)
                 donePlaying()
             }
 
             override fun onError(utteranceId: String?, errorCode: Int) {
-                logE(TAG, "TextToSpeech error: $errorCode")
+                logE("TextToSpeech error: $errorCode", LOG_CATEGORY)
                 donePlaying()
             }
 
@@ -162,7 +162,7 @@ internal class VoiceInstructionsTextPlayer(
 
     private companion object {
 
-        private const val TAG = "MbxTextPlayer"
+        private const val LOG_CATEGORY = "VoiceInstructionsTextPlayer"
         private const val LANGUAGE_NOT_SUPPORTED = "Language is not supported"
         private const val DEFAULT_UTTERANCE_ID = "default_id"
         private const val DEFAULT_VOLUME_LEVEL = 1.0f

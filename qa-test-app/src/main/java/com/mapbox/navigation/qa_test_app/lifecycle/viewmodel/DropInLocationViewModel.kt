@@ -51,8 +51,8 @@ class DropInLocationViewModel : ViewModel() {
                 }
                 override fun onFailure(exception: Exception) {
                     logE(
-                        "MbxDropInLocationObserver",
-                        "Failed to get immediate location exception=$exception"
+                        "Failed to get immediate location exception=$exception",
+                        "DropInLocationViewModel"
                     )
                 }
             })

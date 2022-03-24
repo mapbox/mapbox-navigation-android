@@ -52,8 +52,8 @@ class ReplayRouteMapper @JvmOverloads constructor(
         val usesPolyline6 = geometries?.contains(DirectionsCriteria.GEOMETRY_POLYLINE6) ?: false
         if (!usesPolyline6) {
             logW(
-                TAG,
-                "Make sure that the route's geometry is encoded with polyline6'"
+                "Make sure that the route's geometry is encoded with polyline6'",
+                LOG_CATEGORY
             )
         }
         directionsRoute.geometry() ?: return emptyList()
@@ -120,7 +120,7 @@ class ReplayRouteMapper @JvmOverloads constructor(
     }
 
     companion object {
-        private const val TAG = "MbxReplayRouteMapper"
+        private const val LOG_CATEGORY = "ReplayRouteMapper"
         private const val REPLAY_ROUTE_ACCURACY_HORIZONTAL = 3.0
 
         /**

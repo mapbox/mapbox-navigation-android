@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.Logger
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
@@ -11,7 +12,6 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logI
-import com.mapbox.navigation.utils.internal.logW
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -144,7 +144,7 @@ class RouteRefreshControllerTest {
 
         verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
         verify(exactly = 1) {
-            logW(RouteRefreshController.TAG, any())
+            Logger.w(any(), any())
         }
     }
 
@@ -285,8 +285,8 @@ class RouteRefreshControllerTest {
         routeRefreshController.stop()
 
         verify(exactly = 1) {
-            logI(RouteRefreshController.TAG, routeDiff1)
-            logI(RouteRefreshController.TAG, routeDiff2)
+            logI(routeDiff1, RouteRefreshController.LOG_CATEGORY)
+            logI(routeDiff2, RouteRefreshController.LOG_CATEGORY)
         }
     }
 
@@ -303,7 +303,7 @@ class RouteRefreshControllerTest {
         routeRefreshController.stop()
 
         verify(exactly = 1) {
-            logI(RouteRefreshController.TAG, "No changes to route annotations")
+            logI("No changes to route annotations", RouteRefreshController.LOG_CATEGORY)
         }
     }
 

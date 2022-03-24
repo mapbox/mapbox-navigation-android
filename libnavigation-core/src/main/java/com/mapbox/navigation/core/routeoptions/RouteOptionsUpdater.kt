@@ -12,7 +12,7 @@ import com.mapbox.navigation.utils.internal.logE
 import kotlin.math.min
 
 private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
-private const val TAG = "MbxRouteOptionsProvider"
+private const val LOG_CATEGORY = "RouteOptionsUpdater"
 
 /**
  * Updater is used for *Reroute* and *Route Alternatives* flow.
@@ -37,7 +37,7 @@ class RouteOptionsUpdater {
         if (routeOptions == null || routeProgress == null || locationMatcherResult == null) {
             val msg = "Cannot combine RouteOptions, invalid inputs. routeOptions, " +
                 "routeProgress and locationMatcherResult cannot be null"
-            logE(TAG, msg)
+            logE(msg, LOG_CATEGORY)
             return RouteOptionsResult.Error(Throwable(msg))
         }
 
@@ -52,7 +52,7 @@ class RouteOptionsUpdater {
                 locationMatcherResult=$locationMatcherResult
                 routeProgress=$routeProgress
             """.trimIndent()
-            logE(TAG, msg)
+            logE(msg, LOG_CATEGORY)
             return RouteOptionsResult.Error(Throwable(msg))
         }
 
@@ -148,9 +148,9 @@ class RouteOptionsUpdater {
             optionsBuilder.arriveBy(null)
             optionsBuilder.departAt(null)
         } catch (e: Exception) {
-            logE(TAG, "routeOptions=[$routeOptions]")
-            logE(TAG, "locationMatcherResult=[$locationMatcherResult]")
-            logE(TAG, "routeProgress=[$routeProgress]")
+            logE("routeOptions=[$routeOptions]", LOG_CATEGORY)
+            logE("locationMatcherResult=[$locationMatcherResult]", LOG_CATEGORY)
+            logE("routeProgress=[$routeProgress]", LOG_CATEGORY)
             throw e
         }
 
