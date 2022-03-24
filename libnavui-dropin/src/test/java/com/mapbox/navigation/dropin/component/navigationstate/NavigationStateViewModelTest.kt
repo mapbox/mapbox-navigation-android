@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.component.navigationstate
 
+import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.testing.MainCoroutineRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -24,7 +25,7 @@ class NavigationStateViewModelTest {
         val job = launch {
             viewModel.state.toList(results)
         }
-        val expected = listOf(NavigationState.Empty)
+        val expected = listOf(NavigationState.FreeDrive)
         viewModel.consumeAction(flowOf(action))
 
         assertEquals(expected, results)
@@ -39,7 +40,7 @@ class NavigationStateViewModelTest {
         val job = launch {
             viewModel.state.toList(results)
         }
-        val expected = listOf(NavigationState.Empty, NavigationState.FreeDrive)
+        val expected = listOf(NavigationState.FreeDrive)
         viewModel.consumeAction(flowOf(action))
 
         assertEquals(expected, results)
@@ -54,7 +55,7 @@ class NavigationStateViewModelTest {
         val job = launch {
             viewModel.state.toList(results)
         }
-        val expected = listOf(NavigationState.Empty, NavigationState.RoutePreview)
+        val expected = listOf(NavigationState.FreeDrive, NavigationState.RoutePreview)
         viewModel.consumeAction(flowOf(action))
 
         assertEquals(expected, results)
@@ -69,7 +70,7 @@ class NavigationStateViewModelTest {
         val job = launch {
             viewModel.state.toList(results)
         }
-        val expected = listOf(NavigationState.Empty, NavigationState.ActiveNavigation)
+        val expected = listOf(NavigationState.FreeDrive, NavigationState.ActiveNavigation)
         viewModel.consumeAction(flowOf(action))
 
         assertEquals(expected, results)
@@ -84,7 +85,7 @@ class NavigationStateViewModelTest {
         val job = launch {
             viewModel.state.toList(results)
         }
-        val expected = listOf(NavigationState.Empty, NavigationState.Arrival)
+        val expected = listOf(NavigationState.FreeDrive, NavigationState.Arrival)
         viewModel.consumeAction(flowOf(action))
 
         assertEquals(expected, results)

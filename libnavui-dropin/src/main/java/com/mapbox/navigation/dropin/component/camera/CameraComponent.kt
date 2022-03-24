@@ -6,8 +6,8 @@ import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.location.LocationViewModel
+import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
-import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.extensions.flowNavigationCameraState
 import com.mapbox.navigation.dropin.extensions.flowRouteProgress
 import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated

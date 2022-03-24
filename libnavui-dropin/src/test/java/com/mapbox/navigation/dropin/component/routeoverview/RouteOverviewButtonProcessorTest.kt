@@ -1,6 +1,6 @@
 package com.mapbox.navigation.dropin.component.routeoverview
 
-import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
+import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -11,7 +11,7 @@ class RouteOverviewButtonProcessorTest {
     @Test
     fun processVisibilityState_empty() {
         val result = RouteOverviewButtonProcessor.ProcessVisibilityState(
-            NavigationState.Empty,
+            NavigationState.FreeDrive,
             NavigationCameraState.IDLE
         ).process()
 

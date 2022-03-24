@@ -2,12 +2,14 @@ package com.mapbox.navigation.dropin.component.audioguidance
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.component.navigation.NavigationState
+import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.lifecycle.UIViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 sealed class AudioAction {
@@ -22,6 +24,7 @@ sealed class AudioAction {
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AudioGuidanceViewModel(
+    val navigationStateViewModel: NavigationStateViewModel,
     default: AudioGuidanceState = AudioGuidanceState()
 ) : UIViewModel<AudioGuidanceState, AudioAction>(default) {
 
@@ -43,13 +46,20 @@ class AudioGuidanceViewModel(
 
         val audioGuidanceApi = AudioGuidanceApi.create(mapboxNavigation, AudioGuidanceServices())
         mainJobControl.scope.launch {
-            state.map { it.isMuted }.flatMapLatest { isMuted ->
-                if (isMuted) {
-                    emptyFlow()
-                } else {
+            flowSpeakInstructions().collect { speakInstructions ->
+                if (speakInstructions) {
                     audioGuidanceApi.speakVoiceInstructions()
+                } else {
+                    emptyFlow()
                 }
-            }.collect()
+            }
         }
+    }
+
+    private fun flowSpeakInstructions(): Flow<Boolean> = combine(
+        navigationStateViewModel.state, state
+    ) { navigationState, audioGuidanceState ->
+        navigationState is NavigationState.ActiveNavigation &&
+            !audioGuidanceState.isMuted
     }
 }

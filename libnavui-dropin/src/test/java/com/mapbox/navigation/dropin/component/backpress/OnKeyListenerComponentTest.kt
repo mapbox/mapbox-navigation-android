@@ -3,11 +3,11 @@ package com.mapbox.navigation.dropin.component.backpress
 import android.view.KeyEvent
 import android.view.View
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
 import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
+import com.mapbox.navigation.dropin.component.navigation.NavigationState
+import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
-import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import io.mockk.Runs
@@ -24,21 +24,19 @@ import org.junit.Test
 class OnKeyListenerComponentTest {
 
     private val mockNavigationStateViewModel: NavigationStateViewModel = mockk(relaxed = true)
-    private val mockRoutesViewModel: RoutesViewModel = mockk(relaxed = true)
     private val mockDestinationViewModel: DestinationViewModel = mockk(relaxed = true)
-    private val context: DropInNavigationViewContext = mockk(relaxed = true) {
-        every { viewModel } returns mockk {
-            every { navigationStateViewModel } returns mockNavigationStateViewModel
-            every { routesViewModel } returns mockRoutesViewModel
-            every { destinationViewModel } returns mockDestinationViewModel
-        }
-    }
+    private val mockRoutesViewModel: RoutesViewModel = mockk(relaxed = true)
     private val slotOnKeyListener = slot<View.OnKeyListener>()
     private val view: View = mockk(relaxed = true) {
         every { setOnKeyListener(capture(slotOnKeyListener)) } just Runs
     }
 
-    private val onKeyListenerComponent = OnKeyListenerComponent(context, view)
+    private val onKeyListenerComponent = OnKeyListenerComponent(
+        mockNavigationStateViewModel,
+        mockDestinationViewModel,
+        mockRoutesViewModel,
+        view,
+    )
 
     @Test
     fun `onAttached with set focus and setOnKeyListener`() {
@@ -60,12 +58,9 @@ class OnKeyListenerComponentTest {
     }
 
     @Test
-    fun `back press is not handled when in FreeDrive state without destination`() {
+    fun `back press during FreeDrive is mot handled`() {
         every { mockNavigationStateViewModel.state } returns MutableStateFlow(
             NavigationState.FreeDrive
-        )
-        every { mockDestinationViewModel.state } returns MutableStateFlow(
-            mockk { every { destination } returns null }
         )
 
         onKeyListenerComponent.onAttached(mockk())
@@ -75,23 +70,52 @@ class OnKeyListenerComponentTest {
     }
 
     @Test
-    fun `back press will set destination to null when in FreeDrive with a destination`() {
+    fun `back press during DestinationPreview is handled`() {
         every { mockNavigationStateViewModel.state } returns MutableStateFlow(
-            NavigationState.FreeDrive
-        )
-        every { mockDestinationViewModel.state } returns MutableStateFlow(
-            mockk { every { destination } returns mockk() }
+            NavigationState.DestinationPreview
         )
 
         onKeyListenerComponent.onAttached(mockk())
         val result = slotOnKeyListener.captured.triggerBackPressed()
 
-        verify { mockDestinationViewModel.invoke(DestinationAction.SetDestination(null)) }
         assertTrue(result)
     }
 
     @Test
-    fun `back press will set routes to empty when in RoutePreview`() {
+    fun `back press during DestinationPreview moves to FreeDrive`() {
+        every { mockNavigationStateViewModel.state } returns MutableStateFlow(
+            NavigationState.DestinationPreview
+        )
+
+        onKeyListenerComponent.onAttached(mockk())
+        val result = slotOnKeyListener.captured.triggerBackPressed()
+
+        verify {
+            mockNavigationStateViewModel.invoke(
+                NavigationStateAction.Update(NavigationState.FreeDrive)
+            )
+        }
+        assertTrue(result)
+    }
+
+    @Test
+    fun `back press during DestinationPreview will SetDestination to null`() {
+        every { mockNavigationStateViewModel.state } returns MutableStateFlow(
+            NavigationState.DestinationPreview
+        )
+
+        onKeyListenerComponent.onAttached(mockk())
+        slotOnKeyListener.captured.triggerBackPressed()
+
+        verify {
+            mockDestinationViewModel.invoke(
+                DestinationAction.SetDestination(null)
+            )
+        }
+    }
+
+    @Test
+    fun `back press during RoutePreview is handled`() {
         every { mockNavigationStateViewModel.state } returns MutableStateFlow(
             NavigationState.RoutePreview
         )
@@ -99,12 +123,44 @@ class OnKeyListenerComponentTest {
         onKeyListenerComponent.onAttached(mockk())
         val result = slotOnKeyListener.captured.triggerBackPressed()
 
-        verify { mockRoutesViewModel.invoke(RoutesAction.SetRoutes(emptyList(), 0)) }
         assertTrue(result)
     }
 
     @Test
-    fun `back press will stop navigation to empty when in ActiveNavigation`() {
+    fun `back press during RoutePreview moves to DestinationPreview`() {
+        every { mockNavigationStateViewModel.state } returns MutableStateFlow(
+            NavigationState.RoutePreview
+        )
+
+        onKeyListenerComponent.onAttached(mockk())
+        val result = slotOnKeyListener.captured.triggerBackPressed()
+
+        verify {
+            mockNavigationStateViewModel.invoke(
+                NavigationStateAction.Update(NavigationState.DestinationPreview)
+            )
+        }
+        assertTrue(result)
+    }
+
+    @Test
+    fun `back press during RoutePreview will SetRoutes to null`() {
+        every { mockNavigationStateViewModel.state } returns MutableStateFlow(
+            NavigationState.RoutePreview
+        )
+
+        onKeyListenerComponent.onAttached(mockk())
+        slotOnKeyListener.captured.triggerBackPressed()
+
+        verify {
+            mockRoutesViewModel.invoke(
+                RoutesAction.SetRoutes(emptyList())
+            )
+        }
+    }
+
+    @Test
+    fun `back press during ActiveNavigation is handled`() {
         every { mockNavigationStateViewModel.state } returns MutableStateFlow(
             NavigationState.ActiveNavigation
         )
@@ -112,12 +168,28 @@ class OnKeyListenerComponentTest {
         onKeyListenerComponent.onAttached(mockk())
         val result = slotOnKeyListener.captured.triggerBackPressed()
 
-        verify { mockRoutesViewModel.invoke(RoutesAction.StopNavigation) }
         assertTrue(result)
     }
 
     @Test
-    fun `back press will stop navigation to empty when in Arrival`() {
+    fun `back press during ActiveNavigation moves to RoutePreview`() {
+        every { mockNavigationStateViewModel.state } returns MutableStateFlow(
+            NavigationState.ActiveNavigation
+        )
+
+        onKeyListenerComponent.onAttached(mockk())
+        val result = slotOnKeyListener.captured.triggerBackPressed()
+
+        verify {
+            mockNavigationStateViewModel.invoke(
+                NavigationStateAction.Update(NavigationState.RoutePreview)
+            )
+        }
+        assertTrue(result)
+    }
+
+    @Test
+    fun `back press during Arrival is handled`() {
         every { mockNavigationStateViewModel.state } returns MutableStateFlow(
             NavigationState.Arrival
         )
@@ -125,7 +197,23 @@ class OnKeyListenerComponentTest {
         onKeyListenerComponent.onAttached(mockk())
         val result = slotOnKeyListener.captured.triggerBackPressed()
 
-        verify { mockRoutesViewModel.invoke(RoutesAction.StopNavigation) }
+        assertTrue(result)
+    }
+
+    @Test
+    fun `back press during Arrival moves to FreeDrive`() {
+        every { mockNavigationStateViewModel.state } returns MutableStateFlow(
+            NavigationState.Arrival
+        )
+
+        onKeyListenerComponent.onAttached(mockk())
+        val result = slotOnKeyListener.captured.triggerBackPressed()
+
+        verify {
+            mockNavigationStateViewModel.invoke(
+                NavigationStateAction.Update(NavigationState.FreeDrive)
+            )
+        }
         assertTrue(result)
     }
 

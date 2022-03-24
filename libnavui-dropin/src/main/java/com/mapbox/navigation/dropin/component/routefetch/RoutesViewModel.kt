@@ -1,6 +1,5 @@
 package com.mapbox.navigation.dropin.component.routefetch
 
-import android.util.Log
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -11,159 +10,94 @@ import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.component.destination.DestinationAction
-import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
-import com.mapbox.navigation.dropin.component.location.LocationViewModel
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
-import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
+import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
 import com.mapbox.navigation.dropin.lifecycle.UIViewModel
-import com.mapbox.navigation.dropin.model.Destination
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal class RoutesViewModel(
-    private val navigationStateViewModel: NavigationStateViewModel,
-    private val locationViewModel: LocationViewModel,
-    private val destinationViewModel: DestinationViewModel,
-    initialState: RoutesState = RoutesState()
-) : UIViewModel<RoutesState, RoutesAction>(initialState) {
+internal class RoutesViewModel : UIViewModel<RoutesState, RoutesAction>(RoutesState.Empty) {
 
-    private var routeRequestId: Long? = null
+    override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        super.onAttached(mapboxNavigation)
+
+        mainJobControl.scope.launch {
+            mapboxNavigation.flowRoutesUpdated().collect { result ->
+                // Empty is ignored on purpose. When the action is processed
+                // it will be converted to RoutesState.Empty.
+                invoke(RoutesAction.Ready(result.navigationRoutes))
+            }
+        }
+    }
 
     override fun process(
         mapboxNavigation: MapboxNavigation,
         state: RoutesState,
         action: RoutesAction
     ): RoutesState {
-        when (action) {
-            is RoutesAction.FetchAndSetRoute -> {
-                val destination = destinationViewModel.state.value.destination
-                fetchAndSetRoute(mapboxNavigation, destination)
-            }
+        return when (action) {
             is RoutesAction.FetchPoints -> {
                 val routeOptions = getDefaultOptions(mapboxNavigation, action.points)
-                fetchRoute(routeOptions, mapboxNavigation)
+                val requestId = mapboxNavigation.fetchRoute(routeOptions)
+                RoutesState.Fetching(requestId)
             }
             is RoutesAction.FetchOptions -> {
-                fetchRoute(action.options, mapboxNavigation)
+                val requestId = mapboxNavigation.fetchRoute(action.options)
+                RoutesState.Fetching(requestId)
             }
             is RoutesAction.SetRoutes -> {
-                mapboxNavigation.setNavigationRoutes(action.routes, action.legIndex)
-            }
-            is RoutesAction.StartNavigation -> {
-                if (mapboxNavigation.getNavigationRoutes().isEmpty()) {
-                    // fetching route if started from free drive
-                    val destination = destinationViewModel.state.value.destination
-                    fetchAndSetRoute(mapboxNavigation, destination) {
-                        startNavigation(mapboxNavigation)
-                    }
+                mapboxNavigation.setNavigationRoutes(action.routes)
+                if (action.routes.isEmpty()) {
+                    RoutesState.Empty
                 } else {
-                    startNavigation(mapboxNavigation)
+                    RoutesState.Ready(action.routes)
                 }
             }
-            is RoutesAction.StopNavigation -> {
-                stopNavigation(mapboxNavigation)
-                return state.copy(navigationStarted = false)
-            }
-            is RoutesAction.DidStartNavigation -> {
-                return state.copy(navigationStarted = true)
-            }
-        }
-        return state
-    }
-
-    override fun onAttached(mapboxNavigation: MapboxNavigation) {
-        super.onAttached(mapboxNavigation)
-
-        mainJobControl.scope.launch {
-            destinationViewModel.state.map { it.destination }.collect { destination ->
-                if (shouldReloadRoute(destination)) {
-                    fetchAndSetRoute(mapboxNavigation, destination)
+            is RoutesAction.Ready -> {
+                if (action.routes.isEmpty()) {
+                    RoutesState.Empty
+                } else {
+                    RoutesState.Ready(action.routes)
                 }
+            }
+            is RoutesAction.Canceled -> {
+                RoutesState.Canceled(action.routeOptions, action.routerOrigin)
+            }
+            is RoutesAction.Failed -> {
+                RoutesState.Failed(action.reasons, action.routeOptions)
             }
         }
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         super.onDetached(mapboxNavigation)
-        routeRequestId?.let {
-            mapboxNavigation.cancelRouteRequest(it)
-        }
-    }
-
-    @Suppress("MissingPermission")
-    private fun startNavigation(mapboxNavigation: MapboxNavigation) {
-        with(mapboxNavigation) {
-            // Temporarily trigger replay here
-            mapboxReplayer.clearEvents()
-            resetTripSession()
-            mapboxReplayer.pushRealLocation(navigationOptions.applicationContext, 0.0)
-            mapboxReplayer.play()
-            startReplayTripSession()
-        }
-        invoke(RoutesAction.DidStartNavigation)
-    }
-
-    private fun stopNavigation(mapboxNavigation: MapboxNavigation) {
-        with(mapboxNavigation) {
-            setNavigationRoutes(listOf())
-            destinationViewModel.invoke(DestinationAction.SetDestination(null))
-            // Stop replay here
-            mapboxReplayer.clearEvents()
-            resetTripSession()
-        }
-    }
-
-    private fun shouldReloadRoute(
-        newDestination: Destination?
-    ) = newDestination != null &&
-        navigationStateViewModel.state.value == NavigationState.RoutePreview
-
-    private fun fetchAndSetRoute(
-        mapboxNavigation: MapboxNavigation,
-        destination: Destination?,
-        cb: (() -> Unit)? = null
-    ) {
-        val from = locationViewModel.lastPoint
-        val to = destination?.point
-        if (from != null && to != null) {
-            val routeOptions = getDefaultOptions(mapboxNavigation, listOf(from, to))
-            fetchRoute(routeOptions, mapboxNavigation) {
-                cb?.invoke()
+        when (val currentState = state.value) {
+            is RoutesState.Fetching -> {
+                mapboxNavigation.cancelRouteRequest(currentState.requestId)
             }
         }
     }
 
-    private fun fetchRoute(
-        options: RouteOptions,
-        mapboxNavigation: MapboxNavigation,
-        cb: (() -> Unit)? = null
-    ) {
-        routeRequestId = mapboxNavigation.requestRoutes(
+    private fun MapboxNavigation.fetchRoute(options: RouteOptions): Long {
+        return requestRoutes(
             options,
             object : NavigationRouterCallback {
                 override fun onRoutesReady(
                     routes: List<NavigationRoute>,
                     routerOrigin: RouterOrigin
                 ) {
-                    mapboxNavigation.setNavigationRoutes(routes)
-                    cb?.invoke()
+                    invoke(RoutesAction.SetRoutes(routes))
                 }
 
                 override fun onFailure(
                     reasons: List<RouterFailure>,
                     routeOptions: RouteOptions
                 ) {
-                    Log.e(TAG, "Failed to fetch route with reason(s):")
-                    reasons.forEach {
-                        Log.e(TAG, it.message)
-                    }
+                    invoke(RoutesAction.Failed(reasons, routeOptions))
                 }
 
                 override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
-                    // no impl
+                    invoke(RoutesAction.Canceled(routeOptions, routerOrigin))
                 }
             }
         )
@@ -180,9 +114,5 @@ internal class RoutesViewModel(
             .coordinatesList(points)
             .alternatives(true)
             .build()
-    }
-
-    private companion object {
-        private val TAG = RoutesViewModel::class.java.simpleName
     }
 }

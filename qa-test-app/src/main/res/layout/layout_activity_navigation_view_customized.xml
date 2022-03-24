@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
@@ -12,35 +11,54 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:accessToken="@string/mapbox_access_token"
-        app:layout_constraintBottom_toTopOf="@+id/toggleCustomViews"
+        app:layout_constraintBottom_toTopOf="@+id/customizationLayout"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/toggleCustomViews"
-        android:layout_width="0dp"
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/customizationLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginBottom="4dp"
-        app:layout_constraintStart_toStartOf="parent"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/toggleTheme"
-        android:text="toggle custom views"
-        />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/toggleTheme"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
-        android:layout_marginBottom="4dp"
-        android:text="Toggle Theme"
-        android:textAllCaps="true"
-        android:padding="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/toggleCustomViews"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/toggleCustomViews"
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="show custom views"
+            android:textAllCaps="true"
+            />
 
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/toggleReplay"
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="enable replay"
+            android:textAllCaps="true"
+            />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/toggleTheme"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
+            android:text="Toggle Theme"
+            android:textAllCaps="true"
+            android:padding="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/toggleCustomViews"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,6 @@
 package com.mapbox.navigation.dropin.component.routeoverview
 
-import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
+import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 
 sealed class RouteOverviewButtonAction {

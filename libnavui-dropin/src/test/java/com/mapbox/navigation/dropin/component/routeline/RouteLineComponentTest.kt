@@ -188,18 +188,18 @@ class RouteLineComponentTest {
 
     @Test
     fun selectRouteTest() {
-        val route1 = TestingUtil.loadRoute("short_route.json")
-        val route2 = TestingUtil.loadRoute("multileg_route.json")
+        val route1 = TestingUtil.loadRoute("short_route.json").toNavigationRoute()
+        val route2 = TestingUtil.loadRoute("multileg_route.json").toNavigationRoute()
         val resultRoutesSlot = slot<RoutesAction.SetRoutes>()
         val mockResponse = mockk<ClosestRouteValue> {
-            every { route } returns route2
+            every { navigationRoute } returns route2
         }
         val consumerSlot =
             slot<MapboxNavigationConsumer<Expected<RouteNotFound, ClosestRouteValue>>>()
         val clickSlot = slot<OnMapClickListener>()
         val mockApi = mockk<MapboxRouteLineApi>(relaxed = true) {
             every { findClosestRoute(any(), any(), any(), capture(consumerSlot)) } returns Unit
-            every { getRoutes() } returns listOf(route1, route2)
+            every { getNavigationRoutes() } returns listOf(route1, route2)
         }
         val point = Point.fromLngLat(-119.27, 84.85)
         RouteLineComponent(mockMapView, options, routesViewModel, mockApi)
@@ -211,8 +211,8 @@ class RouteLineComponentTest {
         consumerSlot.captured.accept(ExpectedFactory.createValue(mockResponse))
         verify { mockApi.findClosestRoute(point, mockMap, any(), any()) }
         coVerify { routesViewModel.invoke(capture(resultRoutesSlot)) }
-        assertEquals(route2.toNavigationRoute(), resultRoutesSlot.captured.routes.first())
-        assertEquals(route1.toNavigationRoute(), resultRoutesSlot.captured.routes[1])
+        assertEquals(route2, resultRoutesSlot.captured.routes.first())
+        assertEquals(route1, resultRoutesSlot.captured.routes[1])
     }
 
     @Test

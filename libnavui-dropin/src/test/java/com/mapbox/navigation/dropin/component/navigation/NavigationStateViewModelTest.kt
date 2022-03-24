@@ -1,7 +1,6 @@
 package com.mapbox.navigation.dropin.component.navigation
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi

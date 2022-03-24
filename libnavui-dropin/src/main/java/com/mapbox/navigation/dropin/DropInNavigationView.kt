@@ -110,8 +110,13 @@ class DropInNavigationView @JvmOverloads constructor(
          * Single point of entry for the Mapbox Navigation View.
          */
         attachCreated(
-            OnKeyListenerComponent(navigationContext, this),
             MapCoordinator(navigationContext, binding),
+            OnKeyListenerComponent(
+                navigationContext.viewModel.navigationStateViewModel,
+                navigationContext.viewModel.destinationViewModel,
+                navigationContext.viewModel.routesViewModel,
+                this,
+            ),
             ManeuverCoordinator(navigationContext, binding.guidanceLayout),
             InfoPanelCoordinator(
                 navigationContext,

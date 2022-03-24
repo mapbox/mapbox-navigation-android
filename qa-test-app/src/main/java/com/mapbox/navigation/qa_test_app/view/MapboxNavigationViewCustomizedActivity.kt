@@ -13,9 +13,12 @@ import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
 import com.mapbox.navigation.dropin.binder.UIBinder
+import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction
+import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterViewModel
 import com.mapbox.navigation.dropin.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.qa_test_app.databinding.LayoutActivityNavigationViewCustomizedBinding
@@ -58,6 +61,7 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
             .build()
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = LayoutActivityNavigationViewCustomizedBinding.inflate(layoutInflater)
@@ -68,6 +72,7 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
         // This demonstrates that you can customize views at any time. You can also reset to
         // the default views.
         showCustomViews.observe(this) { showCustomViews ->
+            binding.toggleCustomViews.isChecked = showCustomViews
             if (showCustomViews) {
                 binding.navigationView.customizeViewBinders {
                     speedLimit = CustomSpeedLimitViewBinder()
@@ -108,6 +113,26 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
 
         binding.navigationView.customizeViewOptions {
             routeArrowOptions = this@MapboxNavigationViewCustomizedActivity.routeArrowOptions
+        }
+
+        // This is not the intended long term solution. We have not yet decided how
+        // to expose view model actions. Considering that we need a navigationView to be created
+        // before we can interact with the view models, we will probably prefer something like this:
+        //       binding.navigationView.api.enableReplay();
+        // TODO Make a ticket with link to list of public api needs
+        val tripSessionStarterViewModel = MapboxNavigationApp
+            .getObserver(TripSessionStarterViewModel::class)
+        binding.toggleReplay.isChecked = tripSessionStarterViewModel.state.value.isReplayEnabled
+        binding.toggleReplay.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                tripSessionStarterViewModel.invoke(
+                    TripSessionStarterAction.EnableReplayTripSession
+                )
+            } else {
+                tripSessionStarterViewModel.invoke(
+                    TripSessionStarterAction.EnableTripSession
+                )
+            }
         }
     }
 

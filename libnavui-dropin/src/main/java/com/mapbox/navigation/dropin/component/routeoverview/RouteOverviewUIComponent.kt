@@ -4,7 +4,7 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.dropin.component.UIComponent
-import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
+import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.util.MapboxDropInUtils.toVisibility
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver
