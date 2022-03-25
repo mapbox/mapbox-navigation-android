@@ -128,6 +128,7 @@ class NavigatorMapperTest {
                 }
                 every { layer } returns null
                 every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
+                every { isFallback } returns false
             }
         )
         val expected = LocationMatcherResult(
@@ -143,7 +144,8 @@ class NavigatorMapperTest {
             ),
             roadEdgeMatchProbability = 1f,
             zLevel = null,
-            road = road
+            road = road,
+            isDegradedMapMatching = false
         )
 
         val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
@@ -170,6 +172,7 @@ class NavigatorMapperTest {
                 }
                 every { layer } returns null
                 every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
+                every { isFallback } returns false
             }
         )
         val expected = LocationMatcherResult(
@@ -185,7 +188,8 @@ class NavigatorMapperTest {
             ),
             roadEdgeMatchProbability = 1f,
             zLevel = null,
-            road = road
+            road = road,
+            isDegradedMapMatching = false
         )
 
         val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
@@ -195,7 +199,7 @@ class NavigatorMapperTest {
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     @Test
-    fun `location matcher result when off road`() {
+    fun `location matcher result when off road and degraded map matching`() {
         val road: Road = RoadFactory.buildRoadObject(navigationStatus)
         val tripStatus = TripStatus(
             route,
@@ -212,6 +216,7 @@ class NavigatorMapperTest {
                 }
                 every { layer } returns null
                 every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
+                every { isFallback } returns true
             }
         )
         val expected = LocationMatcherResult(
@@ -227,7 +232,8 @@ class NavigatorMapperTest {
             ),
             roadEdgeMatchProbability = 1f,
             zLevel = null,
-            road = road
+            road = road,
+            isDegradedMapMatching = true
         )
 
         val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
@@ -254,6 +260,7 @@ class NavigatorMapperTest {
                 }
                 every { layer } returns null
                 every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
+                every { isFallback } returns false
             }
         )
         val expected = LocationMatcherResult(
@@ -269,7 +276,8 @@ class NavigatorMapperTest {
             ),
             roadEdgeMatchProbability = 1f,
             zLevel = null,
-            road = road
+            road = road,
+            isDegradedMapMatching = false
         )
 
         val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
@@ -289,6 +297,7 @@ class NavigatorMapperTest {
             }
             every { layer } returns null
             every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
+            every { isFallback } returns false
         }
         val road: Road = RoadFactory.buildRoadObject(navigationStatus)
         val tripStatus = TripStatus(
@@ -308,7 +317,8 @@ class NavigatorMapperTest {
             ),
             roadEdgeMatchProbability = 0f,
             zLevel = null,
-            road = road
+            road = road,
+            isDegradedMapMatching = false
         )
 
         val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
@@ -335,6 +345,7 @@ class NavigatorMapperTest {
                 }
                 every { layer } returns 2
                 every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
+                every { isFallback } returns false
             }
         )
         val expected = LocationMatcherResult(
@@ -350,7 +361,8 @@ class NavigatorMapperTest {
             ),
             roadEdgeMatchProbability = 1f,
             zLevel = 2,
-            road = road
+            road = road,
+            isDegradedMapMatching = false
         )
 
         val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)

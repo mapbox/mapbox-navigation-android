@@ -807,9 +807,11 @@ package com.mapbox.navigation.core.trip.session {
     method public float getRoadEdgeMatchProbability();
     method public com.mapbox.navigation.base.speed.model.SpeedLimit? getSpeedLimit();
     method public Integer? getZLevel();
+    method public boolean isDegradedMapMatching();
     method public boolean isOffRoad();
     method public boolean isTeleport();
     property public final android.location.Location enhancedLocation;
+    property public final boolean isDegradedMapMatching;
     property public final boolean isOffRoad;
     property public final boolean isTeleport;
     property public final java.util.List<android.location.Location> keyPoints;
