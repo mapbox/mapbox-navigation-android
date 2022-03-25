@@ -9,6 +9,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 /**
@@ -37,31 +38,55 @@ open class UIComponent : MapboxNavigationObserver {
 }
 
 /**
- * Return UIComponent that gets re-created using [factory] when [value] changes.
+ * Return UIComponent that gets re-created using [factory] when [flow] changes.
+ */
+fun <T> reloadOnChange(
+    flow: Flow<T>,
+    factory: (T) -> UIComponent?
+): UIComponent =
+    ReloadingComponent(flow, factory)
+
+/**
+ * Return UIComponent that gets re-created using [factory] when either [flow1] or [flow2] changes.
+ */
+fun <T1, T2> reloadOnChange(
+    flow1: Flow<T1>,
+    flow2: Flow<T2>,
+    factory: (T1, T2) -> UIComponent?
+): UIComponent =
+    ReloadingComponent(combine(flow1, flow2) { v1, v2 -> v1 to v2 }) {
+        factory(it.first, it.second)
+    }
+
+/**
+ * High Order Component that observes [flow] changes and re-creates child component
+ * using [factory] function.
  *
- * eg.
+ * usage eg.
  * ```
- *   reloadOnChange(myFlowValue) { value ->
+ *   ReloadingComponent(myFlowValue) { value ->
  *      MyComponent(value)
  *   }
  * ```
  */
-fun <T> reloadOnChange(value: Flow<T>, factory: (value: T) -> UIComponent): UIComponent =
-    object : UIComponent() {
-        private var childComponent: UIComponent? = null
+class ReloadingComponent<T>(
+    private val flow: Flow<T>,
+    private val factory: (T) -> UIComponent?
+) : UIComponent() {
+    private var childComponent: UIComponent? = null
 
-        override fun onAttached(mapboxNavigation: MapboxNavigation) {
-            super.onAttached(mapboxNavigation)
-            value.observe {
-                childComponent?.onDetached(mapboxNavigation)
-                childComponent = factory(it)
-                childComponent?.onAttached(mapboxNavigation)
-            }
-        }
-
-        override fun onDetached(mapboxNavigation: MapboxNavigation) {
-            super.onDetached(mapboxNavigation)
+    override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        super.onAttached(mapboxNavigation)
+        flow.observe {
             childComponent?.onDetached(mapboxNavigation)
-            childComponent = null
+            childComponent = factory(it)
+            childComponent?.onAttached(mapboxNavigation)
         }
     }
+
+    override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        super.onDetached(mapboxNavigation)
+        childComponent?.onDetached(mapboxNavigation)
+        childComponent = null
+    }
+}

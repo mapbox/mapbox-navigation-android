@@ -2,8 +2,6 @@ package com.mapbox.navigation.dropin
 
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.binder.infopanel.InfoPanelTripProgressBinder
-import com.mapbox.navigation.dropin.component.maneuver.ManeuverViewBinder
-import com.mapbox.navigation.dropin.component.roadlabel.RoadNameViewBinder
 import com.mapbox.navigation.dropin.component.speedlimit.SpeedLimitViewBinder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,8 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 internal class NavigationUIBinders {
 
     private val _speedLimit: MutableStateFlow<UIBinder> = MutableStateFlow(SpeedLimitViewBinder())
-    private val _maneuver: MutableStateFlow<UIBinder> = MutableStateFlow(ManeuverViewBinder())
-    private val _roadName: MutableStateFlow<UIBinder> = MutableStateFlow(RoadNameViewBinder())
+    private val _maneuver: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
+    private val _roadName: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
     private val _infoPanelTripProgressBinder: MutableStateFlow<UIBinder> =
         MutableStateFlow(InfoPanelTripProgressBinder())
     private val _infoPanelHeaderBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
@@ -21,8 +19,8 @@ internal class NavigationUIBinders {
     private val _actionButtonsBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
 
     val speedLimit: StateFlow<UIBinder> get() = _speedLimit.asStateFlow()
-    val maneuver: StateFlow<UIBinder> get() = _maneuver.asStateFlow()
-    val roadName: StateFlow<UIBinder> get() = _roadName.asStateFlow()
+    val maneuver: StateFlow<UIBinder?> get() = _maneuver.asStateFlow()
+    val roadName: StateFlow<UIBinder?> get() = _roadName.asStateFlow()
     val infoPanelTripProgressBinder: StateFlow<UIBinder>
         get() = _infoPanelTripProgressBinder.asStateFlow()
     val infoPanelHeaderBinder: StateFlow<UIBinder?> get() = _infoPanelHeaderBinder.asStateFlow()
@@ -31,8 +29,8 @@ internal class NavigationUIBinders {
 
     fun applyCustomization(customization: ViewBinderCustomization) {
         customization.speedLimit?.also { _speedLimit.emitOrDefault(it, SpeedLimitViewBinder()) }
-        customization.maneuver?.also { _maneuver.emitOrDefault(it, ManeuverViewBinder()) }
-        customization.roadName?.also { _roadName.emitOrDefault(it, RoadNameViewBinder()) }
+        customization.maneuver?.also { _maneuver.emitOrNull(it) }
+        customization.roadName?.also { _roadName.emitOrNull(it) }
         customization.infoPanelTripProgressBinder?.also {
             _infoPanelTripProgressBinder.emitOrDefault(it, InfoPanelTripProgressBinder())
         }

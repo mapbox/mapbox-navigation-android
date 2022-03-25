@@ -1,12 +1,12 @@
 package com.mapbox.navigation.dropin.coordinator
 
-import android.content.res.Configuration
 import android.content.res.Resources
 import android.view.View
 import android.view.ViewGroup
 import androidx.transition.Scene
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
+import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.scalebar.scalebar
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -25,9 +25,11 @@ import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
 import com.mapbox.navigation.dropin.databinding.MapboxMapviewLayoutBinding
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.lifecycle.UICoordinator
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 internal class MapLayoutCoordinator(
     private val navigationViewContext: DropInNavigationViewContext,
@@ -36,6 +38,13 @@ internal class MapLayoutCoordinator(
 
     private val viewGroup = binding.mapViewLayout
     private val navigationStateViewModel = navigationViewContext.viewModel.navigationStateViewModel
+    private val mapStyleLoader = navigationViewContext.mapStyleLoader
+    private var reloadStyleJob: Job? = null
+
+    override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        super.onDetached(mapboxNavigation)
+        mapStyleLoader.mapboxMap = null
+    }
 
     override fun MapboxNavigation.flowViewBinders(): Flow<Binder<ViewGroup>> {
         return navigationViewContext.mapView
@@ -48,14 +57,10 @@ internal class MapLayoutCoordinator(
                     ).enter()
 
                     val binding = MapboxMapviewLayoutBinding.bind(viewGroup)
-                    val style = if (isNightModeEnabled()) {
-                        navigationViewContext.options.mapStyleUriNight.value
-                    } else {
-                        navigationViewContext.options.mapStyleUriDay.value
-                    }
-                    binding.mapView.getMapboxMap().loadStyleUri(style)
+                    initDefaultMap(binding.mapView.getMapboxMap())
                     binding.mapView
                 } else {
+                    initCustomMap(mapViewOverride.getMapboxMap())
                     viewGroup.removeAllViews()
                     viewGroup.addView(mapViewOverride)
                     mapViewOverride
@@ -72,12 +77,17 @@ internal class MapLayoutCoordinator(
             }
     }
 
-    private fun isNightModeEnabled(): Boolean {
-        return retrieveCurrentUiMode() == Configuration.UI_MODE_NIGHT_YES
+    private fun initDefaultMap(mapboxMap: MapboxMap) {
+        mapStyleLoader.mapboxMap = mapboxMap
+        mapStyleLoader.loadInitialStyle() // immediately load map style to avoid map flashing
+        reloadStyleJob = coroutineScope.launch {
+            mapStyleLoader.observeAndReloadNewStyles()
+        }
     }
 
-    private fun retrieveCurrentUiMode(): Int {
-        return viewGroup.resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)
+    private fun initCustomMap(mapboxMap: MapboxMap) {
+        reloadStyleJob?.cancel()
+        mapStyleLoader.mapboxMap = mapboxMap
     }
 }
 

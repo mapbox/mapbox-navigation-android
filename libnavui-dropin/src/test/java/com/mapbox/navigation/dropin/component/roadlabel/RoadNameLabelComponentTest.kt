@@ -2,6 +2,7 @@ package com.mapbox.navigation.dropin.component.roadlabel
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.bindgen.Expected
+import com.mapbox.maps.Style
 import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -23,6 +24,7 @@ import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -31,6 +33,15 @@ class RoadNameLabelComponentTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
+
+    lateinit var style: Style
+
+    @Before
+    fun setUp() {
+        style = mockk {
+            every { styleURI } returns NavigationStyles.NAVIGATION_DAY_STYLE
+        }
+    }
 
     @Test
     fun `onAttached renders location matcher results`() = coroutineRule.runBlockingTest {
@@ -44,7 +55,7 @@ class RoadNameLabelComponentTest {
             every { flowLocationMatcherResult() } returns flowOf(locationMaterResult)
         }
 
-        RoadNameLabelComponent(roadNameView).onAttached(mapboxNavigation)
+        RoadNameLabelComponent(roadNameView, style).onAttached(mapboxNavigation)
 
         verify { roadNameView.renderRoadName(mockRoad) }
         unmockkStatic("com.mapbox.navigation.dropin.extensions.MapboxNavigationEx")
@@ -82,7 +93,7 @@ class RoadNameLabelComponentTest {
             }
         }
 
-        RoadNameLabelComponent(roadNameView, routeShieldApi).onAttached(mapboxNavigation)
+        RoadNameLabelComponent(roadNameView, style, routeShieldApi).onAttached(mapboxNavigation)
 
         verify { roadNameView.renderRoadNameWith(shields) }
         unmockkStatic("com.mapbox.navigation.dropin.extensions.MapboxNavigationEx")

@@ -7,9 +7,11 @@ import android.os.Bundle
 import android.util.TypedValue
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import com.mapbox.geojson.Point
@@ -21,6 +23,7 @@ import com.mapbox.maps.MapInitOptions
 import com.mapbox.maps.MapOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.ResourceOptions
+import com.mapbox.maps.Style
 import com.mapbox.maps.TileStoreUsageMode
 import com.mapbox.maps.applyDefaultParams
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -46,7 +49,13 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.util.Locale
 
+class CustomizedViewModel : ViewModel() {
+    val showCustomViews = MutableLiveData(false)
+    val showCustomMapView = MutableLiveData(false)
+}
+
 class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
+    private val vm: CustomizedViewModel by viewModels()
 
     private val routeLineOptions: MapboxRouteLineOptions by lazy {
         MapboxRouteLineOptions.Builder(this)
@@ -66,9 +75,6 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
             .build()
     }
 
-    private val showCustomViews = MutableLiveData(true)
-    private val showCustomMapView = MutableLiveData(true)
-
     private val routeArrowOptions by lazy {
         RouteArrowOptions.Builder(this)
             .withAboveLayerId(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
@@ -86,7 +92,7 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
 
         // This demonstrates that you can customize views at any time. You can also reset to
         // the default views.
-        showCustomViews.observe(this) { showCustomViews ->
+        vm.showCustomViews.observe(this) { showCustomViews ->
             binding.toggleCustomViews.isChecked = showCustomViews
             if (showCustomViews) {
                 binding.navigationView.customizeViewBinders {
@@ -94,6 +100,8 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
                 }
                 binding.navigationView.customizeViewOptions {
                     routeLineOptions = this@MapboxNavigationViewCustomizedActivity.routeLineOptions
+                    mapStyleUriDay = Style.LIGHT
+                    mapStyleUriNight = Style.DARK
                 }
             } else {
                 // Reset defaults
@@ -102,11 +110,14 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
                 }
                 binding.navigationView.customizeViewOptions {
                     routeLineOptions = defaultRouteLineOptions(applicationContext)
+                    mapStyleUriDay = NavigationStyles.NAVIGATION_DAY_STYLE
+                    mapStyleUriNight = NavigationStyles.NAVIGATION_NIGHT_STYLE
                 }
             }
         }
-        binding.toggleCustomViews.setOnClickListener {
-            showCustomViews.value = showCustomViews.value?.not()
+
+        binding.toggleCustomViews.setOnCheckedChangeListener { buttonView, isChecked ->
+            vm.showCustomViews.value = isChecked
         }
 
         when (resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
@@ -151,7 +162,7 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
         }
 
         // Demonstrate map customization
-        showCustomMapView.observe(this) { showCustomMapView ->
+        vm.showCustomMapView.observe(this) { showCustomMapView ->
             binding.toggleCustomMap.isChecked = showCustomMapView
             if (showCustomMapView) {
                 binding.navigationView.customizeMapView(customMapViewFromCode(this))
@@ -159,8 +170,8 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
                 binding.navigationView.customizeMapView(null)
             }
         }
-        binding.toggleCustomMap.setOnClickListener {
-            showCustomMapView.value = showCustomMapView.value?.not()
+        binding.toggleCustomMap.setOnCheckedChangeListener { buttonView, isChecked ->
+            vm.showCustomMapView.value = isChecked
         }
     }
 

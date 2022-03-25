@@ -25,7 +25,10 @@ internal class FreeDriveMapBinder(
                 value,
                 navigationViewContext.viewModel.locationViewModel,
             ),
-            reloadOnChange(navigationViewContext.options.routeLineOptions) { lineOptions ->
+            reloadOnChange(
+                navigationViewContext.mapStyleLoader.loadedMapStyle,
+                navigationViewContext.options.routeLineOptions
+            ) { _, lineOptions ->
                 RouteLineComponent(
                     value,
                     lineOptions,
