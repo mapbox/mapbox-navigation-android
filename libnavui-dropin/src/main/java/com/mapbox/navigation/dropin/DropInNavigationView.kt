@@ -101,8 +101,8 @@ class DropInNavigationView @JvmOverloads constructor(
         }
 
         /**
-         * Attach the lifecycle to mapbox navigation. This ensures that all
-         * MapboxNavigationObservers will be attached.
+         * Attach the lifecycle to mapbox navigation. This gives MapboxNavigationApp a lifecycle
+         * that allows it to determine the foreground and background state.
          */
         MapboxNavigationApp.attach(this)
 
