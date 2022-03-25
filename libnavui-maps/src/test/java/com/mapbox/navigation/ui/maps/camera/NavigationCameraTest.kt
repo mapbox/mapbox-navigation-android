@@ -208,23 +208,23 @@ class NavigationCameraTest {
     }
 
     @Test
-    fun `when following request canceled, state changes to IDLE`() {
+    fun `when following request canceled, state does not changes to IDLE`() {
         navigationCamera.requestNavigationCameraToFollowing()
 
         internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationCancel(followingAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
-        assertEquals(NavigationCameraState.IDLE, navigationCamera.state)
+        assertEquals(NavigationCameraState.TRANSITION_TO_FOLLOWING, navigationCamera.state)
     }
 
     @Test
-    fun `when overview request canceled, state changes to IDLE`() {
+    fun `when overview request canceled, state does not changes to IDLE`() {
         navigationCamera.requestNavigationCameraToOverview()
 
         internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationCancel(overviewAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
-        assertEquals(NavigationCameraState.IDLE, navigationCamera.state)
+        assertEquals(NavigationCameraState.TRANSITION_TO_OVERVIEW, navigationCamera.state)
     }
 
     @Test
@@ -708,7 +708,6 @@ class NavigationCameraTest {
         verifySequence {
             listener.onNavigationCameraStateChanged(NavigationCameraState.IDLE)
             listener.onNavigationCameraStateChanged(NavigationCameraState.TRANSITION_TO_FOLLOWING)
-            listener.onNavigationCameraStateChanged(NavigationCameraState.IDLE)
         }
     }
 
@@ -741,7 +740,6 @@ class NavigationCameraTest {
         verifySequence {
             listener.onNavigationCameraStateChanged(NavigationCameraState.IDLE)
             listener.onNavigationCameraStateChanged(NavigationCameraState.TRANSITION_TO_OVERVIEW)
-            listener.onNavigationCameraStateChanged(NavigationCameraState.IDLE)
         }
     }
 

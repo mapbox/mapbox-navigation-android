@@ -77,10 +77,9 @@ import java.util.concurrent.CopyOnWriteArraySet
  * executing, listening for cancellation, adjusting states, etc.
  *
  * ## Gestures and other camera interactions
- * When [FOLLOWING] or [OVERVIEW] states are engaged, the `NavigationCamera` assumes full ownership
- * of the [CameraAnimationsPlugin]. This means that if any other camera transition is scheduled
- * outside of the `NavigationCamera`’s context, there might be side-effects or glitches.
- * Consequently, if you want to perform other camera transitions,
+ * The `NavigationCamera` assumes full ownership of the [CameraAnimationsPlugin]. This means that
+ * if any other camera transition is scheduled outside of the `NavigationCamera`’s context, there
+ * might be side-effects or glitches. Consequently, if you want to perform other camera transitions,
  * first call [requestNavigationCameraToIdle], and only after that perform the desired transition.
  *
  * Alternatively, you can use one of the default implementations
@@ -163,7 +162,7 @@ class NavigationCamera(
 
     /**
      * Executes a transition to [FOLLOWING] state. When started, goes to [TRANSITION_TO_FOLLOWING]
-     * and to the final [FOLLOWING] when ended. If transition is canceled, state goes to [IDLE].
+     * and to the final [FOLLOWING] when ended.
      *
      * The target camera position is obtained with [ViewportDataSource.getViewportData].
      *
@@ -189,7 +188,7 @@ class NavigationCamera(
 
     /**
      * Executes a transition to [FOLLOWING] state. When started, goes to [TRANSITION_TO_FOLLOWING]
-     * and to the final [FOLLOWING] when ended. If transition is canceled, state goes to [IDLE].
+     * and to the final [FOLLOWING] when ended.
      *
      * The target camera position is obtained with [ViewportDataSource.getViewportData].
      *
@@ -239,7 +238,7 @@ class NavigationCamera(
 
     /**
      * Executes a transition to [OVERVIEW] state. When started, goes to [TRANSITION_TO_OVERVIEW]
-     * and to the final [OVERVIEW] when ended. If transition is canceled, state goes to [IDLE].
+     * and to the final [OVERVIEW] when ended.
      *
      * The target camera position is obtained with [ViewportDataSource.getViewportData].
      *
@@ -265,7 +264,7 @@ class NavigationCamera(
 
     /**
      * Executes a transition to [OVERVIEW] state. When started, goes to [TRANSITION_TO_OVERVIEW]
-     * and to the final [OVERVIEW] when ended. If transition is canceled, state goes to [IDLE].
+     * and to the final [OVERVIEW] when ended.
      *
      * The target camera position is obtained with [ViewportDataSource.getViewportData].
      *
@@ -443,9 +442,7 @@ class NavigationCamera(
         }
 
         override fun onAnimationEnd(animation: Animator?) {
-            if (isCanceled) {
-                setIdleProperties()
-            } else {
+            if (!isCanceled) {
                 this@NavigationCamera.frameTransitionOptions = frameTransitionOptions
                 state = finalState
             }
