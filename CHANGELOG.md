@@ -9,6 +9,9 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 
 ## Mapbox Navigation SDK 2.4.0-beta.3 - March 25, 2022
+### Changelog
+[Changes between v2.4.0-beta.2 and v2.4.0-beta.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.4.0-beta.2...v2.4.0-beta.3)
+
 - :exclamation: Starting with version 2.4 (2.4.0-beta.3), we are implementing a grace period of 30-seconds for all navigation sessions started by Nav SDK. A session will be counted only after this time period has surpassed. This allows you to reduce the cost of using the SDK during development and testing of your applications, as well as in production. Grace period is especially helpful to decrease the cost of short Free Drive session that are just a transition between Active Guidance sessions, or when a session is aborted right after it was started.
 
 #### Features
@@ -22,8 +25,19 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue where off-route wouldn't be reported if we were navigating in a fallback mode (without routing tiles on device). [#5587](https://github.com/mapbox/mapbox-navigation-android/pull/5587)
 - `RouteProgressState#INITIALIZED` might now be reported for each leg start, not only for the route start. [#5587](https://github.com/mapbox/mapbox-navigation-android/pull/5587)
 
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.4.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.4.0-rc.1))
+- Mapbox Navigation Native `v93.0.0`
+- Mapbox Core Common `v21.2.0-rc.1`
+- Mapbox Java `v6.4.0-beta.3` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.4.0-beta.3))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
+
 ## Mapbox Navigation SDK 2.4.0-beta.2 - March 18, 2022
 ### Changelog
+[Changes between v2.4.0-beta.1 and v2.4.0-beta.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.4.0-beta.1...v2.4.0-beta.2)
+
 - :warning: This version regresses the fix for [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://github.com/mapbox/mapbox-navigation-android/pull/5492) which will be addressed again in the upcoming release.
 
 #### Features
