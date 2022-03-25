@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.directions.session
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouter
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -45,6 +46,7 @@ internal class MapboxDirectionsSession(
         if (this.routes.isEmpty() && routes.isEmpty()) {
             return
         }
+        RouteCompatibilityCache.setDirectionsSessionResult(routes)
         this.routes = routes
         this.routesUpdateReason = routesUpdateReason
         routesObservers.forEach {

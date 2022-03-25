@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.directions.session
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouter
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -16,6 +17,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.slot
+import io.mockk.unmockkObject
 import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -196,6 +198,29 @@ class MapboxDirectionsSessionTest {
         verify(exactly = 1) { observer.onRoutesChanged(slot.captured) }
         assertEquals(slot.captured.reason, mockReason)
         assertEquals(slot.captured.navigationRoutes, routes)
+    }
+
+    @Test
+    fun `when route set, compatibility cache notified`() {
+        mockkObject(RouteCompatibilityCache)
+        session.setRoutes(routes, 0, mockReason)
+
+        verify(exactly = 1) { RouteCompatibilityCache.setDirectionsSessionResult(routes) }
+        verify(exactly = 0) { RouteCompatibilityCache.cacheCreationResult(routes) }
+
+        unmockkObject(RouteCompatibilityCache)
+    }
+
+    @Test
+    fun `when route cleared, compatibility cache notified`() {
+        session.setRoutes(routes, 0, mockReason)
+
+        mockkObject(RouteCompatibilityCache)
+        session.setRoutes(emptyList(), 0, RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
+
+        verify(exactly = 1) { RouteCompatibilityCache.setDirectionsSessionResult(emptyList()) }
+
+        unmockkObject(RouteCompatibilityCache)
     }
 
     @Test
