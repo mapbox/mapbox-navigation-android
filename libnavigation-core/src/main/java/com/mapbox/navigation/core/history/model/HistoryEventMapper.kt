@@ -84,6 +84,8 @@ internal class HistoryEventMapper {
             try {
                 val directionsResponse = DirectionsResponse.fromJson(response)
                 val routeOptions = setRoute.routeRequest?.let {
+                    // Old records may include empty routeRequest
+                    if (it.isEmpty()) return@let null
                     RouteOptions.fromUrl(URL(it))
                 } ?: directionsResponse.routes().firstOrNull()?.routeOptions()
                     ?: throw noOptionsException
