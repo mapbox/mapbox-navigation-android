@@ -1,5 +1,8 @@
 package com.mapbox.navigation.dropin
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewModel
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -11,6 +14,7 @@ import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterViewModel
+import com.mapbox.navigation.dropin.extensions.attachCreated
 
 /**
  * There is a single ViewModel for the navigation view. Use this class to store state that should
@@ -18,6 +22,13 @@ import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterView
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class DropInNavigationViewModel : ViewModel() {
+
+    /**
+     * LifecycleOwner available for attaching events to a lifecycle that will survive configuration
+     * changes. This is only available to the [DropInNavigationViewModel] for now. We can consider
+     * exposing the LifecycleOwner to downstream components, but we do not have a use for it yet.
+     */
+    private val viewModelLifecycleOwner = DropInViewModelLifecycleOwner()
 
     /**
      * These classes are accessible through MapboxNavigationApp.getObserver(..)
@@ -29,7 +40,7 @@ internal class DropInNavigationViewModel : ViewModel() {
     val cameraViewModel = CameraViewModel()
     val destinationViewModel = DestinationViewModel()
     val routesViewModel = RoutesViewModel()
-    private val navigationObservers = listOf(
+    private val navigationObservers = arrayOf(
         destinationViewModel,
         tripSessionStarterViewModel,
         audioGuidanceViewModel,
@@ -41,10 +52,30 @@ internal class DropInNavigationViewModel : ViewModel() {
     )
 
     init {
-        navigationObservers.forEach { MapboxNavigationApp.registerObserver(it) }
+        MapboxNavigationApp.attach(viewModelLifecycleOwner)
+        viewModelLifecycleOwner.attachCreated(*navigationObservers)
     }
 
     override fun onCleared() {
-        navigationObservers.reversed().forEach { MapboxNavigationApp.unregisterObserver(it) }
+        viewModelLifecycleOwner.destroy()
+    }
+}
+
+/**
+ * The [MapboxNavigationApp] needs a scope that can survive configuration changes.
+ * Everything inside the [DropInNavigationViewModel] will survive the orientation change, we can
+ * assume that the [MapboxNavigationApp] is [Lifecycle.State.CREATED] between init and onCleared.
+ *
+ * The [Lifecycle.State.STARTED] and [Lifecycle.State.RESUMED] states are represented by the
+ * hosting view [DropInNavigationView].
+ */
+private class DropInViewModelLifecycleOwner : LifecycleOwner {
+    private val lifecycleRegistry = LifecycleRegistry(this)
+        .apply { currentState = Lifecycle.State.CREATED }
+
+    override fun getLifecycle(): Lifecycle = lifecycleRegistry
+
+    fun destroy() {
+        lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
     }
 }
