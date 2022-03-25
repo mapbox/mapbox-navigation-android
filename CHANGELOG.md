@@ -16,9 +16,6 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue where off-route wouldn't be reported if we were navigating in a fallback mode (without routing tiles on device). [#5587](https://github.com/mapbox/mapbox-navigation-android/pull/5587)
 - `RouteProgressState#INITIALIZED` might now be reported for each leg start, not only for the route start. [#5587](https://github.com/mapbox/mapbox-navigation-android/pull/5587)
 
-#### Known issues :warning:
-- The `DirectionsRoute#toNavigationRoute` compatibility extension is blocking and can now take a significant amount of time to return (in order of hundreds of milliseconds for long routes). To avoid potential slowdowns, try not using the compatibility layer and work with `NavigationRoute` and `NavigationRouterCallback` were possible (look for deprecation warnings and refactor). We are aiming to improve the performance of this compatibility function in upcoming releases.
-
 ## Mapbox Navigation SDK 2.4.0-beta.2 - March 18, 2022
 ### Changelog
 - :warning: This version regresses the fix for [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://github.com/mapbox/mapbox-navigation-android/pull/5492) which will be addressed again in the upcoming release.
