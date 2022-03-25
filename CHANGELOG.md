@@ -3,6 +3,12 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
+
+#### Features
+
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.4.0-beta.3 - March 25, 2022
 - :exclamation: Starting with version 2.4 (2.4.0-beta.3), we are implementing a grace period of 30-seconds for all navigation sessions started by Nav SDK. A session will be counted only after this time period has surpassed. This allows you to reduce the cost of using the SDK during development and testing of your applications, as well as in production. Grace period is especially helpful to decrease the cost of short Free Drive session that are just a transition between Active Guidance sessions, or when a session is aborted right after it was started.
 
 #### Features
