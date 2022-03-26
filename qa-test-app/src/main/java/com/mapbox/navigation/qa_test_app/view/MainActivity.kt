@@ -1,34 +1,31 @@
 package com.mapbox.navigation.qa_test_app.view
 
 import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.ActivityMainBinding
 import com.mapbox.navigation.qa_test_app.domain.TestActivityDescription
 import com.mapbox.navigation.qa_test_app.domain.TestActivitySuite
-import com.mapbox.navigation.qa_test_app.utils.LOCATION_PERMISSIONS_REQUEST_CODE
-import com.mapbox.navigation.qa_test_app.utils.LocationPermissionsHelper
+import com.mapbox.navigation.qa_test_app.utils.PermissionsHelper
+import com.mapbox.navigation.qa_test_app.utils.PermissionsState
 import com.mapbox.navigation.qa_test_app.view.adapters.ActivitiesListAdaptersSupport
 import com.mapbox.navigation.qa_test_app.view.adapters.GenericListAdapter
 import com.mapbox.navigation.qa_test_app.view.adapters.GenericListAdapterItemSelectedFun
-import java.util.ArrayList
+import kotlinx.coroutines.launch
 
 /**
  * To add additional activities see [TestActivitySuite]. Alteration of this class shouldn't be
  * necessary.
  */
-class MainActivity : AppCompatActivity(), PermissionsListener {
+class MainActivity : AppCompatActivity() {
 
-    private val permissionsHelper = LocationPermissionsHelper(this)
+    private val permissionsHelper = PermissionsHelper()
     private val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
@@ -48,11 +45,6 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
         binding.activitiesList.addItemDecoration(
             DividerItemDecoration(this, layoutManager.orientation)
         )
-
-        when (LocationPermissionsHelper.areLocationPermissionsGranted(this)) {
-            true -> requestPermissionIfNotGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            else -> permissionsHelper.requestLocationPermissions(this)
-        }
     }
 
     override fun onStart() {
@@ -62,74 +54,65 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
         )
     }
 
-    override fun onExplanationNeeded(permissionsToExplain: List<String>) {
-        Toast
-            .makeText(
-                this,
-                "This app needs location and storage permissions" +
-                    "in order to show its functionality.",
-                Toast.LENGTH_LONG
-            ).show()
-    }
-
-    override fun onPermissionResult(granted: Boolean) {
-        if (granted) {
-            requestPermissionIfNotGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        } else {
-            Toast.makeText(this, "You didn't grant location permissions.", Toast.LENGTH_LONG).show()
-        }
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_PERMISSIONS_REQUEST_CODE) {
-            permissionsHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        } else {
+        permissionsHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
 
-            when (
-                grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
-            ) {
-                true -> {
-                    binding.activitiesList.isClickable = true
-                }
-                else -> {
-                    binding.activitiesList.isClickable = false
-                    Toast.makeText(
-                        this,
-                        "You didn't grant storage or location permissions.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
+    private fun launchAfterPermissionResult(element: TestActivityDescription) {
+        lifecycleScope.launch {
+            val ready = permissionsHelper.checkAndRequestPermissions(
+                this@MainActivity,
+                DEFAULT_PERMISSIONS
+            )
+            showToastForDeniedPermissions(ready)
+            element.launchActivityFun(this@MainActivity)
         }
     }
 
-    private fun requestPermissionIfNotGranted(permission: String) {
-        val permissionsNeeded = ArrayList<String>()
-
-        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED
-        ) {
-            permissionsNeeded.add(permission)
-            ActivityCompat.requestPermissions(this, permissionsNeeded.toTypedArray(), 10)
+    private fun showToastForDeniedPermissions(ready: PermissionsState.Ready) {
+        val permissionsDenied = ready.results.filter { !it.isGranted }.map { it.permission }
+        if (permissionsDenied.isNotEmpty()) {
+            val toastMessage = when {
+                permissionsDenied.containsAll(DEFAULT_PERMISSIONS) ->
+                    "You didn't grant location or storage permissions."
+                permissionsDenied.contains(Manifest.permission.ACCESS_FINE_LOCATION) ->
+                    "You didn't grant location permissions."
+                permissionsDenied.contains(Manifest.permission.WRITE_EXTERNAL_STORAGE) ->
+                    "You didn't grant storage permissions."
+                else -> "Permissions denied: ${permissionsDenied.joinToString()}"
+            }
+            Toast.makeText(this@MainActivity, toastMessage, Toast.LENGTH_LONG).show()
         }
     }
 
     private val activitySelectedDelegate:
-        GenericListAdapterItemSelectedFun<TestActivityDescription> = { positionAndElement ->
-            positionAndElement.second.launchActivityFun(this)
+        GenericListAdapterItemSelectedFun<TestActivityDescription> = { _, element ->
+            if (element.launchAfterPermissionResult) {
+                launchAfterPermissionResult(element)
+            } else {
+                element.launchActivityFun(this)
+            }
         }
 
     private val infoIconClickListenerFun:
-        GenericListAdapterItemSelectedFun<TestActivityDescription> = { positionAndElement ->
+        GenericListAdapterItemSelectedFun<TestActivityDescription> = { _, element ->
             AlertDialog.Builder(this)
-                .setMessage(positionAndElement.second.fullDescriptionResource)
+                .setMessage(element.fullDescriptionResource)
                 .setTitle("Test Description")
                 .setPositiveButton("Ok") { dlg, _ ->
                     dlg.dismiss()
                 }.show()
         }
+
+    companion object {
+        private val DEFAULT_PERMISSIONS = listOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        )
+    }
 }

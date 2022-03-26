@@ -28,37 +28,41 @@ object TestActivitySuite {
     val testActivities = listOf(
         TestActivityDescription(
             "MapboxNavigation Lifecycle",
-            R.string.mapbox_navigation_app_lifecycle_description
+            R.string.mapbox_navigation_app_lifecycle_description,
         ) { activity ->
             activity.startActivity<AppLifecycleActivity>()
         },
         TestActivityDescription(
             "Alternative Route Selection",
-            R.string.alternative_route_selection_description
+            R.string.alternative_route_selection_description,
         ) { activity ->
             activity.startActivity<AlternativeRouteActivity>()
         },
         TestActivityDescription(
             "Display Route Restrictions",
-            R.string.route_restriction_activity_description
+            R.string.route_restriction_activity_description,
+            launchAfterPermissionResult = false,
         ) { activity ->
             activity.startActivity<RouteRestrictionsActivity>()
         },
         TestActivityDescription(
             "Dynamic Traffic Update",
-            R.string.dynamic_traffic_update_description
+            R.string.dynamic_traffic_update_description,
+            launchAfterPermissionResult = false,
         ) { activity ->
             activity.startActivity<RouteTrafficUpdateActivity>()
         },
         TestActivityDescription(
             "Inactive Route Leg Styling",
-            R.string.inactive_route_styling_description
+            R.string.inactive_route_styling_description,
+            launchAfterPermissionResult = false,
         ) { activity ->
             activity.startActivity<InactiveRouteStylingActivity>()
         },
         TestActivityDescription(
             "Inactive Route Leg Styling With Restrictions",
-            R.string.inactive_route_styling__with_restrictions_description
+            R.string.inactive_route_styling__with_restrictions_description,
+            launchAfterPermissionResult = false,
         ) { activity ->
             activity.startActivity<InactiveRouteStylingWithRestrictionsActivity>()
         },
@@ -105,11 +109,13 @@ object TestActivitySuite {
         ) { activity -> activity.startActivity<MapboxNavigationViewActivity>() },
         TestActivityDescription(
             "Customized navigation View test",
-            R.string.navigation_view_customized_description
+            R.string.navigation_view_customized_description,
+            launchAfterPermissionResult = false
         ) { activity -> activity.startActivity<MapboxNavigationViewCustomizedActivity>() },
         TestActivityDescription(
             "Navigation View in a Fragment test",
-            R.string.navigation_view_fragment_description
+            R.string.navigation_view_fragment_description,
+            launchAfterPermissionResult = false
         ) { activity -> activity.startActivity<MapboxNavigationViewFragmentActivity>() },
     )
 }
