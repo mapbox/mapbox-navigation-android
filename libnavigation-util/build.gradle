@@ -30,6 +30,7 @@ dependencies {
     implementation dependenciesList.androidXCore
     api dependenciesList.mapboxSdkDirectionsModels
     api dependenciesList.mapboxCommonNative
+    implementation dependenciesList.mapboxCommonOkHttp
     api dependenciesList.mapboxAndroidCommon
     implementation dependenciesList.mapboxAnnotations
 

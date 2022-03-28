@@ -519,6 +519,12 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Mapbox Android Commmon OkHttp SDK.
+URL: [https://github.com/mapbox/mapbox-sdk-common](https://github.com/mapbox/mapbox-sdk-common)
+License: [Mapbox Terms of Service](https://www.mapbox.com/legal/tos)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Mapbox Android Commmon SDK.
 URL: [https://github.com/mapbox/mapbox-sdk-common](https://github.com/mapbox/mapbox-sdk-common)
 License: [Mapbox Terms of Service](https://www.mapbox.com/legal/tos)
@@ -552,6 +558,18 @@ License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 Mapbox Navigation uses portions of the Mapbox Logger (Artifact that provides Mapbox Logger module implementation).
 URL: [https://github.com/mapbox/mapbox-base-android](https://github.com/mapbox/mapbox-base-android)
 License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the okhttp (Square’s meticulous HTTP client for Java and Kotlin.).
+URL: [https://square.github.io/okhttp/](https://square.github.io/okhttp/)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Okio (A modern I/O API for Java).
+URL: [https://github.com/square/okio/](https://github.com/square/okio/)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
