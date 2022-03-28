@@ -21,7 +21,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Adopted Common SDK log messages parsing logic so it's consistent across Mapbox SDKs. As an example, this is how the logs would look like `D/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`. [#5604](https://github.com/mapbox/mapbox-navigation-android/pull/5604)
 - :warning: `NavigationRoute`'s constructor has been hidden in favor of `NavigationRoute#create` static factories. [#5587](https://github.com/mapbox/mapbox-navigation-android/pull/5587)
-- This version again fixes [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://github.com/mapbox/mapbox-navigation-android/pull/5492). [#5587](https://github.com/mapbox/mapbox-navigation-android/pull/5587)
+- Added a workaround for [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://issuetracker.google.com/issues/175055271). [#5587](https://github.com/mapbox/mapbox-navigation-android/pull/5587)
 - Fixed an issue where off-route wouldn't be reported if we were navigating in a fallback mode (without routing tiles on device). [#5587](https://github.com/mapbox/mapbox-navigation-android/pull/5587)
 - `RouteProgressState#INITIALIZED` might now be reported for each leg start, not only for the route start. [#5587](https://github.com/mapbox/mapbox-navigation-android/pull/5587)
 
@@ -37,8 +37,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 ## Mapbox Navigation SDK 2.4.0-beta.2 - March 18, 2022
 ### Changelog
 [Changes between v2.4.0-beta.1 and v2.4.0-beta.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.4.0-beta.1...v2.4.0-beta.2)
-
-- :warning: This version regresses the fix for [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://github.com/mapbox/mapbox-navigation-android/pull/5492) which will be addressed again in the upcoming release.
 
 #### Features
 - Added a new `RailwayCrossing` type to `RoadObject`s. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
@@ -122,7 +120,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed an issue where an alternative route was equal a current route. [#5457](https://github.com/mapbox/mapbox-navigation-android/pull/5457)
 - Added delay before re-attempting to request alternatives in case the first attempt resulted in the deviation point behind the current position. [#5457](https://github.com/mapbox/mapbox-navigation-android/pull/5457)
 - Fixed using `POST` for long requests [#5480](https://github.com/mapbox/mapbox-navigation-android/pull/5480)
-- Added a workaround for [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://issuetracker.google.com/issues/175055271). [#5492](https://github.com/mapbox/mapbox-navigation-android/pull/5492)
+- (**Correction** - this workaround only actually became available in `v2.4.0-beta.3`) Added a workaround for [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://issuetracker.google.com/issues/175055271). [#5492](https://github.com/mapbox/mapbox-navigation-android/pull/5492)
 - Fixed `MapboxNavigationApp` issue, that caused unexpected `MapboxNavigation` destroy, when one of the attached lifecycles is destroyed and the other one is stopped. [#5518](https://github.com/mapbox/mapbox-navigation-android/pull/5518)
 
 ### Mapbox dependencies
@@ -163,7 +161,7 @@ This release is a re-tag of the `v2.3.0-rc.2` to correct the commit which should
 [Changes between v2.3.0-rc.2 and v2.3.0-rc.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.3.0-rc.2...v2.3.0-rc.3)
 
 #### Bug fixes and improvements
-- Added a workaround for [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://issuetracker.google.com/issues/175055271). [#5492](https://github.com/mapbox/mapbox-navigation-android/pull/5492)
+- (**Correction** - this workaround only actually became available in `v2.4.0-beta.3`) Added a workaround for [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://issuetracker.google.com/issues/175055271). [#5492](https://github.com/mapbox/mapbox-navigation-android/pull/5492)
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -179,7 +177,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 [Changes between v2.3.0-rc.1 and v2.3.0-rc.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.3.0-rc.1...v2.3.0-rc.2)
 
 #### Bug fixes and improvements
-- Added a workaround for [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://issuetracker.google.com/issues/175055271). [#5492](https://github.com/mapbox/mapbox-navigation-android/pull/5492)
+- (**Correction** - this workaround only actually became available in `v2.4.0-beta.3`) Added a workaround for [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://issuetracker.google.com/issues/175055271). [#5492](https://github.com/mapbox/mapbox-navigation-android/pull/5492)
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
