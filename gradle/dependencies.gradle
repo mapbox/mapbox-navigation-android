@@ -73,6 +73,11 @@ ext {
       mapboxCore                : "com.mapbox.mapboxsdk:mapbox-android-core:${version.mapboxCore}",
       mapboxNavigator           : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
       mapboxCommonNative        : "com.mapbox.common:common:${version.mapboxCommonNative}",
+      /**
+       * explicitly define Mapbox OkHttp dependency so that we are sure it's in sync with the Common SDK version we define
+       * and we're not relying on Mapbox OKHttp coming in transitively
+       */
+      mapboxCommonOkHttp        : "com.mapbox.common:okhttp:${version.mapboxCommonNative}",
       mapboxAnnotationPlugin    : "com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:${version.mapboxAnnotationPlugin}",
       mapboxCrashMonitor        : "com.mapbox.crashmonitor:mapbox-crash-monitor-native:${version.mapboxCrashMonitor}",
       mapboxAnnotations         : "com.mapbox.base:annotations:${version.mapboxBaseAndroid}",
