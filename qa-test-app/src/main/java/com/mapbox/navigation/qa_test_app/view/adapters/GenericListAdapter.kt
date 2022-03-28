@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 typealias GenericListAdapterSameItemFun<T> = (T, T) -> Boolean
 typealias GenericListAdapterGetItemViewTypeFun = (Int) -> Int
-typealias GenericListAdapterItemSelectedFun<T> = (Pair<Int, T>) -> Unit
+typealias GenericListAdapterItemSelectedFun<T> = (Int, T) -> Unit
 
 class GenericListAdapter<T, U : RecyclerView.ViewHolder>(
 
@@ -35,22 +35,20 @@ class GenericListAdapter<T, U : RecyclerView.ViewHolder>(
         val element: T = values[position]
         itemSelectedDelegate?.let {
             holder.itemView.setOnClickListener {
-                itemSelectedDelegate.invoke(
-                    Pair(position, element)
-                )
+                itemSelectedDelegate.invoke(position, element)
             }
         }
 
         longPressDelegate?.let {
             holder.itemView.setOnLongClickListener {
-                longPressDelegate.invoke(Pair(position, element))
+                longPressDelegate.invoke(position, element)
                 true
             }
         }
 
         auxViewClickMap?.forEach { entry ->
             holder.itemView.findViewById<View>(entry.key)
-                ?.setOnClickListener { entry.value.invoke(Pair(position, element)) }
+                ?.setOnClickListener { entry.value.invoke(position, element) }
         }
 
         onBindViewHolder.invoke(holder, position, element)
