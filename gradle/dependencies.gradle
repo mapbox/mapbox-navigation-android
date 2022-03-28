@@ -25,7 +25,7 @@ ext {
       mapboxCommonNative        : '21.2.0-rc.1',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
-      mapboxBaseAndroid         : '0.5.0',
+      mapboxBaseAndroid         : '0.6.0',
       androidXLifecycle         : '2.4.0',
       androidXCoreVersion       : '1.6.0',
       androidXArchCoreVersion   : '2.1.0',
