@@ -8,7 +8,6 @@ import com.mapbox.annotation.module.MapboxModule
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.InternalRouter
 import com.mapbox.navigation.base.internal.route.updateLegAnnotations
@@ -29,6 +28,7 @@ import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.navigator.internal.mapToRoutingMode
 import com.mapbox.navigation.navigator.internal.mapToSdkRouteOrigin
 import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
+import com.mapbox.navigation.route.internal.util.parseDirectionsRouteRefresh
 import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logI
@@ -215,16 +215,25 @@ class RouterWrapper(
                 },
                 {
                     mainJobControl.scope.launch {
-                        val refreshedNavigationRoute = withContext(ThreadController.IODispatcher) {
-                            val refreshResponse = DirectionsRefreshResponse.fromJson(it)
-                            route.updateLegAnnotations(
-                                initialLegIndex = refreshOptions.legIndex,
-                                legAnnotations = refreshResponse.route()?.legs()?.map {
-                                    it.annotation()
-                                }
-                            )
-                        }
-                        callback.onRefreshReady(refreshedNavigationRoute)
+                        withContext(ThreadController.IODispatcher) {
+                            parseDirectionsRouteRefresh(it).mapValue { routeRefresh ->
+                                route.updateLegAnnotations(
+                                    initialLegIndex = refreshOptions.legIndex,
+                                    legAnnotations = routeRefresh.legs()?.map {
+                                        it.annotation()
+                                    },
+                                )
+                            }
+                        }.fold(
+                            { throwable ->
+                                callback.onFailure(
+                                    RouterFactory.buildNavigationRouterRefreshError(
+                                        "failed for response: $it", throwable,
+                                    )
+                                )
+                            },
+                            { callback.onRefreshReady(it) },
+                        )
                     }
                 }
             )
