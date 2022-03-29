@@ -2,6 +2,7 @@ package com.mapbox.navigation.dropin
 
 import android.content.Context
 import androidx.lifecycle.LifecycleOwner
+import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
@@ -12,6 +13,7 @@ import com.mapbox.navigation.dropin.lifecycle.UICoordinator
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache.Companion.MB_IN_BYTES
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
@@ -26,6 +28,8 @@ internal class DropInNavigationViewContext(
     val lifecycleOwner: LifecycleOwner,
     val viewModel: DropInNavigationViewModel,
 ) {
+    val mapView = MutableStateFlow<MapView?>(null)
+
     val uiBinders = NavigationUIBinders()
     val options = NavigationViewOptions(context)
 

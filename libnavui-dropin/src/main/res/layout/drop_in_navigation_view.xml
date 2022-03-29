@@ -6,8 +6,8 @@
     android:layout_height="match_parent"
     tools:parentTag="android.widget.FrameLayout">
 
-    <com.mapbox.maps.MapView
-        android:id="@+id/mapView"
+    <FrameLayout
+        android:id="@+id/mapViewLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:background="#00ccff" />

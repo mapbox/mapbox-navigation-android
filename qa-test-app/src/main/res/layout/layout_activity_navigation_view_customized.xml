@@ -59,6 +59,19 @@
             app:layout_constraintStart_toEndOf="@id/toggleCustomViews"
             app:layout_constraintBottom_toBottomOf="parent" />
 
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/toggleCustomMap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
+            android:text="Toggle Map"
+            android:textAllCaps="true"
+            android:padding="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/toggleCustomViews"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
     </androidx.appcompat.widget.LinearLayoutCompat>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,5 +1,6 @@
 package com.mapbox.navigation.qa_test_app.view
 
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
@@ -11,6 +12,17 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.MutableLiveData
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
+import com.mapbox.geojson.Point
+import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.ConstrainMode
+import com.mapbox.maps.GlyphsRasterizationMode
+import com.mapbox.maps.GlyphsRasterizationOptions
+import com.mapbox.maps.MapInitOptions
+import com.mapbox.maps.MapOptions
+import com.mapbox.maps.MapView
+import com.mapbox.maps.ResourceOptions
+import com.mapbox.maps.TileStoreUsageMode
+import com.mapbox.maps.applyDefaultParams
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -22,6 +34,8 @@ import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterView
 import com.mapbox.navigation.dropin.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.qa_test_app.databinding.LayoutActivityNavigationViewCustomizedBinding
+import com.mapbox.navigation.qa_test_app.utils.Utils
+import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -53,6 +67,7 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
     }
 
     private val showCustomViews = MutableLiveData(true)
+    private val showCustomMapView = MutableLiveData(true)
 
     private val routeArrowOptions by lazy {
         RouteArrowOptions.Builder(this)
@@ -134,6 +149,19 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
                 )
             }
         }
+
+        // Demonstrate map customization
+        showCustomMapView.observe(this) { showCustomMapView ->
+            binding.toggleCustomMap.isChecked = showCustomMapView
+            if (showCustomMapView) {
+                binding.navigationView.customizeMapView(customMapViewFromCode(this))
+            } else {
+                binding.navigationView.customizeMapView(null)
+            }
+        }
+        binding.toggleCustomMap.setOnClickListener {
+            showCustomMapView.value = showCustomMapView.value?.not()
+        }
     }
 
     private fun toggleTheme(themeMode: Int) {
@@ -184,4 +212,44 @@ private fun navigationCoroutine(
             function(mapboxNavigation)
         }
     }
+}
+
+private fun customMapViewFromCode(context: Context): MapView {
+    // set map options
+    val mapOptions = MapOptions.Builder().applyDefaultParams(context)
+        .constrainMode(ConstrainMode.HEIGHT_ONLY)
+        .glyphsRasterizationOptions(
+            GlyphsRasterizationOptions.Builder()
+                .rasterizationMode(GlyphsRasterizationMode.IDEOGRAPHS_RASTERIZED_LOCALLY)
+                .fontFamily("sans-serif")
+                .build()
+        )
+        .build()
+
+    // set token and cache size for this particular map view, these settings will overwrite
+    // the default value.
+    val resourceOptions = ResourceOptions.Builder().applyDefaultParams(context)
+        .accessToken(Utils.getMapboxAccessToken(context))
+        .tileStoreUsageMode(TileStoreUsageMode.DISABLED)
+        .build()
+
+    // set initial camera position
+    val initialCameraOptions = CameraOptions.Builder()
+        .center(Point.fromLngLat(-122.4194, 37.7749))
+        .zoom(9.0)
+        .bearing(120.0)
+        .build()
+
+    val mapInitOptions = MapInitOptions(
+        context = context,
+        resourceOptions = resourceOptions,
+        mapOptions = mapOptions,
+        cameraOptions = initialCameraOptions,
+        textureView = true
+    )
+
+    // create view programmatically and add to root layout
+    val customMapView = MapView(context, mapInitOptions)
+    customMapView.getMapboxMap().loadStyleUri(NavigationStyles.NAVIGATION_DAY_STYLE)
+    return customMapView
 }
