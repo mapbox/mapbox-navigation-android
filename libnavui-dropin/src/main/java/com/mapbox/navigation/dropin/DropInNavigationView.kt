@@ -3,7 +3,6 @@ package com.mapbox.navigation.dropin
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.res.Configuration
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
@@ -13,6 +12,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -21,7 +21,7 @@ import com.mapbox.navigation.dropin.component.backpress.OnKeyListenerComponent
 import com.mapbox.navigation.dropin.coordinator.ActionButtonsCoordinator
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
 import com.mapbox.navigation.dropin.coordinator.ManeuverCoordinator
-import com.mapbox.navigation.dropin.coordinator.MapCoordinator
+import com.mapbox.navigation.dropin.coordinator.MapLayoutCoordinator
 import com.mapbox.navigation.dropin.coordinator.RoadNameLabelCoordinator
 import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
@@ -67,6 +67,13 @@ class DropInNavigationView @JvmOverloads constructor(
     )
 
     /**
+     * Customize the views by implementing your own [UIBinder] components.
+     */
+    fun customizeMapView(mapView: MapView?) {
+        navigationContext.mapView.value = mapView
+    }
+
+    /**
      * Customize view by providing your own [UIBinder] components.
      */
     fun customizeViewBinders(action: ViewBinderCustomization.() -> Unit) {
@@ -81,13 +88,6 @@ class DropInNavigationView @JvmOverloads constructor(
     }
 
     init {
-        val style = if (isNightModeEnabled()) {
-            navigationContext.options.mapStyleUriNight.value
-        } else {
-            navigationContext.options.mapStyleUriDay.value
-        }
-        binding.mapView.getMapboxMap().loadStyleUri(style)
-
         /**
          * Default setup for MapboxNavigationApp. The developer can customize this by
          * setting up the MapboxNavigationApp before the view is constructed.
@@ -110,7 +110,7 @@ class DropInNavigationView @JvmOverloads constructor(
          * Single point of entry for the Mapbox Navigation View.
          */
         attachCreated(
-            MapCoordinator(navigationContext, binding),
+            MapLayoutCoordinator(navigationContext, binding),
             OnKeyListenerComponent(
                 navigationContext.viewModel.navigationStateViewModel,
                 navigationContext.viewModel.destinationViewModel,
@@ -130,14 +130,6 @@ class DropInNavigationView @JvmOverloads constructor(
     }
 
     override fun getLifecycle(): Lifecycle = viewLifecycleRegistry
-
-    private fun retrieveCurrentUiMode(): Int {
-        return resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)
-    }
-
-    private fun isNightModeEnabled(): Boolean {
-        return retrieveCurrentUiMode() == Configuration.UI_MODE_NIGHT_YES
-    }
 
     private inline fun <reified T : ViewModel> lazyViewModel(): Lazy<T> = lazy {
         viewModelProvider[T::class.java]
