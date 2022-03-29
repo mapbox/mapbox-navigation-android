@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
+import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.MockLoggerRule
 import io.mockk.every
 import io.mockk.mockk
@@ -131,7 +132,7 @@ class ReplayRouteMapperTest {
     @Test
     fun `an artificial driver drives with almost constant speed along a motorway`() {
         val route = DirectionsRoute.fromJson(
-            resourceAsString("german_motorway_direction_route.json")
+            FileUtils.loadJsonFixture("german_motorway_direction_route.json")
         )
 
         val updateEvents = replayRouteMapper.mapDirectionsRouteGeometry(route)
@@ -156,33 +157,4 @@ class ReplayRouteMapperTest {
         val inputStream = javaClass.classLoader?.getResourceAsStream("$packageName/$name")
         return IOUtils.toString(inputStream, "UTF-8")
     }
-}
-
-private fun List<Double>.removeAccelerationAndBrakingSpeedUpdates(): List<Double> {
-    val accelerationEndsOn = findEndOfInitialAcceleration()
-    val brakingStartsOn = findBeginningOfBraking()
-    return take(brakingStartsOn)
-        .drop(accelerationEndsOn)
-}
-
-private fun List<Double>.findBeginningOfBraking(): Int {
-    var brakingStartsOn = 0
-    for (i in this.size - 1 downTo 2) {
-        if (this[i] >= this[i - 1]) {
-            brakingStartsOn = i
-            break
-        }
-    }
-    return brakingStartsOn
-}
-
-private fun List<Double>.findEndOfInitialAcceleration(): Int {
-    var accelerationEndsOn = 0
-    for (i in 1 until this.size) {
-        if (this[i] <= this[i - 1]) {
-            accelerationEndsOn = i
-            break
-        }
-    }
-    return accelerationEndsOn
 }
