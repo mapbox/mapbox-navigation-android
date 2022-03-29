@@ -4,6 +4,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -12,8 +13,11 @@ import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -107,5 +111,24 @@ class AudioGuidanceViewModelTest {
 
         verify(exactly = 1) { mapboxAudioApi.speakVoiceInstructions() }
         assertTrue(mapboxAudioViewModel.state.value.isMuted)
+    }
+
+    @Test
+    fun `speakVoiceInstructions is collected`() = runBlockingTest {
+        val mapboxAudioViewModel =
+            AudioGuidanceViewModel(navigationStateViewModel, AudioGuidanceState(isMuted = false))
+        every { navigationStateViewModel.state } returns MutableStateFlow(
+            NavigationState.ActiveNavigation
+        )
+        val captureSpeechAnnouncement = mutableListOf<SpeechAnnouncement?>()
+        every { mapboxAudioApi.speakVoiceInstructions() } answers {
+            flowOf<SpeechAnnouncement?>(mockk(), mockk()).onEach {
+                captureSpeechAnnouncement.add(it)
+            }
+        }
+
+        mapboxAudioViewModel.onAttached(mockk())
+
+        assertEquals(2, captureSpeechAnnouncement.size)
     }
 }
