@@ -25,7 +25,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
-class LocationComponentTest {
+internal class LocationComponentTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()

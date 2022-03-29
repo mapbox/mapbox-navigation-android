@@ -11,76 +11,59 @@ import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.internal.extensions.flowRoutesUpdated
-import com.mapbox.navigation.dropin.lifecycle.UIViewModel
+import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Action
+import com.mapbox.navigation.dropin.model.Reducer
+import com.mapbox.navigation.dropin.model.State
+import com.mapbox.navigation.dropin.model.Store
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-/**
- * Defines actions responsible to mutate the [RoutesState].
- */
 @ExperimentalPreviewMapboxNavigationAPI
-sealed class RoutesAction {
-    /**
-     * The action is used to fetch route based on the list of [points].
-     * @param points list of points
-     */
-    data class FetchPoints(val points: List<Point>) : RoutesAction()
+internal class RoutesViewModel(
+    private val store: Store
+) : UIComponent(), Reducer {
+    init {
+        store.register(this)
+    }
 
-    /**
-     * The action is used to fetch route based on [RouteOptions].
-     * @param options
-     */
-    data class FetchOptions(val options: RouteOptions) : RoutesAction()
-
-    /**
-     * The action is used to directly set the [NavigationRoute] supplied to NavigationView.
-     * @param routes list of [NavigationRoute]
-     */
-    data class SetRoutes(val routes: List<NavigationRoute>) : RoutesAction()
-
-    /**
-     * The action informs that route request was successful and routes are ready to be used.
-     * @param routes list of [NavigationRoute]
-     */
-    data class Ready(val routes: List<NavigationRoute>) : RoutesAction()
-
-    /**
-     * The action informs that the route request failed.
-     * @param reasons for why the request failed
-     * @param routeOptions used to fetch the route
-     */
-    data class Failed(
-        val reasons: List<RouterFailure>,
-        val routeOptions: RouteOptions
-    ) : RoutesAction()
-
-    /**
-     * The action informs that the route request was canceled.
-     * @param routeOptions used to fetch the route
-     * @param routerOrigin origin of the route request
-     */
-    data class Canceled(
-        val routeOptions: RouteOptions,
-        val routerOrigin: RouterOrigin
-    ) : RoutesAction()
-}
-
-@ExperimentalPreviewMapboxNavigationAPI
-internal class RoutesViewModel : UIViewModel<RoutesState, RoutesAction>(RoutesState.Empty) {
+    private var mapboxNavigation: MapboxNavigation? = null
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
+        this.mapboxNavigation = mapboxNavigation
 
-        mainJobControl.scope.launch {
+        coroutineScope.launch {
             mapboxNavigation.flowRoutesUpdated().collect { result ->
                 // Empty is ignored on purpose. When the action is processed
                 // it will be converted to RoutesState.Empty.
-                invoke(RoutesAction.Ready(result.navigationRoutes))
+                store.dispatch(RoutesAction.Ready(result.navigationRoutes))
             }
         }
     }
 
-    override fun process(
+    override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        super.onDetached(mapboxNavigation)
+        when (val currentState = store.state.value.routes) {
+            is RoutesState.Fetching -> {
+                mapboxNavigation.cancelRouteRequest(currentState.requestId)
+            }
+        }
+        this.mapboxNavigation = null
+    }
+
+    override fun process(state: State, action: Action): State {
+        if (action is RoutesAction) {
+            return this.mapboxNavigation?.let {
+                return state.copy(
+                    routes = processRoutesAction(it, state.routes, action)
+                )
+            } ?: state
+        }
+        return state
+    }
+
+    private fun processRoutesAction(
         mapboxNavigation: MapboxNavigation,
         state: RoutesState,
         action: RoutesAction
@@ -119,15 +102,6 @@ internal class RoutesViewModel : UIViewModel<RoutesState, RoutesAction>(RoutesSt
         }
     }
 
-    override fun onDetached(mapboxNavigation: MapboxNavigation) {
-        super.onDetached(mapboxNavigation)
-        when (val currentState = state.value) {
-            is RoutesState.Fetching -> {
-                mapboxNavigation.cancelRouteRequest(currentState.requestId)
-            }
-        }
-    }
-
     private fun MapboxNavigation.fetchRoute(options: RouteOptions): Long {
         return requestRoutes(
             options,
@@ -136,18 +110,18 @@ internal class RoutesViewModel : UIViewModel<RoutesState, RoutesAction>(RoutesSt
                     routes: List<NavigationRoute>,
                     routerOrigin: RouterOrigin
                 ) {
-                    invoke(RoutesAction.SetRoutes(routes))
+                    store.dispatch(RoutesAction.SetRoutes(routes))
                 }
 
                 override fun onFailure(
                     reasons: List<RouterFailure>,
                     routeOptions: RouteOptions
                 ) {
-                    invoke(RoutesAction.Failed(reasons, routeOptions))
+                    store.dispatch(RoutesAction.Failed(reasons, routeOptions))
                 }
 
                 override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
-                    invoke(RoutesAction.Canceled(routeOptions, routerOrigin))
+                    store.dispatch(RoutesAction.Canceled(routeOptions, routerOrigin))
                 }
             }
         )

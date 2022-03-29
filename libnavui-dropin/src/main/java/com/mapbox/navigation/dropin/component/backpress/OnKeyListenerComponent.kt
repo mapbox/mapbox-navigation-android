@@ -6,13 +6,11 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.NavigationView
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
-import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
-import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Store
 
 /**
  * Key listener for the [NavigationView].
@@ -24,9 +22,7 @@ import com.mapbox.navigation.dropin.lifecycle.UIComponent
  */
 @ExperimentalPreviewMapboxNavigationAPI
 internal class OnKeyListenerComponent(
-    private val navigationStateViewModel: NavigationStateViewModel,
-    private val destinationViewModel: DestinationViewModel,
-    private val routesViewModel: RoutesViewModel,
+    private val store: Store,
     private val view: View,
 ) : UIComponent() {
 
@@ -45,38 +41,28 @@ internal class OnKeyListenerComponent(
     }
 
     private fun handleBackPress(): Boolean {
-        return when (navigationStateViewModel.state.value) {
+        return when (store.state.value.navigation) {
             NavigationState.FreeDrive -> {
                 false
             }
             NavigationState.DestinationPreview -> {
-                destinationViewModel.invoke(
-                    DestinationAction.SetDestination(null)
-                )
-                navigationStateViewModel.invoke(
-                    NavigationStateAction.Update(NavigationState.FreeDrive)
-                )
+                store.dispatch(DestinationAction.SetDestination(null))
+                store.dispatch(NavigationStateAction.Update(NavigationState.FreeDrive))
                 true
             }
             NavigationState.RoutePreview -> {
-                routesViewModel.invoke(RoutesAction.SetRoutes(emptyList()))
-                navigationStateViewModel.invoke(
-                    NavigationStateAction.Update(NavigationState.DestinationPreview)
-                )
+                store.dispatch(RoutesAction.SetRoutes(emptyList()))
+                store.dispatch(NavigationStateAction.Update(NavigationState.DestinationPreview))
                 true
             }
             NavigationState.ActiveNavigation -> {
-                navigationStateViewModel.invoke(
-                    NavigationStateAction.Update(NavigationState.RoutePreview)
-                )
+                store.dispatch(NavigationStateAction.Update(NavigationState.RoutePreview))
                 true
             }
             NavigationState.Arrival -> {
-                routesViewModel.invoke(RoutesAction.SetRoutes(emptyList()))
-                destinationViewModel.invoke(DestinationAction.SetDestination(null))
-                navigationStateViewModel.invoke(
-                    NavigationStateAction.Update(NavigationState.FreeDrive)
-                )
+                store.dispatch(RoutesAction.SetRoutes(emptyList()))
+                store.dispatch(DestinationAction.SetDestination(null))
+                store.dispatch(NavigationStateAction.Update(NavigationState.FreeDrive))
                 true
             }
         }

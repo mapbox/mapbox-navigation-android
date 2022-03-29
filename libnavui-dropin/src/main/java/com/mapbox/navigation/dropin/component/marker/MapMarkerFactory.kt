@@ -37,4 +37,13 @@ internal class MapMarkerFactory(
             cache.add(name, it)
         } ?: throw RuntimeException("Cannot load bitmap drawable: $name")
     }
+
+    companion object {
+        fun create(context: Context): MapMarkerFactory {
+            return MapMarkerFactory(
+                context,
+                BitmapMemoryCache(4 * BitmapMemoryCache.MB_IN_BYTES)
+            )
+        }
+    }
 }

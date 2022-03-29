@@ -3,8 +3,11 @@ package com.mapbox.navigation.dropin.component.audioguidance
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
-import com.mapbox.navigation.dropin.lifecycle.UIViewModel
+import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Action
+import com.mapbox.navigation.dropin.model.Reducer
+import com.mapbox.navigation.dropin.model.State
+import com.mapbox.navigation.dropin.model.Store
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -14,37 +17,27 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 
 /**
- * Defines actions responsible to mutate the [AudioGuidanceState].
- */
-@ExperimentalPreviewMapboxNavigationAPI
-sealed class AudioAction {
-    /**
-     * The action mutes the volume control for audio guidance
-     */
-    object Mute : AudioAction()
-    /**
-     * The action un-mutes the volume control for audio guidance
-     */
-    object Unmute : AudioAction()
-    /**
-     * The action toggles mute/un-mute volume control for audio guidance
-     */
-    object Toggle : AudioAction()
-}
-
-/**
  * This class is responsible for playing voice instructions. Use the [AudioAction] to turning the
  * audio on or off.
  */
 @ExperimentalPreviewMapboxNavigationAPI
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class AudioGuidanceViewModel(
-    val navigationStateViewModel: NavigationStateViewModel,
-    default: AudioGuidanceState = AudioGuidanceState()
-) : UIViewModel<AudioGuidanceState, AudioAction>(default) {
+    val store: Store
+) : UIComponent(), Reducer {
+    init {
+        store.register(this)
+    }
 
-    override fun process(
-        mapboxNavigation: MapboxNavigation,
+    override fun process(state: State, action: Action): State {
+        if (action is AudioAction) {
+            val audioState = state.audio
+            return state.copy(audio = processAudioAction(audioState, action))
+        }
+        return state
+    }
+
+    private fun processAudioAction(
         state: AudioGuidanceState,
         action: AudioAction
     ): AudioGuidanceState {
@@ -59,7 +52,7 @@ internal class AudioGuidanceViewModel(
         super.onAttached(mapboxNavigation)
 
         val audioGuidanceApi = AudioGuidanceApi.create(mapboxNavigation, AudioGuidanceServices())
-        mainJobControl.scope.launch {
+        coroutineScope.launch {
             flowSpeakInstructions().flatMapLatest { speakInstructions ->
                 if (speakInstructions) {
                     audioGuidanceApi.speakVoiceInstructions()
@@ -71,7 +64,8 @@ internal class AudioGuidanceViewModel(
     }
 
     private fun flowSpeakInstructions(): Flow<Boolean> = combine(
-        navigationStateViewModel.state, state
+        store.select { it.navigation },
+        store.select { it.audio },
     ) { navigationState, audioGuidanceState ->
         navigationState is NavigationState.ActiveNavigation &&
             !audioGuidanceState.isMuted

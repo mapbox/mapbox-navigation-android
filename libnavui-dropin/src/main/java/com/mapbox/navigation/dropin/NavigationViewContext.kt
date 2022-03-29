@@ -4,14 +4,10 @@ import android.content.Context
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.component.destination.DestinationAction
-import com.mapbox.navigation.dropin.component.destination.DestinationState
 import com.mapbox.navigation.dropin.component.marker.MapMarkerFactory
-import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache.Companion.MB_IN_BYTES
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 /**
  * This context is a top level data object for [NavigationView] which gives access to [context]
@@ -32,15 +28,6 @@ internal class NavigationViewContext(
     val uiBinders = ViewBinder()
     val styles = NavigationViewStyles(context)
     val options = NavigationViewOptions(context)
-
-    val dispatch: (action: Any) -> Unit = { action ->
-        when (action) {
-            is RoutesAction -> viewModel.routesViewModel.invoke(action)
-            is DestinationAction -> viewModel.destinationViewModel.invoke(action)
-        }
-    }
-
-    val destinationState: StateFlow<DestinationState> get() = viewModel.destinationViewModel.state
 
     val mapStyleLoader = MapStyleLoader(context, options)
 

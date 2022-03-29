@@ -95,67 +95,79 @@ class ViewStyleCustomization {
         /**
          * Default destination marker icon.
          */
-        fun defaultDestinationMarker() = R.drawable.mapbox_ic_destination_marker
+        @DrawableRes
+        fun defaultDestinationMarker(): Int = R.drawable.mapbox_ic_destination_marker
 
         /**
          * Default [MapboxRoadNameView] background.
          */
-        fun defaultRoadNameBackground() = R.drawable.mapbox_road_name_view_background
+        @DrawableRes
+        fun defaultRoadNameBackground(): Int = R.drawable.mapbox_road_name_view_background
 
         /**
          * Default [MapboxTripProgressView] style.
          */
-        fun defaultTripProgressStyle() = R.style.DropInStyleTripProgressView
+        @StyleRes
+        fun defaultTripProgressStyle(): Int = R.style.DropInStyleTripProgressView
 
         /**
          * Default [MapboxSpeedLimitView] style.
          */
-        fun defaultSpeedLimitStyle() = R.style.DropInStyleSpeedLimit
+        @StyleRes
+        fun defaultSpeedLimitStyle(): Int = R.style.DropInStyleSpeedLimit
 
         /**
          * Default [MapboxSpeedLimitView] [TextAppearance].
          */
-        fun defaultSpeedLimitTextAppearance() = R.style.DropInSpeedLimitTextAppearance
+        @StyleRes
+        fun defaultSpeedLimitTextAppearance(): Int = R.style.DropInSpeedLimitTextAppearance
 
         /**
          * Default [MapboxRoadNameView] [TextAppearance].
          */
-        fun defaultRoadNameTextAppearance() = R.style.DropInRoadNameViewTextAppearance
+        @StyleRes
+        fun defaultRoadNameTextAppearance(): Int = R.style.DropInRoadNameViewTextAppearance
 
         /**
          * Default [MapboxCameraModeButton] style.
          */
-        fun defaultCameraModeButtonStyle() = R.style.MapboxStyleCameraModeButton
+        @StyleRes
+        fun defaultCameraModeButtonStyle(): Int = R.style.MapboxStyleCameraModeButton
 
         /**
          * Default [MapboxExtendableButton] style for re-center button.
          */
-        fun defaultRecenterButtonStyle() = R.style.DropInStyleRecenterButton
+        @StyleRes
+        fun defaultRecenterButtonStyle(): Int = R.style.DropInStyleRecenterButton
 
         /**
          * Default [MapboxExtendableButton] style for route preview button.
          */
-        fun defaultRoutePreviewButtonStyle() = R.style.DropInStylePreviewButton
+        @StyleRes
+        fun defaultRoutePreviewButtonStyle(): Int = R.style.DropInStylePreviewButton
 
         /**
          * Default [MapboxExtendableButton] style for end navigation button.
          */
-        fun defaultEndNavigationButtonStyle() = R.style.DropInStyleExitButton
+        @StyleRes
+        fun defaultEndNavigationButtonStyle(): Int = R.style.DropInStyleExitButton
 
         /**
          * Default [MapboxExtendableButton] style for start navigation button.
          */
-        fun defaultStartNavigationButtonStyle() = R.style.DropInStyleStartButton
+        @StyleRes
+        fun defaultStartNavigationButtonStyle(): Int = R.style.DropInStyleStartButton
 
         /**
          * Default [MapboxAudioGuidanceButton] style.
          */
-        fun defaultAudioGuidanceButtonStyle() = R.style.MapboxStyleAudioGuidanceButton
+        @StyleRes
+        fun defaultAudioGuidanceButtonStyle(): Int = R.style.MapboxStyleAudioGuidanceButton
 
         /**
          * Default [ManeuverViewOptions] to style [MapboxManeuverView]
          */
-        fun defaultManeuverViewOptions() = ManeuverViewOptions
+        fun defaultManeuverViewOptions(): ManeuverViewOptions = ManeuverViewOptions
             .Builder()
             .maneuverBackgroundColor(R.color.colorPrimary)
             .subManeuverBackgroundColor(R.color.colorPrimaryVariant)

@@ -23,16 +23,14 @@ internal class ManeuverCoordinator(
     private val context: NavigationViewContext,
     guidanceLayout: ViewGroup
 ) : UICoordinator<ViewGroup>(guidanceLayout) {
+    private val store = context.viewModel.store
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
-        return context
-            .viewModel
-            .navigationStateViewModel
-            .state
-            .flatMapLatest { state ->
+        return store.select { it.navigation }
+            .flatMapLatest { navigationState ->
                 context.uiBinders.maneuver.map {
-                    if (state == NavigationState.ActiveNavigation) {
+                    if (navigationState == NavigationState.ActiveNavigation) {
                         it ?: ManeuverViewBinder(
                             context.mapStyleLoader.loadedMapStyle,
                             context.styles.maneuverViewOptions,

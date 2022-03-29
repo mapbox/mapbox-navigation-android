@@ -5,14 +5,13 @@ import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.dropin.view.MapboxAudioGuidanceButton
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class AudioGuidanceButtonComponent(
-    private val audioGuidanceViewModel: AudioGuidanceViewModel,
-    private val navigationStateViewModel: NavigationStateViewModel,
+    private val store: Store,
     private val audioGuidanceButton: MapboxAudioGuidanceButton,
     @StyleRes val audioGuidanceButtonStyle: Int,
 ) : UIComponent() {
@@ -20,17 +19,17 @@ internal class AudioGuidanceButtonComponent(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
         audioGuidanceButton.updateStyle(audioGuidanceButtonStyle)
-        audioGuidanceViewModel.state.observe {
+        store.select { it.audio }.observe {
             if (it.isMuted) audioGuidanceButton.mute()
             else audioGuidanceButton.unMute()
         }
 
-        navigationStateViewModel.state.observe {
+        store.select { it.navigation }.observe {
             audioGuidanceButton.isVisible = it == NavigationState.ActiveNavigation
         }
 
         audioGuidanceButton.setOnClickListener {
-            audioGuidanceViewModel.invoke(AudioAction.Toggle)
+            store.dispatch(AudioAction.Toggle)
         }
     }
 

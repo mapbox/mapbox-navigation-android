@@ -6,34 +6,32 @@ import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
+import com.mapbox.navigation.dropin.model.Store
 
 /**
  * Component for rendering all drop-in UI map markers.
  */
 @ExperimentalPreviewMapboxNavigationAPI
 internal open class MapMarkersComponent(
+    private val store: Store,
     protected val mapView: MapView,
     @DrawableRes val iconImage: Int,
-    protected val context: NavigationViewContext
 ) : UIComponent() {
-    private val mapAnnotationFactory = context.mapAnnotationFactory()
-    private val destinationState = context.destinationState
+
+    private val mapMarkerFactory by lazy {
+        MapMarkerFactory.create(mapView.context)
+    }
     private var annotationManager = mapView.annotations.createPointAnnotationManager()
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        destinationState
-            .map { it.destination?.point }
-            .distinctUntilChanged()
+        store.select { it.destination?.point }
             .observe { point ->
                 annotationManager.deleteAll()
                 if (point != null) {
-                    val annotation = mapAnnotationFactory.createPin(point, iconImage)
+                    val annotation = mapMarkerFactory.createPin(point, iconImage)
                     annotationManager.create(annotation)
                 }
             }

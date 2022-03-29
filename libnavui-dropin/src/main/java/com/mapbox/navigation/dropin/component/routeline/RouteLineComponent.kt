@@ -11,10 +11,10 @@ import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
-import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.dropin.internal.extensions.flowRoutesUpdated
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRouteLines
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
@@ -30,9 +30,9 @@ import kotlinx.coroutines.launch
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class RouteLineComponent(
+    private val store: Store,
     private val mapView: MapView,
     private val options: MapboxRouteLineOptions,
-    private val routesViewModel: RoutesViewModel,
     private val routeLineApi: MapboxRouteLineApi = MapboxRouteLineApi(options),
     private val routeLineView: MapboxRouteLineView = MapboxRouteLineView(options)
 ) : UIComponent() {
@@ -114,9 +114,7 @@ internal class RouteLineComponent(
                         .also {
                             it.add(0, resultValue.navigationRoute)
                         }
-                    routesViewModel.invoke(
-                        RoutesAction.SetRoutes(reOrderedRoutes)
-                    )
+                    store.dispatch(RoutesAction.SetRoutes(reOrderedRoutes))
                 }
             }
         }

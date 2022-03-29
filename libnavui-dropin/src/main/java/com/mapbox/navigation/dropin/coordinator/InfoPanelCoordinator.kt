@@ -14,7 +14,6 @@ import com.mapbox.navigation.dropin.lifecycle.UICoordinator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /**
@@ -27,8 +26,7 @@ internal class InfoPanelCoordinator(
     private val infoPanel: ViewGroup,
     private val guidelineBottom: Guideline
 ) : UICoordinator<ViewGroup>(infoPanel) {
-
-    private val destinationState = context.destinationState
+    private val store = context.viewModel.store
     private val behavior = BottomSheetBehavior.from(infoPanel)
 
     init {
@@ -40,7 +38,7 @@ internal class InfoPanelCoordinator(
 
         behavior.addBottomSheetCallback(updateGuideline)
         coroutineScope.launch {
-            destinationState.map { it.destination }.collect { destination ->
+            store.select { it.destination }.collect { destination ->
                 if (destination != null) behavior.collapse()
                 else behavior.hide()
 

@@ -11,12 +11,14 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,12 +37,15 @@ internal class RoutesViewModelTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
-    private val routesViewModel = RoutesViewModel()
+    private lateinit var store: TestStore
+    private lateinit var routesViewModel: RoutesViewModel
 
     @Before
     fun setUp() {
         mockkStatic("com.mapbox.navigation.base.internal.extensions.ContextEx")
         mockkObject(MapboxNavigationApp)
+        store = spyk(TestStore())
+        routesViewModel = RoutesViewModel(store)
     }
 
     @After
@@ -49,32 +54,24 @@ internal class RoutesViewModelTest {
     }
 
     @Test
-    fun `default state is Empty`() {
-        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-
-        routesViewModel.onAttached(mapboxNavigation)
-
-        assertEquals(RoutesState.Empty, routesViewModel.state.value)
-    }
-
-    @Test
-    fun `route changes with routes will be Ready state`() {
+    fun `onAttached should observe MapboxNavigation route updates and dispatch Ready action`() {
         val mapboxNavigation = mockMapboxNavigation()
+        val routesList = listOf<NavigationRoute>(mockk())
         every { mapboxNavigation.registerRoutesObserver(any()) } answers {
             firstArg<RoutesObserver>().onRoutesChanged(
                 mockk {
-                    every { navigationRoutes } returns listOf(mockk())
+                    every { navigationRoutes } returns routesList
                 }
             )
         }
 
         routesViewModel.onAttached(mapboxNavigation)
 
-        assertTrue(routesViewModel.state.value is RoutesState.Ready)
+        verify { store.dispatch(RoutesAction.Ready(routesList)) }
     }
 
     @Test
-    fun `route changes to empty route will be Empty state`() {
+    fun `RoutesAction Ready with an empty list should result in Empty state`() {
         val mapboxNavigation = mockMapboxNavigation()
         every { mapboxNavigation.registerRoutesObserver(any()) } answers {
             firstArg<RoutesObserver>().onRoutesChanged(
@@ -86,7 +83,7 @@ internal class RoutesViewModelTest {
 
         routesViewModel.onAttached(mapboxNavigation)
 
-        assertTrue(routesViewModel.state.value is RoutesState.Empty)
+        assertTrue(store.state.value.routes is RoutesState.Empty)
     }
 
     @Test
@@ -94,9 +91,9 @@ internal class RoutesViewModelTest {
         val mapboxNavigation = mockMapboxNavigation()
 
         routesViewModel.onAttached(mapboxNavigation)
-        routesViewModel.invoke(RoutesAction.FetchPoints(mockRoutePoints()))
+        store.dispatch(RoutesAction.FetchPoints(mockRoutePoints()))
 
-        assertTrue(routesViewModel.state.value is RoutesState.Fetching)
+        assertTrue(store.state.value.routes is RoutesState.Fetching)
         verify { mapboxNavigation.requestRoutes(any(), any<NavigationRouterCallback>()) }
     }
 
@@ -108,7 +105,7 @@ internal class RoutesViewModelTest {
         }
 
         routesViewModel.onAttached(mapboxNavigation)
-        routesViewModel.invoke(RoutesAction.FetchPoints(mockRoutePoints()))
+        store.dispatch(RoutesAction.FetchPoints(mockRoutePoints()))
         routesViewModel.onDetached(mapboxNavigation)
 
         verify { mapboxNavigation.cancelRouteRequest(123L) }
@@ -119,9 +116,9 @@ internal class RoutesViewModelTest {
         val mapboxNavigation = mockMapboxNavigation()
 
         routesViewModel.onAttached(mapboxNavigation)
-        routesViewModel.invoke(RoutesAction.FetchPoints(mockRoutePoints()))
+        store.dispatch(RoutesAction.FetchPoints(mockRoutePoints()))
 
-        assertTrue(routesViewModel.state.value is RoutesState.Fetching)
+        assertTrue(store.state.value.routes is RoutesState.Fetching)
         verify { mapboxNavigation.requestRoutes(any(), any<NavigationRouterCallback>()) }
     }
 
@@ -133,11 +130,11 @@ internal class RoutesViewModelTest {
         every { mapboxNavigation.requestRoutes(any(), capture(callbackSlot)) } returns 123L
 
         routesViewModel.onAttached(mapboxNavigation)
-        routesViewModel.invoke(RoutesAction.FetchPoints(mockRoutePoints()))
+        store.dispatch(RoutesAction.FetchPoints(mockRoutePoints()))
         callbackSlot.captured.onRoutesReady(routes, mockk())
         routesViewModel.onDetached(mapboxNavigation)
 
-        val readyState = routesViewModel.state.value as? RoutesState.Ready
+        val readyState = store.state.value.routes as? RoutesState.Ready
         assertNotNull(readyState)
         assertEquals(readyState?.routes, routes)
         verify(exactly = 0) { mapboxNavigation.cancelRouteRequest(123L) }
@@ -152,11 +149,11 @@ internal class RoutesViewModelTest {
         every { mapboxNavigation.requestRoutes(any(), capture(callbackSlot)) } returns 123L
 
         routesViewModel.onAttached(mapboxNavigation)
-        routesViewModel.invoke(RoutesAction.FetchPoints(mockRoutePoints()))
+        store.dispatch(RoutesAction.FetchPoints(mockRoutePoints()))
         callbackSlot.captured.onFailure(reasons, routeOptions)
         routesViewModel.onDetached(mapboxNavigation)
 
-        val readyState = routesViewModel.state.value as? RoutesState.Failed
+        val readyState = store.state.value.routes as? RoutesState.Failed
         assertNotNull(readyState)
         assertEquals(readyState?.reasons, reasons)
         assertEquals(readyState?.routeOptions, routeOptions)
@@ -172,11 +169,11 @@ internal class RoutesViewModelTest {
         every { mapboxNavigation.requestRoutes(any(), capture(callbackSlot)) } returns 123L
 
         routesViewModel.onAttached(mapboxNavigation)
-        routesViewModel.invoke(RoutesAction.FetchPoints(mockRoutePoints()))
+        store.dispatch(RoutesAction.FetchPoints(mockRoutePoints()))
         callbackSlot.captured.onCanceled(routeOptions, routerOrigin)
         routesViewModel.onDetached(mapboxNavigation)
 
-        val readyState = routesViewModel.state.value as? RoutesState.Canceled
+        val readyState = store.state.value.routes as? RoutesState.Canceled
         assertNotNull(readyState)
         assertEquals(readyState?.routeOptions, routeOptions)
         assertEquals(readyState?.routerOrigin, routerOrigin)
@@ -189,9 +186,9 @@ internal class RoutesViewModelTest {
         val routeOptions = mockk<RouteOptions>()
 
         routesViewModel.onAttached(mapboxNavigation)
-        routesViewModel.invoke(RoutesAction.FetchOptions(routeOptions))
+        store.dispatch(RoutesAction.FetchOptions(routeOptions))
 
-        assertTrue(routesViewModel.state.value is RoutesState.Fetching)
+        assertTrue(store.state.value.routes is RoutesState.Fetching)
         verify { mapboxNavigation.requestRoutes(routeOptions, any<NavigationRouterCallback>()) }
     }
 
@@ -203,7 +200,7 @@ internal class RoutesViewModelTest {
         }
 
         routesViewModel.onAttached(mapboxNavigation)
-        routesViewModel.invoke(RoutesAction.FetchOptions(mockk()))
+        store.dispatch(RoutesAction.FetchOptions(mockk()))
         routesViewModel.onDetached(mapboxNavigation)
 
         verify { mapboxNavigation.cancelRouteRequest(123L) }
@@ -218,10 +215,10 @@ internal class RoutesViewModelTest {
         val routeOptions = mockk<RouteOptions>()
 
         routesViewModel.onAttached(mapboxNavigation)
-        routesViewModel.invoke(RoutesAction.FetchOptions(routeOptions))
+        store.dispatch(RoutesAction.FetchOptions(routeOptions))
         callbackSlot.captured.onRoutesReady(routes, mockk())
 
-        val readyState = routesViewModel.state.value as? RoutesState.Ready
+        val readyState = store.state.value.routes as? RoutesState.Ready
         assertNotNull(readyState)
         assertEquals(readyState?.routes, routes)
     }
@@ -235,10 +232,10 @@ internal class RoutesViewModelTest {
         every { mapboxNavigation.requestRoutes(any(), capture(callbackSlot)) } returns 123L
 
         routesViewModel.onAttached(mapboxNavigation)
-        routesViewModel.invoke(RoutesAction.FetchOptions(routeOptions))
+        store.dispatch(RoutesAction.FetchOptions(routeOptions))
         callbackSlot.captured.onFailure(reasons, routeOptions)
 
-        val readyState = routesViewModel.state.value as? RoutesState.Failed
+        val readyState = store.state.value.routes as? RoutesState.Failed
         assertNotNull(readyState)
         assertEquals(readyState?.reasons, reasons)
         assertEquals(readyState?.routeOptions, routeOptions)
@@ -253,10 +250,10 @@ internal class RoutesViewModelTest {
         every { mapboxNavigation.requestRoutes(any(), capture(callbackSlot)) } returns 123L
 
         routesViewModel.onAttached(mapboxNavigation)
-        routesViewModel.invoke(RoutesAction.FetchOptions(routeOptions))
+        store.dispatch(RoutesAction.FetchOptions(routeOptions))
         callbackSlot.captured.onCanceled(routeOptions, routerOrigin)
 
-        val readyState = routesViewModel.state.value as? RoutesState.Canceled
+        val readyState = store.state.value.routes as? RoutesState.Canceled
         assertNotNull(readyState)
         assertEquals(readyState?.routeOptions, routeOptions)
         assertEquals(readyState?.routerOrigin, routerOrigin)
@@ -268,10 +265,10 @@ internal class RoutesViewModelTest {
         val navigationRoutes = listOf<NavigationRoute>(mockk())
 
         routesViewModel.onAttached(mapboxNavigation)
-        routesViewModel.invoke(RoutesAction.SetRoutes(navigationRoutes))
+        store.dispatch(RoutesAction.SetRoutes(navigationRoutes))
 
         verify { mapboxNavigation.setNavigationRoutes(navigationRoutes) }
-        val readyState = routesViewModel.state.value as? RoutesState.Ready
+        val readyState = store.state.value.routes as? RoutesState.Ready
         assertNotNull(readyState)
         assertEquals(readyState?.routes, navigationRoutes)
     }
@@ -281,10 +278,10 @@ internal class RoutesViewModelTest {
         val mapboxNavigation = mockMapboxNavigation()
 
         routesViewModel.onAttached(mapboxNavigation)
-        routesViewModel.invoke(RoutesAction.SetRoutes(emptyList()))
+        store.dispatch(RoutesAction.SetRoutes(emptyList()))
 
         verify { mapboxNavigation.setNavigationRoutes(emptyList()) }
-        assertTrue(routesViewModel.state.value is RoutesState.Empty)
+        assertTrue(store.state.value.routes is RoutesState.Empty)
     }
 
     private fun mockMapboxNavigation(): MapboxNavigation {
