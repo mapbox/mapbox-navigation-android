@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 
 sealed class AudioAction {
@@ -46,13 +47,13 @@ class AudioGuidanceViewModel(
 
         val audioGuidanceApi = AudioGuidanceApi.create(mapboxNavigation, AudioGuidanceServices())
         mainJobControl.scope.launch {
-            flowSpeakInstructions().collect { speakInstructions ->
+            flowSpeakInstructions().flatMapLatest { speakInstructions ->
                 if (speakInstructions) {
                     audioGuidanceApi.speakVoiceInstructions()
                 } else {
                     emptyFlow()
                 }
-            }
+            }.collect()
         }
     }
 
