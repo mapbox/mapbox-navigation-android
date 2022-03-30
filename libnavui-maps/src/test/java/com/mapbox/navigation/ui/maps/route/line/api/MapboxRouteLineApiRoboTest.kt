@@ -3,16 +3,21 @@ package com.mapbox.navigation.ui.maps.route.line.api
 import android.content.Context
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
+import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.getRouteDrawData
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRoutes
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.showRouteWithLegIndexHighlighted
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -73,7 +78,11 @@ class MapboxRouteLineApiRoboTest {
                     .length()
             val nativeRoutes = mutableListOf<RouteInterface>().apply {
                 repeat(routesCount) {
-                    add(mockk())
+                    add(
+                        mockk {
+                            every { routeId } returns "$it"
+                        }
+                    )
                 }
             }
             ExpectedFactory.createValue(nativeRoutes)
@@ -862,4 +871,89 @@ class MapboxRouteLineApiRoboTest {
         assertEquals(-27392, result[5].segmentColor)
         assertEquals(1, result[5].legIndex)
     }
+
+    @Test
+    fun `set routes - with alternative metadata - vanished until deviation point`() =
+        coroutineRule.runBlockingTest {
+            val options = MapboxRouteLineOptions.Builder(ctx).build()
+            val api = MapboxRouteLineApi(options)
+            val response = DirectionsResponse.fromJson(
+                FileUtils.loadJsonFixture(
+                    "route_response_alternative_start.json"
+                )
+            )
+            val routeOptions = response.routes().first().routeOptions()!!
+            val routes = NavigationRoute.create(
+                directionsResponse = DirectionsResponse.fromJson(
+                    FileUtils.loadJsonFixture(
+                        "route_response_alternative_start.json"
+                    )
+                ),
+                routeOptions = routeOptions
+            )
+            val alternativeRouteMetadata = mockk<AlternativeRouteMetadata> {
+                every { navigationRoute } returns routes[1]
+                every { forkIntersectionOfAlternativeRoute } returns mockk {
+                    every { location } returns mockk()
+                    every { geometryIndexInRoute } returns 2
+                    every { geometryIndexInLeg } returns 2
+                    every { legIndex } returns 0
+                }
+                every { forkIntersectionOfPrimaryRoute } returns mockk {
+                    every { location } returns mockk()
+                    every { geometryIndexInRoute } returns 2
+                    every { geometryIndexInLeg } returns 2
+                    every { legIndex } returns 0
+                }
+                every { infoFromFork } returns mockk {
+                    every { distance } returns 1588.7698034413877
+                    every { duration } returns 372.0307335579433
+                }
+                every { infoFromStartOfPrimary } returns mockk {
+                    every { distance } returns 1652.4918669972706
+                    every { duration } returns 400.6847335579434
+                }
+            }
+
+            val result = api.setNavigationRoutes(routes, listOf(alternativeRouteMetadata)).value!!
+
+            assertEquals(
+                "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+                    "[rgba, 86.0, 168.0, 251.0, 1.0]]",
+                result
+                    .primaryRouteLineData
+                    .dynamicData
+                    .trafficExpressionProvider!!
+                    .generateExpression().toString()
+            )
+            assertEquals(
+                "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
+                    "0.038547771702788815, [rgba, 134.0, 148.0, 165.0, 1.0]]",
+                result
+                    .alternativeRouteLinesData[0]
+                    .dynamicData
+                    .baseExpressionProvider
+                    .generateExpression().toString()
+            )
+            assertEquals(
+                "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
+                    "0.038547771702788815, [rgba, 114.0, 126.0, 141.0, 1.0]]",
+                result
+                    .alternativeRouteLinesData[0]
+                    .dynamicData
+                    .casingExpressionProvider
+                    .generateExpression().toString()
+            )
+            assertEquals(
+                "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
+                    "0.038547771702788815, [rgba, 134.0, 148.0, 165.0, 1.0], " +
+                    "0.6557962353895171, [rgba, 190.0, 160.0, 135.0, 1.0], " +
+                    "0.7379144868819574, [rgba, 134.0, 148.0, 165.0, 1.0]]",
+                result
+                    .alternativeRouteLinesData[0]
+                    .dynamicData
+                    .trafficExpressionProvider!!
+                    .generateExpression().toString()
+            )
+        }
 }

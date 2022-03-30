@@ -1386,7 +1386,11 @@ class MapboxRouteLineUtilsTest {
                     .length()
             val nativeRoutes = mutableListOf<RouteInterface>().apply {
                 repeat(routesCount) {
-                    add(mockk())
+                    add(
+                        mockk {
+                            every { routeId } returns "$it"
+                        }
+                    )
                 }
             }
             ExpectedFactory.createValue(nativeRoutes)

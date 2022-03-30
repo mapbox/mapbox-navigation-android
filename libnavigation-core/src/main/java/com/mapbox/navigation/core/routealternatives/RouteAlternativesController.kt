@@ -6,13 +6,16 @@ import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.mapToSdkRouteOrigin
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
-import com.mapbox.navigation.utils.internal.logI
+import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouteAlternative
+import com.mapbox.navigator.RouteIntersection
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
@@ -46,6 +49,19 @@ internal class RouteAlternativesController constructor(
 
     private val legacyObserversMap =
         hashMapOf<RouteAlternativesObserver, NavigationRouteAlternativesObserver>()
+
+    private val metadataMap = mutableMapOf<String, AlternativeRouteMetadata>()
+
+    /**
+     * This flag is used to conditionally ignore the calls to native `RouteAlternativesObserver`.
+     *
+     * It's needed because the native observer will fire every time new alternative routes are provided via [MapboxNavigation.setNavigationRoutes],
+     * which would return back to developer the same alternatives they already set, unnecessary duplicating the work.
+     *
+     * This additional call to the native observer will be made synchronously when [Navigator.setAlternativeRoutes] is called.
+     * To prevent this from happening, we're "pausing" the observer for the duration of the route updates.
+     */
+    private var paused = false
 
     fun register(routeAlternativesObserver: RouteAlternativesObserver) {
         val observer = object : NavigationRouteAlternativesObserver {
@@ -137,22 +153,36 @@ internal class RouteAlternativesController constructor(
         observerProcessingJob?.cancel()
     }
 
+    fun getMetadataFor(navigationRoute: NavigationRoute): AlternativeRouteMetadata? {
+        return metadataMap[navigationRoute.id]
+    }
+
     private val nativeObserver = object : com.mapbox.navigator.RouteAlternativesObserver {
         override fun onRouteAlternativesChanged(
             routeAlternatives: List<RouteAlternative>,
             removed: List<RouteAlternative>
         ): List<Int> {
-            val routeProgress = tripSession.getRouteProgress()
-                ?: return emptyList()
+            logD("${routeAlternatives.size} native alternatives available", LOG_CATEGORY)
+            if (paused) {
+                logD("paused, returning", LOG_CATEGORY)
+                return emptyList()
+            }
 
             observerProcessingJob?.cancel()
-            observerProcessingJob = processRouteAlternatives(
-                routeAlternatives
-            ) { alternatives, origin ->
-                observers.forEach {
-                    it.onRouteAlternatives(routeProgress, alternatives, origin)
+            observerProcessingJob =
+                processRouteAlternatives(routeAlternatives) { alternatives, origin ->
+                    logD("${alternatives.size} alternatives available", LOG_CATEGORY)
+
+                    val routeProgress = tripSession.getRouteProgress()
+                        ?: run {
+                            logD("skipping alternatives update - no progress", LOG_CATEGORY)
+                            return@processRouteAlternatives
+                        }
+
+                    observers.forEach {
+                        it.onRouteAlternatives(routeProgress, alternatives, origin)
+                    }
                 }
-            }
 
             // This is supposed to be able to filter alternatives
             // but at this point we're not filtering anything.
@@ -178,25 +208,26 @@ internal class RouteAlternativesController constructor(
         nativeAlternatives: List<RouteAlternative>,
         block: (List<NavigationRoute>, RouterOrigin) -> Unit,
     ) = mainJobControl.scope.launch {
-        val alternatives = nativeAlternatives.mapIndexedNotNull { index, routeAlternative ->
-            val expected = parseNativeDirectionsAlternative(
-                ThreadController.IODispatcher,
-                routeAlternative
-            )
-            if (expected.isValue) {
-                expected.value
-            } else {
-                logE(
-                    """
-                            |unable to parse alternative at index $index;
-                            |failure for response: ${routeAlternative.route.responseJson}
-                        """.trimMargin(),
-                    LOG_CATEGORY
+        val alternatives: List<NavigationRoute> =
+            nativeAlternatives.mapIndexedNotNull { index, routeAlternative ->
+                val expected = parseNativeDirectionsAlternative(
+                    ThreadController.IODispatcher,
+                    routeAlternative
                 )
-                null
+                if (expected.isValue) {
+                    expected.value
+                } else {
+                    logE(
+                        """
+                                |unable to parse alternative at index $index;
+                                |failure for response: ${routeAlternative.route.responseJson}
+                            """.trimMargin(),
+                        LOG_CATEGORY
+                    )
+                    null
+                }
             }
-        }
-        logI("${alternatives.size} alternatives available", LOG_CATEGORY)
+        processAlternativesMetadata(alternatives, nativeAlternatives)
 
         val origin = nativeAlternatives.find {
             // looking for the first new route,
@@ -207,7 +238,63 @@ internal class RouteAlternativesController constructor(
         lastUpdateOrigin = origin
     }
 
+    /**
+     * @see paused
+     */
+    fun pauseUpdates() {
+        paused = true
+    }
+
+    /**
+     * @see paused
+     */
+    fun resumeUpdates() {
+        paused = false
+    }
+
+    fun processAlternativesMetadata(
+        routes: List<NavigationRoute>,
+        nativeAlternatives: List<RouteAlternative>
+    ) {
+        metadataMap.clear()
+        nativeAlternatives.forEach { nativeAlternative ->
+            routes.find { nativeAlternative.route.routeId == it.id }?.let { navigationRoute ->
+                metadataMap[nativeAlternative.route.routeId] = nativeAlternative.mapToMetadata(
+                    navigationRoute
+                )
+            }
+        }
+    }
+
     private companion object {
         private const val LOG_CATEGORY = "RouteAlternativesController"
     }
+}
+
+private fun RouteAlternative.mapToMetadata(
+    navigationRoute: NavigationRoute
+): AlternativeRouteMetadata {
+    return AlternativeRouteMetadata(
+        navigationRoute = navigationRoute,
+        forkIntersectionOfAlternativeRoute = alternativeRouteFork.mapToPlatform(),
+        forkIntersectionOfPrimaryRoute = mainRouteFork.mapToPlatform(),
+        infoFromFork = infoFromFork.mapToPlatform(),
+        infoFromStartOfPrimary = infoFromStart.mapToPlatform(),
+    )
+}
+
+private fun RouteIntersection.mapToPlatform(): AlternativeRouteIntersection {
+    return AlternativeRouteIntersection(
+        location = location,
+        geometryIndexInRoute = geometryIndex,
+        geometryIndexInLeg = segmentIndex,
+        legIndex = legIndex,
+    )
+}
+
+private fun com.mapbox.navigator.AlternativeRouteInfo.mapToPlatform(): AlternativeRouteInfo {
+    return AlternativeRouteInfo(
+        distance = distance,
+        duration = duration,
+    )
 }

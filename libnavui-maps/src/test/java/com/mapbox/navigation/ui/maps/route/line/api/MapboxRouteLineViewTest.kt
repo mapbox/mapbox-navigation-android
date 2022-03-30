@@ -281,14 +281,22 @@ class MapboxRouteLineViewTest {
         val trafficLineExp = mockk<Expression>()
         val routeLineExp = mockk<Expression>()
         val casingLineEx = mockk<Expression>()
-        val alternativeRoute1Expression = mockk<Expression>()
-        val alternativeRoute2Expression = mockk<Expression>()
+        val alternative1TrafficExpression = mockk<Expression>()
+        val alternative2TrafficExpression = mockk<Expression>()
+        val alternative1CasingExpression = mockk<Expression>()
+        val alternative2CasingExpression = mockk<Expression>()
+        val alternative1LineExpression = mockk<Expression>()
+        val alternative2LineExpression = mockk<Expression>()
         val restrictedRouteExpression = mockk<Expression>()
         val primaryRouteTrafficLayer = mockk<LineLayer>(relaxed = true)
         val primaryRouteLayer = mockk<LineLayer>(relaxed = true)
         val primaryRouteCasingLayer = mockk<LineLayer>(relaxed = true)
         val altRouteTrafficLayer1 = mockk<LineLayer>(relaxed = true)
         val altRouteTrafficLayer2 = mockk<LineLayer>(relaxed = true)
+        val altRouteLayer1 = mockk<LineLayer>(relaxed = true)
+        val altRouteLayer2 = mockk<LineLayer>(relaxed = true)
+        val altRouteCasingLayer1 = mockk<LineLayer>(relaxed = true)
+        val altRouteCasingLayer2 = mockk<LineLayer>(relaxed = true)
         val restrictedRouteLayer = mockk<LineLayer>(relaxed = true)
         val topLevelLayer = mockk<LineLayer>(relaxed = true)
         val primaryRouteSource = mockk<GeoJsonSource>(relaxed = true)
@@ -311,18 +319,18 @@ class MapboxRouteLineViewTest {
                     RouteLineData(
                         alternativeRoute1FeatureCollection,
                         RouteLineDynamicData(
-                            { throw UnsupportedOperationException() },
-                            { throw UnsupportedOperationException() },
-                            { alternativeRoute1Expression },
+                            { alternative1LineExpression },
+                            { alternative1CasingExpression },
+                            { alternative1TrafficExpression },
                             { throw UnsupportedOperationException() }
                         )
                     ),
                     RouteLineData(
                         alternativeRoute2FeatureCollection,
                         RouteLineDynamicData(
-                            { throw UnsupportedOperationException() },
-                            { throw UnsupportedOperationException() },
-                            { alternativeRoute2Expression },
+                            { alternative2LineExpression },
+                            { alternative2CasingExpression },
+                            { alternative2TrafficExpression },
                             { throw UnsupportedOperationException() }
                         )
                     )
@@ -340,6 +348,18 @@ class MapboxRouteLineViewTest {
             every {
                 getLayer(PRIMARY_ROUTE_CASING_LAYER_ID)
             } returns primaryRouteCasingLayer
+            every {
+                getLayer(ALTERNATIVE_ROUTE1_LAYER_ID)
+            } returns altRouteLayer1
+            every {
+                getLayer(ALTERNATIVE_ROUTE2_LAYER_ID)
+            } returns altRouteLayer2
+            every {
+                getLayer(ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
+            } returns altRouteCasingLayer1
+            every {
+                getLayer(ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
+            } returns altRouteCasingLayer2
             every {
                 getLayer(ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
             } returns altRouteTrafficLayer1
@@ -371,8 +391,12 @@ class MapboxRouteLineViewTest {
         verify { primaryRouteTrafficLayer.lineGradient(trafficLineExp) }
         verify { primaryRouteLayer.lineGradient(routeLineExp) }
         verify { primaryRouteCasingLayer.lineGradient(casingLineEx) }
-        verify { altRouteTrafficLayer1.lineGradient(alternativeRoute1Expression) }
-        verify { altRouteTrafficLayer2.lineGradient(alternativeRoute2Expression) }
+        verify { altRouteLayer1.lineGradient(alternative1LineExpression) }
+        verify { altRouteLayer2.lineGradient(alternative2LineExpression) }
+        verify { altRouteCasingLayer1.lineGradient(alternative1CasingExpression) }
+        verify { altRouteCasingLayer2.lineGradient(alternative2CasingExpression) }
+        verify { altRouteTrafficLayer1.lineGradient(alternative1TrafficExpression) }
+        verify { altRouteTrafficLayer2.lineGradient(alternative2TrafficExpression) }
         verify { primaryRouteSource.featureCollection(primaryRouteFeatureCollection) }
         verify { altRoute1Source.featureCollection(alternativeRoute1FeatureCollection) }
         verify { altRoute2Source.featureCollection(alternativeRoute2FeatureCollection) }

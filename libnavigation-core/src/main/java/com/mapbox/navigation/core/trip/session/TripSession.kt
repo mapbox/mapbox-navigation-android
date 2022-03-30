@@ -11,11 +11,11 @@ import com.mapbox.navigator.FallbackVersionsObserver
 internal interface TripSession {
 
     val tripService: TripService
-    fun setRoutes(
+    suspend fun setRoutes(
         routes: List<NavigationRoute>,
         legIndex: Int,
         @RoutesExtra.RoutesUpdateReason reason: String
-    )
+    ): NativeSetRouteResult
 
     fun getRawLocation(): Location?
     val zLevel: Int?

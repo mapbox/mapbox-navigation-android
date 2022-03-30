@@ -194,7 +194,11 @@ class RouterWrapperTests {
                     .length()
             val nativeRoutes = mutableListOf<RouteInterface>().apply {
                 repeat(routesCount) {
-                    add(io.mockk.mockk())
+                    add(
+                        mockk {
+                            every { routeId } returns "$it"
+                        }
+                    )
                 }
             }
             ExpectedFactory.createValue(nativeRoutes)

@@ -21,6 +21,7 @@ import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateU
 import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.LONGITUDE_FOR_VOICE_INSTRUCTION_2
 import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.LONGITUDE_FOR_VOICE_INSTRUCTION_NULL
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -35,6 +36,7 @@ import io.mockk.spyk
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertNull
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.Rule
@@ -43,15 +45,19 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class MapboxTripSessionNoSetupTest {
 
     @get:Rule
+    var coroutineRule = MainCoroutineRule()
+
+    @get:Rule
     val mockLoggerTestRule = MockLoggerRule()
 
     @Test
-    fun voiceInstructionsFallbacksToPreviousValue() {
+    fun voiceInstructionsFallbacksToPreviousValue() = coroutineRule.runBlockingTest {
         // arrange
         val voiceInstructionsObserver = VoiceInstructionsObserverRecorder()
         val routeProgressObserver = RouteProgressObserverRecorder()
@@ -88,7 +94,7 @@ class MapboxTripSessionNoSetupTest {
     }
 
     @Test
-    fun addingVoiceInstructionsObserversInTheMiddleOfNavigation() {
+    fun addingVoiceInstructionsObserversInTheMiddleOfNavigation() = coroutineRule.runBlockingTest {
         // arrange
         val nativeNavigator = createNativeNavigatorMock()
         StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
@@ -121,7 +127,7 @@ class MapboxTripSessionNoSetupTest {
     }
 
     @Test
-    fun noVoiceInstructionFallbackForFreshRoute() {
+    fun noVoiceInstructionFallbackForFreshRoute() = coroutineRule.runBlockingTest {
         // arrange
         val nativeNavigator = createNativeNavigatorMock()
         StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
@@ -157,7 +163,7 @@ class MapboxTripSessionNoSetupTest {
     }
 
     @Test
-    fun noVoiceInstructionFallbackAfterLegIndexUpdate() {
+    fun noVoiceInstructionFallbackAfterLegIndexUpdate() = coroutineRule.runBlockingTest {
         // arrange
         val nativeNavigator = createNativeNavigatorMock()
         StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
@@ -190,7 +196,7 @@ class MapboxTripSessionNoSetupTest {
     }
 
     @Test
-    fun voiceInstructionFallbackAfterUnsuccessfulLegIndexUpdate() {
+    fun voiceInstructionFallbackAfterUnsuccessfulLegIndexUpdate() = coroutineRule.runBlockingTest {
         // arrange
         val nativeNavigator = createNativeNavigatorMock()
         coEvery { nativeNavigator.updateLegIndex(any()) } returns false
@@ -223,55 +229,63 @@ class MapboxTripSessionNoSetupTest {
     }
 
     @Test
-    fun newVoiceInstructionsTriggerEvenIfTheyAreTheSameAsPreviousOne() {
-        // arrange
-        val nativeNavigator = createNativeNavigatorMock()
-        StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
-        val locationEngine = TestLocationEngine.create()
-        val tripSession = buildTripSession(
-            nativeNavigator = nativeNavigator,
-            locationEngine = locationEngine
-        )
-        val voiceInstructionObserver = VoiceInstructionsObserverRecorder()
-        tripSession.registerVoiceInstructionsObserver(voiceInstructionObserver)
-        tripSession.start(true)
-        tripSession.setRoutes(
-            listOf(createNavigationRoute()),
-            0,
-            ROUTES_UPDATE_REASON_NEW
-        )
-        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
-        // act
-        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
-        // assert
-        val newVoiceInstructions = voiceInstructionObserver.records
-            .takeLast(2) // take only events triggered by location updates
-            .map { it.announcement() }
-        assertEquals(listOf("1", "1"), newVoiceInstructions)
-    }
+    fun newVoiceInstructionsTriggerEvenIfTheyAreTheSameAsPreviousOne() =
+        coroutineRule.runBlockingTest {
+            // arrange
+            val nativeNavigator = createNativeNavigatorMock()
+            StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(
+                nativeNavigator
+            )
+            val locationEngine = TestLocationEngine.create()
+            val tripSession = buildTripSession(
+                nativeNavigator = nativeNavigator,
+                locationEngine = locationEngine
+            )
+            val voiceInstructionObserver = VoiceInstructionsObserverRecorder()
+            tripSession.registerVoiceInstructionsObserver(voiceInstructionObserver)
+            tripSession.start(true)
+            tripSession.setRoutes(
+                listOf(createNavigationRoute()),
+                0,
+                ROUTES_UPDATE_REASON_NEW
+            )
+            locationEngine.updateLocation(
+                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1)
+            )
+            // act
+            locationEngine.updateLocation(
+                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1)
+            )
+            // assert
+            val newVoiceInstructions = voiceInstructionObserver.records
+                .takeLast(2) // take only events triggered by location updates
+                .map { it.announcement() }
+            assertEquals(listOf("1", "1"), newVoiceInstructions)
+        }
 
     @Test
-    fun `fallback to the next waypoint index 1 when navigator doesn't think we reached it and returns 0`() {
-        // arrange
-        val nativeNavigator = createNativeNavigatorMock()
-        coEvery {
-            nativeNavigator.setPrimaryRoute(any())
-        } returns null
-        val navigatorObservers = recordNavigatorObservers(nativeNavigator)
-        val tripSession = buildTripSession(
-            nativeNavigator = nativeNavigator,
-        )
-        tripSession.start(false)
-        tripSession.setRoutes(listOf(createNavigationRoute()), 0, ROUTES_UPDATE_REASON_NEW)
-        // act
-        navigatorObservers.onStatus(
-            NavigationStatusOrigin.UNCONDITIONAL,
-            createNavigationStatus(nextWaypointIndex = 0, routeState = RouteState.OFF_ROUTE)
-        )
-        // assert
-        val remainingWaypoints = tripSession.getRouteProgress()?.remainingWaypoints
-        assertEquals(1, remainingWaypoints)
-    }
+    fun `fallback to the next waypoint index 1 when navigator doesn't think we reached it and returns 0`() =
+        coroutineRule.runBlockingTest {
+            // arrange
+            val nativeNavigator = createNativeNavigatorMock()
+            coEvery {
+                nativeNavigator.setPrimaryRoute(any())
+            } returns null
+            val navigatorObservers = recordNavigatorObservers(nativeNavigator)
+            val tripSession = buildTripSession(
+                nativeNavigator = nativeNavigator,
+            )
+            tripSession.start(false)
+            tripSession.setRoutes(listOf(createNavigationRoute()), 0, ROUTES_UPDATE_REASON_NEW)
+            // act
+            navigatorObservers.onStatus(
+                NavigationStatusOrigin.UNCONDITIONAL,
+                createNavigationStatus(nextWaypointIndex = 0, routeState = RouteState.OFF_ROUTE)
+            )
+            // assert
+            val remainingWaypoints = tripSession.getRouteProgress()?.remainingWaypoints
+            assertEquals(1, remainingWaypoints)
+        }
 
     @Test
     fun `location updates doesn't change state when trip session is stopped`() {

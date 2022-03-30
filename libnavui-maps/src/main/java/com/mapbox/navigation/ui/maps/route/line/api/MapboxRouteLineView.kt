@@ -87,23 +87,11 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                     mutex.withLock {
                         updateLineGradient(
                             style,
+                            Expression.color(Color.TRANSPARENT),
                             RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
-                            Expression.color(Color.TRANSPARENT)
-                        )
-                        updateLineGradient(
-                            style,
                             RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
-                            Expression.color(Color.TRANSPARENT)
-                        )
-                        updateLineGradient(
-                            style,
                             RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
-                            Expression.color(Color.TRANSPARENT)
-                        )
-                        updateLineGradient(
-                            style,
                             RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
-                            Expression.color(Color.TRANSPARENT)
                         )
 
                         value.primaryRouteLineData.also {
@@ -148,6 +136,18 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                             updateLineGradientAsync(
                                 jobControl.scope,
                                 style,
+                                RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
+                                it.dynamicData.baseExpressionProvider
+                            )
+                            updateLineGradientAsync(
+                                jobControl.scope,
+                                style,
+                                RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
+                                it.dynamicData.casingExpressionProvider
+                            )
+                            updateLineGradientAsync(
+                                jobControl.scope,
+                                style,
                                 RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
                                 it.dynamicData.trafficExpressionProvider
                             )
@@ -158,6 +158,18 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                                 style,
                                 RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
                                 it.featureCollection
+                            )
+                            updateLineGradientAsync(
+                                jobControl.scope,
+                                style,
+                                RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
+                                it.dynamicData.baseExpressionProvider
+                            )
+                            updateLineGradientAsync(
+                                jobControl.scope,
+                                style,
+                                RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID,
+                                it.dynamicData.casingExpressionProvider
                             )
                             updateLineGradientAsync(
                                 jobControl.scope,
@@ -529,8 +541,8 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
             gradientExpression.await().apply {
                 updateLineGradient(
                     style,
+                    this,
                     layerId,
-                    this
                 )
             }
         }
@@ -542,13 +554,15 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         expressionProvider: RouteLineExpressionProvider?
     ) {
         if (expressionProvider != null) {
-            updateLineGradient(style, layerId, expressionProvider.generateExpression())
+            updateLineGradient(style, expressionProvider.generateExpression(), layerId)
         }
     }
 
-    private fun updateLineGradient(style: Style, layerId: String, expression: Expression) {
-        style.getLayer(layerId)?.let {
-            (it as LineLayer).lineGradient(expression)
+    private fun updateLineGradient(style: Style, expression: Expression, vararg layerIds: String) {
+        layerIds.forEach { layerId ->
+            style.getLayer(layerId)?.let {
+                (it as LineLayer).lineGradient(expression)
+            }
         }
     }
 }

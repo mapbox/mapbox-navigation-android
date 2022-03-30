@@ -14,9 +14,9 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockAvailableTilesVersionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.instrumentation_tests.utils.http.MockRoutingTileEndpointErrorRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.idling.IdlingPolicyTimeoutRule
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteRequestIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RoutesObserverIdlingResource
@@ -58,21 +58,23 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     fun setup() {
         setupMockRequestHandlers(coordinates)
 
-        mapboxNavigation = MapboxNavigationProvider.create(
-            NavigationOptions.Builder(activity)
-                .accessToken(getMapboxAccessTokenFromResources(activity))
-                .routeRefreshOptions(
-                    RouteRefreshOptions.Builder()
-                        .intervalMillis(TimeUnit.SECONDS.toMillis(30))
-                        .build()
-                )
-                .routingTilesOptions(
-                    RoutingTilesOptions.Builder()
-                        .tilesBaseUri(URI(mockWebServerRule.baseUrl))
-                        .build()
-                )
-                .build()
-        )
+        runOnMainSync {
+            mapboxNavigation = MapboxNavigationProvider.create(
+                NavigationOptions.Builder(activity)
+                    .accessToken(getMapboxAccessTokenFromResources(activity))
+                    .routeRefreshOptions(
+                        RouteRefreshOptions.Builder()
+                            .intervalMillis(TimeUnit.SECONDS.toMillis(30))
+                            .build()
+                    )
+                    .routingTilesOptions(
+                        RoutingTilesOptions.Builder()
+                            .tilesBaseUri(URI(mockWebServerRule.baseUrl))
+                            .build()
+                    )
+                    .build()
+            )
+        }
     }
 
     @Test
@@ -126,9 +128,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             )
         )
         mockWebServerRule.requestHandlers.add(
-            MockAvailableTilesVersionsRequestHandler(
-                readRawFileText(activity, R.raw.nn_response_available_versions)
-            )
+            MockRoutingTileEndpointErrorRequestHandler()
         )
     }
 

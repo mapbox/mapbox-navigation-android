@@ -11,8 +11,6 @@ import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouterOrigin
 
-val NavigationRoute.routeId: String get() = nativeRoute.routeId
-
 val NavigationRoute.routerOrigin: RouterOrigin get() = nativeRoute.routerOrigin
 
 /**

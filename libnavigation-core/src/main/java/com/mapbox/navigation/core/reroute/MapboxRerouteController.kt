@@ -3,9 +3,7 @@ package com.mapbox.navigation.core.reroute
 import androidx.annotation.MainThread
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.internal.route.routeId
 import com.mapbox.navigation.base.internal.route.routerOrigin
-import com.mapbox.navigation.base.internal.utils.routeAlternativeId
 import com.mapbox.navigation.base.options.RerouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -113,7 +111,7 @@ internal class MapboxRerouteController(
             directionsSession.routes,
             tripSession.getRouteProgress()?.routeAlternativeId,
         ) { routes, routeAlternativeId ->
-            val relevantAlternative = routes.find { it.routeId == routeAlternativeId }
+            val relevantAlternative = routes.find { it.id == routeAlternativeId }
             if (relevantAlternative != null) {
                 val newList = mutableListOf(relevantAlternative).apply {
                     addAll(

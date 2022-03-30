@@ -31,6 +31,7 @@ import com.mapbox.navigator.PredictiveLocationTrackerOptions
 import com.mapbox.navigator.RoadObjectMatcher
 import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
+import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouterError
@@ -167,21 +168,22 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         }
     }
 
-    override suspend fun setAlternativeRoutes(routes: List<NavigationRoute>) =
-        suspendCancellableCoroutine<Unit> { continuation ->
-            navigator!!.setAlternativeRoutes(
-                routes.map { it.nativeRoute() }
-            ) { result ->
-                result.onError {
-                    logE(
-                        "Failed to set alternative routes, " +
-                            "alternatives will be ignored. Reason: $it",
-                        LOG_CATEGORY
-                    )
-                }
-                continuation.resume(Unit)
+    override suspend fun setAlternativeRoutes(
+        routes: List<NavigationRoute>
+    ): List<RouteAlternative> = suspendCancellableCoroutine { continuation ->
+        navigator!!.setAlternativeRoutes(
+            routes.map { it.nativeRoute() }
+        ) { result ->
+            result.onError {
+                logE(
+                    "Failed to set alternative routes, " +
+                        "alternatives will be ignored. Reason: $it",
+                    LOG_CATEGORY
+                )
             }
+            continuation.resume(result.value ?: emptyList())
         }
+    }
 
     /**
      * Updates annotations so that subsequent calls to getStatus will
