@@ -50,3 +50,10 @@ fun createNavigationRoute(
     directionsRoute: DirectionsRoute,
     sdkRouteParser: SDKRouteParser
 ): NavigationRoute = directionsRoute.toNavigationRoute(sdkRouteParser)
+
+/**
+ * Internal API to create a new [NavigationRoute] from a native peer.
+ */
+fun RouteInterface.toNavigationRoute(): NavigationRoute {
+    return this.toNavigationRoute()
+}

@@ -267,6 +267,15 @@ internal fun DirectionsRoute.toNavigationRoute(sdkRouteParser: SDKRouteParser): 
     return NavigationRoute.create(response, options, sdkRouteParser)[routeIndex]
 }
 
+internal fun RouteInterface.toNavigationRoute(): NavigationRoute {
+    return NavigationRoute(
+        directionsResponse = DirectionsResponse.fromJson(responseJson),
+        routeOptions = RouteOptions.fromUrl(URL(requestUri)),
+        routeIndex = routeIndex,
+        nativeRoute = this
+    ).cache()
+}
+
 private fun List<NavigationRoute>.cache(): List<NavigationRoute> {
     RouteCompatibilityCache.cacheCreationResult(this)
     return this
