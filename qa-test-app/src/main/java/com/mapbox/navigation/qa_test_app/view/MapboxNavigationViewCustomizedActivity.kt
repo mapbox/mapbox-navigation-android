@@ -55,7 +55,7 @@ class CustomizedViewModel : ViewModel() {
 }
 
 class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
-    private val vm: CustomizedViewModel by viewModels()
+    private val viewModel: CustomizedViewModel by viewModels()
 
     private val routeLineOptions: MapboxRouteLineOptions by lazy {
         MapboxRouteLineOptions.Builder(this)
@@ -92,7 +92,7 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
 
         // This demonstrates that you can customize views at any time. You can also reset to
         // the default views.
-        vm.showCustomViews.observe(this) { showCustomViews ->
+        viewModel.showCustomViews.observe(this) { showCustomViews ->
             binding.toggleCustomViews.isChecked = showCustomViews
             if (showCustomViews) {
                 binding.navigationView.customizeViewBinders {
@@ -117,7 +117,7 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
         }
 
         binding.toggleCustomViews.setOnCheckedChangeListener { buttonView, isChecked ->
-            vm.showCustomViews.value = isChecked
+            viewModel.showCustomViews.value = isChecked
         }
 
         when (resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
@@ -162,7 +162,7 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
         }
 
         // Demonstrate map customization
-        vm.showCustomMapView.observe(this) { showCustomMapView ->
+        viewModel.showCustomMapView.observe(this) { showCustomMapView ->
             binding.toggleCustomMap.isChecked = showCustomMapView
             if (showCustomMapView) {
                 binding.navigationView.customizeMapView(customMapViewFromCode(this))
@@ -171,7 +171,7 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
             }
         }
         binding.toggleCustomMap.setOnCheckedChangeListener { buttonView, isChecked ->
-            vm.showCustomMapView.value = isChecked
+            viewModel.showCustomMapView.value = isChecked
         }
     }
 

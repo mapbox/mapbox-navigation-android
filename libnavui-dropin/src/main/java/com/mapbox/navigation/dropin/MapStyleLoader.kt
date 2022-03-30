@@ -51,8 +51,8 @@ internal class MapStyleLoader(
     }
 
     /**
-     * Coroutine that observes on both [NavigationViewOptions.mapStyleUriNight] and
-     * [NavigationViewOptions.mapStyleUriDay] flow changes and reloads map [Style]
+     * Coroutine that observes both [NavigationViewOptions.mapStyleUriNight] and
+     * [NavigationViewOptions.mapStyleUriDay] flows and reloads map [Style]
      */
     suspend fun observeAndReloadNewStyles() {
         combine(
