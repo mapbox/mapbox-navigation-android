@@ -6,15 +6,22 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
+import com.mapbox.navigation.core.testutil.replay.removeAccelerationAndBrakingSpeedUpdates
+import com.mapbox.navigation.testing.FileUtils
+import com.mapbox.navigation.testing.MockLoggerRule
 import io.mockk.every
 import io.mockk.mockk
 import org.apache.commons.io.IOUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
 
 class ReplayRouteMapperTest {
+
+    @get:Rule
+    val mockLogger = MockLoggerRule()
 
     private val replayRouteMapper = ReplayRouteMapper()
 
@@ -121,6 +128,27 @@ class ReplayRouteMapperTest {
         assertNull(replayLocation.location.accuracyHorizontal)
         assertNull(replayLocation.location.bearing)
         assertNull(replayLocation.location.speed)
+    }
+
+    @Test
+    fun `an artificial driver drives with almost constant speed along a motorway`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("german_motorway_direction_route.json")
+        )
+
+        val updateEvents = replayRouteMapper.mapDirectionsRouteGeometry(route)
+
+        val speedUpdatesAmongARoute = updateEvents
+            .filterIsInstance<ReplayEventUpdateLocation>().map {
+                it.location.speed ?: 0.0
+            }
+            .removeAccelerationAndBrakingSpeedUpdates()
+        val minSpeed = speedUpdatesAmongARoute.minOf { it }
+        val maxSpeed = speedUpdatesAmongARoute.maxOf { it }
+        assertTrue(
+            "speed changes too much on the way: $speedUpdatesAmongARoute",
+            maxSpeed - minSpeed < 1
+        )
     }
 
     private fun resourceAsString(

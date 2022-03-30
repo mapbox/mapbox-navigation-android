@@ -1,7 +1,10 @@
 package com.mapbox.navigation.core.replay.route
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
+import com.mapbox.navigation.core.testutil.replay.removeAccelerationAndBrakingSpeedUpdates
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.turf.TurfMeasurement
 import org.junit.Assert.assertEquals
@@ -199,6 +202,29 @@ class ReplayRouteInterpolatorTest {
         val speedProfile = routeInterpolator.createSpeedProfile(defaultOptions, coordinates)
 
         assertEquals(1.0, speedProfile[1].speedMps, defaultOptions.uTurnSpeedMps)
+    }
+
+    @Test
+    fun `should keep max speed for minor curvatures on a motorway`() {
+        val motorway = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("german_motorway_direction_route.json")
+        )
+        val coordinatesFromMotorway = motorway.completeGeometryToPoints()
+
+        val speedProfile = routeInterpolator.createSpeedProfile(
+            defaultOptions,
+            coordinatesFromMotorway
+        )
+
+        val speedAlongARoute = speedProfile
+            .map { it.speedMps }
+            .removeAccelerationAndBrakingSpeedUpdates()
+        val minSpeed = speedAlongARoute.minOf { it }
+        val maxSpeed = speedAlongARoute.maxOf { it }
+        assertTrue(
+            "speed changes too much on the way: $speedAlongARoute",
+            maxSpeed - minSpeed < 1
+        )
     }
 
     @Test
