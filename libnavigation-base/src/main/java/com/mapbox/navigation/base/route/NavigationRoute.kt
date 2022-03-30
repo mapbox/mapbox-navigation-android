@@ -24,12 +24,16 @@ import java.net.URL
  * @param routeIndex the index of the route that this wrapper tracks
  * from the collection of routes returned in the original response.
  * @param routeOptions options used to generate the [directionsResponse]
+ * @param id unique local identifier of the route instance.
+ * For routes which contain server-side UUID it's equal to: `UUID + "#" + routeIndex`, for example: `d77PcddF8rhGUc3ORYGfcwcDfS_8QW6r1iXugXD0HOgmr9CWL8wn0g==#0`.
+ * For routes which were generated onboard and do not have a UUID it's equal to: `"local@" + generateUuid() + "#" + routeIndex`, for example: `local@84438c3e-f608-47e9-88cc-cddf341d2fb1#0`.
  */
 class NavigationRoute internal constructor(
     val directionsResponse: DirectionsResponse,
     val routeIndex: Int,
     val routeOptions: RouteOptions,
     internal val nativeRoute: RouteInterface,
+    val id: String = nativeRoute.routeId,
 ) {
 
     companion object {

@@ -41,6 +41,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadataObserver
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -127,6 +128,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerRouteAlternativesObserver(alternativesObserver)
+        mapboxNavigation.registerRouteAlternativesMetadataObserver(alternativesMetadataObserver)
     }
 
     override fun onStop() {
@@ -135,6 +137,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteAlternativesObserver(alternativesObserver)
+        mapboxNavigation.unregisterRouteAlternativesMetadataObserver(alternativesMetadataObserver)
     }
 
     override fun onDestroy() {
@@ -240,6 +243,10 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             ).show()
             Log.e(TAG, "$error")
         }
+    }
+
+    private val alternativesMetadataObserver = AlternativeRouteMetadataObserver {
+        Log.e("lp_test", it.toString())
     }
 
     private fun findRoute(origin: Point?, destination: Point?) {

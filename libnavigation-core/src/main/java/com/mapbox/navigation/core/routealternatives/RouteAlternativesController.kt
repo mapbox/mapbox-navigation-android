@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.routealternatives
 
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.utils.parseNativeDirectionsAlternative
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
@@ -13,6 +14,7 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigator.RouteAlternative
+import com.mapbox.navigator.RouteIntersection
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CopyOnWriteArraySet
@@ -44,6 +46,11 @@ internal class RouteAlternativesController constructor(
 
     private val legacyObserversMap =
         hashMapOf<RouteAlternativesObserver, NavigationRouteAlternativesObserver>()
+
+    // todo clear on routes cleared in trip session
+    private val metadataMap = mutableMapOf<String, AlternativeRouteMetadata>()
+
+    private val metadataObservers = CopyOnWriteArraySet<AlternativeRouteMetadataObserver>()
 
     fun register(routeAlternativesObserver: RouteAlternativesObserver) {
         val observer = object : NavigationRouteAlternativesObserver {
@@ -89,6 +96,15 @@ internal class RouteAlternativesController constructor(
         }
     }
 
+    fun registerMetadataObserver(metadataObserver: AlternativeRouteMetadataObserver) {
+        metadataObservers.add(metadataObserver)
+        metadataObserver.onMetadataUpdated(metadataMap.values.toList())
+    }
+
+    fun unregisterMetadataObserver(metadataObserver: AlternativeRouteMetadataObserver) {
+        metadataObservers.remove(metadataObserver)
+    }
+
     fun triggerAlternativeRequest(listener: NavigationRouteAlternativesRequestCallback?) {
         nativeRouteAlternativesController.refreshImmediately { expected ->
             val routeProgress = tripSession.getRouteProgress()
@@ -132,6 +148,11 @@ internal class RouteAlternativesController constructor(
         nativeRouteAlternativesController.removeAllObservers()
         observers.clear()
         legacyObserversMap.clear()
+        metadataObservers.clear()
+    }
+
+    fun getMetadataFor(navigationRoute: NavigationRoute): AlternativeRouteMetadata? {
+        return metadataMap[navigationRoute.id]
     }
 
     private val nativeObserver = object : com.mapbox.navigator.RouteAlternativesObserver {
@@ -172,6 +193,7 @@ internal class RouteAlternativesController constructor(
         nativeAlternatives: List<RouteAlternative>,
         block: (List<NavigationRoute>, RouterOrigin) -> Unit,
     ) {
+        metadataMap.clear()
         val alternatives: List<NavigationRoute> = runBlocking {
             nativeAlternatives.mapIndexedNotNull { index, routeAlternative ->
                 val expected = parseNativeDirectionsAlternative(
@@ -179,6 +201,7 @@ internal class RouteAlternativesController constructor(
                     routeAlternative
                 )
                 if (expected.isValue) {
+                    metadataMap[routeAlternative.route.routeId] = routeAlternative.mapToMetadata()
                     expected.value
                 } else {
                     logE(
@@ -202,10 +225,63 @@ internal class RouteAlternativesController constructor(
             }?.route?.routerOrigin?.mapToSdkRouteOrigin() ?: lastUpdateOrigin
             block(alternatives, origin)
             lastUpdateOrigin = origin
+            notifyMetadataObservers()
+        }
+    }
+
+    private fun notifyMetadataObservers() {
+        metadataObservers.forEach {
+            it.onMetadataUpdated(metadataMap.values.toList())
         }
     }
 
     private companion object {
         private const val LOG_CATEGORY = "RouteAlternativesController"
     }
+}
+
+data class AlternativeRouteMetadata internal constructor(
+    val routeId: String,
+    val forkIntersectionOfAlternativeRoute: AlternativeRouteIntersection,
+    val forkIntersectionOfPrimaryRoute: AlternativeRouteIntersection,
+    val infoFromFork: AlternativeRouteInfo,
+    val infoFromStartOfPrimary: AlternativeRouteInfo,
+)
+
+data class AlternativeRouteIntersection internal constructor(
+    val location: Point,
+    val geometryIndexInRoute: Int,
+    val geometryIndexInLeg: Int,
+    val legIndex: Int,
+)
+
+data class AlternativeRouteInfo internal constructor(
+    val distance: Double,
+    val duration: Double,
+)
+
+private fun RouteAlternative.mapToMetadata(): AlternativeRouteMetadata {
+    return AlternativeRouteMetadata(
+        routeId = route.routeId,
+        forkIntersectionOfAlternativeRoute = alternativeRouteFork.mapToPlatform(),
+        forkIntersectionOfPrimaryRoute = mainRouteFork.mapToPlatform(),
+        infoFromFork = infoFromFork.mapToPlatform(),
+        infoFromStartOfPrimary = infoFromStart.mapToPlatform(),
+    )
+}
+
+private fun RouteIntersection.mapToPlatform(): AlternativeRouteIntersection {
+    return AlternativeRouteIntersection(
+        location = location,
+        geometryIndexInRoute = geometryIndex,
+        geometryIndexInLeg = segmentIndex,
+        legIndex = legIndex,
+    )
+}
+
+private fun com.mapbox.navigator.AlternativeRouteInfo.mapToPlatform(): AlternativeRouteInfo {
+    return AlternativeRouteInfo(
+        distance = distance,
+        duration = duration,
+    )
 }

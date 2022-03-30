@@ -61,6 +61,8 @@ import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
+import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadataObserver
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesRequestCallback
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
@@ -1315,6 +1317,22 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeAlternativesObserver: NavigationRouteAlternativesObserver
     ) {
         routeAlternativesController.unregister(routeAlternativesObserver)
+    }
+
+    fun registerRouteAlternativesMetadataObserver(
+        metadataObserver: AlternativeRouteMetadataObserver
+    ) {
+        routeAlternativesController.registerMetadataObserver(metadataObserver)
+    }
+
+    fun unregisterRouteAlternativesMetadataObserver(
+        metadataObserver: AlternativeRouteMetadataObserver
+    ) {
+        routeAlternativesController.unregisterMetadataObserver(metadataObserver)
+    }
+
+    fun getAlternativeMetadataFor(navigationRoute: NavigationRoute): AlternativeRouteMetadata? {
+        return routeAlternativesController.getMetadataFor(navigationRoute)
     }
 
     /**
