@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
+import com.mapbox.navigation.core.testutil.replay.removeAccelerationAndBrakingSpeedUpdates
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.turf.TurfMeasurement
 import org.junit.Assert.assertEquals

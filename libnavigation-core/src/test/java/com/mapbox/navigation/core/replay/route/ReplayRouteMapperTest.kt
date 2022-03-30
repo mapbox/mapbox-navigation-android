@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
+import com.mapbox.navigation.core.testutil.replay.removeAccelerationAndBrakingSpeedUpdates
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.MockLoggerRule
 import io.mockk.every
