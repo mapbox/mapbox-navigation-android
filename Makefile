@@ -33,9 +33,12 @@ examples \
 instrumentation-tests \
 
 define run-gradle-tasks
-	for module in $(1) ; do \
-		./gradlew $$module:$(2) || exit 1 ; \
-	done
+    COMMAND=./gradlew; \
+	for module in $(1); do \
+	    COMMAND+=" "; \
+	    COMMAND+=$$module:$(2); \
+	done; \
+	eval $$COMMAND
 endef
 
 .PHONY: check-kotlin-lint
