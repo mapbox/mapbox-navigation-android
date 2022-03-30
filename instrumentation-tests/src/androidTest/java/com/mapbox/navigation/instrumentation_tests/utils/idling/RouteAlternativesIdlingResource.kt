@@ -7,8 +7,8 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver
-import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
 import com.mapbox.navigation.testing.ui.idling.NavigationIdlingResource
+import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 
 /**
  * Becomes idle when [RouteAlternativesObserver.onRouteAlternatives] is invoked,

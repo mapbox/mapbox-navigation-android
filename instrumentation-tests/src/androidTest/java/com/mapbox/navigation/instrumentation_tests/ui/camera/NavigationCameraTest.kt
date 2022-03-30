@@ -1,7 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.ui.camera
 
 import com.mapbox.navigation.instrumentation_tests.ui.SimpleMapViewNavigationTest
-import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
+import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import org.junit.Test
 
 class NavigationCameraTest : SimpleMapViewNavigationTest() {
