@@ -105,7 +105,8 @@ object TestActivitySuite {
         },
         TestActivityDescription(
             "Navigation View test",
-            R.string.navigation_view_description
+            R.string.navigation_view_description,
+            launchAfterPermissionResult = false
         ) { activity -> activity.startActivity<MapboxNavigationViewActivity>() },
         TestActivityDescription(
             "Customized navigation View test",

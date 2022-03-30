@@ -6,7 +6,6 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.lifecycle.UIViewModel
-import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -14,17 +13,18 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 sealed class TripSessionStarterAction {
+    data class OnLocationPermission(val granted: Boolean) : TripSessionStarterAction()
     object EnableTripSession : TripSessionStarterAction()
     object EnableReplayTripSession : TripSessionStarterAction()
 }
 
 data class TripSessionStarterState(
+    val isLocationPermissionGranted: Boolean = false,
     // TODO this is true for development. Road testing should be set to false.
     val isReplayEnabled: Boolean = true,
 )
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-@SuppressLint("MissingPermission")
 class TripSessionStarterViewModel(
     val navigationStateViewModel: NavigationStateViewModel,
     initialState: TripSessionStarterState = TripSessionStarterState(),
@@ -38,23 +38,27 @@ class TripSessionStarterViewModel(
         action: TripSessionStarterAction
     ): TripSessionStarterState {
         return when (action) {
+            is TripSessionStarterAction.OnLocationPermission -> {
+                state.copy(isLocationPermissionGranted = action.granted)
+            }
             TripSessionStarterAction.EnableReplayTripSession -> {
                 state.copy(isReplayEnabled = true)
             }
             TripSessionStarterAction.EnableTripSession -> {
                 state.copy(isReplayEnabled = false)
             }
-        }.also {
-            logI("TripSessionStarterViewModel", "State changed to $it")
         }
     }
 
+    @SuppressLint("MissingPermission")
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
         mainJobControl.scope.launch {
-            flowStartReplaySession().collect { startReplay ->
-                if (startReplay) {
+            flowStartReplaySession().collect { starterState ->
+                if (!starterState.isLocationPermissionGranted) {
+                    mapboxNavigation.stopTripSession()
+                } else if (starterState.isReplayEnabled) {
                     replayRouteTripSession?.stop(mapboxNavigation)
                     replayRouteTripSession = ReplayRouteTripSession()
                     replayRouteTripSession?.start(mapboxNavigation)
@@ -67,11 +71,14 @@ class TripSessionStarterViewModel(
         }
     }
 
-    private fun flowStartReplaySession(): Flow<Boolean> = combine(
+    private fun flowStartReplaySession(): Flow<TripSessionStarterState> = combine(
         navigationStateViewModel.state, state
     ) { navigationState, tripSessionStarterState ->
-        navigationState is NavigationState.ActiveNavigation &&
-            tripSessionStarterState.isReplayEnabled
+        if (navigationState !is NavigationState.ActiveNavigation) {
+            tripSessionStarterState.copy(isReplayEnabled = false)
+        } else {
+            tripSessionStarterState
+        }
     }.distinctUntilChanged()
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {

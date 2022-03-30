@@ -6,6 +6,7 @@ import android.content.ContextWrapper
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.activity.ComponentActivity
 import androidx.core.content.res.use
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -18,6 +19,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.component.backpress.OnKeyListenerComponent
+import com.mapbox.navigation.dropin.component.tripsession.LocationPermissionComponent
 import com.mapbox.navigation.dropin.coordinator.ActionButtonsCoordinator
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
 import com.mapbox.navigation.dropin.coordinator.ManeuverCoordinator
@@ -27,6 +29,8 @@ import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
 import com.mapbox.navigation.dropin.extensions.attachCreated
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
+import com.mapbox.navigation.utils.internal.logW
+import java.lang.ref.WeakReference
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DropInNavigationView @JvmOverloads constructor(
@@ -110,6 +114,10 @@ class DropInNavigationView @JvmOverloads constructor(
          * Single point of entry for the Mapbox Navigation View.
          */
         attachCreated(
+            LocationPermissionComponent(
+                context.toComponentActivityRef(),
+                navigationContext.viewModel.tripSessionStarterViewModel
+            ),
             MapLayoutCoordinator(navigationContext, binding),
             OnKeyListenerComponent(
                 navigationContext.viewModel.navigationStateViewModel,
@@ -170,4 +178,12 @@ private fun Context.toViewModelStoreOwner(): ViewModelStoreOwner {
         "Please ensure that the hosting Context is a valid ViewModelStoreOwner"
     }
     return viewModelStoreOwner
+}
+
+private fun Context.toComponentActivityRef(): WeakReference<ComponentActivity>? {
+    val componentActivity = recursiveUnwrap(this) as? ComponentActivity
+    if (componentActivity == null) {
+        logW("Unable to find ComponentActivity to request location permissions")
+    }
+    return componentActivity?.let { WeakReference(it) }
 }
