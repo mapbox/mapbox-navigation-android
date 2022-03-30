@@ -24,6 +24,7 @@ import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
@@ -198,6 +199,7 @@ class MapboxRouteLineApi(
     internal var activeLegIndex = INVALID_ACTIVE_LEG_INDEX
         private set
     private val trafficBackfillRoadClasses = CopyOnWriteArrayList<String>()
+    private val alternativesDeviationOffset = mutableMapOf<String, Double>()
     private val alternativelyStyleSegmentsNotInLegCache: LruCache<
         CacheResultUtils.CacheResultKey2<
             Int, List<RouteLineExpressionData>,
@@ -309,10 +311,34 @@ class MapboxRouteLineApi(
         newRoutes: List<NavigationRoute>,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
+        setNavigationRoutes(
+            newRoutes = newRoutes,
+            alternativeRoutesMetadata = emptyList(),
+            consumer = consumer
+        )
+    }
+
+    /**
+     * Sets the routes that will be operated on.
+     *
+     * This can be a long running task with long routes.
+     * There is a cancel method which will cancel the background tasks.
+     *
+     * @param newRoutes one or more routes. The first route in the collection will be considered
+     * the primary route and any additional routes will be alternate routes.
+     * @param alternativeRoutesMetadata if available, the update will hide the portions of the alternative routes
+     * until the deviation point with the primary route. See [MapboxNavigation.getAlternativeMetadataFor].
+     * @param consumer a method that consumes the result of the operation.
+     */
+    fun setNavigationRoutes(
+        newRoutes: List<NavigationRoute>,
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
+        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
+    ) {
         val routeLines = newRoutes.map {
             NavigationRouteLine(it, null)
         }
-        setNavigationRouteLines(routeLines, consumer)
+        setNavigationRouteLines(routeLines, alternativeRoutesMetadata, consumer)
     }
 
     /**
@@ -329,6 +355,30 @@ class MapboxRouteLineApi(
         newRoutes: List<NavigationRouteLine>,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
+        setNavigationRouteLines(
+            newRoutes = newRoutes,
+            alternativeRoutesMetadata = emptyList(),
+            consumer = consumer
+        )
+    }
+
+    /**
+     * Sets the routes that will be operated on.
+     *
+     * This can be a long running task with long routes.
+     * There is a cancel method which will cancel the background tasks.
+     *
+     * @param newRoutes one or more routes. The first route in the collection will be considered
+     * the primary route and any additional routes will be alternate routes.
+     * @param alternativeRoutesMetadata if available, the update will hide the portions of the alternative routes
+     * until the deviation point with the primary route. See [MapboxNavigation.getAlternativeMetadataFor].
+     * @param consumer a method that consumes the result of the operation.
+     */
+    fun setNavigationRouteLines(
+        newRoutes: List<NavigationRouteLine>,
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
+        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
+    ) {
         cancel()
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
@@ -336,7 +386,8 @@ class MapboxRouteLineApi(
                     MapboxRouteLineUtils.getRouteLineFeatureDataProvider(newRoutes)
                 val routeData = setNewRouteData(
                     newRoutes.map(NavigationRouteLine::route),
-                    featureDataProvider
+                    featureDataProvider,
+                    alternativeRoutesMetadata
                 )
                 consumer.accept(routeData)
             }
@@ -1079,7 +1130,8 @@ class MapboxRouteLineApi(
 
     private suspend fun setNewRouteData(
         newRoutes: List<NavigationRoute>,
-        featureDataProvider: () -> List<RouteFeatureData>
+        featureDataProvider: () -> List<RouteFeatureData>,
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>
     ): Expected<RouteLineError, RouteSetValue> {
         ifNonNull(newRoutes.firstOrNull()) { primaryRouteCandidate ->
             if (!primaryRouteCandidate.directionsRoute.isSameRoute(primaryRoute?.directionsRoute)) {
@@ -1092,6 +1144,28 @@ class MapboxRouteLineApi(
         routes.addAll(newRoutes)
         primaryRoute = newRoutes.firstOrNull()
         resetCaches()
+
+        alternativesDeviationOffset.clear()
+        alternativeRoutesMetadata.forEach { routeMetadata ->
+            var runningDistance = 0.0
+            val route = routeMetadata.navigationRoute.directionsRoute
+            route.legs()?.forEachIndexed LegLoop@{ legIndex, leg ->
+                leg.annotation()?.distance()
+                    ?.forEachIndexed AnnotationLoop@{ annotationIndex, distance ->
+                        val forkLegIndex = routeMetadata.forkIntersectionOfAlternativeRoute.legIndex
+                        val forkGeometryIndexInLeg =
+                            routeMetadata.forkIntersectionOfAlternativeRoute.geometryIndexInLeg
+                        if (legIndex == forkLegIndex && annotationIndex == forkGeometryIndexInLeg) {
+                            val percentageTraveled = runningDistance / route.distance()
+                            alternativesDeviationOffset[routeMetadata.navigationRoute.id] =
+                                percentageTraveled
+                            return@LegLoop
+                        }
+                        runningDistance += distance
+                    }
+            }
+        }
+
         return buildDrawRoutesState(featureDataProvider)
     }
 
@@ -1152,17 +1226,43 @@ class MapboxRouteLineApi(
             )
         }
 
-        val alternateRoutesBaseExpressionProducer = {
-            // todo add support for vanishing until divergence point
-            throw UnsupportedOperationException(
-                "vanishing of alternatives routes is not supported yet"
+        val alternative1PercentageTraveled = partitionedRoutes.second.firstOrNull()?.route?.run {
+            alternativesDeviationOffset[this.id]
+        } ?: 0.0
+        val alternateRoute1BaseExpressionProducer = {
+            MapboxRouteLineUtils.getRouteLineExpression(
+                alternative1PercentageTraveled,
+                Color.TRANSPARENT,
+                routeLineOptions
+                    .resourceProvider.routeLineColorResources.alternativeRouteDefaultColor
+            )
+        }
+        val alternateRoute1CasingExpressionProducer = {
+            MapboxRouteLineUtils.getRouteLineExpression(
+                alternative1PercentageTraveled,
+                Color.TRANSPARENT,
+                routeLineOptions
+                    .resourceProvider.routeLineColorResources.alternativeRouteCasingColor
             )
         }
 
-        val alternateRoutesCasingExpressionProducer = {
-            // todo add support for vanishing until divergence point
-            throw UnsupportedOperationException(
-                "vanishing of alternatives routes is not supported yet"
+        val alternative2PercentageTraveled = partitionedRoutes.second.getOrNull(1)?.route?.run {
+            alternativesDeviationOffset[this.id]
+        } ?: 0.0
+        val alternateRoute2BaseExpressionProducer = {
+            MapboxRouteLineUtils.getRouteLineExpression(
+                alternative2PercentageTraveled,
+                Color.TRANSPARENT,
+                routeLineOptions
+                    .resourceProvider.routeLineColorResources.alternativeRouteDefaultColor
+            )
+        }
+        val alternateRoute2CasingExpressionProducer = {
+            MapboxRouteLineUtils.getRouteLineExpression(
+                alternative2PercentageTraveled,
+                Color.TRANSPARENT,
+                routeLineOptions
+                    .resourceProvider.routeLineColorResources.alternativeRouteCasingColor
             )
         }
 
@@ -1180,7 +1280,7 @@ class MapboxRouteLineApi(
                     routeLineOptions.resourceProvider.routeLineColorResources,
                     trafficBackfillRoadClasses,
                     false,
-                    0.0,
+                    alternativesDeviationOffset[this.id] ?: 0.0,
                     Color.TRANSPARENT,
                     routeLineOptions
                         .resourceProvider
@@ -1197,7 +1297,7 @@ class MapboxRouteLineApi(
                 routeLineOptions.resourceProvider.routeLineColorResources,
                 trafficBackfillRoadClasses,
                 false,
-                0.0,
+                alternativesDeviationOffset[partitionedRoutes.second[1].route.id] ?: 0.0,
                 Color.TRANSPARENT,
                 routeLineOptions
                     .resourceProvider
@@ -1315,8 +1415,8 @@ class MapboxRouteLineApi(
                     RouteLineData(
                         alternativeRoute1FeatureCollection,
                         RouteLineDynamicData(
-                            alternateRoutesBaseExpressionProducer,
-                            alternateRoutesCasingExpressionProducer,
+                            alternateRoute1BaseExpressionProducer,
+                            alternateRoute1CasingExpressionProducer,
                             alternateRoute1TrafficExpressionProducer,
                             alternateRoutesRestrictedSectionsExpressionProducer
                         )
@@ -1324,8 +1424,8 @@ class MapboxRouteLineApi(
                     RouteLineData(
                         alternativeRoute2FeatureCollection,
                         RouteLineDynamicData(
-                            alternateRoutesBaseExpressionProducer,
-                            alternateRoutesCasingExpressionProducer,
+                            alternateRoute2BaseExpressionProducer,
+                            alternateRoute2CasingExpressionProducer,
                             alternateRoute2TrafficExpressionProducer,
                             alternateRoutesRestrictedSectionsExpressionProducer
                         )

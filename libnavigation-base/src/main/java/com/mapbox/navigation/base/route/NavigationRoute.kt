@@ -115,6 +115,13 @@ class NavigationRoute internal constructor(
     }
 
     /**
+     * Unique local identifier of the route instance.
+     * For routes which contain server-side UUID it's equal to: `UUID + "#" + routeIndex`, for example: `d77PcddF8rhGUc3ORYGfcwcDfS_8QW6r1iXugXD0HOgmr9CWL8wn0g==#0`.
+     * For routes which were generated onboard and do not have a UUID it's equal to: `"local@" + generateUuid() + "#" + routeIndex`, for example: `local@84438c3e-f608-47e9-88cc-cddf341d2fb1#0`.
+     */
+    val id: String = nativeRoute.routeId
+
+    /**
      * [DirectionsRoute] that this [NavigationRoute] represents.
      */
     val directionsRoute = directionsResponse.routes()[routeIndex].toBuilder()
@@ -138,10 +145,8 @@ class NavigationRoute internal constructor(
 
         other as NavigationRoute
 
+        if (id != other.id) return false
         if (directionsRoute != other.directionsRoute) return false
-        if (routeOptions != other.routeOptions) return false
-        if (directionsResponse.waypoints() != other.directionsResponse.waypoints()) return false
-        if (directionsResponse.metadata() != other.directionsResponse.metadata()) return false
 
         return true
     }
@@ -150,10 +155,8 @@ class NavigationRoute internal constructor(
      * Returns a hash code value for the object.
      */
     override fun hashCode(): Int {
-        var result = directionsRoute.hashCode()
-        result = 31 * result + routeOptions.hashCode()
-        result = 31 * result + directionsResponse.waypoints().hashCode()
-        result = 31 * result + directionsResponse.metadata().hashCode()
+        var result = id.hashCode()
+        result = 31 * result + directionsRoute.hashCode()
         return result
     }
 
@@ -161,12 +164,7 @@ class NavigationRoute internal constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "NavigationRoute(" +
-            "directionsResponse=$directionsResponse, " +
-            "routeIndex=$routeIndex, " +
-            "routeOptions=$routeOptions, " +
-            "nativeRoute=$nativeRoute, " +
-            ")"
+        return "NavigationRoute(id=$id)"
     }
 
     internal fun copy(

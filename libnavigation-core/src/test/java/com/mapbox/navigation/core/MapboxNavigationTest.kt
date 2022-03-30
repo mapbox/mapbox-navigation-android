@@ -45,6 +45,7 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.core.trip.session.NativeSetRouteResult
 import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
@@ -59,12 +60,14 @@ import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigatorConfig
+import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.TilesConfig
 import io.mockk.Ordering
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -78,6 +81,7 @@ import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import org.junit.After
@@ -105,6 +109,7 @@ class MapboxNavigationTest {
 
     @get:Rule
     val mockLoggerTestRule = MockLoggerRule()
+
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
@@ -233,7 +238,11 @@ class MapboxNavigationTest {
                     .length()
             val nativeRoutes = mutableListOf<RouteInterface>().apply {
                 repeat(routesCount) {
-                    add(mockk())
+                    add(
+                        mockk {
+                            every { routeId } returns "$it"
+                        }
+                    )
                 }
             }
             ExpectedFactory.createValue(nativeRoutes)
@@ -302,7 +311,7 @@ class MapboxNavigationTest {
         }
         mapboxNavigation.stopTripSession()
 
-        verify(exactly = 1) {
+        coVerify(exactly = 1) {
             tripSession.setRoutes(
                 routes = emptyList(),
                 legIndex = 0,
@@ -312,7 +321,7 @@ class MapboxNavigationTest {
 
         mapboxNavigation.startTripSession()
 
-        verify(exactly = 1) {
+        coVerify(exactly = 1) {
             tripSession.setRoutes(
                 routes, currentLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW
             )
@@ -444,7 +453,7 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun onDestroySetsRoutesToEmpty() {
+    fun onDestroySetsRoutesToEmpty() = coroutineRule.runBlockingTest {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
 
@@ -629,8 +638,7 @@ class MapboxNavigationTest {
             it.onRoutesChanged(RoutesUpdatedResult(routes, reason))
         }
 
-        verify { tripSession.setRoutes(routes, initialLegIndex, reason) }
-        verify { routeRefreshController.restart(primary) }
+        verify { routeRefreshController.restart(primary, any()) }
     }
 
     @Test
@@ -648,44 +656,7 @@ class MapboxNavigationTest {
             it.onRoutesChanged(RoutesUpdatedResult(routes, reason))
         }
 
-        verify { tripSession.setRoutes(emptyList(), initialLegIndex, reason) }
         verify { routeRefreshController.stop() }
-    }
-
-    @Test
-    fun `trip session route is delayed till trip session is started`() {
-        createMapboxNavigation()
-        val routes = listOf<NavigationRoute>(
-            mockk {
-                every { directionsRoute } returns mockk()
-            },
-            mockk {
-                every { directionsRoute } returns mockk()
-            }
-        )
-        val initialLegIndex = 2
-        val routeObserversSlot = mutableListOf<RoutesObserver>()
-
-        every { tripSession.getState() } returns TripSessionState.STOPPED
-        every { directionsSession.routes } returns routes
-        every { directionsSession.initialLegIndex } returns initialLegIndex
-        verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
-
-        for (observer in routeObserversSlot) {
-            observer.onRoutesChanged(
-                RoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
-            )
-        }
-
-        verify(exactly = 0) { tripSession.setRoutes(any(), any(), any()) }
-
-        mapboxNavigation.startTripSession()
-
-        verify(exactly = 1) {
-            tripSession.setRoutes(
-                routes, initialLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW
-            )
-        }
     }
 
     @Test
@@ -864,7 +835,7 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun `setRoute pushes the route to the directions session`() {
+    fun `setRoute pushes the route to the directions session`() = coroutineRule.runBlockingTest {
         createMapboxNavigation()
         val route: NavigationRoute = mockk()
         val routeOptions: RouteOptions = mockk()
@@ -1073,7 +1044,7 @@ class MapboxNavigationTest {
             assertEquals(primaryRoute, this.firstArg<Pair<NavigationRoute, Int>>().first)
             mockk()
         }
-        coEvery { navigator.setAlternativeRoutes(any()) } just Runs
+        coEvery { navigator.setAlternativeRoutes(any()) } returns emptyList()
 
         mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
 
@@ -1158,19 +1129,20 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun `external route is first provided to the billing controller before directions session`() {
-        createMapboxNavigation()
-        val routes = listOf(mockk<NavigationRoute>())
+    fun `external route is first provided to the billing controller before directions session`() =
+        coroutineRule.runBlockingTest {
+            createMapboxNavigation()
+            val routes = listOf(mockk<NavigationRoute>())
 
-        mapboxNavigation.setNavigationRoutes(routes)
+            mapboxNavigation.setNavigationRoutes(routes)
 
-        verifyOrder {
-            billingController.onExternalRouteSet(routes.first())
-            directionsSession.setRoutes(
-                routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW
-            )
+            verifyOrder {
+                billingController.onExternalRouteSet(routes.first())
+                directionsSession.setRoutes(
+                    routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW
+                )
+            }
         }
-    }
 
     @Test
     fun `adding or removing alternative routes creates alternative reason`() {
@@ -1216,6 +1188,130 @@ class MapboxNavigationTest {
         assertFalse(MapboxNavigationProvider.isCreated())
     }
 
+    @Test
+    fun `set routes are processed in the correct order`() = coroutineRule.runBlockingTest {
+        createMapboxNavigation()
+
+        val longRoutes = listOf<NavigationRoute>(mockk())
+        val shortRoutes = listOf<NavigationRoute>(mockk())
+        coEvery { tripSession.setRoutes(longRoutes, any(), any()) } coAnswers {
+            delay(100L)
+            mockk(relaxed = true)
+        }
+        coEvery { tripSession.setRoutes(shortRoutes, any(), any()) } coAnswers {
+            delay(50L)
+            mockk(relaxed = true)
+        }
+
+        pauseDispatcher {
+            mapboxNavigation.setNavigationRoutes(longRoutes)
+            mapboxNavigation.setNavigationRoutes(shortRoutes)
+        }
+
+        verifyOrder {
+            directionsSession.setRoutes(longRoutes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            directionsSession.setRoutes(shortRoutes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        }
+    }
+
+    @Test
+    fun `set route - correct order of actions, result applied to alternatives controller`() =
+        coroutineRule.runBlockingTest {
+            createMapboxNavigation()
+            val routes = listOf<NavigationRoute>(mockk())
+            val nativeAlternatives = listOf<RouteAlternative>(mockk())
+            coEvery {
+                tripSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            } returns NativeSetRouteResult(nativeAlternatives)
+
+            mapboxNavigation.setNavigationRoutes(routes)
+
+            coVerifyOrder {
+                routeAlternativesController.pauseUpdates()
+                tripSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+                routeAlternativesController.processAlternativesMetadata(routes, nativeAlternatives)
+                routeAlternativesController.resumeUpdates()
+                directionsSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            }
+        }
+
+    @Test
+    fun `correct order of actions when trip session started before routes are processed`() =
+        coroutineRule.runBlockingTest {
+            every { directionsSession.initialLegIndex } returns 0
+            every { tripSession.isRunningWithForegroundService() } returns true
+            createMapboxNavigation()
+            val routes = listOf<NavigationRoute>(mockk())
+            coEvery {
+                tripSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            } coAnswers {
+                delay(100)
+                mockk(relaxed = true)
+            }
+            every { directionsSession.setRoutes(any(), any(), any()) } answers {
+                every { directionsSession.routes } returns firstArg()
+            }
+
+            pauseDispatcher {
+                mapboxNavigation.setNavigationRoutes(routes)
+                runCurrent()
+                advanceTimeBy(50) // let trip session start processing
+                mapboxNavigation.startTripSession() // start session before routes processed
+            }
+
+            coVerifyOrder {
+                tripSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+                directionsSession.setRoutes(routes, any(), any())
+                tripSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            }
+
+            val routesSlot = mutableListOf<List<NavigationRoute>>()
+            verify(exactly = 1) {
+                directionsSession.setRoutes(capture(routesSlot), any(), any())
+            }
+            assertEquals(1, routesSlot.size)
+            assertEquals(routes, routesSlot.first())
+        }
+
+    @Test
+    fun `refreshed route is set to trip session and directions session`() =
+        coroutineRule.runBlockingTest {
+            createMapboxNavigation()
+            val primary: NavigationRoute = mockk {
+                every { directionsRoute } returns mockk()
+            }
+            val routes = listOf(primary)
+            val reason = RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            val initialLegIndex = 0
+            val routeObserversSlot = mutableListOf<RoutesObserver>()
+            every { tripSession.getState() } returns TripSessionState.STARTED
+            every { directionsSession.initialLegIndex } returns initialLegIndex
+            verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
+
+            val refreshedRoutes = listOf(mockk<NavigationRoute>())
+            every { routeRefreshController.restart(primary, captureLambda()) } answers {
+                lambda<(List<NavigationRoute>) -> Unit>().captured.invoke(refreshedRoutes)
+            }
+            routeObserversSlot.forEach {
+                it.onRoutesChanged(RoutesUpdatedResult(routes, reason))
+            }
+
+            coVerify(exactly = 1) {
+                tripSession.setRoutes(
+                    refreshedRoutes,
+                    0,
+                    RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
+                )
+            }
+            verify(exactly = 1) {
+                directionsSession.setRoutes(
+                    refreshedRoutes,
+                    0,
+                    RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
+                )
+            }
+        }
+
     private fun createMapboxNavigation() {
         mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
     }
@@ -1259,6 +1355,9 @@ class MapboxNavigationTest {
             )
         } returns tripSession
         every { tripSession.getRouteProgress() } returns routeProgress
+        coEvery { tripSession.setRoutes(any(), any(), any()) } returns NativeSetRouteResult(
+            nativeAlternatives = emptyList()
+        )
     }
 
     private fun mockDirectionSession() {

@@ -97,7 +97,11 @@ class RouteLineComponentTest {
                     .length()
             val nativeRoutes = mutableListOf<RouteInterface>().apply {
                 repeat(routesCount) {
-                    add(mockk())
+                    add(
+                        mockk {
+                            every { routeId } returns "$it"
+                        }
+                    )
                 }
             }
             ExpectedFactory.createValue(nativeRoutes)
@@ -203,7 +207,7 @@ class RouteLineComponentTest {
 
         routesObserverSlot.captured.onRoutesChanged(routesUpdateResult)
 
-        verify { mockApi.setNavigationRouteLines(any(), capture(callbackSlot)) }
+        verify { mockApi.setNavigationRouteLines(any(), any(), capture(callbackSlot)) }
         callbackSlot.captured.accept(expectedMockError)
         verify { mockView.renderRouteDrawData(mockStyle, expectedMockError) }
     }

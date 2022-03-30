@@ -35,7 +35,9 @@ public class RouteExclusionsJavaTest {
   @Before
   public void setup() {
     List<RouteInterface> nativeRoutes = new ArrayList<>();
-    nativeRoutes.add(Mockito.mock(RouteInterface.class));
+    RouteInterface nativeRoute = Mockito.mock(RouteInterface.class);
+    Mockito.doReturn("route_id").when(nativeRoute).getRouteId();
+    nativeRoutes.add(nativeRoute);
     Mockito.doReturn(
         ExpectedFactory.createValue(nativeRoutes)
     ).when(parser).parseDirectionsResponse(

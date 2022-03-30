@@ -37,6 +37,9 @@ import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
  * @param upcomingRoadObjects list of upcoming road objects.
  * @param stale `true` if there were no location updates for a significant amount which causes
  * a lack of confidence in the progress updates being sent.
+ * @param routeAlternativeId in case of [currentState] equal to [RouteProgressState.OFF_ROUTE],
+ * this field can provide the route ID of an alternative route that user turned into causing off-route event (if there is one).
+ * This field can be used to find a route with [NavigationRoute.id] that can be immediately used as the new primary route.
  */
 class RouteProgress internal constructor(
     val navigationRoute: NavigationRoute,
@@ -53,7 +56,7 @@ class RouteProgress internal constructor(
     val remainingWaypoints: Int,
     val upcomingRoadObjects: List<UpcomingRoadObject>,
     val stale: Boolean,
-    internal val routeAlternativeId: String?,
+    val routeAlternativeId: String?,
 ) {
 
     /**

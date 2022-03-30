@@ -4,6 +4,8 @@ package com.mapbox.navigation.core {
   @UiThread public final class MapboxNavigation {
     ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public void cancelRouteRequest(long requestId);
+    method public com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata? getAlternativeMetadataFor(com.mapbox.navigation.base.route.NavigationRoute navigationRoute);
+    method public java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> getAlternativeMetadataFor(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> navigationRoutes);
     method public com.mapbox.navigator.Experimental getExperimental();
     method public com.mapbox.navigation.core.trip.session.eh.GraphAccessor getGraphAccessor();
     method public com.mapbox.navigation.core.history.MapboxHistoryRecorder getHistoryRecorder();
@@ -612,6 +614,37 @@ package com.mapbox.navigation.core.reroute {
 
 package com.mapbox.navigation.core.routealternatives {
 
+  public final class AlternativeRouteInfo {
+    method public double getDistance();
+    method public double getDuration();
+    property public final double distance;
+    property public final double duration;
+  }
+
+  public final class AlternativeRouteIntersection {
+    method public int getGeometryIndexInLeg();
+    method public int getGeometryIndexInRoute();
+    method public int getLegIndex();
+    method public com.mapbox.geojson.Point getLocation();
+    property public final int geometryIndexInLeg;
+    property public final int geometryIndexInRoute;
+    property public final int legIndex;
+    property public final com.mapbox.geojson.Point location;
+  }
+
+  public final class AlternativeRouteMetadata {
+    method public com.mapbox.navigation.core.routealternatives.AlternativeRouteIntersection getForkIntersectionOfAlternativeRoute();
+    method public com.mapbox.navigation.core.routealternatives.AlternativeRouteIntersection getForkIntersectionOfPrimaryRoute();
+    method public com.mapbox.navigation.core.routealternatives.AlternativeRouteInfo getInfoFromFork();
+    method public com.mapbox.navigation.core.routealternatives.AlternativeRouteInfo getInfoFromStartOfPrimary();
+    method public com.mapbox.navigation.base.route.NavigationRoute getNavigationRoute();
+    property public final com.mapbox.navigation.core.routealternatives.AlternativeRouteIntersection forkIntersectionOfAlternativeRoute;
+    property public final com.mapbox.navigation.core.routealternatives.AlternativeRouteIntersection forkIntersectionOfPrimaryRoute;
+    property public final com.mapbox.navigation.core.routealternatives.AlternativeRouteInfo infoFromFork;
+    property public final com.mapbox.navigation.core.routealternatives.AlternativeRouteInfo infoFromStartOfPrimary;
+    property public final com.mapbox.navigation.base.route.NavigationRoute navigationRoute;
+  }
+
   public interface NavigationRouteAlternativesObserver {
     method public void onRouteAlternatives(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, java.util.List<com.mapbox.navigation.base.route.NavigationRoute> alternatives, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
     method public void onRouteAlternativesError(com.mapbox.navigation.core.routealternatives.RouteAlternativesError error);
@@ -620,6 +653,9 @@ package com.mapbox.navigation.core.routealternatives {
   public interface NavigationRouteAlternativesRequestCallback {
     method public void onRouteAlternativeRequestFinished(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, java.util.List<com.mapbox.navigation.base.route.NavigationRoute> alternatives, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
     method public void onRouteAlternativesRequestError(com.mapbox.navigation.core.routealternatives.RouteAlternativesError error);
+  }
+
+  public final class RouteAlternativesControllerKt {
   }
 
   public final class RouteAlternativesError {

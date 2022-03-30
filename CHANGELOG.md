@@ -5,8 +5,20 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 
 #### Features
+- Exposed `MapboxNavigation#getAlternativeMetadataFor` function which returns metadata associated with alternative routes that are tracked in the current navigation session. This metadata can be used with `MapboxRouteLineApi#setNavigationRoutes` to hide portions of the alternative routes until their deviation point with the primary route. This is especially helpful in preventing alternative routes from resurfacing under the puck if the vanishing route line feature is enabled. [#5653](https://github.com/mapbox/mapbox-navigation-android/pull/5653)
+- Exposed `NavigationRoute#id` and `RouteProgress#routeAlternativeId` which together can be used to immediately find an alternative route that a user might've turned into and generated an off-route event. [#5653](https://github.com/mapbox/mapbox-navigation-android/pull/5653)
 
 #### Bug fixes and improvements
+- Improved reroute experience for a default controller. `MapboxRerouteController` now immediately switches to an alternative route when a user turns to it, without making an unnecessary route request. [#5645](https://github.com/mapbox/mapbox-navigation-android/pull/5645)
+- Made all reachable polygon entries and exits tracked instead of the closest one for E-horizon `RoadObject`s. [#5653](https://github.com/mapbox/mapbox-navigation-android/pull/5653)
+- Fixed an issue where enhanced location couldn't snap to correct road edge for a long time after leaving a tunnel. [#5653](https://github.com/mapbox/mapbox-navigation-android/pull/5653)
+
+#### Other changes
+- Up until this point, `RoutesObserver` fired nearly immediately with new route references after `MapboxNavigation@setNavigationRoutes` was called. Now, the Nav SDK first fully processes the routes (for example, to compute the `AlternativeRouteMetadata`) which results in a small delay between routes being set and actually returned by the `RoutesObserver`.
+
+#### Known issues
+- Occasionally, the first `RouteProgress` update after setting new route might fail to be delivered due to the scheduling of route processing jobs.
+- When alternative routes that take advantage of the `AlternativeRouteMetadata` are reset because new become available, or changed manually by interacting with the map, there could be a brief flash of the full alternative route geometry which quickly recovers to a valid state.
 
 ## Mapbox Navigation SDK 2.4.0-rc.2 - April 7, 2022
 
@@ -30,7 +42,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 #### Bug fixes and improvements
 - :warning: Realigned all `NavigationCamera` transitions to not fallback to `Idle` if a transition is canceled to keep the behavior consistent and predictable (state transitions used to be cancelable while frame transitions weren't). If you need the `NavigationCamera` to reset to `Idle` on external interactions or cancellations, use `NavigationBasicGesturesHandler` or `NavigationScaleGestureHandler` [#5607](https://github.com/mapbox/mapbox-navigation-android/pull/5607)
-- Improved reroute experience for a default controller. `MapboxRerouteController` now immediately switches to an alternative route when a user turns to it, without making an unnecessary route request. [#5645](https://github.com/mapbox/mapbox-navigation-android/pull/5645)
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:

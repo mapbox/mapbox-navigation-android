@@ -10,6 +10,7 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.navigator.RouteInitInfo
@@ -61,6 +62,7 @@ import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -83,6 +85,7 @@ class MapboxTripSessionTest {
 
     @get:Rule
     val mockLoggerTestRule = MockLoggerRule()
+
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
@@ -141,6 +144,7 @@ class MapboxTripSessionTest {
 
         coEvery { navigator.updateLocation(any()) } returns false
         coEvery { navigator.setPrimaryRoute(any()) } returns null
+        coEvery { navigator.setAlternativeRoutes(any()) } returns listOf()
         coEvery { navigator.updateAnnotations(any()) } returns Unit
         every { navigationStatus.getTripStatusFrom(any()) } returns tripStatus
 
@@ -161,6 +165,7 @@ class MapboxTripSessionTest {
         every {
             getRouteProgressFrom(any(), any(), any(), any(), any(), any())
         } returns routeProgress
+        every { routeProgress.currentState } returns RouteProgressState.TRACKING
         every { routes[0].directionsResponse.uuid() } returns "uuid"
 
         every {
@@ -244,7 +249,7 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun stopSessionDoesNotClearUpRoute() {
+    fun stopSessionDoesNotClearUpRoute() = coroutineRule.runBlockingTest {
         tripSession.setRoutes(routes, legIndex, updateReason)
         tripSession.start(true)
 
@@ -568,7 +573,7 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun setRoutes() {
+    fun setRoutes() = coroutineRule.runBlockingTest {
         val alternative: NavigationRoute = mockk()
         tripSession.setRoutes(routes + alternative, legIndex, updateReason)
 
@@ -577,7 +582,7 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun setRoute_nullable() {
+    fun setRoute_nullable() = coroutineRule.runBlockingTest {
         tripSession.setRoutes(emptyList(), 0, RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
 
         coVerify(exactly = 1) { navigator.setPrimaryRoute(null) }
@@ -585,7 +590,7 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun checkNavigatorUpdateAnnotationsWhenReasonIsRefresh() {
+    fun checkNavigatorUpdateAnnotationsWhenReasonIsRefresh() = coroutineRule.runBlockingTest {
         tripSession.start(true)
 
         tripSession.setRoutes(routes, legIndex, RoutesExtra.ROUTES_UPDATE_REASON_REFRESH)
@@ -596,20 +601,21 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun `verify only alternatives are updated when reason is ROUTES_UPDATE_REASON_ALTERNATIVE`() {
-        tripSession.start(true)
+    fun `verify only alternatives are updated when reason is ROUTES_UPDATE_REASON_ALTERNATIVE`() =
+        coroutineRule.runBlockingTest {
+            tripSession.start(true)
 
-        val alternative = mockk<NavigationRoute>()
-        tripSession.setRoutes(
-            routes + alternative,
-            legIndex,
-            RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
-        )
+            val alternative = mockk<NavigationRoute>()
+            tripSession.setRoutes(
+                routes + alternative,
+                legIndex,
+                RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
+            )
 
-        coVerify(exactly = 0) { navigator.setPrimaryRoute(Pair(routes.first(), legIndex)) }
-        coVerify(exactly = 1) { navigator.setAlternativeRoutes(listOf(alternative)) }
-        coVerify(exactly = 0) { navigator.updateAnnotations(any()) }
-    }
+            coVerify(exactly = 0) { navigator.setPrimaryRoute(Pair(routes.first(), legIndex)) }
+            coVerify(exactly = 1) { navigator.setAlternativeRoutes(listOf(alternative)) }
+            coVerify(exactly = 0) { navigator.updateAnnotations(any()) }
+        }
 
     @Test
     fun stateObserverImmediateStop() {
@@ -1057,19 +1063,21 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun `local route reference updated after route set`() = runBlockingTest {
+    fun `local route reference updated after route set`() = coroutineRule.runBlockingTest {
         coEvery { navigator.setPrimaryRoute(any()) } coAnswers {
             delay(100)
             null
         }
 
-        tripSession.setRoutes(routes, legIndex, updateReason)
-
-        assertNull(tripSession.primaryRoute)
-
-        coroutineRule.testDispatcher.advanceTimeBy(200)
-
-        assertEquals(tripSession.primaryRoute, routes.first())
+        pauseDispatcher {
+            launch {
+                tripSession.setRoutes(routes, legIndex, updateReason)
+            }
+            runCurrent()
+            assertNull(tripSession.primaryRoute)
+            advanceTimeBy(200)
+            assertEquals(tripSession.primaryRoute, routes.first())
+        }
     }
 
     @Test
@@ -1084,13 +1092,14 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun `offRoute state is reset when setRoute is called`() = runBlockingTest {
+    fun `offRoute state is reset when setRoute is called`() = coroutineRule.runBlockingTest {
         coEvery { navigator.setPrimaryRoute(any()) } coAnswers {
             delay(100)
             null
         }
 
         every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
+        every { routeProgress.currentState } returns RouteProgressState.OFF_ROUTE
 
         val offRouteObserver: OffRouteObserver = mockk(relaxed = true)
 
@@ -1101,19 +1110,22 @@ class MapboxTripSessionTest {
 
         navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
 
-        tripSession.setRoutes(routes, legIndex, updateReason)
+        pauseDispatcher {
+            launch {
+                tripSession.setRoutes(routes, legIndex, updateReason)
+            }
+            runCurrent()
 
-        verifyOrder {
-            offRouteObserver.onOffRouteStateChanged(false)
-            offRouteObserver.onOffRouteStateChanged(true)
-            offRouteObserver.onOffRouteStateChanged(false)
+            verifyOrder {
+                offRouteObserver.onOffRouteStateChanged(false)
+                offRouteObserver.onOffRouteStateChanged(true)
+                offRouteObserver.onOffRouteStateChanged(false)
+            }
         }
-
-        coroutineRule.testDispatcher.advanceTimeBy(200)
     }
 
     @Test
-    fun `routeProgress is reset when setRoute is called`() = runBlockingTest {
+    fun `routeProgress is reset when setRoute is called`() = coroutineRule.runBlockingTest {
         coEvery { navigator.setPrimaryRoute(any()) } coAnswers {
             delay(100)
             null
@@ -1127,77 +1139,124 @@ class MapboxTripSessionTest {
 
         assertNotNull(tripSession.getRouteProgress())
 
-        tripSession.setRoutes(routes, legIndex, updateReason)
-
-        assertNull(tripSession.getRouteProgress())
-
-        coroutineRule.testDispatcher.advanceTimeBy(200)
+        pauseDispatcher {
+            launch {
+                tripSession.setRoutes(routes, legIndex, updateReason)
+            }
+            runCurrent()
+            assertNull(tripSession.getRouteProgress())
+        }
     }
 
     @Test
-    fun `roadObjects are reset when setRoute is called`() = runBlockingTest {
-        coEvery { navigator.setPrimaryRoute(any()) } coAnswers {
-            delay(100)
-            null
-        }
-
-        every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
-
+    fun `roadObjects are reset when setRoute is called`() = coroutineRule.runBlockingTest {
+        val roadObjects: List<UpcomingRoadObject> = listOf(mockk())
+        val mockedRouteInitInfo: RouteInitInfo = mockk()
+        every { mockedRouteInitInfo.roadObjects } returns roadObjects
+        val mockedRouteInfo: RouteInfo = mockk()
+        every { getRouteInitInfo(mockedRouteInfo) } returns mockedRouteInitInfo
+        coEvery { navigator.setPrimaryRoute(any()) } returns mockedRouteInfo
         val roadObjectsObserver: RoadObjectsOnRouteObserver = mockk(relaxed = true)
         tripSession = buildTripSession()
         tripSession.registerRoadObjectsOnRouteObserver(roadObjectsObserver)
         tripSession.start(true)
-
-        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
-
         tripSession.setRoutes(routes, legIndex, updateReason)
-
-        verify(exactly = 1) {
-            roadObjectsObserver.onNewRoadObjectsOnTheRoute(emptyList())
+        coEvery {
+            navigator.setPrimaryRoute(any())
+        } coAnswers {
+            delay(100)
+            null
         }
-
-        coroutineRule.testDispatcher.advanceTimeBy(200)
+        pauseDispatcher {
+            tripSession.setRoutes(routes, legIndex, updateReason)
+            val alertsSlot = mutableListOf<List<UpcomingRoadObject>>()
+            verify {
+                roadObjectsObserver.onNewRoadObjectsOnTheRoute(capture(alertsSlot))
+            }
+            assertEquals(0, alertsSlot[0].size)
+            assertEquals(1, alertsSlot[1].size)
+            assertEquals(0, alertsSlot[2].size)
+        }
     }
 
+    /**
+     * fixme https://github.com/mapbox/mapbox-navigation-android/pull/5653 - progress updates are currently ignored while alternatives are being set.
+     */
     @Test
-    fun `routeProgress updated after route is set`() = runBlockingTest {
+    fun `routeProgress updates ignored while route is being set`() = coroutineRule.runBlockingTest {
+        val primary = mockk<NavigationRoute>()
+        val alternative = mockk<NavigationRoute>()
         coEvery { navigator.setPrimaryRoute(any()) } coAnswers {
             delay(100)
             null
+        }
+        coEvery { navigator.setAlternativeRoutes(listOf(alternative)) } coAnswers {
+            delay(300)
+            emptyList()
         }
 
         val observerOne: RouteProgressObserver = mockk(relaxUnitFun = true)
         val observerTwo: RouteProgressObserver = mockk(relaxUnitFun = true)
         every { observerOne.onRouteProgressChanged(any()) } just Runs
         every { observerTwo.onRouteProgressChanged(any()) } just Runs
-        every { routes.first().directionsRoute.legs() } returns null
 
         tripSession = buildTripSession()
         tripSession.registerRouteProgressObserver(observerOne)
         tripSession.registerRouteProgressObserver(observerTwo)
         tripSession.start(true)
-        tripSession.setRoutes(routes, legIndex, updateReason)
 
-        repeat(5) {
-            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+        pauseDispatcher {
+            var setRouteReturned = false
+            launch {
+                tripSession.setRoutes(
+                    listOf(primary, alternative),
+                    legIndex,
+                    updateReason
+                )
+                setRouteReturned = true
+            }
+            runCurrent()
+            navigatorObserverImplSlot.captured.onStatus(
+                navigationStatusOrigin,
+                navigationStatus
+            )
+            runCurrent() // primary being set, keep ignoring
+            verify(exactly = 0) { observerOne.onRouteProgressChanged(any()) }
+            verify(exactly = 0) { observerTwo.onRouteProgressChanged(any()) }
+            assertFalse(setRouteReturned)
+            advanceTimeBy(150)
+            navigatorObserverImplSlot.captured.onStatus(
+                navigationStatusOrigin,
+                navigationStatus
+            )
+            runCurrent() // alternatives still being set, keep ignoring
+            verify(exactly = 0) { observerOne.onRouteProgressChanged(any()) }
+            verify(exactly = 0) { observerTwo.onRouteProgressChanged(any()) }
+            assertFalse(setRouteReturned)
+            advanceTimeBy(350)
+            navigatorObserverImplSlot.captured.onStatus(
+                navigationStatusOrigin,
+                navigationStatus
+            )
+            runCurrent()
+            assertTrue(setRouteReturned)
+            verify(exactly = 1) { observerOne.onRouteProgressChanged(any()) }
+            verify(exactly = 1) { observerTwo.onRouteProgressChanged(any()) }
         }
-
-        coroutineRule.testDispatcher.advanceTimeBy(200)
-
-        repeat(2) {
-            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
-        }
-
-        verify(exactly = 2) { observerOne.onRouteProgressChanged(any()) }
-        verify(exactly = 2) { observerTwo.onRouteProgressChanged(any()) }
     }
 
     @Test
     fun `enhancedLocation, locationMatcherResult, zLevel are updating while setting a route, routeProgress, bannerInstructions and offRoute state are skipped`() =
-        runBlockingTest {
+        coroutineRule.runBlockingTest {
+            val primary = mockk<NavigationRoute>()
+            val alternative = mockk<NavigationRoute>()
             coEvery { navigator.setPrimaryRoute(any()) } coAnswers {
                 delay(100)
                 null
+            }
+            coEvery { navigator.setAlternativeRoutes(listOf(alternative)) } coAnswers {
+                delay(300)
+                emptyList()
             }
 
             val routeProgressObserver: RouteProgressObserver = mockk(relaxUnitFun = true)
@@ -1222,38 +1281,60 @@ class MapboxTripSessionTest {
             tripSession.registerOffRouteObserver(offRouteObserver)
             tripSession.registerBannerInstructionsObserver(bannerInstructionsObserver)
             tripSession.start(true)
-            // it will notify offRouteObserver for the first time
-            tripSession.setRoutes(routes, legIndex, updateReason)
 
-            every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
+            pauseDispatcher {
+                launch {
+                    // it will notify offRouteObserver for the first time
+                    tripSession.setRoutes(
+                        listOf(primary, alternative),
+                        legIndex,
+                        updateReason
+                    )
+                }
+                runCurrent()
 
-            // first status update
-            every { navigationStatus.layer } returns 100
-            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
-            assertEquals(100, tripSession.zLevel)
+                every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
 
-            // second status update
-            every { navigationStatus.layer } returns 200
-            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
-            assertEquals(200, tripSession.zLevel)
+                // first status update
+                every { navigationStatus.layer } returns 100
+                navigatorObserverImplSlot.captured.onStatus(
+                    navigationStatusOrigin,
+                    navigationStatus
+                )
+                runCurrent()
+                assertEquals(100, tripSession.zLevel)
 
-            // finish setRoute
-            coroutineRule.testDispatcher.advanceTimeBy(200)
+                // second status update
+                every { navigationStatus.layer } returns 200
+                navigatorObserverImplSlot.captured.onStatus(
+                    navigationStatusOrigin,
+                    navigationStatus
+                )
+                runCurrent()
+                assertEquals(200, tripSession.zLevel)
 
-            // third status update
-            every { navigationStatus.layer } returns 300
-            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
-            assertEquals(300, tripSession.zLevel)
+                // finish setRoute
+                advanceTimeBy(400)
 
-            // locationObserver is notified on each status update
-            verify(exactly = 3) { locationObserver.onNewLocationMatcherResult(any()) }
+                // third status update
+                every { navigationStatus.layer } returns 300
+                navigatorObserverImplSlot.captured.onStatus(
+                    navigationStatusOrigin,
+                    navigationStatus
+                )
+                runCurrent()
+                assertEquals(300, tripSession.zLevel)
 
-            // routeProgressObserver and bannerInstructionsObserver are notified when setRoute is finished
-            verify(exactly = 1) { routeProgressObserver.onRouteProgressChanged(any()) }
-            verify(exactly = 1) { bannerInstructionsObserver.onNewBannerInstructions(any()) }
-            // offRouteObserver is notified twice:
-            // when setRoute starts, and on a new status when setRoute is finished
-            verify(exactly = 2) { offRouteObserver.onOffRouteStateChanged(any()) }
+                // locationObserver is notified on each status update
+                verify(exactly = 3) { locationObserver.onNewLocationMatcherResult(any()) }
+
+                // routeProgressObserver and bannerInstructionsObserver are notified when setRoute is finished
+                verify(exactly = 1) { routeProgressObserver.onRouteProgressChanged(any()) }
+                verify(exactly = 1) { bannerInstructionsObserver.onNewBannerInstructions(any()) }
+                // offRouteObserver is notified twice:
+                // when setRoute starts, and on a new status when setRoute is finished
+                verify(exactly = 2) { offRouteObserver.onOffRouteStateChanged(any()) }
+            }
         }
 
     @Test
@@ -1286,7 +1367,7 @@ class MapboxTripSessionTest {
 
     @Test
     fun `updateLegIndexJob is cancelled and callback is fired when setRoute is called`() =
-        runBlockingTest {
+        coroutineRule.runBlockingTest {
             coEvery { navigator.setPrimaryRoute(any()) } coAnswers {
                 delay(100)
                 null
@@ -1303,13 +1384,16 @@ class MapboxTripSessionTest {
             val legIndexUpdatedCallback: LegIndexUpdatedCallback = mockk(relaxed = true)
             tripSession.updateLegIndex(1, legIndexUpdatedCallback)
 
-            tripSession.setRoutes(routes, legIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            pauseDispatcher {
+                launch {
+                    tripSession.setRoutes(routes, legIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+                }
+                runCurrent()
 
-            verify(exactly = 1) {
-                legIndexUpdatedCallback.onLegIndexUpdatedCallback(false)
+                verify(exactly = 1) {
+                    legIndexUpdatedCallback.onLegIndexUpdatedCallback(false)
+                }
             }
-
-            coroutineRule.testDispatcher.advanceTimeBy(200)
         }
 
     @Test

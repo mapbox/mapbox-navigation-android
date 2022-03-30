@@ -61,6 +61,7 @@ import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesRequestCallback
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
@@ -109,6 +110,7 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
+import com.mapbox.navigator.AlertsServiceOptions
 import com.mapbox.navigator.ElectronicHorizonOptions
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.IncidentsOptions
@@ -117,9 +119,12 @@ import com.mapbox.navigator.PollingConfig
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.lang.reflect.Field
 import java.util.Locale
 
@@ -238,8 +243,15 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         navigationOptions.eHorizonOptions.expansion.toByte(),
         navigationOptions.eHorizonOptions.branchLength,
         true, // doNotRecalculateInUncertainState is not exposed and can't be changed at the moment
-        navigationOptions.eHorizonOptions.minTimeDeltaBetweenUpdates
+        navigationOptions.eHorizonOptions.minTimeDeltaBetweenUpdates,
+        AlertsServiceOptions( // todo currently all enabled by default, expose an option instead
+            true,
+            true,
+            true
+        )
     )
+
+    private val routeUpdateMutex = Mutex()
 
     // native Router Interface
     private val nativeRouter: RouterInterface by lazy {
@@ -555,7 +567,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun stopTripSession() {
         runIfNotDestroyed {
             latestLegIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex
-            tripSession.setRoutes(
+            internalSetNavigationRoutes(
                 routes = emptyList(),
                 legIndex = 0,
                 reason = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
@@ -775,11 +787,52 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 RoutesExtra.ROUTES_UPDATE_REASON_NEW
             }
         }
-        directionsSession.setRoutes(
+        internalSetNavigationRoutes(
             routes,
             initialLegIndex,
             reason,
         )
+    }
+
+    private fun internalSetNavigationRoutes(
+        routes: List<NavigationRoute>,
+        legIndex: Int = 0,
+        @RoutesExtra.RoutesUpdateReason reason: String,
+    ) {
+        threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
+            routeUpdateMutex.withLock {
+                setRoutesToTripSession(routes, legIndex, reason)
+                directionsSession.setRoutes(routes, legIndex, reason)
+            }
+        }
+    }
+
+    private fun resetTripSessionRoutes() {
+        threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
+            routeUpdateMutex.withLock {
+                val routes = directionsSession.routes
+                val legIndex = latestLegIndex ?: directionsSession.initialLegIndex
+                setRoutesToTripSession(routes, legIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            }
+        }
+    }
+
+    /**
+     * Call to set routes to trip session.
+     * This call should be synchronized and only one should be executing at a time.
+     */
+    private suspend fun setRoutesToTripSession(
+        routes: List<NavigationRoute>,
+        legIndex: Int = 0,
+        @RoutesExtra.RoutesUpdateReason reason: String,
+    ) {
+        routeAlternativesController.pauseUpdates()
+        val result = tripSession.setRoutes(routes, legIndex, reason)
+        routeAlternativesController.processAlternativesMetadata(
+            routes,
+            result.nativeAlternatives
+        )
+        routeAlternativesController.resumeUpdates()
     }
 
     /**
@@ -875,9 +928,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.unregisterAllFallbackVersionsObservers()
         routeAlternativesController.unregisterAll()
         routeRefreshController.stop()
-        directionsSession.setRoutes(
+        internalSetNavigationRoutes(
             emptyList(),
-            routesUpdateReason = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+            reason = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
         )
         resetTripSession()
         navigator.unregisterAllObservers()
@@ -1318,6 +1371,40 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     /**
+     * If the provided [navigationRoute] is an alternative route in the current session,
+     * this function will return the associated with that route metadata.
+     *
+     * This function is guaranteed to return a valid result (if available) only after the [navigationRoute]
+     * has been processed by [MapboxNavigation] and returned via [RoutesObserver] or [NavigationRouteAlternativesObserver].
+     * To process the routes, call [MapboxNavigation.setNavigationRoutes].
+     *
+     * Whenever [RoutesObserver] or [NavigationRouteAlternativesObserver] fires, the previously obtained metadata becomes invalid.
+     *
+     * This function returns `null` for primary route in the current session.
+     */
+    fun getAlternativeMetadataFor(navigationRoute: NavigationRoute): AlternativeRouteMetadata? {
+        return routeAlternativesController.getMetadataFor(navigationRoute)
+    }
+
+    /**
+     * If the provided [navigationRoutes] are alternative routes in the current session,
+     * this function will return the associated with those route metadata.
+     *
+     * This function is guaranteed to return a valid result (if available) only after the [navigationRoutes]
+     * have been processed by [MapboxNavigation] and returned via [RoutesObserver] or [NavigationRouteAlternativesObserver].
+     * To process the routes, call [MapboxNavigation.setNavigationRoutes].
+     *
+     * Whenever [RoutesObserver] or [NavigationRouteAlternativesObserver] fires, the previously obtained metadata becomes invalid.
+     *
+     * This function doesn't return anything for primary route in the current session.
+     */
+    fun getAlternativeMetadataFor(
+        navigationRoutes: List<NavigationRoute>
+    ): List<AlternativeRouteMetadata> {
+        return navigationRoutes.mapNotNull { getAlternativeMetadataFor(it) }
+    }
+
+    /**
      * Start observing navigation tiles version switch via [NavigationVersionSwitchObserver].
      * Navigation might switch to a fallback tiles version when target tiles are not available
      * and return back to the target version when tiles are loaded.
@@ -1371,33 +1458,22 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 withTripService = withTripService,
                 withReplayEnabled = withReplayEnabled
             )
-            restoreTripSessionRoute()
+            resetTripSessionRoutes()
             notificationChannelField?.let {
                 monitorNotificationActionButton(it.get(null) as ReceiveChannel<NotificationAction>)
             }
         }
     }
 
-    private fun restoreTripSessionRoute() {
-        val legIndex = latestLegIndex ?: directionsSession.initialLegIndex
-        tripSession.setRoutes(
-            directionsSession.routes,
-            legIndex,
-            RoutesExtra.ROUTES_UPDATE_REASON_NEW,
-        )
-    }
-
     private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
-        if (tripSession.getState() == TripSessionState.STARTED) {
-            tripSession.setRoutes(
-                result.navigationRoutes,
-                directionsSession.initialLegIndex,
-                result.reason,
-            )
-        }
         if (result.navigationRoutes.isNotEmpty()) {
-            routeRefreshController.restart(result.navigationRoutes.first())
+            routeRefreshController.restart(result.navigationRoutes.first()) {
+                internalSetNavigationRoutes(
+                    it,
+                    reason = RoutesExtra.ROUTES_UPDATE_REASON_REFRESH,
+                )
+            }
         } else {
             routeRefreshController.stop()
         }
@@ -1478,9 +1554,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun reroute() {
         rerouteController?.reroute { routes, _ ->
-            directionsSession.setRoutes(
+            internalSetNavigationRoutes(
                 routes,
-                routesUpdateReason = RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+                reason = RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
             )
         }
     }

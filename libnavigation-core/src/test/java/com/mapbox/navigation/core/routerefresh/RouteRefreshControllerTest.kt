@@ -34,6 +34,7 @@ class RouteRefreshControllerTest {
 
     @get:Rule
     val mockLoggerTestRule = MockLoggerRule()
+
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
@@ -84,7 +85,7 @@ class RouteRefreshControllerTest {
     fun `should refresh route every 5 minutes by default`() = coroutineRule.runBlockingTest {
         every { routeOptions.enableRefresh() } returns true
 
-        routeRefreshController.restart(validRoute)
+        routeRefreshController.restart(validRoute) {}
         coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(15))
         routeRefreshController.stop()
 
@@ -103,7 +104,7 @@ class RouteRefreshControllerTest {
         )
         every { routeOptions.enableRefresh() } returns true
 
-        routeRefreshController.restart(validRoute)
+        routeRefreshController.restart(validRoute) {}
         coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(15))
         routeRefreshController.stop()
 
@@ -114,7 +115,7 @@ class RouteRefreshControllerTest {
     fun `should refresh route with correct properties`() = coroutineRule.runBlockingTest {
         every { routeOptions.enableRefresh() } returns true
 
-        routeRefreshController.restart(validRoute)
+        routeRefreshController.restart(validRoute) {}
         coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
         routeRefreshController.stop()
 
@@ -126,7 +127,7 @@ class RouteRefreshControllerTest {
         coroutineRule.runBlockingTest {
             every { routeOptions.enableRefresh() } returns true
 
-            routeRefreshController.restart(validRoute)
+            routeRefreshController.restart(validRoute) {}
             coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
             routeRefreshController.stop()
 
@@ -138,7 +139,7 @@ class RouteRefreshControllerTest {
         every { routeOptions.enableRefresh() } returns true
         every { validRoute.directionsResponse.uuid() } returns null
 
-        routeRefreshController.restart(validRoute)
+        routeRefreshController.restart(validRoute) {}
         coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
         routeRefreshController.stop()
 
@@ -159,7 +160,7 @@ class RouteRefreshControllerTest {
     fun `cancel request when stopped`() = coroutineRule.runBlockingTest {
         every { routeOptions.enableRefresh() } returns true
 
-        routeRefreshController.restart(validRoute)
+        routeRefreshController.restart(validRoute) {}
         coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
         routeRefreshController.stop()
 
@@ -171,7 +172,7 @@ class RouteRefreshControllerTest {
         every { routeOptions.enableRefresh() } returns true
         every { validRoute.directionsResponse.uuid() } returns ""
 
-        routeRefreshController.restart(validRoute)
+        routeRefreshController.restart(validRoute) {}
         coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis * 2)
         routeRefreshController.stop()
 
@@ -188,13 +189,13 @@ class RouteRefreshControllerTest {
         val countDownLatch = CountDownLatch(2)
         every { directionsSession.requestRouteRefresh(any(), any(), any()) } answers {
             if (countDownLatch.count == 1L) {
-                routeRefreshController.restart(validRoute)
+                routeRefreshController.restart(validRoute) {}
             }
             countDownLatch.countDown()
             countDownLatch.count
         }
 
-        routeRefreshController.restart(validRoute)
+        routeRefreshController.restart(validRoute) {}
         coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis * 2)
         countDownLatch.await()
         routeRefreshController.stop()
@@ -215,11 +216,11 @@ class RouteRefreshControllerTest {
             countDownLatch.count
         }
 
-        routeRefreshController.restart(validRoute)
+        routeRefreshController.restart(validRoute) {}
         coroutineRule.testDispatcher.advanceTimeBy(
             (routeRefreshOptions.intervalMillis * 1.9).toLong()
         )
-        routeRefreshController.restart(validRoute)
+        routeRefreshController.restart(validRoute) {}
         coroutineRule.testDispatcher.advanceTimeBy(
             (routeRefreshOptions.intervalMillis * 1.9).toLong()
         )
@@ -238,17 +239,18 @@ class RouteRefreshControllerTest {
         every { routeOptions.enableRefresh() } returns true
         every { routeDiffProvider.buildRouteDiffs(validRoute, any(), 0) } returns emptyList()
 
-        routeRefreshController.restart(validRoute)
+        val callback = mockk<(List<NavigationRoute>) -> Unit>(relaxed = true)
+        routeRefreshController.restart(validRoute, callback)
         coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis)
-        routeRefreshCallbackSlot.captured.onRefreshReady(
-            mockk {
-                every { directionsRoute } returns mockk {
-                    every { legs() } returns null
-                }
+        val navRoute = mockk<NavigationRoute> {
+            every { directionsRoute } returns mockk {
+                every { legs() } returns null
             }
-        )
+        }
+        routeRefreshCallbackSlot.captured.onRefreshReady(navRoute)
         routeRefreshController.stop()
 
+        verify(exactly = 1) { callback(listOf(navRoute)) }
         verify(exactly = 1) { directionsSession.requestRouteRefresh(any(), any(), any()) }
         verify(exactly = 0) { directionsSession.cancelRouteRefreshRequest(any()) }
     }
@@ -257,7 +259,8 @@ class RouteRefreshControllerTest {
     fun `clear the request when there is a failure response`() {
         every { routeOptions.enableRefresh() } returns true
 
-        routeRefreshController.restart(validRoute)
+        val callback = mockk<(List<NavigationRoute>) -> Unit>()
+        routeRefreshController.restart(validRoute, callback)
         coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis)
         routeRefreshCallbackSlot.captured.onFailure(
             mockk {
@@ -267,6 +270,7 @@ class RouteRefreshControllerTest {
         )
         routeRefreshController.stop()
 
+        verify(exactly = 0) { callback(any()) }
         verify(exactly = 1) { directionsSession.requestRouteRefresh(any(), any(), any()) }
         verify(exactly = 0) { directionsSession.cancelRouteRefreshRequest(any()) }
     }
@@ -279,7 +283,7 @@ class RouteRefreshControllerTest {
         every { routeOptions.enableRefresh() } returns true
         every { routeDiffProvider.buildRouteDiffs(validRoute, newRoute, 0) } returns routeDiffs
 
-        routeRefreshController.restart(validRoute)
+        routeRefreshController.restart(validRoute) {}
         coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis)
         routeRefreshCallbackSlot.captured.onRefreshReady(newRoute)
         routeRefreshController.stop()
@@ -297,7 +301,7 @@ class RouteRefreshControllerTest {
         every { routeOptions.enableRefresh() } returns true
         every { routeDiffProvider.buildRouteDiffs(validRoute, newRoute, 0) } returns emptyList()
 
-        routeRefreshController.restart(validRoute)
+        routeRefreshController.restart(validRoute) {}
         coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis)
         routeRefreshCallbackSlot.captured.onRefreshReady(newRoute)
         routeRefreshController.stop()

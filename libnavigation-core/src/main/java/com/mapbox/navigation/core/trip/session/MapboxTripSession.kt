@@ -36,6 +36,7 @@ import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
+import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteState
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -61,7 +62,7 @@ internal class MapboxTripSession(
     private val eHorizonSubscriptionManager: EHorizonSubscriptionManager
 ) : TripSession {
 
-    private var updatePrimaryRouteJob: Job? = null
+    private var isUpdatingRoute = false
     private var updateLegIndexJob: Job? = null
     private var updateRouteProgressJob: Job? = null
 
@@ -73,12 +74,15 @@ internal class MapboxTripSession(
         private const val INDEX_OF_INITIAL_LEG_TARGET = 1
     }
 
-    override fun setRoutes(
+    override suspend fun setRoutes(
         routes: List<NavigationRoute>,
         legIndex: Int,
         @RoutesExtra.RoutesUpdateReason reason: String
-    ) {
-        when (reason) {
+    ): NativeSetRouteResult {
+        logD("routes update (reason: $reason, count: ${routes.size}) - starting", LOG_CATEGORY)
+        isUpdatingRoute = true
+        val processedAlternatives = mutableListOf<RouteAlternative>()
+        val updateJobs: List<Job> = when (reason) {
             RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
             RoutesExtra.ROUTES_UPDATE_REASON_NEW,
             RoutesExtra.ROUTES_UPDATE_REASON_REROUTE -> {
@@ -89,9 +93,10 @@ internal class MapboxTripSession(
                 updateLegIndexJob?.cancel()
                 updateRouteProgressJob?.cancel()
 
-                updatePrimaryRouteJob = threadController.getMainScopeAndRootJob().scope.launch(
+                val updateRouteJob = threadController.getMainScopeAndRootJob().scope.launch(
                     Dispatchers.Main.immediate
                 ) {
+                    logD("primary route update - starting", LOG_CATEGORY)
                     val newPrimaryRoute = routes.firstOrNull()
                     navigator.setPrimaryRoute(
                         if (newPrimaryRoute != null) {
@@ -103,28 +108,60 @@ internal class MapboxTripSession(
                         roadObjects = getRouteInitInfo(it)?.roadObjects ?: emptyList()
                     }
                     this@MapboxTripSession.primaryRoute = newPrimaryRoute
+                    logD("primary route update - finished", LOG_CATEGORY)
                 }
-                threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
-                    navigator.setAlternativeRoutes(routes.drop(1))
-                }
+                val updateAlternativesJob =
+                    threadController.getMainScopeAndRootJob().scope.launch(
+                        Dispatchers.Main.immediate
+                    ) {
+                        logD("alternative routes update - starting", LOG_CATEGORY)
+                        processedAlternatives.addAll(
+                            navigator.setAlternativeRoutes(routes.drop(1))
+                        )
+                        logD("alternative routes update - finished", LOG_CATEGORY)
+                    }
+
+                listOf(
+                    updateRouteJob,
+                    updateAlternativesJob
+                )
             }
             RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE -> {
-                threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
-                    navigator.setAlternativeRoutes(routes.drop(1))
-                }
+                listOf(
+                    threadController.getMainScopeAndRootJob().scope.launch(
+                        Dispatchers.Main.immediate
+                    ) {
+                        processedAlternatives.addAll(
+                            navigator.setAlternativeRoutes(routes.drop(1))
+                        )
+                    }
+                )
             }
             RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
-                threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
-                    if (routes.isNotEmpty()) {
-                        navigator.updateAnnotations(routes.first())
-                        this@MapboxTripSession.primaryRoute = routes.first()
-                    } else {
-                        logW("Cannot refresh route. Route can't be null", LOG_CATEGORY)
+                listOf(
+                    threadController.getMainScopeAndRootJob().scope.launch(
+                        Dispatchers.Main.immediate
+                    ) {
+                        if (routes.isNotEmpty()) {
+                            navigator.updateAnnotations(routes.first())
+                            this@MapboxTripSession.primaryRoute = routes.first()
+                        } else {
+                            logW("Cannot refresh route. Route can't be null", LOG_CATEGORY)
+                        }
                     }
-                }
+                )
             }
             else -> throw IllegalArgumentException("Unsupported route update reason: $reason")
         }
+
+        updateJobs.forEach {
+            it.join()
+        }
+        isUpdatingRoute = false
+        logD("routes update (reason: $reason) - finished", LOG_CATEGORY)
+        return NativeSetRouteResult(
+            nativeAlternatives = processedAlternatives
+        )
     }
 
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
@@ -272,7 +309,8 @@ internal class MapboxTripSession(
         override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
             logD(
                 "navigatorObserver#onStatus; " +
-                    "FixLocation elapsed time: ${status.location.monotonicTimestampNanoseconds}",
+                    "fixLocation elapsed time: ${status.location.monotonicTimestampNanoseconds}, " +
+                    "state: ${status.routeState}",
                 LOG_CATEGORY
             )
 
@@ -287,7 +325,8 @@ internal class MapboxTripSession(
 
             // we should skip RouteProgress, BannerInstructions, isOffRoute state updates while
             // setting a new route
-            if (updatePrimaryRouteJob?.isActive == true) {
+            if (isUpdatingRoute) {
+                logD("route progress update dropped - updating routes")
                 return
             }
 
@@ -634,6 +673,10 @@ internal class MapboxTripSession(
             tripService.updateNotification(buildTripNotificationState(progress))
         }
         progress?.let { progress ->
+            logD(
+                "dispatching progress update; state: ${progress.currentState}",
+                LOG_CATEGORY
+            )
             routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
             if (shouldTriggerBannerInstructionsObserver) {
                 checkBannerInstructionEvent { bannerInstruction ->

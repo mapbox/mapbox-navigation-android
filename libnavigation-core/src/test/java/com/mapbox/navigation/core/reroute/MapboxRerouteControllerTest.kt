@@ -2,15 +2,12 @@ package com.mapbox.navigation.core.reroute
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.internal.route.routeId
 import com.mapbox.navigation.base.internal.route.routerOrigin
-import com.mapbox.navigation.base.internal.utils.routeAlternativeId
 import com.mapbox.navigation.base.options.RerouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsRoutes
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -182,15 +179,13 @@ class MapboxRerouteControllerTest {
     @Test
     fun reroute_success_from_alternative() {
         mockkStatic(
-            NavigationRoute::routeId,
             NavigationRoute::routerOrigin,
-            RouteProgress::routeAlternativeId,
         ) {
             val routeId1 = "id_1"
             val routeId2 = "id_2"
             val mockRoutes = listOf<NavigationRoute>(
                 mockk {
-                    every { routeId } returns routeId1
+                    every { id } returns routeId1
                     every {
                         routerOrigin
                     } throws IllegalStateException(
@@ -198,7 +193,7 @@ class MapboxRerouteControllerTest {
                     )
                 },
                 mockk {
-                    every { routeId } returns routeId2
+                    every { id } returns routeId2
                     every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
                 },
             )
