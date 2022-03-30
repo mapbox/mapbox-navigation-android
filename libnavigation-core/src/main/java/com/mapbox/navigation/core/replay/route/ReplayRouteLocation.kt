@@ -17,7 +17,7 @@ internal data class ReplayRouteStep(
     val positionMeters: Double
 )
 
-internal class ReplayRouteLocation(
+internal data class ReplayRouteLocation(
     val routeIndex: Int?,
     val point: Point
 ) {

@@ -1,8 +1,11 @@
 package com.mapbox.navigation.core.replay.route
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.navigation.core.testutil.replay.pairWithAnnotation
+import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import org.apache.commons.io.IOUtils
@@ -142,6 +145,23 @@ class ReplayRouteDriverTest {
         val replayEvents = replayRouteDriver.driveRouteLeg(routeLeg)
 
         assertTrue("${replayEvents.size} >= 50", replayEvents.size >= 50)
+    }
+
+    @Test
+    fun `driveRouteLeg should follow traffic along highway`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("german_motorway_direction_route.json")
+        )
+
+        val routeLeg = route.legs()?.first()!!
+        val updateEvents = replayRouteDriver.driveRouteLeg(routeLeg)
+
+        updateEvents.pairWithAnnotation(routeLeg.annotation()!!).forEach { result ->
+            assertTrue(
+                "${result.first.speedMps} <= ${result.second}",
+                result.first.speedMps <= result.second.speed
+            )
+        }
     }
 
     private fun resourceAsString(

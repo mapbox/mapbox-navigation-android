@@ -1,6 +1,8 @@
 package com.mapbox.navigation.core.replay.route
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.testing.FileUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -8,6 +10,37 @@ import org.junit.Test
 class ReplayRouteTrafficTest {
 
     private val replayRouteTraffic = ReplayRouteTraffic()
+
+    @Test
+    fun `should create a location for each distance plus an origin`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("german_motorway_direction_route.json")
+        )
+
+        val routeLeg = route.legs()!![0]
+        val distinctTrafficPoints = replayRouteTraffic.mapToDistinctRoutePoints(routeLeg)
+
+        val expectedLocationCount = routeLeg.annotation()?.distance()!!.size + 1
+        assertEquals(expectedLocationCount, distinctTrafficPoints.size)
+    }
+
+    @Test
+    fun `should create a location for each distance plus an origin what`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("german_motorway_direction_route.json")
+        )
+
+        val routeLeg = route.legs()!![0]
+        val distances = routeLeg.annotation()?.distance()!!
+        val speed = routeLeg.annotation()?.speed()!!
+        val distinctTrafficPoints = replayRouteTraffic.mapToDistinctRoutePoints(routeLeg)
+        val trafficLocations = replayRouteTraffic.trafficLocations(
+            distinctTrafficPoints, distances, speed
+        )
+
+        val expectedLocationCount = routeLeg.annotation()?.distance()!!.size + 1
+        assertEquals(expectedLocationCount, trafficLocations.size)
+    }
 
     @Test
     fun `should make all traffic locations on route`() {

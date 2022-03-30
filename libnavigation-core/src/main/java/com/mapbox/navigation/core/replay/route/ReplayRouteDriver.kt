@@ -90,7 +90,8 @@ internal class ReplayRouteDriver {
                 segmentStart,
                 segmentEnd
             )
-            segmentStart = segmentEnd
+            segmentStart = segmentEnd.copy()
+            segmentStart.speedMps = replayRouteLocations.last().speedMps
         }
 
         return replayRouteLocations
