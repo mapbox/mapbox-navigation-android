@@ -29,6 +29,7 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.navigator.internal.NativeNavigatorRecreationObserver
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.BannerInstruction
@@ -80,6 +81,8 @@ import org.robolectric.annotation.Config
 @Config(manifest = Config.NONE)
 class MapboxTripSessionTest {
 
+    @get:Rule
+    val mockLoggerTestRule = MockLoggerRule()
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 

@@ -21,6 +21,7 @@ import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateU
 import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.LONGITUDE_FOR_VOICE_INSTRUCTION_2
 import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.LONGITUDE_FOR_VOICE_INSTRUCTION_NULL
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.NavigationStatus
@@ -36,6 +37,7 @@ import junit.framework.Assert.assertNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -44,6 +46,9 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class MapboxTripSessionNoSetupTest {
+
+    @get:Rule
+    val mockLoggerTestRule = MockLoggerRule()
 
     @Test
     fun voiceInstructionsFallbacksToPreviousValue() {
