@@ -2,7 +2,7 @@ package com.mapbox.navigation.instrumentation_tests.utils.history
 
 import android.os.Environment
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
-import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
+import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.utils.internal.logE
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description

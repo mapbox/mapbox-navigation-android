@@ -26,9 +26,9 @@ import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressSta
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
-import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
+import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.utils.internal.logE
 import org.junit.Before
 import org.junit.Rule

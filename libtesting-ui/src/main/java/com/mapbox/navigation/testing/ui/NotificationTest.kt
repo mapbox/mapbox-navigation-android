@@ -12,17 +12,16 @@ open class NotificationTest<A : AppCompatActivity>(activityClass: Class<A>) :
 
     companion object {
         private const val TIMEOUT = 1_000L
-        private const val NOTIFICATION_CHECK_MAX_RETRIES = 3
+        private const val NOTIFICATION_CHECK_MAX_RETRIES = 6
     }
 
     /**
      * Waits for a notification to be available that meets all of the conditions via the
      * [Until.hasObject].
      * If notification is not visible, the automation scrolls the notification tab down up to
-     * three times to find it.
+     * [NOTIFICATION_CHECK_MAX_RETRIES] times to find it.
      */
-    protected fun UiDevice.waitForMyForegroundNotification(vararg selectors: BySelector) {
-        this.openNotification()
+    protected fun UiDevice.searchForMyForegroundNotification(vararg selectors: BySelector) {
         var notificationChecksCount = 0
         while (!notificationAvailable(*selectors).all { it }
             && notificationChecksCount < NOTIFICATION_CHECK_MAX_RETRIES) {
@@ -52,7 +51,7 @@ open class NotificationTest<A : AppCompatActivity>(activityClass: Class<A>) :
             screenSize.y / 2,
             screenSize.x / 2,
             screenSize.y / 4,
-            100
+            25
         )
     }
 
