@@ -23,6 +23,7 @@ import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
@@ -196,6 +197,7 @@ class MapboxRouteLineApi(
     internal var activeLegIndex = INVALID_ACTIVE_LEG_INDEX
         private set
     private val trafficBackfillRoadClasses = CopyOnWriteArrayList<String>()
+    private val alternativesDeviationOffset = mutableMapOf<String, Double>()
 
     companion object {
         private const val INVALID_ACTIVE_LEG_INDEX = -1
@@ -663,6 +665,49 @@ class MapboxRouteLineApi(
                         }
                     }
                 }
+            }
+        }
+    }
+
+    // todo wire up some example and see if it works
+    fun updateWithAlternativeRoutesMetadata(
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
+        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
+    ) {
+        jobControl.scope.launch(Dispatchers.Main) {
+            mutex.withLock {
+                alternativesDeviationOffset.clear()
+                alternativeRoutesMetadata.forEach { routeMetadata ->
+                    val route = routes.find { it.id == routeMetadata.routeId }!!.directionsRoute
+                    var runningDistance = 0.0
+                    route.legs()!!.forEachIndexed LegLoop@{ legIndex, leg ->
+                        leg.annotation()?.distance()
+                            ?.forEachIndexed AnnotationLoop@{ annotationIndex, distance ->
+                                runningDistance += distance
+                                if (legIndex == routeMetadata.forkIntersectionOfAlternativeRoute.legIndex
+                                    && annotationIndex == routeMetadata.forkIntersectionOfAlternativeRoute.geometryIndexInLeg
+                                ) {
+                                    val percentageTraveled = runningDistance / route.distance()
+                                    alternativesDeviationOffset[routeMetadata.routeId] =
+                                        percentageTraveled
+                                    /*RouteLineExpressionProvider {
+                                        step {
+                                            lineProgress()
+                                            color(Color.TRANSPARENT)
+                                            stop {
+                                                literal(percentageTraveled)
+                                            }
+                                        }
+                                    }*/
+                                    return@LegLoop
+                                }
+                            }
+                    }
+                }
+                val featureDataProvider: () -> List<RouteFeatureData> =
+                    MapboxRouteLineUtils.getRouteFeatureDataProvider(routes)
+                val result = buildDrawRoutesState(featureDataProvider)
+                consumer.accept(result)
             }
         }
     }
@@ -1170,7 +1215,7 @@ class MapboxRouteLineApi(
                     routeLineOptions.resourceProvider.routeLineColorResources,
                     trafficBackfillRoadClasses,
                     false,
-                    0.0,
+                    alternativesDeviationOffset[this.id] ?: 0.0,
                     Color.TRANSPARENT,
                     routeLineOptions
                         .resourceProvider
@@ -1187,7 +1232,7 @@ class MapboxRouteLineApi(
                 routeLineOptions.resourceProvider.routeLineColorResources,
                 trafficBackfillRoadClasses,
                 false,
-                0.0,
+                alternativesDeviationOffset[partitionedRoutes.second[1].route.id] ?: 0.0,
                 Color.TRANSPARENT,
                 routeLineOptions
                     .resourceProvider
