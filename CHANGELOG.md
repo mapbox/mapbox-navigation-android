@@ -10,6 +10,9 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed `HistoryEventMapper#mapNavigationRoute` for when `SetRouteHistoryRecord` has empty `routeRequest`. [#5614](https://github.com/mapbox/mapbox-navigation-android/pull/5614)
 - Fixed an issue where route refresh failure led to a parsing error and runtime crash instead of failure callback. [#5617](https://github.com/mapbox/mapbox-navigation-android/pull/5617)
 - Fixed `ReplayRouteInterpolator` speed adjustment on turns. A driver doesn't slow down on minor curvatures on a motorway. [5618](https://github.com/mapbox/mapbox-navigation-android/pull/5618)
+- Fixed an issue where `RouteProgress` might not have been delivered in active guidance when `MapboxNavigation#setRoutes` calls were dispatched in quick succession (session was locked in an invalid state). [#5629](https://github.com/mapbox/mapbox-navigation-android/pull/5629)
+- Improved the time between the router getting access to a raw Directions API response and Nav SDK delivering a `NavigationRoute` instance in `NavigationRouterCallback`. [#5629](https://github.com/mapbox/mapbox-navigation-android/pull/5629)
+- Fixed an issue where line `RoadObject`s matched with `RoadObjectMatcher` which consisted of only one edge and multiple lines where calculated incorrectly. [#5629](https://github.com/mapbox/mapbox-navigation-android/pull/5629)
 
 ## Mapbox Navigation SDK 2.4.0-beta.3 - March 25, 2022
 ### Changelog

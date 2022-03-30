@@ -1,9 +1,8 @@
 package com.mapbox.navigation.base.internal.utils
 
-import com.mapbox.api.directions.v5.models.DirectionsResponse
-import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.navigation.base.internal.route.toNavigationRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigator.RouteAlternative
 import kotlinx.coroutines.CoroutineDispatcher
@@ -12,18 +11,21 @@ import org.json.JSONException
 
 suspend fun parseDirectionsResponse(
     dispatcher: CoroutineDispatcher,
-    json: String,
-    options: RouteOptions,
-): Expected<Throwable, DirectionsResponse> =
+    responseJson: String,
+    requestUrl: String,
+): Expected<Throwable, List<NavigationRoute>> =
     withContext(dispatcher) {
         return@withContext try {
-            val response = DirectionsResponse.fromJson(json, options)
-            if (response.routes().isEmpty()) {
+            val routes = NavigationRoute.create(
+                directionsResponseJson = responseJson,
+                routeRequestUrl = requestUrl
+            )
+            if (routes.isEmpty()) {
                 ExpectedFactory.createError(
                     IllegalStateException("no routes returned, collection is empty")
                 )
             } else {
-                ExpectedFactory.createValue(response)
+                ExpectedFactory.createValue(routes)
             }
         } catch (ex: Exception) {
             when (ex) {
@@ -40,10 +42,7 @@ suspend fun parseNativeDirectionsAlternative(
 ): Expected<Throwable, NavigationRoute> =
     withContext(dispatcher) {
         return@withContext try {
-            val navigationRoute = NavigationRoute.create(
-                directionsResponseJson = routeAlternative.route.response,
-                routeRequestUrl = routeAlternative.route.request
-            )[routeAlternative.route.index]
+            val navigationRoute = routeAlternative.route.toNavigationRoute()
             ExpectedFactory.createValue(navigationRoute)
         } catch (ex: Exception) {
             when (ex) {

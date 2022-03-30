@@ -309,7 +309,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         assertEquals(0, setRouteEvent.legIndex)
     }
 
-    @Test(expected = Exception::class)
+    @Test(expected = Throwable::class)
     fun legacy_json_verify_invalid_json_crashes() {
         val historyReader = historyReaderFromAssetFile("set_route_event_invalid.json")
 

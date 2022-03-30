@@ -192,9 +192,9 @@ class RouteAlternativesControllerTest {
             nativeObserver.captured.onRouteAlternativesChanged(
                 listOf(
                     mockk {
-                        every { route.response } returns alternativeRouteJson
-                        every { route.request } returns mockNativeAlternativeUrl.toString()
-                        every { route.index } returns 0
+                        every { route.responseJson } returns alternativeRouteJson
+                        every { route.requestUri } returns mockNativeAlternativeUrl.toString()
+                        every { route.routeIndex } returns 0
                         every {
                             route.routerOrigin
                         } returns com.mapbox.navigator.RouterOrigin.ONBOARD
@@ -243,9 +243,9 @@ class RouteAlternativesControllerTest {
         nativeObserver.captured.onRouteAlternativesChanged(
             listOf(
                 mockk {
-                    every { route.response } returns alternativeRouteJson
-                    every { route.request } returns mockNativeAlternativeUrl.toString()
-                    every { route.index } returns 0
+                    every { route.responseJson } returns alternativeRouteJson
+                    every { route.requestUri } returns mockNativeAlternativeUrl.toString()
+                    every { route.routeIndex } returns 0
                     every { route.routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
                     every { isNew } returns true
                 }
@@ -299,9 +299,9 @@ class RouteAlternativesControllerTest {
             listOf(
                 mockk {
                     mockk {
-                        every { route.response } returns alternativeRouteJson
-                        every { route.request } returns mockNativeAlternativeUrl.toString()
-                        every { route.index } returns 0
+                        every { route.responseJson } returns alternativeRouteJson
+                        every { route.requestUri } returns mockNativeAlternativeUrl.toString()
+                        every { route.routeIndex } returns 0
                         every {
                             route.routerOrigin
                         } returns com.mapbox.navigator.RouterOrigin.ONBOARD
@@ -350,9 +350,9 @@ class RouteAlternativesControllerTest {
             listOf(
                 mockk {
                     mockk {
-                        every { route.response } returns alternativeRouteJson
-                        every { route.request } returns mockNativeAlternativeUrl.toString()
-                        every { route.index } returns 0
+                        every { route.responseJson } returns alternativeRouteJson
+                        every { route.requestUri } returns mockNativeAlternativeUrl.toString()
+                        every { route.routeIndex } returns 0
                         every {
                             route.routerOrigin
                         } returns com.mapbox.navigator.RouterOrigin.ONBOARD
@@ -396,11 +396,11 @@ class RouteAlternativesControllerTest {
         routeAlternativesController.register(observer)
 
         val firstAlternative: RouteAlternative = mockk {
-            every { route.response } returns FileUtils.loadJsonFixture(
+            every { route.responseJson } returns FileUtils.loadJsonFixture(
                 "route_alternative_from_native.json"
             )
-            every { route.request } returns mockNativeAlternativeUrl.toString()
-            every { route.index } returns 0
+            every { route.requestUri } returns mockNativeAlternativeUrl.toString()
+            every { route.routeIndex } returns 0
             every { route.routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
             every { isNew } returns true
         }
@@ -411,11 +411,11 @@ class RouteAlternativesControllerTest {
             emptyList()
         )
         val secondAlternative: RouteAlternative = mockk {
-            every { route.response } returns FileUtils.loadJsonFixture(
+            every { route.responseJson } returns FileUtils.loadJsonFixture(
                 "route_alternative_from_native.json"
             )
-            every { route.request } returns mockNativeAlternativeUrl.toString()
-            every { route.index } returns 0
+            every { route.requestUri } returns mockNativeAlternativeUrl.toString()
+            every { route.routeIndex } returns 0
             every { route.routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
             every { isNew } returns true
         }
@@ -460,11 +460,11 @@ class RouteAlternativesControllerTest {
             routeAlternativesController.register(observer)
 
             val firstAlternative: RouteAlternative = mockk {
-                every { route.response } returns FileUtils.loadJsonFixture(
+                every { route.responseJson } returns FileUtils.loadJsonFixture(
                     "route_alternative_from_native.json"
                 )
-                every { route.request } returns mockNativeAlternativeUrl.toString()
-                every { route.index } returns 0
+                every { route.requestUri } returns mockNativeAlternativeUrl.toString()
+                every { route.routeIndex } returns 0
                 every { route.routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
                 every { isNew } returns true
             }
@@ -506,11 +506,11 @@ class RouteAlternativesControllerTest {
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RefreshAlternativesCallback>()
         val alternative: RouteAlternative = mockk {
-            every { route.response } returns FileUtils.loadJsonFixture(
+            every { route.responseJson } returns FileUtils.loadJsonFixture(
                 "route_alternative_from_native.json"
             )
-            every { route.request } returns mockNativeAlternativeUrl.toString()
-            every { route.index } returns 0
+            every { route.requestUri } returns mockNativeAlternativeUrl.toString()
+            every { route.routeIndex } returns 0
             every { route.routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
             every { isNew } returns true
         }
@@ -557,11 +557,11 @@ class RouteAlternativesControllerTest {
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RefreshAlternativesCallback>()
         val alternative: RouteAlternative = mockk {
-            every { route.response } returns FileUtils.loadJsonFixture(
+            every { route.responseJson } returns FileUtils.loadJsonFixture(
                 "route_alternative_from_native.json"
             )
-            every { route.request } returns mockNativeAlternativeUrl.toString()
-            every { route.index } returns 0
+            every { route.requestUri } returns mockNativeAlternativeUrl.toString()
+            every { route.routeIndex } returns 0
             every { route.routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
             every { isNew } returns true
         }

@@ -95,7 +95,7 @@ class RouterWrapper(
                         parseDirectionsResponse(
                             ThreadController.IODispatcher,
                             it,
-                            routeOptions
+                            routeUrl
                         ).fold(
                             { throwable ->
                                 callback.onFailure(
@@ -110,19 +110,13 @@ class RouterWrapper(
                                     routeOptions
                                 )
                             },
-                            { response ->
-                                this.launch {
-                                    val navigationRoutes = withContext(
-                                        ThreadController.IODispatcher
-                                    ) {
-                                        NavigationRoute.create(it, routeUrl)
-                                    }
-                                    logI("Response metadata: ${response.metadata()}", LOG_CATEGORY)
-                                    callback.onRoutesReady(
-                                        navigationRoutes,
-                                        origin.mapToSdkRouteOrigin()
-                                    )
-                                }
+                            { routes ->
+                                val metadata = routes.firstOrNull()?.directionsResponse?.metadata()
+                                logI("Response metadata: $metadata", LOG_CATEGORY)
+                                callback.onRoutesReady(
+                                    routes,
+                                    origin.mapToSdkRouteOrigin()
+                                )
                             }
                         )
                     }
