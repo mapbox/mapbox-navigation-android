@@ -1,5 +1,7 @@
 package com.mapbox.navigation.core.history.model
 
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -82,27 +84,56 @@ internal class HistoryEventMapper {
                 "request URL or route options of set route history event cannot be null or empty"
             )
             try {
-                val directionsResponse = DirectionsResponse.fromJson(response)
-                val routeOptions = setRoute.routeRequest?.let {
-                    // Old records may include empty routeRequest
-                    if (it.isEmpty()) return@let null
-                    RouteOptions.fromUrl(URL(it))
-                } ?: directionsResponse.routes().firstOrNull()?.routeOptions()
-                    ?: throw noOptionsException
-                runBlocking {
-                    NavigationRoute.create(directionsResponse, routeOptions).first()
-                }
+                retrieveNavigationRoute(response, setRoute, noOptionsException)
             } catch (t: Throwable) {
                 if (t === noOptionsException) {
                     throw t
                 } else {
-                    DirectionsRoute.fromJson(response).toBuilder()
-                        .routeIndex("0")
-                        .build()
-                        .toNavigationRoute()
+                    try {
+                        // Old records may not include waypoint namfes
+                        val jsonResponse = addWaypointNames(response)
+                        retrieveNavigationRoute(jsonResponse, setRoute, noOptionsException)
+                    } catch (t: Throwable) {
+                        if (t === noOptionsException) {
+                            throw t
+                        } else {
+                            DirectionsRoute.fromJson(response).toBuilder()
+                                .routeIndex("0")
+                                .build()
+                                .toNavigationRoute()
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private fun retrieveNavigationRoute(
+        jsonResponse: String,
+        setRoute: SetRouteHistoryRecord,
+        noOptionsException: IllegalArgumentException
+    ): NavigationRoute {
+        val directionsResponse = DirectionsResponse.fromJson(jsonResponse)
+        val routeOptions = setRoute.routeRequest?.let {
+            // Old records may include empty routeRequest
+            if (it.isEmpty()) return@let null
+            RouteOptions.fromUrl(URL(it))
+        } ?: directionsResponse.routes().firstOrNull()?.routeOptions() ?: throw noOptionsException
+        return runBlocking {
+            NavigationRoute.create(directionsResponse, routeOptions).first()
+        }
+    }
+
+    private fun addWaypointNames(response: String): String {
+        val gson = GsonBuilder().create()
+        val jsonObject = gson.fromJson(response, JsonObject::class.java)
+        val waypoints = jsonObject?.getAsJsonArray(WAYPOINTS_JSON_KEY)?.map { it.asJsonObject }
+        waypoints?.forEach { waypoint ->
+            if (!waypoint.has(NAME_JSON_KEY)) {
+                waypoint.addProperty(NAME_JSON_KEY, "")
+            }
+        }
+        return jsonObject.toString()
     }
 
     private fun mapToWaypoints(routeOptions: RouteOptions?): List<HistoryWaypoint> {
@@ -136,6 +167,9 @@ internal class HistoryEventMapper {
     )
 
     private companion object {
+
         private const val NANOS_PER_SECOND = 1e-9
+        private const val WAYPOINTS_JSON_KEY = "waypoints"
+        private const val NAME_JSON_KEY = "name"
     }
 }
