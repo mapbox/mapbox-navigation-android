@@ -24,10 +24,13 @@ internal class ActiveGuidanceMapBinder(
                 value,
                 navigationViewContext.viewModel.locationViewModel,
             ),
-            reloadOnChange(navigationViewContext.options.routeLineOptions) { routeLineOptions ->
+            reloadOnChange(
+                navigationViewContext.mapStyleLoader.loadedMapStyle,
+                navigationViewContext.options.routeLineOptions
+            ) { _, lineOptions ->
                 RouteLineComponent(
                     value,
-                    routeLineOptions,
+                    lineOptions,
                     navigationViewContext.viewModel.routesViewModel
                 )
             },
@@ -38,8 +41,11 @@ internal class ActiveGuidanceMapBinder(
                 navigationViewContext.viewModel.navigationStateViewModel,
             ),
             MapMarkersComponent(value, navigationViewContext),
-            reloadOnChange(navigationViewContext.options.routeArrowOptions) { routeArrowOptions ->
-                RouteArrowComponent(value, routeArrowOptions)
+            reloadOnChange(
+                navigationViewContext.mapStyleLoader.loadedMapStyle,
+                navigationViewContext.options.routeArrowOptions
+            ) { _, arrowOptions ->
+                RouteArrowComponent(value, arrowOptions)
             }
         )
     }

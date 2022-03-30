@@ -42,6 +42,8 @@ internal class DropInNavigationViewContext(
 
     val destinationState: StateFlow<DestinationState> get() = viewModel.destinationViewModel.state
 
+    val mapStyleLoader = MapStyleLoader(context, options)
+
     //region Builders & Factories
 
     fun mapAnnotationFactory() = MapMarkerFactory(
