@@ -16,7 +16,6 @@ import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteIntersection
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.TimeUnit
 
@@ -193,31 +192,31 @@ internal class RouteAlternativesController constructor(
         nativeAlternatives: List<RouteAlternative>,
         block: (List<NavigationRoute>, RouterOrigin) -> Unit,
     ) {
-        metadataMap.clear()
-        val alternatives: List<NavigationRoute> = runBlocking {
-            nativeAlternatives.mapIndexedNotNull { index, routeAlternative ->
-                val expected = parseNativeDirectionsAlternative(
-                    ThreadController.IODispatcher,
-                    routeAlternative
-                )
-                if (expected.isValue) {
-                    metadataMap[routeAlternative.route.routeId] = routeAlternative.mapToMetadata()
-                    expected.value
-                } else {
-                    logE(
-                        """
-                            |unable to parse alternative at index $index;
-                            |failure for response: ${routeAlternative.route.responseJson}
-                        """.trimMargin(),
-                        LOG_CATEGORY
-                    )
-                    null
-                }
-            }
-        }
-        logI("${alternatives.size} alternatives available", LOG_CATEGORY)
-
         mainJobControl.scope.launch {
+            metadataMap.clear()
+            val alternatives: List<NavigationRoute> =
+                nativeAlternatives.mapIndexedNotNull { index, routeAlternative ->
+                    val expected = parseNativeDirectionsAlternative(
+                        ThreadController.IODispatcher,
+                        routeAlternative
+                    )
+                    if (expected.isValue) {
+                        metadataMap[routeAlternative.route.routeId] =
+                            routeAlternative.mapToMetadata()
+                        expected.value
+                    } else {
+                        logE(
+                            """
+                                |unable to parse alternative at index $index;
+                                |failure for response: ${routeAlternative.route.responseJson}
+                            """.trimMargin(),
+                            LOG_CATEGORY
+                        )
+                        null
+                    }
+                }
+            logI("${alternatives.size} alternatives available", LOG_CATEGORY)
+
             val origin = nativeAlternatives.find {
                 // looking for the first new route,
                 // assuming all new routes come from the same request
