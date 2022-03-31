@@ -35,6 +35,8 @@ android {
 
 dependencies {
     api project(":libnavui-maps")
+    // TODO should be able to delete the extension code and use this snapshot
+//    api "com.mapbox.extension:maps-androidauto:10.4.0-beta.1-km-car-gestures-refactor-SNAPSHOT"
     api dependenciesList.androidXCarApp
 
     implementation dependenciesList.androidXAppCompat
