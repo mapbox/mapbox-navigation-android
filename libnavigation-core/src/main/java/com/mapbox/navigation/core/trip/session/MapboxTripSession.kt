@@ -29,6 +29,7 @@ import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.FallbackVersionsObserver
@@ -238,10 +239,24 @@ internal class MapboxTripSession(
     }
 
     private fun updateRawLocation(rawLocation: Location) {
+        val locationHash = rawLocation.hashCode()
+        logD(
+            "updateRawLocation; system elapsed time: ${System.nanoTime()}; " +
+                "location ($locationHash) elapsed time: ${rawLocation.elapsedRealtimeNanos}",
+            LOG_CATEGORY
+        )
         this.rawLocation = rawLocation
         locationObservers.forEach { it.onNewRawLocation(rawLocation) }
         mainJobController.scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            logD(
+                "updateRawLocation; notify navigator for ($locationHash) - start",
+                LOG_CATEGORY
+            )
             navigator.updateLocation(rawLocation.toFixLocation())
+            logD(
+                "updateRawLocation; notify navigator for ($locationHash) - end",
+                LOG_CATEGORY
+            )
         }
     }
 
@@ -255,6 +270,12 @@ internal class MapboxTripSession(
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     private val navigatorObserver = object : NavigatorObserver {
         override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
+            logD(
+                "navigatorObserver#onStatus; " +
+                    "FixLocation elapsed time: ${status.location.monotonicTimestampNanoseconds}",
+                LOG_CATEGORY
+            )
+
             val tripStatus = status.getTripStatusFrom(primaryRoute)
             val enhancedLocation = tripStatus.navigationStatus.location.toLocation()
             val keyPoints = tripStatus.navigationStatus.keyPoints.toLocations()
