@@ -92,6 +92,8 @@ class DropInNavigationView @JvmOverloads constructor(
     }
 
     init {
+        keepScreenOn = true
+
         /**
          * Default setup for MapboxNavigationApp. The developer can customize this by
          * setting up the MapboxNavigationApp before the view is constructed.
