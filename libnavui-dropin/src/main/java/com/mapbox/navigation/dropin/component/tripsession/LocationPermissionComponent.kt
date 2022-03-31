@@ -55,10 +55,18 @@ internal class LocationPermissionComponent(
         val isGranted = PermissionsManager.areLocationPermissionsGranted(
             mapboxNavigation.navigationOptions.applicationContext
         )
+
         if (isGranted) {
-            tripSessionStarterViewModel.invoke(
-                TripSessionStarterAction.OnLocationPermission(true)
-            )
+            // There can be a race condition between components and view models.
+            // The view model attaches, and then launches a coroutine to collect actions.
+            // The LocationPermissionComponent surfaces this issue because it is not owned by
+            // a coordinator and flowable binder. This issue was also difficult to reproduce on
+            // all devices. Launching a coroutine to update the state is a temporary solution.
+            coroutineScope.launch {
+                tripSessionStarterViewModel.invoke(
+                    TripSessionStarterAction.OnLocationPermission(true)
+                )
+            }
         } else {
             launcher?.launch(LOCATION_PERMISSIONS)
 
