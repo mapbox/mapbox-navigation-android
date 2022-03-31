@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
+import android.util.Log
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
@@ -56,6 +57,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.CopyOnWriteArrayList
@@ -326,6 +328,7 @@ class MapboxRouteLineApi(
         cancel()
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
+                Log.e("lp_test", "new routes: " + newRoutes.map { it.route.id })
                 val featureDataProvider: () -> List<RouteFeatureData> =
                     MapboxRouteLineUtils.getRouteLineFeatureDataProvider(newRoutes)
                 val routeData = setNewRouteData(
@@ -669,47 +672,48 @@ class MapboxRouteLineApi(
         }
     }
 
-    // todo wire up some example and see if it works
     fun updateWithAlternativeRoutesMetadata(
         alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
-        jobControl.scope.launch(Dispatchers.Main) {
-            mutex.withLock {
-                alternativesDeviationOffset.clear()
-                alternativeRoutesMetadata.forEach { routeMetadata ->
-                    val route = routes.find { it.id == routeMetadata.routeId }!!.directionsRoute
-                    var runningDistance = 0.0
-                    route.legs()!!.forEachIndexed LegLoop@{ legIndex, leg ->
-                        leg.annotation()?.distance()
-                            ?.forEachIndexed AnnotationLoop@{ annotationIndex, distance ->
-                                runningDistance += distance
-                                if (legIndex == routeMetadata.forkIntersectionOfAlternativeRoute.legIndex
-                                    && annotationIndex == routeMetadata.forkIntersectionOfAlternativeRoute.geometryIndexInLeg
-                                ) {
-                                    val percentageTraveled = runningDistance / route.distance()
-                                    alternativesDeviationOffset[routeMetadata.routeId] =
-                                        percentageTraveled
-                                    /*RouteLineExpressionProvider {
-                                        step {
-                                            lineProgress()
-                                            color(Color.TRANSPARENT)
-                                            stop {
-                                                literal(percentageTraveled)
-                                            }
+        Log.e("lp_test", "metadata for: " + alternativeRoutesMetadata.map { it.navigationRoute.id })
+        // jobControl.scope.launch(Dispatchers.Main) {
+        //     mutex.withLock {
+        runBlocking {
+            alternativesDeviationOffset.clear()
+            alternativeRoutesMetadata.forEach { routeMetadata ->
+                var runningDistance = 0.0
+                val route = routeMetadata.navigationRoute.directionsRoute
+                route.legs()?.forEachIndexed LegLoop@{ legIndex, leg ->
+                    leg.annotation()?.distance()
+                        ?.forEachIndexed AnnotationLoop@{ annotationIndex, distance ->
+                            if (legIndex == routeMetadata.forkIntersectionOfAlternativeRoute.legIndex
+                                && annotationIndex == routeMetadata.forkIntersectionOfAlternativeRoute.geometryIndexInLeg
+                            ) {
+                                val percentageTraveled = runningDistance / route.distance()
+                                alternativesDeviationOffset[routeMetadata.navigationRoute.id] =
+                                    percentageTraveled
+                                /*RouteLineExpressionProvider {
+                                    step {
+                                        lineProgress()
+                                        color(Color.TRANSPARENT)
+                                        stop {
+                                            literal(percentageTraveled)
                                         }
-                                    }*/
-                                    return@LegLoop
-                                }
+                                    }
+                                }*/
+                                return@LegLoop
                             }
-                    }
+                            runningDistance += distance
+                        }
                 }
-                val featureDataProvider: () -> List<RouteFeatureData> =
-                    MapboxRouteLineUtils.getRouteFeatureDataProvider(routes)
-                val result = buildDrawRoutesState(featureDataProvider)
-                consumer.accept(result)
             }
+            val featureDataProvider: () -> List<RouteFeatureData> =
+                MapboxRouteLineUtils.getRouteFeatureDataProvider(routes)
+            val result = buildDrawRoutesState(featureDataProvider)
+            consumer.accept(result)
         }
+        // }
     }
 
     /**
@@ -1187,17 +1191,25 @@ class MapboxRouteLineApi(
             )
         }
 
-        val alternateRoutesBaseExpressionProducer = {
-            // todo add support for vanishing until divergence point
-            throw UnsupportedOperationException(
-                "vanishing of alternatives routes is not supported yet"
-            )
-        }
-
-        val alternateRoutesCasingExpressionProducer = {
-            // todo add support for vanishing until divergence point
-            throw UnsupportedOperationException(
-                "vanishing of alternatives routes is not supported yet"
+        val (alternateRoute1BaseExpressionProducer, alternateRoute1CasingExpressionProducer) = run {
+            val percentageTraveled = partitionedRoutes.second.firstOrNull()?.route?.run {
+                alternativesDeviationOffset[this.id]
+            } ?: 0.0
+            Pair(
+                {
+                    MapboxRouteLineUtils.getRouteLineExpression(
+                        percentageTraveled,
+                        Color.TRANSPARENT,
+                        routeLineOptions.resourceProvider.routeLineColorResources.alternativeRouteDefaultColor
+                    )
+                },
+                {
+                    MapboxRouteLineUtils.getRouteLineExpression(
+                        percentageTraveled,
+                        Color.TRANSPARENT,
+                        routeLineOptions.resourceProvider.routeLineColorResources.alternativeRouteCasingColor
+                    )
+                }
             )
         }
 
@@ -1350,8 +1362,8 @@ class MapboxRouteLineApi(
                     RouteLineData(
                         alternativeRoute1FeatureCollection,
                         RouteLineDynamicData(
-                            alternateRoutesBaseExpressionProducer,
-                            alternateRoutesCasingExpressionProducer,
+                            alternateRoute1BaseExpressionProducer,
+                            alternateRoute1CasingExpressionProducer,
                             alternateRoute1TrafficExpressionProducer,
                             alternateRoutesRestrictedSectionsExpressionProducer
                         )
@@ -1359,8 +1371,8 @@ class MapboxRouteLineApi(
                     RouteLineData(
                         alternativeRoute2FeatureCollection,
                         RouteLineDynamicData(
-                            alternateRoutesBaseExpressionProducer,
-                            alternateRoutesCasingExpressionProducer,
+                            alternateRoute1BaseExpressionProducer,
+                            alternateRoute1CasingExpressionProducer,
                             alternateRoute2TrafficExpressionProducer,
                             alternateRoutesRestrictedSectionsExpressionProducer
                         )

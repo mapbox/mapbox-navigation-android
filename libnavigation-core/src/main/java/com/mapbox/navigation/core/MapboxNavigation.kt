@@ -490,6 +490,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigationOptions.routeAlternativesOptions,
             navigator,
             tripSession,
+            directionsSession,
             threadController,
         )
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(

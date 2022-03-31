@@ -7,10 +7,12 @@ import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.mapToSdkRouteOrigin
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigator.RouteAlternative
@@ -23,6 +25,7 @@ internal class RouteAlternativesController constructor(
     private val options: RouteAlternativesOptions,
     navigator: MapboxNativeNavigator,
     private val tripSession: TripSession,
+    private val directionsSession: DirectionsSession,
     private val threadController: ThreadController
 ) {
 
@@ -170,7 +173,10 @@ internal class RouteAlternativesController constructor(
 
             // This is supposed to be able to filter alternatives
             // but at this point we're not filtering anything.
-            return emptyList()
+            return mutableListOf<Int>().apply {
+                var index = 0
+                repeat(routeAlternatives.size) { add(index++) }
+            }
         }
 
         override fun onError(message: String) {
@@ -201,9 +207,10 @@ internal class RouteAlternativesController constructor(
                         routeAlternative
                     )
                     if (expected.isValue) {
-                        metadataMap[routeAlternative.route.routeId] =
-                            routeAlternative.mapToMetadata()
-                        expected.value
+                        expected.value?.also {
+                            metadataMap[routeAlternative.route.routeId] =
+                                routeAlternative.mapToMetadata(it)
+                        }
                     } else {
                         logE(
                             """
@@ -217,13 +224,25 @@ internal class RouteAlternativesController constructor(
                 }
             logI("${alternatives.size} alternatives available", LOG_CATEGORY)
 
-            val origin = nativeAlternatives.find {
-                // looking for the first new route,
-                // assuming all new routes come from the same request
-                it.isNew
-            }?.route?.routerOrigin?.mapToSdkRouteOrigin() ?: lastUpdateOrigin
-            block(alternatives, origin)
-            lastUpdateOrigin = origin
+            val hasUpdatedAlternatives = {
+                alternatives.filterNot { newRoute ->
+                    directionsSession.routes.any { existingRoute ->
+                        existingRoute.id == newRoute.id
+                    }
+                }.isNotEmpty() || directionsSession.routes.any { it.id }
+                logD("${deduplicatedAlternatives.size} deduplicated alternatives available", LOG_CATEGORY)
+                deduplicatedAlternatives.isNotEmpty()
+            }
+
+            if ((directionsSession.routes.size - 1) != alternatives.size || hasNewAlternatives()) {
+                val origin = nativeAlternatives.find {
+                    // looking for the first new route,
+                    // assuming all new routes come from the same request
+                    it.isNew
+                }?.route?.routerOrigin?.mapToSdkRouteOrigin() ?: lastUpdateOrigin
+                block(alternatives, origin)
+                lastUpdateOrigin = origin
+            }
             notifyMetadataObservers()
         }
     }
@@ -240,7 +259,7 @@ internal class RouteAlternativesController constructor(
 }
 
 data class AlternativeRouteMetadata internal constructor(
-    val routeId: String,
+    val navigationRoute: NavigationRoute,
     val forkIntersectionOfAlternativeRoute: AlternativeRouteIntersection,
     val forkIntersectionOfPrimaryRoute: AlternativeRouteIntersection,
     val infoFromFork: AlternativeRouteInfo,
@@ -259,9 +278,9 @@ data class AlternativeRouteInfo internal constructor(
     val duration: Double,
 )
 
-private fun RouteAlternative.mapToMetadata(): AlternativeRouteMetadata {
+private fun RouteAlternative.mapToMetadata(navigationRoute: NavigationRoute): AlternativeRouteMetadata {
     return AlternativeRouteMetadata(
-        routeId = route.routeId,
+        navigationRoute = navigationRoute,
         forkIntersectionOfAlternativeRoute = alternativeRouteFork.mapToPlatform(),
         forkIntersectionOfPrimaryRoute = mainRouteFork.mapToPlatform(),
         infoFromFork = infoFromFork.mapToPlatform(),

@@ -30,6 +30,7 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
@@ -169,12 +170,11 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         }
 
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
-            updateCamera(locationMatcherResult.enhancedLocation, locationMatcherResult.keyPoints)
+            navigationLocationProvider.changePosition(locationMatcherResult.enhancedLocation)
         }
     }
 
-    private fun updateCamera(location: Location, keyPoints: List<Location>) {
-        navigationLocationProvider.changePosition(location, keyPoints, null, null)
+    private fun updateCamera(location: Location) {
         val mapAnimationOptionsBuilder = MapAnimationOptions.Builder()
         mapAnimationOptionsBuilder.duration(1500L)
         mapCamera.easeTo(
@@ -199,7 +199,8 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 object : LocationEngineCallback<LocationEngineResult> {
                     override fun onSuccess(result: LocationEngineResult) {
                         result.lastLocation?.let {
-                            updateCamera(it, emptyList())
+                            navigationLocationProvider.changePosition(it)
+                            updateCamera(it)
                         }
                     }
 
@@ -285,12 +286,12 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             .build()
         mapboxNavigation.requestRoutes(
             routeOptions,
-            object : RouterCallback {
+            object : NavigationRouterCallback {
                 override fun onRoutesReady(
-                    routes: List<DirectionsRoute>,
+                    routes: List<NavigationRoute>,
                     routerOrigin: RouterOrigin
                 ) {
-                    mapboxNavigation.setRoutes(routes.reversed())
+                    mapboxNavigation.setNavigationRoutes(routes)
                 }
 
                 override fun onFailure(
@@ -350,6 +351,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val mapClickListener = OnMapClickListener {
         CoroutineScope(Dispatchers.Main).launch {
+            Log.e("lp_test", "alternative: click")
             val result = routeLineApi.findClosestRoute(
                 it,
                 binding.mapView.getMapboxMap(),
