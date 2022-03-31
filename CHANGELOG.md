@@ -7,6 +7,10 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.4.0-rc.1 - March 31, 2022
+
+#### Bug fixes and improvements
 - Fixed `HistoryEventMapper#mapNavigationRoute` for when `SetRouteHistoryRecord` has empty `routeRequest`. [#5614](https://github.com/mapbox/mapbox-navigation-android/pull/5614)
 - Fixed an issue where route refresh failure led to a parsing error and runtime crash instead of failure callback. [#5617](https://github.com/mapbox/mapbox-navigation-android/pull/5617)
 - Fixed `ReplayRouteInterpolator` speed adjustment on turns. A driver doesn't slow down on minor curvatures on a motorway. [5618](https://github.com/mapbox/mapbox-navigation-android/pull/5618)
@@ -14,6 +18,15 @@ Mapbox welcomes participation and contributions from everyone.
 - Improved the time between the router getting access to a raw Directions API response and Nav SDK delivering a `NavigationRoute` instance in `NavigationRouterCallback`. [#5629](https://github.com/mapbox/mapbox-navigation-android/pull/5629)
 - Fixed an issue where line `RoadObject`s matched with `RoadObjectMatcher` which consisted of only one edge and multiple lines where calculated incorrectly. [#5629](https://github.com/mapbox/mapbox-navigation-android/pull/5629)
 - Moved alternative route line processing to a worker thread, relieving a little bit of load from the main thread during each recalculation. [#5634](https://github.com/mapbox/mapbox-navigation-android/pull/5634)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.4.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.4.0))
+- Mapbox Navigation Native `v94.0.0`
+- Mapbox Core Common `v21.2.0`
+- Mapbox Java `v6.4.0-beta.4` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.4.0-beta.4))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
 
 ## Mapbox Navigation SDK 2.4.0-beta.3 - March 25, 2022
 ### Changelog
