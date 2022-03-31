@@ -24,6 +24,7 @@ import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
@@ -46,16 +47,16 @@ import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesO
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.qa_test_app.databinding.AlternativeRouteActivityLayoutBinding
 import com.mapbox.navigation.qa_test_app.utils.Utils.getMapboxAccessToken
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
-import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setRoutes
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRoutes
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -102,6 +103,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         MapboxRouteLineOptions.Builder(this)
             .withRouteLineResources(routeLineResources)
             .withRouteLineBelowLayerId("road-label-navigation")
+            .withVanishingRouteLineEnabled(true)
             .build()
     }
 
@@ -126,6 +128,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         super.onStart()
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
+        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerRouteAlternativesObserver(alternativesObserver)
         mapboxNavigation.registerRouteAlternativesMetadataObserver(alternativesMetadataObserver)
@@ -134,6 +137,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     override fun onStop() {
         super.onStop()
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
+        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteAlternativesObserver(alternativesObserver)
@@ -151,6 +155,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     private fun initNavigation() {
         binding.mapView.location.apply {
             setLocationProvider(navigationLocationProvider)
+            addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
             enabled = true
         }
         mapboxReplayer.pushRealLocation(this, 0.0)
@@ -219,6 +224,15 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         return false
     }
 
+    private val onIndicatorPositionChangedListener = OnIndicatorPositionChangedListener { point ->
+        routeLineApi.updateTraveledRouteLine(point).let {
+            routeLineView.renderRouteLineUpdate(
+                binding.mapView.getMapboxMap().getStyle()!!,
+                it
+            )
+        }
+    }
+
     /**
      * Example of how to handle route alternatives during navigation.
      */
@@ -245,8 +259,20 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
-    private val alternativesMetadataObserver = AlternativeRouteMetadataObserver {
-        Log.e("lp_test", it.toString())
+    private val alternativesMetadataObserver = AlternativeRouteMetadataObserver { metadata ->
+        routeLineApi.updateWithAlternativeRoutesMetadata(metadata) { result ->
+            binding.mapView.getMapboxMap().getStyle()?.apply {
+                routeLineView.renderRouteDrawData(this, result)
+            }
+        }
+    }
+
+    private val routeProgressObserver = RouteProgressObserver { routeProgress ->
+        routeLineApi.updateWithRouteProgress(routeProgress) { result ->
+            binding.mapView.getMapboxMap().getStyle()?.apply {
+                routeLineView.renderRouteLineUpdate(this, result)
+            }
+        }
     }
 
     private fun findRoute(origin: Point?, destination: Point?) {
@@ -312,9 +338,8 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private val routesObserver = RoutesObserver { result ->
-        val routelines = result.routes.map { RouteLine(it, null) }
         CoroutineScope(Dispatchers.Main).launch {
-            routeLineApi.setRoutes(routelines).apply {
+            routeLineApi.setNavigationRoutes(result.navigationRoutes).apply {
                 routeLineView.renderRouteDrawData(
                     binding.mapView.getMapboxMap().getStyle()!!,
                     this
