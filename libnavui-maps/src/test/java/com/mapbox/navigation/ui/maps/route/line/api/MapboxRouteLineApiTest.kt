@@ -27,6 +27,8 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.clearRouteLine
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setAlternativeTrafficColor
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setPrimaryTrafficColor
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
@@ -888,7 +890,6 @@ class MapboxRouteLineApiTest {
         assertTrue(result.value!!.waypointsSource.features()!!.isEmpty())
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun findClosestRoute_whenClickPoint() = runBlockingTest {
         val uuids = listOf(UUID.randomUUID(), UUID.randomUUID())
@@ -928,7 +929,6 @@ class MapboxRouteLineApiTest {
         unmockkStatic(UUID::class)
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun findClosestRoute_whenRectPoint() = runBlockingTest {
         val uuids = listOf(UUID.randomUUID(), UUID.randomUUID())
@@ -974,10 +974,6 @@ class MapboxRouteLineApiTest {
         unmockkStatic(UUID::class)
     }
 
-    /**
-     * todo refactor this test to remove the dependency on the exact order of UUID.randomUUID() invocations across the SDK
-     */
-    @ExperimentalCoroutinesApi
     @Test
     fun findClosestRoute_whenPrimaryRoute() = runBlockingTest {
         val uuids = listOf(UUID.randomUUID(), UUID.randomUUID())
@@ -1118,5 +1114,88 @@ class MapboxRouteLineApiTest {
             .generateExpression()
 
         assertNotEquals(defaultResult.toString(), result.toString())
+    }
+
+    @Test
+    fun setPrimaryTrafficColorExtension() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val api = MapboxRouteLineApi(options)
+        val route = loadRoute("short_route.json")
+        val routes = listOf(RouteLine(route, null))
+
+        val result = api.setRoutes(routes).setPrimaryTrafficColor(Color.MAGENTA).value!!
+
+        assertEquals(
+            "[step, [line-progress], [rgba, 255.0, 0.0, 255.0, 1.0], 0.0, " +
+                "[rgba, 255.0, 0.0, 255.0, 1.0]]",
+            result.primaryRouteLineData
+                .dynamicData
+                .trafficExpressionProvider!!
+                .generateExpression().toString()
+        )
+    }
+
+    @Test
+    fun setPrimaryTrafficExpressionExtension() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val api = MapboxRouteLineApi(options)
+        val route = loadRoute("short_route.json")
+        val routes = listOf(RouteLine(route, null))
+        val replacementExpression =
+            MapboxRouteLineUtils.getRouteLineExpression(0.0, Color.CYAN, Color.CYAN)
+
+        val result = api.setRoutes(routes).setPrimaryTrafficColor(replacementExpression).value!!
+
+        assertEquals(
+            replacementExpression.toString(),
+            result.primaryRouteLineData
+                .dynamicData
+                .trafficExpressionProvider!!
+                .generateExpression().toString()
+        )
+    }
+
+    @Test
+    fun setAlternativeTrafficColorExtension() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val api = MapboxRouteLineApi(options)
+        val route = loadRoute("short_route.json")
+        val altRoute1 = loadRoute("route-with-road-classes.txt")
+        val altRoute2 = loadRoute("multileg_route.json")
+        val routes = listOf(
+            RouteLine(route, null),
+            RouteLine(altRoute1, "alternativeRoute1"),
+            RouteLine(altRoute2, "alternativeRoute2")
+        )
+
+        val result = api.setRoutes(routes).setAlternativeTrafficColor(Color.MAGENTA).value!!
+
+        assertEquals(
+            "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+                "[rgba, 0.0, 0.0, 0.0, 0.0]]",
+            result
+                .primaryRouteLineData
+                .dynamicData
+                .trafficExpressionProvider!!
+                .generateExpression().toString()
+        )
+        assertEquals(
+            "[step, [line-progress], [rgba, 255.0, 0.0, 255.0, 1.0], 0.0, " +
+                "[rgba, 255.0, 0.0, 255.0, 1.0]]",
+            result
+                .alternativeRouteLinesData[0]
+                .dynamicData
+                .trafficExpressionProvider!!
+                .generateExpression().toString()
+        )
+        assertEquals(
+            "[step, [line-progress], [rgba, 255.0, 0.0, 255.0, 1.0], 0.0, " +
+                "[rgba, 255.0, 0.0, 255.0, 1.0]]",
+            result
+                .alternativeRouteLinesData[1]
+                .dynamicData
+                .trafficExpressionProvider!!
+                .generateExpression().toString()
+        )
     }
 }
