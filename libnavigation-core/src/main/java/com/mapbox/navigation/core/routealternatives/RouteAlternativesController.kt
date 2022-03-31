@@ -13,8 +13,8 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigator.RouteAlternative
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.TimeUnit
 
@@ -28,6 +28,8 @@ internal class RouteAlternativesController constructor(
     private var lastUpdateOrigin: RouterOrigin = RouterOrigin.Onboard
 
     private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
+
+    private var observerProcessingJob: Job? = null
 
     private val nativeRouteAlternativesController = navigator.routeAlternativesController
         .apply {
@@ -132,6 +134,7 @@ internal class RouteAlternativesController constructor(
         nativeRouteAlternativesController.removeAllObservers()
         observers.clear()
         legacyObserversMap.clear()
+        observerProcessingJob?.cancel()
     }
 
     private val nativeObserver = object : com.mapbox.navigator.RouteAlternativesObserver {
@@ -142,7 +145,10 @@ internal class RouteAlternativesController constructor(
             val routeProgress = tripSession.getRouteProgress()
                 ?: return emptyList()
 
-            processRouteAlternatives(routeAlternatives) { alternatives, origin ->
+            observerProcessingJob?.cancel()
+            observerProcessingJob = processRouteAlternatives(
+                routeAlternatives
+            ) { alternatives, origin ->
                 observers.forEach {
                     it.onRouteAlternatives(routeProgress, alternatives, origin)
                 }
@@ -171,38 +177,34 @@ internal class RouteAlternativesController constructor(
     private fun processRouteAlternatives(
         nativeAlternatives: List<RouteAlternative>,
         block: (List<NavigationRoute>, RouterOrigin) -> Unit,
-    ) {
-        val alternatives: List<NavigationRoute> = runBlocking {
-            nativeAlternatives.mapIndexedNotNull { index, routeAlternative ->
-                val expected = parseNativeDirectionsAlternative(
-                    ThreadController.IODispatcher,
-                    routeAlternative
-                )
-                if (expected.isValue) {
-                    expected.value
-                } else {
-                    logE(
-                        """
+    ) = mainJobControl.scope.launch {
+        val alternatives = nativeAlternatives.mapIndexedNotNull { index, routeAlternative ->
+            val expected = parseNativeDirectionsAlternative(
+                ThreadController.IODispatcher,
+                routeAlternative
+            )
+            if (expected.isValue) {
+                expected.value
+            } else {
+                logE(
+                    """
                             |unable to parse alternative at index $index;
                             |failure for response: ${routeAlternative.route.responseJson}
                         """.trimMargin(),
-                        LOG_CATEGORY
-                    )
-                    null
-                }
+                    LOG_CATEGORY
+                )
+                null
             }
         }
         logI("${alternatives.size} alternatives available", LOG_CATEGORY)
 
-        mainJobControl.scope.launch {
-            val origin = nativeAlternatives.find {
-                // looking for the first new route,
-                // assuming all new routes come from the same request
-                it.isNew
-            }?.route?.routerOrigin?.mapToSdkRouteOrigin() ?: lastUpdateOrigin
-            block(alternatives, origin)
-            lastUpdateOrigin = origin
-        }
+        val origin = nativeAlternatives.find {
+            // looking for the first new route,
+            // assuming all new routes come from the same request
+            it.isNew
+        }?.route?.routerOrigin?.mapToSdkRouteOrigin() ?: lastUpdateOrigin
+        block(alternatives, origin)
+        lastUpdateOrigin = origin
     }
 
     private companion object {
