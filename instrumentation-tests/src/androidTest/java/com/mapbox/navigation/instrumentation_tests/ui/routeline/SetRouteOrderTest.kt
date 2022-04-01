@@ -8,6 +8,8 @@ import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.bindgen.Expected
+import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.BasicNavigationViewActivity
 import com.mapbox.navigation.instrumentation_tests.utils.idling.MapStyleInitIdlingResource
@@ -64,10 +66,9 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
 
     @Test
     fun multipleSetRouteCall_longAndShortRouteTest() {
-        val shortRoute = getRoute(activity, R.raw.short_route)
-        val longRoute = getRoute(activity, R.raw.cross_country_route)
-        val longRoutes = listOf(RouteLine(longRoute, null))
-        val shortRoutes = listOf(RouteLine(shortRoute, null))
+        val shortRoute = getRoute(activity, R.raw.short_route).toNavigationRoute()
+        val longRoute = getRoute(activity, R.raw.cross_country_route).toNavigationRoute()
+        RouteCompatibilityCache.cacheCreationResult(listOf(shortRoute, longRoute))
 
         val consumerLongRoute =
             MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { value ->
@@ -78,11 +79,11 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
         val consumerShortRoute =
             MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { value ->
                 logE("short", "SetRouteCancellationTest")
-                val primaryRoute = routeLineApi.getPrimaryRoute()
+                val primaryRoute = routeLineApi.getPrimaryNavigationRoute()
                 val contents =
                     value.value!!.primaryRouteLineData.dynamicData.trafficExpressionProvider!!
                         .generateExpression().contents as ArrayList<*>
-                assertEquals(shortRoute, primaryRoute)
+                assertEquals(shortRoute.directionsRoute, primaryRoute?.directionsRoute)
                 assertEquals(
                     7,
                     contents.size
@@ -91,10 +92,10 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
             }
 
         myResourceIdler.increment()
-        routeLineApi.setRoutes(longRoutes, consumerLongRoute)
+        routeLineApi.setNavigationRoutes(listOf(longRoute), consumerLongRoute)
         Timer().schedule(
             timerTask {
-                routeLineApi.setRoutes(shortRoutes, consumerShortRoute)
+                routeLineApi.setNavigationRoutes(listOf(shortRoute), consumerShortRoute)
             },
             5
         )
