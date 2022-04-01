@@ -59,6 +59,20 @@ fun <T1, T2> reloadOnChange(
     }
 
 /**
+ * Return UIComponent that gets re-created using [factory] when either [flow1] or [flow2] or
+ * [flow3] changes.
+ */
+fun <T1, T2, T3> reloadOnChange(
+    flow1: Flow<T1>,
+    flow2: Flow<T2>,
+    flow3: Flow<T3>,
+    factory: (T1, T2, T3) -> UIComponent?
+): UIComponent =
+    ReloadingComponent(combine(flow1, flow2, flow3) { v1, v2, v3 -> Triple(v1, v2, v3) }) {
+        factory(it.first, it.second, it.third)
+    }
+
+/**
  * High Order Component that observes [flow] changes and re-creates child component
  * using [factory] function.
  *

@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin.component.camera
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.toCameraOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.location.LocationViewModel
@@ -18,8 +19,10 @@ import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewpo
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
+import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -63,12 +66,16 @@ internal class CameraComponent constructor(
 
         mapView.camera.addCameraAnimationsLifecycleListener(gesturesHandler)
 
-        cameraViewModel.state.map { it.cameraPadding }.observe {
-            viewportDataSource.overviewPadding = it
-            viewportDataSource.followingPadding = it
-            viewportDataSource.evaluate()
-        }
+        cameraViewModel.state
+            .map { it.cameraPadding }
+            .distinctUntilChanged()
+            .observe {
+                viewportDataSource.overviewPadding = it
+                viewportDataSource.followingPadding = it
+                viewportDataSource.evaluate()
+            }
 
+        restoreCameraState()
         controlCameraFrameOverrides()
         updateCameraFrame()
         updateCameraLocation()
@@ -79,7 +86,23 @@ internal class CameraComponent constructor(
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         super.onDetached(mapboxNavigation)
+        saveCameraState()
         mapView.camera.removeCameraAnimationsLifecycleListener(gesturesHandler)
+    }
+
+    private fun saveCameraState() {
+        val map = mapView.getMapboxMap()
+        val state = map.cameraState
+        cameraViewModel.invoke(CameraAction.SaveMapCameraState(state))
+        logD("saveCameraState $map; $state", "CameraComponent")
+    }
+
+    private fun restoreCameraState() {
+        cameraViewModel.state.value.mapCameraState?.also { state ->
+            val map = mapView.getMapboxMap()
+            logD("restoreCameraState $map; $state", "CameraComponent")
+            map.setCamera(state.toCameraOptions())
+        }
     }
 
     private fun controlCameraFrameOverrides() {
@@ -101,13 +124,14 @@ internal class CameraComponent constructor(
     }
 
     private fun updateCameraFrame() {
-        coroutineScope.launch {
-            cameraViewModel.state.collect { state ->
+        cameraViewModel.state
+            .map { it.cameraMode }
+            .distinctUntilChanged()
+            .observe {
                 if (isCameraInitialized) {
-                    requestCameraModeTo(cameraMode = state.cameraMode)
+                    requestCameraModeTo(cameraMode = it)
                 }
             }
-        }
     }
 
     private fun updateCameraLocation() {
