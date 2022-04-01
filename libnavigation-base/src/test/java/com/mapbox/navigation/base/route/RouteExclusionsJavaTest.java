@@ -10,7 +10,7 @@ import com.mapbox.bindgen.ExpectedFactory;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigation.base.extensions.RouteOptionsExtensions;
 import com.mapbox.navigation.base.internal.SDKRouteParser;
-import com.mapbox.navigation.base.internal.route.NavigationRouteExKt;
+import com.mapbox.navigation.base.internal.route.NavigationRouteEx;
 import com.mapbox.navigation.testing.FileUtils;
 import com.mapbox.navigator.RouteInterface;
 
@@ -61,7 +61,7 @@ public class RouteExclusionsJavaTest {
         .distance(183888.609)
         .duration(10697.573)
         .build();
-    NavigationRoute navigationRoute = NavigationRouteExKt.createNavigationRoute(
+    NavigationRoute navigationRoute = NavigationRouteEx.createNavigationRoute(
         directionsRoute, parser
     );
 
@@ -76,7 +76,7 @@ public class RouteExclusionsJavaTest {
     DirectionsRoute directionsRoute = DirectionsRoute.fromJson(
         FileUtils.INSTANCE.loadJsonFixture("toll_and_ferry_directions_route.json")
     );
-    NavigationRoute navigationRoute = NavigationRouteExKt.createNavigationRoute(
+    NavigationRoute navigationRoute = NavigationRouteEx.createNavigationRoute(
         directionsRoute, parser
     );
 
@@ -91,7 +91,7 @@ public class RouteExclusionsJavaTest {
     DirectionsRoute directionsRoute = DirectionsRoute.fromJson(
         FileUtils.INSTANCE.loadJsonFixture("toll_and_ferry_directions_route.json")
     );
-    NavigationRoute navigationRoute = NavigationRouteExKt.createNavigationRoute(
+    NavigationRoute navigationRoute = NavigationRouteEx.createNavigationRoute(
         directionsRoute, parser
     );
 

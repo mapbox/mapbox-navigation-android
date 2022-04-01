@@ -95,6 +95,7 @@ class NavigatorMapperTest {
             stale = true,
             remainingWaypoints = 1,
             upcomingRoadObjects = listOf(),
+            alternativeRouteId = "alternative_id",
         )
 
         val result = getRouteProgressFrom(
@@ -564,6 +565,7 @@ class NavigatorMapperTest {
         every { inTunnel } returns true
         every { upcomingRouteAlerts } returns emptyList()
         every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
+        every { locatedAlternativeRouteId } returns "alternative_id"
     }
 
     val routeAlertLocation: RouteAlertLocation = mockk()

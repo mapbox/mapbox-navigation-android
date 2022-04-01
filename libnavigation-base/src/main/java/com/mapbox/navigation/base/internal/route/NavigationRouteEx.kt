@@ -1,3 +1,5 @@
+@file:JvmName("NavigationRouteEx")
+
 package com.mapbox.navigation.base.internal.route
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -7,6 +9,11 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouteInterface
+import com.mapbox.navigator.RouterOrigin
+
+val NavigationRoute.routeId: String get() = nativeRoute.routeId
+
+val NavigationRoute.routerOrigin: RouterOrigin get() = nativeRoute.routerOrigin
 
 /**
  * Internal handle for the route's native peer.

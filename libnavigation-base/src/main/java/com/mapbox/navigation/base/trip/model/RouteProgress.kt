@@ -53,6 +53,7 @@ class RouteProgress internal constructor(
     val remainingWaypoints: Int,
     val upcomingRoadObjects: List<UpcomingRoadObject>,
     val stale: Boolean,
+    internal val routeAlternativeId: String?,
 ) {
 
     /**

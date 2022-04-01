@@ -3,6 +3,9 @@ package com.mapbox.navigation.core.reroute
 import androidx.annotation.MainThread
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.internal.route.routeId
+import com.mapbox.navigation.base.internal.route.routerOrigin
+import com.mapbox.navigation.base.internal.utils.routeAlternativeId
 import com.mapbox.navigation.base.options.RerouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -12,8 +15,10 @@ import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.navigator.internal.mapToSdkRouteOrigin
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
@@ -94,20 +99,41 @@ internal class MapboxRerouteController(
     }
 
     override fun reroute(routesCallback: RerouteController.RoutesCallback) {
-        reroute(
-            NavigationRerouteController.RoutesCallback { routes, _ ->
-                routesCallback.onNewRoutes(routes.toDirectionsRoutes())
-            }
-        )
+        reroute { routes, _ ->
+            routesCallback.onNewRoutes(routes.toDirectionsRoutes())
+        }
     }
 
     override fun reroute(callback: NavigationRerouteController.RoutesCallback) {
         interrupt()
         state = RerouteState.FetchingRoute
-        logD(
-            "Fetching route",
-            LOG_CATEGORY
-        )
+        logD("Fetching route", LOG_CATEGORY)
+
+        ifNonNull(
+            directionsSession.routes,
+            tripSession.getRouteProgress()?.routeAlternativeId,
+        ) { routes, routeAlternativeId ->
+            val relevantAlternative = routes.find { it.routeId == routeAlternativeId }
+            if (relevantAlternative != null) {
+                val newList = mutableListOf(relevantAlternative).apply {
+                    addAll(
+                        routes.toMutableList().apply {
+                            removeFirst()
+                            remove(relevantAlternative)
+                        }
+                    )
+                }
+
+                logD("Reroute switch to alternative", LOG_CATEGORY)
+
+                val origin = relevantAlternative.routerOrigin.mapToSdkRouteOrigin()
+                callback.onNewRoutes(newList, origin)
+
+                state = RerouteState.RouteFetched(origin)
+                state = RerouteState.Idle
+                return
+            }
+        }
 
         val routeOptions = directionsSession.getPrimaryRouteOptions()
             ?.applyRerouteOptions(

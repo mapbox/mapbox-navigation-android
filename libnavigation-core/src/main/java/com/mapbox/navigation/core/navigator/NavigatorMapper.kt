@@ -211,6 +211,7 @@ private fun NavigationStatus.getRouteProgress(
             remainingWaypoints,
             upcomingRouteAlerts.toUpcomingRoadObjects(),
             stale,
+            locatedAlternativeRouteId,
         )
     }
     return null
