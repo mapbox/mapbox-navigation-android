@@ -2,10 +2,14 @@ package com.mapbox.navigation.dropin.component.camera
 
 import android.location.Location
 import com.mapbox.android.gestures.Utils
+import com.mapbox.common.Logger
+import com.mapbox.geojson.Point
+import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.toCameraOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
@@ -26,9 +30,11 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.spyk
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -47,7 +53,9 @@ class CameraComponentTest {
     private val mockNavigationCamera: NavigationCamera = mockk(relaxed = true)
     private val mockViewPortDataSource: MapboxNavigationViewportDataSource = mockk(relaxed = true)
     private val mockMapboxNavigation: MapboxNavigation = mockk(relaxed = true)
-    private val mockMapboxMap: MapboxMap = mockk(relaxUnitFun = true)
+    private val mockMapboxMap: MapboxMap = mockk(relaxUnitFun = true) {
+        every { cameraState } returns mockk()
+    }
     private val mockMapView: MapView = mockk(relaxed = true) {
         every { camera } returns mockCamera
         every { getMapboxMap() } returns mockMapboxMap
@@ -59,7 +67,7 @@ class CameraComponentTest {
         every { latitude } returns 37.9876
         every { bearing } returns 45f
     }
-    private val cameraViewModel = CameraViewModel()
+    private val cameraViewModel = spyk(CameraViewModel())
     private val locationViewModel = LocationViewModel()
     private val navigationStateViewModel = NavigationStateViewModel(NavigationState.FreeDrive)
 
@@ -67,8 +75,9 @@ class CameraComponentTest {
 
     @Before
     fun setUp() {
-        mockkStatic(Utils::class)
+        mockkStatic(Utils::class, Logger::class)
         every { Utils.dpToPx(any()) } returns 50f
+        every { Logger.d(any(), any()) } returns Unit
         cameraComponent = CameraComponent(
             mockMapView,
             cameraViewModel,
@@ -81,7 +90,44 @@ class CameraComponentTest {
 
     @After
     fun tearDown() {
-        unmockkStatic(Utils::class)
+        unmockkStatic(Utils::class, Logger::class)
+    }
+
+    @Test
+    fun `onAttached should restore camera state from view model`() {
+        val cameraState = com.mapbox.maps.CameraState(
+            Point.fromLngLat(11.0, 22.0),
+            EdgeInsets(1.0, 2.0, 3.0, 4.0),
+            30.0,
+            40.0,
+            50.0
+        )
+        every { cameraViewModel.state } returns MutableStateFlow(
+            CameraState(
+                mapCameraState = cameraState
+            )
+        )
+
+        cameraComponent.onAttached(mockMapboxNavigation)
+
+        verify { mockMapboxMap.setCamera(cameraState.toCameraOptions()) }
+    }
+
+    @Test
+    fun `onDetached should save camera state in view model`() {
+        val cameraState = com.mapbox.maps.CameraState(
+            Point.fromLngLat(11.0, 22.0),
+            EdgeInsets(1.0, 2.0, 3.0, 4.0),
+            30.0,
+            40.0,
+            50.0
+        )
+        every { mockMapboxMap.cameraState } returns cameraState
+
+        cameraComponent.onAttached(mockMapboxNavigation)
+        cameraComponent.onDetached(mockMapboxNavigation)
+
+        cameraViewModel.invoke(CameraAction.SaveMapCameraState(cameraState))
     }
 
     @Test
