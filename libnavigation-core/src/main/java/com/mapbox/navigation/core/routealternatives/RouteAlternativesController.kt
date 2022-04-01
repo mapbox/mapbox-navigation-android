@@ -166,17 +166,33 @@ internal class RouteAlternativesController constructor(
                 ?: return emptyList()
 
             processRouteAlternatives(routeAlternatives) { alternatives, origin ->
-                observers.forEach {
-                    it.onRouteAlternatives(routeProgress, alternatives, origin)
+                logD("${alternatives.size} alternatives available", LOG_CATEGORY)
+
+                val hasUpdatedAlternatives = {
+                    alternatives.filterNot { newRoute ->
+                        directionsSession.routes.any { existingRoute ->
+                            existingRoute.id == newRoute.id
+                        }
+                    }.also {
+                        logD("${it.size} deduplicated alternatives available", LOG_CATEGORY)
+                    }.isNotEmpty()
+                }
+
+                if ((directionsSession.routes.size - 1) != alternatives.size || hasUpdatedAlternatives()) {
+                    logD("${alternatives.size} alternatives delivered", LOG_CATEGORY)
+                    observers.forEach {
+                        it.onRouteAlternatives(routeProgress, alternatives, origin)
+                    }
                 }
             }
 
             // This is supposed to be able to filter alternatives
             // but at this point we're not filtering anything.
-            return mutableListOf<Int>().apply {
+            return emptyList()
+            /*return mutableListOf<Int>().apply {
                 var index = 0
                 repeat(routeAlternatives.size) { add(index++) }
-            }
+            }*/
         }
 
         override fun onError(message: String) {
@@ -222,28 +238,15 @@ internal class RouteAlternativesController constructor(
                         null
                     }
                 }
-            logI("${alternatives.size} alternatives available", LOG_CATEGORY)
-
-            val hasUpdatedAlternatives = {
-                alternatives.filterNot { newRoute ->
-                    directionsSession.routes.any { existingRoute ->
-                        existingRoute.id == newRoute.id
-                    }
-                }.isNotEmpty() || directionsSession.routes.any { it.id }
-                logD("${deduplicatedAlternatives.size} deduplicated alternatives available", LOG_CATEGORY)
-                deduplicatedAlternatives.isNotEmpty()
-            }
-
-            if ((directionsSession.routes.size - 1) != alternatives.size || hasNewAlternatives()) {
-                val origin = nativeAlternatives.find {
-                    // looking for the first new route,
-                    // assuming all new routes come from the same request
-                    it.isNew
-                }?.route?.routerOrigin?.mapToSdkRouteOrigin() ?: lastUpdateOrigin
-                block(alternatives, origin)
-                lastUpdateOrigin = origin
-            }
             notifyMetadataObservers()
+
+            val origin = nativeAlternatives.find {
+                // looking for the first new route,
+                // assuming all new routes come from the same request
+                it.isNew
+            }?.route?.routerOrigin?.mapToSdkRouteOrigin() ?: lastUpdateOrigin
+            block(alternatives, origin)
+            lastUpdateOrigin = origin
         }
     }
 
