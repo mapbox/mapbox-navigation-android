@@ -13,25 +13,52 @@
         app:mapbox_cameraZoom="14" />
 
     <Button
-        android:id="@+id/add_play"
+        android:id="@+id/add_play_TtsHelper"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:padding="16dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        android:text="Add Instruction"
+        android:text="Add Instruction TtsHelper"
         android:background="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/sound_button"
         app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <Button
+        android:id="@+id/add_play_TtsManager"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="64dp"
+        android:text="Add Instruction TtsManager"
+        android:background="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/sound_button"
+        app:layout_constraintBottom_toBottomOf="@id/add_play_TtsHelper"/>
+
+    <Button
+        android:id="@+id/add_play_SDK"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="64dp"
+        android:text="Add Instruction SDK"
+        android:background="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/sound_button"
+        app:layout_constraintBottom_toBottomOf="@id/add_play_TtsManager"/>
 
     <com.mapbox.navigation.ui.voice.view.MapboxSoundButton
         android:id="@+id/sound_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        app:layout_constraintEnd_toStartOf="@id/add_play"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

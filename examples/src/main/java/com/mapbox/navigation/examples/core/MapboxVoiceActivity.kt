@@ -183,31 +183,35 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
-    private val voiceInstructionsObserver = VoiceInstructionsObserver { voiceInstructions -> // The data obtained must be used to generate the synthesized speech mp3 file.
-        speechApi.generate(
-            voiceInstructions,
-            speechCallback
-        )
-    }
-
-    private val routesObserver = RoutesObserver { result -> // Every time a new route is obtained make sure to cancel the [MapboxSpeechApi] and
-        // clear the [MapboxVoiceInstructionsPlayer]
-        speechApi.cancel()
-        voiceInstructionsPlayer.clear()
-        if (result.routes.isNotEmpty()) {
-            CoroutineScope(Dispatchers.Main).launch {
-                routeLineApi.setRoutes(
-                    listOf(RouteLine(result.routes[0], null))
-                ).apply {
-                    routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
-                }
-            }
-            startSimulation(result.routes[0])
+    private val voiceInstructionsObserver =
+        VoiceInstructionsObserver { voiceInstructions -> // The data obtained must be used to generate the synthesized speech mp3 file.
+            speechApi.generate(
+                voiceInstructions,
+                speechCallback
+            )
         }
-    }
+
+    private val routesObserver =
+        RoutesObserver { result -> // Every time a new route is obtained make sure to cancel the [MapboxSpeechApi] and
+            // clear the [MapboxVoiceInstructionsPlayer]
+            speechApi.cancel()
+            voiceInstructionsPlayer.clear()
+            if (result.routes.isNotEmpty()) {
+                CoroutineScope(Dispatchers.Main).launch {
+                    routeLineApi.setRoutes(
+                        listOf(RouteLine(result.routes[0], null))
+                    ).apply {
+                        routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
+                    }
+                }
+                startSimulation(result.routes[0])
+            }
+        }
 
     private companion object {
+
         private const val SOUND_BUTTON_TEXT_APPEAR_DURATION = 1000L
+        private const val LOG_CATEGORY = "MapboxVoiceActivity"
     }
 
     @SuppressLint("MissingPermission")
@@ -244,7 +248,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
             soundButtonMake(!isMuted)
         }
 
-        binding.addPlay.setOnClickListener {
+        binding.addPlaySDK.setOnClickListener {
             voiceInstructionsPlayer.play(
                 SpeechAnnouncement.Builder("Test hybrid speech player.").build(),
                 voiceInstructionsPlayerCallback
@@ -342,7 +346,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }
-        init()
+
     }
 
     override fun onStart() {

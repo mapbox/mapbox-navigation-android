@@ -16,4 +16,8 @@ interface AudioFocusDelegate {
      * @return true on successful focus change request.
      */
     fun abandonFocus(): Boolean
+
+    fun requestFocusTts(): Boolean {
+        return requestFocus()
+    }
 }

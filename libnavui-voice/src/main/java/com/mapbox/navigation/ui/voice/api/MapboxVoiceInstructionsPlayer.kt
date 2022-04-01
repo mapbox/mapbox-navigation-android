@@ -113,7 +113,15 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
         if (playCallbackQueue.isNotEmpty()) {
             val currentPlayCallback = playCallbackQueue.peek()
             val currentPlay = currentPlayCallback.announcement
-            if (audioFocusDelegate.requestFocus()) {
+            val isFocusGranted = when (currentPlay.file) {
+                null -> {
+                    audioFocusDelegate.requestFocusTts()
+                }
+                else -> {
+                    audioFocusDelegate.requestFocus()
+                }
+            }
+            if (isFocusGranted) {
                 currentPlay.file?.let {
                     filePlayer.play(currentPlay, localCallback)
                 } ?: textPlayer.play(currentPlay, localCallback)

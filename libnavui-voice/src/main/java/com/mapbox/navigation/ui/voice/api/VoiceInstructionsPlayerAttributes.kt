@@ -61,9 +61,9 @@ sealed class VoiceInstructionsPlayerAttributes {
 
         override fun configureTextToSpeech(): TextToSpeech.(Bundle) -> Unit {
             return { bundle ->
-                bundle.putInt(
+                bundle.putString(
                     TextToSpeech.Engine.KEY_PARAM_STREAM,
-                    options.streamType
+                    options.ttsStreamType.toString()
                 )
             }
         }
