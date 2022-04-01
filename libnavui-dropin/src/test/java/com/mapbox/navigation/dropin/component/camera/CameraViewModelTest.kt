@@ -7,7 +7,6 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -24,19 +23,6 @@ class CameraViewModelTest {
         val cameraState = cameraViewModel.state.value
 
         assertEquals(TargetCameraMode.Idle, cameraState.cameraMode)
-    }
-
-    @Test
-    fun `when action initialize update camera mode`() = coroutineRule.runBlockingTest {
-        val cameraViewModel = CameraViewModel()
-        val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        cameraViewModel.onAttached(mockMapboxNavigation)
-        cameraViewModel.invoke(CameraAction.InitializeCamera(TargetCameraMode.Overview))
-
-        val cameraState = cameraViewModel.state.value
-
-        assertTrue(cameraState.isCameraInitialized)
-        assertEquals(TargetCameraMode.Overview, cameraState.cameraMode)
     }
 
     @Test
