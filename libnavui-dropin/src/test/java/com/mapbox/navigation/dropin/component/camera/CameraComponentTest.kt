@@ -31,8 +31,6 @@ import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -87,23 +85,43 @@ class CameraComponentTest {
     }
 
     @Test
-    fun `when location update is received for the first time camera is initialized`() =
+    fun `when location update is received first time in free drive camera frame is updated`() =
         coroutineRule.runBlockingTest {
             locationViewModel.onAttached(mockMapboxNavigation)
             cameraViewModel.onAttached(mockMapboxNavigation)
             cameraComponent.onAttached(mockMapboxNavigation)
             locationViewModel.invoke(LocationAction.Update(mockLocation))
 
-            assertTrue(cameraViewModel.state.value.isCameraInitialized)
+            verify(exactly = 1) {
+                mockNavigationCamera.requestNavigationCameraToOverview(
+                    stateTransitionOptions = NavigationCameraTransitionOptions.Builder()
+                        .maxDuration(0) // instant transition
+                        .build()
+                )
+            }
         }
 
     @Test
-    fun `camera is not initialized if location update hasn't been received`() =
+    fun `when location update is received first time in active guidance camera frame is updated`() =
         coroutineRule.runBlockingTest {
+            navigationStateViewModel.onAttached(mockMapboxNavigation)
+            locationViewModel.onAttached(mockMapboxNavigation)
             cameraViewModel.onAttached(mockMapboxNavigation)
             cameraComponent.onAttached(mockMapboxNavigation)
+            navigationStateViewModel.invoke(
+                NavigationStateAction.Update(
+                    NavigationState.ActiveNavigation
+                )
+            )
+            locationViewModel.invoke(LocationAction.Update(mockLocation))
 
-            assertFalse(cameraViewModel.state.value.isCameraInitialized)
+            verify(exactly = 1) {
+                mockNavigationCamera.requestNavigationCameraToFollowing(
+                    stateTransitionOptions = NavigationCameraTransitionOptions.Builder()
+                        .maxDuration(0) // instant transition
+                        .build()
+                )
+            }
         }
 
     @Test
@@ -133,23 +151,9 @@ class CameraComponentTest {
     fun `camera frame is not updated if camera component instantiation is fresh`() =
         coroutineRule.runBlockingTest {
             cameraViewModel.onAttached(mockMapboxNavigation)
-            cameraViewModel.invoke(CameraAction.InitializeCamera(TargetCameraMode.Overview))
             cameraComponent.onAttached(mockMapboxNavigation)
 
             verify(exactly = 0) {
-                mockNavigationCamera.requestNavigationCameraToOverview()
-            }
-        }
-
-    @Test
-    fun `camera frame is updated if camera component instantiation is not fresh`() =
-        coroutineRule.runBlockingTest {
-            cameraViewModel.onAttached(mockMapboxNavigation)
-            cameraViewModel.invoke(CameraAction.InitializeCamera(TargetCameraMode.Idle))
-            cameraComponent.onAttached(mockMapboxNavigation)
-            cameraViewModel.invoke(CameraAction.ToOverview)
-
-            verify(exactly = 1) {
                 mockNavigationCamera.requestNavigationCameraToOverview()
             }
         }

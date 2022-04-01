@@ -41,10 +41,8 @@ internal class CameraComponent constructor(
         ),
 ) : UIComponent() {
 
+    private var isCameraInitialized = false
     private val gesturesHandler = NavigationBasicGesturesHandler(navigationCamera)
-
-    // To determine if [$this] is a fresh instantiation and is garbage collected upon onDetached
-    private var isFirstAttached: Boolean = true
 
     private val debug = false
     private val debugger by lazy {
@@ -105,12 +103,8 @@ internal class CameraComponent constructor(
     private fun updateCameraFrame() {
         coroutineScope.launch {
             cameraViewModel.state.collect { state ->
-                if (state.isCameraInitialized) {
-                    if (!isFirstAttached) {
-                        requestCameraModeTo(cameraMode = state.cameraMode)
-                    } else {
-                        isFirstAttached = false
-                    }
+                if (isCameraInitialized) {
+                    requestCameraModeTo(cameraMode = state.cameraMode)
                 }
             }
         }
@@ -119,14 +113,13 @@ internal class CameraComponent constructor(
     private fun updateCameraLocation() {
         coroutineScope.launch {
             combine(
-                cameraViewModel.state,
                 locationViewModel.state,
                 navigationStateViewModel.state
-            ) { cameraState, location, navigationState ->
+            ) { location, navigationState ->
                 location?.let {
                     viewportDataSource.onLocationChanged(it)
                     viewportDataSource.evaluate()
-                    if (!cameraState.isCameraInitialized) {
+                    if (!isCameraInitialized) {
                         when (navigationState) {
                             NavigationState.ActiveNavigation,
                             NavigationState.Arrival -> {
@@ -137,7 +130,7 @@ internal class CameraComponent constructor(
                                         .build()
                                 )
                                 cameraViewModel.invoke(
-                                    CameraAction.InitializeCamera(TargetCameraMode.Following)
+                                    CameraAction.ToFollowing
                                 )
                             }
                             else -> {
@@ -148,11 +141,12 @@ internal class CameraComponent constructor(
                                         .build()
                                 )
                                 cameraViewModel.invoke(
-                                    CameraAction.InitializeCamera(TargetCameraMode.Overview)
+                                    CameraAction.ToOverview
                                 )
                             }
                         }
                     }
+                    isCameraInitialized = true
                 }
             }.collect()
         }
