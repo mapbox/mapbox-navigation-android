@@ -2,11 +2,15 @@ package com.mapbox.navigation.core.reroute
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.internal.route.routeId
+import com.mapbox.navigation.base.internal.route.routerOrigin
+import com.mapbox.navigation.base.internal.utils.routeAlternativeId
 import com.mapbox.navigation.base.options.RerouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsRoutes
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -17,7 +21,10 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
@@ -59,6 +66,9 @@ class MapboxRerouteControllerTest {
 
     @MockK
     private lateinit var routeCallback: RerouteController.RoutesCallback
+
+    @MockK
+    private lateinit var navigationRouteCallback: NavigationRerouteController.RoutesCallback
 
     @MockK
     lateinit var primaryRerouteObserver: RerouteController.RerouteStateObserver
@@ -121,7 +131,7 @@ class MapboxRerouteControllerTest {
         verify(exactly = 2) {
             tripSession.locationMatcherResult
         }
-        verify(exactly = 1) {
+        verify(exactly = 2) {
             tripSession.getRouteProgress()
         }
         verify(exactly = 1) {
@@ -166,6 +176,58 @@ class MapboxRerouteControllerTest {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.RouteFetched(origin))
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+        }
+    }
+
+    @Test
+    fun reroute_success_from_alternative() {
+        mockkStatic(
+            NavigationRoute::routeId,
+            NavigationRoute::routerOrigin,
+            RouteProgress::routeAlternativeId,
+        ) {
+            val routeId1 = "id_1"
+            val routeId2 = "id_2"
+            val mockRoutes = listOf<NavigationRoute>(
+                mockk {
+                    every { routeId } returns routeId1
+                    every {
+                        routerOrigin
+                    } throws IllegalStateException(
+                        "route 1 origin mustn't be invoked: it removes from list and is not mapped"
+                    )
+                },
+                mockk {
+                    every { routeId } returns routeId2
+                    every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
+                },
+            )
+            val expectedRoutes = mockRoutes.drop(1)
+            every { directionsSession.routes } returns mockRoutes
+            every { tripSession.getRouteProgress()?.routeAlternativeId } returns routeId2
+            val slotNewRoutes = slot<List<NavigationRoute>>()
+            val slotOrigin = slot<RouterOrigin>()
+            every {
+                navigationRouteCallback.onNewRoutes(capture(slotNewRoutes), capture(slotOrigin))
+            } just runs
+            addRerouteStateObserver()
+
+            rerouteController.reroute(navigationRouteCallback)
+
+            verify(exactly = 1) {
+                navigationRouteCallback.onNewRoutes(any(), any())
+            }
+            assertEquals(expectedRoutes, slotNewRoutes.captured)
+            assertEquals(RouterOrigin.Offboard, slotOrigin.captured)
+
+            verifyOrder {
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
+                primaryRerouteObserver.onRerouteStateChanged(
+                    RerouteState.RouteFetched(RouterOrigin.Offboard)
+                )
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+            }
         }
     }
 

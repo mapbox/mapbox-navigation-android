@@ -41,6 +41,8 @@ object RouteProgressFactory {
      * @param upcomingRoadObjects list of upcoming road objects.
      * @param stale `true` if there were no location updates for a significant amount which causes
      * a lack of confidence in the progress updates being sent.
+     * @param alternativeRouteId id of an alternative route user started to follow deviating from
+     * a primary route. **null** if a route is not exist
      */
     fun buildRouteProgressObject(
         route: NavigationRoute,
@@ -57,6 +59,7 @@ object RouteProgressFactory {
         remainingWaypoints: Int,
         upcomingRoadObjects: List<UpcomingRoadObject>,
         stale: Boolean,
+        alternativeRouteId: String?
     ): RouteProgress {
         return RouteProgress(
             navigationRoute = route,
@@ -73,6 +76,7 @@ object RouteProgressFactory {
             remainingWaypoints = remainingWaypoints,
             upcomingRoadObjects = upcomingRoadObjects,
             stale = stale,
+            alternativeRouteId,
         )
     }
 }
