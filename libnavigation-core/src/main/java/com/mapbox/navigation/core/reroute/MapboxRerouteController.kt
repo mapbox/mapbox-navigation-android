@@ -9,9 +9,9 @@ import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsRoutes
-import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
-import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.core.trip.session.MapboxTripSession
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logD
@@ -22,8 +22,8 @@ import java.util.concurrent.CopyOnWriteArraySet
  * Default implementation of [RerouteController]
  */
 internal class MapboxRerouteController(
-    private val directionsSession: DirectionsSession,
-    private val tripSession: TripSession,
+    private val directionsSession: MapboxDirectionsSession,
+    private val tripSession: MapboxTripSession,
     private val routeOptionsUpdater: RouteOptionsUpdater,
     private val rerouteOptions: RerouteOptions,
     threadController: ThreadController,
@@ -109,7 +109,7 @@ internal class MapboxRerouteController(
             LOG_CATEGORY
         )
 
-        val routeOptions = directionsSession.getPrimaryRouteOptions()
+        val routeOptions = tripSession.routes.firstOrNull()?.routeOptions
             ?.applyRerouteOptions(
                 rerouteOptions,
                 tripSession.locationMatcherResult?.enhancedLocation?.speed

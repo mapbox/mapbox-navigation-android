@@ -15,11 +15,10 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
-import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.trip.session.MapboxTripSession
 import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
-import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.turf.TurfConstants.UNIT_METRES
 import com.mapbox.turf.TurfMeasurement
@@ -184,7 +183,7 @@ internal class BillingController(
     private val navigationSession: NavigationSession,
     private val arrivalProgressObserver: ArrivalProgressObserver,
     private val accessToken: String,
-    private val tripSession: TripSession,
+    private val tripSession: MapboxTripSession,
 ) {
 
     private companion object {
@@ -260,7 +259,7 @@ internal class BillingController(
     /**
      * Has to be called whenever a new route is set by the developer.
      *
-     * It also **has to be called** before the state changes in the [DirectionsSession].
+     * It also **has to be called** before the state changes in the [MapboxTripSession].
      * That's because a route change can also change the state and we first want to evaluate the consequences of the action with the current state,
      * and only then react to a potential state change. When executed in this order, the logic in this block is always mutually exclusive to the [navigationSessionStateObserver].
      * If we already are in active guidance and a route is set, [onExternalRouteSet] will take action while [navigationSessionStateObserver] won't be called.
@@ -436,5 +435,3 @@ internal class BillingController(
         }
     }
 }
-
-private data class Waypoint(val index: Int, val point: Point)

@@ -57,7 +57,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.CopyOnWriteArrayList
@@ -305,10 +304,32 @@ class MapboxRouteLineApi(
         newRoutes: List<NavigationRoute>,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
+        setNavigationRoutes(
+            newRoutes = newRoutes,
+            alternativeRoutesMetadata = emptyList(),
+            consumer = consumer
+        )
+    }
+
+    /**
+     * Sets the routes that will be operated on.
+     *
+     * This can be a long running task with long routes.
+     * There is a cancel method which will cancel the background tasks.
+     *
+     * @param newRoutes one or more routes. The first route in the collection will be considered
+     * the primary route and any additional routes will be alternate routes.
+     * @param consumer a method that consumes the result of the operation.
+     */
+    fun setNavigationRoutes(
+        newRoutes: List<NavigationRoute>,
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
+        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
+    ) {
         val routeLines = newRoutes.map {
             NavigationRouteLine(it, null)
         }
-        setNavigationRouteLines(routeLines, consumer)
+        setNavigationRouteLines(routeLines, alternativeRoutesMetadata, consumer)
     }
 
     /**
@@ -325,6 +346,28 @@ class MapboxRouteLineApi(
         newRoutes: List<NavigationRouteLine>,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
+        setNavigationRouteLines(
+            newRoutes = newRoutes,
+            alternativeRoutesMetadata = emptyList(),
+            consumer = consumer
+        )
+    }
+
+    /**
+     * Sets the routes that will be operated on.
+     *
+     * This can be a long running task with long routes.
+     * There is a cancel method which will cancel the background tasks.
+     *
+     * @param newRoutes one or more routes. The first route in the collection will be considered
+     * the primary route and any additional routes will be alternate routes.
+     * @param consumer a method that consumes the result of the operation.
+     */
+    fun setNavigationRouteLines(
+        newRoutes: List<NavigationRouteLine>,
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
+        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
+    ) {
         cancel()
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
@@ -333,7 +376,8 @@ class MapboxRouteLineApi(
                     MapboxRouteLineUtils.getRouteLineFeatureDataProvider(newRoutes)
                 val routeData = setNewRouteData(
                     newRoutes.map(NavigationRouteLine::route),
-                    featureDataProvider
+                    featureDataProvider,
+                    alternativeRoutesMetadata
                 )
                 consumer.accept(routeData)
             }
@@ -670,50 +714,6 @@ class MapboxRouteLineApi(
                 }
             }
         }
-    }
-
-    fun updateWithAlternativeRoutesMetadata(
-        alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
-        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
-    ) {
-        Log.e("lp_test", "metadata for: " + alternativeRoutesMetadata.map { it.navigationRoute.id })
-        // jobControl.scope.launch(Dispatchers.Main) {
-        //     mutex.withLock {
-        runBlocking {
-            alternativesDeviationOffset.clear()
-            alternativeRoutesMetadata.forEach { routeMetadata ->
-                var runningDistance = 0.0
-                val route = routeMetadata.navigationRoute.directionsRoute
-                route.legs()?.forEachIndexed LegLoop@{ legIndex, leg ->
-                    leg.annotation()?.distance()
-                        ?.forEachIndexed AnnotationLoop@{ annotationIndex, distance ->
-                            if (legIndex == routeMetadata.forkIntersectionOfAlternativeRoute.legIndex
-                                && annotationIndex == routeMetadata.forkIntersectionOfAlternativeRoute.geometryIndexInLeg
-                            ) {
-                                val percentageTraveled = runningDistance / route.distance()
-                                alternativesDeviationOffset[routeMetadata.navigationRoute.id] =
-                                    percentageTraveled
-                                /*RouteLineExpressionProvider {
-                                    step {
-                                        lineProgress()
-                                        color(Color.TRANSPARENT)
-                                        stop {
-                                            literal(percentageTraveled)
-                                        }
-                                    }
-                                }*/
-                                return@LegLoop
-                            }
-                            runningDistance += distance
-                        }
-                }
-            }
-            val featureDataProvider: () -> List<RouteFeatureData> =
-                MapboxRouteLineUtils.getRouteFeatureDataProvider(routes)
-            val result = buildDrawRoutesState(featureDataProvider)
-            consumer.accept(result)
-        }
-        // }
     }
 
     /**
@@ -1119,7 +1119,8 @@ class MapboxRouteLineApi(
 
     private suspend fun setNewRouteData(
         newRoutes: List<NavigationRoute>,
-        featureDataProvider: () -> List<RouteFeatureData>
+        featureDataProvider: () -> List<RouteFeatureData>,
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>
     ): Expected<RouteLineError, RouteSetValue> {
         ifNonNull(newRoutes.firstOrNull()) { primaryRouteCandidate ->
             if (!primaryRouteCandidate.directionsRoute.isSameRoute(primaryRoute?.directionsRoute)) {
@@ -1131,6 +1132,39 @@ class MapboxRouteLineApi(
         routes.clear()
         routes.addAll(newRoutes)
         primaryRoute = newRoutes.firstOrNull()
+
+        Log.e(
+            "lp_test",
+            "metadata for: " + alternativeRoutesMetadata.map { it.navigationRoute.id })
+        alternativesDeviationOffset.clear()
+        alternativeRoutesMetadata.forEach { routeMetadata ->
+            var runningDistance = 0.0
+            val route = routeMetadata.navigationRoute.directionsRoute
+            route.legs()?.forEachIndexed LegLoop@{ legIndex, leg ->
+                leg.annotation()?.distance()
+                    ?.forEachIndexed AnnotationLoop@{ annotationIndex, distance ->
+                        if (legIndex == routeMetadata.forkIntersectionOfAlternativeRoute.legIndex
+                            && annotationIndex == routeMetadata.forkIntersectionOfAlternativeRoute.geometryIndexInLeg
+                        ) {
+                            val percentageTraveled = runningDistance / route.distance()
+                            alternativesDeviationOffset[routeMetadata.navigationRoute.id] =
+                                percentageTraveled
+                            /*RouteLineExpressionProvider {
+                                step {
+                                    lineProgress()
+                                    color(Color.TRANSPARENT)
+                                    stop {
+                                        literal(percentageTraveled)
+                                    }
+                                }
+                            }*/
+                            return@LegLoop
+                        }
+                        runningDistance += distance
+                    }
+            }
+        }
+
         return buildDrawRoutesState(featureDataProvider)
     }
 

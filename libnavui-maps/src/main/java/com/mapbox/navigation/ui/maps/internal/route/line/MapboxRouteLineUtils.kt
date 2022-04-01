@@ -831,8 +831,7 @@ internal object MapboxRouteLineUtils {
                 true -> belowLayerId
                 false -> {
                     logE(
-                        "Layer $belowLayerId not found. Route line related layers will be " +
-                            "placed at top of the map stack.",
+                        "Layer $belowLayerId not found. Route line related layers will be placed at top of the map stack.",
                         LOG_CATEGORY
                     )
                     null

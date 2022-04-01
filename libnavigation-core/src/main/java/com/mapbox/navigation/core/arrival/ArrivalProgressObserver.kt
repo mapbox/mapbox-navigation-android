@@ -6,12 +6,12 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.trip.session.LegIndexUpdatedCallback
+import com.mapbox.navigation.core.trip.session.MapboxTripSession
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.core.trip.session.TripSession
 import java.util.concurrent.CopyOnWriteArraySet
 
 internal class ArrivalProgressObserver(
-    private val tripSession: TripSession
+    private val tripSession: MapboxTripSession
 ) : RouteProgressObserver {
 
     private var arrivalController: ArrivalController = AutoArrivalController()

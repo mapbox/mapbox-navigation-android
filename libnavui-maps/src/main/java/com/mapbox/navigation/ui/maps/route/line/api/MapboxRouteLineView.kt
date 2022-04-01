@@ -85,15 +85,15 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
             { value ->
                 jobControl.scope.launch(Dispatchers.Main) {
                     mutex.withLock {
-                        updateLineGradient(
+                        /*updateLineGradient(
                             style,
                             Expression.color(Color.TRANSPARENT),
                             RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
                             RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
                             RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
                             RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
-                        )/*
-                        updateLineGradient(
+                        )*/
+                        /*updateLineGradient(
                             style,
                             Expression.color(Color.TRANSPARENT),
                             RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,

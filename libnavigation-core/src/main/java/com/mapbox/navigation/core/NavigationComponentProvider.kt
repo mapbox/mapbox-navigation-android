@@ -7,13 +7,11 @@ import com.mapbox.navigation.base.route.NavigationRouter
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
-import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.core.trip.service.MapboxTripService
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.MapboxTripSession
 import com.mapbox.navigation.core.trip.session.NavigationSession
-import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManagerImpl
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -26,7 +24,7 @@ import com.mapbox.navigator.TilesConfig
 internal object NavigationComponentProvider {
     fun createDirectionsSession(
         router: NavigationRouter,
-    ): DirectionsSession = MapboxDirectionsSession(router)
+    ): MapboxDirectionsSession = MapboxDirectionsSession(router)
 
     fun createNativeNavigator(
         deviceProfile: DeviceProfile,
@@ -63,7 +61,7 @@ internal object NavigationComponentProvider {
         tripSessionLocationEngine: TripSessionLocationEngine,
         navigator: MapboxNativeNavigator,
         threadController: ThreadController,
-    ): TripSession = MapboxTripSession(
+    ): MapboxTripSession = MapboxTripSession(
         tripService,
         tripSessionLocationEngine,
         navigator = navigator,
@@ -76,7 +74,7 @@ internal object NavigationComponentProvider {
     fun createBillingController(
         accessToken: String?,
         navigationSession: NavigationSession,
-        tripSession: TripSession,
+        tripSession: MapboxTripSession,
         arrivalProgressObserver: ArrivalProgressObserver
     ): BillingController = BillingController(
         navigationSession,
@@ -86,6 +84,6 @@ internal object NavigationComponentProvider {
     )
 
     fun createArrivalProgressObserver(
-        tripSession: TripSession
+        tripSession: MapboxTripSession
     ): ArrivalProgressObserver = ArrivalProgressObserver(tripSession)
 }

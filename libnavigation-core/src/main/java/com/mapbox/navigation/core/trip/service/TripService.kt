@@ -2,10 +2,10 @@ package com.mapbox.navigation.core.trip.service
 
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.TripNotificationState
-import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.core.trip.session.MapboxTripSession
 
 /**
- * It's a part of [TripSession], interface provides [RouteProgress] to notification bar
+ * It's a part of [MapboxTripSession], interface provides [RouteProgress] to notification bar
  */
 internal interface TripService {
 

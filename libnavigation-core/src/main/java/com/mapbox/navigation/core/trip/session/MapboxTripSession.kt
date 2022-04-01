@@ -1,17 +1,21 @@
 package com.mapbox.navigation.core.trip.session
 
 import android.location.Location
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadFactory
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
+import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.navigator.getLocationMatcherResult
 import com.mapbox.navigation.core.navigator.getRouteInitInfo
 import com.mapbox.navigation.core.navigator.getRouteProgressFrom
@@ -44,21 +48,23 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.math.max
 
-/**
- * Default implementation of [TripSession]
- *
- * @param tripService TripService
- * @param tripSessionLocationEngine the location engine
- * @param navigator Native navigator
- * @param threadController controller for main/io jobs
- */
 internal class MapboxTripSession(
-    override val tripService: TripService,
+    val tripService: TripService,
     private val tripSessionLocationEngine: TripSessionLocationEngine,
     private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl,
     private val threadController: ThreadController,
     private val eHorizonSubscriptionManager: EHorizonSubscriptionManager
-) : TripSession {
+) {
+
+    private val routesObservers = CopyOnWriteArraySet<RoutesObserver>()
+
+    var routes: List<NavigationRoute> = emptyList()
+        private set
+
+    private var routesUpdateReason: String = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+
+    var initialLegIndex = 0
+        private set
 
     private var updatePrimaryRouteJob: Job? = null
     private var updateLegIndexJob: Job? = null
@@ -72,12 +78,17 @@ internal class MapboxTripSession(
         private const val INDEX_OF_INITIAL_LEG_TARGET = 1
     }
 
-    override fun setRoutes(
+    suspend fun setRoutes(
         routes: List<NavigationRoute>,
-        legIndex: Int,
-        @RoutesExtra.RoutesUpdateReason reason: String
+        legIndex: Int = 0,
+        @RoutesExtra.RoutesUpdateReason reason: String,
+        onFinished: (() -> Unit)? = null,
     ) {
-        when (reason) {
+        if (this.routes.isEmpty() && routes.isEmpty()) {
+            return
+        }
+        Log.e("lp_test", "setRoutes")
+        val updateJobs: List<Job> = when (reason) {
             RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
             RoutesExtra.ROUTES_UPDATE_REASON_NEW,
             RoutesExtra.ROUTES_UPDATE_REASON_REROUTE -> {
@@ -88,7 +99,7 @@ internal class MapboxTripSession(
                 updateLegIndexJob?.cancel()
                 updateRouteProgressJob?.cancel()
 
-                updatePrimaryRouteJob = threadController.getMainScopeAndRootJob().scope.launch(
+                val updateRouteJob = threadController.getMainScopeAndRootJob().scope.launch(
                     Dispatchers.Main.immediate
                 ) {
                     val newPrimaryRoute = routes.firstOrNull()
@@ -103,27 +114,59 @@ internal class MapboxTripSession(
                     }
                     this@MapboxTripSession.primaryRoute = newPrimaryRoute
                 }
-                threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
-                    navigator.setAlternativeRoutes(routes.drop(1))
-                }
+                updatePrimaryRouteJob = updateRouteJob
+                val updateAlternativesJob =
+                    threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
+                        Log.e("lp_test", "starting alternatives update")
+                        navigator.setAlternativeRoutes(routes.drop(1))
+                        Log.e("lp_test", "finished alternatives update")
+                    }
+
+                listOf(
+                    updateRouteJob,
+                    updateAlternativesJob
+                )
             }
             RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE -> {
-                threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
-                    navigator.setAlternativeRoutes(routes.drop(1))
-                }
+                listOf(
+                    threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
+                        navigator.setAlternativeRoutes(routes.drop(1))
+                    }
+                )
             }
             RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
-                threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
-                    if (routes.isNotEmpty()) {
-                        navigator.updateAnnotations(routes.first())
-                        this@MapboxTripSession.primaryRoute = routes.first()
-                    } else {
-                        logW("Cannot refresh route. Route can't be null", LOG_CATEGORY)
+                listOf(
+                    threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
+                        if (routes.isNotEmpty()) {
+                            navigator.updateAnnotations(routes.first())
+                            this@MapboxTripSession.primaryRoute = routes.first()
+                        } else {
+                            logW("Cannot refresh route. Route can't be null", LOG_CATEGORY)
+                        }
                     }
-                }
+                )
             }
             else -> throw IllegalArgumentException("Unsupported route update reason: $reason")
         }
+
+        updateJobs.forEach {
+            it.join()
+        }
+
+        Log.e("lp_test", "finished setRoutes")
+        this@MapboxTripSession.initialLegIndex = initialLegIndex
+        RouteCompatibilityCache.setDirectionsSessionResult(routes)
+        this@MapboxTripSession.routes = routes
+        this@MapboxTripSession.routesUpdateReason = reason
+        routesObservers.forEach {
+            it.onRoutesChanged(
+                RoutesUpdatedResult(
+                    routes,
+                    routesUpdateReason
+                )
+            )
+        }
+        onFinished?.invoke()
     }
 
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
@@ -160,7 +203,7 @@ internal class MapboxTripSession(
         }
 
     private var rawLocation: Location? = null
-    override var zLevel: Int? = null
+    var zLevel: Int? = null
         private set
     private var routeProgress: RouteProgress? = null
     private var roadObjects: List<UpcomingRoadObject> = emptyList()
@@ -172,7 +215,7 @@ internal class MapboxTripSession(
             roadObjectsOnRouteObservers.forEach { it.onNewRoadObjectsOnTheRoute(value) }
         }
 
-    override var locationMatcherResult: LocationMatcherResult? = null
+    var locationMatcherResult: LocationMatcherResult? = null
         private set
 
     private val nativeFallbackVersionsObserver =
@@ -208,22 +251,22 @@ internal class MapboxTripSession(
     /**
      * Return raw location
      */
-    override fun getRawLocation() = rawLocation
+    fun getRawLocation() = rawLocation
 
     /**
      * Provide route progress
      */
-    override fun getRouteProgress() = routeProgress
+    fun getRouteProgress() = routeProgress
 
     /**
      * Current [MapboxTripSession] state
      */
-    override fun getState(): TripSessionState = state
+    fun getState(): TripSessionState = state
 
     /**
      * Start MapboxTripSession
      */
-    override fun start(withTripService: Boolean, withReplayEnabled: Boolean) {
+    fun start(withTripService: Boolean, withReplayEnabled: Boolean) {
         if (state == TripSessionState.STARTED) {
             return
         }
@@ -248,7 +291,7 @@ internal class MapboxTripSession(
     /**
      * Returns if the MapboxTripSession is running a foreground service
      */
-    override fun isRunningWithForegroundService(): Boolean {
+    fun isRunningWithForegroundService(): Boolean {
         return tripService.hasServiceStarted()
     }
 
@@ -337,7 +380,7 @@ internal class MapboxTripSession(
     /**
      * Stop MapboxTripSession
      */
-    override fun stop() {
+    fun stop() {
         if (state == TripSessionState.STOPPED) {
             return
         }
@@ -361,9 +404,33 @@ internal class MapboxTripSession(
     }
 
     /**
+     * Registers [RoutesObserver]. Updated on each change of [routes]
+     */
+    fun registerRoutesObserver(routesObserver: RoutesObserver) {
+        routesObservers.add(routesObserver)
+        if (routes.isNotEmpty()) {
+            routesObserver.onRoutesChanged(RoutesUpdatedResult(routes, routesUpdateReason))
+        }
+    }
+
+    /**
+     * Unregisters [RoutesObserver]
+     */
+    fun unregisterRoutesObserver(routesObserver: RoutesObserver) {
+        routesObservers.remove(routesObserver)
+    }
+
+    /**
+     * Unregisters all [RoutesObserver]
+     */
+    fun unregisterAllRoutesObservers() {
+        routesObservers.clear()
+    }
+
+    /**
      * Register [LocationObserver] to receive location updates
      */
-    override fun registerLocationObserver(locationObserver: LocationObserver) {
+    fun registerLocationObserver(locationObserver: LocationObserver) {
         locationObservers.add(locationObserver)
         rawLocation?.let { locationObserver.onNewRawLocation(it) }
         locationMatcherResult?.let { locationObserver.onNewLocationMatcherResult(it) }
@@ -372,7 +439,7 @@ internal class MapboxTripSession(
     /**
      * Unregister [LocationObserver]
      */
-    override fun unregisterLocationObserver(locationObserver: LocationObserver) {
+    fun unregisterLocationObserver(locationObserver: LocationObserver) {
         locationObservers.remove(locationObserver)
     }
 
@@ -381,7 +448,7 @@ internal class MapboxTripSession(
      *
      * @see [registerLocationObserver]
      */
-    override fun unregisterAllLocationObservers() {
+    fun unregisterAllLocationObservers() {
         locationObservers.clear()
     }
 
@@ -391,7 +458,7 @@ internal class MapboxTripSession(
      *
      * @see [RouteProgress]
      */
-    override fun registerRouteProgressObserver(routeProgressObserver: RouteProgressObserver) {
+    fun registerRouteProgressObserver(routeProgressObserver: RouteProgressObserver) {
         routeProgressObservers.add(routeProgressObserver)
         routeProgress?.let { routeProgressObserver.onRouteProgressChanged(it) }
     }
@@ -399,7 +466,7 @@ internal class MapboxTripSession(
     /**
      * Unregister [RouteProgressObserver]
      */
-    override fun unregisterRouteProgressObserver(routeProgressObserver: RouteProgressObserver) {
+    fun unregisterRouteProgressObserver(routeProgressObserver: RouteProgressObserver) {
         routeProgressObservers.remove(routeProgressObserver)
     }
 
@@ -408,14 +475,14 @@ internal class MapboxTripSession(
      *
      * @see [registerRouteProgressObserver]
      */
-    override fun unregisterAllRouteProgressObservers() {
+    fun unregisterAllRouteProgressObservers() {
         routeProgressObservers.clear()
     }
 
     /**
      * Register [OffRouteObserver] to receive notification about off-route events
      */
-    override fun registerOffRouteObserver(offRouteObserver: OffRouteObserver) {
+    fun registerOffRouteObserver(offRouteObserver: OffRouteObserver) {
         offRouteObservers.add(offRouteObserver)
         offRouteObserver.onOffRouteStateChanged(isOffRoute)
     }
@@ -423,7 +490,7 @@ internal class MapboxTripSession(
     /**
      * Unregister [OffRouteObserver]
      */
-    override fun unregisterOffRouteObserver(offRouteObserver: OffRouteObserver) {
+    fun unregisterOffRouteObserver(offRouteObserver: OffRouteObserver) {
         offRouteObservers.remove(offRouteObserver)
     }
 
@@ -432,7 +499,7 @@ internal class MapboxTripSession(
      *
      * @see [registerOffRouteObserver]
      */
-    override fun unregisterAllOffRouteObservers() {
+    fun unregisterAllOffRouteObservers() {
         offRouteObservers.clear()
     }
 
@@ -441,7 +508,7 @@ internal class MapboxTripSession(
      *
      * @see [TripSessionState]
      */
-    override fun registerStateObserver(stateObserver: TripSessionStateObserver) {
+    fun registerStateObserver(stateObserver: TripSessionStateObserver) {
         stateObservers.add(stateObserver)
         stateObserver.onSessionStateChanged(state)
     }
@@ -449,7 +516,7 @@ internal class MapboxTripSession(
     /**
      * Unregister [TripSessionStateObserver]
      */
-    override fun unregisterStateObserver(stateObserver: TripSessionStateObserver) {
+    fun unregisterStateObserver(stateObserver: TripSessionStateObserver) {
         stateObservers.remove(stateObserver)
     }
 
@@ -458,14 +525,14 @@ internal class MapboxTripSession(
      *
      * @see [registerStateObserver]
      */
-    override fun unregisterAllStateObservers() {
+    fun unregisterAllStateObservers() {
         stateObservers.clear()
     }
 
     /**
      * Register [BannerInstructionsObserver]
      */
-    override fun registerBannerInstructionsObserver(
+    fun registerBannerInstructionsObserver(
         bannerInstructionsObserver: BannerInstructionsObserver
     ) {
         bannerInstructionsObservers.add(bannerInstructionsObserver)
@@ -477,7 +544,7 @@ internal class MapboxTripSession(
     /**
      * Unregister [BannerInstructionsObserver]
      */
-    override fun unregisterBannerInstructionsObserver(
+    fun unregisterBannerInstructionsObserver(
         bannerInstructionsObserver: BannerInstructionsObserver
     ) {
         bannerInstructionsObservers.remove(bannerInstructionsObserver)
@@ -488,14 +555,14 @@ internal class MapboxTripSession(
      *
      * @see [registerBannerInstructionsObserver]
      */
-    override fun unregisterAllBannerInstructionsObservers() {
+    fun unregisterAllBannerInstructionsObservers() {
         bannerInstructionsObservers.clear()
     }
 
     /**
      * Register [VoiceInstructionsObserver]
      */
-    override fun registerVoiceInstructionsObserver(
+    fun registerVoiceInstructionsObserver(
         voiceInstructionsObserver: VoiceInstructionsObserver
     ) {
         voiceInstructionsObservers.add(voiceInstructionsObserver)
@@ -509,7 +576,7 @@ internal class MapboxTripSession(
     /**
      * Unregister [VoiceInstructionsObserver]
      */
-    override fun unregisterVoiceInstructionsObserver(
+    fun unregisterVoiceInstructionsObserver(
         voiceInstructionsObserver: VoiceInstructionsObserver
     ) {
         voiceInstructionsObservers.remove(voiceInstructionsObserver)
@@ -520,7 +587,7 @@ internal class MapboxTripSession(
      *
      * @see [registerVoiceInstructionsObserver]
      */
-    override fun unregisterAllVoiceInstructionsObservers() {
+    fun unregisterAllVoiceInstructionsObservers() {
         voiceInstructionsObservers.clear()
     }
 
@@ -533,7 +600,7 @@ internal class MapboxTripSession(
      *
      * @return an initialized [NavigationStatus] if no errors, invalid otherwise
      */
-    override fun updateLegIndex(legIndex: Int, callback: LegIndexUpdatedCallback) {
+    fun updateLegIndex(legIndex: Int, callback: LegIndexUpdatedCallback) {
         var legIndexUpdated = false
         updateLegIndexJob = mainJobController.scope.launch {
             try {
@@ -547,36 +614,36 @@ internal class MapboxTripSession(
         }
     }
 
-    override fun registerRoadObjectsOnRouteObserver(
+    fun registerRoadObjectsOnRouteObserver(
         roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
     ) {
         roadObjectsOnRouteObservers.add(roadObjectsOnRouteObserver)
         roadObjectsOnRouteObserver.onNewRoadObjectsOnTheRoute(roadObjects)
     }
 
-    override fun unregisterRoadObjectsOnRouteObserver(
+    fun unregisterRoadObjectsOnRouteObserver(
         roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
     ) {
         roadObjectsOnRouteObservers.remove(roadObjectsOnRouteObserver)
     }
 
-    override fun unregisterAllRoadObjectsOnRouteObservers() {
+    fun unregisterAllRoadObjectsOnRouteObservers() {
         roadObjectsOnRouteObservers.clear()
     }
 
-    override fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver) {
+    fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver) {
         eHorizonSubscriptionManager.registerObserver(eHorizonObserver)
     }
 
-    override fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver) {
+    fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver) {
         eHorizonSubscriptionManager.unregisterObserver(eHorizonObserver)
     }
 
-    override fun unregisterAllEHorizonObservers() {
+    fun unregisterAllEHorizonObservers() {
         eHorizonSubscriptionManager.unregisterAllObservers()
     }
 
-    override fun registerFallbackVersionsObserver(
+    fun registerFallbackVersionsObserver(
         fallbackVersionsObserver: FallbackVersionsObserver
     ) {
         if (fallbackVersionsObservers.isEmpty()) {
@@ -585,7 +652,7 @@ internal class MapboxTripSession(
         fallbackVersionsObservers.add(fallbackVersionsObserver)
     }
 
-    override fun unregisterFallbackVersionsObserver(
+    fun unregisterFallbackVersionsObserver(
         fallbackVersionsObserver: FallbackVersionsObserver
     ) {
         fallbackVersionsObservers.remove(fallbackVersionsObserver)
@@ -594,7 +661,7 @@ internal class MapboxTripSession(
         }
     }
 
-    override fun unregisterAllFallbackVersionsObservers() {
+    fun unregisterAllFallbackVersionsObservers() {
         fallbackVersionsObservers.clear()
         navigator.setFallbackVersionsObserver(null)
     }
