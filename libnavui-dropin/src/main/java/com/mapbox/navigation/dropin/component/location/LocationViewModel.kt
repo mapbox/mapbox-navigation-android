@@ -1,16 +1,12 @@
 package com.mapbox.navigation.dropin.component.location
 
-import android.annotation.SuppressLint
 import android.location.Location
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.dropin.lifecycle.UIViewModel
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
-import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -19,7 +15,6 @@ sealed class LocationAction {
     data class Update(val location: Location) : LocationAction()
 }
 
-@SuppressLint("MissingPermission")
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class LocationViewModel : UIViewModel<Location?, LocationAction>(null) {
     val navigationLocationProvider = NavigationLocationProvider()
@@ -56,21 +51,6 @@ class LocationViewModel : UIViewModel<Location?, LocationAction>(null) {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
-        val locationEngine = mapboxNavigation.navigationOptions.locationEngine
-        locationEngine.getLastLocation(object : LocationEngineCallback<LocationEngineResult> {
-            override fun onSuccess(result: LocationEngineResult) {
-                result.lastLocation?.let {
-                    navigationLocationProvider.changePosition(it, emptyList())
-                    invoke(LocationAction.Update(it))
-                }
-            }
-            override fun onFailure(exception: Exception) {
-                logE(
-                    "Failed to get immediate location exception=$exception",
-                    "LocationViewModel"
-                )
-            }
-        })
 
         mainJobControl.scope.launch {
             mapboxNavigation.flowLocationMatcherResult().collect { locationMatcherResult ->
