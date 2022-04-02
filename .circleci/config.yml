@@ -282,11 +282,14 @@ commands:
       - store-results:
           module_target: "libnavui-speedlimit"
 
-  codecov:
+  codecov-upload:
     steps:
       - run:
           name: Post code coverage reports to Codecov.io
-          command: pip3 install --user codecov && /root/.local/bin/codecov
+          command: |
+            curl -Os https://uploader.codecov.io/latest/linux/codecov
+            chmod +x codecov
+            ./codecov
 
   generate-version-name:
     steps:
@@ -492,6 +495,7 @@ jobs:
           steps:
             - read-workspace
             - unit-tests-core
+            - codecov-upload
       - run: exit 0
 
   unit-tests-ui:
@@ -506,9 +510,8 @@ jobs:
           steps:
             - read-workspace
             - unit-tests-ui
+            - codecov-upload
       - run: exit 0
-  # Disabling Codecov (for now) due to https://about.codecov.io/security-update/
-  #      - codecov
 
   static-analysis:
     executor: ndk-r22-latest-executor
