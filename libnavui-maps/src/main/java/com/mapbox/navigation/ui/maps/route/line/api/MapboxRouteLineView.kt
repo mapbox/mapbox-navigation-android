@@ -92,8 +92,8 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                             RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
                             RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
                             RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
-                        )/*
-                        updateLineGradient(
+                        )
+                        /*updateLineGradient(
                             style,
                             Expression.color(Color.TRANSPARENT),
                             RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,

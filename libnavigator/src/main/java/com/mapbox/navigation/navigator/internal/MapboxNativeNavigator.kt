@@ -24,6 +24,7 @@ import com.mapbox.navigator.PredictiveCacheController
 import com.mapbox.navigator.RoadObjectMatcher
 import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
+import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouterError
@@ -88,7 +89,7 @@ interface MapboxNativeNavigator {
 
     suspend fun setAlternativeRoutes(
         routes: List<NavigationRoute>
-    )
+    ): List<RouteAlternative>
 
     /**
      * Updates annotations so that subsequent calls to getStatus will

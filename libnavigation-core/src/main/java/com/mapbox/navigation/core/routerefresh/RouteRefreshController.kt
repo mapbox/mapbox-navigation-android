@@ -41,11 +41,11 @@ internal class RouteRefreshController(
      * If route refresh is enabled, attach a refresh poller.
      * Cancel old timers, and cancel pending requests.
      */
-    fun restart(route: NavigationRoute) {
+    fun restart(route: NavigationRoute, onRoutesRefreshed: (List<NavigationRoute>) -> Unit) {
         stop()
         if (route.routeOptions.enableRefresh() == true) {
             routerRefreshTimer.startTimer {
-                refreshRoute(route)
+                refreshRoute(route, onRoutesRefreshed)
             }
         }
     }
@@ -61,7 +61,7 @@ internal class RouteRefreshController(
         }
     }
 
-    private fun refreshRoute(route: NavigationRoute) {
+    private fun refreshRoute(route: NavigationRoute, onRoutesRefreshed: (List<NavigationRoute>) -> Unit) {
         val isValid = route.routeOptions.enableRefresh() == true &&
             route.directionsResponse.uuid()?.isNotBlank() == true
         if (isValid) {
@@ -70,7 +70,7 @@ internal class RouteRefreshController(
             currentRequestId = directionsSession.requestRouteRefresh(
                 route,
                 legIndex,
-                createRouteRefreshCallback(route, legIndex),
+                createRouteRefreshCallback(route, legIndex, onRoutesRefreshed),
             )
         } else {
             logW(
@@ -89,6 +89,7 @@ internal class RouteRefreshController(
     private fun createRouteRefreshCallback(
         oldRoute: NavigationRoute,
         currentLegIndex: Int,
+        onRoutesRefreshed: (List<NavigationRoute>) -> Unit
     ) = object : NavigationRouterRefreshCallback {
 
         override fun onRefreshReady(route: NavigationRoute) {
@@ -108,10 +109,7 @@ internal class RouteRefreshController(
             val directionsSessionRoutes = directionsSession.routes.toMutableList()
             if (directionsSessionRoutes.isNotEmpty()) {
                 directionsSessionRoutes[0] = route
-                directionsSession.setRoutes(
-                    directionsSessionRoutes,
-                    routesUpdateReason = RoutesExtra.ROUTES_UPDATE_REASON_REFRESH,
-                )
+                onRoutesRefreshed(directionsSessionRoutes)
             }
             currentRequestId = null
         }

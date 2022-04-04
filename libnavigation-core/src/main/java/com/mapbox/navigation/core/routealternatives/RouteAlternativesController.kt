@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.routealternatives
 
+import android.util.Log
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.utils.parseNativeDirectionsAlternative
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -14,7 +15,6 @@ import com.mapbox.navigation.navigator.internal.mapToSdkRouteOrigin
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
-import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteIntersection
 import kotlinx.coroutines.launch
@@ -25,7 +25,6 @@ internal class RouteAlternativesController constructor(
     private val options: RouteAlternativesOptions,
     navigator: MapboxNativeNavigator,
     private val tripSession: TripSession,
-    private val directionsSession: DirectionsSession,
     private val threadController: ThreadController
 ) {
 
@@ -49,8 +48,7 @@ internal class RouteAlternativesController constructor(
     private val legacyObserversMap =
         hashMapOf<RouteAlternativesObserver, NavigationRouteAlternativesObserver>()
 
-    // todo clear on routes cleared in trip session
-    private val metadataMap = mutableMapOf<String, AlternativeRouteMetadata>()
+    private var metadataMap = mapOf<String, AlternativeRouteMetadata>()
 
     private val metadataObservers = CopyOnWriteArraySet<AlternativeRouteMetadataObserver>()
 
@@ -162,27 +160,21 @@ internal class RouteAlternativesController constructor(
             routeAlternatives: List<RouteAlternative>,
             removed: List<RouteAlternative>
         ): List<Int> {
-            val routeProgress = tripSession.getRouteProgress()
-                ?: return emptyList()
+            Log.e("lp_test", "nativeObserver#onRouteAlternativesChanged")
+            if (paused) {
+                Log.e("lp_test", "nativeObserver#onRouteAlternativesChanged - paused")
+                return emptyList()
+            }
 
             processRouteAlternatives(routeAlternatives) { alternatives, origin ->
                 logD("${alternatives.size} alternatives available", LOG_CATEGORY)
 
-                val hasUpdatedAlternatives = {
-                    alternatives.filterNot { newRoute ->
-                        directionsSession.routes.any { existingRoute ->
-                            existingRoute.id == newRoute.id
-                        }
-                    }.also {
-                        logD("${it.size} deduplicated alternatives available", LOG_CATEGORY)
-                    }.isNotEmpty()
-                }
+                val routeProgress = tripSession.getRouteProgress()
+                    ?: return@processRouteAlternatives
 
-                if ((directionsSession.routes.size - 1) != alternatives.size || hasUpdatedAlternatives()) {
-                    logD("${alternatives.size} alternatives delivered", LOG_CATEGORY)
-                    observers.forEach {
-                        it.onRouteAlternatives(routeProgress, alternatives, origin)
-                    }
+                logD("${alternatives.size} alternatives delivered", LOG_CATEGORY)
+                observers.forEach {
+                    it.onRouteAlternatives(routeProgress, alternatives, origin)
                 }
             }
 
@@ -215,7 +207,7 @@ internal class RouteAlternativesController constructor(
         block: (List<NavigationRoute>, RouterOrigin) -> Unit,
     ) {
         mainJobControl.scope.launch {
-            metadataMap.clear()
+            val localMetadataMap = mutableMapOf<String, AlternativeRouteMetadata>()
             val alternatives: List<NavigationRoute> =
                 nativeAlternatives.mapIndexedNotNull { index, routeAlternative ->
                     val expected = parseNativeDirectionsAlternative(
@@ -224,7 +216,7 @@ internal class RouteAlternativesController constructor(
                     )
                     if (expected.isValue) {
                         expected.value?.also {
-                            metadataMap[routeAlternative.route.routeId] =
+                            localMetadataMap[routeAlternative.route.routeId] =
                                 routeAlternative.mapToMetadata(it)
                         }
                     } else {
@@ -238,7 +230,7 @@ internal class RouteAlternativesController constructor(
                         null
                     }
                 }
-            notifyMetadataObservers()
+            notifyMetadataObservers(localMetadataMap)
 
             val origin = nativeAlternatives.find {
                 // looking for the first new route,
@@ -250,10 +242,38 @@ internal class RouteAlternativesController constructor(
         }
     }
 
-    private fun notifyMetadataObservers() {
-        metadataObservers.forEach {
-            it.onMetadataUpdated(metadataMap.values.toList())
+    private fun notifyMetadataObservers(update: Map<String, AlternativeRouteMetadata>) {
+        if (metadataMap != update) {
+            metadataMap = update
+            metadataObservers.forEach {
+                it.onMetadataUpdated(metadataMap.values.toList())
+            }
         }
+    }
+
+    private var paused = false
+
+    fun pauseUpdates() {
+        Log.e("lp_test", "nativeObserver#pauseUpdates")
+        paused = true
+    }
+
+    fun resumeUpdates() {
+        Log.e("lp_test", "nativeObserver#resumeUpdates")
+        paused = false
+    }
+
+    fun setProcessedAlternativesMetadata(
+        routes: List<NavigationRoute>,
+        processedAlternatives: List<RouteAlternative>
+    ) {
+        val localMetadataMap = mutableMapOf<String, AlternativeRouteMetadata>()
+        processedAlternatives.forEach { nativeAlternative ->
+            localMetadataMap[nativeAlternative.route.routeId] = nativeAlternative.mapToMetadata(
+                routes.find { nativeAlternative.route.routeId == it.id }!!
+            )
+        }
+        notifyMetadataObservers(localMetadataMap)
     }
 
     private companion object {

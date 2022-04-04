@@ -32,7 +32,6 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
-import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -176,12 +175,12 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private fun updateCamera(location: Location) {
         val mapAnimationOptionsBuilder = MapAnimationOptions.Builder()
-        mapAnimationOptionsBuilder.duration(1500L)
+        mapAnimationOptionsBuilder.duration(0L)
         mapCamera.easeTo(
             CameraOptions.Builder()
                 .center(Point.fromLngLat(location.longitude, location.latitude))
                 .bearing(location.bearing.toDouble())
-                .zoom(15.0)
+                .zoom(13.0)
                 .padding(EdgeInsets(1000.0, 0.0, 0.0, 0.0))
                 .build(),
             mapAnimationOptionsBuilder.build()
@@ -261,14 +260,14 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private val alternativesMetadataObserver = AlternativeRouteMetadataObserver { metadata ->
-        routeLineApi.updateWithAlternativeRoutesMetadata(metadata) { result ->
-            binding.mapView.getMapboxMap().getStyle()?.apply {
-                routeLineView.renderRouteDrawData(this, result)
-            }
-        }
+        Log.e(
+            "lp_test",
+            "alternativesMetadataObserver, new update client ${metadata.map { it.navigationRoute.id }}"
+        )
     }
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
+        Log.e("lp_test", "got progress: ${routeProgress.currentState}")
         routeLineApi.updateWithRouteProgress(routeProgress) { result ->
             binding.mapView.getMapboxMap().getStyle()?.apply {
                 routeLineView.renderRouteLineUpdate(this, result)
@@ -339,8 +338,12 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private val routesObserver = RoutesObserver { result ->
+        Log.e("lp_test", "got routes: ${result.navigationRoutes.size}")
         CoroutineScope(Dispatchers.Main).launch {
-            routeLineApi.setNavigationRoutes(result.navigationRoutes).apply {
+            routeLineApi.setNavigationRoutes(
+                newRoutes = result.navigationRoutes,
+                alternativeRoutesMetadata = mapboxNavigation.getAlternativeMetadataFor(result.navigationRoutes)
+            ).apply {
                 routeLineView.renderRouteDrawData(
                     binding.mapView.getMapboxMap().getStyle()!!,
                     this

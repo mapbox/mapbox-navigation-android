@@ -6,6 +6,7 @@ package com.mapbox.navigation.core
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
@@ -119,6 +120,7 @@ import com.mapbox.navigator.PollingConfig
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
@@ -490,7 +492,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigationOptions.routeAlternativesOptions,
             navigator,
             tripSession,
-            directionsSession,
             threadController,
         )
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
@@ -558,7 +559,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun stopTripSession() {
         runIfNotDestroyed {
             latestLegIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex
-            tripSession.setRoutes(
+            internalSetNavigationRoutes(
                 routes = emptyList(),
                 legIndex = 0,
                 reason = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
@@ -778,11 +779,29 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 RoutesExtra.ROUTES_UPDATE_REASON_NEW
             }
         }
-        directionsSession.setRoutes(
+        internalSetNavigationRoutes(
             routes,
             initialLegIndex,
             reason,
         )
+    }
+
+    private fun internalSetNavigationRoutes(
+        routes: List<NavigationRoute>,
+        legIndex: Int = 0,
+        @RoutesExtra.RoutesUpdateReason reason: String,
+    ) {
+        Log.e("lp_test", "internalSetNavigationRoutes")
+        threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
+            routeAlternativesController.pauseUpdates()
+            val result = tripSession.setRoutes(routes, legIndex, reason)
+            routeAlternativesController.setProcessedAlternativesMetadata(
+                routes,
+                result.processedAlternatives
+            )
+            routeAlternativesController.resumeUpdates()
+            directionsSession.setRoutes(routes, legIndex, reason)
+        }
     }
 
     /**
@@ -878,9 +897,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.unregisterAllFallbackVersionsObservers()
         routeAlternativesController.unregisterAll()
         routeRefreshController.stop()
-        directionsSession.setRoutes(
+        internalSetNavigationRoutes(
             emptyList(),
-            routesUpdateReason = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+            reason = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
         )
         resetTripSession()
         navigator.unregisterAllObservers()
@@ -1336,6 +1355,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         return routeAlternativesController.getMetadataFor(navigationRoute)
     }
 
+    fun getAlternativeMetadataFor(navigationRoutes: List<NavigationRoute>): List<AlternativeRouteMetadata> {
+        return navigationRoutes.mapNotNull { getAlternativeMetadataFor(it) }
+    }
+
     /**
      * Start observing navigation tiles version switch via [NavigationVersionSwitchObserver].
      * Navigation might switch to a fallback tiles version when target tiles are not available
@@ -1399,7 +1422,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun restoreTripSessionRoute() {
         val legIndex = latestLegIndex ?: directionsSession.initialLegIndex
-        tripSession.setRoutes(
+        internalSetNavigationRoutes(
             directionsSession.routes,
             legIndex,
             RoutesExtra.ROUTES_UPDATE_REASON_NEW,
@@ -1408,15 +1431,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
-        if (tripSession.getState() == TripSessionState.STARTED) {
-            tripSession.setRoutes(
-                result.navigationRoutes,
-                directionsSession.initialLegIndex,
-                result.reason,
-            )
-        }
         if (result.navigationRoutes.isNotEmpty()) {
-            routeRefreshController.restart(result.navigationRoutes.first())
+            routeRefreshController.restart(result.navigationRoutes.first()) {
+                internalSetNavigationRoutes(
+                    it,
+                    reason = RoutesExtra.ROUTES_UPDATE_REASON_REFRESH,
+                )
+            }
         } else {
             routeRefreshController.stop()
         }
@@ -1424,6 +1445,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->
         if (offRoute) {
+            Log.e("lp_test", "offRoute")
             reroute()
         }
     }
@@ -1497,9 +1519,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun reroute() {
         rerouteController?.reroute { routes, _ ->
-            directionsSession.setRoutes(
+            internalSetNavigationRoutes(
                 routes,
-                routesUpdateReason = RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+                reason = RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
             )
         }
     }

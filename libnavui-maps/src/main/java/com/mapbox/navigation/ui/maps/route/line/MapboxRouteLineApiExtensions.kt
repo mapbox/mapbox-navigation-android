@@ -5,6 +5,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
@@ -60,9 +61,28 @@ object MapboxRouteLineApiExtensions {
     suspend fun MapboxRouteLineApi.setNavigationRouteLines(
         newRoutes: List<NavigationRouteLine>
     ): Expected<RouteLineError, RouteSetValue> {
+        return setNavigationRouteLines(
+            newRoutes = newRoutes,
+            alternativeRoutesMetadata = emptyList()
+        )
+    }
+
+    /**
+     * Sets the routes that will be operated on.
+     *
+     * @param newRoutes one or more routes. The first route in the collection will be considered
+     * the primary route and any additional routes will be alternate routes.
+     *
+     * @return a state which contains the side effects to be applied to the map
+     */
+    suspend fun MapboxRouteLineApi.setNavigationRouteLines(
+        newRoutes: List<NavigationRouteLine>,
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>
+    ): Expected<RouteLineError, RouteSetValue> {
         return suspendCoroutine { continuation ->
             this.setNavigationRouteLines(
-                newRoutes
+                newRoutes,
+                alternativeRoutesMetadata
             ) { value -> continuation.resume(value) }
         }
     }
@@ -78,9 +98,25 @@ object MapboxRouteLineApiExtensions {
     suspend fun MapboxRouteLineApi.setNavigationRoutes(
         newRoutes: List<NavigationRoute>
     ): Expected<RouteLineError, RouteSetValue> {
+        return setNavigationRoutes(newRoutes = newRoutes, alternativeRoutesMetadata = emptyList())
+    }
+
+    /**
+     * Sets the routes that will be operated on.
+     *
+     * @param newRoutes one or more routes. The first route in the collection will be considered
+     * the primary route and any additional routes will be alternate routes.
+     *
+     * @return a state which contains the side effects to be applied to the map
+     */
+    suspend fun MapboxRouteLineApi.setNavigationRoutes(
+        newRoutes: List<NavigationRoute>,
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>
+    ): Expected<RouteLineError, RouteSetValue> {
         return suspendCoroutine { continuation ->
             this.setNavigationRoutes(
-                newRoutes
+                newRoutes,
+                alternativeRoutesMetadata
             ) { value -> continuation.resume(value) }
         }
     }

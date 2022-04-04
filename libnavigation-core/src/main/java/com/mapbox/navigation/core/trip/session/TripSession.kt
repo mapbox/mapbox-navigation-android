@@ -7,15 +7,16 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigator.FallbackVersionsObserver
+import com.mapbox.navigator.RouteAlternative
 
 internal interface TripSession {
 
     val tripService: TripService
-    fun setRoutes(
+    suspend fun setRoutes(
         routes: List<NavigationRoute>,
         legIndex: Int,
         @RoutesExtra.RoutesUpdateReason reason: String
-    )
+    ): NativeSetRouteResult
 
     fun getRawLocation(): Location?
     val zLevel: Int?
