@@ -12,6 +12,7 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
+import com.mapbox.navigation.ui.maps.route.arrow.model.ClearArrowsValue
 import com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue
@@ -82,5 +83,32 @@ class RouteArrowComponentTest {
         routeProgressObserverSlot.captured.onRouteProgressChanged(mockk())
 
         verify { mockView.renderManeuverUpdate(mockStyle, expected) }
+    }
+
+    @Test
+    fun `onDetached should clear all route arrows`() {
+        val style = mockk<Style>()
+        val mockMapView = mockk<MapView> {
+            every { getMapboxMap() } returns mockk {
+                every { getStyle() } returns style
+            }
+        }
+        val clearValue = mockk<ClearArrowsValue>()
+        val mockApi = mockk<MapboxRouteArrowApi> {
+            every { clearArrows() } returns clearValue
+        }
+        val mockView = mockk<MapboxRouteArrowView>(relaxed = true)
+        val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+
+        val sut = RouteArrowComponent(
+            mockMapView,
+            routeArrowOptions,
+            mockApi,
+            mockView
+        )
+        sut.onAttached(mockMapboxNavigation)
+        sut.onDetached(mockMapboxNavigation)
+
+        verify { mockView.render(style, clearValue) }
     }
 }
