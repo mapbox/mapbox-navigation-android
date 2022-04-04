@@ -69,7 +69,7 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
                     )
                     .build()
             )
-            .withRouteLineBelowLayerId("road-label-navigation")
+            .withRouteLineBelowLayerId("road-label") // for Style.LIGHT and Style.DARK
             .withVanishingRouteLineEnabled(true)
             .displaySoftGradientForTraffic(true)
             .build()
