@@ -6,6 +6,7 @@ import android.media.AudioManager
 import android.media.AudioManager.AUDIOFOCUS_REQUEST_DELAYED
 import android.media.AudioManager.AUDIOFOCUS_REQUEST_FAILED
 import android.media.AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+import com.mapbox.navigation.ui.voice.model.AudioFocusOwner
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import io.mockk.every
 import io.mockk.mockk
@@ -33,7 +34,7 @@ class OreoAndLaterAudioFocusDelegateTest {
         } returns mockedPlayerOptions
 
         every {
-            mockedPlayerAttributes.applyOn(any<AudioFocusRequest.Builder>())
+            mockedPlayerAttributes.applyOn(any(), any<AudioFocusRequest.Builder>())
         } returns Unit
 
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
@@ -42,7 +43,11 @@ class OreoAndLaterAudioFocusDelegateTest {
         )
         val slotAudioFocusRequest = slot<AudioFocusRequest>()
 
-        oreoAndLaterAudioFocusDelegate.requestFocus()
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        val mockOwner: AudioFocusOwner = mockk()
+        oreoAndLaterAudioFocusDelegate.requestFocus(mockOwner, mockCallback)
 
         verify(exactly = 1) {
             mockedAudioManager.requestAudioFocus(capture(slotAudioFocusRequest))
@@ -79,7 +84,11 @@ class OreoAndLaterAudioFocusDelegateTest {
         )
         val slotAudioFocusRequest = slot<AudioFocusRequest>()
 
-        oreoAndLaterAudioFocusDelegate.requestFocus()
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        val mockOwner: AudioFocusOwner = mockk()
+        oreoAndLaterAudioFocusDelegate.requestFocus(mockOwner, mockCallback)
 
         verify(exactly = 1) {
             mockedAudioManager.requestAudioFocus(capture(slotAudioFocusRequest))
@@ -104,7 +113,7 @@ class OreoAndLaterAudioFocusDelegateTest {
         } returns mockedPlayerOptions
 
         every {
-            mockedPlayerAttributes.applyOn(any<AudioFocusRequest.Builder>())
+            mockedPlayerAttributes.applyOn(any(), any<AudioFocusRequest.Builder>())
         } returns Unit
 
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
@@ -117,9 +126,15 @@ class OreoAndLaterAudioFocusDelegateTest {
             mockedAudioManager.requestAudioFocus(any())
         } returns AUDIOFOCUS_REQUEST_GRANTED
 
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        val mockOwner: AudioFocusOwner = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        oreoAndLaterAudioFocusDelegate.requestFocus(mockOwner, mockCallback)
+
         assertEquals(
             true,
-            oreoAndLaterAudioFocusDelegate.requestFocus(),
+            slotResult.captured,
         )
 
         verify(exactly = 1) {
@@ -141,7 +156,7 @@ class OreoAndLaterAudioFocusDelegateTest {
         } returns mockedPlayerOptions
 
         every {
-            mockedPlayerAttributes.applyOn(any<AudioFocusRequest.Builder>())
+            mockedPlayerAttributes.applyOn(any(), any<AudioFocusRequest.Builder>())
         } returns Unit
 
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
@@ -154,9 +169,15 @@ class OreoAndLaterAudioFocusDelegateTest {
             mockedAudioManager.requestAudioFocus(any())
         } returns AUDIOFOCUS_REQUEST_FAILED
 
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        val mockOwner: AudioFocusOwner = mockk()
+        oreoAndLaterAudioFocusDelegate.requestFocus(mockOwner, mockCallback)
+
         assertEquals(
             false,
-            oreoAndLaterAudioFocusDelegate.requestFocus(),
+            slotResult.captured,
         )
 
         verify(exactly = 1) {
@@ -178,7 +199,7 @@ class OreoAndLaterAudioFocusDelegateTest {
         } returns mockedPlayerOptions
 
         every {
-            mockedPlayerAttributes.applyOn(any<AudioFocusRequest.Builder>())
+            mockedPlayerAttributes.applyOn(any(), any<AudioFocusRequest.Builder>())
         } returns Unit
 
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
@@ -191,9 +212,15 @@ class OreoAndLaterAudioFocusDelegateTest {
             mockedAudioManager.requestAudioFocus(any())
         } returns AUDIOFOCUS_REQUEST_DELAYED
 
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        val mockOwner: AudioFocusOwner = mockk()
+        oreoAndLaterAudioFocusDelegate.requestFocus(mockOwner, mockCallback)
+
         assertEquals(
             true,
-            oreoAndLaterAudioFocusDelegate.requestFocus(),
+            slotResult.captured,
         )
 
         verify(exactly = 1) {
@@ -215,7 +242,7 @@ class OreoAndLaterAudioFocusDelegateTest {
         } returns mockedPlayerOptions
 
         every {
-            mockedPlayerAttributes.applyOn(any<AudioFocusRequest.Builder>())
+            mockedPlayerAttributes.applyOn(any(), any<AudioFocusRequest.Builder>())
         } returns Unit
 
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
@@ -229,9 +256,14 @@ class OreoAndLaterAudioFocusDelegateTest {
             mockedAudioManager.abandonAudioFocusRequest(any())
         } returns AUDIOFOCUS_REQUEST_GRANTED
 
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        oreoAndLaterAudioFocusDelegate.abandonFocus(mockCallback)
+
         assertEquals(
             true,
-            oreoAndLaterAudioFocusDelegate.abandonFocus(),
+            slotResult.captured,
         )
 
         verify(exactly = 1) {
@@ -253,7 +285,7 @@ class OreoAndLaterAudioFocusDelegateTest {
         } returns mockedPlayerOptions
 
         every {
-            mockedPlayerAttributes.applyOn(any<AudioFocusRequest.Builder>())
+            mockedPlayerAttributes.applyOn(any(), any<AudioFocusRequest.Builder>())
         } returns Unit
 
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
@@ -267,9 +299,14 @@ class OreoAndLaterAudioFocusDelegateTest {
             mockedAudioManager.abandonAudioFocusRequest(any())
         } returns AUDIOFOCUS_REQUEST_FAILED
 
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        oreoAndLaterAudioFocusDelegate.abandonFocus(mockCallback)
+
         assertEquals(
             false,
-            oreoAndLaterAudioFocusDelegate.abandonFocus(),
+            slotResult.captured,
         )
 
         verify(exactly = 1) {

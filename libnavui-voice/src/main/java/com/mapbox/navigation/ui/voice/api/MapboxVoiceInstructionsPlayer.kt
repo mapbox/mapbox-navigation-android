@@ -4,6 +4,7 @@ import android.content.Context
 import android.media.AudioManager
 import androidx.annotation.UiThread
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
+import com.mapbox.navigation.ui.voice.model.AudioFocusOwner
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
@@ -18,7 +19,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * @property accessToken String
  * @property language [Locale] language (ISO 639)
  * @property options [VoiceInstructionsPlayerOptions] (optional)
- * @property audioFocusDelegate [AudioFocusDelegate] (optional)
+ * @property audioFocusDelegate [AsyncAudioFocusDelegate] (optional)
  */
 @UiThread
 class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
@@ -27,8 +28,17 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
     private val language: String,
     private val options: VoiceInstructionsPlayerOptions = VoiceInstructionsPlayerOptions.Builder()
         .build(),
-    private val audioFocusDelegate: AudioFocusDelegate = buildAndroidAudioFocus(context, options),
+    private val audioFocusDelegate: AsyncAudioFocusDelegate =
+        buildAndroidAudioFocus(context, options),
 ) {
+    constructor(
+        context: Context,
+        accessToken: String,
+        language: String,
+        options: VoiceInstructionsPlayerOptions = VoiceInstructionsPlayerOptions.Builder()
+            .build(),
+        audioFocusDelegate: AudioFocusDelegate,
+    ) : this(context, accessToken, language, options, wrapDelegate(audioFocusDelegate))
 
     private val attributes: VoiceInstructionsPlayerAttributes =
         VoiceInstructionsPlayerAttributesProvider.retrievePlayerAttributes(options)
@@ -47,12 +57,13 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
         )
     private val localCallback: VoiceInstructionsPlayerCallback =
         VoiceInstructionsPlayerCallback {
-            audioFocusDelegate.abandonFocus()
-            val currentPlayCallback = playCallbackQueue.poll()
-            val currentAnnouncement = currentPlayCallback.announcement
-            val currentClientCallback = currentPlayCallback.consumer
-            currentClientCallback.accept(currentAnnouncement)
-            play()
+            audioFocusDelegate.abandonFocus {
+                val currentPlayCallback = playCallbackQueue.poll()
+                val currentAnnouncement = currentPlayCallback.announcement
+                val currentClientCallback = currentPlayCallback.consumer
+                currentClientCallback.accept(currentAnnouncement)
+                play()
+            }
         }
 
     /**
@@ -113,22 +124,48 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
         if (playCallbackQueue.isNotEmpty()) {
             val currentPlayCallback = playCallbackQueue.peek()
             val currentPlay = currentPlayCallback.announcement
-            if (audioFocusDelegate.requestFocus()) {
-                currentPlay.file?.let {
-                    filePlayer.play(currentPlay, localCallback)
-                } ?: textPlayer.play(currentPlay, localCallback)
-            } else {
-                localCallback.onDone(currentPlay)
+
+            val owner = when (currentPlay.file) {
+                null -> AudioFocusOwner.TextToSpeech
+                else -> AudioFocusOwner.MediaPlayer
+            }
+
+            audioFocusDelegate.requestFocus(owner) { isGranted ->
+                if (isGranted) {
+                    when (owner) {
+                        AudioFocusOwner.MediaPlayer -> filePlayer.play(currentPlay, localCallback)
+                        AudioFocusOwner.TextToSpeech -> textPlayer.play(currentPlay, localCallback)
+                    }
+                } else {
+                    localCallback.onDone(currentPlay)
+                }
             }
         }
     }
 
     private fun finalize() {
         playCallbackQueue.clear()
-        audioFocusDelegate.abandonFocus()
+        audioFocusDelegate.abandonFocus {
+            // Ignore
+        }
     }
 
     private companion object {
+
+        private fun wrapDelegate(delegate: AudioFocusDelegate): AsyncAudioFocusDelegate {
+            return object : AsyncAudioFocusDelegate {
+                override fun requestFocus(
+                    owner: AudioFocusOwner,
+                    callback: AudioFocusRequestCallback
+                ) {
+                    callback(delegate.requestFocus())
+                }
+
+                override fun abandonFocus(callback: AudioFocusRequestCallback) {
+                    callback(delegate.abandonFocus())
+                }
+            }
+        }
 
         private fun buildAndroidAudioFocus(
             context: Context,

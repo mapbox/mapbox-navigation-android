@@ -27,6 +27,14 @@ class VoiceInstructionsPlayerOptions private constructor(
     val streamType: Int,
 
     /**
+     * Defines which stream will be used for playing TTS
+     * Defaults to [AudioManager.STREAM_MUSIC]
+     * See [AudioManager] for a list of stream types.
+     * Supports pre Oreo and above implementations
+     */
+    val ttsStreamType: Int,
+
+    /**
      * Defines the context in which the stream is used, providing information about
      * why the sound is playing and what the sound is used for.
      * Usage information is more expressive than a stream type and allows platforms
@@ -69,6 +77,7 @@ class VoiceInstructionsPlayerOptions private constructor(
     fun toBuilder(): Builder = Builder().apply {
         focusGain(focusGain)
         streamType(streamType)
+        ttsStreamType(ttsStreamType)
         usage(usage)
         contentType(contentType)
         useLegacyApi(useLegacyApi)
@@ -86,6 +95,7 @@ class VoiceInstructionsPlayerOptions private constructor(
 
         if (focusGain != other.focusGain) return false
         if (streamType != other.streamType) return false
+        if (ttsStreamType != other.ttsStreamType) return false
         if (usage != other.usage) return false
         if (contentType != other.contentType) return false
         if (useLegacyApi != other.useLegacyApi) return false
@@ -100,6 +110,7 @@ class VoiceInstructionsPlayerOptions private constructor(
     override fun hashCode(): Int {
         var result = focusGain
         result = 31 * result + streamType
+        result = 31 * result + ttsStreamType
         result = 31 * result + usage
         result = 31 * result + contentType
         result = 31 * result + useLegacyApi.hashCode()
@@ -113,6 +124,7 @@ class VoiceInstructionsPlayerOptions private constructor(
     override fun toString(): String {
         return "VoiceInstructionsPlayerOptions(focusGain=$focusGain, " +
             "streamType=$streamType, " +
+            "ttsStreamType=$ttsStreamType, " +
             "usage=$usage, " +
             "contentType=$contentType, " +
             "useLegacyApi=$useLegacyApi, " +
@@ -126,6 +138,7 @@ class VoiceInstructionsPlayerOptions private constructor(
 
         private var focusGain: Int = AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
         private var streamType: Int = AudioManager.STREAM_MUSIC
+        private var ttsStreamType: Int = AudioManager.STREAM_MUSIC
         private var usage: Int = AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE
         private var contentType: Int = AudioAttributes.CONTENT_TYPE_MUSIC
         private var useLegacyApi: Boolean = false
@@ -162,6 +175,17 @@ class VoiceInstructionsPlayerOptions private constructor(
         fun streamType(streamType: Int): Builder =
             apply {
                 this.streamType = streamType
+            }
+
+        /**
+         * Specifies which stream will be used for playing TTS
+         * Defaults to [AudioManager.STREAM_MUSIC]
+         * See [AudioManager] for a list of stream types.
+         * Supports pre Oreo and above implementations
+         */
+        fun ttsStreamType(streamType: Int): Builder =
+            apply {
+                this.ttsStreamType = streamType
             }
 
         /**
@@ -212,6 +236,7 @@ class VoiceInstructionsPlayerOptions private constructor(
             return VoiceInstructionsPlayerOptions(
                 focusGain = focusGain,
                 streamType = streamType,
+                ttsStreamType = ttsStreamType,
                 usage = usage,
                 contentType = contentType,
                 useLegacyApi = useLegacyApi,

@@ -7,7 +7,9 @@ import android.os.Build
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import androidx.annotation.RequiresApi
+import com.mapbox.navigation.ui.voice.model.AudioFocusOwner
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
+import org.jetbrains.annotations.TestOnly
 
 /**
  * PlayerAttributes implements attributes that define how the audio system handles routing
@@ -38,13 +40,18 @@ sealed class VoiceInstructionsPlayerAttributes {
      * Configure [AudioFocusRequest.Builder]
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
-    internal fun applyOn(audioFocusRequestBuilder: AudioFocusRequest.Builder) {
-        configureAudioFocusRequestBuilder()(audioFocusRequestBuilder)
+    internal fun applyOn(
+        owner: AudioFocusOwner,
+        audioFocusRequestBuilder: AudioFocusRequest.Builder,
+    ) {
+        configureAudioFocusRequestBuilder(owner)(audioFocusRequestBuilder)
     }
 
     protected abstract fun configureMediaPlayer(): MediaPlayer.() -> Unit
     protected abstract fun configureTextToSpeech(): TextToSpeech.(Bundle) -> Unit
-    protected abstract fun configureAudioFocusRequestBuilder(): AudioFocusRequest.Builder.() -> Unit
+    protected abstract fun configureAudioFocusRequestBuilder(
+        owner: AudioFocusOwner
+    ): AudioFocusRequest.Builder.() -> Unit
 
     /**
      * Attributes for API below Android O
@@ -61,14 +68,16 @@ sealed class VoiceInstructionsPlayerAttributes {
 
         override fun configureTextToSpeech(): TextToSpeech.(Bundle) -> Unit {
             return { bundle ->
-                bundle.putInt(
+                bundle.putString(
                     TextToSpeech.Engine.KEY_PARAM_STREAM,
-                    options.streamType
+                    options.ttsStreamType.toString()
                 )
             }
         }
 
-        override fun configureAudioFocusRequestBuilder(): AudioFocusRequest.Builder.() -> Unit {
+        override fun configureAudioFocusRequestBuilder(
+            owner: AudioFocusOwner,
+        ): AudioFocusRequest.Builder.() -> Unit {
             return {
                 // Not used
             }
@@ -87,10 +96,11 @@ sealed class VoiceInstructionsPlayerAttributes {
         /**
          * Specifies a collection of attributes describing information about an audio stream.
          */
-        private val audioAttributes: AudioAttributes = builder
+        @TestOnly
+        internal fun audioAttributes(owner: AudioFocusOwner): AudioAttributes = builder
             .let { builder ->
                 if (options.useLegacyApi) {
-                    builder.buildLegacy()
+                    builder.buildLegacy(owner)
                 } else {
                     builder.buildNormal()
                 }
@@ -99,25 +109,34 @@ sealed class VoiceInstructionsPlayerAttributes {
 
         override fun configureMediaPlayer(): MediaPlayer.() -> Unit {
             return {
-                setAudioAttributes(audioAttributes)
+                setAudioAttributes(audioAttributes(AudioFocusOwner.MediaPlayer))
             }
         }
 
         override fun configureTextToSpeech(): TextToSpeech.(Bundle) -> Unit {
             return {
-                setAudioAttributes(audioAttributes)
+                setAudioAttributes(audioAttributes(AudioFocusOwner.TextToSpeech))
             }
         }
 
-        override fun configureAudioFocusRequestBuilder(): AudioFocusRequest.Builder.() -> Unit {
+        override fun configureAudioFocusRequestBuilder(
+            owner: AudioFocusOwner,
+        ): AudioFocusRequest.Builder.() -> Unit {
             return {
-                setAudioAttributes(audioAttributes)
+                setAudioAttributes(audioAttributes(owner))
             }
         }
 
         private fun AudioAttributes.Builder.buildNormal() = setUsage(options.usage)
             .setContentType(options.contentType)
 
-        private fun AudioAttributes.Builder.buildLegacy() = setLegacyStreamType(options.streamType)
+        private fun AudioAttributes.Builder.buildLegacy(
+            owner: AudioFocusOwner
+        ) = setLegacyStreamType(
+            when (owner) {
+                AudioFocusOwner.MediaPlayer -> options.streamType
+                AudioFocusOwner.TextToSpeech -> options.ttsStreamType
+            }
+        )
     }
 }
