@@ -286,10 +286,7 @@ commands:
     steps:
       - run:
           name: Post code coverage reports to Codecov.io
-          command: |
-            curl -Os https://uploader.codecov.io/latest/linux/codecov
-            chmod +x codecov
-            ./codecov
+          command: sh scripts/coverage.sh
 
   generate-version-name:
     steps:
