@@ -8,7 +8,6 @@ import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
-import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -24,11 +23,18 @@ internal class RouteArrowComponent(
         super.onAttached(mapboxNavigation)
         coroutineScope.launch {
             mapboxNavigation.flowRouteProgress().collect { routeProgress ->
-                ifNonNull(mapView.getMapboxMap().getStyle()) { style ->
+                mapView.getMapboxMap().getStyle()?.also { style ->
                     val arrowUpdate = routeArrowApi.addUpcomingManeuverArrow(routeProgress)
                     routeArrowView.renderManeuverUpdate(style, arrowUpdate)
                 }
             }
+        }
+    }
+
+    override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        super.onDetached(mapboxNavigation)
+        mapView.getMapboxMap().getStyle()?.also { style ->
+            routeArrowView.render(style, routeArrowApi.clearArrows())
         }
     }
 }
