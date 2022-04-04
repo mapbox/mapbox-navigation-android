@@ -19,9 +19,11 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimExpressionProvider
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -204,28 +206,53 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 update.onValue {
-                    updateLineGradient(
-                        style,
-                        RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                    getExpressionUpdateFun(
                         it.primaryRouteLineDynamicData.trafficExpressionProvider
-                    )
-                    updateLineGradient(
-                        style,
-                        RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
+                    ).apply {
+                        this(
+                            style,
+                            RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                            it.primaryRouteLineDynamicData.trafficExpressionProvider
+                        )
+                    }
+                    getExpressionUpdateFun(
                         it.primaryRouteLineDynamicData.baseExpressionProvider
-                    )
-                    updateLineGradient(
-                        style,
-                        RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+                    ).apply {
+                        this(
+                            style,
+                            RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
+                            it.primaryRouteLineDynamicData.baseExpressionProvider
+                        )
+                    }
+                    getExpressionUpdateFun(
                         it.primaryRouteLineDynamicData.casingExpressionProvider
-                    )
-                    updateLineGradient(
-                        style,
-                        RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
+                    ).apply {
+                        this(
+                            style,
+                            RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+                            it.primaryRouteLineDynamicData.casingExpressionProvider
+                        )
+                    }
+                    getExpressionUpdateFun(
                         it.primaryRouteLineDynamicData.restrictedSectionExpressionProvider
-                    )
+                    ).apply {
+                        this(
+                            style,
+                            RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
+                            it.primaryRouteLineDynamicData.restrictedSectionExpressionProvider
+                        )
+                    }
                 }
             }
+        }
+    }
+
+    private fun getExpressionUpdateFun(
+        provider: RouteLineExpressionProvider?
+    ): (Style, String, RouteLineExpressionProvider?) -> Unit {
+        return when (provider) {
+            is RouteLineTrimExpressionProvider -> ::updateTrimOffset
+            else -> ::updateLineGradient
         }
     }
 
@@ -544,6 +571,18 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                     this,
                     layerId,
                 )
+            }
+        }
+    }
+
+    private fun updateTrimOffset(
+        style: Style,
+        layerId: String,
+        expressionProvider: RouteLineExpressionProvider?
+    ) {
+        ifNonNull(expressionProvider) { expressionProvider ->
+            style.getLayer(layerId)?.let {
+                (it as LineLayer).lineTrimOffset(expressionProvider.generateExpression())
             }
         }
     }

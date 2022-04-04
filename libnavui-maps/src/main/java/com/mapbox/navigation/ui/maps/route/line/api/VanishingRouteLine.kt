@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
 import com.mapbox.geojson.Point
+import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
@@ -11,6 +12,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimExpressionProvider
 import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineExpressions
@@ -109,6 +111,94 @@ internal class VanishingRouteLine {
         }
     }
 
+    private fun getOffset(
+        point: Point,
+        granularDistances: RouteLineGranularDistances,
+        index: Int
+    ): Double? {
+        val upcomingIndex = granularDistances.distancesArray[index]
+        if (upcomingIndex == null) {
+            logD(
+                "Upcoming route line index is null.",
+                "VanishingRouteLine"
+            )
+            return null
+        }
+        val upcomingPoint = upcomingIndex.point
+        if (index > 0) {
+            val distanceToLine = MapboxRouteLineUtils.findDistanceToNearestPointOnCurrentLine(
+                point,
+                granularDistances,
+                index
+            )
+            if (
+                distanceToLine >
+                RouteLayerConstants.ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS
+            ) {
+                return null
+            }
+        }
+
+        /**
+         * Take the remaining distance from the upcoming point on the route and extends it
+         * by the exact position of the puck.
+         */
+        val remainingDistance =
+            upcomingIndex.distanceRemaining + MapboxRouteLineUtils.calculateDistance(
+                upcomingPoint,
+                point
+            )
+
+        /**
+         * Calculate the percentage of the route traveled and update the expression.
+         */
+        /**
+         * Calculate the percentage of the route traveled and update the expression.
+         */
+        val offset = if (granularDistances.distance >= remainingDistance) {
+            (1.0 - remainingDistance / granularDistances.distance)
+        } else {
+            0.0
+        }
+
+        if (vanishingPointState == VanishingPointState.ONLY_INCREASE_PROGRESS &&
+            vanishPointOffset > offset
+        ) {
+            return null
+        }
+        return offset
+    }
+
+    internal fun getTraveledRouteLineExpressions(point: Point): VanishingRouteLineExpressions? {
+        return ifNonNull(
+            primaryRouteLineGranularDistances,
+            primaryRouteRemainingDistancesIndex
+        ) { granularDistances, index ->
+            ifNonNull(getOffset(point, granularDistances, index)) { offset ->
+                vanishPointOffset = offset
+                val trimmedOffsetExpression = literal(listOf(0.0, offset))
+                val trafficLineExpressionProvider = RouteLineTrimExpressionProvider {
+                    trimmedOffsetExpression
+                }
+                val routeLineExpressionProvider = RouteLineTrimExpressionProvider {
+                    trimmedOffsetExpression
+                }
+                val routeLineCasingExpressionProvider = RouteLineTrimExpressionProvider {
+                    trimmedOffsetExpression
+                }
+                val restrictedRoadExpressionProvider = RouteLineTrimExpressionProvider {
+                    trimmedOffsetExpression
+                }
+                VanishingRouteLineExpressions(
+                    trafficLineExpressionProvider,
+                    routeLineExpressionProvider,
+                    routeLineCasingExpressionProvider,
+                    restrictedRoadExpressionProvider
+                )
+            }
+        }
+    }
+
     internal fun getTraveledRouteLineExpressions(
         point: Point,
         routeLineExpressionData: List<RouteLineExpressionData>,
@@ -116,126 +206,78 @@ internal class VanishingRouteLine {
         routeResourceProvider: RouteLineResources,
         activeLegIndex: Int,
         softGradientTransition: Double,
-        useSoftGradient: Boolean
+        useSoftGradient: Boolean,
     ): VanishingRouteLineExpressions? {
-        ifNonNull(
+        return ifNonNull(
             primaryRouteLineGranularDistances,
             primaryRouteRemainingDistancesIndex
         ) { granularDistances, index ->
-            val upcomingIndex = granularDistances.distancesArray[index]
-            if (upcomingIndex == null) {
-                logD(
-                    "Upcoming route line index is null.",
-                    "VanishingRouteLine"
-                )
-                return null
-            }
-            val upcomingPoint = upcomingIndex.point
-            if (index > 0) {
-                val distanceToLine = MapboxRouteLineUtils.findDistanceToNearestPointOnCurrentLine(
-                    point,
-                    granularDistances,
-                    index
-                )
-                if (
-                    distanceToLine >
-                    RouteLayerConstants.ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS
-                ) {
-                    return null
-                }
-            }
-
-            /**
-             * Take the remaining distance from the upcoming point on the route and extends it
-             * by the exact position of the puck.
-             */
-            val remainingDistance =
-                upcomingIndex.distanceRemaining + MapboxRouteLineUtils.calculateDistance(
-                    upcomingPoint,
-                    point
-                )
-
-            /**
-             * Calculate the percentage of the route traveled and update the expression.
-             */
-            /**
-             * Calculate the percentage of the route traveled and update the expression.
-             */
-            val offset = if (granularDistances.distance >= remainingDistance) {
-                (1.0 - remainingDistance / granularDistances.distance)
-            } else {
-                0.0
-            }
-
-            if (vanishingPointState == VanishingPointState.ONLY_INCREASE_PROGRESS &&
-                vanishPointOffset > offset
-            ) {
-                return null
-            }
-            vanishPointOffset = offset
-
-            val trafficLineExpressionProvider = if (useSoftGradient) {
-                {
-                    MapboxRouteLineUtils.getTrafficLineExpressionSoftGradient(
-                        offset,
-                        routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
-                        routeResourceProvider.routeLineColorResources.routeUnknownCongestionColor,
-                        softGradientTransition,
-                        routeLineExpressionData
-                    )
-                }
-            } else {
-                {
-                    MapboxRouteLineUtils.getTrafficLineExpression(
-                        offset,
-                        routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
-                        routeResourceProvider.routeLineColorResources.routeUnknownCongestionColor,
-                        routeLineExpressionData
-                    )
-                }
-            }
-
-            val routeLineExpressionProvider = {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    offset,
-                    routeLineExpressionData,
-                    routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
-                    routeResourceProvider.routeLineColorResources.routeDefaultColor,
-                    routeResourceProvider.routeLineColorResources.inActiveRouteLegsColor,
-                    activeLegIndex
-                )
-            }
-            val routeLineCasingExpressionProvider = {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    offset,
-                    routeLineExpressionData,
-                    routeResourceProvider.routeLineColorResources.routeLineTraveledCasingColor,
-                    routeResourceProvider.routeLineColorResources.routeCasingColor,
-                    Color.TRANSPARENT,
-                    activeLegIndex
-                )
-            }
-
-            val restrictedRoadExpressionProvider =
-                ifNonNull(restrictedLineExpressionData) { expressionData ->
+            ifNonNull(getOffset(point, granularDistances, index)) { offset ->
+                vanishPointOffset = offset
+                val trafficLineExpressionProvider = if (useSoftGradient) {
                     {
-                        MapboxRouteLineUtils.getRestrictedLineExpression(
+                        MapboxRouteLineUtils.getTrafficLineExpressionSoftGradient(
                             offset,
-                            activeLegIndex,
-                            routeResourceProvider.routeLineColorResources.restrictedRoadColor,
-                            expressionData
+                            routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
+                            routeResourceProvider
+                                .routeLineColorResources
+                                .routeUnknownCongestionColor,
+                            softGradientTransition,
+                            routeLineExpressionData
+                        )
+                    }
+                } else {
+                    {
+                        MapboxRouteLineUtils.getTrafficLineExpression(
+                            offset,
+                            routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
+                            routeResourceProvider
+                                .routeLineColorResources
+                                .routeUnknownCongestionColor,
+                            routeLineExpressionData
                         )
                     }
                 }
+                val routeLineExpressionProvider = {
+                    MapboxRouteLineUtils.getRouteLineExpression(
+                        offset,
+                        routeLineExpressionData,
+                        routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
+                        routeResourceProvider.routeLineColorResources.routeDefaultColor,
+                        routeResourceProvider.routeLineColorResources.inActiveRouteLegsColor,
+                        activeLegIndex
+                    )
+                }
+                val routeLineCasingExpressionProvider = {
+                    MapboxRouteLineUtils.getRouteLineExpression(
+                        offset,
+                        routeLineExpressionData,
+                        routeResourceProvider.routeLineColorResources.routeLineTraveledCasingColor,
+                        routeResourceProvider.routeLineColorResources.routeCasingColor,
+                        Color.TRANSPARENT,
+                        activeLegIndex
+                    )
+                }
+                val restrictedRoadExpressionProvider =
+                    ifNonNull(restrictedLineExpressionData) { expressionData ->
+                        {
+                            MapboxRouteLineUtils.getRestrictedLineExpression(
+                                offset,
+                                activeLegIndex,
+                                routeResourceProvider.routeLineColorResources.restrictedRoadColor,
+                                expressionData
+                            )
+                        }
+                    }
 
-            return VanishingRouteLineExpressions(
-                trafficLineExpressionProvider,
-                routeLineExpressionProvider,
-                routeLineCasingExpressionProvider,
-                restrictedRoadExpressionProvider
-            )
+                VanishingRouteLineExpressions(
+                    trafficLineExpressionProvider,
+                    routeLineExpressionProvider,
+                    routeLineCasingExpressionProvider,
+                    restrictedRoadExpressionProvider
+                )
+            }
         }
-        return null
     }
 
     /**

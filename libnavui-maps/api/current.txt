@@ -1191,6 +1191,9 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final float scaleStop;
   }
 
+  public fun interface RouteLineTrimExpressionProvider extends com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider {
+  }
+
   public final class RouteLineUpdateValue {
     method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData> getAlternativeRouteLinesDynamicData();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData getPrimaryRouteLineDynamicData();

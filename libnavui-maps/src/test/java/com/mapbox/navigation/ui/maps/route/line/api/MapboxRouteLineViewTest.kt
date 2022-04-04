@@ -38,6 +38,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimExpressionProvider
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
@@ -52,6 +53,7 @@ import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import org.junit.After
@@ -61,6 +63,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.util.UUID
 
+@ExperimentalCoroutinesApi
 class MapboxRouteLineViewTest {
 
     @get:Rule
@@ -261,6 +264,78 @@ class MapboxRouteLineViewTest {
         verify { primaryRouteLayer.lineGradient(routeLineExp) }
         verify { primaryRouteCasingLayer.lineGradient(casingLineEx) }
         verify { restrictedLineLayer.lineGradient(restrictedRoadExp) }
+        unmockkObject(MapboxRouteLineUtils)
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+    }
+
+    @Test
+    fun renderTraveledRouteLineTrimUpdate() = coroutineRule.runBlockingTest {
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        mockkObject(MapboxRouteLineUtils)
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val trafficLineExp = mockk<Expression>()
+        val routeLineExp = mockk<Expression>()
+        val casingLineEx = mockk<Expression>()
+        val restrictedRoadExp = mockk<Expression>()
+        val state: Expected<RouteLineError, RouteLineUpdateValue> =
+            ExpectedFactory.createValue(
+                RouteLineUpdateValue(
+                    primaryRouteLineDynamicData = RouteLineDynamicData(
+                        RouteLineTrimExpressionProvider { routeLineExp },
+                        RouteLineTrimExpressionProvider { casingLineEx },
+                        RouteLineTrimExpressionProvider { trafficLineExp },
+                        RouteLineTrimExpressionProvider { restrictedRoadExp }
+                    ),
+                    alternativeRouteLinesDynamicData = listOf(
+                        RouteLineDynamicData(
+                            { throw UnsupportedOperationException() },
+                            { throw UnsupportedOperationException() },
+                            { throw UnsupportedOperationException() },
+                            { throw UnsupportedOperationException() }
+                        ),
+                        RouteLineDynamicData(
+                            { throw UnsupportedOperationException() },
+                            { throw UnsupportedOperationException() },
+                            { throw UnsupportedOperationException() },
+                            { throw UnsupportedOperationException() }
+                        )
+                    )
+                )
+            )
+        val primaryRouteTrafficLayer = mockk<LineLayer>(relaxed = true)
+        val primaryRouteLayer = mockk<LineLayer>(relaxed = true)
+        val primaryRouteCasingLayer = mockk<LineLayer>(relaxed = true)
+        val restrictedLineLayer = mockk<LineLayer>(relaxed = true)
+        val topLevelLayer = mockk<LineLayer>(relaxed = true)
+        val style = mockk<Style> {
+            every {
+                getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+            } returns primaryRouteTrafficLayer
+            every {
+                getLayer(PRIMARY_ROUTE_LAYER_ID)
+            } returns primaryRouteLayer
+            every {
+                getLayer(PRIMARY_ROUTE_CASING_LAYER_ID)
+            } returns primaryRouteCasingLayer
+            every {
+                getLayer(RESTRICTED_ROAD_LAYER_ID)
+            } returns restrictedLineLayer
+            every {
+                getLayer(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+            } returns topLevelLayer
+        }.also {
+            mockCheckForLayerInitialization(it)
+        }
+
+        pauseDispatcher {
+            MapboxRouteLineView(options).renderRouteLineUpdate(style, state)
+            verify { MapboxRouteLineUtils.initializeLayers(style, options) }
+        }
+
+        verify { primaryRouteTrafficLayer.lineTrimOffset(trafficLineExp) }
+        verify { primaryRouteLayer.lineTrimOffset(routeLineExp) }
+        verify { primaryRouteCasingLayer.lineTrimOffset(casingLineEx) }
+        verify { restrictedLineLayer.lineTrimOffset(restrictedRoadExp) }
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }

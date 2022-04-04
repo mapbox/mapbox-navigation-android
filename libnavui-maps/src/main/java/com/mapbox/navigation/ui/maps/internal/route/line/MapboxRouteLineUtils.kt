@@ -1002,6 +1002,21 @@ internal object MapboxRouteLineUtils {
             style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
         }
 
+        options.routeLayerProvider.buildPrimaryRouteCasingTrailLayer(
+            style,
+            options.resourceProvider.routeLineColorResources.routeLineTraveledCasingColor
+        ).let {
+            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
+        }
+
+        options.routeLayerProvider.buildPrimaryRouteTrailLayer(
+            style,
+            options.resourceProvider.roundedLineCap,
+            options.resourceProvider.routeLineColorResources.routeLineTraveledColor
+        ).let {
+            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
+        }
+
         options.routeLayerProvider.buildPrimaryRouteCasingLayer(
             style,
             options.resourceProvider.routeLineColorResources.routeCasingColor
