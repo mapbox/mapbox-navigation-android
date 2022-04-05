@@ -89,6 +89,7 @@ internal class CameraComponent constructor(
                     is NavigationState.FreeDrive -> {
                         viewportDataSource.followingZoomPropertyOverride(FOLLOWING_ZOOM_OVERRIDE)
                         viewportDataSource.overviewZoomPropertyOverride(OVERVIEW_ZOOM_OVERRIDE)
+                        viewportDataSource.overviewPitchPropertyOverride(OVERVIEW_PITCH_OVERRIDE)
                     }
                     else -> {
                         viewportDataSource.clearFollowingOverrides()
@@ -218,6 +219,7 @@ internal class CameraComponent constructor(
 
     companion object {
         private const val OVERVIEW_ZOOM_OVERRIDE = 16.5
+        private const val OVERVIEW_PITCH_OVERRIDE = 0.0
         private const val FOLLOWING_ZOOM_OVERRIDE = 16.5
     }
 }
