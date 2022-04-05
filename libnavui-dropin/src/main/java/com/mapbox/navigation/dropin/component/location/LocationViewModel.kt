@@ -4,6 +4,7 @@ import android.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.dropin.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.dropin.lifecycle.UIViewModel
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
@@ -12,11 +13,11 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 sealed class LocationAction {
-    data class Update(val location: Location) : LocationAction()
+    data class Update(val result: LocationMatcherResult) : LocationAction()
 }
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class LocationViewModel : UIViewModel<Location?, LocationAction>(null) {
+class LocationViewModel : UIViewModel<LocationMatcherResult?, LocationAction>(null) {
     val navigationLocationProvider = NavigationLocationProvider()
 
     /**
@@ -41,11 +42,11 @@ class LocationViewModel : UIViewModel<Location?, LocationAction>(null) {
 
     override fun process(
         mapboxNavigation: MapboxNavigation,
-        state: Location?,
+        state: LocationMatcherResult?,
         action: LocationAction
-    ): Location {
+    ): LocationMatcherResult? {
         return when (action) {
-            is LocationAction.Update -> action.location
+            is LocationAction.Update -> action.result
         }
     }
 
@@ -53,12 +54,12 @@ class LocationViewModel : UIViewModel<Location?, LocationAction>(null) {
         super.onAttached(mapboxNavigation)
 
         mainJobControl.scope.launch {
-            mapboxNavigation.flowLocationMatcherResult().collect { locationMatcherResult ->
+            mapboxNavigation.flowLocationMatcherResult().collect {
                 navigationLocationProvider.changePosition(
-                    location = locationMatcherResult.enhancedLocation,
-                    keyPoints = locationMatcherResult.keyPoints,
+                    location = it.enhancedLocation,
+                    keyPoints = it.keyPoints,
                 )
-                invoke(LocationAction.Update(locationMatcherResult.enhancedLocation))
+                invoke(LocationAction.Update(it))
             }
         }
     }

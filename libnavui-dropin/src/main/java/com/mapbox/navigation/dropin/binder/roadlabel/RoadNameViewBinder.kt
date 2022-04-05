@@ -1,21 +1,24 @@
-package com.mapbox.navigation.dropin.component.roadlabel
+package com.mapbox.navigation.dropin.binder.roadlabel
 
 import android.transition.Scene
 import android.transition.TransitionManager
 import android.view.ViewGroup
-import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
+import com.mapbox.navigation.dropin.component.roadlabel.RoadNameLabelComponent
 import com.mapbox.navigation.dropin.databinding.MapboxRoadNameLayoutBinding
 import com.mapbox.navigation.dropin.lifecycle.reloadOnChange
-import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class RoadNameViewBinder(
-    private val loadedMapStyle: StateFlow<Style?>
+internal class RoadNameViewBinder(
+    private val context: DropInNavigationViewContext
 ) : UIBinder {
+
+    private val loadedMapStyle = context.mapStyleLoader.loadedMapStyle
+
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
             viewGroup,
@@ -26,8 +29,15 @@ class RoadNameViewBinder(
         val binding = MapboxRoadNameLayoutBinding.bind(viewGroup)
 
         return reloadOnChange(loadedMapStyle) { style ->
-            if (style != null) RoadNameLabelComponent(binding.roadNameView, style)
-            else null
+            if (style != null) {
+                RoadNameLabelComponent(
+                    binding.roadNameView,
+                    context.viewModel.locationViewModel,
+                    style
+                )
+            } else {
+                null
+            }
         }
     }
 }

@@ -59,8 +59,8 @@ class LocationViewModelTest {
             )
 
             with(locationViewModel.state.value!!) {
-                assertEquals(-109.587335, longitude, 0.00001)
-                assertEquals(38.731370, latitude, 0.00001)
+                assertEquals(-109.587335, enhancedLocation.longitude, 0.00001)
+                assertEquals(38.731370, enhancedLocation.latitude, 0.00001)
             }
         }
 
