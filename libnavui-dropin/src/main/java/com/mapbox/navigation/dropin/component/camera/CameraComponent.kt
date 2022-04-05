@@ -137,7 +137,7 @@ internal class CameraComponent constructor(
     private fun updateCameraLocation() {
         coroutineScope.launch {
             combine(
-                locationViewModel.state,
+                locationViewModel.state.map { it?.enhancedLocation },
                 navigationStateViewModel.state
             ) { location, navigationState ->
                 location?.let {

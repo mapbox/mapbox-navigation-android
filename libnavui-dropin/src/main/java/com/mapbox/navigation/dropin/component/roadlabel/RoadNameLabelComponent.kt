@@ -1,49 +1,68 @@
 package com.mapbox.navigation.dropin.component.roadlabel
 
-import android.view.View
+import androidx.core.view.isVisible
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.bindgen.Expected
 import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.extensions.flowLocationMatcherResult
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
+import com.mapbox.navigation.dropin.component.location.LocationViewModel
 import com.mapbox.navigation.dropin.extensions.getStyleId
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.roadname.view.MapboxRoadNameView
 import com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import com.mapbox.navigation.ui.shield.model.RouteShieldError
+import com.mapbox.navigation.ui.shield.model.RouteShieldResult
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RoadNameLabelComponent(
     private val roadNameView: MapboxRoadNameView,
+    private val locationViewModel: LocationViewModel,
     private val mapStyle: Style,
     private val routeShieldApi: MapboxRouteShieldApi = MapboxRouteShieldApi()
 ) : UIComponent() {
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
-        coroutineScope.launch {
-            mapboxNavigation.flowLocationMatcherResult().collect { locationMatcherResult ->
-                // todo there is probably some other state data that needs to be monitored to
-                // determine the visibility of this view
-                if (roadNameView.visibility != View.VISIBLE) {
-                    roadNameView.visibility = View.VISIBLE
-                }
-                roadNameView.renderRoadName(locationMatcherResult.road)
 
-                routeShieldApi.getRouteShields(
-                    locationMatcherResult.road,
+        locationViewModel.state.observe { matcherResult ->
+            if (matcherResult != null && matcherResult.isRoadNameAvailable()) {
+                roadNameView.isVisible = true
+
+                roadNameView.renderRoadName(matcherResult.road)
+
+                val result = routeShieldApi.getRouteShields(
+                    matcherResult.road,
                     DirectionsCriteria.PROFILE_DEFAULT_USER,
                     mapStyle.getStyleId(),
                     mapboxNavigation.navigationOptions.accessToken,
-                ) { result ->
-                    roadNameView.renderRoadNameWith(result)
-                }
+                )
+                roadNameView.renderRoadNameWith(result)
+            } else {
+                roadNameView.isVisible = false
             }
         }
     }
 
-    override fun onDetached(mapboxNavigation: MapboxNavigation) {
-        super.onDetached(mapboxNavigation)
-        roadNameView.visibility = View.INVISIBLE
-    }
+    private fun LocationMatcherResult.isRoadNameAvailable() =
+        road.components.isNotEmpty()
+
+    private suspend fun MapboxRouteShieldApi.getRouteShields(
+        road: Road,
+        userId: String?,
+        styleId: String?,
+        accessToken: String?
+    ): List<Expected<RouteShieldError, RouteShieldResult>> =
+        suspendCancellableCoroutine { cont ->
+            getRouteShields(road, userId, styleId, accessToken) { result ->
+                cont.resume(result)
+            }
+            cont.invokeOnCancellation {
+                // this cancel call will cancel any job invoked through other APIs
+                cancel()
+            }
+        }
 }

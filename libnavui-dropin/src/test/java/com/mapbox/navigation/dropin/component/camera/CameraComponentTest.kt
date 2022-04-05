@@ -1,6 +1,5 @@
 package com.mapbox.navigation.dropin.component.camera
 
-import android.location.Location
 import com.mapbox.android.gestures.Utils
 import com.mapbox.common.Logger
 import com.mapbox.geojson.Point
@@ -15,6 +14,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.dropin.component.location.LocationAction
 import com.mapbox.navigation.dropin.component.location.LocationViewModel
@@ -62,11 +62,8 @@ class CameraComponentTest {
         every { context } returns mockk(relaxed = true)
         every { resources } returns mockk(relaxed = true)
     }
-    private val mockLocation: Location = mockk {
-        every { longitude } returns -121.4567
-        every { latitude } returns 37.9876
-        every { bearing } returns 45f
-    }
+    private val locMatcherResult: LocationMatcherResult =
+        makeLocationMatcherResult(-121.4567, 37.9876, 45f)
     private val cameraViewModel = spyk(CameraViewModel())
     private val locationViewModel = LocationViewModel()
     private val navigationStateViewModel = NavigationStateViewModel(NavigationState.FreeDrive)
@@ -136,7 +133,7 @@ class CameraComponentTest {
             locationViewModel.onAttached(mockMapboxNavigation)
             cameraViewModel.onAttached(mockMapboxNavigation)
             cameraComponent.onAttached(mockMapboxNavigation)
-            locationViewModel.invoke(LocationAction.Update(mockLocation))
+            locationViewModel.invoke(LocationAction.Update(locMatcherResult))
 
             verify(exactly = 1) {
                 mockNavigationCamera.requestNavigationCameraToOverview(
@@ -159,7 +156,7 @@ class CameraComponentTest {
                     NavigationState.ActiveNavigation
                 )
             )
-            locationViewModel.invoke(LocationAction.Update(mockLocation))
+            locationViewModel.invoke(LocationAction.Update(locMatcherResult))
 
             verify(exactly = 1) {
                 mockNavigationCamera.requestNavigationCameraToFollowing(
@@ -173,16 +170,13 @@ class CameraComponentTest {
     @Test
     fun `camera frame is not updated on subsequent location updates`() =
         coroutineRule.runBlockingTest {
-            val nextMockLocation: Location = mockk {
-                every { longitude } returns -121.4567
-                every { latitude } returns 37.9876
-                every { bearing } returns 45f
-            }
+            val nextLocMatcherResult =
+                makeLocationMatcherResult(-121.4567, 37.9876, 45f)
             locationViewModel.onAttached(mockMapboxNavigation)
             cameraViewModel.onAttached(mockMapboxNavigation)
             cameraComponent.onAttached(mockMapboxNavigation)
-            locationViewModel.invoke(LocationAction.Update(mockLocation))
-            locationViewModel.invoke(LocationAction.Update(nextMockLocation))
+            locationViewModel.invoke(LocationAction.Update(locMatcherResult))
+            locationViewModel.invoke(LocationAction.Update(nextLocMatcherResult))
 
             verify(exactly = 1) {
                 mockNavigationCamera.requestNavigationCameraToOverview(
@@ -210,7 +204,7 @@ class CameraComponentTest {
             locationViewModel.onAttached(mockMapboxNavigation)
             cameraViewModel.onAttached(mockMapboxNavigation)
             cameraComponent.onAttached(mockMapboxNavigation)
-            locationViewModel.invoke(LocationAction.Update(mockLocation))
+            locationViewModel.invoke(LocationAction.Update(locMatcherResult))
             cameraViewModel.invoke(CameraAction.ToIdle)
 
             verify(exactly = 1) {
@@ -224,7 +218,7 @@ class CameraComponentTest {
             locationViewModel.onAttached(mockMapboxNavigation)
             cameraViewModel.onAttached(mockMapboxNavigation)
             cameraComponent.onAttached(mockMapboxNavigation)
-            locationViewModel.invoke(LocationAction.Update(mockLocation))
+            locationViewModel.invoke(LocationAction.Update(locMatcherResult))
             cameraViewModel.invoke(CameraAction.ToFollowing)
 
             verify(atLeast = 1) {
@@ -384,7 +378,7 @@ class CameraComponentTest {
             cameraComponent.onAttached(mockMapboxNavigation)
             locationViewModel.onAttached(mockMapboxNavigation)
             navigationStateViewModel.onAttached(mockMapboxNavigation)
-            locationViewModel.invoke(LocationAction.Update(mockLocation))
+            locationViewModel.invoke(LocationAction.Update(locMatcherResult))
             navigationStateViewModel.invoke(
                 NavigationStateAction.Update(NavigationState.ActiveNavigation)
             )
@@ -434,3 +428,12 @@ class CameraComponentTest {
             }
         }
 }
+
+private fun makeLocationMatcherResult(lon: Double, lat: Double, bearing: Float) =
+    mockk<LocationMatcherResult> {
+        every { enhancedLocation } returns mockk {
+            every { longitude } returns lon
+            every { latitude } returns lat
+            every { this@mockk.bearing } returns bearing
+        }
+    }
