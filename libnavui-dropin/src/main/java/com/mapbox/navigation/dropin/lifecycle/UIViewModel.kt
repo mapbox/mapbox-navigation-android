@@ -27,7 +27,7 @@ abstract class UIViewModel<State, Action>(initialState: State) : MapboxNavigatio
 
     private val _action = MutableSharedFlow<Action>(extraBufferCapacity = 1)
     val action: Flow<Action> = _action
-    private val _state: MutableStateFlow<State> = MutableStateFlow(initialState)
+    protected val _state: MutableStateFlow<State> = MutableStateFlow(initialState)
     val state: StateFlow<State> = _state
 
     lateinit var mainJobControl: JobControl

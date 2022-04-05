@@ -127,7 +127,7 @@ class CameraComponentTest {
         cameraComponent.onAttached(mockMapboxNavigation)
         cameraComponent.onDetached(mockMapboxNavigation)
 
-        cameraViewModel.invoke(CameraAction.SaveMapCameraState(cameraState))
+        verify { cameraViewModel.saveCameraState(cameraState) }
     }
 
     @Test
