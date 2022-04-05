@@ -33,10 +33,10 @@ examples \
 instrumentation-tests \
 
 define run-gradle-tasks
-    COMMAND=./gradlew; \
+    COMMAND="./gradlew"; \
 	for module in $(1); do \
 	    COMMAND+=" "; \
-	    COMMAND+=$$module:$(2); \
+	    COMMAND+="$$module:$(2)"; \
 	done; \
 	eval $$COMMAND
 endef
