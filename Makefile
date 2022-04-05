@@ -38,6 +38,7 @@ define run-gradle-tasks
 	    COMMAND+=" "; \
 	    COMMAND+="$$module:$(2)"; \
 	done; \
+	echo "executing $$COMMAND"; \
 	eval $$COMMAND
 endef
 
