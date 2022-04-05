@@ -93,16 +93,15 @@ internal class CameraComponent constructor(
     private fun saveCameraState() {
         val map = mapView.getMapboxMap()
         val state = map.cameraState
-        cameraViewModel.invoke(CameraAction.SaveMapCameraState(state))
+        cameraViewModel.saveCameraState(state)
         logD("saveCameraState $map; $state", "CameraComponent")
     }
 
     private fun restoreCameraState() {
-        cameraViewModel.state.value.mapCameraState?.also { state ->
-            val map = mapView.getMapboxMap()
-            logD("restoreCameraState $map; $state", "CameraComponent")
-            map.setCamera(state.toCameraOptions())
-        }
+        val state = cameraViewModel.state.value.mapCameraState
+        val map = mapView.getMapboxMap()
+        logD("restoreCameraState $map; $state", "CameraComponent")
+        if (state != null) map.setCamera(state.toCameraOptions())
     }
 
     private fun controlCameraFrameOverrides() {

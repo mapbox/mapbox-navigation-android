@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.component.camera
 
+import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -74,4 +75,20 @@ class CameraViewModelTest {
 
             assertEquals(padding, cameraViewModel.state.value.cameraPadding)
         }
+
+    @Test
+    fun `saveCameraState should save map camera state`() {
+        val cameraState = com.mapbox.maps.CameraState(
+            Point.fromLngLat(11.0, 22.0),
+            EdgeInsets(1.0, 2.0, 3.0, 4.0),
+            30.0,
+            40.0,
+            50.0
+        )
+        val cameraViewModel = CameraViewModel()
+
+        cameraViewModel.saveCameraState(cameraState)
+
+        assertEquals(cameraState, cameraViewModel.state.value.mapCameraState)
+    }
 }
