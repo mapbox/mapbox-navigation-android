@@ -19,6 +19,7 @@ import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
+import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -37,6 +38,7 @@ import com.mapbox.navigation.base.trip.model.eh.EHorizonEdge
 import com.mapbox.navigation.base.trip.model.eh.EHorizonEdgeMetadata
 import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
+import com.mapbox.navigation.base.trip.notification.TripNotificationInterceptor
 import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
@@ -232,6 +234,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val connectivityHandler: ConnectivityHandler = ConnectivityHandler(
         Channel(Channel.CONFLATED)
     )
+    private val tripNotificationInterceptorOwner = TripNotificationInterceptorOwner()
     private val internalRoutesObserver: RoutesObserver
     private val internalOffRouteObserver: OffRouteObserver
     private val internalFallbackVersionsObserver: FallbackVersionsObserver
@@ -427,6 +430,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 paramsProvider(
                     ModuleParams.NavigationTripNotification(
                         navigationOptions,
+                        tripNotificationInterceptorOwner,
                         navigationOptions.distanceFormatterOptions
                     )
                 )
@@ -1065,6 +1069,17 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     fun unregisterTripSessionStateObserver(tripSessionStateObserver: TripSessionStateObserver) {
         tripSession.unregisterStateObserver(tripSessionStateObserver)
+    }
+
+    /**
+     * Allows you to intercept the notification builder before it is passed to the android sdk. Use
+     * this interceptor to extend the notification, or apply your own modifications. Use `null`
+     * to clear the interceptor you have set previously.
+     *
+     * @param interceptor [TripNotificationInterceptor]
+     */
+    fun setTripNotificationInterceptor(interceptor: TripNotificationInterceptor?) {
+        tripNotificationInterceptorOwner.interceptor = interceptor
     }
 
     /**

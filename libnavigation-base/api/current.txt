@@ -1557,6 +1557,10 @@ package com.mapbox.navigation.base.trip.notification {
     method public void updateNotification(com.mapbox.navigation.base.trip.model.TripNotificationState state);
   }
 
+  public fun interface TripNotificationInterceptor {
+    method public androidx.core.app.NotificationCompat.Builder intercept(androidx.core.app.NotificationCompat.Builder builder);
+  }
+
 }
 
 package com.mapbox.navigation.base.utils {
