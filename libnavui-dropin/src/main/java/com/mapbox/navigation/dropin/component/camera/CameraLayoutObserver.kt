@@ -37,22 +37,17 @@ internal class CameraLayoutObserver(
     }
 
     private fun getOverlayEdgeInsets(): EdgeInsets {
+        val bottom = vPadding + (mapView.height - binding.roadNameLayout.top)
         return when (navigationStateViewModel.state.value) {
             is NavigationState.DestinationPreview,
             is NavigationState.FreeDrive,
             is NavigationState.RoutePreview -> {
-                val bottom = vPadding + (mapView.height - binding.infoPanelLayout.top)
                 EdgeInsets(vPadding, hPadding, bottom, hPadding)
             }
             is NavigationState.ActiveNavigation,
             is NavigationState.Arrival -> {
-                val bottom = vPadding + (mapView.height - binding.roadNameLayout.top)
-                EdgeInsets(
-                    vPadding + binding.guidanceLayout.height,
-                    hPadding,
-                    bottom,
-                    hPadding
-                )
+                val top = vPadding + binding.guidanceLayout.height
+                EdgeInsets(top, hPadding, bottom, hPadding)
             }
         }
     }
