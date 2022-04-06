@@ -19,6 +19,7 @@ class VoiceInstructionsPlayerOptionsTest :
         VoiceInstructionsPlayerOptions.Builder()
             .focusGain(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
             .streamType(AudioManager.STREAM_RING)
+            .ttsStreamType(AudioManager.STREAM_DTMF)
             .usage(AudioAttributes.USAGE_MEDIA)
             .contentType(AudioAttributes.CONTENT_TYPE_MOVIE)
             .useLegacyApi(true)
