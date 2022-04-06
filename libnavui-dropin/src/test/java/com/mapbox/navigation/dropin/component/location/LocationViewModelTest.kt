@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin.component.location
 import android.location.Location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.MockLoggerRule
@@ -10,12 +11,16 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.slot
+import io.mockk.unmockkAll
 import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -29,11 +34,25 @@ class LocationViewModelTest {
     val mockLoggerTestRule = MockLoggerRule()
 
     private val locationObserverSlot = slot<LocationObserver>()
-    private val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true) {
-        every { registerLocationObserver(capture(locationObserverSlot)) } just Runs
+    private val locationViewModel = LocationViewModel()
+
+    private fun mockMapboxNavigation(): MapboxNavigation {
+        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true) {
+            every { registerLocationObserver(capture(locationObserverSlot)) } just Runs
+        }
+        every { MapboxNavigationApp.current() } returns mapboxNavigation
+        return mapboxNavigation
     }
 
-    private val locationViewModel = LocationViewModel()
+    @Before
+    fun setup() {
+        mockkObject(MapboxNavigationApp)
+    }
+
+    @After
+    fun teardown() {
+        unmockkAll()
+    }
 
     @Test
     fun `default state is a null location`() = runBlockingTest {
@@ -50,7 +69,7 @@ class LocationViewModelTest {
                 every { latitude } returns 38.731370
             }
 
-            locationViewModel.onAttached(mockMapboxNavigation)
+            locationViewModel.onAttached(mockMapboxNavigation())
             locationObserverSlot.captured.onNewLocationMatcherResult(
                 mockk(relaxed = true) {
                     every { enhancedLocation } returns mockLocation
@@ -72,7 +91,7 @@ class LocationViewModelTest {
                 every { latitude } returns 38.731370
             }
 
-            locationViewModel.onAttached(mockMapboxNavigation)
+            locationViewModel.onAttached(mockMapboxNavigation())
             locationObserverSlot.captured.onNewLocationMatcherResult(
                 mockk(relaxed = true) {
                     every { enhancedLocation } returns mockLocation
@@ -94,7 +113,7 @@ class LocationViewModelTest {
                 every { latitude } returns 38.731370
             }
 
-            locationViewModel.onAttached(mockMapboxNavigation)
+            locationViewModel.onAttached(mockMapboxNavigation())
             locationObserverSlot.captured.onNewLocationMatcherResult(
                 mockk(relaxed = true) {
                     every { enhancedLocation } returns mockLocation
@@ -110,6 +129,7 @@ class LocationViewModelTest {
 
     @Test
     fun `onDetached will unregisterLocationObserver`() = runBlockingTest {
+        val mockMapboxNavigation = mockMapboxNavigation()
         locationViewModel.onAttached(mockMapboxNavigation)
         locationViewModel.onDetached(mockMapboxNavigation)
 

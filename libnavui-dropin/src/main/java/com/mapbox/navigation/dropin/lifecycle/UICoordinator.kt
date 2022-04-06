@@ -24,11 +24,11 @@ abstract class UICoordinator<T : ViewGroup>(
     private val viewGroup: T
 ) : MapboxNavigationObserver {
 
+    private var attachedObserver: MapboxNavigationObserver? = null
     lateinit var coroutineScope: CoroutineScope
 
     @CallSuper
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
-        var attachedObserver: MapboxNavigationObserver? = null
         coroutineScope = MainScope()
 
         coroutineScope.launch {
@@ -37,14 +37,14 @@ abstract class UICoordinator<T : ViewGroup>(
                 attachedObserver = viewBinder.bind(viewGroup)
                 attachedObserver?.onAttached(mapboxNavigation)
             }
-        }.invokeOnCompletion {
-            attachedObserver?.onDetached(mapboxNavigation)
         }
     }
 
     @CallSuper
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         coroutineScope.cancel()
+        attachedObserver?.onDetached(mapboxNavigation)
+        attachedObserver = null
     }
 
     /**

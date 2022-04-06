@@ -9,13 +9,10 @@ sealed class CameraAction {
     object ToOverview : CameraAction()
     object ToFollowing : CameraAction()
     data class UpdatePadding(val padding: EdgeInsets) : CameraAction()
+    data class SaveMapState(val mapState: com.mapbox.maps.CameraState) : CameraAction()
 }
 
 internal class CameraViewModel : UIViewModel<CameraState, CameraAction>(CameraState()) {
-
-    fun saveCameraState(cameraState: com.mapbox.maps.CameraState) {
-        _state.value = _state.value.copy(mapCameraState = cameraState)
-    }
 
     override fun process(
         mapboxNavigation: MapboxNavigation,
@@ -35,6 +32,9 @@ internal class CameraViewModel : UIViewModel<CameraState, CameraAction>(CameraSt
             }
             is CameraAction.UpdatePadding -> {
                 state.copy(cameraPadding = action.padding)
+            }
+            is CameraAction.SaveMapState -> {
+                state.copy(mapCameraState = action.mapState)
             }
         }
     }

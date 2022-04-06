@@ -2,6 +2,7 @@ package com.mapbox.navigation.dropin.component.routefetch
 
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -9,10 +10,13 @@ import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,7 +29,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.util.Locale
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
 internal class RoutesViewModelTest {
 
     @get:Rule
@@ -36,6 +40,7 @@ internal class RoutesViewModelTest {
     @Before
     fun setUp() {
         mockkStatic("com.mapbox.navigation.base.internal.extensions.ContextEx")
+        mockkObject(MapboxNavigationApp)
     }
 
     @After
@@ -54,7 +59,7 @@ internal class RoutesViewModelTest {
 
     @Test
     fun `route changes with routes will be Ready state`() {
-        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        val mapboxNavigation = mockMapboxNavigation()
         every { mapboxNavigation.registerRoutesObserver(any()) } answers {
             firstArg<RoutesObserver>().onRoutesChanged(
                 mockk {
@@ -70,7 +75,7 @@ internal class RoutesViewModelTest {
 
     @Test
     fun `route changes to empty route will be Empty state`() {
-        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        val mapboxNavigation = mockMapboxNavigation()
         every { mapboxNavigation.registerRoutesObserver(any()) } answers {
             firstArg<RoutesObserver>().onRoutesChanged(
                 mockk {
@@ -124,13 +129,12 @@ internal class RoutesViewModelTest {
     fun `RoutesAction FetchPoints will go to Ready state when onRoutesReady`() {
         val mapboxNavigation = mockMapboxNavigation()
         val routes = listOf<NavigationRoute>(mockk())
-        every { mapboxNavigation.requestRoutes(any(), any<NavigationRouterCallback>()) } answers {
-            secondArg<NavigationRouterCallback>().onRoutesReady(routes, mockk())
-            123L
-        }
+        val callbackSlot = slot<NavigationRouterCallback>()
+        every { mapboxNavigation.requestRoutes(any(), capture(callbackSlot)) } returns 123L
 
         routesViewModel.onAttached(mapboxNavigation)
         routesViewModel.invoke(RoutesAction.FetchPoints(mockRoutePoints()))
+        callbackSlot.captured.onRoutesReady(routes, mockk())
         routesViewModel.onDetached(mapboxNavigation)
 
         val readyState = routesViewModel.state.value as? RoutesState.Ready
@@ -144,13 +148,12 @@ internal class RoutesViewModelTest {
         val mapboxNavigation = mockMapboxNavigation()
         val reasons = listOf<RouterFailure>(mockk())
         val routeOptions = mockk<RouteOptions>()
-        every { mapboxNavigation.requestRoutes(any(), any<NavigationRouterCallback>()) } answers {
-            secondArg<NavigationRouterCallback>().onFailure(reasons, routeOptions)
-            123L
-        }
+        val callbackSlot = slot<NavigationRouterCallback>()
+        every { mapboxNavigation.requestRoutes(any(), capture(callbackSlot)) } returns 123L
 
         routesViewModel.onAttached(mapboxNavigation)
         routesViewModel.invoke(RoutesAction.FetchPoints(mockRoutePoints()))
+        callbackSlot.captured.onFailure(reasons, routeOptions)
         routesViewModel.onDetached(mapboxNavigation)
 
         val readyState = routesViewModel.state.value as? RoutesState.Failed
@@ -165,13 +168,12 @@ internal class RoutesViewModelTest {
         val mapboxNavigation = mockMapboxNavigation()
         val routeOptions = mockk<RouteOptions>()
         val routerOrigin = mockk<RouterOrigin>()
-        every { mapboxNavigation.requestRoutes(any(), any<NavigationRouterCallback>()) } answers {
-            secondArg<NavigationRouterCallback>().onCanceled(routeOptions, routerOrigin)
-            123L
-        }
+        val callbackSlot = slot<NavigationRouterCallback>()
+        every { mapboxNavigation.requestRoutes(any(), capture(callbackSlot)) } returns 123L
 
         routesViewModel.onAttached(mapboxNavigation)
         routesViewModel.invoke(RoutesAction.FetchPoints(mockRoutePoints()))
+        callbackSlot.captured.onCanceled(routeOptions, routerOrigin)
         routesViewModel.onDetached(mapboxNavigation)
 
         val readyState = routesViewModel.state.value as? RoutesState.Canceled
@@ -211,14 +213,13 @@ internal class RoutesViewModelTest {
     fun `RoutesAction FetchOptions will go to Ready state when onRoutesReady`() {
         val mapboxNavigation = mockMapboxNavigation()
         val routes = listOf<NavigationRoute>(mockk())
-        every { mapboxNavigation.requestRoutes(any(), any<NavigationRouterCallback>()) } answers {
-            secondArg<NavigationRouterCallback>().onRoutesReady(routes, mockk())
-            123L
-        }
+        val callbackSlot = slot<NavigationRouterCallback>()
+        every { mapboxNavigation.requestRoutes(any(), capture(callbackSlot)) } returns 123L
         val routeOptions = mockk<RouteOptions>()
 
         routesViewModel.onAttached(mapboxNavigation)
         routesViewModel.invoke(RoutesAction.FetchOptions(routeOptions))
+        callbackSlot.captured.onRoutesReady(routes, mockk())
 
         val readyState = routesViewModel.state.value as? RoutesState.Ready
         assertNotNull(readyState)
@@ -230,13 +231,12 @@ internal class RoutesViewModelTest {
         val mapboxNavigation = mockMapboxNavigation()
         val reasons = listOf<RouterFailure>(mockk())
         val routeOptions = mockk<RouteOptions>()
-        every { mapboxNavigation.requestRoutes(any(), any<NavigationRouterCallback>()) } answers {
-            secondArg<NavigationRouterCallback>().onFailure(reasons, routeOptions)
-            123L
-        }
+        val callbackSlot = slot<NavigationRouterCallback>()
+        every { mapboxNavigation.requestRoutes(any(), capture(callbackSlot)) } returns 123L
 
         routesViewModel.onAttached(mapboxNavigation)
         routesViewModel.invoke(RoutesAction.FetchOptions(routeOptions))
+        callbackSlot.captured.onFailure(reasons, routeOptions)
 
         val readyState = routesViewModel.state.value as? RoutesState.Failed
         assertNotNull(readyState)
@@ -249,13 +249,12 @@ internal class RoutesViewModelTest {
         val mapboxNavigation = mockMapboxNavigation()
         val routeOptions = mockk<RouteOptions>()
         val routerOrigin = mockk<RouterOrigin>()
-        every { mapboxNavigation.requestRoutes(any(), any<NavigationRouterCallback>()) } answers {
-            secondArg<NavigationRouterCallback>().onCanceled(routeOptions, routerOrigin)
-            123L
-        }
+        val callbackSlot = slot<NavigationRouterCallback>()
+        every { mapboxNavigation.requestRoutes(any(), capture(callbackSlot)) } returns 123L
 
         routesViewModel.onAttached(mapboxNavigation)
         routesViewModel.invoke(RoutesAction.FetchOptions(routeOptions))
+        callbackSlot.captured.onCanceled(routeOptions, routerOrigin)
 
         val readyState = routesViewModel.state.value as? RoutesState.Canceled
         assertNotNull(readyState)
@@ -288,18 +287,22 @@ internal class RoutesViewModelTest {
         assertTrue(routesViewModel.state.value is RoutesState.Empty)
     }
 
-    private fun mockMapboxNavigation() = mockk<MapboxNavigation>(relaxed = true) {
-        every { getZLevel() } returns 9
-        every { navigationOptions } returns mockk {
+    private fun mockMapboxNavigation(): MapboxNavigation {
+        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true) {
+            every { getZLevel() } returns 9
             every { navigationOptions } returns mockk {
-                every { applicationContext } returns mockk {
-                    every { inferDeviceLocale() } returns Locale.ENGLISH
-                    every { resources } returns mockk {
-                        every { configuration } returns mockk()
+                every { navigationOptions } returns mockk {
+                    every { applicationContext } returns mockk {
+                        every { inferDeviceLocale() } returns Locale.ENGLISH
+                        every { resources } returns mockk {
+                            every { configuration } returns mockk()
+                        }
                     }
                 }
             }
         }
+        every { MapboxNavigationApp.current() } returns mapboxNavigation
+        return mapboxNavigation
     }
 
     private fun mockRoutePoints() = listOf(
