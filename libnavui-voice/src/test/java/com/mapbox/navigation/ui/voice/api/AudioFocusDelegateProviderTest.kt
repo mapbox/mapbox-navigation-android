@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.voice.api
 
-import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build.VERSION_CODES.LOLLIPOP
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
@@ -27,10 +26,6 @@ class AudioFocusDelegateProviderTest {
         every {
             mockedPlayerAttributes.options
         } returns mockedPlayerOptions
-
-        every {
-            mockedPlayerAttributes.applyOn(any<AudioFocusRequest.Builder>())
-        } returns Unit
 
         val actual = AudioFocusDelegateProvider.retrieveAudioFocusDelegate(
             mockedAudioManager,

@@ -8,14 +8,14 @@ internal object AudioFocusDelegateProvider {
     fun retrieveAudioFocusDelegate(
         audioManager: AudioManager,
         playerAttributes: VoiceInstructionsPlayerAttributes,
-    ): AudioFocusDelegate {
+    ): AsyncAudioFocusDelegate {
         return buildAudioFocusDelegate(audioManager, playerAttributes)
     }
 
     private fun buildAudioFocusDelegate(
         audioManager: AudioManager,
         playerAttributes: VoiceInstructionsPlayerAttributes,
-    ): AudioFocusDelegate {
+    ): AsyncAudioFocusDelegate {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             OreoAndLaterAudioFocusDelegate(audioManager, playerAttributes)
         } else PreOreoAudioFocusDelegate(audioManager, playerAttributes)
