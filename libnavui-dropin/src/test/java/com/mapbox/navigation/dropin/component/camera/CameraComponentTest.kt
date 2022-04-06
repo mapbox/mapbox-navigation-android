@@ -233,12 +233,13 @@ class CameraComponentTest {
         }
 
     @Test
-    fun `when in free drive zoom property is overridden`() =
+    fun `when in free drive zoom and pitch property is overridden`() =
         coroutineRule.runBlockingTest {
             cameraComponent.onAttached(mockMapboxNavigation)
 
             verify {
                 mockViewPortDataSource.overviewZoomPropertyOverride(16.5)
+                mockViewPortDataSource.overviewPitchPropertyOverride(0.0)
                 mockViewPortDataSource.followingZoomPropertyOverride(16.5)
                 mockViewPortDataSource.evaluate()
             }
