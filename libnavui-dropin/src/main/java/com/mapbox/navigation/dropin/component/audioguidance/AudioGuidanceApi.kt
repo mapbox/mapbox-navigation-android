@@ -3,8 +3,8 @@ package com.mapbox.navigation.dropin.component.audioguidance
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLanguage
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
-import com.mapbox.navigation.dropin.extensions.flowVoiceInstructions
+import com.mapbox.navigation.dropin.internal.extensions.flowRoutesUpdated
+import com.mapbox.navigation.dropin.internal.extensions.flowVoiceInstructions
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview

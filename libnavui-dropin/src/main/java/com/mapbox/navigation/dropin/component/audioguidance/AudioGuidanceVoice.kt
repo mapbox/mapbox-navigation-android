@@ -21,11 +21,12 @@ import kotlinx.coroutines.flow.callbackFlow
  * @param mapboxSpeechApi language (ISO 639)
  * @param mapboxVoiceInstructionsPlayer stream of [VoiceInstructions].
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class AudioGuidanceVoice(
     private val mapboxSpeechApi: MapboxSpeechApi,
     private val mapboxVoiceInstructionsPlayer: MapboxVoiceInstructionsPlayer
 ) {
-    @OptIn(ExperimentalCoroutinesApi::class)
+
     fun speak(voiceInstructions: VoiceInstructions): Flow<SpeechAnnouncement?> =
         callbackFlow {
             val speechCallback =

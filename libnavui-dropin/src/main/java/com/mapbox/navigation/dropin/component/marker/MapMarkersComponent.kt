@@ -4,7 +4,7 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
+import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.map
  */
 internal open class MapMarkersComponent(
     protected val mapView: MapView,
-    protected val context: DropInNavigationViewContext
+    protected val context: NavigationViewContext
 ) : UIComponent() {
     private val mapAnnotationFactory = context.mapAnnotationFactory()
     private val destinationState = context.destinationState

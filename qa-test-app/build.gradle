@@ -22,6 +22,10 @@ android {
         }
     }
 
+    kotlinOptions {
+        freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+    }
+
     defaultConfig {
         applicationId "com.mapbox.navigation.qa_test_app"
         minSdkVersion androidVersions.minSdkVersion

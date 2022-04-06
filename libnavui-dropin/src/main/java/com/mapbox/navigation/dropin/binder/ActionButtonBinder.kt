@@ -7,7 +7,7 @@ import android.view.Gravity
 import android.view.ViewGroup
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
+import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.audioguidance.AudioGuidanceButtonComponent
 import com.mapbox.navigation.dropin.component.cameramode.CameraModeButtonComponent
@@ -16,18 +16,18 @@ import com.mapbox.navigation.dropin.databinding.MapboxActionButtonsLayoutBinding
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class ActionButtonBinder(
-    private val navigationViewContext: DropInNavigationViewContext
+    private val navigationViewContext: NavigationViewContext
 ) : UIBinder {
 
-    override fun bind(value: ViewGroup): MapboxNavigationObserver {
+    override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
-            value,
+            viewGroup,
             R.layout.mapbox_action_buttons_layout,
-            value.context
+            viewGroup.context
         )
         TransitionManager.go(scene, Slide(Gravity.RIGHT))
 
-        val binding = MapboxActionButtonsLayoutBinding.bind(value)
+        val binding = MapboxActionButtonsLayoutBinding.bind(viewGroup)
         return navigationListOf(
             AudioGuidanceButtonComponent(
                 navigationViewContext.viewModel.audioGuidanceViewModel,

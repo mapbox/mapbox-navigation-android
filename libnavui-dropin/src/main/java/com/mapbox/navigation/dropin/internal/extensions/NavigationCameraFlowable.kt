@@ -1,6 +1,6 @@
 @file:JvmName("NavigationCameraExFlowable")
 
-package com.mapbox.navigation.dropin.extensions
+package com.mapbox.navigation.dropin.internal.extensions
 
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState

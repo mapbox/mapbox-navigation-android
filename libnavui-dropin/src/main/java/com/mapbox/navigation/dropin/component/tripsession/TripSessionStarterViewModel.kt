@@ -1,7 +1,6 @@
 package com.mapbox.navigation.dropin.component.tripsession
 
 import android.annotation.SuppressLint
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
@@ -18,13 +17,6 @@ sealed class TripSessionStarterAction {
     object EnableReplayTripSession : TripSessionStarterAction()
 }
 
-data class TripSessionStarterState(
-    val isLocationPermissionGranted: Boolean = false,
-    // TODO this is true for development. Road testing should be set to false.
-    val isReplayEnabled: Boolean = true,
-)
-
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class TripSessionStarterViewModel(
     val navigationStateViewModel: NavigationStateViewModel,
     initialState: TripSessionStarterState = TripSessionStarterState(),

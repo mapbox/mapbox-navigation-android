@@ -7,7 +7,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-internal class NavigationUIBinders {
+/**
+ * A class that is a central place to hold the definitions for custom view injections and view(s)
+ * swapping.
+ */
+internal class ViewBinder {
 
     private val _speedLimit: MutableStateFlow<UIBinder> = MutableStateFlow(SpeedLimitViewBinder())
     private val _maneuver: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
@@ -28,9 +32,11 @@ internal class NavigationUIBinders {
     val actionButtonsBinder: StateFlow<UIBinder?> get() = _actionButtonsBinder.asStateFlow()
 
     fun applyCustomization(customization: ViewBinderCustomization) {
-        customization.speedLimit?.also { _speedLimit.emitOrDefault(it, SpeedLimitViewBinder()) }
-        customization.maneuver?.also { _maneuver.emitOrNull(it) }
-        customization.roadName?.also { _roadName.emitOrNull(it) }
+        customization.speedLimitBinder?.also {
+            _speedLimit.emitOrDefault(it, SpeedLimitViewBinder())
+        }
+        customization.maneuverBinder?.also { _maneuver.emitOrNull(it) }
+        customization.roadNameBinder?.also { _roadName.emitOrNull(it) }
         customization.infoPanelTripProgressBinder?.also {
             _infoPanelTripProgressBinder.emitOrDefault(it, InfoPanelTripProgressBinder())
         }

@@ -2,7 +2,7 @@ package com.mapbox.navigation.dropin.component.tripprogress
 
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.extensions.flowRouteProgress
+import com.mapbox.navigation.dropin.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
 import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
@@ -13,7 +13,7 @@ import com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class TripProgressComponent(val tripProgressView: MapboxTripProgressView) : UIComponent() {
+internal class TripProgressComponent(val tripProgressView: MapboxTripProgressView) : UIComponent() {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)

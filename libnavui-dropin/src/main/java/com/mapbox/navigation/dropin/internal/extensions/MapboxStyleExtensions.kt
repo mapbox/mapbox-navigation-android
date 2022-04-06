@@ -1,6 +1,6 @@
 @file:JvmName("MapboxStyleEx")
 
-package com.mapbox.navigation.dropin.extensions
+package com.mapbox.navigation.dropin.internal.extensions
 
 import com.mapbox.maps.Style
 import com.mapbox.navigation.ui.maps.NavigationStyles

@@ -69,13 +69,25 @@ class MapboxCameraModeButton : FrameLayout {
      */
     var overviewText: String? = null
 
+    /**
+     * Default button that allows user to toggle between Camera Following and Overview mode.
+     */
     constructor(context: Context) : this(context, null)
 
+    /**
+     * Default button that allows user to toggle between Camera Following and Overview mode.
+     */
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
+    /**
+     * Default button that allows user to toggle between Camera Following and Overview mode.
+     */
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
         this(context, attrs, defStyleAttr, R.style.MapboxStyleCameraModeButton)
 
+    /**
+     * Default button that allows user to toggle between Camera Following and Overview mode.
+     */
     constructor(
         context: Context,
         attrs: AttributeSet?,
@@ -164,10 +176,10 @@ class MapboxCameraModeButton : FrameLayout {
         state == NavigationCameraState.TRANSITION_TO_FOLLOWING ||
             state == NavigationCameraState.FOLLOWING
 
-    companion object {
+    private companion object {
         /**
          * Default extended mode duration in milliseconds (2000).
          */
-        const val EXTEND_DURATION: Long = 2000L
+        private const val EXTEND_DURATION: Long = 2000L
     }
 }

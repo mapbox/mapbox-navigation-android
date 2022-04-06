@@ -8,7 +8,9 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 
 /**
- * DropInNavigationView Options customizations.
+ * A class that allows you to define values for various different properties used by the
+ * [NavigationView]. If not specified, [NavigationView] uses the default values defined for
+ * each of these properties.
  */
 class ViewOptionsCustomization {
     /**

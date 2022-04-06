@@ -4,13 +4,13 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.component.destination.Destination
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
 import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
 import com.mapbox.navigation.dropin.component.location.LocationViewModel
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
-import com.mapbox.navigation.dropin.model.Destination
 import com.mapbox.navigation.dropin.util.HapticFeedback
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logW

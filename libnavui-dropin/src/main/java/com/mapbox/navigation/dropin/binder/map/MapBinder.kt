@@ -6,7 +6,7 @@ import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.scalebar.scalebar
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
+import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.binder.navigationListOf
 import com.mapbox.navigation.dropin.component.camera.CameraComponent
@@ -19,14 +19,14 @@ import com.mapbox.navigation.dropin.component.marker.RoutePreviewLongPressMapCom
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.routearrow.RouteArrowComponent
 import com.mapbox.navigation.dropin.component.routeline.RouteLineComponent
-import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
+import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.lifecycle.reloadOnChange
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class MapBinder(
-    private val navigationViewContext: DropInNavigationViewContext,
-    private val binding: DropInNavigationViewBinding,
+    private val navigationViewContext: NavigationViewContext,
+    private val binding: MapboxNavigationViewLayoutBinding,
     private val mapView: MapView
 ) : UIBinder {
 
@@ -35,7 +35,7 @@ internal class MapBinder(
         mapView.scalebar.enabled = false
     }
 
-    override fun bind(value: ViewGroup): MapboxNavigationObserver {
+    override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val navigationState = navigationViewContext.viewModel.navigationStateViewModel.state
         return navigationListOf(
             CameraLayoutObserver(

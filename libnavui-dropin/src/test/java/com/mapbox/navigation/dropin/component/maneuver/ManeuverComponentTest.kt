@@ -11,7 +11,7 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
-import com.mapbox.navigation.dropin.extensions.flowRouteProgress
+import com.mapbox.navigation.dropin.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
@@ -44,7 +44,7 @@ class ManeuverComponentTest {
 
     @Before
     fun setUp() {
-        mockkStatic("com.mapbox.navigation.dropin.extensions.MapboxNavigationEx")
+        mockkStatic("com.mapbox.navigation.dropin.internal.extensions.MapboxNavigationEx")
         every { mockNavigation.flowRouteProgress() } returns flowOf(routeProgress)
         style = mockk {
             every { styleURI } returns NavigationStyles.NAVIGATION_DAY_STYLE
@@ -53,7 +53,7 @@ class ManeuverComponentTest {
 
     @After
     fun tearDown() {
-        unmockkStatic("com.mapbox.navigation.dropin.extensions.MapboxNavigationEx")
+        unmockkStatic("com.mapbox.navigation.dropin.internal.extensions.MapboxNavigationEx")
     }
 
     private val callbackSlot = slot<RouteShieldCallback>()
