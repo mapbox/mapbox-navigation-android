@@ -2,13 +2,12 @@ codecov:
   require_ci_to_pass: false
   notify:
     wait_for_ci: false
-    after_n_builds: 2 # ui and core tests passed
-    threshold': 1%
+    after_n_builds: 2
 
 comment:
   layout: "reach, diff, flags, files"
   behavior: default
   require_changes: false
-  require_base: no
-  require_head: yes
-  after_n_builds: 2 # ui and core tests passed
+  require_base: false
+  require_head: true
+  after_n_builds: 2
