@@ -34,7 +34,7 @@ class LocationComponentTest {
     private lateinit var locationProvider: NavigationLocationProvider
 
     @MockK
-    lateinit var mockLocationViewModel: LocationViewModel
+    internal lateinit var mockLocationViewModel: LocationViewModel
 
     @MockK
     lateinit var mockLocationPlugin: LocationComponentPlugin

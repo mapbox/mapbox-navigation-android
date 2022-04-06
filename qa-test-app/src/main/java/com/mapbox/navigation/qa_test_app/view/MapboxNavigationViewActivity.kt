@@ -10,11 +10,5 @@ class MapboxNavigationViewActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val binding = LayoutActivityNavigationViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        /**
-         * This activity is demonstrating default behavior. Do not add anything to this class.
-         *
-         * Customized behavior can be demonstrated in [MapboxNavigationViewCustomizedActivity]
-         */
     }
 }

@@ -2,7 +2,6 @@ package com.mapbox.navigation.dropin.component.routefetch
 
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -10,12 +9,26 @@ import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
+import com.mapbox.navigation.dropin.internal.extensions.flowRoutesUpdated
 import com.mapbox.navigation.dropin.lifecycle.UIViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+sealed class RoutesAction {
+    data class FetchPoints(val points: List<Point>) : RoutesAction()
+    data class FetchOptions(val options: RouteOptions) : RoutesAction()
+    data class SetRoutes(val routes: List<NavigationRoute>) : RoutesAction()
+    data class Ready(val routes: List<NavigationRoute>) : RoutesAction()
+    data class Failed(
+        val reasons: List<RouterFailure>,
+        val routeOptions: RouteOptions
+    ) : RoutesAction()
+    data class Canceled(
+        val routeOptions: RouteOptions,
+        val routerOrigin: RouterOrigin
+    ) : RoutesAction()
+}
+
 internal class RoutesViewModel : UIViewModel<RoutesState, RoutesAction>(RoutesState.Empty) {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {

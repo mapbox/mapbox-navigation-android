@@ -14,7 +14,7 @@ import com.mapbox.navigation.dropin.util.BitmapMemoryCache
 /**
  * Factory class for creating all drop-in UI map point annotations.
  */
-class MapMarkerFactory(
+internal class MapMarkerFactory(
     val context: Context,
     val cache: BitmapMemoryCache
 ) {

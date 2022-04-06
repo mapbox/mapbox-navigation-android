@@ -11,7 +11,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class BitmapMemoryCacheTest {
 
-    lateinit var sut: BitmapMemoryCache
+    internal lateinit var sut: BitmapMemoryCache
 
     @Before
     fun setUp() {

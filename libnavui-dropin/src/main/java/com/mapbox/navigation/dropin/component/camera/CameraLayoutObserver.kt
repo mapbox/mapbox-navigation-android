@@ -7,12 +7,12 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
-import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
+import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 
 internal class CameraLayoutObserver(
     private val mapView: MapView,
-    private val binding: DropInNavigationViewBinding,
+    private val binding: MapboxNavigationViewLayoutBinding,
     private val cameraViewModel: CameraViewModel,
     private val navigationStateViewModel: NavigationStateViewModel
 ) : UIComponent() {

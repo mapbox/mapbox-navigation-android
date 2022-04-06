@@ -3,7 +3,9 @@ package com.mapbox.navigation.dropin
 import com.mapbox.navigation.dropin.binder.UIBinder
 
 /**
- * DropInNavigationView Binder customizations.
+ * A class that allows you to define [UIBinder] for various different views used by the
+ * [NavigationView]. If not specified, [NavigationView] uses the default [UIBinder] defined for
+ * each of these views.
  */
 class ViewBinderCustomization {
 
@@ -11,19 +13,19 @@ class ViewBinderCustomization {
      * Customize the speed limit view by providing your own [UIBinder].
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
-    var speedLimit: UIBinder? = null
+    var speedLimitBinder: UIBinder? = null
 
     /**
      * Customize the maneuvers view by providing your own [UIBinder].
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
-    var maneuver: UIBinder? = null
+    var maneuverBinder: UIBinder? = null
 
     /**
      * Customize the road name view by providing your own [UIBinder].
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
-    var roadName: UIBinder? = null
+    var roadNameBinder: UIBinder? = null
 
     /**
      * Customize the Info Panel Trip Progress by providing your own [UIBinder].

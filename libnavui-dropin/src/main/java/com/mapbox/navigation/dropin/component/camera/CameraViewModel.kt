@@ -11,7 +11,7 @@ sealed class CameraAction {
     data class UpdatePadding(val padding: EdgeInsets) : CameraAction()
 }
 
-class CameraViewModel : UIViewModel<CameraState, CameraAction>(CameraState()) {
+internal class CameraViewModel : UIViewModel<CameraState, CameraAction>(CameraState()) {
 
     fun saveCameraState(cameraState: com.mapbox.maps.CameraState) {
         _state.value = _state.value.copy(mapCameraState = cameraState)

@@ -1,6 +1,5 @@
 package com.mapbox.navigation.dropin.component.audioguidance
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
@@ -23,8 +22,8 @@ sealed class AudioAction {
  * This class is responsible for playing voice instructions. Use the [AudioAction] to turning the
  * audio on or off.
  */
-@ExperimentalPreviewMapboxNavigationAPI
-class AudioGuidanceViewModel(
+@OptIn(ExperimentalCoroutinesApi::class)
+internal class AudioGuidanceViewModel(
     val navigationStateViewModel: NavigationStateViewModel,
     default: AudioGuidanceState = AudioGuidanceState()
 ) : UIViewModel<AudioGuidanceState, AudioAction>(default) {
@@ -41,7 +40,6 @@ class AudioGuidanceViewModel(
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 

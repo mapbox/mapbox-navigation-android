@@ -9,13 +9,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-internal class NavigationUIBindersTest {
+internal class ViewBinderTest {
 
-    lateinit var sut: NavigationUIBinders
+    lateinit var sut: ViewBinder
 
     @Before
     fun setUp() {
-        sut = NavigationUIBinders()
+        sut = ViewBinder()
     }
 
     @Test
@@ -24,9 +24,9 @@ internal class NavigationUIBindersTest {
 
         sut.applyCustomization(c)
 
-        assertEquals(c.speedLimit, sut.speedLimit.value)
-        assertEquals(c.maneuver, sut.maneuver.value)
-        assertEquals(c.roadName, sut.roadName.value)
+        assertEquals(c.speedLimitBinder, sut.speedLimit.value)
+        assertEquals(c.maneuverBinder, sut.maneuver.value)
+        assertEquals(c.roadNameBinder, sut.roadName.value)
         assertEquals(c.infoPanelTripProgressBinder, sut.infoPanelTripProgressBinder.value)
         assertEquals(c.infoPanelHeaderBinder, sut.infoPanelHeaderBinder.value)
         assertEquals(c.infoPanelContentBinder, sut.infoPanelContentBinder.value)
@@ -39,9 +39,9 @@ internal class NavigationUIBindersTest {
 
         sut.applyCustomization(
             ViewBinderCustomization().apply {
-                speedLimit = UIBinder.USE_DEFAULT
-                maneuver = UIBinder.USE_DEFAULT
-                roadName = UIBinder.USE_DEFAULT
+                speedLimitBinder = UIBinder.USE_DEFAULT
+                maneuverBinder = UIBinder.USE_DEFAULT
+                roadNameBinder = UIBinder.USE_DEFAULT
                 infoPanelTripProgressBinder = UIBinder.USE_DEFAULT
                 infoPanelHeaderBinder = UIBinder.USE_DEFAULT
                 infoPanelContentBinder = UIBinder.USE_DEFAULT
@@ -59,9 +59,9 @@ internal class NavigationUIBindersTest {
     }
 
     private fun customization() = ViewBinderCustomization().apply {
-        speedLimit = EmptyBinder()
-        maneuver = EmptyBinder()
-        roadName = EmptyBinder()
+        speedLimitBinder = EmptyBinder()
+        maneuverBinder = EmptyBinder()
+        roadNameBinder = EmptyBinder()
         infoPanelTripProgressBinder = EmptyBinder()
         infoPanelHeaderBinder = EmptyBinder()
         infoPanelContentBinder = EmptyBinder()

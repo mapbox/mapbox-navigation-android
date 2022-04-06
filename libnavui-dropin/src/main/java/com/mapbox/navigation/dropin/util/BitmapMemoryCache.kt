@@ -8,7 +8,7 @@ import android.util.LruCache
  *
  * @param cacheSize Cache size in BYTES.
  */
-class BitmapMemoryCache(val cacheSize: Int) {
+internal class BitmapMemoryCache(val cacheSize: Int) {
 
     private val memoryCache: LruCache<String, Bitmap>
 

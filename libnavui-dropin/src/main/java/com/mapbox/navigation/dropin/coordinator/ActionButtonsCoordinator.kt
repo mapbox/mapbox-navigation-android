@@ -2,7 +2,7 @@ package com.mapbox.navigation.dropin.coordinator
 
 import android.view.ViewGroup
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
+import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.binder.ActionButtonBinder
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.lifecycle.UICoordinator
@@ -14,13 +14,13 @@ import kotlinx.coroutines.flow.map
  * This is the side panel for a portrait view.
  */
 internal class ActionButtonsCoordinator(
-    private val navContext: DropInNavigationViewContext,
+    private val context: NavigationViewContext,
     actionList: ViewGroup
 ) : UICoordinator<ViewGroup>(actionList) {
 
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
-        return navContext.uiBinders.actionButtonsBinder.map {
-            it ?: ActionButtonBinder(navContext)
+        return context.uiBinders.actionButtonsBinder.map {
+            it ?: ActionButtonBinder(context)
         }
     }
 }

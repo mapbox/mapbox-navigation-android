@@ -13,17 +13,17 @@ import com.mapbox.navigation.dropin.lifecycle.reloadOnChange
 import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class ManeuverViewBinder(
+internal class ManeuverViewBinder(
     private val loadedMapStyle: StateFlow<Style?>
 ) : UIBinder {
-    override fun bind(value: ViewGroup): MapboxNavigationObserver {
+    override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
-            value,
+            viewGroup,
             R.layout.mapbox_maneuver_guidance_layout,
-            value.context
+            viewGroup.context
         )
         TransitionManager.go(scene)
-        val binding = MapboxManeuverGuidanceLayoutBinding.bind(value)
+        val binding = MapboxManeuverGuidanceLayoutBinding.bind(viewGroup)
 
         return reloadOnChange(loadedMapStyle) {
             if (it != null) ManeuverComponent(binding.maneuverView, it)

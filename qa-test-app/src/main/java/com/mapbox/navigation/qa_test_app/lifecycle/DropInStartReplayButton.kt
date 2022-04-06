@@ -5,7 +5,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.TripSessionState
-import com.mapbox.navigation.dropin.extensions.flowTripSessionState
+import com.mapbox.navigation.dropin.internal.extensions.flowTripSessionState
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInReplayComponent
 import kotlinx.coroutines.ExperimentalCoroutinesApi

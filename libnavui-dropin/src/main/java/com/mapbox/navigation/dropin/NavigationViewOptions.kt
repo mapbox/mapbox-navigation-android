@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * DropInNavigationView configuration holder class.
+ * A class that is a central place to hold all the configurable options for [NavigationView].
  */
 internal class NavigationViewOptions(context: Context) {
 

@@ -7,9 +7,9 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
+import com.mapbox.navigation.dropin.NavigationViewContext
+import com.mapbox.navigation.dropin.component.destination.Destination
 import com.mapbox.navigation.dropin.component.destination.DestinationState
-import com.mapbox.navigation.dropin.model.Destination
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -46,7 +46,7 @@ internal class MapMarkersComponentTest {
                 every { createPointAnnotationManager() } returns mockAnnotationManager
             }
         }
-        val navContext = mockk<DropInNavigationViewContext> {
+        val navContext = mockk<NavigationViewContext> {
             every { destinationState } returns destinationStateFlow
             every { mapAnnotationFactory() } returns mockAnnotationFactory
         }

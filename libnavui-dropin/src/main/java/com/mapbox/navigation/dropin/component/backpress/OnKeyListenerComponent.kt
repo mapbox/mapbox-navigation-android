@@ -3,7 +3,7 @@ package com.mapbox.navigation.dropin.component.backpress
 import android.view.KeyEvent
 import android.view.View
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationView
+import com.mapbox.navigation.dropin.NavigationView
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
 import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
@@ -14,7 +14,7 @@ import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 
 /**
- * Key listener for the [DropInNavigationView].
+ * Key listener for the [NavigationView].
  *
  * On back pressed will update the navigation state.
  *
@@ -48,7 +48,9 @@ internal class OnKeyListenerComponent(
                 false
             }
             NavigationState.DestinationPreview -> {
-                destinationViewModel.invoke(DestinationAction.SetDestination(null))
+                destinationViewModel.invoke(
+                    DestinationAction.SetDestination(null)
+                )
                 navigationStateViewModel.invoke(
                     NavigationStateAction.Update(NavigationState.FreeDrive)
                 )

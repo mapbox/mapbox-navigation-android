@@ -45,13 +45,25 @@ class MapboxExtendableButton : FrameLayout {
      */
     val textView: AppCompatTextView = binding.buttonText
 
+    /**
+     * Button with an icon and expand behaviour.
+     */
     constructor(context: Context) : this(context, null)
 
+    /**
+     * Button with an icon and expand behaviour.
+     */
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
+    /**
+     * Button with an icon and expand behaviour.
+     */
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
         this(context, attrs, defStyleAttr, R.style.MapboxStyleExtendableButton)
 
+    /**
+     * Button with an icon and expand behaviour.
+     */
     constructor(
         context: Context,
         attrs: AttributeSet?,

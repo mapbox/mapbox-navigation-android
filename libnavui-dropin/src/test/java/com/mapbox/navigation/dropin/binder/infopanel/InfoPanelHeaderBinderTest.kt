@@ -4,8 +4,8 @@ import android.content.Context
 import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
-import com.mapbox.navigation.dropin.NavigationUIBinders
+import com.mapbox.navigation.dropin.NavigationViewContext
+import com.mapbox.navigation.dropin.ViewBinder
 import com.mapbox.navigation.dropin.ViewBinderCustomization
 import com.mapbox.navigation.dropin.binder.EmptyBinder
 import io.mockk.MockKAnnotations
@@ -31,7 +31,7 @@ internal class InfoPanelHeaderBinderTest {
     var tripProgressBinder = EmptyBinder()
 
     @MockK
-    lateinit var mockNavContext: DropInNavigationViewContext
+    lateinit var mockNavContext: NavigationViewContext
 
     @Before
     fun setUp() {
@@ -39,7 +39,7 @@ internal class InfoPanelHeaderBinderTest {
         ctx = ApplicationProvider.getApplicationContext()
         sut = InfoPanelHeaderBinder(mockNavContext)
 
-        every { mockNavContext.uiBinders } returns NavigationUIBinders().apply {
+        every { mockNavContext.uiBinders } returns ViewBinder().apply {
             applyCustomization(
                 ViewBinderCustomization().apply {
                     infoPanelTripProgressBinder = tripProgressBinder

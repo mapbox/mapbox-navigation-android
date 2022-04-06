@@ -1,7 +1,6 @@
 package com.mapbox.navigation.dropin.component.audioguidance
 
 import androidx.core.view.isVisible
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
@@ -10,7 +9,6 @@ import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.view.MapboxExtendableButton
 import com.mapbox.navigation.dropin.view.MapboxExtendableButton.State
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class AudioGuidanceButtonComponent(
     private val audioGuidanceViewModel: AudioGuidanceViewModel,
     private val navigationStateViewModel: NavigationStateViewModel,

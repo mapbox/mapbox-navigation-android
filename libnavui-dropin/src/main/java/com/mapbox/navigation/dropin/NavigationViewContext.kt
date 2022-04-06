@@ -3,7 +3,6 @@ package com.mapbox.navigation.dropin
 import android.content.Context
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.maps.MapView
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
 import com.mapbox.navigation.dropin.component.destination.DestinationState
@@ -18,19 +17,21 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
 /**
- * This context is a top level data object for [DropInNavigationView].
+ * This context is a top level data object for [NavigationView] which gives access to [context]
+ * and [NavigationViewModel]. The lifecycle of this object is attached to the lifecycle of
+ * [NavigationView] and will destroy and recreate upon configuration changes.
  *
- * If your data should survive orientation changes, place it inside [DropInNavigationViewModel].
+ * If your data should survive configuration changes, place it inside
+ * [NavigationViewModel].
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal class DropInNavigationViewContext(
+internal class NavigationViewContext(
     val context: Context,
     val lifecycleOwner: LifecycleOwner,
-    val viewModel: DropInNavigationViewModel,
+    val viewModel: NavigationViewModel,
 ) {
     val mapView = MutableStateFlow<MapView?>(null)
 
-    val uiBinders = NavigationUIBinders()
+    val uiBinders = ViewBinder()
     val options = NavigationViewOptions(context)
 
     val dispatch: (action: Any) -> Unit = { action ->
@@ -44,14 +45,10 @@ internal class DropInNavigationViewContext(
 
     val mapStyleLoader = MapStyleLoader(context, options)
 
-    //region Builders & Factories
-
     fun mapAnnotationFactory() = MapMarkerFactory(
         context,
         BitmapMemoryCache(4 * MB_IN_BYTES)
     )
-
-    //endregion
 
     fun applyBinderCustomization(action: ViewBinderCustomization.() -> Unit) {
         val customization = ViewBinderCustomization().apply(action)
@@ -68,8 +65,8 @@ internal class DropInNavigationViewContext(
  * Helper extension to map [UIBinder] inside a [UICoordinator].
  * Uses a distinct by class to prevent refreshing views of the same type of [UIBinder].
  */
-internal fun <T : UIBinder> DropInNavigationViewContext.flowUiBinder(
-    selector: (value: NavigationUIBinders) -> StateFlow<T>,
+internal fun <T : UIBinder> NavigationViewContext.flowUiBinder(
+    selector: (value: ViewBinder) -> StateFlow<T>,
     mapper: suspend (value: T) -> T = { it }
 ): Flow<T> {
     return selector(this.uiBinders).map(mapper)

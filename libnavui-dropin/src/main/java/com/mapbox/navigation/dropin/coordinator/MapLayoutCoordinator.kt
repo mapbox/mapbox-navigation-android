@@ -2,23 +2,27 @@ package com.mapbox.navigation.dropin.coordinator
 
 import android.view.ViewGroup
 import androidx.transition.Scene
+import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
+import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.Binder
 import com.mapbox.navigation.dropin.binder.map.MapBinder
-import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
 import com.mapbox.navigation.dropin.databinding.MapboxMapviewLayoutBinding
+import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.lifecycle.UICoordinator
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
+/**
+ * Coordinator for inflating [MapView].
+ */
 internal class MapLayoutCoordinator(
-    private val navigationViewContext: DropInNavigationViewContext,
-    private val binding: DropInNavigationViewBinding
+    private val navigationViewContext: NavigationViewContext,
+    private val binding: MapboxNavigationViewLayoutBinding
 ) : UICoordinator<ViewGroup>(binding.mapViewLayout) {
 
     private val viewGroup = binding.mapViewLayout

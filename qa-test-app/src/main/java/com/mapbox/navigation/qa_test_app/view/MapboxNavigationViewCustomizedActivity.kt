@@ -34,7 +34,7 @@ import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRo
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction
 import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterViewModel
-import com.mapbox.navigation.dropin.extensions.flowLocationMatcherResult
+import com.mapbox.navigation.dropin.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.qa_test_app.databinding.LayoutActivityNavigationViewCustomizedBinding
 import com.mapbox.navigation.qa_test_app.utils.Utils
@@ -96,7 +96,7 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
             binding.toggleCustomViews.isChecked = showCustomViews
             if (showCustomViews) {
                 binding.navigationView.customizeViewBinders {
-                    speedLimit = CustomSpeedLimitViewBinder()
+                    speedLimitBinder = CustomSpeedLimitViewBinder()
                 }
                 binding.navigationView.customizeViewOptions {
                     routeLineOptions = this@MapboxNavigationViewCustomizedActivity.routeLineOptions
@@ -106,7 +106,7 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
             } else {
                 // Reset defaults
                 binding.navigationView.customizeViewBinders {
-                    speedLimit = UIBinder.USE_DEFAULT
+                    speedLimitBinder = UIBinder.USE_DEFAULT
                 }
                 binding.navigationView.customizeViewOptions {
                     routeLineOptions = defaultRouteLineOptions(applicationContext)

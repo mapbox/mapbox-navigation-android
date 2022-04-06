@@ -9,8 +9,8 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.dropin.component.location.LocationViewModel
-import com.mapbox.navigation.dropin.extensions.flowLocationMatcherResult
-import com.mapbox.navigation.dropin.extensions.flowRouteProgress
+import com.mapbox.navigation.dropin.internal.extensions.flowLocationMatcherResult
+import com.mapbox.navigation.dropin.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.roadname.view.MapboxRoadNameView
@@ -88,7 +88,7 @@ class RoadNameLabelComponentTest {
 
     @Test
     fun `onAttached renders location matcher results`() = coroutineRule.runBlockingTest {
-        mockkStatic("com.mapbox.navigation.dropin.extensions.MapboxNavigationEx")
+        mockkStatic("com.mapbox.navigation.dropin.internal.extensions.MapboxNavigationEx")
         val mockRoad = mockk<Road> {
             every { components } returns listOf(mockk())
         }
@@ -107,12 +107,12 @@ class RoadNameLabelComponentTest {
             .onAttached(mapboxNavigation)
 
         verify { roadNameView.renderRoadName(mockRoad) }
-        unmockkStatic("com.mapbox.navigation.dropin.extensions.MapboxNavigationEx")
+        unmockkStatic("com.mapbox.navigation.dropin.internal.extensions.MapboxNavigationEx")
     }
 
     @Test
     fun `onAttached renders road shields`() = coroutineRule.runBlockingTest {
-        mockkStatic("com.mapbox.navigation.dropin.extensions.MapboxNavigationEx")
+        mockkStatic("com.mapbox.navigation.dropin.internal.extensions.MapboxNavigationEx")
         val routeProgress = mockk<RouteProgress>()
         val mockRoad = mockk<Road> {
             every { components } returns listOf(mockk())
@@ -155,6 +155,6 @@ class RoadNameLabelComponentTest {
         ).onAttached(mapboxNavigation)
 
         verify { roadNameView.renderRoadNameWith(shields) }
-        unmockkStatic("com.mapbox.navigation.dropin.extensions.MapboxNavigationEx")
+        unmockkStatic("com.mapbox.navigation.dropin.internal.extensions.MapboxNavigationEx")
     }
 }

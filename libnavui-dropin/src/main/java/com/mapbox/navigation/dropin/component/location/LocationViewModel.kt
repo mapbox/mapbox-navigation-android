@@ -2,10 +2,9 @@ package com.mapbox.navigation.dropin.component.location
 
 import android.location.Location
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
-import com.mapbox.navigation.dropin.extensions.flowLocationMatcherResult
+import com.mapbox.navigation.dropin.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.dropin.lifecycle.UIViewModel
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import kotlinx.coroutines.delay
@@ -16,8 +15,8 @@ sealed class LocationAction {
     data class Update(val result: LocationMatcherResult) : LocationAction()
 }
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class LocationViewModel : UIViewModel<LocationMatcherResult?, LocationAction>(null) {
+internal class LocationViewModel :
+    UIViewModel<LocationMatcherResult?, LocationAction>(null) {
     val navigationLocationProvider = NavigationLocationProvider()
 
     /**
@@ -44,7 +43,7 @@ class LocationViewModel : UIViewModel<LocationMatcherResult?, LocationAction>(nu
         mapboxNavigation: MapboxNavigation,
         state: LocationMatcherResult?,
         action: LocationAction
-    ): LocationMatcherResult? {
+    ): LocationMatcherResult {
         return when (action) {
             is LocationAction.Update -> action.result
         }
