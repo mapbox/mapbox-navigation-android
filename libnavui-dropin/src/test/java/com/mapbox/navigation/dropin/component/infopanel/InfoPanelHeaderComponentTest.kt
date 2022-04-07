@@ -20,9 +20,7 @@ import com.mapbox.navigation.dropin.component.routefetch.RoutesState
 import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderLayoutBinding
 import com.mapbox.navigation.testing.MainCoroutineRule
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -188,7 +186,9 @@ internal class InfoPanelHeaderComponentTest {
         every { mockLocationViewModel.lastPoint } returns mockk()
         every { mockRoutesViewModel.state } returns MutableStateFlow(RoutesState.Ready(mockk()))
         val routeActionSlot = mutableListOf<RoutesAction>()
-        every { mockRoutesViewModel.invoke(capture(routeActionSlot)) } just Runs
+        every {
+            mockRoutesViewModel.invoke(capture(routeActionSlot))
+        } returns RoutesState.Ready(mockk())
 
         sut.onAttached(mockk())
         binding.routePreview.performClick()
@@ -204,7 +204,7 @@ internal class InfoPanelHeaderComponentTest {
         )
         every { mockLocationViewModel.lastPoint } returns mockk()
         every { mockRoutesViewModel.state } returns MutableStateFlow(RoutesState.Ready(mockk()))
-        every { mockRoutesViewModel.invoke(any()) } just Runs
+        every { mockRoutesViewModel.invoke(any()) } returns RoutesState.Ready(mockk())
 
         sut.onAttached(mockk())
         binding.routePreview.performClick()
@@ -224,7 +224,9 @@ internal class InfoPanelHeaderComponentTest {
         every { mockLocationViewModel.lastPoint } returns mockk()
         every { mockRoutesViewModel.state } returns MutableStateFlow(RoutesState.Ready(mockk()))
         val routeActionSlot = mutableListOf<RoutesAction>()
-        every { mockRoutesViewModel.invoke(capture(routeActionSlot)) } just Runs
+        every {
+            mockRoutesViewModel.invoke(capture(routeActionSlot))
+        } returns RoutesState.Ready(mockk())
 
         sut.onAttached(mockk())
         binding.startNavigation.performClick()
@@ -240,7 +242,7 @@ internal class InfoPanelHeaderComponentTest {
         )
         every { mockLocationViewModel.lastPoint } returns mockk()
         every { mockRoutesViewModel.state } returns MutableStateFlow(RoutesState.Ready(mockk()))
-        every { mockRoutesViewModel.invoke(any()) } just Runs
+        every { mockRoutesViewModel.invoke(any()) } returns RoutesState.Ready(mockk())
 
         sut.onAttached(mockk())
         binding.startNavigation.performClick()

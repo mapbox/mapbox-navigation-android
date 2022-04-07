@@ -2,18 +2,23 @@ package com.mapbox.navigation.dropin.component.tripsession
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkAll
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runBlockingTest
+import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -22,6 +27,16 @@ class TripSessionStarterViewModelTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
+
+    @Before
+    fun setup() {
+        mockkObject(MapboxNavigationApp)
+    }
+
+    @After
+    fun teardown() {
+        unmockkAll()
+    }
 
     @Test
     fun `verify default state is respected`() = runBlockingTest {
@@ -156,7 +171,11 @@ class TripSessionStarterViewModelTest {
             verify(exactly = 1) { mapboxNavigation.startReplayTripSession() }
         }
 
-    private fun mockMapboxNavigation(): MapboxNavigation = mockk(relaxed = true)
+    private fun mockMapboxNavigation(): MapboxNavigation {
+        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        every { MapboxNavigationApp.current() } returns mapboxNavigation
+        return mapboxNavigation
+    }
 
     private fun mockNavigationStateViewModel(
         initialState: NavigationState = NavigationState.FreeDrive

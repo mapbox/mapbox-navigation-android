@@ -3,16 +3,16 @@ package com.mapbox.navigation.dropin.lifecycle
 import androidx.annotation.CallSuper
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
+import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
 /**
  * Implement your version of a behavior. Behaviors do not reference android ui elements directly,
@@ -25,9 +25,11 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 abstract class UIViewModel<State, Action>(initialState: State) : MapboxNavigationObserver {
 
+    // TODO Potential mechanism to expose actions in the sdk through a public api
     private val _action = MutableSharedFlow<Action>(extraBufferCapacity = 1)
     val action: Flow<Action> = _action
-    protected val _state: MutableStateFlow<State> = MutableStateFlow(initialState)
+
+    private val _state: MutableStateFlow<State> = MutableStateFlow(initialState)
     val state: StateFlow<State> = _state
 
     lateinit var mainJobControl: JobControl
@@ -35,8 +37,20 @@ abstract class UIViewModel<State, Action>(initialState: State) : MapboxNavigatio
     /**
      * Invoke an action for the behavior.
      */
-    fun invoke(action: Action) {
+    fun invoke(action: Action): State {
         _action.tryEmit(action)
+        val mapboxNavigation: MapboxNavigation? = MapboxNavigationApp.current()
+        return if (mapboxNavigation != null) {
+            process(mapboxNavigation, _state.value, action).also {
+                _state.value = it
+            }
+        } else {
+            logW(
+                "Cannot invoke action when MapboxNavigationApp is not setup $action",
+                LOG_CATEGORY
+            )
+            _state.value
+        }
     }
 
     /**
@@ -48,16 +62,14 @@ abstract class UIViewModel<State, Action>(initialState: State) : MapboxNavigatio
     @CallSuper
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         mainJobControl = InternalJobControlFactory.createMainScopeJobControl()
-
-        mainJobControl.scope.launch {
-            action.collect {
-                _state.value = process(mapboxNavigation, _state.value, it)
-            }
-        }
     }
 
     @CallSuper
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         mainJobControl.job.cancelChildren()
+    }
+
+    private companion object {
+        private val LOG_CATEGORY = UIViewModel::class.java.simpleName
     }
 }

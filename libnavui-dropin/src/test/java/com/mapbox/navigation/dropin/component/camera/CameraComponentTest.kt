@@ -14,6 +14,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.dropin.component.location.LocationAction
@@ -29,9 +30,10 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.spyk
-import io.mockk.unmockkStatic
+import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,7 +54,6 @@ class CameraComponentTest {
     }
     private val mockNavigationCamera: NavigationCamera = mockk(relaxed = true)
     private val mockViewPortDataSource: MapboxNavigationViewportDataSource = mockk(relaxed = true)
-    private val mockMapboxNavigation: MapboxNavigation = mockk(relaxed = true)
     private val mockMapboxMap: MapboxMap = mockk(relaxUnitFun = true) {
         every { cameraState } returns mockk()
     }
@@ -73,6 +74,7 @@ class CameraComponentTest {
     @Before
     fun setUp() {
         mockkStatic(Utils::class, Logger::class)
+        mockkObject(MapboxNavigationApp)
         every { Utils.dpToPx(any()) } returns 50f
         every { Logger.d(any(), any()) } returns Unit
         cameraComponent = CameraComponent(
@@ -87,7 +89,7 @@ class CameraComponentTest {
 
     @After
     fun tearDown() {
-        unmockkStatic(Utils::class, Logger::class)
+        unmockkAll()
     }
 
     @Test
@@ -105,7 +107,7 @@ class CameraComponentTest {
             )
         )
 
-        cameraComponent.onAttached(mockMapboxNavigation)
+        cameraComponent.onAttached(mockMapboxNavigation())
 
         verify { mockMapboxMap.setCamera(cameraState.toCameraOptions()) }
     }
@@ -121,15 +123,17 @@ class CameraComponentTest {
         )
         every { mockMapboxMap.cameraState } returns cameraState
 
+        val mockMapboxNavigation = mockMapboxNavigation()
         cameraComponent.onAttached(mockMapboxNavigation)
         cameraComponent.onDetached(mockMapboxNavigation)
 
-        verify { cameraViewModel.saveCameraState(cameraState) }
+        verify { cameraViewModel.invoke(CameraAction.SaveMapState(cameraState)) }
     }
 
     @Test
     fun `when location update is received first time in free drive camera frame is updated`() =
         coroutineRule.runBlockingTest {
+            val mockMapboxNavigation = mockMapboxNavigation()
             locationViewModel.onAttached(mockMapboxNavigation)
             cameraViewModel.onAttached(mockMapboxNavigation)
             cameraComponent.onAttached(mockMapboxNavigation)
@@ -147,6 +151,7 @@ class CameraComponentTest {
     @Test
     fun `when location update is received first time in active guidance camera frame is updated`() =
         coroutineRule.runBlockingTest {
+            val mockMapboxNavigation = mockMapboxNavigation()
             navigationStateViewModel.onAttached(mockMapboxNavigation)
             locationViewModel.onAttached(mockMapboxNavigation)
             cameraViewModel.onAttached(mockMapboxNavigation)
@@ -172,6 +177,7 @@ class CameraComponentTest {
         coroutineRule.runBlockingTest {
             val nextLocMatcherResult =
                 makeLocationMatcherResult(-121.4567, 37.9876, 45f)
+            val mockMapboxNavigation = mockMapboxNavigation()
             locationViewModel.onAttached(mockMapboxNavigation)
             cameraViewModel.onAttached(mockMapboxNavigation)
             cameraComponent.onAttached(mockMapboxNavigation)
@@ -190,6 +196,7 @@ class CameraComponentTest {
     @Test
     fun `camera frame is not updated if camera component instantiation is fresh`() =
         coroutineRule.runBlockingTest {
+            val mockMapboxNavigation = mockMapboxNavigation()
             cameraViewModel.onAttached(mockMapboxNavigation)
             cameraComponent.onAttached(mockMapboxNavigation)
 
@@ -201,6 +208,7 @@ class CameraComponentTest {
     @Test
     fun `camera frame updates to idle when requested`() =
         coroutineRule.runBlockingTest {
+            val mockMapboxNavigation = mockMapboxNavigation()
             locationViewModel.onAttached(mockMapboxNavigation)
             cameraViewModel.onAttached(mockMapboxNavigation)
             cameraComponent.onAttached(mockMapboxNavigation)
@@ -215,6 +223,7 @@ class CameraComponentTest {
     @Test
     fun `camera frame updates to following when requested`() =
         coroutineRule.runBlockingTest {
+            val mockMapboxNavigation = mockMapboxNavigation()
             locationViewModel.onAttached(mockMapboxNavigation)
             cameraViewModel.onAttached(mockMapboxNavigation)
             cameraComponent.onAttached(mockMapboxNavigation)
@@ -229,6 +238,7 @@ class CameraComponentTest {
     @Test
     fun `when in free drive zoom and pitch property is overridden`() =
         coroutineRule.runBlockingTest {
+            val mockMapboxNavigation = mockMapboxNavigation()
             cameraComponent.onAttached(mockMapboxNavigation)
 
             verify {
@@ -242,6 +252,7 @@ class CameraComponentTest {
     @Test
     fun `when in mode other than free drive zoom property override is cleared`() =
         coroutineRule.runBlockingTest {
+            val mockMapboxNavigation = mockMapboxNavigation()
             navigationStateViewModel.onAttached(mockMapboxNavigation)
             navigationStateViewModel.invoke(
                 NavigationStateAction.Update(NavigationState.RoutePreview)
@@ -258,6 +269,7 @@ class CameraComponentTest {
     @Test
     fun `when route progress updates camera viewport updates`() =
         coroutineRule.runBlockingTest {
+            val mockMapboxNavigation = mockMapboxNavigation()
             every {
                 mockMapboxNavigation.registerRouteProgressObserver(any())
             } answers {
@@ -275,6 +287,7 @@ class CameraComponentTest {
     @Test
     fun `when route obtained in route overview and is not empty camera viewport updates`() =
         coroutineRule.runBlockingTest {
+            val mockMapboxNavigation = mockMapboxNavigation()
             val mockNavigationRoute: List<NavigationRoute> = listOf(
                 mockk {
                     every { directionsRoute } returns mockk()
@@ -307,6 +320,7 @@ class CameraComponentTest {
     @Test
     fun `when route updates in arrival and is not empty camera viewport updates`() =
         coroutineRule.runBlockingTest {
+            val mockMapboxNavigation = mockMapboxNavigation()
             navigationStateViewModel.onAttached(mockMapboxNavigation)
             navigationStateViewModel.invoke(
                 NavigationStateAction.Update(NavigationState.Arrival)
@@ -339,6 +353,7 @@ class CameraComponentTest {
     @Test
     fun `when route updates and is empty camera viewport clear`() =
         coroutineRule.runBlockingTest {
+            val mockMapboxNavigation = mockMapboxNavigation()
             val mockNavigationRoute: List<NavigationRoute> = listOf()
             val mockRoutesUpdatedResult: RoutesUpdatedResult = mockk {
                 every { navigationRoutes } returns mockNavigationRoute
@@ -360,6 +375,7 @@ class CameraComponentTest {
     @Test
     fun `when route is ready and navigation state is active guidance camera starts in following`() =
         coroutineRule.runBlockingTest {
+            val mockMapboxNavigation = mockMapboxNavigation()
             val mockNavigationRoute: List<NavigationRoute> = listOf(
                 mockk {
                     every { directionsRoute } returns mockk()
@@ -393,6 +409,7 @@ class CameraComponentTest {
     @Test
     fun `when called detach route updates should not happen`() =
         coroutineRule.runBlockingTest {
+            val mockMapboxNavigation = mockMapboxNavigation()
             val mockNavigationRoute: List<NavigationRoute> = listOf(
                 mockk {
                     every { directionsRoute } returns mockk()
@@ -415,6 +432,7 @@ class CameraComponentTest {
     @Test
     fun `when called detach route progress updates should not happen`() =
         coroutineRule.runBlockingTest {
+            val mockMapboxNavigation = mockMapboxNavigation()
             every {
                 mockMapboxNavigation.registerRouteProgressObserver(any())
             } just Runs
@@ -427,6 +445,12 @@ class CameraComponentTest {
                 mockViewPortDataSource.onRouteProgressChanged(any())
             }
         }
+
+    private fun mockMapboxNavigation(): MapboxNavigation {
+        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        every { MapboxNavigationApp.current() } returns mapboxNavigation
+        return mapboxNavigation
+    }
 }
 
 private fun makeLocationMatcherResult(lon: Double, lat: Double, bearing: Float) =
