@@ -6,6 +6,7 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
+import com.mapbox.navigation.ui.voice.model.AudioFocusOwner
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import io.mockk.every
 import io.mockk.mockk
@@ -18,7 +19,7 @@ class VoiceInstructionsPlayerAttributesTest {
     fun `PreOreoAttributes configureTextToSpeech must set stream type`() {
         val mockedPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
         every {
-            mockedPlayerOptions.streamType
+            mockedPlayerOptions.ttsStreamType
         } returns AudioManager.STREAM_MUSIC
 
         val attributes = VoiceInstructionsPlayerAttributes.PreOreoAttributes(mockedPlayerOptions)
@@ -28,7 +29,10 @@ class VoiceInstructionsPlayerAttributesTest {
         attributes.applyOn(tts, bundle)
 
         verify(exactly = 1) {
-            bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC)
+            bundle.putString(
+                TextToSpeech.Engine.KEY_PARAM_STREAM,
+                AudioManager.STREAM_MUSIC.toString(),
+            )
         }
 
         verify(exactly = 0) {
@@ -63,7 +67,8 @@ class VoiceInstructionsPlayerAttributesTest {
         val attributes = VoiceInstructionsPlayerAttributes.PreOreoAttributes(mockedPlayerOptions)
 
         val audioFocusRequest: AudioFocusRequest.Builder = mockk(relaxed = true)
-        attributes.applyOn(audioFocusRequest)
+        val mockOwner: AudioFocusOwner = mockk()
+        attributes.applyOn(mockOwner, audioFocusRequest)
 
         verify(exactly = 0) {
             audioFocusRequest.setFocusGain(any())
@@ -82,7 +87,7 @@ class VoiceInstructionsPlayerAttributesTest {
     fun `OreoAndLaterAttributes configureTextToSpeech must call setAudioAttributes`() {
         val mockedPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
         every {
-            mockedPlayerOptions.streamType
+            mockedPlayerOptions.ttsStreamType
         } returns AudioManager.STREAM_MUSIC
 
         every {
@@ -213,7 +218,7 @@ class VoiceInstructionsPlayerAttributesTest {
         )
 
         val audioFocusRequest: AudioFocusRequest.Builder = mockk(relaxed = true)
-        attributes.applyOn(audioFocusRequest)
+        attributes.applyOn(AudioFocusOwner.MediaPlayer, audioFocusRequest)
 
         verify(exactly = 1) {
             audioFocusRequest.setAudioAttributes(audioAttributes)
@@ -254,10 +259,12 @@ class VoiceInstructionsPlayerAttributesTest {
             audioAttributesBuilder.setContentType(any())
         } returns audioAttributesBuilder
 
-        VoiceInstructionsPlayerAttributes.OreoAndLaterAttributes(
+        val attributes = VoiceInstructionsPlayerAttributes.OreoAndLaterAttributes(
             mockedPlayerOptions,
             audioAttributesBuilder,
         )
+
+        attributes.audioAttributes(AudioFocusOwner.MediaPlayer)
 
         verify(exactly = 1) {
             audioAttributesBuilder.setLegacyStreamType(AudioManager.STREAM_MUSIC)
@@ -310,10 +317,12 @@ class VoiceInstructionsPlayerAttributesTest {
             audioAttributesBuilder.setContentType(any())
         } returns audioAttributesBuilder
 
-        VoiceInstructionsPlayerAttributes.OreoAndLaterAttributes(
+        val attributes = VoiceInstructionsPlayerAttributes.OreoAndLaterAttributes(
             mockedPlayerOptions,
             audioAttributesBuilder,
         )
+
+        attributes.audioAttributes(AudioFocusOwner.MediaPlayer)
 
         verify(exactly = 0) {
             audioAttributesBuilder.setLegacyStreamType(any())
