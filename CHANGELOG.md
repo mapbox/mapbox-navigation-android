@@ -7,6 +7,9 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
+- Added `AsyncAudioFocusDelegate` to `MapboxVoiceInstructionsPlayer` to allow clients to interact with the audio focus in an asynchronous way. [#5652](https://github.com/mapbox/mapbox-navigation-android/pull/5652)
+- Added `AudioFocusOwner` so that the owner can be specified when requesting the audio focus `AsyncAudioFocusDelegate#requestFocus`. [#5652](https://github.com/mapbox/mapbox-navigation-android/pull/5652)
+- Added `ttsStreamType` to `VoiceInstructionsPlayerOptions` so that the stream type for playing TTS can be specified, allowing to fix an issue with `KEY_PARAM_STREAM` not being updated and used properly. Defaults to `AudioManager.STREAM_MUSIC`. [#5652](https://github.com/mapbox/mapbox-navigation-android/pull/5652)
 
 ## Mapbox Navigation SDK 2.5.0-alpha.1 - April 1, 2022
 ### Changelog
