@@ -6,12 +6,12 @@ package com.mapbox.navigation.ui.voice.model
 enum class AudioFocusOwner {
 
     /**
-     * The focus is requsted for playing an instruction with the media player.
+     * The focus is requested for playing an instruction with the media player.
      */
     MediaPlayer,
 
     /**
-     * The focus is requsted for playing an instruction using text-to-speach service.
+     * The focus is requested for playing an instruction using text-to-speech service.
      */
     TextToSpeech,
 }
