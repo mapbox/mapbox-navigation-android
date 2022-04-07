@@ -87,6 +87,7 @@ class MapboxSpeedLimitView : AppCompatTextView {
     fun render(expected: Expected<UpdateSpeedLimitError, UpdateSpeedLimitValue>) {
         expected.fold(
             { // error
+                updateBackgroundSize(speedLimitSign)
                 val speedLimitSpan = when (speedLimitSign) {
                     SpeedLimitSign.MUTCD -> {
                         background = getViewDrawable(SpeedLimitSign.MUTCD)

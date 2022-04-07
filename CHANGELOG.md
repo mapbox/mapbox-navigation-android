@@ -12,6 +12,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Improved reroute experience for a default controller. `MapboxRerouteController` now immediately switches to an alternative route when a user turns to it, without making an unnecessary route request. [#5645](https://github.com/mapbox/mapbox-navigation-android/pull/5645)
 - Made all reachable polygon entries and exits tracked instead of the closest one for E-horizon `RoadObject`s. [#5653](https://github.com/mapbox/mapbox-navigation-android/pull/5653)
 - Fixed an issue where enhanced location couldn't snap to correct road edge for a long time after leaving a tunnel. [#5653](https://github.com/mapbox/mapbox-navigation-android/pull/5653)
+- Fixed `MapboxSpeedLimitView` sizing when rendering `UpdateSpeedLimitError` value [#5666](https://github.com/mapbox/mapbox-navigation-android/pull/5666)
 
 #### Other changes
 - Up until this point, `RoutesObserver` fired nearly immediately with new route references after `MapboxNavigation@setNavigationRoutes` was called. Now, the Nav SDK first fully processes the routes (for example, to compute the `AlternativeRouteMetadata`) which results in a small delay between routes being set and actually returned by the `RoutesObserver`.
