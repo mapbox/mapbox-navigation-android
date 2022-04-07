@@ -5,11 +5,20 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 
 #### Features
+
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.5.0-alpha.2 - April 7, 2022
+
+#### Features
 - Exposed `MapboxNavigation#getAlternativeMetadataFor` function which returns metadata associated with alternative routes that are tracked in the current navigation session. This metadata can be used with `MapboxRouteLineApi#setNavigationRoutes` to hide portions of the alternative routes until their deviation point with the primary route. This is especially helpful in preventing alternative routes from resurfacing under the puck if the vanishing route line feature is enabled. [#5653](https://github.com/mapbox/mapbox-navigation-android/pull/5653)
 - Exposed `NavigationRoute#id` and `RouteProgress#routeAlternativeId` which together can be used to immediately find an alternative route that a user might've turned into and generated an off-route event. [#5653](https://github.com/mapbox/mapbox-navigation-android/pull/5653)
 
 #### Bug fixes and improvements
 - Improved reroute experience for a default controller. `MapboxRerouteController` now immediately switches to an alternative route when a user turns to it, without making an unnecessary route request. [#5645](https://github.com/mapbox/mapbox-navigation-android/pull/5645)
+- Added `AsyncAudioFocusDelegate` to `MapboxVoiceInstructionsPlayer` to allow clients to interact with the audio focus in an asynchronous way. [#5652](https://github.com/mapbox/mapbox-navigation-android/pull/5652)
+- Added `AudioFocusOwner` so that the owner can be specified when requesting the audio focus `AsyncAudioFocusDelegate#requestFocus`. [#5652](https://github.com/mapbox/mapbox-navigation-android/pull/5652)
+- Added `ttsStreamType` to `VoiceInstructionsPlayerOptions` so that the stream type for playing TTS can be specified, allowing to fix an issue with `KEY_PARAM_STREAM` not being updated and used properly. Defaults to `AudioManager.STREAM_MUSIC`. [#5652](https://github.com/mapbox/mapbox-navigation-android/pull/5652)
 - Made all reachable polygon entries and exits tracked instead of the closest one for E-horizon `RoadObject`s. [#5653](https://github.com/mapbox/mapbox-navigation-android/pull/5653)
 - Fixed an issue where enhanced location couldn't snap to correct road edge for a long time after leaving a tunnel. [#5653](https://github.com/mapbox/mapbox-navigation-android/pull/5653)
 - Fixed `MapboxSpeedLimitView` sizing when rendering `UpdateSpeedLimitError` value [#5666](https://github.com/mapbox/mapbox-navigation-android/pull/5666)
@@ -20,6 +29,15 @@ Mapbox welcomes participation and contributions from everyone.
 #### Known issues
 - Occasionally, the first `RouteProgress` update after setting new route might fail to be delivered due to the scheduling of route processing jobs.
 - When alternative routes that take advantage of the `AlternativeRouteMetadata` are reset because new become available, or changed manually by interacting with the map, there could be a brief flash of the full alternative route geometry which quickly recovers to a valid state.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.4.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.4.0))
+- Mapbox Navigation Native `v95.0.0`
+- Mapbox Core Common `v21.2.0`
+- Mapbox Java `v6.4.0-beta.4` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.4.0-beta.4))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
 
 ## Mapbox Navigation SDK 2.4.0-rc.2 - April 7, 2022
 
