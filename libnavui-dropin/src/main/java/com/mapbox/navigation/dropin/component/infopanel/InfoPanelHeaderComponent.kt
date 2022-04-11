@@ -15,11 +15,8 @@ import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderLayoutBinding
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.utils.internal.ifNonNull
-import com.mapbox.navigation.utils.internal.logE
-import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.takeWhile
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 internal class InfoPanelHeaderComponent(
@@ -55,11 +52,23 @@ internal class InfoPanelHeaderComponent(
         }
 
         binding.routePreview.setOnClickListener {
-            updateNavigationStateWhenRouteIsReady(NavigationState.RoutePreview)
+            coroutineScope.launch {
+                if (fetchRouteIfNeeded()) {
+                    navigationStateViewModel.invoke(
+                        NavigationStateAction.Update(NavigationState.RoutePreview)
+                    )
+                }
+            }
         }
 
         binding.startNavigation.setOnClickListener {
-            updateNavigationStateWhenRouteIsReady(NavigationState.ActiveNavigation)
+            coroutineScope.launch {
+                if (fetchRouteIfNeeded()) {
+                    navigationStateViewModel.invoke(
+                        NavigationStateAction.Update(NavigationState.ActiveNavigation)
+                    )
+                }
+            }
         }
 
         binding.endNavigation.setOnClickListener {
@@ -71,32 +80,28 @@ internal class InfoPanelHeaderComponent(
         }
     }
 
-    private fun updateNavigationStateWhenRouteIsReady(navigationState: NavigationState) {
-        ifNonNull(
+    /**
+     * Dispatch FetchPoints action and wait for RoutesState.Ready.
+     * Method returns immediately if already in RoutesState.Ready or RoutesState.Fetching, or if
+     * required location or destination data is missing.
+     *
+     * @return `true` once in RoutesState.Ready state, otherwise `false`
+     */
+    private suspend fun fetchRouteIfNeeded(): Boolean {
+        if (routesViewModel.state.value is RoutesState.Ready) return true
+        if (routesViewModel.state.value is RoutesState.Fetching) return false
+
+        return ifNonNull(
             locationViewModel.lastPoint,
             destinationViewModel.state.value.destination
         ) { lastPoint, destination ->
             routesViewModel.invoke(RoutesAction.FetchPoints(listOf(lastPoint, destination.point)))
-            coroutineScope.launch {
-                // Wait for fetching to complete and then take action
-                val isRouteReady = waitForFetched()
-                if (isActive && isRouteReady) {
-                    navigationStateViewModel.invoke(
-                        NavigationStateAction.Update(navigationState)
-                    )
-                } else {
-                    logW(TAG, "Routes are not ready")
-                }
-            }
-        } ?: logE(TAG, "Cannot fetch routes because state is incorrect")
+            waitForFetched()
+        } ?: false
     }
 
     private suspend fun waitForFetched(): Boolean {
         routesViewModel.state.takeWhile { it is RoutesState.Fetching }.collect()
         return routesViewModel.state.value is RoutesState.Ready
-    }
-
-    private companion object {
-        private val TAG = this::class.java.simpleName
     }
 }
