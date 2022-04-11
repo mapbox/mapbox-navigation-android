@@ -8,6 +8,8 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
  * @param distance distance (based on the referenced route)
  * @param duration duration (based on the referenced route)
  */
+// the values might get out of date after route refresh,
+// refs https://github.com/mapbox/mapbox-navigation-native/issues/5655
 class AlternativeRouteInfo internal constructor(
     val distance: Double,
     val duration: Double,

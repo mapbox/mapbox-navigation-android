@@ -38,6 +38,7 @@ import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
+import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteState
 import io.mockk.Runs
@@ -618,6 +619,94 @@ class MapboxTripSessionTest {
         }
 
     @Test
+    fun `route set result - native alternatives delivered when only alternatives are updated`() =
+        coroutineRule.runBlockingTest {
+            tripSession.start(true)
+
+            val alternative = mockk<NavigationRoute>()
+            val nativeAlternatives = listOf(mockk<RouteAlternative>())
+            coEvery {
+                navigator.setAlternativeRoutes(listOf(alternative))
+            } returns nativeAlternatives
+            val result = tripSession.setRoutes(
+                routes + alternative,
+                legIndex,
+                RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
+            )
+
+            assertEquals(nativeAlternatives, result.nativeAlternatives)
+        }
+
+    @Test
+    fun `route set result - native alternatives delivered when routes are updated`() =
+        coroutineRule.runBlockingTest {
+            tripSession.start(true)
+
+            val alternative = mockk<NavigationRoute>()
+            val nativeAlternatives = listOf(mockk<RouteAlternative>())
+            coEvery {
+                navigator.setAlternativeRoutes(listOf(alternative))
+            } returns nativeAlternatives
+            val result = tripSession.setRoutes(
+                routes + alternative,
+                legIndex,
+                RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            )
+
+            assertEquals(nativeAlternatives, result.nativeAlternatives)
+        }
+
+    @Test
+    fun `route set result - empty native alternatives delivered when routes are cleared`() =
+        coroutineRule.runBlockingTest {
+            tripSession.start(true)
+
+            coEvery {
+                navigator.setAlternativeRoutes(emptyList())
+            } returns emptyList()
+            val result = tripSession.setRoutes(
+                emptyList(),
+                legIndex,
+                RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+            )
+
+            assertTrue(result.nativeAlternatives!!.isEmpty())
+        }
+
+    @Test
+    fun `route set result - native alternatives delivered when reroute`() =
+        coroutineRule.runBlockingTest {
+            tripSession.start(true)
+
+            val alternative = mockk<NavigationRoute>()
+            val nativeAlternatives = listOf(mockk<RouteAlternative>())
+            coEvery {
+                navigator.setAlternativeRoutes(listOf(alternative))
+            } returns nativeAlternatives
+            val result = tripSession.setRoutes(
+                routes + alternative,
+                legIndex,
+                RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+            )
+
+            assertEquals(nativeAlternatives, result.nativeAlternatives)
+        }
+
+    @Test
+    fun `route set result - native alternatives are null for refresh`() =
+        coroutineRule.runBlockingTest {
+            tripSession.start(true)
+
+            val result = tripSession.setRoutes(
+                routes,
+                legIndex,
+                RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
+            )
+
+            assertNull(result.nativeAlternatives)
+        }
+
+    @Test
     fun stateObserverImmediateStop() {
         tripSession.registerStateObserver(stateObserver)
         verify(exactly = 1) { stateObserver.onSessionStateChanged(TripSessionState.STOPPED) }
@@ -1180,7 +1269,7 @@ class MapboxTripSessionTest {
     }
 
     /**
-     * fixme https://github.com/mapbox/mapbox-navigation-android/pull/5653 - progress updates are currently ignored while alternatives are being set.
+     * Refs https://github.com/mapbox/navigation-sdks/issues/1615.
      */
     @Test
     fun `routeProgress updates ignored while route is being set`() = coroutineRule.runBlockingTest {
