@@ -302,6 +302,24 @@ package com.mapbox.navigation.base.metrics {
 
 package com.mapbox.navigation.base.options {
 
+  public final class AlertServiceOptions {
+    method public boolean getCollectBridges();
+    method public boolean getCollectRestrictedAreas();
+    method public boolean getCollectTunnels();
+    method public com.mapbox.navigation.base.options.AlertServiceOptions.Builder toBuilder();
+    property public final boolean collectBridges;
+    property public final boolean collectRestrictedAreas;
+    property public final boolean collectTunnels;
+  }
+
+  public static final class AlertServiceOptions.Builder {
+    ctor public AlertServiceOptions.Builder();
+    method public com.mapbox.navigation.base.options.AlertServiceOptions build();
+    method public com.mapbox.navigation.base.options.AlertServiceOptions.Builder collectBridges(boolean collectBridges);
+    method public com.mapbox.navigation.base.options.AlertServiceOptions.Builder collectRestrictedAreas(boolean collectRestrictedAreas);
+    method public com.mapbox.navigation.base.options.AlertServiceOptions.Builder collectTunnels(boolean collectTunnels);
+  }
+
   public final class DeviceProfile {
     method public String getCustomConfig();
     method public com.mapbox.navigation.base.options.DeviceType getDeviceType();
@@ -323,11 +341,13 @@ package com.mapbox.navigation.base.options {
   }
 
   public final class EHorizonOptions {
+    method public com.mapbox.navigation.base.options.AlertServiceOptions getAlertServiceOptions();
     method public double getBranchLength();
     method public int getExpansion();
     method public double getLength();
     method public Double? getMinTimeDeltaBetweenUpdates();
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.base.options.AlertServiceOptions alertServiceOptions;
     property public final double branchLength;
     property public final int expansion;
     property public final double length;
@@ -336,6 +356,7 @@ package com.mapbox.navigation.base.options {
 
   public static final class EHorizonOptions.Builder {
     ctor public EHorizonOptions.Builder();
+    method public com.mapbox.navigation.base.options.EHorizonOptions.Builder alertServiceOptions(com.mapbox.navigation.base.options.AlertServiceOptions alertServiceOptions);
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder branchLength(double branchLength);
     method public com.mapbox.navigation.base.options.EHorizonOptions build();
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder expansion(int expansion);

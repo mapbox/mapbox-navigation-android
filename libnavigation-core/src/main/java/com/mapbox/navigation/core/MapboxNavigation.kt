@@ -247,10 +247,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         navigationOptions.eHorizonOptions.branchLength,
         true, // doNotRecalculateInUncertainState is not exposed and can't be changed at the moment
         navigationOptions.eHorizonOptions.minTimeDeltaBetweenUpdates,
-        AlertsServiceOptions( // todo currently all enabled by default, expose an option instead
-            true,
-            true,
-            true
+        AlertsServiceOptions(
+            navigationOptions.eHorizonOptions.alertServiceOptions.collectTunnels,
+            navigationOptions.eHorizonOptions.alertServiceOptions.collectBridges,
+            navigationOptions.eHorizonOptions.alertServiceOptions.collectRestrictedAreas
         )
     )
 
