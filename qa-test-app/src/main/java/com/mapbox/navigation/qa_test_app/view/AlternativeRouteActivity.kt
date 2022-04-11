@@ -327,6 +327,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private val routesObserver = RoutesObserver { result ->
+        Log.e("lp_test", "newRoutes: ${result.navigationRoutes.size}")
         CoroutineScope(Dispatchers.Main).launch {
             routeLineApi.setNavigationRoutes(
                 newRoutes = result.navigationRoutes,
