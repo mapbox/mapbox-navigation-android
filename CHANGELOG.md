@@ -7,6 +7,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
+- Fixed an issue where a call to `MapboxNavigation#stopTripSession` would clear the routes reference and led to a `RoutesObserver` notification with empty routes collection. [#5685](https://github.com/mapbox/mapbox-navigation-android/pull/5685)
 
 ## Mapbox Navigation SDK 2.5.0-alpha.2 - April 7, 2022
 
@@ -29,6 +30,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Known issues
 - Occasionally, the first `RouteProgress` update after setting new route might fail to be delivered due to the scheduling of route processing jobs.
 - When alternative routes that take advantage of the `AlternativeRouteMetadata` are reset because new become available, or changed manually by interacting with the map, there could be a brief flash of the full alternative route geometry which quickly recovers to a valid state.
+- Calling `MapboxNavigation#stopTripSession` clears the routes reference and leads to a `RoutesObserver` notification with empty routes collection.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:

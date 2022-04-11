@@ -567,11 +567,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun stopTripSession() {
         runIfNotDestroyed {
             latestLegIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex
-            internalSetNavigationRoutes(
-                routes = emptyList(),
-                legIndex = 0,
-                reason = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
-            )
             tripSession.stop()
         }
     }

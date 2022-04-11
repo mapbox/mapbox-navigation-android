@@ -297,7 +297,7 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun `trip session route is restored after trip session is restarted`() {
+    fun `trip session route is reset after trip session is restarted`() {
         createMapboxNavigation()
         val primary = mockk<NavigationRoute>()
         val routes = listOf(primary, mockk())
@@ -310,15 +310,6 @@ class MapboxNavigationTest {
             }
         }
         mapboxNavigation.stopTripSession()
-
-        coVerify(exactly = 1) {
-            tripSession.setRoutes(
-                routes = emptyList(),
-                legIndex = 0,
-                reason = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
-            )
-        }
-
         mapboxNavigation.startTripSession()
 
         coVerify(exactly = 1) {
@@ -1272,6 +1263,24 @@ class MapboxNavigationTest {
             assertEquals(1, routesSlot.size)
             assertEquals(routes, routesSlot.first())
         }
+
+    @Test
+    fun `stopping trip session does not clear the route`() = coroutineRule.runBlockingTest {
+        createMapboxNavigation()
+        every { directionsSession.initialLegIndex } returns 0
+        every { tripSession.isRunningWithForegroundService() } returns true
+        val routes = listOf<NavigationRoute>(mockk())
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.setNavigationRoutes(routes)
+        mapboxNavigation.stopTripSession()
+
+        verify(exactly = 1) {
+            directionsSession.setRoutes(routes, any(), any())
+        }
+        verify(exactly = 0) {
+            directionsSession.setRoutes(emptyList(), any(), any())
+        }
+    }
 
     @Test
     fun `refreshed route is set to trip session and directions session`() =
