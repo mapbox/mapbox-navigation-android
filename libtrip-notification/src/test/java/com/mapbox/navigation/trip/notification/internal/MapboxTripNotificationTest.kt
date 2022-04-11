@@ -1,6 +1,5 @@
 package com.mapbox.navigation.trip.notification.internal
 
-import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
@@ -13,14 +12,15 @@ import android.text.TextUtils
 import android.text.format.DateFormat
 import android.view.View
 import android.widget.RemoteViews
+import androidx.core.app.NotificationCompat
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
 import com.mapbox.navigation.base.internal.time.TimeFormatter
+import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.TripNotificationState
-import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
 import com.mapbox.navigation.trip.notification.R
 import com.mapbox.navigation.trip.notification.RemoteViewsProvider
 import com.mapbox.navigation.utils.internal.NOTIFICATION_ID
@@ -32,11 +32,14 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.util.Locale
@@ -55,6 +58,7 @@ class MapboxTripNotificationTest {
     private lateinit var collapsedViews: RemoteViews
     private lateinit var expandedViews: RemoteViews
     private val navigationOptions: NavigationOptions = mockk(relaxed = true)
+    private val interceptorOwner: TripNotificationInterceptorOwner = mockk(relaxed = true)
     private val distanceSpannable: SpannableString = mockk()
     private val distanceFormatter: DistanceFormatter
 
@@ -68,14 +72,21 @@ class MapboxTripNotificationTest {
     fun setUp() {
         mockkStatic(DateFormat::class)
         mockkStatic(PendingIntent::class)
+        mockkStatic(TimeFormatter::class)
         mockedContext = createContext()
         every { mockedContext.applicationContext } returns mockedContext
         every { navigationOptions.applicationContext } returns mockedContext
         mockRemoteViews()
         notification = MapboxTripNotification(
             navigationOptions,
+            interceptorOwner,
             distanceFormatter
         )
+    }
+
+    @After
+    fun teardown() {
+        unmockkAll()
     }
 
     private fun mockRemoteViews() {
@@ -174,17 +185,21 @@ class MapboxTripNotificationTest {
     }
 
     @Test
-    fun whenGetNotificationCalledThenNavigationNotificationProviderInteractedOnlyOnce() {
-        mockNotificationCreation()
+    fun getNotificationCreatesBuilderWithDefaults() {
+        mockkObject(NotificationBuilderProvider)
+        val builder = mockNotificationBuilder()
 
         notification.getNotification()
 
-        verify(exactly = 1) { NavigationNotificationProvider.buildNotification(any()) }
-
-        notification.getNotification()
-        notification.getNotification()
-
-        verify(exactly = 1) { NavigationNotificationProvider.buildNotification(any()) }
+        verify {
+            builder.setCategory(NotificationCompat.CATEGORY_SERVICE)
+            builder.priority = NotificationCompat.PRIORITY_MAX
+            builder.setSmallIcon(R.drawable.mapbox_ic_navigation)
+            builder.setCustomContentView(any())
+            builder.setCustomBigContentView(any())
+            builder.setOngoing(true)
+            builder.setContentIntent(any())
+        }
     }
 
     @Test
@@ -443,18 +458,46 @@ class MapboxTripNotificationTest {
         verify(exactly = 2) { expandedViews.setTextViewText(any(), STOP_SESSION) }
     }
 
+    @Test
+    fun useInterceptorOwnerInterceptorToBuildNotification() {
+        mockkObject(NotificationBuilderProvider)
+        every { NotificationBuilderProvider.create(any(), any()) } returns mockk(relaxed = true)
+        val notificationBuilderSlot = slot<NotificationCompat.Builder>()
+        every { interceptorOwner.interceptor } returns mockk(relaxed = true) {
+            every { intercept(capture(notificationBuilderSlot)) } answers { firstArg() }
+        }
+
+        val state = buildTripNotificationState(
+            null, 10.0, 10.0, null
+        )
+        notification.updateNotification(state)
+
+        assertTrue(notificationBuilderSlot.isCaptured)
+    }
+
+    @Test
+    fun theInterceptorCanModifyTheExtender() {
+        mockkObject(NotificationBuilderProvider)
+        every { NotificationBuilderProvider.create(any(), any()) } returns mockk(relaxed = true)
+        val notificationBuilderSlot = slot<NotificationCompat.Builder>()
+        every { interceptorOwner.interceptor } returns mockk(relaxed = true) {
+            every { intercept(capture(notificationBuilderSlot)) } answers {
+                firstArg<NotificationCompat.Builder>().extend(mockk())
+            }
+        }
+
+        val state = buildTripNotificationState(
+            null, 10.0, 10.0, null
+        )
+        notification.updateNotification(state)
+
+        verify { notificationBuilderSlot.captured.extend(any()) }
+    }
+
     private fun mockUpdateNotificationAndroidInteractions() {
         mockkStatic(TextUtils::class)
         val slot = slot<CharSequence>()
         every { TextUtils.isEmpty(capture(slot)) } answers { slot.captured.isEmpty() }
-
-        mockNotificationCreation()
-    }
-
-    private fun mockNotificationCreation() {
-        mockkObject(NavigationNotificationProvider)
-        val notificationMock = mockk<Notification>()
-        every { NavigationNotificationProvider.buildNotification(any()) } returns notificationMock
     }
 
     private fun mockBannerText(
@@ -480,5 +523,19 @@ class MapboxTripNotificationTest {
         every {
             TimeFormatter.formatTime(any(), capture(durationSlot), any(), any())
         } answers { "$suffix${durationSlot.captured}" }
+    }
+
+    private fun mockNotificationBuilder(): NotificationCompat.Builder {
+        val builder = mockk<NotificationCompat.Builder>(relaxed = true)
+        every { builder.setCategory(any()) } returns builder
+        every { builder.setPriority(any()) } returns builder
+        every { builder.setSmallIcon(any<Int>()) } returns builder
+        every { builder.setCustomContentView(any()) } returns builder
+        every { builder.setCustomBigContentView(any()) } returns builder
+        every { builder.setOngoing(any()) } returns builder
+        every { builder.setColor(any()) } returns builder
+        every { builder.setContentIntent(any()) } returns builder
+        every { NotificationBuilderProvider.create(any(), any()) } returns builder
+        return builder
     }
 }

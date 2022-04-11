@@ -29,13 +29,13 @@ import com.mapbox.api.directions.v5.models.StepManeuver.StepManeuverType
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.internal.maneuver.TurnIconHelper
 import com.mapbox.navigation.base.internal.time.TimeFormatter.formatTime
+import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.TripNotificationState
 import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.trip.notification.MapboxTripNotificationView
-import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
 import com.mapbox.navigation.trip.notification.R
 import com.mapbox.navigation.utils.internal.END_NAVIGATION_ACTION
 import com.mapbox.navigation.utils.internal.NAVIGATION_NOTIFICATION_CHANNEL
@@ -50,15 +50,17 @@ import java.util.Calendar
 /**
  * Default implementation of [TripNotification] interface
  *
- * @param navigationOptions is [NavigationOptions] used here to format distance and time
+ * @param navigationOptions usage is deprecated. Please use [TripNotificationOptions] for any
+ * customizes needed for this class.
  *
  * @property currentManeuverType This indicates the type of current maneuver. The same [BannerText.type] of primary [BannerInstructions]
  * @property currentManeuverModifier This indicates the mode of the maneuver. The same [BannerText.modifier] of primary [BannerInstructions]
  */
 @MapboxModule(MapboxModuleType.NavigationTripNotification)
 class MapboxTripNotification constructor(
-    private val navigationOptions: NavigationOptions,
-    private val distanceFormatter: DistanceFormatter
+    navigationOptions: NavigationOptions,
+    private val interceptorOwner: TripNotificationInterceptorOwner,
+    private val distanceFormatter: DistanceFormatter,
 ) : TripNotification {
 
     companion object {
@@ -69,6 +71,7 @@ class MapboxTripNotification constructor(
     }
 
     private val applicationContext = navigationOptions.applicationContext
+    private val timeFormatType = navigationOptions.timeFormatType
 
     @StepManeuverType
     var currentManeuverType: String? = null
@@ -120,8 +123,7 @@ class MapboxTripNotification constructor(
      */
     override fun getNotification(): Notification {
         if (!::notification.isInitialized) {
-            this.notification =
-                NavigationNotificationProvider.buildNotification(getNotificationBuilder())
+            this.notification = getNotificationBuilder().build()
         }
         return this.notification
     }
@@ -149,7 +151,7 @@ class MapboxTripNotification constructor(
         // buildRemoteViews() will rebuild the RemoteViews and clear the stored mActions.
         notificationView.buildRemoteViews(pendingCloseIntent)
         updateNotificationViews(state)
-        notification = NavigationNotificationProvider.buildNotification(getNotificationBuilder())
+        notification = getNotificationBuilder().build()
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
@@ -199,14 +201,14 @@ class MapboxTripNotification constructor(
     }
 
     private fun getNotificationBuilder(): NotificationCompat.Builder {
-        val builder =
-            NotificationCompat.Builder(applicationContext, NAVIGATION_NOTIFICATION_CHANNEL)
-                .setCategory(NotificationCompat.CATEGORY_SERVICE)
-                .setPriority(NotificationCompat.PRIORITY_MAX)
-                .setSmallIcon(R.drawable.mapbox_ic_navigation)
-                .setCustomContentView(notificationView.collapsedView)
-                .setCustomBigContentView(notificationView.expandedView)
-                .setOngoing(true)
+        val builder = NotificationBuilderProvider
+            .create(applicationContext, NAVIGATION_NOTIFICATION_CHANNEL)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setSmallIcon(R.drawable.mapbox_ic_navigation)
+            .setCustomContentView(notificationView.collapsedView)
+            .setCustomBigContentView(notificationView.expandedView)
+            .setOngoing(true)
 
         if (Build.VERSION.SDK_INT >= 31) {
             val color = ContextCompat.getColor(applicationContext, R.color.mapbox_notification_blue)
@@ -216,7 +218,8 @@ class MapboxTripNotification constructor(
         pendingOpenIntent?.let { pendingOpenIntent ->
             builder.setContentIntent(pendingOpenIntent)
         }
-        return builder
+
+        return interceptorOwner.interceptor?.intercept(builder) ?: builder
     }
 
     /**
@@ -300,7 +303,7 @@ class MapboxTripNotification constructor(
         time: Calendar = Calendar.getInstance()
     ): String? {
         return durationRemaining?.let {
-            val timeFormatType = navigationOptions.timeFormatType
+            val timeFormatType = timeFormatType
             val arrivalTime = formatTime(
                 time,
                 durationRemaining,

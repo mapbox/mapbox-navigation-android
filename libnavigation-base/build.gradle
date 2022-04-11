@@ -34,6 +34,7 @@ dependencies {
     implementation dependenciesList.mapboxNavigator
 
     implementation dependenciesList.androidXAnnotation
+    implementation dependenciesList.androidXCoreKtx
     implementation dependenciesList.coroutinesAndroid
     implementation dependenciesList.kotlinStdLib
 

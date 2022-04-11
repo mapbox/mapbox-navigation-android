@@ -59,6 +59,7 @@ package com.mapbox.navigation.core {
     method public void setRerouteOptionsAdapter(com.mapbox.navigation.core.reroute.RerouteOptionsAdapter? rerouteOptionsAdapter);
     method @Deprecated public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes, int initialLegIndex = 0);
     method @Deprecated public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
+    method public void setTripNotificationInterceptor(com.mapbox.navigation.base.trip.notification.TripNotificationInterceptor? interceptor);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void startReplayTripSession(boolean withForegroundService = true);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession(boolean withForegroundService = true);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession();
