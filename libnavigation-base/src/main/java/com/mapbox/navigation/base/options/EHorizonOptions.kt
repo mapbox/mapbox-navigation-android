@@ -22,12 +22,14 @@ import com.mapbox.navigation.base.trip.model.eh.EHorizon
  * @param minTimeDeltaBetweenUpdates the minimum time which should pass between consecutive
  * navigation statuses to update electronic horizon (seconds). If null electronic horizon will be
  * updated on each navigation status. Default value null
+ * @param alertServiceOptions control how Navigation SDK extracts road objects from the road graph and which objects are collected.
  */
 class EHorizonOptions private constructor(
     val length: Double,
     val expansion: Int,
     val branchLength: Double,
-    val minTimeDeltaBetweenUpdates: Double?
+    val minTimeDeltaBetweenUpdates: Double?,
+    val alertServiceOptions: AlertServiceOptions,
 ) {
 
     /**
@@ -38,6 +40,7 @@ class EHorizonOptions private constructor(
         expansion(expansion)
         branchLength(branchLength)
         minTimeDeltaBetweenUpdates(minTimeDeltaBetweenUpdates)
+        alertServiceOptions(alertServiceOptions)
     }
 
     /**
@@ -53,6 +56,7 @@ class EHorizonOptions private constructor(
         if (expansion != other.expansion) return false
         if (branchLength != other.branchLength) return false
         if (minTimeDeltaBetweenUpdates != other.minTimeDeltaBetweenUpdates) return false
+        if (alertServiceOptions != other.alertServiceOptions) return false
 
         return true
     }
@@ -65,6 +69,7 @@ class EHorizonOptions private constructor(
         result = 31 * result + expansion.hashCode()
         result = 31 * result + branchLength.hashCode()
         result = 31 * result + minTimeDeltaBetweenUpdates.hashCode()
+        result = 31 * result + alertServiceOptions.hashCode()
         return result
     }
 
@@ -76,7 +81,8 @@ class EHorizonOptions private constructor(
             "length=$length, " +
             "expansion=$expansion, " +
             "branchLength=$branchLength, " +
-            "minTimeDeltaBetweenUpdates=$minTimeDeltaBetweenUpdates" +
+            "minTimeDeltaBetweenUpdates=$minTimeDeltaBetweenUpdates, " +
+            "alertServiceOptions=$alertServiceOptions" +
             ")"
     }
 
@@ -89,6 +95,7 @@ class EHorizonOptions private constructor(
         private var expansion: Int = DEFAULT_EXPANSION
         private var branchLength: Double = DEFAULT_BRANCH_LENGTH
         private var minTimeDeltaBetweenUpdates: Double? = DEFAULT_MIN_DELTA
+        private var alertServiceOptions: AlertServiceOptions = AlertServiceOptions.Builder().build()
 
         /**
          * Override the minimum length of the EHorizon ahead of the current position.
@@ -141,6 +148,14 @@ class EHorizonOptions private constructor(
             }
 
         /**
+         * Control how Navigation SDK extracts road objects from the road graph and which objects are collected.
+         */
+        fun alertServiceOptions(alertServiceOptions: AlertServiceOptions): Builder =
+            apply {
+                this.alertServiceOptions = alertServiceOptions
+            }
+
+        /**
          * Build the [EHorizonOptions]
          */
         fun build(): EHorizonOptions {
@@ -148,7 +163,8 @@ class EHorizonOptions private constructor(
                 length = length,
                 expansion = expansion,
                 branchLength = branchLength,
-                minTimeDeltaBetweenUpdates = minTimeDeltaBetweenUpdates
+                minTimeDeltaBetweenUpdates = minTimeDeltaBetweenUpdates,
+                alertServiceOptions = alertServiceOptions,
             )
         }
 

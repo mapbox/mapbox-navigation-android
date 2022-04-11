@@ -16,6 +16,13 @@ class EHorizonOptionsTest : BuilderTest<EHorizonOptions, EHorizonOptions.Builder
         .expansion(1)
         .branchLength(150.0)
         .minTimeDeltaBetweenUpdates(1.0)
+        .alertServiceOptions(
+            AlertServiceOptions.Builder()
+                .collectTunnels(false)
+                .collectBridges(false)
+                .collectRestrictedAreas(true)
+                .build()
+        )
 
     @Test
     override fun trigger() {
