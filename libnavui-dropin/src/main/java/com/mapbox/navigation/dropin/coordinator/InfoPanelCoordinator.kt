@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
  */
 internal class InfoPanelCoordinator(
     private val context: NavigationViewContext,
-    infoPanel: ViewGroup,
+    private val infoPanel: ViewGroup,
     private val guidelineBottom: Guideline
 ) : UICoordinator<ViewGroup>(infoPanel) {
 
@@ -41,6 +41,10 @@ internal class InfoPanelCoordinator(
             destinationState.map { it.destination }.collect { destination ->
                 if (destination != null) behavior.collapse()
                 else behavior.hide()
+
+                // When BottomSheet is already in requested state, BottomSheetCallback won't be
+                // called leaving guideline in a wrong position.
+                setGuidelinePosition(infoPanel)
             }
         }
     }
@@ -72,15 +76,18 @@ internal class InfoPanelCoordinator(
         state = BottomSheetBehavior.STATE_HIDDEN
     }
 
+    private fun setGuidelinePosition(bottomSheet: View) {
+        val offsetBottom = (bottomSheet.parent as ViewGroup).height - bottomSheet.top
+        guidelineBottom.setGuidelineEnd(offsetBottom)
+    }
+
     private val updateGuideline = object : BottomSheetBehavior.BottomSheetCallback() {
         override fun onStateChanged(bottomSheet: View, newState: Int) {
-            guidelineBottom.setGuidelineEnd(offsetBottom(bottomSheet))
+            setGuidelinePosition(bottomSheet)
         }
 
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
-            guidelineBottom.setGuidelineEnd(offsetBottom(bottomSheet))
+            setGuidelinePosition(bottomSheet)
         }
-
-        private fun offsetBottom(v: View) = (v.parent as ViewGroup).height - v.top
     }
 }
