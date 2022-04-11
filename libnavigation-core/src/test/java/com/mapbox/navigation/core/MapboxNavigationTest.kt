@@ -1227,6 +1227,43 @@ class MapboxNavigationTest {
         }
 
     @Test
+    fun `route refresh - empty native alternatives returned doesn't clear alternatives metadata`() =
+        coroutineRule.runBlockingTest {
+            createMapboxNavigation()
+            val primary: NavigationRoute = mockk {
+                every { directionsRoute } returns mockk()
+            }
+            val routes = listOf(primary)
+            val initialLegIndex = 0
+            val routeObserversSlot = mutableListOf<RoutesObserver>()
+            every { tripSession.getState() } returns TripSessionState.STARTED
+            every { directionsSession.initialLegIndex } returns initialLegIndex
+
+            val refreshedRoutes = listOf(mockk<NavigationRoute>())
+            coEvery {
+                tripSession.setRoutes(
+                    refreshedRoutes,
+                    initialLegIndex,
+                    RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
+                )
+            } returns NativeSetRouteResult()
+            every { routeRefreshController.restart(primary, captureLambda()) } answers {
+                lambda<(List<NavigationRoute>) -> Unit>().captured.invoke(refreshedRoutes)
+            }
+
+            verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
+            routeObserversSlot.forEach {
+                it.onRoutesChanged(
+                    RoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+                )
+            }
+
+            verify(exactly = 0) {
+                routeAlternativesController.processAlternativesMetadata(any(), any())
+            }
+        }
+
+    @Test
     fun `correct order of actions when trip session started before routes are processed`() =
         coroutineRule.runBlockingTest {
             every { directionsSession.initialLegIndex } returns 0

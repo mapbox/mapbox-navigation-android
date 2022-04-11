@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.trip.session
 
 import android.location.Location
+import androidx.annotation.MainThread
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
@@ -54,6 +55,7 @@ import kotlin.math.max
  * @param navigator Native navigator
  * @param threadController controller for main/io jobs
  */
+@MainThread
 internal class MapboxTripSession(
     override val tripService: TripService,
     private val tripSessionLocationEngine: TripSessionLocationEngine,
@@ -81,8 +83,7 @@ internal class MapboxTripSession(
     ): NativeSetRouteResult {
         logD("routes update (reason: $reason, count: ${routes.size}) - starting", LOG_CATEGORY)
         isUpdatingRoute = true
-        val processedAlternatives = mutableListOf<RouteAlternative>()
-        val updateJobs: List<Job> = when (reason) {
+        val result = when (reason) {
             RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
             RoutesExtra.ROUTES_UPDATE_REASON_NEW,
             RoutesExtra.ROUTES_UPDATE_REASON_REROUTE -> {
@@ -93,6 +94,7 @@ internal class MapboxTripSession(
                 updateLegIndexJob?.cancel()
                 updateRouteProgressJob?.cancel()
 
+                val processedAlternatives = mutableListOf<RouteAlternative>()
                 val updateRouteJob = threadController.getMainScopeAndRootJob().scope.launch(
                     Dispatchers.Main.immediate
                 ) {
@@ -120,48 +122,32 @@ internal class MapboxTripSession(
                         )
                         logD("alternative routes update - finished", LOG_CATEGORY)
                     }
-
-                listOf(
-                    updateRouteJob,
-                    updateAlternativesJob
+                updateRouteJob.join()
+                updateAlternativesJob.join()
+                NativeSetRouteResult(
+                    nativeAlternatives = processedAlternatives
                 )
             }
             RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE -> {
-                listOf(
-                    threadController.getMainScopeAndRootJob().scope.launch(
-                        Dispatchers.Main.immediate
-                    ) {
-                        processedAlternatives.addAll(
-                            navigator.setAlternativeRoutes(routes.drop(1))
-                        )
-                    }
+                NativeSetRouteResult(
+                    nativeAlternatives = navigator.setAlternativeRoutes(routes.drop(1))
                 )
             }
             RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
-                listOf(
-                    threadController.getMainScopeAndRootJob().scope.launch(
-                        Dispatchers.Main.immediate
-                    ) {
-                        if (routes.isNotEmpty()) {
-                            navigator.updateAnnotations(routes.first())
-                            this@MapboxTripSession.primaryRoute = routes.first()
-                        } else {
-                            logW("Cannot refresh route. Route can't be null", LOG_CATEGORY)
-                        }
-                    }
-                )
+                if (routes.isNotEmpty()) {
+                    navigator.updateAnnotations(routes.first())
+                    this@MapboxTripSession.primaryRoute = routes.first()
+                } else {
+                    logW("Cannot refresh route. Route can't be null", LOG_CATEGORY)
+                }
+
+                NativeSetRouteResult()
             }
             else -> throw IllegalArgumentException("Unsupported route update reason: $reason")
         }
-
-        updateJobs.forEach {
-            it.join()
-        }
         isUpdatingRoute = false
         logD("routes update (reason: $reason) - finished", LOG_CATEGORY)
-        return NativeSetRouteResult(
-            nativeAlternatives = processedAlternatives
-        )
+        return result
     }
 
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()

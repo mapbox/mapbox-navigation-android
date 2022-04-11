@@ -826,11 +826,14 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         @RoutesExtra.RoutesUpdateReason reason: String,
     ) {
         routeAlternativesController.pauseUpdates()
-        val result = tripSession.setRoutes(routes, legIndex, reason)
-        routeAlternativesController.processAlternativesMetadata(
-            routes,
-            result.nativeAlternatives
-        )
+        tripSession.setRoutes(routes, legIndex, reason).run {
+            if (nativeAlternatives != null) {
+                routeAlternativesController.processAlternativesMetadata(
+                    routes,
+                    nativeAlternatives
+                )
+            }
+        }
         routeAlternativesController.resumeUpdates()
     }
 
