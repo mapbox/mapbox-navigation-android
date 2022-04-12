@@ -9,6 +9,7 @@ import com.mapbox.common.module.provider.ModuleProviderArgument
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
+import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
@@ -63,6 +64,10 @@ internal class TripServiceActivity : AppCompatActivity() {
 
                 arrayOf(
                     ModuleProviderArgument(NavigationOptions::class.java, options),
+                    ModuleProviderArgument(
+                        TripNotificationInterceptorOwner::class.java,
+                        TripNotificationInterceptorOwner()
+                    ),
                     ModuleProviderArgument(
                         DistanceFormatter::class.java,
                         MapboxDistanceFormatter(options.distanceFormatterOptions)
