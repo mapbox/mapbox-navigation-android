@@ -50,9 +50,6 @@ import java.util.Calendar
 /**
  * Default implementation of [TripNotification] interface
  *
- * @param navigationOptions usage is deprecated. Please use [TripNotificationOptions] for any
- * customizes needed for this class.
- *
  * @property currentManeuverType This indicates the type of current maneuver. The same [BannerText.type] of primary [BannerInstructions]
  * @property currentManeuverModifier This indicates the mode of the maneuver. The same [BannerText.modifier] of primary [BannerInstructions]
  */
