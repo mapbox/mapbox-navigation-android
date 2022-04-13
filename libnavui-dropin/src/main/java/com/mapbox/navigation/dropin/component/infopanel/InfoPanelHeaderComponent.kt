@@ -96,11 +96,11 @@ internal class InfoPanelHeaderComponent(
             destinationViewModel.state.value.destination
         ) { lastPoint, destination ->
             routesViewModel.invoke(RoutesAction.FetchPoints(listOf(lastPoint, destination.point)))
-            waitForFetched()
+            waitForReady()
         } ?: false
     }
 
-    private suspend fun waitForFetched(): Boolean {
+    private suspend fun waitForReady(): Boolean {
         routesViewModel.state.takeWhile { it is RoutesState.Fetching }.collect()
         return routesViewModel.state.value is RoutesState.Ready
     }
