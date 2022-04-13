@@ -5,9 +5,9 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.binder.navigationListOf
+import com.mapbox.navigation.dropin.internal.extensions.navigationListOf
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@ExperimentalPreviewMapboxNavigationAPI
 internal class InfoPanelBinder(
     private val headerBinder: UIBinder,
     private val contentBinder: UIBinder?

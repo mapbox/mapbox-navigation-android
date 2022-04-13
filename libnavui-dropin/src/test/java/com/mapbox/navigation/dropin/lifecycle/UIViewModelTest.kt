@@ -23,7 +23,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
+@OptIn(ExperimentalCoroutinesApi::class)
+@ExperimentalPreviewMapboxNavigationAPI
 class UIViewModelTest {
 
     @get:Rule
@@ -125,6 +126,7 @@ class UIViewModelTest {
     }
 }
 
+@ExperimentalPreviewMapboxNavigationAPI
 private class AdderViewModel(default: Int) : UIViewModel<Int, Int>(default) {
     override fun process(mapboxNavigation: MapboxNavigation, state: Int, action: Int): Int {
         return state + action

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin
 
 import android.content.Context
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
@@ -12,6 +13,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
  * [NavigationView]. If not specified, [NavigationView] uses the default values defined for
  * each of these properties.
  */
+@ExperimentalPreviewMapboxNavigationAPI
 class ViewOptionsCustomization {
     /**
      * Provide custom navigation style for day mode.

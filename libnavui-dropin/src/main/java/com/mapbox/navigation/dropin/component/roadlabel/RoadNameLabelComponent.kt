@@ -4,6 +4,7 @@ import androidx.core.view.isVisible
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.bindgen.Expected
 import com.mapbox.maps.Style
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -17,6 +18,7 @@ import com.mapbox.navigation.ui.shield.model.RouteShieldResult
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
+@ExperimentalPreviewMapboxNavigationAPI
 internal class RoadNameLabelComponent(
     private val roadNameView: MapboxRoadNameView,
     private val locationViewModel: LocationViewModel,

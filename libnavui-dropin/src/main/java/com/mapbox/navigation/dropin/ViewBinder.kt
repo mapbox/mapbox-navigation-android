@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin
 
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.binder.infopanel.InfoPanelTripProgressBinder
 import com.mapbox.navigation.dropin.component.speedlimit.SpeedLimitViewBinder
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * A class that is a central place to hold the definitions for custom view injections and view(s)
  * swapping.
  */
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class ViewBinder {
 
     private val _speedLimit: MutableStateFlow<UIBinder> = MutableStateFlow(SpeedLimitViewBinder())

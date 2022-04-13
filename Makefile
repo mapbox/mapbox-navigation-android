@@ -21,11 +21,9 @@ libnavigation-android \
 libnavui-speedlimit \
 libnavui-shield \
 libnavui-status \
-
-NOT_RELEASED_UI_MODULES = \
 libnavui-dropin \
 
-UI_MODULES = $(RELEASED_UI_MODULES)$(NOT_RELEASED_UI_MODULES)
+UI_MODULES = $(RELEASED_UI_MODULES)
 
 APPLICATION_MODULES = \
 qa-test-app \
@@ -171,6 +169,7 @@ ui-check-api: assemble-ui-release
 	./gradlew :libnavui-shield:checkApi -PhidePackage=com.mapbox.navigation.ui.shield.internal
 	./gradlew :libnavui-speedlimit:checkApi -PhidePackage=com.mapbox.navigation.ui.speedlimit.internal -PhideId=ReferencesHidden
 	./gradlew :libnavui-status:checkApi -PhidePackage=com.mapbox.navigation.ui.status.internal
+	./gradlew :libnavui-dropin:checkApi -PhidePackage=com.mapbox.navigation.dropin.internal
 
 .PHONY: ui-update-api
 ui-update-api: assemble-ui-release
@@ -183,6 +182,7 @@ ui-update-api: assemble-ui-release
 	./gradlew :libnavui-shield:updateApi -PhidePackage=com.mapbox.navigation.ui.shield.internal
 	./gradlew :libnavui-speedlimit:updateApi -PhidePackage=com.mapbox.navigation.ui.speedlimit.internal
 	./gradlew :libnavui-status:updateApi -PhidePackage=com.mapbox.navigation.ui.status.internal
+	./gradlew :libnavui-dropin:updateApi -PhidePackage=com.mapbox.navigation.dropin.internal
 
 .PHONY: update-metalava
 update-metalava:

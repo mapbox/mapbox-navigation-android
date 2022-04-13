@@ -10,9 +10,9 @@ import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.component.roadlabel.RoadNameLabelComponent
 import com.mapbox.navigation.dropin.databinding.MapboxRoadNameLayoutBinding
-import com.mapbox.navigation.dropin.lifecycle.reloadOnChange
+import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@ExperimentalPreviewMapboxNavigationAPI
 internal class RoadNameViewBinder(
     private val context: NavigationViewContext
 ) : UIBinder {

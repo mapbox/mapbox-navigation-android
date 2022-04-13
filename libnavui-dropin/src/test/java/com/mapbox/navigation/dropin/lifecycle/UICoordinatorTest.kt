@@ -18,7 +18,8 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
+@ExperimentalPreviewMapboxNavigationAPI
 class UICoordinatorTest {
 
     @get:Rule
@@ -106,6 +107,7 @@ class UICoordinatorTest {
     }
 }
 
+@ExperimentalPreviewMapboxNavigationAPI
 private class TestUICoordinator(viewGroup: ViewGroup) : UICoordinator<ViewGroup>(viewGroup) {
     val flow = MutableSharedFlow<UIBinder>()
 

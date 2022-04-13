@@ -13,8 +13,9 @@ import com.mapbox.navigation.dropin.component.audioguidance.AudioGuidanceButtonC
 import com.mapbox.navigation.dropin.component.cameramode.CameraModeButtonComponent
 import com.mapbox.navigation.dropin.component.recenter.RecenterButtonComponent
 import com.mapbox.navigation.dropin.databinding.MapboxActionButtonsLayoutBinding
+import com.mapbox.navigation.dropin.internal.extensions.navigationListOf
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@ExperimentalPreviewMapboxNavigationAPI
 internal class ActionButtonBinder(
     private val navigationViewContext: NavigationViewContext
 ) : UIBinder {

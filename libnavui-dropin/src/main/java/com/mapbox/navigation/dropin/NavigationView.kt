@@ -31,6 +31,7 @@ import com.mapbox.navigation.dropin.internal.extensions.toComponentActivityRef
 import com.mapbox.navigation.dropin.internal.extensions.toLifecycleOwner
 import com.mapbox.navigation.dropin.internal.extensions.toViewModelStoreOwner
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * An Android [View] that creates the drop-in UI.
@@ -58,7 +59,8 @@ import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
  *
  * A Mapbox access token must also be set by the developer (to initialize navigation).
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@ExperimentalPreviewMapboxNavigationAPI
+@OptIn(ExperimentalCoroutinesApi::class)
 class NavigationView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -126,6 +128,9 @@ class NavigationView @JvmOverloads constructor(
         )
     }
 
+    /**
+     * Provides access to [ViewLifecycleRegistry]
+     */
     override fun getLifecycle(): Lifecycle = viewLifecycleRegistry
 
     /**

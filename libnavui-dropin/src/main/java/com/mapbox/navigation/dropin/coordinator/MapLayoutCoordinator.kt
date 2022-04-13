@@ -4,6 +4,7 @@ import android.view.ViewGroup
 import androidx.transition.Scene
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.R
@@ -20,6 +21,7 @@ import kotlinx.coroutines.launch
 /**
  * Coordinator for inflating [MapView].
  */
+@ExperimentalPreviewMapboxNavigationAPI
 internal class MapLayoutCoordinator(
     private val navigationViewContext: NavigationViewContext,
     private val binding: MapboxNavigationViewLayoutBinding

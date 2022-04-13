@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin.component.marker
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.map
 /**
  * Component for rendering all drop-in UI map markers.
  */
+@ExperimentalPreviewMapboxNavigationAPI
 internal open class MapMarkersComponent(
     protected val mapView: MapView,
     protected val context: NavigationViewContext

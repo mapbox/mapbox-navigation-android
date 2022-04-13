@@ -2,10 +2,12 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
+apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'com.jaredsburrows.license'
 apply plugin: 'com.mapbox.android.sdk.versions'
 apply from: "${rootDir}/gradle/ktlint.gradle"
 apply from: file("${rootDir}/gradle/artifact-settings.gradle")
+apply from: "${rootDir}/gradle/kdoc-settings.gradle"
 
 version = project.ext.versionName
 group = project.ext.mapboxArtifactGroupId
@@ -70,5 +72,20 @@ dependencies {
     testImplementation(dependenciesList.mapboxNavigator)
 }
 
+dokkaHtml {
+    outputDirectory.set(kdocPath)
+    moduleName.set("UI Drop-In")
+    dokkaSourceSets {
+        configureEach {
+            reportUndocumented.set(true)
+            perPackageOption {
+                matchingRegex.set("com.mapbox.navigation.dropin.internal.*")
+                suppress.set(true)
+            }
+        }
+    }
+}
+
 apply from: "${rootDir}/gradle/track-public-apis.gradle"
 apply from: "${rootDir}/gradle/jacoco.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"

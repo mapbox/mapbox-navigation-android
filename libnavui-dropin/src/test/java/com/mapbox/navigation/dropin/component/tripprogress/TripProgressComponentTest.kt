@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin.component.tripprogress
 
 import android.os.Build
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
@@ -22,6 +23,7 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.N])
+@ExperimentalPreviewMapboxNavigationAPI
 @ExperimentalCoroutinesApi
 class TripProgressComponentTest {
 

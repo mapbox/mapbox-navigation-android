@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin
 
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.binder.UIBinder
 
 /**
@@ -7,6 +8,7 @@ import com.mapbox.navigation.dropin.binder.UIBinder
  * [NavigationView]. If not specified, [NavigationView] uses the default [UIBinder] defined for
  * each of these views.
  */
+@ExperimentalPreviewMapboxNavigationAPI
 class ViewBinderCustomization {
 
     /**

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin.component.infopanel
 
 import androidx.core.view.isVisible
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 
+@ExperimentalPreviewMapboxNavigationAPI
 internal class InfoPanelHeaderComponent(
     private val binding: MapboxInfoPanelHeaderLayoutBinding,
     private val navigationStateViewModel: NavigationStateViewModel,

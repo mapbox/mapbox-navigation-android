@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin
 
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.binder.EmptyBinder
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.binder.infopanel.InfoPanelTripProgressBinder
@@ -9,6 +10,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
+@ExperimentalPreviewMapboxNavigationAPI
 internal class ViewBinderTest {
 
     lateinit var sut: ViewBinder

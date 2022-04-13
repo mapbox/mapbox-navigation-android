@@ -1,0 +1,513 @@
+// Signature format: 3.0
+package com.mapbox.navigation.dropin {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NavigationView extends android.widget.FrameLayout implements androidx.lifecycle.LifecycleOwner {
+    ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null, String accessToken = attrs.navigationViewAccessToken(context));
+    ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null);
+    ctor public NavigationView(android.content.Context context);
+    method public void customizeMapView(com.mapbox.maps.MapView? mapView);
+    method public void customizeViewBinders(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewBinderCustomization,kotlin.Unit> action);
+    method public void customizeViewOptions(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewOptionsCustomization,kotlin.Unit> action);
+    method public androidx.lifecycle.Lifecycle getLifecycle();
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ViewBinderCustomization {
+    ctor public ViewBinderCustomization();
+    method public com.mapbox.navigation.dropin.binder.UIBinder? getActionButtonsBinder();
+    method public com.mapbox.navigation.dropin.binder.UIBinder? getInfoPanelContentBinder();
+    method public com.mapbox.navigation.dropin.binder.UIBinder? getInfoPanelHeaderBinder();
+    method public com.mapbox.navigation.dropin.binder.UIBinder? getInfoPanelTripProgressBinder();
+    method public com.mapbox.navigation.dropin.binder.UIBinder? getManeuverBinder();
+    method public com.mapbox.navigation.dropin.binder.UIBinder? getRoadNameBinder();
+    method public com.mapbox.navigation.dropin.binder.UIBinder? getSpeedLimitBinder();
+    method public void setActionButtonsBinder(com.mapbox.navigation.dropin.binder.UIBinder? p);
+    method public void setInfoPanelContentBinder(com.mapbox.navigation.dropin.binder.UIBinder? p);
+    method public void setInfoPanelHeaderBinder(com.mapbox.navigation.dropin.binder.UIBinder? p);
+    method public void setInfoPanelTripProgressBinder(com.mapbox.navigation.dropin.binder.UIBinder? p);
+    method public void setManeuverBinder(com.mapbox.navigation.dropin.binder.UIBinder? p);
+    method public void setRoadNameBinder(com.mapbox.navigation.dropin.binder.UIBinder? p);
+    method public void setSpeedLimitBinder(com.mapbox.navigation.dropin.binder.UIBinder? p);
+    property public final com.mapbox.navigation.dropin.binder.UIBinder? actionButtonsBinder;
+    property public final com.mapbox.navigation.dropin.binder.UIBinder? infoPanelContentBinder;
+    property public final com.mapbox.navigation.dropin.binder.UIBinder? infoPanelHeaderBinder;
+    property public final com.mapbox.navigation.dropin.binder.UIBinder? infoPanelTripProgressBinder;
+    property public final com.mapbox.navigation.dropin.binder.UIBinder? maneuverBinder;
+    property public final com.mapbox.navigation.dropin.binder.UIBinder? roadNameBinder;
+    property public final com.mapbox.navigation.dropin.binder.UIBinder? speedLimitBinder;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ViewOptionsCustomization {
+    ctor public ViewOptionsCustomization();
+    method public String? getMapStyleUriDay();
+    method public String? getMapStyleUriNight();
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions? getRouteArrowOptions();
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions? getRouteLineOptions();
+    method public void setMapStyleUriDay(String? p);
+    method public void setMapStyleUriNight(String? p);
+    method public void setRouteArrowOptions(com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions? p);
+    method public void setRouteLineOptions(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions? p);
+    property public final String? mapStyleUriDay;
+    property public final String? mapStyleUriNight;
+    property public final com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions? routeArrowOptions;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions? routeLineOptions;
+    field public static final com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion Companion;
+  }
+
+  public static final class ViewOptionsCustomization.Companion {
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions defaultRouteArrowOptions(android.content.Context context);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions defaultRouteLineOptions(android.content.Context context);
+  }
+
+}
+
+package com.mapbox.navigation.dropin.binder {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface Binder<T> {
+    method public com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver bind(T? viewGroup);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface UIBinder extends com.mapbox.navigation.dropin.binder.Binder<android.view.ViewGroup> {
+    field public static final com.mapbox.navigation.dropin.binder.UIBinder.Companion Companion;
+  }
+
+  public static final class UIBinder.Companion {
+    method public com.mapbox.navigation.dropin.binder.UIBinder getUSE_DEFAULT();
+    property public final com.mapbox.navigation.dropin.binder.UIBinder USE_DEFAULT;
+  }
+
+}
+
+package com.mapbox.navigation.dropin.component.audioguidance {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class AudioAction {
+  }
+
+  public static final class AudioAction.Mute extends com.mapbox.navigation.dropin.component.audioguidance.AudioAction {
+    field public static final com.mapbox.navigation.dropin.component.audioguidance.AudioAction.Mute INSTANCE;
+  }
+
+  public static final class AudioAction.Toggle extends com.mapbox.navigation.dropin.component.audioguidance.AudioAction {
+    field public static final com.mapbox.navigation.dropin.component.audioguidance.AudioAction.Toggle INSTANCE;
+  }
+
+  public static final class AudioAction.Unmute extends com.mapbox.navigation.dropin.component.audioguidance.AudioAction {
+    field public static final com.mapbox.navigation.dropin.component.audioguidance.AudioAction.Unmute INSTANCE;
+  }
+
+  public final class AudioGuidanceState {
+    method public boolean component1();
+    method public com.mapbox.navigation.dropin.component.audioguidance.AudioGuidanceState copy(boolean isMuted);
+    method public boolean isMuted();
+    property public final boolean isMuted;
+  }
+
+}
+
+package com.mapbox.navigation.dropin.component.camera {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class CameraAction {
+  }
+
+  public static final class CameraAction.SaveMapState extends com.mapbox.navigation.dropin.component.camera.CameraAction {
+    ctor public CameraAction.SaveMapState(com.mapbox.maps.CameraState mapState);
+    method public com.mapbox.maps.CameraState component1();
+    method public com.mapbox.navigation.dropin.component.camera.CameraAction.SaveMapState copy(com.mapbox.maps.CameraState mapState);
+    method public com.mapbox.maps.CameraState getMapState();
+    property public final com.mapbox.maps.CameraState mapState;
+  }
+
+  public static final class CameraAction.ToFollowing extends com.mapbox.navigation.dropin.component.camera.CameraAction {
+    field public static final com.mapbox.navigation.dropin.component.camera.CameraAction.ToFollowing INSTANCE;
+  }
+
+  public static final class CameraAction.ToIdle extends com.mapbox.navigation.dropin.component.camera.CameraAction {
+    field public static final com.mapbox.navigation.dropin.component.camera.CameraAction.ToIdle INSTANCE;
+  }
+
+  public static final class CameraAction.ToOverview extends com.mapbox.navigation.dropin.component.camera.CameraAction {
+    field public static final com.mapbox.navigation.dropin.component.camera.CameraAction.ToOverview INSTANCE;
+  }
+
+  public static final class CameraAction.UpdatePadding extends com.mapbox.navigation.dropin.component.camera.CameraAction {
+    ctor public CameraAction.UpdatePadding(com.mapbox.maps.EdgeInsets padding);
+    method public com.mapbox.maps.EdgeInsets component1();
+    method public com.mapbox.navigation.dropin.component.camera.CameraAction.UpdatePadding copy(com.mapbox.maps.EdgeInsets padding);
+    method public com.mapbox.maps.EdgeInsets getPadding();
+    property public final com.mapbox.maps.EdgeInsets padding;
+  }
+
+  public final class CameraState {
+    method public com.mapbox.navigation.dropin.component.camera.TargetCameraMode component1();
+    method public com.mapbox.maps.EdgeInsets component2();
+    method public com.mapbox.maps.CameraState? component3();
+    method public com.mapbox.navigation.dropin.component.camera.CameraState copy(com.mapbox.navigation.dropin.component.camera.TargetCameraMode cameraMode, com.mapbox.maps.EdgeInsets cameraPadding, com.mapbox.maps.CameraState? mapCameraState);
+    method public com.mapbox.navigation.dropin.component.camera.TargetCameraMode getCameraMode();
+    method public com.mapbox.maps.EdgeInsets getCameraPadding();
+    method public com.mapbox.maps.CameraState? getMapCameraState();
+    property public final com.mapbox.navigation.dropin.component.camera.TargetCameraMode cameraMode;
+    property public final com.mapbox.maps.EdgeInsets cameraPadding;
+    property public final com.mapbox.maps.CameraState? mapCameraState;
+  }
+
+  public abstract sealed class TargetCameraMode {
+  }
+
+  public static final class TargetCameraMode.Following extends com.mapbox.navigation.dropin.component.camera.TargetCameraMode {
+    field public static final com.mapbox.navigation.dropin.component.camera.TargetCameraMode.Following INSTANCE;
+  }
+
+  public static final class TargetCameraMode.Idle extends com.mapbox.navigation.dropin.component.camera.TargetCameraMode {
+    field public static final com.mapbox.navigation.dropin.component.camera.TargetCameraMode.Idle INSTANCE;
+  }
+
+  public static final class TargetCameraMode.Overview extends com.mapbox.navigation.dropin.component.camera.TargetCameraMode {
+    field public static final com.mapbox.navigation.dropin.component.camera.TargetCameraMode.Overview INSTANCE;
+  }
+
+}
+
+package com.mapbox.navigation.dropin.component.destination {
+
+  public final class Destination {
+    method public com.mapbox.geojson.Point component1();
+    method public java.util.List<com.mapbox.api.geocoding.v5.models.CarmenFeature>? component2();
+    method public com.mapbox.navigation.dropin.component.destination.Destination copy(com.mapbox.geojson.Point point, java.util.List<? extends com.mapbox.api.geocoding.v5.models.CarmenFeature>? features);
+    method public java.util.List<com.mapbox.api.geocoding.v5.models.CarmenFeature>? getFeatures();
+    method public com.mapbox.geojson.Point getPoint();
+    property public final java.util.List<com.mapbox.api.geocoding.v5.models.CarmenFeature>? features;
+    property public final com.mapbox.geojson.Point point;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class DestinationAction {
+  }
+
+  public static final class DestinationAction.DidReverseGeocode extends com.mapbox.navigation.dropin.component.destination.DestinationAction {
+    ctor public DestinationAction.DidReverseGeocode(com.mapbox.geojson.Point point, java.util.List<? extends com.mapbox.api.geocoding.v5.models.CarmenFeature> features);
+    method public com.mapbox.geojson.Point component1();
+    method public java.util.List<com.mapbox.api.geocoding.v5.models.CarmenFeature> component2();
+    method public com.mapbox.navigation.dropin.component.destination.DestinationAction.DidReverseGeocode copy(com.mapbox.geojson.Point point, java.util.List<? extends com.mapbox.api.geocoding.v5.models.CarmenFeature> features);
+    method public java.util.List<com.mapbox.api.geocoding.v5.models.CarmenFeature> getFeatures();
+    method public com.mapbox.geojson.Point getPoint();
+    property public final java.util.List<com.mapbox.api.geocoding.v5.models.CarmenFeature> features;
+    property public final com.mapbox.geojson.Point point;
+  }
+
+  public static final class DestinationAction.SetDestination extends com.mapbox.navigation.dropin.component.destination.DestinationAction {
+    ctor public DestinationAction.SetDestination(com.mapbox.navigation.dropin.component.destination.Destination? destination);
+    method public com.mapbox.navigation.dropin.component.destination.Destination? component1();
+    method public com.mapbox.navigation.dropin.component.destination.DestinationAction.SetDestination copy(com.mapbox.navigation.dropin.component.destination.Destination? destination);
+    method public com.mapbox.navigation.dropin.component.destination.Destination? getDestination();
+    property public final com.mapbox.navigation.dropin.component.destination.Destination? destination;
+  }
+
+  public final class DestinationState {
+    method public com.mapbox.navigation.dropin.component.destination.Destination? component1();
+    method public com.mapbox.navigation.dropin.component.destination.DestinationState copy(com.mapbox.navigation.dropin.component.destination.Destination? destination);
+    method public com.mapbox.navigation.dropin.component.destination.Destination? getDestination();
+    property public final com.mapbox.navigation.dropin.component.destination.Destination? destination;
+  }
+
+}
+
+package com.mapbox.navigation.dropin.component.location {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class LocationAction {
+  }
+
+  public static final class LocationAction.Update extends com.mapbox.navigation.dropin.component.location.LocationAction {
+    ctor public LocationAction.Update(com.mapbox.navigation.core.trip.session.LocationMatcherResult result);
+    method public com.mapbox.navigation.core.trip.session.LocationMatcherResult component1();
+    method public com.mapbox.navigation.dropin.component.location.LocationAction.Update copy(com.mapbox.navigation.core.trip.session.LocationMatcherResult result);
+    method public com.mapbox.navigation.core.trip.session.LocationMatcherResult getResult();
+    property public final com.mapbox.navigation.core.trip.session.LocationMatcherResult result;
+  }
+
+}
+
+package com.mapbox.navigation.dropin.component.navigation {
+
+  public abstract sealed class NavigationState {
+  }
+
+  public static final class NavigationState.ActiveNavigation extends com.mapbox.navigation.dropin.component.navigation.NavigationState {
+    field public static final com.mapbox.navigation.dropin.component.navigation.NavigationState.ActiveNavigation INSTANCE;
+  }
+
+  public static final class NavigationState.Arrival extends com.mapbox.navigation.dropin.component.navigation.NavigationState {
+    field public static final com.mapbox.navigation.dropin.component.navigation.NavigationState.Arrival INSTANCE;
+  }
+
+  public static final class NavigationState.DestinationPreview extends com.mapbox.navigation.dropin.component.navigation.NavigationState {
+    field public static final com.mapbox.navigation.dropin.component.navigation.NavigationState.DestinationPreview INSTANCE;
+  }
+
+  public static final class NavigationState.FreeDrive extends com.mapbox.navigation.dropin.component.navigation.NavigationState {
+    field public static final com.mapbox.navigation.dropin.component.navigation.NavigationState.FreeDrive INSTANCE;
+  }
+
+  public static final class NavigationState.RoutePreview extends com.mapbox.navigation.dropin.component.navigation.NavigationState {
+    field public static final com.mapbox.navigation.dropin.component.navigation.NavigationState.RoutePreview INSTANCE;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class NavigationStateAction {
+  }
+
+  public static final class NavigationStateAction.Update extends com.mapbox.navigation.dropin.component.navigation.NavigationStateAction {
+    ctor public NavigationStateAction.Update(com.mapbox.navigation.dropin.component.navigation.NavigationState state);
+    method public com.mapbox.navigation.dropin.component.navigation.NavigationState component1();
+    method public com.mapbox.navigation.dropin.component.navigation.NavigationStateAction.Update copy(com.mapbox.navigation.dropin.component.navigation.NavigationState state);
+    method public com.mapbox.navigation.dropin.component.navigation.NavigationState getState();
+    property public final com.mapbox.navigation.dropin.component.navigation.NavigationState state;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NavigationStateViewModel extends com.mapbox.navigation.dropin.lifecycle.UIViewModel<com.mapbox.navigation.dropin.component.navigation.NavigationState,com.mapbox.navigation.dropin.component.navigation.NavigationStateAction> {
+    ctor public NavigationStateViewModel(com.mapbox.navigation.dropin.component.navigation.NavigationState p);
+    method public com.mapbox.navigation.dropin.component.navigation.NavigationState process(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation, com.mapbox.navigation.dropin.component.navigation.NavigationState state, com.mapbox.navigation.dropin.component.navigation.NavigationStateAction action);
+  }
+
+}
+
+package com.mapbox.navigation.dropin.component.routefetch {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class RoutesAction {
+  }
+
+  public static final class RoutesAction.Canceled extends com.mapbox.navigation.dropin.component.routefetch.RoutesAction {
+    ctor public RoutesAction.Canceled(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
+    method public com.mapbox.api.directions.v5.models.RouteOptions component1();
+    method public com.mapbox.navigation.base.route.RouterOrigin component2();
+    method public com.mapbox.navigation.dropin.component.routefetch.RoutesAction.Canceled copy(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
+    method public com.mapbox.api.directions.v5.models.RouteOptions getRouteOptions();
+    method public com.mapbox.navigation.base.route.RouterOrigin getRouterOrigin();
+    property public final com.mapbox.api.directions.v5.models.RouteOptions routeOptions;
+    property public final com.mapbox.navigation.base.route.RouterOrigin routerOrigin;
+  }
+
+  public static final class RoutesAction.Failed extends com.mapbox.navigation.dropin.component.routefetch.RoutesAction {
+    ctor public RoutesAction.Failed(java.util.List<com.mapbox.navigation.base.route.RouterFailure> reasons, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public java.util.List<com.mapbox.navigation.base.route.RouterFailure> component1();
+    method public com.mapbox.api.directions.v5.models.RouteOptions component2();
+    method public com.mapbox.navigation.dropin.component.routefetch.RoutesAction.Failed copy(java.util.List<com.mapbox.navigation.base.route.RouterFailure> reasons, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public java.util.List<com.mapbox.navigation.base.route.RouterFailure> getReasons();
+    method public com.mapbox.api.directions.v5.models.RouteOptions getRouteOptions();
+    property public final java.util.List<com.mapbox.navigation.base.route.RouterFailure> reasons;
+    property public final com.mapbox.api.directions.v5.models.RouteOptions routeOptions;
+  }
+
+  public static final class RoutesAction.FetchOptions extends com.mapbox.navigation.dropin.component.routefetch.RoutesAction {
+    ctor public RoutesAction.FetchOptions(com.mapbox.api.directions.v5.models.RouteOptions options);
+    method public com.mapbox.api.directions.v5.models.RouteOptions component1();
+    method public com.mapbox.navigation.dropin.component.routefetch.RoutesAction.FetchOptions copy(com.mapbox.api.directions.v5.models.RouteOptions options);
+    method public com.mapbox.api.directions.v5.models.RouteOptions getOptions();
+    property public final com.mapbox.api.directions.v5.models.RouteOptions options;
+  }
+
+  public static final class RoutesAction.FetchPoints extends com.mapbox.navigation.dropin.component.routefetch.RoutesAction {
+    ctor public RoutesAction.FetchPoints(java.util.List<com.mapbox.geojson.Point> points);
+    method public java.util.List<com.mapbox.geojson.Point> component1();
+    method public com.mapbox.navigation.dropin.component.routefetch.RoutesAction.FetchPoints copy(java.util.List<com.mapbox.geojson.Point> points);
+    method public java.util.List<com.mapbox.geojson.Point> getPoints();
+    property public final java.util.List<com.mapbox.geojson.Point> points;
+  }
+
+  public static final class RoutesAction.Ready extends com.mapbox.navigation.dropin.component.routefetch.RoutesAction {
+    ctor public RoutesAction.Ready(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> component1();
+    method public com.mapbox.navigation.dropin.component.routefetch.RoutesAction.Ready copy(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> getRoutes();
+    property public final java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes;
+  }
+
+  public static final class RoutesAction.SetRoutes extends com.mapbox.navigation.dropin.component.routefetch.RoutesAction {
+    ctor public RoutesAction.SetRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> component1();
+    method public com.mapbox.navigation.dropin.component.routefetch.RoutesAction.SetRoutes copy(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> getRoutes();
+    property public final java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes;
+  }
+
+  public abstract sealed class RoutesState {
+  }
+
+  public static final class RoutesState.Canceled extends com.mapbox.navigation.dropin.component.routefetch.RoutesState {
+    method public com.mapbox.api.directions.v5.models.RouteOptions component1();
+    method public com.mapbox.navigation.base.route.RouterOrigin component2();
+    method public com.mapbox.navigation.dropin.component.routefetch.RoutesState.Canceled copy(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
+    method public com.mapbox.api.directions.v5.models.RouteOptions getRouteOptions();
+    method public com.mapbox.navigation.base.route.RouterOrigin getRouterOrigin();
+    property public final com.mapbox.api.directions.v5.models.RouteOptions routeOptions;
+    property public final com.mapbox.navigation.base.route.RouterOrigin routerOrigin;
+  }
+
+  public static final class RoutesState.Empty extends com.mapbox.navigation.dropin.component.routefetch.RoutesState {
+    field public static final com.mapbox.navigation.dropin.component.routefetch.RoutesState.Empty INSTANCE;
+  }
+
+  public static final class RoutesState.Failed extends com.mapbox.navigation.dropin.component.routefetch.RoutesState {
+    method public java.util.List<com.mapbox.navigation.base.route.RouterFailure> component1();
+    method public com.mapbox.api.directions.v5.models.RouteOptions component2();
+    method public com.mapbox.navigation.dropin.component.routefetch.RoutesState.Failed copy(java.util.List<com.mapbox.navigation.base.route.RouterFailure> reasons, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public java.util.List<com.mapbox.navigation.base.route.RouterFailure> getReasons();
+    method public com.mapbox.api.directions.v5.models.RouteOptions getRouteOptions();
+    property public final java.util.List<com.mapbox.navigation.base.route.RouterFailure> reasons;
+    property public final com.mapbox.api.directions.v5.models.RouteOptions routeOptions;
+  }
+
+  public static final class RoutesState.Fetching extends com.mapbox.navigation.dropin.component.routefetch.RoutesState {
+    method public long component1();
+    method public com.mapbox.navigation.dropin.component.routefetch.RoutesState.Fetching copy(long requestId);
+    method public long getRequestId();
+    property public final long requestId;
+  }
+
+  public static final class RoutesState.Ready extends com.mapbox.navigation.dropin.component.routefetch.RoutesState {
+    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> component1();
+    method public com.mapbox.navigation.dropin.component.routefetch.RoutesState.Ready copy(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> getRoutes();
+    property public final java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes;
+  }
+
+}
+
+package com.mapbox.navigation.dropin.component.tripsession {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class TripSessionStarterAction {
+  }
+
+  public static final class TripSessionStarterAction.EnableReplayTripSession extends com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction {
+    field public static final com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction.EnableReplayTripSession INSTANCE;
+  }
+
+  public static final class TripSessionStarterAction.EnableTripSession extends com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction {
+    field public static final com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction.EnableTripSession INSTANCE;
+  }
+
+  public static final class TripSessionStarterAction.OnLocationPermission extends com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction {
+    ctor public TripSessionStarterAction.OnLocationPermission(boolean granted);
+    method public boolean component1();
+    method public com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction.OnLocationPermission copy(boolean granted);
+    method public boolean getGranted();
+    property public final boolean granted;
+  }
+
+  public final class TripSessionStarterState {
+    method public boolean component1();
+    method public boolean component2();
+    method public com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterState copy(boolean isLocationPermissionGranted, boolean isReplayEnabled);
+    method public boolean isLocationPermissionGranted();
+    method public boolean isReplayEnabled();
+    property public final boolean isLocationPermissionGranted;
+    property public final boolean isReplayEnabled;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class TripSessionStarterViewModel extends com.mapbox.navigation.dropin.lifecycle.UIViewModel<com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterState,com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction> {
+    ctor public TripSessionStarterViewModel(com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel navigationStateViewModel, com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterState initialState = TripSessionStarterState());
+    method public com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel getNavigationStateViewModel();
+    method public com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterState process(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation, com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterState state, com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction action);
+    property public final com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel navigationStateViewModel;
+  }
+
+}
+
+package com.mapbox.navigation.dropin.lifecycle {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public class UIComponent implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    ctor public UIComponent();
+    method public final kotlinx.coroutines.CoroutineScope getCoroutineScope();
+    method protected final inline <T> void observe(kotlinx.coroutines.flow.Flow<? extends T>, kotlin.jvm.functions.Function2<? super T,? super kotlin.coroutines.Continuation<? super kotlin.Unit>,?> action);
+    method @CallSuper public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method @CallSuper public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public final void setCoroutineScope(kotlinx.coroutines.CoroutineScope p);
+    property public final kotlinx.coroutines.CoroutineScope coroutineScope;
+    field public kotlinx.coroutines.CoroutineScope coroutineScope;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class UICoordinator<T extends android.view.ViewGroup> implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    ctor public UICoordinator(T viewGroup);
+    method public abstract kotlinx.coroutines.flow.Flow<com.mapbox.navigation.dropin.binder.Binder<T>> flowViewBinders(com.mapbox.navigation.core.MapboxNavigation);
+    method public final kotlinx.coroutines.CoroutineScope getCoroutineScope();
+    method @CallSuper public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method @CallSuper public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public final void setCoroutineScope(kotlinx.coroutines.CoroutineScope p);
+    property public final kotlinx.coroutines.CoroutineScope coroutineScope;
+    field public kotlinx.coroutines.CoroutineScope coroutineScope;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class UIViewModel<State, Action> implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    ctor public UIViewModel(State? initialState);
+    method public final kotlinx.coroutines.flow.Flow<Action> getAction();
+    method public final com.mapbox.navigation.utils.internal.JobControl getMainJobControl();
+    method public final kotlinx.coroutines.flow.StateFlow<State> getState();
+    method public final State! invoke(Action? action);
+    method @CallSuper public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method @CallSuper public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public abstract State! process(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation, State? state, Action? action);
+    method public final void setMainJobControl(com.mapbox.navigation.utils.internal.JobControl p);
+    property public final kotlinx.coroutines.flow.Flow<Action> action;
+    property public final com.mapbox.navigation.utils.internal.JobControl mainJobControl;
+    property public final kotlinx.coroutines.flow.StateFlow<State> state;
+    field public com.mapbox.navigation.utils.internal.JobControl mainJobControl;
+  }
+
+}
+
+package com.mapbox.navigation.dropin.view {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxCameraModeButton extends android.widget.FrameLayout {
+    ctor public MapboxCameraModeButton(android.content.Context context);
+    ctor public MapboxCameraModeButton(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxCameraModeButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    ctor public MapboxCameraModeButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr, int defStyleRes);
+    method public androidx.constraintlayout.widget.ConstraintLayout getContainerView();
+    method public int getFollowingIconResId();
+    method public String? getFollowingText();
+    method public androidx.appcompat.widget.AppCompatImageView getIconImage();
+    method public int getOverviewIconResId();
+    method public String? getOverviewText();
+    method public androidx.appcompat.widget.AppCompatTextView getTextView();
+    method public void setFollowingIconResId(int p);
+    method public void setFollowingText(String? p);
+    method public void setOverviewIconResId(int p);
+    method public void setOverviewText(String? p);
+    method @UiThread public void setState(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state);
+    method @UiThread public void setStateAndExtend(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state, long duration = 2000L);
+    method @UiThread public void setStateAndExtend(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state);
+    property public final androidx.constraintlayout.widget.ConstraintLayout containerView;
+    property public final int followingIconResId;
+    property public final String? followingText;
+    property public final androidx.appcompat.widget.AppCompatImageView iconImage;
+    property public final int overviewIconResId;
+    property public final String? overviewText;
+    property public final androidx.appcompat.widget.AppCompatTextView textView;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxExtendableButton extends android.widget.FrameLayout {
+    ctor public MapboxExtendableButton(android.content.Context context);
+    ctor public MapboxExtendableButton(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxExtendableButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    ctor public MapboxExtendableButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr, int defStyleRes);
+    method public androidx.constraintlayout.widget.ConstraintLayout getContainerView();
+    method public androidx.appcompat.widget.AppCompatImageView getIconImage();
+    method public androidx.appcompat.widget.AppCompatTextView getTextView();
+    method public void setState(com.mapbox.navigation.dropin.view.MapboxExtendableButton.State state);
+    property public final androidx.constraintlayout.widget.ConstraintLayout containerView;
+    property public final androidx.appcompat.widget.AppCompatImageView iconImage;
+    property public final androidx.appcompat.widget.AppCompatTextView textView;
+  }
+
+  public static final class MapboxExtendableButton.State {
+    ctor public MapboxExtendableButton.State(@DrawableRes int icon, String? text = null, long duration = 0);
+    method public int component1();
+    method public String? component2();
+    method public long component3();
+    method public com.mapbox.navigation.dropin.view.MapboxExtendableButton.State copy(int icon, String? text, long duration);
+    method public long getDuration();
+    method public int getIcon();
+    method public String? getText();
+    property public final long duration;
+    property public final int icon;
+    property public final String? text;
+  }
+
+}
+

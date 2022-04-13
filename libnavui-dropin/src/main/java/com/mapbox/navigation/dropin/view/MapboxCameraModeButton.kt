@@ -9,6 +9,7 @@ import androidx.annotation.UiThread
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxCameraModeButtonLayoutBinding
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
@@ -18,6 +19,7 @@ import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
 /**
  * Default button that allows user to toggle between Camera Following and Overview mode.
  */
+@ExperimentalPreviewMapboxNavigationAPI
 class MapboxCameraModeButton : FrameLayout {
 
     private val binding =

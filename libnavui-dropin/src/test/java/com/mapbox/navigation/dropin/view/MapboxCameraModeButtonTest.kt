@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin.view
 import android.content.Context
 import android.view.View
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,6 +19,7 @@ import org.robolectric.annotation.LooperMode
 @LooperMode(LooperMode.Mode.PAUSED)
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
+@ExperimentalPreviewMapboxNavigationAPI
 class MapboxCameraModeButtonTest {
 
     private lateinit var ctx: Context

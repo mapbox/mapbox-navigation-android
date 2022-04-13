@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin.coordinator
 
 import android.view.ViewGroup
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.binder.EmptyBinder
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.map
  * Coordinator for navigation guidance.
  * This is the top panel for a portrait view.
  */
+@ExperimentalPreviewMapboxNavigationAPI
 internal class ManeuverCoordinator(
     private val context: NavigationViewContext,
     guidanceLayout: ViewGroup

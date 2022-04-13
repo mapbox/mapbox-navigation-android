@@ -2,6 +2,7 @@ package com.mapbox.navigation.dropin.component.maneuver
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.maps.Style
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
+@ExperimentalPreviewMapboxNavigationAPI
 internal class ManeuverComponent(
     val maneuverView: MapboxManeuverView,
     val mapStyle: Style,

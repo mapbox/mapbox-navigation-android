@@ -8,7 +8,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.binder.navigationListOf
 import com.mapbox.navigation.dropin.component.camera.CameraComponent
 import com.mapbox.navigation.dropin.component.camera.CameraLayoutObserver
 import com.mapbox.navigation.dropin.component.location.LocationComponent
@@ -20,10 +19,11 @@ import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.routearrow.RouteArrowComponent
 import com.mapbox.navigation.dropin.component.routeline.RouteLineComponent
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
-import com.mapbox.navigation.dropin.lifecycle.reloadOnChange
+import com.mapbox.navigation.dropin.internal.extensions.navigationListOf
+import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@ExperimentalPreviewMapboxNavigationAPI
 internal class MapBinder(
     private val navigationViewContext: NavigationViewContext,
     private val binding: MapboxNavigationViewLayoutBinding,

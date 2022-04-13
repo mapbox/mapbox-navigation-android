@@ -2,6 +2,7 @@ package com.mapbox.navigation.dropin.component.backpress
 
 import android.view.KeyEvent
 import android.view.View
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
 import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
@@ -21,6 +22,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+@ExperimentalPreviewMapboxNavigationAPI
 class OnKeyListenerComponentTest {
 
     private val mockNavigationStateViewModel: NavigationStateViewModel = mockk(relaxed = true)
