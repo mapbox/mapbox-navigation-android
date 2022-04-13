@@ -772,7 +772,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         if (routes.isNotEmpty()) {
             billingController.onExternalRouteSet(routes.first())
         }
-        rerouteController?.interrupt()
 
         // Telemetry uses this field to determine what type of event should be triggered.
         @RoutesExtra.RoutesUpdateReason val reason = when {
@@ -798,6 +797,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         legIndex: Int = 0,
         @RoutesExtra.RoutesUpdateReason reason: String,
     ) {
+        rerouteController?.interrupt()
+        routeRefreshController.stop()
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
                 setRoutesToTripSession(routes, legIndex, reason)
@@ -1487,8 +1488,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                     reason = RoutesExtra.ROUTES_UPDATE_REASON_REFRESH,
                 )
             }
-        } else {
-            routeRefreshController.stop()
         }
     }
 
