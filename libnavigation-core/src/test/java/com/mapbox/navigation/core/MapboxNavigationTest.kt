@@ -646,8 +646,6 @@ class MapboxNavigationTest {
         routeObserversSlot.forEach {
             it.onRoutesChanged(RoutesUpdatedResult(routes, reason))
         }
-
-        verify { routeRefreshController.stop() }
     }
 
     @Test
@@ -658,15 +656,6 @@ class MapboxNavigationTest {
         mapboxNavigation.requestRoutes(mockk(), mockk<NavigationRouterCallback>())
 
         verify(exactly = 0) { rerouteController.interrupt() }
-    }
-
-    @Test
-    fun interrupt_reroute_on_set_routes() {
-        createMapboxNavigation()
-        mapboxNavigation.setRerouteController(rerouteController)
-        mapboxNavigation.setRoutes(listOf())
-
-        verify(exactly = 1) { rerouteController.interrupt() }
     }
 
     @Test
@@ -1202,6 +1191,39 @@ class MapboxNavigationTest {
         verifyOrder {
             directionsSession.setRoutes(longRoutes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
             directionsSession.setRoutes(shortRoutes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        }
+    }
+
+    @Test
+    fun `set route - immediately stops the refresh controller`() = coroutineRule.runBlockingTest {
+        createMapboxNavigation()
+
+        val shortRoutes = listOf<NavigationRoute>(mockk())
+        coEvery { tripSession.setRoutes(shortRoutes, any(), any()) } coAnswers {
+            delay(50L)
+            mockk(relaxed = true)
+        }
+
+        pauseDispatcher {
+            mapboxNavigation.setNavigationRoutes(shortRoutes)
+            verify(exactly = 1) { routeRefreshController.stop() }
+        }
+    }
+
+    @Test
+    fun `set route - immediately stops the reroute controller`() = coroutineRule.runBlockingTest {
+        createMapboxNavigation()
+        mapboxNavigation.setRerouteController(rerouteController)
+
+        val shortRoutes = listOf<NavigationRoute>(mockk())
+        coEvery { tripSession.setRoutes(shortRoutes, any(), any()) } coAnswers {
+            delay(50L)
+            mockk(relaxed = true)
+        }
+
+        pauseDispatcher {
+            mapboxNavigation.setNavigationRoutes(shortRoutes)
+            verify(exactly = 1) { rerouteController.interrupt() }
         }
     }
 
