@@ -26,7 +26,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-@OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)
+@ExperimentalPreviewMapboxNavigationAPI
+@OptIn(MapboxExperimental::class)
 internal class CameraComponent constructor(
     private val mapView: MapView,
     private val cameraViewModel: CameraViewModel,

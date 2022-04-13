@@ -8,11 +8,11 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.binder.navigationListOf
 import com.mapbox.navigation.dropin.component.infopanel.InfoPanelHeaderComponent
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderLayoutBinding
+import com.mapbox.navigation.dropin.internal.extensions.navigationListOf
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@ExperimentalPreviewMapboxNavigationAPI
 internal class InfoPanelHeaderBinder(
     private val context: NavigationViewContext
 ) : UIBinder {

@@ -2,6 +2,7 @@ package com.mapbox.navigation.dropin.component.location
 
 import android.location.Location
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.dropin.internal.extensions.flowLocationMatcherResult
@@ -11,10 +12,19 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
+/**
+ * Defines action responsible to update the [Location].
+ */
+@ExperimentalPreviewMapboxNavigationAPI
 sealed class LocationAction {
+    /**
+     * The action updates the [LocationMatcherResult] retrieved from location observer
+     * @property result
+     */
     data class Update(val result: LocationMatcherResult) : LocationAction()
 }
 
+@ExperimentalPreviewMapboxNavigationAPI
 internal class LocationViewModel :
     UIViewModel<LocationMatcherResult?, LocationAction>(null) {
     val navigationLocationProvider = NavigationLocationProvider()

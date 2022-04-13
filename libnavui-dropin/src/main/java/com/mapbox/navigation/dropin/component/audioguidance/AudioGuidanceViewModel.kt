@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.component.audioguidance
 
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
@@ -12,9 +13,22 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 
+/**
+ * Defines actions responsible to mutate the [AudioGuidanceState].
+ */
+@ExperimentalPreviewMapboxNavigationAPI
 sealed class AudioAction {
+    /**
+     * The action mutes the volume control for audio guidance
+     */
     object Mute : AudioAction()
+    /**
+     * The action un-mutes the volume control for audio guidance
+     */
     object Unmute : AudioAction()
+    /**
+     * The action toggles mute/un-mute volume control for audio guidance
+     */
     object Toggle : AudioAction()
 }
 
@@ -22,6 +36,7 @@ sealed class AudioAction {
  * This class is responsible for playing voice instructions. Use the [AudioAction] to turning the
  * audio on or off.
  */
+@ExperimentalPreviewMapboxNavigationAPI
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class AudioGuidanceViewModel(
     val navigationStateViewModel: NavigationStateViewModel,

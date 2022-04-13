@@ -9,7 +9,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.databinding.MapboxManeuverGuidanceLayoutBinding
-import com.mapbox.navigation.dropin.lifecycle.reloadOnChange
+import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
 import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)

@@ -6,7 +6,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@ExperimentalPreviewMapboxNavigationAPI
 @SuppressLint("MissingPermission")
 internal class ReplayRouteTripSession {
     private var replayProgressObserver: ReplayProgressObserver? = null

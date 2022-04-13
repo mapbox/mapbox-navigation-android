@@ -10,7 +10,7 @@ import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.component.tripprogress.TripProgressComponent
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelTripProgressLayoutBinding
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@ExperimentalPreviewMapboxNavigationAPI
 internal class InfoPanelTripProgressBinder : UIBinder {
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {

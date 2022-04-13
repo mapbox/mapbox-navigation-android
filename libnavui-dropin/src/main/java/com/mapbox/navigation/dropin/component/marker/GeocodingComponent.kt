@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin.component.marker
 
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.destination.DestinationAction.DidReverseGeocode
 import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.mapNotNull
 /**
  * UIComponent that observes and reverse geocodes Destination.
  */
+@ExperimentalPreviewMapboxNavigationAPI
 internal class GeocodingComponent(
     private val destinationViewModel: DestinationViewModel
 ) : UIComponent() {

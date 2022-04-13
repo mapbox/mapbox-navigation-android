@@ -2,6 +2,7 @@ package com.mapbox.navigation.dropin.component.backpress
 
 import android.view.KeyEvent
 import android.view.View
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.NavigationView
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
@@ -21,6 +22,7 @@ import com.mapbox.navigation.dropin.lifecycle.UIComponent
  * (FreeDrive) <- (DestinationPreview) <- (RoutePreview) <- (ActiveNavigation)
  *             <- (Arrival)
  */
+@ExperimentalPreviewMapboxNavigationAPI
 internal class OnKeyListenerComponent(
     private val navigationStateViewModel: NavigationStateViewModel,
     private val destinationViewModel: DestinationViewModel,

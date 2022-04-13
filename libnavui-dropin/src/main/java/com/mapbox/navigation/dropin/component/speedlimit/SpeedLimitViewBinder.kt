@@ -10,8 +10,8 @@ import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.databinding.MapboxSpeedLimitLayoutBinding
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class SpeedLimitViewBinder : UIBinder {
+@ExperimentalPreviewMapboxNavigationAPI
+internal class SpeedLimitViewBinder : UIBinder {
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
             viewGroup,

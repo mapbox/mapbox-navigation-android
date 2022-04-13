@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin.component.cameramode
 
 import androidx.core.view.isVisible
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.camera.CameraAction
 import com.mapbox.navigation.dropin.component.camera.CameraViewModel
@@ -11,6 +12,7 @@ import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.view.MapboxCameraModeButton
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 
+@ExperimentalPreviewMapboxNavigationAPI
 internal class CameraModeButtonComponent(
     private val cameraViewModel: CameraViewModel,
     private val navigationStateViewModel: NavigationStateViewModel,

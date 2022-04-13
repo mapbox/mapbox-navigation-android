@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin.coordinator
 
 import android.view.ViewGroup
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.binder.UIBinder
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.map
 /**
  * Coordinator for showing current road name.
  */
+@ExperimentalPreviewMapboxNavigationAPI
 internal class RoadNameLabelCoordinator(
     val context: NavigationViewContext,
     roadNameLabelLayout: ViewGroup

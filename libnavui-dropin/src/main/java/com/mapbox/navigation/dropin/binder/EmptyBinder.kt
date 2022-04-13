@@ -7,7 +7,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.R
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@ExperimentalPreviewMapboxNavigationAPI
 internal class EmptyBinder : UIBinder {
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         Scene.getSceneForLayout(

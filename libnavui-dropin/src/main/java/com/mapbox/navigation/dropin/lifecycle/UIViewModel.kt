@@ -21,8 +21,11 @@ import kotlinx.coroutines.flow.StateFlow
  * UIViewModels have a lifecycle, contain state, and process actions.
  *
  * @param initialState used to initialize the [state]
+ * @property action
+ * @property state
+ * @property mainJobControl
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@ExperimentalPreviewMapboxNavigationAPI
 abstract class UIViewModel<State, Action>(initialState: State) : MapboxNavigationObserver {
 
     // TODO Potential mechanism to expose actions in the sdk through a public api
@@ -59,11 +62,19 @@ abstract class UIViewModel<State, Action>(initialState: State) : MapboxNavigatio
      */
     abstract fun process(mapboxNavigation: MapboxNavigation, state: State, action: Action): State
 
+    /**
+     * Signals that the [mapboxNavigation] instance is ready for use.
+     * @param mapboxNavigation
+     */
     @CallSuper
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         mainJobControl = InternalJobControlFactory.createMainScopeJobControl()
     }
 
+    /**
+     * Signals that the [mapboxNavigation] instance is being detached.
+     * @param mapboxNavigation
+     */
     @CallSuper
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         mainJobControl.job.cancelChildren()

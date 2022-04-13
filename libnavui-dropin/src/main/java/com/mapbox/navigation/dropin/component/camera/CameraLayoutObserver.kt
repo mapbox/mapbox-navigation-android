@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin.component.camera
 import android.view.View
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
@@ -10,6 +11,7 @@ import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewMode
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class CameraLayoutObserver(
     private val mapView: MapView,
     private val binding: MapboxNavigationViewLayoutBinding,

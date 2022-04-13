@@ -18,8 +18,9 @@ import kotlinx.coroutines.launch
  * Attach a UICoordinator to a [ViewGroup] of your choosing. When you implement this class
  * you will need to build a [Flow] with [Binder]. There can only be one view binder
  * attached at a time for the [ViewGroup].
+ * @property coroutineScope Defines a scope for new coroutine
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@ExperimentalPreviewMapboxNavigationAPI
 abstract class UICoordinator<T : ViewGroup>(
     private val viewGroup: T
 ) : MapboxNavigationObserver {
@@ -27,6 +28,10 @@ abstract class UICoordinator<T : ViewGroup>(
     private var attachedObserver: MapboxNavigationObserver? = null
     lateinit var coroutineScope: CoroutineScope
 
+    /**
+     * Signals that the [mapboxNavigation] instance is ready for use.
+     * @param mapboxNavigation
+     */
     @CallSuper
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         coroutineScope = MainScope()
@@ -40,6 +45,10 @@ abstract class UICoordinator<T : ViewGroup>(
         }
     }
 
+    /**
+     * Signals that the [mapboxNavigation] instance is being detached.
+     * @param mapboxNavigation
+     */
     @CallSuper
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         coroutineScope.cancel()

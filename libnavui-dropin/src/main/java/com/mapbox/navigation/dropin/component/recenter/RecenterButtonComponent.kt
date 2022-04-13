@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin.component.recenter
 
 import androidx.core.view.isVisible
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.camera.CameraAction
 import com.mapbox.navigation.dropin.component.camera.CameraViewModel
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
+@ExperimentalPreviewMapboxNavigationAPI
 internal class RecenterButtonComponent(
     private val cameraViewModel: CameraViewModel,
     private val navigationStateViewModel: NavigationStateViewModel,

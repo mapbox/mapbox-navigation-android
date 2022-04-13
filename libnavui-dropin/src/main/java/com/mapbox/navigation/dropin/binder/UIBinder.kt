@@ -11,7 +11,7 @@ import com.mapbox.navigation.dropin.lifecycle.UICoordinator
  * are responsible for transitioning a view(s) into the [ViewGroup]. They are also responsible for
  * deciding what components should be part of the view.
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@ExperimentalPreviewMapboxNavigationAPI
 interface Binder<T> {
 
     /**
@@ -26,31 +26,18 @@ interface Binder<T> {
  * are responsible for transitioning a view(s) into the [ViewGroup]. They are also responsible for
  * deciding what components should be part of the view.
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@ExperimentalPreviewMapboxNavigationAPI
 fun interface UIBinder : Binder<ViewGroup> {
     companion object {
+        /**
+         * Defines the default [UIBinder] used by NavigationView
+         */
         val USE_DEFAULT: UIBinder = UIBinder { NoOpMapboxNavigationObserver }
     }
 }
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@ExperimentalPreviewMapboxNavigationAPI
 internal object NoOpMapboxNavigationObserver : MapboxNavigationObserver {
     override fun onAttached(mapboxNavigation: MapboxNavigation) = Unit
     override fun onDetached(mapboxNavigation: MapboxNavigation) = Unit
 }
-
-/**
- * When returning an observer from [UIBinder.bind], you can use this extension to return
- * a list of observers. This will attach one to many observers to your view binder.
- */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal fun <T : MapboxNavigationObserver> navigationListOf(vararg elements: T) =
-    object : MapboxNavigationObserver {
-        override fun onAttached(mapboxNavigation: MapboxNavigation) {
-            elements.forEach { it.onAttached(mapboxNavigation) }
-        }
-
-        override fun onDetached(mapboxNavigation: MapboxNavigation) {
-            elements.reversed().forEach { it.onDetached(mapboxNavigation) }
-        }
-    }

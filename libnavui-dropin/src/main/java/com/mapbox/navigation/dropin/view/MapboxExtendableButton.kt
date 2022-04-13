@@ -8,6 +8,7 @@ import androidx.annotation.DrawableRes
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxExtendableButtonLayoutBinding
 import com.mapbox.navigation.ui.utils.internal.ExtendableButtonHelper
@@ -16,6 +17,7 @@ import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
 /**
  * Button with an icon and expand behaviour.
  */
+@ExperimentalPreviewMapboxNavigationAPI
 class MapboxExtendableButton : FrameLayout {
 
     private val binding =
