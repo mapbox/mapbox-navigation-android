@@ -12,6 +12,21 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue where a call to `MapboxNavigation#stopTripSession` would clear the routes reference and led to a `RoutesObserver` notification with empty routes collection. [#5685](https://github.com/mapbox/mapbox-navigation-android/pull/5685)
 - Fixed an issue where `AlternativeRouteMetadata` would get cleared after route refresh (whenever routes update reason was `RoutesExtra#ROUTES_UPDATE_REASON_REFRESH`). [#5691](https://github.com/mapbox/mapbox-navigation-android/pull/5691)
 
+## Mapbox Navigation SDK 2.4.0 - April 14, 2022
+
+#### Bug fixes and improvements
+- Fixed an issue where compressed tiles were incorrectly decoded from the cache. This could have led to degraded map matching or unavailable resources. [#5707](https://github.com/mapbox/mapbox-navigation-android/pull/5707)
+- :warning: Restricted Areas are intentionally not being picked up from the eHorizon graph in Free Drive as the operation can be very resource intensive. An option to re-enable this feature will be exposed in future releases.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.4.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.4.2))
+- Mapbox Navigation Native `v94.0.3`
+- Mapbox Core Common `v21.2.1`
+- Mapbox Java `v6.4.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.4.0))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
+
 ## Mapbox Navigation SDK 2.5.0-alpha.2 - April 7, 2022
 
 #### Features
