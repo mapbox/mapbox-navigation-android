@@ -12,10 +12,47 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue where `AlternativeRouteMetadata` would get cleared after route refresh (whenever routes update reason was `RoutesExtra#ROUTES_UPDATE_REASON_REFRESH`). [#5691](https://github.com/mapbox/mapbox-navigation-android/pull/5691)
 
 ## Mapbox Navigation SDK 2.4.0 - April 14, 2022
+### Changelog
+[Changes between v2.4.0 and v2.3.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.3.0...v2.4.0)
+
+- :exclamation: Starting with version 2.4 (2.4.0-beta.3), we are implementing a grace period of 30-seconds for all navigation sessions started by Nav SDK. A session will be counted only after this time period has surpassed. This allows you to reduce the cost of using the SDK during development and testing of your applications, as well as in production. Grace period is especially helpful to decrease the cost of short Free Drive session that are just a transition between Active Guidance sessions, or when a session is aborted right after it was started.
+- :warning: Deprecated `RouterOrigin.Custom(obj: Any?)`. The SDK doesn't keep `RouteOrigin.Custom#obj` anymore, it always becomes `null` when the `obj` returns in `RoutesObserver`. [#5500](https://github.com/mapbox/mapbox-navigation-android/pull/5500)
+- :warning: Restricted Areas are intentionally not being picked up from the eHorizon graph in Free Drive as the operation can be very resource intensive. An option to re-enable this feature will be exposed in future releases.
+
+#### Features
+- Introduced a `NavigationRoute` object and related functions like `NavigationRouterCallback`, `MapboxNavigation#setNavigationRoutes`, etc. `NavigationRoute` is a domain specific wrapper on top of `DirectionsRoute` which provides information (and enforces its presence) about the original `DirectionsResponse` that this route is part of, as well as what `RouteOptions` were used to generate it.
+  Most of the Navigation SDK APIs that rely only on `DirectionsRoute` are now marked as `Deprecated` since there might be features introduced in the future that would require the `NavigationRoute` instances instead.
+  There are `NavigationRoute#toDirectionsRoute()` and `DirectionsRoute#toNavigationRoute()` compatibility extensions available, however, the latter is lossy since `DirectionsRoute` cannot carry as much information as `NavigationRoute` and the recommended migration path is to use `NavigationRouterCallback` instead of the old `RouterCallback` to request routes.
+  This change might require action when integrating if you have hardcoded routes in your test suites that do not have all necessary fields to support `DirectionsRoute` to `NavigationRoute` mapping (mostly `DirectionsRoute#routeIndex`) - in these cases make sure to provide the missing data or regenerate the routes using `MapboxNavigation#requestRoutes`.
+  [#5411](https://github.com/mapbox/mapbox-navigation-android/pull/5411)
+- Added a new `RailwayCrossing` type to `RoadObject`s. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
+- Added point exclusion option for onboard router. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
+- Improved capabilities to replay route alternatives with the `ReplayProgressObserver` by respecting the current distance traveled. This fixes the jump to the beginning of the alternative route upon the switch. [#5586](https://github.com/mapbox/mapbox-navigation-android/pull/5586)
+- Added extension functions for overriding the route line traffic expression or color. [#5597](https://github.com/mapbox/mapbox-navigation-android/pull/5597)
+- Added `RerouteOptionsAdapter`. It allows to modify `RouteOptions` on reroute for default implementation of `RerouteController` via `MapboxNavigation#setRerouteOptionsAdapter`. [#5573](https://github.com/mapbox/mapbox-navigation-android/pull/5573)
+- Added `LocationMatcherResult#isDegradedMapMatching` which allows to understand if current matched location was produced using limited map matching approach(e.g. due to lack of map data). [#5606](https://github.com/mapbox/mapbox-navigation-android/pull/5606)
 
 #### Bug fixes and improvements
-- Fixed an issue where compressed tiles were incorrectly decoded from the cache. This could have led to degraded map matching or unavailable resources. [#5707](https://github.com/mapbox/mapbox-navigation-android/pull/5707)
-- :warning: Restricted Areas are intentionally not being picked up from the eHorizon graph in Free Drive as the operation can be very resource intensive. An option to re-enable this feature will be exposed in future releases.
+- Added `MapboxNavigationApp.setup` overload, that accepts `NavigationOptionsProvider` instead of prebuilt `NavigationOptions`. [#5490](https://github.com/mapbox/mapbox-navigation-android/pull/5490)
+- Fixed `MapboxNavigationApp` issue, that caused unexpected `MapboxNavigation` destroy, when one of the attached lifecycles is destroyed and the other one is stopped. [#5518](https://github.com/mapbox/mapbox-navigation-android/pull/5518)
+- Fixed uncaught exception in the `ShieldsCache` class. [#5524](https://github.com/mapbox/mapbox-navigation-android/pull/5524)
+- Use native logger backend instead of the Android instance directly. [#5520](https://github.com/mapbox/mapbox-navigation-android/pull/5520)
+- Fixed an issue where a route refresh would only refresh annotations for the current leg of a route instead of for all remaining legs of a route. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
+- Fixed an issue where alternative routes would hold a reference to the original route's `RouteOptions` instead of the correct ones that were used to generate the alternative. [#5552](https://github.com/mapbox/mapbox-navigation-android/pull/5552)
+- Fixed an issue related to highlighting buildings via the MapboxBuildingsApi by adding the building-extrusion layer as one of the layers queried. [#5433](https://github.com/mapbox/mapbox-navigation-android/pull/5433)
+- Adopted Common SDK log messages parsing logic so it's consistent across Mapbox SDKs. As an example, this is how the logs would look like `D/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`. [#5604](https://github.com/mapbox/mapbox-navigation-android/pull/5604)
+- Added a workaround for [`ConnectivityManager`'s occasional security exception on Android 11 and older](https://issuetracker.google.com/issues/175055271). [#5587](https://github.com/mapbox/mapbox-navigation-android/pull/5587)
+- Fixed an issue where off-route wouldn't be reported if we were navigating in a fallback mode (without routing tiles on device). [#5587](https://github.com/mapbox/mapbox-navigation-android/pull/5587)
+- `RouteProgressState#INITIALIZED` might now be reported for each leg start, not only for the route start. [#5587](https://github.com/mapbox/mapbox-navigation-android/pull/5587)
+- Fixed `HistoryEventMapper#mapNavigationRoute` for when `SetRouteHistoryRecord` has empty `routeRequest`. [#5614](https://github.com/mapbox/mapbox-navigation-android/pull/5614)
+- Fixed an issue where route refresh failure led to a parsing error and runtime crash instead of failure callback. [#5617](https://github.com/mapbox/mapbox-navigation-android/pull/5617)
+- Fixed `ReplayRouteInterpolator` speed adjustment on turns. A driver doesn't slow down on minor curvatures on a motorway. [5618](https://github.com/mapbox/mapbox-navigation-android/pull/5618)
+- Fixed an issue where line `RoadObject`s matched with `RoadObjectMatcher` which consisted of only one edge and multiple lines where calculated incorrectly. [#5629](https://github.com/mapbox/mapbox-navigation-android/pull/5629)
+- Moved alternative route line processing to a worker thread, relieving a little bit of load from the main thread during each recalculation. [#5634](https://github.com/mapbox/mapbox-navigation-android/pull/5634)
+- Added `AsyncAudioFocusDelegate` to `MapboxVoiceInstructionsPlayer` to allow clients to interact with the audio focus in an asynchronous way. [#5652](https://github.com/mapbox/mapbox-navigation-android/pull/5652)
+- Added `AudioFocusOwner` so that the owner can be specified when requesting the audio focus `AsyncAudioFocusDelegate#requestFocus`. [#5652](https://github.com/mapbox/mapbox-navigation-android/pull/5652)
+- Added `ttsStreamType` to `VoiceInstructionsPlayerOptions` so that the stream type for playing TTS can be specified, allowing to fix an issue with `KEY_PARAM_STREAM` not being updated and used properly. Defaults to `AudioManager.STREAM_MUSIC`. [#5652](https://github.com/mapbox/mapbox-navigation-android/pull/5652)
+- Fixed an issue found in `v2.4.0-beta.3` and later where compressed tiles were incorrectly decoded from the cache. This could have led to degraded map matching or unavailable resources. [#5707](https://github.com/mapbox/mapbox-navigation-android/pull/5707)
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
