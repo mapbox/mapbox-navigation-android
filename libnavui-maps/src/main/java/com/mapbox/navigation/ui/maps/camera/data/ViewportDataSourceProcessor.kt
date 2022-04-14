@@ -8,6 +8,7 @@ import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
 import com.mapbox.navigation.utils.internal.logE
@@ -239,18 +240,25 @@ internal object ViewportDataSourceProcessor {
      * Returns the pitch based on route progress and settings.
      */
     fun getPitchFallbackFromRouteProgress(
-        pitchNearManeuversEnabled: Boolean,
-        triggerDistanceForPitchZero: Double,
-        defaultPitch: Double,
-        distanceRemainingOnStep: Float
+        routeProgress: RouteProgress,
+        followingFrameOptions: FollowingFrameOptions
     ): Double {
-        return if (
-            pitchNearManeuversEnabled &&
-            distanceRemainingOnStep <= triggerDistanceForPitchZero
-        ) {
-            MapboxNavigationViewportDataSource.ZERO_PITCH
-        } else {
-            defaultPitch
+        val currentStepProgress = routeProgress.currentLegProgress?.currentStepProgress
+        val upcomingManeuverType = routeProgress.bannerInstructions?.primary()?.type()
+        if (currentStepProgress == null || upcomingManeuverType == null) {
+            return followingFrameOptions.defaultPitch
+        }
+
+        return followingFrameOptions.pitchNearManeuvers.run {
+            if (
+                enabled &&
+                upcomingManeuverType !in excludedManeuvers &&
+                currentStepProgress.distanceRemaining <= triggerDistanceFromManeuver
+            ) {
+                MapboxNavigationViewportDataSource.ZERO_PITCH
+            } else {
+                followingFrameOptions.defaultPitch
+            }
         }
     }
 

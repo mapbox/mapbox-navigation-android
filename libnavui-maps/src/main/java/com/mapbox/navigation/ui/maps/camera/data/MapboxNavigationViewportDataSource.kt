@@ -481,14 +481,10 @@ class MapboxNavigationViewportDataSource(
             routeProgress.currentLegProgress,
             routeProgress.currentLegProgress?.currentStepProgress
         ) { currentLegProgress, currentStepProgress ->
-            options.followingFrameOptions.run {
-                followingPitchProperty.fallback = getPitchFallbackFromRouteProgress(
-                    pitchNearManeuvers.enabled,
-                    pitchNearManeuvers.triggerDistanceFromManeuver,
-                    defaultPitch,
-                    currentStepProgress.distanceRemaining
-                )
-            }
+            followingPitchProperty.fallback = getPitchFallbackFromRouteProgress(
+                routeProgress,
+                options.followingFrameOptions
+            )
 
             options.followingFrameOptions.intersectionDensityCalculation.run {
                 pointsToFrameOnCurrentStep = getPointsToFrameOnCurrentStep(
