@@ -175,6 +175,7 @@ class RouterWrapperTests {
     fun setUp() {
         mockkObject(ThreadController)
         every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
+        every { ThreadController.DefaultDispatcher } returns coroutineRule.testDispatcher
 
         every { mapboxNativeNavigator.router } returns router
         every { router.getRoute(any(), capture(getRouteSlot)) } returns 0L

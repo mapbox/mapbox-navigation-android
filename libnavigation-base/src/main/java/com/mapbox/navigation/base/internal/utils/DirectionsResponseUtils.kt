@@ -16,7 +16,7 @@ suspend fun parseDirectionsResponse(
 ): Expected<Throwable, List<NavigationRoute>> =
     withContext(dispatcher) {
         return@withContext try {
-            val routes = NavigationRoute.create(
+            val routes = NavigationRoute.createAsync(
                 directionsResponseJson = responseJson,
                 routeRequestUrl = requestUrl
             )

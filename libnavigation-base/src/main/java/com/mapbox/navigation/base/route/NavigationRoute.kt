@@ -10,12 +10,17 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.StepIntersection
 import com.mapbox.api.directions.v5.models.StepManeuver
+import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
+import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.RouteInterface
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import java.net.URL
 
 /**
@@ -73,6 +78,40 @@ class NavigationRoute internal constructor(
             )
         }
 
+        /**
+         * Creates new instances of [NavigationRoute] based on the routes found in the [directionsResponseJson].
+         *
+         * This function parallelizes response parsing and native navigator parsing.
+         *
+         * @param directionsResponseJson response to be parsed into [NavigationRoute]s
+         * @param routeRequestUrl URL used to generate the [directionsResponse]
+         */
+        internal suspend fun createAsync(
+            directionsResponseJson: String,
+            routeRequestUrl: String,
+            routeParser: SDKRouteParser = NativeRouteParserWrapper
+        ): List<NavigationRoute> {
+            return coroutineScope {
+                val deferredResponseParsing = async(ThreadController.DefaultDispatcher) {
+                    DirectionsResponse.fromJson(directionsResponseJson)
+                }
+                val deferredNativeParsing = async(ThreadController.DefaultDispatcher) {
+                    routeParser.parseDirectionsResponse(
+                        directionsResponseJson,
+                        routeRequestUrl
+                    )
+                }
+                val deferredRouteOptionsParsing = async(ThreadController.DefaultDispatcher) {
+                    RouteOptions.fromUrl(URL(routeRequestUrl))
+                }
+                create(
+                    deferredNativeParsing.await(),
+                    deferredResponseParsing.await(),
+                    deferredRouteOptionsParsing.await()
+                )
+            }
+        }
+
         internal fun create(
             directionsResponse: DirectionsResponse,
             routeOptions: RouteOptions,
@@ -96,21 +135,29 @@ class NavigationRoute internal constructor(
         ): List<NavigationRoute> {
             return routeParser.parseDirectionsResponse(
                 directionsResponseJson, routeOptionsUrlString
-            ).fold(
-                { error ->
-                    throw RuntimeException("Failed to parse a route. Reason: $error")
-                },
-                { value ->
-                    value.mapIndexed { index, routeInterface ->
-                        NavigationRoute(
-                            directionsResponse,
-                            index,
-                            routeOptions,
-                            routeInterface
-                        )
-                    }
-                }
-            ).cache()
+            ).run {
+                create(this, directionsResponse, routeOptions)
+            }
+        }
+
+        private fun create(
+            expected: Expected<String, List<RouteInterface>>,
+            directionsResponse: DirectionsResponse,
+            routeOptions: RouteOptions,
+        ): List<NavigationRoute> {
+            return expected.fold({ error ->
+                logE("NavigationRoute", "Failed to parse a route. Reason: $error")
+                listOf()
+            }, { value ->
+                value
+            }).mapIndexed { index, routeInterface ->
+                NavigationRoute(
+                    directionsResponse,
+                    index,
+                    routeOptions,
+                    routeInterface
+                )
+            }.cache()
         }
     }
 
