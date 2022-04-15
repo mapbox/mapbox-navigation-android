@@ -5,6 +5,12 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 
 #### Features
+
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.5.0-alpha.3 - April 15, 2022
+
+#### Features
 - Added `MapboxNavigation#setTripNotificationInterceptor` to allow for notification customizations. This makes the notification compatible with the `CarAppExtender`. [#5669](https://github.com/mapbox/mapbox-navigation-android/pull/5669)
 
 #### Bug fixes and improvements
@@ -12,6 +18,15 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue where a call to `MapboxNavigation#stopTripSession` would clear the routes reference and led to a `RoutesObserver` notification with empty routes collection. [#5685](https://github.com/mapbox/mapbox-navigation-android/pull/5685)
 - Fixed an issue where `AlternativeRouteMetadata` would get cleared after route refresh (whenever routes update reason was `RoutesExtra#ROUTES_UPDATE_REASON_REFRESH`). [#5691](https://github.com/mapbox/mapbox-navigation-android/pull/5691)
 - Fixed a race condition where internal route refresh logic could overwrite the result of a call to `MapboxNavigation#setRoutes`. [#5685](https://github.com/mapbox/mapbox-navigation-android/pull/5685)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.5.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.5.0-beta.1))
+- Mapbox Navigation Native `v96.0.0`
+- Mapbox Core Common `v21.3.0-rc.2`
+- Mapbox Java `v6.4.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.4.0))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
 
 ## Mapbox Navigation SDK 2.4.0 - April 14, 2022
 ### Changelog
