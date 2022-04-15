@@ -130,6 +130,18 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Android DataStore (Android DataStore - contains the underlying store used by each serialization method along with components that require an Android dependency).
+URL: [https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0](https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android DataStore Core (Android DataStore Core - contains the underlying store used by each serialization method).
+URL: [https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0](https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Android Lifecycle Runtime.
 URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -138,6 +150,18 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 Mapbox Navigation uses portions of the Android Lifecycle-Common.
 URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Preferences DataStore.
+URL: [https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0](https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Preferences DataStore Core (Android Preferences DataStore without the Android Dependencies).
+URL: [https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0](https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
@@ -764,6 +788,18 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Android DataStore (Android DataStore - contains the underlying store used by each serialization method along with components that require an Android dependency).
+URL: [https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0](https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android DataStore Core (Android DataStore Core - contains the underlying store used by each serialization method).
+URL: [https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0](https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Android Lifecycle Runtime.
 URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -772,6 +808,18 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 Mapbox Navigation uses portions of the Android Lifecycle-Common.
 URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Preferences DataStore.
+URL: [https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0](https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Preferences DataStore Core (Android Preferences DataStore without the Android Dependencies).
+URL: [https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0](https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
@@ -844,6 +892,12 @@ License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENS
 Mapbox Navigation uses portions of the Kotlin Stdlib Jdk8 (Kotlin Standard Library JDK 8 extension).
 URL: [https://kotlinlang.org/](https://kotlinlang.org/)
 License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the kotlinx-coroutines-android (Coroutines support libraries for Kotlin).
+URL: [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
+License: [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
@@ -1149,6 +1203,18 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Android DataStore (Android DataStore - contains the underlying store used by each serialization method along with components that require an Android dependency).
+URL: [https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0](https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android DataStore Core (Android DataStore Core - contains the underlying store used by each serialization method).
+URL: [https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0](https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Android Lifecycle LiveData.
 URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1181,6 +1247,18 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 Mapbox Navigation uses portions of the Android Lifecycle-Common.
 URL: [https://developer.android.com/jetpack/androidx/releases/lifecycle#2.3.1](https://developer.android.com/jetpack/androidx/releases/lifecycle#2.3.1)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Preferences DataStore.
+URL: [https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0](https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Preferences DataStore Core (Android Preferences DataStore without the Android Dependencies).
+URL: [https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0](https://developer.android.com/jetpack/androidx/releases/datastore#1.0.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
