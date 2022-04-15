@@ -18,6 +18,8 @@ import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateU
 import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.LONGITUDE_FOR_VOICE_INSTRUCTION_NULL
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.factories.createBannerInstruction
+import com.mapbox.navigation.testing.factories.createBannerSection
 import com.mapbox.navigation.testing.factories.createLocation
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createNavigationStatus
@@ -261,6 +263,61 @@ class MapboxTripSessionNoSetupTest {
                 .takeLast(2) // take only events triggered by location updates
                 .map { it.announcement() }
             assertEquals(listOf("1", "1"), newVoiceInstructions)
+        }
+
+    @Test
+    fun `banner instruction is transferred from NN to SDK status update`() =
+        coroutineRule.runBlockingTest {
+            // arrange
+            val nativeNavigator = createNativeNavigatorMock()
+            val statusUpdateListeners = recordNavigatorObservers(nativeNavigator)
+            val locationEngine = TestLocationEngine.create()
+            val tripSession = buildTripSession(
+                nativeNavigator = nativeNavigator,
+                locationEngine = locationEngine
+            )
+            val routeProgressRecorder = RouteProgressObserverRecorder()
+            tripSession.registerRouteProgressObserver(routeProgressRecorder)
+            tripSession.start(true)
+            tripSession.setRoutes(
+                listOf(createNavigationRoute()),
+                0,
+                ROUTES_UPDATE_REASON_NEW
+            )
+            // act
+            locationEngine.updateLocation(createLocation())
+            statusUpdateListeners.onStatus(
+                NavigationStatusOrigin.LOCATION_UPDATE,
+                createNavigationStatus(
+                    bannerInstruction = createBannerInstruction(
+                        index = 0,
+                        primary = createBannerSection(
+                            text = "turn1"
+                        )
+                    )
+                )
+            )
+
+            locationEngine.updateLocation(createLocation())
+            statusUpdateListeners.onStatus(
+                NavigationStatusOrigin.LOCATION_UPDATE,
+                createNavigationStatus(
+                    bannerInstruction = createBannerInstruction(
+                        index = 2,
+                        primary = createBannerSection(
+                            text = "turn2"
+                        )
+                    )
+                )
+            )
+            // assert
+            val bannerInstructions = routeProgressRecorder.records
+                .takeLast(2) // take only events triggered by location updates
+                .map { it.bannerInstructions?.primary()?.text() }
+            assertEquals(
+                listOf("turn1", "turn2"),
+                bannerInstructions
+            )
         }
 
     @Test
