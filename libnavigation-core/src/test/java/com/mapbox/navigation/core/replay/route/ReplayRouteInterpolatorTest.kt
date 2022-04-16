@@ -116,7 +116,7 @@ class ReplayRouteInterpolatorTest {
             assertTrue(first().speedMps <= startSpeedMps)
             assertTrue(last().speedMps < 0.001)
         }
-        assertTrue("${segment.steps.size} < 13", segment.steps.size < 13)
+        assertTrue("${segment.steps.size} < 14", segment.steps.size < 14)
     }
 
     @Test
@@ -154,6 +154,26 @@ class ReplayRouteInterpolatorTest {
 
         assertEquals(223.96630390737917, segment.steps.last().positionMeters, 0.00001)
         assertEquals(3.0, segment.endSpeedMps, 0.0001)
+    }
+
+    @Test
+    fun `should accelerate to complete short route`() {
+        val startSpeedMps = 0.0
+        val endSpeedMps = 0.0
+        val distanceMeters = 200.0
+
+        val segment = routeInterpolator.interpolateSpeed(
+            defaultOptions,
+            startSpeedMps,
+            endSpeedMps,
+            distanceMeters
+        )
+
+        segment.steps.apply {
+            val midStep = get(lastIndex / 2)
+            assertTrue(size > 5)
+            assertTrue("${midStep.speedMps} > 5.0", midStep.speedMps > 5.0)
+        }
     }
 
     @Test

@@ -9,6 +9,7 @@ class ReplayRouteOptionsTest : BuilderTest<ReplayRouteOptions, ReplayRouteOption
 
     override fun getFilledUpBuilder(): ReplayRouteOptions.Builder {
         return ReplayRouteOptions.Builder()
+            .frequency(10.0)
             .maxAcceleration(12.0)
             .maxSpeedMps(34.0)
             .minAcceleration(56.0)

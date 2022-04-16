@@ -6,6 +6,7 @@ package com.mapbox.navigation.core.replay.route
  *
  * Note that the default values are recommended because they have been tested.
  *
+ * @param frequency The number of signals per second
  * @param maxSpeedMps Max speed the driver will drive on straight-aways
  * @param turnSpeedMps Speed the driver will slow down for turns approaching 90 degrees
  * @param uTurnSpeedMps Speed the driver will go when facing a u-turn
@@ -13,6 +14,7 @@ package com.mapbox.navigation.core.replay.route
  * @param minAcceleration How fast the driver will decelerate in mps^2
  */
 class ReplayRouteOptions private constructor(
+    val frequency: Double,
     val maxSpeedMps: Double,
     val turnSpeedMps: Double,
     val uTurnSpeedMps: Double,
@@ -23,6 +25,7 @@ class ReplayRouteOptions private constructor(
      * @return the builder that created the [ReplayRouteOptions]
      */
     fun toBuilder(): Builder = Builder().apply {
+        frequency(frequency)
         maxSpeedMps(maxSpeedMps)
         turnSpeedMps(turnSpeedMps)
         uTurnSpeedMps(uTurnSpeedMps)
@@ -39,6 +42,7 @@ class ReplayRouteOptions private constructor(
 
         other as ReplayRouteOptions
 
+        if (frequency != other.frequency) return false
         if (maxSpeedMps != other.maxSpeedMps) return false
         if (turnSpeedMps != other.turnSpeedMps) return false
         if (uTurnSpeedMps != other.uTurnSpeedMps) return false
@@ -52,7 +56,8 @@ class ReplayRouteOptions private constructor(
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        var result = maxSpeedMps.hashCode()
+        var result = frequency.hashCode()
+        result = 31 * result + maxSpeedMps.hashCode()
         result = 31 * result + turnSpeedMps.hashCode()
         result = 31 * result + uTurnSpeedMps.hashCode()
         result = 31 * result + maxAcceleration.hashCode()
@@ -65,6 +70,7 @@ class ReplayRouteOptions private constructor(
      */
     override fun toString(): String {
         return "ReplayRouteOptions(" +
+            "frequency=$frequency, " +
             "maxSpeedMps=$maxSpeedMps, " +
             "turnSpeedMps=$turnSpeedMps, " +
             "uTurnSpeedMps=$uTurnSpeedMps, " +
@@ -77,6 +83,7 @@ class ReplayRouteOptions private constructor(
      * Used to build [ReplayRouteOptions].
      */
     class Builder {
+        private var frequency = 1.0
         private var maxSpeedMps = 30.0
         private var turnSpeedMps = 3.0
         private var uTurnSpeedMps = 1.0
@@ -94,8 +101,22 @@ class ReplayRouteOptions private constructor(
                 turnSpeedMps = turnSpeedMps,
                 uTurnSpeedMps = uTurnSpeedMps,
                 maxAcceleration = maxAcceleration,
-                minAcceleration = minAcceleration
+                minAcceleration = minAcceleration,
+                frequency = frequency
             )
+        }
+
+        /**
+         * Number of signals per second.
+         *   1 will produce 1 location per second (default)
+         *   10 will produce 10 locations per second
+         *   0.5 will produce 1 location every 2 seconds
+         *
+         * @param frequency
+         * @return [Builder]
+         */
+        fun frequency(frequency: Double): Builder = apply {
+            this.frequency = frequency
         }
 
         /**

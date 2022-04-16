@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
+import kotlin.math.floor
 import kotlin.math.min
 
 internal class ReplayRouteDriver {
@@ -14,7 +15,7 @@ internal class ReplayRouteDriver {
     private val routeInterpolator = ReplayRouteInterpolator()
     private val replayRouteTraffic = ReplayRouteTraffic()
 
-    private var timeMillis = 0L
+    private var timeMillis = 0.0
 
     /**
      * Given a list of location points, simulate the locations needed to drive the points.
@@ -33,6 +34,7 @@ internal class ReplayRouteDriver {
         val smoothLocations = routeInterpolator.createSpeedProfile(options, distinctPoints)
         val replayRouteLocations = interpolateLocations(options, distinctPoints, smoothLocations)
         routeInterpolator.createBearingProfile(replayRouteLocations)
+        timeMillis += 1000.0 / options.frequency
 
         return replayRouteLocations
     }
@@ -64,6 +66,7 @@ internal class ReplayRouteDriver {
         )
         val replayRouteLocations = driveTraffic(options, routePoints, trafficLocations)
         routeInterpolator.createBearingProfile(replayRouteLocations)
+        timeMillis += 1000.0 / options.frequency
 
         return replayRouteLocations
     }
@@ -74,7 +77,8 @@ internal class ReplayRouteDriver {
         trafficLocations: List<ReplayRouteLocation>
     ): List<ReplayRouteLocation> {
         val replayRouteLocations = mutableListOf<ReplayRouteLocation>()
-        var segmentStart = replayRouteLocations.addFirstTrafficLocation(routePoints)
+        var segmentStart = ReplayRouteLocation(0, routePoints[0])
+        segmentStart.speedMps = 0.0
         for (i in 0..trafficLocations.lastIndex) {
             val segmentEnd = trafficLocations[i]
             val segmentRoute = routeSmoother.segmentRoute(
@@ -96,23 +100,12 @@ internal class ReplayRouteDriver {
         return replayRouteLocations
     }
 
-    private fun MutableList<ReplayRouteLocation>.addFirstTrafficLocation(
-        routePoints: List<Point>
-    ): ReplayRouteLocation {
-        val segmentStart = ReplayRouteLocation(0, routePoints[0])
-        segmentStart.speedMps = 0.0
-        addLocation(segmentStart)
-        return segmentStart
-    }
-
     private fun interpolateLocations(
         options: ReplayRouteOptions,
         distinctPoints: List<Point>,
         smoothLocations: List<ReplayRouteLocation>
     ): List<ReplayRouteLocation> {
         val replayRouteLocations = mutableListOf<ReplayRouteLocation>()
-        replayRouteLocations.addLocation(smoothLocations.first())
-
         for (i in 0 until smoothLocations.lastIndex) {
             val segmentStart = smoothLocations[i]
             val segmentEnd = smoothLocations[i + 1]
@@ -139,6 +132,7 @@ internal class ReplayRouteDriver {
         segmentEnd: ReplayRouteLocation
     ) {
         val segmentDistance = TurfMeasurement.length(segmentRoute, TurfConstants.UNIT_METERS)
+
         val segment = routeInterpolator.interpolateSpeed(
             options,
             segmentStart.speedMps,
@@ -146,20 +140,17 @@ internal class ReplayRouteDriver {
             segmentDistance
         )
 
-        for (stepIndex in 1..segment.steps.lastIndex) {
+        if (isNotEmpty()) removeLast()
+        for (stepIndex in 0..segment.steps.lastIndex) {
             val step = segment.steps[stepIndex]
             val point =
                 TurfMeasurement.along(segmentRoute, step.positionMeters, TurfConstants.UNIT_METERS)
             val location = ReplayRouteLocation(null, point)
             location.distance = step.positionMeters
             location.speedMps = step.speedMps
-            addLocation(location)
+            location.timeMillis = floor(timeMillis + step.timeSeconds * 1000.0).toLong()
+            add(location)
         }
-    }
-
-    private fun MutableList<ReplayRouteLocation>.addLocation(location: ReplayRouteLocation) {
-        location.timeMillis = timeMillis
-        add(location)
-        timeMillis += 1000L
+        timeMillis = lastOrNull()?.timeMillis?.toDouble() ?: timeMillis
     }
 }

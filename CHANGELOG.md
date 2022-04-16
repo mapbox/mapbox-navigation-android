@@ -6,8 +6,10 @@ Mapbox welcomes participation and contributions from everyone.
 
 #### Features
 - Added `TollCollection#name` field which contains a name of the toll collection point, when available. [#5784](https://github.com/mapbox/mapbox-navigation-android/pull/5784)
+- Added `ReplayRouteOptions#frequency` to allow adjusting the simulated location frequency. [#5724](https://github.com/mapbox/mapbox-navigation-android/pull/5724)
 
 #### Bug fixes and improvements
+- Improved the accuracy of simulated locations speeds and the coordinate distance. This also fixed issues where the simulated driver would stall or jump near route turns. [#5724](https://github.com/mapbox/mapbox-navigation-android/pull/5724)
 
 #### Known issues
 - If your instrumentation tests use a mocked, prettified JSON response for Mapbox Directions services, you might need to remove white spaces from `"code": "Ok"` substring to `"code":"Ok"`.
