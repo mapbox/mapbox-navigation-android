@@ -12,8 +12,6 @@
         android:maxLines="1"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:paddingBottom="2dp"
-        android:background="@drawable/mapbox_road_name_view_background"
-        android:textAppearance="@style/DropInRoadNameViewTextAppearance"/>
+        android:paddingBottom="2dp"/>
 
 </merge>

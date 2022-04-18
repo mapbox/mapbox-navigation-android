@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.component.infopanel
 
+import androidx.annotation.StyleRes
 import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -27,12 +28,19 @@ internal class InfoPanelHeaderComponent(
     private val destinationViewModel: DestinationViewModel,
     private val locationViewModel: LocationViewModel,
     private val routesViewModel: RoutesViewModel,
+    @StyleRes private val routePreviewStyle: Int,
+    @StyleRes private val endNavigationStyle: Int,
+    @StyleRes private val startNavigationStyle: Int,
 ) : UIComponent() {
 
     private val resources get() = binding.root.resources
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
+
+        binding.routePreview.updateStyle(routePreviewStyle)
+        binding.endNavigation.updateStyle(endNavigationStyle)
+        binding.startNavigation.updateStyle(startNavigationStyle)
 
         // views visibility
         navigationStateViewModel.state.observe {

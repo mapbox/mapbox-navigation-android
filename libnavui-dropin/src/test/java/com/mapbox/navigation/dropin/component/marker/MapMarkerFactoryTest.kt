@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin.component.marker
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -27,7 +28,7 @@ class MapMarkerFactoryTest {
     fun `createPin - should create point annotation`() {
         val point = Point.fromLngLat(10.0, 20.0)
 
-        val annotation = sut.createPin(point)
+        val annotation = sut.createPin(point, R.drawable.mapbox_ic_destination_marker,)
 
         assertNotNull(annotation)
         assertEquals(point, annotation.getPoint())

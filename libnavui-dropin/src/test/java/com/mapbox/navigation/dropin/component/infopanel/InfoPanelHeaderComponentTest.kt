@@ -8,6 +8,7 @@ import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.destination.Destination
 import com.mapbox.navigation.dropin.component.destination.DestinationState
 import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
@@ -73,6 +74,9 @@ internal class InfoPanelHeaderComponentTest {
             mockDestinationViewModel,
             mockLocationViewModel,
             mockRoutesViewModel,
+            R.style.DropInStylePreviewButton,
+            R.style.DropInStyleExitButton,
+            R.style.DropInStyleStartButton
         )
     }
 

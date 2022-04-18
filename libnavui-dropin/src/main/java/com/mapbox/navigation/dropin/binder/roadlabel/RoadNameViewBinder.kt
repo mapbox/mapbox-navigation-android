@@ -28,12 +28,18 @@ internal class RoadNameViewBinder(
         TransitionManager.go(scene)
         val binding = MapboxRoadNameLayoutBinding.bind(viewGroup)
 
-        return reloadOnChange(loadedMapStyle) { style ->
+        return reloadOnChange(
+            loadedMapStyle,
+            context.styles.roadNameTextAppearance,
+            context.styles.roadNameBackground
+        ) { style, appearance, background ->
             if (style != null) {
                 RoadNameLabelComponent(
-                    binding.roadNameView,
-                    context.viewModel.locationViewModel,
-                    style
+                    roadNameView = binding.roadNameView,
+                    locationViewModel = context.viewModel.locationViewModel,
+                    mapStyle = style,
+                    textAppearance = appearance,
+                    roadNameBackground = background
                 )
             } else {
                 null

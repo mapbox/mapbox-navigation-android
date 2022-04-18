@@ -9,14 +9,15 @@ import com.mapbox.navigation.dropin.internal.extensions.navigationListOf
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class InfoPanelBinder(
-    private val headerBinder: UIBinder,
+    private val headerBinder: UIBinder?,
     private val contentBinder: UIBinder?
 ) : UIBinder {
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
-        val binders = mutableListOf(
-            headerBinder.bind(viewGroup.findViewById(R.id.infoPanelHeader))
-        )
+        val binders = mutableListOf<MapboxNavigationObserver>()
+        if (headerBinder != null) {
+            binders.add(headerBinder.bind(viewGroup.findViewById(R.id.infoPanelHeader)))
+        }
         if (contentBinder != null) {
             binders.add(contentBinder.bind(viewGroup.findViewById(R.id.infoPanelContent)))
         }

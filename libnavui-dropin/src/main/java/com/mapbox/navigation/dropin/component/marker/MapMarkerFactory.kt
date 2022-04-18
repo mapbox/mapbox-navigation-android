@@ -8,7 +8,6 @@ import androidx.core.graphics.drawable.toBitmap
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
-import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache
 
 /**
@@ -16,13 +15,18 @@ import com.mapbox.navigation.dropin.util.BitmapMemoryCache
  */
 internal class MapMarkerFactory(
     val context: Context,
-    val cache: BitmapMemoryCache
+    val cache: BitmapMemoryCache,
 ) {
-    fun createPin(point: Point): PointAnnotationOptions {
+    fun createPin(
+        point: Point,
+        @DrawableRes iconImage: Int,
+    ): PointAnnotationOptions {
         return PointAnnotationOptions()
             .withPoint(point)
             .withIconAnchor(IconAnchor.BOTTOM)
-            .withIconImage(loadBitmap(R.drawable.mapbox_map_pin))
+            .withIconImage(
+                loadBitmap(iconImage)
+            )
     }
 
     private fun loadBitmap(@DrawableRes drawableId: Int): Bitmap {

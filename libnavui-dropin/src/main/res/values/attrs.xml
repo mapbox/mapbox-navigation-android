@@ -3,23 +3,11 @@
     <declare-styleable name="NavigationView">
         <!-- Defines the mapbox access token. -->
         <attr name="accessToken" format="string"/>
-        <attr name="maneuverView" format="reference"/>
-        <attr name="speedLimitView" format="reference"/>
-        <attr name="tripProgressView" format="reference"/>
-        <attr name="roadNameBackground" format="reference"/>
-        <attr name="infoPanelBackground" format="reference"/>
-        <attr name="dragHandle" format="reference" />
-        <attr name="recenterButton" format="reference" />
-        <attr name="audioGuidanceOn" format="reference" />
-        <attr name="audioGuidanceOff" format="reference" />
-        <attr name="cameraModeButton" format="reference" />
-        <attr name="routePreviewButton" format="reference" />
-        <attr name="endNavigationButton" format="reference" />
-        <attr name="startNavigationButton" format="reference" />
-        <attr name="infoPanelPoiTitleTextAppearance" format="reference"/>
     </declare-styleable>
 
     <declare-styleable name="MapboxCameraModeButton">
+        <!-- Background to apply to the view. -->
+        <attr name="cameraModeButtonBackground" format="reference|color" />
         <!-- Tint to apply to the icon drawable. -->
         <attr name="cameraModeButtonIconTint" format="reference|color" />
         <!-- Follow mode icon drawable -->
@@ -34,7 +22,26 @@
         <attr name="cameraModeButtonFollowText" format="string" localization="suggested" />
     </declare-styleable>
 
+    <declare-styleable name="MapboxAudioGuidanceButton">
+        <!-- Background to apply to the view. -->
+        <attr name="audioGuidanceButtonBackground" format="reference|color" />
+        <!-- Tint to apply to the icon drawable. -->
+        <attr name="audioGuidanceButtonIconTint" format="reference|color" />
+        <!-- Follow mode icon drawable -->
+        <attr name="audioGuidanceButtonMuteIcon" format="reference" />
+        <!-- Overview mode icon drawable -->
+        <attr name="audioGuidanceButtonUnmuteIcon" format="reference" />
+        <!-- Appearance of a text message. -->
+        <attr name="audioGuidanceButtonTextAppearance" format="reference" />
+        <!-- Follow mode text -->
+        <attr name="audioGuidanceButtonMuteText" format="string" localization="suggested" />
+        <!-- Overview mode text -->
+        <attr name="audioGuidanceButtonUnmuteText" format="string" localization="suggested" />
+    </declare-styleable>
+
     <declare-styleable name="MapboxExtendableButton">
+        <!-- Background to apply to the view. -->
+        <attr name="extendableButtonBackground" format="reference|color" />
         <!-- Default icon drawable -->
         <attr name="extendableButtonIcon" format="reference" />
         <!-- Tint to apply to the icon drawable. -->

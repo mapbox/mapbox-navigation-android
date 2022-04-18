@@ -5,9 +5,10 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.internal.extensions.flowUiBinder
+import com.mapbox.navigation.dropin.component.speedlimit.SpeedLimitViewBinder
 import com.mapbox.navigation.dropin.lifecycle.UICoordinator
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /**
  * Coordinator for showing speed limit.
@@ -19,6 +20,8 @@ internal class SpeedLimitCoordinator(
 ) : UICoordinator<ViewGroup>(speedLimitLayout) {
 
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
-        return navigationViewContext.flowUiBinder({ it.speedLimit })
+        return navigationViewContext.uiBinders.speedLimit.map {
+            it ?: SpeedLimitViewBinder(navigationViewContext)
+        }
     }
 }

@@ -51,7 +51,6 @@
             app:layout_constraintHorizontal_bias="0.5" />
 
         <com.mapbox.navigation.dropin.view.MapboxExtendableButton
-            style="@style/DropInStyleExitButton"
             android:id="@+id/endNavigation"
             android:layout_width="72dp"
             android:layout_height="52dp"
@@ -77,7 +76,6 @@
             app:layout_constraintEnd_toStartOf="@+id/routePreview" />
 
         <com.mapbox.navigation.dropin.view.MapboxExtendableButton
-            style="@style/DropInStylePreviewButton"
             android:id="@+id/routePreview"
             android:layout_width="72dp"
             android:layout_height="52dp"
@@ -87,7 +85,6 @@
             app:layout_constraintTop_toTopOf="@+id/startNavigation" />
 
         <com.mapbox.navigation.dropin.view.MapboxExtendableButton
-            style="@style/DropInStyleStartButton"
             android:id="@+id/startNavigation"
             android:layout_width="72dp"
             android:layout_height="52dp"

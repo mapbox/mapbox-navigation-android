@@ -25,7 +25,7 @@ import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class MapBinder(
-    private val navigationViewContext: NavigationViewContext,
+    private val context: NavigationViewContext,
     private val binding: MapboxNavigationViewLayoutBinding,
     private val mapView: MapView
 ) : UIBinder {
@@ -36,35 +36,39 @@ internal class MapBinder(
     }
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
-        val navigationState = navigationViewContext.viewModel.navigationStateViewModel.state
+        val navigationState = context.viewModel.navigationStateViewModel.state
         return navigationListOf(
             CameraLayoutObserver(
                 mapView,
                 binding,
-                navigationViewContext.viewModel.cameraViewModel,
-                navigationViewContext.viewModel.navigationStateViewModel,
+                context.viewModel.cameraViewModel,
+                context.viewModel.navigationStateViewModel,
             ),
             LocationComponent(
                 mapView,
-                navigationViewContext.viewModel.locationViewModel,
+                context.viewModel.locationViewModel,
             ),
             reloadOnChange(
-                navigationViewContext.mapStyleLoader.loadedMapStyle,
-                navigationViewContext.options.routeLineOptions
+                context.mapStyleLoader.loadedMapStyle,
+                context.options.routeLineOptions
             ) { _, lineOptions ->
                 RouteLineComponent(
                     mapView,
                     lineOptions,
-                    navigationViewContext.viewModel.routesViewModel
+                    context.viewModel.routesViewModel
                 )
             },
             CameraComponent(
                 mapView,
-                navigationViewContext.viewModel.cameraViewModel,
-                navigationViewContext.viewModel.locationViewModel,
-                navigationViewContext.viewModel.navigationStateViewModel,
+                context.viewModel.cameraViewModel,
+                context.viewModel.locationViewModel,
+                context.viewModel.navigationStateViewModel,
             ),
-            MapMarkersComponent(mapView, navigationViewContext),
+            reloadOnChange(
+                context.styles.destinationMarker
+            ) { marker ->
+                MapMarkersComponent(mapView = mapView, iconImage = marker, context = context)
+            },
             reloadOnChange(navigationState) {
                 longPressMapComponent(it)
             },
@@ -72,8 +76,8 @@ internal class MapBinder(
                 geocodingComponent(it)
             },
             reloadOnChange(
-                navigationViewContext.mapStyleLoader.loadedMapStyle,
-                navigationViewContext.options.routeArrowOptions,
+                context.mapStyleLoader.loadedMapStyle,
+                context.options.routeArrowOptions,
                 navigationState
             ) { _, arrowOptions, navState ->
                 routeArrowComponent(navState, arrowOptions)
@@ -87,16 +91,16 @@ internal class MapBinder(
             NavigationState.DestinationPreview ->
                 FreeDriveLongPressMapComponent(
                     mapView,
-                    navigationViewContext.viewModel.navigationStateViewModel,
-                    navigationViewContext.viewModel.routesViewModel,
-                    navigationViewContext.viewModel.destinationViewModel,
+                    context.viewModel.navigationStateViewModel,
+                    context.viewModel.routesViewModel,
+                    context.viewModel.destinationViewModel,
                 )
             NavigationState.RoutePreview ->
                 RoutePreviewLongPressMapComponent(
                     mapView,
-                    navigationViewContext.viewModel.locationViewModel,
-                    navigationViewContext.viewModel.routesViewModel,
-                    navigationViewContext.viewModel.destinationViewModel,
+                    context.viewModel.locationViewModel,
+                    context.viewModel.routesViewModel,
+                    context.viewModel.destinationViewModel,
                 )
             NavigationState.ActiveNavigation,
             NavigationState.Arrival ->
@@ -108,7 +112,7 @@ internal class MapBinder(
             NavigationState.FreeDrive,
             NavigationState.DestinationPreview,
             NavigationState.RoutePreview ->
-                GeocodingComponent(navigationViewContext.viewModel.destinationViewModel)
+                GeocodingComponent(context.viewModel.destinationViewModel)
             NavigationState.ActiveNavigation,
             NavigationState.Arrival ->
                 null

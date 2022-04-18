@@ -14,10 +14,11 @@ import com.mapbox.navigation.dropin.component.cameramode.CameraModeButtonCompone
 import com.mapbox.navigation.dropin.component.recenter.RecenterButtonComponent
 import com.mapbox.navigation.dropin.databinding.MapboxActionButtonsLayoutBinding
 import com.mapbox.navigation.dropin.internal.extensions.navigationListOf
+import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class ActionButtonBinder(
-    private val navigationViewContext: NavigationViewContext
+    private val context: NavigationViewContext
 ) : UIBinder {
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
@@ -30,21 +31,34 @@ internal class ActionButtonBinder(
 
         val binding = MapboxActionButtonsLayoutBinding.bind(viewGroup)
         return navigationListOf(
-            AudioGuidanceButtonComponent(
-                navigationViewContext.viewModel.audioGuidanceViewModel,
-                navigationViewContext.viewModel.navigationStateViewModel,
-                binding.soundButton,
-            ),
-            CameraModeButtonComponent(
-                navigationViewContext.viewModel.cameraViewModel,
-                navigationViewContext.viewModel.navigationStateViewModel,
-                binding.cameraModeButton
-            ),
-            RecenterButtonComponent(
-                navigationViewContext.viewModel.cameraViewModel,
-                navigationViewContext.viewModel.navigationStateViewModel,
-                binding.recenterButton
-            )
+            reloadOnChange(
+                context.styles.audioGuidanceButtonStyle,
+            ) { style ->
+                AudioGuidanceButtonComponent(
+                    audioGuidanceViewModel = context.viewModel.audioGuidanceViewModel,
+                    navigationStateViewModel = context.viewModel.navigationStateViewModel,
+                    audioGuidanceButton = binding.soundButton,
+                    audioGuidanceButtonStyle = style,
+                )
+            },
+            reloadOnChange(context.styles.cameraModeButtonStyle) { style ->
+                CameraModeButtonComponent(
+                    cameraViewModel = context.viewModel.cameraViewModel,
+                    navigationStateViewModel = context.viewModel.navigationStateViewModel,
+                    cameraModeButton = binding.cameraModeButton,
+                    cameraModeStyle = style
+                )
+            },
+            reloadOnChange(
+                context.styles.recenterButtonStyle
+            ) { style ->
+                RecenterButtonComponent(
+                    cameraViewModel = context.viewModel.cameraViewModel,
+                    navigationStateViewModel = context.viewModel.navigationStateViewModel,
+                    recenterStyle = style,
+                    recenterButton = binding.recenterButton
+                )
+            }
         )
     }
 }

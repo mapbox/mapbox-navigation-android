@@ -3,8 +3,6 @@ package com.mapbox.navigation.dropin
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.binder.EmptyBinder
 import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.binder.infopanel.InfoPanelTripProgressBinder
-import com.mapbox.navigation.dropin.component.speedlimit.SpeedLimitViewBinder
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -51,10 +49,10 @@ internal class ViewBinderTest {
             }
         )
 
-        assertTrue(sut.speedLimit.value is SpeedLimitViewBinder)
+        assertTrue(sut.speedLimit.value == null)
         assertTrue(sut.maneuver.value == null)
         assertTrue(sut.roadName.value == null)
-        assertTrue(sut.infoPanelTripProgressBinder.value is InfoPanelTripProgressBinder)
+        assertTrue(sut.infoPanelTripProgressBinder.value == null)
         assertTrue(sut.infoPanelHeaderBinder.value == null)
         assertTrue(sut.infoPanelContentBinder.value == null)
         assertTrue(sut.actionButtonsBinder.value == null)

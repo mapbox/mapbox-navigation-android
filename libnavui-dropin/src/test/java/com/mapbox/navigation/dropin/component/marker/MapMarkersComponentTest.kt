@@ -8,6 +8,7 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.NavigationViewContext
+import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.destination.Destination
 import com.mapbox.navigation.dropin.component.destination.DestinationState
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -17,12 +18,13 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
 internal class MapMarkersComponentTest {
 
     @get:Rule
@@ -51,7 +53,7 @@ internal class MapMarkersComponentTest {
             every { mapAnnotationFactory() } returns mockAnnotationFactory
         }
 
-        sut = MapMarkersComponent(mapView, navContext)
+        sut = MapMarkersComponent(mapView, R.drawable.mapbox_ic_destination_marker, navContext)
     }
 
     @Test
@@ -60,7 +62,9 @@ internal class MapMarkersComponentTest {
             val annotation = mockk<PointAnnotationOptions>()
             val point = Point.fromLngLat(10.0, 11.0)
             destinationStateFlow.value = DestinationState(Destination(point))
-            every { mockAnnotationFactory.createPin(point) } returns annotation
+            every {
+                mockAnnotationFactory.createPin(point, R.drawable.mapbox_ic_destination_marker)
+            } returns annotation
 
             sut.onAttached(mockk())
 

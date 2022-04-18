@@ -33,7 +33,10 @@ internal class ManeuverCoordinator(
             .flatMapLatest { state ->
                 context.uiBinders.maneuver.map {
                     if (state == NavigationState.ActiveNavigation) {
-                        it ?: ManeuverViewBinder(context.mapStyleLoader.loadedMapStyle)
+                        it ?: ManeuverViewBinder(
+                            context.mapStyleLoader.loadedMapStyle,
+                            context.styles.maneuverViewOptions,
+                        )
                     } else {
                         EmptyBinder()
                     }

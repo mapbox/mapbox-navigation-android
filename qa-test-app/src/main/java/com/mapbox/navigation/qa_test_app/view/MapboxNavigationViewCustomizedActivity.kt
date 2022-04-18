@@ -31,13 +31,32 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultAudioGuidanceButtonStyle
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultCameraModeButtonStyle
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultDestinationMarker
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultEndNavigationButtonStyle
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultManeuverViewOptions
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRecenterButtonStyle
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoadNameBackground
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoadNameTextAppearance
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoutePreviewButtonStyle
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultSpeedLimitStyle
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultSpeedLimitTextAppearance
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultStartNavigationButtonStyle
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultTripProgressStyle
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction
 import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterViewModel
 import com.mapbox.navigation.dropin.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.LayoutActivityNavigationViewCustomizedBinding
 import com.mapbox.navigation.qa_test_app.utils.Utils
+import com.mapbox.navigation.ui.maneuver.model.ManeuverExitOptions
+import com.mapbox.navigation.ui.maneuver.model.ManeuverPrimaryOptions
+import com.mapbox.navigation.ui.maneuver.model.ManeuverSecondaryOptions
+import com.mapbox.navigation.ui.maneuver.model.ManeuverSubOptions
+import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
@@ -50,7 +69,8 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 class CustomizedViewModel : ViewModel() {
-    val showCustomViews = MutableLiveData(false)
+    val useCustomViews = MutableLiveData(false)
+    val useCustomStyles = MutableLiveData(false)
     val showCustomMapView = MutableLiveData(false)
 }
 
@@ -90,9 +110,83 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
 
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.getDefaultNightMode())
 
+        viewModel.useCustomStyles.observe(this) { customStyles ->
+            binding.toggleViewStyling.isChecked = customStyles
+            if (customStyles) {
+                binding.navigationView.customizeViewStyles {
+                    tripProgressStyle = R.style.MyCustomTripProgressStyle
+                    speedLimitStyle = R.style.MyCustomSpeedLimitStyle
+                    speedLimitTextAppearance = R.style.MyCustomSpeedLimitTextAppearance
+                    destinationMarker = R.drawable.mapbox_ic_marker
+                    roadNameBackground = R.drawable.mapbox_bg_road_name
+                    roadNameTextAppearance = R.style.MyCustomRoadNameViewTextAppearance
+                    audioGuidanceButtonStyle = R.style.MyCustomAudioGuidanceButton
+                    recenterButtonStyle = R.style.MyCustomRecenterButton
+                    cameraModeButtonStyle = R.style.MyCustomCameraModeButton
+                    routePreviewButtonStyle = R.style.MyCustomRoutePreviewButton
+                    endNavigationButtonStyle = R.style.MyCustomEndNavigationButton
+                    startNavigationButtonStyle = R.style.MyCustomStartNavigationButton
+                    maneuverViewOptions = ManeuverViewOptions
+                        .Builder()
+                        .primaryManeuverOptions(
+                            ManeuverPrimaryOptions
+                                .Builder()
+                                .textAppearance(R.style.MyCustomPrimaryManeuver)
+                                .exitOptions(
+                                    ManeuverExitOptions
+                                        .Builder()
+                                        .textAppearance(R.style.MyCustomExitTextForPrimary)
+                                        .build()
+                                )
+                                .build()
+                        )
+                        .secondaryManeuverOptions(
+                            ManeuverSecondaryOptions
+                                .Builder()
+                                .textAppearance(R.style.MyCustomSecondaryManeuver)
+                                .exitOptions(
+                                    ManeuverExitOptions
+                                        .Builder()
+                                        .textAppearance(R.style.MyCustomExitTextForSecondary)
+                                        .build()
+                                )
+                                .build()
+                        )
+                        .subManeuverOptions(
+                            ManeuverSubOptions
+                                .Builder()
+                                .textAppearance(R.style.MyCustomSubManeuver)
+                                .exitOptions(
+                                    ManeuverExitOptions
+                                        .Builder()
+                                        .textAppearance(R.style.MyCustomExitTextForSub)
+                                        .build()
+                                )
+                                .build()
+                        )
+                        .build()
+                }
+            } else {
+                binding.navigationView.customizeViewStyles {
+                    tripProgressStyle = defaultTripProgressStyle()
+                    speedLimitStyle = defaultSpeedLimitStyle()
+                    speedLimitTextAppearance = defaultSpeedLimitTextAppearance()
+                    maneuverViewOptions = defaultManeuverViewOptions()
+                    destinationMarker = defaultDestinationMarker()
+                    roadNameBackground = defaultRoadNameBackground()
+                    roadNameTextAppearance = defaultRoadNameTextAppearance()
+                    audioGuidanceButtonStyle = defaultAudioGuidanceButtonStyle()
+                    recenterButtonStyle = defaultRecenterButtonStyle()
+                    cameraModeButtonStyle = defaultCameraModeButtonStyle()
+                    routePreviewButtonStyle = defaultRoutePreviewButtonStyle()
+                    endNavigationButtonStyle = defaultEndNavigationButtonStyle()
+                    startNavigationButtonStyle = defaultStartNavigationButtonStyle()
+                }
+            }
+        }
         // This demonstrates that you can customize views at any time. You can also reset to
         // the default views.
-        viewModel.showCustomViews.observe(this) { showCustomViews ->
+        viewModel.useCustomViews.observe(this) { showCustomViews ->
             binding.toggleCustomViews.isChecked = showCustomViews
             if (showCustomViews) {
                 binding.navigationView.customizeViewBinders {
@@ -116,8 +210,12 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
             }
         }
 
-        binding.toggleCustomViews.setOnCheckedChangeListener { buttonView, isChecked ->
-            viewModel.showCustomViews.value = isChecked
+        binding.toggleCustomViews.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.useCustomViews.value = isChecked
+        }
+
+        binding.toggleViewStyling.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.useCustomStyles.value = isChecked
         }
 
         when (resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {

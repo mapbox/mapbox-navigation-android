@@ -14,26 +14,25 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.databinding.MapboxCameraModeButtonLayoutBinding
-import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
+import com.mapbox.navigation.dropin.databinding.MapboxAudioGuidanceButtonLayoutBinding
 import com.mapbox.navigation.ui.utils.internal.ExtendableButtonHelper
 import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
 
 /**
- * Default button that allows user to toggle between Camera Following and Overview mode.
+ * Default button that allows user to mute and un-mute audio guidance.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class MapboxCameraModeButton : FrameLayout {
+class MapboxAudioGuidanceButton : FrameLayout {
 
     private val binding =
-        MapboxCameraModeButtonLayoutBinding.inflate(LayoutInflater.from(context), this)
+        MapboxAudioGuidanceButtonLayoutBinding.inflate(LayoutInflater.from(context), this)
 
     private val helper = ExtendableButtonHelper(
         binding.buttonText,
         { 0 },
         { text ->
             binding.buttonText.measureTextWidth(text).toInt() +
-                resources.getDimensionPixelSize(R.dimen.mapbox_cameraModeButton_paddingStart)
+                resources.getDimensionPixelSize(R.dimen.mapbox_audioGuidanceButton_paddingStart)
         },
     )
 
@@ -53,45 +52,45 @@ class MapboxCameraModeButton : FrameLayout {
     val textView: AppCompatTextView = binding.buttonText
 
     /**
-     * Icon Resource Id for FOLLOWING camera state.
+     * Icon Resource Id for MUTE audio guidance.
      */
     @DrawableRes
-    var followingIconResId: Int = 0
+    var muteIconResId: Int = 0
 
     /**
-     * Icon  Drawable Resource Id for OVERVIEW camera state.
+     * Icon  Drawable Resource Id for UNMUTE audio guidance.
      */
     @DrawableRes
-    var overviewIconResId: Int = 0
+    var unMuteIconResId: Int = 0
 
     /**
-     * Extended mode Text for FOLLOWING camera state.
+     * Extended mode Text for MUTE audio guidance.
      */
-    var followingText: String? = null
+    var muteText: String? = null
 
     /**
-     * Extended mode Text for OVERVIEW camera state.
+     * Extended mode Text for UNMUTE audio guidance.
      */
-    var overviewText: String? = null
+    var unMuteText: String? = null
 
     /**
-     * Default button that allows user to toggle between Camera Following and Overview mode.
+     * Default button that allows user to mute and un-mute audio guidance.
      */
     constructor(context: Context) : this(context, null)
 
     /**
-     * Default button that allows user to toggle between Camera Following and Overview mode.
+     * Default button that allows user to mute and un-mute audio guidance.
      */
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
     /**
-     * Default button that allows user to toggle between Camera Following and Overview mode.
+     * Default button that allows user to mute and un-mute audio guidance.
      */
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
         this(context, attrs, defStyleAttr, R.style.MapboxStyleCameraModeButton)
 
     /**
-     * Default button that allows user to toggle between Camera Following and Overview mode.
+     * Default button that allows user to mute and un-mute audio guidance.
      */
     constructor(
         context: Context,
@@ -101,7 +100,7 @@ class MapboxCameraModeButton : FrameLayout {
     ) : super(context, attrs, defStyleAttr, defStyleRes) {
         context.theme.obtainStyledAttributes(
             attrs,
-            R.styleable.MapboxCameraModeButton,
+            R.styleable.MapboxAudioGuidanceButton,
             defStyleAttr,
             defStyleRes
         ).apply {
@@ -114,41 +113,65 @@ class MapboxCameraModeButton : FrameLayout {
     }
 
     /**
-     * Update this button to represent new camera state.
+     * Update this button to represent audio guidance state in muted state.
+     * This method does nothing if button is already in given state.
+     */
+    @UiThread
+    fun mute() {
+        iconImage.setImageResource(muteIconResId)
+    }
+
+    /**
+     * Update this button to represent audio guidance state in un-muted state.
      * This method does nothing if button is already in given state.
      *
      * @param state new camera state
      */
     @UiThread
-    fun setState(state: NavigationCameraState) {
-        updateIconDrawable(state)
+    fun unMute() {
+        iconImage.setImageResource(unMuteIconResId)
     }
 
     /**
-     * Update this button to represent new camera state.
-     * Extend button for the [duration] and show [followingText] or [overviewText].
+     * Update this button to represent audio guidance state in muted state.
+     * Extend button for the [duration] and show [muteText].
      * This method does nothing if button is already in given state.
      *
-     * @param state new camera state.
      * @param duration duration in milliseconds. Defaults to [EXTEND_DURATION].
      */
     @UiThread
     @JvmOverloads
-    fun setStateAndExtend(state: NavigationCameraState, duration: Long = EXTEND_DURATION) {
-        updateIconDrawable(state)
+    fun muteAndExtend(duration: Long = EXTEND_DURATION) {
+        iconImage.setImageResource(muteIconResId)
 
-        val text = getText(state)
-        if (text != null && !helper.isAnimationRunning) {
-            helper.showTextAndExtend(text, duration)
+        if (muteText != null && !helper.isAnimationRunning) {
+            helper.showTextAndExtend(muteText!!, duration)
         }
     }
 
     /**
-     * Allows you to change the style of [MapboxCameraModeButton].
+     * Update this button to represent audio guidance state in un-muted state.
+     * Extend button for the [duration] and show [unMuteText].
+     * This method does nothing if button is already in given state.
+     *
+     * @param duration duration in milliseconds. Defaults to [EXTEND_DURATION].
+     */
+    @UiThread
+    @JvmOverloads
+    fun unMuteAndExtend(duration: Long = EXTEND_DURATION) {
+        iconImage.setImageResource(unMuteIconResId)
+
+        if (unMuteText != null && !helper.isAnimationRunning) {
+            helper.showTextAndExtend(unMuteText!!, duration)
+        }
+    }
+
+    /**
+     * Allows you to change the style of [MapboxAudioGuidanceButton].
      * @param style Int
      */
     fun updateStyle(@StyleRes style: Int) {
-        context.obtainStyledAttributes(style, R.styleable.MapboxCameraModeButton).apply {
+        context.obtainStyledAttributes(style, R.styleable.MapboxAudioGuidanceButton).apply {
             try {
                 applyAttributes(this)
             } finally {
@@ -158,52 +181,39 @@ class MapboxCameraModeButton : FrameLayout {
     }
 
     private fun applyAttributes(typedArray: TypedArray) {
-        followingIconResId = typedArray.getResourceId(
-            R.styleable.MapboxCameraModeButton_cameraModeButtonFollowIcon,
-            R.drawable.mapbox_ic_camera_follow
+        muteIconResId = typedArray.getResourceId(
+            R.styleable.MapboxAudioGuidanceButton_audioGuidanceButtonMuteIcon,
+            R.drawable.mapbox_ic_sound_off
         )
-        overviewIconResId = typedArray.getResourceId(
-            R.styleable.MapboxCameraModeButton_cameraModeButtonOverviewIcon,
-            R.drawable.mapbox_ic_camera_overview
+        unMuteIconResId = typedArray.getResourceId(
+            R.styleable.MapboxAudioGuidanceButton_audioGuidanceButtonUnmuteIcon,
+            R.drawable.mapbox_ic_sound_on
         )
         typedArray.getColorStateList(
-            R.styleable.MapboxCameraModeButton_cameraModeButtonIconTint
+            R.styleable.MapboxAudioGuidanceButton_audioGuidanceButtonIconTint
         )?.also {
             iconImage.imageTintList = it
         }
         typedArray.getResourceId(
-            R.styleable.MapboxCameraModeButton_cameraModeButtonBackground,
+            R.styleable.MapboxAudioGuidanceButton_audioGuidanceButtonBackground,
             R.drawable.mapbox_bg_button
         ).also {
             background = ContextCompat.getDrawable(context, it)
         }
         typedArray.getResourceId(
-            R.styleable.MapboxCameraModeButton_cameraModeButtonTextAppearance,
-            R.style.MapboxCameraModeButtonTextAppearance
+            R.styleable.MapboxAudioGuidanceButton_audioGuidanceButtonTextAppearance,
+            R.style.MapboxAudioGuidanceButtonTextAppearance
         ).also {
             // setTextAppearance is not deprecated in AppCompatTextView
             textView.setTextAppearance(context, it)
         }
-        followingText =
-            typedArray.getString(R.styleable.MapboxCameraModeButton_cameraModeButtonFollowText)
-        overviewText =
-            typedArray.getString(R.styleable.MapboxCameraModeButton_cameraModeButtonOverviewText)
+        muteText =
+            typedArray.getString(R.styleable.MapboxAudioGuidanceButton_audioGuidanceButtonMuteText)
+        unMuteText =
+            typedArray.getString(
+                R.styleable.MapboxAudioGuidanceButton_audioGuidanceButtonUnmuteText
+            )
     }
-
-    private fun updateIconDrawable(state: NavigationCameraState) {
-        if (isInFollowMode(state)) {
-            iconImage.setImageResource(overviewIconResId)
-        } else {
-            iconImage.setImageResource(followingIconResId)
-        }
-    }
-
-    private fun getText(state: NavigationCameraState): String? =
-        if (isInFollowMode(state)) overviewText else followingText
-
-    private fun isInFollowMode(state: NavigationCameraState) =
-        state == NavigationCameraState.TRANSITION_TO_FOLLOWING ||
-            state == NavigationCameraState.FOLLOWING
 
     private companion object {
         /**

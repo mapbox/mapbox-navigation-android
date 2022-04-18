@@ -1,5 +1,8 @@
 package com.mapbox.navigation.dropin.component.roadlabel
 
+import androidx.annotation.DrawableRes
+import androidx.annotation.StyleRes
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.bindgen.Expected
@@ -23,11 +26,18 @@ internal class RoadNameLabelComponent(
     private val roadNameView: MapboxRoadNameView,
     private val locationViewModel: LocationViewModel,
     private val mapStyle: Style,
+    @StyleRes private val textAppearance: Int,
+    @DrawableRes private val roadNameBackground: Int,
     private val routeShieldApi: MapboxRouteShieldApi = MapboxRouteShieldApi()
 ) : UIComponent() {
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
-
+        roadNameView.background = ContextCompat.getDrawable(
+            roadNameView.context,
+            roadNameBackground
+        )
+        // setTextAppearance is not deprecated in AppCompatTextView
+        roadNameView.setTextAppearance(roadNameView.context, textAppearance)
         locationViewModel.state.observe { matcherResult ->
             if (matcherResult != null && matcherResult.isRoadNameAvailable()) {
                 roadNameView.isVisible = true

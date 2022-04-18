@@ -27,12 +27,22 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/toggleViewStyling"
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="Use custom styling"
+            android:textAllCaps="true"
+            />
+
+        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/toggleCustomViews"
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:text="show custom views"
+            android:text="Use custom views"
             android:textAllCaps="true"
             />
 

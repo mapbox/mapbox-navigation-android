@@ -13,6 +13,7 @@ import com.mapbox.navigation.dropin.internal.extensions.flowTripSessionState
 import com.mapbox.navigation.dropin.internal.extensions.getStyleId
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
+import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
 internal class ManeuverComponent(
     val maneuverView: MapboxManeuverView,
     val mapStyle: Style,
+    val options: ManeuverViewOptions,
     val maneuverApi: MapboxManeuverApi = MapboxManeuverApi(
         MapboxDistanceFormatter(
             DistanceFormatterOptions.Builder(maneuverView.context).build()
@@ -30,6 +32,7 @@ internal class ManeuverComponent(
 ) : UIComponent() {
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
+        maneuverView.updateManeuverViewOptions(options)
         maneuverView.upcomingManeuverRenderingEnabled = false
         coroutineScope.launch {
             combine(
