@@ -148,6 +148,13 @@ class NavigationView @JvmOverloads constructor(
     }
 
     /**
+     * Customize standalone UI components styles by providing your own custom styles.
+     */
+    fun customizeViewStyles(action: ViewStyleCustomization.() -> Unit) {
+        navigationContext.applyStyleCustomization(action)
+    }
+
+    /**
      * Provide custom map styles, route line and arrow options.
      */
     fun customizeViewOptions(action: ViewOptionsCustomization.() -> Unit) {

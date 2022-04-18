@@ -7,8 +7,6 @@
 
     <com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
         android:id="@+id/speedLimitView"
-        style="@style/DropInStyleSpeedLimit"
-        android:textAppearance="@style/DropInSpeedLimitTextAppearance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 

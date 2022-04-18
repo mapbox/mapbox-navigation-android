@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.component.cameramode
 
+import androidx.annotation.StyleRes
 import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -17,6 +18,7 @@ internal class CameraModeButtonComponent(
     private val cameraViewModel: CameraViewModel,
     private val navigationStateViewModel: NavigationStateViewModel,
     private val cameraModeButton: MapboxCameraModeButton,
+    @StyleRes private val cameraModeStyle: Int,
 ) : UIComponent() {
 
     private var buttonIconState: TargetCameraMode = TargetCameraMode.Idle
@@ -24,6 +26,7 @@ internal class CameraModeButtonComponent(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
+        cameraModeButton.updateStyle(cameraModeStyle)
         cameraViewModel.state.observe {
             when (it.cameraMode) {
                 TargetCameraMode.Following -> {

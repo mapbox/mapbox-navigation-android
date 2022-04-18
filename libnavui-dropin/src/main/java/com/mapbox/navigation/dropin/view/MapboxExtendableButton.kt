@@ -1,13 +1,16 @@
 package com.mapbox.navigation.dropin.view
 
 import android.content.Context
+import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.annotation.DrawableRes
+import androidx.annotation.StyleRes
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxExtendableButtonLayoutBinding
@@ -79,24 +82,7 @@ class MapboxExtendableButton : FrameLayout {
             defStyleRes
         ).apply {
             try {
-                getResourceId(
-                    R.styleable.MapboxExtendableButton_extendableButtonIcon,
-                    0
-                ).also {
-                    iconImage.setImageResource(it)
-                }
-                getColorStateList(
-                    R.styleable.MapboxExtendableButton_extendableButtonIconTint
-                )?.also {
-                    iconImage.imageTintList = it
-                }
-                getResourceId(
-                    R.styleable.MapboxExtendableButton_extendableButtonTextAppearance,
-                    R.style.MapboxExtendableButtonTextAppearance
-                ).also {
-                    // setTextAppearance is not deprecated in AppCompatTextView
-                    textView.setTextAppearance(context, it)
-                }
+                applyAttributes(this)
             } finally {
                 recycle()
             }
@@ -117,6 +103,47 @@ class MapboxExtendableButton : FrameLayout {
 
         if (0 < state.duration && !state.text.isNullOrEmpty() && !helper.isAnimationRunning) {
             helper.showTextAndExtend(state.text, state.duration)
+        }
+    }
+
+    /**
+     * Allows you to change the style of [MapboxExtendableButton].
+     * @param style Int
+     */
+    fun updateStyle(@StyleRes style: Int) {
+        context.obtainStyledAttributes(style, R.styleable.MapboxExtendableButton).apply {
+            try {
+                applyAttributes(this)
+            } finally {
+                recycle()
+            }
+        }
+    }
+
+    private fun applyAttributes(typedArray: TypedArray) {
+        typedArray.getResourceId(
+            R.styleable.MapboxExtendableButton_extendableButtonIcon,
+            0
+        ).also {
+            iconImage.setImageResource(it)
+        }
+        typedArray.getColorStateList(
+            R.styleable.MapboxExtendableButton_extendableButtonIconTint
+        )?.also {
+            iconImage.imageTintList = it
+        }
+        typedArray.getResourceId(
+            R.styleable.MapboxExtendableButton_extendableButtonBackground,
+            R.drawable.mapbox_bg_button
+        ).also {
+            background = ContextCompat.getDrawable(context, it)
+        }
+        typedArray.getResourceId(
+            R.styleable.MapboxExtendableButton_extendableButtonTextAppearance,
+            R.style.MapboxExtendableButtonTextAppearance
+        ).also {
+            // setTextAppearance is not deprecated in AppCompatTextView
+            textView.setTextAppearance(context, it)
         }
     }
 

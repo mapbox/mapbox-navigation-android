@@ -30,6 +30,7 @@ internal class NavigationViewContext(
     val mapView = MutableStateFlow<MapView?>(null)
 
     val uiBinders = ViewBinder()
+    val styles = NavigationViewStyles(context)
     val options = NavigationViewOptions(context)
 
     val dispatch: (action: Any) -> Unit = { action ->
@@ -51,6 +52,11 @@ internal class NavigationViewContext(
     fun applyBinderCustomization(action: ViewBinderCustomization.() -> Unit) {
         val customization = ViewBinderCustomization().apply(action)
         uiBinders.applyCustomization(customization)
+    }
+
+    fun applyStyleCustomization(action: ViewStyleCustomization.() -> Unit) {
+        val customization = ViewStyleCustomization().apply(action)
+        styles.applyCustomization(customization)
     }
 
     fun applyOptionsCustomization(action: ViewOptionsCustomization.() -> Unit) {

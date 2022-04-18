@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.component.marker
 
+import androidx.annotation.DrawableRes
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.map
 @ExperimentalPreviewMapboxNavigationAPI
 internal open class MapMarkersComponent(
     protected val mapView: MapView,
+    @DrawableRes val iconImage: Int,
     protected val context: NavigationViewContext
 ) : UIComponent() {
     private val mapAnnotationFactory = context.mapAnnotationFactory()
@@ -31,7 +33,7 @@ internal open class MapMarkersComponent(
             .observe { point ->
                 annotationManager.deleteAll()
                 if (point != null) {
-                    val annotation = mapAnnotationFactory.createPin(point)
+                    val annotation = mapAnnotationFactory.createPin(point, iconImage)
                     annotationManager.create(annotation)
                 }
             }

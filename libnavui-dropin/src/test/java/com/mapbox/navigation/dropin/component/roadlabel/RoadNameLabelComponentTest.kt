@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
+import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.location.LocationViewModel
 import com.mapbox.navigation.dropin.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.dropin.internal.extensions.flowRouteProgress
@@ -62,7 +63,13 @@ class RoadNameLabelComponentTest {
                 every { state } returns MutableStateFlow(matcherResult)
             }
 
-            RoadNameLabelComponent(roadNameView, locationViewModel, style)
+            RoadNameLabelComponent(
+                roadNameView,
+                locationViewModel,
+                style,
+                R.style.DropInRoadNameViewTextAppearance,
+                R.drawable.mapbox_road_name_view_background
+            )
                 .onAttached(mapboxNavigation)
 
             verify { roadNameView.isVisible = false }
@@ -82,7 +89,13 @@ class RoadNameLabelComponentTest {
                 every { state } returns MutableStateFlow(matcherResult)
             }
 
-            RoadNameLabelComponent(roadNameView, locationViewModel, style)
+            RoadNameLabelComponent(
+                roadNameView,
+                locationViewModel,
+                style,
+                R.style.DropInRoadNameViewTextAppearance,
+                R.drawable.mapbox_road_name_view_background
+            )
                 .onAttached(mapboxNavigation)
 
             verify { roadNameView.isVisible = true }
@@ -105,8 +118,13 @@ class RoadNameLabelComponentTest {
             every { state } returns MutableStateFlow(locationMatcherResult)
         }
 
-        RoadNameLabelComponent(roadNameView, locationViewModel, style)
-            .onAttached(mapboxNavigation)
+        RoadNameLabelComponent(
+            roadNameView,
+            locationViewModel,
+            style,
+            R.style.DropInRoadNameViewTextAppearance,
+            R.drawable.mapbox_road_name_view_background
+        ).onAttached(mapboxNavigation)
 
         verify { roadNameView.renderRoadName(mockRoad) }
         unmockkStatic("com.mapbox.navigation.dropin.internal.extensions.MapboxNavigationEx")
@@ -153,6 +171,8 @@ class RoadNameLabelComponentTest {
             roadNameView,
             locationViewModel,
             style,
+            R.style.DropInRoadNameViewTextAppearance,
+            R.drawable.mapbox_road_name_view_background,
             routeShieldApi
         ).onAttached(mapboxNavigation)
 

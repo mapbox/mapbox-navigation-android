@@ -11,14 +11,15 @@ import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.component.infopanel.InfoPanelHeaderComponent
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderLayoutBinding
 import com.mapbox.navigation.dropin.internal.extensions.navigationListOf
+import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class InfoPanelHeaderBinder(
     private val context: NavigationViewContext
 ) : UIBinder {
 
-    private val tripProgressBinder get() = context.uiBinders.infoPanelTripProgressBinder.value
-
+    @ExperimentalCoroutinesApi
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
             viewGroup,
@@ -28,15 +29,26 @@ internal class InfoPanelHeaderBinder(
         TransitionManager.go(scene)
 
         val binding = MapboxInfoPanelHeaderLayoutBinding.bind(viewGroup)
+
         return navigationListOf(
-            InfoPanelHeaderComponent(
-                binding,
-                context.viewModel.navigationStateViewModel,
-                context.viewModel.destinationViewModel,
-                context.viewModel.locationViewModel,
-                context.viewModel.routesViewModel,
-            ),
-            tripProgressBinder.bind(binding.tripProgressLayout),
+            reloadOnChange(
+                context.styles.routePreviewButtonStyle,
+                context.styles.endNavigationButtonStyle,
+                context.styles.startNavigationButtonStyle
+            ) { previewStyle, endNavStyle, startNavStyle ->
+                InfoPanelHeaderComponent(
+                    binding = binding,
+                    navigationStateViewModel = context.viewModel.navigationStateViewModel,
+                    destinationViewModel = context.viewModel.destinationViewModel,
+                    locationViewModel = context.viewModel.locationViewModel,
+                    routesViewModel = context.viewModel.routesViewModel,
+                    routePreviewStyle = previewStyle,
+                    endNavigationStyle = endNavStyle,
+                    startNavigationStyle = startNavStyle,
+                )
+            },
+            context.uiBinders.infoPanelTripProgressBinder.value?.bind(binding.tripProgressLayout)
+                ?: InfoPanelTripProgressBinder(context).bind(binding.tripProgressLayout)
         )
     }
 }

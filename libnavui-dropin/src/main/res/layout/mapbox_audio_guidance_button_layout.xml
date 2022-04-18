@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    tools:background="@drawable/mapbox_bg_button"
+    tools:layout_margin="20dp"
+    tools:parentTag="android.widget.FrameLayout">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/container"
+        android:layout_width="wrap_content"
+        android:layout_height="52dp"
+        android:minWidth="72dp"
+        android:paddingStart="@dimen/mapbox_cameraModeButton_paddingStart">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iconImage"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/mapbox_ic_sound_on"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/buttonText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="8dp"
+            android:text=""
+            android:maxLines="1"
+            android:textColor="@color/colorOnSurface"
+            app:layout_constraintBottom_toBottomOf="@+id/iconImage"
+            app:layout_constraintTop_toTopOf="@+id/iconImage"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/iconImage" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</merge>

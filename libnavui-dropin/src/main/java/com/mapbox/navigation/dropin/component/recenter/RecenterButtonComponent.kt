@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.component.recenter
 
+import androidx.annotation.StyleRes
 import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -18,12 +19,14 @@ import kotlinx.coroutines.launch
 internal class RecenterButtonComponent(
     private val cameraViewModel: CameraViewModel,
     private val navigationStateViewModel: NavigationStateViewModel,
+    @StyleRes private val recenterStyle: Int,
     private val recenterButton: MapboxExtendableButton,
 ) : UIComponent() {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
+        recenterButton.updateStyle(recenterStyle)
         recenterButton.setOnClickListener {
             cameraViewModel.invoke(
                 CameraAction.ToFollowing

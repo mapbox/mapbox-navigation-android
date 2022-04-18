@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.component.tripprogress
 
+import androidx.annotation.StyleRes
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.core.MapboxNavigation
@@ -15,10 +16,14 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal class TripProgressComponent(val tripProgressView: MapboxTripProgressView) : UIComponent() {
+internal class TripProgressComponent(
+    @StyleRes val styles: Int,
+    val tripProgressView: MapboxTripProgressView
+) : UIComponent() {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
+        tripProgressView.updateStyle(styles)
         val distanceFormatterOptions =
             DistanceFormatterOptions.Builder(tripProgressView.context).build()
         val tripProgressFormatter = TripProgressUpdateFormatter

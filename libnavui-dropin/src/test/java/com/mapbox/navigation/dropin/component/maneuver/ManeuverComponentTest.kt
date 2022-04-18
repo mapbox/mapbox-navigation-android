@@ -17,6 +17,7 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
+import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.shield.model.RouteShieldCallback
@@ -43,6 +44,8 @@ class ManeuverComponentTest {
     var coroutineRule = MainCoroutineRule()
 
     lateinit var style: Style
+
+    private val maneuverViewOptions = ManeuverViewOptions.Builder().build()
 
     @Before
     fun setUp() {
@@ -104,7 +107,8 @@ class ManeuverComponentTest {
             } answers {
                 firstArg<TripSessionStateObserver>().onSessionStateChanged(TripSessionState.STARTED)
             }
-            val maneuverComponent = ManeuverComponent(maneuverView, style, mockManeuverApi)
+            val maneuverComponent =
+                ManeuverComponent(maneuverView, style, maneuverViewOptions, mockManeuverApi)
 
             maneuverComponent.onAttached(mockNavigation)
 
@@ -134,7 +138,8 @@ class ManeuverComponentTest {
                 firstArg<TripSessionStateObserver>().onSessionStateChanged(TripSessionState.STARTED)
             }
             val expectedList: List<Expected<RouteShieldError, RouteShieldResult>> = listOf()
-            val maneuverComponent = ManeuverComponent(maneuverView, style, mockManeuverApi)
+            val maneuverComponent =
+                ManeuverComponent(maneuverView, style, maneuverViewOptions, mockManeuverApi)
 
             maneuverComponent.onAttached(mockNavigation).also {
                 callbackSlot.captured.onRoadShields(expectedList)
@@ -166,7 +171,8 @@ class ManeuverComponentTest {
                 firstArg<TripSessionStateObserver>().onSessionStateChanged(TripSessionState.STOPPED)
             }
 
-            val maneuverComponent = ManeuverComponent(maneuverView, style, mockManeuverApi)
+            val maneuverComponent =
+                ManeuverComponent(maneuverView, style, maneuverViewOptions, mockManeuverApi)
 
             maneuverComponent.onAttached(mockNavigation)
 
@@ -194,7 +200,8 @@ class ManeuverComponentTest {
                 firstArg<TripSessionStateObserver>().onSessionStateChanged(TripSessionState.STARTED)
             }
 
-            val maneuverComponent = ManeuverComponent(maneuverView, style, mockManeuverApi)
+            val maneuverComponent =
+                ManeuverComponent(maneuverView, style, maneuverViewOptions, mockManeuverApi)
 
             maneuverComponent.onAttached(mockNavigation)
 

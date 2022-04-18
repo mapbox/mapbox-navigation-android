@@ -8,6 +8,7 @@ package com.mapbox.navigation.dropin {
     method public void customizeMapView(com.mapbox.maps.MapView? mapView);
     method public void customizeViewBinders(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewBinderCustomization,kotlin.Unit> action);
     method public void customizeViewOptions(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewOptionsCustomization,kotlin.Unit> action);
+    method public void customizeViewStyles(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewStyleCustomization,kotlin.Unit> action);
     method public androidx.lifecycle.Lifecycle getLifecycle();
   }
 
@@ -56,6 +57,66 @@ package com.mapbox.navigation.dropin {
   public static final class ViewOptionsCustomization.Companion {
     method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions defaultRouteArrowOptions(android.content.Context context);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions defaultRouteLineOptions(android.content.Context context);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ViewStyleCustomization {
+    ctor public ViewStyleCustomization();
+    method public Integer? getAudioGuidanceButtonStyle();
+    method public Integer? getCameraModeButtonStyle();
+    method public Integer? getDestinationMarker();
+    method public Integer? getEndNavigationButtonStyle();
+    method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? getManeuverViewOptions();
+    method public Integer? getRecenterButtonStyle();
+    method public Integer? getRoadNameBackground();
+    method public Integer? getRoadNameTextAppearance();
+    method public Integer? getRoutePreviewButtonStyle();
+    method public Integer? getSpeedLimitStyle();
+    method public Integer? getSpeedLimitTextAppearance();
+    method public Integer? getStartNavigationButtonStyle();
+    method public Integer? getTripProgressStyle();
+    method public void setAudioGuidanceButtonStyle(Integer? p);
+    method public void setCameraModeButtonStyle(Integer? p);
+    method public void setDestinationMarker(Integer? p);
+    method public void setEndNavigationButtonStyle(Integer? p);
+    method public void setManeuverViewOptions(com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? p);
+    method public void setRecenterButtonStyle(Integer? p);
+    method public void setRoadNameBackground(Integer? p);
+    method public void setRoadNameTextAppearance(Integer? p);
+    method public void setRoutePreviewButtonStyle(Integer? p);
+    method public void setSpeedLimitStyle(Integer? p);
+    method public void setSpeedLimitTextAppearance(Integer? p);
+    method public void setStartNavigationButtonStyle(Integer? p);
+    method public void setTripProgressStyle(Integer? p);
+    property public final Integer? audioGuidanceButtonStyle;
+    property public final Integer? cameraModeButtonStyle;
+    property public final Integer? destinationMarker;
+    property public final Integer? endNavigationButtonStyle;
+    property public final com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? maneuverViewOptions;
+    property public final Integer? recenterButtonStyle;
+    property public final Integer? roadNameBackground;
+    property public final Integer? roadNameTextAppearance;
+    property public final Integer? routePreviewButtonStyle;
+    property public final Integer? speedLimitStyle;
+    property public final Integer? speedLimitTextAppearance;
+    property public final Integer? startNavigationButtonStyle;
+    property public final Integer? tripProgressStyle;
+    field public static final com.mapbox.navigation.dropin.ViewStyleCustomization.Companion Companion;
+  }
+
+  public static final class ViewStyleCustomization.Companion {
+    method public int defaultAudioGuidanceButtonStyle();
+    method public int defaultCameraModeButtonStyle();
+    method public int defaultDestinationMarker();
+    method public int defaultEndNavigationButtonStyle();
+    method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions defaultManeuverViewOptions();
+    method public int defaultRecenterButtonStyle();
+    method public int defaultRoadNameBackground();
+    method public int defaultRoadNameTextAppearance();
+    method public int defaultRoutePreviewButtonStyle();
+    method public int defaultSpeedLimitStyle();
+    method public int defaultSpeedLimitTextAppearance();
+    method public int defaultStartNavigationButtonStyle();
+    method public int defaultTripProgressStyle();
   }
 
 }
@@ -453,6 +514,38 @@ package com.mapbox.navigation.dropin.lifecycle {
 
 package com.mapbox.navigation.dropin.view {
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxAudioGuidanceButton extends android.widget.FrameLayout {
+    ctor public MapboxAudioGuidanceButton(android.content.Context context);
+    ctor public MapboxAudioGuidanceButton(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxAudioGuidanceButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    ctor public MapboxAudioGuidanceButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr, int defStyleRes);
+    method public androidx.constraintlayout.widget.ConstraintLayout getContainerView();
+    method public androidx.appcompat.widget.AppCompatImageView getIconImage();
+    method public int getMuteIconResId();
+    method public String? getMuteText();
+    method public androidx.appcompat.widget.AppCompatTextView getTextView();
+    method public int getUnMuteIconResId();
+    method public String? getUnMuteText();
+    method @UiThread public void mute();
+    method @UiThread public void muteAndExtend(long duration = 2000L);
+    method @UiThread public void muteAndExtend();
+    method public void setMuteIconResId(int p);
+    method public void setMuteText(String? p);
+    method public void setUnMuteIconResId(int p);
+    method public void setUnMuteText(String? p);
+    method @UiThread public void unMute();
+    method @UiThread public void unMuteAndExtend(long duration = 2000L);
+    method @UiThread public void unMuteAndExtend();
+    method public void updateStyle(@StyleRes int style);
+    property public final androidx.constraintlayout.widget.ConstraintLayout containerView;
+    property public final androidx.appcompat.widget.AppCompatImageView iconImage;
+    property public final int muteIconResId;
+    property public final String? muteText;
+    property public final androidx.appcompat.widget.AppCompatTextView textView;
+    property public final int unMuteIconResId;
+    property public final String? unMuteText;
+  }
+
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxCameraModeButton extends android.widget.FrameLayout {
     ctor public MapboxCameraModeButton(android.content.Context context);
     ctor public MapboxCameraModeButton(android.content.Context context, android.util.AttributeSet? attrs);
@@ -472,6 +565,7 @@ package com.mapbox.navigation.dropin.view {
     method @UiThread public void setState(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state);
     method @UiThread public void setStateAndExtend(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state, long duration = 2000L);
     method @UiThread public void setStateAndExtend(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state);
+    method public void updateStyle(@StyleRes int style);
     property public final androidx.constraintlayout.widget.ConstraintLayout containerView;
     property public final int followingIconResId;
     property public final String? followingText;
@@ -490,6 +584,7 @@ package com.mapbox.navigation.dropin.view {
     method public androidx.appcompat.widget.AppCompatImageView getIconImage();
     method public androidx.appcompat.widget.AppCompatTextView getTextView();
     method public void setState(com.mapbox.navigation.dropin.view.MapboxExtendableButton.State state);
+    method public void updateStyle(@StyleRes int style);
     property public final androidx.constraintlayout.widget.ConstraintLayout containerView;
     property public final androidx.appcompat.widget.AppCompatImageView iconImage;
     property public final androidx.appcompat.widget.AppCompatTextView textView;

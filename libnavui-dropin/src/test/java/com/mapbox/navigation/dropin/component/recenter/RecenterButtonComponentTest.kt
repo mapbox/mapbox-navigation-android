@@ -4,6 +4,7 @@ import android.view.View
 import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.camera.CameraState
 import com.mapbox.navigation.dropin.component.camera.CameraViewModel
 import com.mapbox.navigation.dropin.component.camera.TargetCameraMode
@@ -34,6 +35,7 @@ class RecenterButtonComponentTest {
         every { visibility = View.VISIBLE } just Runs
         every { visibility = View.GONE } just Runs
         every { setOnClickListener(any()) } just Runs
+        every { updateStyle(any()) } just Runs
     }
     private val mockMapboxNavigation: MapboxNavigation = mockk(relaxed = true)
     private val navigationStateFlow = MutableStateFlow<NavigationState>(NavigationState.FreeDrive)
@@ -55,6 +57,7 @@ class RecenterButtonComponentTest {
         recenterButtonComponent = RecenterButtonComponent(
             cameraViewModel,
             navigationStateViewModel,
+            R.style.DropInStyleRecenterButton,
             mockRecenterButton
         )
     }

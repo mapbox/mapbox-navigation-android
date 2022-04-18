@@ -2,8 +2,6 @@ package com.mapbox.navigation.dropin
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.binder.infopanel.InfoPanelTripProgressBinder
-import com.mapbox.navigation.dropin.component.speedlimit.SpeedLimitViewBinder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,40 +13,34 @@ import kotlinx.coroutines.flow.asStateFlow
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class ViewBinder {
 
-    private val _speedLimit: MutableStateFlow<UIBinder> = MutableStateFlow(SpeedLimitViewBinder())
+    private val _speedLimit: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
     private val _maneuver: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
     private val _roadName: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
-    private val _infoPanelTripProgressBinder: MutableStateFlow<UIBinder> =
-        MutableStateFlow(InfoPanelTripProgressBinder())
+    private val _infoPanelTripProgressBinder: MutableStateFlow<UIBinder?> =
+        MutableStateFlow(null)
     private val _infoPanelHeaderBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
     private val _infoPanelContentBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
     private val _actionButtonsBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
 
-    val speedLimit: StateFlow<UIBinder> get() = _speedLimit.asStateFlow()
+    val speedLimit: StateFlow<UIBinder?> get() = _speedLimit.asStateFlow()
     val maneuver: StateFlow<UIBinder?> get() = _maneuver.asStateFlow()
     val roadName: StateFlow<UIBinder?> get() = _roadName.asStateFlow()
-    val infoPanelTripProgressBinder: StateFlow<UIBinder>
+    val infoPanelTripProgressBinder: StateFlow<UIBinder?>
         get() = _infoPanelTripProgressBinder.asStateFlow()
     val infoPanelHeaderBinder: StateFlow<UIBinder?> get() = _infoPanelHeaderBinder.asStateFlow()
     val infoPanelContentBinder: StateFlow<UIBinder?> get() = _infoPanelContentBinder.asStateFlow()
     val actionButtonsBinder: StateFlow<UIBinder?> get() = _actionButtonsBinder.asStateFlow()
 
     fun applyCustomization(customization: ViewBinderCustomization) {
-        customization.speedLimitBinder?.also {
-            _speedLimit.emitOrDefault(it, SpeedLimitViewBinder())
-        }
+        customization.speedLimitBinder?.also { _speedLimit.emitOrNull(it) }
         customization.maneuverBinder?.also { _maneuver.emitOrNull(it) }
         customization.roadNameBinder?.also { _roadName.emitOrNull(it) }
         customization.infoPanelTripProgressBinder?.also {
-            _infoPanelTripProgressBinder.emitOrDefault(it, InfoPanelTripProgressBinder())
+            _infoPanelTripProgressBinder.emitOrNull(it)
         }
         customization.infoPanelHeaderBinder?.also { _infoPanelHeaderBinder.emitOrNull(it) }
         customization.infoPanelContentBinder?.also { _infoPanelContentBinder.emitOrNull(it) }
         customization.actionButtonsBinder?.also { _actionButtonsBinder.emitOrNull(it) }
-    }
-
-    private fun MutableStateFlow<UIBinder>.emitOrDefault(v: UIBinder, default: UIBinder) {
-        tryEmit(if (v != UIBinder.USE_DEFAULT) v else default)
     }
 
     private fun MutableStateFlow<UIBinder?>.emitOrNull(v: UIBinder) {

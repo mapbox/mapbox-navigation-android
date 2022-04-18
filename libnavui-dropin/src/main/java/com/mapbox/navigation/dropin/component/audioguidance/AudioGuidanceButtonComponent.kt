@@ -1,45 +1,41 @@
 package com.mapbox.navigation.dropin.component.audioguidance
 
+import androidx.annotation.StyleRes
 import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
-import com.mapbox.navigation.dropin.view.MapboxExtendableButton
-import com.mapbox.navigation.dropin.view.MapboxExtendableButton.State
+import com.mapbox.navigation.dropin.view.MapboxAudioGuidanceButton
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class AudioGuidanceButtonComponent(
     private val audioGuidanceViewModel: AudioGuidanceViewModel,
     private val navigationStateViewModel: NavigationStateViewModel,
-    private val soundButton: MapboxExtendableButton,
+    private val audioGuidanceButton: MapboxAudioGuidanceButton,
+    @StyleRes val audioGuidanceButtonStyle: Int,
 ) : UIComponent() {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
+        audioGuidanceButton.updateStyle(audioGuidanceButtonStyle)
         audioGuidanceViewModel.state.observe {
-            if (it.isMuted) soundButton.setState(MUTED)
-            else soundButton.setState(UN_MUTED)
+            if (it.isMuted) audioGuidanceButton.mute()
+            else audioGuidanceButton.unMute()
         }
 
         navigationStateViewModel.state.observe {
-            soundButton.isVisible = it == NavigationState.ActiveNavigation
+            audioGuidanceButton.isVisible = it == NavigationState.ActiveNavigation
         }
 
-        soundButton.setOnClickListener {
+        audioGuidanceButton.setOnClickListener {
             audioGuidanceViewModel.invoke(AudioAction.Toggle)
         }
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         super.onDetached(mapboxNavigation)
-        soundButton.setOnClickListener(null)
-    }
-
-    companion object ButtonStates {
-        private val UN_MUTED = State(R.drawable.mapbox_ic_sound_on)
-        private val MUTED = State(R.drawable.mapbox_ic_sound_off)
+        audioGuidanceButton.setOnClickListener(null)
     }
 }

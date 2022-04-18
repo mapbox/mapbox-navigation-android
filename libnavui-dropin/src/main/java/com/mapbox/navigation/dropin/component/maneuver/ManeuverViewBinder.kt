@@ -10,11 +10,13 @@ import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.databinding.MapboxManeuverGuidanceLayoutBinding
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
+import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class ManeuverViewBinder(
-    private val loadedMapStyle: StateFlow<Style?>
+    private val loadedMapStyle: StateFlow<Style?>,
+    private val maneuverViewOptions: StateFlow<ManeuverViewOptions>,
 ) : UIBinder {
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
@@ -25,9 +27,19 @@ internal class ManeuverViewBinder(
         TransitionManager.go(scene)
         val binding = MapboxManeuverGuidanceLayoutBinding.bind(viewGroup)
 
-        return reloadOnChange(loadedMapStyle) {
-            if (it != null) ManeuverComponent(binding.maneuverView, it)
-            else null
+        return reloadOnChange(
+            loadedMapStyle,
+            maneuverViewOptions
+        ) { mapStyle, options ->
+            if (mapStyle != null) {
+                ManeuverComponent(
+                    maneuverView = binding.maneuverView,
+                    mapStyle = mapStyle,
+                    options = options
+                )
+            } else {
+                null
+            }
         }
     }
 }
