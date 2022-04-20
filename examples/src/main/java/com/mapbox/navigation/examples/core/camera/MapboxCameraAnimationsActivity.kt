@@ -472,7 +472,7 @@ class MapboxCameraAnimationsActivity :
                     |  left: ${currentMapCamera.padding.left.formatNumber()}
                     |  bottom: ${currentMapCamera.padding.bottom.formatNumber()}
                     |  right: ${currentMapCamera.padding.right.formatNumber()}
-               """.trimMargin()
+                """.trimMargin()
         }
     }
 

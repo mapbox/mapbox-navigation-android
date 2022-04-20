@@ -221,7 +221,7 @@ internal class RouteAlternativesController constructor(
                         """
                                 |unable to parse alternative at index $index;
                                 |failure for response: ${routeAlternative.route.responseJson}
-                            """.trimMargin(),
+                        """.trimMargin(),
                         LOG_CATEGORY
                     )
                     null

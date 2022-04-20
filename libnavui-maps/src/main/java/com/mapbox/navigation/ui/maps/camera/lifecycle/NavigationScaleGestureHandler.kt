@@ -243,7 +243,7 @@ class NavigationScaleGestureHandler(
 
     private val onIndicatorPositionChangedListener =
         OnIndicatorPositionChangedListener {
-            point ->
+                point ->
             puckScreenPosition = point.also { adjustFocalPoint(it) }
         }
 
