@@ -134,7 +134,8 @@ class ReplayRouteSmootherTest {
         val geometry =
             """u{l~fA|kenhF`]vChRl@hRL`Wk@fN_@~HMnILfINvI\dJjAdJzAvIxBnIhC~Hv
 |CfIvDfIrEpHrF~HbG~H`H~I~IrJhLvIfNd@|@nDrF~CrFfDpG~CrGpC`GxGtPnCpGhCpGnCrGdj@xjAxLdYhCrG
-|vC`HhCpGfC`HhC`HhC`HxB`H`C`HxBnHpB`HhB`IbB`HzK|gAt@tOd@rP?vN?bp@WpRsAzi@?hCMxa@""".trimMargin()
+|vC`HhCpGfC`HhC`HhC`HxB`H`C`HxBnHpB`HhB`IbB`HzK|gAt@tOd@rP?vN?bp@WpRsAzi@?hCMxa@
+            """.trimMargin()
 
         val coordinates = LineString.fromPolyline(geometry, 6).coordinates()
 

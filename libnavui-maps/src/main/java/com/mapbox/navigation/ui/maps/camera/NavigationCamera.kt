@@ -152,7 +152,7 @@ class NavigationCamera(
 
     private val sourceUpdateObserver =
         ViewportDataSourceUpdateObserver {
-            viewportData ->
+                viewportData ->
             updateFrame(viewportData, instant = false)
         }
 
