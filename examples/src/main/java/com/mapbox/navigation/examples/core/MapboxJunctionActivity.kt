@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -171,7 +172,7 @@ class MapboxJunctionActivity : AppCompatActivity(), OnMapLongClickListener {
     private fun initNavigation() {
         mapboxNavigation = MapboxNavigationProvider.create(
             NavigationOptions.Builder(this)
-                .accessToken(getMapboxAccessTokenFromResources())
+                .accessToken(getMapboxRouteAccessToken(this))
                 .locationEngine(ReplayLocationEngine(mapboxReplayer))
                 .build()
         )
@@ -261,6 +262,7 @@ class MapboxJunctionActivity : AppCompatActivity(), OnMapLongClickListener {
         return if (tokenResId != 0) {
             context.getString(tokenResId)
         } else {
+            Toast.makeText(this, "Missing mapbox_access_token_junction", Toast.LENGTH_LONG).show()
             getMapboxAccessTokenFromResources()
         }
     }
