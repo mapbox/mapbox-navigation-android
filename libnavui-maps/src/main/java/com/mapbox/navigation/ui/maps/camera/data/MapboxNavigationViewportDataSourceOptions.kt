@@ -191,6 +191,8 @@ class FollowingFrameOptions internal constructor() {
          * List of maneuvers for which camera frames pitch should not be set to `0`.
          *
          * Defaults to `listOf("continue", "merge", "on ramp", "off ramp", "fork")`.
+         *
+         * See [available maneuver types](https://docs.mapbox.com/api/navigation/directions/#maneuver-types) and [StepManeuver] class for more options.
          */
         var excludedManeuvers: List<String> = listOf(
             StepManeuver.CONTINUE,
