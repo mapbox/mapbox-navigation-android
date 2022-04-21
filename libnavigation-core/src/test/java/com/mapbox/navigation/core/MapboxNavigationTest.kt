@@ -101,6 +101,7 @@ import java.io.File
 import java.net.URL
 import java.util.Locale
 
+@ExperimentalPreviewMapboxNavigationAPI
 @Config(shadows = [ShadowReachabilityFactory::class])
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
@@ -230,7 +231,7 @@ class MapboxNavigationTest {
 
         mockkObject(NativeRouteParserWrapper)
         every {
-            NativeRouteParserWrapper.parseDirectionsResponse(any(), any())
+            NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
         } answers {
             val routesCount =
                 JSONObject(this.firstArg<String>())

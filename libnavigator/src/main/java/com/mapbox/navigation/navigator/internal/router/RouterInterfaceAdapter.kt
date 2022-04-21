@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.navigation.base.internal.utils.mapToNativeRouteOrigin
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouter
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -12,7 +13,6 @@ import com.mapbox.navigation.base.route.NavigationRouterRefreshError
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.navigator.internal.mapToDirectionsResponse
-import com.mapbox.navigation.navigator.internal.mapToNativeRouteOrigin
 import com.mapbox.navigator.RouteRefreshOptions
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterErrorType

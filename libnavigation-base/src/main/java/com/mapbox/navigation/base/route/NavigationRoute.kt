@@ -46,15 +46,44 @@ class NavigationRoute internal constructor(
          * @param directionsResponse response to be parsed into [NavigationRoute]s
          * @param routeOptions options used to generate the [directionsResponse]
          */
+        @Deprecated(
+            "Navigation route requires RouterOrigin. " +
+                "If RouterOrigin is not set uses RouterOrigin.Custom()",
+            ReplaceWith("create(directionsResponse, routeOptions, routerOrigin)")
+        )
+        @JvmStatic
         fun create(
             directionsResponse: DirectionsResponse,
             routeOptions: RouteOptions,
         ): List<NavigationRoute> {
             return create(
                 directionsResponse,
+                routeOptions,
+                RouterOrigin.Custom()
+            )
+        }
+
+        /**
+         * Creates new instances of [NavigationRoute] based on the routes found in the [directionsResponse].
+         *
+         * Should not be called from UI thread. Contains serialisation and deserialisation under the hood.
+         *
+         * @param directionsResponse response to be parsed into [NavigationRoute]s
+         * @param routeOptions options used to generate the [directionsResponse]
+         * @param routerOrigin origin where route was fetched from
+         */
+        @JvmStatic
+        fun create(
+            directionsResponse: DirectionsResponse,
+            routeOptions: RouteOptions,
+            routerOrigin: RouterOrigin,
+        ): List<NavigationRoute> {
+            return create(
+                directionsResponse,
                 directionsResponseJson = directionsResponse.toJson(),
                 routeOptions,
-                routeOptionsUrlString = routeOptions.toUrl("").toString()
+                routeOptionsUrlString = routeOptions.toUrl("").toString(),
+                routerOrigin,
             )
         }
 
@@ -66,15 +95,44 @@ class NavigationRoute internal constructor(
          * @param directionsResponseJson response to be parsed into [NavigationRoute]s
          * @param routeRequestUrl URL used to generate the [directionsResponse]
          */
+        @Deprecated(
+            "Navigation route requires RouterOrigin. " +
+                "If RouterOrigin is not set uses RouterOrigin.Custom()",
+            ReplaceWith("create(directionsResponseJson, routeRequestUrl, routerOrigin)")
+        )
+        @JvmStatic
         fun create(
             directionsResponseJson: String,
             routeRequestUrl: String,
         ): List<NavigationRoute> {
             return create(
-                DirectionsResponse.fromJson(directionsResponseJson),
+                directionsResponseJson,
+                routeRequestUrl,
+                RouterOrigin.Custom()
+            )
+        }
+
+        /**
+         * Creates new instances of [NavigationRoute] based on the routes found in the [directionsResponseJson].
+         *
+         * Should not be called from UI thread. Contains serialisation and deserialisation under the hood.
+         *
+         * @param directionsResponseJson response to be parsed into [NavigationRoute]s
+         * @param routeRequestUrl URL used to generate the [directionsResponse]
+         * @param routerOrigin origin where route was fetched from
+         */
+        @JvmStatic
+        fun create(
+            directionsResponseJson: String,
+            routeRequestUrl: String,
+            routerOrigin: RouterOrigin,
+        ): List<NavigationRoute> {
+            return create(
+                directionsResponse = DirectionsResponse.fromJson(directionsResponseJson),
                 directionsResponseJson = directionsResponseJson,
-                RouteOptions.fromUrl(URL(routeRequestUrl)),
-                routeOptionsUrlString = routeRequestUrl
+                routeOptions = RouteOptions.fromUrl(URL(routeRequestUrl)),
+                routeOptionsUrlString = routeRequestUrl,
+                routerOrigin = routerOrigin,
             )
         }
 
@@ -89,6 +147,7 @@ class NavigationRoute internal constructor(
         internal suspend fun createAsync(
             directionsResponseJson: String,
             routeRequestUrl: String,
+            routerOrigin: RouterOrigin,
             routeParser: SDKRouteParser = NativeRouteParserWrapper
         ): List<NavigationRoute> {
             return coroutineScope {
@@ -98,7 +157,8 @@ class NavigationRoute internal constructor(
                 val deferredNativeParsing = async(ThreadController.DefaultDispatcher) {
                     routeParser.parseDirectionsResponse(
                         directionsResponseJson,
-                        routeRequestUrl
+                        routeRequestUrl,
+                        routerOrigin,
                     )
                 }
                 val deferredRouteOptionsParsing = async(ThreadController.DefaultDispatcher) {
@@ -116,13 +176,15 @@ class NavigationRoute internal constructor(
             directionsResponse: DirectionsResponse,
             routeOptions: RouteOptions,
             routeParser: SDKRouteParser,
+            routerOrigin: RouterOrigin,
         ): List<NavigationRoute> {
             return create(
                 directionsResponse,
                 directionsResponseJson = directionsResponse.toJson(),
                 routeOptions,
                 routeOptionsUrlString = routeOptions.toUrl("").toString(),
-                routeParser
+                routerOrigin,
+                routeParser,
             )
         }
 
@@ -131,10 +193,11 @@ class NavigationRoute internal constructor(
             directionsResponseJson: String,
             routeOptions: RouteOptions,
             routeOptionsUrlString: String,
+            routerOrigin: RouterOrigin,
             routeParser: SDKRouteParser = NativeRouteParserWrapper
         ): List<NavigationRoute> {
             return routeParser.parseDirectionsResponse(
-                directionsResponseJson, routeOptionsUrlString
+                directionsResponseJson, routeOptionsUrlString, routerOrigin
             ).run {
                 create(this, directionsResponse, routeOptions)
             }
@@ -244,7 +307,32 @@ fun List<NavigationRoute>.toDirectionsRoutes() = map { it.directionsRoute }
  *
  * **Avoid using this mapper and instead try using APIs that accept [NavigationRoute] type where possible.**
  */
-fun List<DirectionsRoute>.toNavigationRoutes() = map { it.toNavigationRoute() }
+@Deprecated(
+    "NavigationRoute requires routerOrigin. If RouterOrigin is not set uses RouterOrigin.Custom()",
+    ReplaceWith("toNavigationRoutes(routerOrigin)")
+)
+fun List<DirectionsRoute>.toNavigationRoutes() =
+    map { it.toNavigationRoute(RouterOrigin.Custom()) }
+
+/**
+ * Maps [DirectionsRoute]s to [NavigationRoute]s.
+ *
+ * This mapping tries to fulfill some of the required [NavigationRoute] data points from the nested features of the [DirectionsRoute],
+ * or supplies them with fake supplements to the best of its ability.
+ *
+ * This is a lossy mapping since the [DirectionsRoute] cannot carry the same amount of information as [NavigationRoute].
+ *
+ * This compatibility extension is blocking and can now take a significant amount of time to return (in order of hundreds of milliseconds for long routes).
+ * To avoid potential slowdowns, try not using the compatibility layer and work with [NavigationRoute] and [NavigationRouterCallback] were possible (look for deprecation warnings and refactor).
+ * There's a cache layer baked in that avoids the blocking operations if the route was generated by the Navigation SDK itself which could avoid majority of blocking operations, but it's not guaranteed.
+ *
+ * **Avoid using this mapper and instead try using APIs that accept [NavigationRoute] type where possible.**
+ *
+ * @param routerOrigin origin where route was fetched from
+ */
+fun List<DirectionsRoute>.toNavigationRoutes(
+    routerOrigin: RouterOrigin,
+) = map { it.toNavigationRoute(routerOrigin) }
 
 /**
  * Maps [DirectionsRoute] to [NavigationRoute].
@@ -260,11 +348,37 @@ fun List<DirectionsRoute>.toNavigationRoutes() = map { it.toNavigationRoute() }
  *
  * **Avoid using this mapper and instead try using APIs that accept [NavigationRoute] type where possible.**
  */
+@Deprecated(
+    "NavigationRoute requires routerOrigin. If RouterOrigin is not set uses RouterOrigin.Custom()",
+    ReplaceWith("toNavigationRoute(routerOrigin)")
+)
 fun DirectionsRoute.toNavigationRoute(): NavigationRoute = this.toNavigationRoute(
-    NativeRouteParserWrapper
+    NativeRouteParserWrapper,
+    RouterOrigin.Custom(),
 )
 
-internal fun DirectionsRoute.toNavigationRoute(sdkRouteParser: SDKRouteParser): NavigationRoute {
+/**
+ * Maps [DirectionsRoute] to [NavigationRoute].
+ *
+ * This mapping tries to fulfill some of the required [NavigationRoute] data points from the nested features of the [DirectionsRoute],
+ * or supplies them with fake supplements to the best of its ability.
+ *
+ * This is a lossy mapping since the [DirectionsRoute] cannot carry the same amount of information as [NavigationRoute].
+ *
+ * This compatibility extension is blocking and can now take a significant amount of time to return (in order of hundreds of milliseconds for long routes).
+ * To avoid potential slowdowns, try not using the compatibility layer and work with [NavigationRoute] and [NavigationRouterCallback] were possible (look for deprecation warnings and refactor).
+ * There's a cache layer baked in that avoids the blocking operations if the route was generated by the Navigation SDK itself which could avoid majority of blocking operations, but it's not guaranteed.
+ *
+ * **Avoid using this mapper and instead try using APIs that accept [NavigationRoute] type where possible.**
+ */
+fun DirectionsRoute.toNavigationRoute(
+    routerOrigin: RouterOrigin,
+): NavigationRoute = this.toNavigationRoute(NativeRouteParserWrapper, routerOrigin)
+
+internal fun DirectionsRoute.toNavigationRoute(
+    sdkRouteParser: SDKRouteParser,
+    routerOrigin: RouterOrigin,
+): NavigationRoute {
     RouteCompatibilityCache.getFor(this)?.let {
         return it
     }
@@ -309,7 +423,7 @@ internal fun DirectionsRoute.toNavigationRoute(sdkRouteParser: SDKRouteParser): 
         .waypoints(waypoints)
         .uuid(requestUuid())
         .build()
-    return NavigationRoute.create(response, options, sdkRouteParser)[routeIndex]
+    return NavigationRoute.create(response, options, sdkRouteParser, routerOrigin)[routeIndex]
 }
 
 internal fun RouteInterface.toNavigationRoute(): NavigationRoute {

@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouterOrigin
+import org.jetbrains.annotations.TestOnly
 
 val NavigationRoute.routerOrigin: RouterOrigin get() = nativeRoute.routerOrigin
 
@@ -51,10 +52,13 @@ fun NavigationRoute.updateLegAnnotations(
 /**
  * Internal API used for testing purposes. Needed to avoid calling native parser from unit tests.
  */
+@TestOnly
 fun createNavigationRoute(
     directionsRoute: DirectionsRoute,
-    sdkRouteParser: SDKRouteParser
-): NavigationRoute = directionsRoute.toNavigationRoute(sdkRouteParser)
+    sdkRouteParser: SDKRouteParser,
+): NavigationRoute =
+    directionsRoute
+        .toNavigationRoute(sdkRouteParser, com.mapbox.navigation.base.route.RouterOrigin.Custom())
 
 /**
  * Internal API to create a new [NavigationRoute] from a native peer.

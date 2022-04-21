@@ -11,6 +11,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.InternalRouter
 import com.mapbox.navigation.base.internal.route.updateLegAnnotations
+import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouter
@@ -26,7 +27,6 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.navigator.internal.mapToRoutingMode
-import com.mapbox.navigation.navigator.internal.mapToSdkRouteOrigin
 import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
 import com.mapbox.navigation.route.internal.util.parseDirectionsRouteRefresh
 import com.mapbox.navigation.route.internal.util.redactQueryParam
@@ -95,7 +95,8 @@ class RouterWrapper(
                         parseDirectionsResponse(
                             ThreadController.IODispatcher,
                             it,
-                            routeUrl
+                            routeUrl,
+                            origin.mapToSdkRouteOrigin(),
                         ).fold(
                             { throwable ->
                                 callback.onFailure(

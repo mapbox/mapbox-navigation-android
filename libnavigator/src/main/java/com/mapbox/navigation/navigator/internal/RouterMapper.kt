@@ -3,27 +3,7 @@ package com.mapbox.navigation.navigator.internal
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.RouterOrigin.Offboard
-import com.mapbox.navigation.base.route.RouterOrigin.Onboard
-import com.mapbox.navigator.RouterOrigin
 import com.mapbox.navigator.RoutingMode
-
-internal const val HTTP_SUCCESS_CODE = "Ok"
-
-fun RouterOrigin.mapToSdkRouteOrigin(): com.mapbox.navigation.base.route.RouterOrigin {
-    return when (this) {
-        RouterOrigin.ONLINE -> Offboard
-        RouterOrigin.ONBOARD -> Onboard
-        RouterOrigin.CUSTOM -> com.mapbox.navigation.base.route.RouterOrigin.Custom()
-    }
-}
-
-fun com.mapbox.navigation.base.route.RouterOrigin.mapToNativeRouteOrigin(): RouterOrigin =
-    when (this) {
-        Offboard -> RouterOrigin.ONLINE
-        Onboard -> RouterOrigin.ONBOARD
-        is com.mapbox.navigation.base.route.RouterOrigin.Custom -> RouterOrigin.CUSTOM
-    }
 
 fun String.mapToRoutingMode(): RoutingMode {
     return when (this) {

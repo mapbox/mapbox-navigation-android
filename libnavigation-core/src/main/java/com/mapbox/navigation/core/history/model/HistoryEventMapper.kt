@@ -100,6 +100,7 @@ internal class HistoryEventMapper {
                             DirectionsRoute.fromJson(response).toBuilder()
                                 .routeIndex("0")
                                 .build()
+                                // TODO set Origin when closed https://github.com/mapbox/mapbox-navigation-native/issues/5699
                                 .toNavigationRoute()
                         }
                     }

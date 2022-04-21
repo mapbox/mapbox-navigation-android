@@ -125,7 +125,7 @@ class MapboxNavigationViewportDataSourceTest {
 
     @Before
     fun setup() {
-        mockkStatic(DirectionsRoute::toNavigationRoute)
+        mockkStatic("com.mapbox.navigation.base.route.NavigationRouteEx")
         every { route.toNavigationRoute() } returns mockk {
             every { routeOptions } returns route.routeOptions()!!
             every { directionsRoute } returns route
@@ -1233,7 +1233,7 @@ class MapboxNavigationViewportDataSourceTest {
     @After
     fun tearDown() {
         unmockkObject(ViewportDataSourceProcessor)
-        unmockkStatic(DirectionsRoute::toNavigationRoute)
+        unmockkStatic("com.mapbox.navigation.base.route.NavigationRouteEx")
     }
 
     private fun createLocation(

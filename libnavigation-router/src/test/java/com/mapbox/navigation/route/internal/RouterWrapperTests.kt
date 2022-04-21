@@ -38,7 +38,6 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkObject
-import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -187,7 +186,7 @@ class RouterWrapperTests {
 
         mockkObject(NativeRouteParserWrapper)
         every {
-            NativeRouteParserWrapper.parseDirectionsResponse(any(), any())
+            NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
         } answers {
             val routesCount =
                 JSONObject(this.firstArg<String>())
@@ -391,39 +390,37 @@ class RouterWrapperTests {
 
     @Test
     fun `route refresh set right params`() {
-        val route: DirectionsRoute = mockk(relaxed = true) {
-            every { requestUuid() } returns UUID
-            every { routeIndex() } returns "1"
-            every { routeOptions() } returns routerOptions
-            every { distance() } returns 0.0
-            every { duration() } returns 0.0
-        }
+        mockkStatic("com.mapbox.navigation.base.route.NavigationRouteEx") {
+            val route: DirectionsRoute = mockk(relaxed = true) {
+                every { requestUuid() } returns UUID
+                every { routeIndex() } returns "1"
+                every { routeOptions() } returns routerOptions
+                every { distance() } returns 0.0
+                every { duration() } returns 0.0
+            }
+            every { route.toNavigationRoute() } returns mockk {
+                every { directionsResponse.uuid() } returns UUID
+                every { routeOptions } returns routerOptions
+                every { directionsRoute } returns route
+                every { routeIndex } returns 1
+            }
 
-        mockkStatic(DirectionsRoute::toNavigationRoute)
-        every { route.toNavigationRoute() } returns mockk {
-            every { directionsResponse.uuid() } returns UUID
-            every { routeOptions } returns routerOptions
-            every { directionsRoute } returns route
-            every { routeIndex } returns 1
-        }
+            routerWrapper.getRouteRefresh(route, 0, routerRefreshCallback)
 
-        routerWrapper.getRouteRefresh(route, 0, routerRefreshCallback)
-
-        val expectedRefreshOptions = RouteRefreshOptions(
-            UUID,
-            1,
-            0,
-            RoutingProfile(routerOptions.profile().mapToRoutingMode(), routerOptions.user())
-        )
-
-        verify(exactly = 1) {
-            router.getRouteRefresh(
-                expectedRefreshOptions,
-                any()
+            val expectedRefreshOptions = RouteRefreshOptions(
+                UUID,
+                1,
+                0,
+                RoutingProfile(routerOptions.profile().mapToRoutingMode(), routerOptions.user())
             )
-        }
 
-        unmockkStatic(DirectionsRoute::toNavigationRoute)
+            verify(exactly = 1) {
+                router.getRouteRefresh(
+                    expectedRefreshOptions,
+                    any()
+                )
+            }
+        }
     }
 
     @Test

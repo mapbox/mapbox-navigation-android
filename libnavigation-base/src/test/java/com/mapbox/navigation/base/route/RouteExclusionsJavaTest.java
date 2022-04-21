@@ -41,7 +41,7 @@ public class RouteExclusionsJavaTest {
     Mockito.doReturn(
         ExpectedFactory.createValue(nativeRoutes)
     ).when(parser).parseDirectionsResponse(
-        ArgumentMatchers.anyString(), ArgumentMatchers.anyString()
+        ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.any()
     );
   }
 
