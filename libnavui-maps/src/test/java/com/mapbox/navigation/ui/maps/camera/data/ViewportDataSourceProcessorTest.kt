@@ -10,6 +10,7 @@ import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getMapAnchoredPaddingFromUserPadding
@@ -424,14 +425,41 @@ class ViewportDataSourceProcessorTest {
     }
 
     @Test
+    fun `test getPitchFallbackFromRouteProgress - pitch near maneuver, defaults`() {
+        val maneuvers = listOf("continue", "merge", "on ramp", "off ramp", "fork")
+        maneuvers.forEach {
+            val actual = getPitchFallbackFromRouteProgress(
+                routeProgressWith(
+                    upcomingManeuverType = it,
+                    distanceToUpcomingManeuver = 150f
+                ),
+                FollowingFrameOptions()
+            )
+
+            assertEquals(
+                "Camera pitch should not update to 0 for maneuver `$it`",
+                45.0,
+                actual,
+                0.0000001
+            )
+        }
+    }
+
+    @Test
     fun `test getPitchFallbackFromRouteProgress - pitch near maneuver disabled`() {
         val expected = 45.0
 
         val actual = getPitchFallbackFromRouteProgress(
-            pitchNearManeuversEnabled = false,
-            triggerDistanceForPitchZero = 180.0,
-            defaultPitch = 45.0,
-            distanceRemainingOnStep = 150f
+            routeProgressWith(
+                upcomingManeuverType = "fork",
+                distanceToUpcomingManeuver = 150f
+            ),
+            FollowingFrameOptions().apply {
+                defaultPitch = 45.0
+                pitchNearManeuvers.enabled = false
+                pitchNearManeuvers.triggerDistanceFromManeuver = 180.0
+                pitchNearManeuvers.excludedManeuvers = emptyList()
+            }
         )
 
         assertEquals(expected, actual, 0.0000001)
@@ -442,10 +470,16 @@ class ViewportDataSourceProcessorTest {
         val expected = 45.0
 
         val actual = getPitchFallbackFromRouteProgress(
-            pitchNearManeuversEnabled = true,
-            triggerDistanceForPitchZero = 180.0,
-            defaultPitch = 45.0,
-            distanceRemainingOnStep = 200f
+            routeProgressWith(
+                upcomingManeuverType = "fork",
+                distanceToUpcomingManeuver = 200f
+            ),
+            FollowingFrameOptions().apply {
+                defaultPitch = 45.0
+                pitchNearManeuvers.enabled = true
+                pitchNearManeuvers.triggerDistanceFromManeuver = 180.0
+                pitchNearManeuvers.excludedManeuvers = emptyList()
+            }
         )
 
         assertEquals(expected, actual, 0.0000001)
@@ -456,10 +490,36 @@ class ViewportDataSourceProcessorTest {
         val expected = 0.0
 
         val actual = getPitchFallbackFromRouteProgress(
-            pitchNearManeuversEnabled = true,
-            triggerDistanceForPitchZero = 180.0,
-            defaultPitch = 45.0,
-            distanceRemainingOnStep = 150f
+            routeProgressWith(
+                upcomingManeuverType = "fork",
+                distanceToUpcomingManeuver = 150f
+            ),
+            FollowingFrameOptions().apply {
+                defaultPitch = 45.0
+                pitchNearManeuvers.enabled = true
+                pitchNearManeuvers.triggerDistanceFromManeuver = 180.0
+                pitchNearManeuvers.excludedManeuvers = emptyList()
+            }
+        )
+
+        assertEquals(expected, actual, 0.0000001)
+    }
+
+    @Test
+    fun `test getPitchFallbackFromRouteProgress - pitch near maneuver enabled, reached but excluded`() {
+        val expected = 45.0
+
+        val actual = getPitchFallbackFromRouteProgress(
+            routeProgressWith(
+                upcomingManeuverType = "fork",
+                distanceToUpcomingManeuver = 150f
+            ),
+            FollowingFrameOptions().apply {
+                defaultPitch = 45.0
+                pitchNearManeuvers.enabled = true
+                pitchNearManeuvers.triggerDistanceFromManeuver = 180.0
+                pitchNearManeuvers.excludedManeuvers = listOf("fork")
+            }
         )
 
         assertEquals(expected, actual, 0.0000001)
@@ -830,6 +890,22 @@ class ViewportDataSourceProcessorTest {
         }
         builder.append("]")
         return builder.toString()
+    }
+
+    private fun routeProgressWith(
+        upcomingManeuverType: String,
+        distanceToUpcomingManeuver: Float,
+    ): RouteProgress = mockk {
+        every { currentLegProgress } returns mockk {
+            every { currentStepProgress } returns mockk {
+                every { distanceRemaining } returns distanceToUpcomingManeuver
+            }
+        }
+        every { bannerInstructions } returns mockk {
+            every { primary() } returns mockk {
+                every { type() } returns upcomingManeuverType
+            }
+        }
     }
 }
 

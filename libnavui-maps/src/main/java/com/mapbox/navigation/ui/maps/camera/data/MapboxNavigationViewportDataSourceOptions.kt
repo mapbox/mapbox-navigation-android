@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.camera.data
 
 import android.location.Location
+import com.mapbox.api.directions.v5.models.StepManeuver
 
 /**
  * Options that impact generation of frames.
@@ -185,6 +186,21 @@ class FollowingFrameOptions internal constructor() {
          * Defaults to `180.0` meters.
          */
         var triggerDistanceFromManeuver = 180.0
+
+        /**
+         * List of maneuvers for which camera frames pitch should not be set to `0`.
+         *
+         * Defaults to `listOf("continue", "merge", "on ramp", "off ramp", "fork")`.
+         *
+         * See [available maneuver types](https://docs.mapbox.com/api/navigation/directions/#maneuver-types) and [StepManeuver] class for more options.
+         */
+        var excludedManeuvers: List<String> = listOf(
+            StepManeuver.CONTINUE,
+            StepManeuver.MERGE,
+            StepManeuver.ON_RAMP,
+            StepManeuver.OFF_RAMP,
+            StepManeuver.FORK
+        )
     }
 
     /**

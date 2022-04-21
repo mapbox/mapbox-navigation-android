@@ -172,10 +172,7 @@ class MapboxNavigationViewportDataSourceTest {
         } returns postManeuverFramingPoints
         every {
             getPitchFallbackFromRouteProgress(
-                viewportDataSource.options.followingFrameOptions.pitchNearManeuvers.enabled,
-                viewportDataSource.options.followingFrameOptions.pitchNearManeuvers
-                    .triggerDistanceFromManeuver,
-                viewportDataSource.options.followingFrameOptions.defaultPitch,
+                any(),
                 any()
             )
         } returns pitchFromProgress
@@ -1031,13 +1028,7 @@ class MapboxNavigationViewportDataSourceTest {
     @Test
     fun `verify frame - location + route + progress + reset route`() {
         every {
-            getPitchFallbackFromRouteProgress(
-                viewportDataSource.options.followingFrameOptions.pitchNearManeuvers.enabled,
-                viewportDataSource.options.followingFrameOptions.pitchNearManeuvers
-                    .triggerDistanceFromManeuver,
-                viewportDataSource.options.followingFrameOptions.defaultPitch,
-                any()
-            )
+            getPitchFallbackFromRouteProgress(any(), any())
         } returns ZERO_PITCH
 
         val stepProgress = mockk<RouteStepProgress> {
@@ -1108,13 +1099,7 @@ class MapboxNavigationViewportDataSourceTest {
         mockkStatic(Logger::class)
         every { Logger.e(any(), any()) } just Runs
         every {
-            getPitchFallbackFromRouteProgress(
-                viewportDataSource.options.followingFrameOptions.pitchNearManeuvers.enabled,
-                viewportDataSource.options.followingFrameOptions.pitchNearManeuvers
-                    .triggerDistanceFromManeuver,
-                viewportDataSource.options.followingFrameOptions.defaultPitch,
-                any()
-            )
+            getPitchFallbackFromRouteProgress(any(), any())
         } returns ZERO_PITCH
 
         val stepProgress = mockk<RouteStepProgress> {

@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -267,6 +268,14 @@ class MapboxCameraAnimationsActivity :
         viewportDataSource = MapboxNavigationViewportDataSource(
             binding.mapView.getMapboxMap()
         )
+        viewportDataSource.options.followingFrameOptions.pitchNearManeuvers.apply {
+            // An example of maneuver exclusion from "pitch to 0 near maneuvers" updates.
+            excludedManeuvers = listOf(
+                StepManeuver.FORK,
+                StepManeuver.OFF_RAMP,
+                StepManeuver.ARRIVE
+            )
+        }
         viewportDataSource.debugger = debugger
         navigationCamera = NavigationCamera(
             binding.mapView.getMapboxMap(),

@@ -195,10 +195,13 @@ package com.mapbox.navigation.ui.maps.camera.data {
 
   public static final class FollowingFrameOptions.PitchNearManeuvers {
     method public boolean getEnabled();
+    method public java.util.List<java.lang.String> getExcludedManeuvers();
     method public double getTriggerDistanceFromManeuver();
     method public void setEnabled(boolean p);
+    method public void setExcludedManeuvers(java.util.List<java.lang.String> p);
     method public void setTriggerDistanceFromManeuver(double p);
     property public final boolean enabled;
+    property public final java.util.List<java.lang.String> excludedManeuvers;
     property public final double triggerDistanceFromManeuver;
   }
 
