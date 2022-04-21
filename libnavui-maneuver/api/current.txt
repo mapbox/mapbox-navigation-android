@@ -447,21 +447,39 @@ package com.mapbox.navigation.ui.maneuver.model {
   }
 
   public final class ManeuverViewOptions {
+    method public int getLaneGuidanceTurnIconManeuver();
+    method public int getManeuverBackgroundColor();
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverPrimaryOptions getPrimaryManeuverOptions();
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverSecondaryOptions getSecondaryManeuverOptions();
+    method public int getStepDistanceTextAppearance();
+    method public int getSubManeuverBackgroundColor();
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverSubOptions getSubManeuverOptions();
+    method public int getTurnIconManeuver();
+    method public int getUpcomingManeuverBackgroundColor();
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions.Builder toBuilder();
+    property public final int laneGuidanceTurnIconManeuver;
+    property public final int maneuverBackgroundColor;
     property public final com.mapbox.navigation.ui.maneuver.model.ManeuverPrimaryOptions primaryManeuverOptions;
     property public final com.mapbox.navigation.ui.maneuver.model.ManeuverSecondaryOptions secondaryManeuverOptions;
+    property public final int stepDistanceTextAppearance;
+    property public final int subManeuverBackgroundColor;
     property public final com.mapbox.navigation.ui.maneuver.model.ManeuverSubOptions subManeuverOptions;
+    property public final int turnIconManeuver;
+    property public final int upcomingManeuverBackgroundColor;
   }
 
   public static final class ManeuverViewOptions.Builder {
     ctor public ManeuverViewOptions.Builder();
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions build();
+    method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions.Builder laneGuidanceTurnIconManeuver(@StyleRes int laneGuidanceTurnIconManeuver);
+    method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions.Builder maneuverBackgroundColor(@ColorRes int maneuverBackgroundColor);
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions.Builder primaryManeuverOptions(com.mapbox.navigation.ui.maneuver.model.ManeuverPrimaryOptions primaryManeuverOptions);
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions.Builder secondaryManeuverOptions(com.mapbox.navigation.ui.maneuver.model.ManeuverSecondaryOptions secondaryManeuverOptions);
+    method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions.Builder stepDistanceTextAppearance(@StyleRes int stepDistanceTextAppearance);
+    method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions.Builder subManeuverBackgroundColor(@ColorRes int subManeuverBackgroundColor);
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions.Builder subManeuverOptions(com.mapbox.navigation.ui.maneuver.model.ManeuverSubOptions subManeuverOptions);
+    method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions.Builder turnIconManeuver(@StyleRes int turnIconManeuver);
+    method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions.Builder upcomingManeuverBackgroundColor(@ColorRes int upcomingManeuverBackgroundColor);
   }
 
   public abstract sealed class MapboxExitProperties {
@@ -974,19 +992,19 @@ package com.mapbox.navigation.ui.maneuver.view {
     method @Deprecated public void renderSubManeuver(com.mapbox.navigation.ui.maneuver.model.SubManeuver? sub, com.mapbox.navigation.ui.maneuver.model.RoadShield? roadShield = null);
     method @Deprecated public void renderSubManeuver(com.mapbox.navigation.ui.maneuver.model.SubManeuver? sub);
     method public void setUpcomingManeuverRenderingEnabled(boolean value);
-    method public void updateLaneGuidanceIconStyle(@StyleRes int style);
+    method @Deprecated public void updateLaneGuidanceIconStyle(@StyleRes int style);
     method public void updateManeuverViewOptions(com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions options);
     method @Deprecated public void updatePrimaryManeuverTextAppearance(@StyleRes int style);
     method public void updatePrimaryManeuverTextVisibility(int visibility);
     method @Deprecated public void updateSecondaryManeuverTextAppearance(@StyleRes int style);
     method public void updateSecondaryManeuverVisibility(int visibility);
-    method public void updateStepDistanceTextAppearance(@StyleRes int style);
-    method public void updateStyle(@StyleRes int style);
+    method @Deprecated public void updateStepDistanceTextAppearance(@StyleRes int style);
+    method @Deprecated public void updateStyle(@StyleRes int style);
     method @Deprecated public void updateSubManeuverTextAppearance(@StyleRes int style);
     method public void updateSubManeuverViewVisibility(int visibility);
     method public void updateTurnIconResources(com.mapbox.navigation.ui.maneuver.model.TurnIconResources turnIconResources);
-    method public void updateTurnIconStyle(@StyleRes int style);
-    method public void updateUpcomingManeuverStepDistanceTextAppearance(@StyleRes int style);
+    method @Deprecated public void updateTurnIconStyle(@StyleRes int style);
+    method @Deprecated public void updateUpcomingManeuverStepDistanceTextAppearance(@StyleRes int style);
     method public void updateUpcomingManeuversVisibility(int visibility);
     method @Deprecated public void updateUpcomingPrimaryManeuverTextAppearance(@StyleRes int style);
     method @Deprecated public void updateUpcomingSecondaryManeuverTextAppearance(@StyleRes int style);

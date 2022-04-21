@@ -157,6 +157,11 @@ class ViewStyleCustomization {
          */
         fun defaultManeuverViewOptions() = ManeuverViewOptions
             .Builder()
+            .maneuverBackgroundColor(R.color.colorPrimary)
+            .subManeuverBackgroundColor(R.color.colorPrimaryVariant)
+            .turnIconManeuver(R.style.DropInStyleTurnIconManeuver)
+            .laneGuidanceTurnIconManeuver(R.style.DropInStyleTurnIconManeuver)
+            .stepDistanceTextAppearance(R.style.DropInStyleStepDistance)
             .primaryManeuverOptions(
                 ManeuverPrimaryOptions
                     .Builder()
@@ -164,7 +169,7 @@ class ViewStyleCustomization {
                     .exitOptions(
                         ManeuverExitOptions
                             .Builder()
-                            .textAppearance(R.style.DropInStyleExitTextForPrimary)
+                            .textAppearance(R.style.DropInStyleExitPrimary)
                             .build()
                     )
                     .build()
@@ -176,7 +181,7 @@ class ViewStyleCustomization {
                     .exitOptions(
                         ManeuverExitOptions
                             .Builder()
-                            .textAppearance(R.style.DropInStyleExitTextForSecondary)
+                            .textAppearance(R.style.DropInStyleExitSecondary)
                             .build()
                     )
                     .build()
@@ -188,7 +193,7 @@ class ViewStyleCustomization {
                     .exitOptions(
                         ManeuverExitOptions
                             .Builder()
-                            .textAppearance(R.style.DropInStyleExitTextForSub)
+                            .textAppearance(R.style.DropInStyleExitSub)
                             .build()
                     )
                     .build()

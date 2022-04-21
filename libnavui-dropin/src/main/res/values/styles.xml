@@ -7,14 +7,7 @@
         <item name="maneuverTurnIconShadowColor">@color/colorSecondary</item>
     </style>
 
-    <style name="DropInStyleManeuverView" parent="MapboxStyleManeuverView">
-        <item name="maneuverViewBackgroundColor">@color/colorPrimary</item>
-        <item name="subManeuverViewBackgroundColor">@color/colorPrimaryVariant</item>
-        <item name="maneuverViewIconStyle">@style/DropInStyleTurnIconManeuver</item>
-        <item name="laneGuidanceManeuverIconStyle">@style/DropInStyleTurnIconManeuver</item>
-    </style>
-
-    <style name="DropInStylePrimaryManeuver" parent="TextAppearance.AppCompat">
+    <style name="DropInStylePrimaryManeuver" parent="MapboxStylePrimaryManeuver">
         <item name="android:textColor">@color/colorOnPrimary</item>
         <item name="android:textSize">@dimen/mapbox_maneuver_view_primary_text_regular</item>
         <item name="android:includeFontPadding">false</item>
@@ -22,7 +15,14 @@
         <item name="android:ellipsize">end</item>
     </style>
 
-    <style name="DropInStyleSecondaryManeuver" parent="TextAppearance.AppCompat">
+    <style name="DropInStyleExitPrimary" parent="MapboxStyleExitTextForPrimary">
+        <item name="android:textSize">@dimen/mapbox_maneuver_view_primary_text_regular</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/colorOnSecondaryVariant</item>
+    </style>
+
+    <style name="DropInStyleSecondaryManeuver" parent="MapboxStyleSecondaryManeuver">
         <item name="android:textColor">@color/colorOnPrimary</item>
         <item name="android:textSize">@dimen/mapbox_maneuver_view_secondary_text_regular</item>
         <item name="android:includeFontPadding">false</item>
@@ -30,7 +30,14 @@
         <item name="android:ellipsize">end</item>
     </style>
 
-    <style name="DropInStyleSubManeuver" parent="TextAppearance.AppCompat">
+    <style name="DropInStyleExitSecondary" parent="MapboxStyleExitTextForSecondary">
+        <item name="android:textSize">@dimen/mapbox_maneuver_view_secondary_text_regular</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/colorOnSecondaryVariant</item>
+    </style>
+
+    <style name="DropInStyleSubManeuver" parent="MapboxStyleSubManeuver">
         <item name="android:textColor">@color/colorOnPrimaryVariant</item>
         <item name="android:textSize">@dimen/mapbox_maneuver_view_sub_text_regular</item>
         <item name="android:includeFontPadding">false</item>
@@ -38,28 +45,14 @@
         <item name="android:ellipsize">end</item>
     </style>
 
-    <style name="DropInStyleExitTextForPrimary" parent="TextAppearance.AppCompat">
-        <item name="android:textSize">@dimen/mapbox_maneuver_view_primary_text_regular</item>
-        <item name="android:includeFontPadding">false</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/colorOnSecondaryVariant</item>
-    </style>
-
-    <style name="DropInStyleExitTextForSecondary" parent="TextAppearance.AppCompat">
-        <item name="android:textSize">@dimen/mapbox_maneuver_view_secondary_text_regular</item>
-        <item name="android:includeFontPadding">false</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/colorOnSecondaryVariant</item>
-    </style>
-
-    <style name="DropInStyleExitTextForSub" parent="TextAppearance.AppCompat">
+    <style name="DropInStyleExitSub" parent="MapboxStyleExitTextForSub">
         <item name="android:textSize">@dimen/mapbox_maneuver_view_sub_text_regular</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/colorOnSecondaryVariant</item>
     </style>
 
-    <style name="MapboxStyleStepDistance">
+    <style name="DropInStyleStepDistance" parent="MapboxStyleStepDistance">
         <item name="android:textColor">@color/colorOnPrimary</item>
         <item name="android:textSize">@dimen/mapbox_maneuver_step_distance_text_regular</item>
         <item name="android:includeFontPadding">false</item>

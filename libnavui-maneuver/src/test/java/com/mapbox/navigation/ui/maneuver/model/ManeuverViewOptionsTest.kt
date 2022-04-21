@@ -10,6 +10,12 @@ class ManeuverViewOptionsTest : BuilderTest<ManeuverViewOptions, ManeuverViewOpt
 
     override fun getFilledUpBuilder(): ManeuverViewOptions.Builder {
         return ManeuverViewOptions.Builder()
+            .maneuverBackgroundColor(0)
+            .subManeuverBackgroundColor(0)
+            .upcomingManeuverBackgroundColor(0)
+            .turnIconManeuver(3)
+            .stepDistanceTextAppearance(5)
+            .laneGuidanceTurnIconManeuver(3)
             .primaryManeuverOptions(getPrimaryManeuverOptions())
             .secondaryManeuverOptions(getSecondaryManeuverOptions())
             .subManeuverOptions(getSubManeuverOptions())

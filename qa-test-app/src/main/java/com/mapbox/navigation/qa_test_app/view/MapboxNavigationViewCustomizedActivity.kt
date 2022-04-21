@@ -128,6 +128,11 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
                     startNavigationButtonStyle = R.style.MyCustomStartNavigationButton
                     maneuverViewOptions = ManeuverViewOptions
                         .Builder()
+                        .maneuverBackgroundColor(R.color.maneuver_main_background)
+                        .subManeuverBackgroundColor(R.color.maneuver_sub_background)
+                        .turnIconManeuver(R.style.MyCustomTurnIconManeuver)
+                        .laneGuidanceTurnIconManeuver(R.style.MyCustomTurnIconManeuver)
+                        .stepDistanceTextAppearance(R.style.MyCustomStepDistance)
                         .primaryManeuverOptions(
                             ManeuverPrimaryOptions
                                 .Builder()

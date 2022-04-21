@@ -19,25 +19,29 @@
     </style>
 
     <style name="MyCustomTripProgressStyle">
-        <item name="tripProgressTextColor">#AF064F</item>
+        <item name="tripProgressTextColor">@color/primary</item>
         <item name="tripProgressDividerColor">#CDCDCD</item>
-        <item name="tripProgressViewBackgroundColor">#FFFFFF</item>
     </style>
 
     <style name="MyCustomSpeedLimitStyle">
         <item name="speedLimitTextColor">#FFFFFF</item>
-        <item name="speedLimitBackgroundColor">#AF064F</item>
-        <item name="speedLimitMutcdBorderColor">#F786AA</item>
-        <item name="speedLimitViennaBorderColor">#F786AA</item>
+        <item name="speedLimitBackgroundColor">@color/primary</item>
+        <item name="speedLimitMutcdBorderColor">@color/secondary</item>
+        <item name="speedLimitViennaBorderColor">@color/secondary</item>
     </style>
 
     <style name="MyCustomSpeedLimitTextAppearance" parent="TextAppearance.AppCompat">
         <item name="android:textSize">10sp</item>
     </style>
 
+    <style name="MyCustomTurnIconManeuver" parent="MapboxStyleTurnIconManeuver">
+        <item name="maneuverTurnIconColor">@android:color/white</item>
+        <item name="maneuverTurnIconShadowColor">@color/colorSecondary</item>
+    </style>
+
     <style name="MyCustomPrimaryManeuver" parent="TextAppearance.AppCompat">
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">#F786AA</item>
+        <item name="android:textColor">@color/secondary</item>
         <item name="android:textSize">28sp</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:textDirection">locale</item>
@@ -46,7 +50,7 @@
 
     <style name="MyCustomSecondaryManeuver" parent="TextAppearance.AppCompat">
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">#F786AA</item>
+        <item name="android:textColor">@color/secondary</item>
         <item name="android:textSize">22sp</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:textDirection">locale</item>
@@ -55,7 +59,7 @@
 
     <style name="MyCustomSubManeuver" parent="TextAppearance.AppCompat">
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">#F786AA</item>
+        <item name="android:textColor">@color/secondary</item>
         <item name="android:textSize">16sp</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:textDirection">locale</item>
@@ -66,30 +70,36 @@
         <item name="android:textSize">28sp</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:textStyle">italic</item>
-        <item name="android:textColor">#F786AA</item>
+        <item name="android:textColor">@color/secondary</item>
     </style>
 
     <style name="MyCustomExitTextForSecondary" parent="TextAppearance.AppCompat">
         <item name="android:textSize">22sp</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">#F786AA</item>
+        <item name="android:textColor">@color/secondary</item>
     </style>
 
     <style name="MyCustomExitTextForSub" parent="TextAppearance.AppCompat">
         <item name="android:textSize">16sp</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">#F786AA</item>
+        <item name="android:textColor">@color/secondary</item>
+    </style>
+
+    <style name="MyCustomStepDistance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/secondary</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:includeFontPadding">false</item>
     </style>
 
     <style name="MyCustomRoadNameViewTextAppearance" parent="TextAppearance.AppCompat">
-        <item name="android:textColor">#F786AA</item>
+        <item name="android:textColor">@color/secondary</item>
         <item name="android:textSize">16sp</item>
     </style>
 
     <style name="MyCustomCameraModeButton">
-        <item name="cameraModeButtonIconTint">#AF064F</item>
+        <item name="cameraModeButtonIconTint">@color/primary</item>
         <item name="cameraModeButtonFollowIcon">@drawable/mapbox_ic_camera_follow</item>
         <item name="cameraModeButtonBackground">@drawable/mapbox_bg_action_button_alternative</item>
         <item name="cameraModeButtonOverviewIcon">@drawable/mapbox_ic_camera_overview</item>
@@ -99,7 +109,7 @@
     </style>
 
     <style name="MyCustomAudioGuidanceButton">
-        <item name="audioGuidanceButtonIconTint">#AF064F</item>
+        <item name="audioGuidanceButtonIconTint">@color/primary</item>
         <item name="audioGuidanceButtonBackground">@drawable/mapbox_bg_action_button_alternative</item>
         <item name="audioGuidanceButtonMuteIcon">@drawable/mapbox_ic_mute</item>
         <item name="audioGuidanceButtonUnmuteIcon">@drawable/mapbox_ic_unmute</item>
@@ -109,18 +119,19 @@
     </style>
 
     <style name="MyCustomRecenterButton">
-        <item name="extendableButtonIconTint">#AF064F</item>
+        <item name="extendableButtonIconTint">@color/primary</item>
+        <item name="extendableButtonBackground">@drawable/mapbox_bg_action_button_alternative</item>
         <item name="extendableButtonIcon">@drawable/mapbox_ic_current_location</item>
         <item name="extendableButtonTextAppearance">@style/MapboxExtendableButtonTextAppearance</item>
     </style>
 
     <style name="MyCustomRoutePreviewButton">
-        <item name="extendableButtonIconTint">#AF064F</item>
+        <item name="extendableButtonIconTint">@color/primary</item>
         <item name="extendableButtonIcon">@drawable/mapbox_ic_route</item>
     </style>
 
     <style name="MyCustomEndNavigationButton">
-        <item name="extendableButtonIconTint">#AF064F</item>
+        <item name="extendableButtonIconTint">@color/primary</item>
         <item name="extendableButtonIcon">@drawable/mapbox_ic_close</item>
     </style>
 
