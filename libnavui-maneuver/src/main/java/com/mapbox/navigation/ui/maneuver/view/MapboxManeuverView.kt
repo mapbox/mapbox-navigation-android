@@ -171,11 +171,34 @@ class MapboxManeuverView : ConstraintLayout {
             subLayoutBinding.subManeuverText,
             maneuverViewOptions.subManeuverOptions.textAppearance
         )
+        TextViewCompat.setTextAppearance(
+            mainLayoutBinding.stepDistance,
+            maneuverViewOptions.stepDistanceTextAppearance
+        )
+        binding.mainManeuverLayout.setBackgroundColor(
+            ContextCompat.getColor(context, maneuverViewOptions.maneuverBackgroundColor)
+        )
+        binding.subManeuverLayout.setBackgroundColor(
+            ContextCompat.getColor(context, maneuverViewOptions.subManeuverBackgroundColor)
+        )
+        laneGuidanceAdapter.updateStyle(maneuverViewOptions.laneGuidanceTurnIconManeuver)
+        mainLayoutBinding.maneuverIcon.updateTurnIconStyle(
+            ContextThemeWrapper(context, maneuverViewOptions.turnIconManeuver)
+        )
+        subLayoutBinding.subManeuverIcon.updateTurnIconStyle(
+            ContextThemeWrapper(context, maneuverViewOptions.turnIconManeuver)
+        )
+        binding.upcomingManeuverRecycler.setBackgroundColor(
+            ContextCompat.getColor(context, maneuverViewOptions.upcomingManeuverBackgroundColor)
+        )
         upcomingManeuverAdapter.updateUpcomingPrimaryManeuverTextAppearance(
             maneuverViewOptions.primaryManeuverOptions.textAppearance
         )
         upcomingManeuverAdapter.updateUpcomingSecondaryManeuverTextAppearance(
             maneuverViewOptions.secondaryManeuverOptions.textAppearance
+        )
+        upcomingManeuverAdapter.updateUpcomingManeuverStepDistanceTextAppearance(
+            maneuverViewOptions.stepDistanceTextAppearance
         )
     }
 
@@ -214,29 +237,6 @@ class MapboxManeuverView : ConstraintLayout {
     /**
      * Invoke the method to update rendered maneuvers with road shields.
      *
-     * The provided shields are mapped to IDs of [PrimaryManeuver], [SecondaryManeuver], and [SubManeuver]
-     * and if a maneuver has already been rendered via [renderManeuvers], the respective shields' text will be changed to the shield icon.
-     *
-     * Invoking this method also caches all of the available shields. Whenever [renderManeuvers] is invoked, the cached shields are reused for rendering.
-     *
-     * @param shieldMap the map of maneuver IDs to available shields
-     */
-    @Deprecated(
-        message = "The method is incapable of rendering Mapbox designed route shields. In cases " +
-            "where an instruction contains multiple shields, the method may only render 1 shield " +
-            "instead of multiple shields for that maneuver.",
-        replaceWith = ReplaceWith("renderManeuverWith(shields)")
-    )
-    fun renderManeuverShields(shieldMap: Map<String, RoadShield?>) {
-        val shields = shieldMap.values.filterNotNull().map(RoadShield::toRouteShield)
-        routeShields.clear()
-        routeShields.addAll(shields)
-        renderManeuvers()
-    }
-
-    /**
-     * Invoke the method to update rendered maneuvers with road shields.
-     *
      * The provided shields are list of either [RouteShieldError] or [RouteShieldResult].
      * If a maneuver has already been rendered via [renderManeuvers], the respective shields'
      * text will be changed to the shield icon.
@@ -270,120 +270,6 @@ class MapboxManeuverView : ConstraintLayout {
     fun updateTurnIconResources(turnIconResources: TurnIconResources) {
         mainLayoutBinding.maneuverIcon.updateTurnIconResources(turnIconResources)
         subLayoutBinding.subManeuverIcon.updateTurnIconResources(turnIconResources)
-    }
-
-    /**
-     * Allows you to change the style of turn icon in main and sub maneuver view.
-     * @param style Int
-     */
-    fun updateTurnIconStyle(@StyleRes style: Int) {
-        mainLayoutBinding.maneuverIcon.updateTurnIconStyle(
-            ContextThemeWrapper(context, style)
-        )
-        subLayoutBinding.subManeuverIcon.updateTurnIconStyle(
-            ContextThemeWrapper(context, style)
-        )
-    }
-
-    /**
-     * Allows you to change the style of lane guidance turn icons in sub maneuver view.
-     * @param style Int
-     */
-    fun updateLaneGuidanceIconStyle(@StyleRes style: Int) {
-        laneGuidanceAdapter.updateStyle(style)
-    }
-
-    /**
-     * Allows you to change the text appearance of primary maneuver text.
-     * @see [TextViewCompat.setTextAppearance]
-     * @param style Int
-     */
-    @Deprecated(
-        message = "The function is incapable to style the exit text inside a Primary Maneuver.",
-        replaceWith = ReplaceWith("updateOptions(options)")
-    )
-    fun updatePrimaryManeuverTextAppearance(@StyleRes style: Int) {
-        TextViewCompat.setTextAppearance(mainLayoutBinding.primaryManeuverText, style)
-    }
-
-    /**
-     * Allows you to change the text appearance of secondary maneuver text.
-     * @see [TextViewCompat.setTextAppearance]
-     * @param style Int
-     */
-    @Deprecated(
-        message = "The function is incapable to style the exit text inside a Secondary Maneuver.",
-        replaceWith = ReplaceWith("updateOptions(options)")
-    )
-    fun updateSecondaryManeuverTextAppearance(@StyleRes style: Int) {
-        TextViewCompat.setTextAppearance(mainLayoutBinding.secondaryManeuverText, style)
-    }
-
-    /**
-     * Allows you to change the text appearance of sub maneuver text.
-     * @see [TextViewCompat.setTextAppearance]
-     * @param style Int
-     */
-    @Deprecated(
-        message = "The function is incapable to style the exit text inside a Sub Maneuver.",
-        replaceWith = ReplaceWith("updateOptions(options)")
-    )
-    fun updateSubManeuverTextAppearance(@StyleRes style: Int) {
-        TextViewCompat.setTextAppearance(subLayoutBinding.subManeuverText, style)
-    }
-
-    /**
-     * Allows you to change the text appearance of step distance text.
-     * @see [TextViewCompat.setTextAppearance]
-     * @param style Int
-     */
-    fun updateStepDistanceTextAppearance(@StyleRes style: Int) {
-        TextViewCompat.setTextAppearance(mainLayoutBinding.stepDistance, style)
-    }
-
-    /**
-     * Allows you to change the text appearance of primary maneuver text in upcoming maneuver list.
-     * @see [TextViewCompat.setTextAppearance]
-     * @param style Int
-     */
-    @Deprecated(
-        message = "The function is incapable to style the exit text inside a Primary Maneuver.",
-        replaceWith = ReplaceWith("updateOptions(options)")
-    )
-    fun updateUpcomingPrimaryManeuverTextAppearance(@StyleRes style: Int) {
-        upcomingManeuverAdapter.updateUpcomingPrimaryManeuverTextAppearance(style)
-    }
-
-    /**
-     * Allows you to change the text appearance of secondary maneuver text in upcoming maneuver list.
-     * @see [TextViewCompat.setTextAppearance]
-     * @param style Int
-     */
-    @Deprecated(
-        message = "The function is incapable to style the exit text inside a Secondary Maneuver.",
-        replaceWith = ReplaceWith("updateOptions(options)")
-    )
-    fun updateUpcomingSecondaryManeuverTextAppearance(@StyleRes style: Int) {
-        upcomingManeuverAdapter.updateUpcomingSecondaryManeuverTextAppearance(style)
-    }
-
-    /**
-     * Allows you to change the text appearance of step distance text in upcoming maneuver list.
-     * @see [TextViewCompat.setTextAppearance]
-     * @param style Int
-     */
-    fun updateUpcomingManeuverStepDistanceTextAppearance(@StyleRes style: Int) {
-        upcomingManeuverAdapter.updateUpcomingManeuverStepDistanceTextAppearance(style)
-    }
-
-    /**
-     * Allows you to change the style of [MapboxManeuverView].
-     * @param style Int
-     */
-    fun updateStyle(@StyleRes style: Int) {
-        val typedArray = context.obtainStyledAttributes(style, R.styleable.MapboxManeuverView)
-        applyAttributes(typedArray)
-        typedArray.recycle()
     }
 
     /**
@@ -431,25 +317,6 @@ class MapboxManeuverView : ConstraintLayout {
     /**
      * Invoke the method to render primary instructions on top of [MapboxManeuverView]
      * @param primary PrimaryManeuver
-     * @param roadShield shield if available otherwise null
-     */
-    @Deprecated(
-        message = "The method is incapable of rendering Mapbox designed route shields. In cases " +
-            "where an instruction contains multiple shields, the method may only render 1 shield " +
-            "instead of multiple shields for that maneuver.",
-        replaceWith = ReplaceWith("renderPrimary(primary, roadShields)")
-    )
-    @JvmOverloads
-    fun renderPrimaryManeuver(primary: PrimaryManeuver, roadShield: RoadShield? = null) {
-        val shields = ifNonNull(roadShield) {
-            setOf(it.toRouteShield())
-        }
-        renderPrimary(primary, shields)
-    }
-
-    /**
-     * Invoke the method to render primary instructions on top of [MapboxManeuverView]
-     * @param primary PrimaryManeuver
      * @param routeShields set of shields if available otherwise null
      */
     fun renderPrimary(primary: PrimaryManeuver, routeShields: Set<RouteShield>?) {
@@ -460,48 +327,10 @@ class MapboxManeuverView : ConstraintLayout {
     /**
      * Invoke the method to render secondary instructions on top of [MapboxManeuverView]
      * @param secondary SecondaryManeuver?
-     * @param roadShield shield if available otherwise null
-     */
-    @Deprecated(
-        message = "The method is incapable of rendering Mapbox designed route shields. In cases " +
-            "where an instruction contains multiple shields, the method may only render 1 shield " +
-            "instead of multiple shields for that maneuver.",
-        replaceWith = ReplaceWith("renderSecondary(secondary, roadShields)")
-    )
-    @JvmOverloads
-    fun renderSecondaryManeuver(secondary: SecondaryManeuver?, roadShield: RoadShield? = null) {
-        val shields = ifNonNull(roadShield) {
-            setOf(it.toRouteShield())
-        }
-        renderSecondary(secondary, shields)
-    }
-
-    /**
-     * Invoke the method to render secondary instructions on top of [MapboxManeuverView]
-     * @param secondary SecondaryManeuver?
      * @param routeShields set of shields if available otherwise null
      */
     fun renderSecondary(secondary: SecondaryManeuver?, routeShields: Set<RouteShield>?) {
         mainLayoutBinding.secondaryManeuverText.renderManeuver(secondary, routeShields)
-    }
-
-    /**
-     * Invoke the method to render sub instructions on top of [MapboxManeuverView]
-     * @param sub SubManeuver?
-     * @param roadShield shield if available otherwise null
-     */
-    @Deprecated(
-        message = "The method is incapable of rendering Mapbox designed route shields. In cases " +
-            "where an instruction contains multiple shields, the method may only render 1 shield " +
-            "instead of multiple shields for that maneuver.",
-        replaceWith = ReplaceWith("renderSub(sub, roadShields)")
-    )
-    @JvmOverloads
-    fun renderSubManeuver(sub: SubManeuver?, roadShield: RoadShield? = null) {
-        val shields = ifNonNull(roadShield) {
-            setOf(it.toRouteShield())
-        }
-        renderSub(sub, shields)
     }
 
     /**
@@ -673,5 +502,219 @@ class MapboxManeuverView : ConstraintLayout {
         params.bottomToBottom = LayoutParams.UNSET
         params.bottomToTop = mainLayoutBinding.secondaryManeuverText.id
         requestLayout()
+    }
+
+    /**
+     * Invoke the method to render primary instructions on top of [MapboxManeuverView]
+     * @param primary PrimaryManeuver
+     * @param roadShield shield if available otherwise null
+     */
+    @Deprecated(
+        message = "The method is incapable of rendering Mapbox designed route shields. In cases " +
+            "where an instruction contains multiple shields, the method may only render 1 shield " +
+            "instead of multiple shields for that maneuver.",
+        replaceWith = ReplaceWith("renderPrimary(primary, roadShields)")
+    )
+    @JvmOverloads
+    fun renderPrimaryManeuver(primary: PrimaryManeuver, roadShield: RoadShield? = null) {
+        val shields = ifNonNull(roadShield) {
+            setOf(it.toRouteShield())
+        }
+        renderPrimary(primary, shields)
+    }
+
+    /**
+     * Invoke the method to update rendered maneuvers with road shields.
+     *
+     * The provided shields are mapped to IDs of [PrimaryManeuver], [SecondaryManeuver], and [SubManeuver]
+     * and if a maneuver has already been rendered via [renderManeuvers], the respective shields' text will be changed to the shield icon.
+     *
+     * Invoking this method also caches all of the available shields. Whenever [renderManeuvers] is invoked, the cached shields are reused for rendering.
+     *
+     * @param shieldMap the map of maneuver IDs to available shields
+     */
+    @Deprecated(
+        message = "The method is incapable of rendering Mapbox designed route shields. In cases " +
+            "where an instruction contains multiple shields, the method may only render 1 shield " +
+            "instead of multiple shields for that maneuver.",
+        replaceWith = ReplaceWith("renderManeuverWith(shields)")
+    )
+    fun renderManeuverShields(shieldMap: Map<String, RoadShield?>) {
+        val shields = shieldMap.values.filterNotNull().map(RoadShield::toRouteShield)
+        routeShields.clear()
+        routeShields.addAll(shields)
+        renderManeuvers()
+    }
+
+    /**
+     * Allows you to change the style of turn icon in main and sub maneuver view.
+     * @param style Int
+     */
+    @Deprecated(
+        message = "The function is deprecated.",
+        replaceWith = ReplaceWith("updateOptions(options)")
+    )
+    fun updateTurnIconStyle(@StyleRes style: Int) {
+        mainLayoutBinding.maneuverIcon.updateTurnIconStyle(
+            ContextThemeWrapper(context, style)
+        )
+        subLayoutBinding.subManeuverIcon.updateTurnIconStyle(
+            ContextThemeWrapper(context, style)
+        )
+    }
+
+    /**
+     * Allows you to change the style of lane guidance turn icons in sub maneuver view.
+     * @param style Int
+     */
+    @Deprecated(
+        message = "The function is deprecated.",
+        replaceWith = ReplaceWith("updateOptions(options)")
+    )
+    fun updateLaneGuidanceIconStyle(@StyleRes style: Int) {
+        laneGuidanceAdapter.updateStyle(style)
+    }
+
+    /**
+     * Allows you to change the text appearance of primary maneuver text.
+     * @see [TextViewCompat.setTextAppearance]
+     * @param style Int
+     */
+    @Deprecated(
+        message = "The function is incapable to style the exit text inside a Primary Maneuver.",
+        replaceWith = ReplaceWith("updateOptions(options)")
+    )
+    fun updatePrimaryManeuverTextAppearance(@StyleRes style: Int) {
+        TextViewCompat.setTextAppearance(mainLayoutBinding.primaryManeuverText, style)
+    }
+
+    /**
+     * Allows you to change the text appearance of secondary maneuver text.
+     * @see [TextViewCompat.setTextAppearance]
+     * @param style Int
+     */
+    @Deprecated(
+        message = "The function is incapable to style the exit text inside a Secondary Maneuver.",
+        replaceWith = ReplaceWith("updateOptions(options)")
+    )
+    fun updateSecondaryManeuverTextAppearance(@StyleRes style: Int) {
+        TextViewCompat.setTextAppearance(mainLayoutBinding.secondaryManeuverText, style)
+    }
+
+    /**
+     * Allows you to change the text appearance of sub maneuver text.
+     * @see [TextViewCompat.setTextAppearance]
+     * @param style Int
+     */
+    @Deprecated(
+        message = "The function is incapable to style the exit text inside a Sub Maneuver.",
+        replaceWith = ReplaceWith("updateOptions(options)")
+    )
+    fun updateSubManeuverTextAppearance(@StyleRes style: Int) {
+        TextViewCompat.setTextAppearance(subLayoutBinding.subManeuverText, style)
+    }
+
+    /**
+     * Allows you to change the text appearance of step distance text.
+     * @see [TextViewCompat.setTextAppearance]
+     * @param style Int
+     */
+    @Deprecated(
+        message = "The function is deprecated.",
+        replaceWith = ReplaceWith("updateOptions(options)")
+    )
+    fun updateStepDistanceTextAppearance(@StyleRes style: Int) {
+        TextViewCompat.setTextAppearance(mainLayoutBinding.stepDistance, style)
+    }
+
+    /**
+     * Allows you to change the text appearance of primary maneuver text in upcoming maneuver list.
+     * @see [TextViewCompat.setTextAppearance]
+     * @param style Int
+     */
+    @Deprecated(
+        message = "The function is incapable to style the exit text inside a Primary Maneuver.",
+        replaceWith = ReplaceWith("updateOptions(options)")
+    )
+    fun updateUpcomingPrimaryManeuverTextAppearance(@StyleRes style: Int) {
+        upcomingManeuverAdapter.updateUpcomingPrimaryManeuverTextAppearance(style)
+    }
+
+    /**
+     * Allows you to change the text appearance of secondary maneuver text in upcoming maneuver list.
+     * @see [TextViewCompat.setTextAppearance]
+     * @param style Int
+     */
+    @Deprecated(
+        message = "The function is incapable to style the exit text inside a Secondary Maneuver.",
+        replaceWith = ReplaceWith("updateOptions(options)")
+    )
+    fun updateUpcomingSecondaryManeuverTextAppearance(@StyleRes style: Int) {
+        upcomingManeuverAdapter.updateUpcomingSecondaryManeuverTextAppearance(style)
+    }
+
+    /**
+     * Allows you to change the text appearance of step distance text in upcoming maneuver list.
+     * @see [TextViewCompat.setTextAppearance]
+     * @param style Int
+     */
+    @Deprecated(
+        message = "The function is deprecated.",
+        replaceWith = ReplaceWith("updateOptions(options)")
+    )
+    fun updateUpcomingManeuverStepDistanceTextAppearance(@StyleRes style: Int) {
+        upcomingManeuverAdapter.updateUpcomingManeuverStepDistanceTextAppearance(style)
+    }
+
+    /**
+     * Allows you to change the style of [MapboxManeuverView].
+     * @param style Int
+     */
+    @Deprecated(
+        message = "The function is deprecated.",
+        replaceWith = ReplaceWith("updateOptions(options)")
+    )
+    fun updateStyle(@StyleRes style: Int) {
+        val typedArray = context.obtainStyledAttributes(style, R.styleable.MapboxManeuverView)
+        applyAttributes(typedArray)
+        typedArray.recycle()
+    }
+
+    /**
+     * Invoke the method to render secondary instructions on top of [MapboxManeuverView]
+     * @param secondary SecondaryManeuver?
+     * @param roadShield shield if available otherwise null
+     */
+    @Deprecated(
+        message = "The method is incapable of rendering Mapbox designed route shields. In cases " +
+            "where an instruction contains multiple shields, the method may only render 1 shield " +
+            "instead of multiple shields for that maneuver.",
+        replaceWith = ReplaceWith("renderSecondary(secondary, roadShields)")
+    )
+    @JvmOverloads
+    fun renderSecondaryManeuver(secondary: SecondaryManeuver?, roadShield: RoadShield? = null) {
+        val shields = ifNonNull(roadShield) {
+            setOf(it.toRouteShield())
+        }
+        renderSecondary(secondary, shields)
+    }
+
+    /**
+     * Invoke the method to render sub instructions on top of [MapboxManeuverView]
+     * @param sub SubManeuver?
+     * @param roadShield shield if available otherwise null
+     */
+    @Deprecated(
+        message = "The method is incapable of rendering Mapbox designed route shields. In cases " +
+            "where an instruction contains multiple shields, the method may only render 1 shield " +
+            "instead of multiple shields for that maneuver.",
+        replaceWith = ReplaceWith("renderSub(sub, roadShields)")
+    )
+    @JvmOverloads
+    fun renderSubManeuver(sub: SubManeuver?, roadShield: RoadShield? = null) {
+        val shields = ifNonNull(roadShield) {
+            setOf(it.toRouteShield())
+        }
+        renderSub(sub, shields)
     }
 }

@@ -21,7 +21,7 @@ internal class NavigationViewStyles(context: Context) {
     private var _routePreviewButtonStyle: MutableStateFlow<Int> =
         MutableStateFlow(ViewStyleCustomization.defaultRoutePreviewButtonStyle())
     private var _endNavigationButtonStyle: MutableStateFlow<Int> =
-        MutableStateFlow(ViewStyleCustomization.defaultStartNavigationButtonStyle())
+        MutableStateFlow(ViewStyleCustomization.defaultEndNavigationButtonStyle())
     private var _startNavigationButtonStyle: MutableStateFlow<Int> =
         MutableStateFlow(ViewStyleCustomization.defaultStartNavigationButtonStyle())
     private var _speedLimitStyle: MutableStateFlow<Int> =
