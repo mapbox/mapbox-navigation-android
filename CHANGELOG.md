@@ -5,12 +5,27 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 
 #### Features
+
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.5.0-beta.1 - April 22, 2022
+
+#### Features
 - Added support for excluding maneuvers from the 'pitch to 0' camera updates when `FollowingFrameOptions#pitchNearManeuvers` is enabled. See `FollowingFrameOptions#pitchNearManeuvers#excludedManeuvers`. [#5717](https://github.com/mapbox/mapbox-navigation-android/pull/5717)
 - :warning: Navigation Camera will no longer animate to `pitch 0` when approaching following maneuvers: "continue", "merge", "on ramp", "off ramp" and "fork". Original behavior can be restored by setting an empty list to `FollowingFrameOptions#pitchNearManeuvers#excludedManeuvers`.
 
 #### Bug fixes and improvements
 - Parallelized some work in `MapboxNavigation#requestRoutes` to decrease the time in which `NavigationRouterCallback` returns. [#5718](https://github.com/mapbox/mapbox-navigation-android/pull/5718)
 - :warning: Removed support for style changes of standalone UI components based on `NavigationView` `attributes`. Introduced runtime styling support instead. [#5730](https://github.com/mapbox/mapbox-navigation-android/pull/5730)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.5.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.5.0-beta.1))
+- Mapbox Navigation Native `v96.0.0`
+- Mapbox Core Common `v21.3.0-rc.2`
+- Mapbox Java `v6.5.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.5.0-beta.2))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
 
 ## Mapbox Navigation SDK 2.5.0-alpha.3 - April 15, 2022
 
