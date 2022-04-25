@@ -5,7 +5,7 @@ package com.mapbox.navigation.ui.tripprogress.api {
     ctor public MapboxTripProgressApi(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter formatter);
     method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter getFormatter();
     method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue getTripProgress(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
-    method public void setFormatter(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter p);
+    method public void setFormatter(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter);
     property public final com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter formatter;
   }
 
@@ -32,7 +32,7 @@ package com.mapbox.navigation.ui.tripprogress.model {
     ctor public TimeRemainingFormatter(android.content.Context context, java.util.Locale? locale = null);
     method public android.text.SpannableString format(double update);
     method public java.util.Locale? getLocale();
-    method public void setLocale(java.util.Locale? p);
+    method public void setLocale(java.util.Locale?);
     property public final java.util.Locale? locale;
   }
 

@@ -32,8 +32,6 @@ android.libraryVariants.all { variant ->
             args = [
                     '--no-banner',
                     '--source-path', 'src/main/java',
-                    '--compatible-output=no',
-                    '--omit-common-packages=yes',
                     '--output-kotlin-nulls=yes',
                     '--hide', 'HiddenSuperclass',
                     '--hide', 'DeprecationMismatch',

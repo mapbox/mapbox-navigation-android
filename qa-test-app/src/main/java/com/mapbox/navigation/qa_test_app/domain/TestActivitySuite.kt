@@ -24,7 +24,6 @@ typealias LaunchActivityFun = (Activity) -> Unit
 
 object TestActivitySuite {
 
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     val testActivities = listOf(
         TestActivityDescription(
             "MapboxNavigation Lifecycle",
