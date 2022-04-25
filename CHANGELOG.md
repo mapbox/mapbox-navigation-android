@@ -19,6 +19,9 @@ Mapbox welcomes participation and contributions from everyone.
 - :warning: Removed support for style changes of standalone UI components based on `NavigationView` `attributes`. Introduced runtime styling support instead. [#5730](https://github.com/mapbox/mapbox-navigation-android/pull/5730)
 - :warning: Added more runtime styling options to `ManeuverViewOptions` and deprecated individual styling methods [#5733](https://github.com/mapbox/mapbox-navigation-android/pull/5733)
 
+#### Known issues
+- Adding a custom `Logger` instance by [replacing the default logger module](https://docs.mapbox.com/android/navigation/guides/get-started/modularization/#logger) causes a runtime exception during library loading.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.5.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.5.0-beta.1))
@@ -38,6 +41,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed an issue where a call to `MapboxNavigation#stopTripSession` would clear the routes reference and led to a `RoutesObserver` notification with empty routes collection. [#5685](https://github.com/mapbox/mapbox-navigation-android/pull/5685)
 - Fixed an issue where `AlternativeRouteMetadata` would get cleared after route refresh (whenever routes update reason was `RoutesExtra#ROUTES_UPDATE_REASON_REFRESH`). [#5691](https://github.com/mapbox/mapbox-navigation-android/pull/5691)
 - Fixed a race condition where internal route refresh logic could overwrite the result of a call to `MapboxNavigation#setRoutes`. [#5685](https://github.com/mapbox/mapbox-navigation-android/pull/5685)
+
+#### Known issues
+- Adding a custom `Logger` instance by [replacing the default logger module](https://docs.mapbox.com/android/navigation/guides/get-started/modularization/#logger) causes a runtime exception during library loading.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
