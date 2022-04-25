@@ -142,6 +142,7 @@ createPullRequest() {
     echo $LINK_TO_DOCS_PR
 
     # workaround to trigger publisher-production deployment
+    git checkout "${DOCS_BASE_BRANCH_NAME_PRODUCTION}"
     TRIGGER_BRANCH_NAME="trigger-publisher-production-for-${BRANCH_NAME}"
     git checkout -b $TRIGGER_BRANCH_NAME
     git commit -m "empty commit to trigger publisher production" --allow-empty
@@ -150,7 +151,7 @@ createPullRequest() {
         --title "Trigger publisher production" \
         --body "This PR contains an empty commit to trigger deployment from the publisher-production branch.
         Should be **squashed** after ${LINK_TO_DOCS_PR}" \
-        --base $BRANCH_NAME \
+        --base $DOCS_BASE_BRANCH_NAME_PRODUCTION \
         --head $TRIGGER_BRANCH_NAME
 
     popd > /dev/null
