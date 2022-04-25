@@ -101,6 +101,7 @@ import java.io.File
 import java.net.URL
 import java.util.Locale
 
+@ExperimentalPreviewMapboxNavigationAPI
 @Config(shadows = [ShadowReachabilityFactory::class])
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
