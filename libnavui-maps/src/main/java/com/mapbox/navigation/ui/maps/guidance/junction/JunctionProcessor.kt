@@ -3,23 +3,15 @@ package com.mapbox.navigation.ui.maps.guidance.junction
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.bindgen.Expected
-import com.mapbox.common.HttpMethod
-import com.mapbox.common.HttpRequest
-import com.mapbox.common.HttpRequestError
-import com.mapbox.common.HttpResponseData
-import com.mapbox.common.UAComponents
+import com.mapbox.common.ResourceLoadError
+import com.mapbox.common.ResourceLoadResult
+import com.mapbox.common.ResourceLoadStatus
 import com.mapbox.navigation.ui.maps.guidance.junction.api.MapboxRasterToBitmapParser
 import com.mapbox.navigation.ui.utils.internal.extensions.getBannerComponents
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.navigation.ui.utils.resource.ResourceLoadRequest
 
 internal object JunctionProcessor {
-
-    private const val USER_AGENT_KEY = "User-Agent"
-    private const val USER_AGENT_VALUE = "MapboxJava/"
-    private const val SDK_IDENTIFIER = "mapbox-navigation-ui-android"
-    private const val CODE_200 = 200L
-    private const val CODE_401 = 401L
-    private const val CODE_404 = 404L
 
     /**
      * The function takes [JunctionAction], performs business logic and returns [JunctionResult]
@@ -74,43 +66,34 @@ internal object JunctionProcessor {
     }
 
     private fun prepareRequest(url: String): JunctionResult {
-        val request = HttpRequest.Builder()
-            .url(url)
-            .body(byteArrayOf())
-            .method(HttpMethod.GET)
-            .headers(hashMapOf(Pair(USER_AGENT_KEY, USER_AGENT_VALUE)))
-            .uaComponents(
-                UAComponents.Builder()
-                    .sdkIdentifierComponent(SDK_IDENTIFIER)
-                    .build()
-            )
-            .build()
-        return JunctionResult.JunctionRequest(request)
+        val loadRequest = ResourceLoadRequest(url)
+        return JunctionResult.JunctionRequest(loadRequest)
     }
 
     private fun processResponse(
-        response: Expected<HttpRequestError, HttpResponseData>
+        response: Expected<ResourceLoadError, ResourceLoadResult>
     ): JunctionResult {
         return response.fold(
             { error ->
                 JunctionResult.JunctionRaster.Failure(error.message)
             },
             { responseData ->
-                when (responseData.code) {
-                    CODE_200 -> {
-                        if (responseData.data.isEmpty()) {
+                when (responseData.status) {
+                    ResourceLoadStatus.AVAILABLE -> {
+                        val blob: ByteArray = responseData.data?.data ?: byteArrayOf()
+                        if (blob.isEmpty()) {
                             JunctionResult.JunctionRaster.Empty
                         } else {
-                            JunctionResult.JunctionRaster.Success(responseData.data)
+                            JunctionResult.JunctionRaster.Success(blob)
                         }
                     }
-                    CODE_401 -> {
+                    ResourceLoadStatus.UNAUTHORIZED -> {
                         JunctionResult.JunctionRaster.Failure(
                             "Your token cannot access this " +
                                 "resource, contact support"
                         )
                     }
-                    CODE_404 -> {
+                    ResourceLoadStatus.NOT_FOUND -> {
                         JunctionResult.JunctionRaster.Failure("Resource is missing")
                     }
                     else -> {

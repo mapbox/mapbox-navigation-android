@@ -1,98 +1,36 @@
 package com.mapbox.navigation.ui.shield
 
 import com.mapbox.bindgen.Expected
-import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.common.HttpMethod
-import com.mapbox.common.HttpRequest
-import com.mapbox.common.HttpServiceFactory
-import com.mapbox.common.UAComponents
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
+import com.mapbox.bindgen.ExpectedFactory.createError
+import com.mapbox.bindgen.ExpectedFactory.createValue
+import com.mapbox.common.ResourceLoadStatus
+import com.mapbox.navigation.ui.utils.resource.ResourceLoadRequest
+import com.mapbox.navigation.ui.utils.resource.ResourceLoaderFactory
+import com.mapbox.navigation.ui.utils.resource.load
 
 internal object RoadShieldDownloader {
 
-    private const val USER_AGENT_KEY = "User-Agent"
-    private const val USER_AGENT_VALUE = "MapboxJava/"
-    private const val SDK_IDENTIFIER = "mapbox-navigation-ui-android"
+    private val resourceLoader get() = ResourceLoaderFactory.getInstance()
 
-    private const val CODE_200 = 200L
-    private const val CODE_401 = 401L
-    private const val CODE_404 = 404L
+    suspend fun download(url: String): Expected<String, ByteArray> {
+        val response = resourceLoader.load(loadRequest(url))
 
-    suspend fun download(urlToDownload: String): Expected<String, ByteArray> =
-        suspendCancellableCoroutine { continuation ->
-            val id = HttpServiceFactory.getInstance().request(
-                getHttpRequest(urlToDownload)
-            ) { response ->
-                when {
-                    response.result.isValue -> {
-                        response.result.value?.let { responseData ->
-                            when (responseData.code) {
-                                CODE_200 -> {
-                                    continuation.resume(
-                                        ExpectedFactory.createValue(
-                                            responseData.data
-                                        )
-                                    )
-                                }
-                                CODE_401 -> {
-                                    continuation.resume(
-                                        ExpectedFactory.createError(
-                                            "Your token cannot access this resource."
-                                        )
-                                    )
-                                }
-                                CODE_404 -> {
-                                    continuation.resume(
-                                        ExpectedFactory.createError(
-                                            "Resource is missing."
-                                        )
-                                    )
-                                }
-                                else -> {
-                                    continuation.resume(
-                                        ExpectedFactory.createError(
-                                            "Unknown error (code: ${responseData.code})."
-                                        )
-                                    )
-                                }
-                            }
-                        } ?: continuation.resume(
-                            ExpectedFactory.createError(
-                                "No data available."
-                            )
-                        )
-                    }
-                    response.result.isError -> {
-                        continuation.resume(
-                            ExpectedFactory.createError(response.result.error?.message ?: "")
-                        )
-                    }
+        return response.value?.let { responseData ->
+            when (responseData.status) {
+                ResourceLoadStatus.AVAILABLE -> {
+                    val blob: ByteArray = responseData.data?.data ?: byteArrayOf()
+                    if (blob.isNotEmpty()) createValue(blob)
+                    else createError("No data available.")
                 }
+                ResourceLoadStatus.UNAUTHORIZED ->
+                    createError("Your token cannot access this resource.")
+                ResourceLoadStatus.NOT_FOUND ->
+                    createError("Resource is missing.")
+                else ->
+                    createError("Unknown error (status: ${responseData.status}).")
             }
-            continuation.invokeOnCancellation {
-                HttpServiceFactory.getInstance().cancelRequest(id) {}
-            }
-        }
-
-    private fun getHttpRequest(urlToDownload: String): HttpRequest {
-        return HttpRequest.Builder()
-            .url(urlToDownload)
-            .body(byteArrayOf())
-            .headers(
-                hashMapOf(
-                    Pair(
-                        USER_AGENT_KEY,
-                        USER_AGENT_VALUE
-                    )
-                )
-            )
-            .method(HttpMethod.GET)
-            .uaComponents(
-                UAComponents.Builder()
-                    .sdkIdentifierComponent(SDK_IDENTIFIER)
-                    .build()
-            )
-            .build()
+        } ?: createError(response.error?.message ?: "No data available.")
     }
+
+    private fun loadRequest(url: String) = ResourceLoadRequest(url)
 }

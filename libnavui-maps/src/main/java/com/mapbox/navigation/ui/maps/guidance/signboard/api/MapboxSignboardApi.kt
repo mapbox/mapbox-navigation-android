@@ -5,16 +5,17 @@ import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.common.HttpResponse
+import com.mapbox.common.ResourceLoadError
+import com.mapbox.common.ResourceLoadResult
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardAction
 import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardProcessor
 import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardResult
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions
-import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardRequest
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue
-import com.mapbox.navigation.utils.internal.HttpServiceFactoryWrapper
+import com.mapbox.navigation.ui.utils.resource.ResourceLoaderFactory
+import com.mapbox.navigation.ui.utils.resource.load
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
@@ -46,7 +47,7 @@ class MapboxSignboardApi @JvmOverloads constructor(
     }
 
     private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
-    private val requestList: MutableList<MapboxSignboardRequest> = mutableListOf()
+    private val resourceLoader by lazy { ResourceLoaderFactory.getInstance() }
 
     /**
      * The method takes in [BannerInstructions] and generates a signboard based on the presence of
@@ -61,19 +62,7 @@ class MapboxSignboardApi @JvmOverloads constructor(
         val action = SignboardAction.CheckSignboardAvailability(instructions)
         when (val result = SignboardProcessor.process(action)) {
             is SignboardResult.SignboardAvailable -> {
-                val requestAction = SignboardAction.PrepareSignboardRequest(
-                    result.signboardUrl.plus(ACCESS_TOKEN.plus(accessToken))
-                )
-                val signboardRequest = SignboardProcessor.process(requestAction)
-                val httpRequest = (signboardRequest as SignboardResult.SignboardRequest).request
-                val requestId = HttpServiceFactoryWrapper.getInstance().request(
-                    httpRequest
-                ) { httpResponse ->
-                    mainJobController.scope.launch {
-                        onSignboardResponse(httpResponse, consumer)
-                    }
-                }
-                requestList.add(MapboxSignboardRequest(requestId, httpRequest))
+                makeSignboardRequest(result, consumer)
             }
             is SignboardResult.SignboardUnavailable -> {
                 consumer.accept(
@@ -96,25 +85,29 @@ class MapboxSignboardApi @JvmOverloads constructor(
      * Invoke the method to cancel all ongoing requests to generate a signboard.
      */
     fun cancelAll() {
-        requestList.forEach {
-            HttpServiceFactoryWrapper.getInstance().cancelRequest(it.requestId) {
-            }
-        }
-        requestList.clear()
         mainJobController.job.cancelChildren()
     }
 
-    private fun onSignboardResponse(
-        httpResponse: HttpResponse,
+    private fun makeSignboardRequest(
+        result: SignboardResult.SignboardAvailable,
         consumer: MapboxNavigationConsumer<Expected<SignboardError, SignboardValue>>
     ) {
-        val filteredList = requestList.filter {
-            it.httpRequest != httpResponse.request
+        val requestAction = SignboardAction.PrepareSignboardRequest(
+            result.signboardUrl.plus(ACCESS_TOKEN.plus(accessToken))
+        )
+        val signboardRequest = SignboardProcessor.process(requestAction)
+        val loadRequest = (signboardRequest as SignboardResult.SignboardRequest).request
+        mainJobController.scope.launch {
+            val loadResult = resourceLoader.load(loadRequest)
+            onSignboardResponse(loadResult, consumer)
         }
-        requestList.clear()
-        requestList.addAll(filteredList)
-        val response = httpResponse.result
-        val action = SignboardAction.ProcessSignboardResponse(response)
+    }
+
+    private fun onSignboardResponse(
+        loadResult: Expected<ResourceLoadError, ResourceLoadResult>,
+        consumer: MapboxNavigationConsumer<Expected<SignboardError, SignboardValue>>
+    ) {
+        val action = SignboardAction.ProcessSignboardResponse(loadResult)
         when (val result = SignboardProcessor.process(action)) {
             is SignboardResult.SignboardSvg.Success -> {
                 onSvgAvailable(result.data, consumer)
