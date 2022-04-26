@@ -14,6 +14,7 @@ import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.history.ReplayEvents
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.replay.route.ReplayRouteOptions
 import java.util.Collections.singletonList
 
 /**
@@ -118,10 +119,11 @@ class MapboxReplayer {
      * Use this function to play the first location received from your [LocationEngine].
      */
     fun playFirstLocation() {
-        val firstUpdateLocation = replayEvents.events.firstOrNull { replayEvent ->
+        val firstUpdateLocationIndex = replayEvents.events.indexOfFirst { replayEvent ->
             replayEvent is ReplayEventUpdateLocation
         }
-        firstUpdateLocation?.let { replayEvent ->
+        replayEvents.events.getOrNull(firstUpdateLocationIndex)?.let { replayEvent ->
+            seekTo(replayEvent)
             val replayEvents = singletonList(replayEvent)
             replayEventsObservers.forEach { it.replayEvents(replayEvents) }
         }
@@ -169,6 +171,19 @@ class MapboxReplayer {
         val firstEvent = replayEvents.events.firstOrNull()
             ?: return 0.0
         return eventTimestamp - firstEvent.eventTimestamp
+    }
+
+    /**
+     * Used when the replayer is actively playing and emitting replay events. Call this from
+     * your [ReplayEventsObserver] to offset the current time to accurately represent when the
+     * simulated or historical event occurred - needed for sub-millisecond accuracy or when
+     * simulating routes at high frequencies @see [ReplayRouteOptions.frequency].
+     *
+     * @param eventTimestamp to get the realtime offset for
+     * @return the difference in realtime and the event replayed
+     */
+    fun eventRealtimeOffset(eventTimestamp: Double): Double {
+        return replayEventSimulator.eventRealtimeOffset(eventTimestamp)
     }
 
     /**
