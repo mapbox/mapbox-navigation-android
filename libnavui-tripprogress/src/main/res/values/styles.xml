@@ -5,6 +5,33 @@
     <item name="tripProgressTextColor">@color/mapbox_trip_progress_text_color</item>
     <item name="tripProgressDividerColor">@color/mapbox_trip_progress_divider_color</item>
     <item name="tripProgressViewBackgroundColor">@color/mapbox_trip_progress_view_background_color</item>
+
+    <item name="timeRemainingTextAppearance">@style/MapboxStyleTimeRemaining</item>
+    <item name="distanceRemainingTextAppearance">@style/MapboxStyleDistanceRemaining</item>
+    <item name="estimatedArrivalTimeTextAppearance">@style/MapboxStyleEstimatedArrivalTime</item>
+    <item name="distanceRemainingIcon">@drawable/mapbox_ic_pin</item>
+    <item name="estimatedArrivalTimeIcon">@drawable/mapbox_ic_time</item>
+  </style>
+
+  <style name="MapboxStyleTimeRemaining" parent="TextAppearance.AppCompat" >
+    <item name="android:textSize">14sp</item>
+    <item name="android:gravity">start|left|center_vertical</item>
+    <item name="android:includeFontPadding">false</item>
+    <item name="android:textColor">@color/colorSecondaryVariant</item>
+  </style>
+
+  <style name="MapboxStyleDistanceRemaining" parent="TextAppearance.AppCompat" >
+    <item name="android:textSize">14sp</item>
+    <item name="android:gravity">center_vertical</item>
+    <item name="android:includeFontPadding">false</item>
+    <item name="android:textColor">@color/colorSecondaryVariant</item>
+  </style>
+
+  <style name="MapboxStyleEstimatedArrivalTime" parent="TextAppearance.AppCompat" >
+    <item name="android:textSize">16sp</item>
+    <item name="android:gravity">center_vertical</item>
+    <item name="android:includeFontPadding">false</item>
+    <item name="android:textColor">@color/colorSecondaryVariant</item>
   </style>
 
 </resources>

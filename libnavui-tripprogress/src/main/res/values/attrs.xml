@@ -2,11 +2,27 @@
 <resources>
   <declare-styleable name="MapboxTripProgressView">
     <!-- Defines the color of text representing distance remaining, estimated time to arrival and
-     time remaining. -->
+     time remaining {@deprecated Not used by the view.} -->
     <attr name="tripProgressTextColor" format="color"/>
-    <!-- Defines the color of divider in the trip progress view. -->
+    <!-- Defines the color of divider in the trip progress view
+    {@deprecated Not used by the view.} -->
     <attr name="tripProgressDividerColor" format="color"/>
+
     <!-- Defines the background color of trip progress view itself. -->
     <attr name="tripProgressViewBackgroundColor" format="color"/>
+    <!-- Defines the text appearance of time remaining. -->
+    <attr name="timeRemainingTextAppearance" format="reference" />
+    <!-- Defines the text appearance of distance remaining. -->
+    <attr name="distanceRemainingTextAppearance" format="reference" />
+    <!-- Defines the text appearance of estimated time to arrival. -->
+    <attr name="estimatedArrivalTimeTextAppearance" format="reference" />
+    <!-- Defines the drawable for distance remaining. -->
+    <attr name="distanceRemainingIcon" format="reference" />
+    <!-- Defines the drawable for estimated time to arrival. -->
+    <attr name="estimatedArrivalTimeIcon" format="reference" />
+    <!-- Defines the icon tint for distance remaining. -->
+    <attr name="distanceRemainingIconTint" format="reference|color" />
+    <!-- Defines the icon tint for estimated time to arrival. -->
+    <attr name="estimatedArrivalTimeIconTint" format="reference|color" />
   </declare-styleable>
 </resources>

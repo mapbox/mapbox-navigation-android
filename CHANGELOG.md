@@ -13,6 +13,7 @@ Mapbox welcomes participation and contributions from everyone.
   - extension `List<DirectionsRoute>#toNavigationRoutes()` by `List<DirectionsRoute>#toNavigationRoutes(RouterOrigin)`;
   - extension `DirectionsRoute#toNavigationRoute()` by `DirectionsRoute#toNavigationRoute(RouterOrigin)`.
 - Fixed an issue where [replacing the default logger module](https://docs.mapbox.com/android/navigation/guides/get-started/modularization/#logger) was throwing a runtime exception during library loading. [#5738](https://github.com/mapbox/mapbox-navigation-android/pull/5738)
+- :warning: Refactored the designs for `MapboxTripProgressView` [#5744](https://github.com/mapbox/mapbox-navigation-android/pull/5744)
 
 ## Mapbox Navigation SDK 2.5.0-beta.1 - April 22, 2022
 

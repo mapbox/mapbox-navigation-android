@@ -74,12 +74,39 @@ package com.mapbox.navigation.ui.tripprogress.model {
 
 package com.mapbox.navigation.ui.tripprogress.view {
 
+  public final class DistanceRemainingView extends androidx.appcompat.widget.AppCompatTextView {
+    ctor public DistanceRemainingView(android.content.Context context);
+    ctor public DistanceRemainingView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public DistanceRemainingView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void renderDistanceRemaining(android.text.SpannableString distanceRemaining, android.widget.TextView.BufferType bufferType);
+  }
+
+  public final class EstimatedArrivalTimeView extends androidx.appcompat.widget.AppCompatTextView {
+    ctor public EstimatedArrivalTimeView(android.content.Context context);
+    ctor public EstimatedArrivalTimeView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public EstimatedArrivalTimeView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void renderEstimatedArrivalTime(android.text.SpannableString estimatedArrivalTime, android.widget.TextView.BufferType bufferType);
+  }
+
   public final class MapboxTripProgressView extends android.widget.FrameLayout {
     ctor public MapboxTripProgressView(android.content.Context context);
     ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public com.mapbox.navigation.ui.tripprogress.view.DistanceRemainingView getDistanceRemainingView();
+    method public com.mapbox.navigation.ui.tripprogress.view.EstimatedArrivalTimeView getEstimatedArrivalTimeView();
+    method public com.mapbox.navigation.ui.tripprogress.view.TimeRemainingView getTimeRemainingView();
     method public void render(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue result);
     method public void updateStyle(@StyleRes int style);
+    property public final com.mapbox.navigation.ui.tripprogress.view.DistanceRemainingView distanceRemainingView;
+    property public final com.mapbox.navigation.ui.tripprogress.view.EstimatedArrivalTimeView estimatedArrivalTimeView;
+    property public final com.mapbox.navigation.ui.tripprogress.view.TimeRemainingView timeRemainingView;
+  }
+
+  public final class TimeRemainingView extends androidx.appcompat.widget.AppCompatTextView {
+    ctor public TimeRemainingView(android.content.Context context);
+    ctor public TimeRemainingView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public TimeRemainingView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void renderTimeRemaining(android.text.SpannableString timeRemaining, android.widget.TextView.BufferType bufferType);
   }
 
 }
