@@ -299,14 +299,16 @@ class RoadObjectMapperTest {
     private val tollCollectionGantry = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.TOLL_COLLECTION_POINT,
         tollCollectionInfo = com.mapbox.navigator.TollCollectionInfo(
-            com.mapbox.navigator.TollCollectionType.TOLL_GANTRY
+            com.mapbox.navigator.TollCollectionType.TOLL_GANTRY,
+            "toll_name_1"
         )
     )
 
     private val tollCollectionBooth = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.TOLL_COLLECTION_POINT,
         tollCollectionInfo = com.mapbox.navigator.TollCollectionInfo(
-            com.mapbox.navigator.TollCollectionType.TOLL_BOOTH
+            com.mapbox.navigator.TollCollectionType.TOLL_BOOTH,
+            "toll_name_2",
         )
     )
 

@@ -28,7 +28,7 @@ class NavigationRouteTest {
     fun setup() {
         mockkObject(NativeRouteParserWrapper)
         every {
-            NativeRouteParserWrapper.parseDirectionsResponse(any(), any())
+            NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
         } answers {
             val routesCount = JSONObject(this.firstArg<String>())
                 .getJSONArray("routes")

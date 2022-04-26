@@ -588,6 +588,10 @@ package com.mapbox.navigation.base.route {
   }
 
   public final class NavigationRoute {
+    method @Deprecated public static java.util.List<com.mapbox.navigation.base.route.NavigationRoute> create(com.mapbox.api.directions.v5.models.DirectionsResponse directionsResponse, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public static java.util.List<com.mapbox.navigation.base.route.NavigationRoute> create(com.mapbox.api.directions.v5.models.DirectionsResponse directionsResponse, com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
+    method @Deprecated public static java.util.List<com.mapbox.navigation.base.route.NavigationRoute> create(String directionsResponseJson, String routeRequestUrl);
+    method public static java.util.List<com.mapbox.navigation.base.route.NavigationRoute> create(String directionsResponseJson, String routeRequestUrl, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
     method public com.mapbox.api.directions.v5.models.DirectionsResponse getDirectionsResponse();
     method public com.mapbox.api.directions.v5.models.DirectionsRoute getDirectionsRoute();
     method public String getId();
@@ -602,14 +606,18 @@ package com.mapbox.navigation.base.route {
   }
 
   public static final class NavigationRoute.Companion {
-    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> create(com.mapbox.api.directions.v5.models.DirectionsResponse directionsResponse, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
-    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> create(String directionsResponseJson, String routeRequestUrl);
+    method @Deprecated public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> create(com.mapbox.api.directions.v5.models.DirectionsResponse directionsResponse, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> create(com.mapbox.api.directions.v5.models.DirectionsResponse directionsResponse, com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
+    method @Deprecated public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> create(String directionsResponseJson, String routeRequestUrl);
+    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> create(String directionsResponseJson, String routeRequestUrl, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
   }
 
   public final class NavigationRouteEx {
     method public static java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> toDirectionsRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute>);
-    method public static com.mapbox.navigation.base.route.NavigationRoute toNavigationRoute(com.mapbox.api.directions.v5.models.DirectionsRoute);
-    method public static java.util.List<com.mapbox.navigation.base.route.NavigationRoute> toNavigationRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute>);
+    method @Deprecated public static com.mapbox.navigation.base.route.NavigationRoute toNavigationRoute(com.mapbox.api.directions.v5.models.DirectionsRoute);
+    method public static com.mapbox.navigation.base.route.NavigationRoute toNavigationRoute(com.mapbox.api.directions.v5.models.DirectionsRoute, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
+    method @Deprecated public static java.util.List<com.mapbox.navigation.base.route.NavigationRoute> toNavigationRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute>);
+    method public static java.util.List<com.mapbox.navigation.base.route.NavigationRoute> toNavigationRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute>, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
   }
 
   public interface NavigationRouter extends com.mapbox.navigation.base.route.Router {

@@ -4,6 +4,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.internal.route.toNavigationRoute
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigator.RouteAlternative
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -13,12 +14,14 @@ suspend fun parseDirectionsResponse(
     dispatcher: CoroutineDispatcher,
     responseJson: String,
     requestUrl: String,
+    routerOrigin: RouterOrigin,
 ): Expected<Throwable, List<NavigationRoute>> =
     withContext(dispatcher) {
         return@withContext try {
             val routes = NavigationRoute.createAsync(
                 directionsResponseJson = responseJson,
-                routeRequestUrl = requestUrl
+                routeRequestUrl = requestUrl,
+                routerOrigin,
             )
             if (routes.isEmpty()) {
                 ExpectedFactory.createError(

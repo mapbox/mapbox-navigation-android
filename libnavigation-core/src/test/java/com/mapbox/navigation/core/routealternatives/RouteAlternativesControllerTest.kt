@@ -78,7 +78,7 @@ class RouteAlternativesControllerTest {
 
         mockkObject(NativeRouteParserWrapper)
         every {
-            NativeRouteParserWrapper.parseDirectionsResponse(any(), any())
+            NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
         } answers {
             val routesCount =
                 JSONObject(this.firstArg<String>())
