@@ -264,9 +264,7 @@ class RouterWrapperTests {
                     .toUrl(),
                 routerOrigin = Onboard,
                 message = "failed for response: ${routerResultSuccessErroneousValue.value}",
-                throwable = IllegalStateException(
-                    """route response should contain "routes" array"""
-                )
+                throwable = IllegalStateException("Null routes")
             )
 
             val failures = slot<List<RouterFailure>>()

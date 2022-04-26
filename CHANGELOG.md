@@ -6,6 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
+- Fixed double direction response parsing. Directions response handling is up to 30% faster. [#5747](https://github.com/mapbox/mapbox-navigation-android/pull/5747)
 
 ## Mapbox Navigation SDK 2.2.2 - February 3, 2022
 ### Changelog

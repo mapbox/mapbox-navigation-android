@@ -18,24 +18,19 @@ suspend fun parseDirectionsResponse(
 ): Expected<Throwable, List<DirectionsRoute>> =
     withContext(dispatcher) {
         return@withContext try {
-            val jsonObject = JSONObject(json)
-            val uuid: String? = if (jsonObject.has(UUID)) {
-                jsonObject.getString(UUID)
-            } else {
-                null
-            }
-
-            // TODO remove after https://github.com/mapbox/navigation-sdks/issues/1229
-            if (jsonObject.has(METADATA)) {
-                onMetadata(jsonObject.getString(METADATA))
-            }
-
-            check(jsonObject.has("routes")) {
-                """route response should contain "routes" array"""
-            }
             // TODO simplify when https://github.com/mapbox/mapbox-java/issues/1292 is finished
-            val response = DirectionsResponse.fromJson(json, options, uuid)
-            val routes = response.routes()
+            val response = DirectionsResponse.fromJson(json)
+            response.metadata()?.let {
+                onMetadata(it.toJson())
+            }
+
+            val uuid = response.uuid()
+            val routes = response.routes().map {
+                it.toBuilder()
+                    .routeOptions(options)
+                    .requestUuid(uuid)
+                    .build()
+            }
             check(routes.size > 0) {
                 "route response should contain at least one route"
             }
