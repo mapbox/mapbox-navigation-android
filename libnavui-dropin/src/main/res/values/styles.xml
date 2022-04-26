@@ -60,14 +60,31 @@
 
     <!-- Trip progress view styling -->
     <style name="DropInStyleTripProgressView" parent="MapboxStyleTripProgressView">
-        <item name="tripProgressTextColor">@color/colorOnSurface</item>
-        <item name="tripProgressDividerColor">@color/colorSecondaryVariant</item>
         <item name="tripProgressViewBackgroundColor">@color/colorSurface</item>
+        <item name="timeRemainingTextAppearance">@style/DropInStyleTimeRemaining</item>
+        <item name="distanceRemainingTextAppearance">@style/DropInStyleDistanceRemaining</item>
+        <item name="estimatedArrivalTimeTextAppearance">@style/DropInStyleEstimatedArrivalTime</item>
     </style>
 
-    <style name="DropInTripProgressViewTextAppearance" parent="TextAppearance.AppCompat">
+    <style name="DropInStyleTimeRemaining" parent="TextAppearance.AppCompat" >
+        <item name="android:textSize">14sp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+    </style>
+
+    <style name="DropInStyleDistanceRemaining" parent="TextAppearance.AppCompat" >
+        <item name="android:textSize">16sp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:includeFontPadding">false</item>
         <item name="android:textColor">@color/colorOnSurface</item>
-        <item name="android:textSize">@dimen/mapbox_trip_progress_text_regular</item>
+    </style>
+
+    <style name="DropInStyleEstimatedArrivalTime" parent="TextAppearance.AppCompat" >
+        <item name="android:textSize">16sp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textColor">@color/colorOnSurface</item>
     </style>
 
     <!-- Speed limit view styling -->

@@ -41,6 +41,7 @@ dependencies {
     api project(":libnavui-base")
     implementation project(":libnavui-resources")
 
+    implementation dependenciesList.androidXAppCompat
     implementation dependenciesList.androidXConstraintLayout
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
