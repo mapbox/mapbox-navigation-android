@@ -70,43 +70,51 @@ package com.mapbox.navigation.ui.tripprogress.model {
     property public final int trafficCongestionColor;
   }
 
+  public final class TripProgressViewOptions {
+    method public int getBackgroundColor();
+    method public int getDistanceRemainingIcon();
+    method public android.content.res.ColorStateList? getDistanceRemainingIconTint();
+    method public int getDistanceRemainingTextAppearance();
+    method public int getEstimatedArrivalTimeIcon();
+    method public android.content.res.ColorStateList? getEstimatedArrivalTimeIconTint();
+    method public int getEstimatedArrivalTimeTextAppearance();
+    method public int getTimeRemainingTextAppearance();
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions.Builder toBuilder();
+    property public final int backgroundColor;
+    property public final int distanceRemainingIcon;
+    property public final android.content.res.ColorStateList? distanceRemainingIconTint;
+    property public final int distanceRemainingTextAppearance;
+    property public final int estimatedArrivalTimeIcon;
+    property public final android.content.res.ColorStateList? estimatedArrivalTimeIconTint;
+    property public final int estimatedArrivalTimeTextAppearance;
+    property public final int timeRemainingTextAppearance;
+  }
+
+  public static final class TripProgressViewOptions.Builder {
+    ctor public TripProgressViewOptions.Builder();
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions.Builder backgroundColor(@ColorRes int backgroundColor);
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions build();
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions.Builder distanceRemainingIcon(@DrawableRes int distanceRemainingIcon);
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions.Builder distanceRemainingIconTint(android.content.res.ColorStateList? distanceRemainingIconTint);
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions.Builder distanceRemainingTextAppearance(@StyleRes int distanceRemainingTextAppearance);
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions.Builder estimatedArrivalTimeIcon(@DrawableRes int estimatedArrivalTimeIcon);
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions.Builder estimatedArrivalTimeIconTint(android.content.res.ColorStateList? estimatedArrivalTimeIconTint);
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions.Builder estimatedArrivalTimeTextAppearance(@StyleRes int estimatedArrivalTimeTextAppearance);
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions.Builder timeRemainingTextAppearance(@StyleRes int timeRemainingTextAppearance);
+  }
+
 }
 
 package com.mapbox.navigation.ui.tripprogress.view {
 
-  public final class DistanceRemainingView extends androidx.appcompat.widget.AppCompatTextView {
-    ctor public DistanceRemainingView(android.content.Context context);
-    ctor public DistanceRemainingView(android.content.Context context, android.util.AttributeSet? attrs);
-    ctor public DistanceRemainingView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    method public void renderDistanceRemaining(android.text.SpannableString distanceRemaining, android.widget.TextView.BufferType bufferType);
-  }
-
-  public final class EstimatedArrivalTimeView extends androidx.appcompat.widget.AppCompatTextView {
-    ctor public EstimatedArrivalTimeView(android.content.Context context);
-    ctor public EstimatedArrivalTimeView(android.content.Context context, android.util.AttributeSet? attrs);
-    ctor public EstimatedArrivalTimeView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    method public void renderEstimatedArrivalTime(android.text.SpannableString estimatedArrivalTime, android.widget.TextView.BufferType bufferType);
-  }
-
   public final class MapboxTripProgressView extends android.widget.FrameLayout {
+    ctor public MapboxTripProgressView(android.content.Context context, com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions options = TripProgressViewOptions.<init>().build());
     ctor public MapboxTripProgressView(android.content.Context context);
     ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    method public com.mapbox.navigation.ui.tripprogress.view.DistanceRemainingView getDistanceRemainingView();
-    method public com.mapbox.navigation.ui.tripprogress.view.EstimatedArrivalTimeView getEstimatedArrivalTimeView();
-    method public com.mapbox.navigation.ui.tripprogress.view.TimeRemainingView getTimeRemainingView();
     method public void render(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue result);
-    method public void updateStyle(@StyleRes int style);
-    property public final com.mapbox.navigation.ui.tripprogress.view.DistanceRemainingView distanceRemainingView;
-    property public final com.mapbox.navigation.ui.tripprogress.view.EstimatedArrivalTimeView estimatedArrivalTimeView;
-    property public final com.mapbox.navigation.ui.tripprogress.view.TimeRemainingView timeRemainingView;
-  }
-
-  public final class TimeRemainingView extends androidx.appcompat.widget.AppCompatTextView {
-    ctor public TimeRemainingView(android.content.Context context);
-    ctor public TimeRemainingView(android.content.Context context, android.util.AttributeSet? attrs);
-    ctor public TimeRemainingView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    method public void renderTimeRemaining(android.text.SpannableString timeRemaining, android.widget.TextView.BufferType bufferType);
+    method public void updateOptions(com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions options);
+    method @Deprecated public void updateStyle(@StyleRes int style);
   }
 
 }
