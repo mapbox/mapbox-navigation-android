@@ -27,4 +27,5 @@
     <color name="colorSurface">#0D0D0D</color>
     <!-- The color used for elements displayed on top of your surface color -->
     <color name="colorOnSurface">#F8F8F8</color>
+    <color name="textPrimary">#9EA8FF</color>
 </resources>

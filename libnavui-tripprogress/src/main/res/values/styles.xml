@@ -24,14 +24,14 @@
     <item name="android:textSize">14sp</item>
     <item name="android:gravity">center_vertical</item>
     <item name="android:includeFontPadding">false</item>
-    <item name="android:textColor">@color/colorSecondaryVariant</item>
+    <item name="android:textColor">@color/colorOnSurface</item>
   </style>
 
   <style name="MapboxStyleEstimatedArrivalTime" parent="TextAppearance.AppCompat" >
     <item name="android:textSize">16sp</item>
     <item name="android:gravity">center_vertical</item>
     <item name="android:includeFontPadding">false</item>
-    <item name="android:textColor">@color/colorSecondaryVariant</item>
+    <item name="android:textColor">@color/colorOnSurface</item>
   </style>
 
 </resources>

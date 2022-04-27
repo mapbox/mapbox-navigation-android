@@ -19,8 +19,32 @@
     </style>
 
     <style name="MyCustomTripProgressStyle">
-        <item name="tripProgressTextColor">@color/primary</item>
-        <item name="tripProgressDividerColor">#CDCDCD</item>
+        <item name="timeRemainingTextAppearance">@style/MyCustomTimeRemaining</item>
+        <item name="distanceRemainingTextAppearance">@style/MyCustomDistanceRemaining</item>
+        <item name="estimatedArrivalTimeTextAppearance">@style/MyCustomEstimatedArrivalTime</item>
+        <item name="estimatedArrivalTimeIcon">@drawable/mapbox_ic_estimated_time</item>
+        <item name="estimatedArrivalTimeIconTint">@android:color/holo_red_light</item>
+    </style>
+
+    <style name="MyCustomTimeRemaining" parent="TextAppearance.AppCompat" >
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@android:color/holo_red_light</item>
+        <item name="android:gravity">left|start|center_vertical</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="MyCustomDistanceRemaining" parent="TextAppearance.AppCompat" >
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/holo_red_light</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="MyCustomEstimatedArrivalTime" parent="TextAppearance.AppCompat" >
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@android:color/holo_red_light</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:includeFontPadding">false</item>
     </style>
 
     <style name="MyCustomSpeedLimitStyle">

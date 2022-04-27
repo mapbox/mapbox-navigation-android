@@ -3,8 +3,8 @@ package com.mapbox.navigation.ui.tripprogress.view
 import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.text.SpannableString
-import android.view.View
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.ui.tripprogress.R
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter
@@ -17,7 +17,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 class MapboxTripProgressViewTest {
@@ -41,7 +40,8 @@ class MapboxTripProgressViewTest {
     fun `constructor with context and attr`() {
         val view = MapboxTripProgressView(ctx, null)
         val timeRemainingView = view.findViewById<TextView>(R.id.timeRemainingText)
-        val expectedColor = ctx.getColor(R.color.mapbox_trip_progress_text_color)
+        timeRemainingView.setTextColor(R.color.mapbox_trip_progress_text_color)
+        val expectedColor = R.color.mapbox_trip_progress_text_color
 
         assertEquals(expectedColor, timeRemainingView.currentTextColor)
     }
@@ -49,22 +49,22 @@ class MapboxTripProgressViewTest {
     @Test
     fun `constructor with context attr and defStyleAttr`() {
         val view = MapboxTripProgressView(ctx, null)
-        val timeRemainingView = view.findViewById<TextView>(R.id.distanceRemainingText)
-        val expectedColor = ctx.getColor(R.color.mapbox_trip_progress_text_color)
+        val distanceRemainingView = view.findViewById<TextView>(R.id.distanceRemainingText)
+        distanceRemainingView.setTextColor(R.color.mapbox_trip_progress_text_color)
+        val expectedColor = R.color.mapbox_trip_progress_text_color
 
-        assertEquals(expectedColor, timeRemainingView.currentTextColor)
+        assertEquals(expectedColor, distanceRemainingView.currentTextColor)
     }
 
     @Test
-    fun initAttributes() {
-        val expectedTextColor = ctx.getColor(R.color.mapbox_trip_progress_text_color)
-        val expectedDividerColor = ctx.getColor(R.color.mapbox_trip_progress_divider_color)
-        val expectedBackgroundColor = ctx.getColor(
+    fun updateOptions() {
+        val expectedTextColor = ContextCompat.getColor(ctx, R.color.colorOnSurface)
+        val expectedBackgroundColor = ContextCompat.getColor(
+            ctx,
             R.color.mapbox_trip_progress_view_background_color
         )
 
-        val view = MapboxTripProgressView(ctx, null)
-
+        val view = MapboxTripProgressView(ctx, null, R.style.MapboxStyleTripProgressView)
         assertEquals(
             expectedTextColor,
             view.findViewById<TextView>(
@@ -78,35 +78,12 @@ class MapboxTripProgressViewTest {
             ).currentTextColor
         )
         assertEquals(
-            expectedTextColor,
+            ContextCompat.getColor(ctx, R.color.colorSecondaryVariant),
             view.findViewById<TextView>(R.id.timeRemainingText).currentTextColor
-        )
-        assertEquals(
-            expectedDividerColor,
-            (
-                view.findViewById<View>(R.id.tripProgressDivider).background as ColorDrawable
-                ).color
         )
         assertEquals(
             expectedBackgroundColor,
             (view.background as ColorDrawable).color
-        )
-    }
-
-    @Test
-    @Config(qualifiers = "land")
-    fun initAttributes_landscape() {
-        val expectedDividerColor = ctx.getColor(R.color.mapbox_trip_progress_divider_color)
-
-        val view = MapboxTripProgressView(ctx, null)
-
-        assertEquals(
-            expectedDividerColor,
-            view.findViewById<TextView>(R.id.tripProgressDividerLeft).currentTextColor
-        )
-        assertEquals(
-            expectedDividerColor,
-            view.findViewById<TextView>(R.id.tripProgressDividerRight).currentTextColor
         )
     }
 

@@ -1,16 +1,17 @@
 package com.mapbox.navigation.ui.tripprogress.view
 
 import android.content.Context
-import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.StyleRes
 import androidx.core.content.ContextCompat
+import androidx.core.widget.TextViewCompat
 import com.mapbox.navigation.ui.tripprogress.R
 import com.mapbox.navigation.ui.tripprogress.databinding.MapboxTripProgressLayoutBinding
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue
+import com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions
 
 /**
  * A view that can be added to activity layouts which displays trip progress.
@@ -22,7 +23,13 @@ class MapboxTripProgressView : FrameLayout {
      * @param context Context
      * @constructor
      */
-    constructor(context: Context) : super(context)
+    @JvmOverloads
+    constructor(
+        context: Context,
+        options: TripProgressViewOptions = TripProgressViewOptions.Builder().build()
+    ) : super(context) {
+        updateOptions(options)
+    }
 
     /**
      *
@@ -30,9 +37,10 @@ class MapboxTripProgressView : FrameLayout {
      * @param attrs AttributeSet?
      * @constructor
      */
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        initAttributes(attrs)
-    }
+    constructor(
+        context: Context,
+        attrs: AttributeSet?
+    ) : this(context, attrs, 0)
 
     /**
      *
@@ -46,7 +54,7 @@ class MapboxTripProgressView : FrameLayout {
         attrs: AttributeSet?,
         defStyleAttr: Int
     ) : super(context, attrs, defStyleAttr) {
-        initAttributes(attrs)
+        updateStyle(defStyleAttr)
     }
 
     private val binding =
@@ -56,30 +64,32 @@ class MapboxTripProgressView : FrameLayout {
         )
 
     /**
-     * [TimeRemainingView] to render time remaining to reach the destination
+     * Invoke the method to change the styling of various trip progress components at runtime.
+     *
+     * @param options TripProgressViewOptions
      */
-    val timeRemainingView: TimeRemainingView = binding.timeRemainingText
-    /**
-     * [TimeRemainingView] to render distance remaining to reach the destination
-     */
-    val distanceRemainingView: DistanceRemainingView = binding.distanceRemainingText
-    /**
-     * [TimeRemainingView] to render estimated arrival time to reach the destination
-     */
-    val estimatedArrivalTimeView: EstimatedArrivalTimeView = binding.estimatedTimeToArriveText
-
-    /**
-     * Allows you to change the style of [MapboxTripProgressView].
-     * @param style Int
-     */
-    fun updateStyle(@StyleRes style: Int) {
-        context.obtainStyledAttributes(style, R.styleable.MapboxTripProgressView).apply {
-            try {
-                applyAttributes(this)
-            } finally {
-                recycle()
-            }
+    fun updateOptions(options: TripProgressViewOptions) {
+        TextViewCompat.setTextAppearance(
+            binding.timeRemainingText,
+            options.timeRemainingTextAppearance
+        )
+        TextViewCompat.setTextAppearance(
+            binding.distanceRemainingText,
+            options.distanceRemainingTextAppearance
+        )
+        TextViewCompat.setTextAppearance(
+            binding.estimatedTimeToArriveText,
+            options.estimatedArrivalTimeTextAppearance
+        )
+        binding.distanceRemainingIcon.setImageResource(options.distanceRemainingIcon)
+        binding.estimatedTimeToArriveIcon.setImageResource(options.estimatedArrivalTimeIcon)
+        options.distanceRemainingIconTint?.let { tint ->
+            binding.distanceRemainingIcon.imageTintList = tint
         }
+        options.estimatedArrivalTimeIconTint?.let { tint ->
+            binding.estimatedTimeToArriveIcon.imageTintList = tint
+        }
+        setBackgroundColor(ContextCompat.getColor(context, options.backgroundColor))
     }
 
     /**
@@ -88,92 +98,86 @@ class MapboxTripProgressView : FrameLayout {
      * @param result a [TripProgressUpdateValue] containing the data that should be rendered.
      */
     fun render(result: TripProgressUpdateValue) {
-        distanceRemainingView.renderDistanceRemaining(
+        binding.timeRemainingText.renderTimeRemaining(
+            result.formatter.getTimeRemaining(result.currentLegTimeRemaining),
+            TextView.BufferType.SPANNABLE
+        )
+
+        binding.distanceRemainingText.renderDistanceRemaining(
             result.formatter.getDistanceRemaining(result.distanceRemaining),
             TextView.BufferType.SPANNABLE
         )
 
-        estimatedArrivalTimeView.renderEstimatedArrivalTime(
+        binding.estimatedTimeToArriveText.renderEstimatedArrivalTime(
             result.formatter.getEstimatedTimeToArrival(
                 result.estimatedTimeToArrival
             ),
             TextView.BufferType.SPANNABLE
         )
-
-        timeRemainingView.renderTimeRemaining(
-            result.formatter.getTimeRemaining(result.currentLegTimeRemaining),
-            TextView.BufferType.SPANNABLE
-        )
     }
 
-    private fun initAttributes(attrs: AttributeSet?) {
-        context.obtainStyledAttributes(
-            attrs,
-            R.styleable.MapboxTripProgressView,
-            0,
-            R.style.MapboxStyleTripProgressView
-        ).apply {
+    /**
+     * Allows you to change the style of [MapboxTripProgressView].
+     * @param style Int
+     */
+    @Deprecated(
+        message = "The function is deprecated.",
+        replaceWith = ReplaceWith("updateOptions(options)")
+    )
+    fun updateStyle(@StyleRes style: Int) {
+        context.obtainStyledAttributes(style, R.styleable.MapboxTripProgressView).apply {
             try {
-                applyAttributes(this)
+                val options = TripProgressViewOptions.Builder()
+                getResourceId(
+                    R.styleable.MapboxTripProgressView_timeRemainingTextAppearance,
+                    R.style.MapboxStyleTimeRemaining
+                ).also {
+                    options.timeRemainingTextAppearance(it)
+                }
+                getResourceId(
+                    R.styleable.MapboxTripProgressView_distanceRemainingTextAppearance,
+                    R.style.MapboxStyleDistanceRemaining
+                ).also {
+                    options.distanceRemainingTextAppearance(it)
+                }
+                getResourceId(
+                    R.styleable.MapboxTripProgressView_estimatedArrivalTimeTextAppearance,
+                    R.style.MapboxStyleEstimatedArrivalTime
+                ).also {
+                    options.estimatedArrivalTimeTextAppearance(it)
+                }
+                getResourceId(
+                    R.styleable.MapboxTripProgressView_distanceRemainingIcon,
+                    R.drawable.mapbox_ic_pin
+                ).also {
+                    options.distanceRemainingIcon(it)
+                }
+                getResourceId(
+                    R.styleable.MapboxTripProgressView_estimatedArrivalTimeIcon,
+                    R.drawable.mapbox_ic_time
+                ).also {
+                    options.estimatedArrivalTimeIcon(it)
+                }
+                getColorStateList(
+                    R.styleable.MapboxTripProgressView_distanceRemainingIconTint,
+                )?.also {
+                    options.distanceRemainingIconTint(it)
+                }
+                getColorStateList(
+                    R.styleable.MapboxTripProgressView_estimatedArrivalTimeIconTint
+                )?.also {
+                    options.estimatedArrivalTimeIconTint(it)
+                }
+                getResourceId(
+                    R.styleable.MapboxTripProgressView_tripProgressViewBackgroundColor,
+                    R.color.mapbox_trip_progress_view_background_color
+                ).also {
+                    options.backgroundColor(it)
+                }
+                updateOptions(options.build())
             } finally {
                 recycle()
             }
-        }
-    }
-
-    private fun applyAttributes(typedArray: TypedArray) {
-
-        typedArray.getResourceId(
-            R.styleable.MapboxTripProgressView_timeRemainingTextAppearance,
-            R.style.MapboxStyleTimeRemaining
-        ).also {
-            // setTextAppearance is not deprecated in AppCompatTextView
-            timeRemainingView.setTextAppearance(context, it)
-        }
-        typedArray.getResourceId(
-            R.styleable.MapboxTripProgressView_distanceRemainingTextAppearance,
-            R.style.MapboxStyleDistanceRemaining
-        ).also {
-            // setTextAppearance is not deprecated in AppCompatTextView
-            distanceRemainingView.setTextAppearance(context, it)
-        }
-        typedArray.getResourceId(
-            R.styleable.MapboxTripProgressView_estimatedArrivalTimeTextAppearance,
-            R.style.MapboxStyleEstimatedArrivalTime
-        ).also {
-            // setTextAppearance is not deprecated in AppCompatTextView
-            estimatedArrivalTimeView.setTextAppearance(context, it)
-        }
-        typedArray.getResourceId(
-            R.styleable.MapboxTripProgressView_distanceRemainingIcon,
-            R.drawable.mapbox_ic_pin
-        ).also {
-            binding.distanceRemainingIcon.setImageResource(it)
-        }
-        typedArray.getResourceId(
-            R.styleable.MapboxTripProgressView_estimatedArrivalTimeIcon,
-            R.drawable.mapbox_ic_time
-        ).also {
-            binding.estimatedTimeToArriveIcon.setImageResource(it)
-        }
-        typedArray.getColorStateList(
-            R.styleable.MapboxTripProgressView_distanceRemainingIconTint,
-        )?.also {
-            binding.distanceRemainingIcon.imageTintList = it
-        }
-        typedArray.getColorStateList(
-            R.styleable.MapboxTripProgressView_estimatedArrivalTimeIconTint
-        )?.also {
-            binding.estimatedTimeToArriveIcon.imageTintList = it
-        }
-        typedArray.getColor(
-            R.styleable.MapboxTripProgressView_tripProgressViewBackgroundColor,
-            ContextCompat.getColor(
-                context,
-                R.color.mapbox_trip_progress_view_background_color
-            )
-        ).also {
-            setBackgroundColor(it)
         }
     }
 }
