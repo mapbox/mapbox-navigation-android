@@ -7,6 +7,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
+- Fixed an issue where route refresh was not updating the ETA values found in the `RouteProgress` object. [#5755](https://github.com/mapbox/mapbox-navigation-android/pull/5755)
 - :warning: Deprecated `NavigationRoute` creation and mapping functions in favor of equivalents that take `RouterOrigin` as a parameter. If not provided, `RouterOrigin.Custom()` is used. [#5738](https://github.com/mapbox/mapbox-navigation-android/pull/5738)
   - method `NavigationRoute#create(DirectionsResponse, RouteOptions)` by `NavigationRoute#create(DirectionsResponse, RouteOptions, RouterOrigin)`;
   - method `NavigationRoute#create(String, String)` by `NavigationRoute#create(String, String, RouterOrigin)`;
