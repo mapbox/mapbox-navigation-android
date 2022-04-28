@@ -7,9 +7,6 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
-- Added `NavigationOptions#EHorizonOptions#AlertServiceOptions` which allow to control which road objects are picked up from the eHorizon graph. :warning: Since Restricted Areas can be resource intensive to pick up, they are now disabled by default. [#5693](https://github.com/mapbox/mapbox-navigation-android/pull/5693)
-- Fixed an issue where a call to `MapboxNavigation#stopTripSession` would clear the routes reference and led to a `RoutesObserver` notification with empty routes collection. [#5685](https://github.com/mapbox/mapbox-navigation-android/pull/5685)
-- Fixed an issue where `AlternativeRouteMetadata` would get cleared after route refresh (whenever routes update reason was `RoutesExtra#ROUTES_UPDATE_REASON_REFRESH`). [#5691](https://github.com/mapbox/mapbox-navigation-android/pull/5691)
 
 ## Mapbox Navigation SDK 2.4.0 - April 14, 2022
 ### Changelog
@@ -101,6 +98,22 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Added `AsyncAudioFocusDelegate` to `MapboxVoiceInstructionsPlayer` to allow clients to interact with the audio focus in an asynchronous way. [#5652](https://github.com/mapbox/mapbox-navigation-android/pull/5652)
 - Added `AudioFocusOwner` so that the owner can be specified when requesting the audio focus `AsyncAudioFocusDelegate#requestFocus`. [#5652](https://github.com/mapbox/mapbox-navigation-android/pull/5652)
 - Added `ttsStreamType` to `VoiceInstructionsPlayerOptions` so that the stream type for playing TTS can be specified, allowing to fix an issue with `KEY_PARAM_STREAM` not being updated and used properly. Defaults to `AudioManager.STREAM_MUSIC`. [#5652](https://github.com/mapbox/mapbox-navigation-android/pull/5652)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.4.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.4.0))
+- Mapbox Navigation Native `v94.0.0`
+- Mapbox Core Common `v21.2.0`
+- Mapbox Java `v6.4.0-beta.4` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.4.0-beta.4))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
+
+## Mapbox Navigation SDK 2.5.0-alpha.1 - April 1, 2022
+### Changelog
+[Changes between v2.4.0-rc.3 and v2.5.0-alpha.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.4.0-rc.3...v2.5.0-alpha.1)
+
+#### Bug fixes and improvements
+- :warning: Realigned all `NavigationCamera` transitions to not fallback to `Idle` if a transition is canceled to keep the behavior consistent and predictable (state transitions used to be cancelable while frame transitions weren't). If you need the `NavigationCamera` to reset to `Idle` on external interactions or cancellations, use `NavigationBasicGesturesHandler` or `NavigationScaleGestureHandler` [#5607](https://github.com/mapbox/mapbox-navigation-android/pull/5607)
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
