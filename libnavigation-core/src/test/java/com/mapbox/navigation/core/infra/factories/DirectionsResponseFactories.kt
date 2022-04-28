@@ -1,28 +1,43 @@
 package com.mapbox.navigation.core.infra.factories
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigator.RouteInfo
+import com.mapbox.navigator.RouteInterface
+import com.mapbox.navigator.RouterOrigin
 import io.mockk.every
 import io.mockk.mockk
 
 fun createNavigationRoute(
-    legs: List<RouteLeg> = listOf(createRouteLeg()), // each route should have at least one leg,
-    routeOptions: RouteOptions = createRouteOptions()
+    directionsRoute: DirectionsRoute = createDirectionsRoute()
 ): NavigationRoute {
+    requireNotNull(directionsRoute.routeOptions())
     return mockk {
-        every { this@mockk.routeOptions } returns routeOptions
-        every { directionsRoute } returns DirectionsRoute.builder()
-            .distance(5.0)
-            .duration(9.0)
-            .legs(legs)
-            .routeOptions(routeOptions)
-            .build()
+        every { this@mockk.routeOptions } returns directionsRoute.routeOptions()!!
+        every { directionsRoute } returns directionsRoute
     }
 }
+
+fun createDirectionsRoute(
+    legs: List<RouteLeg> = listOf(createRouteLeg()),
+    routeOptions: RouteOptions = createRouteOptions(),
+    distance: Double = 5.0,
+    duration: Double = 9.0,
+    routeIndex: String = "0"
+): DirectionsRoute = DirectionsRoute.builder()
+    .distance(distance)
+    .duration(duration)
+    .legs(legs)
+    .routeOptions(routeOptions)
+    .routeIndex(routeIndex)
+    .build()
 
 fun createRouteLeg(): RouteLeg {
     return RouteLeg.builder().build()
