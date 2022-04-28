@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.internal.utils
 
+import com.google.gson.JsonSyntaxException
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.internal.route.toNavigationRoute
@@ -33,7 +34,7 @@ suspend fun parseDirectionsResponse(
         } catch (ex: Exception) {
             when (ex) {
                 is JSONException,
-                is NullPointerException -> ExpectedFactory.createError(ex)
+                is JsonSyntaxException -> ExpectedFactory.createError(ex)
                 else -> throw ex
             }
         }

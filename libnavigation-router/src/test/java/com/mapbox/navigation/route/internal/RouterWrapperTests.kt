@@ -300,7 +300,7 @@ class RouterWrapperTests {
                 routerOrigin = Onboard,
                 message = "failed for response: ${routerResultSuccessErroneousValue.value}",
                 throwable = IllegalStateException(
-                    """Null routes"""
+                    "java.lang.IllegalStateException: Property \"routes\" has not been set"
                 )
             )
 
