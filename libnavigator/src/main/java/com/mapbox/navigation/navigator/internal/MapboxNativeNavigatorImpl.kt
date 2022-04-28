@@ -222,14 +222,14 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 ) {
                     if (it != null) {
                         logD(
-                            "Annotation updated successfully for route with ID '${route.id}'" +
-                                " and leg at index '$legIndex'",
+                            "Annotation updated successfully for" +
+                                " leg at index '$legIndex'",
                             LOG_CATEGORY
                         )
                     } else {
                         logE(
-                            "Annotation update failed for route with ID '${route.id}'" +
-                                " and leg at index '$legIndex'",
+                            "Annotation update failed for" +
+                                " leg at index '$legIndex'",
                             LOG_CATEGORY
                         )
                     }
