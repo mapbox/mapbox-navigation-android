@@ -1,6 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
+import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -9,6 +10,7 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.RouteRefreshOptions
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.R
@@ -18,6 +20,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefr
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockRoutingTileEndpointErrorRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.idling.IdlingPolicyTimeoutRule
+import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteRequestIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RoutesObserverIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
@@ -25,14 +28,21 @@ import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigation.utils.internal.logD
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.net.URI
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.math.absoluteValue
 
 class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
+
+    private companion object {
+        private const val LOG_CATEGORY = "RouteRefreshTest"
+    }
 
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
@@ -45,13 +55,14 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
 
     private lateinit var mapboxNavigation: MapboxNavigation
     private val coordinates = listOf(
-        Point.fromLngLat(-121.495975, 38.57774),
+        Point.fromLngLat(-121.496066, 38.577764),
         Point.fromLngLat(-121.480279, 38.57674)
     )
 
     override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
         latitude = coordinates[0].latitude()
         longitude = coordinates[0].longitude()
+        bearing = 190f
     }
 
     @Before
@@ -72,6 +83,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                             .tilesBaseUri(URI(mockWebServerRule.baseUrl))
                             .build()
                     )
+                    .navigatorPredictionMillis(0L)
                     .build()
             )
         }
@@ -89,6 +101,25 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         // Set navigation with the route.
         runOnMainSync {
             mapboxNavigation.setRoutes(routes)
+            mapboxNavigation.startTripSession()
+            mockLocationReplayerRule.loopUpdate(
+                mockLocationUpdatesRule.generateLocationUpdate {
+                    latitude = coordinates[0].latitude()
+                    longitude = coordinates[0].longitude()
+                    bearing = 190f
+                },
+                times = 60
+            )
+            mapboxNavigation.registerRouteProgressObserver { routeProgress ->
+                logD(
+                    "progress state: ${routeProgress.currentState}",
+                    LOG_CATEGORY
+                )
+                logD(
+                    "progress duration remaining: ${routeProgress.durationRemaining}",
+                    LOG_CATEGORY
+                )
+            }
         }
 
         // Wait for the initial route.
@@ -97,6 +128,31 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         // Wait for the route refresh.
         val refreshedRoutes = initialRouteIdlingResource.next()
         initialRouteIdlingResource.unregister()
+
+        val progressIdlingResource = RouteProgressStateIdlingResource(
+            mapboxNavigation,
+            RouteProgressState.TRACKING
+        )
+        progressIdlingResource.register()
+        Espresso.onIdle()
+        progressIdlingResource.unregister()
+
+        val latch = CountDownLatch(1)
+        runOnMainSync {
+            mapboxNavigation.registerRouteProgressObserver { routeProgress ->
+                val durationRemaining = routeProgress.durationRemaining
+                val expectedDurationRemaining = 1180.651
+                // 30 seconds margin of error
+                if ((durationRemaining - expectedDurationRemaining).absoluteValue < 30) {
+                    latch.countDown()
+                }
+            }
+        }
+        if (!latch.await(5, TimeUnit.SECONDS)) {
+            throw AssertionError(
+                """progress duration remaining wasn't refreshed by native navigator"""
+            )
+        }
 
         // Only the annotations are refreshed. So sum up the duration from the old and new.
         val sanityLeg = routes.first().legs()!!
@@ -108,7 +164,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
 
         assertEquals(sanityDuration, initialDuration, 0.0)
         assertEquals(227.918, initialDuration, 0.0001)
-        assertEquals(230.651, refreshedDuration, 0.0001)
+        assertEquals(1180.651, refreshedDuration, 0.0001)
     }
 
     // Will be ignored when .baseUrl(mockWebServerRule.baseUrl) is commented out

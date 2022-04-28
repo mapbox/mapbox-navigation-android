@@ -1,6 +1,8 @@
 package com.mapbox.navigation.navigator.internal
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
+import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
+import com.mapbox.api.directionsrefresh.v1.models.RouteLegRefresh
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
@@ -10,6 +12,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.BannerInstruction
@@ -38,6 +41,7 @@ import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.coroutines.resume
 
@@ -189,21 +193,49 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * Updates annotations so that subsequent calls to getStatus will
      * reflect the most current annotations for the route.
      *
-     * @param route [DirectionsRoute]
+     * This methods manufactures a [DirectionsRefreshResponse] to adhere to requirements from
+     * https://github.com/mapbox/mapbox-navigation-native/pull/5420 where the full response has to be provided
+     * to [Navigator.updateAnnotations], not only the annotations/incidents collections.
      */
     override suspend fun updateAnnotations(route: NavigationRoute) {
-        route.directionsRoute.legs()?.forEachIndexed { index, routeLeg ->
+        val refreshedLegs = route.directionsRoute.legs()?.map { routeLeg ->
+            RouteLegRefresh.builder()
+                .annotation(routeLeg.annotation())
+                .build()
+        }
+        val refreshRoute = DirectionsRouteRefresh.builder()
+            .legs(refreshedLegs)
+            .build()
+        val refreshResponse = DirectionsRefreshResponse.builder()
+            .code("200")
+            .route(refreshRoute)
+            .build()
+
+        val refreshResponseJson = withContext(ThreadController.DefaultDispatcher) {
+            refreshResponse.toJson()
+        }
+
+        for (legIndex in 0 until (route.directionsRoute.legs()?.size ?: 0)) {
             suspendCancellableCoroutine<Unit> { continuation ->
-                routeLeg.annotation()?.toJson()?.let { annotations ->
-                    navigator!!.updateAnnotations(annotations, route.nativeRoute().routeId, index) {
+                navigator!!.updateAnnotations(
+                    refreshResponseJson,
+                    route.nativeRoute().routeId,
+                    legIndex
+                ) {
+                    if (it != null) {
                         logD(
-                            "Annotation updated successfully=$it, for leg " +
-                                "index $index, annotations: [$annotations]",
+                            "Annotation updated successfully for route with ID '${route.id}'" +
+                                " and leg at index '$legIndex'",
                             LOG_CATEGORY
                         )
-
-                        continuation.resume(Unit)
+                    } else {
+                        logE(
+                            "Annotation update failed for route with ID '${route.id}'" +
+                                " and leg at index '$legIndex'",
+                            LOG_CATEGORY
+                        )
                     }
+                    continuation.resume(Unit)
                 }
             }
         }
