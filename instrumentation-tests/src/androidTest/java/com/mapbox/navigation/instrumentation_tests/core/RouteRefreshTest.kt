@@ -16,9 +16,9 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockAvailableTilesVersionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.instrumentation_tests.utils.http.MockRoutingTileEndpointErrorRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.idling.IdlingPolicyTimeoutRule
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteRequestIdlingResource
@@ -184,9 +184,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             )
         )
         mockWebServerRule.requestHandlers.add(
-            MockAvailableTilesVersionsRequestHandler(
-                readRawFileText(activity, R.raw.nn_response_available_versions)
-            )
+            MockRoutingTileEndpointErrorRequestHandler()
         )
     }
 
