@@ -132,8 +132,10 @@ class RouterWrapperTests {
             valueSlot.captured.invoke(this@mockk.value!!)
         }
     }
-    private val routerResultSuccessErroneousValue: Expected<RouterError, String>
-        = ExpectedFactory.createValue("{\"message\":\"should be >= 1\",\"code\":\"InvalidInput\"}")
+    private val routerResultSuccessErroneousValue: Expected<RouterError, String> =
+        ExpectedFactory.createValue(
+            "{\"message\":\"should be >= 1\",\"code\":\"InvalidInput\"}"
+        )
 
     private val routerRefreshSuccess: Expected<RouterError, String> = mockk {
         every { isValue } returns true
