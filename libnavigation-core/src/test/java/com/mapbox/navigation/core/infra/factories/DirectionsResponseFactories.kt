@@ -10,19 +10,28 @@ import io.mockk.every
 import io.mockk.mockk
 
 fun createNavigationRoute(
-    legs: List<RouteLeg> = listOf(createRouteLeg()), // each route should have at least one leg,
-    routeOptions: RouteOptions = createRouteOptions()
+    directionsRoute: DirectionsRoute = createDirectionsRoute()
 ): NavigationRoute {
+    requireNotNull(directionsRoute.routeOptions())
     return mockk {
-        every { this@mockk.routeOptions } returns routeOptions
-        every { directionsRoute } returns DirectionsRoute.builder()
-            .distance(5.0)
-            .duration(9.0)
-            .legs(legs)
-            .routeOptions(routeOptions)
-            .build()
+        every { this@mockk.routeOptions } returns directionsRoute.routeOptions()!!
+        every { this@mockk.directionsRoute } returns directionsRoute
     }
 }
+
+fun createDirectionsRoute(
+    legs: List<RouteLeg> = listOf(createRouteLeg()),
+    routeOptions: RouteOptions = createRouteOptions(),
+    distance: Double = 5.0,
+    duration: Double = 9.0,
+    routeIndex: String = "0"
+): DirectionsRoute = DirectionsRoute.builder()
+    .distance(distance)
+    .duration(duration)
+    .legs(legs)
+    .routeOptions(routeOptions)
+    .routeIndex(routeIndex)
+    .build()
 
 fun createRouteLeg(): RouteLeg {
     return RouteLeg.builder().build()
