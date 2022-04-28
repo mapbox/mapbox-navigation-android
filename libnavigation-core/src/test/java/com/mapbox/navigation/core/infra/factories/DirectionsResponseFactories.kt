@@ -1,17 +1,11 @@
 package com.mapbox.navigation.core.infra.factories
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigator.RouteInfo
-import com.mapbox.navigator.RouteInterface
-import com.mapbox.navigator.RouterOrigin
 import io.mockk.every
 import io.mockk.mockk
 
