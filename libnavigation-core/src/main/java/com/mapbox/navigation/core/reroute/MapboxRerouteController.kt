@@ -125,9 +125,9 @@ internal class MapboxRerouteController(
                 logD("Reroute switch to alternative", LOG_CATEGORY)
 
                 val origin = relevantAlternative.routerOrigin.mapToSdkRouteOrigin()
-                callback.onNewRoutes(newList, origin)
 
                 state = RerouteState.RouteFetched(origin)
+                callback.onNewRoutes(newList, origin)
                 state = RerouteState.Idle
                 return
             }
