@@ -8,6 +8,23 @@ Mapbox welcomes participation and contributions from everyone.
 
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.4.1 - April 28, 2022
+### Changelog
+[Changes between v2.4.0 and v2.4.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.4.0...v2.4.1)
+
+#### Bug fixes and improvements
+
+- Fixed an issue where route refresh was not updating the ETA values found in the `RouteProgress` object. [#5755](https://github.com/mapbox/mapbox-navigation-android/pull/5755)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.4.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.4.3))
+- Mapbox Navigation Native `v94.0.3`
+- Mapbox Core Common `v21.2.1`
+- Mapbox Java `v6.4.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.4.1))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
+
 ## Mapbox Navigation SDK 2.4.0 - April 14, 2022
 ### Changelog
 [Changes between v2.4.0 and v2.3.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.3.0...v2.4.0)
