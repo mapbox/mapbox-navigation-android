@@ -221,6 +221,7 @@ class MapboxRerouteControllerTest {
                 primaryRerouteObserver.onRerouteStateChanged(
                     RerouteState.RouteFetched(RouterOrigin.Offboard)
                 )
+                navigationRouteCallback.onNewRoutes(expectedRoutes, RouterOrigin.Offboard)
                 primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
             }
         }
