@@ -8,7 +8,6 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.telemetry.MapboxTelemetryConstants.MAPBOX_SHARED_PREFERENCES
 import com.mapbox.android.telemetry.TelemetryEnabler
 import com.mapbox.annotation.module.MapboxModuleType
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.MapboxSDKCommon
@@ -36,6 +35,7 @@ import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.infra.factories.createDirectionsRoute
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
@@ -98,7 +98,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.File
-import java.net.URL
 import java.util.Locale
 
 @ExperimentalPreviewMapboxNavigationAPI
@@ -1128,18 +1127,8 @@ class MapboxNavigationTest {
     @Test
     fun `adding or removing alternative routes creates alternative reason`() {
         createMapboxNavigation()
-        val primaryRoute = mockk<DirectionsRoute>(relaxed = true) {
-            every { routeIndex() } returns "0"
-            every { routeOptions() } returns mockk {
-                every { toUrl(any()) } returns URL("https://test.com")
-            }
-        }
-        val alternativeRoute = mockk<DirectionsRoute>(relaxed = true) {
-            every { routeIndex() } returns "0"
-            every { routeOptions() } returns mockk {
-                every { toUrl(any()) } returns URL("https://test.com")
-            }
-        }
+        val primaryRoute = createDirectionsRoute()
+        val alternativeRoute = createDirectionsRoute()
         every { directionsSession.routes } returns listOf(primaryRoute.toNavigationRoute())
 
         mapboxNavigation.setRoutes(listOf(primaryRoute, alternativeRoute))

@@ -132,17 +132,11 @@ class RouterWrapperTests {
             valueSlot.captured.invoke(this@mockk.value!!)
         }
     }
-    private val routerResultSuccessErroneousValue: Expected<RouterError, String> = mockk {
-        every { isValue } returns true
-        every { isError } returns false
-        every { value } returns "{\"message\":\"should be >= 1\",\"code\":\"InvalidInput\"}"
-        every { error } returns null
+    private val routerResultSuccessErroneousValue: Expected<RouterError, String> =
+        ExpectedFactory.createValue(
+            "{\"message\":\"should be >= 1\",\"code\":\"InvalidInput\"}"
+        )
 
-        val valueSlot = slot<Expected.Transformer<String, Unit>>()
-        every { fold(any(), capture(valueSlot)) } answers {
-            valueSlot.captured.invoke(this@mockk.value!!)
-        }
-    }
     private val routerRefreshSuccess: Expected<RouterError, String> = mockk {
         every { isValue } returns true
         every { isError } returns false
@@ -308,7 +302,7 @@ class RouterWrapperTests {
                 routerOrigin = Onboard,
                 message = "failed for response: ${routerResultSuccessErroneousValue.value}",
                 throwable = IllegalStateException(
-                    """Null routes"""
+                    "java.lang.IllegalStateException: Property \"routes\" has not been set"
                 )
             )
 
@@ -368,10 +362,13 @@ class RouterWrapperTests {
 
     @Test
     fun `route refresh fails with null requestUuid`() {
-        val route: DirectionsRoute = mockk(relaxed = true)
-        every { route.requestUuid() } returns null
-        every { route.routeIndex() } returns "1"
-        every { route.routeOptions() } returns routerOptions
+        val route: DirectionsRoute = DirectionsRoute.builder()
+            .requestUuid(null)
+            .distance(100.0)
+            .duration(100.0)
+            .routeIndex("1")
+            .routeOptions(routerOptions)
+            .build()
 
         routerWrapper.getRouteRefresh(route, 0, routerRefreshCallback)
 
@@ -483,10 +480,13 @@ class RouterWrapperTests {
 
     @Test
     fun `route refresh failure`() {
-        val route: DirectionsRoute = mockk(relaxed = true)
-        every { route.requestUuid() } returns UUID
-        every { route.routeIndex() } returns "1"
-        every { route.routeOptions() } returns routerOptions
+        val route: DirectionsRoute = DirectionsRoute.builder()
+            .requestUuid(UUID)
+            .distance(100.0)
+            .duration(100.0)
+            .routeIndex("1")
+            .routeOptions(routerOptions)
+            .build()
 
         val legIndex = 0
         routerWrapper.getRouteRefresh(route, legIndex, routerRefreshCallback)
