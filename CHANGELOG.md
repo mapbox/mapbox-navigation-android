@@ -8,6 +8,98 @@ Mapbox welcomes participation and contributions from everyone.
 
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.4.1 - April 28, 2022
+### Changelog
+[Changes between v2.4.0 and v2.4.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.4.0...v2.4.1)
+
+#### Bug fixes and improvements
+
+- Fixed an issue where route refresh was not updating the ETA values found in the `RouteProgress` object. [#5755](https://github.com/mapbox/mapbox-navigation-android/pull/5755)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.4.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.4.3))
+- Mapbox Navigation Native `v94.0.3`
+- Mapbox Core Common `v21.2.1`
+- Mapbox Java `v6.4.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.4.1))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
+
+## Mapbox Navigation SDK 2.5.0-beta.2 - April 28, 2022
+### Changelog
+[Changes between v2.5.0-beta.1 and v2.5.0-beta.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.5.0-beta.1...v2.5.0-beta.2)
+
+#### Bug fixes and improvements
+
+- Fixed an issue where route refresh was not updating the ETA values found in the `RouteProgress` object. [#5755](https://github.com/mapbox/mapbox-navigation-android/pull/5755)
+- :warning: Deprecated `NavigationRoute` creation and mapping functions in favor of equivalents that take `RouterOrigin` as a parameter. If not provided, `RouterOrigin.Custom()` is used. [#5738](https://github.com/mapbox/mapbox-navigation-android/pull/5738)
+  - method `NavigationRoute#create(DirectionsResponse, RouteOptions)` by `NavigationRoute#create(DirectionsResponse, RouteOptions, RouterOrigin)`;
+  - method `NavigationRoute#create(String, String)` by `NavigationRoute#create(String, String, RouterOrigin)`;
+  - extension `List<DirectionsRoute>#toNavigationRoutes()` by `List<DirectionsRoute>#toNavigationRoutes(RouterOrigin)`;
+  - extension `DirectionsRoute#toNavigationRoute()` by `DirectionsRoute#toNavigationRoute(RouterOrigin)`.
+- Fixed an issue where [replacing the default logger module](https://docs.mapbox.com/android/navigation/guides/get-started/modularization/#logger) was throwing a runtime exception during library loading. [#5738](https://github.com/mapbox/mapbox-navigation-android/pull/5738)
+- :warning: Refactored the designs for `MapboxTripProgressView`. [#5744](https://github.com/mapbox/mapbox-navigation-android/pull/5744)
+- Fixed the crash of default `RerouteController` when it immediately switches to an existing alternative. [#5753](https://github.com/mapbox/mapbox-navigation-android/pull/5753)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.5.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.5.0-rc.1))
+- Mapbox Navigation Native `v97.0.0`
+- Mapbox Core Common `v21.3.1`
+- Mapbox Java `v6.5.0-beta.3` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.5.0-beta.3))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
+
+## Mapbox Navigation SDK 2.5.0-beta.1 - April 22, 2022
+### Changelog
+[Changes between v2.5.0-alpha.3 and v2.5.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.5.0-alpha.3...v2.5.0-beta.1)
+
+#### Features
+- Added support for excluding maneuvers from the 'pitch to 0' camera updates when `FollowingFrameOptions#pitchNearManeuvers` is enabled. See `FollowingFrameOptions#pitchNearManeuvers#excludedManeuvers`. [#5717](https://github.com/mapbox/mapbox-navigation-android/pull/5717)
+- :warning: Navigation Camera will no longer animate to `pitch 0` when approaching following maneuvers: "continue", "merge", "on ramp", "off ramp" and "fork". Original behavior can be restored by setting an empty list to `FollowingFrameOptions#pitchNearManeuvers#excludedManeuvers`.
+
+#### Bug fixes and improvements
+- Parallelized some work in `MapboxNavigation#requestRoutes` to decrease the time in which `NavigationRouterCallback` returns. [#5718](https://github.com/mapbox/mapbox-navigation-android/pull/5718)
+- :warning: Removed support for style changes of standalone UI components based on `NavigationView` `attributes`. Introduced runtime styling support instead. [#5730](https://github.com/mapbox/mapbox-navigation-android/pull/5730)
+- :warning: Added more runtime styling options to `ManeuverViewOptions` and deprecated individual styling methods [#5733](https://github.com/mapbox/mapbox-navigation-android/pull/5733)
+
+#### Known issues
+- Adding a custom `Logger` instance by [replacing the default logger module](https://docs.mapbox.com/android/navigation/guides/get-started/modularization/#logger) causes a runtime exception during library loading.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.5.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.5.0-beta.1))
+- Mapbox Navigation Native `v96.0.0`
+- Mapbox Core Common `v21.3.0-rc.2`
+- Mapbox Java `v6.5.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.5.0-beta.2))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
+
+## Mapbox Navigation SDK 2.5.0-alpha.3 - April 15, 2022
+### Changelog
+[Changes between v2.5.0-alpha.2 and v2.5.0-alpha.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.5.0-alpha.2...v2.5.0-alpha.3)
+
+#### Features
+- Added `MapboxNavigation#setTripNotificationInterceptor` to allow for notification customizations. This makes the notification compatible with the `CarAppExtender`. [#5669](https://github.com/mapbox/mapbox-navigation-android/pull/5669)
+
+#### Bug fixes and improvements
+- Added `NavigationOptions#EHorizonOptions#AlertServiceOptions` which allow to control which road objects are picked up from the eHorizon graph. :warning: Since Restricted Areas can be resource intensive to pick up, they are now disabled by default. [#5693](https://github.com/mapbox/mapbox-navigation-android/pull/5693)
+- Fixed an issue where a call to `MapboxNavigation#stopTripSession` would clear the routes reference and led to a `RoutesObserver` notification with empty routes collection. [#5685](https://github.com/mapbox/mapbox-navigation-android/pull/5685)
+- Fixed an issue where `AlternativeRouteMetadata` would get cleared after route refresh (whenever routes update reason was `RoutesExtra#ROUTES_UPDATE_REASON_REFRESH`). [#5691](https://github.com/mapbox/mapbox-navigation-android/pull/5691)
+- Fixed a race condition where internal route refresh logic could overwrite the result of a call to `MapboxNavigation#setRoutes`. [#5685](https://github.com/mapbox/mapbox-navigation-android/pull/5685)
+
+#### Known issues
+- Adding a custom `Logger` instance by [replacing the default logger module](https://docs.mapbox.com/android/navigation/guides/get-started/modularization/#logger) causes a runtime exception during library loading.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.5.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.5.0-beta.1))
+- Mapbox Navigation Native `v96.0.0`
+- Mapbox Core Common `v21.3.0-rc.2`
+- Mapbox Java `v6.4.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.4.0))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
+
 ## Mapbox Navigation SDK 2.4.0 - April 14, 2022
 ### Changelog
 [Changes between v2.4.0 and v2.3.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.3.0...v2.4.0)
