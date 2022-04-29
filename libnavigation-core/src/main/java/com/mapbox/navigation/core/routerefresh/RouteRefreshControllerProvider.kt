@@ -15,7 +15,6 @@ internal object RouteRefreshControllerProvider {
     ) = RouteRefreshController(
         routeRefreshOptions,
         directionsSession,
-        tripSession,
-        threadController,
+        { tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0 },
     )
 }

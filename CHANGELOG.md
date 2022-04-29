@@ -117,6 +117,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 ## Mapbox Navigation SDK 2.5.0-rc.2 - May 19, 2022
 ### Changelog
 [Changes between v2.5.0-rc.1 and v2.5.0-rc.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.5.0-rc.1...v2.5.0-rc.2)
+- :warning: Congestion annotations are now became "unknown" in current leg upon expiration. [#1557](https://github.com/mapbox/navigation-sdks/issues/1557)
+- :warning: The Navigation SDK cleans-up an expiring data in current route leg if the data can't be updated via route refresh. Congestion annotations change to "unknown". Numeric congestion annotations change to null. Expired incidents disappear. [#1557](https://github.com/mapbox/navigation-sdks/issues/1557)
+
 
 #### Bug fixes and improvements
 - Fixed an issue with the vanishing point being rendered ahead of the location indicator (especially on long routes) and other rendering artifact on the route line when the vanishing feature is enabled. [#5816](https://github.com/mapbox/mapbox-navigation-android/pull/5816)

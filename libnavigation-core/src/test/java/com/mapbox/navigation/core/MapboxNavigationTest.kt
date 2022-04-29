@@ -32,10 +32,12 @@ import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.infra.factories.createDirectionsRoute
+import com.mapbox.navigation.core.infra.factories.createNavigationRoute
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
@@ -79,6 +81,7 @@ import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -627,7 +630,7 @@ class MapboxNavigationTest {
             it.onRoutesChanged(RoutesUpdatedResult(routes, reason))
         }
 
-        verify { routeRefreshController.restart(primary, any()) }
+        coVerify { routeRefreshController.refresh(routes) }
     }
 
     @Test
@@ -1180,19 +1183,42 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun `set route - immediately stops the refresh controller`() = coroutineRule.runBlockingTest {
+    fun `route refresh of previous route completes after new route is set`() = coroutineRule.runBlockingTest {
+        every { NavigationComponentProvider.createDirectionsSession(any()) } answers {
+            MapboxDirectionsSession(mockk(relaxed = true))
+        }
         createMapboxNavigation()
-
-        val shortRoutes = listOf<NavigationRoute>(mockk())
-        coEvery { tripSession.setRoutes(shortRoutes, any(), any()) } coAnswers {
-            delay(50L)
+        val first = listOf(createNavigationRoute(createDirectionsRoute(requestUuid = "test1")))
+        val second = listOf(createNavigationRoute(createDirectionsRoute(requestUuid = "test2")))
+        val refreshOrFirstRoute = CompletableDeferred<Unit>()
+        coEvery { routeRefreshController.refresh(any()) } coAnswers {
+            CompletableDeferred<Unit>().await() // never completes
+            firstArg()
+        }
+        coEvery { routeRefreshController.refresh(first) } coAnswers {
+            refreshOrFirstRoute.await()
+            listOf(createNavigationRoute(createDirectionsRoute(requestUuid = "test1.1")))
+        }
+        coEvery { tripSession.setRoutes(second, any(), any()) } coAnswers {
             mockk(relaxed = true)
         }
 
-        pauseDispatcher {
-            mapboxNavigation.setNavigationRoutes(shortRoutes)
-            verify(exactly = 1) { routeRefreshController.stop() }
+        val routesUpdates = mutableListOf<RoutesUpdatedResult>()
+        mapboxNavigation.registerRoutesObserver {
+            routesUpdates.add(it)
         }
+        mapboxNavigation.setNavigationRoutes(first)
+        mapboxNavigation.setNavigationRoutes(second)
+        refreshOrFirstRoute.complete(Unit)
+
+        assertEquals(
+            listOf(first, second),
+            routesUpdates.map { it.navigationRoutes }
+        )
+        assertEquals(
+            listOf(RoutesExtra.ROUTES_UPDATE_REASON_NEW, RoutesExtra.ROUTES_UPDATE_REASON_NEW),
+            routesUpdates.map { it.reason }
+        )
     }
 
     @Test
@@ -1254,9 +1280,7 @@ class MapboxNavigationTest {
                     RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
                 )
             } returns NativeSetRouteResult()
-            every { routeRefreshController.restart(primary, captureLambda()) } answers {
-                lambda<(List<NavigationRoute>) -> Unit>().captured.invoke(refreshedRoutes)
-            }
+            coEvery { routeRefreshController.refresh(routes) } returns refreshedRoutes
 
             verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
             routeObserversSlot.forEach {
@@ -1342,9 +1366,7 @@ class MapboxNavigationTest {
             verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
 
             val refreshedRoutes = listOf(mockk<NavigationRoute>())
-            every { routeRefreshController.restart(primary, captureLambda()) } answers {
-                lambda<(List<NavigationRoute>) -> Unit>().captured.invoke(refreshedRoutes)
-            }
+            coEvery { routeRefreshController.refresh(routes) } returns refreshedRoutes
             routeObserversSlot.forEach {
                 it.onRoutesChanged(RoutesUpdatedResult(routes, reason))
             }

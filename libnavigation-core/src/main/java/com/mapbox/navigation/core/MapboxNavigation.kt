@@ -122,6 +122,7 @@ import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
@@ -240,6 +241,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val internalFallbackVersionsObserver: FallbackVersionsObserver
     private val routeAlternativesController: RouteAlternativesController
     private val routeRefreshController: RouteRefreshController
+    private var routeRefreshJob: Job? = null
     private val arrivalProgressObserver: ArrivalProgressObserver
     private val electronicHorizonOptions: ElectronicHorizonOptions = ElectronicHorizonOptions(
         navigationOptions.eHorizonOptions.length,
@@ -798,7 +800,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         @RoutesExtra.RoutesUpdateReason reason: String,
     ) {
         rerouteController?.interrupt()
-        routeRefreshController.stop()
+        routeRefreshJob?.cancel()
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
                 setRoutesToTripSession(routes, legIndex, reason)
@@ -930,7 +932,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.unregisterAllEHorizonObservers()
         tripSession.unregisterAllFallbackVersionsObservers()
         routeAlternativesController.unregisterAll()
-        routeRefreshController.stop()
         internalSetNavigationRoutes(
             emptyList(),
             reason = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
@@ -1482,10 +1483,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
         if (result.navigationRoutes.isNotEmpty()) {
-            routeRefreshController.restart(result.navigationRoutes.first()) {
+            routeRefreshJob = threadController.getMainScopeAndRootJob().scope.launch {
+                val refreshed = routeRefreshController.refresh(result.navigationRoutes)
                 internalSetNavigationRoutes(
-                    it,
-                    reason = RoutesExtra.ROUTES_UPDATE_REASON_REFRESH,
+                    refreshed,
+                    reason = RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
                 )
             }
         }
