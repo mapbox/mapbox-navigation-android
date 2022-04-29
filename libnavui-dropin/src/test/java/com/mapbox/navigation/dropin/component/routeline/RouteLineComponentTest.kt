@@ -102,6 +102,7 @@ class RouteLineComponentTest {
                     add(
                         mockk {
                             every { routeId } returns "$it"
+                            every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
                         }
                     )
                 }

@@ -595,11 +595,13 @@ package com.mapbox.navigation.base.route {
     method public com.mapbox.api.directions.v5.models.DirectionsResponse getDirectionsResponse();
     method public com.mapbox.api.directions.v5.models.DirectionsRoute getDirectionsRoute();
     method public String getId();
+    method public com.mapbox.navigation.base.route.RouterOrigin getOrigin();
     method public int getRouteIndex();
     method public com.mapbox.api.directions.v5.models.RouteOptions getRouteOptions();
     property public final com.mapbox.api.directions.v5.models.DirectionsResponse directionsResponse;
     property public final com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute;
     property public final String id;
+    property public final com.mapbox.navigation.base.route.RouterOrigin origin;
     property public final int routeIndex;
     property public final com.mapbox.api.directions.v5.models.RouteOptions routeOptions;
     field public static final com.mapbox.navigation.base.route.NavigationRoute.Companion Companion;
