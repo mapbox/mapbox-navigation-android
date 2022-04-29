@@ -16,6 +16,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
+import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.RouteInterface
@@ -230,6 +231,11 @@ class NavigationRoute internal constructor(
      * For routes which were generated onboard and do not have a UUID it's equal to: `"local@" + generateUuid() + "#" + routeIndex`, for example: `local@84438c3e-f608-47e9-88cc-cddf341d2fb1#0`.
      */
     val id: String = nativeRoute.routeId
+
+    /**
+     * Describes which router type generated the route.
+     */
+    val origin: RouterOrigin = nativeRoute.routerOrigin.mapToSdkRouteOrigin()
 
     /**
      * [DirectionsRoute] that this [NavigationRoute] represents.

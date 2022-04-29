@@ -18,6 +18,7 @@ import io.mockk.verify
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.net.URL
@@ -38,6 +39,7 @@ class NavigationRouteTest {
                     add(
                         mockk {
                             every { routeId } returns "$it"
+                            every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
                         }
                     )
                 }
@@ -226,5 +228,51 @@ class NavigationRouteTest {
         }
 
         unmockkObject(RouteCompatibilityCache)
+    }
+
+    @Test
+    fun `origin access`() {
+        val requestUrl = FileUtils.loadJsonFixture("test_directions_request_url.txt")
+        val responseJson = FileUtils.loadJsonFixture("test_directions_response.json")
+
+        val navigationRoute = NavigationRoute.create(
+            directionsResponseJson = responseJson,
+            routeRequestUrl = requestUrl,
+            routerOrigin = RouterOrigin.Onboard
+        )
+
+        assertTrue(navigationRoute.all { it.origin == RouterOrigin.Onboard })
+    }
+
+    @Test
+    fun `id access`() {
+        every {
+            NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
+        } answers {
+            val routesCount = JSONObject(this.firstArg<String>())
+                .getJSONArray("routes")
+                .length()
+            val nativeRoutes = mutableListOf<RouteInterface>().apply {
+                repeat(routesCount) {
+                    add(
+                        mockk {
+                            every { routeId } returns "some_id"
+                            every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
+                        }
+                    )
+                }
+            }
+            ExpectedFactory.createValue(nativeRoutes)
+        }
+        val requestUrl = FileUtils.loadJsonFixture("test_directions_request_url.txt")
+        val responseJson = FileUtils.loadJsonFixture("test_directions_response.json")
+
+        val navigationRoute = NavigationRoute.create(
+            directionsResponseJson = responseJson,
+            routeRequestUrl = requestUrl,
+            routerOrigin = RouterOrigin.Onboard
+        )
+
+        assertTrue(navigationRoute.all { it.id == "some_id" })
     }
 }

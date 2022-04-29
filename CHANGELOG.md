@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 
 #### Features
+- Exposed `NavigationRoute#origin` that describes the type of router that generated the particular route. [#5766](https://github.com/mapbox/mapbox-navigation-android/pull/5766)
 
 #### Bug fixes and improvements
 
