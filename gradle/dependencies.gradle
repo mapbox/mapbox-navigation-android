@@ -147,6 +147,7 @@ ext {
       junit                     : "junit:junit:${version.junit}",
       mockito                   : "org.mockito:mockito-core:${version.mockito}",
       mockk                     : "io.mockk:mockk:${version.mockkVersion}",
+      mockkAndroid              : "io.mockk:mockk-android:${version.mockkVersion}",
       commonsIO                 : "commons-io:commons-io:${version.commonsIO}",
       robolectric               : "org.robolectric:robolectric:${version.robolectric}",
       mockwebserver             : "com.squareup.okhttp3:mockwebserver:${version.mockwebserver}",
