@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId "com.mapbox.navigation.instrumentation_tests"
-        minSdkVersion androidVersions.minSdkVersion
+        minSdkVersion androidVersions.carMinSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
         multiDexEnabled true
         versionCode 1
@@ -36,11 +36,15 @@ dependencies {
     // Mapbox Navigation SDK
     implementation project(':libnavigation-android')
     implementation project(':libnavui-dropin')
+    implementation project(":libnavui-androidauto")
     implementation project(":libnavui-util")
 
     // test
     androidTestImplementation project(':libtesting-ui')
     androidTestImplementation dependenciesList.testRunner
+    androidTestImplementation dependenciesList.testRules
+    androidTestImplementation dependenciesList.mockkAndroid
+    androidTestImplementation dependenciesList.androidxTestCore
     androidTestUtil dependenciesList.testOrchestrator
 
     // Kotlin support

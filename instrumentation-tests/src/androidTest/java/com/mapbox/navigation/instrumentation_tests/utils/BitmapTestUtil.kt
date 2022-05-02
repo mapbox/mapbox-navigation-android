@@ -1,4 +1,4 @@
-package com.mapbox.androidauto.testing
+package com.mapbox.navigation.instrumentation_tests.utils
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -75,11 +75,18 @@ class BitmapTestUtil(
             context.assets.open(expectedBitmapFile).use {
                 val expected = BitmapFactory.decodeStream(it)
                 val difference = calculateDifference(expected, actual)
-                // If the images are different, write them to a file so they can be uploaded for debugging.
+                // If the images are different, write them to a file so they can be uploaded for
+                // debugging.
                 if (difference.similarity > 0.01) {
                     writeBitmapFile(testName, actual)
-                    writeBitmapFile("${testName.methodName}-diff", difference.difference)
-                    fail("The ${testName.methodName} image failed with similarity: ${difference.similarity}")
+                    writeBitmapFile(
+                        "${testName.methodName}-diff",
+                        difference.difference
+                    )
+                    fail(
+                        "The ${testName.methodName} image failed with similarity: " +
+                            "${difference.similarity}"
+                    )
                 }
             }
         } catch (t: Throwable) {
@@ -154,7 +161,6 @@ class BitmapTestUtil(
         forEachIndexed { index, i ->
             if (i != Color.TRANSPARENT) {
                 val differenceColor = Color.valueOf(i)
-                val similarity = calculateSimilarity(i)
                 this[index] = Color.argb(
                     1.0f,
                     differenceColor.red(),

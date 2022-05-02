@@ -1,22 +1,21 @@
-package com.mapbox.androidauto.car.navigation.maneuver
+package com.mapbox.navigation.instrumentation_tests.androidauto
 
 import android.Manifest
 import android.graphics.Color
 import androidx.test.filters.SmallTest
-import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.GrantPermissionRule
-import com.mapbox.androidauto.testing.BitmapTestUtil
+import com.mapbox.androidauto.car.navigation.maneuver.CarManeuverIconOptions
+import com.mapbox.androidauto.car.navigation.maneuver.CarManeuverIconRenderer
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
+import com.mapbox.navigation.instrumentation_tests.utils.BitmapTestUtil
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
-import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4ClassRunner::class)
 @SmallTest
 class CarManeuverIconRendererTest {
 
@@ -31,7 +30,7 @@ class CarManeuverIconRendererTest {
     )
 
     private val bitmapTestUtils = BitmapTestUtil(
-        "expected_maneuver_icons",
+        "androidauto/expected_maneuver_icons",
         "test_maneuver_icons"
     )
 

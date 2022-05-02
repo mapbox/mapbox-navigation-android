@@ -107,7 +107,7 @@ class SpeedLimitWidget(
         viewWidgetHost.updateBitmap(drawSpeedLimitSign(speedLimit, speed))
     }
 
-    internal fun drawSpeedLimitSign(speedLimit: Int?, speed: Int): Bitmap {
+    fun drawSpeedLimitSign(speedLimit: Int?, speed: Int): Bitmap {
         logAndroidAuto("$TAG drawSpeedLimitSign: speedLimit = $speedLimit, speed = $speed")
 
         val speedLimitText = if (speedLimit == null) {

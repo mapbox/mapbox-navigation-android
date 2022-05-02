@@ -1,7 +1,6 @@
 @file:Suppress("NoMockkVerifyImport")
-package com.mapbox.androidauto.navigation
+package com.mapbox.androidauto.car.navigation
 
-import com.mapbox.androidauto.car.navigation.CarLocationsOverviewCamera
 import com.mapbox.androidauto.testing.MapboxRobolectricTestRunner
 import com.mapbox.common.Logger
 import com.mapbox.maps.CameraOptions

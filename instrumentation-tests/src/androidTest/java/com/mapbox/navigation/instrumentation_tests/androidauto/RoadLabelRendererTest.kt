@@ -1,25 +1,24 @@
-package com.mapbox.androidauto.car.navigation.roadlabel
+package com.mapbox.navigation.instrumentation_tests.androidauto
 
 import android.Manifest
 import android.graphics.Color
 import androidx.test.filters.SmallTest
-import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
-import com.mapbox.androidauto.testing.BitmapTestUtil
+import com.mapbox.androidauto.car.navigation.roadlabel.RoadLabelOptions
+import com.mapbox.androidauto.car.navigation.roadlabel.RoadLabelRenderer
 import com.mapbox.api.directions.v5.models.MapboxShield
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.road.model.RoadComponent
+import com.mapbox.navigation.instrumentation_tests.utils.BitmapTestUtil
 import com.mapbox.navigation.ui.shield.model.RouteShieldFactory
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
-import org.junit.runner.RunWith
 
 @ExperimentalMapboxNavigationAPI
-@RunWith(AndroidJUnit4ClassRunner::class)
 @SmallTest
 class RoadLabelRendererTest {
 
@@ -34,7 +33,7 @@ class RoadLabelRendererTest {
     )
 
     private val bitmapTestUtils = BitmapTestUtil(
-        "expected_road_label_images",
+        "androidauto/expected_road_label_images",
         "test_road_label_images"
     )
 
@@ -70,7 +69,10 @@ class RoadLabelRendererTest {
     @Test
     fun very_long_street_name() {
         val bitmap = roadLabelBitmapRenderer.render(
-            createRoad("Taumatawhakatangihangakoauauotamateaturipukakapikimaungahoronukupokaiwhenuakitanatahu"),
+            createRoad(
+                "Taumatawhakatangihangakoauauotamateaturipukakapikimaungahoronukupokaiw" +
+                    "henuakitanatahu"
+            ),
             emptyList(),
             RoadLabelOptions.Builder()
                 .backgroundColor(0x784D4DD3)
@@ -98,11 +100,22 @@ class RoadLabelRendererTest {
     @Test
     fun street_with_shield() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val byteArray = context.assets.open("shield.svg").use { it.readBytes() }
+        val byteArray = context.assets.open("androidauto/shield.svg").use { it.readBytes() }
         val mapboxShield = mockk<MapboxShield>()
         val bitmap = roadLabelBitmapRenderer.render(
-            listOf(createComponent("Clarksburg Road"), createComponent("/"), createComponent("121", mapboxShield)),
-            listOf(RouteShieldFactory.buildRouteShield("download-url", byteArray, mapboxShield, mockk())),
+            listOf(
+                createComponent("Clarksburg Road"),
+                createComponent("/"),
+                createComponent("121", mapboxShield)
+            ),
+            listOf(
+                RouteShieldFactory.buildRouteShield(
+                    "download-url",
+                    byteArray,
+                    mapboxShield,
+                    mockk()
+                )
+            ),
             RoadLabelOptions.Builder()
                 .backgroundColor(0x784D4DD3)
                 .build(),

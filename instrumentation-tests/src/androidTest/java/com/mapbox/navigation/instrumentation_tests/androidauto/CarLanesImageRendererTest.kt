@@ -1,20 +1,18 @@
-package com.mapbox.androidauto.car.navigation.lanes
+package com.mapbox.navigation.instrumentation_tests.androidauto
 
 import android.Manifest
 import android.graphics.Color
 import androidx.test.filters.SmallTest
-import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.GrantPermissionRule
-import com.mapbox.androidauto.testing.BitmapTestUtil
+import com.mapbox.androidauto.car.navigation.lanes.CarLanesImageRenderer
+import com.mapbox.navigation.instrumentation_tests.utils.BitmapTestUtil
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
-import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4ClassRunner::class)
 @SmallTest
 class CarLanesImageRendererTest {
 
@@ -29,7 +27,7 @@ class CarLanesImageRendererTest {
     )
 
     private val bitmapTestUtils = BitmapTestUtil(
-        "expected_lanes_images",
+        "androidauto/expected_lanes_images",
         "test_lanes_images"
     )
 
