@@ -5,6 +5,7 @@ ext {
       minSdkVersion           : 21,
       targetSdkVersion        : 31,
       compileSdkVersion       : 31,
+      carMinSdkVersion        : 23
   ]
 
   // Navigation Native CI can run SDK CI downstream with forced Navigation Native version
@@ -26,6 +27,7 @@ ext {
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxBaseAndroid         : '0.7.0',
+      mapboxMapsAndroidAuto     : '0.1.0',
       androidXLifecycle         : '2.4.0',
       androidXCoreVersion       : '1.6.0',
       androidXArchCoreVersion   : '2.1.0',
@@ -85,6 +87,7 @@ ext {
       mapboxAnnotationsProcessor: "com.mapbox.base:annotations-processor:${version.mapboxBaseAndroid}",
       mapboxAndroidCommon       : "com.mapbox.base:common:${version.mapboxBaseAndroid}",
       mapboxLogger              : "com.mapbox.common:logger:${version.mapboxBaseAndroid}",
+      mapboxMapsAndroidAuto     : "com.mapbox.extension:maps-androidauto:${version.mapboxMapsAndroidAuto}",
 
       // Kotlin
       kotlinStdLib              : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${version.kotlinStdLib}",

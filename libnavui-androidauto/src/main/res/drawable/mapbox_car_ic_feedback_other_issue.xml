@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="70dp"
+    android:height="70dp"
+    android:viewportWidth="70"
+    android:viewportHeight="70">
+  <!--  The android auto icon won't work with this -->
+<!--  <path-->
+<!--      android:pathData="M35,35m-35,0a35,35 0,1 1,70 0a35,35 0,1 1,-70 0"-->
+<!--      android:fillColor="#F0F3F8"/>-->
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="M51,15H19C16.8,15 15.02,16.8 15.02,19L15,55L23,47H51C53.2,47 55,45.2 55,43V19C55,16.8 53.2,15 51,15ZM51,43H21.34L20.16,44.18L19,45.34V19H51V43ZM33,35H37V39H33V35ZM33,23H37V31H33V23Z"
+      />
+</vector>

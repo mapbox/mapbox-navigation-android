@@ -22,4 +22,5 @@ include ':examples',
         ':libnavui-shield',
         ':libnavui-status',
         ':libnavui-dropin',
+        ':libnavui-androidauto',
         ':qa-test-app'

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mapbox.examples.androidauto">
+
+    <uses-permission android:name="androidx.car.app.NAVIGATION_TEMPLATES"/>
+    <uses-permission android:name="androidx.car.app.ACCESS_SURFACE"/>
+
+    <application>
+
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+
+        <meta-data
+            android:name="androidx.car.app.theme"
+            android:resource="@style/CarAppTheme"/>
+
+        <meta-data
+            android:name="androidx.car.app.minCarApiLevel"
+            android:value="3" />
+
+    </application>
+
+</manifest>
