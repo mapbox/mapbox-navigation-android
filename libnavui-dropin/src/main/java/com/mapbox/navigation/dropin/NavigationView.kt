@@ -18,6 +18,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.component.backpress.OnKeyListenerComponent
 import com.mapbox.navigation.dropin.component.tripsession.LocationPermissionComponent
+import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction
 import com.mapbox.navigation.dropin.coordinator.ActionButtonsCoordinator
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
 import com.mapbox.navigation.dropin.coordinator.ManeuverCoordinator
@@ -105,17 +106,9 @@ class NavigationView @JvmOverloads constructor(
         MapboxNavigationApp.attach(this)
 
         attachCreated(
-            LocationPermissionComponent(
-                context.toComponentActivityRef(),
-                navigationContext.viewModel.tripSessionStarterViewModel
-            ),
+            LocationPermissionComponent(context.toComponentActivityRef(), viewModel.store),
             MapLayoutCoordinator(navigationContext, binding),
-            OnKeyListenerComponent(
-                navigationContext.viewModel.navigationStateViewModel,
-                navigationContext.viewModel.destinationViewModel,
-                navigationContext.viewModel.routesViewModel,
-                this,
-            ),
+            OnKeyListenerComponent(viewModel.store, this),
             ManeuverCoordinator(navigationContext, binding.guidanceLayout),
             InfoPanelCoordinator(
                 navigationContext,
@@ -127,6 +120,19 @@ class NavigationView @JvmOverloads constructor(
             RoadNameLabelCoordinator(navigationContext, binding.roadNameLayout)
         )
     }
+
+    /**
+     * Enable/Disable Trip Session Replay
+     */
+    var isReplayEnabled: Boolean
+        get() = viewModel.store.state.value.tripSession.isReplayEnabled
+        set(value) {
+            if (value) {
+                viewModel.store.dispatch(TripSessionStarterAction.EnableReplayTripSession)
+            } else {
+                viewModel.store.dispatch(TripSessionStarterAction.EnableTripSession)
+            }
+        }
 
     /**
      * Provides access to [ViewLifecycleRegistry]

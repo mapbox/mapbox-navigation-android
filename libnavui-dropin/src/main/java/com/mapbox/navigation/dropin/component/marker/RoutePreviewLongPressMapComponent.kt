@@ -7,21 +7,17 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.destination.Destination
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
-import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
-import com.mapbox.navigation.dropin.component.location.LocationViewModel
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
-import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.dropin.util.HapticFeedback
-import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logW
+import com.mapbox.navigation.utils.internal.toPoint
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class RoutePreviewLongPressMapComponent(
+    private val store: Store,
     private val mapView: MapView,
-    private val locationViewModel: LocationViewModel,
-    private val routesViewModel: RoutesViewModel,
-    private val destinationViewModel: DestinationViewModel,
 ) : UIComponent() {
 
     private var hapticFeedback: HapticFeedback? = null
@@ -40,9 +36,10 @@ internal class RoutePreviewLongPressMapComponent(
     }
 
     private val longClickListener = OnMapLongClickListener { point ->
-        ifNonNull(locationViewModel.lastPoint) { lastPoint ->
-            destinationViewModel.invoke(DestinationAction.SetDestination(Destination(point)))
-            routesViewModel.invoke(RoutesAction.FetchPoints(listOf(lastPoint, point)))
+        val location = store.state.value.location?.enhancedLocation
+        location?.toPoint()?.also { lastPoint ->
+            store.dispatch(DestinationAction.SetDestination(Destination(point)))
+            store.dispatch(RoutesAction.FetchPoints(listOf(lastPoint, point)))
             hapticFeedback?.tick()
         } ?: logW(TAG, "Current location is unknown so map long press does nothing")
         false

@@ -10,22 +10,20 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.destination.Destination
-import com.mapbox.navigation.dropin.component.destination.DestinationState
-import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
-import com.mapbox.navigation.dropin.component.location.LocationViewModel
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.component.routefetch.RoutesState
-import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderLayoutBinding
+import com.mapbox.navigation.dropin.model.State
+import com.mapbox.navigation.dropin.util.TestStore
+import com.mapbox.navigation.dropin.util.TestingUtil.makeLocationMatcherResult
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -45,19 +43,7 @@ internal class InfoPanelHeaderComponentTest {
 
     private lateinit var binding: MapboxInfoPanelHeaderLayoutBinding
 
-    private val mockNavigationStateViewModel: NavigationStateViewModel = mockk(relaxed = true) {
-        every { state } returns MutableStateFlow(mockk(relaxed = true))
-    }
-    private val mockDestinationViewModel: DestinationViewModel = mockk(relaxed = true) {
-        every { state } returns MutableStateFlow(mockk(relaxed = true))
-    }
-    private val mockLocationViewModel: LocationViewModel = mockk(relaxed = true) {
-        every { state } returns MutableStateFlow(mockk(relaxed = true))
-    }
-    private val mockRoutesViewModel: RoutesViewModel = mockk(relaxed = true) {
-        every { state } returns MutableStateFlow(mockk(relaxed = true))
-    }
-
+    private lateinit var store: TestStore
     private lateinit var sut: InfoPanelHeaderComponent
 
     @Before
@@ -67,13 +53,10 @@ internal class InfoPanelHeaderComponentTest {
             context.getSystemService(LayoutInflater::class.java),
             FrameLayout(context)
         )
-
+        store = spyk(TestStore())
         sut = InfoPanelHeaderComponent(
+            store,
             binding,
-            mockNavigationStateViewModel,
-            mockDestinationViewModel,
-            mockLocationViewModel,
-            mockRoutesViewModel,
             R.style.DropInStylePreviewButton,
             R.style.DropInStyleExitButton,
             R.style.DropInStyleStartButton
@@ -82,8 +65,10 @@ internal class InfoPanelHeaderComponentTest {
 
     @Test
     fun `should update views visibility for FreeDrive state`() = runBlockingTest {
-        every { mockNavigationStateViewModel.state } returns MutableStateFlow(
-            NavigationState.FreeDrive
+        store.setState(
+            State(
+                navigation = NavigationState.FreeDrive
+            )
         )
 
         sut.onAttached(mockk())
@@ -98,8 +83,10 @@ internal class InfoPanelHeaderComponentTest {
 
     @Test
     fun `should update views visibility for DestinationPreview state`() = runBlockingTest {
-        every { mockNavigationStateViewModel.state } returns MutableStateFlow(
-            NavigationState.DestinationPreview
+        store.setState(
+            State(
+                navigation = NavigationState.DestinationPreview
+            )
         )
 
         sut.onAttached(mockk())
@@ -114,8 +101,10 @@ internal class InfoPanelHeaderComponentTest {
 
     @Test
     fun `should update views visibility for RoutePreview state`() = runBlockingTest {
-        every { mockNavigationStateViewModel.state } returns MutableStateFlow(
-            NavigationState.RoutePreview
+        store.setState(
+            State(
+                navigation = NavigationState.RoutePreview
+            )
         )
 
         sut.onAttached(mockk())
@@ -130,8 +119,10 @@ internal class InfoPanelHeaderComponentTest {
 
     @Test
     fun `should update views visibility for ActiveNavigation state`() = runBlockingTest {
-        every { mockNavigationStateViewModel.state } returns MutableStateFlow(
-            NavigationState.ActiveNavigation
+        store.setState(
+            State(
+                navigation = NavigationState.ActiveNavigation
+            )
         )
 
         sut.onAttached(mockk())
@@ -146,8 +137,10 @@ internal class InfoPanelHeaderComponentTest {
 
     @Test
     fun `should update views visibility for Arrival state`() = runBlockingTest {
-        every { mockNavigationStateViewModel.state } returns MutableStateFlow(
-            NavigationState.Arrival
+        store.setState(
+            State(
+                navigation = NavigationState.Arrival
+            )
         )
 
         sut.onAttached(mockk())
@@ -162,8 +155,6 @@ internal class InfoPanelHeaderComponentTest {
 
     @Test
     fun `should update poiName text`() {
-        every { mockNavigationStateViewModel.state } returns MutableStateFlow(mockk(relaxed = true))
-
         val featurePlaceName = "POI NAME"
         val newDestination = Destination(
             Point.fromLngLat(1.0, 2.0),
@@ -173,96 +164,119 @@ internal class InfoPanelHeaderComponentTest {
                 }
             )
         )
-        val destinationState = MutableStateFlow(DestinationState())
-        every { mockDestinationViewModel.state } returns destinationState
 
         sut.onAttached(mockk())
-        destinationState.tryEmit(DestinationState(newDestination))
+        store.setState(
+            State(
+                destination = newDestination
+            )
+        )
 
         assertEquals(binding.poiName.text, featurePlaceName)
     }
 
     @Test
     fun `onClick routePreview should FetchPoints`() = runBlockingTest {
-        val lastPoint = Point.fromLngLat(1.0, 2.0)
-        val destination = Destination(Point.fromLngLat(2.0, 3.0))
-        every { mockLocationViewModel.lastPoint } returns lastPoint
-        every { mockNavigationStateViewModel.state } returns
-            MutableStateFlow(NavigationState.DestinationPreview)
-        every { mockDestinationViewModel.state } returns
-            MutableStateFlow(DestinationState(destination))
-        every { mockRoutesViewModel.state } returns
-            MutableStateFlow(RoutesState.Empty)
+        val origPoint = Point.fromLngLat(1.0, 2.0)
+        val destPoint = Point.fromLngLat(2.0, 3.0)
+        store.setState(
+            State(
+                location = makeLocationMatcherResult(
+                    origPoint.longitude(),
+                    origPoint.latitude(),
+                    0f
+                ),
+                destination = Destination(destPoint),
+                navigation = NavigationState.DestinationPreview,
+                routes = RoutesState.Empty
+            )
+        )
 
         sut.onAttached(mockk())
         binding.routePreview.performClick()
 
         verify(exactly = 1) {
-            val action = RoutesAction.FetchPoints(listOf(lastPoint, destination.point))
-            mockRoutesViewModel.invoke(action)
+            val action = RoutesAction.FetchPoints(listOf(origPoint, destPoint))
+            store.dispatch(action)
         }
     }
 
     @Test
     fun `onClick routePreview should NOT FetchPoints when already in Ready state`() =
         runBlockingTest {
-            val lastPoint = Point.fromLngLat(1.0, 2.0)
-            val destination = Destination(Point.fromLngLat(2.0, 3.0))
-            every { mockLocationViewModel.lastPoint } returns lastPoint
-            every { mockNavigationStateViewModel.state } returns
-                MutableStateFlow(NavigationState.DestinationPreview)
-            every { mockDestinationViewModel.state } returns
-                MutableStateFlow(DestinationState(destination))
-            every { mockRoutesViewModel.state } returns
-                MutableStateFlow(RoutesState.Ready(mockk()))
+            val origPoint = Point.fromLngLat(1.0, 2.0)
+            val destPoint = Point.fromLngLat(2.0, 3.0)
+            store.setState(
+                State(
+                    location = makeLocationMatcherResult(
+                        origPoint.longitude(),
+                        origPoint.latitude(),
+                        0f
+                    ),
+                    destination = Destination(destPoint),
+                    navigation = NavigationState.DestinationPreview,
+                    routes = RoutesState.Ready(mockk())
+                )
+            )
 
             sut.onAttached(mockk())
             binding.routePreview.performClick()
 
             verify(exactly = 0) {
-                val action = RoutesAction.FetchPoints(listOf(lastPoint, destination.point))
-                mockRoutesViewModel.invoke(action)
+                val action = RoutesAction.FetchPoints(listOf(origPoint, destPoint))
+                store.dispatch(action)
             }
         }
 
     @Test
     fun `onClick startNavigation start ActiveNavigation`() = runBlockingTest {
-        every { mockNavigationStateViewModel.state } returns MutableStateFlow(
-            NavigationState.DestinationPreview
+        val origPoint = Point.fromLngLat(1.0, 2.0)
+        val destPoint = Point.fromLngLat(2.0, 3.0)
+        store.setState(
+            State(
+                location = makeLocationMatcherResult(
+                    origPoint.longitude(),
+                    origPoint.latitude(),
+                    0f
+                ),
+                destination = Destination(destPoint),
+                navigation = NavigationState.DestinationPreview,
+                routes = RoutesState.Ready(mockk())
+            )
         )
-        every { mockLocationViewModel.lastPoint } returns mockk()
-        every { mockRoutesViewModel.state } returns MutableStateFlow(RoutesState.Ready(mockk()))
-        every { mockRoutesViewModel.invoke(any()) } returns RoutesState.Ready(mockk())
 
         sut.onAttached(mockk())
         binding.startNavigation.performClick()
 
         verify {
-            mockNavigationStateViewModel.invoke(
-                NavigationStateAction.Update(NavigationState.ActiveNavigation)
-            )
+            store.dispatch(NavigationStateAction.Update(NavigationState.ActiveNavigation))
         }
     }
 
     @Test
     fun `onClick startNavigation should NOT FetchPoints when already in Ready state`() =
         runBlockingTest {
-            val lastPoint = Point.fromLngLat(1.0, 2.0)
-            val destination = Destination(Point.fromLngLat(2.0, 3.0))
-            every { mockLocationViewModel.lastPoint } returns lastPoint
-            every { mockNavigationStateViewModel.state } returns
-                MutableStateFlow(NavigationState.DestinationPreview)
-            every { mockDestinationViewModel.state } returns
-                MutableStateFlow(DestinationState(destination))
-            every { mockRoutesViewModel.state } returns
-                MutableStateFlow(RoutesState.Ready(mockk()))
+            val origPoint = Point.fromLngLat(1.0, 2.0)
+            val destPoint = Point.fromLngLat(2.0, 3.0)
+            store.setState(
+                State(
+                    location = makeLocationMatcherResult(
+                        origPoint.longitude(),
+                        origPoint.latitude(),
+                        0f
+                    ),
+                    destination = Destination(destPoint),
+                    navigation = NavigationState.DestinationPreview,
+                    routes = RoutesState.Ready(mockk())
+                )
+            )
 
             sut.onAttached(mockk())
             binding.startNavigation.performClick()
 
             verify(exactly = 0) {
-                val action = RoutesAction.FetchPoints(listOf(lastPoint, destination.point))
-                mockRoutesViewModel.invoke(action)
+                val action = RoutesAction.FetchPoints(listOf(origPoint, destPoint))
+                store.dispatch(action)
             }
         }
 }

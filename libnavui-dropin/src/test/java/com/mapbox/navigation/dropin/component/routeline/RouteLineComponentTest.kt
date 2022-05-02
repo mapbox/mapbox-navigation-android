@@ -23,8 +23,8 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
-import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.component.routeline.RouteLineComponent
+import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.dropin.util.TestingUtil
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
@@ -37,12 +37,12 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigator.RouteInterface
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
@@ -77,7 +77,8 @@ class RouteLineComponentTest {
     }
     private val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
     private val options by lazy { MapboxRouteLineOptions.Builder(context).build() }
-    private val routesViewModel = mockk<RoutesViewModel>(relaxed = true)
+
+    private lateinit var testStore: TestStore
 
     @Before
     fun setUp() {
@@ -88,7 +89,6 @@ class RouteLineComponentTest {
             every { intrinsicHeight } returns 24
             every { intrinsicWidth } returns 24
         }
-
         mockkObject(NativeRouteParserWrapper)
         every {
             NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
@@ -109,6 +109,7 @@ class RouteLineComponentTest {
             }
             ExpectedFactory.createValue(nativeRoutes)
         }
+        testStore = spyk(TestStore())
     }
 
     @After
@@ -128,7 +129,7 @@ class RouteLineComponentTest {
             every { findClosestRoute(any(), any(), any(), capture(consumerSlot)) } returns Unit
         }
         val point = Point.fromLngLat(-119.27, 84.85)
-        RouteLineComponent(mockMapView, options, routesViewModel, mockApi)
+        RouteLineComponent(testStore, mockMapView, options, mockApi)
             .onAttached(mockMapboxNavigation)
 
         verify { mockGestures.addOnMapClickListener(capture(mapClickSlot)) }
@@ -146,7 +147,7 @@ class RouteLineComponentTest {
             every { updateTraveledRouteLine(point) } returns ExpectedFactory.createError(mockk())
         }
         val mockView = mockk<MapboxRouteLineView>(relaxed = true)
-        RouteLineComponent(mockMapView, options, routesViewModel, mockApi, mockView)
+        RouteLineComponent(testStore, mockMapView, options, mockApi, mockView)
             .onAttached(mockMapboxNavigation)
         verify {
             locationComponentPlugin.addOnIndicatorPositionChangedListener(
@@ -173,7 +174,7 @@ class RouteLineComponentTest {
         val callbackResult =
             ExpectedFactory.createError<RouteLineError, RouteLineUpdateValue>(mockError)
         val routeProgressObserverSlot = slot<RouteProgressObserver>()
-        RouteLineComponent(mockMapView, options, routesViewModel, mockApi, mockView)
+        RouteLineComponent(testStore, mockMapView, options, mockApi, mockView)
             .onAttached(mockMapboxNavigation)
         verify {
             mockMapboxNavigation.registerRouteProgressObserver(capture(routeProgressObserverSlot))
@@ -202,7 +203,7 @@ class RouteLineComponentTest {
         }
         val callbackSlot = slot<MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>>()
         val routesObserverSlot = slot<RoutesObserver>()
-        RouteLineComponent(mockMapView, options, routesViewModel, mockApi, mockView)
+        RouteLineComponent(testStore, mockMapView, options, mockApi, mockView)
             .onAttached(mockMapboxNavigation)
         verify {
             mockMapboxNavigation.registerRoutesObserver(capture(routesObserverSlot))
@@ -231,7 +232,7 @@ class RouteLineComponentTest {
             every { getNavigationRoutes() } returns listOf(route1, route2)
         }
         val point = Point.fromLngLat(-119.27, 84.85)
-        RouteLineComponent(mockMapView, options, routesViewModel, mockApi)
+        RouteLineComponent(testStore, mockMapView, options, mockApi)
             .onAttached(mockMapboxNavigation)
         verify { mockGestures.addOnMapClickListener(capture(clickSlot)) }
 
@@ -239,7 +240,7 @@ class RouteLineComponentTest {
 
         consumerSlot.captured.accept(ExpectedFactory.createValue(mockResponse))
         verify { mockApi.findClosestRoute(point, mockMap, any(), any()) }
-        coVerify { routesViewModel.invoke(capture(resultRoutesSlot)) }
+        verify { testStore.dispatch(capture(resultRoutesSlot)) }
         assertEquals(route2, resultRoutesSlot.captured.routes.first())
         assertEquals(route1, resultRoutesSlot.captured.routes[1])
     }
@@ -247,7 +248,7 @@ class RouteLineComponentTest {
     @Test
     fun `onDetached cancels route line API`() {
         val mockApi = mockk<MapboxRouteLineApi>(relaxed = true)
-        val component = RouteLineComponent(mockMapView, options, routesViewModel, mockApi)
+        val component = RouteLineComponent(testStore, mockMapView, options, mockApi)
         component.onAttached(mockMapboxNavigation)
 
         component.onDetached(mockMapboxNavigation)
@@ -259,7 +260,7 @@ class RouteLineComponentTest {
     fun `onDetached cancels route line view`() {
         val mockApi = mockk<MapboxRouteLineApi>(relaxed = true)
         val mockView = mockk<MapboxRouteLineView>(relaxed = true)
-        val component = RouteLineComponent(mockMapView, options, routesViewModel, mockApi, mockView)
+        val component = RouteLineComponent(testStore, mockMapView, options, mockApi, mockView)
         component.onAttached(mockMapboxNavigation)
 
         component.onDetached(mockMapboxNavigation)

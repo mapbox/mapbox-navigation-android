@@ -4,12 +4,13 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
-import io.mockk.unmockkAll
+import io.mockk.unmockkObject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -23,6 +24,8 @@ internal class NavigationStateViewModelTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
+    private lateinit var testStore: TestStore
+
     lateinit var sut: NavigationStateViewModel
     lateinit var mockMapboxNavigation: MapboxNavigation
 
@@ -32,21 +35,22 @@ internal class NavigationStateViewModelTest {
         mockMapboxNavigation = mockk()
         every { MapboxNavigationApp.current() } returns mockMapboxNavigation
 
-        sut = NavigationStateViewModel(NavigationState.FreeDrive)
+        testStore = TestStore()
+        sut = NavigationStateViewModel(testStore)
     }
 
     @After
     fun teardown() {
-        unmockkAll()
+        unmockkObject(MapboxNavigationApp)
     }
 
     @Test
     fun `should set new state on Update action`() = coroutineRule.runBlockingTest {
         sut.onAttached(mockMapboxNavigation)
 
-        sut.invoke(NavigationStateAction.Update(NavigationState.RoutePreview))
+        testStore.dispatch(NavigationStateAction.Update(NavigationState.RoutePreview))
 
-        assertEquals(NavigationState.RoutePreview, sut.state.value)
+        assertEquals(NavigationState.RoutePreview, testStore.state.value.navigation)
     }
 
     @Test
@@ -57,6 +61,6 @@ internal class NavigationStateViewModelTest {
 
         observerSlot.captured.onFinalDestinationArrival(mockk())
 
-        assertEquals(NavigationState.Arrival, sut.state.value)
+        assertEquals(NavigationState.Arrival, testStore.state.value.navigation)
     }
 }

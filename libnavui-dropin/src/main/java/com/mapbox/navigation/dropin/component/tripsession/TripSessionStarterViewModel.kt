@@ -4,8 +4,11 @@ import android.annotation.SuppressLint
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
-import com.mapbox.navigation.dropin.lifecycle.UIViewModel
+import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Action
+import com.mapbox.navigation.dropin.model.Reducer
+import com.mapbox.navigation.dropin.model.State
+import com.mapbox.navigation.dropin.model.Store
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -13,42 +16,31 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 /**
- * Defines actions responsible to mutate the [TripSessionStarterState].
- */
-@ExperimentalPreviewMapboxNavigationAPI
-sealed class TripSessionStarterAction {
-    /**
-     * The action informs whether the location permissions have been granted.
-     * @param granted is set to true if location permissions were granted; false otherwise
-     */
-    data class OnLocationPermission(val granted: Boolean) : TripSessionStarterAction()
-
-    /**
-     * The action enables trip session based on real gps updates.
-     */
-    object EnableTripSession : TripSessionStarterAction()
-
-    /**
-     * The action enables replay trip session based on simulated gps updates.
-     */
-    object EnableReplayTripSession : TripSessionStarterAction()
-}
-
-/**
  * The class is responsible to start and stop the `TripSession` for NavigationView.
  * @param navigationStateViewModel defines the current screen state
  * @param initialState defines the initial [TripSessionStarterState]
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class TripSessionStarterViewModel(
-    val navigationStateViewModel: NavigationStateViewModel,
-    initialState: TripSessionStarterState = TripSessionStarterState(),
-) : UIViewModel<TripSessionStarterState, TripSessionStarterAction>(initialState) {
+@SuppressLint("MissingPermission")
+internal class TripSessionStarterViewModel(
+    val store: Store
+) : UIComponent(), Reducer {
+    init {
+        store.register(this)
+    }
 
     private var replayRouteTripSession: ReplayRouteTripSession? = null
 
-    override fun process(
-        mapboxNavigation: MapboxNavigation,
+    override fun process(state: State, action: Action): State {
+        if (action is TripSessionStarterAction) {
+            return state.copy(
+                tripSession = processTripSessionAction(state.tripSession, action)
+            )
+        }
+        return state
+    }
+
+    private fun processTripSessionAction(
         state: TripSessionStarterState,
         action: TripSessionStarterAction
     ): TripSessionStarterState {
@@ -73,7 +65,7 @@ class TripSessionStarterViewModel(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        mainJobControl.scope.launch {
+        coroutineScope.launch {
             flowStartReplaySession().collect { starterState ->
                 if (!starterState.isLocationPermissionGranted) {
                     mapboxNavigation.stopTripSession()
@@ -101,7 +93,8 @@ class TripSessionStarterViewModel(
     }
 
     private fun flowStartReplaySession(): Flow<TripSessionStarterState> = combine(
-        navigationStateViewModel.state, state
+        store.select { it.navigation },
+        store.select { it.tripSession }
     ) { navigationState, tripSessionStarterState ->
         if (navigationState !is NavigationState.ActiveNavigation) {
             tripSessionStarterState.copy(isReplayEnabled = false)

@@ -10,9 +10,10 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.component.location.LocationViewModel
 import com.mapbox.navigation.dropin.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.dropin.internal.extensions.flowRouteProgress
+import com.mapbox.navigation.dropin.model.State
+import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.roadname.view.MapboxRoadNameView
@@ -24,10 +25,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Before
 import org.junit.Rule
@@ -35,18 +36,20 @@ import org.junit.Test
 
 @ExperimentalCoroutinesApi
 @ExperimentalPreviewMapboxNavigationAPI
-class RoadNameLabelComponentTest {
+internal class RoadNameLabelComponentTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
     lateinit var style: Style
+    lateinit var store: TestStore
 
     @Before
     fun setUp() {
         style = mockk {
             every { styleURI } returns NavigationStyles.NAVIGATION_DAY_STYLE
         }
+        store = spyk(TestStore())
     }
 
     @Test
@@ -59,18 +62,19 @@ class RoadNameLabelComponentTest {
                 }
             }
             val mapboxNavigation = mockk<MapboxNavigation>()
-            val locationViewModel = mockk<LocationViewModel> {
-                every { state } returns MutableStateFlow(matcherResult)
-            }
+            store.setState(
+                State(
+                    location = matcherResult
+                )
+            )
 
             RoadNameLabelComponent(
+                store,
                 roadNameView,
-                locationViewModel,
                 style,
                 R.style.DropInRoadNameViewTextAppearance,
                 R.drawable.mapbox_road_name_view_background
-            )
-                .onAttached(mapboxNavigation)
+            ).onAttached(mapboxNavigation)
 
             verify { roadNameView.isVisible = false }
         }
@@ -85,18 +89,19 @@ class RoadNameLabelComponentTest {
                 }
             }
             val mapboxNavigation = mockk<MapboxNavigation>()
-            val locationViewModel = mockk<LocationViewModel> {
-                every { state } returns MutableStateFlow(matcherResult)
-            }
+            store.setState(
+                State(
+                    location = matcherResult
+                )
+            )
 
             RoadNameLabelComponent(
+                store,
                 roadNameView,
-                locationViewModel,
                 style,
                 R.style.DropInRoadNameViewTextAppearance,
                 R.drawable.mapbox_road_name_view_background
-            )
-                .onAttached(mapboxNavigation)
+            ).onAttached(mapboxNavigation)
 
             verify { roadNameView.isVisible = true }
         }
@@ -114,13 +119,15 @@ class RoadNameLabelComponentTest {
         val mapboxNavigation = mockk<MapboxNavigation> {
             every { flowLocationMatcherResult() } returns flowOf(locationMatcherResult)
         }
-        val locationViewModel = mockk<LocationViewModel> {
-            every { state } returns MutableStateFlow(locationMatcherResult)
-        }
+        store.setState(
+            State(
+                location = locationMatcherResult
+            )
+        )
 
         RoadNameLabelComponent(
+            store,
             roadNameView,
-            locationViewModel,
             style,
             R.style.DropInRoadNameViewTextAppearance,
             R.drawable.mapbox_road_name_view_background
@@ -156,20 +163,22 @@ class RoadNameLabelComponentTest {
                     mockRoad,
                     DirectionsCriteria.PROFILE_DEFAULT_USER,
                     NavigationStyles.NAVIGATION_DAY_STYLE_ID,
-                    any<String>(),
+                    any(),
                     capture(shieldsCallbackSlot)
                 )
             } answers {
                 shieldsCallbackSlot.captured.onRoadShields(shields)
             }
         }
-        val locationViewModel = mockk<LocationViewModel> {
-            every { state } returns MutableStateFlow(locationMatcherResult)
-        }
+        store.setState(
+            State(
+                location = locationMatcherResult
+            )
+        )
 
         RoadNameLabelComponent(
+            store,
             roadNameView,
-            locationViewModel,
             style,
             R.style.DropInRoadNameViewTextAppearance,
             R.drawable.mapbox_road_name_view_background,

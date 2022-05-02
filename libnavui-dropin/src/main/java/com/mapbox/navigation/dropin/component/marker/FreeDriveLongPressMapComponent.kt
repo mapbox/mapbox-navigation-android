@@ -7,21 +7,17 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.destination.Destination
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
-import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
-import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.dropin.util.HapticFeedback
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class FreeDriveLongPressMapComponent(
+    private val store: Store,
     private val mapView: MapView,
-    private val navigationStateViewModel: NavigationStateViewModel,
-    private val routesViewModel: RoutesViewModel,
-    private val destinationViewModel: DestinationViewModel,
 ) : UIComponent() {
 
     private var hapticFeedback: HapticFeedback? = null
@@ -40,15 +36,9 @@ internal class FreeDriveLongPressMapComponent(
     }
 
     private val longClickListener = OnMapLongClickListener { point ->
-        destinationViewModel.invoke(
-            DestinationAction.SetDestination(Destination(point))
-        )
-        routesViewModel.invoke(
-            RoutesAction.SetRoutes(emptyList())
-        )
-        navigationStateViewModel.invoke(
-            NavigationStateAction.Update(NavigationState.DestinationPreview)
-        )
+        store.dispatch(DestinationAction.SetDestination(Destination(point)))
+        store.dispatch(RoutesAction.SetRoutes(emptyList()))
+        store.dispatch(NavigationStateAction.Update(NavigationState.DestinationPreview))
         hapticFeedback?.tick()
         false
     }

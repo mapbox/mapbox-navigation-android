@@ -3,21 +3,13 @@ package com.mapbox.navigation.dropin.component.navigation
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.internal.extensions.flowOnFinalDestinationArrival
-import com.mapbox.navigation.dropin.lifecycle.UIViewModel
+import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Action
+import com.mapbox.navigation.dropin.model.Reducer
+import com.mapbox.navigation.dropin.model.State
+import com.mapbox.navigation.dropin.model.Store
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-
-/**
- * Defines actions responsible to mutate the [NavigationState].
- */
-@ExperimentalPreviewMapboxNavigationAPI
-sealed class NavigationStateAction {
-    /**
-     * The action update the [NavigationState] for the screen.
-     * @property state to update the screen to
-     */
-    data class Update(val state: NavigationState) : NavigationStateAction()
-}
 
 /**
  * The class is responsible to set the screen to one of the [NavigationState] based on the
@@ -25,9 +17,12 @@ sealed class NavigationStateAction {
  * @param default the default [NavigationState] to start with
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class NavigationStateViewModel(
-    default: NavigationState
-) : UIViewModel<NavigationState, NavigationStateAction>(default) {
+internal class NavigationStateViewModel(
+    private val store: Store
+) : UIComponent(), Reducer {
+    init {
+        store.register(this)
+    }
 
     // TODO get destination and navigation route for initial state
 
@@ -38,15 +33,23 @@ class NavigationStateViewModel(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        mainJobControl.scope.launch {
+        coroutineScope.launch {
             mapboxNavigation.flowOnFinalDestinationArrival().collect {
-                invoke(NavigationStateAction.Update(NavigationState.Arrival))
+                store.dispatch(NavigationStateAction.Update(NavigationState.Arrival))
             }
         }
     }
 
-    override fun process(
-        mapboxNavigation: MapboxNavigation,
+    override fun process(state: State, action: Action): State {
+        if (action is NavigationStateAction) {
+            return state.copy(
+                navigation = processNavigationAction(state.navigation, action)
+            )
+        }
+        return state
+    }
+
+    private fun processNavigationAction(
         state: NavigationState,
         action: NavigationStateAction
     ): NavigationState {

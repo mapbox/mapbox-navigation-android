@@ -6,10 +6,10 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.camera.CameraState
-import com.mapbox.navigation.dropin.component.camera.CameraViewModel
 import com.mapbox.navigation.dropin.component.camera.TargetCameraMode
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
+import com.mapbox.navigation.dropin.model.State
+import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.dropin.view.MapboxCameraModeButton
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
@@ -17,9 +17,9 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -30,7 +30,6 @@ class CameraModeButtonComponentTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
-    private val cameraStateFlow = MutableStateFlow(CameraState())
     private val mockCameraModeButton: MapboxCameraModeButton = mockk {
         every { setState(any()) } just Runs
         every { visibility = View.VISIBLE } just Runs
@@ -39,26 +38,17 @@ class CameraModeButtonComponentTest {
         every { updateStyle(any()) } just Runs
     }
     private val mockMapboxNavigation: MapboxNavigation = mockk(relaxed = true)
-    private val navigationStateFlow = MutableStateFlow<NavigationState>(NavigationState.FreeDrive)
 
-    private lateinit var cameraViewModel: CameraViewModel
-    private lateinit var navigationStateViewModel: NavigationStateViewModel
+    private lateinit var testStore: TestStore
 
     private lateinit var cameraModeButtonComponent: CameraModeButtonComponent
 
     @Before
     fun setUp() {
-        cameraViewModel = mockk {
-            every { state } returns cameraStateFlow
-        }
-
-        navigationStateViewModel = mockk {
-            every { state } returns navigationStateFlow
-        }
+        testStore = spyk(TestStore())
 
         cameraModeButtonComponent = CameraModeButtonComponent(
-            cameraViewModel,
-            navigationStateViewModel,
+            testStore,
             mockCameraModeButton,
             R.style.MapboxStyleCameraModeButton
         )
@@ -69,7 +59,9 @@ class CameraModeButtonComponentTest {
         coroutineRule.runBlockingTest {
             cameraModeButtonComponent.onAttached(mockMapboxNavigation)
 
-            cameraStateFlow.value = CameraState(cameraMode = TargetCameraMode.Following)
+            testStore.setState(
+                State(camera = CameraState(cameraMode = TargetCameraMode.Following))
+            )
 
             verify { mockCameraModeButton.setState(NavigationCameraState.FOLLOWING) }
         }
@@ -79,7 +71,9 @@ class CameraModeButtonComponentTest {
         coroutineRule.runBlockingTest {
             cameraModeButtonComponent.onAttached(mockMapboxNavigation)
 
-            cameraStateFlow.value = CameraState(cameraMode = TargetCameraMode.Overview)
+            testStore.setState(
+                State(camera = CameraState(cameraMode = TargetCameraMode.Overview))
+            )
 
             verify { mockCameraModeButton.setState(NavigationCameraState.OVERVIEW) }
         }
@@ -89,7 +83,7 @@ class CameraModeButtonComponentTest {
         coroutineRule.runBlockingTest {
             cameraModeButtonComponent.onAttached(mockMapboxNavigation)
 
-            navigationStateFlow.value = NavigationState.RoutePreview
+            testStore.setState(State(navigation = NavigationState.RoutePreview))
 
             verify { mockCameraModeButton.isVisible = false }
         }
@@ -99,7 +93,7 @@ class CameraModeButtonComponentTest {
         coroutineRule.runBlockingTest {
             cameraModeButtonComponent.onAttached(mockMapboxNavigation)
 
-            navigationStateFlow.value = NavigationState.ActiveNavigation
+            testStore.setState(State(navigation = NavigationState.ActiveNavigation))
 
             verify { mockCameraModeButton.isVisible = true }
         }

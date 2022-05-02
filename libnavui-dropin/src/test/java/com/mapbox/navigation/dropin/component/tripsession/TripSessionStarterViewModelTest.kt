@@ -4,20 +4,19 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
+import com.mapbox.navigation.dropin.model.State
+import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -28,9 +27,12 @@ class TripSessionStarterViewModelTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
+    private lateinit var testStore: TestStore
+
     @Before
     fun setup() {
         mockkObject(MapboxNavigationApp)
+        testStore = spyk(TestStore())
     }
 
     @After
@@ -39,32 +41,21 @@ class TripSessionStarterViewModelTest {
     }
 
     @Test
-    fun `verify default state is respected`() = runBlockingTest {
-        val navigationStateViewModel = mockNavigationStateViewModel()
-        val tripSessionStarterViewModel = TripSessionStarterViewModel(
-            navigationStateViewModel,
-            TripSessionStarterState(isReplayEnabled = false, isLocationPermissionGranted = true)
-        )
-
-        tripSessionStarterViewModel.onAttached(mockMapboxNavigation())
-
-        assertFalse(tripSessionStarterViewModel.state.value.isReplayEnabled)
-        assertTrue(tripSessionStarterViewModel.state.value.isLocationPermissionGranted)
-    }
-    @Test
     fun `startTripSession if location permissions are granted`() =
         runBlockingTest {
-            val tripSessionStarterViewModel = TripSessionStarterViewModel(
-                mockNavigationStateViewModel(),
-                TripSessionStarterState(
-                    isLocationPermissionGranted = false,
-                    isReplayEnabled = false
+            testStore.setState(
+                State(
+                    tripSession = TripSessionStarterState(
+                        isLocationPermissionGranted = false,
+                        isReplayEnabled = false,
+                    )
                 )
             )
+            val tripSessionStarterViewModel = TripSessionStarterViewModel(testStore)
             val mapboxNavigation = mockMapboxNavigation()
 
             tripSessionStarterViewModel.onAttached(mapboxNavigation)
-            tripSessionStarterViewModel.invoke(
+            testStore.dispatch(
                 TripSessionStarterAction.OnLocationPermission(true)
             )
 
@@ -74,13 +65,15 @@ class TripSessionStarterViewModelTest {
     @Test
     fun `onDetached does not stopTripSession for a regular session`() =
         runBlockingTest {
-            val tripSessionStarterViewModel = TripSessionStarterViewModel(
-                mockNavigationStateViewModel(),
-                TripSessionStarterState(
-                    isLocationPermissionGranted = true,
-                    isReplayEnabled = false
+            testStore.setState(
+                State(
+                    tripSession = TripSessionStarterState(
+                        isLocationPermissionGranted = true,
+                        isReplayEnabled = false,
+                    )
                 )
             )
+            val tripSessionStarterViewModel = TripSessionStarterViewModel(testStore)
             val mapboxNavigation = mockMapboxNavigation()
 
             tripSessionStarterViewModel.onAttached(mapboxNavigation)
@@ -93,17 +86,20 @@ class TripSessionStarterViewModelTest {
     @Test
     fun `EnableTripSession will restart a trip session when replay is enabled`() =
         runBlockingTest {
-            val tripSessionStarterViewModel = TripSessionStarterViewModel(
-                mockNavigationStateViewModel(NavigationState.ActiveNavigation),
-                TripSessionStarterState(
-                    isLocationPermissionGranted = true,
-                    isReplayEnabled = true
+            testStore.setState(
+                State(
+                    navigation = NavigationState.ActiveNavigation,
+                    tripSession = TripSessionStarterState(
+                        isLocationPermissionGranted = true,
+                        isReplayEnabled = true,
+                    )
                 )
             )
+            val tripSessionStarterViewModel = TripSessionStarterViewModel(testStore)
             val mapboxNavigation = mockMapboxNavigation()
 
             tripSessionStarterViewModel.onAttached(mapboxNavigation)
-            tripSessionStarterViewModel.invoke(TripSessionStarterAction.EnableTripSession)
+            testStore.dispatch(TripSessionStarterAction.EnableTripSession)
 
             verifyOrder {
                 mapboxNavigation.startReplayTripSession()
@@ -115,17 +111,19 @@ class TripSessionStarterViewModelTest {
     @Test
     fun `EnableReplayTripSession will startReplayTripSession`() =
         runBlockingTest {
-            val navigationStateViewModel = mockNavigationStateViewModel(
-                NavigationState.ActiveNavigation
+            testStore.setState(
+                State(
+                    navigation = NavigationState.ActiveNavigation
+                )
             )
-            val tripSessionStarterViewModel = TripSessionStarterViewModel(navigationStateViewModel)
+            val tripSessionStarterViewModel = TripSessionStarterViewModel(testStore)
             val mapboxNavigation = mockMapboxNavigation()
 
             tripSessionStarterViewModel.onAttached(mapboxNavigation)
-            tripSessionStarterViewModel.invoke(
+            testStore.dispatch(
                 TripSessionStarterAction.OnLocationPermission(true)
             )
-            tripSessionStarterViewModel.invoke(TripSessionStarterAction.EnableReplayTripSession)
+            testStore.dispatch(TripSessionStarterAction.EnableReplayTripSession)
 
             verify { mapboxNavigation.startReplayTripSession() }
         }
@@ -133,17 +131,19 @@ class TripSessionStarterViewModelTest {
     @Test
     fun `EnableReplayTripSession will not startReplayTripSession without location permissions`() =
         runBlockingTest {
-            val navigationStateViewModel = mockNavigationStateViewModel(
-                NavigationState.ActiveNavigation
+            testStore.setState(
+                State(
+                    navigation = NavigationState.ActiveNavigation,
+                )
             )
-            val tripSessionStarterViewModel = TripSessionStarterViewModel(navigationStateViewModel)
+            val tripSessionStarterViewModel = TripSessionStarterViewModel(testStore)
             val mapboxNavigation = mockMapboxNavigation()
 
             tripSessionStarterViewModel.onAttached(mapboxNavigation)
-            tripSessionStarterViewModel.invoke(
+            testStore.dispatch(
                 TripSessionStarterAction.OnLocationPermission(false)
             )
-            tripSessionStarterViewModel.invoke(TripSessionStarterAction.EnableReplayTripSession)
+            testStore.dispatch(TripSessionStarterAction.EnableReplayTripSession)
 
             verify(exactly = 0) { mapboxNavigation.startReplayTripSession() }
         }
@@ -151,23 +151,26 @@ class TripSessionStarterViewModelTest {
     @Test
     fun `EnableReplayTripSession will only startReplayTripSession for ActiveGuidance`() =
         runBlockingTest {
-            val stateFlow = MutableStateFlow<NavigationState>(NavigationState.FreeDrive)
-            val navigationStateViewModel: NavigationStateViewModel = mockk {
-                every { state } returns stateFlow
-            }
-            val tripSessionStarterViewModel = TripSessionStarterViewModel(
-                navigationStateViewModel,
-                TripSessionStarterState(isLocationPermissionGranted = true, isReplayEnabled = true)
+            testStore.setState(
+                State(
+                    navigation = NavigationState.FreeDrive,
+                    tripSession = TripSessionStarterState(
+                        isLocationPermissionGranted = true,
+                        isReplayEnabled = true,
+                    )
+                )
             )
+            val tripSessionStarterViewModel = TripSessionStarterViewModel(testStore)
+
             val mapboxNavigation = mockMapboxNavigation()
 
             tripSessionStarterViewModel.onAttached(mapboxNavigation)
-            stateFlow.emit(NavigationState.DestinationPreview)
-            stateFlow.emit(NavigationState.RoutePreview)
-            stateFlow.emit(NavigationState.Arrival)
+            testStore.setNavigationState(NavigationState.DestinationPreview)
+            testStore.setNavigationState(NavigationState.RoutePreview)
+            testStore.setNavigationState(NavigationState.Arrival)
 
             verify(exactly = 0) { mapboxNavigation.startReplayTripSession() }
-            stateFlow.emit(NavigationState.ActiveNavigation)
+            testStore.setNavigationState(NavigationState.ActiveNavigation)
             verify(exactly = 1) { mapboxNavigation.startReplayTripSession() }
         }
 
@@ -177,11 +180,11 @@ class TripSessionStarterViewModelTest {
         return mapboxNavigation
     }
 
-    private fun mockNavigationStateViewModel(
-        initialState: NavigationState = NavigationState.FreeDrive
-    ): NavigationStateViewModel {
-        return mockk {
-            every { state } returns MutableStateFlow(initialState)
-        }
+    private fun TestStore.setNavigationState(navState: NavigationState) {
+        setState(
+            state.value.copy(
+                navigation = navState
+            )
+        )
     }
 }

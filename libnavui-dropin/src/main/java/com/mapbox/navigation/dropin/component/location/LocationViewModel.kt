@@ -6,27 +6,22 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.dropin.internal.extensions.flowLocationMatcherResult
-import com.mapbox.navigation.dropin.lifecycle.UIViewModel
+import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Action
+import com.mapbox.navigation.dropin.model.Reducer
+import com.mapbox.navigation.dropin.model.State
+import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
-
-/**
- * Defines action responsible to update the [Location].
- */
-@ExperimentalPreviewMapboxNavigationAPI
-sealed class LocationAction {
-    /**
-     * The action updates the [LocationMatcherResult] retrieved from location observer
-     * @property result
-     */
-    data class Update(val result: LocationMatcherResult) : LocationAction()
-}
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal class LocationViewModel :
-    UIViewModel<LocationMatcherResult?, LocationAction>(null) {
+internal class LocationViewModel(
+    private val store: Store
+) : UIComponent(), Reducer {
+    init {
+        store.register(this)
+    }
+
     val navigationLocationProvider = NavigationLocationProvider()
 
     /**
@@ -49,11 +44,17 @@ internal class LocationViewModel :
         return nonNullLocation
     }
 
-    override fun process(
-        mapboxNavigation: MapboxNavigation,
+    override fun process(state: State, action: Action): State {
+        if (action is LocationAction) {
+            return state.copy(location = processLocationAction(state.location, action))
+        }
+        return state
+    }
+
+    private fun processLocationAction(
         state: LocationMatcherResult?,
         action: LocationAction
-    ): LocationMatcherResult {
+    ): LocationMatcherResult? {
         return when (action) {
             is LocationAction.Update -> action.result
         }
@@ -62,14 +63,12 @@ internal class LocationViewModel :
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        mainJobControl.scope.launch {
-            mapboxNavigation.flowLocationMatcherResult().collect {
-                navigationLocationProvider.changePosition(
-                    location = it.enhancedLocation,
-                    keyPoints = it.keyPoints,
-                )
-                invoke(LocationAction.Update(it))
-            }
+        mapboxNavigation.flowLocationMatcherResult().observe {
+            navigationLocationProvider.changePosition(
+                location = it.enhancedLocation,
+                keyPoints = it.keyPoints,
+            )
+            store.dispatch(LocationAction.Update(it))
         }
     }
 

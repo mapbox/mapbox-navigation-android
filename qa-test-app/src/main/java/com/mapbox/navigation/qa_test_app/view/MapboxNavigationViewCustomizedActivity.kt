@@ -28,7 +28,6 @@ import com.mapbox.maps.TileStoreUsageMode
 import com.mapbox.maps.applyDefaultParams
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultAudioGuidanceButtonStyle
@@ -45,8 +44,6 @@ import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultSpee
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultStartNavigationButtonStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultTripProgressStyle
 import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction
-import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterViewModel
 import com.mapbox.navigation.dropin.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.qa_test_app.R
@@ -249,19 +246,9 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
         // before we can interact with the view models, we will probably prefer something like this:
         //       binding.navigationView.api.enableReplay();
         // TODO Make a ticket with link to list of public api needs
-        val tripSessionStarterViewModel = MapboxNavigationApp
-            .getObserver(TripSessionStarterViewModel::class)
-        binding.toggleReplay.isChecked = tripSessionStarterViewModel.state.value.isReplayEnabled
+        binding.toggleReplay.isChecked = binding.navigationView.isReplayEnabled
         binding.toggleReplay.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                tripSessionStarterViewModel.invoke(
-                    TripSessionStarterAction.EnableReplayTripSession
-                )
-            } else {
-                tripSessionStarterViewModel.invoke(
-                    TripSessionStarterAction.EnableTripSession
-                )
-            }
+            binding.navigationView.isReplayEnabled = isChecked
         }
 
         // Demonstrate map customization

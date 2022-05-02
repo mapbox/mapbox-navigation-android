@@ -30,31 +30,25 @@ internal class ActionButtonBinder(
         TransitionManager.go(scene, Slide(Gravity.RIGHT))
 
         val binding = MapboxActionButtonsLayoutBinding.bind(viewGroup)
+        val store = context.viewModel.store
         return navigationListOf(
-            reloadOnChange(
-                context.styles.audioGuidanceButtonStyle,
-            ) { style ->
+            reloadOnChange(context.styles.audioGuidanceButtonStyle) { style ->
                 AudioGuidanceButtonComponent(
-                    audioGuidanceViewModel = context.viewModel.audioGuidanceViewModel,
-                    navigationStateViewModel = context.viewModel.navigationStateViewModel,
+                    store = store,
                     audioGuidanceButton = binding.soundButton,
                     audioGuidanceButtonStyle = style,
                 )
             },
             reloadOnChange(context.styles.cameraModeButtonStyle) { style ->
                 CameraModeButtonComponent(
-                    cameraViewModel = context.viewModel.cameraViewModel,
-                    navigationStateViewModel = context.viewModel.navigationStateViewModel,
+                    store = store,
                     cameraModeButton = binding.cameraModeButton,
                     cameraModeStyle = style
                 )
             },
-            reloadOnChange(
-                context.styles.recenterButtonStyle
-            ) { style ->
+            reloadOnChange(context.styles.recenterButtonStyle) { style ->
                 RecenterButtonComponent(
-                    cameraViewModel = context.viewModel.cameraViewModel,
-                    navigationStateViewModel = context.viewModel.navigationStateViewModel,
+                    store = store,
                     recenterStyle = style,
                     recenterButton = binding.recenterButton
                 )

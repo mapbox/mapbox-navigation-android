@@ -6,9 +6,9 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.destination.Destination
 import com.mapbox.navigation.dropin.component.destination.DestinationAction.DidReverseGeocode
-import com.mapbox.navigation.dropin.component.destination.DestinationState
-import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
+import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.util.Geocoder
+import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -17,10 +17,10 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -40,22 +40,19 @@ internal class GeocodingComponentTest {
     @MockK
     lateinit var mockNavigation: MapboxNavigation
 
-    @MockK
-    lateinit var mockDestinationViewModel: DestinationViewModel
-    private lateinit var destinationStateFlow: MutableStateFlow<DestinationState>
+    private lateinit var testStore: TestStore
 
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true)
         mockkObject(Geocoder)
         every { Geocoder.create(any()) } returns mockGeocoder
+        testStore = spyk(TestStore())
         every { mockNavigation.navigationOptions } returns mockk {
             every { accessToken } returns "ACCESS_TOKEN"
         }
-        destinationStateFlow = MutableStateFlow(DestinationState())
-        every { mockDestinationViewModel.state } returns destinationStateFlow
 
-        sut = GeocodingComponent(mockDestinationViewModel)
+        sut = GeocodingComponent(testStore)
     }
 
     @After
@@ -72,10 +69,10 @@ internal class GeocodingComponentTest {
         } returns Result.success(features)
 
         sut.onAttached(mockNavigation)
-        destinationStateFlow.tryEmit(DestinationState(newDestination))
+        testStore.setState(State(destination = newDestination))
 
         verify {
-            mockDestinationViewModel.invoke(DidReverseGeocode(newDestination.point, features))
+            testStore.dispatch(DidReverseGeocode(newDestination.point, features))
         }
     }
 
@@ -86,7 +83,7 @@ internal class GeocodingComponentTest {
             point = Point.fromLngLat(22.0, 33.0),
             features = listOf(mockk())
         )
-        destinationStateFlow.tryEmit(DestinationState(destination))
+        testStore.setState(State(destination = destination))
 
         sut.onAttached(mockNavigation)
 

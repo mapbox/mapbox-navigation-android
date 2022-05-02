@@ -9,30 +9,32 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.destination.Destination
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
-import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
-import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.util.HapticFeedback
+import com.mapbox.navigation.dropin.util.TestStore
+import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
 internal class FreeDriveLongPressMapComponentTest {
 
-    private val mockNavigationStateViewModel: NavigationStateViewModel = mockk(relaxed = true)
-    private val mockRoutesViewModel: RoutesViewModel = mockk(relaxed = true)
-    private val mockDestinationViewModel: DestinationViewModel = mockk(relaxed = true)
+    @get:Rule
+    var coroutineRule = MainCoroutineRule()
+
     private val mockGesturesPlugin: GesturesPlugin = mockk(relaxed = true)
     private val mockMapView: MapView = mockk {
         every { gestures } returns mockGesturesPlugin
@@ -44,18 +46,15 @@ internal class FreeDriveLongPressMapComponentTest {
     }
 
     lateinit var sut: FreeDriveLongPressMapComponent
+    private lateinit var testStore: TestStore
 
     @Before
     fun setUp() {
         mockkObject(HapticFeedback)
         every { HapticFeedback.create(any()) } returns mockk(relaxed = true)
+        testStore = spyk(TestStore())
 
-        sut = FreeDriveLongPressMapComponent(
-            mockMapView,
-            mockNavigationStateViewModel,
-            mockRoutesViewModel,
-            mockDestinationViewModel,
-        )
+        sut = FreeDriveLongPressMapComponent(testStore, mockMapView)
     }
 
     @After
@@ -89,9 +88,9 @@ internal class FreeDriveLongPressMapComponentTest {
         slot.captured.onMapLongClick(point)
 
         verifyOrder {
-            mockDestinationViewModel.invoke(DestinationAction.SetDestination(Destination(point)))
-            mockRoutesViewModel.invoke(RoutesAction.SetRoutes(emptyList()))
-            mockNavigationStateViewModel.invoke(
+            testStore.dispatch(DestinationAction.SetDestination(Destination(point)))
+            testStore.dispatch(RoutesAction.SetRoutes(emptyList()))
+            testStore.dispatch(
                 NavigationStateAction.Update(NavigationState.DestinationPreview)
             )
         }

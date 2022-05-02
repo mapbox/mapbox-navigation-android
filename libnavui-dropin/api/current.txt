@@ -10,6 +10,9 @@ package com.mapbox.navigation.dropin {
     method public void customizeViewOptions(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewOptionsCustomization,kotlin.Unit> action);
     method public void customizeViewStyles(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewStyleCustomization,kotlin.Unit> action);
     method public androidx.lifecycle.Lifecycle getLifecycle();
+    method public boolean isReplayEnabled();
+    method public void setReplayEnabled(boolean value);
+    property public final boolean isReplayEnabled;
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ViewBinderCustomization {
@@ -104,19 +107,19 @@ package com.mapbox.navigation.dropin {
   }
 
   public static final class ViewStyleCustomization.Companion {
-    method public int defaultAudioGuidanceButtonStyle();
-    method public int defaultCameraModeButtonStyle();
-    method public int defaultDestinationMarker();
-    method public int defaultEndNavigationButtonStyle();
+    method @StyleRes public int defaultAudioGuidanceButtonStyle();
+    method @StyleRes public int defaultCameraModeButtonStyle();
+    method @DrawableRes public int defaultDestinationMarker();
+    method @StyleRes public int defaultEndNavigationButtonStyle();
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions defaultManeuverViewOptions();
-    method public int defaultRecenterButtonStyle();
-    method public int defaultRoadNameBackground();
-    method public int defaultRoadNameTextAppearance();
-    method public int defaultRoutePreviewButtonStyle();
-    method public int defaultSpeedLimitStyle();
-    method public int defaultSpeedLimitTextAppearance();
-    method public int defaultStartNavigationButtonStyle();
-    method public int defaultTripProgressStyle();
+    method @StyleRes public int defaultRecenterButtonStyle();
+    method @DrawableRes public int defaultRoadNameBackground();
+    method @StyleRes public int defaultRoadNameTextAppearance();
+    method @StyleRes public int defaultRoutePreviewButtonStyle();
+    method @StyleRes public int defaultSpeedLimitStyle();
+    method @StyleRes public int defaultSpeedLimitTextAppearance();
+    method @StyleRes public int defaultStartNavigationButtonStyle();
+    method @StyleRes public int defaultTripProgressStyle();
   }
 
 }
@@ -140,7 +143,7 @@ package com.mapbox.navigation.dropin.binder {
 
 package com.mapbox.navigation.dropin.component.audioguidance {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class AudioAction {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class AudioAction implements com.mapbox.navigation.dropin.model.Action {
   }
 
   public static final class AudioAction.Mute extends com.mapbox.navigation.dropin.component.audioguidance.AudioAction {
@@ -166,7 +169,7 @@ package com.mapbox.navigation.dropin.component.audioguidance {
 
 package com.mapbox.navigation.dropin.component.camera {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class CameraAction {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class CameraAction implements com.mapbox.navigation.dropin.model.Action {
   }
 
   public static final class CameraAction.SaveMapState extends com.mapbox.navigation.dropin.component.camera.CameraAction {
@@ -239,7 +242,7 @@ package com.mapbox.navigation.dropin.component.destination {
     property public final com.mapbox.geojson.Point point;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class DestinationAction {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class DestinationAction implements com.mapbox.navigation.dropin.model.Action {
   }
 
   public static final class DestinationAction.DidReverseGeocode extends com.mapbox.navigation.dropin.component.destination.DestinationAction {
@@ -261,18 +264,11 @@ package com.mapbox.navigation.dropin.component.destination {
     property public final com.mapbox.navigation.dropin.component.destination.Destination? destination;
   }
 
-  public final class DestinationState {
-    method public com.mapbox.navigation.dropin.component.destination.Destination? component1();
-    method public com.mapbox.navigation.dropin.component.destination.DestinationState copy(com.mapbox.navigation.dropin.component.destination.Destination? destination);
-    method public com.mapbox.navigation.dropin.component.destination.Destination? getDestination();
-    property public final com.mapbox.navigation.dropin.component.destination.Destination? destination;
-  }
-
 }
 
 package com.mapbox.navigation.dropin.component.location {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class LocationAction {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class LocationAction implements com.mapbox.navigation.dropin.model.Action {
   }
 
   public static final class LocationAction.Update extends com.mapbox.navigation.dropin.component.location.LocationAction {
@@ -310,7 +306,7 @@ package com.mapbox.navigation.dropin.component.navigation {
     field public static final com.mapbox.navigation.dropin.component.navigation.NavigationState.RoutePreview INSTANCE;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class NavigationStateAction {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class NavigationStateAction implements com.mapbox.navigation.dropin.model.Action {
   }
 
   public static final class NavigationStateAction.Update extends com.mapbox.navigation.dropin.component.navigation.NavigationStateAction {
@@ -321,16 +317,11 @@ package com.mapbox.navigation.dropin.component.navigation {
     property public final com.mapbox.navigation.dropin.component.navigation.NavigationState state;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NavigationStateViewModel extends com.mapbox.navigation.dropin.lifecycle.UIViewModel<com.mapbox.navigation.dropin.component.navigation.NavigationState,com.mapbox.navigation.dropin.component.navigation.NavigationStateAction> {
-    ctor public NavigationStateViewModel(com.mapbox.navigation.dropin.component.navigation.NavigationState p);
-    method public com.mapbox.navigation.dropin.component.navigation.NavigationState process(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation, com.mapbox.navigation.dropin.component.navigation.NavigationState state, com.mapbox.navigation.dropin.component.navigation.NavigationStateAction action);
-  }
-
 }
 
 package com.mapbox.navigation.dropin.component.routefetch {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class RoutesAction {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class RoutesAction implements com.mapbox.navigation.dropin.model.Action {
   }
 
   public static final class RoutesAction.Canceled extends com.mapbox.navigation.dropin.component.routefetch.RoutesAction {
@@ -432,7 +423,7 @@ package com.mapbox.navigation.dropin.component.routefetch {
 
 package com.mapbox.navigation.dropin.component.tripsession {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class TripSessionStarterAction {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class TripSessionStarterAction implements com.mapbox.navigation.dropin.model.Action {
   }
 
   public static final class TripSessionStarterAction.EnableReplayTripSession extends com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction {
@@ -461,13 +452,6 @@ package com.mapbox.navigation.dropin.component.tripsession {
     property public final boolean isReplayEnabled;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class TripSessionStarterViewModel extends com.mapbox.navigation.dropin.lifecycle.UIViewModel<com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterState,com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction> {
-    ctor public TripSessionStarterViewModel(com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel navigationStateViewModel, com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterState initialState = TripSessionStarterState());
-    method public com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel getNavigationStateViewModel();
-    method public com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterState process(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation, com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterState state, com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction action);
-    property public final com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel navigationStateViewModel;
-  }
-
 }
 
 package com.mapbox.navigation.dropin.lifecycle {
@@ -494,20 +478,11 @@ package com.mapbox.navigation.dropin.lifecycle {
     field public kotlinx.coroutines.CoroutineScope coroutineScope;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class UIViewModel<State, Action> implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
-    ctor public UIViewModel(State? initialState);
-    method public final kotlinx.coroutines.flow.Flow<Action> getAction();
-    method public final com.mapbox.navigation.utils.internal.JobControl getMainJobControl();
-    method public final kotlinx.coroutines.flow.StateFlow<State> getState();
-    method public final State! invoke(Action? action);
-    method @CallSuper public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
-    method @CallSuper public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
-    method public abstract State! process(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation, State? state, Action? action);
-    method public final void setMainJobControl(com.mapbox.navigation.utils.internal.JobControl p);
-    property public final kotlinx.coroutines.flow.Flow<Action> action;
-    property public final com.mapbox.navigation.utils.internal.JobControl mainJobControl;
-    property public final kotlinx.coroutines.flow.StateFlow<State> state;
-    field public com.mapbox.navigation.utils.internal.JobControl mainJobControl;
+}
+
+package com.mapbox.navigation.dropin.model {
+
+  public interface Action {
   }
 
 }
