@@ -1,11 +1,13 @@
-package com.mapbox.navigation.dropin.component.audioguidance
+package com.mapbox.navigation.dropin.controller
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.component.audioguidance.AudioAction
+import com.mapbox.navigation.dropin.component.audioguidance.AudioGuidanceApi
+import com.mapbox.navigation.dropin.component.audioguidance.AudioGuidanceServices
+import com.mapbox.navigation.dropin.component.audioguidance.AudioGuidanceState
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Action
-import com.mapbox.navigation.dropin.model.Reducer
 import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.model.Store
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -22,9 +24,9 @@ import kotlinx.coroutines.launch
  */
 @ExperimentalPreviewMapboxNavigationAPI
 @OptIn(ExperimentalCoroutinesApi::class)
-internal class AudioGuidanceViewModel(
-    val store: Store
-) : UIComponent(), Reducer {
+internal class AudioGuidanceStateController(
+    private val store: Store
+) : StateController() {
     init {
         store.register(this)
     }

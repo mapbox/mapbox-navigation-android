@@ -1,9 +1,11 @@
-package com.mapbox.navigation.dropin.component.navigation
+package com.mapbox.navigation.dropin.controller
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.dropin.component.navigation.NavigationState
+import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
@@ -19,14 +21,14 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
-internal class NavigationStateViewModelTest {
+internal class NavigationStateControllerTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
     private lateinit var testStore: TestStore
 
-    lateinit var sut: NavigationStateViewModel
+    lateinit var sut: NavigationStateController
     lateinit var mockMapboxNavigation: MapboxNavigation
 
     @Before
@@ -36,7 +38,7 @@ internal class NavigationStateViewModelTest {
         every { MapboxNavigationApp.current() } returns mockMapboxNavigation
 
         testStore = TestStore()
-        sut = NavigationStateViewModel(testStore)
+        sut = NavigationStateController(testStore)
     }
 
     @After

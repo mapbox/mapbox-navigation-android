@@ -7,6 +7,7 @@ import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.dropin.controller.LocationStateController
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import io.mockk.MockKAnnotations
@@ -34,7 +35,7 @@ internal class LocationComponentTest {
     private lateinit var locationProvider: NavigationLocationProvider
 
     @MockK
-    internal lateinit var mockLocationViewModel: LocationViewModel
+    internal lateinit var mockLocationStateController: LocationStateController
 
     @MockK
     lateinit var mockLocationPlugin: LocationComponentPlugin
@@ -55,10 +56,10 @@ internal class LocationComponentTest {
             every { location } returns mockLocationPlugin
         }
         every { ContextCompat.getDrawable(any(), any()) } returns mockk()
-        coEvery { mockLocationViewModel.firstLocation() } returns mockk()
-        every { mockLocationViewModel.navigationLocationProvider } returns locationProvider
+        coEvery { mockLocationStateController.firstLocation() } returns mockk()
+        every { mockLocationStateController.navigationLocationProvider } returns locationProvider
 
-        sut = LocationComponent(mockMapView, mockLocationViewModel)
+        sut = LocationComponent(mockMapView, mockLocationStateController)
     }
 
     @After

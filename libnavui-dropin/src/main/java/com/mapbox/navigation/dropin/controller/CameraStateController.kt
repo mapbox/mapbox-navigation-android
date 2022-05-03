@@ -1,14 +1,17 @@
-package com.mapbox.navigation.dropin.component.camera
+package com.mapbox.navigation.dropin.controller
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.component.camera.CameraAction
+import com.mapbox.navigation.dropin.component.camera.CameraState
+import com.mapbox.navigation.dropin.component.camera.TargetCameraMode
 import com.mapbox.navigation.dropin.model.Action
-import com.mapbox.navigation.dropin.model.Reducer
 import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.model.Store
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal class CameraViewModel(store: Store) : UIComponent(), Reducer {
+internal class CameraStateController(
+    store: Store
+) : StateController() {
     init {
         store.register(this)
     }

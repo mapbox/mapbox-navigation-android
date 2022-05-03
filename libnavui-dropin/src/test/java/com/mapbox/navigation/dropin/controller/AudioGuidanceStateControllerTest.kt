@@ -1,8 +1,11 @@
-package com.mapbox.navigation.dropin.component.audioguidance
+package com.mapbox.navigation.dropin.controller
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.dropin.component.audioguidance.AudioAction
+import com.mapbox.navigation.dropin.component.audioguidance.AudioGuidanceApi
+import com.mapbox.navigation.dropin.component.audioguidance.AudioGuidanceState
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.util.TestStore
@@ -26,7 +29,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
-class AudioGuidanceViewModelTest {
+class AudioGuidanceStateControllerTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
@@ -49,7 +52,7 @@ class AudioGuidanceViewModelTest {
 
     @Test
     fun `onAttach will collect voice instructions for ActiveNavigation`() = runBlockingTest {
-        val mapboxAudioViewModel = AudioGuidanceViewModel(testStore)
+        val sut = AudioGuidanceStateController(testStore)
         testStore.setState(
             State(
                 navigation = NavigationState.ActiveNavigation,
@@ -57,7 +60,7 @@ class AudioGuidanceViewModelTest {
             )
         )
 
-        mapboxAudioViewModel.onAttached(mockMapboxNavigation())
+        sut.onAttached(mockMapboxNavigation())
 
         verify(exactly = 1) { mapboxAudioApi.speakVoiceInstructions() }
     }
@@ -70,9 +73,9 @@ class AudioGuidanceViewModelTest {
                 audio = AudioGuidanceState(isMuted = false)
             )
         )
-        val mapboxAudioViewModel = AudioGuidanceViewModel(testStore)
+        val sut = AudioGuidanceStateController(testStore)
 
-        mapboxAudioViewModel.onAttached(mockMapboxNavigation())
+        sut.onAttached(mockMapboxNavigation())
 
         verify(exactly = 0) { mapboxAudioApi.speakVoiceInstructions() }
     }
@@ -85,11 +88,11 @@ class AudioGuidanceViewModelTest {
                 audio = AudioGuidanceState(isMuted = true)
             )
         )
-        val mapboxAudioViewModel = AudioGuidanceViewModel(testStore)
+        val sut = AudioGuidanceStateController(testStore)
 
         val mapboxNavigation = mockMapboxNavigation()
-        mapboxAudioViewModel.onAttached(mapboxNavigation)
-        mapboxAudioViewModel.onDetached(mapboxNavigation)
+        sut.onAttached(mapboxNavigation)
+        sut.onDetached(mapboxNavigation)
         testStore.dispatch(AudioAction.Unmute)
 
         verify(exactly = 0) { mapboxAudioApi.speakVoiceInstructions() }
@@ -103,12 +106,12 @@ class AudioGuidanceViewModelTest {
                 audio = AudioGuidanceState(isMuted = false)
             )
         )
-        val mapboxAudioViewModel = AudioGuidanceViewModel(testStore)
+        val sut = AudioGuidanceStateController(testStore)
 
         val mapboxNavigation = mockMapboxNavigation()
-        mapboxAudioViewModel.onAttached(mapboxNavigation)
+        sut.onAttached(mapboxNavigation)
         testStore.dispatch(AudioAction.Toggle)
-        mapboxAudioViewModel.onDetached(mapboxNavigation)
+        sut.onDetached(mapboxNavigation)
 
         verify(exactly = 1) { mapboxAudioApi.speakVoiceInstructions() }
         assertTrue(testStore.state.value.audio.isMuted)
@@ -122,7 +125,7 @@ class AudioGuidanceViewModelTest {
                 audio = AudioGuidanceState(isMuted = false)
             )
         )
-        val mapboxAudioViewModel = AudioGuidanceViewModel(testStore)
+        val sut = AudioGuidanceStateController(testStore)
 
         val captureSpeechAnnouncement = mutableListOf<SpeechAnnouncement?>()
         every { mapboxAudioApi.speakVoiceInstructions() } answers {
@@ -131,7 +134,7 @@ class AudioGuidanceViewModelTest {
             }
         }
 
-        mapboxAudioViewModel.onAttached(mockk())
+        sut.onAttached(mockk())
 
         assertEquals(2, captureSpeechAnnouncement.size)
     }

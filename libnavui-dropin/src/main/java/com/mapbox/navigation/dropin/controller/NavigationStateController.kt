@@ -1,11 +1,11 @@
-package com.mapbox.navigation.dropin.component.navigation
+package com.mapbox.navigation.dropin.controller
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.component.navigation.NavigationState
+import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
 import com.mapbox.navigation.dropin.internal.extensions.flowOnFinalDestinationArrival
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Action
-import com.mapbox.navigation.dropin.model.Reducer
 import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.model.Store
 import kotlinx.coroutines.flow.collect
@@ -17,9 +17,9 @@ import kotlinx.coroutines.launch
  * @param default the default [NavigationState] to start with
  */
 @ExperimentalPreviewMapboxNavigationAPI
-internal class NavigationStateViewModel(
+internal class NavigationStateController(
     private val store: Store
-) : UIComponent(), Reducer {
+) : StateController() {
     init {
         store.register(this)
     }

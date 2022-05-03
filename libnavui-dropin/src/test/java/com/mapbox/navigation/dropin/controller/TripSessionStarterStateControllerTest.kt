@@ -1,9 +1,11 @@
-package com.mapbox.navigation.dropin.component.tripsession
+package com.mapbox.navigation.dropin.controller
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
+import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction
+import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterState
 import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -22,7 +24,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
-class TripSessionStarterViewModelTest {
+class TripSessionStarterStateControllerTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
@@ -51,10 +53,10 @@ class TripSessionStarterViewModelTest {
                     )
                 )
             )
-            val tripSessionStarterViewModel = TripSessionStarterViewModel(testStore)
+            val sut = TripSessionStarterStateController(testStore)
             val mapboxNavigation = mockMapboxNavigation()
 
-            tripSessionStarterViewModel.onAttached(mapboxNavigation)
+            sut.onAttached(mapboxNavigation)
             testStore.dispatch(
                 TripSessionStarterAction.OnLocationPermission(true)
             )
@@ -73,11 +75,11 @@ class TripSessionStarterViewModelTest {
                     )
                 )
             )
-            val tripSessionStarterViewModel = TripSessionStarterViewModel(testStore)
+            val sut = TripSessionStarterStateController(testStore)
             val mapboxNavigation = mockMapboxNavigation()
 
-            tripSessionStarterViewModel.onAttached(mapboxNavigation)
-            tripSessionStarterViewModel.onDetached(mapboxNavigation)
+            sut.onAttached(mapboxNavigation)
+            sut.onDetached(mapboxNavigation)
 
             verify(exactly = 1) { mapboxNavigation.startTripSession() }
             verify(exactly = 0) { mapboxNavigation.stopTripSession() }
@@ -95,10 +97,10 @@ class TripSessionStarterViewModelTest {
                     )
                 )
             )
-            val tripSessionStarterViewModel = TripSessionStarterViewModel(testStore)
+            val sut = TripSessionStarterStateController(testStore)
             val mapboxNavigation = mockMapboxNavigation()
 
-            tripSessionStarterViewModel.onAttached(mapboxNavigation)
+            sut.onAttached(mapboxNavigation)
             testStore.dispatch(TripSessionStarterAction.EnableTripSession)
 
             verifyOrder {
@@ -116,10 +118,10 @@ class TripSessionStarterViewModelTest {
                     navigation = NavigationState.ActiveNavigation
                 )
             )
-            val tripSessionStarterViewModel = TripSessionStarterViewModel(testStore)
+            val sut = TripSessionStarterStateController(testStore)
             val mapboxNavigation = mockMapboxNavigation()
 
-            tripSessionStarterViewModel.onAttached(mapboxNavigation)
+            sut.onAttached(mapboxNavigation)
             testStore.dispatch(
                 TripSessionStarterAction.OnLocationPermission(true)
             )
@@ -136,10 +138,10 @@ class TripSessionStarterViewModelTest {
                     navigation = NavigationState.ActiveNavigation,
                 )
             )
-            val tripSessionStarterViewModel = TripSessionStarterViewModel(testStore)
+            val sut = TripSessionStarterStateController(testStore)
             val mapboxNavigation = mockMapboxNavigation()
 
-            tripSessionStarterViewModel.onAttached(mapboxNavigation)
+            sut.onAttached(mapboxNavigation)
             testStore.dispatch(
                 TripSessionStarterAction.OnLocationPermission(false)
             )
@@ -160,11 +162,11 @@ class TripSessionStarterViewModelTest {
                     )
                 )
             )
-            val tripSessionStarterViewModel = TripSessionStarterViewModel(testStore)
+            val sut = TripSessionStarterStateController(testStore)
 
             val mapboxNavigation = mockMapboxNavigation()
 
-            tripSessionStarterViewModel.onAttached(mapboxNavigation)
+            sut.onAttached(mapboxNavigation)
             testStore.setNavigationState(NavigationState.DestinationPreview)
             testStore.setNavigationState(NavigationState.RoutePreview)
             testStore.setNavigationState(NavigationState.Arrival)

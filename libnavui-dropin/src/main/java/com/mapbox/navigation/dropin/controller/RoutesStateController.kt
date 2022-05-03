@@ -1,4 +1,4 @@
-package com.mapbox.navigation.dropin.component.routefetch
+package com.mapbox.navigation.dropin.controller
 
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -10,19 +10,19 @@ import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
+import com.mapbox.navigation.dropin.component.routefetch.RoutesState
 import com.mapbox.navigation.dropin.internal.extensions.flowRoutesUpdated
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Action
-import com.mapbox.navigation.dropin.model.Reducer
 import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.model.Store
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal class RoutesViewModel(
+internal class RoutesStateController(
     private val store: Store
-) : UIComponent(), Reducer {
+) : StateController() {
     init {
         store.register(this)
     }
@@ -48,6 +48,7 @@ internal class RoutesViewModel(
             is RoutesState.Fetching -> {
                 mapboxNavigation.cancelRouteRequest(currentState.requestId)
             }
+            else -> Unit
         }
         this.mapboxNavigation = null
     }

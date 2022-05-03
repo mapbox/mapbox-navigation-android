@@ -7,13 +7,13 @@ import androidx.lifecycle.ViewModel
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
-import com.mapbox.navigation.dropin.component.audioguidance.AudioGuidanceViewModel
-import com.mapbox.navigation.dropin.component.camera.CameraViewModel
-import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
-import com.mapbox.navigation.dropin.component.location.LocationViewModel
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
-import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
-import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterViewModel
+import com.mapbox.navigation.dropin.controller.AudioGuidanceStateController
+import com.mapbox.navigation.dropin.controller.CameraStateController
+import com.mapbox.navigation.dropin.controller.DestinationStateController
+import com.mapbox.navigation.dropin.controller.LocationStateController
+import com.mapbox.navigation.dropin.controller.NavigationStateController
+import com.mapbox.navigation.dropin.controller.RoutesStateController
+import com.mapbox.navigation.dropin.controller.TripSessionStarterStateController
 import com.mapbox.navigation.dropin.internal.extensions.attachCreated
 import com.mapbox.navigation.dropin.model.Store
 
@@ -36,13 +36,13 @@ internal class NavigationViewModel : ViewModel() {
     /**
      * These classes are accessible through MapboxNavigationApp.getObserver(..)
      */
-    private val navigationStateViewModel = NavigationStateViewModel(store)
-    val locationViewModel = LocationViewModel(store)
-    private val tripSessionStarterViewModel = TripSessionStarterViewModel(store)
-    private val audioGuidanceViewModel = AudioGuidanceViewModel(store)
-    private val cameraViewModel = CameraViewModel(store)
-    private val destinationViewModel = DestinationViewModel(store)
-    private val routesViewModel = RoutesViewModel(store)
+    private val navigationStateViewModel = NavigationStateController(store)
+    val locationViewModel = LocationStateController(store)
+    private val tripSessionStarterViewModel = TripSessionStarterStateController(store)
+    private val audioGuidanceViewModel = AudioGuidanceStateController(store)
+    private val cameraViewModel = CameraStateController(store)
+    private val destinationViewModel = DestinationStateController(store)
+    private val routesViewModel = RoutesStateController(store)
     private val navigationObservers: Array<MapboxNavigationObserver> = arrayOf(
         destinationViewModel,
         tripSessionStarterViewModel,

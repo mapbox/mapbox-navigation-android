@@ -1,16 +1,17 @@
-package com.mapbox.navigation.dropin.component.destination
+package com.mapbox.navigation.dropin.controller
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.component.destination.DestinationAction
 import com.mapbox.navigation.dropin.model.Action
-import com.mapbox.navigation.dropin.model.Reducer
 import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.model.Store
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalPreviewMapboxNavigationAPI
 @OptIn(ExperimentalCoroutinesApi::class)
-internal class DestinationViewModel(store: Store) : UIComponent(), Reducer {
+internal class DestinationStateController(
+    store: Store
+) : StateController() {
     init {
         store.register(this)
     }

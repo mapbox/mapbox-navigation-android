@@ -1,12 +1,13 @@
-package com.mapbox.navigation.dropin.component.tripsession
+package com.mapbox.navigation.dropin.controller
 
 import android.annotation.SuppressLint
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.component.tripsession.ReplayRouteTripSession
+import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction
+import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterState
 import com.mapbox.navigation.dropin.model.Action
-import com.mapbox.navigation.dropin.model.Reducer
 import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.model.Store
 import kotlinx.coroutines.flow.Flow
@@ -22,9 +23,9 @@ import kotlinx.coroutines.launch
  */
 @ExperimentalPreviewMapboxNavigationAPI
 @SuppressLint("MissingPermission")
-internal class TripSessionStarterViewModel(
-    val store: Store
-) : UIComponent(), Reducer {
+internal class TripSessionStarterStateController(
+    private val store: Store
+) : StateController() {
     init {
         store.register(this)
     }
