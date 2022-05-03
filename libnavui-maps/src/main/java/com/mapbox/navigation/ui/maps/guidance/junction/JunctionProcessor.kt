@@ -9,7 +9,7 @@ import com.mapbox.common.ResourceLoadStatus
 import com.mapbox.navigation.ui.maps.guidance.junction.api.MapboxRasterToBitmapParser
 import com.mapbox.navigation.ui.utils.internal.extensions.getBannerComponents
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
-import com.mapbox.navigation.ui.utils.resource.ResourceLoadRequest
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 
 internal object JunctionProcessor {
 

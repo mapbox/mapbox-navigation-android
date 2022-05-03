@@ -14,10 +14,10 @@ import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardResult
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue
-import com.mapbox.navigation.ui.utils.resource.ResourceLoadCallback
-import com.mapbox.navigation.ui.utils.resource.ResourceLoadRequest
-import com.mapbox.navigation.ui.utils.resource.ResourceLoader
-import com.mapbox.navigation.ui.utils.resource.ResourceLoaderFactory
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadCallback
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoader
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoaderFactory
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject

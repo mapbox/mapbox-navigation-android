@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.maps.guidance.signboard
 
 import android.graphics.Bitmap
-import com.mapbox.navigation.ui.utils.resource.ResourceLoadRequest
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 
 internal sealed class SignboardResult {
 

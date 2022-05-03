@@ -12,8 +12,8 @@ import com.mapbox.navigation.ui.maps.guidance.junction.JunctionProcessor
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionResult
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue
-import com.mapbox.navigation.ui.utils.resource.ResourceLoaderFactory
-import com.mapbox.navigation.ui.utils.resource.load
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoaderFactory
+import com.mapbox.navigation.ui.utils.internal.resource.load
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch

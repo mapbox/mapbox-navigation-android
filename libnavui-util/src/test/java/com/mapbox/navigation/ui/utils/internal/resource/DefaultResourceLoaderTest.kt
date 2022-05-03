@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.utils.resource
+package com.mapbox.navigation.ui.utils.internal.resource
 
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
@@ -57,7 +57,7 @@ class DefaultResourceLoaderTest {
             )
         } returns mockk()
 
-        sut.load(loadRequest, mockk())
+        sut.load(loadRequest, mockk(relaxed = true))
 
         assertEquals(loadRequest.url, descriptionCapture.captured.url)
         assertEquals(TileDataDomain.NAVIGATION, descriptionCapture.captured.domain)
@@ -112,7 +112,7 @@ class DefaultResourceLoaderTest {
             mockTileStore.loadResource(any(), any(), any(), any())
         } returns cancelable
 
-        val requestId = sut.load(loadRequest, mockk())
+        val requestId = sut.load(loadRequest, mockk(relaxed = true))
         sut.cancel(requestId)
 
         verify { cancelable.cancel() }

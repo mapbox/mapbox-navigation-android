@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.utils.resource
+package com.mapbox.navigation.ui.utils.internal.resource
 
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.Cancelable
@@ -33,9 +33,18 @@ internal class DefaultResourceLoader(
     private val observers: Queue<ResourceLoadObserver> = ConcurrentLinkedQueue()
 
     override fun load(request: ResourceLoadRequest, callback: ResourceLoadCallback): Long {
-        val requestId = nextRequestId.incrementAndGet()
-        val callbackAdapter = CallbackAdapter(request, callback, *observers.toTypedArray())
+        return load(tileStore, request, callback)
+    }
 
+    override fun load(
+        tileStore: TileStore,
+        request: ResourceLoadRequest,
+        callback: ResourceLoadCallback
+    ): Long {
+        val requestId = nextRequestId.incrementAndGet()
+        val callbackAdapter = CallbackAdapter(request, callback, observers)
+
+        callbackAdapter.notifyOnStart(request)
         cancelableMap[requestId] = tileStore.loadResource(
             /* description */ request.toResourceDescription(),
             /* options */ request.toResourceLoadOptions("DefaultResourceLoader-$requestId"),
@@ -68,20 +77,22 @@ internal class DefaultResourceLoader(
 
     private class CallbackAdapter(
         private val request: ResourceLoadRequest,
-        private vararg val observers: ResourceLoadObserver
+        private val callback: ResourceLoadCallback,
+        private val observers: Queue<ResourceLoadObserver>
     ) : ResourceLoadProgressCallback, ResourceLoadResultCallback {
 
-        private var started = false
+        fun notifyOnStart(request: ResourceLoadRequest) {
+            callback.onStart(request)
+            observers.forEach { it.onStart(request) }
+        }
 
         override fun run(progress: ResourceLoadProgress) {
-            if (!started) {
-                started = true
-                observers.forEach { it.onStart(request) }
-            }
+            callback.onProgress(request, progress)
             observers.forEach { it.onProgress(request, progress) }
         }
 
         override fun run(result: Expected<ResourceLoadError, ResourceLoadResult>) {
+            callback.onFinish(request, result)
             observers.forEach { it.onFinish(request, result) }
         }
     }

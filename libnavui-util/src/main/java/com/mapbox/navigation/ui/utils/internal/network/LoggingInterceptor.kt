@@ -10,7 +10,7 @@ class LoggingInterceptor : HttpServiceInterceptorInterface {
     override fun onRequest(request: HttpRequest): HttpRequest {
         logD(
             ">> onRequest ${request.url}|${request.headers}",
-            "LoggingInterceptor"
+            LOG_CAT
         )
         return request
     }
@@ -18,7 +18,7 @@ class LoggingInterceptor : HttpServiceInterceptorInterface {
     override fun onDownload(download: DownloadOptions): DownloadOptions {
         logD(
             ">> onDownload ${download.request.url}|${download.request.headers}",
-            "LoggingInterceptor"
+            LOG_CAT
         )
         return download
     }
@@ -26,8 +26,12 @@ class LoggingInterceptor : HttpServiceInterceptorInterface {
     override fun onResponse(response: HttpResponse): HttpResponse {
         logD(
             "<< onResponse ${response.result?.value?.code} ${response.request.url}",
-            "LoggingInterceptor"
+            LOG_CAT
         )
         return response
+    }
+
+    companion object {
+        private const val LOG_CAT = "LoggingInterceptor"
     }
 }

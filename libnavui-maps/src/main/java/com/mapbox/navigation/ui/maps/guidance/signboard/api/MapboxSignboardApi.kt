@@ -14,8 +14,8 @@ import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardResult
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue
-import com.mapbox.navigation.ui.utils.resource.ResourceLoaderFactory
-import com.mapbox.navigation.ui.utils.resource.load
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoaderFactory
+import com.mapbox.navigation.ui.utils.internal.resource.load
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch

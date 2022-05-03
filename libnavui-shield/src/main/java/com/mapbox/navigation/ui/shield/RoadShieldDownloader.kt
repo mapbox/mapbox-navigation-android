@@ -4,16 +4,17 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory.createError
 import com.mapbox.bindgen.ExpectedFactory.createValue
 import com.mapbox.common.ResourceLoadStatus
-import com.mapbox.navigation.ui.utils.resource.ResourceLoadRequest
-import com.mapbox.navigation.ui.utils.resource.ResourceLoaderFactory
-import com.mapbox.navigation.ui.utils.resource.load
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoader
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoaderFactory
+import com.mapbox.navigation.ui.utils.internal.resource.load
 
 internal object RoadShieldDownloader {
 
     private val resourceLoader get() = ResourceLoaderFactory.getInstance()
 
     suspend fun download(url: String): Expected<String, ByteArray> {
-        val response = resourceLoader.load(loadRequest(url))
+        val response = resourceLoader.load(url)
 
         return response.value?.let { responseData ->
             when (responseData.status) {
@@ -32,5 +33,5 @@ internal object RoadShieldDownloader {
         } ?: createError(response.error?.message ?: "No data available.")
     }
 
-    private fun loadRequest(url: String) = ResourceLoadRequest(url)
+    private suspend fun ResourceLoader.load(url: String) = load(ResourceLoadRequest(url))
 }

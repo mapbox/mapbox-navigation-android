@@ -14,10 +14,10 @@ import com.mapbox.navigation.ui.maps.guidance.junction.JunctionProcessor
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionResult
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue
-import com.mapbox.navigation.ui.utils.resource.ResourceLoadCallback
-import com.mapbox.navigation.ui.utils.resource.ResourceLoadRequest
-import com.mapbox.navigation.ui.utils.resource.ResourceLoader
-import com.mapbox.navigation.ui.utils.resource.ResourceLoaderFactory
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadCallback
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoader
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoaderFactory
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject

@@ -6,10 +6,10 @@ import com.mapbox.common.ResourceData
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadStatus
-import com.mapbox.navigation.ui.utils.resource.ResourceLoadCallback
-import com.mapbox.navigation.ui.utils.resource.ResourceLoadRequest
-import com.mapbox.navigation.ui.utils.resource.ResourceLoader
-import com.mapbox.navigation.ui.utils.resource.ResourceLoaderFactory
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadCallback
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoader
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoaderFactory
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.utils.resource
+package com.mapbox.navigation.ui.utils.internal.resource
 
 import com.mapbox.common.NetworkRestriction
 import com.mapbox.common.ResourceLoadFlags

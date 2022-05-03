@@ -7,7 +7,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 - Exposed `NavigationRoute#origin` that describes the type of router that generated the particular route. [#5766](https://github.com/mapbox/mapbox-navigation-android/pull/5766)
 - Added `RestStop#name` field which contains a name of the service/rest area, when available. [#5768](https://github.com/mapbox/mapbox-navigation-android/pull/5768)
-- Added new `ResourceLoader` class that loads and caches on disk `MapboxJunctionApi`, `MapboxSignboardApi` and `MapboxRouteShieldApi` assets. Default instance can be acquired by calling `ResourceLoaderFactory#getInstance()` [#5750](https://github.com/mapbox/mapbox-navigation-android/pull/5750)
+- Introduced persistent cache for assets downloaded by `MapboxJunctionApi`, `MapboxSignboardApi` and `MapboxRouteShieldApi` to decrease the bandwidth consumption. [#5750](https://github.com/mapbox/mapbox-navigation-android/pull/5750)
 
 #### Bug fixes and improvements
 - Now it's possible to see the same route in `NavigationRouteAlternativesObserver` but coming from an offboard router if the current route was built onboard which can be used to always prefer an offboard-generated route over onboard-generated one. This is a good practice because offboard-generated routes take live road conditions into account, have more precise ETAs, and can also be refreshed as the user drives and conditions change. Check `NavigationRouteAlternativesObserver` documentation for example usage. [#5768](https://github.com/mapbox/mapbox-navigation-android/pull/5768)
