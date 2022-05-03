@@ -1,10 +1,12 @@
-package com.mapbox.navigation.dropin.component.camera
+package com.mapbox.navigation.dropin.controller
 
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.dropin.component.camera.CameraAction
+import com.mapbox.navigation.dropin.component.camera.TargetCameraMode
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.MockLoggerRule
@@ -15,13 +17,13 @@ import io.mockk.spyk
 import io.mockk.unmockkObject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
-import org.junit.Assert.assertEquals
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
-class CameraViewModelTest {
+class CameraStateControllerTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
@@ -44,49 +46,49 @@ class CameraViewModelTest {
 
     @Test
     fun `when action toIdle updates camera mode`() = coroutineRule.runBlockingTest {
-        val cameraViewModel = CameraViewModel(testStore)
-        cameraViewModel.onAttached(mockMapboxNavigation())
+        val sut = CameraStateController(testStore)
+        sut.onAttached(mockMapboxNavigation())
 
         testStore.dispatch(CameraAction.ToIdle)
 
         val cameraState = testStore.state.value.camera
-        assertEquals(TargetCameraMode.Idle, cameraState.cameraMode)
+        Assert.assertEquals(TargetCameraMode.Idle, cameraState.cameraMode)
     }
 
     @Test
     fun `when action toOverview updates camera mode`() = coroutineRule.runBlockingTest {
-        val cameraViewModel = CameraViewModel(testStore)
-        cameraViewModel.onAttached(mockMapboxNavigation())
+        val sut = CameraStateController(testStore)
+        sut.onAttached(mockMapboxNavigation())
 
         testStore.dispatch(CameraAction.ToOverview)
 
         val cameraState = testStore.state.value.camera
-        assertEquals(TargetCameraMode.Overview, cameraState.cameraMode)
+        Assert.assertEquals(TargetCameraMode.Overview, cameraState.cameraMode)
     }
 
     @Test
     fun `when action toFollowing updates camera mode and zoomUpdatesAllowed`() =
         coroutineRule.runBlockingTest {
-            val cameraViewModel = CameraViewModel(testStore)
-            cameraViewModel.onAttached(mockMapboxNavigation())
+            val sut = CameraStateController(testStore)
+            sut.onAttached(mockMapboxNavigation())
 
             testStore.dispatch(CameraAction.ToFollowing)
 
             val cameraState = testStore.state.value.camera
-            assertEquals(TargetCameraMode.Following, cameraState.cameraMode)
+            Assert.assertEquals(TargetCameraMode.Following, cameraState.cameraMode)
         }
 
     @Test
     fun `when action UpdatePadding updates cameraPadding`() =
         coroutineRule.runBlockingTest {
             val padding = EdgeInsets(1.0, 2.0, 3.0, 4.0)
-            val cameraViewModel = CameraViewModel(testStore)
-            cameraViewModel.onAttached(mockMapboxNavigation())
+            val sut = CameraStateController(testStore)
+            sut.onAttached(mockMapboxNavigation())
 
             testStore.dispatch(CameraAction.UpdatePadding(padding))
 
             val cameraState = testStore.state.value.camera
-            assertEquals(padding, cameraState.cameraPadding)
+            Assert.assertEquals(padding, cameraState.cameraPadding)
         }
 
     @Test
@@ -99,12 +101,12 @@ class CameraViewModelTest {
             50.0
         )
         val mockMapboxNavigation = mockMapboxNavigation()
-        val cameraViewModel = CameraViewModel(testStore)
-        cameraViewModel.onAttached(mockMapboxNavigation)
+        val sut = CameraStateController(testStore)
+        sut.onAttached(mockMapboxNavigation)
 
         testStore.dispatch(CameraAction.SaveMapState(cameraState))
 
-        assertEquals(cameraState, testStore.state.value.camera.mapCameraState)
+        Assert.assertEquals(cameraState, testStore.state.value.camera.mapCameraState)
     }
 
     private fun mockMapboxNavigation(): MapboxNavigation {

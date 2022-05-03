@@ -1,23 +1,22 @@
-package com.mapbox.navigation.dropin.component.location
+package com.mapbox.navigation.dropin.controller
 
 import android.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
+import com.mapbox.navigation.dropin.component.location.LocationAction
 import com.mapbox.navigation.dropin.internal.extensions.flowLocationMatcherResult
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Action
-import com.mapbox.navigation.dropin.model.Reducer
 import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import kotlinx.coroutines.delay
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal class LocationViewModel(
+internal class LocationStateController(
     private val store: Store
-) : UIComponent(), Reducer {
+) : StateController() {
     init {
         store.register(this)
     }
