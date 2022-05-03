@@ -37,9 +37,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
     private val initIdlingResource: MapStyleInitIdlingResource by lazy {
         MapStyleInitIdlingResource(activity.binding.mapView)
     }
-    private val routeLineApi: MapboxRouteLineApi by lazy {
-        MapboxRouteLineApi(MapboxRouteLineOptions.Builder(activity).build())
-    }
+
     private val myResourceIdler =
         CountingIdlingResource("MultipleRouteSetTestResource")
 
@@ -66,6 +64,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
 
     @Test
     fun multipleSetRouteCall_longAndShortRouteTest() {
+        val routeLineApi = MapboxRouteLineApi(MapboxRouteLineOptions.Builder(activity).build())
         val shortRoute = getRoute(activity, R.raw.short_route).toNavigationRoute()
         val longRoute = getRoute(activity, R.raw.cross_country_route).toNavigationRoute()
         RouteCompatibilityCache.cacheCreationResult(listOf(shortRoute, longRoute))
@@ -105,6 +104,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
 
     @Test
     fun multipleSetRouteCall_longAndShortRouteSameConsumerTest() {
+        val routeLineApi = MapboxRouteLineApi(MapboxRouteLineOptions.Builder(activity).build())
         var consumerCallCount = 0
         val shortRoute = getRoute(activity, R.raw.short_route)
         val longRoute = getRoute(activity, R.raw.cross_country_route)
@@ -146,6 +146,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
 
     @Test
     fun clearRoutesTest() {
+        val routeLineApi = MapboxRouteLineApi(MapboxRouteLineOptions.Builder(activity).build())
         val route = getRoute(activity, R.raw.cross_country_route)
         val routeLines = listOf(RouteLine(route, null))
         var clearInvoked = false
