@@ -1525,7 +1525,9 @@ package com.mapbox.navigation.base.trip.model.roadobject.restrictedarea {
 package com.mapbox.navigation.base.trip.model.roadobject.reststop {
 
   public final class RestStop extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public String? getName();
     method public int getRestStopType();
+    property public final String? name;
     property public final int restStopType;
   }
 

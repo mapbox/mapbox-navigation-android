@@ -96,6 +96,7 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
             RestStop(
                 id,
                 metadata.serviceAreaInfo.toRestStopType(),
+                metadata.serviceAreaInfo.name,
                 length,
                 location,
                 provider,
