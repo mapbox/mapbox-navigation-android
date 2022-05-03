@@ -139,17 +139,19 @@ class RoadObjectMapperTest {
         val expected = RestStop(
             ID,
             RestStopType.REST_AREA,
+            "rest_stop_name",
             LENGTH,
             location,
             SDKRoadObjectProvider.MAPBOX,
             nativeObject
         )
-        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject) as RestStop
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
         assertEquals(expected.toString(), roadObject.toString())
         assertEquals(RoadObjectType.REST_STOP, roadObject.objectType)
+        assertEquals("rest_stop_name", roadObject.name)
     }
 
     @Test
@@ -159,17 +161,19 @@ class RoadObjectMapperTest {
         val expected = RestStop(
             ID,
             RestStopType.SERVICE_AREA,
+            "rest_area_name",
             LENGTH,
             location,
             SDKRoadObjectProvider.MAPBOX,
             nativeObject
         )
-        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject) as RestStop
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
         assertEquals(expected.toString(), roadObject.toString())
         assertEquals(RoadObjectType.REST_STOP, roadObject.objectType)
+        assertEquals("rest_area_name", roadObject.name)
     }
 
     @Test
@@ -315,14 +319,16 @@ class RoadObjectMapperTest {
     private val restStopRest = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.SERVICE_AREA,
         serviceAreaInfo = com.mapbox.navigator.ServiceAreaInfo(
-            com.mapbox.navigator.ServiceAreaType.REST_AREA
+            com.mapbox.navigator.ServiceAreaType.REST_AREA,
+            "rest_stop_name"
         )
     )
 
     private val restStopService = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.SERVICE_AREA,
         serviceAreaInfo = com.mapbox.navigator.ServiceAreaInfo(
-            com.mapbox.navigator.ServiceAreaType.SERVICE_AREA
+            com.mapbox.navigator.ServiceAreaType.SERVICE_AREA,
+            "rest_area_name"
         )
     )
 

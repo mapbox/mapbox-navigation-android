@@ -25,27 +25,76 @@ interface NavigationRouteAlternativesObserver {
      * The alternatives are not automatically added to [MapboxNavigation],
      * you need to add them manually to trigger [RoutesObserver], for example:
      * ```kotlin
-     * mapboxNavigation.requestAlternativeRoutes(
-     *     object : NavigationRouteAlternativesRequestCallback {
-     *         override fun onRouteAlternativeRequestFinished(
-     *             routeProgress: RouteProgress,
-     *             alternatives: List<NavigationRoute>,
-     *             routerOrigin: RouterOrigin
-     *         ) {
-     *             val newRoutes = mutableListOf<NavigationRoute>().apply {
-     *                 add(mapboxNavigation.getNavigationRoutes().first())
-     *                 addAll(alternatives)
-     *             }
-     *             mapboxNavigation.setNavigationRoutes(newRoutes)
+     * private val alternativesObserver = object : NavigationRouteAlternativesObserver {
+     *     override fun onRouteAlternatives(
+     *         routeProgress: RouteProgress,
+     *         alternatives: List<NavigationRoute>,
+     *         routerOrigin: RouterOrigin
+     *     ) {
+     *         val newRoutes = mutableListOf<NavigationRoute>().apply {
+     *             add(mapboxNavigation.getNavigationRoutes().first())
+     *             addAll(alternatives)
      *         }
-     *         override fun onRouteAlternativesRequestError(error: RouteAlternativesError) {
-     *             // ...
-     *         }
+     *
+     *         mapboxNavigation.setNavigationRoutes(newRoutes)
      *     }
-     * )
+     *
+     *     override fun onRouteAlternativesError(error: RouteAlternativesError) {
+     *         // error handling
+     *     }
+     * }
+     * mapboxNavigation.registerRouteAlternativesObserver(alternativesObserver)
      * ```
      *
      * You can filter the alternatives out before setting them back to [MapboxNavigation] based on requirements.
+     *
+     * Additionally, you can use the alternatives observer to switch to an offboard route if the current route was built onboard
+     * which can be used to always prefer an offboard-generated route over onboard-generated one.
+     * This is a good practice because offboard-generated routes take live road conditions into account,
+     * have more precise ETAs, and can also be refreshed as the user drives and conditions change. Example usage:
+     * ```kotlin
+     * private val alternativesObserver = object : NavigationRouteAlternativesObserver {
+     *     override fun onRouteAlternatives(
+     *         routeProgress: RouteProgress,
+     *         alternatives: List<NavigationRoute>,
+     *         routerOrigin: RouterOrigin
+     *     ) {
+     *         val primaryRoute = routeProgress.navigationRoute
+     *         val isPrimaryRouteOffboard = primaryRoute.origin == RouterOrigin.Offboard
+     *         val offboardAlternatives = alternatives.filter { it.origin == RouterOrigin.Offboard }
+     *
+     *         when {
+     *             isPrimaryRouteOffboard -> {
+     *                 // if the current route is offboard, keep it
+     *                 // but consider accepting additional offboard alternatives only and ignore onboard ones
+     *                 val updatedRoutes = mutableListOf<NavigationRoute>()
+     *                 updatedRoutes.add(primaryRoute)
+     *                 updatedRoutes.addAll(offboardAlternatives)
+     *                 mapboxNavigation.setNavigationRoutes(updatedRoutes)
+     *             }
+     *             isPrimaryRouteOffboard.not() && offboardAlternatives.isNotEmpty() -> {
+     *                 // if the current route is onboard, and there's an offboard route available
+     *                 // consider notifying the user that a more accurate route is available and whether they'd want to switch
+     *                 // or force the switch like presented
+     *                 mapboxNavigation.setNavigationRoutes(offboardAlternatives)
+     *             }
+     *             else -> {
+     *                 // in other cases, when current route is onboard and there are no offboard alternatives,
+     *                 // just append the new alternatives
+     *                 val updatedRoutes = mutableListOf<NavigationRoute>()
+     *                 updatedRoutes.add(primaryRoute)
+     *                 updatedRoutes.addAll(alternatives)
+     *                 mapboxNavigation.setNavigationRoutes(updatedRoutes)
+     *             }
+     *         }
+     *     }
+     *
+     *     override fun onRouteAlternativesError(error: RouteAlternativesError) {
+     *         // error handling
+     *     }
+     * }
+     * mapboxNavigation.registerRouteAlternativesObserver(alternativesObserver)
+     * ```
      *
      * @param routeProgress the current route's progress.
      * @param alternatives list of alternative routes, can be empty.

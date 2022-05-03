@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.core.navigator.toLocation
@@ -62,7 +63,6 @@ internal class HistoryEventMapper {
         eventTimestamp: Double,
         setRoute: SetRouteHistoryRecord
     ): HistoryEventSetRoute {
-        // remove mapping after https://github.com/mapbox/mapbox-navigation-native/issues/5142
         val navigationRoute = mapNavigationRoute(setRoute)
         return HistoryEventSetRoute(
             eventTimestamp = eventTimestamp,
@@ -75,6 +75,12 @@ internal class HistoryEventMapper {
         )
     }
 
+    /**
+     * Function that tries to map the JSON found as route source to an instance of [NavigationRoute].
+     *
+     * For compatibility reasons, it contains fallbacks to support different formats
+     * in which the route was saved over the lifetime of the history recorder.
+     */
     private fun mapNavigationRoute(setRoute: SetRouteHistoryRecord): NavigationRoute? {
         val response = setRoute.routeResponse
         return if (response.isNullOrEmpty() || response == "{}") {
@@ -100,8 +106,9 @@ internal class HistoryEventMapper {
                             DirectionsRoute.fromJson(response).toBuilder()
                                 .routeIndex("0")
                                 .build()
-                                // TODO set Origin when closed https://github.com/mapbox/mapbox-navigation-native/issues/5699
-                                .toNavigationRoute()
+                                .toNavigationRoute(
+                                    setRoute.origin.mapToSdkRouteOrigin()
+                                )
                         }
                     }
                 }
@@ -121,7 +128,11 @@ internal class HistoryEventMapper {
             RouteOptions.fromUrl(URL(it))
         } ?: directionsResponse.routes().firstOrNull()?.routeOptions() ?: throw noOptionsException
         return runBlocking {
-            NavigationRoute.create(directionsResponse, routeOptions).first()
+            NavigationRoute.create(
+                directionsResponse,
+                routeOptions,
+                setRoute.origin.mapToSdkRouteOrigin()
+            ).first()
         }
     }
 

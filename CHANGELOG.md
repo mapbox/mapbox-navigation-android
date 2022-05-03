@@ -6,8 +6,11 @@ Mapbox welcomes participation and contributions from everyone.
 
 #### Features
 - Exposed `NavigationRoute#origin` that describes the type of router that generated the particular route. [#5766](https://github.com/mapbox/mapbox-navigation-android/pull/5766)
+- Added `RestStop#name` field which contains a name of the service/rest area, when available. [#5768](https://github.com/mapbox/mapbox-navigation-android/pull/5768)
 
 #### Bug fixes and improvements
+- Now it's possible to see the same route in `NavigationRouteAlternativesObserver` but coming from an offboard router if the current route was built onboard which can be used to always prefer an offboard-generated route over onboard-generated one. This is a good practice because offboard-generated routes take live road conditions into account, have more precise ETAs, and can also be refreshed as the user drives and conditions change. Check `NavigationRouteAlternativesObserver` documentation for example usage. [#5768](https://github.com/mapbox/mapbox-navigation-android/pull/5768)
+- Improved behavior of enhanced location teleports on parallel roads, especially forks. [#5768](https://github.com/mapbox/mapbox-navigation-android/pull/5768)
 
 ## Mapbox Navigation SDK 2.4.1 - April 28, 2022
 ### Changelog
