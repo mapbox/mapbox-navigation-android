@@ -1,7 +1,7 @@
 package com.mapbox.androidauto.deeplink
 
+import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.junit.jupiter.api.Assertions.assertEquals
 
 class GeoDeeplinkParserTest {
 

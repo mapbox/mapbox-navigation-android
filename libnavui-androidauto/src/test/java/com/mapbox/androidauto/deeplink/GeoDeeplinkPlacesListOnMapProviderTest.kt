@@ -6,11 +6,11 @@ import android.location.Location
 import androidx.car.app.CarContext
 import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.navigation.location.CarAppLocation
-import com.mapbox.androidauto.testing.MainCoroutineRule
 import com.mapbox.api.geocoding.v5.models.CarmenFeature
 import com.mapbox.api.geocoding.v5.models.GeocodingResponse
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplink
+import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -42,7 +42,7 @@ class GeoDeeplinkPlacesListOnMapProviderTest {
     }
 
     @Test
-    fun getPlaces() = coroutineRule.runTest {
+    fun getPlaces() = coroutineRule.runBlockingTest {
         mockkObject(MapboxCarApp)
         val location = mockk<Location> {
             every { longitude } returns -121.8544717
