@@ -24,6 +24,7 @@ ext {
       mapboxCore                : '5.0.1',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
       mapboxCommonNative        : '21.3.1',
+      mapboxSearchSdk           : '1.0.0-beta.29',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxBaseAndroid         : '0.8.0',
@@ -35,6 +36,7 @@ ext {
       androidXPreferenceVersion : '1.1.0',
       androidXAnnotationVersion : '1.2.0',
       androidXFragmentVersion   : '1.4.0',
+      androidXDataStore         : '1.0.0',
       cardViewVersion           : '1.0.0',
       recyclerViewVersion       : '1.1.0',
       materialDesignVersion     : '1.1.0',
@@ -76,6 +78,8 @@ ext {
       mapboxCore                : "com.mapbox.mapboxsdk:mapbox-android-core:${version.mapboxCore}",
       mapboxNavigator           : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
       mapboxCommonNative        : "com.mapbox.common:common:${version.mapboxCommonNative}",
+      mapboxSearchSdk           : "com.mapbox.search:mapbox-search-android:${version.mapboxSearchSdk}",
+
       /**
        * explicitly define Mapbox OkHttp dependency so that we are sure it's in sync with the Common SDK version we define
        * and we're not relying on Mapbox OKHttp coming in transitively
@@ -126,6 +130,7 @@ ext {
       androidStartup            : "androidx.startup:startup-runtime:${version.androidStartup}",
       androidXFragment          : "androidx.fragment:fragment-ktx:${version.androidXFragmentVersion}",
       androidXArchCoreTesting   : "androidx.arch.core:core-testing:${version.androidXArchCoreVersion}",
+      androidXDataStore         : "androidx.datastore:datastore-preferences:${version.androidXDataStore}",
 
       // lifecycle
       androidXLifecycleRuntime  : "androidx.lifecycle:lifecycle-runtime-ktx:${version.androidXLifecycle}",

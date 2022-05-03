@@ -17,7 +17,7 @@ import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.androidauto.navigation.audioguidance.muteAudioGuidance
-import com.mapbox.examples.androidauto.R
+import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.car.feedback.ui.routePreviewCarFeedbackProvider

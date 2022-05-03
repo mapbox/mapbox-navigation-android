@@ -7,7 +7,7 @@ import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Row
 import androidx.car.app.model.Template
 import androidx.car.app.model.Toggle
-import com.mapbox.examples.androidauto.R
+import com.mapbox.androidauto.R
 
 /**
  * Handle the android auto car app settings.

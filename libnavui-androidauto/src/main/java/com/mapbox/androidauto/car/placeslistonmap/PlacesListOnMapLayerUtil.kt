@@ -2,7 +2,7 @@ package com.mapbox.androidauto.car.placeslistonmap
 
 import android.content.res.Resources
 import android.graphics.BitmapFactory
-import com.mapbox.examples.androidauto.R
+import com.mapbox.androidauto.R
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.addLayer

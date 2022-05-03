@@ -1,7 +1,7 @@
 package com.mapbox.androidauto.car.feedback.ui
 
 import androidx.annotation.DrawableRes
-import com.mapbox.examples.androidauto.R
+import com.mapbox.androidauto.R
 
 sealed class CarFeedbackIcon(val name: String)
 

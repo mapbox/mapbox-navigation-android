@@ -144,9 +144,13 @@ ui-unit-tests-jacoco:
 core-publish-local:
 	./gradlew publishToMavenLocal
 
+.PHONY: upload-to-sdk-registry-snapshot
+upload-to-sdk-registry:
+	./gradlew mapboxSDKRegistryUpload -Psnapshot=true;
+
 .PHONY: upload-to-sdk-registry
 upload-to-sdk-registry:
-	./gradlew mapboxSDKRegistryUpload
+	./gradlew mapboxSDKRegistryUpload -x libnavui-androidauto:mapboxSDKRegistryUpload;
 
 .PHONY: publish-to-sdk-registry
 publish-to-sdk-registry:
@@ -155,6 +159,19 @@ publish-to-sdk-registry:
 	else \
 		python3 -m pip install git-pull-request; \
 		./gradlew mapboxSDKRegistryPublishAll; \
+	fi
+
+.PHONY: upload-to-sdk-registry-androidauto
+upload-to-sdk-registry-androidauto:
+	./gradlew libnavui-androidauto:mapboxSDKRegistryUpload;
+
+.PHONY: publish-to-sdk-registry-androidauto
+publish-to-sdk-registry-androidauto:
+	if [ -z "$(GITHUB_TOKEN)" ]; then \
+		echo "GITHUB_TOKEN env variable has to be set"; \
+	else \
+		python3 -m pip install git-pull-request; \
+		./gradlew libnavui-androidauto:mapboxSDKRegistryPublish; \
 	fi
 
 .PHONY: ui-check-api
@@ -187,3 +204,10 @@ ui-update-api: assemble-ui-release
 .PHONY: update-metalava
 update-metalava:
 	sh ./scripts/update_metalava.sh
+
+# Android Auto helper command. Set up your environment to run the desktop car emulator.
+# Guidance available in the android-auto README: /libnavui-androidauto/README.md
+.PHONY: car
+car:
+	adb forward tcp:5277 tcp:5277
+	cd $(ANDROID_HOME)/extras/google/auto/ && ./desktop-head-unit

@@ -41,7 +41,13 @@ workflows:
       - release:
           filters:
             tags:
-              only: /^v.*/
+              only: /v.*/
+            branches:
+              ignore: /.*/
+      - release-androidauto:
+          filters:
+            tags:
+              only: /androidauto-v.*/
             branches:
               ignore: /.*/
       - publish-documentation:
@@ -410,6 +416,13 @@ commands:
               --device model=redfin,version=30,locale=en,orientation=portrait \
               --timeout 5m
 
+  upload-artifacts-snapshot:
+    steps:
+      - deploy:
+          name: Upload all SDKs to SDK Registry
+          command: |
+            make upload-to-sdk-registry-snapshot
+
   upload-artifacts:
     steps:
       - deploy:
@@ -425,6 +438,22 @@ commands:
             export GITHUB_TOKEN=$(./mbx-ci github writer private token)
             git config --global user.email no-reply@mapbox.com && git config --global user.name mapbox-ci
             make publish-to-sdk-registry
+
+  upload-artifacts-androidauto:
+    steps:
+      - deploy:
+          name: Upload Android Auto Navigation SDK to SDK Registry
+          command: |
+            make upload-to-sdk-registry-androidauto
+
+  publish-artifacts-androidauto:
+    steps:
+      - deploy:
+          name: Publish Android Auto Navitation SDK to SDK Registry
+          command: |
+            export GITHUB_TOKEN=$(./mbx-ci github writer private token)
+            git config --global user.email no-reply@mapbox.com && git config --global user.name mapbox-ci
+            make publish-to-sdk-registry-androidauto
 
   check-public-documentation:
     steps:
@@ -704,7 +733,7 @@ jobs:
       - check-public-documentation
       - prepare-mbx-ci
       - setup-aws-credentials
-      - upload-artifacts
+      - upload-artifacts-snapshot
       - trigger-mobile-metrics
 
   release:
@@ -720,3 +749,14 @@ jobs:
       - setup-aws-credentials
       - upload-artifacts
       - publish-artifacts
+
+  release-androidauto:
+    executor: ndk-r22-latest-executor
+    steps:
+      - checkout
+      - check-public-documentation
+      - generate-documentation
+      - prepare-mbx-ci
+      - setup-aws-credentials
+      - upload-artifacts-androidauto
+      - publish-artifacts-androidauto

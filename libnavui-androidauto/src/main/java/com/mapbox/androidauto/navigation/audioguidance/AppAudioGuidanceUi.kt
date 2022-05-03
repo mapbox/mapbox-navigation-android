@@ -1,6 +1,6 @@
 package com.mapbox.androidauto.navigation.audioguidance
 
-import androidx.core.view.isVisible
+import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
@@ -25,7 +25,7 @@ fun Fragment.attachAudioGuidance(
                 } else {
                     mapboxSoundButton.unmute()
                 }
-                mapboxSoundButton.isVisible = state.isPlayable
+                mapboxSoundButton.visibility = if (state.isPlayable) View.VISIBLE else View.GONE
             }
         }
     }

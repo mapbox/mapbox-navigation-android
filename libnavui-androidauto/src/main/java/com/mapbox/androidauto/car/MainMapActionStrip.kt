@@ -9,7 +9,7 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.mapbox.examples.androidauto.R
+import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.navigation.CarCameraMode
 import com.mapbox.androidauto.car.navigation.CarNavigationCamera
 import kotlinx.coroutines.flow.collect

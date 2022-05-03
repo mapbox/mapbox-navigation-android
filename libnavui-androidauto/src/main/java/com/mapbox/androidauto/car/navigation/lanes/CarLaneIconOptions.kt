@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.res.Resources
 import androidx.annotation.StyleRes
 import androidx.appcompat.view.ContextThemeWrapper
-import com.mapbox.examples.androidauto.R
+import com.mapbox.androidauto.R
 
 /**
  * Modify the look and feel of the car lanes.

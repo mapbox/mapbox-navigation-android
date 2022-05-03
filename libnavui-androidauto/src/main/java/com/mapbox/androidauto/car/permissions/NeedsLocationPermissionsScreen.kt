@@ -5,7 +5,7 @@ import androidx.car.app.Screen
 import androidx.car.app.model.Action
 import androidx.car.app.model.MessageTemplate
 import androidx.car.app.model.Template
-import com.mapbox.examples.androidauto.R
+import com.mapbox.androidauto.R
 
 class NeedsLocationPermissionsScreen(
     carContext: CarContext

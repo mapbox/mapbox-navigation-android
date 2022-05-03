@@ -13,7 +13,7 @@ import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.car.navigation.roadlabel.RoadLabelSurfaceLayer
 import com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.logAndroidAuto
-import com.mapbox.examples.androidauto.R
+import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.MainMapActionStrip
 import com.mapbox.androidauto.car.action.MapboxActionProvider
 import com.mapbox.androidauto.car.location.CarLocationRenderer
