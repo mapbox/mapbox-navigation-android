@@ -1,211 +1,90 @@
 package com.mapbox.navigation.ui.voice.api
 
-import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
+import com.mapbox.navigation.ui.voice.model.TypeAndAnnouncement
 import com.mapbox.navigation.ui.voice.model.VoiceState
+import com.mapbox.navigation.ui.voice.testutils.Fixtures
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import okhttp3.ResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
-import retrofit2.Response
 import java.io.File
+import java.io.InputStream
 
-class MapboxVoiceApiTest {
+internal class MapboxVoiceApiTest {
 
-    @Test
-    fun `retrieve voice file`() = runBlocking {
-        val voiceInstructions: VoiceInstructions = mockk()
-        every {
-            voiceInstructions.announcement()
-        } returns "Turn right onto Frederick Road, Maryland 3 55."
-        every {
-            voiceInstructions.ssmlAnnouncement()
-        } returns """
-            <speak>
-                <amazon:effect name="drc">
-                    <prosody rate="1.08">Turn right onto Frederick Road, Maryland 3 55.</prosody>
-                </amazon:effect>
-            </speak>
-        """.trimIndent()
-        val response: Response<ResponseBody> = mockk(relaxed = true)
-        every { response.isSuccessful } returns true
-        every { response.body() } returns mockk()
-        val voiceResponse: VoiceState.VoiceResponse = mockk(relaxed = true)
-        every { voiceResponse.response } returns response
-        val speechProvider: MapboxSpeechProvider = mockk(relaxed = true)
-        coEvery { speechProvider.enqueueCall(any()) } returns voiceResponse
-        val fileProvider: MapboxSpeechFileProvider = mockk(relaxed = true)
-        val file: File = mockk(relaxed = true)
-        coEvery { fileProvider.generateVoiceFileFrom(any()) } returns file
-        val mapboxVoiceApi = MapboxVoiceApi(speechProvider, fileProvider)
+    private lateinit var sut: MapboxVoiceApi
+    private lateinit var mockSpeechProvider: MapboxSpeechProvider
+    private lateinit var mockSpeechFileProvider: MapboxSpeechFileProvider
 
-        val voiceState = mapboxVoiceApi.retrieveVoiceFile(voiceInstructions)
+    @Before
+    fun setUp() {
+        mockSpeechProvider = mockk(relaxed = true)
+        mockSpeechFileProvider = mockk(relaxed = true)
 
-        assertTrue(voiceState is VoiceState.VoiceFile)
-        assertEquals(file, (voiceState as VoiceState.VoiceFile).instructionFile)
+        sut = MapboxVoiceApi(mockSpeechProvider, mockSpeechFileProvider)
     }
 
     @Test
-    fun `retrieve voice file voice request failure if announcement is null`() = runBlocking {
-        val voiceInstructions: VoiceInstructions = mockk()
-        every {
-            voiceInstructions.announcement()
-        } returns null
-        every {
-            voiceInstructions.ssmlAnnouncement()
-        } returns null
-        val speechProvider: MapboxSpeechProvider = mockk(relaxed = true)
-        val fileProvider: MapboxSpeechFileProvider = mockk(relaxed = true)
-        val mapboxVoiceApi = MapboxVoiceApi(speechProvider, fileProvider)
+    fun `retrieveVoiceFile should download audio data using MapboxSpeechProvider`() = runBlocking {
+        val voiceInstructions = Fixtures.ssmlInstructions()
+        coEvery { mockSpeechProvider.load(any()) } returns ExpectedFactory.createError(Error())
 
-        val voiceState = mapboxVoiceApi.retrieveVoiceFile(voiceInstructions)
+        sut.retrieveVoiceFile(voiceInstructions)
 
-        assertTrue(voiceState is VoiceState.VoiceError)
-        assertEquals(
-            "VoiceInstructions ssmlAnnouncement / announcement can't be null or blank",
-            (voiceState as VoiceState.VoiceError).exception
-        )
+        val announcement = TypeAndAnnouncement("ssml", voiceInstructions.ssmlAnnouncement()!!)
+        coVerify { mockSpeechProvider.load(announcement) }
     }
 
     @Test
-    fun `retrieve voice file voice request failure if announcement is blank`() = runBlocking {
-        val voiceInstructions: VoiceInstructions = mockk()
-        every {
-            voiceInstructions.announcement()
-        } returns ""
-        every {
-            voiceInstructions.ssmlAnnouncement()
-        } returns null
-        val speechProvider: MapboxSpeechProvider = mockk(relaxed = true)
-        val fileProvider: MapboxSpeechFileProvider = mockk(relaxed = true)
-        val mapboxVoiceApi = MapboxVoiceApi(speechProvider, fileProvider)
+    fun `retrieveVoiceFile should save audio data to a file using MapboxSpeechFileProvider`() =
+        runBlocking {
+            val voiceInstructions = Fixtures.ssmlInstructions()
+            val blob = byteArrayOf(11, 22)
+            val blobInputStream = slot<InputStream>()
+            coEvery { mockSpeechProvider.load(any()) } returns ExpectedFactory.createValue(blob)
+            coEvery {
+                mockSpeechFileProvider.generateVoiceFileFrom(capture(blobInputStream))
+            } returns File("ignored")
 
-        val voiceState = mapboxVoiceApi.retrieveVoiceFile(voiceInstructions)
+            sut.retrieveVoiceFile(voiceInstructions)
 
-        assertTrue(voiceState is VoiceState.VoiceError)
-        assertEquals(
-            "VoiceInstructions ssmlAnnouncement / announcement can't be null or blank",
-            (voiceState as VoiceState.VoiceError).exception
-        )
-    }
+            assertEquals(blob.count(), blobInputStream.captured.available())
+        }
 
     @Test
-    fun `retrieve voice file voice response failure no data`() = runBlocking {
-        val voiceInstructions: VoiceInstructions = mockk()
-        every {
-            voiceInstructions.announcement()
-        } returns "Turn right onto Frederick Road, Maryland 3 55."
-        every {
-            voiceInstructions.ssmlAnnouncement()
-        } returns """
-            <speak>
-                <amazon:effect name="drc">
-                    <prosody rate="1.08">Turn right onto Frederick Road, Maryland 3 55.</prosody>
-                </amazon:effect>
-            </speak>
-        """.trimIndent()
-        val response: Response<ResponseBody> = mockk(relaxed = true)
-        every { response.isSuccessful } returns true
-        every { response.code() } returns 204
-        every { response.body() } returns null
-        val voiceResponse: VoiceState.VoiceResponse = mockk(relaxed = true)
-        every { voiceResponse.response } returns response
-        val speechProvider: MapboxSpeechProvider = mockk(relaxed = true)
-        coEvery { speechProvider.enqueueCall(any()) } returns voiceResponse
-        val fileProvider: MapboxSpeechFileProvider = mockk(relaxed = true)
-        val file: File = mockk(relaxed = true)
-        coEvery { fileProvider.generateVoiceFileFrom(any()) } returns file
-        val mapboxVoiceApi = MapboxVoiceApi(speechProvider, fileProvider)
+    fun `retrieveVoiceFile should return VoiceFile on success`() =
+        runBlocking {
+            val voiceInstructions = Fixtures.ssmlInstructions()
+            val blob = byteArrayOf(11, 22)
+            val file = File("saved-audio-file")
+            coEvery { mockSpeechProvider.load(any()) } returns ExpectedFactory.createValue(blob)
+            coEvery { mockSpeechFileProvider.generateVoiceFileFrom(any()) } returns file
 
-        val voiceState = mapboxVoiceApi.retrieveVoiceFile(voiceInstructions)
+            val result = sut.retrieveVoiceFile(voiceInstructions)
 
-        assertTrue(voiceState is VoiceState.VoiceError)
-        assertEquals(
-            "code: 204, error: No data available",
-            (voiceState as VoiceState.VoiceError).exception
-        )
-    }
+            assertEquals(VoiceState.VoiceFile(file), result)
+        }
 
     @Test
-    fun `retrieve voice file voice response failure not successful`() = runBlocking {
-        val voiceInstructions: VoiceInstructions = mockk()
-        every {
-            voiceInstructions.announcement()
-        } returns "Turn right onto Frederick Road, Maryland 3 55."
-        every {
-            voiceInstructions.ssmlAnnouncement()
-        } returns """
-            <speak>
-                <amazon:effect name="drc">
-                    <prosody rate="1.08">Turn right onto Frederick Road, Maryland 3 55.</prosody>
-                </amazon:effect>
-            </speak>
-        """.trimIndent()
-        val response: Response<ResponseBody> = mockk(relaxed = true)
-        every { response.isSuccessful } returns false
-        every { response.code() } returns 403
-        val responseBody: ResponseBody = mockk()
-        every { responseBody.string() } returns "Forbidden"
-        every { response.errorBody() } returns responseBody
-        val voiceResponse: VoiceState.VoiceResponse = mockk(relaxed = true)
-        every { voiceResponse.response } returns response
-        val speechProvider: MapboxSpeechProvider = mockk(relaxed = true)
-        coEvery { speechProvider.enqueueCall(any()) } returns voiceResponse
-        val fileProvider: MapboxSpeechFileProvider = mockk(relaxed = true)
-        val file: File = mockk(relaxed = true)
-        coEvery { fileProvider.generateVoiceFileFrom(any()) } returns file
-        val mapboxVoiceApi = MapboxVoiceApi(speechProvider, fileProvider)
+    fun `retrieveVoiceFile should return VoiceError on any error`() =
+        runBlocking {
+            val voiceInstructions = Fixtures.emptyInstructions()
+            coEvery { mockSpeechProvider.load(any()) } returns ExpectedFactory.createError(Error())
+            coEvery { mockSpeechFileProvider.generateVoiceFileFrom(any()) } throws Error()
 
-        val voiceState = mapboxVoiceApi.retrieveVoiceFile(voiceInstructions)
+            val result = sut.retrieveVoiceFile(voiceInstructions)
 
-        assertTrue(voiceState is VoiceState.VoiceError)
-        assertEquals(
-            "code: 403, error: Forbidden",
-            (voiceState as VoiceState.VoiceError).exception
-        )
-    }
-
-    @Test
-    fun `retrieve voice file voice response failure not successful no error body`() = runBlocking {
-        val voiceInstructions: VoiceInstructions = mockk()
-        every {
-            voiceInstructions.announcement()
-        } returns "Turn right onto Frederick Road, Maryland 3 55."
-        every {
-            voiceInstructions.ssmlAnnouncement()
-        } returns """
-            <speak>
-                <amazon:effect name="drc">
-                    <prosody rate="1.08">Turn right onto Frederick Road, Maryland 3 55.</prosody>
-                </amazon:effect>
-            </speak>
-        """.trimIndent()
-        val response: Response<ResponseBody> = mockk(relaxed = true)
-        every { response.isSuccessful } returns false
-        every { response.code() } returns 500
-        every { response.errorBody() } returns null
-        val voiceResponse: VoiceState.VoiceResponse = mockk(relaxed = true)
-        every { voiceResponse.response } returns response
-        val speechProvider: MapboxSpeechProvider = mockk(relaxed = true)
-        coEvery { speechProvider.enqueueCall(any()) } returns voiceResponse
-        val fileProvider: MapboxSpeechFileProvider = mockk(relaxed = true)
-        val file: File = mockk(relaxed = true)
-        coEvery { fileProvider.generateVoiceFileFrom(any()) } returns file
-        val mapboxVoiceApi = MapboxVoiceApi(speechProvider, fileProvider)
-
-        val voiceState = mapboxVoiceApi.retrieveVoiceFile(voiceInstructions)
-
-        assertTrue(voiceState is VoiceState.VoiceError)
-        assertEquals(
-            "code: 500, error: Unknown",
-            (voiceState as VoiceState.VoiceError).exception
-        )
-    }
+            assertTrue(result is VoiceState.VoiceError)
+        }
 
     @Test
     fun `clean file`() = runBlocking {

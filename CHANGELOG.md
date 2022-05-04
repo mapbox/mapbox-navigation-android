@@ -265,6 +265,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed occasional absence of the first voice instruction. [#5807](https://github.com/mapbox/mapbox-navigation-android/pull/5807)
 - Fixed an issue where prettified Mapbox Directions service responses weren't parsed correctly. [#5807](https://github.com/mapbox/mapbox-navigation-android/pull/5807)
 - Fixed feature to customize alternative route line colors based on route property. [#5802](https://github.com/mapbox/mapbox-navigation-android/pull/5802)
+- Updated MapboxSpeechApi to use persistent cache to decrease the bandwidth consumption. [#5790](https://github.com/mapbox/mapbox-navigation-android/pull/5790)
 
 #### Known issues
 - Precision of the point at which the route is supposed to change behind the location indicator is negatively impacted for long routes. This can present itself by the route vanishing/changing in front the the location indicator.

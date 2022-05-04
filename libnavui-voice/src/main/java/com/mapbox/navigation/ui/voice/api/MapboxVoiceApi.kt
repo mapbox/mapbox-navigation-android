@@ -1,17 +1,11 @@
 package com.mapbox.navigation.ui.voice.api
 
 import com.mapbox.api.directions.v5.models.VoiceInstructions
-import com.mapbox.navigation.ui.voice.VoiceAction
-import com.mapbox.navigation.ui.voice.VoiceAction.PrepareTypeAndAnnouncement
-import com.mapbox.navigation.ui.voice.VoiceAction.PrepareVoiceRequest
-import com.mapbox.navigation.ui.voice.VoiceAction.ProcessVoiceResponse
-import com.mapbox.navigation.ui.voice.VoiceProcessor
-import com.mapbox.navigation.ui.voice.VoiceResult.VoiceRequest
-import com.mapbox.navigation.ui.voice.VoiceResult.VoiceResponse
-import com.mapbox.navigation.ui.voice.VoiceResult.VoiceTypeAndAnnouncement
+import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.VoiceState
 import com.mapbox.navigation.ui.voice.model.VoiceState.VoiceError
+import com.mapbox.navigation.ui.voice.model.VoiceState.VoiceFile
 import java.io.File
 
 /**
@@ -27,7 +21,14 @@ internal class MapboxVoiceApi(
      * @param voiceInstruction VoiceInstructions object representing [VoiceInstructions]
      */
     override suspend fun retrieveVoiceFile(voiceInstruction: VoiceInstructions): VoiceState {
-        return processAction(PrepareTypeAndAnnouncement(voiceInstruction))
+        return runCatching {
+            val typeAndAnnouncement = VoiceInstructionsParser.parse(voiceInstruction).getOrThrow()
+            val blob = speechProvider.load(typeAndAnnouncement).getOrThrow()
+            val file = speechFileProvider.generateVoiceFileFrom(blob.inputStream())
+            VoiceFile(file)
+        }.getOrElse {
+            VoiceError(it.localizedMessage ?: genericError(voiceInstruction))
+        }
     }
 
     /**
@@ -47,39 +48,11 @@ internal class MapboxVoiceApi(
         speechFileProvider.cancel()
     }
 
-    private suspend fun processAction(action: VoiceAction): VoiceState {
-        return when (val result = VoiceProcessor.process(action)) {
-            is VoiceTypeAndAnnouncement -> {
-                when (result) {
-                    is VoiceTypeAndAnnouncement.Success -> processAction(
-                        PrepareVoiceRequest(result.typeAndAnnouncement)
-                    )
-                    is VoiceTypeAndAnnouncement.Failure -> VoiceError(result.error)
-                }
-            }
-            is VoiceRequest -> {
-                when (result) {
-                    is VoiceRequest.Success -> processVoiceRequest(result)
-                }
-            }
-            is VoiceResponse -> {
-                when (result) {
-                    is VoiceResponse.Success ->
-                        VoiceState.VoiceFile(speechFileProvider.generateVoiceFileFrom(result.data))
-                    is VoiceResponse.Failure -> VoiceError(
-                        "code: ${result.responseCode}, error: ${result.error}"
-                    )
-                }
-            }
-        }
-    }
+    private fun genericError(voiceInstruction: VoiceInstructions) =
+        "Cannot load voice instructions $voiceInstruction"
 
-    private suspend fun processVoiceRequest(result: VoiceRequest.Success): VoiceState {
-        return when (val speechResult = speechProvider.enqueueCall(result)) {
-            is VoiceState.VoiceResponse -> {
-                processAction(ProcessVoiceResponse(speechResult.response))
-            }
-            else -> speechResult
-        }
+    private fun <E : Throwable, V> Expected<E, V>.getOrThrow(): V {
+        if (isError) throw error!!
+        return value!!
     }
 }

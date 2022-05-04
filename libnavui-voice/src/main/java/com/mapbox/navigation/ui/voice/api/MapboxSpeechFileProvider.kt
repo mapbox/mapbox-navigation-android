@@ -5,19 +5,20 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.ResponseBody
 import java.io.File
+import java.io.InputStream
 
 internal class MapboxSpeechFileProvider(private val cacheDirectory: File) {
 
     private val ioJobController by lazy { InternalJobControlFactory.createIOScopeJobControl() }
 
-    suspend fun generateVoiceFileFrom(data: ResponseBody): File =
+    suspend fun generateVoiceFileFrom(inputStream: InputStream): File =
         withContext(ThreadController.IODispatcher) {
             // OS can delete folders and files in the cache even while app is running.
             cacheDirectory.mkdirs()
-            File(cacheDirectory, "${retrieveUniqueId()}$MP3_EXTENSION")
-                .apply { outputStream().use { data.byteStream().copyTo(it) } }
+            File(cacheDirectory, "${retrieveUniqueId()}$MP3_EXTENSION").apply {
+                inputStream.copyTo(outputStream())
+            }
         }
 
     fun delete(file: File) {
