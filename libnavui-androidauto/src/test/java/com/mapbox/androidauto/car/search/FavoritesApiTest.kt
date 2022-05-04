@@ -3,8 +3,8 @@
 package com.mapbox.androidauto.car.search
 
 import androidx.car.app.CarContext
-import com.mapbox.androidauto.testing.MainCoroutineRule
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.search.AsyncOperationTask
 import com.mapbox.search.CompletionCallback
 import com.mapbox.search.record.FavoriteRecord
@@ -27,7 +27,7 @@ class FavoritesApiTest {
     val coroutineRule = MainCoroutineRule()
 
     @Test
-    fun getPlaces() = coroutineRule.runTest {
+    fun getPlaces() = coroutineRule.runBlockingTest {
         val expectedItemList = listOf(
             FavoriteRecord(
                 "id",
@@ -59,7 +59,7 @@ class FavoritesApiTest {
     }
 
     @Test
-    fun getFavorites() = coroutineRule.runTest {
+    fun getFavorites() = coroutineRule.runBlockingTest {
         val expectedItemList = listOf<FavoriteRecord>()
         val callbackSlot = slot<CompletionCallback<List<FavoriteRecord>>>()
         val mockFavoritesProvider = mockk<FavoritesDataProvider>(relaxed = true) {
@@ -75,7 +75,7 @@ class FavoritesApiTest {
     }
 
     @Test
-    fun getFavorites_cancelsAsyncTask() = coroutineRule.runTest {
+    fun getFavorites_cancelsAsyncTask() = coroutineRule.runBlockingTest {
         val expectedAsyncOperationTask = mockk<AsyncOperationTask>(relaxed = true)
         val expectedItemList = listOf<FavoriteRecord>()
         val callbackSlot = slot<CompletionCallback<List<FavoriteRecord>>>()
@@ -94,7 +94,7 @@ class FavoritesApiTest {
     }
 
     @Test
-    fun getFavorites_onError() = coroutineRule.runTest {
+    fun getFavorites_onError() = coroutineRule.runBlockingTest {
         val callbackSlot = slot<CompletionCallback<List<FavoriteRecord>>>()
         val mockFavoritesProvider = mockk<FavoritesDataProvider>(relaxed = true) {
             every { getAll(capture(callbackSlot)) } answers {
@@ -109,7 +109,7 @@ class FavoritesApiTest {
     }
 
     @Test
-    fun addFavorite() = coroutineRule.runTest {
+    fun addFavorite() = coroutineRule.runBlockingTest {
         val expected = mockk<FavoriteRecord>(relaxed = true)
         val callbackSlot = slot<CompletionCallback<Unit>>()
         val mockFavoritesProvider = mockk<FavoritesDataProvider>(relaxed = true) {
@@ -125,7 +125,7 @@ class FavoritesApiTest {
     }
 
     @Test
-    fun addFavorite_cancelsAsyncTask() = coroutineRule.runTest {
+    fun addFavorite_cancelsAsyncTask() = coroutineRule.runBlockingTest {
         val favoriteRecord = mockk<FavoriteRecord>(relaxed = true)
         val expectedAsyncOperationTask = mockk<AsyncOperationTask>(relaxed = true)
         val callbackSlot = slot<CompletionCallback<Unit>>()
@@ -145,7 +145,7 @@ class FavoritesApiTest {
     }
 
     @Test
-    fun removeFavorite() = coroutineRule.runTest {
+    fun removeFavorite() = coroutineRule.runBlockingTest {
         val callbackSlot = slot<CompletionCallback<Boolean>>()
         val mockFavoritesProvider = mockk<FavoritesDataProvider>(relaxed = true) {
             every { remove("foobar", capture(callbackSlot)) } answers {
@@ -160,7 +160,7 @@ class FavoritesApiTest {
     }
 
     @Test
-    fun removeFavorite_cancelsAsyncTask() = coroutineRule.runTest {
+    fun removeFavorite_cancelsAsyncTask() = coroutineRule.runBlockingTest {
         val expectedAsyncOperationTask = mockk<AsyncOperationTask>(relaxed = true)
         val callbackSlot = slot<CompletionCallback<Boolean>>()
         val mockFavoritesProvider = mockk<FavoritesDataProvider>(relaxed = true) {
@@ -178,7 +178,7 @@ class FavoritesApiTest {
     }
 
     @Test
-    fun cancelRequests() = coroutineRule.runTest {
+    fun cancelRequests() = coroutineRule.runBlockingTest {
         val favoriteRecord = mockk<FavoriteRecord>(relaxed = true)
         val getAllTask = mockk<AsyncOperationTask>(relaxed = true)
         val addFavoriteTask = mockk<AsyncOperationTask>(relaxed = true)

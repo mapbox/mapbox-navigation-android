@@ -6,12 +6,12 @@ import androidx.car.app.CarContext
 import androidx.car.app.navigation.NavigationManager
 import androidx.car.app.navigation.NavigationManagerCallback
 import com.mapbox.androidauto.testing.CarAppTestRule
-import com.mapbox.androidauto.testing.MainCoroutineRule
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
+import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -21,6 +21,7 @@ import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.collect
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -120,7 +121,7 @@ class MapboxCarNavigationManagerTest {
     }
 
     @Test
-    fun `onAutoDriveEnabled updates the autoDriveEnabledFlow state`() = coroutineRule.runTest {
+    fun `onAutoDriveEnabled updates the autoDriveEnabledFlow state`() = coroutineRule.runBlockingTest {
         val resultsSlot = mutableListOf<Boolean>()
         val results = async { sut.autoDriveEnabledFlow.collect { resultsSlot.add(it) } }
         val mapboxNavigation: MapboxNavigation = mockk(relaxed = true)
@@ -135,7 +136,7 @@ class MapboxCarNavigationManagerTest {
     }
 
     @Test
-    fun `the state of autoDriveEnabledFlow can be observed after the event`() = coroutineRule.runTest {
+    fun `the state of autoDriveEnabledFlow can be observed after the event`() = coroutineRule.runBlockingTest {
         val resultsSlot = mutableListOf<Boolean>()
         val mapboxNavigation: MapboxNavigation = mockk(relaxed = true)
 

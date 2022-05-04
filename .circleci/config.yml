@@ -66,6 +66,9 @@ workflows:
       - unit-tests-ui:
           requires:
             - prepare-and-assemble
+      - unit-tests-androidauto:
+          requires:
+            - prepare-and-assemble
       - ui-robo-tests:
           requires:
             - prepare-and-assemble
@@ -281,6 +284,15 @@ commands:
           module_target: "libnavui-voice"
       - store-results:
           module_target: "libnavui-speedlimit"
+
+  unit-tests-androidauto:
+    steps:
+      - run:
+          name: Run Navigation UI SDK Unit Tests and generate Jacoco test report
+          command: |
+            ./gradlew libnavui-androidauto:jacocoTestReport
+      - store-results:
+          module_target: "libnavui-androidauto"
 
   codecov-upload:
     steps:
@@ -508,6 +520,20 @@ jobs:
             - read-workspace
             - unit-tests-ui
             - codecov-upload
+      - run: exit 0
+
+  unit-tests-androidauto:
+    executor: ndk-r22-latest-executor
+    steps:
+      - when:
+          condition:
+            not:
+              matches:
+                pattern: "^add-changelog.*"
+                value: << pipeline.git.branch >>
+          steps:
+            - read-workspace
+            - unit-tests-androidauto
       - run: exit 0
 
   static-analysis:

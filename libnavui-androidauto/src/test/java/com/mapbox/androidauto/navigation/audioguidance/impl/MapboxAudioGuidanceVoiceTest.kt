@@ -3,10 +3,10 @@
 package com.mapbox.androidauto.navigation.audioguidance.impl
 
 import com.mapbox.androidauto.testing.CarAppTestRule
-import com.mapbox.androidauto.testing.MainCoroutineRule
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
@@ -39,7 +39,7 @@ class MapboxAudioGuidanceVoiceTest {
     )
 
     @Test
-    fun `voice instruction should be played as SpeechAnnouncement`() = coroutineRule.runTest {
+    fun `voice instruction should be played as SpeechAnnouncement`() = coroutineRule.runBlockingTest {
         mockSuccessfulSpeechApi()
         mockSuccessfulVoiceInstructionsPlayer()
 
@@ -52,7 +52,7 @@ class MapboxAudioGuidanceVoiceTest {
     }
 
     @Test
-    fun `null should clean up the api and player`() = coroutineRule.runTest {
+    fun `null should clean up the api and player`() = coroutineRule.runBlockingTest {
         carAppAudioGuidanceVoice.speak(null).collect()
 
         verify { speechApi.cancel() }
@@ -60,7 +60,7 @@ class MapboxAudioGuidanceVoiceTest {
     }
 
     @Test
-    fun `should play fallback when speech api fails`() = coroutineRule.runTest {
+    fun `should play fallback when speech api fails`() = coroutineRule.runBlockingTest {
         every { speechApi.generate(any(), any()) } answers {
             val consumer = secondArg<MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>>>()
             val error = mockk<SpeechError> {
