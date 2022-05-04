@@ -96,6 +96,8 @@ dependencies {
     // Mapbox Navigation SDK
     implementation project(':libnavigation-android')
 
+    api dependenciesList.mapboxSdkServices
+
     // test
     androidTestImplementation project(':libtesting-ui')
     androidTestImplementation dependenciesList.testRunner

@@ -49,6 +49,9 @@ dependencies {
     api project(":libnavui-speedlimit")
     api project(":libnavui-tripprogress")
     api project(":libnavui-voice")
+
+    api dependenciesList.mapboxSdkServices
+
     implementation project(":libnavui-resources")
     implementation project(":libnavui-util")
 

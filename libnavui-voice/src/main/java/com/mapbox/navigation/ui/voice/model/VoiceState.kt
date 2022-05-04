@@ -1,19 +1,11 @@
 package com.mapbox.navigation.ui.voice.model
 
-import okhttp3.ResponseBody
-import retrofit2.Response
 import java.io.File
 
 /**
  * Immutable object representing the voice data to be played.
  */
 internal sealed class VoiceState {
-
-    /**
-     * State representing data about the response from Mapbox's API Voice.
-     * @param response
-     */
-    data class VoiceResponse(val response: Response<ResponseBody>) : VoiceState()
 
     /**
      * State representing data about the instruction file.

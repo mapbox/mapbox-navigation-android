@@ -5,9 +5,6 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
-import com.mapbox.navigation.ui.voice.VoiceAction
-import com.mapbox.navigation.ui.voice.VoiceProcessor
-import com.mapbox.navigation.ui.voice.VoiceResult
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
@@ -83,11 +80,6 @@ class MapboxSpeechApi @JvmOverloads constructor(
         consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>>
     ) {
         when (val result = voiceAPI.retrieveVoiceFile(voiceInstruction)) {
-            is VoiceState.VoiceResponse -> {
-                check(false) {
-                    "Invalid state: retrieveVoiceFile can't produce VoiceResponse VoiceState"
-                }
-            }
             is VoiceState.VoiceFile -> {
                 val announcement = voiceInstruction.announcement()
                 val ssmlAnnouncement = voiceInstruction.ssmlAnnouncement()
@@ -121,14 +113,18 @@ class MapboxSpeechApi @JvmOverloads constructor(
         }
     }
 
-    private suspend fun processVoiceAnnouncement(
+    private fun processVoiceAnnouncement(
         voiceInstruction: VoiceInstructions,
         onAvailable: (SpeechAnnouncement) -> Unit
     ) {
-        val checkVoiceInstructionsResult =
-            VoiceProcessor.process(VoiceAction.PrepareTypeAndAnnouncement(voiceInstruction))
-        when (checkVoiceInstructionsResult as VoiceResult.VoiceTypeAndAnnouncement) {
-            is VoiceResult.VoiceTypeAndAnnouncement.Success -> {
+        VoiceInstructionsParser.parse(voiceInstruction).fold(
+            {
+                check(false) {
+                    "Invalid state: processVoiceAnnouncement can't produce " +
+                        "Failure VoiceTypeAndAnnouncement VoiceResult"
+                }
+            },
+            {
                 val announcement = voiceInstruction.announcement()
                 val ssmlAnnouncement = voiceInstruction.ssmlAnnouncement()
                 // Can't be null as it's checked in processVoiceAnnouncement
@@ -137,12 +133,6 @@ class MapboxSpeechApi @JvmOverloads constructor(
                     .build()
                 onAvailable(available)
             }
-            is VoiceResult.VoiceTypeAndAnnouncement.Failure -> {
-                check(false) {
-                    "Invalid state: processVoiceAnnouncement can't produce " +
-                        "Failure VoiceTypeAndAnnouncement VoiceResult"
-                }
-            }
-        }
+        )
     }
 }
