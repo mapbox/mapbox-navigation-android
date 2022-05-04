@@ -4,15 +4,16 @@ import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.common.HttpResponse
+import com.mapbox.common.ResourceLoadError
+import com.mapbox.common.ResourceLoadResult
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionAction
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionProcessor
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionResult
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue
-import com.mapbox.navigation.ui.maps.guidance.junction.model.MapboxJunctionRequest
-import com.mapbox.navigation.utils.internal.HttpServiceFactoryWrapper
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoaderFactory
+import com.mapbox.navigation.ui.utils.internal.resource.load
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
@@ -30,7 +31,7 @@ class MapboxJunctionApi(
     }
 
     private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
-    private val requestList: MutableList<MapboxJunctionRequest> = mutableListOf()
+    private val resourceLoader by lazy { ResourceLoaderFactory.getInstance() }
 
     /**
      * The method takes in [BannerInstructions] and generates a junction based on the presence of
@@ -68,11 +69,6 @@ class MapboxJunctionApi(
      * Invoke the method to cancel all ongoing requests to generate a junction.
      */
     fun cancelAll() {
-        requestList.forEach {
-            HttpServiceFactoryWrapper.getInstance().cancelRequest(it.requestId) {
-            }
-        }
-        requestList.clear()
         mainJobController.job.cancelChildren()
     }
 
@@ -84,28 +80,18 @@ class MapboxJunctionApi(
             result.junctionUrl.plus(ACCESS_TOKEN.plus(accessToken))
         )
         val junctionRequest = JunctionProcessor.process(requestAction)
-        val httpRequest = (junctionRequest as JunctionResult.JunctionRequest).request
-        val requestId = HttpServiceFactoryWrapper.getInstance().request(
-            httpRequest
-        ) { httpResponse ->
-            mainJobController.scope.launch {
-                onJunctionResponse(httpResponse, consumer)
-            }
+        val loadRequest = (junctionRequest as JunctionResult.JunctionRequest).request
+        mainJobController.scope.launch {
+            val loadResult = resourceLoader.load(loadRequest)
+            onJunctionResponse(loadResult, consumer)
         }
-        requestList.add(MapboxJunctionRequest(requestId, httpRequest))
     }
 
     private fun onJunctionResponse(
-        httpResponse: HttpResponse,
+        loadResult: Expected<ResourceLoadError, ResourceLoadResult>,
         consumer: MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>
     ) {
-        val filteredList = requestList.filter {
-            it.httpRequest != httpResponse.request
-        }
-        requestList.clear()
-        requestList.addAll(filteredList)
-        val response = httpResponse.result
-        val action = JunctionAction.ProcessJunctionResponse(response)
+        val action = JunctionAction.ProcessJunctionResponse(loadResult)
         when (val result = JunctionProcessor.process(action)) {
             is JunctionResult.JunctionRaster.Success -> {
                 onJunctionAvailable(result.data, consumer)

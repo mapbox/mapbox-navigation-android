@@ -5,20 +5,18 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerView
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.bindgen.ExpectedFactory.createError
 import com.mapbox.bindgen.ExpectedFactory.createValue
-import com.mapbox.common.HttpMethod
-import com.mapbox.common.HttpRequest
-import com.mapbox.common.HttpRequestError
-import com.mapbox.common.HttpRequestErrorType
-import com.mapbox.common.HttpResponseData
-import com.mapbox.common.UAComponents
+import com.mapbox.common.ResourceData
+import com.mapbox.common.ResourceLoadError
+import com.mapbox.common.ResourceLoadResult
+import com.mapbox.common.ResourceLoadStatus
 import com.mapbox.navigation.ui.maps.guidance.signboard.api.SvgToBitmapParser
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.util.Date
 
 class SignboardProcessorTest {
 
@@ -112,34 +110,21 @@ class SignboardProcessorTest {
     }
 
     @Test
-    fun `process action signboard process http request result http request`() {
-        val mockHttpRequest = HttpRequest.Builder()
-            .headers(hashMapOf(Pair("User-Agent", "MapboxJava/")))
-            .body(byteArrayOf())
-            .method(HttpMethod.GET)
-            .url("https://abc.mapbox.com")
-            .uaComponents(
-                UAComponents.Builder()
-                    .sdkIdentifierComponent("mapbox-navigation-ui-android")
-                    .build()
-            )
-            .build()
+    fun `process PrepareSignboardRequest action should return SignboardRequest`() {
         val action = SignboardAction.PrepareSignboardRequest("https://abc.mapbox.com")
 
         val result = SignboardProcessor.process(action) as SignboardResult.SignboardRequest
 
-        assertEquals(mockHttpRequest.url, result.request.url)
-        assertEquals(mockHttpRequest.body?.isEmpty(), result.request.body?.isEmpty())
-        assertEquals(mockHttpRequest.method, result.request.method)
-        assertEquals(mockHttpRequest.headers, result.request.headers)
-        assertEquals(mockHttpRequest.uaComponents, result.request.uaComponents)
+        assertEquals(action.signboardUrl, result.request.url)
     }
 
     @Test
-    fun `process action signboard process response result unauthorized access`() {
-        val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(401L, ByteArray(0))
-        val response: Expected<HttpRequestError, HttpResponseData> =
-            createValue(mockHttpResponseData)
+    fun `process ProcessSignboardResponse action with ResourceLoadStatus UNAUTHORIZED`() {
+        val loadResult = resourceLoadResult(
+            data = null,
+            status = ResourceLoadStatus.UNAUTHORIZED,
+        )
+        val response: Expected<ResourceLoadError, ResourceLoadResult> = createValue(loadResult)
         val action = SignboardAction.ProcessSignboardResponse(response)
         val expected = SignboardResult.SignboardSvg.Failure(
             "Your token cannot access this " +
@@ -152,10 +137,12 @@ class SignboardProcessorTest {
     }
 
     @Test
-    fun `process action signboard process response result resource missing`() {
-        val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(404L, ByteArray(0))
-        val response: Expected<HttpRequestError, HttpResponseData> =
-            createValue(mockHttpResponseData)
+    fun `process ProcessSignboardResponse action with ResourceLoadStatus NOT_FOUND`() {
+        val loadResult = resourceLoadResult(
+            data = null,
+            status = ResourceLoadStatus.NOT_FOUND,
+        )
+        val response: Expected<ResourceLoadError, ResourceLoadResult> = createValue(loadResult)
         val expected = SignboardResult.SignboardSvg.Failure("Resource is missing")
         val action = SignboardAction.ProcessSignboardResponse(response)
 
@@ -165,23 +152,12 @@ class SignboardProcessorTest {
     }
 
     @Test
-    fun `process action signboard process response result unknown error`() {
-        val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(500L, ByteArray(0))
-        val response: Expected<HttpRequestError, HttpResponseData> =
-            createValue(mockHttpResponseData)
-        val expected = SignboardResult.SignboardSvg.Failure("Unknown error")
-        val action = SignboardAction.ProcessSignboardResponse(response)
-
-        val result = SignboardProcessor.process(action) as SignboardResult.SignboardSvg.Failure
-
-        assertEquals(expected.error, result.error)
-    }
-
-    @Test
-    fun `process action signboard process response result no data`() {
-        val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(200L, ByteArray(0))
-        val response: Expected<HttpRequestError, HttpResponseData> =
-            createValue(mockHttpResponseData)
+    fun `process ProcessSignboardResponse action with ResourceLoadStatus AVAILABLE but with no data`() {
+        val loadResult = resourceLoadResult(
+            data = resourceData(ByteArray(0)),
+            status = ResourceLoadStatus.AVAILABLE,
+        )
+        val response: Expected<ResourceLoadError, ResourceLoadResult> = createValue(loadResult)
         val expected = SignboardResult.SignboardSvg.Empty
         val action = SignboardAction.ProcessSignboardResponse(response)
 
@@ -191,29 +167,14 @@ class SignboardProcessorTest {
     }
 
     @Test
-    fun `process action signboard process response result failure`() {
-        val response: Expected<HttpRequestError, HttpResponseData> =
-            createError(
-                getMockHttpRequestError(
-                    HttpRequestErrorType.CONNECTION_ERROR,
-                    "Connection Error"
-                )
-            )
-        val expected = SignboardResult.SignboardSvg.Failure("Connection Error")
-        val action = SignboardAction.ProcessSignboardResponse(response)
-
-        val result = SignboardProcessor.process(action) as SignboardResult.SignboardSvg.Failure
-
-        assertEquals(expected.error, result.error)
-    }
-
-    @Test
-    fun `process action signboard process response result success`() {
-        val mockData = byteArrayOf(12, -12, 23, 65, -56, 74, 88, 90, -92, -11)
-        val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(200L, mockData)
-        val response: Expected<HttpRequestError, HttpResponseData> =
-            createValue(mockHttpResponseData)
-        val expected = SignboardResult.SignboardSvg.Success(mockData)
+    fun `process ProcessSignboardResponse action with ResourceLoadStatus AVAILABLE`() {
+        val blob = byteArrayOf(12, -12, 23, 65, -56, 74, 88, 90, -92, -11)
+        val loadResult = resourceLoadResult(
+            data = resourceData(blob),
+            status = ResourceLoadStatus.AVAILABLE,
+        )
+        val response: Expected<ResourceLoadError, ResourceLoadResult> = createValue(loadResult)
+        val expected = SignboardResult.SignboardSvg.Success(blob)
         val action = SignboardAction.ProcessSignboardResponse(response)
 
         val result = SignboardProcessor.process(action) as SignboardResult.SignboardSvg.Success
@@ -262,20 +223,29 @@ class SignboardProcessorTest {
             .build()
     }
 
-    private fun getMockHttpResponseData(code: Long, data: ByteArray): HttpResponseData {
-        val httpResponseData: HttpResponseData = mockk()
-        every { httpResponseData.code } returns code
-        every { httpResponseData.data } returns data
-        return httpResponseData
+    private fun resourceData(blob: ByteArray) = object : ResourceData(0) {
+        override fun getData(): ByteArray = blob
     }
 
-    private fun getMockHttpRequestError(
-        errorType: HttpRequestErrorType,
-        msg: String
-    ): HttpRequestError {
-        val error: HttpRequestError = mockk()
-        every { error.type } returns errorType
-        every { error.message } returns msg
-        return error
+    private fun resourceLoadResult(
+        data: ResourceData?,
+        status: ResourceLoadStatus,
+        immutable: Boolean = false,
+        mustRevalidate: Boolean = false,
+        expires: Date = Date(),
+        totalBytes: Long = 0,
+        transferredBytes: Long = 0,
+        contentType: String = "image/png"
+    ): ResourceLoadResult {
+        return ResourceLoadResult(
+            data,
+            status,
+            immutable,
+            mustRevalidate,
+            expires,
+            totalBytes,
+            transferredBytes,
+            contentType
+        )
     }
 }

@@ -2,8 +2,8 @@ package com.mapbox.navigation.ui.maps.guidance.signboard
 
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.bindgen.Expected
-import com.mapbox.common.HttpRequestError
-import com.mapbox.common.HttpResponseData
+import com.mapbox.common.ResourceLoadError
+import com.mapbox.common.ResourceLoadResult
 import com.mapbox.navigation.ui.maps.guidance.signboard.api.SvgToBitmapParser
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions
 
@@ -18,7 +18,7 @@ internal sealed class SignboardAction {
     ) : SignboardAction()
 
     data class ProcessSignboardResponse(
-        val response: Expected<HttpRequestError, HttpResponseData>
+        val response: Expected<ResourceLoadError, ResourceLoadResult>
     ) : SignboardAction()
 
     data class ParseSvgToBitmap(

@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.maps.guidance.junction
 
 import android.graphics.Bitmap
-import com.mapbox.common.HttpRequest
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 
 internal sealed class JunctionResult {
 
@@ -12,7 +12,7 @@ internal sealed class JunctionResult {
     object JunctionUnavailable : JunctionResult()
 
     data class JunctionRequest(
-        val request: HttpRequest
+        val request: ResourceLoadRequest
     ) : JunctionResult()
 
     sealed class JunctionRaster : JunctionResult() {

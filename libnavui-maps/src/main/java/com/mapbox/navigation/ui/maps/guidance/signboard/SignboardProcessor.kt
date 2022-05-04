@@ -3,24 +3,16 @@ package com.mapbox.navigation.ui.maps.guidance.signboard
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.bindgen.Expected
-import com.mapbox.common.HttpMethod
-import com.mapbox.common.HttpRequest
-import com.mapbox.common.HttpRequestError
-import com.mapbox.common.HttpResponseData
-import com.mapbox.common.UAComponents
+import com.mapbox.common.ResourceLoadError
+import com.mapbox.common.ResourceLoadResult
+import com.mapbox.common.ResourceLoadStatus
 import com.mapbox.navigation.ui.maps.guidance.signboard.api.SvgToBitmapParser
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions
 import com.mapbox.navigation.ui.utils.internal.extensions.getBannerComponents
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 
 internal object SignboardProcessor {
-
-    private const val USER_AGENT_KEY = "User-Agent"
-    private const val USER_AGENT_VALUE = "MapboxJava/"
-    private const val SDK_IDENTIFIER = "mapbox-navigation-ui-android"
-    private const val CODE_200 = 200L
-    private const val CODE_401 = 401L
-    private const val CODE_404 = 404L
 
     /**
      * The function takes [SignboardAction] performs business logic and returns [SignboardResult]
@@ -75,43 +67,34 @@ internal object SignboardProcessor {
     }
 
     private fun prepareRequest(url: String): SignboardResult {
-        val request = HttpRequest.Builder()
-            .url(url)
-            .body(byteArrayOf())
-            .method(HttpMethod.GET)
-            .headers(hashMapOf(Pair(USER_AGENT_KEY, USER_AGENT_VALUE)))
-            .uaComponents(
-                UAComponents.Builder()
-                    .sdkIdentifierComponent(SDK_IDENTIFIER)
-                    .build()
-            )
-            .build()
-        return SignboardResult.SignboardRequest(request)
+        val loadRequest = ResourceLoadRequest(url)
+        return SignboardResult.SignboardRequest(loadRequest)
     }
 
     private fun processResponse(
-        response: Expected<HttpRequestError, HttpResponseData>
+        response: Expected<ResourceLoadError, ResourceLoadResult>
     ): SignboardResult {
         return response.fold(
             { error ->
                 SignboardResult.SignboardSvg.Failure(error.message)
             },
             { responseData ->
-                when (responseData.code) {
-                    CODE_200 -> {
-                        if (responseData.data.isEmpty()) {
+                when (responseData.status) {
+                    ResourceLoadStatus.AVAILABLE -> {
+                        val blob: ByteArray = responseData.data?.data ?: byteArrayOf()
+                        if (blob.isEmpty()) {
                             SignboardResult.SignboardSvg.Empty
                         } else {
-                            SignboardResult.SignboardSvg.Success(responseData.data)
+                            SignboardResult.SignboardSvg.Success(blob)
                         }
                     }
-                    CODE_401 -> {
+                    ResourceLoadStatus.UNAUTHORIZED -> {
                         SignboardResult.SignboardSvg.Failure(
                             "Your token cannot access this " +
                                 "resource, contact support"
                         )
                     }
-                    CODE_404 -> {
+                    ResourceLoadStatus.NOT_FOUND -> {
                         SignboardResult.SignboardSvg.Failure("Resource is missing")
                     }
                     else -> {

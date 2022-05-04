@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.maps.guidance.signboard
 
 import android.graphics.Bitmap
-import com.mapbox.common.HttpRequest
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 
 internal sealed class SignboardResult {
 
@@ -12,7 +12,7 @@ internal sealed class SignboardResult {
     object SignboardUnavailable : SignboardResult()
 
     data class SignboardRequest(
-        val request: HttpRequest
+        val request: ResourceLoadRequest
     ) : SignboardResult()
 
     sealed class SignboardSvg : SignboardResult() {
