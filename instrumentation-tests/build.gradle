@@ -46,7 +46,6 @@ dependencies {
     androidTestImplementation dependenciesList.mockkAndroid
     androidTestImplementation dependenciesList.androidxTestCore
     androidTestUtil dependenciesList.testOrchestrator
-    implementation dependenciesList.mockk
 
     // Kotlin support
     implementation dependenciesList.kotlinStdLib
