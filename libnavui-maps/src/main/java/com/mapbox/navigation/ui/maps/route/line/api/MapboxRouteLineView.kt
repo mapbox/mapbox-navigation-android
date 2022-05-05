@@ -12,6 +12,7 @@ import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
+import com.mapbox.maps.extension.style.utils.toValue
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getLayerVisibility
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.initializeLayers
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
@@ -22,6 +23,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvide
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -49,7 +51,7 @@ import kotlinx.coroutines.sync.withLock
 class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
 
     private companion object {
-        private const val TAG = "MbxRouteLineView"
+        private const val CATEGORY = "RouteLineView"
     }
 
     private val jobControl = InternalJobControlFactory.createDefaultScopeJobControl()
@@ -80,7 +82,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         initializeLayers(style, options)
         routeDrawData.fold(
             { error ->
-                Log.e(TAG, error.errorMessage)
+                logE("renderRouteDrawData failure: ${error.errorMessage}", CATEGORY)
             },
             { value ->
                 jobControl.scope.launch(Dispatchers.Main) {
@@ -128,11 +130,26 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                         // SBNOTE: In the future let's find a better way to
                         // match the items in the list with the alt. route layer ID's.
                         value.alternativeRouteLinesData[0].also {
-                            updateSource(
-                                style,
-                                RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
-                                it.featureCollection
-                            )
+                            if (it.featureCollection.features()?.isNotEmpty() == true) {
+                                Log.e(
+                                    "lp_test",
+                                    "updating alt1: ${it.featureCollection.features()?.size}"
+                                )
+                                updateSource(
+                                    style,
+                                    RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
+                                    it.featureCollection
+                                )
+                            } else {
+                                Log.e(
+                                    "lp_test",
+                                    "clearing alt1: ${it.featureCollection.features()?.size}"
+                                )
+                                clearSource(
+                                    style,
+                                    RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID
+                                )
+                            }
                             updateLineGradientAsync(
                                 jobControl.scope,
                                 style,
@@ -154,11 +171,18 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                         }
 
                         value.alternativeRouteLinesData[1].also {
-                            updateSource(
-                                style,
-                                RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
-                                it.featureCollection
-                            )
+                            if (it.featureCollection.features()?.isNotEmpty() == true) {
+                                updateSource(
+                                    style,
+                                    RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                                    it.featureCollection
+                                )
+                            } else {
+                                clearSource(
+                                    style,
+                                    RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID
+                                )
+                            }
                             updateLineGradientAsync(
                                 jobControl.scope,
                                 style,
@@ -528,6 +552,16 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         }
     }
 
+    private fun clearSource(style: Style, sourceId: String) {
+        style.getSource(sourceId)?.let {
+            style.setStyleSourceProperty(
+                sourceId,
+                "data",
+                FeatureCollection.fromFeatures(emptyArray()).toValue()
+            )
+        }
+    }
+
     private suspend fun updateLineGradientAsync(
         coroutineScope: CoroutineScope,
         style: Style,
@@ -561,6 +595,14 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
     private fun updateLineGradient(style: Style, expression: Expression, vararg layerIds: String) {
         layerIds.forEach { layerId ->
             style.getLayer(layerId)?.let {
+                if (listOf(
+                        RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
+                        RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
+                        RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID
+                    ).contains(layerId)
+                ) {
+                    Log.e("lp_test", "updating $layerId with ${expression.toJson()}")
+                }
                 (it as LineLayer).lineGradient(expression)
             }
         }
