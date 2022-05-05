@@ -34,6 +34,9 @@ android {
 }
 
 dependencies {
+    compileOnly(dependenciesList.mapboxAnnotations)
+    kapt(dependenciesList.mapboxAnnotationsProcessor)
+
     api(dependenciesList.mapboxMapsAndroidAuto)
     api(project(":libnavigation-android"))
     implementation(project(":libnavui-resources"))
@@ -53,6 +56,11 @@ dependencies {
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
     testImplementation(project(':libtesting-utils'))
     testImplementation(dependenciesList.androidXArchCoreTesting)
+
+    androidTestImplementation(dependenciesList.testRunner)
+    androidTestImplementation(dependenciesList.testRules)
+    androidTestImplementation(dependenciesList.androidxTestCore)
+    androidTestImplementation(dependenciesList.mockkAndroid)
 }
 
 dokkaHtml {

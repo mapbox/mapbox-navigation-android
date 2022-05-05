@@ -1,4 +1,6 @@
 version: 2.1
+orbs:
+  android: circleci/android@1.0.3
 
 parameters:
   mapbox_navigation_native_upstream:
@@ -78,6 +80,7 @@ workflows:
       - instrumentation-tests:
           requires:
             - prepare-and-assemble
+      - androidauto-test
       - mobile-metrics-dry-run:
           type: approval
       - mobile-metrics-benchmarks:
@@ -656,6 +659,33 @@ jobs:
             - login-google-cloud-platform
             - run-firebase-instrumentation:
                 variant: "debug"
+      - run: exit 0
+
+  androidauto-test:
+    executor:
+      name: android/android-machine
+      resource-class: large
+    steps:
+      - when:
+          condition:
+            not:
+              matches:
+                pattern: "^add-changelog.*"
+                value: << pipeline.git.branch >>
+          steps:
+            - checkout
+            - android/start-emulator-and-run-tests:
+                post-emulator-launch-assemble-command: ./gradlew libnavui-androidauto:assembleDebugAndroidTest
+                test-command: ./gradlew libnavui-androidauto:connectedDebugAndroidTest
+                system-image: system-images;android-30;google_apis_playstore;x86
+            - run:
+                name: Save test results
+                command: |
+                  mkdir -p ~/mapbox_test/
+                  adb pull sdcard/Download/mapbox_test ~/mapbox_test/
+                when: on_fail
+            - store_artifacts:
+                path: ~/mapbox_test/
       - run: exit 0
 
   mobile-metrics-benchmarks:
