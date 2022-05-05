@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.internal.factory
 
+import com.mapbox.api.directions.v5.models.MapboxShield
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.toMapboxShield
 import com.mapbox.navigation.base.road.model.Road
@@ -11,6 +12,14 @@ import com.mapbox.navigator.NavigationStatus
  */
 @ExperimentalMapboxNavigationAPI
 object RoadFactory {
+
+    fun buildRoadComponent(
+        text: String,
+        shield: MapboxShield? = null,
+        imageBaseUrl: String? = null
+    ): RoadComponent {
+        return RoadComponent(text, shield, imageBaseUrl)
+    }
 
     fun buildRoadObject(navigationStatus: NavigationStatus): Road {
         val components = navigationStatus.roads.map { road ->
