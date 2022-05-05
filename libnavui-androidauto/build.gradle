@@ -41,8 +41,8 @@ dependencies {
     // This defines the minimum version of Maps, Navigation, and Search which are included in
     // this SDK. To upgrade the SDK versions, you can specify a newer version in your downstream
     // build.gradle.
-    api("com.mapbox.navigation:android:2.4.1")
-    api("com.mapbox.search:mapbox-search-android:1.0.0-beta.26")
+    api("com.mapbox.navigation:android:2.5.0-rc.1")
+    api("com.mapbox.search:mapbox-search-android:1.0.0-beta.29")
 
     implementation(dependenciesList.androidXAppCompat)
     implementation(dependenciesList.coroutinesCore)

@@ -1,6 +1,5 @@
 package com.mapbox.navigation.qa_test_app.view
 
-import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -8,14 +7,8 @@ import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.trip.notification.TripNotificationInterceptor
-import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.dropin.internal.extensions.attachCreated
 import com.mapbox.navigation.dropin.internal.extensions.attachResumed
-import com.mapbox.navigation.dropin.internal.extensions.flowRoutesUpdated
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.AppLifecycleActivityLayoutBinding
 import com.mapbox.navigation.qa_test_app.lifecycle.DropInContinuousRoutes
@@ -27,8 +20,6 @@ import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInLocationViewM
 import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInNavigationViewModel
 import com.mapbox.navigation.qa_test_app.utils.Utils.getMapboxAccessToken
 import com.mapbox.navigation.ui.maps.NavigationStyles
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class AppLifecycleActivity : AppCompatActivity() {
@@ -77,7 +68,6 @@ class AppLifecycleActivity : AppCompatActivity() {
          */
         viewModel.triggerIdleCameraOnMoveListener = false
 
-        attachCreated(CustomTripNotificationComponent())
         attachResumed(
             DropInLocationPuck(locationViewModel, binding.mapView),
             DropInRoutesInteractor(locationViewModel, binding.mapView),
@@ -96,40 +86,6 @@ class AppLifecycleActivity : AppCompatActivity() {
                 setReorderingAllowed(true)
                 replace<RetainedActiveGuidanceFragment>(R.id.activeGuidanceBannerFragment)
             }
-        }
-    }
-}
-
-/**
- * TODO Planning to remove this after adding an example that extends the notification to support
- *   Android Auto. For now, this is an example showing you can modify the notification at runtime.
- */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-private class CustomTripNotificationComponent : UIComponent() {
-    private var currentColor: Int? = null
-
-    private val interceptor = TripNotificationInterceptor { builder ->
-        currentColor?.let { builder.setColor(it) } ?: builder
-    }
-
-    private fun updateColor(routes: List<NavigationRoute>) {
-        currentColor = when (routes.isEmpty()) {
-            true -> Color.RED
-            else -> null
-        }
-    }
-
-    override fun onAttached(mapboxNavigation: MapboxNavigation) {
-        super.onAttached(mapboxNavigation)
-        mapboxNavigation.setTripNotificationInterceptor(interceptor)
-        coroutineScope.launch {
-            updateColor(mapboxNavigation.getNavigationRoutes())
-            mapboxNavigation.flowRoutesUpdated().collect { routesUpdated ->
-                updateColor(routesUpdated.navigationRoutes)
-            }
-        }.invokeOnCompletion {
-            mapboxNavigation.setTripNotificationInterceptor(null)
-            currentColor = null
         }
     }
 }
