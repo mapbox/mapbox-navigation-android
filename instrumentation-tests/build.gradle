@@ -43,7 +43,6 @@ dependencies {
     androidTestImplementation project(':libtesting-ui')
     androidTestImplementation dependenciesList.testRunner
     androidTestImplementation dependenciesList.testRules
-    androidTestImplementation dependenciesList.mockkAndroid
     androidTestImplementation dependenciesList.androidxTestCore
     androidTestUtil dependenciesList.testOrchestrator
 
