@@ -279,13 +279,10 @@ class MapboxRouteLineApiRoboTest {
             .vanishingRouteLineUpdateInterval(0)
             .build()
         val api = MapboxRouteLineApi(options)
-        val expectedCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
-            "0.3240769449298392, [rgba, 47.0, 122.0, 198.0, 1.0]]"
-        val expectedRouteExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
-            "0.3240769449298392, [rgba, 86.0, 168.0, 251.0, 1.0]]"
-        val expectedTrafficExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
-            "0.3240769449298392, [rgba, 86.0, 168.0, 251.0, 1.0], 0.9429639111009005, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0]]"
+        val expectedCasingExpression = "[literal, [0.0, 0.3240769449298392]]"
+        val expectedRouteExpression = "[literal, [0.0, 0.3240769449298392]]"
+        val expectedTrafficExpression = "[literal, [0.0, 0.3240769449298392]]"
+        val expectedRestrictedExpression = "[literal, [0.0, 0.3240769449298392]]"
         val route = loadRoute("short_route.json")
         val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
         val routeProgress = mockk<RouteProgress> {
@@ -327,8 +324,11 @@ class MapboxRouteLineApiRoboTest {
                 .primaryRouteLineDynamicData.trafficExpressionProvider!!
                 .generateExpression().toString()
         )
-        assertNull(
-            result.value!!.primaryRouteLineDynamicData.restrictedSectionExpressionProvider
+        assertEquals(
+            expectedRestrictedExpression,
+            result.value!!
+                .primaryRouteLineDynamicData.restrictedSectionExpressionProvider!!
+                .generateExpression().toString()
         )
     }
 
@@ -388,11 +388,7 @@ class MapboxRouteLineApiRoboTest {
             .vanishingRouteLineUpdateInterval(0)
             .build()
         val api = MapboxRouteLineApi(options)
-        val expectedRestrictedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0]," +
-            " 0.05416168943228483, [rgba, 0.0, 0.0, 0.0, 0.0], 0.44865144220494346, " +
-            "[rgba, 0.0, 0.0, 0.0, 1.0], 0.468779750455607, [rgba, 0.0, 0.0, 0.0, 0.0]," +
-            " 0.5032854217424586, [rgba, 0.0, 0.0, 0.0, 1.0], 0.5207714038134984," +
-            " [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val expectedRestrictedExpression = "[literal, [0.0, 0.05416168943228483]]"
         val route = loadRoute("route-with-restrictions.json")
         val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
         val routeProgress = mockk<RouteProgress> {
@@ -428,13 +424,10 @@ class MapboxRouteLineApiRoboTest {
     @Test
     fun updateTraveledRouteLine_whenRouteRestrictionsEnabledButHasNone() =
         coroutineRule.runBlockingTest {
-            val expectedCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
-                "0.3240769449298392, [rgba, 47.0, 122.0, 198.0, 1.0]]"
-            val expectedRouteExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
-                "0.3240769449298392, [rgba, 86.0, 168.0, 251.0, 1.0]]"
-            val expectedTrafficExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
-                "0.3240769449298392, [rgba, 86.0, 168.0, 251.0, 1.0], 0.9429639111009005, " +
-                "[rgba, 255.0, 149.0, 0.0, 1.0]]"
+            val expectedCasingExpression = "[literal, [0.0, 0.3240769449298392]]"
+            val expectedRouteExpression = "[literal, [0.0, 0.3240769449298392]]"
+            val expectedTrafficExpression = "[literal, [0.0, 0.3240769449298392]]"
+            val restrictedTrafficExpression = "[literal, [0.0, 0.3240769449298392]]"
             val options = MapboxRouteLineOptions.Builder(ctx)
                 .withVanishingRouteLineEnabled(true)
                 .displayRestrictedRoadSections(true)
@@ -483,8 +476,11 @@ class MapboxRouteLineApiRoboTest {
                     .primaryRouteLineDynamicData.trafficExpressionProvider!!
                     .generateExpression().toString()
             )
-            assertNull(
-                result.value!!.primaryRouteLineDynamicData.restrictedSectionExpressionProvider
+            assertEquals(
+                restrictedTrafficExpression,
+                result.value!!
+                    .primaryRouteLineDynamicData.restrictedSectionExpressionProvider!!
+                    .generateExpression().toString()
             )
         }
 

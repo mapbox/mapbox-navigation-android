@@ -36,6 +36,17 @@ object RouteLayerConstants {
     internal const val PRIMARY_ROUTE_CASING_LAYER_ID = "mapbox-navigation-route-casing-layer"
 
     /**
+     * Layer ID for the primary route line trail
+     */
+    internal const val PRIMARY_ROUTE_TRAIL_LAYER_ID = "mapbox-navigation-route-trail-layer"
+
+    /**
+     * Layer ID for the primary route casing line trail
+     */
+    internal const val PRIMARY_ROUTE_CASING_TRAIL_LAYER_ID =
+        "mapbox-navigation-route-casing-trail-layer"
+
+    /**
      * Layer ID for the first alternative route line
      */
     internal const val ALTERNATIVE_ROUTE1_LAYER_ID = "mapbox-navigation-alt-route1-layer"

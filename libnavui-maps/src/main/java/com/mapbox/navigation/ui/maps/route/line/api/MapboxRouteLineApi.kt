@@ -468,15 +468,19 @@ class MapboxRouteLineApi(
             }
 
         val routeLineExpressionProviders =
-            routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(
-                point,
-                workingRouteLineExpressionData,
-                restrictedExpressionData,
-                routeLineOptions.resourceProvider,
-                activeLegIndex,
-                stopGap,
-                routeLineOptions.displaySoftGradientForTraffic
-            )
+            if (routeLineOptions.styleInactiveRouteLegsIndependently) {
+                routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(
+                    point,
+                    workingRouteLineExpressionData,
+                    restrictedExpressionData,
+                    routeLineOptions.resourceProvider,
+                    activeLegIndex,
+                    stopGap,
+                    routeLineOptions.displaySoftGradientForTraffic,
+                )
+            } else {
+                routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(point)
+            }
 
         lastPointUpdateTimeNano = System.nanoTime()
         return when (routeLineExpressionProviders) {

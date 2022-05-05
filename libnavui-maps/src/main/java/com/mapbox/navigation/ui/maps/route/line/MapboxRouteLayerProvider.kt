@@ -57,10 +57,44 @@ internal class MapboxRouteLayerProvider(
                 routeStyleDescriptors,
                 RouteStyleDescriptor::lineColor
             )
+        return buildPrimaryRouteRelatedLayer(
+            RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
+            style,
+            roundedLineCap,
+            routeLineColorExpressions
+        )
+    }
+
+    fun buildPrimaryRouteTrailLayer(
+        style: Style,
+        roundedLineCap: Boolean,
+        color: Int
+    ): LineLayer {
+        val routeLineColorExpressions =
+            getRouteLineColorExpressions(
+                color,
+                listOf(),
+                RouteStyleDescriptor::lineColor
+            )
+
+        return buildPrimaryRouteRelatedLayer(
+            RouteLayerConstants.PRIMARY_ROUTE_TRAIL_LAYER_ID,
+            style,
+            roundedLineCap,
+            routeLineColorExpressions
+        )
+    }
+
+    private fun buildPrimaryRouteRelatedLayer(
+        layerId: String,
+        style: Style,
+        roundedLineCap: Boolean,
+        routeLineColorExpressions: List<Expression>
+    ): LineLayer {
         return initializeRouteLayer(
             style,
             roundedLineCap,
-            RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
+            layerId,
             RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID,
             routeLineScaleExpression,
             routeLineColorExpressions
@@ -98,10 +132,39 @@ internal class MapboxRouteLayerProvider(
                 routeStyleDescriptors,
                 RouteStyleDescriptor::lineCasingColor
             )
+        return buildPrimaryRouteCasingRelatedLayer(
+            RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+            style,
+            routeLineColorExpressions
+        )
+    }
+
+    fun buildPrimaryRouteCasingTrailLayer(
+        style: Style,
+        color: Int
+    ): LineLayer {
+        val routeLineColorExpressions =
+            getRouteLineColorExpressions(
+                color,
+                listOf(),
+                RouteStyleDescriptor::lineCasingColor
+            )
+        return buildPrimaryRouteCasingRelatedLayer(
+            RouteLayerConstants.PRIMARY_ROUTE_CASING_TRAIL_LAYER_ID,
+            style,
+            routeLineColorExpressions
+        )
+    }
+
+    private fun buildPrimaryRouteCasingRelatedLayer(
+        layerId: String,
+        style: Style,
+        routeLineColorExpressions: List<Expression>
+    ): LineLayer {
         return initializeRouteLayer(
             style,
             true,
-            RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+            layerId,
             RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID,
             routeCasingLineScaleExpression,
             routeLineColorExpressions

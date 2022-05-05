@@ -34,9 +34,11 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DEFAULT_ROUTE_SOU
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DESTINATION_MARKER_NAME
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ORIGIN_MARKER_NAME
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_CASING_TRAIL_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_TRAIL_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_ID
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -97,6 +99,12 @@ class MapboxRouteLineUtilsRoboTest {
             } returns false
             every {
                 styleLayerExists(PRIMARY_ROUTE_CASING_LAYER_ID)
+            } returns false
+            every {
+                styleLayerExists(PRIMARY_ROUTE_TRAIL_LAYER_ID)
+            } returns false
+            every {
+                styleLayerExists(PRIMARY_ROUTE_CASING_TRAIL_LAYER_ID)
             } returns false
             every {
                 styleLayerExists(ALTERNATIVE_ROUTE1_LAYER_ID)
@@ -300,50 +308,58 @@ class MapboxRouteLineUtilsRoboTest {
             (addStyleLayerSlots[6].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-route-casing-layer",
+            "mapbox-navigation-route-casing-trail-layer",
             (addStyleLayerSlots[7].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-route-layer",
+            "mapbox-navigation-route-trail-layer",
             (addStyleLayerSlots[8].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-route-traffic-layer",
+            "mapbox-navigation-route-casing-layer",
             (addStyleLayerSlots[9].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-restricted-road-layer",
+            "mapbox-navigation-route-layer",
             (addStyleLayerSlots[10].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-top-level-route-layer",
+            "mapbox-navigation-route-traffic-layer",
             (addStyleLayerSlots[11].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-waypoint-layer",
+            "mapbox-restricted-road-layer",
             (addStyleLayerSlots[12].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
+            "mapbox-top-level-route-layer",
+            (addStyleLayerSlots[13].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-navigation-waypoint-layer",
+            (addStyleLayerSlots[14].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
             "bottom-right",
-            (addStyleLayerSlots[12].contents as HashMap<String, Value>)["icon-anchor"]!!.contents
+            (addStyleLayerSlots[14].contents as HashMap<String, Value>)["icon-anchor"]!!.contents
         )
         assertEquals(
             33.3,
             (
-                (addStyleLayerSlots[12].contents as HashMap<String, Value>)["icon-offset"]
+                (addStyleLayerSlots[14].contents as HashMap<String, Value>)["icon-offset"]
                 !!.contents as ArrayList<Value>
                 ).first().contents
         )
         assertEquals(
             44.4,
             (
-                (addStyleLayerSlots[12].contents as HashMap<String, Value>)["icon-offset"]
+                (addStyleLayerSlots[14].contents as HashMap<String, Value>)["icon-offset"]
                 !!.contents as ArrayList<Value>
                 ).component2().contents
         )
         assertEquals(
             "viewport",
-            (addStyleLayerSlots[12].contents as HashMap<String, Value>)["icon-pitch-alignment"]
+            (addStyleLayerSlots[14].contents as HashMap<String, Value>)["icon-pitch-alignment"]
             !!.contents
         )
         assertEquals(

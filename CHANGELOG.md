@@ -12,6 +12,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Now it's possible to see the same route in `NavigationRouteAlternativesObserver` but coming from an offboard router if the current route was built onboard which can be used to always prefer an offboard-generated route over onboard-generated one. This is a good practice because offboard-generated routes take live road conditions into account, have more precise ETAs, and can also be refreshed as the user drives and conditions change. Check `NavigationRouteAlternativesObserver` documentation for example usage. [#5768](https://github.com/mapbox/mapbox-navigation-android/pull/5768)
 - Improved behavior of enhanced location teleports on parallel roads, especially forks. [#5768](https://github.com/mapbox/mapbox-navigation-android/pull/5768)
+- Changed the internal vanishing route line feature implementation to use `line-trim-offset` property of `LineLayer` to improve performance of updates. [#5697](https://github.com/mapbox/mapbox-navigation-android/pull/5697)
 
 ## Mapbox Navigation SDK 2.4.1 - April 28, 2022
 ### Changelog

@@ -12,6 +12,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimExpressionProvider
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
@@ -27,6 +28,7 @@ import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -173,6 +175,51 @@ class VanishingRouteLineRoboTest {
             expectedCasingExpression,
             result.routeLineCasingExpression.generateExpression().toString()
         )
+    }
+
+    @Test
+    fun getTraveledRouteLineExpressionsWithPoint() {
+        val expectedTrafficExpression = "[literal, [0.0, 0.0]]"
+        val expectedRouteLineExpression = "[literal, [0.0, 0.0]]"
+        val expectedCasingExpression = "[literal, [0.0, 0.0]]"
+
+        val colorResources = RouteLineColorResources.Builder()
+            .routeModerateCongestionColor(-1)
+            .routeUnknownCongestionColor(-1)
+            .build()
+
+        val route = loadRoute("short_route.json").toNavigationRoute()
+        val lineString = LineString.fromPolyline(
+            route.directionsRoute.geometry() ?: "", Constants.PRECISION_6
+        )
+        val vanishingRouteLine = VanishingRouteLine()
+        vanishingRouteLine.initWithRoute(route)
+        vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
+        val segments: List<RouteLineExpressionData> =
+            MapboxRouteLineUtils.calculateRouteLineSegments(
+                loadRoute("short_route.json"),
+                listOf(),
+                true,
+                colorResources
+            )
+
+        val result = vanishingRouteLine.getTraveledRouteLineExpressions(lineString.coordinates()[0])
+
+        assertEquals(
+            expectedTrafficExpression,
+            result!!.trafficLineExpression.generateExpression().toString()
+        )
+        assertEquals(
+            expectedRouteLineExpression,
+            result.routeLineExpression.generateExpression().toString()
+        )
+        assertEquals(
+            expectedCasingExpression,
+            result.routeLineCasingExpression.generateExpression().toString()
+        )
+        assertTrue(result.trafficLineExpression is RouteLineTrimExpressionProvider)
+        assertTrue(result.routeLineExpression is RouteLineTrimExpressionProvider)
+        assertTrue(result.routeLineCasingExpression is RouteLineTrimExpressionProvider)
     }
 
     @Test
