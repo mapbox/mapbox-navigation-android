@@ -135,7 +135,7 @@ internal class MapboxTripSession(
             }
             RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
                 if (routes.isNotEmpty()) {
-                    navigator.updateAnnotations(routes.first())
+                    navigator.refreshRoute(routes.first())
                     this@MapboxTripSession.primaryRoute = routes.first()
                 } else {
                     logW("Cannot refresh route. Route can't be null", LOG_CATEGORY)

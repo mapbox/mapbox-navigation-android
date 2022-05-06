@@ -97,7 +97,7 @@ interface MapboxNativeNavigator {
      *
      * @param route [DirectionsRoute]
      */
-    suspend fun updateAnnotations(route: NavigationRoute)
+    suspend fun refreshRoute(route: NavigationRoute)
 
     /**
      * Gets the current banner. If there is no

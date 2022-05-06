@@ -98,17 +98,19 @@ class RoadObjectMapperTest {
         val expected = TollCollection(
             ID,
             TollCollectionType.TOLL_GANTRY,
+            "toll_name_1",
             LENGTH,
             location,
             SDKRoadObjectProvider.MAPBOX,
             nativeObject
         )
-        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject) as TollCollection
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
         assertEquals(expected.toString(), roadObject.toString())
         assertEquals(RoadObjectType.TOLL_COLLECTION, roadObject.objectType)
+        assertEquals("toll_name_1", roadObject.name)
     }
 
     @Test
@@ -118,18 +120,20 @@ class RoadObjectMapperTest {
         val expected = TollCollection(
             ID,
             TollCollectionType.TOLL_BOOTH,
+            "toll_name_2",
             LENGTH,
             location,
             SDKRoadObjectProvider.MAPBOX,
             nativeObject
         )
 
-        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject) as TollCollection
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
         assertEquals(expected.toString(), roadObject.toString())
         assertEquals(RoadObjectType.TOLL_COLLECTION, roadObject.objectType)
+        assertEquals("toll_name_2", roadObject.name)
     }
 
     @Test

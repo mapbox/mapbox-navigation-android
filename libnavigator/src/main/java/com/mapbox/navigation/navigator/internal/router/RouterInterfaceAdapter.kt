@@ -77,7 +77,7 @@ class RouterInterfaceAdapter(
                                 RouterError(
                                     ROUTE_REQUEST_FAILED_EMPTY_ROUTES_LIST,
                                     ROUTE_REQUEST_FAILED_DEFAULT_CODE,
-                                    RouterErrorType.WRONG_RESPONSE,
+                                    RouterErrorType.UNKNOWN,
                                     requestId
                                 )
                             )

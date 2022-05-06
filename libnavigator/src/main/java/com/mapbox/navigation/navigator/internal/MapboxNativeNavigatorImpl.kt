@@ -195,9 +195,9 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      *
      * This methods manufactures a [DirectionsRefreshResponse] to adhere to requirements from
      * https://github.com/mapbox/mapbox-navigation-native/pull/5420 where the full response has to be provided
-     * to [Navigator.updateAnnotations], not only the annotations/incidents collections.
+     * to [Navigator.refreshRoute], not only the annotations/incidents collections.
      */
-    override suspend fun updateAnnotations(route: NavigationRoute) {
+    override suspend fun refreshRoute(route: NavigationRoute) {
         val refreshedLegs = route.directionsRoute.legs()?.map { routeLeg ->
             RouteLegRefresh.builder()
                 .annotation(routeLeg.annotation())
@@ -215,28 +215,28 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             refreshResponse.toJson()
         }
 
-        for (legIndex in 0 until (route.directionsRoute.legs()?.size ?: 0)) {
-            suspendCancellableCoroutine<Unit> { continuation ->
-                navigator!!.updateAnnotations(
-                    refreshResponseJson,
-                    route.nativeRoute().routeId,
-                    legIndex
-                ) {
-                    if (it != null) {
-                        logD(
-                            "Annotation updated successfully for route with ID '${route.id}'" +
-                                " and leg at index '$legIndex'",
+        suspendCancellableCoroutine<Unit> { continuation ->
+            navigator!!.refreshRoute(
+                refreshResponseJson,
+                route.nativeRoute().routeId
+            ) {
+                it.fold(
+                    { error ->
+                        logE(
+                            "Annotations update failed for route with ID '${route.id}'. " +
+                                "Reason: $error",
                             LOG_CATEGORY
                         )
-                    } else {
-                        logE(
-                            "Annotation update failed for route with ID '${route.id}'" +
-                                " and leg at index '$legIndex'",
+                    },
+                    { nativeRoute ->
+                        logD(
+                            "Annotations updated successfully " +
+                                "for route with ID: '${nativeRoute.routeId}'",
                             LOG_CATEGORY
                         )
                     }
-                    continuation.resume(Unit)
-                }
+                )
+                continuation.resume(Unit)
             }
         }
     }

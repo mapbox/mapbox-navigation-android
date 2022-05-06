@@ -5,8 +5,12 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 
 #### Features
+- Added `TollCollection#name` field which contains a name of the toll collection point, when available. [#5784](https://github.com/mapbox/mapbox-navigation-android/pull/5784)
 
 #### Bug fixes and improvements
+
+#### Known issues
+- If your instrumentation tests use a mocked, prettified JSON response for Mapbox Directions services, you might need to remove white spaces from `"code": "Ok"` substring to `"code":"Ok"`.
 
 ## Mapbox Navigation SDK 2.5.0-beta.3 - May 5, 2022
 ### Changelog

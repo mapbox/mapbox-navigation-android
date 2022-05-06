@@ -66,6 +66,7 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
             TollCollection(
                 id,
                 metadata.tollCollectionInfo.toTollCollectionType(),
+                metadata.tollCollectionInfo.name,
                 length,
                 location,
                 provider,
