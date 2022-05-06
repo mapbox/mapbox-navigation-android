@@ -26,6 +26,9 @@ Mapbox welcomes participation and contributions from everyone.
 - Improved behavior of enhanced location teleports on parallel roads, especially forks. [#5768](https://github.com/mapbox/mapbox-navigation-android/pull/5768)
 - Changed the internal vanishing route line feature implementation to use the `line-trim-offset` property of `LineLayer` to improve the performance of updates. The optimization is not available when `MapboxRouteLineOptions#styleInactiveRouteLegsIndependently` is enabled. [#5697](https://github.com/mapbox/mapbox-navigation-android/pull/5697)
 
+#### Known issues
+- `RestStop#name` are only available through `RoadObjectsOnRouteObserver` and not through `EHorizonObserver` yet.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.5.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.5.0))
