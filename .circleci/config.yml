@@ -309,20 +309,6 @@ commands:
           name: Post code coverage reports to Codecov.io
           command: sh scripts/coverage.sh
 
-  generate-version-name:
-    steps:
-      - run:
-          name: Generate Core version name
-          command: |
-            if [[ -n "$CIRCLE_TAG" ]]; then
-              if [[ $CIRCLE_TAG == v* ]]; then
-                sed -i -e "s/^VERSION_NAME=.*/VERSION_NAME=${CIRCLE_TAG:1}/" gradle.properties
-              else
-                echo "Exiting the job as this is not a release TAG"
-                exit 1
-              fi
-            fi
-
   generate-google-services-json:
     steps:
       - run:
@@ -466,6 +452,12 @@ commands:
       - run:
           name: Generate documentation
           command: make javadoc-dokka
+
+  generate-documentation-androidauto:
+    steps:
+      - run:
+          name: Generate documentation
+          command: make javadoc-dokka-androidauto
 
   trigger-mobile-metrics:
     steps:
@@ -727,7 +719,6 @@ jobs:
     executor: ndk-r22-latest-executor
     steps:
       - checkout
-      - generate-version-name
       - assemble-core-release
       - assemble-ui-release
       - check-public-documentation
@@ -740,7 +731,6 @@ jobs:
     executor: ndk-r22-latest-executor
     steps:
       - checkout
-      - generate-version-name
       - assemble-core-release
       - assemble-ui-release
       - check-public-documentation
@@ -755,7 +745,7 @@ jobs:
     steps:
       - checkout
       - check-public-documentation
-      - generate-documentation
+      - generate-documentation-androidauto
       - prepare-mbx-ci
       - setup-aws-credentials
       - upload-artifacts-androidauto
