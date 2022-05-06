@@ -9,12 +9,14 @@ import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocat
  * Road object type that provides information about toll collection points on the route.
  *
  * @param tollCollectionType information about a toll collection point. See [TollCollectionType].
+ * @param name name of the toll collection point.
  * @see RoadObject
  * @see RoadObjectType.TOLL_COLLECTION
  */
 class TollCollection internal constructor(
     id: String,
     @TollCollectionType.Type val tollCollectionType: Int,
+    val name: String?,
     length: Double?,
     location: RoadObjectLocation,
     @RoadObjectProvider.Type provider: String,
@@ -39,6 +41,7 @@ class TollCollection internal constructor(
         other as TollCollection
 
         if (tollCollectionType != other.tollCollectionType) return false
+        if (name != other.name) return false
 
         return true
     }
@@ -49,6 +52,7 @@ class TollCollection internal constructor(
     override fun hashCode(): Int {
         var result = super.hashCode()
         result = 31 * result + tollCollectionType
+        result = 31 * result + name.hashCode()
         return result
     }
 
@@ -56,6 +60,9 @@ class TollCollection internal constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "TollCollection(tollCollectionType=$tollCollectionType), ${super.toString()}"
+        return "TollCollection(" +
+            "tollCollectionType=$tollCollectionType," +
+            "name=$name" +
+            "), ${super.toString()}"
     }
 }

@@ -146,7 +146,7 @@ class MapboxTripSessionTest {
         coEvery { navigator.updateLocation(any()) } returns false
         coEvery { navigator.setPrimaryRoute(any()) } returns null
         coEvery { navigator.setAlternativeRoutes(any()) } returns listOf()
-        coEvery { navigator.updateAnnotations(any()) } returns Unit
+        coEvery { navigator.refreshRoute(any()) } returns Unit
         every { navigationStatus.getTripStatusFrom(any()) } returns tripStatus
 
         every { navigationStatus.location } returns fixLocation
@@ -591,12 +591,12 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun checkNavigatorUpdateAnnotationsWhenReasonIsRefresh() = coroutineRule.runBlockingTest {
+    fun checkNavigatorRefreshRouteWhenReasonIsRefresh() = coroutineRule.runBlockingTest {
         tripSession.start(true)
 
         tripSession.setRoutes(routes, legIndex, RoutesExtra.ROUTES_UPDATE_REASON_REFRESH)
 
-        coVerify(exactly = 1) { navigator.updateAnnotations(routes[0]) }
+        coVerify(exactly = 1) { navigator.refreshRoute(routes[0]) }
         coVerify(exactly = 0) { navigator.setPrimaryRoute(any()) }
         coVerify(exactly = 0) { navigator.setAlternativeRoutes(any()) }
     }
@@ -615,7 +615,7 @@ class MapboxTripSessionTest {
 
             coVerify(exactly = 0) { navigator.setPrimaryRoute(Pair(routes.first(), legIndex)) }
             coVerify(exactly = 1) { navigator.setAlternativeRoutes(listOf(alternative)) }
-            coVerify(exactly = 0) { navigator.updateAnnotations(any()) }
+            coVerify(exactly = 0) { navigator.refreshRoute(any()) }
         }
 
     @Test

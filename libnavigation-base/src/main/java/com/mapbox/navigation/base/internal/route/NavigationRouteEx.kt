@@ -21,7 +21,7 @@ fun NavigationRoute.nativeRoute(): RouteInterface = this.nativeRoute
 
 /**
  * Updates route's annotations in place while keeping the Native peer as is.
- * The peer should later be updated through [Navigator.updateAnnotations].
+ * The peer should later be updated through [Navigator.refreshRoute].
  */
 fun NavigationRoute.updateLegAnnotations(
     initialLegIndex: Int,

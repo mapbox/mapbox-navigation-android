@@ -1546,7 +1546,9 @@ package com.mapbox.navigation.base.trip.model.roadobject.reststop {
 package com.mapbox.navigation.base.trip.model.roadobject.tollcollection {
 
   public final class TollCollection extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public String? getName();
     method public int getTollCollectionType();
+    property public final String? name;
     property public final int tollCollectionType;
   }
 

@@ -9,7 +9,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocat
  * Road object type that provides information about rest stops on the road.
  *
  * @param restStopType information about a rest stop. See [RestStopType].
- * @param name name of the rest stop
+ * @param name name of the rest stop.
  * @see RoadObject
  * @see RoadObjectType.REST_STOP
  */
@@ -55,7 +55,6 @@ class RestStop internal constructor(
     override fun toString(): String {
         return "RestStop(" +
             "restStopType=$restStopType, " +
-            "name=$name), " +
-            super.toString()
+            "name=$name), ${super.toString()}"
     }
 }

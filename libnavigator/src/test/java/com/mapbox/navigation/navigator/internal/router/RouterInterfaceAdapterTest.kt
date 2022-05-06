@@ -98,7 +98,7 @@ class RouterInterfaceAdapterTest {
         assertNotNull(slotNativeRouterCallback.captured)
         assertTrue(slotNativeRouterCallback.captured.isError)
         with(slotNativeRouterCallback.captured.error!!) {
-            assertEquals(RouterErrorType.WRONG_RESPONSE, type)
+            assertEquals(RouterErrorType.UNKNOWN, type)
         }
         assertEquals(com.mapbox.navigator.RouterOrigin.ONLINE, slotNativeRouterOrigin.captured)
         assertEquals(requestId, receivedRequestId)

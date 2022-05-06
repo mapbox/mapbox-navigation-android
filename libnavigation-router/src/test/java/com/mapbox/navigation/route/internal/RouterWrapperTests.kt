@@ -522,7 +522,7 @@ class RouterWrapperTests {
         private const val CANCELLED_MESSAGE = "Cancelled"
         private const val FAILURE_MESSAGE = "No suitable edges near location"
         private const val FAILURE_CODE = 171
-        private val FAILURE_TYPE = RouterErrorType.WRONG_REQUEST
+        private val FAILURE_TYPE = RouterErrorType.UNKNOWN
         private val CANCELED_TYPE = RouterErrorType.REQUEST_CANCELLED
         private const val REQUEST_ID = 19L
         private const val UUID = "cjeacbr8s21bk47lggcvce7lv"
