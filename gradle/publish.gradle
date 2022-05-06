@@ -69,13 +69,13 @@ sdkNameMap["libnavui-speedlimit"] = "mobile-navigation-ui-speedlimit"
 sdkNameMap["libnavui-shield"] = "mobile-navigation-ui-shield"
 sdkNameMap["libnavui-status"] = "mobile-navigation-ui-status"
 sdkNameMap["libnavui-dropin"] = "mobile-navigation-ui-dropin"
-//sdkNameMap["libnavui-androidauto"] = "mobile-navigation-ui-androidauto"
+sdkNameMap["libnavui-androidauto"] = "mobile-navigation-ui-androidauto"
 
 registry {
     sdkName = sdkNameMap[project.name]
     production = true
-    snapshot = project.ext.versionName.endsWith("-SNAPSHOT")
-    override = snapshot ? true : false
+    snapshot = project.ext.snapshot
+    override = snapshot
     dryRun = false
     publish = true
     publishMessage = "cc @mapbox/navigation-android"

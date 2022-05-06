@@ -3,7 +3,7 @@ package com.mapbox.androidauto.car.map.widgets.compass
 import android.content.Context
 import android.graphics.BitmapFactory
 import com.mapbox.androidauto.car.map.widgets.WidgetPosition
-import com.mapbox.examples.androidauto.R
+import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.map.widgets.ImageOverlayHost
 import com.mapbox.androidauto.car.map.widgets.Margin
 

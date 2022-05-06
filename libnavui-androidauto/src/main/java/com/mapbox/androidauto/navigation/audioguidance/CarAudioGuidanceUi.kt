@@ -9,7 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.androidauto.MapboxCarApp
-import com.mapbox.examples.androidauto.R
+import com.mapbox.androidauto.R
 import kotlinx.coroutines.flow.collect
 import com.mapbox.androidauto.car.MainActionStrip
 import com.mapbox.androidauto.car.action.MapboxActionProvider

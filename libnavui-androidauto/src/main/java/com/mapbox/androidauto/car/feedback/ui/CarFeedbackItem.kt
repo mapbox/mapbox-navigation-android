@@ -3,7 +3,7 @@ package com.mapbox.androidauto.car.feedback.ui
 import androidx.annotation.Keep
 import androidx.car.app.CarContext
 import com.mapbox.api.geocoding.v5.models.GeocodingResponse
-import com.mapbox.examples.androidauto.R
+import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackItemProvider
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplink
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent

@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import androidx.annotation.ColorInt
 import androidx.annotation.StyleRes
-import com.mapbox.examples.androidauto.R
+import com.mapbox.androidauto.R
 
 /**
  * Modify the look of the maneuver icon.

@@ -4,7 +4,7 @@ import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.MessageTemplate
 import androidx.car.app.model.Template
-import com.mapbox.examples.androidauto.R
+import com.mapbox.androidauto.R
 
 /**
  * Screen used to display that the settings did not load

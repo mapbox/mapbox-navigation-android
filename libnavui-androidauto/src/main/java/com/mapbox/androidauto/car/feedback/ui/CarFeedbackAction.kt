@@ -5,7 +5,7 @@ import androidx.car.app.model.Action
 import androidx.car.app.model.CarIcon
 import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.lifecycleScope
-import com.mapbox.examples.androidauto.R
+import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.action.MapboxActionProvider
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackItemProvider
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender

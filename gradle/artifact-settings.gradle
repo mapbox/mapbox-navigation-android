@@ -10,5 +10,35 @@ ext {
     mapboxArtifactScmUrl = 'scm:git@github.com:mapbox/mapbox-navigation-android.git'
     mapboxArtifactLicenseName = 'Mapbox Terms of Service'
     mapboxArtifactLicenseUrl = 'https://www.mapbox.com/legal/tos/'
-    versionName = project.hasProperty('VERSION_NAME') ? project.property('VERSION_NAME') : System.getenv('VERSION_NAME')
+    snapshot = project.hasProperty("snapshot") ? project.property("snapshot").toBoolean() : false
+    releaseTagPrefix = project.hasProperty('RELEASE_TAG_PREFIX') ? project.property('RELEASE_TAG_PREFIX') : 'v'
+    versionName = getVersionName()
+}
+
+def getVersionName() {
+    def prefix = project.ext.releaseTagPrefix
+    def cmd = ["git", "describe", "--tag", "--match", "$prefix*", "--abbrev=0"]
+    def version = cmd.execute().text
+    return project.ext.snapshot ? getSnapshotVersion(version) : getReleaseVersion(version)
+}
+
+def getReleaseVersion(String version) {
+    if (version.isEmpty()) {
+        return "0.1.0"
+    } else {
+        def prefix = project.ext.releaseTagPrefix
+        return version.substring(prefix.length()).trim()
+    }
+}
+
+def getSnapshotVersion(String version) {
+    if (version.isEmpty()) {
+        return "0.1.0-SNAPSHOT"
+    } else {
+        def prefix = project.ext.releaseTagPrefix
+        def matcher = version =~ /$prefix(\d+).(\d+)?.*/
+        def major = (matcher[0][1] as Integer)
+        def minor = (matcher[0][2] as Integer) + 1
+        return "${major}.${minor}.0-SNAPSHOT"
+    }
 }

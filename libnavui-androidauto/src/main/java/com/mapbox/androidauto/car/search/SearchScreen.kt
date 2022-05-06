@@ -11,7 +11,7 @@ import androidx.car.app.model.SearchTemplate
 import androidx.car.app.model.Template
 import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.androidauto.logAndroidAutoFailure
-import com.mapbox.examples.androidauto.R
+import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.car.feedback.ui.buildSearchPlacesCarFeedbackProvider

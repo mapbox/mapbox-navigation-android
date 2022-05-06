@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.examples.androidauto.R
+import com.mapbox.androidauto.R
 import com.mapbox.navigation.testing.BuilderTest
 import org.junit.Test
 import org.junit.runner.RunWith
