@@ -65,6 +65,10 @@ javadoc-dokka:
 	./gradlew dokkaHtmlMultiModule
 	./docs/replace-styles.sh
 
+.PHONY: javadoc-dokka-androidauto
+javadoc-dokka-androidauto:
+	./gradlew libnavui-androidauto:dokkaHtml
+
 .PHONY: dependency-graphs
 dependency-graphs:
 	$(call run-gradle-tasks,$(CORE_MODULES),generateDependencyGraphMapboxLibraries) \
