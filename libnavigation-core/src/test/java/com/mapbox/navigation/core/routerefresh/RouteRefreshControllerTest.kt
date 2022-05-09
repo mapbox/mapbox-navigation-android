@@ -1,7 +1,6 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.common.Logger
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
@@ -9,17 +8,14 @@ import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.testing.MockLoggerRule
+import com.mapbox.navigation.utils.internal.LoggerFrontend
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigation.utils.internal.logI
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.slot
-import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -31,9 +27,6 @@ private const val routeDiff2 = "Updated duration, speed, maxSpeed, congestion at
 
 @ExperimentalCoroutinesApi
 class RouteRefreshControllerTest {
-
-    @get:Rule
-    val mockLoggerTestRule = MockLoggerRule()
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
@@ -54,6 +47,7 @@ class RouteRefreshControllerTest {
         every { directionsResponse.uuid() } returns "test_uuid"
         every { directionsRoute.legs() } returns null
     }
+    private val logger = mockk<LoggerFrontend>(relaxed = true)
 
     private val routeRefreshOptions = RouteRefreshOptions.Builder().build()
     private val threadController = ThreadController()
@@ -70,7 +64,6 @@ class RouteRefreshControllerTest {
 
     @Before
     fun setup() {
-        mockkStatic("com.mapbox.navigation.base.extensions.RouteOptionsExtensions")
         every { tripSession.getRouteProgress() } returns mockk {
             every { currentLegProgress } returns mockk {
                 every { legIndex } returns 0
@@ -79,6 +72,7 @@ class RouteRefreshControllerTest {
         every {
             directionsSession.requestRouteRefresh(any(), any(), capture(routeRefreshCallbackSlot))
         } returns requestId
+        LoggerProvider.setLoggerFrontend(logger)
     }
 
     @Test
@@ -145,7 +139,7 @@ class RouteRefreshControllerTest {
 
         verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
         verify(exactly = 1) {
-            Logger.w(any(), any())
+            logger.logW(any(), any())
         }
     }
 
@@ -289,8 +283,8 @@ class RouteRefreshControllerTest {
         routeRefreshController.stop()
 
         verify(exactly = 1) {
-            logI(routeDiff1, RouteRefreshController.LOG_CATEGORY)
-            logI(routeDiff2, RouteRefreshController.LOG_CATEGORY)
+            logger.logI(routeDiff1, RouteRefreshController.LOG_CATEGORY)
+            logger.logI(routeDiff2, RouteRefreshController.LOG_CATEGORY)
         }
     }
 
@@ -307,12 +301,7 @@ class RouteRefreshControllerTest {
         routeRefreshController.stop()
 
         verify(exactly = 1) {
-            logI("No changes to route annotations", RouteRefreshController.LOG_CATEGORY)
+            logger.logI("No changes to route annotations", RouteRefreshController.LOG_CATEGORY)
         }
-    }
-
-    @After
-    fun tearDown() {
-        unmockkStatic("com.mapbox.navigation.base.extensions.RouteOptionsExtensions")
     }
 }

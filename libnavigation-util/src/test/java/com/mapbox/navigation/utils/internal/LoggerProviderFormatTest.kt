@@ -7,10 +7,27 @@ import io.mockk.just
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkStatic
+import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 
 class LoggerProviderFormatTest {
+
+    @Before
+    fun setup() {
+        mockkStatic(Logger::class)
+        every { Logger.i(any(), any()) } just Runs
+        every { Logger.w(any(), any()) } just Runs
+        every { Logger.d(any(), any()) } just Runs
+        every { Logger.e(any(), any()) } just Runs
+        LoggerProvider.setLoggerFrontend(MapboxCommonLoggerFrontend())
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic(Logger::class)
+    }
 
     @Test
     fun `format log V - without category`() {

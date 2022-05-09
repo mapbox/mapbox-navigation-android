@@ -55,7 +55,6 @@ import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.FallbackVersionsObserver
@@ -106,9 +105,6 @@ import java.util.Locale
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class MapboxNavigationTest {
-
-    @get:Rule
-    val mockLoggerTestRule = MockLoggerRule()
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()

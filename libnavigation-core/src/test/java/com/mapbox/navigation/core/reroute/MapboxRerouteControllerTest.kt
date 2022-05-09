@@ -13,7 +13,6 @@ import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -69,9 +68,6 @@ class MapboxRerouteControllerTest {
 
     @MockK
     lateinit var primaryRerouteObserver: RerouteController.RerouteStateObserver
-
-    @get:Rule
-    val mockLoggerTestRule = MockLoggerRule()
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()

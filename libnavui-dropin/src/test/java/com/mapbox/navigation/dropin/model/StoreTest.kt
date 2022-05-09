@@ -6,7 +6,6 @@ import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
 import com.mapbox.navigation.dropin.component.routefetch.RoutesState
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.testing.MockLoggerRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
@@ -22,9 +21,6 @@ internal class StoreTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
-
-    @get:Rule
-    val mockLoggerTestRule = MockLoggerRule()
 
     private lateinit var sut: TestStore
 

@@ -9,7 +9,6 @@ import com.mapbox.navigation.dropin.component.location.LocationAction
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.dropin.util.TestingUtil.makeLocationMatcherResult
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.testing.MockLoggerRule
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -33,9 +32,6 @@ class LocationStateControllerTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
-
-    @get:Rule
-    val mockLoggerTestRule = MockLoggerRule()
 
     private val locationObserverSlot = slot<LocationObserver>()
     private val store = spyk(TestStore())

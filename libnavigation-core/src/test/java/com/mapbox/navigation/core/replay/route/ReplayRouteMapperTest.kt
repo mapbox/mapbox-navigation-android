@@ -8,7 +8,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.testutil.replay.removeAccelerationAndBrakingSpeedUpdates
 import com.mapbox.navigation.testing.FileUtils
-import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import io.mockk.every
@@ -17,13 +16,9 @@ import org.apache.commons.io.IOUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
-import org.junit.Rule
 import org.junit.Test
 
 class ReplayRouteMapperTest {
-
-    @get:Rule
-    val mockLogger = MockLoggerRule()
 
     private val replayRouteMapper = ReplayRouteMapper()
 

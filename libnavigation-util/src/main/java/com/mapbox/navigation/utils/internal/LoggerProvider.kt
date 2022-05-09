@@ -1,5 +1,6 @@
 package com.mapbox.navigation.utils.internal
 
+import androidx.annotation.VisibleForTesting
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
@@ -10,7 +11,7 @@ import com.mapbox.common.LoggingLevel
 import com.mapbox.common.module.provider.MapboxModuleProvider
 
 private const val TAG = "Mapbox"
-private const val CATEGORY = "nav-sdk"
+internal const val NAV_SDK_CATEGORY = "nav-sdk"
 
 /**
  * Singleton provider of [Logger].
@@ -18,8 +19,17 @@ private const val CATEGORY = "nav-sdk"
 object LoggerProvider {
 
     fun initialize() {
+        frontend = MapboxCommonLoggerFrontend()
         LogConfiguration.getInstance().registerLogWriterBackend(NavigationLogBackend())
     }
+
+    @VisibleForTesting
+    fun setLoggerFrontend(frontend: LoggerFrontend) {
+        this.frontend = frontend
+    }
+
+    internal var frontend: LoggerFrontend = NoLoggingFrontend()
+        private set
 
     internal val logger = MapboxModuleProvider.createModule<Logger>(
         MapboxModuleType.CommonLogger
@@ -29,72 +39,56 @@ object LoggerProvider {
 }
 
 /**
- * Alias of [com.mapbox.common.Logger.d].
- *
  * @param msg to log.
  * @param category optional string to identify the source or category of the log message.
  * Noting that the category is appended to the log message to give extra context along with the `[nav-sdk]` parent category.
  * As an example, this is how the logs would look like `D/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`.
  */
 fun logV(msg: String, category: String? = null) {
-    val message = createMessage(msg, category)
-    // There's no com.mapbox.common.Logger.v available - using Logger.d instead
-    com.mapbox.common.Logger.d(CATEGORY, message)
+    LoggerProvider.frontend.logD(msg, category)
 }
 
 /**
- * Alias of [com.mapbox.common.Logger.d].
- *
  * @param msg to log.
  * @param category optional string to identify the source or category of the log message.
  * Noting that the category is appended to the log message to give extra context along with the `[nav-sdk]` parent category.
  * As an example, this is how the logs would look like `D/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`.
  */
 fun logD(msg: String, category: String? = null) {
-    val message = createMessage(msg, category)
-    com.mapbox.common.Logger.d(CATEGORY, message)
+    LoggerProvider.frontend.logD(msg, category)
 }
 
 /**
- * Alias of [com.mapbox.common.Logger.i].
- *
  * @param msg to log.
  * @param category optional string to identify the source or category of the log message.
  * Noting that the category is appended to the log message to give extra context along with the `[nav-sdk]` parent category.
  * As an example, this is how the logs would look like `I/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`.
  */
 fun logI(msg: String, category: String? = null) {
-    val message = createMessage(msg, category)
-    com.mapbox.common.Logger.i(CATEGORY, message)
+    LoggerProvider.frontend.logI(msg, category)
 }
 
 /**
- * Alias of [com.mapbox.common.Logger.w].
- *
  * @param msg to log.
  * @param category optional string to identify the source or category of the log message.
  * Noting that the category is appended to the log message to give extra context along with the `[nav-sdk]` parent category.
  * As an example, this is how the logs would look like `W/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`.
  */
 fun logW(msg: String, category: String? = null) {
-    val message = createMessage(msg, category)
-    com.mapbox.common.Logger.w(CATEGORY, message)
+    LoggerProvider.frontend.logW(msg, category)
 }
 
 /**
- * Alias of [com.mapbox.common.Logger.e].
- *
  * @param msg to log.
  * @param category optional string to identify the source or category of the log message.
  * Noting that the category is appended to the log message to give extra context along with the `[nav-sdk]` parent category.
  * As an example, this is how the logs would look like `E/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`.
  */
 fun logE(msg: String, category: String? = null) {
-    val message = createMessage(msg, category)
-    com.mapbox.common.Logger.e(CATEGORY, message)
+    LoggerProvider.frontend.logE(msg, category)
 }
 
-private fun createMessage(message: String, category: String?): String =
+internal fun createMessage(message: String, category: String?): String =
     "${if (category != null) "[".plus(category).plus("] ") else ""}$message"
 
 private class NavigationLogBackend : LogWriterBackend {

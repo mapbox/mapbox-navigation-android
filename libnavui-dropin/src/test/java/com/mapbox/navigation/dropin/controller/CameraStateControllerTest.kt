@@ -9,7 +9,6 @@ import com.mapbox.navigation.dropin.component.camera.CameraAction
 import com.mapbox.navigation.dropin.component.camera.TargetCameraMode
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.testing.MockLoggerRule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -27,9 +26,6 @@ class CameraStateControllerTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
-
-    @get:Rule
-    val mockLoggerTestRule = MockLoggerRule()
 
     private lateinit var testStore: TestStore
 

@@ -2,13 +2,13 @@ package com.mapbox.navigation.core.history
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.common.Logger
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.testing.MockLoggerRule
+import com.mapbox.navigation.utils.internal.LoggerFrontend
+import com.mapbox.navigation.utils.internal.LoggerProvider
+import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Assert.assertTrue
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -16,11 +16,11 @@ import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 class MapboxHistoryRecorderTest {
-
-    @get:Rule
-    val mockLoggerTestRule = MockLoggerRule()
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val navigationOptionsBuilder = NavigationOptions.Builder(context)
+    private val logger = mockk<LoggerFrontend>(relaxed = true).apply {
+        LoggerProvider.setLoggerFrontend(this)
+    }
 
     @Test
     fun `historyRecorder fileDirectory is default when no options provided`() {
@@ -77,6 +77,6 @@ class MapboxHistoryRecorderTest {
             // do nothing
         }
 
-        verify { Logger.w(any(), any()) }
+        verify { logger.logW(any(), any()) }
     }
 }

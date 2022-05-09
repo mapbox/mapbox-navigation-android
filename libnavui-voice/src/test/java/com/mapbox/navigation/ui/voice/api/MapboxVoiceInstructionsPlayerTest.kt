@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
 import android.media.AudioManager
-import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.model.AudioFocusOwner
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
@@ -19,15 +18,11 @@ import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import java.io.File
 import java.util.Locale
 
 class MapboxVoiceInstructionsPlayerTest {
-
-    @get:Rule
-    val mockLoggerTestRule = MockLoggerRule()
 
     private val aMockedContext: Context = mockk(relaxed = true)
     private val audioManager = mockk<AudioManager>(relaxed = true)

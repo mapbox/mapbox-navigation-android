@@ -59,7 +59,6 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEvent
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.testing.MockLoggerRule
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -138,9 +137,6 @@ class MapboxNavigationTelemetryTest {
          */
         private val billingService = mockk<BillingServiceInterface>(relaxed = true)
     }
-
-    @get:Rule
-    val mockLoggerTestRule = MockLoggerRule()
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 

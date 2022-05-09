@@ -1,17 +1,12 @@
 package com.mapbox.navigation.utils.internal
 
 import com.mapbox.common.NetworkStatus
-import com.mapbox.navigation.testing.MockLoggerRule
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.channels.Channel
-import org.junit.Rule
 import org.junit.Test
 
 class ConnectivityHandlerTest {
-
-    @get:Rule
-    val mockLoggerTestRule = MockLoggerRule()
 
     @Test
     fun `not reachable network status channel sends false`() {
@@ -55,13 +50,14 @@ class ConnectivityHandlerTest {
 
     @Test
     fun `not reachable logger prints out not reachable`() {
+        val logger = mockLogger()
         val mockedNetworkStatusChannel: Channel<Boolean> = mockk(relaxed = true)
         val connectivityHandler = ConnectivityHandler(mockedNetworkStatusChannel)
 
         connectivityHandler.run(NetworkStatus.NOT_REACHABLE)
 
         verify {
-            logD(
+            logger.logD(
                 "NetworkStatus=${NetworkStatus.NOT_REACHABLE}",
                 "ConnectivityHandler"
             )
@@ -70,13 +66,14 @@ class ConnectivityHandlerTest {
 
     @Test
     fun `reachable via wifi logger prints out reachable via wifi`() {
+        val logger = mockLogger()
         val mockedNetworkStatusChannel: Channel<Boolean> = mockk(relaxed = true)
         val connectivityHandler = ConnectivityHandler(mockedNetworkStatusChannel)
 
         connectivityHandler.run(NetworkStatus.REACHABLE_VIA_WI_FI)
 
         verify {
-            logD(
+            logger.logD(
                 "NetworkStatus=${NetworkStatus.REACHABLE_VIA_WI_FI}",
                 "ConnectivityHandler"
             )
@@ -85,13 +82,14 @@ class ConnectivityHandlerTest {
 
     @Test
     fun `reachable via ethernet logger prints out reachable via ethernet`() {
+        val logger = mockLogger()
         val mockedNetworkStatusChannel: Channel<Boolean> = mockk(relaxed = true)
         val connectivityHandler = ConnectivityHandler(mockedNetworkStatusChannel)
 
         connectivityHandler.run(NetworkStatus.REACHABLE_VIA_ETHERNET)
 
         verify {
-            logD(
+            logger.logD(
                 "NetworkStatus=${NetworkStatus.REACHABLE_VIA_ETHERNET}",
                 "ConnectivityHandler"
             )
@@ -100,16 +98,23 @@ class ConnectivityHandlerTest {
 
     @Test
     fun `reachable via wwan logger prints out reachable via wwan`() {
+        val logger = mockLogger()
         val mockedNetworkStatusChannel: Channel<Boolean> = mockk(relaxed = true)
         val connectivityHandler = ConnectivityHandler(mockedNetworkStatusChannel)
 
         connectivityHandler.run(NetworkStatus.REACHABLE_VIA_WWAN)
 
         verify {
-            logD(
+            logger.logD(
                 "NetworkStatus=${NetworkStatus.REACHABLE_VIA_WWAN}",
                 "ConnectivityHandler"
             )
         }
     }
+}
+
+private fun mockLogger(): LoggerFrontend {
+    val mock = mockk<LoggerFrontend>(relaxed = true)
+    LoggerProvider.setLoggerFrontend(mock)
+    return mock
 }
