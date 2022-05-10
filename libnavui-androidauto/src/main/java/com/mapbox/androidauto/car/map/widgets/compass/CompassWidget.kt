@@ -2,10 +2,10 @@ package com.mapbox.androidauto.car.map.widgets.compass
 
 import android.content.Context
 import android.graphics.BitmapFactory
-import com.mapbox.androidauto.car.map.widgets.WidgetPosition
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.map.widgets.ImageOverlayHost
 import com.mapbox.androidauto.car.map.widgets.Margin
+import com.mapbox.androidauto.car.map.widgets.WidgetPosition
 
 /**
  * A widget to show the compass on the map.

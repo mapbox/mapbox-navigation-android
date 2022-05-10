@@ -49,7 +49,13 @@ class CarManeuverInstructionRenderer {
                 append(getRenderedExit(node, exitView, modifier)).append(" ")
             }
             is RoadShieldComponentNode -> {
-                append(getRenderedShield(node.text, desiredHeight, getShieldToRender(node, shields))).append(" ")
+                append(
+                    getRenderedShield(
+                        node.text,
+                        desiredHeight,
+                        getShieldToRender(node, shields)
+                    )
+                ).append(" ")
             }
             is DelimiterComponentNode -> {
                 append(node.text).append(" ")
@@ -72,7 +78,10 @@ class CarManeuverInstructionRenderer {
         return exitBuilder
     }
 
-    private fun getShieldToRender(node: RoadShieldComponentNode, roadShields: List<RouteShield>): RouteShield? {
+    private fun getShieldToRender(
+        node: RoadShieldComponentNode,
+        roadShields: List<RouteShield>
+    ): RouteShield? {
         return node.mapboxShield?.let { shield ->
             roadShields.find { it is RouteShield.MapboxDesignedShield && it.compareWith(shield) }
         } ?: node.shieldUrl?.let { shieldUrl ->
@@ -80,7 +89,11 @@ class CarManeuverInstructionRenderer {
         }
     }
 
-    private fun getRenderedShield(shieldText: String, desiredHeight: Int, shield: RouteShield?): CharSequence {
+    private fun getRenderedShield(
+        shieldText: String,
+        desiredHeight: Int,
+        shield: RouteShield?
+    ): CharSequence {
         val roadShieldBuilder = SpannableStringBuilder(shieldText)
         val shieldIcon = shield?.byteArray
         if (shieldIcon != null && shieldIcon.isNotEmpty()) {
@@ -88,7 +101,12 @@ class CarManeuverInstructionRenderer {
             SvgUtil.renderAsBitmapWithHeight(stream, desiredHeight)?.let { svgBitmap ->
                 val icon = CarIcon.Builder(IconCompat.createWithBitmap(svgBitmap)).build()
                 val carIconSpan = CarIconSpan.create(icon, CarIconSpan.ALIGN_CENTER)
-                roadShieldBuilder.setSpan(carIconSpan, 0, shieldText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                roadShieldBuilder.setSpan(
+                    carIconSpan,
+                    0,
+                    shieldText.length,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
             }
         }
         return roadShieldBuilder

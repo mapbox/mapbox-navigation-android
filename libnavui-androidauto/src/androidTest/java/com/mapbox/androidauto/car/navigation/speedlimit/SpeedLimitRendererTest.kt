@@ -33,36 +33,57 @@ class SpeedLimitRendererTest {
 
     @Test
     fun speed_limit_120_speed_150() {
-        bitmapUtils.assertBitmapsSimilar(testName, speedLimitWidget.drawSpeedLimitSign(speedLimit = 120, speed = 150))
+        bitmapUtils.assertBitmapsSimilar(
+            testName,
+            speedLimitWidget.drawSpeedLimitSign(speedLimit = 120, speed = 150)
+        )
     }
 
     @Test
     fun speed_limit_120_speed_90() {
-        bitmapUtils.assertBitmapsSimilar(testName, speedLimitWidget.drawSpeedLimitSign(speedLimit = 120, speed = 90))
+        bitmapUtils.assertBitmapsSimilar(
+            testName,
+            speedLimitWidget.drawSpeedLimitSign(speedLimit = 120, speed = 90)
+        )
     }
 
     @Test
     fun speed_limit_65_speed_90() {
-        bitmapUtils.assertBitmapsSimilar(testName, speedLimitWidget.drawSpeedLimitSign(speedLimit = 65, speed = 90))
+        bitmapUtils.assertBitmapsSimilar(
+            testName,
+            speedLimitWidget.drawSpeedLimitSign(speedLimit = 65, speed = 90)
+        )
     }
 
     @Test
     fun speed_limit_65_speed_30() {
-        bitmapUtils.assertBitmapsSimilar(testName, speedLimitWidget.drawSpeedLimitSign(speedLimit = 65, speed = 30))
+        bitmapUtils.assertBitmapsSimilar(
+            testName,
+            speedLimitWidget.drawSpeedLimitSign(speedLimit = 65, speed = 30)
+        )
     }
 
     @Test
     fun speed_limit_5_speed_30() {
-        bitmapUtils.assertBitmapsSimilar(testName, speedLimitWidget.drawSpeedLimitSign(speedLimit = 5, speed = 30))
+        bitmapUtils.assertBitmapsSimilar(
+            testName,
+            speedLimitWidget.drawSpeedLimitSign(speedLimit = 5, speed = 30)
+        )
     }
 
     @Test
     fun speed_limit_5_speed_0() {
-        bitmapUtils.assertBitmapsSimilar(testName, speedLimitWidget.drawSpeedLimitSign(speedLimit = 5, speed = 0))
+        bitmapUtils.assertBitmapsSimilar(
+            testName,
+            speedLimitWidget.drawSpeedLimitSign(speedLimit = 5, speed = 0)
+        )
     }
 
     @Test
     fun speed_limit_unknown_speed_5() {
-        bitmapUtils.assertBitmapsSimilar(testName, speedLimitWidget.drawSpeedLimitSign(speedLimit = null, speed = 5))
+        bitmapUtils.assertBitmapsSimilar(
+            testName,
+            speedLimitWidget.drawSpeedLimitSign(speedLimit = null, speed = 5)
+        )
     }
 }

@@ -1,10 +1,10 @@
 package com.mapbox.androidauto.car.navigation
 
+import com.mapbox.androidauto.car.MainCarContext
 import com.mapbox.androidauto.car.navigation.lanes.CarLanesImageRenderer
 import com.mapbox.androidauto.car.navigation.maneuver.CarManeuverIconOptions
 import com.mapbox.androidauto.car.navigation.maneuver.CarManeuverIconRenderer
 import com.mapbox.androidauto.car.navigation.maneuver.CarManeuverInstructionRenderer
-import com.mapbox.androidauto.car.MainCarContext
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter
 
@@ -18,10 +18,10 @@ class CarActiveGuidanceCarContext(
     val distanceFormatter = mainCarContext.distanceFormatter
 
     /** NavigationCarContext **/
-    val carDistanceFormatter = CarDistanceFormatter(
+    private val carDistanceFormatter = CarDistanceFormatter(
         mapboxNavigation.navigationOptions.distanceFormatterOptions.unitType
     )
-    val carLaneImageGenerator = CarLanesImageRenderer(carContext)
+    private val carLaneImageGenerator = CarLanesImageRenderer(carContext)
     val navigationInfoMapper = CarNavigationInfoMapper(
         carContext.applicationContext,
         CarManeuverInstructionRenderer(),

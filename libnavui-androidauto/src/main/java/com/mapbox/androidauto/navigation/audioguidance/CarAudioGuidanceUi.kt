@@ -10,9 +10,9 @@ import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.R
-import kotlinx.coroutines.flow.collect
 import com.mapbox.androidauto.car.MainActionStrip
 import com.mapbox.androidauto.car.action.MapboxActionProvider
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
@@ -57,7 +57,11 @@ class CarAudioGuidanceUi : MapboxActionProvider.ScreenActionProvider {
         return buildSoundButtonAction(screen)
     }
 
-    private fun buildIconAction(screen: Screen, @DrawableRes icon: Int, onClick: () -> Unit) = Action.Builder()
+    private fun buildIconAction(
+        screen: Screen,
+        @DrawableRes icon: Int,
+        onClick: () -> Unit
+    ) = Action.Builder()
         .setIcon(
             CarIcon.Builder(
                 IconCompat.createWithResource(screen.carContext, icon)

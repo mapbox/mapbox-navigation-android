@@ -8,6 +8,7 @@ import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.channels.onSuccess
@@ -35,22 +36,25 @@ class MapboxAudioGuidanceVoice(
         }
     }
 
-    private fun speechFlow(voiceInstructions: VoiceInstructions): Flow<SpeechAnnouncement> = callbackFlow {
-        val speechCallback = MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> { value ->
-            val speechAnnouncement = value.value?.announcement ?: value.error!!.fallback
-            mapboxVoiceInstructionsPlayer.play(speechAnnouncement) {
-                mapboxSpeechApi.clean(it)
-                trySend(speechAnnouncement).onSuccess {
-                    close()
-                }.onFailure {
-                    close()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun speechFlow(voiceInstructions: VoiceInstructions): Flow<SpeechAnnouncement> =
+        callbackFlow {
+            val speechCallback =
+                MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> { value ->
+                    val speechAnnouncement = value.value?.announcement ?: value.error!!.fallback
+                    mapboxVoiceInstructionsPlayer.play(speechAnnouncement) {
+                        mapboxSpeechApi.clean(it)
+                        trySend(speechAnnouncement).onSuccess {
+                            close()
+                        }.onFailure {
+                            close()
+                        }
+                    }
                 }
+            mapboxSpeechApi.generate(voiceInstructions, speechCallback)
+            awaitClose {
+                mapboxSpeechApi.cancel()
+                mapboxVoiceInstructionsPlayer.clear()
             }
         }
-        mapboxSpeechApi.generate(voiceInstructions, speechCallback)
-        awaitClose {
-            mapboxSpeechApi.cancel()
-            mapboxVoiceInstructionsPlayer.clear()
-        }
-    }
 }

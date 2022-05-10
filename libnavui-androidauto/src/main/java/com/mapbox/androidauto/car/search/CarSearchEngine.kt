@@ -26,7 +26,10 @@ class CarSearchEngine(
 
     private val searchCallback = object : SearchSuggestionsCallback {
 
-        override fun onSuggestions(suggestions: List<SearchSuggestion>, responseInfo: ResponseInfo) {
+        override fun onSuggestions(
+            suggestions: List<SearchSuggestion>,
+            responseInfo: ResponseInfo
+        ) {
             logAndroidAuto("carLocationProvider result ${searchResults.size}")
             searchResults.clear()
             searchResults.addAll(suggestions)

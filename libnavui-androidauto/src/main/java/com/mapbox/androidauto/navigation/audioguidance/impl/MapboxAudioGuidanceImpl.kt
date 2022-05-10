@@ -99,14 +99,17 @@ class MapboxAudioGuidanceImpl(
      * Top level flow that will switch based on the language and muted state.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun audioGuidanceFlow(mapboxNavigation: MapboxNavigation): Flow<MapboxAudioGuidance.State> {
+    private fun audioGuidanceFlow(
+        mapboxNavigation: MapboxNavigation
+    ): Flow<MapboxAudioGuidance.State> {
         return combine(
             audioGuidanceServices.mapboxVoiceInstructions(mapboxNavigation).voiceLanguage(),
             carAppConfigOwner.language(),
         ) { voiceLanguage, deviceLanguage -> voiceLanguage ?: deviceLanguage }
             .distinctUntilChanged()
             .flatMapLatest { language ->
-                val audioGuidance = audioGuidanceServices.mapboxAudioGuidanceVoice(mapboxNavigation, language)
+                val audioGuidance =
+                    audioGuidanceServices.mapboxAudioGuidanceVoice(mapboxNavigation, language)
                 carAppDataStore.read(StoreAudioGuidanceMuted).flatMapLatest { isMuted ->
                     if (isMuted) {
                         silentFlow(mapboxNavigation)

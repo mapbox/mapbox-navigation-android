@@ -38,7 +38,11 @@ class RoadLabelRenderer(private val resources: Resources) {
                 is Component.Shield -> component.bitmap.height
             }
         }
-        val bitmap = Bitmap.createBitmap(width + TEXT_PADDING * 2, height + TEXT_PADDING * 2, Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(
+            width + TEXT_PADDING * 2,
+            height + TEXT_PADDING * 2,
+            Bitmap.Config.ARGB_8888
+        )
         val textBaselineY = TEXT_PADDING + (height - textPaint.descent() - textPaint.ascent()) / 2
         val shieldCenterY = TEXT_PADDING + height / 2f
         bitmap.eraseColor(options.backgroundColor)
@@ -49,7 +53,10 @@ class RoadLabelRenderer(private val resources: Resources) {
         return bitmap
     }
 
-    private fun measureRoadLabel(road: List<RoadComponent>, shields: List<RouteShield>): List<Component> {
+    private fun measureRoadLabel(
+        road: List<RoadComponent>,
+        shields: List<RouteShield>
+    ): List<Component> {
         return road.map { component ->
             getShieldBitmap(component, shields)
                 ?.let { Component.Shield(it) }
@@ -98,7 +105,12 @@ class RoadLabelRenderer(private val resources: Resources) {
         components.fold(TEXT_PADDING) { x, component ->
             x + spaceWidth + when (component) {
                 is Component.Text -> {
-                    drawText(component.value, x + component.rect.width() / 2f, textBaselineY, textPaint)
+                    drawText(
+                        component.value,
+                        x + component.rect.width() / 2f,
+                        textBaselineY,
+                        textPaint
+                    )
                     component.rect.width()
                 }
                 is Component.Shield -> {

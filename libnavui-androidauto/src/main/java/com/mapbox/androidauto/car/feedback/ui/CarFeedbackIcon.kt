@@ -40,8 +40,10 @@ fun CarFeedbackIcon.drawableRes() = when (this) {
 
     // Search feedback icons
     IncorrectNameCarFeedbackIcon -> R.drawable.mapbox_search_sdk_ic_feedback_reason_incorrect_name
-    IncorrectAddressCarFeedbackIcon -> R.drawable.mapbox_search_sdk_ic_feedback_reason_incorrect_address
-    IncorrectLocationCarFeedbackIcon -> R.drawable.mapbox_search_sdk_ic_feedback_reason_incorrect_location
+    IncorrectAddressCarFeedbackIcon ->
+        R.drawable.mapbox_search_sdk_ic_feedback_reason_incorrect_address
+    IncorrectLocationCarFeedbackIcon ->
+        R.drawable.mapbox_search_sdk_ic_feedback_reason_incorrect_location
     SearchOtherIssueCarFeedbackIcon -> R.drawable.mapbox_search_sdk_ic_three_dots
 
     // Generic feedback icons

@@ -48,14 +48,25 @@ class CarNavigationInfoMapper(
         val distanceRemaining = currentStepProgress?.distanceRemaining ?: return null
         val maneuver = expectedManeuvers.value?.firstOrNull()
         return maneuver?.primary?.let { primary ->
-            val carManeuver = CarManeuverMapper.from(primary.type, primary.modifier, primary.degrees)
+            val carManeuver =
+                CarManeuverMapper.from(primary.type, primary.modifier, primary.degrees)
             carManeuverIconRenderer.renderManeuverIcon(primary)?.let { carManeuver.setIcon(it) }
             val primaryInstruction =
-                renderManeuver(primary.componentList, routeShields, primaryExitOptions, primary.modifier)
+                renderManeuver(
+                    primary.componentList,
+                    routeShields,
+                    primaryExitOptions,
+                    primary.modifier
+                )
             val instruction = SpannableStringBuilder.valueOf(primaryInstruction)
             maneuver.secondary?.let { secondary ->
                 val secondaryInstruction =
-                    renderManeuver(secondary.componentList, routeShields, secondaryExitOptions, secondary.modifier)
+                    renderManeuver(
+                        secondary.componentList,
+                        routeShields,
+                        secondaryExitOptions,
+                        secondary.modifier
+                    )
                 instruction.append(System.lineSeparator())
                 instruction.append(secondaryInstruction)
             }
@@ -72,12 +83,22 @@ class CarNavigationInfoMapper(
         }
     }
 
-    private fun RoutingInfo.Builder.withOptionalNextStep(maneuver: Maneuver, routeShields: List<RouteShield>) = apply {
+    private fun RoutingInfo.Builder.withOptionalNextStep(
+        maneuver: Maneuver,
+        routeShields: List<RouteShield>
+    ) = apply {
         maneuver.sub?.let { subManeuver ->
-            val nextCarManeuver = CarManeuverMapper.from(subManeuver.type, subManeuver.modifier, subManeuver.degrees)
-            carManeuverIconRenderer.renderManeuverIcon(subManeuver)?.let { nextCarManeuver.setIcon(it) }
+            val nextCarManeuver =
+                CarManeuverMapper.from(subManeuver.type, subManeuver.modifier, subManeuver.degrees)
+            carManeuverIconRenderer.renderManeuverIcon(subManeuver)
+                ?.let { nextCarManeuver.setIcon(it) }
             val instruction =
-                renderManeuver(subManeuver.componentList, routeShields, subExitOptions, subManeuver.modifier)
+                renderManeuver(
+                    subManeuver.componentList,
+                    routeShields,
+                    subExitOptions,
+                    subManeuver.modifier
+                )
             val nextStep = Step.Builder(instruction)
                 .setManeuver(nextCarManeuver.build())
                 .build()
@@ -95,7 +116,13 @@ class CarNavigationInfoMapper(
         exitView.updateTextAppearance(exitOptions.textAppearance)
         // TODO write when to check the type and pass MUTCD or VIENNA when the data is available
         exitView.updateExitProperties(exitOptions.mutcdExitProperties)
-        return carManeuverInstructionRenderer.renderInstruction(maneuver, shields, exitView, modifier, IMAGE_HEIGHT)
+        return carManeuverInstructionRenderer.renderInstruction(
+            maneuver,
+            shields,
+            exitView,
+            modifier,
+            IMAGE_HEIGHT
+        )
     }
 
     private companion object {

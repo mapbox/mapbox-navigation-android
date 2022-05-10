@@ -14,9 +14,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.androidauto.ActiveGuidanceState
 import com.mapbox.androidauto.MapboxCarApp
-import com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer
-import com.mapbox.androidauto.logAndroidAuto
-import com.mapbox.androidauto.navigation.audioguidance.muteAudioGuidance
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
@@ -24,10 +21,14 @@ import com.mapbox.androidauto.car.feedback.ui.routePreviewCarFeedbackProvider
 import com.mapbox.androidauto.car.location.CarLocationRenderer
 import com.mapbox.androidauto.car.navigation.CarCameraMode
 import com.mapbox.androidauto.car.navigation.CarNavigationCamera
+import com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil
 import com.mapbox.androidauto.car.search.PlaceRecord
+import com.mapbox.androidauto.logAndroidAuto
+import com.mapbox.androidauto.navigation.audioguidance.muteAudioGuidance
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
+import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -36,6 +37,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
  * After a destination has been selected. This view previews the route and lets
  * you select alternatives. From here, you can start turn-by-turn navigation.
  */
+@MapboxExperimental
 class CarRoutePreviewScreen(
     private val routePreviewCarContext: RoutePreviewCarContext,
     private val placeRecord: PlaceRecord,
@@ -99,7 +101,9 @@ class CarRoutePreviewScreen(
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onResume(owner: LifecycleOwner) {
                 logAndroidAuto("CarRoutePreviewScreen onResume")
-                routePreviewCarContext.carContext.onBackPressedDispatcher.addCallback(backPressCallback)
+                routePreviewCarContext.carContext.onBackPressedDispatcher.addCallback(
+                    backPressCallback
+                )
                 routePreviewCarContext.mapboxCarMap.registerObserver(carLocationRenderer)
                 routePreviewCarContext.mapboxCarMap.registerObserver(carSpeedLimitRenderer)
                 routePreviewCarContext.mapboxCarMap.registerObserver(carNavigationCamera)
@@ -173,7 +177,9 @@ class CarRoutePreviewScreen(
                 Action.Builder()
                     .setTitle(carContext.getString(R.string.car_action_preview_navigate_button))
                     .setOnClickListener {
-                        routePreviewCarContext.mapboxNavigation.setNavigationRoutes(routesProvider.routes)
+                        routePreviewCarContext.mapboxNavigation.setNavigationRoutes(
+                            routesProvider.routes
+                        )
                         MapboxCarApp.updateCarAppState(ActiveGuidanceState)
                     }
                     .build(),

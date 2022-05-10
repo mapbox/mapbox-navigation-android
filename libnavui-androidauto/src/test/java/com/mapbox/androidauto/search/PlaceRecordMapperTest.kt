@@ -1,8 +1,8 @@
 package com.mapbox.androidauto.search
 
+import com.mapbox.androidauto.car.search.PlaceRecordMapper
 import com.mapbox.androidauto.testing.FileUtils
 import com.mapbox.api.geocoding.v5.models.CarmenFeature
-import com.mapbox.androidauto.car.search.PlaceRecordMapper
 import com.mapbox.geojson.Point
 import com.mapbox.search.record.FavoriteRecord
 import com.mapbox.search.result.SearchAddress
@@ -31,7 +31,9 @@ class PlaceRecordMapperTest {
                 country = "United States"
             )
             every { categories } returns null
-            every { coordinate } returns Point.fromLngLat(-122.27494049, 37.80561066)
+            every {
+                coordinate
+            } returns Point.fromLngLat(-122.27494049, 37.80561066)
         }
 
         val placeRecord = PlaceRecordMapper.fromFavoriteRecord(favoriteRecord)
@@ -55,7 +57,10 @@ class PlaceRecordMapperTest {
         assertEquals(placeRecord.name, "Starbucks")
         assertEquals(placeRecord.coordinate?.latitude(), 37.800456)
         assertEquals(placeRecord.coordinate?.longitude(), -122.273904)
-        assertEquals(placeRecord.description, "Starbucks, 801 Broadway, Oakland, California 94607, United States")
+        assertEquals(
+            placeRecord.description,
+            "Starbucks, 801 Broadway, Oakland, California 94607, United States"
+        )
         assertEquals(placeRecord.categories, listOf("poi"))
     }
 }

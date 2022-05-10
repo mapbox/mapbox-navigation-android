@@ -72,17 +72,22 @@ open class ImageOverlayHost(
         this.margins = margins
         logE(
             TAG,
-            "onSizeChanged-> bitmap size: ${bitmap.width}, ${bitmap.height}; screen size: $width, $height"
+            "onSizeChanged-> bitmap size: ${bitmap.width}," +
+                " ${bitmap.height}; screen size: $width, $height"
         )
         val heightOffset = when (position) {
-            WidgetPosition.BOTTOM_LEFT -> height.toFloat() - bitmap.height.toFloat() / 2f - margins.marginBottom
-            WidgetPosition.BOTTOM_RIGHT -> height.toFloat() - bitmap.height.toFloat() / 2f - margins.marginBottom
+            WidgetPosition.BOTTOM_LEFT ->
+                height.toFloat() - bitmap.height.toFloat() / 2f - margins.marginBottom
+            WidgetPosition.BOTTOM_RIGHT ->
+                height.toFloat() - bitmap.height.toFloat() / 2f - margins.marginBottom
             WidgetPosition.TOP_LEFT -> margins.marginTop + bitmap.height.toFloat() / 2f
             WidgetPosition.TOP_RIGHT -> margins.marginTop + bitmap.height.toFloat() / 2f
         }
         val widthOffset = when (position) {
-            WidgetPosition.TOP_RIGHT -> width.toFloat() - bitmap.width.toFloat() / 2f - margins.marginRight
-            WidgetPosition.BOTTOM_RIGHT -> width.toFloat() - bitmap.width.toFloat() / 2f - margins.marginRight
+            WidgetPosition.TOP_RIGHT ->
+                width.toFloat() - bitmap.width.toFloat() / 2f - margins.marginRight
+            WidgetPosition.BOTTOM_RIGHT ->
+                width.toFloat() - bitmap.width.toFloat() / 2f - margins.marginRight
             WidgetPosition.TOP_LEFT -> margins.marginLeft + bitmap.width.toFloat() / 2f
             WidgetPosition.BOTTOM_LEFT -> margins.marginLeft + bitmap.width.toFloat() / 2f
         }

@@ -20,7 +20,6 @@ class GeoDeeplinkGeocoding(
 ) {
     var currentMapboxGeocoding: MapboxGeocoding? = null
 
-    @Suppress("UseCheckOrError")
     suspend fun requestPlaces(
         geoDeeplink: GeoDeeplink,
         origin: Point

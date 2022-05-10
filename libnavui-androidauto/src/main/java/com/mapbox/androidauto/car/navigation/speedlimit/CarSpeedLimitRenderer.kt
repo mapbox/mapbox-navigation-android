@@ -2,8 +2,8 @@ package com.mapbox.androidauto.car.navigation.speedlimit
 
 import android.graphics.Rect
 import android.location.Location
-import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.androidauto.car.MainCarContext
+import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
@@ -25,25 +25,33 @@ class CarSpeedLimitRenderer(
 
     private val locationObserver = object : LocationObserver {
 
-        @Suppress("MagicNumber")
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
-            val speedKmph = locationMatcherResult.enhancedLocation.speed / METERS_IN_KILOMETER * SECONDS_IN_HOUR
-            when (mainCarContext.mapboxNavigation.navigationOptions.distanceFormatterOptions.unitType) {
-                UnitType.IMPERIAL -> {
-                    val speedLimit = locationMatcherResult.speedLimit?.speedKmph?.let { speedLimitKmph ->
-                        5 * (speedLimitKmph / KILOMETERS_IN_MILE / 5).roundToInt()
-                    }
-                    val speed = speedKmph / KILOMETERS_IN_MILE
-                    speedLimitWidget.update(speedLimit, speed.roundToInt())
-                }
-                UnitType.METRIC -> {
-                    speedLimitWidget.update(locationMatcherResult.speedLimit?.speedKmph, speedKmph.roundToInt())
-                }
-            }
+            updateSpeed(locationMatcherResult)
         }
 
         override fun onNewRawLocation(rawLocation: Location) {
             // no op
+        }
+    }
+
+    private fun updateSpeed(locationMatcherResult: LocationMatcherResult) {
+        val speedKmph =
+            locationMatcherResult.enhancedLocation.speed / METERS_IN_KILOMETER * SECONDS_IN_HOUR
+        when (mainCarContext.mapboxNavigation.navigationOptions.distanceFormatterOptions.unitType) {
+            UnitType.IMPERIAL -> {
+                val speedLimit =
+                    locationMatcherResult.speedLimit?.speedKmph?.let { speedLimitKmph ->
+                        5 * (speedLimitKmph / KILOMETERS_IN_MILE / 5).roundToInt()
+                    }
+                val speed = speedKmph / KILOMETERS_IN_MILE
+                speedLimitWidget.update(speedLimit, speed.roundToInt())
+            }
+            UnitType.METRIC -> {
+                speedLimitWidget.update(
+                    locationMatcherResult.speedLimit?.speedKmph,
+                    speedKmph.roundToInt()
+                )
+            }
         }
     }
 

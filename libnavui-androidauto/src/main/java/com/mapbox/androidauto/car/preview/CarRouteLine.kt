@@ -1,10 +1,10 @@
 package com.mapbox.androidauto.car.preview
 
-import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.androidauto.car.MainCarContext
 import com.mapbox.androidauto.car.routes.NavigationRoutesProvider
 import com.mapbox.androidauto.car.routes.RoutesListener
 import com.mapbox.androidauto.car.routes.RoutesProvider
+import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
@@ -51,7 +51,8 @@ class CarRouteLine internal constructor(
 
     private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
         val result = routeLineApi.updateTraveledRouteLine(point)
-        mainCarContext.mapboxCarMap.carMapSurface?.mapSurface?.getMapboxMap()?.getStyle()?.let { style ->
+        val mapboxMap = mainCarContext.mapboxCarMap.carMapSurface?.mapSurface?.getMapboxMap()
+        mapboxMap?.getStyle()?.let { style ->
             routeLineView.renderRouteLineUpdate(style, result)
         }
     }

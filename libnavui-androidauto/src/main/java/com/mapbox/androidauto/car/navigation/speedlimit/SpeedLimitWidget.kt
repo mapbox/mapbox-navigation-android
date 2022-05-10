@@ -15,7 +15,6 @@ import com.mapbox.maps.EdgeInsets
 /**
  * Widget to display a speed limit sign on the map.
  */
-@Suppress("MagicNumber")
 class SpeedLimitWidget(
     /**
      * The position of the widget.

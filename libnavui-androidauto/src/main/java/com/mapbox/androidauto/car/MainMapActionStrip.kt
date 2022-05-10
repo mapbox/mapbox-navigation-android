@@ -32,9 +32,15 @@ class MainMapActionStrip(
             .addAction(buildPanAction())
         val nextCameraMode = carNavigationCamera.nextCameraMode.value
         when {
-            nextCameraMode == CarCameraMode.FOLLOWING -> mapActionStripBuilder.addAction(buildRecenterAction())
-            nextCameraMode == CarCameraMode.OVERVIEW -> mapActionStripBuilder.addAction(buildOverviewAction())
-            !carNavigationCamera.followingZoomUpdatesAllowed() -> mapActionStripBuilder.addAction(buildRecenterAction())
+            nextCameraMode == CarCameraMode.FOLLOWING -> mapActionStripBuilder.addAction(
+                buildRecenterAction()
+            )
+            nextCameraMode == CarCameraMode.OVERVIEW -> mapActionStripBuilder.addAction(
+                buildOverviewAction()
+            )
+            !carNavigationCamera.followingZoomUpdatesAllowed() -> mapActionStripBuilder.addAction(
+                buildRecenterAction()
+            )
         }
 
         return mapActionStripBuilder
@@ -84,9 +90,11 @@ class MainMapActionStrip(
         }
         .build()
 
-    private fun buildRecenterAction() = buildCameraAction(R.drawable.ic_recenter_24, CarCameraMode.FOLLOWING)
+    private fun buildRecenterAction() =
+        buildCameraAction(R.drawable.ic_recenter_24, CarCameraMode.FOLLOWING)
 
-    private fun buildOverviewAction() = buildCameraAction(R.drawable.ic_route_overview, CarCameraMode.OVERVIEW)
+    private fun buildOverviewAction() =
+        buildCameraAction(R.drawable.ic_route_overview, CarCameraMode.OVERVIEW)
 
     private fun buildCameraAction(@DrawableRes iconId: Int, carCameraMode: CarCameraMode): Action {
         return Action.Builder()

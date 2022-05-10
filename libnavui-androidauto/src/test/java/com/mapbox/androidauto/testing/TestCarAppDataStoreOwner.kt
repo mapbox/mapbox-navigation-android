@@ -9,7 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 class TestCarAppDataStoreOwner {
 
-    private val booleanStorageMap = mutableMapOf<CarAppDataStoreKey<Boolean>, MutableStateFlow<Boolean>>()
+    private val booleanStorageMap =
+        mutableMapOf<CarAppDataStoreKey<Boolean>, MutableStateFlow<Boolean>>()
 
     val carAppDataStoreOwner: CarAppDataStoreOwner = mockk {
         every { read(any<CarAppDataStoreKey<Boolean>>()) } answers {

@@ -11,7 +11,6 @@ import androidx.car.app.navigation.model.PlaceListNavigationTemplate
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.androidauto.MapboxCarApp
-import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.MainCarContext
 import com.mapbox.androidauto.car.action.MapboxActionProvider
@@ -22,6 +21,7 @@ import com.mapbox.androidauto.car.preview.CarRouteRequestCallback
 import com.mapbox.androidauto.car.preview.RoutePreviewCarContext
 import com.mapbox.androidauto.car.search.PlaceRecord
 import com.mapbox.androidauto.car.search.SearchCarContext
+import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArrayList
 
-@OptIn(MapboxExperimental::class)
+@MapboxExperimental
 class PlacesListOnMapScreen(
     private val mainCarContext: MainCarContext,
     private val placesProvider: PlacesListOnMapProvider,
@@ -192,7 +192,9 @@ class PlacesListOnMapScreen(
             placeRecords.clear()
             expectedPlaceRecords.fold(
                 {
-                    logAndroidAuto("PlacesListOnMapScreen ${it.errorMessage}, ${it.throwable?.stackTrace}")
+                    logAndroidAuto(
+                        "PlacesListOnMapScreen ${it.errorMessage}, ${it.throwable?.stackTrace}"
+                    )
                 },
                 {
                     placeRecords.addAll(it)

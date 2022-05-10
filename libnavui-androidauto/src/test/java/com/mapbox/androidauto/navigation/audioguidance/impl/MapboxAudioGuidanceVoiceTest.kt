@@ -1,5 +1,3 @@
-@file:Suppress("NoMockkVerifyImport")
-
 package com.mapbox.androidauto.navigation.audioguidance.impl
 
 import com.mapbox.androidauto.testing.CarAppTestRule
