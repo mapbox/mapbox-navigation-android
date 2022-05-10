@@ -123,7 +123,7 @@ class MapboxTripSessionNoSetupTest {
         val voiceInstructionsAnnouncements = voiceInstructionsObserver.records
             .takeLast(2) // take only events triggered by location updates
             .map { it.announcement() }
-        assertEquals(listOf("1", "2"), voiceInstructionsAnnouncements)
+        assertEquals(listOf("2"), voiceInstructionsAnnouncements)
     }
 
     @Test

@@ -545,11 +545,6 @@ internal class MapboxTripSession(
         voiceInstructionsObserver: VoiceInstructionsObserver
     ) {
         voiceInstructionsObservers.add(voiceInstructionsObserver)
-        routeProgress?.let {
-            checkVoiceInstructionEvent(it.voiceInstructions) { voiceInstruction ->
-                voiceInstructionsObserver.onNewVoiceInstructions(voiceInstruction)
-            }
-        }
     }
 
     /**
