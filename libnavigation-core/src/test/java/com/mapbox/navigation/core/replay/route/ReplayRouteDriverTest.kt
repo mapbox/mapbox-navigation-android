@@ -24,32 +24,55 @@ class ReplayRouteDriverTest {
 
         val locations = replayRouteDriver.drivePointList(defaultOptions, points)
 
-        var time = 0L
-        locations.forEach {
-            assertEquals(time, it.timeMillis)
-            time += 1000L
+        locations.windowed(size = 2) {
+            val deltaMillis = it.last().timeSeconds - it.first().timeSeconds
+            assertEquals(1.0, deltaMillis, 0.2)
         }
     }
 
     @Test
+    fun `should complete short routes`() {
+        val points = PolylineUtils.decode("""qnq_gAxdhmhFuvBlJe@?qC^""", 6)
+        val locations = replayRouteDriver.drivePointList(defaultOptions, points)
+
+        assertTrue("${locations.size} < 20", locations.size < 20)
+    }
+
+    @Test
     fun `should have location every second for multiple routes`() {
+        val options = defaultOptions.toBuilder().frequency(1.0).build()
         val firstPoints = PolylineUtils.decode(
             """anq_gAxdhmhFbZkA^?tDMUsF?m@WmKMoHOeF]eO?}@GiBcB}s@?{@McGoDLu@?cUlAqMj@qfAtE""",
             6,
         )
         val secondPoints = PolylineUtils.decode("""qnq_gAxdhmhFuvBlJe@?qC^""", 6)
 
-        val firstLegLocations = replayRouteDriver.drivePointList(defaultOptions, firstPoints)
-        val secondLegLocations = replayRouteDriver.drivePointList(defaultOptions, secondPoints)
+        val firstLegLocations = replayRouteDriver.drivePointList(options, firstPoints)
+        val secondLegLocations = replayRouteDriver.drivePointList(options, secondPoints)
+        val flattenedLocations = listOf(firstLegLocations, secondLegLocations).flatten()
 
-        var time = 0L
-        firstLegLocations.forEach {
-            assertEquals(time, it.timeMillis)
-            time += 1000L
+        flattenedLocations.windowed(size = 2) {
+            val deltaMillis = it.last().timeSeconds - it.first().timeSeconds
+            assertEquals(1.0, deltaMillis, 0.2)
         }
-        secondLegLocations.forEach {
-            assertEquals(time, it.timeMillis)
-            time += 1000L
+    }
+
+    @Test
+    fun `should have ten locations every second for multiple routes with higher frequency`() {
+        val options = defaultOptions.toBuilder().frequency(10.0).build()
+        val firstPoints = PolylineUtils.decode(
+            """anq_gAxdhmhFbZkA^?tDMUsF?m@WmKMoHOeF]eO?}@GiBcB}s@?{@McGoDLu@?cUlAqMj@qfAtE""",
+            6,
+        )
+        val secondPoints = PolylineUtils.decode("""qnq_gAxdhmhFuvBlJe@?qC^""", 6)
+
+        val firstLegLocations = replayRouteDriver.drivePointList(options, firstPoints)
+        val secondLegLocations = replayRouteDriver.drivePointList(options, secondPoints)
+        val flattenedLocations = listOf(firstLegLocations, secondLegLocations).flatten()
+
+        flattenedLocations.windowed(size = 2) {
+            val deltaMillis = it.last().timeSeconds - it.first().timeSeconds
+            assertEquals(0.1, deltaMillis, 0.02)
         }
     }
 
@@ -67,12 +90,16 @@ class ReplayRouteDriverTest {
     }
 
     @Test
-    fun `should not crash for smallest trip`() {
+    fun `should complete the smallest trip`() {
         val points = PolylineUtils.decode("""ooq_gAbehmhFO@""", 6)
 
         val locations = replayRouteDriver.drivePointList(defaultOptions, points)
 
-        assertEquals(2, locations.size)
+        val lastLocation = locations.last()
+        assertTrue(locations.size >= 3)
+        assertEquals(0.0, lastLocation.speedMps, 0.001)
+        assertEquals(0.89, lastLocation.distance, 0.01)
+        assertTrue(lastLocation.timeMillis < 3000L)
     }
 
     @Test

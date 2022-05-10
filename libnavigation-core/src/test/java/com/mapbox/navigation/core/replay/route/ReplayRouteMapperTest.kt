@@ -9,6 +9,8 @@ import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.testutil.replay.removeAccelerationAndBrakingSpeedUpdates
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.MockLoggerRule
+import com.mapbox.turf.TurfConstants
+import com.mapbox.turf.TurfMeasurement
 import io.mockk.every
 import io.mockk.mockk
 import org.apache.commons.io.IOUtils
@@ -149,6 +151,29 @@ class ReplayRouteMapperTest {
             "speed changes too much on the way: $speedUpdatesAmongARoute",
             maxSpeed - minSpeed < 1
         )
+    }
+
+    @Test
+    fun `distance speed should be near the estimated speed`() {
+        val geometry = "kxia{Ao{daU??z@f@nAnAnAvBzEvBz@f@nAnA?rDzEg@bGg@bBg@nAwBzOgc@vBcGRcGg@" +
+            "sDg@kCsI{JgEvVcGv[oFb[_I~a@_I~a@kC~MwBjMcB~HoA~H"
+        val events = replayRouteMapper.mapGeometry(geometry)
+        val locations = events.filterIsInstance(ReplayEventUpdateLocation::class.java).toList()
+
+        // Loop through the locations and calculate the speed the location is reporting.
+        // Compare that to the speed that the distance was traveled. The closer to zero we can make
+        // this, the more accurate the estimates are.
+        for (i in 1..locations.lastIndex) {
+            val previousLocation = locations[i - 1].location
+            val currentLocation = locations[i].location
+            val previous = Point.fromLngLat(previousLocation.lon, previousLocation.lat)
+            val current = Point.fromLngLat(currentLocation.lon, currentLocation.lat)
+            val distance = TurfMeasurement.distance(previous, current, TurfConstants.UNIT_METERS)
+            val locationSpeed = (previousLocation.speed!! + currentLocation.speed!!) / 2.0
+            val distanceSpeed = distance / (currentLocation.time!! - previousLocation.time!!)
+
+            assertEquals(locationSpeed, distanceSpeed, 1.0)
+        }
     }
 
     private fun resourceAsString(

@@ -512,12 +512,14 @@ package com.mapbox.navigation.core.replay.route {
   }
 
   public final class ReplayRouteOptions {
+    method public double getFrequency();
     method public double getMaxAcceleration();
     method public double getMaxSpeedMps();
     method public double getMinAcceleration();
     method public double getTurnSpeedMps();
     method public double getUTurnSpeedMps();
     method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder toBuilder();
+    property public final double frequency;
     property public final double maxAcceleration;
     property public final double maxSpeedMps;
     property public final double minAcceleration;
@@ -528,6 +530,7 @@ package com.mapbox.navigation.core.replay.route {
   public static final class ReplayRouteOptions.Builder {
     ctor public ReplayRouteOptions.Builder();
     method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions build();
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder frequency(double frequency);
     method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder maxAcceleration(double maxAcceleration);
     method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder maxSpeedMps(double maxSpeedMps);
     method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder minAcceleration(double minAcceleration);

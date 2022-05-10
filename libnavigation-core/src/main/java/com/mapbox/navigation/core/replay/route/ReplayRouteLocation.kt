@@ -6,12 +6,17 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 
 internal data class ReplayRouteSegment(
     val startSpeedMps: Double,
+    val maxSpeedMps: Double,
     val endSpeedMps: Double,
-    val distanceMeters: Double,
+    val totalDistance: Double,
+    val speedUpDistance: Double,
+    val cruiseDistance: Double,
+    val slowDownDistance: Double,
     val steps: List<ReplayRouteStep>
 )
 
 internal data class ReplayRouteStep(
+    val timeSeconds: Double,
     val acceleration: Double,
     val speedMps: Double,
     val positionMeters: Double

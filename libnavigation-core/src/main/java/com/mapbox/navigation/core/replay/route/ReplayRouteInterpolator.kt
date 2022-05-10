@@ -4,8 +4,10 @@ import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
 import kotlin.math.abs
 import kotlin.math.ceil
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.math.sqrt
 
 internal class ReplayRouteInterpolator {
 
@@ -31,7 +33,10 @@ internal class ReplayRouteInterpolator {
 
     /**
      * Interpolate a speed across a distance. The returned segment will include approximate
-     * once per second speed and distance calculations that can be used to create location coordinates.
+     * speed and distance calculations that can be used to create location coordinates.
+     *
+     * This will speed up to a cruising speed and slow down to the end speed, which allows for the
+     * start and end speeds to be zero.
      */
     fun interpolateSpeed(
         options: ReplayRouteOptions,
@@ -39,25 +44,155 @@ internal class ReplayRouteInterpolator {
         endSpeed: Double,
         distance: Double
     ): ReplayRouteSegment {
+        val segment = calculateSegmentSpeedAndDistances(options, startSpeed, endSpeed, distance)
         val speedSteps = mutableListOf<ReplayRouteStep>()
-        speedSteps.add(
-            ReplayRouteStep(
-                acceleration = 0.0,
-                speedMps = startSpeed,
-                positionMeters = 0.0
+            .addAcceleratingSteps(
+                frequency = options.frequency,
+                startSpeed = startSpeed,
+                endSpeed = segment.maxSpeedMps,
+                distance = segment.speedUpDistance
             )
-        )
+            .addCruisingSteps(
+                frequency = options.frequency,
+                speed = segment.maxSpeedMps,
+                distance = segment.cruiseDistance
+            )
+            .addAcceleratingSteps(
+                frequency = options.frequency,
+                startSpeed = segment.maxSpeedMps,
+                endSpeed = endSpeed,
+                distance = segment.slowDownDistance
+            )
+            .clampLastStep(endSpeed, distance)
 
-        while (speedSteps.last().positionMeters < distance) {
-            estimateSpeedStep(options, speedSteps, endSpeed, distance)
-        }
+        return segment.copy(steps = speedSteps)
+    }
+
+    /**
+     * A [ReplayRouteSegment] is created from a [startSpeed], [endSpeed], and a [distance]. The
+     * [startSpeed] and [endSpeed] can be equal, so this determines a proper speed that can be
+     * used for traveling the segment. The calling function, is responsible for calculating and
+     * adding the [ReplayRouteSegment.steps] before it is returned.
+     *
+     * Note that it is possible to give this function an infeasible task. For example, a driver
+     * cannot accelerate from 0-100mps in 10 meters with a max acceleration of 3mps^2. The
+     * caller is responsible for ensuring the values are feasible.
+     *
+     * @param options contains thresholds like max speed and min|max acceleration
+     * @param startSpeed starting speed for the segment in meters per second
+     * @param endSpeed ending speed for the segment in meters per second
+     * @param distance distance in meters to travel from a [startSpeed] to an [endSpeed]
+     */
+    private fun calculateSegmentSpeedAndDistances(
+        options: ReplayRouteOptions,
+        startSpeed: Double,
+        endSpeed: Double,
+        distance: Double
+    ): ReplayRouteSegment {
+        // Solving for v with a v^2 problem requires the quadratic formula.
+        // This is the result, sorry it's a mess.
+        val alpha = 1.0 / options.maxAcceleration - 1.0 / options.minAcceleration
+        val beta = -startSpeed.pow(2.0) / options.maxAcceleration
+        val gamma = endSpeed.pow(2.0) / options.minAcceleration
+        val delta = (beta + gamma - 2.0 * distance)
+        var maxSpeed = sqrt(-4.0 * alpha * delta) / (2.0 * alpha)
+        maxSpeed = max(max(startSpeed, endSpeed), min(options.maxSpeedMps, maxSpeed))
+
+        // Plug back into the equations we solved for to get the maxSpeed. This will give distances.
+        val t1 = (maxSpeed - startSpeed) / options.maxAcceleration
+        val speedUpDistance = newtonDistance(t1, 0.0, startSpeed, options.maxAcceleration)
+        val slowDownDistance = if (maxSpeed > endSpeed) {
+            val t3 = (endSpeed - maxSpeed) / options.minAcceleration
+            newtonDistance(t3, 0.0, maxSpeed, options.minAcceleration)
+        } else 0.0
+        val cruiseDistance = (distance - (speedUpDistance + slowDownDistance)).removeZeroError()
 
         return ReplayRouteSegment(
             startSpeedMps = startSpeed,
+            maxSpeedMps = maxSpeed,
             endSpeedMps = endSpeed,
-            distanceMeters = distance,
-            steps = speedSteps
+            totalDistance = distance,
+            speedUpDistance = speedUpDistance,
+            cruiseDistance = cruiseDistance,
+            slowDownDistance = slowDownDistance,
+            steps = emptyList(),
         )
+    }
+
+    private fun MutableList<ReplayRouteStep>.addCruisingSteps(
+        frequency: Double,
+        speed: Double,
+        distance: Double
+    ) = apply {
+        if (distance == 0.0) return this
+        val startDistance = lastOrNull()?.positionMeters ?: 0.0
+        val startTime = lastOrNull()?.timeSeconds ?: 0.0
+        if (startDistance > 0.0) { removeLast() }
+        val t1 = distance / speed
+        val steps = ceil(t1) * frequency
+        val increment = t1 / steps
+        for (i in 0..steps.toInt()) {
+            val t = i * increment
+            val replayRouteStep = ReplayRouteStep(
+                timeSeconds = startTime + t,
+                acceleration = 0.0,
+                speedMps = speed,
+                positionMeters = startDistance + speed * t
+            )
+            add(replayRouteStep)
+        }
+    }
+
+    private fun MutableList<ReplayRouteStep>.addAcceleratingSteps(
+        frequency: Double,
+        startSpeed: Double,
+        endSpeed: Double,
+        distance: Double
+    ) = apply {
+        if (distance == 0.0) return this
+        val startDistance = lastOrNull()?.positionMeters ?: 0.0
+        val startTime = lastOrNull()?.timeSeconds ?: 0.0
+        if (startDistance > 0.0) { removeLast() }
+        val acceleration = (endSpeed.pow(2.0) - startSpeed.pow(2.0)) / (2 * distance)
+        val t1 = (endSpeed - startSpeed) / acceleration
+        val steps = ceil(t1) * frequency
+        val increment = t1 / steps
+        for (i in 0..steps.toInt()) {
+            val t = i * increment
+            val replayRouteStep = ReplayRouteStep(
+                timeSeconds = startTime + t,
+                acceleration = acceleration,
+                speedMps = startSpeed + acceleration * t,
+                positionMeters = newtonDistance(t, startDistance, startSpeed, acceleration)
+            )
+            add(replayRouteStep)
+        }
+    }
+
+    /**
+     * Clamp the end to remove any residual floating point error.
+     */
+    private fun MutableList<ReplayRouteStep>.clampLastStep(
+        endSpeed: Double,
+        distance: Double
+    ) = apply {
+        val lastStep = last().copy(
+            speedMps = endSpeed,
+            positionMeters = distance
+        )
+        set(lastIndex, lastStep)
+    }
+
+    /**
+     * A little helper method to convert known values into a distance.
+     *
+     * @param t time in seconds
+     * @param r0 start distance in meters
+     * @param v0 start velocity in meters per second
+     * @param a acceleration in meters per second squared
+     */
+    private fun newtonDistance(t: Double, r0: Double, v0: Double, a: Double): Double {
+        return (r0 + v0 * t + 0.5 * a * t.pow(2.0)).removeZeroError()
     }
 
     /**
@@ -82,31 +217,14 @@ internal class ReplayRouteInterpolator {
         }
     }
 
-    private fun estimateSpeedStep(
-        options: ReplayRouteOptions,
-        speedSteps: MutableList<ReplayRouteStep>,
-        endSpeed: Double,
-        distance: Double
-    ) {
-        val previous = speedSteps.last()
-        val acceleration = maxSpeedForStep(options, previous)
-
-        val needsToSlowDown =
-            isRemainingStepSlowingDown(options, previous, endSpeed, acceleration, distance)
-        if (needsToSlowDown) {
-            interpolateSlowdown(options, endSpeed, distance, speedSteps)
-        } else {
-            val replayRouteStep = newtonsNextReplayRouteStep(acceleration, previous)
-            speedSteps.add(replayRouteStep)
-        }
-    }
-
     private fun createSpeedForTurns(
         options: ReplayRouteOptions,
         smoothLocations: List<ReplayRouteLocation>
     ) {
         for (i in 1 until smoothLocations.lastIndex) {
-            val deltaBearing = abs(smoothLocations[i - 1].bearing - smoothLocations[i].bearing)
+            val segmentStart = smoothLocations[i - 1]
+            val segmentEnd = smoothLocations[i]
+            val deltaBearing = abs(segmentStart.bearing - segmentEnd.bearing)
             val speedMps = when (deltaBearing) {
                 in maxSpeedBearingRange -> {
                     options.maxSpeedMps
@@ -128,118 +246,29 @@ internal class ReplayRouteInterpolator {
         options: ReplayRouteOptions,
         smoothLocations: List<ReplayRouteLocation>
     ) {
-        for (i in smoothLocations.lastIndex downTo 1) {
-            val to = smoothLocations[i].speedMps
+        // Check the speed estimates with their speeds. Reduce the speed to ensure the estimates
+        // are within the acceleration limits. For example, a car can only go so fast, and slamming
+        // the breaks can only slow you down by so much.
+        for (i in 1..smoothLocations.lastIndex) {
             val from = smoothLocations[i - 1].speedMps
+            val to = smoothLocations[i].speedMps
             val runway = smoothLocations[i - 1].distance
-            val isSlowingDown = (to - from) < 0.0
-            if (isSlowingDown) {
-                val runwayNeeded = distanceToSlowDown(options, from, 0.0, to)
-                if (runwayNeeded > runway) {
-                    smoothLocations[i - 1].speedMps = maxSpeedForDistance(options, to, runway)
+            val isSlowing = from - to > 0
+            val acceleration = if (isSlowing) options.minAcceleration else options.maxAcceleration
+            val feasibleDistance = (to.pow(2.0) - from.pow(2.0)) / (2.0 * acceleration)
+            val isFeasible = runway - feasibleDistance >= 0
+            if (!isFeasible) {
+                if (isSlowing) {
+                    val d2a = runway * 2.0 * acceleration
+                    val feasibleFromSpeed = sqrt(-d2a + to.pow(2.0))
+                    smoothLocations[i - 1].speedMps = feasibleFromSpeed
+                } else {
+                    val d2a = runway * 2.0 * acceleration
+                    val feasibleToSpeed = sqrt(d2a + from.pow(2.0))
+                    smoothLocations[i].speedMps = feasibleToSpeed
                 }
             }
         }
-    }
-
-    private fun isRemainingStepSlowingDown(
-        options: ReplayRouteOptions,
-        previousStep: ReplayRouteStep,
-        endSpeed: Double,
-        acceleration: Double,
-        distance: Double
-    ): Boolean {
-        val slowDownDistance =
-            distanceToSlowDown(options, previousStep.speedMps, acceleration, endSpeed)
-        val nextRemainingDistance =
-            distance - (previousStep.positionMeters + previousStep.speedMps)
-        return nextRemainingDistance > 0 && nextRemainingDistance <= slowDownDistance
-    }
-
-    private fun newtonsNextReplayRouteStep(
-        acceleration: Double,
-        previousStep: ReplayRouteStep
-    ): ReplayRouteStep {
-        val speed = previousStep.speedMps + acceleration
-        val position = previousStep.positionMeters + (speed + previousStep.speedMps) / 2.0
-        return ReplayRouteStep(
-            acceleration = acceleration,
-            speedMps = speed,
-            positionMeters = position
-        )
-    }
-
-    private fun maxSpeedForStep(
-        options: ReplayRouteOptions,
-        previousStep: ReplayRouteStep
-    ): Double {
-        return when {
-            previousStep.speedMps == options.maxSpeedMps -> 0.0
-            previousStep.speedMps > options.maxSpeedMps -> {
-                options.maxSpeedMps - previousStep.speedMps
-            }
-            else -> min(options.maxSpeedMps - previousStep.speedMps, options.maxAcceleration)
-        }
-    }
-
-    /**
-     * Assumes we need to slow down to [endSpeed] in [distance] meters. Add the [ReplayRouteStep]s
-     * needed to perform that maneuver accurately.
-     */
-    private fun interpolateSlowdown(
-        options: ReplayRouteOptions,
-        endSpeed: Double,
-        distance: Double,
-        steps: MutableList<ReplayRouteStep>
-    ) {
-        var previous = steps.last()
-        val targetDistance = distance - previous.positionMeters
-        val targetSpeed = endSpeed - previous.speedMps
-        val remainingSteps = ceil(targetSpeed / options.minAcceleration).toInt() + 1
-        val acceleration = targetSpeed / remainingSteps
-        val positionSpeed = targetDistance / remainingSteps
-        for (i in 0 until remainingSteps) {
-            previous = steps.last()
-            steps.add(
-                ReplayRouteStep(
-                    acceleration = acceleration,
-                    speedMps = previous.speedMps + acceleration,
-                    positionMeters = previous.positionMeters + positionSpeed
-                )
-            )
-        }
-        steps[steps.lastIndex] = ReplayRouteStep(steps.last().acceleration, endSpeed, distance)
-    }
-
-    private fun distanceToSlowDown(
-        options: ReplayRouteOptions,
-        velocity: Double,
-        acceleration: Double,
-        endVelocity: Double
-    ): Double {
-        var currentVelocity = velocity + acceleration
-        var distanceToStop = 0.0
-        while (currentVelocity > endVelocity) {
-            val velocityNext = currentVelocity + options.minAcceleration
-            distanceToStop += (velocityNext + currentVelocity) / 2.0
-            currentVelocity = velocityNext
-        }
-        return distanceToStop
-    }
-
-    private fun maxSpeedForDistance(
-        options: ReplayRouteOptions,
-        endSpeed: Double,
-        distance: Double
-    ): Double {
-        var currentVelocity = endSpeed
-        var distanceToStop = -options.minAcceleration
-        do {
-            val velocityNext = currentVelocity - options.minAcceleration
-            distanceToStop += (velocityNext + currentVelocity) / 2.0
-            currentVelocity = velocityNext
-        } while (distanceToStop < distance)
-        return currentVelocity
     }
 
     private companion object {
@@ -256,5 +285,17 @@ internal class ReplayRouteInterpolator {
          * when the driver will drive the [ReplayRouteOptions.uTurnSpeedMps].
          */
         private val uTurnBearingRange: ClosedRange<Double> = 150.0..200.0
+
+        /*
+         * Constant epsilon for distances and floating point comparisons.
+         */
+        private const val ZERO_METERS_EPSILON = 0.001
+
+        /*
+         * When comparing distances there can be rounding error.
+         * This removes the rounding error to create better value == 0.0 comparisons.
+         */
+        private fun Double.removeZeroError(): Double =
+            if (abs(this) < ZERO_METERS_EPSILON) 0.0 else this
     }
 }
