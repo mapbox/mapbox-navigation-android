@@ -10,15 +10,15 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.androidauto.ArrivalState
 import com.mapbox.androidauto.MapboxCarApp
-import com.mapbox.androidauto.car.navigation.roadlabel.RoadLabelSurfaceLayer
-import com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer
-import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.MainMapActionStrip
 import com.mapbox.androidauto.car.action.MapboxActionProvider
 import com.mapbox.androidauto.car.location.CarLocationRenderer
+import com.mapbox.androidauto.car.navigation.roadlabel.RoadLabelSurfaceLayer
+import com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil
 import com.mapbox.androidauto.car.preview.CarRouteLine
+import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.MapboxExperimental
@@ -93,9 +93,12 @@ class ActiveGuidanceScreen(
     }
 
     private val routesObserver = RoutesObserver { result ->
-        val route = result.navigationRoutes.firstOrNull() ?: return@RoutesObserver
-        val coordinate = route.routeOptions.coordinatesList().lastOrNull() ?: return@RoutesObserver
-        val mapboxCarMapSurface = carActiveGuidanceContext.mapboxCarMap.carMapSurface ?: return@RoutesObserver
+        val route = result.navigationRoutes.firstOrNull()
+            ?: return@RoutesObserver
+        val coordinate = route.routeOptions.coordinatesList().lastOrNull()
+            ?: return@RoutesObserver
+        val mapboxCarMapSurface = carActiveGuidanceContext.mapboxCarMap.carMapSurface
+            ?: return@RoutesObserver
         val featureCollection = FeatureCollection.fromFeature(Feature.fromGeometry(coordinate))
         mapboxCarMapSurface.mapSurface.getMapboxMap().getStyle { style ->
             placesLayerUtil.updatePlacesListOnMapLayer(style, featureCollection)

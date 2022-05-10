@@ -70,7 +70,10 @@ class RoadLabelRendererTest {
     @Test
     fun very_long_street_name() {
         val bitmap = roadLabelBitmapRenderer.render(
-            createRoad("Taumatawhakatangihangakoauauotamateaturipukakapikimaungahoronukupokaiwhenuakitanatahu"),
+            createRoad(
+                "Taumatawhakatangihangakoauauotamateaturipukakapikimaungahoronukupokaiwhen" +
+                    "uakitanatahu"
+            ),
             emptyList(),
             RoadLabelOptions.Builder()
                 .backgroundColor(0x784D4DD3)
@@ -101,8 +104,19 @@ class RoadLabelRendererTest {
         val byteArray = context.assets.open("shield.svg").use { it.readBytes() }
         val mapboxShield = mockk<MapboxShield>()
         val bitmap = roadLabelBitmapRenderer.render(
-            listOf(createComponent("Clarksburg Road"), createComponent("/"), createComponent("121", mapboxShield)),
-            listOf(RouteShieldFactory.buildRouteShield("download-url", byteArray, mapboxShield, mockk())),
+            listOf(
+                createComponent("Clarksburg Road"),
+                createComponent("/"),
+                createComponent("121", mapboxShield)
+            ),
+            listOf(
+                RouteShieldFactory.buildRouteShield(
+                    "download-url",
+                    byteArray,
+                    mapboxShield,
+                    mockk()
+                )
+            ),
             RoadLabelOptions.Builder()
                 .backgroundColor(0x784D4DD3)
                 .build(),

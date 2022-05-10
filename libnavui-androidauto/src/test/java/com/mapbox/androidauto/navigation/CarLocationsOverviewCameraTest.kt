@@ -1,4 +1,3 @@
-@file:Suppress("NoMockkVerifyImport")
 package com.mapbox.androidauto.navigation
 
 import com.mapbox.androidauto.car.navigation.CarLocationsOverviewCamera
@@ -24,7 +23,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
-
 import org.junit.Test
 
 @OptIn(MapboxExperimental::class)

@@ -1,5 +1,3 @@
-@file:Suppress("NoMockkVerifyImport")
-
 package com.mapbox.androidauto.deeplink
 
 import android.location.Location
@@ -79,9 +77,10 @@ class GeoDeeplinkPlacesListOnMapProviderTest {
         val carContext = mockk<CarContext> {
             every { getString(any()) } returns "test_string"
         }
-        val result = GeoDeeplinkPlacesListOnMapProvider(carContext, geoDeeplinkGeocoding, geoDeeplink)
-            .getPlaces()
-            .value!!
+        val result =
+            GeoDeeplinkPlacesListOnMapProvider(carContext, geoDeeplinkGeocoding, geoDeeplink)
+                .getPlaces()
+                .value!!
 
         assertEquals(45.6824467, originSlot.captured.latitude(), 0.0001)
         assertEquals(-121.8544717, originSlot.captured.longitude(), 0.0001)

@@ -1,5 +1,3 @@
-@file:Suppress("NoMockkVerifyImport")
-
 package com.mapbox.androidauto.car.navigation.maneuver
 
 import androidx.car.app.navigation.model.Maneuver

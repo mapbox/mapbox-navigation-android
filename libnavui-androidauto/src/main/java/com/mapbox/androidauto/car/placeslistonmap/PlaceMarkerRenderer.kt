@@ -9,8 +9,8 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.car.app.model.CarIcon
 import androidx.core.graphics.drawable.IconCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
-import com.mapbox.androidauto.car.RendererUtils.dpToPx
 import com.mapbox.androidauto.R
+import com.mapbox.androidauto.car.RendererUtils.dpToPx
 
 /**
  * Render bitmaps that can be shown as markers on the map.

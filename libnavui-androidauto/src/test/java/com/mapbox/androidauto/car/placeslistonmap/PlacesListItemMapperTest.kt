@@ -3,8 +3,8 @@ package com.mapbox.androidauto.car.placeslistonmap
 import android.location.Location
 import androidx.car.app.model.CarIcon
 import androidx.core.graphics.drawable.IconCompat
-import com.mapbox.androidauto.testing.MapboxRobolectricTestRunner
 import com.mapbox.androidauto.car.search.PlaceRecord
+import com.mapbox.androidauto.testing.MapboxRobolectricTestRunner
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.formatter.UnitType
 import io.mockk.every

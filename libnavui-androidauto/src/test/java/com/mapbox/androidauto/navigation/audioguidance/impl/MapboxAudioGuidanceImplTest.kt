@@ -1,5 +1,3 @@
-@file:Suppress("NoMockkVerifyImport")
-
 package com.mapbox.androidauto.navigation.audioguidance.impl
 
 import com.mapbox.androidauto.configuration.CarAppConfigOwner
@@ -198,21 +196,23 @@ class MapboxAudioGuidanceImplTest {
     }
 
     @Test
-    fun `voice language from route is preferred to device language`() = coroutineRule.runBlockingTest {
-        carAppAudioGuidance.onAttached(mockk())
+    fun `voice language from route is preferred to device language`() =
+        coroutineRule.runBlockingTest {
+            carAppAudioGuidance.onAttached(mockk())
 
-        val voiceLanguage = "ru"
-        testMapboxAudioGuidanceServices.emitVoiceLanguage(voiceLanguage)
-        delay(SPEECH_ANNOUNCEMENT_DELAY_MS)
+            val voiceLanguage = "ru"
+            testMapboxAudioGuidanceServices.emitVoiceLanguage(voiceLanguage)
+            delay(SPEECH_ANNOUNCEMENT_DELAY_MS)
 
-        val mapboxAudioGuidanceServices = testMapboxAudioGuidanceServices.mapboxAudioGuidanceServices
-        excludeRecords {
-            mapboxAudioGuidanceServices.mapboxVoiceInstructions(any())
+            val mapboxAudioGuidanceServices =
+                testMapboxAudioGuidanceServices.mapboxAudioGuidanceServices
+            excludeRecords {
+                mapboxAudioGuidanceServices.mapboxVoiceInstructions(any())
+            }
+            verifySequence {
+                mapboxAudioGuidanceServices.mapboxAudioGuidanceVoice(any(), deviceLanguage)
+                mapboxAudioGuidanceServices.mapboxAudioGuidanceVoice(any(), voiceLanguage)
+            }
+            carAppAudioGuidance.onDetached(mockk())
         }
-        verifySequence {
-            mapboxAudioGuidanceServices.mapboxAudioGuidanceVoice(any(), deviceLanguage)
-            mapboxAudioGuidanceServices.mapboxAudioGuidanceVoice(any(), voiceLanguage)
-        }
-        carAppAudioGuidance.onDetached(mockk())
-    }
 }

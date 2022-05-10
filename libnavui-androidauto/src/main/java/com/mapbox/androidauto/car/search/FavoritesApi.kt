@@ -1,12 +1,12 @@
 package com.mapbox.androidauto.car.search
 
 import androidx.car.app.CarContext
-import com.mapbox.bindgen.Expected
-import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackItemProvider
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackItem
 import com.mapbox.androidauto.car.feedback.ui.buildSearchPlacesCarFeedbackItems
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapProvider
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.search.AsyncOperationTask
 import com.mapbox.search.CompletionCallback
 import com.mapbox.search.record.FavoriteRecord
@@ -65,7 +65,9 @@ class FavoritesApi(
         }
     }
 
-    suspend fun addFavorite(favoriteRecord: FavoriteRecord): Expected<GetPlacesError, FavoriteRecord> {
+    suspend fun addFavorite(
+        favoriteRecord: FavoriteRecord
+    ): Expected<GetPlacesError, FavoriteRecord> {
         addFavoriteTask?.cancel()
         return suspendCoroutine { continuation ->
             addFavoriteTask = favoritesProvider.add(

@@ -55,9 +55,11 @@ class MapboxVoiceInstructionsTest {
 
         val state = carAppVoiceInstructions.voiceInstructions().take(3).toList()
 
-        assertFalse(state[0].isPlayable) // routesFlow() on start sends empty list to disable sound button  in FreeDrive
+        // routesFlow() on start sends empty list to disable sound button  in FreeDrive
+        assertFalse(state[0].isPlayable)
         assertEquals(null, state[0].voiceInstructions)
-        assertTrue(state[1].isPlayable) // voiceInstructionsFlow() sends null voiceInstruction before observer is fired
+        // voiceInstructionsFlow() sends null voiceInstruction before observer is fired
+        assertTrue(state[1].isPlayable)
         assertEquals("Left on Broadway", state[2].voiceInstructions?.announcement())
     }
 
@@ -88,8 +90,10 @@ class MapboxVoiceInstructionsTest {
         val voiceInstruction = carAppVoiceInstructions.voiceInstructions().take(4).toList()
 
         val actual = voiceInstruction.map { it.voiceInstructions?.announcement() }
-        assertEquals(null, actual[0]) // routesFlow() on start sends empty list to disable sound button  in FreeDrive
-        assertEquals(null, actual[1]) // voiceInstructionsFlow() sends null voiceInstruction before observer is fired
+        // routesFlow() on start sends empty list to disable sound button  in FreeDrive
+        assertEquals(null, actual[0])
+        // voiceInstructionsFlow() sends null voiceInstruction before observer is fired
+        assertEquals(null, actual[1])
         assertEquals("Left on Broadway", actual[2])
         assertEquals("Right on Pennsylvania", actual[3])
     }
@@ -131,15 +135,20 @@ class MapboxVoiceInstructionsTest {
         val language = "de"
         every { mapboxNavigation.registerRoutesObserver(any()) } answers {
             val result = mockk<RoutesUpdatedResult> {
-                every { navigationRoutes } returns listOf(createRoute(language), createRoute(voiceLanguage = "en"))
+                every { navigationRoutes } returns listOf(
+                    createRoute(language),
+                    createRoute(voiceLanguage = "en")
+                )
             }
             firstArg<RoutesObserver>().onRoutesChanged(result)
         }
 
         val state = carAppVoiceInstructions.voiceLanguage().take(3).toList()
 
-        assertEquals(null, state[0]) // routesFlow() on start sends empty list to disable sound button  in FreeDrive
-        assertEquals(null, state[1]) // voiceInstructionsFlow() sends null voiceInstruction before observer is fired
+        // routesFlow() on start sends empty list to disable sound button  in FreeDrive
+        assertEquals(null, state[0])
+        // voiceInstructionsFlow() sends null voiceInstruction before observer is fired
+        assertEquals(null, state[1])
         assertEquals(language, state[2])
     }
 
@@ -156,11 +165,12 @@ class MapboxVoiceInstructionsTest {
     }
 
     @Test
-    fun `should emit null voice language before routes are updated`() = coroutineRule.runBlockingTest {
-        every { mapboxNavigation.registerRoutesObserver(any()) } just Runs
+    fun `should emit null voice language before routes are updated`() =
+        coroutineRule.runBlockingTest {
+            every { mapboxNavigation.registerRoutesObserver(any()) } just Runs
 
-        assertNull(carAppVoiceInstructions.voiceLanguage().first())
-    }
+            assertNull(carAppVoiceInstructions.voiceLanguage().first())
+        }
 
     private fun createRoute(voiceLanguage: String): NavigationRoute {
         return mockk {

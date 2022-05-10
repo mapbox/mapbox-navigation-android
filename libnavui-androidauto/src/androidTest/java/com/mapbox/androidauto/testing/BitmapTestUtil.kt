@@ -75,11 +75,17 @@ class BitmapTestUtil(
             context.assets.open(expectedBitmapFile).use {
                 val expected = BitmapFactory.decodeStream(it)
                 val difference = calculateDifference(expected, actual)
-                // If the images are different, write them to a file so they can be uploaded for debugging.
+                // If the images are different, write them to a file so they can be uploaded for
+                // debugging.
                 if (difference.similarity > 0.01) {
                     writeBitmapFile(testName, actual)
-                    writeBitmapFile("${testName.methodName}-diff", difference.difference)
-                    fail("The ${testName.methodName} image failed with similarity: ${difference.similarity}")
+                    writeBitmapFile(
+                        "${testName.methodName}-diff", difference.difference
+                    )
+                    fail(
+                        "The ${testName.methodName} image failed with similarity: " +
+                            "${difference.similarity}"
+                    )
                 }
             }
         } catch (t: Throwable) {

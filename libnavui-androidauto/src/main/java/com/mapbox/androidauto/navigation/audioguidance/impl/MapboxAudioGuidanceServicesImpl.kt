@@ -12,14 +12,18 @@ class MapboxAudioGuidanceServicesImpl : MapboxAudioGuidanceServices {
         language: String,
     ): MapboxAudioGuidanceVoice {
         val mapboxSpeechApi = mapboxSpeechApi(mapboxNavigation, language)
-        val mapboxVoiceInstructionsPlayer = mapboxVoiceInstructionsPlayer(mapboxNavigation, language)
+        val mapboxVoiceInstructionsPlayer =
+            mapboxVoiceInstructionsPlayer(mapboxNavigation, language)
         return MapboxAudioGuidanceVoice(
             mapboxSpeechApi,
             mapboxVoiceInstructionsPlayer
         )
     }
 
-    override fun mapboxSpeechApi(mapboxNavigation: MapboxNavigation, language: String): MapboxSpeechApi {
+    override fun mapboxSpeechApi(
+        mapboxNavigation: MapboxNavigation,
+        language: String
+    ): MapboxSpeechApi {
         val applicationContext = mapboxNavigation.navigationOptions.applicationContext
         val accessToken = mapboxNavigation.navigationOptions.accessToken!!
         return MapboxSpeechApi(applicationContext, accessToken, language)
@@ -34,7 +38,7 @@ class MapboxAudioGuidanceServicesImpl : MapboxAudioGuidanceServices {
         return MapboxVoiceInstructionsPlayer(applicationContext, accessToken, language)
     }
 
-    override fun mapboxVoiceInstructions(mapboxNavigation: MapboxNavigation): MapboxVoiceInstructions {
-        return MapboxVoiceInstructions(mapboxNavigation)
-    }
+    override fun mapboxVoiceInstructions(
+        mapboxNavigation: MapboxNavigation
+    ) = MapboxVoiceInstructions(mapboxNavigation)
 }

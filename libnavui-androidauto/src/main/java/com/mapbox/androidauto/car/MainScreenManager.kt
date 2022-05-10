@@ -8,8 +8,6 @@ import com.mapbox.androidauto.CarAppState
 import com.mapbox.androidauto.FreeDriveState
 import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.RoutePreviewState
-import com.mapbox.androidauto.logAndroidAuto
-import com.mapbox.androidauto.navigation.audioguidance.CarAudioGuidanceUi
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.car.feedback.ui.CarGridFeedbackScreen
@@ -17,6 +15,8 @@ import com.mapbox.androidauto.car.feedback.ui.activeGuidanceCarFeedbackProvider
 import com.mapbox.androidauto.car.feedback.ui.buildArrivalFeedbackProvider
 import com.mapbox.androidauto.car.navigation.ActiveGuidanceScreen
 import com.mapbox.androidauto.car.navigation.CarActiveGuidanceCarContext
+import com.mapbox.androidauto.logAndroidAuto
+import com.mapbox.androidauto.navigation.audioguidance.CarAudioGuidanceUi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.map
@@ -41,7 +41,8 @@ class MainScreenManager(val mainCarContext: MainCarContext) {
                     )
                 )
             }
-            // Push screen and capture feedback. When completed, go back to FreeDriveState and clear the current route.
+            // Push screen and capture feedback. When completed, go back to FreeDriveState
+            // and clear the current route.
             ArrivalState -> CarGridFeedbackScreen(
                 mainCarContext.carContext,
                 javaClass.simpleName,
@@ -56,13 +57,17 @@ class MainScreenManager(val mainCarContext: MainCarContext) {
     }
 
     suspend fun observeCarAppState() {
-        MapboxCarApp.carAppState.map { currentScreen(it) }.distinctUntilChangedBy { it.javaClass }.collect { screen ->
-            val screenManager = mainCarContext.carContext.getCarService(ScreenManager::class.java)
-            logAndroidAuto("MainScreenManager screen change ${screen.javaClass.simpleName}")
-            if (screenManager.top.javaClass != screen.javaClass) {
-                screenManager.replace(screen)
+        MapboxCarApp.carAppState
+            .map { currentScreen(it) }
+            .distinctUntilChangedBy { it.javaClass }
+            .collect { screen ->
+                val screenManager = mainCarContext.carContext
+                    .getCarService(ScreenManager::class.java)
+                logAndroidAuto("MainScreenManager screen change ${screen.javaClass.simpleName}")
+                if (screenManager.top.javaClass != screen.javaClass) {
+                    screenManager.replace(screen)
+                }
             }
-        }
     }
 }
 

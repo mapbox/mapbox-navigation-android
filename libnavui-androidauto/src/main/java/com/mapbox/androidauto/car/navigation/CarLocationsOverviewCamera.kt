@@ -53,7 +53,9 @@ class CarLocationsOverviewCamera(
                     .maxDuration(0)
                     .build()
 
-                navigationCamera.requestNavigationCameraToOverview(stateTransitionOptions = instantTransition)
+                navigationCamera.requestNavigationCameraToOverview(
+                    stateTransitionOptions = instantTransition
+                )
             }
         }
     }

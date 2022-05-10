@@ -1,5 +1,3 @@
-@file:Suppress("NoMockkVerifyImport")
-
 package com.mapbox.androidauto
 
 import androidx.car.app.CarContext

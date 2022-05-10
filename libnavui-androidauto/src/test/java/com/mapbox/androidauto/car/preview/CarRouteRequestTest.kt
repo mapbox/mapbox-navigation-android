@@ -1,5 +1,3 @@
-@file:Suppress("NoMockkVerifyImport")
-
 package com.mapbox.androidauto.car.preview
 
 import androidx.test.core.app.ApplicationProvider

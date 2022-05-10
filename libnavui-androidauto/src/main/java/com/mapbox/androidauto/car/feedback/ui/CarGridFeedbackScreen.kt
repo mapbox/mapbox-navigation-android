@@ -51,7 +51,11 @@ class CarGridFeedbackScreen constructor(
                             CarToast.LENGTH_LONG
                         ).show()
                     } else {
-                        carFeedbackSender.send(selectedItem, encodedSnapshot, sourceScreenSimpleName)
+                        carFeedbackSender.send(
+                            selectedItem,
+                            encodedSnapshot,
+                            sourceScreenSimpleName
+                        )
                         CarToast.makeText(
                             carContext,
                             carContext.getString(R.string.car_feedback_submit_toast_success),

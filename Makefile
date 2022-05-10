@@ -25,6 +25,9 @@ libnavui-dropin \
 
 UI_MODULES = $(RELEASED_UI_MODULES)
 
+EXTENSION_MODULES = \
+libnavui-androidauto
+
 APPLICATION_MODULES = \
 qa-test-app \
 examples \
@@ -43,12 +46,14 @@ endef
 check-kotlin-lint:
 	$(call run-gradle-tasks,$(CORE_MODULES),ktlint) \
 	&& $(call run-gradle-tasks,$(UI_MODULES),ktlint) \
+	&& $(call run-gradle-tasks,$(EXTENSION_MODULES),ktlint) \
 	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),ktlint)
 
 .PHONY: check-android-lint
 check-android-lint:
 	$(call run-gradle-tasks,$(CORE_MODULES),lint) \
 	&& $(call run-gradle-tasks,$(UI_MODULES),lint) \
+	&& $(call run-gradle-tasks,$(EXTENSION_MODULES),lint) \
 	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),lint)
 
 .PHONY: license-verification

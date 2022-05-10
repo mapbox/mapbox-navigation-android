@@ -6,13 +6,13 @@ import androidx.car.app.model.Template
 import androidx.car.app.navigation.model.NavigationTemplate
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.mapbox.androidauto.car.navigation.roadlabel.RoadLabelSurfaceLayer
-import com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer
-import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.androidauto.car.location.CarLocationRenderer
 import com.mapbox.androidauto.car.navigation.CarCameraMode
 import com.mapbox.androidauto.car.navigation.CarNavigationCamera
+import com.mapbox.androidauto.car.navigation.roadlabel.RoadLabelSurfaceLayer
+import com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.car.preview.CarRouteLine
+import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.maps.MapboxExperimental
 
 /**

@@ -1,12 +1,10 @@
-@file:Suppress("NoMockkVerifyImport")
-
 package com.mapbox.androidauto.car.placeslistonmap
 
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.androidauto.testing.MapboxRobolectricTestRunner
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.addLayer

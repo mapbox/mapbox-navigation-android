@@ -2,8 +2,8 @@ package com.mapbox.androidauto.car.location
 
 import android.content.Context
 import androidx.core.content.ContextCompat
-import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.androidauto.R
+import com.mapbox.maps.plugin.LocationPuck2D
 
 object CarLocationPuck {
 

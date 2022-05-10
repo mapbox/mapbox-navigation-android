@@ -15,7 +15,6 @@ import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 import java.util.Calendar
 import java.util.TimeZone
 
-@Suppress("TooManyFunctions")
 object CarManeuverMapper {
 
     fun from(routeProgress: RouteProgress, maneuverApi: MapboxManeuverApi): Trip {
