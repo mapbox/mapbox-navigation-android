@@ -15,7 +15,6 @@ import com.mapbox.navigation.dropin.util.HapticFeedback
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.dropin.util.TestingUtil.makeLocationMatcherResult
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.navigation.utils.internal.toPoint
 import io.mockk.every
 import io.mockk.mockk
@@ -35,9 +34,6 @@ internal class RoutePreviewLongPressMapComponentTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
-
-    @get:Rule
-    val mockLoggerTestRule = MockLoggerRule()
 
     private val mockGesturesPlugin: GesturesPlugin = mockk(relaxed = true)
     private val mockMapView: MapView = mockk {

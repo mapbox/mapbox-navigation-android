@@ -1,21 +1,16 @@
 package com.mapbox.navigation.core.telemetry
 
 import android.location.Location
-import com.mapbox.navigation.testing.MockLoggerRule
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
-import org.junit.Rule
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
 class LocationsCollectorTest {
-
-    @get:Rule
-    val mockLoggerTestRule = MockLoggerRule()
     private val locationsCollector = LocationsCollectorImpl()
 
     @Test

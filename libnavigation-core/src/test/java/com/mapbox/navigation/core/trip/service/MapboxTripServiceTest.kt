@@ -1,13 +1,13 @@
 package com.mapbox.navigation.core.trip.service
 
 import android.app.Notification
-import com.mapbox.common.Logger
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.TripNotificationState
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.testing.MockLoggerRule
+import com.mapbox.navigation.utils.internal.LoggerFrontend
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
@@ -27,9 +27,9 @@ class MapboxTripServiceTest {
     private val notification: Notification = mockk()
     private val initializeLambda: () -> Unit = mockk(relaxed = true)
     private val terminateLambda: () -> Unit = mockk(relaxed = true)
-
-    @get:Rule
-    val mockLoggerTestRule = MockLoggerRule()
+    private val logger = mockk<LoggerFrontend>(relaxed = true).apply {
+        LoggerProvider.setLoggerFrontend(this)
+    }
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
@@ -76,7 +76,9 @@ class MapboxTripServiceTest {
         service.startService()
 
         verify(exactly = 1) { tripNotification.onTripSessionStarted() }
-        verify(exactly = 1) { Logger.i(any(), "[MapboxTripService] service already started") }
+        verify(exactly = 1) {
+            logger.logI("service already started", "MapboxTripService")
+        }
     }
 
     @Test
@@ -109,7 +111,9 @@ class MapboxTripServiceTest {
         service.stopService()
 
         verify(exactly = 1) { tripNotification.onTripSessionStopped() }
-        verify(exactly = 1) { Logger.i(any(), "[MapboxTripService] Service is not started yet") }
+        verify(exactly = 1) {
+            logger.logI("Service is not started yet", "MapboxTripService")
+        }
     }
 
     @Test

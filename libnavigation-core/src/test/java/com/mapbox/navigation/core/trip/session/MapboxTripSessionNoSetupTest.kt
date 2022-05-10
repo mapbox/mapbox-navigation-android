@@ -22,7 +22,6 @@ import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateU
 import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.LONGITUDE_FOR_VOICE_INSTRUCTION_NULL
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.NavigationStatus
@@ -52,9 +51,6 @@ class MapboxTripSessionNoSetupTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
-
-    @get:Rule
-    val mockLoggerTestRule = MockLoggerRule()
 
     @Test
     fun voiceInstructionsFallbacksToPreviousValue() = coroutineRule.runBlockingTest {
