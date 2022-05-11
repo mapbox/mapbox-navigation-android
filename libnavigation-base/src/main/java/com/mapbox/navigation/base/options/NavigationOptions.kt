@@ -298,7 +298,7 @@ class NavigationOptions private constructor(
 
         /**
          * Enables analyzing data from sensors for better location prediction in case of a weak
-         *  GPS signal, for example in tunnel.
+         *  GPS signal, for example in tunnel. Usage of sensors can increase battery consumption.
          * Warning: don't enable sensors if you emulate location updates. The SDK ignores
          *  location updates which don't match data from sensors.
          */
