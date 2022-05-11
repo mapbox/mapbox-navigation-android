@@ -8,7 +8,6 @@ import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadStatus
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
-import com.mapbox.navigation.testing.MockLoggerRule
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadCallback
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoader
@@ -25,7 +24,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -34,9 +32,6 @@ import java.net.URL
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 internal class MapboxSpeechProviderTest {
-
-    @get:Rule
-    val mockLoggerTestRule = MockLoggerRule()
 
     private lateinit var sut: MapboxSpeechProvider
 

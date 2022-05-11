@@ -1,9 +1,13 @@
 package com.mapbox.navigation.ui.utils.internal.resource
 
 import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory.createError
 import com.mapbox.common.Cancelable
+import com.mapbox.common.NetworkRestriction
+import com.mapbox.common.ReachabilityInterface
 import com.mapbox.common.ResourceDescription
 import com.mapbox.common.ResourceLoadError
+import com.mapbox.common.ResourceLoadErrorType
 import com.mapbox.common.ResourceLoadOptions
 import com.mapbox.common.ResourceLoadProgress
 import com.mapbox.common.ResourceLoadProgressCallback
@@ -25,7 +29,8 @@ import java.util.concurrent.atomic.AtomicLong
  * abort load operation.
  */
 internal class DefaultResourceLoader(
-    private val tileStore: TileStore
+    private val tileStore: TileStore,
+    private val reachability: ReachabilityInterface
 ) : ResourceLoader() {
 
     private val nextRequestId = AtomicLong(0L)
@@ -43,19 +48,32 @@ internal class DefaultResourceLoader(
     ): Long {
         val requestId = nextRequestId.incrementAndGet()
         val callbackAdapter = CallbackAdapter(request, callback, observers)
+        val requiresNetwork = request.networkRestriction != NetworkRestriction.DISALLOW_ALL
 
         callbackAdapter.notifyOnStart(request)
-        cancelableMap[requestId] = tileStore.loadResource(
-            /* description */ request.toResourceDescription(),
-            /* options */ request.toResourceLoadOptions("DefaultResourceLoader-$requestId"),
-            /* progressCallback */ callbackAdapter
-        ) {
-            cancelableMap.remove(requestId)
-            callbackAdapter.run(it)
+        // Since the TileStore (commonSDK 21.3.1) will defer any requests that require internet connection,
+        // we must verify network requirement here and fail fast if the network is not available.
+        if (requiresNetwork && !reachability.isReachable) {
+            callbackAdapter.run(createError(connectionError()))
+        } else {
+            cancelableMap[requestId] = tileStore.loadResource(
+                /* description */ request.toResourceDescription(),
+                /* options */ request.toResourceLoadOptions("DefaultResourceLoader-$requestId"),
+                /* progressCallback */ callbackAdapter
+            ) {
+                cancelableMap.remove(requestId)
+                callbackAdapter.run(it)
+            }
         }
 
         return requestId
     }
+
+    private fun connectionError() = ResourceLoadError(
+        ResourceLoadErrorType.UNSATISFIED,
+        "No internet connection",
+        0L
+    )
 
     override fun cancel(requestId: Long) {
         cancelableMap.remove(requestId)?.cancel()

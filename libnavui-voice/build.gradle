@@ -41,6 +41,8 @@ dependencies {
     api project(":libnavui-base")
     implementation project(":libnavui-resources")
 
+    api dependenciesList.mapboxSdkServices
+
     implementation dependenciesList.kotlinStdLib
 
     implementation dependenciesList.coroutinesAndroid

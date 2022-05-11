@@ -4,6 +4,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.Cancelable
 import com.mapbox.common.NetworkRestriction
+import com.mapbox.common.ReachabilityInterface
 import com.mapbox.common.ResourceData
 import com.mapbox.common.ResourceDescription
 import com.mapbox.common.ResourceLoadError
@@ -23,6 +24,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.util.Date
@@ -30,12 +32,16 @@ import java.util.Date
 class DefaultResourceLoaderTest {
 
     private lateinit var mockTileStore: TileStore
+    private lateinit var mockReachability: ReachabilityInterface
     private lateinit var sut: ResourceLoader
 
     @Before
     fun setUp() {
         mockTileStore = mockk<StubTileStore>(relaxed = true)
-        sut = DefaultResourceLoader(mockTileStore)
+        mockReachability = mockk(relaxed = true) {
+            every { isReachable } returns true
+        }
+        sut = DefaultResourceLoader(mockTileStore, mockReachability)
     }
 
     @Test
@@ -97,6 +103,31 @@ class DefaultResourceLoaderTest {
             callback.onProgress(loadRequest, loadProgress)
             callback.onFinish(loadRequest, loadResult)
         }
+    }
+
+    @Test
+    fun `load - should fail fast if request requires network and network is not reachable`() {
+        val callback = mockk<ResourceLoadCallback>(relaxed = true)
+        val loadRequest = ResourceLoadRequest("http://example.com/some-resource")
+        every { mockReachability.isReachable } returns false
+        sut.load(loadRequest, callback)
+
+        val errorCapture = slot<Expected<ResourceLoadError, ResourceLoadResult>>()
+        verifyOrder {
+            callback.onStart(loadRequest)
+            callback.onFinish(loadRequest, capture(errorCapture))
+        }
+        assertTrue(errorCapture.captured.isError)
+    }
+
+    @Test
+    fun `load - should NOT call TileStore if request requires network and network is not reachable`() {
+        val callback = mockk<ResourceLoadCallback>(relaxed = true)
+        val loadRequest = ResourceLoadRequest("http://example.com/some-resource")
+        every { mockReachability.isReachable } returns false
+        sut.load(loadRequest, callback)
+
+        verify(exactly = 0) { mockTileStore.loadResource(any(), any(), any(), any()) }
     }
 
     @Test

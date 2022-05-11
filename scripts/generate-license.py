@@ -13,6 +13,26 @@ licensePath = path + "/LICENSE.md"
 htmlFileName = "/open_source_licenses.html"
 assetsDirPath = "/src/main/assets"
 
+class LicenseEntry:
+    def __init__(self, project_name, project_descr, project_url, licence_name, license_url):
+        self.project_name = project_name
+        self.project_descr = project_descr
+        self.project_url = project_url
+        self.license_name = licence_name
+        self.license_url = license_url
+
+    def text(self):
+        if self.project_descr is not None and str(self.project_descr).lower() != str(self.project_name).lower() :
+            description = " (%s).\n" % self.project_descr
+        else :
+            description = ".\n"
+
+        return ("Mapbox Navigation uses portions of the %s%s" % (self.project_name, description) +
+                ("URL: [%s](%s)\n" % (self.project_url, self.project_url) if self.project_url is not None else "") +
+                "License: [%s](%s)" % (self.license_name, self.license_url) +
+                "\n\n===========================================================================\n\n")
+
+
 def removeLicenseHtmlFileForModule(moduleName) :
     try:
         os.remove(path + "/" + moduleName + assetsDirPath + htmlFileName)
@@ -38,18 +58,16 @@ def writeToFile(file, filePath) :
                     uniqueProjects.add(projectName)
                     projectUrl = entry["url"]
                     description = entry["description"]
-                    if description is not None and str(description).lower() != str(projectName).lower() :
-                        description = " (%s).\n" % description
-                    else :
-                        description = ".\n"
                     for license in entry["licenses"]:
                         licenseName = license["license"]
                         licenseUrl = license["license_url"]
 
-                    file.write("Mapbox Navigation uses portions of the %s%s" % (projectName, description) +
-                                      ("URL: [%s](%s)\n" % (projectUrl, projectUrl) if projectUrl is not None else "") +
-                                      "License: [%s](%s)" % (licenseName, licenseUrl) +
-                                      "\n\n===========================================================================\n\n")
+                    file.write(LicenseEntry(projectName, description, projectUrl, licenseName, licenseUrl).text())
+
+staticLicenses = [
+    LicenseEntry("Gradle License Plugin", None, "https://github.com/jaredsburrows/gradle-license-plugin", "The Apache Software License, Version 2.0", "http://www.apache.org/licenses/LICENSE-2.0.txt"),
+    LicenseEntry("okhttp", "Square’s meticulous HTTP client for Java and Kotlin.", "https://square.github.io/okhttp/", "The Apache Software License, Version 2.0", "http://www.apache.org/licenses/LICENSE-2.0.txt")
+]
 
 with codecs.open(licensePath, 'w', encoding='utf-8') as licenseFile:
     licenseFile.write("### License\n")
@@ -60,11 +78,7 @@ with codecs.open(licensePath, 'w', encoding='utf-8') as licenseFile:
     licenseFile.write("Mapbox Navigation for Android version 2.0 (" + u"“" + "Mapbox Navigation Android SDK" + u"“" + ") or higher must be used according to the Mapbox Terms of Service. This license allows developers with a current active Mapbox account to use and modify the Mapbox Navigation Android SDK. Developers may modify the Mapbox Navigation Android SDK code so long as the modifications do not change or interfere with marked portions of the code related to billing, accounting, and anonymized data collection. The Mapbox Navigation Android SDK sends anonymized location and usage data, which Mapbox uses for fixing bugs and errors, accounting, and generating aggregated anonymized statistics. This license terminates automatically if a user no longer has an active Mapbox account.\n\n")
     licenseFile.write("For the full license terms, please see the Mapbox Terms of Service at https://www.mapbox.com/legal/tos/\n\n")
     licenseFile.write("---------------------------------------\n")
-    project = "Gradle License Plugin"
-    url = "https://github.com/jaredsburrows/gradle-license-plugin"
-    license = "The Apache Software License, Version 2.0"
-    license_url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-    licenseFile.write("URL: [%s](%s)  \n" % (project, url) + "License: [%s](%s)" % (license, license_url))
+    [licenseFile.write(l.text()) for l in staticLicenses]
 
     licenseFile.write("\n\n#### Hybrid Router SDK module\n")
     writeToFile(licenseFile, "/libnavigation-router/build/reports/licenses/licenseReleaseReport.json")
@@ -118,3 +132,5 @@ removeLicenseHtmlFileForModule("libnavigation-android")
 removeLicenseHtmlFileForModule("libnavui-speedlimit")
 removeLicenseHtmlFileForModule("libnavui-shield")
 removeLicenseHtmlFileForModule("libnavui-status")
+removeLicenseHtmlFileForModule("libnavui-dropin")
+removeLicenseHtmlFileForModule("libnavui-androidauto")

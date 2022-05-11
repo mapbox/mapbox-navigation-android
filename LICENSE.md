@@ -12,8 +12,19 @@ Mapbox Navigation for Android version 2.0 (“Mapbox Navigation Android SDK“) 
 For the full license terms, please see the Mapbox Terms of Service at https://www.mapbox.com/legal/tos/
 
 ---------------------------------------
-URL: [Gradle License Plugin](https://github.com/jaredsburrows/gradle-license-plugin)  
+Mapbox Navigation uses portions of the Gradle License Plugin.
+URL: [https://github.com/jaredsburrows/gradle-license-plugin](https://github.com/jaredsburrows/gradle-license-plugin)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the okhttp (Square’s meticulous HTTP client for Java and Kotlin.).
+URL: [https://square.github.io/okhttp/](https://square.github.io/okhttp/)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+
 
 #### Hybrid Router SDK module
 Mapbox Navigation uses portions of the Android Support Library Annotations (The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs.).

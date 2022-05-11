@@ -4,6 +4,11 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 
+#### Features
+
+#### Bug fixes and improvements
+- Updated `MapboxSpeechApi` to use persistent cache to decrease the bandwidth consumption. [#5790](https://github.com/mapbox/mapbox-navigation-android/pull/5790)
+
 ## Mapbox Navigation SDK 2.5.0-rc.1 - May 13, 2022
 ### Changelog
 [Changes between v2.5.0-beta.3 and v2.5.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.5.0-beta.3...v2.5.0-rc.1)
@@ -23,7 +28,6 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed occasional absence of the first voice instruction. [#5807](https://github.com/mapbox/mapbox-navigation-android/pull/5807)
 - Fixed an issue where prettified Mapbox Directions service responses weren't parsed correctly. [#5807](https://github.com/mapbox/mapbox-navigation-android/pull/5807)
 - Fixed feature to customize alternative route line colors based on route property. [#5802](https://github.com/mapbox/mapbox-navigation-android/pull/5802)
-- Updated MapboxSpeechApi to use persistent cache to decrease the bandwidth consumption. [#5790](https://github.com/mapbox/mapbox-navigation-android/pull/5790)
 
 #### Known issues
 - Precision of the point at which the route is supposed to change behind the location indicator is negatively impacted for long routes. This can present itself by the route vanishing/changing in front the the location indicator.
