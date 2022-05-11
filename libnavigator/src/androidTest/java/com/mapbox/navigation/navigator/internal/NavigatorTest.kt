@@ -95,17 +95,7 @@ class NavigatorTest {
             NavigatorConfig(
                 null, null, null, null, null, null, null
             ),
-            """
-            {
-                "input": {
-            	    "stopDetector": {
-            		    "mobile": {
-            			    "useImu": false
-            		    }
-            	    }
-                }
-            }
-            """.trimIndent()
+            ""
         )
 
     private fun provideCacheHandle(
