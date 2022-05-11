@@ -6,7 +6,6 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
-import kotlin.math.floor
 import kotlin.math.min
 
 internal class ReplayRouteDriver {
@@ -148,9 +147,9 @@ internal class ReplayRouteDriver {
             val location = ReplayRouteLocation(null, point)
             location.distance = step.positionMeters
             location.speedMps = step.speedMps
-            location.timeMillis = floor(timeMillis + step.timeSeconds * 1000.0).toLong()
+            location.timeMillis = timeMillis + step.timeSeconds * 1000.0
             add(location)
         }
-        timeMillis = lastOrNull()?.timeMillis?.toDouble() ?: timeMillis
+        timeMillis = lastOrNull()?.timeMillis ?: timeMillis
     }
 }

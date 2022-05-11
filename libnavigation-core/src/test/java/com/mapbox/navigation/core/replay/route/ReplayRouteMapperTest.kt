@@ -6,10 +6,9 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
+import com.mapbox.navigation.core.testutil.replay.measureSpeedDistances
 import com.mapbox.navigation.core.testutil.replay.removeAccelerationAndBrakingSpeedUpdates
 import com.mapbox.navigation.testing.FileUtils
-import com.mapbox.turf.TurfConstants
-import com.mapbox.turf.TurfMeasurement
 import io.mockk.every
 import io.mockk.mockk
 import org.apache.commons.io.IOUtils
@@ -149,25 +148,38 @@ class ReplayRouteMapperTest {
     }
 
     @Test
+    fun `should map geometry that is very long`() {
+        val geometry = FileUtils.loadJsonFixture("replay_route_long_geometry.txt")
+
+        val updateEvents = replayRouteMapper.mapGeometry(geometry)
+
+        assertTrue(updateEvents.isNotEmpty())
+        updateEvents.measureSpeedDistances().forEachIndexed { i, it ->
+            assertEquals(it.locationSpeed, it.distanceSpeed, 1.0)
+        }
+    }
+
+    @Test
     fun `distance speed should be near the estimated speed`() {
         val geometry = "kxia{Ao{daU??z@f@nAnAnAvBzEvBz@f@nAnA?rDzEg@bGg@bBg@nAwBzOgc@vBcGRcGg@" +
             "sDg@kCsI{JgEvVcGv[oFb[_I~a@_I~a@kC~MwBjMcB~HoA~H"
         val events = replayRouteMapper.mapGeometry(geometry)
-        val locations = events.filterIsInstance(ReplayEventUpdateLocation::class.java).toList()
 
-        // Loop through the locations and calculate the speed the location is reporting.
-        // Compare that to the speed that the distance was traveled. The closer to zero we can make
-        // this, the more accurate the estimates are.
-        for (i in 1..locations.lastIndex) {
-            val previousLocation = locations[i - 1].location
-            val currentLocation = locations[i].location
-            val previous = Point.fromLngLat(previousLocation.lon, previousLocation.lat)
-            val current = Point.fromLngLat(currentLocation.lon, currentLocation.lat)
-            val distance = TurfMeasurement.distance(previous, current, TurfConstants.UNIT_METERS)
-            val locationSpeed = (previousLocation.speed!! + currentLocation.speed!!) / 2.0
-            val distanceSpeed = distance / (currentLocation.time!! - previousLocation.time!!)
+        events.measureSpeedDistances().forEach {
+            assertEquals(it.locationSpeed, it.distanceSpeed, 1.0)
+        }
+    }
 
-            assertEquals(locationSpeed, distanceSpeed, 1.0)
+    @Test
+    fun `distance speed should be near the estimated speed for high frequency`() {
+        val geometry = "kxia{Ao{daU??z@f@nAnAnAvBzEvBz@f@nAnA?rDzEg@bGg@bBg@nAwBzOgc@vBcGRcGg@" +
+            "sDg@kCsI{JgEvVcGv[oFb[_I~a@_I~a@kC~MwBjMcB~HoA~H"
+        val events = ReplayRouteMapper(
+            ReplayRouteOptions.Builder().frequency(10.0).build()
+        ).mapGeometry(geometry)
+
+        events.measureSpeedDistances().forEach {
+            assertEquals(it.locationSpeed, it.distanceSpeed, 1.0)
         }
     }
 

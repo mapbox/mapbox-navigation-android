@@ -27,6 +27,7 @@ class ReplayLocationEngineTest {
 
     private val mapboxReplayer: MapboxReplayer = mockk {
         every { registerObserver(any()) } returns Unit
+        every { eventRealtimeOffset(any()) } returns 0.0
     }
 
     private val replayLocationEngine = ReplayLocationEngine(mapboxReplayer)
@@ -209,8 +210,26 @@ class ReplayLocationEngineTest {
         replayLocationEngine.removeLocationUpdates(pendingIntent)
     }
 
-    private fun testLocation(): ReplayEventUpdateLocation {
-        val time = 0.0
+    @Test
+    fun `should add realtimeOffset to the location time`() {
+        val successData = mutableListOf<LocationEngineResult>()
+        val callback: LocationEngineCallback<LocationEngineResult> = mockk {
+            every { onSuccess(capture(successData)) } returns Unit
+        }
+        val testEventFirst = testLocation(2.0)
+        val testEventSecond = testLocation(3.0)
+        every { mapboxReplayer.eventRealtimeOffset(2.0) } returns -0.3
+        every { mapboxReplayer.eventRealtimeOffset(3.0) } returns 0.4
+        every { SystemClock.elapsedRealtimeNanos() } returns 5_000_000_000L
+
+        replayLocationEngine.requestLocationUpdates(mockk(), callback, mockk())
+        replayLocationEngine.replayEvents(listOf(testEventFirst, testEventSecond))
+
+        assertEquals(4700000000, successData[0].lastLocation!!.elapsedRealtimeNanos)
+        assertEquals(5400000000, successData[1].lastLocation!!.elapsedRealtimeNanos)
+    }
+
+    private fun testLocation(time: Double = 0.0): ReplayEventUpdateLocation {
         return ReplayEventUpdateLocation(
             time,
             ReplayEventLocation(

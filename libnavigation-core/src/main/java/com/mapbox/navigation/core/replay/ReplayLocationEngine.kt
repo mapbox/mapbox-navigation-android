@@ -20,7 +20,7 @@ private typealias EngineCallback = LocationEngineCallback<LocationEngineResult>
  * Location Engine for replaying route history.
  */
 class ReplayLocationEngine(
-    mapboxReplayer: MapboxReplayer
+    private val mapboxReplayer: MapboxReplayer
 ) : LocationEngine, ReplayEventsObserver {
 
     private val registeredCallbacks: MutableList<EngineCallback> = CopyOnWriteArrayList()
@@ -86,20 +86,21 @@ class ReplayLocationEngine(
     }
 
     override fun replayEvents(replayEvents: List<ReplayEventBase>) {
-        replayEvents.forEach { event ->
-            when (event) {
-                is ReplayEventUpdateLocation -> replayLocation(event)
+        replayEvents.forEach { replayEventBase ->
+            when (replayEventBase) {
+                is ReplayEventUpdateLocation -> replayLocation(replayEventBase)
             }
         }
     }
 
     private fun replayLocation(event: ReplayEventUpdateLocation) {
+        val timeOffset = mapboxReplayer.eventRealtimeOffset(event.eventTimestamp)
         val eventLocation = event.location
         val location = Location(eventLocation.provider)
         location.longitude = eventLocation.lon
         location.latitude = eventLocation.lat
-        location.time = Date().time
-        location.elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
+        location.time = Date().time + timeOffset.secToMillis()
+        location.elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos() + timeOffset.secToNanos()
         eventLocation.accuracyHorizontal?.toFloat()?.let { location.accuracy = it }
         eventLocation.bearing?.toFloat()?.let { location.bearing = it }
         eventLocation.altitude?.let { location.altitude = it }
@@ -110,5 +111,12 @@ class ReplayLocationEngine(
         registeredCallbacks.forEach { it.onSuccess(locationEngineResult) }
         lastLocationCallbacks.forEach { it.onSuccess(locationEngineResult) }
         lastLocationCallbacks.clear()
+    }
+
+    private companion object {
+        private const val MILLIS_PER_SECOND = 1000.0
+        private const val NANOS_PER_SECOND = 1e+9
+        private fun Double.secToMillis(): Long = (this * MILLIS_PER_SECOND).toLong()
+        private fun Double.secToNanos(): Long = (this * NANOS_PER_SECOND).toLong()
     }
 }

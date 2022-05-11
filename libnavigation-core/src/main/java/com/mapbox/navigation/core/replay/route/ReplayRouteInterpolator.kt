@@ -249,30 +249,41 @@ internal class ReplayRouteInterpolator {
         // Check the speed estimates with their speeds. Reduce the speed to ensure the estimates
         // are within the acceleration limits. For example, a car can only go so fast, and slamming
         // the breaks can only slow you down by so much.
-        for (i in 1..smoothLocations.lastIndex) {
+        var i = 1
+        while (i <= smoothLocations.lastIndex) {
             val from = smoothLocations[i - 1].speedMps
             val to = smoothLocations[i].speedMps
             val runway = smoothLocations[i - 1].distance
             val isSlowing = from - to > 0
             val acceleration = if (isSlowing) options.minAcceleration else options.maxAcceleration
             val feasibleDistance = (to.pow(2.0) - from.pow(2.0)) / (2.0 * acceleration)
-            val isFeasible = runway - feasibleDistance >= 0
+            val isFeasible = (runway - feasibleDistance).removeZeroError() >= 0.0
             if (!isFeasible) {
                 if (isSlowing) {
                     val d2a = runway * 2.0 * acceleration
                     val feasibleFromSpeed = sqrt(-d2a + to.pow(2.0))
                     smoothLocations[i - 1].speedMps = feasibleFromSpeed
+                    // We changed a location of the previous, so we need to go back until all
+                    // previous steps are feasible.
+                    i = max(i - 1, 1)
                 } else {
                     val d2a = runway * 2.0 * acceleration
                     val feasibleToSpeed = sqrt(d2a + from.pow(2.0))
                     smoothLocations[i].speedMps = feasibleToSpeed
                 }
+            } else {
+                i++
             }
         }
     }
 
     private companion object {
-        private const val SMOOTH_THRESHOLD_METERS = 3.0
+        /*
+         * Threshold for removing curves that will not impact the speed of the driver. The
+         * measurement is the centripetal distance the driver must travel before the next
+         * significant route edge.
+         */
+        private const val SMOOTH_THRESHOLD_METERS = 1.5
 
         /*
          * The road curvature used to determine

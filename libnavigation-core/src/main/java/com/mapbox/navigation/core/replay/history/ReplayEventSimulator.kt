@@ -109,6 +109,12 @@ internal class ReplayEventSimulator(
         return elapsedNanos * simulatorTimeScale
     }
 
+    fun eventRealtimeOffset(eventTimestamp: Double): Double {
+        val simulatorTime = timeSeconds() - simulatorTimeOffset
+        val eventTime = eventTimestamp - historyTimeOffset
+        return REPLAY_UPDATE_SPEED_MILLIS + eventTime - simulatorTime
+    }
+
     private companion object {
 
         // The frequency that replay updates will be broad-casted

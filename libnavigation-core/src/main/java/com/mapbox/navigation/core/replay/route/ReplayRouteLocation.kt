@@ -31,7 +31,7 @@ internal class ReplayRouteLocation(
      * [MapboxReplayer] is in Double seconds and [Location] is in milliseconds.
      * Keep track of the mapping in between
      */
-    var timeMillis: Long = 0L
+    var timeMillis: Double = 0.0
     val timeSeconds: Double
         get() = timeMillis / 1000.0
 
