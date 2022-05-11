@@ -511,6 +511,7 @@ class MapboxRouteLineApiRoboTest {
                 every { displayRestrictedRoadSections } returns false
                 every { displaySoftGradientForTraffic } returns false
                 every { softGradientTransition } returns 30.0
+                every { routeStyleDescriptors } returns listOf()
             }
             val api = MapboxRouteLineApi(options)
             val routeProgress = mockk<RouteProgress> {

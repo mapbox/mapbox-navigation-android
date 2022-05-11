@@ -28,6 +28,7 @@ import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getMatchingColors
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
@@ -1233,40 +1234,48 @@ class MapboxRouteLineApi(
         val alternative1PercentageTraveled = partitionedRoutes.second.firstOrNull()?.route?.run {
             alternativesDeviationOffset[this.id]
         } ?: 0.0
+        val alternateRoute1LineColors = getMatchingColors(
+            partitionedRoutes.second.firstOrNull()?.featureCollection,
+            routeLineOptions.routeStyleDescriptors,
+            routeLineOptions.resourceProvider.routeLineColorResources.alternativeRouteDefaultColor,
+            routeLineOptions.resourceProvider.routeLineColorResources.alternativeRouteCasingColor
+        )
         val alternateRoute1BaseExpressionProducer = {
             MapboxRouteLineUtils.getRouteLineExpression(
                 alternative1PercentageTraveled,
                 Color.TRANSPARENT,
-                routeLineOptions
-                    .resourceProvider.routeLineColorResources.alternativeRouteDefaultColor
+                alternateRoute1LineColors.first
             )
         }
         val alternateRoute1CasingExpressionProducer = {
             MapboxRouteLineUtils.getRouteLineExpression(
                 alternative1PercentageTraveled,
                 Color.TRANSPARENT,
-                routeLineOptions
-                    .resourceProvider.routeLineColorResources.alternativeRouteCasingColor
+                alternateRoute1LineColors.second
             )
         }
 
         val alternative2PercentageTraveled = partitionedRoutes.second.getOrNull(1)?.route?.run {
             alternativesDeviationOffset[this.id]
         } ?: 0.0
+        val alternateRoute2LineColors = getMatchingColors(
+            partitionedRoutes.second.getOrNull(1)?.featureCollection,
+            routeLineOptions.routeStyleDescriptors,
+            routeLineOptions.resourceProvider.routeLineColorResources.alternativeRouteDefaultColor,
+            routeLineOptions.resourceProvider.routeLineColorResources.alternativeRouteCasingColor
+        )
         val alternateRoute2BaseExpressionProducer = {
             MapboxRouteLineUtils.getRouteLineExpression(
                 alternative2PercentageTraveled,
                 Color.TRANSPARENT,
-                routeLineOptions
-                    .resourceProvider.routeLineColorResources.alternativeRouteDefaultColor
+                alternateRoute2LineColors.first
             )
         }
         val alternateRoute2CasingExpressionProducer = {
             MapboxRouteLineUtils.getRouteLineExpression(
                 alternative2PercentageTraveled,
                 Color.TRANSPARENT,
-                routeLineOptions
-                    .resourceProvider.routeLineColorResources.alternativeRouteCasingColor
+                alternateRoute2LineColors.second
             )
         }
 

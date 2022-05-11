@@ -52,6 +52,8 @@
             android:theme="@style/Theme.AppCompat.NoActionBar"
             />
 
+        <activity android:name=".view.CustomAlternativeRouteColoringActivity"/>
+
         <service
             android:name=".car.MainCarAppService"
             android:exported="true"

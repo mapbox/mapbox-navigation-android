@@ -6,6 +6,7 @@ import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.utils.startActivity
 import com.mapbox.navigation.qa_test_app.view.AlternativeRouteActivity
 import com.mapbox.navigation.qa_test_app.view.AppLifecycleActivity
+import com.mapbox.navigation.qa_test_app.view.CustomAlternativeRouteColoringActivity
 import com.mapbox.navigation.qa_test_app.view.FeedbackActivity
 import com.mapbox.navigation.qa_test_app.view.IconsPreviewActivity
 import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingActivity
@@ -37,6 +38,12 @@ object TestActivitySuite {
             R.string.alternative_route_selection_description,
         ) { activity ->
             activity.startActivity<AlternativeRouteActivity>()
+        },
+        TestActivityDescription(
+            "Custom Alt. Route Colors",
+            R.string.custom_alternative_route_color_description,
+        ) { activity ->
+            activity.startActivity<CustomAlternativeRouteColoringActivity>()
         },
         TestActivityDescription(
             "Display Route Restrictions",

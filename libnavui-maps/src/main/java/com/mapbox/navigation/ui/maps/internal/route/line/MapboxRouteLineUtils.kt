@@ -14,8 +14,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
-import com.mapbox.maps.extension.style.expressions.dsl.generated.color
-import com.mapbox.maps.extension.style.expressions.dsl.generated.eq
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.addPersistentLayer
 import com.mapbox.maps.extension.style.layers.generated.BackgroundLayer
@@ -49,7 +47,6 @@ import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.sin
 import kotlin.math.sqrt
-import kotlin.reflect.KProperty1
 
 internal object MapboxRouteLineUtils {
 
@@ -906,30 +903,6 @@ internal object MapboxRouteLineUtils {
         return expressionBuilder.build()
     }
 
-    internal fun getRouteLineColorExpressions(
-        defaultColor: Int,
-        routeStyleDescriptors: List<RouteStyleDescriptor>,
-        routeColorProvider: KProperty1<RouteStyleDescriptor, Int>
-    ): List<Expression> {
-        val expressions = mutableListOf(
-            eq {
-                get { literal(RouteLayerConstants.DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER) }
-                literal(true)
-            },
-            color(defaultColor)
-        )
-        routeStyleDescriptors.forEach {
-            expressions.add(
-                eq {
-                    get { literal(it.routeIdentifier) }
-                    literal(true)
-                }
-            )
-            expressions.add(color(routeColorProvider.get(it)))
-        }
-        return expressions.plus(color(defaultColor))
-    }
-
     @OptIn(MapboxExperimental::class)
     internal fun initializeLayers(style: Style, options: MapboxRouteLineOptions) {
         if (layersAreInitialized(style, options)) {
@@ -1228,6 +1201,41 @@ internal object MapboxRouteLineUtils {
     internal fun resetCache() {
         synchronized(extractRouteDataCache) {
             extractRouteDataCache.evictAll()
+        }
+    }
+
+    /**
+     * Looks for a property in the [FeatureCollection] matching an identifier in the
+     * collection of [RouteStyleDescriptor] items and if a match is found the color from
+     * the [RouteStyleDescriptor] is returned. If no match is found the fallback color is returned.
+     */
+    internal fun getMatchingColors(
+        featureCollection: FeatureCollection?,
+        styleDescriptors: List<RouteStyleDescriptor>,
+        fallbackLineColor: Int,
+        fallbackLineCasingColor: Int
+    ): Pair<Int, Int> {
+        return styleDescriptors.firstOrNull {
+            featureCollectionHasProperty(featureCollection, 0, it.routeIdentifier)
+        }?.run {
+            Pair(this.lineColor, this.lineCasingColor)
+        } ?: Pair(fallbackLineColor, fallbackLineCasingColor)
+    }
+
+    internal tailrec fun featureCollectionHasProperty(
+        featureCollection: FeatureCollection?,
+        index: Int,
+        property: String
+    ): Boolean {
+        return when {
+            featureCollection == null -> false
+            featureCollection.features().isNullOrEmpty() -> false
+            index >= featureCollection.features()!!.size -> false
+            featureCollection
+                .features()
+                ?.get(index)
+                ?.hasNonNullValueForProperty(property) == true -> true
+            else -> featureCollectionHasProperty(featureCollection, index + 1, property)
         }
     }
 
