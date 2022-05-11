@@ -40,6 +40,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L
  * @param incidentsOptions defines configuration for live incidents
  * @param historyRecorderOptions defines configuration for recording navigation events
  * @param eventsAppMetadata [EventsAppMetadata] information (optional)
+ * @param enableSensors enables sensors for current position calculation (optional)
  */
 class NavigationOptions private constructor(
     val applicationContext: Context,
