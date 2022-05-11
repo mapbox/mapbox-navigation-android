@@ -92,6 +92,10 @@ workflows:
       - mobile-metrics-benchmarks:
           requires:
             - mobile-metrics-dry-run
+      - codecov-upload:
+          requires:
+            - unit-tests-ui
+            - unit-tests-core
 
 #------------------------------
 #---------- COMMANDS ----------
@@ -103,6 +107,13 @@ commands:
           root: ~/code
           paths:
             - ./
+
+  write-test-results:
+    steps:
+      - persist_to_workspace:
+          root: ~/code
+          paths:
+            - '*/build/jacoco/jacoco.xml'
 
   read-workspace:
     steps:
@@ -528,7 +539,7 @@ jobs:
           steps:
             - read-workspace
             - unit-tests-core
-            - codecov-upload
+            - write-test-results
       - run: exit 0
 
   unit-tests-ui:
@@ -543,8 +554,14 @@ jobs:
           steps:
             - read-workspace
             - unit-tests-ui
-            - codecov-upload
+            - write-test-results
       - run: exit 0
+
+  codecov-upload:
+    executor: ndk-r22-latest-executor
+    steps:
+      - read-workspace
+      - codecov-upload
 
   unit-tests-androidauto:
     executor: ndk-r22-latest-executor
