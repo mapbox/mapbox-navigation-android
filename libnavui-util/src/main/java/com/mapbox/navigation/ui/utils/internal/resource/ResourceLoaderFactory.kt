@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.utils.internal.resource
 
+import com.mapbox.common.ReachabilityFactory
 import com.mapbox.common.TileStore
 
 /**
@@ -8,7 +9,10 @@ import com.mapbox.common.TileStore
 object ResourceLoaderFactory {
 
     private val sharedLoader: DefaultResourceLoader by lazy {
-        DefaultResourceLoader(TileStore.create())
+        DefaultResourceLoader(
+            TileStore.create(),
+            ReachabilityFactory.reachability(null)
+        )
     }
 
     /**

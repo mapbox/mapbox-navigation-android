@@ -43,10 +43,12 @@ internal class MapboxSpeechProvider(
     private fun processResponse(
         response: Expected<ResourceLoadError, ResourceLoadResult>
     ): Expected<Throwable, ByteArray> =
-        response.value?.let { responseData ->
-            when (responseData.status) {
+        response.fold({
+            createError("${it.type}: ${it.message}")
+        }, {
+            when (it.status) {
                 ResourceLoadStatus.AVAILABLE -> {
-                    val blob: ByteArray = responseData.data?.data ?: byteArrayOf()
+                    val blob: ByteArray = it.data?.data ?: byteArrayOf()
                     if (blob.isNotEmpty()) createValue(blob)
                     else createError("No data available.")
                 }
@@ -55,9 +57,9 @@ internal class MapboxSpeechProvider(
                 ResourceLoadStatus.NOT_FOUND ->
                     createError("Resource is missing.")
                 else ->
-                    createError("Unknown error (status: ${responseData.status}).")
+                    createError("Unknown error (status: ${it.status}).")
             }
-        } ?: createError(response.error?.message ?: "No data available.")
+        })
 
     @Throws(MalformedURLException::class)
     private fun instructionUrl(instruction: String, textType: String): String {

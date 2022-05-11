@@ -10,6 +10,7 @@ import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.VoiceState
 import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
+import com.mapbox.navigation.ui.voice.testutils.Fixtures
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
 import io.mockk.Runs
@@ -26,6 +27,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -109,152 +113,63 @@ class MapboxSpeechApiTest {
         }
     }
 
-    // @Test
-    // fun `generate voice file onError`() = coroutineRule.runBlockingTest {
-    //     val aMockedContext: Context = mockk(relaxed = true)
-    //     val anyAccessToken = "pk.123"
-    //     val anyLanguage = Locale.US.language
-    //     val mockedVoiceInstructions: VoiceInstructions = mockk()
-    //     val anAnnouncement = "Turn right onto Frederick Road, Maryland 3 55."
-    //     val aSsmlAnnouncement = """
-    //         <speak>
-    //             <amazon:effect name="drc">
-    //                 <prosody rate="1.08">Turn right onto Frederick Road, Maryland 3 55.</prosody>
-    //             </amazon:effect>
-    //         </speak>
-    //     """.trimIndent()
-    //     every { mockedVoiceInstructions.announcement() } returns anAnnouncement
-    //     every { mockedVoiceInstructions.ssmlAnnouncement() } returns aSsmlAnnouncement
-    //     val speechConsumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> = mockk()
-    //     every { speechConsumer.accept(any()) } just Runs
-    //     val mockedVoiceError: VoiceState.VoiceError = VoiceState.VoiceError(
-    //         "code: 204, error: No data available"
-    //     )
-    //     val mockedVoiceApi: MapboxVoiceApi = mockk()
-    //     coEvery {
-    //         mockedVoiceApi.retrieveVoiceFile(any())
-    //     } returns mockedVoiceError
-    //     val options = MapboxSpeechApiOptions.Builder().build()
-    //     every {
-    //         VoiceApiProvider.retrieveMapboxVoiceApi(
-    //             aMockedContext,
-    //             anyAccessToken,
-    //             anyLanguage,
-    //             options
-    //         )
-    //     } returns mockedVoiceApi
-    //     val mapboxSpeechApi = MapboxSpeechApi(aMockedContext, anyAccessToken, anyLanguage)
-    //     val speechErrorSlot = slot<Expected<SpeechError, SpeechValue>>()
-    //     val mockedTypeAndAnnouncement: TypeAndAnnouncement = mockk()
-    //     every { mockedTypeAndAnnouncement.type } returns "ssml"
-    //     every { mockedTypeAndAnnouncement.announcement } returns aSsmlAnnouncement
-    //     coEvery {
-    //         VoiceInstructionsParser.process(any<VoiceAction.PrepareTypeAndAnnouncement>())
-    //     } returns VoiceResult.VoiceTypeAndAnnouncement.Success(mockedTypeAndAnnouncement)
-    //
-    //     mapboxSpeechApi.generate(mockedVoiceInstructions, speechConsumer)
-    //
-    //     verify(exactly = 1) {
-    //         speechConsumer.accept(
-    //             capture(speechErrorSlot)
-    //         )
-    //     }
-    //     assertEquals(
-    //         "code: 204, error: No data available",
-    //         speechErrorSlot.captured.error!!.errorMessage
-    //     )
-    //     assertEquals(anAnnouncement, speechErrorSlot.captured.error!!.fallback.announcement)
-    //     assertEquals(
-    //         aSsmlAnnouncement,
-    //         speechErrorSlot.captured.error!!.fallback.ssmlAnnouncement
-    //     )
-    //     assertNull(speechErrorSlot.captured.error!!.fallback.file)
-    // }
-    //
-    // @Test
-    // fun `generate voice file onError invalid state`() = coroutineRule.runBlockingTest {
-    //     val aMockedContext: Context = mockk(relaxed = true)
-    //     val anyAccessToken = "pk.123"
-    //     val anyLanguage = Locale.US.language
-    //     val mockedVoiceInstructions: VoiceInstructions = mockk()
-    //     val anAnnouncement = "Turn right onto Frederick Road, Maryland 3 55."
-    //     val aSsmlAnnouncement = """
-    //         <speak>
-    //             <amazon:effect name="drc">
-    //                 <prosody rate="1.08">Turn right onto Frederick Road, Maryland 3 55.</prosody>
-    //             </amazon:effect>
-    //         </speak>
-    //     """.trimIndent()
-    //     every { mockedVoiceInstructions.announcement() } returns anAnnouncement
-    //     every { mockedVoiceInstructions.ssmlAnnouncement() } returns aSsmlAnnouncement
-    //     val speechConsumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> = mockk()
-    //     every { speechConsumer.accept(any()) } just Runs
-    //     val mockedVoiceError: VoiceState.VoiceError = VoiceState.VoiceError(
-    //         "code: 204, error: No data available"
-    //     )
-    //     val mockedVoiceApi: MapboxVoiceApi = mockk()
-    //     coEvery {
-    //         mockedVoiceApi.retrieveVoiceFile(any())
-    //     } returns mockedVoiceError
-    //     val options = MapboxSpeechApiOptions.Builder().build()
-    //     every {
-    //         VoiceApiProvider.retrieveMapboxVoiceApi(
-    //             aMockedContext,
-    //             anyAccessToken,
-    //             anyLanguage,
-    //             options
-    //         )
-    //     } returns mockedVoiceApi
-    //     val mapboxSpeechApi = MapboxSpeechApi(aMockedContext, anyAccessToken, anyLanguage)
-    //     val voiceTypeAndAnnouncementError =
-    //         "VoiceInstructions ssmlAnnouncement / announcement can't be null or blank"
-    //     coEvery {
-    //         VoiceInstructionsParser.process(any<VoiceAction.PrepareTypeAndAnnouncement>())
-    //     } returns VoiceResult.VoiceTypeAndAnnouncement.Failure(voiceTypeAndAnnouncementError)
-    //
-    //     mapboxSpeechApi.generate(mockedVoiceInstructions, speechConsumer)
-    //
-    //     assertTrue(exceptions[0] is java.lang.IllegalStateException)
-    //     assertEquals(
-    //         "Invalid state: processVoiceAnnouncement can't produce " +
-    //             "Failure VoiceTypeAndAnnouncement VoiceResult",
-    //         exceptions[0].localizedMessage
-    //     )
-    // }
-    //
-    // @Test
-    // fun `generate voice file can't produce VoiceResponse VoiceState`() =
-    //     coroutineRule.runBlockingTest {
-    //         val aMockedContext: Context = mockk(relaxed = true)
-    //         val anyAccessToken = "pk.123"
-    //         val anyLanguage = Locale.US.language
-    //         val mockedVoiceInstructions: VoiceInstructions = mockk()
-    //         val speechConsumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> =
-    //             mockk()
-    //         val mockedVoiceResponse: VoiceState.VoiceResponse = VoiceState.VoiceResponse(mockk())
-    //         val mockedVoiceApi: MapboxVoiceApi = mockk()
-    //         coEvery {
-    //             mockedVoiceApi.retrieveVoiceFile(any())
-    //         } returns mockedVoiceResponse
-    //         val options = MapboxSpeechApiOptions.Builder().build()
-    //         every {
-    //             VoiceApiProvider.retrieveMapboxVoiceApi(
-    //                 aMockedContext,
-    //                 anyAccessToken,
-    //                 anyLanguage,
-    //                 options
-    //             )
-    //         } returns mockedVoiceApi
-    //         val mapboxSpeechApi = MapboxSpeechApi(aMockedContext, anyAccessToken, anyLanguage)
-    //
-    //         mapboxSpeechApi.generate(mockedVoiceInstructions, speechConsumer)
-    //
-    //         assertTrue(exceptions[0] is java.lang.IllegalStateException)
-    //         assertEquals(
-    //             "Invalid state: retrieveVoiceFile can't produce VoiceResponse VoiceState",
-    //             exceptions[0].localizedMessage
-    //         )
-    //     }
+    @Test
+    fun `generate voice file onError`() = coroutineRule.runBlockingTest {
+        val voiceInstructions = Fixtures.ssmlInstructions()
+        val speechErrorCapture = slot<Expected<SpeechError, SpeechValue>>()
+        val speechConsumer = mockk<MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>>> {
+            every { accept(capture(speechErrorCapture)) } just Runs
+        }
+        val mockedVoiceApi = mockk<MapboxVoiceApi> {
+            coEvery {
+                retrieveVoiceFile(voiceInstructions)
+            } returns VoiceState.VoiceError("Some error message")
+        }
+        every {
+            VoiceApiProvider.retrieveMapboxVoiceApi(any(), any(), any(), any())
+        } returns mockedVoiceApi
+
+        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        sut.generate(voiceInstructions, speechConsumer)
+        val result = speechErrorCapture.captured
+
+        assertEquals(
+            voiceInstructions.announcement()!!,
+            result.error!!.fallback.announcement
+        )
+        assertEquals(
+            voiceInstructions.ssmlAnnouncement()!!,
+            speechErrorCapture.captured.error!!.fallback.ssmlAnnouncement
+        )
+        assertNull(result.error!!.fallback.file)
+    }
+
+    @Test
+    fun `generate voice file onError with IllegalStateException`() = coroutineRule.runBlockingTest {
+        val voiceInstructions = Fixtures.nullInstructions()
+        val speechErrorCapture = slot<Expected<SpeechError, SpeechValue>>()
+        val speechConsumer = mockk<MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>>> {
+            every { accept(capture(speechErrorCapture)) } just Runs
+        }
+        val mockedVoiceApi = mockk<MapboxVoiceApi> {
+            coEvery {
+                retrieveVoiceFile(voiceInstructions)
+            } returns VoiceState.VoiceError("Some error message")
+        }
+        every {
+            VoiceApiProvider.retrieveMapboxVoiceApi(any(), any(), any(), any())
+        } returns mockedVoiceApi
+
+        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        sut.generate(voiceInstructions, speechConsumer)
+
+        assertTrue(exceptions[0] is java.lang.IllegalStateException)
+        assertEquals(
+            "Invalid state: processVoiceAnnouncement can't produce " +
+                "Fallback VoiceTypeAndAnnouncement VoiceResult",
+            exceptions[0].localizedMessage
+        )
+    }
 
     @Test
     fun clean() {

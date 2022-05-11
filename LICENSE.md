@@ -12,8 +12,19 @@ Mapbox Navigation for Android version 2.0 (“Mapbox Navigation Android SDK“) 
 For the full license terms, please see the Mapbox Terms of Service at https://www.mapbox.com/legal/tos/
 
 ---------------------------------------
-URL: [Gradle License Plugin](https://github.com/jaredsburrows/gradle-license-plugin)  
+Mapbox Navigation uses portions of the Gradle License Plugin.
+URL: [https://github.com/jaredsburrows/gradle-license-plugin](https://github.com/jaredsburrows/gradle-license-plugin)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the okhttp (Square’s meticulous HTTP client for Java and Kotlin.).
+URL: [https://square.github.io/okhttp/](https://square.github.io/okhttp/)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+
 
 #### Hybrid Router SDK module
 Mapbox Navigation uses portions of the Android Support Library Annotations (The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs.).
@@ -3610,6 +3621,22 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the auto-value-gson-runtime.
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the autotransient (A transient annotation for AutoValue extensions.).
+URL: [https://github.com/ZacSweers/AutoTransient/](https://github.com/ZacSweers/AutoTransient/)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Converter: Gson.
+License: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Core Kotlin Extensions (Kotlin extensions for 'core' artifact).
 URL: [https://developer.android.com/jetpack/androidx/releases/core#1.6.0](https://developer.android.com/jetpack/androidx/releases/core#1.6.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -3619,6 +3646,11 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 Mapbox Navigation uses portions of the Experimental annotation (Java annotation for use on unstable Android API surfaces. When used in conjunction with the Experimental annotation lint checks, this annotation provides functional parity with Kotlin's Experimental annotation.).
 URL: [https://developer.android.com/jetpack/androidx/releases/annotation#1.1.0](https://developer.android.com/jetpack/androidx/releases/annotation#1.1.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Gson.
+License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
@@ -3676,9 +3708,38 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Mapbox Java SDK.
+URL: [https://github.com/mapbox/mapbox-java](https://github.com/mapbox/mapbox-java)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Material Components for Android (Material Components for Android is a static library that you can add to your Android application in order to use APIs that provide implementations of the Material Design specification. Compatible on devices running API 14 or later.).
 URL: [http://developer.android.com/tools/extras/support-library.html](http://developer.android.com/tools/extras/support-library.html)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the okhttp (Square’s meticulous HTTP client for Java and Kotlin.).
+URL: [https://square.github.io/okhttp/](https://square.github.io/okhttp/)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the okhttp-logging-interceptor (Square’s meticulous HTTP client for Java and Kotlin.).
+URL: [https://square.github.io/okhttp/](https://square.github.io/okhttp/)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Okio (A modern I/O API for Java).
+URL: [https://github.com/square/okio/](https://github.com/square/okio/)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Retrofit.
+License: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 

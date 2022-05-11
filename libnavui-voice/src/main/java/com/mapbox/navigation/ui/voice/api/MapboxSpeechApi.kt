@@ -75,6 +75,7 @@ class MapboxSpeechApi @JvmOverloads constructor(
         voiceAPI.clean(announcement)
     }
 
+    @Throws(IllegalStateException::class)
     private suspend fun retrieveVoiceFile(
         voiceInstruction: VoiceInstructions,
         consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>>
@@ -87,52 +88,36 @@ class MapboxSpeechApi @JvmOverloads constructor(
                     ExpectedFactory.createValue(
                         SpeechValue(
                             // Can't be null as it's checked in retrieveVoiceFile
-                            SpeechAnnouncement.Builder(announcement!!).apply {
-                                ssmlAnnouncement(ssmlAnnouncement)
-                                file(result.instructionFile)
-                            }.build()
+                            SpeechAnnouncement.Builder(announcement!!)
+                                .ssmlAnnouncement(ssmlAnnouncement)
+                                .file(result.instructionFile)
+                                .build()
                         )
                     )
                 )
             }
             is VoiceState.VoiceError -> {
-                processVoiceAnnouncement(
-                    voiceInstruction
-                ) { available ->
-                    consumer.accept(
-                        ExpectedFactory.createError(
-                            SpeechError(
-                                result.exception,
-                                null,
-                                available
-                            )
-                        )
-                    )
-                }
+                val fallback = getFallbackAnnouncement(voiceInstruction)
+                val speechError = SpeechError(result.exception, null, fallback)
+                consumer.accept(ExpectedFactory.createError(speechError))
             }
         }
     }
 
-    private fun processVoiceAnnouncement(
-        voiceInstruction: VoiceInstructions,
-        onAvailable: (SpeechAnnouncement) -> Unit
-    ) {
-        VoiceInstructionsParser.parse(voiceInstruction).fold(
-            {
-                check(false) {
-                    "Invalid state: processVoiceAnnouncement can't produce " +
-                        "Failure VoiceTypeAndAnnouncement VoiceResult"
-                }
-            },
-            {
-                val announcement = voiceInstruction.announcement()
-                val ssmlAnnouncement = voiceInstruction.ssmlAnnouncement()
-                // Can't be null as it's checked in processVoiceAnnouncement
-                val available = SpeechAnnouncement.Builder(announcement!!)
-                    .ssmlAnnouncement(ssmlAnnouncement)
-                    .build()
-                onAvailable(available)
-            }
-        )
+    @Throws(IllegalStateException::class)
+    private fun getFallbackAnnouncement(voiceInstruction: VoiceInstructions): SpeechAnnouncement {
+        if (VoiceInstructionsParser.parse(voiceInstruction).isError) {
+            throw IllegalStateException(
+                "Invalid state: processVoiceAnnouncement can't produce " +
+                    "Fallback VoiceTypeAndAnnouncement VoiceResult"
+            )
+        }
+
+        val announcement = voiceInstruction.announcement()
+        val ssmlAnnouncement = voiceInstruction.ssmlAnnouncement()
+        // Can't be null as it's checked in VoiceInstructionsParser.parse
+        return SpeechAnnouncement.Builder(announcement!!)
+            .ssmlAnnouncement(ssmlAnnouncement)
+            .build()
     }
 }

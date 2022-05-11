@@ -1,12 +1,11 @@
 /*
- * The following methods and referenced constants have been copied over from okhttp3 library
- * HttpUrl class, and reformatted to match project code formatting standards.
+ * This class uses portion of the OkHttp library with code reformatted to match project code formatting standards.
  * - String.canonicalize
  * - Char.parseHexDigit
  * - String.isPercentEncoded
  * - Buffer.writeCanonicalized
  *
- * source: https://github.com/square/okhttp/blob/master/okhttp/src/jvmMain/kotlin/okhttp3/HttpUrl.kt#L1770
+ * source: https://github.com/square/okhttp/blob/b4904c65bdf38fd20ca0aacb23b474c50e5c1d06/okhttp/src/jvmMain/kotlin/okhttp3/HttpUrl.kt#L1770
  */
 package com.mapbox.navigation.ui.voice.api
 
