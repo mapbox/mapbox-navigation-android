@@ -413,6 +413,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.DeviceProfile getDeviceProfile();
     method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions getDistanceFormatterOptions();
     method public com.mapbox.navigation.base.options.EHorizonOptions getEHorizonOptions();
+    method public boolean getEnableSensors();
     method public com.mapbox.navigation.base.options.EventsAppMetadata? getEventsAppMetadata();
     method public com.mapbox.navigation.base.options.HistoryRecorderOptions getHistoryRecorderOptions();
     method public com.mapbox.navigation.base.options.IncidentsOptions getIncidentsOptions();
@@ -431,6 +432,7 @@ package com.mapbox.navigation.base.options {
     property public final com.mapbox.navigation.base.options.DeviceProfile deviceProfile;
     property public final com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions;
     property public final com.mapbox.navigation.base.options.EHorizonOptions eHorizonOptions;
+    property public final boolean enableSensors;
     property public final com.mapbox.navigation.base.options.EventsAppMetadata? eventsAppMetadata;
     property public final com.mapbox.navigation.base.options.HistoryRecorderOptions historyRecorderOptions;
     property public final com.mapbox.navigation.base.options.IncidentsOptions incidentsOptions;
@@ -452,6 +454,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder deviceProfile(com.mapbox.navigation.base.options.DeviceProfile deviceProfile);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder distanceFormatterOptions(com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder eHorizonOptions(com.mapbox.navigation.base.options.EHorizonOptions eHorizonOptions);
+    method public com.mapbox.navigation.base.options.NavigationOptions.Builder enableSensors(boolean value);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder eventsAppMetadata(com.mapbox.navigation.base.options.EventsAppMetadata? eventsAppMetadata);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder historyRecorderOptions(com.mapbox.navigation.base.options.HistoryRecorderOptions historyRecorderOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder incidentsOptions(com.mapbox.navigation.base.options.IncidentsOptions incidentsOptions);
