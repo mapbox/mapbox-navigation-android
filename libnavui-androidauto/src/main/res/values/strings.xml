@@ -43,8 +43,6 @@
     <string name="car_feedback_search_incorrect_name">Incorrect name</string>
     <string name="car_feedback_search_other">Other issue</string>
 
-    <string name="car_feedback_positive_arrived_at_destination">Arrived</string>
-    <string name="car_feedback_positive_no_issue">No issue</string>
-    <string name="car_feedback_positive_amazing">Amazing!</string>
-    <string name="car_feedback_negative_unable_arrive">Unable to arrive</string>
+    <string name="car_feedback_arrival_positive">Good</string>
+    <string name="car_feedback_arrival_negative">Not good</string>
 </resources>
