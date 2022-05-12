@@ -10,7 +10,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.InternalRouter
-import com.mapbox.navigation.base.internal.route.updateLegAnnotations
+import com.mapbox.navigation.base.internal.route.refreshRoute
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -212,11 +212,14 @@ class RouterWrapper(
                     mainJobControl.scope.launch {
                         withContext(ThreadController.IODispatcher) {
                             parseDirectionsRouteRefresh(it).mapValue { routeRefresh ->
-                                route.updateLegAnnotations(
+                                route.refreshRoute(
                                     initialLegIndex = refreshOptions.legIndex,
                                     legAnnotations = routeRefresh.legs()?.map {
                                         it.annotation()
                                     },
+                                    incidents = routeRefresh.legs()?.map {
+                                        it.incidents()
+                                    }
                                 )
                             }
                         }.fold(

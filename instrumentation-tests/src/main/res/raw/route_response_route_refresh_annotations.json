@@ -3,6 +3,58 @@
   "route": {
     "legs": [
       {
+        "incidents": [
+          {
+            "length": 20,
+            "affected_road_names": [
+              "9th Street"
+            ],
+            "id": "14158569638505033",
+            "type": "lane_restriction",
+            "congestion": {
+              "value": 101
+            },
+            "description": "Möllendorffstrasse: Bauarbeiten zwischen Storkower Strasse und Scheffelstrasse",
+            "long_description": "Fahrbahnverengung von auf eine Fahrspur wegen Bauarbeiten auf der Möllendorffstrasse in Richtung Süden zwischen Storkower Strasse und Scheffelstrasse.",
+            "impact": "low",
+            "alertc_codes": [
+              743
+            ],
+            "geometry_index_start": 10,
+            "geometry_index_end": 15,
+            "creation_time": "2022-05-11T14:10:36Z",
+            "start_time": "2022-04-19T05:00:00Z",
+            "end_time": "2022-06-30T21:59:00Z",
+            "iso_3166_1_alpha2": "DE",
+            "iso_3166_1_alpha3": "DEU",
+            "lanes_blocked": []
+          },
+          {
+            "length": 30,
+            "affected_road_names": [
+              "9th Street"
+            ],
+            "id": "11589180127444257",
+            "type": "lane_restriction",
+            "congestion": {
+              "value": 101
+            },
+            "description": "Rummelsburger Landstrasse: Bauarbeiten um Fritz-König-Weg",
+            "long_description": "Fahrbahnverengung von auf eine Fahrspur wegen Bauarbeiten auf der Rummelsburger Landstrasse in Richtung Süden zwischen Rummelsburger Landstrasse und Fritz-König-Weg.",
+            "impact": "low",
+            "alertc_codes": [
+              743
+            ],
+            "geometry_index_start": 30,
+            "geometry_index_end": 38,
+            "creation_time": "2022-05-11T14:10:36Z",
+            "start_time": "2022-04-29T13:08:25Z",
+            "end_time": "2022-05-30T21:59:00Z",
+            "iso_3166_1_alpha2": "DE",
+            "iso_3166_1_alpha3": "DEU",
+            "lanes_blocked": []
+          }
+        ],
         "annotation": {
           "maxspeed": [
             {

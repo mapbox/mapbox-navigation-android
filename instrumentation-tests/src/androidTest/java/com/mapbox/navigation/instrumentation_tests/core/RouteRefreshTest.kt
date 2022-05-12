@@ -30,6 +30,7 @@ import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.utils.internal.logD
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -137,7 +138,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         Espresso.onIdle()
         progressIdlingResource.unregister()
 
-        val latch = CountDownLatch(1)
+        val latch = CountDownLatch(2)
         runOnMainSync {
             mapboxNavigation.registerRouteProgressObserver { routeProgress ->
                 val durationRemaining = routeProgress.durationRemaining
@@ -147,20 +148,39 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                     latch.countDown()
                 }
             }
+            mapboxNavigation.registerRoadObjectsOnRouteObserver { upcomingRoadObjects ->
+                // upcoming road's objects mut be exact 2 with following ids
+                if (upcomingRoadObjects.size == 2 &&
+                    upcomingRoadObjects.map { it.roadObject.id }
+                        .containsAll(listOf("11589180127444257", "14158569638505033"))
+                ) {
+                    latch.countDown()
+                }
+            }
         }
-        if (!latch.await(5, TimeUnit.SECONDS)) {
+        if (!latch.await(10, TimeUnit.SECONDS)) {
             throw AssertionError(
-                """progress duration remaining wasn't refreshed by native navigator"""
+                """progress duration remaining or upcoming road objects weren't  
+                    refreshed by native navigator
+                """.trimMargin()
             )
         }
 
-        // Only the annotations are refreshed. So sum up the duration from the old and new.
+        // Only the annotations AND incidents are refreshed. So sum up the duration from the old and new.
         val sanityLeg = routes.first().legs()!!
         val sanityDuration = sanityLeg.first().annotation()?.duration()?.sum()!!
         val initialLeg = initialRoutes.first().legs()?.first()!!
         val initialDuration = initialLeg.annotation()?.duration()?.sum()!!
         val refreshedLeg = refreshedRoutes.first().legs()?.first()!!
         val refreshedDuration = refreshedLeg.annotation()?.duration()?.sum()!!
+
+        assertEquals(1, initialLeg.incidents()!!.size)
+        assertEquals("11589180127444257", initialLeg.incidents()!!.first().id())
+        assertEquals(2, refreshedLeg.incidents()!!.size)
+        assertTrue(
+            refreshedLeg.incidents()!!.map { it.id() }
+                .containsAll(listOf("11589180127444257", "14158569638505033"))
+        )
 
         assertEquals(sanityDuration, initialDuration, 0.0)
         assertEquals(227.918, initialDuration, 0.0001)
