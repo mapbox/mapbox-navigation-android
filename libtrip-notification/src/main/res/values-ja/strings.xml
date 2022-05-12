@@ -1,5 +1,0 @@
-<resources>
-    <!-- Notification Strings -->
-    <string name="mapbox_end_navigation">ナビゲーションを終了</string>
-    <string name="mapbox_eta_format">到着予定時刻%s</string>
-</resources>

@@ -8,4 +8,8 @@
     <string name="mapbox_unit_hr">時間</string>
     <!-- Minute -->
     <string name="mapbox_unit_min">分</string>
+
+    <!-- Notification Strings -->
+    <string name="mapbox_end_navigation">ナビゲーションを終了</string>
+    <string name="mapbox_eta_format">到着予定時刻%s</string>
 </resources>

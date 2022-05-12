@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Time formatting -->
     <plurals name="mapbox_number_of_days">
@@ -6,7 +6,14 @@
         <item quantity="other">days</item>
     </plurals>
     <!-- Hour -->
-    <string name="mapbox_unit_hr">hr</string>
+    <string name="mapbox_unit_hr" tools:ignore="MissingTranslation">hr</string>
     <!-- Minute -->
-    <string name="mapbox_unit_min">min</string>
+    <string name="mapbox_unit_min" tools:ignore="MissingTranslation">min</string>
+
+    <!-- Notification Strings -->
+    <string name="mapbox_end_navigation">End Navigation</string>
+    <string name="mapbox_navigation_is_starting" tools:ignore="MissingTranslation">Navigation is starting…</string>
+    <string name="mapbox_stop_session" tools:ignore="MissingTranslation">Stop session</string>
+    <string name="mapbox_free_drive_session" tools:ignore="MissingTranslation">Free Drive Session</string>
+    <string name="mapbox_eta_format" tools:ignore="MissingTranslation">%s ETA</string>
 </resources>

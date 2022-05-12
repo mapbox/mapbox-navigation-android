@@ -1,5 +1,0 @@
-<resources>
-    <!-- Notification Strings -->
-    <string name="mapbox_end_navigation">Terminar Navegação</string>
-    <string name="mapbox_eta_format">%s TEC</string>
-</resources>
