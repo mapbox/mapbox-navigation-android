@@ -83,9 +83,11 @@ interface MapboxNativeNavigator {
     fun removeNavigatorObserver(navigatorObserver: NavigatorObserver)
 
     // Routing
-    suspend fun setPrimaryRoute(
-        routeWithStartingLeg: Pair<NavigationRoute, Int>?
-    ): RouteInfo?
+    suspend fun setRoutes(
+        primaryRoute: NavigationRoute?,
+        startingLeg: Int = 0,
+        alternatives: List<NavigationRoute> = emptyList(),
+    )
 
     suspend fun setAlternativeRoutes(
         routes: List<NavigationRoute>

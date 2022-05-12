@@ -101,30 +101,14 @@ internal class MapboxTripSession(
                 ) {
                     logD("primary route update - starting", LOG_CATEGORY)
                     val newPrimaryRoute = routes.firstOrNull()
-                    navigator.setPrimaryRoute(
-                        if (newPrimaryRoute != null) {
-                            Pair(newPrimaryRoute, legIndex)
-                        } else {
-                            null
-                        }
-                    )?.let {
-                        roadObjects = getRouteInitInfo(it)?.roadObjects ?: emptyList()
-                    }
+                    navigator.setRoutes(newPrimaryRoute, legIndex, routes.drop(1))
                     this@MapboxTripSession.primaryRoute = newPrimaryRoute
+                    roadObjects = newPrimaryRoute?.let {
+                        getRouteInitInfo(it.nativeRoute().routeInfo)?.roadObjects
+                    } ?: emptyList()
                     logD("primary route update - finished", LOG_CATEGORY)
                 }
-                val updateAlternativesJob =
-                    threadController.getMainScopeAndRootJob().scope.launch(
-                        Dispatchers.Main.immediate
-                    ) {
-                        logD("alternative routes update - starting", LOG_CATEGORY)
-                        processedAlternatives.addAll(
-                            navigator.setAlternativeRoutes(routes.drop(1))
-                        )
-                        logD("alternative routes update - finished", LOG_CATEGORY)
-                    }
                 updateRouteJob.join()
-                updateAlternativesJob.join()
                 NativeSetRouteResult(
                     nativeAlternatives = processedAlternatives
                 )

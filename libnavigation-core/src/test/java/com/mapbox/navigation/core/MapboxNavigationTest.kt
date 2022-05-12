@@ -1017,7 +1017,7 @@ class MapboxNavigationTest {
         every { tripSession.getRouteProgress() } returns routeProgress
         every { routeProgress.currentLegProgress } returns legProgress
         every { legProgress.legIndex } returns index
-        coEvery { navigator.setPrimaryRoute(any()) } answers {
+        coEvery { navigator.setRoutes(any()) } answers {
             assertEquals(primaryRoute, this.firstArg<Pair<NavigationRoute, Int>>().first)
             mockk()
         }
@@ -1028,7 +1028,7 @@ class MapboxNavigationTest {
         fallbackObserverSlot.captured.onFallbackVersionsFound(listOf("version"))
 
         coVerify {
-            navigator.setPrimaryRoute(Pair(primaryRoute, index))
+            navigator.setRoutes(primaryRoute, index)
             navigator.setAlternativeRoutes(listOf(alternativeRoute))
         }
     }
