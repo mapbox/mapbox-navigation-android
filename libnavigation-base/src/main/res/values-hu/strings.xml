@@ -9,4 +9,8 @@
     <string name="mapbox_unit_hr">óra</string>
     <!-- Minute -->
     <string name="mapbox_unit_min">perc</string>
+
+    <!-- Notification Strings -->
+    <string name="mapbox_end_navigation">Navigáció vége</string>
+    <string name="mapbox_eta_format">%s érkezés</string>
 </resources>

@@ -1,5 +1,0 @@
-<resources>
-    <!-- Notification Strings -->
-    <string name="mapbox_end_navigation">Ukončit navigaci</string>
-    <string name="mapbox_eta_format">%s Předpokládaný čas příjezdu</string>
-</resources>

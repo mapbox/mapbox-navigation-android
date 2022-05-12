@@ -9,4 +9,7 @@
     <string name="mapbox_unit_hr">h</string>
     <!-- Minute -->
     <string name="mapbox_unit_min">min</string>
+
+    <!-- Notification Strings -->
+    <string name="mapbox_end_navigation">Fin de navigation</string>
 </resources>

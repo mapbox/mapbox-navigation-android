@@ -29,6 +29,7 @@ import com.mapbox.api.directions.v5.models.StepManeuver.StepManeuverType
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.internal.maneuver.TurnIconHelper
 import com.mapbox.navigation.base.internal.time.TimeFormatter.formatTime
+import com.mapbox.navigation.base.internal.trip.notification.NotificationTurnIconResources
 import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress

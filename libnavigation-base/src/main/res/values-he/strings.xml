@@ -11,4 +11,7 @@
     <string name="mapbox_unit_hr">שעות</string>
     <!-- Minute -->
     <string name="mapbox_unit_min">דק׳</string>
+
+    <!-- Notification Strings -->
+    <string name="mapbox_end_navigation">סיום ניווט</string>
 </resources>
