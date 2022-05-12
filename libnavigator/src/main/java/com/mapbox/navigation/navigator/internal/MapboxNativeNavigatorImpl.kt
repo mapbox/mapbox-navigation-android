@@ -201,6 +201,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         val refreshedLegs = route.directionsRoute.legs()?.map { routeLeg ->
             RouteLegRefresh.builder()
                 .annotation(routeLeg.annotation())
+                .incidents(routeLeg.incidents())
                 .build()
         }
         val refreshRoute = DirectionsRouteRefresh.builder()

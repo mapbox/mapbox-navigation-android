@@ -3,6 +3,7 @@
 package com.mapbox.navigation.base.internal.route
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -20,12 +21,13 @@ val NavigationRoute.routerOrigin: RouterOrigin get() = nativeRoute.routerOrigin
 fun NavigationRoute.nativeRoute(): RouteInterface = this.nativeRoute
 
 /**
- * Updates route's annotations in place while keeping the Native peer as is.
+ * Updates route's annotations and incidents in place while keeping the Native peer as is.
  * The peer should later be updated through [Navigator.refreshRoute].
  */
-fun NavigationRoute.updateLegAnnotations(
+fun NavigationRoute.refreshRoute(
     initialLegIndex: Int,
-    legAnnotations: List<LegAnnotation?>?
+    legAnnotations: List<LegAnnotation?>?,
+    incidents: List<List<Incident>?>?,
 ): NavigationRoute {
     val updateLegs = directionsRoute.legs()?.mapIndexed { index, routeLeg ->
         if (index < initialLegIndex) {
@@ -33,6 +35,8 @@ fun NavigationRoute.updateLegAnnotations(
         } else {
             routeLeg.toBuilder().annotation(
                 legAnnotations?.getOrNull(index)
+            ).incidents(
+                incidents?.getOrNull(index)
             ).build()
         }
     }

@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadFactory
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
+import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -135,7 +136,11 @@ internal class MapboxTripSession(
             }
             RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
                 if (routes.isNotEmpty()) {
-                    navigator.refreshRoute(routes.first())
+                    val primaryRoute = routes.first()
+                    navigator.refreshRoute(primaryRoute)
+                    roadObjects = getRouteInitInfo(primaryRoute.nativeRoute().routeInfo)
+                        ?.roadObjects
+                        ?: emptyList()
                     this@MapboxTripSession.primaryRoute = routes.first()
                 } else {
                     logW("Cannot refresh route. Route can't be null", LOG_CATEGORY)

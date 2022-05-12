@@ -7,6 +7,7 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -893,7 +894,7 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun `road objects observer gets called only one on duplicate updates`() =
+    fun `road objects observer gets called on refresh`() =
         coroutineRule.runBlockingTest {
             val roadObjectsObserver: RoadObjectsOnRouteObserver = mockk(relaxUnitFun = true)
             val roadObjects: List<UpcomingRoadObject> = listOf(mockk())
@@ -911,12 +912,16 @@ class MapboxTripSessionTest {
                 RoutesExtra.ROUTES_UPDATE_REASON_NEW
             )
             tripSession.setRoutes(
-                listOf(mockk()),
+                listOf(
+                    mockk {
+                        every { nativeRoute().routeInfo } returns mockedRouteInfo
+                    }
+                ),
                 0,
                 RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
             )
 
-            verify(exactly = 1) { roadObjectsObserver.onNewRoadObjectsOnTheRoute(roadObjects) }
+            verify(exactly = 2) { roadObjectsObserver.onNewRoadObjectsOnTheRoute(any()) }
         }
 
     @Test
