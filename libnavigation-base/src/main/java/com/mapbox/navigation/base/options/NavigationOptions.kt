@@ -40,6 +40,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L
  * @param incidentsOptions defines configuration for live incidents
  * @param historyRecorderOptions defines configuration for recording navigation events
  * @param eventsAppMetadata [EventsAppMetadata] information (optional)
+ * @param enableSensors enables sensors for current position calculation (optional)
  */
 class NavigationOptions private constructor(
     val applicationContext: Context,
@@ -59,6 +60,7 @@ class NavigationOptions private constructor(
     val incidentsOptions: IncidentsOptions,
     val historyRecorderOptions: HistoryRecorderOptions,
     val eventsAppMetadata: EventsAppMetadata?,
+    val enableSensors: Boolean,
 ) {
 
     /**
@@ -81,6 +83,7 @@ class NavigationOptions private constructor(
         incidentsOptions(incidentsOptions)
         historyRecorderOptions(historyRecorderOptions)
         eventsAppMetadata(eventsAppMetadata)
+        enableSensors(enableSensors)
     }
 
     /**
@@ -109,6 +112,7 @@ class NavigationOptions private constructor(
         if (incidentsOptions != other.incidentsOptions) return false
         if (historyRecorderOptions != other.historyRecorderOptions) return false
         if (eventsAppMetadata != other.eventsAppMetadata) return false
+        if (enableSensors != other.enableSensors) return false
 
         return true
     }
@@ -134,6 +138,7 @@ class NavigationOptions private constructor(
         result = 31 * result + incidentsOptions.hashCode()
         result = 31 * result + historyRecorderOptions.hashCode()
         result = 31 * result + eventsAppMetadata.hashCode()
+        result = 31 * result + enableSensors.hashCode()
         return result
     }
 
@@ -158,7 +163,8 @@ class NavigationOptions private constructor(
             "routeAlternativesOptions=$routeAlternativesOptions, " +
             "incidentsOptions=$incidentsOptions, " +
             "historyRecorderOptions=$historyRecorderOptions, " +
-            "eventsAppMetadata=$eventsAppMetadata" +
+            "eventsAppMetadata=$eventsAppMetadata, " +
+            "enableSensors=$enableSensors" +
             ")"
     }
 
@@ -192,6 +198,7 @@ class NavigationOptions private constructor(
         private var historyRecorderOptions: HistoryRecorderOptions =
             HistoryRecorderOptions.Builder().build()
         private var eventsAppMetadata: EventsAppMetadata? = null
+        private var enableSensors: Boolean = false
 
         /**
          * Defines [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
@@ -290,6 +297,15 @@ class NavigationOptions private constructor(
             apply { this.eventsAppMetadata = eventsAppMetadata }
 
         /**
+         * Enables analyzing data from sensors for better location prediction in case of a weak
+         *  GPS signal, for example in tunnel. Usage of sensors can increase battery consumption.
+         * Warning: don't enable sensors if you emulate location updates. The SDK ignores
+         *  location updates which don't match data from sensors.
+         */
+        fun enableSensors(value: Boolean): Builder =
+            apply { this.enableSensors = value }
+
+        /**
          * Build a new instance of [NavigationOptions]
          * @return NavigationOptions
          */
@@ -313,6 +329,7 @@ class NavigationOptions private constructor(
                 incidentsOptions = incidentsOptions,
                 historyRecorderOptions = historyRecorderOptions,
                 eventsAppMetadata = eventsAppMetadata,
+                enableSensors = enableSensors
             )
         }
     }

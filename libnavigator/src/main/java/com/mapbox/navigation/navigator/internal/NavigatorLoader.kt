@@ -1,11 +1,7 @@
 package com.mapbox.navigation.navigator.internal
 
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
-import com.mapbox.navigation.navigator.internal.NavigatorLoader.customConfig
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.CacheFactory
 import com.mapbox.navigator.CacheHandle
@@ -41,7 +37,7 @@ object NavigatorLoader {
         val config = ConfigFactory.build(
             settingsProfile(deviceProfile),
             navigatorConfig,
-            customConfig(deviceProfile)
+            deviceProfile.customConfig
         )
         val historyRecorder = buildHistoryRecorder(historyDir, config)
         val cache = CacheFactory.build(tilesConfig, config, historyRecorder)
@@ -74,7 +70,7 @@ object NavigatorLoader {
         val config = ConfigFactory.build(
             settingsProfile(deviceProfile),
             navigatorConfig,
-            customConfig(deviceProfile)
+            deviceProfile.customConfig
         )
         val historyRecorder = buildHistoryRecorder(historyDir, config)
         val cache = CacheFactory.build(tilesConfig, config, historyRecorder)
@@ -114,62 +110,6 @@ object NavigatorLoader {
             }
             else -> throw NotImplementedError("Unknown device profile")
         }
-    }
-
-    // TODO Remove after NN disables it by default
-    private fun customConfig(deviceProfile: DeviceProfile): String {
-        val useImuJson = """
-            {
-                "input": {
-            	    "stopDetector": {
-            		    "mobile": {
-            			    "useImu": false
-            		    }
-            	    }
-                }
-            }
-        """.trimIndent()
-        val customConfig = deviceProfile.customConfig
-        return if (customConfig.isEmpty()) {
-            useImuJson
-        } else {
-            disableImu(customConfig)
-        }
-    }
-
-    private fun disableImu(customConfig: String): String {
-        val gson = GsonBuilder().create()
-        val jsonObject = gson.fromJson(customConfig, JsonObject::class.java)
-        val useImu = gson.fromJson(
-            """{"useImu": false}""".trimIndent(),
-            JsonElement::class.java
-        )
-        val mobile = gson.fromJson(
-            """{"mobile": {"useImu": false}}""".trimIndent(),
-            JsonElement::class.java
-        )
-        val stopDetector = gson.fromJson(
-            """{"stopDetector": {"mobile": {"useImu": false}}}""".trimIndent(),
-            JsonElement::class.java
-        )
-        when {
-            jsonObject?.getAsJsonObject("input") == null -> {
-                jsonObject.add("input", stopDetector)
-            }
-            jsonObject.getAsJsonObject("input").getAsJsonObject("stopDetector") == null -> {
-                jsonObject.getAsJsonObject("input").add("stopDetector", mobile)
-            }
-            jsonObject.getAsJsonObject("input").getAsJsonObject("stopDetector")
-                .getAsJsonObject("mobile") == null -> {
-                jsonObject.getAsJsonObject("input").getAsJsonObject("stopDetector")
-                    .add("mobile", useImu)
-            }
-            else -> {
-                jsonObject.getAsJsonObject("input")?.getAsJsonObject("stopDetector")
-                    ?.getAsJsonObject("mobile")?.addProperty("useImu", false)
-            }
-        }
-        return jsonObject.toString()
     }
 
     internal data class NativeComponents(

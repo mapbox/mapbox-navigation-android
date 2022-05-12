@@ -78,6 +78,7 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
                 EventsAppMetadata.Builder("name", "version")
                     .build()
             )
+            .enableSensors(true)
     }
 
     @Test

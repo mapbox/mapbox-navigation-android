@@ -309,7 +309,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         incidentsOptions,
         null,
         null,
-        false,
+        navigationOptions.enableSensors,
     )
 
     private var notificationChannelField: Field? = null
