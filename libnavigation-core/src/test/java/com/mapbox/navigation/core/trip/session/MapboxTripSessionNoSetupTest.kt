@@ -2,10 +2,10 @@ package com.mapbox.navigation.core.trip.session
 
 import android.content.Context
 import android.location.Location
-import androidx.test.core.app.ApplicationProvider
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_NEW
@@ -31,26 +31,30 @@ import com.mapbox.navigator.RouteState
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.spyk
+import io.mockk.unmockkAll
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
+import java.util.Locale
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(RobolectricTestRunner::class)
-@Config(manifest = Config.NONE)
 class MapboxTripSessionNoSetupTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
+
+    @After
+    fun cleanup() {
+        unmockkAll()
+    }
 
     @Test
     fun voiceInstructionsFallbacksToPreviousValue() = coroutineRule.runBlockingTest {
@@ -119,7 +123,7 @@ class MapboxTripSessionNoSetupTest {
         val voiceInstructionsAnnouncements = voiceInstructionsObserver.records
             .takeLast(2) // take only events triggered by location updates
             .map { it.announcement() }
-        assertEquals(listOf("1", "2"), voiceInstructionsAnnouncements)
+        assertEquals(listOf("2"), voiceInstructionsAnnouncements)
     }
 
     @Test
@@ -317,9 +321,9 @@ class MapboxTripSessionNoSetupTest {
 
 private fun buildTripSession(
     nativeNavigator: MapboxNativeNavigator = createNativeNavigatorMock(),
-    locationEngine: LocationEngine = TestLocationEngine.create()
+    locationEngine: LocationEngine = TestLocationEngine.create(),
+    context: Context = createMockContext()
 ): MapboxTripSession {
-    val context: Context = ApplicationProvider.getApplicationContext()
     val navigationOptions = NavigationOptions.Builder(context)
         .locationEngine(locationEngine)
         .build()
@@ -340,6 +344,15 @@ private fun buildTripSession(
         threadController,
         eHorizonSubscriptionManager = mockk(relaxed = true),
     )
+}
+
+private fun createMockContext(): Context {
+    val context: Context = mockk(relaxed = true)
+    mockkStatic(context::inferDeviceLocale)
+    every {
+        context.inferDeviceLocale()
+    } returns Locale.US
+    return context
 }
 
 object StatusWithVoiceInstructionUpdateUtil {
