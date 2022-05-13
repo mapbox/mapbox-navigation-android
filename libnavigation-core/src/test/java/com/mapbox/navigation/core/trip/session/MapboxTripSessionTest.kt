@@ -41,7 +41,6 @@ import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteInfo
-import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.SetRoutesResult
 import io.mockk.Runs
@@ -1241,7 +1240,11 @@ class MapboxTripSessionTest {
         tripSession = buildTripSession()
         tripSession.registerRoadObjectsOnRouteObserver(roadObjectsObserver)
         tripSession.start(true)
-        tripSession.setRoutes(listOf(mockNavigationRoute(routeInfo = mockedRouteInfo)), legIndex, updateReason)
+        tripSession.setRoutes(
+            listOf(mockNavigationRoute(routeInfo = mockedRouteInfo)),
+            legIndex,
+            updateReason
+        )
         coEvery {
             navigator.setRoutes(any())
         } coAnswers {
@@ -1249,7 +1252,11 @@ class MapboxTripSessionTest {
             createSetRouteResult()
         }
         pauseDispatcher {
-            tripSession.setRoutes(listOf(mockNavigationRoute(routeInfo = mockedRouteInfo)), legIndex, updateReason)
+            tripSession.setRoutes(
+                listOf(mockNavigationRoute(routeInfo = mockedRouteInfo)),
+                legIndex,
+                updateReason
+            )
             val alertsSlot = mutableListOf<List<UpcomingRoadObject>>()
             verify {
                 roadObjectsObserver.onNewRoadObjectsOnTheRoute(capture(alertsSlot))
@@ -1456,19 +1463,17 @@ class MapboxTripSessionTest {
 
 private fun mockNavigationRoute(
     routeInfo: RouteInfo = mockk(relaxed = true)
-): NavigationRoute {
-    val navigationRoute = mockk<NavigationRoute>(relaxed = true) {
-        val navigationRoute = this
-        every { navigationRoute.nativeRoute() } returns mockk() {
-            val nativeRoute = this
-            every { nativeRoute.routeInfo } returns routeInfo
-        }
+): NavigationRoute = mockk(relaxed = true) {
+    val navigationRoute = this
+    every { navigationRoute.nativeRoute() } returns mockk(relaxed = true) {
+        val nativeRoute = this
+        every { nativeRoute.routeInfo } returns routeInfo
     }
-    return navigationRoute
 }
 
-private fun createSetRouteError(error: String = "test error")
-    = ExpectedFactory.createError<String, SetRoutesResult>(error)
+private fun createSetRouteError(
+    error: String = "test error"
+) = ExpectedFactory.createError<String, SetRoutesResult>(error)
 
 fun createSetRouteResult(
     nativeAlternatives: List<RouteAlternative> = emptyList()
