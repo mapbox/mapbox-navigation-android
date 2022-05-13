@@ -183,9 +183,9 @@ class RouteArrowUtilsRoboTest {
             every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
             every {
-                styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+                styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAFFIC)
             } returns true
-            every { styleLayerExists(RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID) } returns true
+            every { styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_RESTRICTED) } returns true
             every { styleLayerExists(options.aboveLayerId) } returns true
             every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {

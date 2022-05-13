@@ -29,6 +29,9 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getMatchingColors
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup1SourceLayerIds
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup2SourceLayerIds
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup3SourceLayerIds
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
@@ -201,7 +204,7 @@ class MapboxRouteLineApi(
     internal var activeLegIndex = INVALID_ACTIVE_LEG_INDEX
         private set
     private val trafficBackfillRoadClasses = CopyOnWriteArrayList<String>()
-    private val alternativesDeviationOffset = mutableMapOf<String, Double>()
+    private var alternativesDeviationOffset = mapOf<String, Double>()
     private val alternativelyStyleSegmentsNotInLegCache: LruCache<
         CacheResultUtils.CacheResultKey2<
             Int, List<RouteLineExpressionData>,
@@ -972,15 +975,22 @@ class MapboxRouteLineApi(
         val routesAndFeatures = routeFeatureData.toList()
         val features = routesAndFeatures.map { it.featureCollection }
 
+        val primaryRouteLineLayers = ifNonNull(mapboxMap.getStyle()) { style ->
+            MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(
+                style,
+                MapboxRouteLineUtils.sourceLayerMap
+            )
+        } ?: setOf()
+
+        val alternateRouteLayers = layerGroup1SourceLayerIds
+            .union(layerGroup2SourceLayerIds)
+            .union(layerGroup3SourceLayerIds)
+            .subtract(primaryRouteLineLayers)
+
         val clickPointFeatureIndex = queryMapForFeatureIndex(
             mapboxMap,
             mapClickPoint,
-            listOf(
-                RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
-                RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
-                RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
-                RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID
-            ),
+            alternateRouteLayers.toList(),
             features
         )
 
@@ -992,12 +1002,7 @@ class MapboxRouteLineApi(
             val clickRectFeatureIndex = queryMapForFeatureIndex(
                 mapboxMap,
                 clickRect,
-                listOf(
-                    RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
-                    RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
-                    RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
-                    RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID
-                ),
+                alternateRouteLayers.toList(),
                 features
             )
             if (clickRectFeatureIndex >= 0) {
@@ -1008,10 +1013,7 @@ class MapboxRouteLineApi(
                 val index = queryMapForFeatureIndex(
                     mapboxMap,
                     mapClickPoint,
-                    listOf(
-                        RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
-                        RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
-                    ),
+                    primaryRouteLineLayers.toList(),
                     features
                 )
                 if (index >= 0) {
@@ -1065,7 +1067,7 @@ class MapboxRouteLineApi(
     ): Int {
         return features.distinct().run {
             routeFeatures.indexOfFirst {
-                it.features()?.get(0)?.id() ?: 0 == this.firstOrNull()?.feature?.id()
+                (it.features()?.get(0)?.id() ?: 0) == this.firstOrNull()?.feature?.id()
             }
         }
     }
@@ -1150,27 +1152,8 @@ class MapboxRouteLineApi(
         routes.addAll(newRoutes)
         primaryRoute = newRoutes.firstOrNull()
         resetCaches()
-
-        alternativesDeviationOffset.clear()
-        alternativeRoutesMetadata.forEach { routeMetadata ->
-            var runningDistance = 0.0
-            val route = routeMetadata.navigationRoute.directionsRoute
-            route.legs()?.forEachIndexed LegLoop@{ legIndex, leg ->
-                leg.annotation()?.distance()
-                    ?.forEachIndexed AnnotationLoop@{ annotationIndex, distance ->
-                        val forkLegIndex = routeMetadata.forkIntersectionOfAlternativeRoute.legIndex
-                        val forkGeometryIndexInLeg =
-                            routeMetadata.forkIntersectionOfAlternativeRoute.geometryIndexInLeg
-                        if (legIndex == forkLegIndex && annotationIndex == forkGeometryIndexInLeg) {
-                            val percentageTraveled = runningDistance / route.distance()
-                            alternativesDeviationOffset[routeMetadata.navigationRoute.id] =
-                                percentageTraveled
-                            return@LegLoop
-                        }
-                        runningDistance += distance
-                    }
-            }
-        }
+        alternativesDeviationOffset =
+            MapboxRouteLineUtils.getAlternativeRoutesDeviationOffsets(alternativeRoutesMetadata)
 
         return buildDrawRoutesState(featureDataProvider)
     }
@@ -1232,9 +1215,32 @@ class MapboxRouteLineApi(
             )
         }
 
+        val primaryRouteTrailExpressionProducer = {
+            MapboxRouteLineUtils.getRouteLineExpression(
+                routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
+                routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor,
+                routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor
+            )
+        }
+
+        val primaryRouteTrailCasingExpressionProducer = {
+            MapboxRouteLineUtils.getRouteLineExpression(
+                routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
+                routeLineOptions
+                    .resourceProvider
+                    .routeLineColorResources
+                    .routeLineTraveledCasingColor,
+                routeLineOptions
+                    .resourceProvider
+                    .routeLineColorResources
+                    .routeLineTraveledCasingColor
+            )
+        }
+
         val alternative1PercentageTraveled = partitionedRoutes.second.firstOrNull()?.route?.run {
             alternativesDeviationOffset[this.id]
         } ?: 0.0
+
         val alternateRoute1LineColors = getMatchingColors(
             partitionedRoutes.second.firstOrNull()?.featureCollection,
             routeLineOptions.routeStyleDescriptors,
@@ -1256,9 +1262,34 @@ class MapboxRouteLineApi(
             )
         }
 
+        val alternateRoute1TrailExpressionProducer = {
+            MapboxRouteLineUtils.getRouteLineExpression(
+                alternative1PercentageTraveled,
+                Color.TRANSPARENT,
+                Color.TRANSPARENT
+            )
+        }
+
+        val alternateRoute1TrailCasingExpressionProducer = {
+            MapboxRouteLineUtils.getRouteLineExpression(
+                alternative1PercentageTraveled,
+                Color.TRANSPARENT,
+                Color.TRANSPARENT
+            )
+        }
+
+        val alternateRoute1RestrictedSectionsExpressionProducer = {
+            MapboxRouteLineUtils.getRouteLineExpression(
+                alternative1PercentageTraveled,
+                Color.TRANSPARENT,
+                Color.TRANSPARENT
+            )
+        }
+
         val alternative2PercentageTraveled = partitionedRoutes.second.getOrNull(1)?.route?.run {
             alternativesDeviationOffset[this.id]
         } ?: 0.0
+
         val alternateRoute2LineColors = getMatchingColors(
             partitionedRoutes.second.getOrNull(1)?.featureCollection,
             routeLineOptions.routeStyleDescriptors,
@@ -1280,10 +1311,27 @@ class MapboxRouteLineApi(
             )
         }
 
-        val alternateRoutesRestrictedSectionsExpressionProducer = {
-            // todo add support for restricted sections
-            throw UnsupportedOperationException(
-                "restricted sections on alternative routes are not supported yet"
+        val alternateRoute2TrailExpressionProducer = {
+            MapboxRouteLineUtils.getRouteLineExpression(
+                alternative2PercentageTraveled,
+                Color.TRANSPARENT,
+                Color.TRANSPARENT
+            )
+        }
+
+        val alternateRoute2TrailCasingExpressionProducer = {
+            MapboxRouteLineUtils.getRouteLineExpression(
+                alternative2PercentageTraveled,
+                Color.TRANSPARENT,
+                Color.TRANSPARENT
+            )
+        }
+
+        val alternateRoute2RestrictedSectionsExpressionProducer = {
+            MapboxRouteLineUtils.getRouteLineExpression(
+                alternative2PercentageTraveled,
+                Color.TRANSPARENT,
+                Color.TRANSPARENT
             )
         }
 
@@ -1425,7 +1473,9 @@ class MapboxRouteLineApi(
                         primaryRouteRestrictedSectionsExpressionProducer,
                         RouteLineTrimOffset(
                             routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0
-                        )
+                        ),
+                        primaryRouteTrailExpressionProducer,
+                        primaryRouteTrailCasingExpressionProducer
                     )
                 ),
                 alternativeRouteLinesData = listOf(
@@ -1435,7 +1485,10 @@ class MapboxRouteLineApi(
                             alternateRoute1BaseExpressionProducer,
                             alternateRoute1CasingExpressionProducer,
                             alternateRoute1TrafficExpressionProducer,
-                            alternateRoutesRestrictedSectionsExpressionProducer
+                            alternateRoute1RestrictedSectionsExpressionProducer,
+                            RouteLineTrimOffset(alternative1PercentageTraveled),
+                            alternateRoute1TrailExpressionProducer,
+                            alternateRoute1TrailCasingExpressionProducer
                         )
                     ),
                     RouteLineData(
@@ -1444,7 +1497,10 @@ class MapboxRouteLineApi(
                             alternateRoute2BaseExpressionProducer,
                             alternateRoute2CasingExpressionProducer,
                             alternateRoute2TrafficExpressionProducer,
-                            alternateRoutesRestrictedSectionsExpressionProducer
+                            alternateRoute2RestrictedSectionsExpressionProducer,
+                            RouteLineTrimOffset(alternative2PercentageTraveled),
+                            alternateRoute2TrailExpressionProducer,
+                            alternateRoute2TrailCasingExpressionProducer
                         )
                     )
                 ),

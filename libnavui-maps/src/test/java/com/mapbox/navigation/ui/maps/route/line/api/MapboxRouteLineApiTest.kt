@@ -69,7 +69,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MapboxRouteLineApiTest {
@@ -194,7 +193,6 @@ class MapboxRouteLineApiTest {
         val vanishingRouteLine = mockk<VanishingRouteLine>(relaxed = true)
         val realOptions = MapboxRouteLineOptions.Builder(ctx).build()
         val options = mockk<MapboxRouteLineOptions>()
-        every { options.routeLayerProvider } returns realOptions.routeLayerProvider
         every { options.resourceProvider } returns realOptions.resourceProvider
         every { options.vanishingRouteLine } returns vanishingRouteLine
         every { options.displayRestrictedRoadSections } returns false
@@ -220,7 +218,6 @@ class MapboxRouteLineApiTest {
             val vanishingRouteLine = mockk<VanishingRouteLine>(relaxed = true)
             val realOptions = MapboxRouteLineOptions.Builder(ctx).build()
             val options = mockk<MapboxRouteLineOptions>()
-            every { options.routeLayerProvider } returns realOptions.routeLayerProvider
             every { options.resourceProvider } returns realOptions.resourceProvider
             every { options.vanishingRouteLine } returns vanishingRouteLine
             every { options.displayRestrictedRoadSections } returns false
@@ -247,7 +244,6 @@ class MapboxRouteLineApiTest {
             val vanishingRouteLine = mockk<VanishingRouteLine>(relaxed = true)
             val realOptions = MapboxRouteLineOptions.Builder(ctx).build()
             val options = mockk<MapboxRouteLineOptions>()
-            every { options.routeLayerProvider } returns realOptions.routeLayerProvider
             every { options.resourceProvider } returns realOptions.resourceProvider
             every { options.vanishingRouteLine } returns vanishingRouteLine
             every { options.displayRestrictedRoadSections } returns false
@@ -461,7 +457,6 @@ class MapboxRouteLineApiTest {
             }
             val realOptions = MapboxRouteLineOptions.Builder(ctx).build()
             val options = mockk<MapboxRouteLineOptions>()
-            every { options.routeLayerProvider } returns realOptions.routeLayerProvider
             every { options.resourceProvider } returns realOptions.resourceProvider
             every { options.vanishingRouteLine } returns vanishingRouteLine
             every { options.displayRestrictedRoadSections } returns false
@@ -529,7 +524,6 @@ class MapboxRouteLineApiTest {
             }
             val realOptions = MapboxRouteLineOptions.Builder(ctx).build()
             val options = mockk<MapboxRouteLineOptions>()
-            every { options.routeLayerProvider } returns realOptions.routeLayerProvider
             every { options.resourceProvider } returns realOptions.resourceProvider
             every { options.vanishingRouteLine } returns vanishingRouteLine
             every { options.displayRestrictedRoadSections } returns false
@@ -558,7 +552,6 @@ class MapboxRouteLineApiTest {
             }
             val realOptions = MapboxRouteLineOptions.Builder(ctx).build()
             val options = mockk<MapboxRouteLineOptions>()
-            every { options.routeLayerProvider } returns realOptions.routeLayerProvider
             every { options.resourceProvider } returns realOptions.resourceProvider
             every { options.vanishingRouteLine } returns vanishingRouteLine
             every { options.displayRestrictedRoadSections } returns false
@@ -1003,14 +996,13 @@ class MapboxRouteLineApiTest {
 
     @Test
     fun findClosestRoute_whenClickPoint() = runBlockingTest {
-        val uuids = listOf(UUID.randomUUID(), UUID.randomUUID())
-        mockkStatic(UUID::class)
-        every { UUID.randomUUID() } returnsMany uuids
+        mockkObject(MapboxRouteLineUtils)
+        every { MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any(), any()) } returns setOf()
         val feature1 = mockk<QueriedFeature> {
-            every { feature.id() } returns uuids[0].toString()
+            every { feature.id() } returns "0"
         }
         val feature2 = mockk<QueriedFeature> {
-            every { feature.id() } returns uuids[1].toString()
+            every { feature.id() } returns "0"
         }
         val route1 = loadRoute("short_route.json")
         val route2 = loadRoute("short_route.json")
@@ -1037,19 +1029,18 @@ class MapboxRouteLineApiTest {
         val result = api.findClosestRoute(point, mockkMap, 50f)
 
         assertEquals(route2, result.value!!.route)
-        unmockkStatic(UUID::class)
+        unmockkObject(MapboxRouteLineUtils)
     }
 
     @Test
     fun findClosestRoute_whenRectPoint() = runBlockingTest {
-        val uuids = listOf(UUID.randomUUID(), UUID.randomUUID())
-        mockkStatic(UUID::class)
-        every { UUID.randomUUID() } returnsMany uuids
+        mockkObject(MapboxRouteLineUtils)
+        every { MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any(), any()) } returns setOf()
         val feature1 = mockk<QueriedFeature> {
-            every { feature.id() } returns uuids[0].toString()
+            every { feature.id() } returns "0"
         }
         val feature2 = mockk<QueriedFeature> {
-            every { feature.id() } returns uuids[1].toString()
+            every { feature.id() } returns "0"
         }
         val route1 = loadRoute("short_route.json")
         val route2 = loadRoute("short_route.json")
@@ -1082,19 +1073,18 @@ class MapboxRouteLineApiTest {
         val result = api.findClosestRoute(point, mockkMap, 50f)
 
         assertEquals(route2, result.value!!.route)
-        unmockkStatic(UUID::class)
+        unmockkObject(MapboxRouteLineUtils)
     }
 
     @Test
     fun findClosestRoute_whenPrimaryRoute() = runBlockingTest {
-        val uuids = listOf(UUID.randomUUID(), UUID.randomUUID())
-        mockkStatic(UUID::class)
-        every { UUID.randomUUID() } returnsMany uuids
+        mockkObject(MapboxRouteLineUtils)
+        every { MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any(), any()) } returns setOf()
         val feature1 = mockk<QueriedFeature> {
-            every { feature.id() } returns uuids[0].toString()
+            every { feature.id() } returns "0"
         }
         val feature2 = mockk<QueriedFeature> {
-            every { feature.id() } returns uuids[1].toString()
+            every { feature.id() } returns "0"
         }
         val route1 = loadRoute("short_route.json")
         val route2 = loadRoute("short_route.json")
@@ -1126,7 +1116,7 @@ class MapboxRouteLineApiTest {
             } answers {
                 if (
                     renderedQueryOptionsSlot.captured.layerIds!!
-                        .contains(RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID)
+                        .contains(RouteLayerConstants.LAYER_GROUP_2_MAIN)
                 ) {
                     querySlot.captured.run(emptyExpected)
                 } else {
@@ -1141,7 +1131,7 @@ class MapboxRouteLineApiTest {
         val result = api.findClosestRoute(point, mockkMap, 50f)
 
         assertEquals(route1, result.value!!.route)
-        unmockkStatic(UUID::class)
+        unmockkObject(MapboxRouteLineUtils)
     }
 
     @Test

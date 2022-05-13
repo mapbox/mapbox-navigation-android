@@ -41,6 +41,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 #### Known issues
 - :bangbang: Expiration of congestion annotations and incidents doesn't work for alternative routes, which can cause inconsistency and a false fact that alternative route is faster.
+- Improvements in route line layer management to eliminate blinking when alternative routes are recomputed and redrawn after passing a fork, in addition to improving performance by reducing route line layer redraws. [#5859](https://github.com/mapbox/mapbox-navigation-android/pull/5859)
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:

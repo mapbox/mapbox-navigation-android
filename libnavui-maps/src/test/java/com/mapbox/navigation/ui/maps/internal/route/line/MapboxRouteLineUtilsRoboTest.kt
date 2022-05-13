@@ -13,32 +13,40 @@ import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.LayerPosition
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DESTINATION_MARKER_NAME
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_MAIN
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_RESTRICTED
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAFFIC
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAIL
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_MAIN
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_RESTRICTED
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAFFIC
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAIL
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_MAIN
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_RESTRICTED
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAFFIC
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAIL
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ORIGIN_MARKER_NAME
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_CASING_TRAIL_LAYER_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_TRAIL_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_ID
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -67,7 +75,6 @@ class MapboxRouteLineUtilsRoboTest {
         ctx = ApplicationProvider.getApplicationContext()
     }
 
-    @OptIn(MapboxExperimental::class)
     @Test
     fun initializeLayers() {
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
@@ -89,58 +96,81 @@ class MapboxRouteLineUtilsRoboTest {
         }
         val style = mockk<Style> {
             every { styleLayers } returns listOf(mockLayer)
-            every { styleSourceExists(PRIMARY_ROUTE_SOURCE_ID) } returns false
-            every { styleSourceExists(ALTERNATIVE_ROUTE1_SOURCE_ID) } returns false
-            every { styleSourceExists(ALTERNATIVE_ROUTE2_SOURCE_ID) } returns false
+            every { styleSourceExists(LAYER_GROUP_1_SOURCE_ID) } returns false
+            every { styleSourceExists(LAYER_GROUP_2_SOURCE_ID) } returns false
+            every { styleSourceExists(LAYER_GROUP_3_SOURCE_ID) } returns false
             every { styleSourceExists(WAYPOINT_SOURCE_ID) } returns false
-            every { styleLayerExists(PRIMARY_ROUTE_LAYER_ID) } returns false
+            every { styleLayerExists(LAYER_GROUP_1_TRAIL_CASING) } returns false
             every {
-                styleLayerExists(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+                styleLayerExists(LAYER_GROUP_1_TRAIL)
             } returns false
             every {
-                styleLayerExists(PRIMARY_ROUTE_CASING_LAYER_ID)
+                styleLayerExists(LAYER_GROUP_1_CASING)
             } returns false
             every {
-                styleLayerExists(PRIMARY_ROUTE_TRAIL_LAYER_ID)
+                styleLayerExists(LAYER_GROUP_1_MAIN)
             } returns false
             every {
-                styleLayerExists(PRIMARY_ROUTE_CASING_TRAIL_LAYER_ID)
+                styleLayerExists(LAYER_GROUP_1_TRAFFIC)
             } returns false
             every {
-                styleLayerExists(ALTERNATIVE_ROUTE1_LAYER_ID)
+                styleLayerExists(LAYER_GROUP_1_RESTRICTED)
+            } returns false
+            every { styleLayerExists(LAYER_GROUP_2_TRAIL_CASING) } returns false
+            every {
+                styleLayerExists(LAYER_GROUP_2_TRAIL)
             } returns false
             every {
-                styleLayerExists(ALTERNATIVE_ROUTE2_LAYER_ID)
+                styleLayerExists(LAYER_GROUP_2_CASING)
+            } returns false
+            every {
+                styleLayerExists(LAYER_GROUP_2_MAIN)
+            } returns false
+            every {
+                styleLayerExists(LAYER_GROUP_2_TRAFFIC)
+            } returns false
+            every {
+                styleLayerExists(LAYER_GROUP_2_RESTRICTED)
+            } returns false
+            every { styleLayerExists(LAYER_GROUP_3_TRAIL_CASING) } returns false
+            every {
+                styleLayerExists(LAYER_GROUP_3_TRAIL)
+            } returns false
+            every {
+                styleLayerExists(LAYER_GROUP_3_CASING)
+            } returns false
+            every {
+                styleLayerExists(LAYER_GROUP_3_MAIN)
+            } returns false
+            every {
+                styleLayerExists(LAYER_GROUP_3_TRAFFIC)
+            } returns false
+            every {
+                styleLayerExists(LAYER_GROUP_3_RESTRICTED)
+            } returns false
+            every {
+                styleLayerExists(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)
+            } returns false
+            every {
+                styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
             } returns false
             every { getStyleImage(ARROW_HEAD_ICON) } returns null
             every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns null
             every { getStyleImage(ORIGIN_MARKER_NAME) } returns null
             every { getStyleImage(DESTINATION_MARKER_NAME) } returns null
-            every {
-                styleLayerExists(ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
-            } returns false
-            every {
-                styleLayerExists(ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
-            } returns false
-            every {
-                styleLayerExists(ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
-            } returns false
-            every {
-                styleLayerExists(ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
-            } returns false
             every { styleLayerExists(WAYPOINT_LAYER_ID) } returns false
             every { styleLayerExists(LocationComponentConstants.MODEL_LAYER) } returns true
             every {
                 addStyleSource(WAYPOINT_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(PRIMARY_ROUTE_SOURCE_ID, any())
+                addStyleSource(LAYER_GROUP_1_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(ALTERNATIVE_ROUTE1_SOURCE_ID, any())
+                addStyleSource(LAYER_GROUP_2_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(ALTERNATIVE_ROUTE2_SOURCE_ID, any())
+                addStyleSource(LAYER_GROUP_3_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
             every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
@@ -179,7 +209,7 @@ class MapboxRouteLineUtilsRoboTest {
 
         verify {
             style.addStyleSource(
-                PRIMARY_ROUTE_SOURCE_ID,
+                LAYER_GROUP_1_SOURCE_ID,
                 capture(primaryRouteSourceValueSlots),
             )
         }
@@ -211,7 +241,7 @@ class MapboxRouteLineUtilsRoboTest {
 
         verify {
             style.addStyleSource(
-                ALTERNATIVE_ROUTE1_SOURCE_ID,
+                LAYER_GROUP_2_SOURCE_ID,
                 capture(alternativeRoute1SourceValueSlots),
             )
         }
@@ -243,7 +273,7 @@ class MapboxRouteLineUtilsRoboTest {
 
         verify {
             style.addStyleSource(
-                ALTERNATIVE_ROUTE2_SOURCE_ID,
+                LAYER_GROUP_3_SOURCE_ID,
                 capture(alternativeRoute2SourceValueSlots),
             )
         }
@@ -284,82 +314,106 @@ class MapboxRouteLineUtilsRoboTest {
             (addStyleLayerSlots[0].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-alt-route1-casing-layer",
+            "mapbox-layerGroup-3-trailCasing",
             (addStyleLayerSlots[1].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-alt-route2-casing-layer",
+            "mapbox-layerGroup-3-trail",
             (addStyleLayerSlots[2].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-alt-route1-layer",
+            "mapbox-layerGroup-3-casing",
             (addStyleLayerSlots[3].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-alt-route2-layer",
+            "mapbox-layerGroup-3-main",
             (addStyleLayerSlots[4].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-alt-route1-traffic-layer",
+            "mapbox-layerGroup-3-traffic",
             (addStyleLayerSlots[5].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-alt-route2-traffic-layer",
+            "mapbox-layerGroup-3-restricted",
             (addStyleLayerSlots[6].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-route-casing-trail-layer",
+            "mapbox-layerGroup-2-trailCasing",
             (addStyleLayerSlots[7].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-route-trail-layer",
+            "mapbox-layerGroup-2-trail",
             (addStyleLayerSlots[8].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-route-casing-layer",
+            "mapbox-layerGroup-2-casing",
             (addStyleLayerSlots[9].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-route-layer",
+            "mapbox-layerGroup-2-main",
             (addStyleLayerSlots[10].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-route-traffic-layer",
+            "mapbox-layerGroup-2-traffic",
             (addStyleLayerSlots[11].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-restricted-road-layer",
+            "mapbox-layerGroup-2-restricted",
             (addStyleLayerSlots[12].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-top-level-route-layer",
+            "mapbox-layerGroup-1-trailCasing",
             (addStyleLayerSlots[13].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-waypoint-layer",
+            "mapbox-layerGroup-1-trail",
             (addStyleLayerSlots[14].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
+            "mapbox-layerGroup-1-casing",
+            (addStyleLayerSlots[15].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-layerGroup-1-main",
+            (addStyleLayerSlots[16].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-layerGroup-1-traffic",
+            (addStyleLayerSlots[17].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-layerGroup-1-restricted",
+            (addStyleLayerSlots[18].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-top-level-route-layer",
+            (addStyleLayerSlots[19].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-navigation-waypoint-layer",
+            (addStyleLayerSlots[20].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
             "bottom-right",
-            (addStyleLayerSlots[14].contents as HashMap<String, Value>)["icon-anchor"]!!.contents
+            (addStyleLayerSlots[20].contents as HashMap<String, Value>)["icon-anchor"]!!.contents
         )
         assertEquals(
             33.3,
             (
-                (addStyleLayerSlots[14].contents as HashMap<String, Value>)["icon-offset"]
+                (addStyleLayerSlots[20].contents as HashMap<String, Value>)["icon-offset"]
                 !!.contents as ArrayList<Value>
                 ).first().contents
         )
         assertEquals(
             44.4,
             (
-                (addStyleLayerSlots[14].contents as HashMap<String, Value>)["icon-offset"]
+                (addStyleLayerSlots[20].contents as HashMap<String, Value>)["icon-offset"]
                 !!.contents as ArrayList<Value>
                 ).component2().contents
         )
         assertEquals(
             "viewport",
-            (addStyleLayerSlots[14].contents as HashMap<String, Value>)["icon-pitch-alignment"]
+            (addStyleLayerSlots[20].contents as HashMap<String, Value>)["icon-pitch-alignment"]
             !!.contents
         )
         assertEquals(
@@ -409,6 +463,42 @@ class MapboxRouteLineUtilsRoboTest {
         assertEquals(
             LocationComponentConstants.MODEL_LAYER,
             addStyleLayerPositionSlots[11].below
+        )
+        assertEquals(
+            LocationComponentConstants.MODEL_LAYER,
+            addStyleLayerPositionSlots[12].below
+        )
+        assertEquals(
+            LocationComponentConstants.MODEL_LAYER,
+            addStyleLayerPositionSlots[13].below
+        )
+        assertEquals(
+            LocationComponentConstants.MODEL_LAYER,
+            addStyleLayerPositionSlots[14].below
+        )
+        assertEquals(
+            LocationComponentConstants.MODEL_LAYER,
+            addStyleLayerPositionSlots[15].below
+        )
+        assertEquals(
+            LocationComponentConstants.MODEL_LAYER,
+            addStyleLayerPositionSlots[16].below
+        )
+        assertEquals(
+            LocationComponentConstants.MODEL_LAYER,
+            addStyleLayerPositionSlots[17].below
+        )
+        assertEquals(
+            LocationComponentConstants.MODEL_LAYER,
+            addStyleLayerPositionSlots[18].below
+        )
+        assertEquals(
+            LocationComponentConstants.MODEL_LAYER,
+            addStyleLayerPositionSlots[19].below
+        )
+        assertEquals(
+            LocationComponentConstants.MODEL_LAYER,
+            addStyleLayerPositionSlots[20].below
         )
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }

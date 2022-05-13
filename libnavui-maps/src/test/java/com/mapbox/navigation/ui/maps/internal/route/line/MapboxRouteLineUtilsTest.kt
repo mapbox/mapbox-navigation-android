@@ -14,30 +14,41 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.Style
+import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.testing.FileUtils
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.CLOSURE_CONGESTION_VALUE
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.HEAVY_CONGESTION_VALUE
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_MAIN
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_RESTRICTED
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAFFIC
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAIL
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_MAIN
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_RESTRICTED
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAFFIC
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAIL
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_MAIN
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_RESTRICTED
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAFFIC
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAIL
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LOW_CONGESTION_VALUE
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MODERATE_CONGESTION_VALUE
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_CONGESTION_VALUE
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.SEVERE_CONGESTION_VALUE
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
@@ -269,33 +280,30 @@ class MapboxRouteLineUtilsTest {
             every { displayRestrictedRoadSections } returns true
         }
         val style = mockk<Style> {
-            every { styleSourceExists(PRIMARY_ROUTE_SOURCE_ID) } returns true
-            every { styleSourceExists(ALTERNATIVE_ROUTE1_SOURCE_ID) } returns true
-            every { styleSourceExists(ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
-            every { styleLayerExists(PRIMARY_ROUTE_LAYER_ID) } returns true
-            every {
-                styleLayerExists(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(PRIMARY_ROUTE_CASING_LAYER_ID)
-            } returns true
-            every { styleLayerExists(ALTERNATIVE_ROUTE1_LAYER_ID) } returns true
-            every { styleLayerExists(ALTERNATIVE_ROUTE2_LAYER_ID) } returns true
-            every {
-                styleLayerExists(ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(RESTRICTED_ROAD_LAYER_ID)
-            } returns true
+            every { styleSourceExists(LAYER_GROUP_1_SOURCE_ID) } returns true
+            every { styleSourceExists(LAYER_GROUP_2_SOURCE_ID) } returns true
+            every { styleSourceExists(LAYER_GROUP_3_SOURCE_ID) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_TRAIL_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_TRAIL) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_MAIN) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_TRAFFIC) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_RESTRICTED) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_TRAIL_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_TRAIL) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_MAIN) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_TRAFFIC) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_RESTRICTED) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_TRAIL_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_TRAIL) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_MAIN) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_TRAFFIC) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_RESTRICTED) } returns true
+            every { styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID) } returns true
+
             every {
                 styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
             } returns true
@@ -304,19 +312,29 @@ class MapboxRouteLineUtilsTest {
         val result = MapboxRouteLineUtils.layersAreInitialized(style, options)
 
         assertTrue(result)
-        verify { style.styleSourceExists(PRIMARY_ROUTE_SOURCE_ID) }
-        verify { style.styleSourceExists(ALTERNATIVE_ROUTE1_SOURCE_ID) }
-        verify { style.styleSourceExists(ALTERNATIVE_ROUTE2_SOURCE_ID) }
-        verify { style.styleLayerExists(PRIMARY_ROUTE_LAYER_ID) }
-        verify { style.styleLayerExists(PRIMARY_ROUTE_TRAFFIC_LAYER_ID) }
-        verify { style.styleLayerExists(PRIMARY_ROUTE_CASING_LAYER_ID) }
-        verify { style.styleLayerExists(ALTERNATIVE_ROUTE1_LAYER_ID) }
-        verify { style.styleLayerExists(ALTERNATIVE_ROUTE2_LAYER_ID) }
-        verify { style.styleLayerExists(ALTERNATIVE_ROUTE1_CASING_LAYER_ID) }
-        verify { style.styleLayerExists(ALTERNATIVE_ROUTE2_CASING_LAYER_ID) }
-        verify { style.styleLayerExists(ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID) }
-        verify { style.styleLayerExists(ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID) }
-        verify { style.styleLayerExists(RESTRICTED_ROAD_LAYER_ID) }
+        verify { style.styleSourceExists(LAYER_GROUP_1_SOURCE_ID) }
+        verify { style.styleSourceExists(LAYER_GROUP_2_SOURCE_ID) }
+        verify { style.styleSourceExists(LAYER_GROUP_3_SOURCE_ID) }
+        verify { style.styleLayerExists(LAYER_GROUP_1_TRAIL_CASING) }
+        verify { style.styleLayerExists(LAYER_GROUP_1_TRAIL) }
+        verify { style.styleLayerExists(LAYER_GROUP_1_CASING) }
+        verify { style.styleLayerExists(LAYER_GROUP_1_MAIN) }
+        verify { style.styleLayerExists(LAYER_GROUP_1_TRAFFIC) }
+        verify { style.styleLayerExists(LAYER_GROUP_1_RESTRICTED) }
+        verify { style.styleLayerExists(LAYER_GROUP_2_TRAIL_CASING) }
+        verify { style.styleLayerExists(LAYER_GROUP_2_TRAIL) }
+        verify { style.styleLayerExists(LAYER_GROUP_2_CASING) }
+        verify { style.styleLayerExists(LAYER_GROUP_2_MAIN) }
+        verify { style.styleLayerExists(LAYER_GROUP_2_TRAFFIC) }
+        verify { style.styleLayerExists(LAYER_GROUP_2_RESTRICTED) }
+        verify { style.styleLayerExists(LAYER_GROUP_3_TRAIL_CASING) }
+        verify { style.styleLayerExists(LAYER_GROUP_3_TRAIL) }
+        verify { style.styleLayerExists(LAYER_GROUP_3_CASING) }
+        verify { style.styleLayerExists(LAYER_GROUP_3_MAIN) }
+        verify { style.styleLayerExists(LAYER_GROUP_3_TRAFFIC) }
+        verify { style.styleLayerExists(LAYER_GROUP_3_RESTRICTED) }
+        verify { style.styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID) }
+        verify { style.styleLayerExists(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID) }
     }
 
     @Test
@@ -325,55 +343,61 @@ class MapboxRouteLineUtilsTest {
             every { displayRestrictedRoadSections } returns false
         }
         val style = mockk<Style> {
-            every { styleSourceExists(PRIMARY_ROUTE_SOURCE_ID) } returns true
-            every { styleSourceExists(ALTERNATIVE_ROUTE1_SOURCE_ID) } returns true
-            every { styleSourceExists(ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
-            every { styleLayerExists(PRIMARY_ROUTE_LAYER_ID) } returns true
-            every {
-                styleLayerExists(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(PRIMARY_ROUTE_CASING_LAYER_ID)
-            } returns true
-            every { styleLayerExists(ALTERNATIVE_ROUTE1_LAYER_ID) } returns true
-            every { styleLayerExists(ALTERNATIVE_ROUTE2_LAYER_ID) } returns true
-            every {
-                styleLayerExists(ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(RESTRICTED_ROAD_LAYER_ID)
-            } returns false
-            every {
-                styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
-            } returns true
+            every { styleSourceExists(LAYER_GROUP_1_SOURCE_ID) } returns true
+            every { styleSourceExists(LAYER_GROUP_2_SOURCE_ID) } returns true
+            every { styleSourceExists(LAYER_GROUP_3_SOURCE_ID) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_TRAIL_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_TRAIL) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_MAIN) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_TRAFFIC) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_RESTRICTED) } returns false
+            every { styleLayerExists(LAYER_GROUP_2_TRAIL_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_TRAIL) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_MAIN) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_TRAFFIC) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_RESTRICTED) } returns false
+            every { styleLayerExists(LAYER_GROUP_3_TRAIL_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_TRAIL) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_MAIN) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_TRAFFIC) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_RESTRICTED) } returns false
+            every { styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID) } returns true
+            every { styleSourceExists(WAYPOINT_SOURCE_ID) } returns true
         }
 
         val result = MapboxRouteLineUtils.layersAreInitialized(style, options)
 
         assertTrue(result)
-        verify { style.styleSourceExists(PRIMARY_ROUTE_SOURCE_ID) }
-        verify { style.styleSourceExists(ALTERNATIVE_ROUTE1_SOURCE_ID) }
-        verify { style.styleSourceExists(ALTERNATIVE_ROUTE2_SOURCE_ID) }
-        verify { style.styleLayerExists(PRIMARY_ROUTE_LAYER_ID) }
-        verify { style.styleLayerExists(PRIMARY_ROUTE_TRAFFIC_LAYER_ID) }
-        verify { style.styleLayerExists(PRIMARY_ROUTE_CASING_LAYER_ID) }
-        verify { style.styleLayerExists(ALTERNATIVE_ROUTE1_LAYER_ID) }
-        verify { style.styleLayerExists(ALTERNATIVE_ROUTE2_LAYER_ID) }
-        verify { style.styleLayerExists(ALTERNATIVE_ROUTE1_CASING_LAYER_ID) }
-        verify { style.styleLayerExists(ALTERNATIVE_ROUTE2_CASING_LAYER_ID) }
-        verify { style.styleLayerExists(ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID) }
-        verify { style.styleLayerExists(ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID) }
+        verify { style.styleSourceExists(LAYER_GROUP_1_SOURCE_ID) }
+        verify { style.styleSourceExists(LAYER_GROUP_2_SOURCE_ID) }
+        verify { style.styleSourceExists(LAYER_GROUP_3_SOURCE_ID) }
+        verify { style.styleLayerExists(LAYER_GROUP_1_TRAIL_CASING) }
+        verify { style.styleLayerExists(LAYER_GROUP_1_TRAIL) }
+        verify { style.styleLayerExists(LAYER_GROUP_1_CASING) }
+        verify { style.styleLayerExists(LAYER_GROUP_1_MAIN) }
+        verify { style.styleLayerExists(LAYER_GROUP_1_TRAFFIC) }
+        verify { style.styleLayerExists(LAYER_GROUP_2_TRAIL_CASING) }
+        verify { style.styleLayerExists(LAYER_GROUP_2_TRAIL) }
+        verify { style.styleLayerExists(LAYER_GROUP_2_CASING) }
+        verify { style.styleLayerExists(LAYER_GROUP_2_MAIN) }
+        verify { style.styleLayerExists(LAYER_GROUP_2_TRAFFIC) }
+        verify { style.styleLayerExists(LAYER_GROUP_3_TRAIL_CASING) }
+        verify { style.styleLayerExists(LAYER_GROUP_3_TRAIL) }
+        verify { style.styleLayerExists(LAYER_GROUP_3_CASING) }
+        verify { style.styleLayerExists(LAYER_GROUP_3_MAIN) }
+        verify { style.styleLayerExists(LAYER_GROUP_3_TRAFFIC) }
         verify(exactly = 0) {
-            style.styleLayerExists(RESTRICTED_ROAD_LAYER_ID)
+            style.styleLayerExists(LAYER_GROUP_1_RESTRICTED)
+        }
+        verify(exactly = 0) {
+            style.styleLayerExists(LAYER_GROUP_2_RESTRICTED)
+        }
+        verify(exactly = 0) {
+            style.styleLayerExists(LAYER_GROUP_3_RESTRICTED)
         }
     }
 
@@ -382,33 +406,28 @@ class MapboxRouteLineUtilsTest {
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val style = mockk<Style> {
             every { styleLayers } returns listOf()
-            every { styleSourceExists(PRIMARY_ROUTE_SOURCE_ID) } returns true
-            every { styleSourceExists(ALTERNATIVE_ROUTE1_SOURCE_ID) } returns true
-            every { styleSourceExists(ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
-            every { styleLayerExists(PRIMARY_ROUTE_LAYER_ID) } returns true
-            every {
-                styleLayerExists(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(PRIMARY_ROUTE_CASING_LAYER_ID)
-            } returns true
-            every { styleLayerExists(ALTERNATIVE_ROUTE1_LAYER_ID) } returns true
-            every { styleLayerExists(ALTERNATIVE_ROUTE2_LAYER_ID) } returns true
-            every {
-                styleLayerExists(ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(RESTRICTED_ROAD_LAYER_ID)
-            } returns true
+            every { styleSourceExists(LAYER_GROUP_1_SOURCE_ID) } returns true
+            every { styleSourceExists(LAYER_GROUP_2_SOURCE_ID) } returns true
+            every { styleSourceExists(LAYER_GROUP_3_SOURCE_ID) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_TRAIL_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_TRAIL) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_MAIN) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_TRAFFIC) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_RESTRICTED) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_TRAIL_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_TRAIL) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_MAIN) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_TRAFFIC) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_RESTRICTED) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_TRAIL_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_TRAIL) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_MAIN) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_TRAFFIC) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_RESTRICTED) } returns true
+            every { styleLayerExists(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID) } returns true
             every {
                 styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
             } returns true
@@ -1883,6 +1902,190 @@ class MapboxRouteLineUtilsTest {
 
         assertEquals(4, result.first)
         assertEquals(5, result.second)
+    }
+
+    @Test
+    fun layerGroup1SourceKey() {
+        assertEquals(LAYER_GROUP_1_SOURCE_ID, MapboxRouteLineUtils.layerGroup1SourceKey.sourceId)
+    }
+
+    @Test
+    fun layerGroup2SourceKey() {
+        assertEquals(LAYER_GROUP_2_SOURCE_ID, MapboxRouteLineUtils.layerGroup2SourceKey.sourceId)
+    }
+
+    @Test
+    fun layerGroup3SourceKey() {
+        assertEquals(LAYER_GROUP_3_SOURCE_ID, MapboxRouteLineUtils.layerGroup3SourceKey.sourceId)
+    }
+
+    @Test
+    fun layerGroup1SourceLayerIds() {
+        assertEquals(6, MapboxRouteLineUtils.layerGroup1SourceLayerIds.size)
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup1SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING
+            )
+        )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup1SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_1_TRAIL
+            )
+        )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup1SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_1_CASING
+            )
+        )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup1SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_1_MAIN
+            )
+        )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup1SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_1_TRAFFIC
+            )
+        )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup1SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_1_RESTRICTED
+            )
+        )
+    }
+
+    @Test
+    fun layerGroup2SourceLayerIds() {
+        assertEquals(6, MapboxRouteLineUtils.layerGroup2SourceLayerIds.size)
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup2SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING
+            )
+        )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup2SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_2_TRAIL
+            )
+        )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup2SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_2_CASING
+            )
+        )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup2SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_2_MAIN
+            )
+        )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup2SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_2_TRAFFIC
+            )
+        )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup2SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_2_RESTRICTED
+            )
+        )
+    }
+
+    @Test
+    fun layerGroup3SourceLayerIds() {
+        assertEquals(6, MapboxRouteLineUtils.layerGroup3SourceLayerIds.size)
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup3SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING
+            )
+        )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup3SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_3_TRAIL
+            )
+        )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup3SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_3_CASING
+            )
+        )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup3SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_3_MAIN
+            )
+        )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup3SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_3_TRAFFIC
+            )
+        )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup3SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_3_RESTRICTED
+            )
+        )
+    }
+
+    @Test
+    fun sourceLayerMap() {
+        assertEquals(3, MapboxRouteLineUtils.sourceLayerMap.size)
+        assertEquals(
+            MapboxRouteLineUtils.layerGroup1SourceKey,
+            MapboxRouteLineUtils.sourceLayerMap.keys.toList()[0]
+        )
+        assertEquals(
+            MapboxRouteLineUtils.layerGroup1SourceLayerIds,
+            MapboxRouteLineUtils.sourceLayerMap.values.toList()[0]
+        )
+        assertEquals(
+            MapboxRouteLineUtils.layerGroup2SourceKey,
+            MapboxRouteLineUtils.sourceLayerMap.keys.toList()[1]
+        )
+        assertEquals(
+            MapboxRouteLineUtils.layerGroup2SourceLayerIds,
+            MapboxRouteLineUtils.sourceLayerMap.values.toList()[1]
+        )
+        assertEquals(
+            MapboxRouteLineUtils.layerGroup3SourceKey,
+            MapboxRouteLineUtils.sourceLayerMap.keys.toList()[2]
+        )
+        assertEquals(
+            MapboxRouteLineUtils.layerGroup3SourceLayerIds,
+            MapboxRouteLineUtils.sourceLayerMap.values.toList()[2]
+        )
+    }
+
+    @Test
+    fun getLayerIdsForPrimaryRoute() {
+        val topLevelRouteLayer = StyleObjectInfo(
+            TOP_LEVEL_ROUTE_LINE_LAYER_ID,
+            "background"
+        )
+        val bottomLevelRouteLayer = StyleObjectInfo(
+            BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID,
+            "background"
+        )
+        val layerGroup1 = StyleObjectInfo(
+            LAYER_GROUP_1_MAIN,
+            "line"
+        )
+        val layerGroup2 = StyleObjectInfo(
+            LAYER_GROUP_2_MAIN,
+            "line"
+        )
+        val style = mockk<Style> {
+            every { styleLayers } returns listOf(
+                bottomLevelRouteLayer,
+                layerGroup2,
+                layerGroup1,
+                topLevelRouteLayer
+            )
+        }
+
+        val result = MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(
+            style,
+            MapboxRouteLineUtils.sourceLayerMap
+        )
+
+        assertEquals(MapboxRouteLineUtils.layerGroup1SourceLayerIds, result)
     }
 
     private fun <T> listElementsAreEqual(
