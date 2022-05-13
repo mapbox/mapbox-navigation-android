@@ -7,6 +7,7 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -42,6 +43,7 @@ import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteState
+import com.mapbox.navigator.SetRoutesResult
 import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -142,7 +144,7 @@ class MapboxTripSessionTest {
         tripSession = buildTripSession()
 
         coEvery { navigator.updateLocation(any()) } returns false
-        coEvery { navigator.setRoutes(any()) }
+        coEvery { navigator.setRoutes(any(), any(), any()) } returns createSetRouteResult()
         coEvery { navigator.setAlternativeRoutes(any()) } returns listOf()
         coEvery { navigator.refreshRoute(any()) } returns Unit
         every { navigationStatus.getTripStatusFrom(any()) } returns tripStatus
@@ -610,7 +612,7 @@ class MapboxTripSessionTest {
             )
 
             coVerify(exactly = 0) {
-                navigator.setRoutes(routes.first(), legIndex, listOf(alternative))
+                navigator.setRoutes(routes.first(), legIndex, any())
             }
             coVerify(exactly = 0) { navigator.refreshRoute(any()) }
         }
@@ -642,8 +644,8 @@ class MapboxTripSessionTest {
             val alternative = mockk<NavigationRoute>()
             val nativeAlternatives = listOf(mockk<RouteAlternative>())
             coEvery {
-                navigator.setAlternativeRoutes(listOf(alternative))
-            } returns nativeAlternatives
+                navigator.setRoutes(any(), any(), listOf(alternative))
+            } returns createSetRouteResult(nativeAlternatives)
             val result = tripSession.setRoutes(
                 routes + alternative,
                 legIndex,
@@ -678,8 +680,8 @@ class MapboxTripSessionTest {
             val alternative = mockk<NavigationRoute>()
             val nativeAlternatives = listOf(mockk<RouteAlternative>())
             coEvery {
-                navigator.setAlternativeRoutes(listOf(alternative))
-            } returns nativeAlternatives
+                navigator.setRoutes(any(), any(), eq(listOf(alternative)))
+            } returns createSetRouteResult(nativeAlternatives = nativeAlternatives)
             val result = tripSession.setRoutes(
                 routes + alternative,
                 legIndex,
@@ -1144,9 +1146,9 @@ class MapboxTripSessionTest {
 
     @Test
     fun `local route reference updated after route set`() = coroutineRule.runBlockingTest {
-        coEvery { navigator.setRoutes(any()) } coAnswers {
+        coEvery { navigator.setRoutes(any(), any(), any()) } coAnswers {
             delay(100)
-            null
+            createSetRouteResult()
         }
 
         pauseDispatcher {
@@ -1156,7 +1158,7 @@ class MapboxTripSessionTest {
             runCurrent()
             assertNull(tripSession.primaryRoute)
             advanceTimeBy(200)
-            assertEquals(tripSession.primaryRoute, routes.first())
+            assertEquals(routes.first(), tripSession.primaryRoute)
         }
     }
 
@@ -1175,7 +1177,7 @@ class MapboxTripSessionTest {
     fun `offRoute state is reset when setRoute is called`() = coroutineRule.runBlockingTest {
         coEvery { navigator.setRoutes(any()) } coAnswers {
             delay(100)
-            null
+            createSetRouteResult()
         }
 
         every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
@@ -1208,7 +1210,7 @@ class MapboxTripSessionTest {
     fun `routeProgress is reset when setRoute is called`() = coroutineRule.runBlockingTest {
         coEvery { navigator.setRoutes(any()) } coAnswers {
             delay(100)
-            null
+            createSetRouteResult()
         }
 
         every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
@@ -1239,11 +1241,12 @@ class MapboxTripSessionTest {
         tripSession = buildTripSession()
         tripSession.registerRoadObjectsOnRouteObserver(roadObjectsObserver)
         tripSession.start(true)
-        tripSession.setRoutes(routes, legIndex, updateReason)
+        tripSession.setRoutes(listOf(mockNavigationRoute(routeInfo = mockedRouteInfo)), legIndex, updateReason)
         coEvery {
             navigator.setRoutes(any())
         } coAnswers {
             delay(100)
+            createSetRouteResult()
         }
         pauseDispatcher {
             tripSession.setRoutes(listOf(mockNavigationRoute(routeInfo = mockedRouteInfo)), legIndex, updateReason)
@@ -1262,8 +1265,9 @@ class MapboxTripSessionTest {
         coroutineRule.runBlockingTest {
             val primary = mockNavigationRoute()
             val alternative = mockNavigationRoute()
-            coEvery { navigator.setRoutes(any()) } coAnswers {
+            coEvery { navigator.setRoutes(any(), any(), any()) } coAnswers {
                 delay(100)
+                createSetRouteResult()
             }
 
             val routeProgressObserver: RouteProgressObserver = mockk(relaxUnitFun = true)
@@ -1377,7 +1381,7 @@ class MapboxTripSessionTest {
         coroutineRule.runBlockingTest {
             coEvery { navigator.setRoutes(any()) } coAnswers {
                 delay(100)
-                Unit
+                createSetRouteResult()
             }
 
             coEvery { navigator.updateLegIndex(any()) } coAnswers {
@@ -1451,14 +1455,21 @@ class MapboxTripSessionTest {
 }
 
 private fun mockNavigationRoute(
-    routeInfo: RouteInfo = mockk()
+    routeInfo: RouteInfo = mockk(relaxed = true)
 ): NavigationRoute {
     val navigationRoute = mockk<NavigationRoute>(relaxed = true) {
         val navigationRoute = this
-        every { navigationRoute.nativeRoute() } returns mockk<RouteInterface>() {
+        every { navigationRoute.nativeRoute() } returns mockk() {
             val nativeRoute = this
             every { nativeRoute.routeInfo } returns routeInfo
         }
     }
     return navigationRoute
 }
+
+private fun createSetRouteError(error: String = "test error")
+    = ExpectedFactory.createError<String, SetRoutesResult>(error)
+
+fun createSetRouteResult(
+    nativeAlternatives: List<RouteAlternative> = emptyList()
+) = ExpectedFactory.createValue<String, SetRoutesResult>(SetRoutesResult(nativeAlternatives))

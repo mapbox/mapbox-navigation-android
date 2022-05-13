@@ -4,6 +4,7 @@ import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
 import com.mapbox.api.directionsrefresh.v1.models.RouteLegRefresh
 import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.internal.route.nativeRoute
@@ -40,6 +41,7 @@ import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.SetRoutesParams
+import com.mapbox.navigator.SetRoutesResult
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -159,7 +161,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         primaryRoute: NavigationRoute?,
         startingLeg: Int,
         alternatives: List<NavigationRoute>,
-    ): Unit = suspendCancellableCoroutine { continuation ->
+    ): Expected<String, SetRoutesResult> = suspendCancellableCoroutine { continuation ->
         navigator!!.setRoutes(
             primaryRoute?.let { route ->
                 SetRoutesParams(
@@ -175,7 +177,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                     LOG_CATEGORY
                 )
             }
-            continuation.resume(Unit)
+            continuation.resume(result)
         }
     }
 

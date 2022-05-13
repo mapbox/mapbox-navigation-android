@@ -101,7 +101,9 @@ internal class MapboxTripSession(
                 ) {
                     logD("primary route update - starting", LOG_CATEGORY)
                     val newPrimaryRoute = routes.firstOrNull()
-                    navigator.setRoutes(newPrimaryRoute, legIndex, routes.drop(1))
+                    navigator.setRoutes(newPrimaryRoute, legIndex, routes.drop(1)).onValue {
+                        processedAlternatives.addAll(it.alternatives)
+                    }
                     this@MapboxTripSession.primaryRoute = newPrimaryRoute
                     roadObjects = newPrimaryRoute?.let {
                         getRouteInitInfo(it.nativeRoute().routeInfo)?.roadObjects

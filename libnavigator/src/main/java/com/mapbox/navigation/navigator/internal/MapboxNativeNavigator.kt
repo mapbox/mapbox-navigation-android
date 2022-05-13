@@ -29,6 +29,7 @@ import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterInterface
+import com.mapbox.navigator.SetRoutesResult
 import com.mapbox.navigator.TilesConfig
 
 /**
@@ -87,7 +88,7 @@ interface MapboxNativeNavigator {
         primaryRoute: NavigationRoute?,
         startingLeg: Int = 0,
         alternatives: List<NavigationRoute> = emptyList(),
-    )
+    ): Expected<String, SetRoutesResult>
 
     suspend fun setAlternativeRoutes(
         routes: List<NavigationRoute>
