@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.navigator.internal.util.readRawFileText
 import com.mapbox.navigation.navigator.internal.util.runOnMainSync
@@ -17,7 +18,7 @@ import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
-import com.mapbox.navigator.Routes
+import com.mapbox.navigator.SetRoutesParams
 import com.mapbox.navigator.SettingsProfile
 import com.mapbox.navigator.TilesConfig
 import org.junit.Assert.assertTrue
@@ -39,11 +40,10 @@ class NavigatorTest {
             val navigator = provideNavigator()
             val routes = provideDirectionsRouteAndRouteOptions()
             navigator.setRoutes(
-                Routes(
-                    routes.mapToDirectionsResponse().toJson(),
+                SetRoutesParams(
+                    routes.map { it.nativeRoute() }.first(),
                     0,
-                    0,
-                    routes.first().routeOptions.toUrl("pk.**").toString()
+                    routes.map { it.nativeRoute() }.drop(1),
                 )
             ) { expected ->
                 assertTrue(expected.isValue)

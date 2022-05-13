@@ -314,6 +314,8 @@ class MapboxTripSessionNoSetupTest {
 
         assertEquals(testLocation, tripSession.getRawLocation())
     }
+
+
 }
 
 private fun buildTripSession(
