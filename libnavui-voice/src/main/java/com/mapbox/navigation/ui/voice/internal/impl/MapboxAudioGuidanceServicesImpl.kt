@@ -1,25 +1,28 @@
-package com.mapbox.navigation.dropin.component.audioguidance
+package com.mapbox.navigation.ui.voice.internal.impl
 
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
+import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidanceServices
+import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidanceVoice
+import com.mapbox.navigation.ui.voice.internal.MapboxVoiceInstructions
 
-internal class AudioGuidanceServices {
+class MapboxAudioGuidanceServicesImpl : MapboxAudioGuidanceServices {
 
-    fun audioGuidanceVoice(
+    override fun mapboxAudioGuidanceVoice(
         mapboxNavigation: MapboxNavigation,
         language: String,
-    ): AudioGuidanceVoice {
+    ): MapboxAudioGuidanceVoice {
         val mapboxSpeechApi = mapboxSpeechApi(mapboxNavigation, language)
         val mapboxVoiceInstructionsPlayer =
             mapboxVoiceInstructionsPlayer(mapboxNavigation, language)
-        return AudioGuidanceVoice(
+        return MapboxAudioGuidanceVoice(
             mapboxSpeechApi,
             mapboxVoiceInstructionsPlayer
         )
     }
 
-    private fun mapboxSpeechApi(
+    override fun mapboxSpeechApi(
         mapboxNavigation: MapboxNavigation,
         language: String
     ): MapboxSpeechApi {
@@ -28,7 +31,7 @@ internal class AudioGuidanceServices {
         return MapboxSpeechApi(applicationContext, accessToken, language)
     }
 
-    private fun mapboxVoiceInstructionsPlayer(
+    override fun mapboxVoiceInstructionsPlayer(
         mapboxNavigation: MapboxNavigation,
         language: String,
     ): MapboxVoiceInstructionsPlayer {
@@ -36,4 +39,6 @@ internal class AudioGuidanceServices {
         val accessToken = mapboxNavigation.navigationOptions.accessToken!!
         return MapboxVoiceInstructionsPlayer(applicationContext, accessToken, language)
     }
+
+    override fun mapboxVoiceInstructions() = MapboxVoiceInstructions()
 }

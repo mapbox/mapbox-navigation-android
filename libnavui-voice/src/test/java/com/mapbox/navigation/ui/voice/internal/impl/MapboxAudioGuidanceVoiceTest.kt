@@ -1,13 +1,13 @@
-@file:Suppress("NoMockkVerifyImport")
-
-package com.mapbox.navigation.dropin.component.audioguidance
+package com.mapbox.navigation.ui.voice.internal.impl
 
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
+import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidanceVoice
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
@@ -16,22 +16,25 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
+import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalCoroutinesApi::class)
-class AudioGuidanceVoiceTest {
+@ExperimentalCoroutinesApi
+class MapboxAudioGuidanceVoiceTest {
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     private val speechApi = mockk<MapboxSpeechApi>(relaxUnitFun = true)
     private val voiceInstructionsPlayer = mockk<MapboxVoiceInstructionsPlayer>(relaxUnitFun = true)
-    private val carAppAudioGuidanceVoice = AudioGuidanceVoice(
+    private val carAppAudioGuidanceVoice = MapboxAudioGuidanceVoice(
         speechApi,
         voiceInstructionsPlayer
     )
 
     @Test
-    fun `voice instruction should be played as SpeechAnnouncement`() = runBlockingTest {
+    fun `voice instruction should be played as SpeechAnnouncement`() = coroutineRule.runBlockingTest {
         mockSuccessfulSpeechApi()
         mockSuccessfulVoiceInstructionsPlayer()
 
@@ -44,23 +47,15 @@ class AudioGuidanceVoiceTest {
     }
 
     @Test
-    fun `the apis are cleaned up after completing announcements`() = runBlockingTest {
-        mockSuccessfulSpeechApi()
-        mockSuccessfulVoiceInstructionsPlayer()
-        val voiceInstructions = mockk<VoiceInstructions> {
-            every { announcement() } returns "Turn right on Market"
-        }
-        carAppAudioGuidanceVoice.speak(voiceInstructions).collect { speechAnnouncement ->
-            assertEquals("Turn right on Market", speechAnnouncement!!.announcement)
-        }
+    fun `null should clean up the api and player`() = coroutineRule.runBlockingTest {
+        carAppAudioGuidanceVoice.speak(null).collect()
 
-        verify { speechApi.clean(any()) }
         verify { speechApi.cancel() }
         verify { voiceInstructionsPlayer.clear() }
     }
 
     @Test
-    fun `should play fallback when speech api fails`() = runBlockingTest {
+    fun `should play fallback when speech api fails`() = coroutineRule.runBlockingTest {
         every { speechApi.generate(any(), any()) } answers {
             val consumer = secondArg<MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>>>()
             val error = mockk<SpeechError> {
