@@ -171,7 +171,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         ) { result ->
             result.onError {
                 logE(
-                    "Failed to set the primary route with alternatives," +
+                    "Failed to set the primary route with alternatives, " +
                         "active guidance session will not function correctly. Reason: $it",
                     LOG_CATEGORY
                 )
