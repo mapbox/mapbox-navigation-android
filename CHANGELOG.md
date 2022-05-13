@@ -17,7 +17,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed simulated route feasibility calculations. This will improve the accuracy of replay for curved roads. [#5748](https://github.com/mapbox/mapbox-navigation-android/pull/5748)
 - :warning: `VoiceInstructionsObserver` doesn't trigger the last available voice instruction on registration with `MapboxNavigation#registerVoiceInstructionsObserver` anymore. The invocations of `VoiceInstructionsObserver` are critical to drive the correct timing of the instructions to be read out, that's why delivering the outdated value on registration could have led to incorrect guidance instructions. Use `RouteProgress#voiceInstructions` to get the last available voice instruction.[#5746](https://github.com/mapbox/mapbox-navigation-android/issues/5746) 
 - Fixed absence of the first voice instruction [#5807](https://github.com/mapbox/mapbox-navigation-android/pull/5807)
-- Fixed parsing of 2xx response JSON from directions [#5807](https://github.com/mapbox/mapbox-navigation-android/pull/5807)
+- Fixed an issue where prettified Mapbox Directions service responses weren't parsed correctly. [#5807](https://github.com/mapbox/mapbox-navigation-android/pull/5807)
 
 #### Known issues
 - If your instrumentation tests use a mocked, prettified JSON response for Mapbox Directions services, you might need to remove white spaces from `"code": "Ok"` substring to `"code":"Ok"`.
