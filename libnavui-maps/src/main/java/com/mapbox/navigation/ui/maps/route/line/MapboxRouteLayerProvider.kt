@@ -6,20 +6,16 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
 import com.mapbox.maps.extension.style.expressions.dsl.generated.match
 import com.mapbox.maps.extension.style.expressions.generated.Expression
-import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.switchCase
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
 import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
 import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRouteLineColorExpressions
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
-import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.utils.internal.extensions.getBitmap
 
 internal class MapboxRouteLayerProvider(
-    val routeStyleDescriptors: List<RouteStyleDescriptor>,
     private val routeLineScaleExpression: Expression,
     private val routeCasingLineScaleExpression: Expression,
     private val routeTrafficLineScaleExpression: Expression,
@@ -51,17 +47,11 @@ internal class MapboxRouteLayerProvider(
         roundedLineCap: Boolean,
         color: Int
     ): LineLayer {
-        val routeLineColorExpressions =
-            getRouteLineColorExpressions(
-                color,
-                routeStyleDescriptors,
-                RouteStyleDescriptor::lineColor
-            )
         return buildPrimaryRouteRelatedLayer(
             RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
             style,
             roundedLineCap,
-            routeLineColorExpressions
+            color
         )
     }
 
@@ -70,18 +60,11 @@ internal class MapboxRouteLayerProvider(
         roundedLineCap: Boolean,
         color: Int
     ): LineLayer {
-        val routeLineColorExpressions =
-            getRouteLineColorExpressions(
-                color,
-                listOf(),
-                RouteStyleDescriptor::lineColor
-            )
-
         return buildPrimaryRouteRelatedLayer(
             RouteLayerConstants.PRIMARY_ROUTE_TRAIL_LAYER_ID,
             style,
             roundedLineCap,
-            routeLineColorExpressions
+            color
         )
     }
 
@@ -89,7 +72,7 @@ internal class MapboxRouteLayerProvider(
         layerId: String,
         style: Style,
         roundedLineCap: Boolean,
-        routeLineColorExpressions: List<Expression>
+        color: Int
     ): LineLayer {
         return initializeRouteLayer(
             style,
@@ -97,7 +80,7 @@ internal class MapboxRouteLayerProvider(
             layerId,
             RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID,
             routeLineScaleExpression,
-            routeLineColorExpressions
+            color
         )
     }
 
@@ -106,19 +89,13 @@ internal class MapboxRouteLayerProvider(
         roundedLineCap: Boolean,
         color: Int
     ): LineLayer {
-        val routeLineColorExpressions =
-            getRouteLineColorExpressions(
-                color,
-                routeStyleDescriptors,
-                RouteStyleDescriptor::lineColor
-            )
         return initializeRouteLayer(
             style,
             roundedLineCap,
             RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
             RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID,
             routeTrafficLineScaleExpression,
-            routeLineColorExpressions
+            color
         )
     }
 
@@ -126,16 +103,10 @@ internal class MapboxRouteLayerProvider(
         style: Style,
         color: Int
     ): LineLayer {
-        val routeLineColorExpressions =
-            getRouteLineColorExpressions(
-                color,
-                routeStyleDescriptors,
-                RouteStyleDescriptor::lineCasingColor
-            )
         return buildPrimaryRouteCasingRelatedLayer(
             RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
             style,
-            routeLineColorExpressions
+            color
         )
     }
 
@@ -143,23 +114,17 @@ internal class MapboxRouteLayerProvider(
         style: Style,
         color: Int
     ): LineLayer {
-        val routeLineColorExpressions =
-            getRouteLineColorExpressions(
-                color,
-                listOf(),
-                RouteStyleDescriptor::lineCasingColor
-            )
         return buildPrimaryRouteCasingRelatedLayer(
             RouteLayerConstants.PRIMARY_ROUTE_CASING_TRAIL_LAYER_ID,
             style,
-            routeLineColorExpressions
+            color
         )
     }
 
     private fun buildPrimaryRouteCasingRelatedLayer(
         layerId: String,
         style: Style,
-        routeLineColorExpressions: List<Expression>
+        color: Int
     ): LineLayer {
         return initializeRouteLayer(
             style,
@@ -167,7 +132,7 @@ internal class MapboxRouteLayerProvider(
             layerId,
             RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID,
             routeCasingLineScaleExpression,
-            routeLineColorExpressions
+            color
         )
     }
 
@@ -176,13 +141,6 @@ internal class MapboxRouteLayerProvider(
         roundedLineCap: Boolean,
         color: Int
     ): List<LineLayer> {
-        val routeLineColorExpressions =
-            getRouteLineColorExpressions(
-                color,
-                routeStyleDescriptors,
-                RouteStyleDescriptor::lineColor
-            )
-
         return listOf(
             initializeRouteLayer(
                 style,
@@ -190,7 +148,7 @@ internal class MapboxRouteLayerProvider(
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
                 alternativeRouteLineScaleExpression,
-                routeLineColorExpressions
+                color
             ),
             initializeRouteLayer(
                 style,
@@ -198,7 +156,7 @@ internal class MapboxRouteLayerProvider(
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
                 alternativeRouteLineScaleExpression,
-                routeLineColorExpressions
+                color
             )
         )
     }
@@ -207,13 +165,6 @@ internal class MapboxRouteLayerProvider(
         style: Style,
         color: Int
     ): List<LineLayer> {
-        val routeLineColorExpressions =
-            getRouteLineColorExpressions(
-                color,
-                routeStyleDescriptors,
-                RouteStyleDescriptor::lineCasingColor
-            )
-
         return listOf(
             initializeRouteLayer(
                 style,
@@ -221,7 +172,7 @@ internal class MapboxRouteLayerProvider(
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
                 alternativeRouteCasingLineScaleExpression,
-                routeLineColorExpressions
+                color
             ),
             initializeRouteLayer(
                 style,
@@ -229,7 +180,7 @@ internal class MapboxRouteLayerProvider(
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID,
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
                 alternativeRouteCasingLineScaleExpression,
-                routeLineColorExpressions
+                color
             )
         )
     }
@@ -239,13 +190,6 @@ internal class MapboxRouteLayerProvider(
         roundedLineCap: Boolean,
         color: Int
     ): List<LineLayer> {
-        val routeLineColorExpressions =
-            getRouteLineColorExpressions(
-                color,
-                routeStyleDescriptors,
-                RouteStyleDescriptor::lineColor
-            )
-
         return listOf(
             initializeRouteLayer(
                 style,
@@ -253,7 +197,7 @@ internal class MapboxRouteLayerProvider(
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
                 alternativeRouteTrafficLineScaleExpression,
-                routeLineColorExpressions
+                color
             ),
             initializeRouteLayer(
                 style,
@@ -261,7 +205,7 @@ internal class MapboxRouteLayerProvider(
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
                 alternativeRouteTrafficLineScaleExpression,
-                routeLineColorExpressions
+                color
             )
         )
     }
@@ -347,7 +291,7 @@ internal class MapboxRouteLayerProvider(
         layerId: String,
         layerSourceId: String,
         lineWidthExpression: Expression,
-        colorExpressions: List<Expression>
+        lineColor: Int
     ): LineLayer {
         if (style.styleLayerExists(layerId)) {
             style.removeStyleLayer(layerId)
@@ -367,8 +311,6 @@ internal class MapboxRouteLayerProvider(
             .lineCap(lineCapValue)
             .lineJoin(lineJoinValue)
             .lineWidth(lineWidthExpression)
-            .lineColor(
-                switchCase(*colorExpressions.toTypedArray())
-            )
+            .lineColor(lineColor)
     }
 }

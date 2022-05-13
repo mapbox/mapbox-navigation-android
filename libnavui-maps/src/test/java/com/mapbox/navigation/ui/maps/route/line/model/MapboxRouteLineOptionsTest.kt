@@ -68,7 +68,7 @@ class MapboxRouteLineOptionsTest {
             .withRouteStyleDescriptors(routeStyleDescriptors)
             .build()
 
-        assertEquals(routeStyleDescriptors, options.routeLayerProvider.routeStyleDescriptors)
+        assertEquals(routeStyleDescriptors, options.routeStyleDescriptors)
     }
 
     @Test
@@ -180,7 +180,7 @@ class MapboxRouteLineOptionsTest {
         assertEquals("someLayerId", options.routeLineBelowLayerId)
         assertNotNull(options.vanishingRouteLine)
         assertEquals(.111, options.tolerance, 0.0)
-        assertEquals(routeStyleDescriptors, options.routeLayerProvider.routeStyleDescriptors)
+        assertEquals(routeStyleDescriptors, options.routeStyleDescriptors)
         assertTrue(options.displayRestrictedRoadSections)
         assertTrue(options.styleInactiveRouteLegsIndependently)
         assertTrue(options.displaySoftGradientForTraffic)

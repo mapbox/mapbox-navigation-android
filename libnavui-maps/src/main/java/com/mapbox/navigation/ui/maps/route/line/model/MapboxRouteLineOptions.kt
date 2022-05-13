@@ -17,6 +17,7 @@ import kotlin.math.abs
  *
  * @param resourceProvider an instance of RouteLineResources
  * @param routeLayerProvider an instance of RouteLayerProvider
+ * @param routeStyleDescriptors a collection of [RouteStyleDescriptor] objects
  * @param originIcon the drawable for representing the origin icon
  * @param destinationIcon the drawable for representing the destination icon
  * @param routeLineBelowLayerId determines the elevation of the route layers
@@ -40,6 +41,7 @@ import kotlin.math.abs
 class MapboxRouteLineOptions private constructor(
     val resourceProvider: RouteLineResources,
     internal val routeLayerProvider: MapboxRouteLayerProvider,
+    val routeStyleDescriptors: List<RouteStyleDescriptor>,
     val originIcon: Drawable,
     val destinationIcon: Drawable,
     val routeLineBelowLayerId: String?,
@@ -67,7 +69,7 @@ class MapboxRouteLineOptions private constructor(
             context,
             resourceProvider,
             routeLineBelowLayerId,
-            routeLayerProvider.routeStyleDescriptors,
+            routeStyleDescriptors,
             vanishingRouteLineEnabled,
             tolerance,
             displayRestrictedRoadSections,
@@ -372,7 +374,6 @@ class MapboxRouteLineOptions private constructor(
                 ?: RouteLineResources.Builder().build()
 
             val routeLineLayerProvider = MapboxRouteLayerProvider(
-                routeStyleDescriptors,
                 resourceProvider.routeLineScaleExpression,
                 resourceProvider.routeCasingLineScaleExpression,
                 resourceProvider.routeTrafficLineScaleExpression,
@@ -400,6 +401,7 @@ class MapboxRouteLineOptions private constructor(
             return MapboxRouteLineOptions(
                 resourceProvider,
                 routeLineLayerProvider,
+                routeStyleDescriptors,
                 originIcon!!,
                 destinationIcon!!,
                 routeLineBelowLayerId,

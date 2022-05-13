@@ -848,6 +848,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public android.graphics.drawable.Drawable getOriginIcon();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources getResourceProvider();
     method public String? getRouteLineBelowLayerId();
+    method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor> getRouteStyleDescriptors();
     method public double getSoftGradientTransition();
     method public boolean getStyleInactiveRouteLegsIndependently();
     method public double getTolerance();
@@ -862,6 +863,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final android.graphics.drawable.Drawable originIcon;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources resourceProvider;
     property public final String? routeLineBelowLayerId;
+    property public final java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor> routeStyleDescriptors;
     property public final double softGradientTransition;
     property public final boolean styleInactiveRouteLegsIndependently;
     property public final double tolerance;

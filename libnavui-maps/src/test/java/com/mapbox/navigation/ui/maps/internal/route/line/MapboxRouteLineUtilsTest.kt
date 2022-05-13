@@ -9,6 +9,8 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.Logger
 import com.mapbox.core.constants.Constants
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.Style
@@ -259,27 +261,6 @@ class MapboxRouteLineUtilsTest {
         )
 
         assertEquals(0.0000017145850113848236, result, 0.0)
-    }
-
-    @Test
-    fun getRouteLineColorExpressions() {
-        val blueLineDescriptor = RouteStyleDescriptor("blueLine", 1, 3)
-        val redLineDescriptor = RouteStyleDescriptor("redLine", 2, 4)
-
-        val result = MapboxRouteLineUtils.getRouteLineColorExpressions(
-            7,
-            listOf(blueLineDescriptor, redLineDescriptor),
-            RouteStyleDescriptor::lineColor
-        )
-
-        assertEquals(7, result.size)
-        assertEquals("[==, [get, mapboxDescriptorPlaceHolderUnused], true]", result[0].toString())
-        assertEquals("[rgba, 0.0, 0.0, 7.0, 0.0]", result[1].toString())
-        assertEquals("[==, [get, blueLine], true]", result[2].toString())
-        assertEquals("[rgba, 0.0, 0.0, 1.0, 0.0]", result[3].toString())
-        assertEquals("[==, [get, redLine], true]", result[4].toString())
-        assertEquals("[rgba, 0.0, 0.0, 2.0, 0.0]", result[5].toString())
-        assertEquals("[rgba, 0.0, 0.0, 7.0, 0.0]", result[6].toString())
     }
 
     @Test
@@ -1729,6 +1710,179 @@ class MapboxRouteLineUtilsTest {
 
         assertEquals(0, result.size)
         unmockkStatic(Logger::class)
+    }
+
+    @Test
+    fun `featureCollectionHasProperty when FeatureCollection is null`() {
+        val result = MapboxRouteLineUtils.featureCollectionHasProperty(
+            null,
+            0,
+            ""
+        )
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `featureCollectionHasProperty when features null`() {
+        val mockFeatureCollection = mockk<FeatureCollection> {
+            every { features() } returns null
+        }
+        val result = MapboxRouteLineUtils.featureCollectionHasProperty(
+            mockFeatureCollection,
+            0,
+            ""
+        )
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `featureCollectionHasProperty when features empty`() {
+        val mockFeatureCollection = mockk<FeatureCollection> {
+            every { features() } returns listOf()
+        }
+        val result = MapboxRouteLineUtils.featureCollectionHasProperty(
+            mockFeatureCollection,
+            0,
+            ""
+        )
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `featureCollectionHasProperty when index equal to features size`() {
+        val mockFeatureCollection = mockk<FeatureCollection> {
+            every { features() } returns listOf(mockk())
+        }
+        val result = MapboxRouteLineUtils.featureCollectionHasProperty(
+            mockFeatureCollection,
+            1,
+            ""
+        )
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `featureCollectionHasProperty when index greater than features size`() {
+        val mockFeatureCollection = mockk<FeatureCollection> {
+            every { features() } returns listOf(mockk())
+        }
+        val result = MapboxRouteLineUtils.featureCollectionHasProperty(
+            mockFeatureCollection,
+            5,
+            ""
+        )
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `featureCollectionHasProperty when feature has property`() {
+        val mockFeature1 = mockk<Feature> {
+            every { hasNonNullValueForProperty("someProperty") } returns false
+        }
+        val mockFeature2 = mockk<Feature> {
+            every { hasNonNullValueForProperty("someProperty") } returns true
+        }
+        val mockFeatureCollection = mockk<FeatureCollection> {
+            every { features() } returns listOf(mockFeature1, mockFeature2)
+        }
+        val result = MapboxRouteLineUtils.featureCollectionHasProperty(
+            mockFeatureCollection,
+            0,
+            "someProperty"
+        )
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun getMatchingColors() {
+        val mockFeature1 = mockk<Feature> {
+            every { hasNonNullValueForProperty("someProperty") } returns false
+        }
+        val mockFeature2 = mockk<Feature> {
+            every { hasNonNullValueForProperty("someProperty") } returns true
+        }
+        val mockFeatureCollection = mockk<FeatureCollection> {
+            every { features() } returns listOf(mockFeature1, mockFeature2)
+        }
+        val styleDescriptors = listOf(RouteStyleDescriptor("someProperty", 1, 2))
+
+        val result = MapboxRouteLineUtils.getMatchingColors(
+            mockFeatureCollection,
+            styleDescriptors,
+            4,
+            5
+        )
+
+        assertEquals(1, result.first)
+        assertEquals(2, result.second)
+    }
+
+    @Test
+    fun `getMatchingColors when no match`() {
+        val mockFeature1 = mockk<Feature> {
+            every { hasNonNullValueForProperty("someProperty") } returns false
+        }
+        val mockFeature2 = mockk<Feature> {
+            every { hasNonNullValueForProperty("someProperty") } returns false
+        }
+        val mockFeatureCollection = mockk<FeatureCollection> {
+            every { features() } returns listOf(mockFeature1, mockFeature2)
+        }
+        val styleDescriptors = listOf(RouteStyleDescriptor("someProperty", 1, 2))
+
+        val result = MapboxRouteLineUtils.getMatchingColors(
+            mockFeatureCollection,
+            styleDescriptors,
+            4,
+            5
+        )
+
+        assertEquals(4, result.first)
+        assertEquals(5, result.second)
+    }
+
+    @Test
+    fun `getMatchingColors when feature collection is null`() {
+        val styleDescriptors = listOf(RouteStyleDescriptor("someProperty", 1, 2))
+
+        val result = MapboxRouteLineUtils.getMatchingColors(
+            null,
+            styleDescriptors,
+            4,
+            5
+        )
+
+        assertEquals(4, result.first)
+        assertEquals(5, result.second)
+    }
+
+    @Test
+    fun `getMatchingColors when route descriptors empty`() {
+        val mockFeature1 = mockk<Feature> {
+            every { hasNonNullValueForProperty("someProperty") } returns false
+        }
+        val mockFeature2 = mockk<Feature> {
+            every { hasNonNullValueForProperty("someProperty") } returns true
+        }
+        val mockFeatureCollection = mockk<FeatureCollection> {
+            every { features() } returns listOf(mockFeature1, mockFeature2)
+        }
+
+        val result = MapboxRouteLineUtils.getMatchingColors(
+            mockFeatureCollection,
+            listOf(),
+            4,
+            5
+        )
+
+        assertEquals(4, result.first)
+        assertEquals(5, result.second)
     }
 
     private fun <T> listElementsAreEqual(
