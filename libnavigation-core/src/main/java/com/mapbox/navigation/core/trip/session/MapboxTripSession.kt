@@ -38,7 +38,6 @@ import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
-import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteState
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -94,40 +93,7 @@ internal class MapboxTripSession(
                 routeProgress = null
                 updateLegIndexJob?.cancel()
                 updateRouteProgressJob?.cancel()
-
-                val processedAlternatives = mutableListOf<RouteAlternative>()
-                val updateRouteJob = threadController.getMainScopeAndRootJob().scope.launch(
-                    Dispatchers.Main.immediate
-                ) {
-                    logD("primary route update - starting", LOG_CATEGORY)
-                    val newPrimaryRoute = routes.firstOrNull()
-                    navigator.setPrimaryRoute(
-                        if (newPrimaryRoute != null) {
-                            Pair(newPrimaryRoute, legIndex)
-                        } else {
-                            null
-                        }
-                    )?.let {
-                        roadObjects = getRouteInitInfo(it)?.roadObjects ?: emptyList()
-                    }
-                    this@MapboxTripSession.primaryRoute = newPrimaryRoute
-                    logD("primary route update - finished", LOG_CATEGORY)
-                }
-                val updateAlternativesJob =
-                    threadController.getMainScopeAndRootJob().scope.launch(
-                        Dispatchers.Main.immediate
-                    ) {
-                        logD("alternative routes update - starting", LOG_CATEGORY)
-                        processedAlternatives.addAll(
-                            navigator.setAlternativeRoutes(routes.drop(1))
-                        )
-                        logD("alternative routes update - finished", LOG_CATEGORY)
-                    }
-                updateRouteJob.join()
-                updateAlternativesJob.join()
-                NativeSetRouteResult(
-                    nativeAlternatives = processedAlternatives
-                )
+                setRouteToNativeNavigator(routes, legIndex)
             }
             RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE -> {
                 NativeSetRouteResult(
@@ -153,6 +119,27 @@ internal class MapboxTripSession(
         isUpdatingRoute = false
         logD("routes update (reason: $reason) - finished", LOG_CATEGORY)
         return result
+    }
+
+    private suspend fun setRouteToNativeNavigator(
+        routes: List<NavigationRoute>,
+        legIndex: Int
+    ): NativeSetRouteResult {
+        logD("primary route update - starting", LOG_CATEGORY)
+        val newPrimaryRoute = routes.firstOrNull()
+        val processedAlternatives = navigator.setRoutes(
+            newPrimaryRoute,
+            legIndex,
+            routes.drop(1)
+        ).mapValue { it.alternatives }.getValueOrElse { emptyList() }
+        this@MapboxTripSession.primaryRoute = newPrimaryRoute
+        roadObjects = newPrimaryRoute?.let {
+            getRouteInitInfo(it.nativeRoute().routeInfo)?.roadObjects
+        } ?: emptyList()
+        logD("primary route update - finished", LOG_CATEGORY)
+        return NativeSetRouteResult(
+            nativeAlternatives = processedAlternatives
+        )
     }
 
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()

@@ -52,6 +52,7 @@ import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.TripSessionState
+import com.mapbox.navigation.core.trip.session.createSetRouteResult
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -1017,19 +1018,16 @@ class MapboxNavigationTest {
         every { tripSession.getRouteProgress() } returns routeProgress
         every { routeProgress.currentLegProgress } returns legProgress
         every { legProgress.legIndex } returns index
-        coEvery { navigator.setPrimaryRoute(any()) } answers {
-            assertEquals(primaryRoute, this.firstArg<Pair<NavigationRoute, Int>>().first)
-            mockk()
+        coEvery { navigator.setRoutes(any(), any(), any()) } answers {
+            createSetRouteResult()
         }
-        coEvery { navigator.setAlternativeRoutes(any()) } returns emptyList()
 
         mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
 
         fallbackObserverSlot.captured.onFallbackVersionsFound(listOf("version"))
 
         coVerify {
-            navigator.setPrimaryRoute(Pair(primaryRoute, index))
-            navigator.setAlternativeRoutes(listOf(alternativeRoute))
+            navigator.setRoutes(primaryRoute, index, listOf(alternativeRoute))
         }
     }
 

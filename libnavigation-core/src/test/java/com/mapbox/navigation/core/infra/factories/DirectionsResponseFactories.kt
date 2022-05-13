@@ -13,7 +13,7 @@ fun createNavigationRoute(
     directionsRoute: DirectionsRoute = createDirectionsRoute()
 ): NavigationRoute {
     requireNotNull(directionsRoute.routeOptions())
-    return mockk {
+    return mockk(relaxed = true) {
         every { this@mockk.routeOptions } returns directionsRoute.routeOptions()!!
         every { this@mockk.directionsRoute } returns directionsRoute
     }

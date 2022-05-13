@@ -268,9 +268,6 @@ class MapboxTripSessionNoSetupTest {
         coroutineRule.runBlockingTest {
             // arrange
             val nativeNavigator = createNativeNavigatorMock()
-            coEvery {
-                nativeNavigator.setPrimaryRoute(any())
-            } returns null
             val navigatorObservers = recordNavigatorObservers(nativeNavigator)
             val tripSession = buildTripSession(
                 nativeNavigator = nativeNavigator,
@@ -411,8 +408,8 @@ object StatusWithVoiceInstructionUpdateUtil {
 private fun createNativeNavigatorMock(): MapboxNativeNavigator {
     val nativeNavigator = mockk<MapboxNativeNavigator>(relaxed = true)
     coEvery {
-        nativeNavigator.setPrimaryRoute(any())
-    } returns mockk(relaxed = true)
+        nativeNavigator.setRoutes(any(), any(), any())
+    } returns createSetRouteResult()
     return nativeNavigator
 }
 

@@ -1550,16 +1550,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             )
             historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
 
-            directionsSession.routes.firstOrNull()?.let { route ->
-                navigator.setPrimaryRoute(
-                    Pair(
-                        route,
-                        tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0
-                    )
+            val routes = directionsSession.routes
+            if (routes.isNotEmpty()) {
+                navigator.setRoutes(
+                    primaryRoute = routes[0],
+                    startingLeg = tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0,
+                    alternatives = routes.drop(1)
                 )
-            }
-            directionsSession.routes.drop(1).let {
-                navigator.setAlternativeRoutes(it)
             }
         }
     }
