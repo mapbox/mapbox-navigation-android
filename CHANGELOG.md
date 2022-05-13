@@ -4,6 +4,10 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 
+## Mapbox Navigation SDK 2.5.0-rc.1 - May 13, 2022
+### Changelog
+[Changes between v2.5.0-beta.3 and v2.5.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.5.0-beta.3...v2.5.0-rc.1)
+
 #### Features
 - Added `TollCollection#name` field which contains a name of the toll collection point, when available. [#5784](https://github.com/mapbox/mapbox-navigation-android/pull/5784)
 - Added `ReplayRouteOptions#frequency` to allow adjusting the simulated location frequency. [#5724](https://github.com/mapbox/mapbox-navigation-android/pull/5724)
@@ -21,7 +25,16 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed feature to customize alternative route line colors based on route property. [#5802](https://github.com/mapbox/mapbox-navigation-android/pull/5802)
 
 #### Known issues
-- If your instrumentation tests use a mocked, prettified JSON response for Mapbox Directions services, you might need to remove white spaces from `"code": "Ok"` substring to `"code":"Ok"`.
+- Precision of the point at which the route is supposed to change behind the location indicator is negatively impacted for long routes. This can present itself by the route vanishing/changing in front the the location indicator.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.5.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.5.0))
+- Mapbox Navigation Native `v100.0.0`
+- Mapbox Core Common `v21.3.1`
+- Mapbox Java `v6.5.0-beta.5` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.5.0-beta.5))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
 
 ## Mapbox Navigation SDK 2.5.0-beta.3 - May 5, 2022
 ### Changelog
