@@ -10,11 +10,14 @@ Mapbox welcomes participation and contributions from everyone.
 - Added `MapboxReplayer#eventRealtimeOffset` to allow adjusting simulated locations timestamps for more accurate replays. [#5748](https://github.com/mapbox/mapbox-navigation-android/pull/5748)
 - Added `NavigationOptions.enableSensors` which enables analyzing data from sensors for better location prediction in case of a weak GPS signal [#5800](https://github.com/mapbox/mapbox-navigation-android/pull/5800)
 - Updated feature `route refresh`: now also supports refreshing `incidents` along the route found in `RouteLeg#incidents` and `RoadObjectsOnRouteObserver`. [#5749](https://github.com/mapbox/mapbox-navigation-android/pull/5749)
+- Added filling of `RestStop#name` using offline routing tiles in EHorizon [#5807](https://github.com/mapbox/mapbox-navigation-android/pull/5807)
 
 #### Bug fixes and improvements
 - Improved the accuracy of simulated locations speeds and the coordinate distance. This also fixed issues where the simulated driver would stall or jump near route turns. [#5724](https://github.com/mapbox/mapbox-navigation-android/pull/5724)
 - Fixed simulated route feasibility calculations. This will improve the accuracy of replay for curved roads. [#5748](https://github.com/mapbox/mapbox-navigation-android/pull/5748)
 - :warning: `VoiceInstructionsObserver` doesn't trigger the last available voice instruction on registration with `MapboxNavigation#registerVoiceInstructionsObserver` anymore. The invocations of `VoiceInstructionsObserver` are critical to drive the correct timing of the instructions to be read out, that's why delivering the outdated value on registration could have led to incorrect guidance instructions. Use `RouteProgress#voiceInstructions` to get the last available voice instruction.[#5746](https://github.com/mapbox/mapbox-navigation-android/issues/5746) 
+- Fixed absence of the first voice instruction [#5807](https://github.com/mapbox/mapbox-navigation-android/pull/5807)
+- Fixed parsing of 2xx response JSON from directions [#5807](https://github.com/mapbox/mapbox-navigation-android/pull/5807)
 
 #### Known issues
 - If your instrumentation tests use a mocked, prettified JSON response for Mapbox Directions services, you might need to remove white spaces from `"code": "Ok"` substring to `"code":"Ok"`.
