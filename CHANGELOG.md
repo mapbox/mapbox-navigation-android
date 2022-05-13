@@ -16,7 +16,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Improved the accuracy of simulated locations speeds and the coordinate distance. This also fixed issues where the simulated driver would stall or jump near route turns. [#5724](https://github.com/mapbox/mapbox-navigation-android/pull/5724)
 - Fixed simulated route feasibility calculations. This will improve the accuracy of replay for curved roads. [#5748](https://github.com/mapbox/mapbox-navigation-android/pull/5748)
 - :warning: `VoiceInstructionsObserver` doesn't trigger the last available voice instruction on registration with `MapboxNavigation#registerVoiceInstructionsObserver` anymore. The invocations of `VoiceInstructionsObserver` are critical to drive the correct timing of the instructions to be read out, that's why delivering the outdated value on registration could have led to incorrect guidance instructions. Use `RouteProgress#voiceInstructions` to get the last available voice instruction.[#5746](https://github.com/mapbox/mapbox-navigation-android/issues/5746) 
-- Fixed absence of the first voice instruction [#5807](https://github.com/mapbox/mapbox-navigation-android/pull/5807)
+- Fixed occasional absence of the first voice instruction. [#5807](https://github.com/mapbox/mapbox-navigation-android/pull/5807)
 - Fixed an issue where prettified Mapbox Directions service responses weren't parsed correctly. [#5807](https://github.com/mapbox/mapbox-navigation-android/pull/5807)
 
 #### Known issues
