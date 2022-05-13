@@ -10,7 +10,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Added `MapboxReplayer#eventRealtimeOffset` to allow adjusting simulated locations timestamps for more accurate replays. [#5748](https://github.com/mapbox/mapbox-navigation-android/pull/5748)
 - Added `NavigationOptions.enableSensors` which enables analyzing data from sensors for better location prediction in case of a weak GPS signal [#5800](https://github.com/mapbox/mapbox-navigation-android/pull/5800)
 - Updated feature `route refresh`: now also supports refreshing `incidents` along the route found in `RouteLeg#incidents` and `RoadObjectsOnRouteObserver`. [#5749](https://github.com/mapbox/mapbox-navigation-android/pull/5749)
-- Added filling of `RestStop#name` using offline routing tiles in EHorizon [#5807](https://github.com/mapbox/mapbox-navigation-android/pull/5807)
+- Added `RestStop#name` values for updates coming from EHorizon. [#5807](https://github.com/mapbox/mapbox-navigation-android/pull/5807)
 
 #### Bug fixes and improvements
 - Improved the accuracy of simulated locations speeds and the coordinate distance. This also fixed issues where the simulated driver would stall or jump near route turns. [#5724](https://github.com/mapbox/mapbox-navigation-android/pull/5724)
