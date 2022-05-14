@@ -30,22 +30,42 @@ internal class ReplayRouteBender {
         route: List<ReplayRouteLocation>
     ): List<ReplayRouteLocation> {
         val curveCount = route.size - 2
-        val pointCurves = Array(curveCount) {
-            mutableListOf<ReplayRouteLocation>()
-        }
+        val pointCurves = Array(curveCount) { mutableListOf<ReplayRouteLocation>() }
 
-        for (i in 1 until route.lastIndex) {
+        for (routeIndex in 1 until route.lastIndex) {
             val pointCurve = locationCurve(
-                route[i - 1].point,
-                route[i],
-                route[i + 1].point
+                route[routeIndex - 1].point,
+                route[routeIndex],
+                route[routeIndex + 1].point
             )
-            pointCurves[i - 1].addAll(pointCurve.map { ReplayRouteLocation(i, it) })
+            val curveDistance = TurfMeasurement.length(pointCurve, TurfConstants.UNIT_METERS)
+            pointCurves[routeIndex - 1].addAll(
+                pointCurve.mapIndexed { curveIndex, point ->
+                    val curvePosition = curveIndex / pointCurve.lastIndex.toDouble()
+                    ReplayRouteLocation(routeIndex, point).also { replayRouteLocation ->
+                        replayRouteLocation.curvePosition = curvePosition
+                        replayRouteLocation.speedMps = route[routeIndex].speedMps
+                        replayRouteLocation.distance = curveDistance * (1.0 - curvePosition)
+                    }
+                }
+            )
         }
 
         val bentRoute = mutableListOf<ReplayRouteLocation>()
         bentRoute.add(route.first())
-        pointCurves.forEach { it.forEach { item -> bentRoute.add(item) } }
+        pointCurves.forEach { pointCurve ->
+            bentRoute.last().distance = TurfMeasurement.distance(
+                bentRoute.last().point,
+                pointCurve.first().point,
+                TurfConstants.UNIT_METERS
+            )
+            pointCurve.forEach { item -> bentRoute.add(item) }
+        }
+        bentRoute.last().distance = TurfMeasurement.distance(
+            bentRoute.last().point,
+            route.last().point,
+            TurfConstants.UNIT_METERS
+        )
         bentRoute.add(route.last())
 
         return bentRoute

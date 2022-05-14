@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.replay.route
 
 import android.location.Location
+import androidx.annotation.FloatRange
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.replay.MapboxReplayer
 
@@ -22,7 +23,7 @@ internal data class ReplayRouteStep(
     val positionMeters: Double
 )
 
-internal class ReplayRouteLocation(
+internal class ReplayRouteLocation constructor(
     val routeIndex: Int?,
     val point: Point
 ) {
@@ -44,6 +45,13 @@ internal class ReplayRouteLocation(
     var bearing: Double = 0.0
     var distance: Double = 0.0
 
+    /**
+     * Represents
+     * Null when this position does not represent a curved location.
+     */
+    @FloatRange(from = 0.0, to = 1.0)
+    var curvePosition: Double? = null
+
     override fun toString(): String {
         return "ReplayRouteLocation(" +
             "routeIndex=$routeIndex, " +
@@ -51,6 +59,8 @@ internal class ReplayRouteLocation(
             "timeMillis=$timeMillis, " +
             "speedMps=$speedMps, " +
             "bearing=$bearing, " +
-            "distance=$distance)"
+            "distance=$distance," +
+            "curvePosition=$curvePosition" +
+            ")"
     }
 }

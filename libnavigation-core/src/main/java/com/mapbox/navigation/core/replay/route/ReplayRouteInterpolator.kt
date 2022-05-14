@@ -24,17 +24,16 @@ internal class ReplayRouteInterpolator {
         distinctPoints: List<Point>
     ): List<ReplayRouteLocation> {
         val smoothLocations = routeSmoother.smoothRoute(distinctPoints, SMOOTH_THRESHOLD_METERS)
-        val bentPoints = routeBender.bendRoute(smoothLocations)
-        createBearingProfile(bentPoints)
+        createSpeedForTurns(options, smoothLocations)
+        val bentLocations = routeBender.bendRoute(smoothLocations)
         println("smoothLocations ${MultiPoint.fromLngLats(smoothLocations.map { it.point }).toJson()}")
-        println("bentPoints ${MultiPoint.fromLngLats(bentPoints.map { it.point }).toJson()}")
-        bentPoints.first().speedMps = 0.0
-        bentPoints.last().speedMps = 0.0
+        println("bentPoints ${MultiPoint.fromLngLats(bentLocations.map { it.point }).toJson()}")
+        smoothLocations.first().speedMps = 0.0
+        smoothLocations.last().speedMps = 0.0
 
-        createSpeedForTurns(options, bentPoints)
-        reduceSpeedForDistances(options, bentPoints)
+        reduceSpeedForDistances(options, bentLocations)
 
-        return bentPoints
+        return bentLocations
     }
 
     /**
@@ -225,7 +224,7 @@ internal class ReplayRouteInterpolator {
 
     private fun createSpeedForTurns(
         options: ReplayRouteOptions,
-        smoothLocations: List<ReplayRouteLocation>
+        smoothLocations: List<ReplayRouteLocation>,
     ) {
         for (i in 1 until smoothLocations.lastIndex) {
             val segmentStart = smoothLocations[i - 1]

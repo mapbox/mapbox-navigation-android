@@ -34,7 +34,8 @@ internal class ReplayRouteDriver {
         if (distinctPoints.size < 2) return emptyList()
 
         val smoothLocations = routeInterpolator.createSpeedProfile(options, distinctPoints)
-        val replayRouteLocations = interpolateLocations(options, distinctPoints, smoothLocations)
+        val replayRouteLocations = interpolateLocations(options, smoothLocations)
+        routeInterpolator.createBearingProfile(replayRouteLocations)
         timeMillis += 1000.0 / options.frequency
 
         return replayRouteLocations
@@ -103,26 +104,42 @@ internal class ReplayRouteDriver {
 
     private fun interpolateLocations(
         options: ReplayRouteOptions,
-        distinctPoints: List<Point>,
         smoothLocations: List<ReplayRouteLocation>
     ): List<ReplayRouteLocation> {
         val replayRouteLocations = mutableListOf<ReplayRouteLocation>()
-        for (i in 0 until smoothLocations.lastIndex) {
-            val segmentStart = smoothLocations[i]
-            val segmentEnd = smoothLocations[i + 1]
-            val segmentRoute = routeSmoother.segmentRoute(
-                distinctPoints,
-                segmentStart.routeIndex!!,
-                segmentEnd.routeIndex!!
-            )
-            replayRouteLocations.addInterpolatedLocations(
-                options,
-                segmentRoute,
-                segmentStart,
-                segmentEnd
-            )
+        val entries = smoothLocations.groupBy { it.routeIndex }.toList()
+        entries.forEachIndexed { index, pair ->
+            if (pair.second.size == 1) {
+                // Individual locations
+                val (segmentStart, segmentEnd) = if (index < entries.lastIndex) {
+                    Pair(pair.second[0], entries[index + 1].second.first())
+                } else {
+                    Pair(entries[index - 1].second.last(), pair.second[0])
+                }
+                replayRouteLocations.addInterpolatedLocations(
+                    options,
+                    listOf(segmentStart.point, segmentEnd.point),
+                    segmentStart,
+                    segmentEnd,
+                )
+            } else {
+                // Curves
+                val maxSpeed = pair.second.map { it.speedMps }.maxOrNull() ?: options.maxSpeedMps
+                replayRouteLocations.addInterpolatedLocations(
+                    options.toBuilder().maxSpeedMps(maxSpeed).build(),
+                    pair.second.map { it.point },
+                    pair.second.first(),
+                    pair.second.last()
+                )
+                val (segmentStart, segmentEnd) = Pair(pair.second[0], entries[index + 1].second.first())
+                replayRouteLocations.addInterpolatedLocations(
+                    options,
+                    listOf(segmentStart.point, segmentEnd.point),
+                    segmentStart,
+                    segmentEnd,
+                )
+            }
         }
-
         return replayRouteLocations
     }
 
@@ -130,7 +147,7 @@ internal class ReplayRouteDriver {
         options: ReplayRouteOptions,
         segmentRoute: List<Point>,
         segmentStart: ReplayRouteLocation,
-        segmentEnd: ReplayRouteLocation
+        segmentEnd: ReplayRouteLocation,
     ) {
         val segmentDistance = TurfMeasurement.length(segmentRoute, TurfConstants.UNIT_METERS)
 
@@ -138,7 +155,7 @@ internal class ReplayRouteDriver {
             options,
             segmentStart.speedMps,
             segmentEnd.speedMps,
-            segmentDistance
+            segmentDistance,
         )
 
         if (isNotEmpty()) removeLast()
