@@ -560,8 +560,16 @@ jobs:
   codecov-upload:
     executor: ndk-r22-latest-executor
     steps:
-      - read-workspace
-      - codecov-upload
+      - when:
+          condition:
+            not:
+              matches:
+                pattern: "^add-changelog.*"
+                value: << pipeline.git.branch >>
+          steps:
+            - read-workspace
+            - codecov-upload
+      - run: exit 0
 
   unit-tests-androidauto:
     executor: ndk-r22-latest-executor
