@@ -87,15 +87,17 @@ workflows:
           requires:
             - prepare-and-assemble
       - androidauto-test
+      - codecov-upload:
+          requires:
+            - unit-tests-ui
+            - unit-tests-core
+  metrics:
+    jobs:
       - mobile-metrics-dry-run:
           type: approval
       - mobile-metrics-benchmarks:
           requires:
             - mobile-metrics-dry-run
-      - codecov-upload:
-          requires:
-            - unit-tests-ui
-            - unit-tests-core
 
 #------------------------------
 #---------- COMMANDS ----------
