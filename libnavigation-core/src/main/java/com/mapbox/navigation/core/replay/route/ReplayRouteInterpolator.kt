@@ -206,7 +206,7 @@ internal class ReplayRouteInterpolator {
      */
     fun createBearingProfile(replayRouteLocations: List<ReplayRouteLocation>) {
         if (replayRouteLocations.size < 2) return
-        val lookAhead = 2
+        val lookAhead = 1
         var bearing = TurfMeasurement.bearing(
             replayRouteLocations[0].point,
             replayRouteLocations[1].point
@@ -288,7 +288,7 @@ internal class ReplayRouteInterpolator {
          * measurement is the centripetal distance the driver must travel before the next
          * significant route edge.
          */
-        private const val SMOOTH_THRESHOLD_METERS = 1.5
+        private const val SMOOTH_THRESHOLD_METERS = 0.5
 
         /*
          * The road curvature used to determine

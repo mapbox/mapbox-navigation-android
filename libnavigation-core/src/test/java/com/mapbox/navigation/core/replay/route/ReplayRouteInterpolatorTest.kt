@@ -348,7 +348,7 @@ class ReplayRouteInterpolatorTest {
         val speedProfile = routeInterpolator.createSpeedProfile(options, coordinates)
 
         speedProfile.subList(1, speedProfile.lastIndex - 2).forEach {
-            assertTrue(it.speedMps > 20.0)
+            assertTrue("${it.speedMps} > 20.0", it.speedMps > 20.0)
         }
     }
 }

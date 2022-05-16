@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.replay.route
 
+import com.mapbox.geojson.MultiPoint
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
@@ -38,17 +39,22 @@ internal class ReplayRouteBender {
                 route[routeIndex],
                 route[routeIndex + 1].point
             )
-            val curveDistance = TurfMeasurement.length(pointCurve, TurfConstants.UNIT_METERS)
-            pointCurves[routeIndex - 1].addAll(
-                pointCurve.mapIndexed { curveIndex, point ->
-                    val curvePosition = curveIndex / pointCurve.lastIndex.toDouble()
-                    ReplayRouteLocation(routeIndex, point).also { replayRouteLocation ->
-                        replayRouteLocation.curvePosition = curvePosition
-                        replayRouteLocation.speedMps = route[routeIndex].speedMps
-                        replayRouteLocation.distance = curveDistance * (1.0 - curvePosition)
+            if (pointCurve.size > 1) {
+                val curveDistance = TurfMeasurement.length(pointCurve, TurfConstants.UNIT_METERS)
+                pointCurves[routeIndex - 1].addAll(
+                    pointCurve.mapIndexed { curveIndex, point ->
+                        val curvePosition = curveIndex / pointCurve.lastIndex.toDouble()
+                        val routeLocation = route[routeIndex]
+                        ReplayRouteLocation(routeLocation.routeIndex, point).also { replayRouteLocation ->
+                            replayRouteLocation.curvePosition = curvePosition
+                            replayRouteLocation.speedMps = routeLocation.speedMps
+                            replayRouteLocation.distance = curveDistance * (1.0 - curvePosition)
+                        }
                     }
-                }
-            )
+                )
+            } else {
+                pointCurves[routeIndex - 1].add(route[routeIndex])
+            }
         }
 
         val bentRoute = mutableListOf<ReplayRouteLocation>()
@@ -87,21 +93,16 @@ internal class ReplayRouteBender {
         val startDistance = TurfMeasurement.distance(start, mid, TurfConstants.UNIT_METERS)
         val endDistance = TurfMeasurement.distance(mid, end, TurfConstants.UNIT_METERS)
 
-        val startLength = min(startDistance - 0.1, MAX_CURVE_LENGTH_METERS)
+        val startLength = min(startDistance * 0.40, MAX_CURVE_LENGTH_METERS)
         val startMultiplier = 1.0 - (startLength / startDistance)
         val startPoint = pointAlong(start, mid, startMultiplier * startDistance)
 
-        val endLength = min(endDistance - 0.1, MAX_CURVE_LENGTH_METERS)
+        val endLength = min(endDistance * 0.40, MAX_CURVE_LENGTH_METERS)
         val endMultiplier = (endLength / endDistance)
         val endPoint = pointAlong(mid, end, endMultiplier * endDistance)
 
         val granularity = if (midReplayLocation.speedMps < 5.0) 7 else 5
-        val curve = curve(granularity, startPoint, mid, endPoint)
-
-        val curveLength = TurfMeasurement.length(curve, TurfConstants.UNIT_METERS)
-        println("locationCurve $curveLength ${midReplayLocation.speedMps} $deltaBearing")
-
-        return curve
+        return curve(granularity, startPoint, mid, endPoint)
     }
 
     private fun curve(
@@ -120,7 +121,6 @@ internal class ReplayRouteBender {
             endPoint,
             TurfConstants.UNIT_METERS
         )
-
         val granularity = points - 1
         val curvePoints = mutableListOf<Point>()
         for (i in 0..granularity) {
@@ -140,6 +140,8 @@ internal class ReplayRouteBender {
             curvePoints.add(curvePoint)
         }
 
+        println("startToMidDistance: $startToMidDistance midToEndDistance: $midToEndDistance granularity: $granularity")
+        println("curve: ${MultiPoint.fromLngLats(curvePoints).toJson()}")
         return curvePoints
     }
 

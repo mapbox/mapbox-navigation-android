@@ -3,7 +3,6 @@ package com.mapbox.navigation.core.replay.route
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.RouteLeg
-import com.mapbox.geojson.LineString
 import com.mapbox.geojson.MultiPoint
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
@@ -131,7 +130,7 @@ internal class ReplayRouteDriver {
                     pair.second.first(),
                     pair.second.last()
                 )
-                val (segmentStart, segmentEnd) = Pair(pair.second[0], entries[index + 1].second.first())
+                val (segmentStart, segmentEnd) = Pair(pair.second.last(), entries[index + 1].second.first())
                 replayRouteLocations.addInterpolatedLocations(
                     options,
                     listOf(segmentStart.point, segmentEnd.point),

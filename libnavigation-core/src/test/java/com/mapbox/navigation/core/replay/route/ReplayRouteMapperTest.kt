@@ -138,7 +138,8 @@ class ReplayRouteMapperTest {
             .filterIsInstance<ReplayEventUpdateLocation>().map {
                 it.location.speed ?: 0.0
             }
-            .removeAccelerationAndBrakingSpeedUpdates()
+        println(speedUpdatesAmongARoute.joinToString())
+        speedUpdatesAmongARoute.removeAccelerationAndBrakingSpeedUpdates()
         val minSpeed = speedUpdatesAmongARoute.minOf { it }
         val maxSpeed = speedUpdatesAmongARoute.maxOf { it }
         assertTrue(

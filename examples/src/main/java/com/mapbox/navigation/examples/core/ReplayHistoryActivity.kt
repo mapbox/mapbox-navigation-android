@@ -27,7 +27,11 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
+import com.mapbox.navigation.core.replay.history.ReplayEventLocation
+import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.history.ReplaySetNavigationRoute
+import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.replay.route.ReplayRouteOptions
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -50,11 +54,13 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.Collections
+import kotlin.math.log
 
 private const val DEFAULT_INITIAL_ZOOM = 15.0
 
@@ -161,6 +167,9 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        mapboxNavigation.historyRecorder.stopRecording {
+            logD("save history file $it", "kyle_debug")
+        }
         routeLineApi.cancel()
         routeLineView.cancel()
         mapboxReplayer.finish()
@@ -338,8 +347,11 @@ class ReplayHistoryActivity : AppCompatActivity() {
         loadNavigationJob = CoroutineScope(Dispatchers.Main).launch {
             val events = historyFileLoader
                 .loadReplayHistory(this@ReplayHistoryActivity)
+            val firstLocation = events.filterIsInstance<ReplayEventUpdateLocation>().first()
+            val firstSetRoute = events.filterIsInstance<ReplaySetNavigationRoute>()
+                .first { it.route != null }
             mapboxReplayer.clearEvents()
-            mapboxReplayer.pushEvents(events)
+            mapboxReplayer.pushEvents(listOf(firstLocation, firstSetRoute))
             binding.playReplay.visibility = View.VISIBLE
             mapboxNavigation.resetTripSession()
             mapboxNavigation.setRoutes(emptyList())
@@ -397,8 +409,18 @@ class ReplayHistoryActivity : AppCompatActivity() {
     }
 
     private fun setRoute(replaySetRoute: ReplaySetNavigationRoute) {
+        logD("setRoute ${replaySetRoute.route?.directionsRoute?.geometry()}", "kyle_debug")
         replaySetRoute.route?.let { directionRoute ->
+            directionRoute.directionsRoute.geometry()?.let { geometry ->
+                mapboxReplayer.clearEvents()
+                val events = ReplayRouteMapper().mapGeometry(geometry)
+                mapboxReplayer.pushEvents(events)
+                mapboxReplayer.play()
+            }
+
             mapboxNavigation.setNavigationRoutes(Collections.singletonList(directionRoute))
+            mapboxNavigation.historyRecorder.startRecording()
         }
     }
 }
+
