@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="mapbox_route_overview">Översikt</string>
-</resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="mapbox_route_overview" tools:ignore="MissingTranslation">Översikt</string>
+    </resources>

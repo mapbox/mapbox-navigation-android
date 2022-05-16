@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Time formatting -->
-    <plurals name="mapbox_number_of_days">
+    <plurals name="mapbox_number_of_days" tools:ignore="MissingTranslation">
         <item quantity="one">day</item>
         <item quantity="other">days</item>
     </plurals>

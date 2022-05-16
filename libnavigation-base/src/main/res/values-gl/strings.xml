@@ -1,16 +1,16 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Time formatting -->
-    <plurals name="mapbox_number_of_days">
+    <plurals name="mapbox_number_of_days" tools:ignore="MissingTranslation">
         <item quantity="one">día</item>
         <item quantity="other">días</item>
     </plurals>
     <!-- Hour -->
-    <string name="mapbox_unit_hr">h</string>
+    <string name="mapbox_unit_hr" tools:ignore="MissingTranslation">h</string>
     <!-- Minute -->
-    <string name="mapbox_unit_min">min</string>
+    <string name="mapbox_unit_min" tools:ignore="MissingTranslation">min</string>
 
     <!-- Notification Strings -->
     <string name="mapbox_end_navigation">Remata a navegación</string>
-    <string name="mapbox_eta_format">%s ETA</string>
+    <string name="mapbox_eta_format" tools:ignore="MissingTranslation">%s ETA</string>
 </resources>
