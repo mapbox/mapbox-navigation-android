@@ -529,6 +529,7 @@ jobs:
 
   unit-tests-core:
     executor: ndk-r22-latest-executor
+    resource_class: medium+
     steps:
       - when:
           condition:
@@ -544,6 +545,7 @@ jobs:
 
   unit-tests-ui:
     executor: ndk-r22-latest-executor
+    resource_class: medium+
     steps:
       - when:
           condition:
