@@ -21,6 +21,7 @@ import com.mapbox.androidauto.car.map.widgets.logo.CarLogoSurfaceRenderer
 import com.mapbox.androidauto.car.permissions.NeedsLocationPermissionsScreen
 import com.mapbox.androidauto.deeplink.GeoDeeplinkNavigateAction
 import com.mapbox.androidauto.logAndroidAuto
+import com.mapbox.androidauto.notification.CarNotificationInterceptor
 import com.mapbox.maps.MapInitOptions
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
@@ -41,6 +42,9 @@ class MainCarSession : Session() {
     private lateinit var mapboxCarMap: MapboxCarMap
     private lateinit var mapboxNavigationManager: MapboxCarNavigationManager
     private val carMapStyleLoader = MainCarMapLoader()
+    private val notificationInterceptor by lazy {
+        CarNotificationInterceptor(carContext, MainCarAppService::class.java)
+    }
 
     init {
         val logoSurfaceRenderer = CarLogoSurfaceRenderer()
@@ -72,6 +76,7 @@ class MainCarSession : Session() {
                         mainScreenManager.observeCarAppState()
                     }
                 }
+                MapboxNavigationApp.registerObserver(notificationInterceptor)
             }
 
             override fun onResume(owner: LifecycleOwner) {
@@ -95,6 +100,7 @@ class MainCarSession : Session() {
                 MapboxNavigationApp.unregisterObserver(mapboxNavigationManager)
                 mapboxCarMap.unregisterObserver(carMapStyleLoader)
                 mainCarContext = null
+                MapboxNavigationApp.unregisterObserver(notificationInterceptor)
             }
         })
 
