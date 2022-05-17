@@ -6,6 +6,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.ViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.CoroutineScope
@@ -31,11 +32,11 @@ import java.util.concurrent.Flow
 @UiThread
 class ViewLifecycleRegistry(
     view: View,
-    localLifecycleOwner: LifecycleOwner,
-    hostingLifecycleOwner: LifecycleOwner,
+    localLifecycleOwner: LifecycleOwner
 ) : LifecycleRegistry(localLifecycleOwner) {
 
-    private var isAttached = view.isAttachedToWindow
+    private var isAttached = false
+    private var hostingLifecycleOwner: LifecycleOwner? = null
 
     private val hostingLifecycleObserver = LifecycleEventObserver { _, event ->
         val isAtLeastCreated = currentState.isAtLeast(State.CREATED)
@@ -45,22 +46,45 @@ class ViewLifecycleRegistry(
     }
 
     private val attachStateChangeListener = object : View.OnAttachStateChangeListener {
-        override fun onViewAttachedToWindow(p0: View?) {
-            currentState = hostingLifecycleOwner.lifecycle.currentState
-            isAttached = true
+        override fun onViewAttachedToWindow(p0: View) {
+            doOnAttached(p0)
         }
 
-        override fun onViewDetachedFromWindow(p0: View?) {
-            isAttached = false
-            if (hostingLifecycleOwner.lifecycle.currentState.isAtLeast(State.STARTED)) {
-                currentState = State.CREATED
-            }
+        override fun onViewDetachedFromWindow(p0: View) {
+            doOnDetached()
         }
     }
 
     init {
-        hostingLifecycleOwner.lifecycle.addObserver(hostingLifecycleObserver)
         view.addOnAttachStateChangeListener(attachStateChangeListener)
+        if (view.isAttachedToWindow) {
+            doOnAttached(view)
+        }
+    }
+
+    private fun doOnAttached(view: View) {
+        if (isAttached) return
+
+        hostingLifecycleOwner?.lifecycle?.removeObserver(hostingLifecycleObserver)
+
+        val hostingLifecycleOwner = ViewTreeLifecycleOwner.get(view)
+            ?: throw IllegalStateException(
+                "Please ensure that the hosting activity/fragment is a valid LifecycleOwner"
+            )
+        currentState = hostingLifecycleOwner.lifecycle.currentState
+        hostingLifecycleOwner.lifecycle.addObserver(hostingLifecycleObserver)
+        this@ViewLifecycleRegistry.hostingLifecycleOwner = hostingLifecycleOwner
+        isAttached = true
+    }
+
+    private fun doOnDetached() {
+        if (!isAttached) return
+
+        isAttached = false
+        val hostingLifecycleOwner: LifecycleOwner = checkNotNull(hostingLifecycleOwner)
+        if (hostingLifecycleOwner.lifecycle.currentState.isAtLeast(State.CREATED)) {
+            currentState = State.CREATED
+        }
     }
 }
 
