@@ -8,6 +8,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 #### Bug fixes and improvements
  - Remove extra arrival feedback options. [#5805](https://github.com/mapbox/mapbox-navigation-android/pull/5805)
+ - Fixed an issue when the first voice instruction was not played. [#5825](https://github.com/mapbox/mapbox-navigation-android/pull/5825)
 
 ## androidauto-v0.1.0 - May 05, 2022
 

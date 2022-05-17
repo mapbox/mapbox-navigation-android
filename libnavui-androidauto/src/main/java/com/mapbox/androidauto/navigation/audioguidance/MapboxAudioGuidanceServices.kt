@@ -18,5 +18,5 @@ interface MapboxAudioGuidanceServices {
         language: String,
     ): MapboxVoiceInstructionsPlayer
 
-    fun mapboxVoiceInstructions(mapboxNavigation: MapboxNavigation): MapboxVoiceInstructions
+    fun mapboxVoiceInstructions(): MapboxVoiceInstructions
 }

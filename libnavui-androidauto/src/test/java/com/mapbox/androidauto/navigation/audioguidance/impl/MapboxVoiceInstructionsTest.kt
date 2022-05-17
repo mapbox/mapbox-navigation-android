@@ -13,12 +13,10 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -31,7 +29,7 @@ class MapboxVoiceInstructionsTest {
     val coroutineRule = MainCoroutineRule()
 
     private val mapboxNavigation = mockk<MapboxNavigation>(relaxUnitFun = true)
-    private val carAppVoiceInstructions = MapboxVoiceInstructions(mapboxNavigation)
+    private val carAppVoiceInstructions = MapboxVoiceInstructions()
 
     @Test
     fun `should emit voice instruction`() = coroutineRule.runBlockingTest {
@@ -46,21 +44,24 @@ class MapboxVoiceInstructionsTest {
             }
             firstArg<RoutesObserver>().onRoutesChanged(result)
         }
-        every { mapboxNavigation.registerVoiceInstructionsObserver(any()) } answers {
-            val voiceInstructions = mockk<VoiceInstructions> {
-                every { announcement() } returns "Left on Broadway"
-            }
-            firstArg<VoiceInstructionsObserver>().onNewVoiceInstructions(voiceInstructions)
+        val observerSlot = slot<VoiceInstructionsObserver>()
+        every {
+            mapboxNavigation.registerVoiceInstructionsObserver(capture(observerSlot))
+        } just Runs
+        val voiceInstructions = mockk<VoiceInstructions> {
+            every { announcement() } returns "Left on Broadway"
         }
 
-        val state = carAppVoiceInstructions.voiceInstructions().take(3).toList()
+        carAppVoiceInstructions.registerObservers(mapboxNavigation)
+        val flow = carAppVoiceInstructions.voiceInstructions()
+        val initialInstruction = flow.first()
+        observerSlot.captured.onNewVoiceInstructions(voiceInstructions)
+        val updatedInstruction = flow.first()
 
-        // routesFlow() on start sends empty list to disable sound button  in FreeDrive
-        assertFalse(state[0].isPlayable)
-        assertEquals(null, state[0].voiceInstructions)
-        // voiceInstructionsFlow() sends null voiceInstruction before observer is fired
-        assertTrue(state[1].isPlayable)
-        assertEquals("Left on Broadway", state[2].voiceInstructions?.announcement())
+        // voiceInstructionsFlow has null voiceInstruction as initial state
+        assertTrue(initialInstruction.isPlayable)
+        assertEquals(null, initialInstruction.voiceInstructions)
+        assertEquals("Left on Broadway", updatedInstruction.voiceInstructions?.announcement())
     }
 
     @Test
@@ -76,26 +77,33 @@ class MapboxVoiceInstructionsTest {
             }
             firstArg<RoutesObserver>().onRoutesChanged(result)
         }
-        every { mapboxNavigation.registerVoiceInstructionsObserver(any()) } answers {
-            val firstVoiceInstructions = mockk<VoiceInstructions> {
-                every { announcement() } returns "Left on Broadway"
-            }
-            firstArg<VoiceInstructionsObserver>().onNewVoiceInstructions(firstVoiceInstructions)
-            val secondVoiceInstructions = mockk<VoiceInstructions> {
-                every { announcement() } returns "Right on Pennsylvania"
-            }
-            firstArg<VoiceInstructionsObserver>().onNewVoiceInstructions(secondVoiceInstructions)
+
+        val observerSlot = slot<VoiceInstructionsObserver>()
+        val firstVoiceInstructions = mockk<VoiceInstructions> {
+            every { announcement() } returns "Left on Broadway"
         }
+        val secondVoiceInstructions = mockk<VoiceInstructions> {
+            every { announcement() } returns "Right on Pennsylvania"
+        }
+        every {
+            mapboxNavigation.registerVoiceInstructionsObserver(capture(observerSlot))
+        } just Runs
 
-        val voiceInstruction = carAppVoiceInstructions.voiceInstructions().take(4).toList()
+        val flow = carAppVoiceInstructions.voiceInstructions()
+        val initialAnnouncement = flow.first().voiceInstructions?.announcement()
 
-        val actual = voiceInstruction.map { it.voiceInstructions?.announcement() }
-        // routesFlow() on start sends empty list to disable sound button  in FreeDrive
-        assertEquals(null, actual[0])
-        // voiceInstructionsFlow() sends null voiceInstruction before observer is fired
-        assertEquals(null, actual[1])
-        assertEquals("Left on Broadway", actual[2])
-        assertEquals("Right on Pennsylvania", actual[3])
+        carAppVoiceInstructions.registerObservers(mapboxNavigation)
+
+        observerSlot.captured.onNewVoiceInstructions(firstVoiceInstructions)
+        val firstAnnouncement = flow.first().voiceInstructions?.announcement()
+
+        observerSlot.captured.onNewVoiceInstructions(secondVoiceInstructions)
+        val secondAnnouncement = flow.first().voiceInstructions?.announcement()
+
+        // voiceInstructionsFlow has null voiceInstruction as initial state
+        assertEquals(null, initialAnnouncement)
+        assertEquals("Left on Broadway", firstAnnouncement)
+        assertEquals("Right on Pennsylvania", secondAnnouncement)
     }
 
     @Test
@@ -143,13 +151,14 @@ class MapboxVoiceInstructionsTest {
             firstArg<RoutesObserver>().onRoutesChanged(result)
         }
 
-        val state = carAppVoiceInstructions.voiceLanguage().take(3).toList()
+        val flow = carAppVoiceInstructions.voiceLanguage()
+        val initialInstruction = flow.first()
+        carAppVoiceInstructions.registerObservers(mapboxNavigation)
+        val updatedInstruction = flow.first()
 
         // routesFlow() on start sends empty list to disable sound button  in FreeDrive
-        assertEquals(null, state[0])
-        // voiceInstructionsFlow() sends null voiceInstruction before observer is fired
-        assertEquals(null, state[1])
-        assertEquals(language, state[2])
+        assertEquals(null, initialInstruction)
+        assertEquals(language, updatedInstruction)
     }
 
     @Test

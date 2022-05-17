@@ -38,7 +38,5 @@ class MapboxAudioGuidanceServicesImpl : MapboxAudioGuidanceServices {
         return MapboxVoiceInstructionsPlayer(applicationContext, accessToken, language)
     }
 
-    override fun mapboxVoiceInstructions(
-        mapboxNavigation: MapboxNavigation
-    ) = MapboxVoiceInstructions(mapboxNavigation)
+    override fun mapboxVoiceInstructions() = MapboxVoiceInstructions()
 }
