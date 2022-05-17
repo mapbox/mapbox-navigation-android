@@ -1,5 +1,7 @@
 package com.mapbox.navigation.utils.internal
 
+private const val NAV_SDK_CATEGORY = "nav-sdk"
+
 interface LoggerFrontend {
     fun logV(msg: String, category: String? = null)
     fun logD(msg: String, category: String? = null)
@@ -52,3 +54,6 @@ internal class MapboxCommonLoggerFrontend : LoggerFrontend {
         com.mapbox.common.Logger.w(NAV_SDK_CATEGORY, message)
     }
 }
+
+private fun createMessage(message: String, category: String?): String =
+    "${if (category != null) "[".plus(category).plus("] ") else ""}$message"
