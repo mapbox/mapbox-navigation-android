@@ -6,10 +6,13 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -32,6 +35,7 @@ import com.mapbox.navigation.dropin.internal.extensions.toComponentActivityRef
 import com.mapbox.navigation.dropin.internal.extensions.toLifecycleOwner
 import com.mapbox.navigation.dropin.internal.extensions.toViewModelStoreOwner
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
+import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
@@ -62,11 +66,26 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
  */
 @ExperimentalPreviewMapboxNavigationAPI
 @OptIn(ExperimentalCoroutinesApi::class)
-class NavigationView @JvmOverloads constructor(
+class NavigationView constructor(
     context: Context,
-    attrs: AttributeSet? = null,
-    accessToken: String = attrs.navigationViewAccessToken(context),
+    attrs: AttributeSet?,
+    accessToken: String,
+    hostingLifecycle: Lifecycle?,
+    viewModelStoreOwner: ViewModelStoreOwner?,
 ) : FrameLayout(context, attrs), LifecycleOwner {
+
+    @JvmOverloads constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+        accessToken: String = attrs.navigationViewAccessToken(context),
+        hostingFragment: Fragment? = null
+    ): this(
+        context,
+        attrs,
+        accessToken,
+        hostingFragment?.viewLifecycleOwner?.lifecycle,
+        hostingFragment
+    )
 
     private val binding: MapboxNavigationViewLayoutBinding =
         MapboxNavigationViewLayoutBinding.inflate(
@@ -74,14 +93,16 @@ class NavigationView @JvmOverloads constructor(
             this
         )
 
-    private val viewLifecycleRegistry: ViewLifecycleRegistry = ViewLifecycleRegistry(
+    private val lifecycle: Lifecycle = (hostingLifecycle ?: ViewLifecycleRegistry(
         view = this,
         localLifecycleOwner = this,
-        hostingLifecycleOwner = context.toLifecycleOwner(),
-    )
+        hostingLifecycleOwner =  context.toLifecycleOwner(),
+    )).also {
+        it.addObserver(LifecycleLogger(this@NavigationView.hashCode().toString()))
+    }
 
     private val viewModelProvider by lazy {
-        ViewModelProvider(context.toViewModelStoreOwner())
+        ViewModelProvider(viewModelStoreOwner ?: context.toViewModelStoreOwner())
     }
 
     private val viewModel: NavigationViewModel by lazyViewModel()
@@ -137,7 +158,7 @@ class NavigationView @JvmOverloads constructor(
     /**
      * Provides access to [ViewLifecycleRegistry]
      */
-    override fun getLifecycle(): Lifecycle = viewLifecycleRegistry
+    override fun getLifecycle(): Lifecycle = lifecycle
 
     /**
      * Customize the views by implementing your own [UIBinder] components.
@@ -171,3 +192,4 @@ class NavigationView @JvmOverloads constructor(
         viewModelProvider[T::class.java]
     }
 }
+

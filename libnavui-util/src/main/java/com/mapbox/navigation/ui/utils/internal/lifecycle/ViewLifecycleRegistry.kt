@@ -8,6 +8,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.Flow
@@ -46,11 +47,13 @@ class ViewLifecycleRegistry(
 
     private val attachStateChangeListener = object : View.OnAttachStateChangeListener {
         override fun onViewAttachedToWindow(p0: View?) {
+            logD("onViewAttachedToWindow ${p0.hashCode()}", "lifecycle_debug")
             currentState = hostingLifecycleOwner.lifecycle.currentState
             isAttached = true
         }
 
         override fun onViewDetachedFromWindow(p0: View?) {
+            logD("onViewDetachedFromWindow ${p0.hashCode()}", "lifecycle_debug")
             isAttached = false
             if (hostingLifecycleOwner.lifecycle.currentState.isAtLeast(State.STARTED)) {
                 currentState = State.CREATED
