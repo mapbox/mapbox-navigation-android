@@ -31,5 +31,7 @@
 
     <!-- Overview camera padding to ensure location puck and target pin are not clipped -->
     <dimen name="mapbox_camera_overview_padding_v">50dp</dimen>
+    <dimen name="mapbox_camera_overview_padding_landscape_v">30dp</dimen>
     <dimen name="mapbox_camera_overview_padding_h">50dp</dimen>
+    <dimen name="mapbox_camera_overview_padding_landscape_h">30dp</dimen>
 </resources>
