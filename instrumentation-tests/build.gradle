@@ -53,9 +53,11 @@ dependencies {
     implementation dependenciesList.androidXCore
     implementation dependenciesList.materialDesign
     implementation dependenciesList.androidXAppCompat
+    implementation dependenciesList.androidXCardView
     implementation dependenciesList.androidXConstraintLayout
-    implementation dependenciesList.androidXPreference
-    implementation dependenciesList.androidXLifecycleViewmodel
+    implementation dependenciesList.androidXFragment
+    implementation dependenciesList.androidXLifecycleLivedata
+    implementation dependenciesList.androidXLifecycleRuntime
 
     implementation dependenciesList.gmsLocation
 

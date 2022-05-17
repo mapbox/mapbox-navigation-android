@@ -51,6 +51,10 @@
             android:name=".view.MapboxNavigationViewFragmentActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             />
+        <activity
+            android:name=".view.NavigationViewFragmentLifecycleActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            />
 
         <activity android:name=".view.CustomAlternativeRouteColoringActivity"/>
 

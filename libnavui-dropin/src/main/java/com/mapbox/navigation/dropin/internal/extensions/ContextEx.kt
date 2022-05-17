@@ -6,7 +6,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import androidx.activity.ComponentActivity
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
 import com.mapbox.navigation.utils.internal.logW
 import java.lang.ref.WeakReference
@@ -17,14 +16,6 @@ internal tailrec fun Context.recursiveUnwrap(): Context =
     } else {
         this
     }
-
-internal fun Context.toLifecycleOwner(): LifecycleOwner {
-    val lifecycleOwner = this.recursiveUnwrap() as? LifecycleOwner
-    checkNotNull(lifecycleOwner) {
-        "Please ensure that the hosting Context is a valid LifecycleOwner"
-    }
-    return lifecycleOwner
-}
 
 internal fun Context.toViewModelStoreOwner(): ViewModelStoreOwner {
     val viewModelStoreOwner = this.recursiveUnwrap() as? ViewModelStoreOwner

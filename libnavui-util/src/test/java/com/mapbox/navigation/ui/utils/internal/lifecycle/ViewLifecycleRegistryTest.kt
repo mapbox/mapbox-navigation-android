@@ -5,21 +5,31 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewTreeLifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
+import org.junit.After
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
 class ViewLifecycleRegistryTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
+
+    @Before
+    fun setup() {
+        mockkStatic(ViewTreeLifecycleOwner::class)
+    }
 
     @Test
     fun `mirrors hosting lifecycles state when attached`() {
@@ -44,7 +54,7 @@ class ViewLifecycleRegistryTest {
     }
 
     @Test
-    fun `stops when detached and hosting lifecycle started`() {
+    fun `stops when detached and hosting lifecycle resumed`() {
         val hostingLifecycleOwner = generateHostingLifecycleOwner()
         val localLifecycleOwner = generateLocalLifecycleOwner(hostingLifecycleOwner)
         val lifecycleObserver = mockk<LifecycleEventObserver>(relaxUnitFun = true)
@@ -52,6 +62,27 @@ class ViewLifecycleRegistryTest {
         localLifecycleOwner.lifecycle.addObserver(lifecycleObserver)
         localLifecycleOwner.attach()
         hostingLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        localLifecycleOwner.detach()
+
+        verifyOrder {
+            lifecycleObserver.onStateChanged(localLifecycleOwner, Lifecycle.Event.ON_CREATE)
+            lifecycleObserver.onStateChanged(localLifecycleOwner, Lifecycle.Event.ON_START)
+            lifecycleObserver.onStateChanged(localLifecycleOwner, Lifecycle.Event.ON_RESUME)
+            lifecycleObserver.onStateChanged(localLifecycleOwner, Lifecycle.Event.ON_PAUSE)
+            lifecycleObserver.onStateChanged(localLifecycleOwner, Lifecycle.Event.ON_STOP)
+        }
+    }
+
+    @Test
+    fun `stopped when detached and hosting lifecycle stopped`() {
+        val hostingLifecycleOwner = generateHostingLifecycleOwner()
+        val localLifecycleOwner = generateLocalLifecycleOwner(hostingLifecycleOwner)
+        val lifecycleObserver = mockk<LifecycleEventObserver>(relaxUnitFun = true)
+
+        localLifecycleOwner.lifecycle.addObserver(lifecycleObserver)
+        localLifecycleOwner.attach()
+        hostingLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        hostingLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         localLifecycleOwner.detach()
 
         verifyOrder {
@@ -141,6 +172,11 @@ class ViewLifecycleRegistryTest {
         }
     }
 
+    @After
+    fun tearDown() {
+        unmockkStatic(ViewTreeLifecycleOwner::class)
+    }
+
     private fun generateHostingLifecycleOwner() = TestLifecycleOwner(
         initialState = Lifecycle.State.INITIALIZED
     )
@@ -165,11 +201,15 @@ private class DummyLifecycleOwner(
         every { addOnAttachStateChangeListener(capture(attachStateSlot)) } just Runs
         every { isAttachedToWindow } returns initializeAttached
     }
-    val viewLifecycleRegistry = ViewLifecycleRegistry(
-        hostingLifecycleOwner = hostingLifecycleOwner,
-        localLifecycleOwner = this,
-        view = view
-    )
+    val viewLifecycleRegistry: ViewLifecycleRegistry
+
+    init {
+        every { ViewTreeLifecycleOwner.get(view) } returns hostingLifecycleOwner
+        viewLifecycleRegistry = ViewLifecycleRegistry(
+            localLifecycleOwner = this,
+            view = view
+        )
+    }
 
     fun attach() {
         attachStateSlot.captured.onViewAttachedToWindow(view)

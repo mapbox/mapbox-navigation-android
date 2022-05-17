@@ -15,6 +15,7 @@ import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewCustomizedActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewFragmentActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxRouteLineActivity
+import com.mapbox.navigation.qa_test_app.view.NavigationViewFragmentLifecycleActivity
 import com.mapbox.navigation.qa_test_app.view.RouteRestrictionsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteTrafficUpdateActivity
 import com.mapbox.navigation.qa_test_app.view.StatusActivity
@@ -125,5 +126,10 @@ object TestActivitySuite {
             R.string.navigation_view_fragment_description,
             launchAfterPermissionResult = false
         ) { activity -> activity.startActivity<MapboxNavigationViewFragmentActivity>() },
+        TestActivityDescription(
+            "Navigation View lifecycle test with Fragments",
+            R.string.navigation_view_fragment_lifecycle_description,
+            launchAfterPermissionResult = false
+        ) { activity -> activity.startActivity<NavigationViewFragmentLifecycleActivity>() },
     )
 }

@@ -1,16 +1,19 @@
 package com.mapbox.navigation.dropin
 
 import android.Manifest
+import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -29,7 +32,6 @@ import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.internal.extensions.navigationViewAccessToken
 import com.mapbox.navigation.dropin.internal.extensions.toComponentActivityRef
-import com.mapbox.navigation.dropin.internal.extensions.toLifecycleOwner
 import com.mapbox.navigation.dropin.internal.extensions.toViewModelStoreOwner
 import com.mapbox.navigation.ui.app.internal.SharedApp
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
@@ -61,6 +63,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
  * Note: [NavigationView] is `Experimental` and the API(s) are subject to breaking changes.
  *
  * A Mapbox access token must also be set by the developer (to initialize navigation).
+ *
+ * @param viewModelStoreOwner Defaults to store owner tied to the hosting [Activity].
+ * If you prefer the lifecycle of the [ViewModel]s internal to [NavigationView] to be tied to the hosting [Fragment] instead,
+ * provide that [Fragment] as an argument. Providing a [Fragment]'s store owner allows to achieve tighter memory control if the resources
+ * used by the [NavigationView] shouldn't outlive its hosting [Fragment] (in anticipation of potential [Fragment] recreation).
  */
 @ExperimentalPreviewMapboxNavigationAPI
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -68,6 +75,7 @@ class NavigationView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     accessToken: String = attrs.navigationViewAccessToken(context),
+    viewModelStoreOwner: ViewModelStoreOwner = context.toViewModelStoreOwner()
 ) : FrameLayout(context, attrs), LifecycleOwner {
 
     private val binding: MapboxNavigationViewLayoutBinding =
@@ -78,12 +86,11 @@ class NavigationView @JvmOverloads constructor(
 
     private val viewLifecycleRegistry: ViewLifecycleRegistry = ViewLifecycleRegistry(
         view = this,
-        localLifecycleOwner = this,
-        hostingLifecycleOwner = context.toLifecycleOwner(),
+        localLifecycleOwner = this
     )
 
     private val viewModelProvider by lazy {
-        ViewModelProvider(context.toViewModelStoreOwner())
+        ViewModelProvider(viewModelStoreOwner)
     }
 
     private val viewModel: NavigationViewModel by lazyViewModel()
