@@ -3,6 +3,10 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
+#### Features
+
+#### Bug fixes and improvements
+- Fixed an issue with the vanishing point being rendered ahead of the location indicator (especially on long routes) and other rendering artifact on the route line when the vanishing feature is enabled. [#5816](https://github.com/mapbox/mapbox-navigation-android/pull/5816)
 
 ## Mapbox Navigation SDK 2.5.0-rc.1 - May 13, 2022
 ### Changelog
