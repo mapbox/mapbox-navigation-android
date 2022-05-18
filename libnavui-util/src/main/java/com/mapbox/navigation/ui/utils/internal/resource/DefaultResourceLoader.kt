@@ -1,13 +1,13 @@
 package com.mapbox.navigation.ui.utils.internal.resource
 
 import com.mapbox.bindgen.Expected
-import com.mapbox.bindgen.ExpectedFactory.createError
 import com.mapbox.common.Cancelable
 import com.mapbox.common.NetworkRestriction
 import com.mapbox.common.ReachabilityInterface
 import com.mapbox.common.ResourceDescription
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadErrorType
+import com.mapbox.common.ResourceLoadFlags
 import com.mapbox.common.ResourceLoadOptions
 import com.mapbox.common.ResourceLoadProgress
 import com.mapbox.common.ResourceLoadProgressCallback
@@ -15,6 +15,7 @@ import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadResultCallback
 import com.mapbox.common.TileDataDomain
 import com.mapbox.common.TileStore
+import com.mapbox.navigation.utils.internal.logD
 import java.util.Queue
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -51,19 +52,38 @@ internal class DefaultResourceLoader(
         val requiresNetwork = request.networkRestriction != NetworkRestriction.DISALLOW_ALL
 
         callbackAdapter.notifyOnStart(request)
+
         // Since the TileStore (commonSDK 21.3.1) will defer any requests that require internet connection,
-        // we must verify network requirement here and fail fast if the network is not available.
-        if (requiresNetwork && !reachability.isReachable) {
-            callbackAdapter.run(createError(connectionError()))
+        // we must verify network requirement here and only request cached resource without accessing the network.
+        val tag = "DefaultResourceLoader-$requestId"
+        val loadOptions = if (requiresNetwork && !reachability.isReachable) {
+            offlineLoadOptions(tag)
         } else {
+            request.toResourceLoadOptions(tag)
+        }
+
+        logD(">>>> load ${request.url}, $loadOptions", "DefaultResourceLoader")
+        try {
             cancelableMap[requestId] = tileStore.loadResource(
                 /* description */ request.toResourceDescription(),
-                /* options */ request.toResourceLoadOptions("DefaultResourceLoader-$requestId"),
+                /* options */ loadOptions,
                 /* progressCallback */ callbackAdapter
             ) {
+                if (it.isError) {
+                    logD(
+                        "<<<< error ${request.url}, $loadOptions | ${it.error}",
+                        "DefaultResourceLoader"
+                    )
+                }
                 cancelableMap.remove(requestId)
                 callbackAdapter.run(it)
             }
+
+        } catch (e: Throwable) {
+            logD(
+                "<<<< error-thrown ${request.url}, $loadOptions | ${e}",
+                "DefaultResourceLoader"
+            )
         }
 
         return requestId
@@ -86,6 +106,14 @@ internal class DefaultResourceLoader(
     override fun unregisterObserver(observer: ResourceLoadObserver) {
         observers.remove(observer)
     }
+
+    private fun offlineLoadOptions(tag: String) =
+        ResourceLoadOptions(
+            tag,
+            ResourceLoadFlags.ACCEPT_EXPIRED,
+            NetworkRestriction.DISALLOW_ALL,
+            null
+        )
 
     private fun ResourceLoadRequest.toResourceDescription() =
         ResourceDescription(url, TileDataDomain.NAVIGATION)

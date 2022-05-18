@@ -8,6 +8,7 @@ import com.mapbox.common.ReachabilityInterface
 import com.mapbox.common.ResourceData
 import com.mapbox.common.ResourceDescription
 import com.mapbox.common.ResourceLoadError
+import com.mapbox.common.ResourceLoadErrorType
 import com.mapbox.common.ResourceLoadFlags
 import com.mapbox.common.ResourceLoadOptions
 import com.mapbox.common.ResourceLoadProgress
@@ -76,8 +77,9 @@ class DefaultResourceLoaderTest {
         val callback = mockk<ResourceLoadCallback>(relaxed = true)
         val loadRequest = ResourceLoadRequest("http://example.com/some-resource")
         val loadProgress = ResourceLoadProgress(0, 0)
+        val data = Fixtures.resourceData(byteArrayOf(1))
         val loadResult = ExpectedFactory.createValue<ResourceLoadError, ResourceLoadResult>(
-            Fixtures.resourceLoadResult(null, ResourceLoadStatus.NOT_FOUND)
+            Fixtures.resourceLoadResult(data, ResourceLoadStatus.AVAILABLE)
         )
         val progressCallbackCapture = slot<ResourceLoadProgressCallback>()
         val resultCallbackCapture = slot<ResourceLoadResultCallback>()
@@ -106,10 +108,38 @@ class DefaultResourceLoaderTest {
     }
 
     @Test
-    fun `load - should fail fast if request requires network and network is not reachable`() {
+    fun `load - should returned expired cached resource if network is not reachable`() {
+        every { mockReachability.isReachable } returns false
         val callback = mockk<ResourceLoadCallback>(relaxed = true)
         val loadRequest = ResourceLoadRequest("http://example.com/some-resource")
+        val data = Fixtures.resourceData(byteArrayOf(1))
+        val loadResult = ExpectedFactory.createValue<ResourceLoadError, ResourceLoadResult>(
+            Fixtures.resourceLoadResult(data, ResourceLoadStatus.AVAILABLE)
+        )
+        given(
+            tileStoreResult = loadResult
+        )
+
+        sut.load(loadRequest, callback)
+
+        verifyOrder {
+            callback.onStart(loadRequest)
+            callback.onFinish(loadRequest, loadResult)
+        }
+    }
+
+    @Test
+    fun `load - should fail when network is not reachable and cached resource is not available`() {
         every { mockReachability.isReachable } returns false
+        val callback = mockk<ResourceLoadCallback>(relaxed = true)
+        val loadRequest = ResourceLoadRequest("http://example.com/some-resource")
+        val loadResult = ExpectedFactory.createError<ResourceLoadError, ResourceLoadResult>(
+            ResourceLoadError(ResourceLoadErrorType.UNSATISFIED, "error", 0L)
+        )
+        given(
+            tileStoreResult = loadResult
+        )
+
         sut.load(loadRequest, callback)
 
         val errorCapture = slot<Expected<ResourceLoadError, ResourceLoadResult>>()
@@ -120,15 +150,15 @@ class DefaultResourceLoaderTest {
         assertTrue(errorCapture.captured.isError)
     }
 
-    @Test
-    fun `load - should NOT call TileStore if request requires network and network is not reachable`() {
-        val callback = mockk<ResourceLoadCallback>(relaxed = true)
-        val loadRequest = ResourceLoadRequest("http://example.com/some-resource")
-        every { mockReachability.isReachable } returns false
-        sut.load(loadRequest, callback)
-
-        verify(exactly = 0) { mockTileStore.loadResource(any(), any(), any(), any()) }
-    }
+    // @Test
+    // fun `load - should NOT call TileStore if request requires network and network is not reachable`() {
+    //     val callback = mockk<ResourceLoadCallback>(relaxed = true)
+    //     val loadRequest = ResourceLoadRequest("http://example.com/some-resource")
+    //     every { mockReachability.isReachable } returns false
+    //     sut.load(loadRequest, callback)
+    //
+    //     verify(exactly = 0) { mockTileStore.loadResource(any(), any(), any(), any()) }
+    // }
 
     @Test
     fun `cancel - should call Cancelable`() {
@@ -154,25 +184,17 @@ class DefaultResourceLoaderTest {
         val observer1 = mockk<ResourceLoadObserver>(relaxed = true)
         val observer2 = mockk<ResourceLoadObserver>(relaxed = true)
         val loadRequest = ResourceLoadRequest("http://example.com/some-resource")
-        val loadProgress = ResourceLoadProgress(0, 0)
+        val loadProgress = listOf(
+            ResourceLoadProgress(0, 10),
+            ResourceLoadProgress(1, 10)
+        )
         val loadResult = ExpectedFactory.createValue<ResourceLoadError, ResourceLoadResult>(
             Fixtures.resourceLoadResult(null, ResourceLoadStatus.NOT_FOUND)
         )
-        val progressCallbackCapture = slot<ResourceLoadProgressCallback>()
-        val resultCallbackCapture = slot<ResourceLoadResultCallback>()
-        every {
-            mockTileStore.loadResource(
-                any(),
-                any(),
-                capture(progressCallbackCapture),
-                capture(resultCallbackCapture)
-            )
-        } answers {
-            progressCallbackCapture.captured.run(loadProgress)
-            progressCallbackCapture.captured.run(loadProgress) // simulate multiple calls
-            resultCallbackCapture.captured.run(loadResult)
-            stubCancelable()
-        }
+        given(
+            tileStoreProgress = loadProgress,
+            tileStoreResult = loadResult
+        )
 
         sut.registerObserver(observer1)
         sut.registerObserver(observer2)
@@ -180,14 +202,14 @@ class DefaultResourceLoaderTest {
 
         verifyOrder {
             observer1.onStart(loadRequest)
-            observer1.onProgress(loadRequest, loadProgress)
-            observer1.onProgress(loadRequest, loadProgress)
+            observer1.onProgress(loadRequest, loadProgress[0])
+            observer1.onProgress(loadRequest, loadProgress[1])
             observer1.onFinish(loadRequest, loadResult)
         }
         verifyOrder {
             observer2.onStart(loadRequest)
-            observer2.onProgress(loadRequest, loadProgress)
-            observer2.onProgress(loadRequest, loadProgress)
+            observer2.onProgress(loadRequest, loadProgress[0])
+            observer2.onProgress(loadRequest, loadProgress[1])
             observer2.onFinish(loadRequest, loadResult)
         }
     }
@@ -196,25 +218,17 @@ class DefaultResourceLoaderTest {
     fun `ResourceLoadObserver - should not throw ConcurrentModificationException when calling unregisterObserver`() {
         val observer = mockk<ResourceLoadObserver>(relaxed = true)
         val loadRequest = ResourceLoadRequest("http://example.com/some-resource")
-        val loadProgress = ResourceLoadProgress(0, 0)
+        val loadProgress = listOf(
+            ResourceLoadProgress(0, 10),
+            ResourceLoadProgress(1, 10)
+        )
         val loadResult = ExpectedFactory.createValue<ResourceLoadError, ResourceLoadResult>(
             Fixtures.resourceLoadResult(null, ResourceLoadStatus.NOT_FOUND)
         )
-        val progressCallbackCapture = slot<ResourceLoadProgressCallback>()
-        val resultCallbackCapture = slot<ResourceLoadResultCallback>()
-        every {
-            mockTileStore.loadResource(
-                any(),
-                any(),
-                capture(progressCallbackCapture),
-                capture(resultCallbackCapture)
-            )
-        } answers {
-            progressCallbackCapture.captured.run(loadProgress)
-            progressCallbackCapture.captured.run(loadProgress) // simulate multiple calls
-            resultCallbackCapture.captured.run(loadResult)
-            stubCancelable()
-        }
+        given(
+            tileStoreProgress = loadProgress,
+            tileStoreResult = loadResult
+        )
 
         sut.registerObserver(object : ResourceLoadObserver {
             override fun onStart(request: ResourceLoadRequest) = Unit
@@ -234,9 +248,29 @@ class DefaultResourceLoaderTest {
 
         verifyOrder {
             observer.onStart(loadRequest)
-            observer.onProgress(loadRequest, loadProgress)
-            observer.onProgress(loadRequest, loadProgress)
+            observer.onProgress(loadRequest, loadProgress[0])
+            observer.onProgress(loadRequest, loadProgress[1])
             observer.onFinish(loadRequest, loadResult)
+        }
+    }
+
+    private fun given(
+        tileStoreResult: Expected<ResourceLoadError, ResourceLoadResult>,
+        tileStoreProgress: List<ResourceLoadProgress> = emptyList()
+    ) {
+        val progressCallbackCapture = slot<ResourceLoadProgressCallback>()
+        val resultCallbackCapture = slot<ResourceLoadResultCallback>()
+        every {
+            mockTileStore.loadResource(
+                any(),
+                any(),
+                capture(progressCallbackCapture),
+                capture(resultCallbackCapture)
+            )
+        } answers {
+            tileStoreProgress.forEach { progressCallbackCapture.captured.run(it) }
+            resultCallbackCapture.captured.run(tileStoreResult)
+            stubCancelable()
         }
     }
 }
