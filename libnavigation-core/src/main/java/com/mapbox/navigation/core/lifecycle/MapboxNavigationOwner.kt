@@ -46,13 +46,15 @@ internal class MapboxNavigationOwner {
     }
 
     fun register(mapboxNavigationObserver: MapboxNavigationObserver) = apply {
-        mapboxNavigation?.let { mapboxNavigationObserver.onAttached(it) }
-        services.add(mapboxNavigationObserver)
+        if (services.add(mapboxNavigationObserver)) {
+            mapboxNavigation?.let { mapboxNavigationObserver.onAttached(it) }
+        }
     }
 
     fun unregister(mapboxNavigationObserver: MapboxNavigationObserver) {
-        mapboxNavigation?.let { mapboxNavigationObserver.onDetached(it) }
-        services.remove(mapboxNavigationObserver)
+        if (services.remove(mapboxNavigationObserver)) {
+            mapboxNavigation?.let { mapboxNavigationObserver.onDetached(it) }
+        }
     }
 
     fun disable() {
@@ -68,10 +70,16 @@ internal class MapboxNavigationOwner {
     fun <T : MapboxNavigationObserver> getObserver(clazz: KClass<T>): T = getObserver(clazz.java)
 
     // Java
-    fun <T : MapboxNavigationObserver> getObserver(clazz: Class<T>): T {
-        return services.filterIsInstance(clazz).firstOrNull()
+    fun <T : MapboxNavigationObserver> getObserver(clazz: Class<T>): T =
+        getObservers(clazz).firstOrNull()
             ?: error("Class ${clazz.simpleName} is not been registered to MapboxNavigationApp")
-    }
+
+    fun <T : MapboxNavigationObserver> getObservers(clazz: KClass<T>): List<T> =
+        getObservers(clazz.java)
+
+    // Java
+    fun <T : MapboxNavigationObserver> getObservers(clazz: Class<T>): List<T> =
+        services.filterIsInstance(clazz)
 
     private companion object {
         private const val LOG_CATEGORY = "MapboxNavigationOwner"
