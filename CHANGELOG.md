@@ -4,6 +4,8 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added support for sharing multiple instances of `MapboxNavigationObserver`. [#5829](https://github.com/mapbox/mapbox-navigation-android/pull/5829)
+
 #### Bug fixes and improvements
 
 ## Mapbox Navigation SDK 2.6.0-alpha.1 - May 19, 2022

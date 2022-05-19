@@ -291,6 +291,7 @@ package com.mapbox.navigation.core.lifecycle {
     method public com.mapbox.navigation.core.lifecycle.MapboxNavigationApp disable();
     method public androidx.lifecycle.LifecycleOwner getLifecycleOwner();
     method public <T extends com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver> T getObserver(kotlin.reflect.KClass<T> kClass);
+    method public <T extends com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver> java.util.List<T> getObservers(kotlin.reflect.KClass<T> kClass);
     method public boolean isSetup();
     method public com.mapbox.navigation.core.lifecycle.MapboxNavigationApp registerObserver(com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver mapboxNavigationObserver);
     method public com.mapbox.navigation.core.lifecycle.MapboxNavigationApp setup(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);

@@ -77,6 +77,12 @@ internal class MapboxNavigationAppDelegate {
     fun <T : MapboxNavigationObserver> getObserver(kClass: KClass<T>): T =
         mapboxNavigationOwner.getObserver(kClass)
 
+    fun <T : MapboxNavigationObserver> getObservers(clazz: Class<T>): List<T> =
+        mapboxNavigationOwner.getObservers(clazz)
+
+    fun <T : MapboxNavigationObserver> getObservers(kClass: KClass<T>): List<T> =
+        mapboxNavigationOwner.getObservers(kClass)
+
     private companion object {
         private const val LOG_CATEGORY = "MapboxNavigationAppDelegate"
     }

@@ -162,6 +162,14 @@ object MapboxNavigationApp {
     }
 
     /**
+     * Provides access to any registered observer instance. If no observers have been registered
+     * with this class type, an empty list is returned.
+     */
+    fun <T : MapboxNavigationObserver> getObservers(kClass: KClass<T>): List<T> {
+        return mapboxNavigationAppDelegate.getObservers(kClass)
+    }
+
+    /**
      * [MapboxNavigation] has functions that do not require observation streams. This function
      * allows you to get the current instance to call those functions.
      *

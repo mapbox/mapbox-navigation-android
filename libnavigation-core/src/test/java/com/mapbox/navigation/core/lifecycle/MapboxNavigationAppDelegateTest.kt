@@ -20,6 +20,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -303,6 +304,23 @@ class MapboxNavigationAppDelegateTest {
     }
 
     @Test
+    fun `verify MapboxNavigationObserver lifecycles are called once`() {
+        mapboxNavigationApp.setup { navigationOptions }
+        val testLifecycleOwner = CarAppLifecycleOwnerTest.TestLifecycleOwner()
+        testLifecycleOwner.lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+        mapboxNavigationApp.attach(testLifecycleOwner)
+
+        val observer = mockk<MapboxNavigationObserver>(relaxUnitFun = true)
+        mapboxNavigationApp.registerObserver(observer)
+        mapboxNavigationApp.registerObserver(observer)
+        mapboxNavigationApp.unregisterObserver(observer)
+        mapboxNavigationApp.unregisterObserver(observer)
+
+        verify(exactly = 1) { observer.onAttached(any()) }
+        verify(exactly = 1) { observer.onDetached(any()) }
+    }
+
+    @Test
     fun `verify getObserver will return the registered observer`() {
         val observer = ExampleObserverA()
         mapboxNavigationApp.registerObserver(observer)
@@ -352,6 +370,59 @@ class MapboxNavigationAppDelegateTest {
 
         // Should crash
         mapboxNavigationApp.getObserver(ExampleObserverA::class)
+    }
+
+    @Test
+    fun `verify getObservers will return the registered observer`() {
+        val observer = ExampleObserverA()
+        mapboxNavigationApp.registerObserver(observer)
+
+        val retrieved = mapboxNavigationApp.getObservers(ExampleObserverA::class)
+        val retrievedJava = mapboxNavigationApp.getObservers(ExampleObserverA::class.java)
+        assertEquals(1, retrieved.size)
+        assertEquals(observer, retrieved[0])
+        assertEquals(retrieved, retrievedJava)
+    }
+
+    @Test
+    fun `verify getObservers will return all registered observers of the same type`() {
+        val observerFirst = ExampleObserverA()
+        val observerSecond = ExampleObserverB()
+        val observerThird = ExampleObserverA()
+        mapboxNavigationApp.registerObserver(observerFirst)
+        mapboxNavigationApp.registerObserver(observerSecond)
+        mapboxNavigationApp.registerObserver(observerThird)
+
+        val retrieved = mapboxNavigationApp.getObservers(ExampleObserverA::class)
+        val retrievedJava = mapboxNavigationApp.getObservers(ExampleObserverA::class.java)
+        assertEquals(2, retrieved.size)
+        assertEquals(observerFirst, retrieved[0])
+        assertEquals(observerThird, retrieved[1])
+        assertEquals(retrieved, retrievedJava)
+    }
+
+    fun `verify getObservers will return empty when observer is not registered`() {
+        val observer = ExampleObserverA()
+        mapboxNavigationApp.registerObserver(observer)
+
+        val retrieved = mapboxNavigationApp.getObservers(ExampleObserverB::class)
+        val retrievedJava = mapboxNavigationApp.getObservers(ExampleObserverB::class.java)
+        assertTrue(retrieved.isEmpty())
+        assertEquals(retrieved, retrievedJava)
+    }
+
+    fun `verify getObservers will return empty when observers are removed`() {
+        val observerFirst = ExampleObserverA()
+        val observerSecond = ExampleObserverB()
+        mapboxNavigationApp.registerObserver(observerFirst)
+        mapboxNavigationApp.registerObserver(observerSecond)
+        mapboxNavigationApp.unregisterObserver(observerFirst)
+
+        // Should crash
+        val retrieved = mapboxNavigationApp.getObservers(ExampleObserverA::class)
+        val retrievedJava = mapboxNavigationApp.getObservers(ExampleObserverA::class.java)
+        assertTrue(retrieved.isEmpty())
+        assertEquals(retrieved, retrievedJava)
     }
 
     private fun mockActivityLifecycle(): Pair<ComponentActivity, LifecycleRegistry> {
