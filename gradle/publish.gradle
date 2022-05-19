@@ -75,7 +75,7 @@ registry {
     sdkName = sdkNameMap[project.name]
     production = true
     snapshot = project.ext.snapshot
-    override = snapshot
+    override = true
     dryRun = false
     publish = true
     publishMessage = "cc @mapbox/navigation-android"
