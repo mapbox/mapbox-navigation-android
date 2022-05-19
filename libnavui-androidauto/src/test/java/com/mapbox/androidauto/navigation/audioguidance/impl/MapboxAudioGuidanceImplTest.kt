@@ -207,7 +207,7 @@ class MapboxAudioGuidanceImplTest {
             val mapboxAudioGuidanceServices =
                 testMapboxAudioGuidanceServices.mapboxAudioGuidanceServices
             excludeRecords {
-                mapboxAudioGuidanceServices.mapboxVoiceInstructions(any())
+                mapboxAudioGuidanceServices.mapboxVoiceInstructions()
             }
             verifySequence {
                 mapboxAudioGuidanceServices.mapboxAudioGuidanceVoice(any(), deviceLanguage)

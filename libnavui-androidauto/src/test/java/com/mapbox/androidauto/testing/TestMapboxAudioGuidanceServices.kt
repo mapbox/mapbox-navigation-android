@@ -6,7 +6,9 @@ import com.mapbox.androidauto.navigation.audioguidance.impl.MapboxVoiceInstructi
 import com.mapbox.androidauto.navigation.audioguidance.impl.MapboxVoiceInstructionsState
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +24,8 @@ class TestMapboxAudioGuidanceServices {
     private val voiceLanguageFlow = MutableStateFlow<String?>(value = null)
 
     private val mapboxVoiceInstructions = mockk<MapboxVoiceInstructions> {
+        every { registerObservers(any()) } just Runs
+        every { unregisterObservers(any()) } just Runs
         every { voiceInstructions() } returns voiceInstructionsFlow
         every { voiceLanguage() } returns voiceLanguageFlow
     }
@@ -45,7 +49,7 @@ class TestMapboxAudioGuidanceServices {
     }
 
     val mapboxAudioGuidanceServices = mockk<MapboxAudioGuidanceServices> {
-        every { mapboxVoiceInstructions(any()) } returns mapboxVoiceInstructions
+        every { mapboxVoiceInstructions() } returns mapboxVoiceInstructions
         every { mapboxAudioGuidanceVoice(any(), any()) } returns mapboxAudioGuidanceVoice
     }
 
