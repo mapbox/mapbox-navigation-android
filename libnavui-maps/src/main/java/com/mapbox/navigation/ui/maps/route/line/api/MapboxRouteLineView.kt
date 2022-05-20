@@ -5,6 +5,7 @@ import android.util.Log
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Style
+import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
@@ -97,6 +98,9 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                         )
 
                         value.primaryRouteLineData.also {
+                            it.dynamicData.trimOffset?.apply {
+                                setTrimOffsetForPrimaryRouteLineLayers(style, offset)
+                            }
                             updateSource(
                                 style,
                                 RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID,
@@ -603,5 +607,41 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                 (it as LineLayer).lineGradient(expression)
             }
         }
+    }
+
+    private fun setTrimOffsetForPrimaryRouteLineLayers(style: Style, offset: Double) {
+        val trafficLineExpressionProvider = RouteLineTrimExpressionProvider {
+            literal(listOf(0.0, offset))
+        }
+        updateTrimOffset(
+            style,
+            RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+            trafficLineExpressionProvider
+        )
+        updateTrimOffset(
+            style,
+            RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+            trafficLineExpressionProvider
+        )
+        updateTrimOffset(
+            style,
+            RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
+            trafficLineExpressionProvider
+        )
+        updateTrimOffset(
+            style,
+            RouteLayerConstants.PRIMARY_ROUTE_TRAIL_LAYER_ID,
+            trafficLineExpressionProvider
+        )
+        updateTrimOffset(
+            style,
+            RouteLayerConstants.PRIMARY_ROUTE_CASING_TRAIL_LAYER_ID,
+            trafficLineExpressionProvider
+        )
+        updateTrimOffset(
+            style,
+            RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
+            trafficLineExpressionProvider
+        )
     }
 }

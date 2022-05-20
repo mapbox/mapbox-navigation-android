@@ -454,6 +454,38 @@ class MapboxRouteLineApiTest {
     }
 
     @Test
+    fun setRoutes_trimOffsetValueFromVanishingRouteLine() =
+        coroutineRule.runBlockingTest {
+            val vanishingRouteLine = mockk<VanishingRouteLine>(relaxed = true) {
+                every { vanishPointOffset } returns 9.9
+            }
+            val realOptions = MapboxRouteLineOptions.Builder(ctx).build()
+            val options = mockk<MapboxRouteLineOptions>()
+            every { options.routeLayerProvider } returns realOptions.routeLayerProvider
+            every { options.resourceProvider } returns realOptions.resourceProvider
+            every { options.vanishingRouteLine } returns vanishingRouteLine
+            every { options.displayRestrictedRoadSections } returns false
+            every {
+                options.styleInactiveRouteLegsIndependently
+            } returns realOptions.styleInactiveRouteLegsIndependently
+            every { options.displaySoftGradientForTraffic } returns false
+            every { options.softGradientTransition } returns 30.0
+            every { options.routeStyleDescriptors } returns listOf()
+
+            val api = MapboxRouteLineApi(options)
+            val route = loadRoute("short_route.json")
+            val routes = listOf(RouteLine(route, null))
+
+            val result = api.setRoutes(routes).value!!
+
+            assertEquals(
+                9.9,
+                result.primaryRouteLineData.dynamicData.trimOffset!!.offset,
+                0.0
+            )
+        }
+
+    @Test
     fun setRoutesAlternativeRouteColorOverride() = coroutineRule.runBlockingTest {
         val routeStyleDescriptors = listOf(
             RouteStyleDescriptor("alternativeRoute1", Color.YELLOW, Color.CYAN),
