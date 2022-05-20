@@ -4,9 +4,9 @@ import android.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.dropin.component.location.LocationAction
-import com.mapbox.navigation.dropin.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.dropin.model.Action
 import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.model.Store

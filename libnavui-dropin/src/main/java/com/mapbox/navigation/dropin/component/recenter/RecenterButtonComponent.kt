@@ -7,9 +7,9 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.camera.CameraAction
 import com.mapbox.navigation.dropin.component.camera.TargetCameraMode
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.dropin.view.MapboxExtendableButton
+import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch

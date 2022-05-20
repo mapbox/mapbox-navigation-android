@@ -1,7 +1,7 @@
 package com.mapbox.navigation.dropin
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.binder.UIBinder
+import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 
 /**
  * A class that allows you to define [UIBinder] for various different views used by the

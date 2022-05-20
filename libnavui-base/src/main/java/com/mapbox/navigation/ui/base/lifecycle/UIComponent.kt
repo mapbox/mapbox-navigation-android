@@ -1,4 +1,4 @@
-package com.mapbox.navigation.dropin.lifecycle
+package com.mapbox.navigation.ui.base.lifecycle
 
 import androidx.annotation.CallSuper
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI

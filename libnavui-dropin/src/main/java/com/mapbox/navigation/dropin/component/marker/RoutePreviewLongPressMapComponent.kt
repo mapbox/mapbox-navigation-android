@@ -8,9 +8,9 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.destination.Destination
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.dropin.util.HapticFeedback
+import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.toPoint
 

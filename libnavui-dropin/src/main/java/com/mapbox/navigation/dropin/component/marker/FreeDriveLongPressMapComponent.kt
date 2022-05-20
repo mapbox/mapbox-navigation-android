@@ -10,9 +10,9 @@ import com.mapbox.navigation.dropin.component.destination.DestinationAction
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.dropin.util.HapticFeedback
+import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class FreeDriveLongPressMapComponent(

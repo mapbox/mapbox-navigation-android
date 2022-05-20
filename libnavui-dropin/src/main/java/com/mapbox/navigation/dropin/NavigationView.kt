@@ -13,9 +13,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.core.internal.extensions.attachCreated
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.replay.MapboxReplayer
-import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.component.backpress.OnKeyListenerComponent
 import com.mapbox.navigation.dropin.component.tripsession.LocationPermissionComponent
 import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction
@@ -26,11 +26,11 @@ import com.mapbox.navigation.dropin.coordinator.MapLayoutCoordinator
 import com.mapbox.navigation.dropin.coordinator.RoadNameLabelCoordinator
 import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
-import com.mapbox.navigation.dropin.internal.extensions.attachCreated
 import com.mapbox.navigation.dropin.internal.extensions.navigationViewAccessToken
 import com.mapbox.navigation.dropin.internal.extensions.toComponentActivityRef
 import com.mapbox.navigation.dropin.internal.extensions.toLifecycleOwner
 import com.mapbox.navigation.dropin.internal.extensions.toViewModelStoreOwner
+import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 

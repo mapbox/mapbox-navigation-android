@@ -4,8 +4,8 @@ import android.widget.Toast
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
-import com.mapbox.navigation.dropin.internal.extensions.flowRouteProgress
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
+import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
 import kotlinx.coroutines.flow.collect

@@ -4,9 +4,9 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.destination.DestinationAction.DidReverseGeocode
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.dropin.util.Geocoder
+import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter

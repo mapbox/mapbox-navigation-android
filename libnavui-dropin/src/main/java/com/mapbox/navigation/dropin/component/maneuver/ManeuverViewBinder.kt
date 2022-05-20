@@ -7,9 +7,9 @@ import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.databinding.MapboxManeuverGuidanceLayoutBinding
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
+import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import kotlinx.coroutines.flow.StateFlow
 

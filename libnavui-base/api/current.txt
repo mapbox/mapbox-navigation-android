@@ -7,6 +7,45 @@ package com.mapbox.navigation.ui.base.formatter {
 
 }
 
+package com.mapbox.navigation.ui.base.lifecycle {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface Binder<T> {
+    method public com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver bind(T? viewGroup);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface UIBinder extends com.mapbox.navigation.ui.base.lifecycle.Binder<android.view.ViewGroup> {
+    field public static final com.mapbox.navigation.ui.base.lifecycle.UIBinder.Companion Companion;
+  }
+
+  public static final class UIBinder.Companion {
+    method public com.mapbox.navigation.ui.base.lifecycle.UIBinder getUSE_DEFAULT();
+    property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder USE_DEFAULT;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public class UIComponent implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    ctor public UIComponent();
+    method public final kotlinx.coroutines.CoroutineScope getCoroutineScope();
+    method protected final inline <T> void observe(kotlinx.coroutines.flow.Flow<? extends T>, kotlin.jvm.functions.Function2<? super T,? super kotlin.coroutines.Continuation<? super kotlin.Unit>,?> action);
+    method @CallSuper public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method @CallSuper public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public final void setCoroutineScope(kotlinx.coroutines.CoroutineScope p);
+    property public final kotlinx.coroutines.CoroutineScope coroutineScope;
+    field public kotlinx.coroutines.CoroutineScope coroutineScope;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class UICoordinator<T extends android.view.ViewGroup> implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    ctor public UICoordinator(T viewGroup);
+    method public abstract kotlinx.coroutines.flow.Flow<com.mapbox.navigation.ui.base.lifecycle.Binder<T>> flowViewBinders(com.mapbox.navigation.core.MapboxNavigation);
+    method public final kotlinx.coroutines.CoroutineScope getCoroutineScope();
+    method @CallSuper public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method @CallSuper public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public final void setCoroutineScope(kotlinx.coroutines.CoroutineScope p);
+    property public final kotlinx.coroutines.CoroutineScope coroutineScope;
+    field public kotlinx.coroutines.CoroutineScope coroutineScope;
+  }
+
+}
+
 package com.mapbox.navigation.ui.base.util {
 
   public fun interface MapboxNavigationConsumer<T> {

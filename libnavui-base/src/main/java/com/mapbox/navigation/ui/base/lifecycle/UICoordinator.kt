@@ -1,12 +1,10 @@
-package com.mapbox.navigation.dropin.lifecycle
+package com.mapbox.navigation.ui.base.lifecycle
 
 import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
-import com.mapbox.navigation.dropin.binder.Binder
-import com.mapbox.navigation.dropin.binder.UIBinder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -57,7 +55,7 @@ abstract class UICoordinator<T : ViewGroup>(
     }
 
     /**
-     * Create your flowable [UIBinder]. This allows you to use a flowable state to
+     * Create your flowable [Binder]. This allows you to use a flowable state to
      * determine what is being shown in the [viewGroup].
      */
     abstract fun MapboxNavigation.flowViewBinders(): Flow<Binder<T>>

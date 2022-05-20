@@ -9,8 +9,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Store
+import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class CameraLayoutObserver(

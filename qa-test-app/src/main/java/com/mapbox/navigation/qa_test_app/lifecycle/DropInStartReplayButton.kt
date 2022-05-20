@@ -3,11 +3,11 @@ package com.mapbox.navigation.qa_test_app.lifecycle
 import android.view.View
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.extensions.flowTripSessionState
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.TripSessionState
-import com.mapbox.navigation.dropin.internal.extensions.flowTripSessionState
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInReplayComponent
+import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

@@ -8,7 +8,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.controller.LocationStateController
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import kotlinx.coroutines.launch
 
 @ExperimentalPreviewMapboxNavigationAPI
