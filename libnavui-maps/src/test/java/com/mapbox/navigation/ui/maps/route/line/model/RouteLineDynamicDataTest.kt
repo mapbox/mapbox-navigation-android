@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
+import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineTrimOffset
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
@@ -12,7 +13,8 @@ class RouteLineDynamicDataTest {
             mockk(),
             mockk(),
             mockk(),
-            mockk()
+            mockk(),
+            RouteLineTrimOffset(9.9)
         )
 
         val result = original.toMutableValue()
@@ -24,6 +26,7 @@ class RouteLineDynamicDataTest {
             result.restrictedSectionExpressionProvider
         )
         assertEquals(original.trafficExpressionProvider, result.trafficExpressionProvider)
+        assertEquals(original.trimOffset, result.trimOffset)
     }
 
     @Test
@@ -32,7 +35,8 @@ class RouteLineDynamicDataTest {
             mockk(),
             mockk(),
             mockk(),
-            mockk()
+            mockk(),
+            RouteLineTrimOffset(9.9)
         )
         val replacementBaseProvider = mockk<RouteLineExpressionProvider>()
         val replacementCasingProvider = mockk<RouteLineExpressionProvider>()
@@ -50,5 +54,6 @@ class RouteLineDynamicDataTest {
         assertEquals(replacementCasingProvider, result.casingExpressionProvider)
         assertEquals(replacementTrafficProvider, result.trafficExpressionProvider)
         assertEquals(replacementSectionProvider, result.restrictedSectionExpressionProvider)
+        assertEquals(original.trimOffset, result.trimOffset)
     }
 }

@@ -9,6 +9,7 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Style
+import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.getLayer
@@ -17,6 +18,7 @@ import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
+import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineTrimOffset
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID
@@ -26,9 +28,11 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_CASING_TRAIL_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_TRAIL_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_LAYER_ID
@@ -378,6 +382,8 @@ class MapboxRouteLineViewTest {
         val altRoute1Source = mockk<GeoJsonSource>(relaxed = true)
         val altRoute2Source = mockk<GeoJsonSource>(relaxed = true)
         val wayPointSource = mockk<GeoJsonSource>(relaxed = true)
+        val trailLayer = mockk<LineLayer>(relaxed = true)
+        val trailCasingLayer = mockk<LineLayer>(relaxed = true)
 
         val state: Expected<RouteLineError, RouteSetValue> = ExpectedFactory.createValue(
             RouteSetValue(
@@ -387,7 +393,8 @@ class MapboxRouteLineViewTest {
                         { routeLineExp },
                         { casingLineEx },
                         { trafficLineExp },
-                        { restrictedRouteExpression }
+                        { restrictedRouteExpression },
+                        RouteLineTrimOffset(9.9)
                     )
                 ),
                 alternativeRouteLinesData = listOf(
@@ -447,6 +454,12 @@ class MapboxRouteLineViewTest {
             every {
                 getLayer(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
             } returns topLevelLayer
+            every {
+                getLayer(PRIMARY_ROUTE_TRAIL_LAYER_ID)
+            } returns trailLayer
+            every {
+                getLayer(PRIMARY_ROUTE_CASING_TRAIL_LAYER_ID)
+            } returns trailCasingLayer
             every { getSource(PRIMARY_ROUTE_SOURCE_ID) } returns primaryRouteSource
             every { getSource(ALTERNATIVE_ROUTE1_SOURCE_ID) } returns altRoute1Source
             every { getSource(ALTERNATIVE_ROUTE2_SOURCE_ID) } returns altRoute2Source
@@ -477,6 +490,13 @@ class MapboxRouteLineViewTest {
         verify { altRoute2Source.featureCollection(alternativeRoute2FeatureCollection) }
         verify { wayPointSource.featureCollection(waypointsFeatureCollection) }
         verify { restrictedRouteLayer.lineGradient(restrictedRouteExpression) }
+        verify { primaryRouteTrafficLayer.lineTrimOffset(literal(listOf(0.0, 9.9))) }
+        verify { primaryRouteLayer.lineTrimOffset(literal(listOf(0.0, 9.9))) }
+        verify { primaryRouteCasingLayer.lineTrimOffset(literal(listOf(0.0, 9.9))) }
+        verify { restrictedRouteLayer.lineTrimOffset(literal(listOf(0.0, 9.9))) }
+        verify { trailCasingLayer.lineTrimOffset(literal(listOf(0.0, 9.9))) }
+        verify { trailLayer.lineTrimOffset(literal(listOf(0.0, 9.9))) }
+
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
