@@ -8,10 +8,10 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
+import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.internal.extensions.flowLocationMatcherResult
-import com.mapbox.navigation.dropin.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -108,7 +108,7 @@ internal class RoadNameLabelComponentTest {
 
     @Test
     fun `onAttached renders location matcher results`() = coroutineRule.runBlockingTest {
-        mockkStatic("com.mapbox.navigation.dropin.internal.extensions.MapboxNavigationEx")
+        mockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationEx")
         val mockRoad = mockk<Road> {
             every { components } returns listOf(mockk())
         }
@@ -134,12 +134,12 @@ internal class RoadNameLabelComponentTest {
         ).onAttached(mapboxNavigation)
 
         verify { roadNameView.renderRoadName(mockRoad) }
-        unmockkStatic("com.mapbox.navigation.dropin.internal.extensions.MapboxNavigationEx")
+        unmockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationEx")
     }
 
     @Test
     fun `onAttached renders road shields`() = coroutineRule.runBlockingTest {
-        mockkStatic("com.mapbox.navigation.dropin.internal.extensions.MapboxNavigationEx")
+        mockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationEx")
         val routeProgress = mockk<RouteProgress>()
         val mockRoad = mockk<Road> {
             every { components } returns listOf(mockk())
@@ -186,6 +186,6 @@ internal class RoadNameLabelComponentTest {
         ).onAttached(mapboxNavigation)
 
         verify { roadNameView.renderRoadNameWith(shields) }
-        unmockkStatic("com.mapbox.navigation.dropin.internal.extensions.MapboxNavigationEx")
+        unmockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationEx")
     }
 }

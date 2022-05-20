@@ -1,4 +1,4 @@
-package com.mapbox.navigation.dropin.lifecycle
+package com.mapbox.navigation.ui.base.lifecycle
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation

@@ -11,8 +11,8 @@ import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.component.routefetch.RoutesState
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderLayoutBinding
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Store
+import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.toPoint
 import kotlinx.coroutines.flow.collect

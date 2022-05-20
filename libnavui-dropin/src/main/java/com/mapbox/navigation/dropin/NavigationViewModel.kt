@@ -5,6 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewModel
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.core.internal.extensions.attachCreated
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.controller.AudioGuidanceStateController
@@ -14,7 +15,6 @@ import com.mapbox.navigation.dropin.controller.LocationStateController
 import com.mapbox.navigation.dropin.controller.NavigationStateController
 import com.mapbox.navigation.dropin.controller.RoutesStateController
 import com.mapbox.navigation.dropin.controller.TripSessionStarterStateController
-import com.mapbox.navigation.dropin.internal.extensions.attachCreated
 import com.mapbox.navigation.dropin.model.Store
 
 /**

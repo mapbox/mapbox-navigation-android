@@ -6,6 +6,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.R
+import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class EmptyBinder : UIBinder {

@@ -2,7 +2,7 @@ package com.mapbox.navigation.dropin
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.binder.EmptyBinder
-import com.mapbox.navigation.dropin.binder.UIBinder
+import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before

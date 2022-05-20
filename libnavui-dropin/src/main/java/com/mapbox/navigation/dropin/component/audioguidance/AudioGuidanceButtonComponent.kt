@@ -5,9 +5,9 @@ import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.dropin.view.MapboxAudioGuidanceButton
+import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class AudioGuidanceButtonComponent(

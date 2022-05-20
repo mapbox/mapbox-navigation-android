@@ -2,9 +2,9 @@ package com.mapbox.navigation.dropin.controller
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.extensions.flowOnFinalDestinationArrival
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
-import com.mapbox.navigation.dropin.internal.extensions.flowOnFinalDestinationArrival
 import com.mapbox.navigation.dropin.model.Action
 import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.model.Store

@@ -3,8 +3,8 @@ package com.mapbox.navigation.dropin.component.speedlimit
 import androidx.annotation.StyleRes
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.internal.extensions.flowLocationMatcherResult
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
+import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi
 import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter
 import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView

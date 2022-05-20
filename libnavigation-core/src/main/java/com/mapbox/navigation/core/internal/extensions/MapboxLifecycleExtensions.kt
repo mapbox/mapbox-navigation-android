@@ -1,4 +1,4 @@
-package com.mapbox.navigation.dropin.internal.extensions
+package com.mapbox.navigation.core.internal.extensions
 
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner

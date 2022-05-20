@@ -7,8 +7,8 @@ import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.core.internal.extensions.attachResumed
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.dropin.internal.extensions.attachResumed
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.AppLifecycleActivityLayoutBinding
 import com.mapbox.navigation.qa_test_app.lifecycle.DropInContinuousRoutes

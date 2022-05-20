@@ -1,11 +1,9 @@
-package com.mapbox.navigation.dropin.lifecycle
+package com.mapbox.navigation.ui.base.lifecycle
 
 import android.view.ViewGroup
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
-import com.mapbox.navigation.dropin.binder.Binder
-import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk

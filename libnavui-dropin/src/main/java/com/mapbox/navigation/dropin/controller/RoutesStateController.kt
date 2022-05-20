@@ -10,9 +10,9 @@ import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.component.routefetch.RoutesState
-import com.mapbox.navigation.dropin.internal.extensions.flowRoutesUpdated
 import com.mapbox.navigation.dropin.model.Action
 import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.model.Store

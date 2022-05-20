@@ -28,6 +28,7 @@ import com.mapbox.maps.TileStoreUsageMode
 import com.mapbox.maps.applyDefaultParams
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultAudioGuidanceButtonStyle
@@ -43,12 +44,11 @@ import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultSpee
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultSpeedLimitTextAppearance
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultStartNavigationButtonStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultTripProgressStyle
-import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.internal.extensions.flowLocationMatcherResult
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.LayoutActivityNavigationViewCustomizedBinding
 import com.mapbox.navigation.qa_test_app.utils.Utils
+import com.mapbox.navigation.ui.base.lifecycle.UIBinder
+import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maneuver.model.ManeuverExitOptions
 import com.mapbox.navigation.ui.maneuver.model.ManeuverPrimaryOptions
 import com.mapbox.navigation.ui.maneuver.model.ManeuverSecondaryOptions

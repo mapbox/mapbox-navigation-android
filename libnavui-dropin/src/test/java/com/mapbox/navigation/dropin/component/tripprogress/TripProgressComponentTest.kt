@@ -5,8 +5,8 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
 import io.mockk.every
@@ -33,7 +33,7 @@ class TripProgressComponentTest {
 
     @Test
     fun `onAttached renders location matcher results`() = coroutineRule.runBlockingTest {
-        mockkStatic("com.mapbox.navigation.dropin.internal.extensions.MapboxNavigationEx")
+        mockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationEx")
         val routeProgress = mockk<RouteProgress> {
             every { durationRemaining } returns 600.0
             every { distanceRemaining } returns 100f
@@ -56,6 +56,6 @@ class TripProgressComponentTest {
         ).onAttached(mapboxNavigation)
 
         verify { tripProgressView.render(any()) }
-        unmockkStatic("com.mapbox.navigation.dropin.internal.extensions.MapboxNavigationEx")
+        unmockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationEx")
     }
 }
