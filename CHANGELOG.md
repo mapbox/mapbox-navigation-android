@@ -66,6 +66,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Added capabilities for Drop-In UI to render in landscape mode. [#5823](https://github.com/mapbox/mapbox-navigation-android/pull/5823)
 - Added support for sharing multiple instances of `MapboxNavigationObserver`. [#5829](https://github.com/mapbox/mapbox-navigation-android/pull/5829)
 - Added support for patches in Tile store. Tile store may download a patch to update an existing tile instead of downloading a new one. [#5861](https://github.com/mapbox/mapbox-navigation-android/pull/5861)
+- :warning: Expired data is cleaned up in current route leg if it can't be updated via route refresh. Congestion annotations become to "unknown". Numeric congestion annotations become null. Expired incidents disappear. [#1557](https://github.com/mapbox/navigation-sdks/issues/1557)
 
 #### Bug fixes and improvements
 - Reduced memory consumptions on startup by not decoding tiles in predictive cache and latest version controller. [#5848](https://github.com/mapbox/mapbox-navigation-android/pull/5847)
@@ -117,9 +118,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 ## Mapbox Navigation SDK 2.5.0-rc.2 - May 19, 2022
 ### Changelog
 [Changes between v2.5.0-rc.1 and v2.5.0-rc.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.5.0-rc.1...v2.5.0-rc.2)
-- :warning: Congestion annotations are now became "unknown" in current leg upon expiration. [#1557](https://github.com/mapbox/navigation-sdks/issues/1557)
-- :warning: The Navigation SDK cleans-up an expiring data in current route leg if the data can't be updated via route refresh. Congestion annotations change to "unknown". Numeric congestion annotations change to null. Expired incidents disappear. [#1557](https://github.com/mapbox/navigation-sdks/issues/1557)
-
 
 #### Bug fixes and improvements
 - Fixed an issue with the vanishing point being rendered ahead of the location indicator (especially on long routes) and other rendering artifact on the route line when the vanishing feature is enabled. [#5816](https://github.com/mapbox/mapbox-navigation-android/pull/5816)
