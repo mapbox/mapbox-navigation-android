@@ -64,6 +64,7 @@ ext {
       barista                   : '4.2.0',
       svgParser                 : '1.4',
       androidStartup            : '1.0.0',
+      desugaring                : '1.1.5'
   ]
   dependenciesList = [
       // mapbox
@@ -165,6 +166,8 @@ ext {
       multidex                  : "androidx.multidex:multidex:${version.multidex}",
 
       svgParser                 : "com.caverock:androidsvg-aar:${version.svgParser}",
+
+      desugaring               : "com.android.tools:desugar_jdk_libs:${version.desugaring}",
 
       // Test app crashlytics
       firebaseCrashlyticsNdk    : "com.google.firebase:firebase-crashlytics-ndk:${version.firebaseCrashlytics}"
