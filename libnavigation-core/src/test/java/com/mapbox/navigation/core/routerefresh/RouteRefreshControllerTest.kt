@@ -230,19 +230,12 @@ class RouteRefreshControllerTest {
         }
 
     @Test
-    fun `traffic annotations and incidents on current leg(first) disappears if refresh fails for a long time`() =
+    fun `traffic annotations and incidents on all legs starting with the current(first) disappears if refresh fails`() =
         coroutineRule.runBlockingTest {
             val currentTime = ZonedDateTime.of(
-                LocalDateTime.of(
-                    2022,
-                    Month.MAY,
-                    22,
-                    14,
-                    30,
-                    0
-                ),
+                LocalDateTime.of(2022, Month.MAY, 22, 14, 30, 0),
                 ZoneId.of("Europe/Berlin")
-            )
+            ) // 12:30 UTC
             val primaryRoute = createTestTwoLegRoute(
                 firstLegIncidents = listOf(
                     createIncident(
@@ -259,8 +252,18 @@ class RouteRefreshControllerTest {
                     )
                 ),
                 secondLegIncidents = listOf(
-                    createIncident(id = "4"),
-                    createIncident(id = "5"),
+                    createIncident(
+                        id = "4",
+                        endTime = "2022-05-23T10:00:00Z",
+                    ),
+                    createIncident(
+                        id = "5",
+                        endTime = "2022-05-22T12:29:00Z",
+                    ),
+                    createIncident(
+                        id = "6",
+                        endTime = null,
+                    )
                 )
             )
             val directionsSession = mockk<DirectionsSession>() {
@@ -292,19 +295,14 @@ class RouteRefreshControllerTest {
             // assert
             val refreshedRoute = refreshedRoutesDeffer.getCompleted().first()
             refreshedRoute.assertCongestionExpiredForLeg(0)
+            refreshedRoute.assertCongestionExpiredForLeg(1)
             assertEquals(
                 listOf("1"),
                 refreshedRoute.directionsRoute.legs()!![0].incidents()?.map { it.id() }
             )
             assertEquals(
-                "ony current(first) leg should be refreshed",
-                primaryRoute.directionsRoute.legs()!![1].annotation(),
-                refreshedRoute.directionsRoute.legs()!![1].annotation()
-            )
-            assertEquals(
-                "ony current(first) leg should be refreshed",
-                primaryRoute.directionsRoute.legs()!![1].incidents(),
-                refreshedRoute.directionsRoute.legs()!![1].incidents()
+                listOf("4"),
+                refreshedRoute.directionsRoute.legs()!![1].incidents()?.map { it.id() }
             )
         }
 
@@ -347,31 +345,24 @@ class RouteRefreshControllerTest {
     fun `traffic annotations and expired annotations on current leg(second) disappear if refresh doesn't respond`() =
         coroutineRule.runBlockingTest {
             val currentTime = ZonedDateTime.of(
-                LocalDateTime.of(
-                    2022,
-                    Month.MAY,
-                    22,
-                    12,
-                    0,
-                    0
-                ),
+                LocalDateTime.of(2022, Month.MAY, 22, 12, 0, 0),
                 ZoneId.of("Europe/Warsaw")
-            )
+            ) // 10:00 UTC
             val currentRoute = createTestTwoLegRoute(
                 firstLegIncidents = listOf(
                     createIncident(
                         id = "1",
-                        endTime = "2022-05-22T10:00:00Z",
+                        endTime = "2022-05-22T09:00:00Z",
                     ),
                 ),
                 secondLegIncidents = listOf(
                     createIncident(
                         id = "2",
-                        endTime = "2022-05-22T10:00:00Z"
+                        endTime = "2022-05-22T09:59:00Z"
                     ),
                     createIncident(
                         id = "3",
-                        endTime = "2022-05-22T13:00:01Z"
+                        endTime = "2022-05-22T10:00:01Z"
                     ),
                 )
             )
@@ -411,12 +402,12 @@ class RouteRefreshControllerTest {
                 refreshedRoute.directionsRoute.legs()!![1].incidents()?.map { it.id() }
             )
             assertEquals(
-                "ony current(second) leg should be refreshed",
+                "annotations on passed legs should not be refreshed",
                 currentRoute.directionsRoute.legs()!![0].annotation(),
                 refreshedRoute.directionsRoute.legs()!![0].annotation()!!
             )
             assertEquals(
-                "ony current(second) leg should be refreshed",
+                "incidents on passed legs should not be refreshed",
                 currentRoute.directionsRoute.legs()!![0].incidents(),
                 refreshedRoute.directionsRoute.legs()!![0].incidents()!!
             )

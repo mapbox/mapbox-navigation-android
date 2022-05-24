@@ -85,7 +85,7 @@ internal class RouteRefreshController(
         return route.refreshRoute(
             0,
             routeLegs.mapIndexed { index, leg ->
-                if (index == currentLegIndex) {
+                if (index >= currentLegIndex) {
                     leg.annotation()
                         ?.toBuilder()
                         ?.congestion(leg.annotation()?.congestion()?.map { "unknown" })
@@ -96,7 +96,7 @@ internal class RouteRefreshController(
                 }
             },
             routeLegs.mapIndexed { index, it ->
-                if (index == currentLegIndex) {
+                if (index >= currentLegIndex) {
                     it.incidents()?.filter {
                         it.endTime()
                             ?.let(ZonedDateTime::parse)
