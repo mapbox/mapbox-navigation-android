@@ -4,7 +4,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StyleRes
 import com.google.android.material.resources.TextAppearance
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.view.MapboxAudioGuidanceButton
 import com.mapbox.navigation.dropin.view.MapboxCameraModeButton
 import com.mapbox.navigation.dropin.view.MapboxExtendableButton
 import com.mapbox.navigation.ui.maneuver.model.ManeuverExitOptions
@@ -16,6 +15,7 @@ import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
 import com.mapbox.navigation.ui.maps.roadname.view.MapboxRoadNameView
 import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
 import com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
+import com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
 
 /**
  * A class that allows you to style the default standalone components used by [NavigationView].

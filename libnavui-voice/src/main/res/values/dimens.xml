@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="mapbox_soundButton_minExtendedWidth">165dp</dimen>
+
+    <dimen name="mapbox_audioGuidanceButton_paddingStart">20dp</dimen>
 </resources>
