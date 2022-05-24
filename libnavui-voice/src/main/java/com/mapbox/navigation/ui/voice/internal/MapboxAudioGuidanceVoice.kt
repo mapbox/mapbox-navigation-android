@@ -1,4 +1,4 @@
-package com.mapbox.navigation.dropin.component.audioguidance
+package com.mapbox.navigation.ui.voice.internal
 
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
@@ -14,20 +14,30 @@ import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.channels.onSuccess
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flowOf
 
 /**
- * Controls audio guidance one instruction at a time.
+ * Controls voice guidance for the car.
  *
  * @param mapboxSpeechApi language (ISO 639)
  * @param mapboxVoiceInstructionsPlayer stream of [VoiceInstructions].
  */
-@OptIn(ExperimentalCoroutinesApi::class)
-internal class AudioGuidanceVoice(
+class MapboxAudioGuidanceVoice(
     private val mapboxSpeechApi: MapboxSpeechApi,
     private val mapboxVoiceInstructionsPlayer: MapboxVoiceInstructionsPlayer
 ) {
+    fun speak(voiceInstructions: VoiceInstructions?): Flow<SpeechAnnouncement?> {
+        return if (voiceInstructions != null) {
+            speechFlow(voiceInstructions)
+        } else {
+            mapboxSpeechApi.cancel()
+            mapboxVoiceInstructionsPlayer.clear()
+            flowOf(null)
+        }
+    }
 
-    fun speak(voiceInstructions: VoiceInstructions): Flow<SpeechAnnouncement?> =
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun speechFlow(voiceInstructions: VoiceInstructions): Flow<SpeechAnnouncement> =
         callbackFlow {
             val speechCallback =
                 MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> { value ->

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin
 
 import android.Manifest
+import android.app.Application
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -30,6 +31,7 @@ import com.mapbox.navigation.dropin.internal.extensions.navigationViewAccessToke
 import com.mapbox.navigation.dropin.internal.extensions.toComponentActivityRef
 import com.mapbox.navigation.dropin.internal.extensions.toLifecycleOwner
 import com.mapbox.navigation.dropin.internal.extensions.toViewModelStoreOwner
+import com.mapbox.navigation.ui.app.internal.SharedApp
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -95,6 +97,7 @@ class NavigationView @JvmOverloads constructor(
     init {
         keepScreenOn = true
 
+        SharedApp.setup(context.applicationContext as Application)
         if (!MapboxNavigationApp.isSetup()) {
             MapboxNavigationApp.setup(
                 NavigationOptions.Builder(context)

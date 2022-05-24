@@ -34,8 +34,9 @@ android {
 }
 
 dependencies {
-    api project(":libnavigation-util")
-    api dependenciesList.svgParser
+    api project(":libnavui-base")
+    api project(":libnavui-voice")
+
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.androidXAnnotation
     implementation dependenciesList.androidXLifecycleRuntime

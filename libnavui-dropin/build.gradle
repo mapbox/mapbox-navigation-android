@@ -51,6 +51,7 @@ dependencies {
     api project(":libnavui-voice")
     implementation project(":libnavui-resources")
     implementation project(":libnavui-util")
+    implementation project(":libnavui-app")
 
     implementation dependenciesList.materialDesign
     implementation dependenciesList.androidXCardView

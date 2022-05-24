@@ -2,28 +2,19 @@ package com.mapbox.navigation.dropin.controller
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.component.audioguidance.AudioAction
-import com.mapbox.navigation.dropin.component.audioguidance.AudioGuidanceApi
-import com.mapbox.navigation.dropin.component.audioguidance.AudioGuidanceServices
 import com.mapbox.navigation.dropin.component.audioguidance.AudioGuidanceState
-import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.model.Action
 import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.model.Store
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.launch
+import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidance
 
 /**
  * This class is responsible for playing voice instructions. Use the [AudioAction] to turning the
  * audio on or off.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class AudioGuidanceStateController(
     private val store: Store
 ) : StateController() {
@@ -35,6 +26,9 @@ internal class AudioGuidanceStateController(
         if (action is AudioAction) {
             val audioState = state.audio
             return state.copy(audio = processAudioAction(audioState, action))
+        }
+        if (action is SetAudioState) {
+            return state.copy(audio = action.state)
         }
         return state
     }
@@ -53,23 +47,23 @@ internal class AudioGuidanceStateController(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        val audioGuidanceApi = AudioGuidanceApi.create(mapboxNavigation, AudioGuidanceServices())
-        coroutineScope.launch {
-            flowSpeakInstructions().flatMapLatest { speakInstructions ->
-                if (speakInstructions) {
-                    audioGuidanceApi.speakVoiceInstructions()
+        val audioGuidance = MapboxNavigationApp.getObserver(MapboxAudioGuidance::class)
+        audioGuidance.stateFlow().observe {
+            if (it.isMuted != store.state.value.audio.isMuted) {
+                val newState = AudioGuidanceState(it.isMuted)
+                store.dispatch(SetAudioState(newState))
+            }
+        }
+        store.select { it.audio }.observe {
+            if (it.isMuted != audioGuidance.stateFlow().value.isMuted) {
+                if (it.isMuted) {
+                    audioGuidance.mute()
                 } else {
-                    emptyFlow()
+                    audioGuidance.unmute()
                 }
-            }.collect()
+            }
         }
     }
 
-    private fun flowSpeakInstructions(): Flow<Boolean> = combine(
-        store.select { it.navigation },
-        store.select { it.audio },
-    ) { navigationState, audioGuidanceState ->
-        navigationState is NavigationState.ActiveNavigation &&
-            !audioGuidanceState.isMuted
-    }
+    private data class SetAudioState(val state: AudioGuidanceState) : Action
 }
