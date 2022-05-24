@@ -23,19 +23,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Android Core `v5.0.1`
 - Mapbox Android Telemetry `v8.1.1`
 
-## Mapbox Navigation SDK 2.6.0-alpha.1 - May 19, 2022
-### Changelog
-[Changes between v2.5.0-rc.2 and v2.6.0-alpha.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.5.0-rc.1...v2.6.0-alpha.1)
-
-### Mapbox dependencies
-This release depends on, and has been tested with, the following Mapbox dependencies:
-- Mapbox Maps SDK `v10.5.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.5.0))
-- Mapbox Navigation Native `v100.0.0`
-- Mapbox Core Common `v21.3.1`
-- Mapbox Java `v6.5.0-beta.6` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.5.0-beta.6))
-- Mapbox Android Core `v5.0.1`
-- Mapbox Android Telemetry `v8.1.1`
-
 ## Mapbox Navigation SDK 2.5.0-rc.2 - May 19, 2022
 ### Changelog
 [Changes between v2.5.0-rc.1 and v2.5.0-rc.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.5.0-rc.1...v2.5.0-rc.2)
