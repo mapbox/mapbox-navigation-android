@@ -1,4 +1,4 @@
-package com.mapbox.navigation.dropin.component.routearrow
+package com.mapbox.navigation.ui.maps.internal.ui
 
 import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal class RouteArrowComponent(
+class RouteArrowComponent(
     private val mapView: MapView,
     private val routeArrowOptions: RouteArrowOptions,
     private val routeArrowApi: MapboxRouteArrowApi = MapboxRouteArrowApi(),

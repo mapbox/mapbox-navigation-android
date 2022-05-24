@@ -1,6 +1,8 @@
 package com.mapbox.navigation.dropin.model
 
+import com.mapbox.navigation.ui.utils.internal.extensions.slice
 import com.mapbox.navigation.utils.internal.logW
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,6 +45,10 @@ internal open class Store {
 
     fun <T> select(selector: (State) -> T): Flow<T> {
         return state.map { selector(it) }.distinctUntilChanged()
+    }
+
+    fun <T> slice(scope: CoroutineScope, selector: (State) -> T): StateFlow<T> {
+        return state.slice(scope, selector = selector)
     }
 
     fun dispatch(action: Action) {

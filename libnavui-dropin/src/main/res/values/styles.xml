@@ -166,23 +166,6 @@
         <item name="cameraModeButtonOverviewText">@string/mapbox_route_overview</item>
     </style>
 
-    <!-- Audio guidance button -->
-    <style name="MapboxAudioGuidanceButtonTextAppearance">
-        <item name="android:textColor">@color/colorOnSurface</item>
-        <item name="android:textSize">@dimen/mapbox_button_text_regular</item>
-    </style>
-
-    <style name="MapboxStyleAudioGuidanceButton">
-        <item name="android:elevation">0dp</item>
-        <item name="audioGuidanceButtonBackground">@drawable/mapbox_bg_button</item>
-        <item name="audioGuidanceButtonIconTint">@color/colorOnSurface</item>
-        <item name="audioGuidanceButtonMuteIcon">@drawable/mapbox_ic_sound_off</item>
-        <item name="audioGuidanceButtonUnmuteIcon">@drawable/mapbox_ic_sound_on</item>
-        <item name="audioGuidanceButtonTextAppearance">@style/MapboxAudioGuidanceButtonTextAppearance</item>
-        <item name="audioGuidanceButtonMuteText">@string/mapbox_muted</item>
-        <item name="audioGuidanceButtonUnmuteText">@string/mapbox_unmuted</item>
-    </style>
-
     <!-- Extendable button -->
     <style name="MapboxExtendableButtonTextAppearance">
         <item name="android:textColor">@color/colorOnSurface</item>

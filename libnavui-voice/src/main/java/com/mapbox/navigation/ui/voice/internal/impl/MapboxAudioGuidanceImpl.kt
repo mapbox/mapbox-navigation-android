@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.voice.internal.impl
 
+import android.content.Context
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -183,6 +184,13 @@ class MapboxAudioGuidanceImpl(
     companion object {
         val STORE_AUDIO_GUIDANCE_MUTED =
             booleanDataStoreKey("audio_guidance_muted", false)
+
+        fun create(context: Context): MapboxAudioGuidanceImpl {
+            return MapboxAudioGuidanceImpl(
+                MapboxAudioGuidanceServicesImpl(),
+                NavigationConfigOwner(context)
+            )
+        }
     }
 }
 
