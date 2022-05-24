@@ -11,6 +11,23 @@ Mapbox welcomes participation and contributions from everyone.
 - Reduced memory consumptions on startup by not decoding tiles in predictive cache and latest version controller [#5848](https://github.com/mapbox/mapbox-navigation-android/pull/5847)
 - Fixed an issue where the vanishing point of the primary route line was not always reset when new routes were drawn following a previous active navigation session. [#5842](https://github.com/mapbox/mapbox-navigation-android/pull/5842)
 
+## Mapbox Navigation SDK 2.5.0-rc.3 - May 24, 2022
+### Changelog
+[Changes between v2.5.0-rc.2 and v2.5.0-rc.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.5.0-rc.2...v2.5.0-rc.3)
+
+#### Bug fixes and improvements
+- Reduced memory consumptions on startup by not decoding tiles in predictive cache and latest version controller. [#5848](https://github.com/mapbox/mapbox-navigation-android/pull/5847)
+- Fixed an issue where the vanishing point of the primary route line was not always reset when new routes were drawn following a previous active navigation session. [#5842](https://github.com/mapbox/mapbox-navigation-android/pull/5842)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.5.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.5.0))
+- Mapbox Navigation Native `v101.0.0`
+- Mapbox Core Common `v21.3.1`
+- Mapbox Java `v6.5.0-beta.6` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.5.0-beta.6))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
+
 ## Mapbox Navigation SDK 2.6.0-alpha.1 - May 19, 2022
 ### Changelog
 [Changes between v2.5.0-rc.2 and v2.6.0-alpha.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.5.0-rc.1...v2.6.0-alpha.1)
