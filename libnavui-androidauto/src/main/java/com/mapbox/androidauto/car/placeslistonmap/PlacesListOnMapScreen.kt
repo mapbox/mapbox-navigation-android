@@ -14,6 +14,9 @@ import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.MainCarContext
 import com.mapbox.androidauto.car.action.MapboxActionProvider
+import com.mapbox.androidauto.car.internal.extensions.getStyle
+import com.mapbox.androidauto.car.internal.extensions.handleStyleOnAttached
+import com.mapbox.androidauto.car.internal.extensions.handleStyleOnDetached
 import com.mapbox.androidauto.car.location.CarLocationRenderer
 import com.mapbox.androidauto.car.navigation.CarLocationsOverviewCamera
 import com.mapbox.androidauto.car.preview.CarRoutePreviewScreen
@@ -28,6 +31,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
+import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.base.route.NavigationRoute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelChildren
@@ -52,15 +56,16 @@ class PlacesListOnMapScreen(
     private val jobControl by lazy { mainCarContext.getJobControl() }
     private val carNavigationCamera = CarLocationsOverviewCamera(mainCarContext.mapboxNavigation)
     private val locationRenderer = CarLocationRenderer(mainCarContext)
+    private var styleLoadedListener: OnStyleLoadedListener? = null
 
     private val surfaceListener = object : MapboxCarMapObserver {
 
         override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
             super.onAttached(mapboxCarMapSurface)
             logAndroidAuto("PlacesListOnMapScreen loaded")
-            mapboxCarMapSurface.mapSurface.getMapboxMap().getStyle { style ->
+            styleLoadedListener = mapboxCarMapSurface.handleStyleOnAttached {
                 placesLayerUtil.initializePlacesListOnMapLayer(
-                    style,
+                    it,
                     carContext.resources
                 )
                 loadPlaceRecords()
@@ -70,8 +75,8 @@ class PlacesListOnMapScreen(
         override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
             super.onDetached(mapboxCarMapSurface)
             logAndroidAuto("PlacesListOnMapScreen detached")
-            mapboxCarMapSurface.mapSurface.getMapboxMap().getStyle()?.let { style ->
-                placesLayerUtil.removePlacesListOnMapLayer(style)
+            mapboxCarMapSurface.handleStyleOnDetached(styleLoadedListener)?.let {
+                placesLayerUtil.removePlacesListOnMapLayer(it)
             }
         }
     }
@@ -176,8 +181,8 @@ class PlacesListOnMapScreen(
                 )
             }
             val featureCollection = FeatureCollection.fromFeatures(features)
-            carMapSurface.mapSurface.getMapboxMap().getStyle { style ->
-                placesLayerUtil.updatePlacesListOnMapLayer(style, featureCollection)
+            carMapSurface.getStyle()?.let {
+                placesLayerUtil.updatePlacesListOnMapLayer(it, featureCollection)
             }
         }
         val placesWithCoordinates = places.mapNotNull { it.coordinate }
