@@ -32,6 +32,8 @@ import org.junit.Rule
 import org.junit.Test
 import java.time.LocalDateTime
 import java.time.Month
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
@@ -230,13 +232,16 @@ class RouteRefreshControllerTest {
     @Test
     fun `traffic annotations and incidents on current leg(first) disappears if refresh fails for a long time`() =
         coroutineRule.runBlockingTest {
-            val currentTime = LocalDateTime.of(
-                2022,
-                Month.MAY,
-                22,
-                13,
-                0,
-                0
+            val currentTime = ZonedDateTime.of(
+                LocalDateTime.of(
+                    2022,
+                    Month.MAY,
+                    22,
+                    14,
+                    30,
+                    0
+                ),
+                ZoneId.of("Europe/Berlin")
             )
             val primaryRoute = createTestTwoLegRoute(
                 firstLegIncidents = listOf(
@@ -341,13 +346,16 @@ class RouteRefreshControllerTest {
     @Test
     fun `traffic annotations and expired annotations on current leg(second) disappear if refresh doesn't respond`() =
         coroutineRule.runBlockingTest {
-            val currentTime = LocalDateTime.of(
-                2022,
-                Month.MAY,
-                22,
-                13,
-                0,
-                0
+            val currentTime = ZonedDateTime.of(
+                LocalDateTime.of(
+                    2022,
+                    Month.MAY,
+                    22,
+                    12,
+                    0,
+                    0
+                ),
+                ZoneId.of("Europe/Warsaw")
             )
             val currentRoute = createTestTwoLegRoute(
                 firstLegIncidents = listOf(
@@ -507,7 +515,9 @@ class RouteRefreshControllerTest {
         directionsSession: DirectionsSession = mockk(),
         currentLegIndexProvider: () -> Int = { 0 },
         routeDiffProvider: DirectionsRouteDiffProvider = DirectionsRouteDiffProvider(),
-        currentDateTimeProvider: () -> LocalDateTime = LocalDateTime::now
+        currentDateTimeProvider: () -> ZonedDateTime = {
+            ZonedDateTime.parse("2022-05-20T14:00:00Z")
+        }
     ) = RouteRefreshController(
         routeRefreshOptions,
         directionsSession,

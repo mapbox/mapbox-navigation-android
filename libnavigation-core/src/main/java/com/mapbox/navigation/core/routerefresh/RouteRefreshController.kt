@@ -16,7 +16,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
-import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import kotlin.coroutines.resume
 
@@ -29,7 +28,7 @@ internal class RouteRefreshController(
     private val directionsSession: DirectionsSession,
     private val currentLegIndexProvider: () -> Int,
     private val routeDiffProvider: DirectionsRouteDiffProvider = DirectionsRouteDiffProvider(),
-    private val currentDateTimeProvider: () -> LocalDateTime = LocalDateTime::now
+    private val currentDateTimeProvider: () -> ZonedDateTime = ZonedDateTime::now
 ) {
 
     internal companion object {
@@ -100,7 +99,7 @@ internal class RouteRefreshController(
                 if (index == currentLegIndex) {
                     it.incidents()?.filter {
                         it.endTime()
-                            ?.let { ZonedDateTime.parse(it).toLocalDateTime() }
+                            ?.let(ZonedDateTime::parse)
                             ?.isAfter(currentDateTimeProvider())
                             ?: false
                     }
