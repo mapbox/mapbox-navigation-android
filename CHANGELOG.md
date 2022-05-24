@@ -16,7 +16,7 @@ Mapbox welcomes participation and contributions from everyone.
 [Changes between v2.5.0-rc.2 and v2.5.0-rc.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.5.0-rc.2...v2.5.0-rc.3)
 
 #### Bug fixes and improvements
-- Reduced memory consumptions on startup by not decoding tiles in predictive cache and latest version controller [#5848](https://github.com/mapbox/mapbox-navigation-android/pull/5847)
+- Reduced memory consumptions on startup by not decoding tiles in predictive cache and latest version controller. [#5848](https://github.com/mapbox/mapbox-navigation-android/pull/5847)
 - Fixed an issue where the vanishing point of the primary route line was not always reset when new routes were drawn following a previous active navigation session. [#5842](https://github.com/mapbox/mapbox-navigation-android/pull/5842)
 
 ### Mapbox dependencies
