@@ -5,8 +5,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgressState
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.parseRoutePoints
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
@@ -16,6 +14,8 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimExpressionPro
 import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineExpressions
+import com.mapbox.navigation.ui.maps.util.MapboxRouteLineUtils
+import com.mapbox.navigation.ui.maps.util.MapboxRouteLineUtils.parseRoutePoints
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl

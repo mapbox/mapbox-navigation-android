@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.maps.internal.route.line
+package com.mapbox.navigation.ui.maps.util
 
 import android.graphics.Color
 import android.util.LruCache
@@ -36,7 +36,6 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
-import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
@@ -317,13 +316,13 @@ internal object MapboxRouteLineUtils {
     fun getRouteFeatureDataProvider(
         directionsRoutes: List<NavigationRoute>
     ): () -> List<RouteFeatureData> = {
-        directionsRoutes.map(::generateFeatureCollection)
+        directionsRoutes.map(MapboxRouteLineUtils::generateFeatureCollection)
     }
 
     fun getRouteLineFeatureDataProvider(
         directionsRoutes: List<NavigationRouteLine>
     ): () -> List<RouteFeatureData> = {
-        directionsRoutes.map(::generateFeatureCollection)
+        directionsRoutes.map(MapboxRouteLineUtils::generateFeatureCollection)
     }
 
     internal fun resolveNumericToValue(

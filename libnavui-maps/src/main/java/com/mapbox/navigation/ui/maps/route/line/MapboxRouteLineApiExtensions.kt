@@ -10,7 +10,6 @@ import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
@@ -24,6 +23,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.maps.route.line.model.toNavigationRouteLines
+import com.mapbox.navigation.ui.maps.util.MapboxRouteLineUtils
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.maps.internal.route.line
+package com.mapbox.navigation.ui.maps.util
 
 import android.content.Context
 import android.graphics.Color

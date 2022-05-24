@@ -1,6 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
-import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineTrimOffset
+import com.mapbox.navigation.ui.maps.internal.RouteLineTrimOffset
 
 /**
  * Provides information needed to draw a route.
