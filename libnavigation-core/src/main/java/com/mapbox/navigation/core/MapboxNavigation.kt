@@ -121,8 +121,9 @@ import com.mapbox.navigator.PollingConfig
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
@@ -241,7 +242,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val internalFallbackVersionsObserver: FallbackVersionsObserver
     private val routeAlternativesController: RouteAlternativesController
     private val routeRefreshController: RouteRefreshController
-    private var routeRefreshJob: Job? = null
+    private var routeScope = createChildScope()
     private val arrivalProgressObserver: ArrivalProgressObserver
     private val electronicHorizonOptions: ElectronicHorizonOptions = ElectronicHorizonOptions(
         navigationOptions.eHorizonOptions.length,
@@ -800,7 +801,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         @RoutesExtra.RoutesUpdateReason reason: String,
     ) {
         rerouteController?.interrupt()
-        routeRefreshJob?.cancel()
+        restartRouteScope()
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
                 setRoutesToTripSession(routes, legIndex, reason)
@@ -1483,7 +1484,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
         if (result.navigationRoutes.isNotEmpty()) {
-            routeRefreshJob = threadController.getMainScopeAndRootJob().scope.launch {
+            routeScope.launch {
                 val refreshed = routeRefreshController.refresh(result.navigationRoutes)
                 internalSetNavigationRoutes(
                     refreshed,
@@ -1642,6 +1643,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 )
             }
         }
+    }
+
+    private fun createChildScope() = CoroutineScope(threadController.getMainScopeAndRootJob().job)
+
+    private fun restartRouteScope() {
+        routeScope.cancel()
+        routeScope = createChildScope()
     }
 
     private companion object {
