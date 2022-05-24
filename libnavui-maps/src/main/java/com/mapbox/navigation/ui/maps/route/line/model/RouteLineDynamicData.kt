@@ -1,7 +1,5 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
-import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineTrimOffset
-
 /**
  * Provides information needed to draw a route.
  *
@@ -9,13 +7,14 @@ import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineTrimOffset
  * @param casingExpressionProvider expression used to style the case of the line
  * @param trafficExpressionProvider expression used to style the congestion colors on the line
  * @param restrictedSectionExpressionProvider expression used to style the restricted sections on the line
+ * @param trimOffset a value representing the section of the line that should be trimmed and made transparent. Null by default
  */
 class RouteLineDynamicData internal constructor(
     val baseExpressionProvider: RouteLineExpressionProvider,
     val casingExpressionProvider: RouteLineExpressionProvider,
     val trafficExpressionProvider: RouteLineExpressionProvider?,
     val restrictedSectionExpressionProvider: RouteLineExpressionProvider?,
-    internal val trimOffset: RouteLineTrimOffset? = null
+    val trimOffset: RouteLineTrimOffset? = null,
 ) {
 
     /**
@@ -36,14 +35,14 @@ class RouteLineDynamicData internal constructor(
      * @param casingExpressionProvider expression used to style the case of the line
      * @param trafficExpressionProvider expression used to style the congestion colors on the line
      * @param restrictedSectionExpressionProvider expression used to style the restricted sections on the line
-     * @param trimOffset a value representing the section of the line that should be trimmed and made transparent
+     * @param trimOffset a value representing the section of the line that should be trimmed and made transparent. Null by default
      */
     class MutableRouteLineDynamicData internal constructor(
         var baseExpressionProvider: RouteLineExpressionProvider,
         var casingExpressionProvider: RouteLineExpressionProvider,
         var trafficExpressionProvider: RouteLineExpressionProvider?,
         var restrictedSectionExpressionProvider: RouteLineExpressionProvider?,
-        internal var trimOffset: RouteLineTrimOffset? = null
+        var trimOffset: RouteLineTrimOffset? = null,
     ) {
 
         /**

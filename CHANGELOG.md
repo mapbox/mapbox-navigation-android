@@ -11,6 +11,7 @@ Mapbox welcomes participation and contributions from everyone.
 [Changes between v2.6.0-alpha.1 and v2.6.0-alpha.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.6.0-alpha.1...v2.6.0-alpha.2)
 
 #### Features
+- `RouteLineTrimOffset` exposed in `RouteLineDynamicData` to override the vanishing point offset produced by the `MapboxRouteLineApi`. [#5858](https://github.com/mapbox/mapbox-navigation-android/pull/5858)
 - Added capabilities for Drop-In UI to render in landscape mode. [#5823](https://github.com/mapbox/mapbox-navigation-android/pull/5823)
 - Added support for sharing multiple instances of `MapboxNavigationObserver`. [#5829](https://github.com/mapbox/mapbox-navigation-android/pull/5829)
 - Added support for patches in Tile store. Tile store may download a patch to update an existing tile instead of downloading a new one. [#5861](https://github.com/mapbox/mapbox-navigation-android/pull/5861)
