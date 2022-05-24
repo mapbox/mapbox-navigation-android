@@ -8,6 +8,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Added support for sharing multiple instances of `MapboxNavigationObserver`. [#5829](https://github.com/mapbox/mapbox-navigation-android/pull/5829)
 
 #### Bug fixes and improvements
+- Reduced memory consumptions on startup by not decoding tiles in predictive cache and latest version controller [#5848](https://github.com/mapbox/mapbox-navigation-android/pull/5847)
 
 ## Mapbox Navigation SDK 2.6.0-alpha.1 - May 19, 2022
 ### Changelog
