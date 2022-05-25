@@ -6,10 +6,15 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 - Added capabilities for Drop-In UI to render in landscape mode. [#5823](https://github.com/mapbox/mapbox-navigation-android/pull/5823)
 - Added support for sharing multiple instances of `MapboxNavigationObserver`. [#5829](https://github.com/mapbox/mapbox-navigation-android/pull/5829)
+- Added support for patches in Tile store. Tile store may download a patch to update an existing tile instead of downloading a new one. [#5861](https://github.com/mapbox/mapbox-navigation-android/pull/5861)
 
 #### Bug fixes and improvements
-- Reduced memory consumptions on startup by not decoding tiles in predictive cache and latest version controller [#5848](https://github.com/mapbox/mapbox-navigation-android/pull/5847)
+- Reduced memory consumptions on startup by not decoding tiles in predictive cache and latest version controller. [#5848](https://github.com/mapbox/mapbox-navigation-android/pull/5847)
 - Fixed an issue where the vanishing point of the primary route line was not always reset when new routes were drawn following a previous active navigation session. [#5842](https://github.com/mapbox/mapbox-navigation-android/pull/5842)
+- Fixed `LocationMatcherResult#location#time`. Now it follows Android conventions, i.e. contains UTC time in milliseconds instead of elapsed time. [#5861](https://github.com/mapbox/mapbox-navigation-android/pull/5861) 
+- Fixed map-matching for some corner cases. [#5861](https://github.com/mapbox/mapbox-navigation-android/pull/5861)
+- Improved off-route detection in case of a teleport. [#5861](https://github.com/mapbox/mapbox-navigation-android/pull/5861)
+- Reduced cache misses in tile store. [#5861](https://github.com/mapbox/mapbox-navigation-android/pull/5861)
 
 ## Mapbox Navigation SDK 2.5.0-rc.3 - May 24, 2022
 ### Changelog

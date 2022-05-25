@@ -43,7 +43,6 @@ dependencies {
     implementation project(":libnavui-resources")
 
     api dependenciesList.mapboxMapSdk
-    implementation dependenciesList.mapboxGLNative
     api dependenciesList.mapboxSdkTurf
 
     implementation dependenciesList.androidXAppCompat
