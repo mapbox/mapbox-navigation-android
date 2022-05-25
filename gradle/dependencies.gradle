@@ -13,18 +13,17 @@ ext {
   // version which we should use in this build
   def mapboxNavigatorVersion = System.getenv("FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION")
   if (mapboxNavigatorVersion == null || mapboxNavigatorVersion == '') {
-      mapboxNavigatorVersion = '101.0.0'
+      mapboxNavigatorVersion = '103.0.0'
   }
   println("Navigation Native version: " + mapboxNavigatorVersion)
 
   version = [
-      mapboxMapSdk              : '10.5.0',
-      mapboxGLNative            : '10.5.2', // remove after upgrading Maps SDK to v10.6.0-beta.1
+      mapboxMapSdk              : 'v10.6.0-beta.1',
       mapboxSdkServices         : '6.5.0-beta.6',
       mapboxEvents              : '8.1.1',
       mapboxCore                : '5.0.1',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
-      mapboxCommonNative        : '21.3.1',
+      mapboxCommonNative        : 'v22.0.0-beta.1',
       mapboxSearchSdk           : '1.0.0-beta.29',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
@@ -69,7 +68,6 @@ ext {
   dependenciesList = [
       // mapbox
       mapboxMapSdk              : "com.mapbox.maps:android:${version.mapboxMapSdk}",
-      mapboxGLNative            : "com.mapbox.maps:android-core:${version.mapboxGLNative}",
       mapboxSdkServices         : "com.mapbox.mapboxsdk:mapbox-sdk-services:${version.mapboxSdkServices}",
       mapboxSdkServicesCore     : "com.mapbox.mapboxsdk:mapbox-sdk-core:${version.mapboxSdkServices}",
       mapboxSdkGeoJSON          : "com.mapbox.mapboxsdk:mapbox-sdk-geojson:${version.mapboxSdkServices}",
