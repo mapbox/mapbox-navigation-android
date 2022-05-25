@@ -4,6 +4,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.6.0-alpha.2 - May 25, 2022
+### Changelog
+[Changes between v2.6.0-alpha.1 and v2.6.0-alpha.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.6.0-alpha.1...v2.6.0-alpha.2)
+
+#### Features
 - Added capabilities for Drop-In UI to render in landscape mode. [#5823](https://github.com/mapbox/mapbox-navigation-android/pull/5823)
 - Added support for sharing multiple instances of `MapboxNavigationObserver`. [#5829](https://github.com/mapbox/mapbox-navigation-android/pull/5829)
 - Added support for patches in Tile store. Tile store may download a patch to update an existing tile instead of downloading a new one. [#5861](https://github.com/mapbox/mapbox-navigation-android/pull/5861)
@@ -15,6 +22,15 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed map-matching for some corner cases. [#5861](https://github.com/mapbox/mapbox-navigation-android/pull/5861)
 - Improved off-route detection in case of a teleport. [#5861](https://github.com/mapbox/mapbox-navigation-android/pull/5861)
 - Reduced cache misses in tile store. [#5861](https://github.com/mapbox/mapbox-navigation-android/pull/5861)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.6.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.6.0-beta.1))
+- Mapbox Navigation Native `v103.0.1`
+- Mapbox Core Common `v22.0.0-beta.1`
+- Mapbox Java `v6.5.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.5.0))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
 
 ## Mapbox Navigation SDK 2.5.0-rc.3 - May 24, 2022
 ### Changelog
