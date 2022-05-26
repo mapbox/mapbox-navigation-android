@@ -2,7 +2,7 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.internal.route.refreshRoute
-import com.mapbox.navigation.base.internal.time.parseSO8061DateToLocalTimeOrNull
+import com.mapbox.navigation.base.internal.time.parseISO8601DateToLocalTimeOrNull
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshError
@@ -99,7 +99,7 @@ internal class RouteRefreshController(
             routeLegs.mapIndexed { index, it ->
                 if (index >= currentLegIndex) {
                     it.incidents()?.filter {
-                        val parsed = parseSO8061DateToLocalTimeOrNull(it.endTime())
+                        val parsed = parseISO8601DateToLocalTimeOrNull(it.endTime())
                             ?: return@filter false
                         val currentDate = localDateProvider()
                         parsed > currentDate

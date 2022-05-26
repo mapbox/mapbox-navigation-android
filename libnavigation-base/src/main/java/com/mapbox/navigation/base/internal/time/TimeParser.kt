@@ -4,7 +4,10 @@ import com.google.gson.internal.bind.util.ISO8601Utils
 import java.text.ParsePosition
 import java.util.Date
 
-fun parseSO8061DateToLocalTimeOrNull(date: String?): Date? {
+/***
+ * Parses a ISO8601 date. Converts parsed date to local time zone.
+ */
+fun parseISO8601DateToLocalTimeOrNull(date: String?): Date? {
     if (date == null) return null
     return try {
         ISO8601Utils.parse(date, ParsePosition(0))
