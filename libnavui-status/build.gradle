@@ -53,7 +53,7 @@ dependencies {
     testImplementation(project(':libtesting-utils'))
 }
 
-dokkaHtml {
+dokkaHtmlPartial {
     outputDirectory.set(kdocPath)
     moduleName.set("UI Status")
     dokkaSourceSets {

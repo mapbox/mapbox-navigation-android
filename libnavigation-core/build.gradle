@@ -69,7 +69,7 @@ dependencies {
     androidTestImplementation project(':libtesting-ui')
 }
 
-dokkaHtml {
+dokkaHtmlPartial {
     outputDirectory.set(kdocPath)
     moduleName.set("Core")
     dokkaSourceSets {
