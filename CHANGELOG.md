@@ -4,6 +4,8 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- :warning: Expired data is cleaned up in current route leg if it can't be updated via route refresh. Congestion annotations become to "unknown". Numeric congestion annotations become null. Expired incidents disappear. [#1557](https://github.com/mapbox/navigation-sdks/issues/1557)
+
 #### Bug fixes and improvements
 
 ## Mapbox Navigation SDK 2.5.0 - May 26, 2022
@@ -66,7 +68,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Added capabilities for Drop-In UI to render in landscape mode. [#5823](https://github.com/mapbox/mapbox-navigation-android/pull/5823)
 - Added support for sharing multiple instances of `MapboxNavigationObserver`. [#5829](https://github.com/mapbox/mapbox-navigation-android/pull/5829)
 - Added support for patches in Tile store. Tile store may download a patch to update an existing tile instead of downloading a new one. [#5861](https://github.com/mapbox/mapbox-navigation-android/pull/5861)
-- :warning: Expired data is cleaned up in current route leg if it can't be updated via route refresh. Congestion annotations become to "unknown". Numeric congestion annotations become null. Expired incidents disappear. [#1557](https://github.com/mapbox/navigation-sdks/issues/1557)
 
 #### Bug fixes and improvements
 - Reduced memory consumptions on startup by not decoding tiles in predictive cache and latest version controller. [#5848](https://github.com/mapbox/mapbox-navigation-android/pull/5847)
