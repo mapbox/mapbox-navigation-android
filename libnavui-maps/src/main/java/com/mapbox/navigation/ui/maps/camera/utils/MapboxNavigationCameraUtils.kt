@@ -4,7 +4,9 @@ import android.animation.Animator
 import android.animation.AnimatorSet
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.plugin.animation.animator.CameraAnimator
 import kotlin.math.hypot
+import kotlin.math.ln
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -18,6 +20,10 @@ internal fun normalizeBearing(currentBearing: Double, targetBearing: Double): Do
     from spinning around unintentionally
     */
     return (currentBearing + shortestRotation(currentBearing, targetBearing)).roundTo(6)
+}
+
+internal fun normalizeProjection(projectedDistance: Double): Double {
+    return ((ln((projectedDistance / 1000.0) + 0.24) + 2.1) * 1000.0)
 }
 
 private fun shortestRotation(from: Double, to: Double): Double {
@@ -49,6 +55,22 @@ internal fun AnimatorSet.constraintDurationTo(maxDuration: Long): AnimatorSet {
 
 internal fun createAnimatorSet(animators: List<Animator>) = AnimatorSet().apply {
     playTogether(*(animators.toTypedArray()))
+}
+
+internal fun createAnimatorSetWith(animators: Array<CameraAnimator<*>>) = AnimatorSet().apply {
+    playTogether(*(animators))
+}
+
+internal fun projectedDistance(
+    mapboxMap: MapboxMap,
+    currentPoint: Point,
+    targetPoint: Point,
+    targetZL: Double
+): Double {
+    return hypot(
+        mapboxMap.project(currentPoint, targetZL).x - mapboxMap.project(targetPoint, targetZL).x,
+        mapboxMap.project(targetPoint, targetZL).y - mapboxMap.project(targetPoint, targetZL).y
+    )
 }
 
 internal fun screenDistanceFromMapCenterToTarget(
