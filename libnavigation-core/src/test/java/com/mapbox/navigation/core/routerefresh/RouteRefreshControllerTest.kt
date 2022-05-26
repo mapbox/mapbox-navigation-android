@@ -71,7 +71,7 @@ class RouteRefreshControllerTest {
     fun `route refreshes`() = coroutineRule.runBlockingTest {
         val (initialRoute, refreshedRoute) = createTestInitialAndRefreshedTestRoutes()
         val directionsSession = mockk<DirectionsSession>().apply {
-            onRefresh { _, _, callback -> callback.onRefreshReady(refreshedRoute) }
+            onRefresh { _, _, _, callback -> callback.onRefreshReady(refreshedRoute) }
         }
         val routeRefreshController = createRouteRefreshController(
             directionsSession = directionsSession,
@@ -96,7 +96,7 @@ class RouteRefreshControllerTest {
         )
         val refreshedRoute = createNavigationRoute()
         val directionsSession = mockk<DirectionsSession>().apply {
-            onRefresh { _, _, callback -> callback.onRefreshReady(refreshedRoute) }
+            onRefresh { _, _, _, callback -> callback.onRefreshReady(refreshedRoute) }
         }
         val routeRefreshController = createRouteRefreshController(
             directionsSession = directionsSession
@@ -189,7 +189,7 @@ class RouteRefreshControllerTest {
                 ),
             )
             val directionsSession = mockk<DirectionsSession>().apply {
-                onRefresh { _, _, callback -> callback.onRefreshReady(refreshedRoute) }
+                onRefresh { _, _, _, callback -> callback.onRefreshReady(refreshedRoute) }
             }
             val routeRefreshController = createRouteRefreshController(
                 directionsSession = directionsSession,
@@ -212,7 +212,7 @@ class RouteRefreshControllerTest {
         coroutineRule.runBlockingTest {
             val initialRoute = createTestTwoLegRoute()
             val refreshedRoute = createTestTwoLegRoute()
-            val directionsSession = mockk<DirectionsSession>().onRefresh { _, _, callback ->
+            val directionsSession = mockk<DirectionsSession>().onRefresh { _, _, _, callback ->
                 callback.onRefreshReady(refreshedRoute)
             }
 
@@ -278,15 +278,10 @@ class RouteRefreshControllerTest {
                     )
                 )
             )
-            val directionsSession = mockk<DirectionsSession>() {
-                var refreshAttempt = 0L
-                every { requestRouteRefresh(any(), any(), any()) } answers {
-                    val callback = thirdArg<NavigationRouterRefreshCallback>()
+            val directionsSession = mockk<DirectionsSession>()
+                .onRefresh { _, _, _, callback ->
                     callback.onFailure(RouterFactory.buildNavigationRouterRefreshError())
-                    refreshAttempt++
-                    refreshAttempt
                 }
-            }
 
             val routeRefreshOptions = RouteRefreshOptions.Builder()
                 .intervalMillis(30_000)
@@ -322,7 +317,7 @@ class RouteRefreshControllerTest {
     fun `after invalidation route isn't updated until successful refresh`() =
         coroutineRule.runBlockingTest {
             val initialRoute = createTestTwoLegRoute()
-            val directionsSession = mockk<DirectionsSession>().onRefresh { _, _, callback ->
+            val directionsSession = mockk<DirectionsSession>().onRefresh { _, _, _, callback ->
                 callback.onFailure(RouterFactory.buildNavigationRouterRefreshError())
             }
             val routeRefreshOptions = RouteRefreshOptions.Builder().build()
@@ -345,7 +340,7 @@ class RouteRefreshControllerTest {
                 expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis) * 100
             )
             assertFalse(refreshedRoute.isCompleted)
-            directionsSession.onRefresh { _, _, callback ->
+            directionsSession.onRefresh { _, _, _, callback ->
                 callback.onRefreshReady(initialRoute)
             }
             advanceTimeBy(routeRefreshOptions.intervalMillis)
@@ -383,13 +378,8 @@ class RouteRefreshControllerTest {
                 )
             )
             val currentLegIndexProvider = { 1 }
-            val directionsSession = mockk<DirectionsSession>(relaxed = true) {
-                var refreshAttempt = 0L
-                every { requestRouteRefresh(any(), any(), any()) } answers {
-                    refreshAttempt++
-                    refreshAttempt
-                }
-            }
+            val directionsSession = mockk<DirectionsSession>(relaxed = true)
+                .onRefresh { _, _, _, _ -> }
             val routeRefreshOptions = RouteRefreshOptions.Builder()
                 .intervalMillis(30_000L)
                 .build()
@@ -445,16 +435,12 @@ class RouteRefreshControllerTest {
                 )
             )
             var currentRoute = initialRoute
-            val directionsSession = mockk<DirectionsSession>(relaxed = true) {
-                var refreshAttempt = 0L
-                every { requestRouteRefresh(any(), any(), any()) } answers {
+            val directionsSession = mockk<DirectionsSession>(relaxed = true)
+                .onRefresh { refreshAttempt, _, _, callback ->
                     if (refreshAttempt >= 1) {
-                        val callback = thirdArg<NavigationRouterRefreshCallback>()
                         callback.onRefreshReady(currentRoute)
                     }
-                    refreshAttempt++
                 }
-            }
             val refreshInterval = 30_000L
             val refreshController = createRouteRefreshController(
                 directionsSession = directionsSession,
@@ -488,18 +474,15 @@ class RouteRefreshControllerTest {
                 )
             )
             var currentRoute = initialRoute
-            val directionsSession = mockk<DirectionsSession>(relaxed = true) {
-                var refreshAttempt = 0L
-                every { requestRouteRefresh(any(), any(), any()) } answers {
-                    val callback = thirdArg<NavigationRouterRefreshCallback>()
+
+            val directionsSession = mockk<DirectionsSession>(relaxed = true)
+                .onRefresh { refreshAttempt, _, _, callback ->
                     if (refreshAttempt >= 1) {
                         callback.onRefreshReady(currentRoute)
                     } else {
                         callback.onFailure(RouterFactory.buildNavigationRouterRefreshError())
                     }
-                    refreshAttempt++
                 }
-            }
             val refreshInterval = 30_000L
             val refreshController = createRouteRefreshController(
                 directionsSession = directionsSession,
@@ -582,16 +565,17 @@ private fun NavigationRoute.assertCongestionExpiredForLeg(legIndex: Int) {
 
 private fun DirectionsSession.onRefresh(
     body: (
+        refreshAttempt: Int,
         route: NavigationRoute,
         legIndex: Int,
         callback: NavigationRouterRefreshCallback
     ) -> Unit
 ): DirectionsSession {
-    var refreshAttempt = 0L
+    var refreshAttempt = 0
     every { this@onRefresh.requestRouteRefresh(any(), any(), any()) } answers {
-        body(firstArg(), secondArg(), thirdArg())
+        body(refreshAttempt, firstArg(), secondArg(), thirdArg())
         refreshAttempt++
-        refreshAttempt
+        refreshAttempt.toLong()
     }
     return this
 }
