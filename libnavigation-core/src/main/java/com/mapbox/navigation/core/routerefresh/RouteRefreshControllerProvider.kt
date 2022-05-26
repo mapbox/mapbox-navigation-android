@@ -3,7 +3,7 @@ package com.mapbox.navigation.core.routerefresh
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.trip.session.TripSession
-import com.mapbox.navigation.utils.internal.ThreadController
+import java.util.Date
 
 internal object RouteRefreshControllerProvider {
 
@@ -11,10 +11,11 @@ internal object RouteRefreshControllerProvider {
         routeRefreshOptions: RouteRefreshOptions,
         directionsSession: DirectionsSession,
         tripSession: TripSession,
-        threadController: ThreadController,
     ) = RouteRefreshController(
         routeRefreshOptions,
         directionsSession,
         { tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0 },
+        DirectionsRouteDiffProvider(),
+        { Date() }
     )
 }

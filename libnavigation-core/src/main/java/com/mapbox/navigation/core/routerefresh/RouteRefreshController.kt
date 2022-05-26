@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.internal.route.refreshRoute
+import com.mapbox.navigation.base.internal.time.parseSO8061DateToLocalTimeOrNull
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshError
@@ -16,7 +17,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
-import java.time.ZonedDateTime
+import java.util.Date
 import kotlin.coroutines.resume
 
 /**
@@ -28,7 +29,7 @@ internal class RouteRefreshController(
     private val directionsSession: DirectionsSession,
     private val currentLegIndexProvider: () -> Int,
     private val routeDiffProvider: DirectionsRouteDiffProvider = DirectionsRouteDiffProvider(),
-    private val currentDateTimeProvider: () -> ZonedDateTime = ZonedDateTime::now
+    private val localDateProvider: () -> Date
 ) {
 
     internal companion object {
@@ -98,10 +99,10 @@ internal class RouteRefreshController(
             routeLegs.mapIndexed { index, it ->
                 if (index >= currentLegIndex) {
                     it.incidents()?.filter {
-                        it.endTime()
-                            ?.let(ZonedDateTime::parse)
-                            ?.isAfter(currentDateTimeProvider())
-                            ?: false
+                        val parsed = parseSO8061DateToLocalTimeOrNull(it.endTime())
+                            ?: return@filter false
+                        val currentDate = localDateProvider()
+                        parsed > currentDate
                     }
                 } else {
                     it.incidents()

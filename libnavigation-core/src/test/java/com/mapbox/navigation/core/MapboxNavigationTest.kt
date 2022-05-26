@@ -199,7 +199,7 @@ class MapboxNavigationTest {
         mockkObject(RouteRefreshControllerProvider)
         every {
             RouteRefreshControllerProvider.createRouteRefreshController(
-                any(), any(), any(), threadController,
+                any(), any(), any(),
             )
         } returns routeRefreshController
         mockkObject(RouteAlternativesControllerProvider)

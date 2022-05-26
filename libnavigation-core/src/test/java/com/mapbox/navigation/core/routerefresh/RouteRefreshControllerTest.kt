@@ -30,10 +30,10 @@ import kotlinx.coroutines.launch
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.time.LocalDateTime
 import java.time.Month
-import java.time.ZoneId
-import java.time.ZonedDateTime
+import java.util.Calendar
+import java.util.Date
+import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
@@ -232,10 +232,14 @@ class RouteRefreshControllerTest {
     @Test
     fun `traffic annotations and incidents on all legs starting with the current(first) disappears if refresh fails`() =
         coroutineRule.runBlockingTest {
-            val currentTime = ZonedDateTime.of(
-                LocalDateTime.of(2022, Month.MAY, 22, 14, 30, 0),
-                ZoneId.of("Europe/Berlin")
-            ) // 12:30 UTC
+            val currentTime = utcToLocalTime(
+                year = 2022,
+                month = Month.MAY,
+                date = 22,
+                hourOfDay = 12,
+                minute = 30,
+                second = 0
+            )
             val primaryRoute = createTestTwoLegRoute(
                 firstLegIncidents = listOf(
                     createIncident(
@@ -248,6 +252,10 @@ class RouteRefreshControllerTest {
                     ),
                     createIncident(
                         id = "3",
+                        endTime = "2022-05-22T12:00:00-01",
+                    ),
+                    createIncident(
+                        id = "4",
                         endTime = null,
                     )
                 ),
@@ -263,6 +271,10 @@ class RouteRefreshControllerTest {
                     createIncident(
                         id = "6",
                         endTime = null,
+                    ),
+                    createIncident(
+                        id = "7",
+                        endTime = "wrong date format",
                     )
                 )
             )
@@ -282,8 +294,8 @@ class RouteRefreshControllerTest {
             val routeRefreshController = createRouteRefreshController(
                 routeRefreshOptions = routeRefreshOptions,
                 currentLegIndexProvider = { 0 },
-                currentDateTimeProvider = { currentTime },
-                directionsSession = directionsSession
+                localDateProvider = { currentTime },
+                directionsSession = directionsSession,
             )
             // act
             val refreshedRoutesDeffer = async {
@@ -297,7 +309,7 @@ class RouteRefreshControllerTest {
             refreshedRoute.assertCongestionExpiredForLeg(0)
             refreshedRoute.assertCongestionExpiredForLeg(1)
             assertEquals(
-                listOf("1"),
+                listOf("1", "3"),
                 refreshedRoute.directionsRoute.legs()!![0].incidents()?.map { it.id() }
             )
             assertEquals(
@@ -344,10 +356,14 @@ class RouteRefreshControllerTest {
     @Test
     fun `traffic annotations and expired annotations on current leg(second) disappear if refresh doesn't respond`() =
         coroutineRule.runBlockingTest {
-            val currentTime = ZonedDateTime.of(
-                LocalDateTime.of(2022, Month.MAY, 22, 12, 0, 0),
-                ZoneId.of("Europe/Warsaw")
-            ) // 10:00 UTC
+            val currentTime = utcToLocalTime(
+                year = 2022,
+                month = Month.MAY,
+                date = 22,
+                hourOfDay = 10,
+                minute = 0,
+                second = 0
+            )
             val currentRoute = createTestTwoLegRoute(
                 firstLegIncidents = listOf(
                     createIncident(
@@ -381,7 +397,7 @@ class RouteRefreshControllerTest {
                 routeRefreshOptions = routeRefreshOptions,
                 routeDiffProvider = DirectionsRouteDiffProvider(),
                 currentLegIndexProvider = currentLegIndexProvider,
-                currentDateTimeProvider = { currentTime },
+                localDateProvider = { currentTime },
                 directionsSession = directionsSession
             )
             // act
@@ -506,15 +522,13 @@ class RouteRefreshControllerTest {
         directionsSession: DirectionsSession = mockk(),
         currentLegIndexProvider: () -> Int = { 0 },
         routeDiffProvider: DirectionsRouteDiffProvider = DirectionsRouteDiffProvider(),
-        currentDateTimeProvider: () -> ZonedDateTime = {
-            ZonedDateTime.parse("2022-05-20T14:00:00Z")
-        }
+        localDateProvider: () -> Date = { Date(1653493148247) }
     ) = RouteRefreshController(
         routeRefreshOptions,
         directionsSession,
         currentLegIndexProvider,
         routeDiffProvider,
-        currentDateTimeProvider
+        localDateProvider
     )
 }
 
@@ -599,3 +613,14 @@ private fun createTestInitialAndRefreshedTestRoutes(): Pair<NavigationRoute, Nav
             )
         )
     )
+
+private fun utcToLocalTime(
+    year: Int,
+    month: Month,
+    date: Int,
+    hourOfDay: Int,
+    minute: Int,
+    second: Int
+) = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+    set(year, month.value - 1, date, hourOfDay, minute, second)
+}.time

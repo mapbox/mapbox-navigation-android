@@ -512,8 +512,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
             navigationOptions.routeRefreshOptions,
             directionsSession,
-            tripSession,
-            threadController,
+            tripSession
         )
 
         defaultRerouteController = MapboxRerouteController(
