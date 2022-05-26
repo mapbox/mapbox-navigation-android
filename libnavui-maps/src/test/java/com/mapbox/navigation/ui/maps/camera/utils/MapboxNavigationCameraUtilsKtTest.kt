@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.camera.utils
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
+import com.mapbox.maps.plugin.animation.animator.CameraAnimator
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -121,6 +122,15 @@ class MapboxNavigationCameraUtilsKtTest {
     }
 
     @Test
+    fun normalize_projection() {
+        val expected = 677.9955562460304
+
+        val actual = normalizeProjection(projectedDistance = 1.23)
+
+        assertEquals(expected, actual, 0.000001)
+    }
+
+    @Test
     fun `test createAnimatorSet`() {
         val animators = listOf<Animator>(mockk(), mockk())
         val expected = AnimatorSet().apply {
@@ -128,6 +138,18 @@ class MapboxNavigationCameraUtilsKtTest {
         }.childAnimations
 
         val actual = createAnimatorSet(animators).childAnimations
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `test createAnimatorSetWith`() {
+        val animators = arrayOf<CameraAnimator<*>>(mockk(), mockk())
+        val expected = AnimatorSet().apply {
+            playTogether(*animators)
+        }.childAnimations
+
+        val actual = createAnimatorSetWith(animators).childAnimations
 
         assertEquals(expected, actual)
     }

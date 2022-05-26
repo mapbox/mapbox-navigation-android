@@ -11,6 +11,7 @@ Mapbox welcomes participation and contributions from everyone.
 - :warning: Moved `MapboxAudioGuidanceButton` from Drop-in UI to Voice module. [#5874](https://github.com/mapbox/mapbox-navigation-android/pull/5874)
 - Changed `Onboard` router to fail fast and deliver an appropriate message when EV route requests are made, which are not supported yet. [#5905](https://github.com/mapbox/mapbox-navigation-android/pull/5905)
 - Fixed an issue where offline route requests sometimes crashed the SDK. [#5905](https://github.com/mapbox/mapbox-navigation-android/pull/5905)
+- :warning: Changed  default `NavigationCamera` transitions to use the `flyTo` animation when transitioning to `NavigationCameraState#FOLLOWING` mode. [#5871](https://github.com/mapbox/mapbox-navigation-android/pull/5871)
 
 ## Mapbox Navigation SDK 2.5.1 - June 2, 2022
 ### Changelog
