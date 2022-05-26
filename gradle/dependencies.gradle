@@ -63,7 +63,7 @@ ext {
       androidxTest              : '1.4.0',
       barista                   : '4.2.0',
       svgParser                 : '1.4',
-      androidStartup            : '1.0.0'
+      androidStartup            : '1.0.0',
   ]
   dependenciesList = [
       // mapbox
