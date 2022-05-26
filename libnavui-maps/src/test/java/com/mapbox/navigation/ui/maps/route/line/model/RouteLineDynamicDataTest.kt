@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
-import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineTrimOffset
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import org.junit.Test

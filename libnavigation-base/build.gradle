@@ -42,7 +42,7 @@ dependencies {
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
 }
 
-dokkaHtml {
+dokkaHtmlPartial {
     outputDirectory.set(kdocPath)
     moduleName.set("Base")
     dokkaSourceSets {

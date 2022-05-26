@@ -1058,11 +1058,13 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider getCasingExpressionProvider();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getRestrictedSectionExpressionProvider();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrafficExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset? getTrimOffset();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData.MutableRouteLineDynamicData toMutableValue();
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider baseExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider casingExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? restrictedSectionExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trafficExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset? trimOffset;
   }
 
   public static final class RouteLineDynamicData.MutableRouteLineDynamicData {
@@ -1070,15 +1072,18 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider getCasingExpressionProvider();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getRestrictedSectionExpressionProvider();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrafficExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset? getTrimOffset();
     method public void setBaseExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider p);
     method public void setCasingExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider p);
     method public void setRestrictedSectionExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? p);
     method public void setTrafficExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? p);
+    method public void setTrimOffset(com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset? p);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData toImmutableValue();
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider baseExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider casingExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? restrictedSectionExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trafficExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset? trimOffset;
   }
 
   public final class RouteLineError {
@@ -1194,6 +1199,12 @@ package com.mapbox.navigation.ui.maps.route.line.model {
   }
 
   public fun interface RouteLineTrimExpressionProvider extends com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider {
+  }
+
+  public final class RouteLineTrimOffset {
+    ctor public RouteLineTrimOffset(double offset);
+    method public double getOffset();
+    property public final double offset;
   }
 
   public final class RouteLineUpdateValue {
