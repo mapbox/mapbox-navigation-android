@@ -118,13 +118,25 @@ class RouteRefreshControllerTest {
         val routeRefreshController = createRouteRefreshController()
 
         val refreshedDeferred = async { routeRefreshController.refresh(listOf(primaryRoute)) }
-        advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
+        advanceTimeBy(TimeUnit.HOURS.toMillis(6))
 
         assertTrue(refreshedDeferred.isActive)
         verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
         verify(exactly = 1) {
-            logger.logW(any(), any())
+            logger.logI(any(), any())
         }
+        refreshedDeferred.cancel()
+    }
+
+    @Test
+    fun `refreshing of empty routes`() = coroutineRule.runBlockingTest {
+        val primaryRoute = createTestTwoLegRoute(requestUuid = null)
+        val routeRefreshController = createRouteRefreshController()
+
+        val refreshedDeferred = async { routeRefreshController.refresh(listOf(primaryRoute)) }
+        advanceTimeBy(TimeUnit.HOURS.toMillis(6))
+
+        assertTrue(refreshedDeferred.isActive)
         refreshedDeferred.cancel()
     }
 

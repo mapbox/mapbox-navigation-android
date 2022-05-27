@@ -10,7 +10,6 @@ import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
-import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -37,12 +36,17 @@ internal class RouteRefreshController(
     }
 
     suspend fun refresh(routes: List<NavigationRoute>): List<NavigationRoute> {
-        return if (routes.firstOrNull()?.routeOptions?.enableRefresh() == true) {
-            val result = routes.toMutableList()
-            val routeToRefresh = result.first()
-            result[0] = tryRefreshingUntilRouteChanges(routeToRefresh)
-            result
-        } else waitForever("refresh isn't enabled")
+        return if (routes.isNotEmpty()) {
+            val routeToRefresh = routes.first()
+            when (val validationResult = validateRoute(routeToRefresh)) {
+                RouteValidationResult.Valid -> {
+                    val result = routes.toMutableList()
+                    result[0] = tryRefreshingUntilRouteChanges(routeToRefresh)
+                    result
+                }
+                is RouteValidationResult.Invalid -> waitForever(validationResult.reason)
+            }
+        } else waitForever("routes are empty")
     }
 
     private suspend fun tryRefreshingUntilRouteChanges(
@@ -114,40 +118,24 @@ internal class RouteRefreshController(
     private suspend fun refreshRouteOrNull(
         route: NavigationRoute
     ): NavigationRoute? {
-        val isValid = route.routeOptions.enableRefresh() == true &&
-            route.directionsResponse.uuid()?.isNotBlank() == true
-        return if (isValid) {
-            val legIndex = currentLegIndexProvider()
-            when (val result = requestRouteRefresh(route, legIndex)) {
-                is RouteRefreshResult.Fail -> {
-                    logE(
-                        "Route refresh error: ${result.error.message} " +
-                            "throwable=${result.error.throwable}",
-                        LOG_CATEGORY
-                    )
-                    null
-                }
-                is RouteRefreshResult.Success -> {
-                    logRoutesDIff(
-                        newRoute = result.route,
-                        oldRoute = route,
-                        currentLegIndex = legIndex
-                    )
-                    result.route
-                }
+        val legIndex = currentLegIndexProvider()
+        return when (val result = requestRouteRefresh(route, legIndex)) {
+            is RouteRefreshResult.Fail -> {
+                logE(
+                    "Route refresh error: ${result.error.message} " +
+                        "throwable=${result.error.throwable}",
+                    LOG_CATEGORY
+                )
+                null
             }
-        } else {
-            logW(
-                """
-                    The route is not qualified for route refresh feature.
-                    See com.mapbox.navigation.base.extensions.supportsRouteRefresh
-                    extension for details.
-                    routeOptions: ${route.routeOptions}
-                    uuid: ${route.directionsResponse.uuid()}
-                """.trimIndent(),
-                LOG_CATEGORY
-            )
-            null
+            is RouteRefreshResult.Success -> {
+                logRoutesDIff(
+                    newRoute = result.route,
+                    oldRoute = route,
+                    currentLegIndex = legIndex
+                )
+                result.route
+            }
         }
     }
 
@@ -171,8 +159,11 @@ internal class RouteRefreshController(
         }
     }
 
-    private suspend fun requestRouteRefresh(route: NavigationRoute, legIndex: Int) =
-        suspendCancellableCoroutine<RouteRefreshResult> { continuation ->
+    private suspend fun requestRouteRefresh(
+        route: NavigationRoute,
+        legIndex: Int
+    ): RouteRefreshResult =
+        suspendCancellableCoroutine { continuation ->
             val requestId = directionsSession.requestRouteRefresh(
                 route,
                 legIndex,
@@ -191,13 +182,28 @@ internal class RouteRefreshController(
             }
         }
 
+    private suspend fun waitForever(message: String): List<NavigationRoute> {
+        logI("Route won't be refreshed because $message", LOG_CATEGORY)
+        return CompletableDeferred<List<NavigationRoute>>().await()
+    }
+
+    private fun validateRoute(route: NavigationRoute): RouteValidationResult = when {
+        route.routeOptions.enableRefresh() != true ->
+            RouteValidationResult.Invalid("RouteOptions#enableRefresh is false")
+        route.directionsRoute.requestUuid()?.isNotBlank() != true ->
+            RouteValidationResult.Invalid(
+                "DirectionsRoute#requestUuid is ${route.directionsRoute.requestUuid()}"
+            )
+        else -> RouteValidationResult.Valid
+    }
+
+    private sealed class RouteValidationResult {
+        object Valid : RouteValidationResult()
+        data class Invalid(val reason: String) : RouteValidationResult()
+    }
+
     private sealed class RouteRefreshResult {
         data class Success(val route: NavigationRoute) : RouteRefreshResult()
         data class Fail(val error: NavigationRouterRefreshError) : RouteRefreshResult()
-    }
-
-    private suspend fun waitForever(message: String): List<NavigationRoute> {
-        logW("Refresh won't happen because $message", LOG_CATEGORY)
-        return CompletableDeferred<List<NavigationRoute>>().await()
     }
 }
