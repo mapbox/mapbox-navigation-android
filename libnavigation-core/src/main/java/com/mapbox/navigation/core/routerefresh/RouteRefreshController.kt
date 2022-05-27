@@ -90,7 +90,7 @@ internal class RouteRefreshController(
     ): NavigationRoute {
         val currentLegIndex = currentLegIndexProvider()
         return route.refreshRoute(
-            0,
+            currentLegIndex,
             routeLegs.mapIndexed { index, leg ->
                 if (index >= currentLegIndex) {
                     leg.annotation()
