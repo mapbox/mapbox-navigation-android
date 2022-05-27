@@ -24,6 +24,7 @@ import io.mockk.verify
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -83,7 +84,7 @@ class RouteRefreshControllerTest {
         val refreshJob = async { routeRefreshController.refresh(listOf(initialRoute)) }
         advanceTimeBy(TimeUnit.SECONDS.toMillis(30))
 
-        assertEquals(listOf(refreshedRoute), refreshJob.getCompleted())
+        assertEquals(listOf(refreshedRoute), refreshJob.getCompletedTest())
         verify(exactly = 1) { directionsSession.requestRouteRefresh(any(), any(), any()) }
         verify(exactly = 0) { directionsSession.cancelRouteRefreshRequest(any()) }
     }
@@ -106,7 +107,7 @@ class RouteRefreshControllerTest {
             async { routeRefreshController.refresh(listOf(routeWithoutAnnotations)) }
         advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
 
-        assertEquals(listOf(refreshedRoute), refreshedRouteDeferred.getCompleted())
+        assertEquals(listOf(refreshedRoute), refreshedRouteDeferred.getCompletedTest())
         verify(exactly = 1) { directionsSession.requestRouteRefresh(any(), any(), any()) }
     }
 
@@ -300,7 +301,7 @@ class RouteRefreshControllerTest {
                 expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis)
             )
             // assert
-            val refreshedRoute = refreshedRoutesDeffer.getCompleted().first()
+            val refreshedRoute = refreshedRoutesDeffer.getCompletedTest().first()
             refreshedRoute.assertCongestionExpiredForLeg(0)
             refreshedRoute.assertCongestionExpiredForLeg(1)
             assertEquals(
@@ -331,7 +332,7 @@ class RouteRefreshControllerTest {
             advanceTimeBy(
                 expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis)
             )
-            val invalidatedRoute = invalidatedRouteDeffer.getCompleted().first()
+            val invalidatedRoute = invalidatedRouteDeffer.getCompletedTest().first()
             // act
             val refreshedRoute = async {
                 routeRefreshController.refresh(listOf(invalidatedRoute))
@@ -345,7 +346,61 @@ class RouteRefreshControllerTest {
             }
             advanceTimeBy(routeRefreshOptions.intervalMillis)
             // assert
-            assertEquals(listOf(initialRoute), refreshedRoute.getCompleted())
+            assertEquals(listOf(initialRoute), refreshedRoute.getCompletedTest())
+        }
+
+    @Test
+    fun `after invalidation route isn't updated until incident expiration`() =
+        coroutineRule.runBlockingTest {
+            var currentTime = utcToLocalTime(
+                year = 2022,
+                month = Month.MAY,
+                date = 22,
+                hourOfDay = 9,
+                minute = 0,
+                second = 0
+            )
+            val initialRoute = createTestTwoLegRoute(
+                firstLegIncidents = listOf(
+                    createIncident(
+                        id = "1",
+                        endTime = "2022-05-22T12:00:00Z" // expires in 3 hours
+                    )
+                )
+            )
+            val directionsSession = mockk<DirectionsSession>().onRefresh { _, _, _, callback ->
+                callback.onFailure(RouterFactory.buildNavigationRouterRefreshError())
+            }
+            val routeRefreshOptions = RouteRefreshOptions.Builder().build()
+            val routeRefreshController = createRouteRefreshController(
+                routeRefreshOptions = routeRefreshOptions,
+                directionsSession = directionsSession,
+                localDateProvider = { currentTime }
+            )
+            val invalidatedRouteDeffer = async {
+                routeRefreshController.refresh(listOf(initialRoute))
+            }
+            advanceTimeBy(
+                expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis)
+            )
+            val invalidatedRoute = invalidatedRouteDeffer.getCompletedTest().first()
+            // act
+            val refreshedRoute = async {
+                routeRefreshController.refresh(listOf(invalidatedRoute))
+            }
+            val twoHours = TimeUnit.HOURS.toMillis(2)
+            currentTime = currentTime.add(milliseconds = twoHours)
+            advanceTimeBy(twoHours)
+            assertFalse("incident should not expire in 2 hours", refreshedRoute.isCompleted)
+            val oneHour = TimeUnit.HOURS.toMillis(1)
+            currentTime = currentTime.add(milliseconds = oneHour)
+            advanceTimeBy(oneHour)
+            // assert
+            assertEquals(
+                emptyList<Incident>(),
+                refreshedRoute.getCompletedTest().first()
+                    .directionsResponse.routes().first().legs()?.first()?.incidents()
+            )
         }
 
     @Test
@@ -401,7 +456,7 @@ class RouteRefreshControllerTest {
                     routeRefreshOptions.intervalMillis
             )
             // assert
-            val refreshedRoute = refreshedRoutesDeferred.getCompleted().first()
+            val refreshedRoute = refreshedRoutesDeferred.getCompletedTest().first()
             refreshedRoute.assertCongestionExpiredForLeg(1)
             assertEquals(
                 listOf("3"),
@@ -455,7 +510,7 @@ class RouteRefreshControllerTest {
             currentRoute = refreshed
             advanceTimeBy(refreshInterval)
 
-            assertEquals(listOf(refreshed), refreshedDeferred.getCompleted())
+            assertEquals(listOf(refreshed), refreshedDeferred.getCompletedTest())
         }
 
     @Test
@@ -497,7 +552,7 @@ class RouteRefreshControllerTest {
             currentRoute = refreshed
             advanceTimeBy(refreshInterval)
 
-            assertEquals(listOf(refreshed), refreshedDeferred.getCompleted())
+            assertEquals(listOf(refreshed), refreshedDeferred.getCompletedTest())
         }
 
     private fun createRouteRefreshController(
@@ -608,3 +663,20 @@ private fun utcToLocalTime(
 ) = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
     set(year, month.value - 1, date, hourOfDay, minute, second)
 }.time
+
+private fun Date.add(
+    hours: Int = 0,
+    milliseconds: Long = 0
+): Date {
+    val calendar = Calendar.getInstance()
+    calendar.time = this
+    calendar.add(Calendar.HOUR_OF_DAY, hours)
+    calendar.add(Calendar.MILLISECOND, milliseconds.toInt())
+    return calendar.time
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+private fun <T> Deferred<T>.getCompletedTest(): T = if (isActive) {
+    cancel()
+    error("can't get result from a Deferred, coroutine is still active")
+} else getCompleted()
