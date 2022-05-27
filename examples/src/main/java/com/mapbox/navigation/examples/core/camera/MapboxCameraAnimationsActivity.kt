@@ -54,6 +54,7 @@ import com.mapbox.navigation.examples.core.camera.AnimationAdapter.OnAnimationBu
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityCameraBinding
 import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
+import com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FocalPoint
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandler
@@ -268,13 +269,16 @@ class MapboxCameraAnimationsActivity :
         viewportDataSource = MapboxNavigationViewportDataSource(
             binding.mapView.getMapboxMap()
         )
-        viewportDataSource.options.followingFrameOptions.pitchNearManeuvers.apply {
+        viewportDataSource.options.followingFrameOptions.apply {
             // An example of maneuver exclusion from "pitch to 0 near maneuvers" updates.
-            excludedManeuvers = listOf(
+            pitchNearManeuvers.excludedManeuvers = listOf(
                 StepManeuver.FORK,
                 StepManeuver.OFF_RAMP,
                 StepManeuver.ARRIVE
             )
+
+            // An example of Following Camera Focal Point adjustment
+            focalPoint = FocalPoint(0.5, 0.9)
         }
         viewportDataSource.debugger = debugger
         navigationCamera = NavigationCamera(

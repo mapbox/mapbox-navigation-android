@@ -744,11 +744,16 @@ class MapboxNavigationViewportDataSource(
                 val mapSize = mapboxMap.getSize()
                 val screenBox = getScreenBoxForFraming(mapSize, followingPadding)
                 val cameraState = mapboxMap.cameraState
+                val padding = getMapAnchoredPaddingFromUserPadding(
+                    mapSize,
+                    followingPadding,
+                    options.followingFrameOptions.focalPoint
+                )
                 val fallbackCameraOptions = CameraOptions.Builder()
                     .center(
                         pointsForFollowing.firstOrNull() ?: cameraState.center
                     )
-                    .padding(getMapAnchoredPaddingFromUserPadding(mapSize, followingPadding))
+                    .padding(padding)
                     .bearing(followingBearingProperty.get())
                     .pitch(followingPitchProperty.get())
                     .zoom(cameraState.zoom)

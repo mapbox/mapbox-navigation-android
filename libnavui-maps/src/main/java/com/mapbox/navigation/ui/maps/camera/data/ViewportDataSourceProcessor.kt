@@ -317,7 +317,11 @@ internal object ViewportDataSourceProcessor {
      *
      * That single-pixel anchor sits on the bottom edge of the provided padding, centered horizontally.
      */
-    fun getMapAnchoredPaddingFromUserPadding(mapSize: Size, padding: EdgeInsets): EdgeInsets {
+    fun getMapAnchoredPaddingFromUserPadding(
+        mapSize: Size,
+        padding: EdgeInsets,
+        focalPoint: FocalPoint = FocalPoint(0.5, 1.0)
+    ): EdgeInsets {
         val verticalRange = 0f..mapSize.height
         val horizontalRange = 0f..mapSize.width
         padding.run {
@@ -342,12 +346,9 @@ internal object ViewportDataSourceProcessor {
             }
         }
 
-        val anchorPointX =
-            ((mapSize.width - padding.left - padding.right) / 2.0) + padding.left
-        val centerInsidePaddingY =
-            ((mapSize.height - padding.top - padding.bottom) / 2.0) + padding.top
-        val anchorPointY =
-            ((mapSize.height - padding.bottom - centerInsidePaddingY)).plus(centerInsidePaddingY)
+        val (fx, fy) = focalPoint
+        val anchorPointX = (mapSize.width - padding.left - padding.right) * fx + padding.left
+        val anchorPointY = (mapSize.height - padding.top - padding.bottom) * fy + padding.top
 
         return EdgeInsets(
             anchorPointY,
