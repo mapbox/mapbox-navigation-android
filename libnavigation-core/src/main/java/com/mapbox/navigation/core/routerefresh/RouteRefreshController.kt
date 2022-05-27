@@ -131,6 +131,7 @@ internal class RouteRefreshController(
                 null
             }
             is RouteRefreshResult.Success -> {
+                logI("Received refreshed route", LOG_CATEGORY)
                 logRoutesDIff(
                     newRoute = result.route,
                     oldRoute = route,
@@ -146,7 +147,6 @@ internal class RouteRefreshController(
         oldRoute: NavigationRoute,
         currentLegIndex: Int,
     ) {
-        logI("Successful route refresh", LOG_CATEGORY)
         val routeDiffs = routeDiffProvider.buildRouteDiffs(
             oldRoute,
             newRoute,
