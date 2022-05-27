@@ -19,6 +19,8 @@ import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Date
 import kotlin.coroutines.resume
 
+private const val FAILED_ATTEMPTS_TO_INVALIDATE_EXPIRING_DATA = 3
+
 /**
  * This class is responsible for refreshing the current direction route's traffic.
  * This does not support alternative routes.
@@ -67,7 +69,7 @@ internal class RouteRefreshController(
         require(routeLegs != null) { "Can't refresh route without legs" }
 
         var timeUntilNextAttempt = async { delay(routeRefreshOptions.intervalMillis) }
-        for (attempts in 0..2) {
+        repeat(FAILED_ATTEMPTS_TO_INVALIDATE_EXPIRING_DATA) {
             timeUntilNextAttempt.await()
             timeUntilNextAttempt = async { delay(routeRefreshOptions.intervalMillis) }
             val refreshedRoute = withTimeoutOrNull(routeRefreshOptions.intervalMillis) {
