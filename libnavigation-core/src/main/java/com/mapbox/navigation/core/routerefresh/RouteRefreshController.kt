@@ -81,10 +81,10 @@ internal class RouteRefreshController(
             }
         }
         timeUntilNextAttempt.cancel()
-        removeTrafficAnnotations(route, routeLegs)
+        removeExpiringDataFromRoute(route, routeLegs)
     }
 
-    private fun removeTrafficAnnotations(
+    private fun removeExpiringDataFromRoute(
         route: NavigationRoute,
         routeLegs: List<RouteLeg>
     ): NavigationRoute {
