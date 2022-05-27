@@ -54,7 +54,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Maps SDK `v10.5.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.5.0))
 - Mapbox Navigation Native `v101.0.0`
 - Mapbox Core Common `v21.3.1`
-- Mapbox Java `v6.5.0-beta.6` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.5.0-beta.6))
+- Mapbox Java `v6.5.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.5.0))
 - Mapbox Android Core `v5.0.1`
 - Mapbox Android Telemetry `v8.1.1`
 
