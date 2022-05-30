@@ -1,6 +1,5 @@
 package com.mapbox.navigation.base.internal.time
 
-import com.google.gson.internal.bind.util.ISO8601Utils
 import java.text.ParsePosition
 import java.util.Date
 
