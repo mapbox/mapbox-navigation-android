@@ -135,7 +135,7 @@ internal class RouteRefreshController(
             }
             is RouteRefreshResult.Success -> {
                 logI("Received refreshed route", LOG_CATEGORY)
-                logRoutesDIff(
+                logRoutesDiff(
                     newRoute = result.route,
                     oldRoute = route,
                     currentLegIndex = legIndex
@@ -145,7 +145,7 @@ internal class RouteRefreshController(
         }
     }
 
-    private fun logRoutesDIff(
+    private fun logRoutesDiff(
         newRoute: NavigationRoute,
         oldRoute: NavigationRoute,
         currentLegIndex: Int,
