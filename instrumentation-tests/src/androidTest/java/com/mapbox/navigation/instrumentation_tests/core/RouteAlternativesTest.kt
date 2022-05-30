@@ -104,14 +104,14 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         firstAlternative.unregister()
         assertTrue(firstAlternative.calledOnMainThread)
 
+        val countDownLatch = CountDownLatch(1)
         runOnMainSync {
-            val countDownLatch = CountDownLatch(1)
             mapboxNavigation.historyRecorder.stopRecording {
                 logE("history path=$it", "DEBUG")
                 countDownLatch.countDown()
             }
-            countDownLatch.await()
         }
+        countDownLatch.await()
 
         // Verify alternative routes events were triggered.
         assertEquals(2, routes.size)
