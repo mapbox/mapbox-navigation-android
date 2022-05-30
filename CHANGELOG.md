@@ -7,6 +7,10 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 
 ## Mapbox Navigation SDK 2.5.0 - May 26, 2022
+
+:bangbang: We have identified a crash in this release https://github.com/mapbox/mapbox-navigation-android/issues/5876.
+ The team is working on a patch. We do not recommend you using this version of the SDK in production.
+
 ### Changelog
 [Changes between v2.4.1 and v2.5.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.4.1...v2.5.0)
 
