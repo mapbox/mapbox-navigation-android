@@ -5,6 +5,9 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Improved enhanced locations bearing changes calculation on corners with high frequency input signal. [#5878](https://github.com/mapbox/mapbox-navigation-android/pull/5878)
+- Fixed off-road detection in unmapped underground garages. [#5878](https://github.com/mapbox/mapbox-navigation-android/pull/5878)
+- Changed `SaveHistoryCallback` to fire on the main thread instead of a worker thread. [#5878](https://github.com/mapbox/mapbox-navigation-android/pull/5878)
 
 ## Mapbox Navigation SDK 2.5.0 - May 26, 2022
 ### Changelog

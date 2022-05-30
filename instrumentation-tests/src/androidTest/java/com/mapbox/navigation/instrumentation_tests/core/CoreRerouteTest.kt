@@ -179,14 +179,14 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         }
         locationTrackingIdlingResource.unregister()
 
+        val countDownLatch = CountDownLatch(1)
         runOnMainSync {
-            val countDownLatch = CountDownLatch(1)
             mapboxNavigation.historyRecorder.stopRecording {
                 logE("history path=$it", "DEBUG")
                 countDownLatch.countDown()
             }
-            countDownLatch.await()
         }
+        countDownLatch.await()
 
         // assert results
         expectedStates.assert()
