@@ -9,10 +9,20 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigator.RouterOrigin
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.Assert.assertEquals
+import junit.framework.Assert.assertEquals
 import org.junit.Test
 
 class NavigationRouteExTest {
+
+    @Test
+    fun `update Navigation route`() {
+        val navigationRoute = provideNavigationRoute(addLeg = true, distance = 88.0)
+        val updated = navigationRoute.updateDirectionsRouteOnly {
+            assertEquals(88.0, distance())
+            toBuilder().distance(73483.0).build()
+        }
+        assertEquals(73483.0, updated.directionsRoute.distance())
+    }
 
     @Test
     fun `extension NavigationRoute refreshRoute`() {
@@ -130,7 +140,8 @@ class NavigationRouteExTest {
     private fun provideNavigationRoute(
         annotations: LegAnnotation? = provideDefaultLegAnnotation(),
         incidents: List<Incident>? = provideDefaultIncidents(),
-        addLeg: Boolean
+        addLeg: Boolean,
+        distance: Double = 10.0
     ): NavigationRoute {
         return NavigationRoute(
             DirectionsResponse.builder()
@@ -138,7 +149,7 @@ class NavigationRouteExTest {
                     listOf(
                         DirectionsRoute.builder()
                             .duration(10.0)
-                            .distance(10.0)
+                            .distance(distance)
                             .legs(
                                 mutableListOf(
                                     RouteLeg.builder()

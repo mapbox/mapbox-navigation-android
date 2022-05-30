@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.RouteLeg
-import com.mapbox.navigation.base.internal.route.refreshRoute
+import com.mapbox.navigation.base.internal.route.updateDirectionsRouteOnly
 import com.mapbox.navigation.base.internal.time.parseISO8601DateToLocalTimeOrNull
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
@@ -88,33 +88,38 @@ internal class RouteRefreshController(
         routeLegs: List<RouteLeg>
     ): NavigationRoute {
         val currentLegIndex = currentLegIndexProvider()
-        return route.refreshRoute(
-            currentLegIndex,
-            routeLegs.mapIndexed { index, leg ->
-                if (index >= currentLegIndex) {
-                    leg.annotation()
-                        ?.toBuilder()
-                        ?.congestion(leg.annotation()?.congestion()?.map { "unknown" })
-                        ?.congestionNumeric(leg.annotation()?.congestionNumeric()?.map { null })
-                        ?.build()
-                } else {
-                    leg.annotation()
+        return route.updateDirectionsRouteOnly {
+            toBuilder().legs(
+                routeLegs.mapIndexed { legIndex, leg ->
+                    val legHasAlreadyBeenPassed = legIndex < currentLegIndex
+                    if (legHasAlreadyBeenPassed) {
+                        leg
+                    } else
+                        removeExpiredDataFromLeg(leg)
                 }
-            },
-            routeLegs.mapIndexed { index, it ->
-                if (index >= currentLegIndex) {
-                    it.incidents()?.filter {
-                        val parsed = parseISO8601DateToLocalTimeOrNull(it.endTime())
-                            ?: return@filter true
-                        val currentDate = localDateProvider()
-                        parsed > currentDate
-                    }
-                } else {
-                    it.incidents()
-                }
-            }
-        )
+            ).build()
+        }
     }
+
+    private fun removeExpiredDataFromLeg(leg: RouteLeg) =
+        leg.toBuilder()
+            .annotation(
+                leg.annotation()?.toBuilder()
+                    ?.congestion(leg.annotation()?.congestion()?.map { "unknown" })
+                    ?.congestionNumeric(
+                        leg.annotation()?.congestionNumeric()?.map { null }
+                    )
+                    ?.build()
+            )
+            .incidents(
+                leg.incidents()?.filter {
+                    val parsed = parseISO8601DateToLocalTimeOrNull(it.endTime())
+                        ?: return@filter true
+                    val currentDate = localDateProvider()
+                    parsed > currentDate
+                }
+            )
+            .build()
 
     private suspend fun refreshRouteOrNull(
         route: NavigationRoute

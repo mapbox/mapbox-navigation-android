@@ -40,13 +40,21 @@ fun NavigationRoute.refreshRoute(
             ).build()
         }
     }
-    val refreshedRoute = directionsRoute.toBuilder()
-        .legs(updateLegs)
-        .build()
-    val refreshedRoutes = directionsResponse.routes().toMutableList().apply {
-        removeAt(routeIndex)
-        add(routeIndex, refreshedRoute)
+    return updateDirectionsRouteOnly {
+        toBuilder().legs(updateLegs).build()
     }
+}
+
+/**
+ * Updates only java representation of route.
+ * The native route should later be updated through [Navigator.refreshRoute].
+ */
+fun NavigationRoute.updateDirectionsRouteOnly(
+    block: DirectionsRoute.() -> DirectionsRoute
+): NavigationRoute {
+    val refreshedRoute = directionsRoute.block()
+    val refreshedRoutes = directionsResponse.routes().toMutableList()
+    refreshedRoutes[routeIndex] = refreshedRoute
     val refreshedResponse = directionsResponse.toBuilder()
         .routes(refreshedRoutes)
         .build()
