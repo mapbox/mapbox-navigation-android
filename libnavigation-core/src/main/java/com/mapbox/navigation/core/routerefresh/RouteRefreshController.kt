@@ -106,7 +106,7 @@ internal class RouteRefreshController(
                 if (index >= currentLegIndex) {
                     it.incidents()?.filter {
                         val parsed = parseISO8601DateToLocalTimeOrNull(it.endTime())
-                            ?: return@filter false
+                            ?: return@filter true
                         val currentDate = localDateProvider()
                         parsed > currentDate
                     }

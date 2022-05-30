@@ -261,7 +261,7 @@ class RouteRefreshControllerTest {
                     ),
                     createIncident(
                         id = "2",
-                        endTime = "2022-05-22T12:00:00Z",
+                        endTime = "2022-05-22T12:00:00Z", // expired
                     ),
                     createIncident(
                         id = "3",
@@ -274,16 +274,12 @@ class RouteRefreshControllerTest {
                 ),
                 secondLegIncidents = listOf(
                     createIncident(
-                        id = "4",
+                        id = "5",
                         endTime = "2022-05-23T10:00:00Z",
                     ),
                     createIncident(
-                        id = "5",
-                        endTime = "2022-05-22T12:29:00Z",
-                    ),
-                    createIncident(
                         id = "6",
-                        endTime = null,
+                        endTime = "2022-05-22T12:29:00Z", // expired
                     ),
                     createIncident(
                         id = "7",
@@ -317,11 +313,11 @@ class RouteRefreshControllerTest {
             refreshedRoute.assertCongestionExpiredForLeg(0)
             refreshedRoute.assertCongestionExpiredForLeg(1)
             assertEquals(
-                listOf("1", "3"),
+                listOf("1", "3", "4"),
                 refreshedRoute.directionsRoute.legs()!![0].incidents()?.map { it.id() }
             )
             assertEquals(
-                listOf("4"),
+                listOf("5", "7"),
                 refreshedRoute.directionsRoute.legs()!![1].incidents()?.map { it.id() }
             )
         }
