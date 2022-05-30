@@ -123,17 +123,24 @@ class RouteRefreshControllerTest {
         assertTrue(refreshedDeferred.isActive)
         verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
         verify(exactly = 1) {
-            logger.logI(any(), any())
+            logger.logI(
+                withArg {
+                    assertTrue(
+                        "message doesn't mention the reason of failure - empty uuid: $it",
+                        it.contains("uuid", ignoreCase = true)
+                    )
+                },
+                any()
+            )
         }
         refreshedDeferred.cancel()
     }
 
     @Test
     fun `refreshing of empty routes`() = coroutineRule.runBlockingTest {
-        val primaryRoute = createTestTwoLegRoute(requestUuid = null)
         val routeRefreshController = createRouteRefreshController()
 
-        val refreshedDeferred = async { routeRefreshController.refresh(listOf(primaryRoute)) }
+        val refreshedDeferred = async { routeRefreshController.refresh(listOf()) }
         advanceTimeBy(TimeUnit.HOURS.toMillis(6))
 
         assertTrue(refreshedDeferred.isActive)
