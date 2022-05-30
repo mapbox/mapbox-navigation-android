@@ -4,7 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
-- :warning: Expired data is cleaned up in current route leg if it can't be updated via route refresh. Congestion annotations become "unknown". Numeric congestion annotations become null. Expired incidents disappear. [#5767](https://github.com/mapbox/mapbox-navigation-android/pull/5767)
+- :warning: Expired data in the current primary route is cleaned up if 3 consecutive refresh attempts fail. Congestion annotations become "unknown". Numeric congestion annotations become `null`. Expired incidents disappear. [#5767](https://github.com/mapbox/mapbox-navigation-android/pull/5767).
 
 #### Bug fixes and improvements
 
