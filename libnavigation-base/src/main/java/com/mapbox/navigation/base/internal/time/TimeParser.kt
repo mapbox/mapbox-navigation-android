@@ -1,6 +1,6 @@
 package com.mapbox.navigation.base.internal.time
 
-import java.text.ParsePosition
+import com.google.gson.GsonBuilder
 import java.util.Date
 
 /***
@@ -9,7 +9,7 @@ import java.util.Date
 fun parseISO8601DateToLocalTimeOrNull(date: String?): Date? {
     if (date == null) return null
     return try {
-        ISO8601Utils.parse(date, ParsePosition(0))
+        GsonBuilder().create().getAdapter(Date::class.java).fromJson("\"$date\"")
     } catch (t: Throwable) {
         null
     }
