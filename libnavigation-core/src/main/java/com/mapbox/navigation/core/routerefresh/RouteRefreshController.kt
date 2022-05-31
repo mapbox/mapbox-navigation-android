@@ -68,18 +68,20 @@ internal class RouteRefreshController(
         require(routeLegs != null) { "Can't refresh route without legs" }
 
         var timeUntilNextAttempt = async { delay(routeRefreshOptions.intervalMillis) }
-        repeat(FAILED_ATTEMPTS_TO_INVALIDATE_EXPIRING_DATA) {
-            timeUntilNextAttempt.await()
-            timeUntilNextAttempt = async { delay(routeRefreshOptions.intervalMillis) }
-            val refreshedRoute = withTimeoutOrNull(routeRefreshOptions.intervalMillis) {
-                refreshRouteOrNull(route)
+        try {
+            repeat(FAILED_ATTEMPTS_TO_INVALIDATE_EXPIRING_DATA) {
+                timeUntilNextAttempt.await()
+                timeUntilNextAttempt = async { delay(routeRefreshOptions.intervalMillis) }
+                val refreshedRoute = withTimeoutOrNull(routeRefreshOptions.intervalMillis) {
+                    refreshRouteOrNull(route)
+                }
+                if (refreshedRoute != null) {
+                    return@coroutineScope refreshedRoute
+                }
             }
-            if (refreshedRoute != null) {
-                timeUntilNextAttempt.cancel()
-                return@coroutineScope refreshedRoute
-            }
+        } finally {
+            timeUntilNextAttempt.cancel() // otherwise current coroutine will wait for its child
         }
-        timeUntilNextAttempt.cancel()
         removeExpiringDataFromRoute(route, routeLegs)
     }
 
