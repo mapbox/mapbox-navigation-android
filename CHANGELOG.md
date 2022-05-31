@@ -4,7 +4,12 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- :warning: Expired data in the current primary route is cleaned up if 3 consecutive refresh attempts fail. Congestion annotations become "unknown". Numeric congestion annotations become `null`. Expired incidents disappear. [#5767](https://github.com/mapbox/mapbox-navigation-android/pull/5767).
+
 #### Bug fixes and improvements
+
+#### Known issues
+- :bangbang: Expiration of congestion annotations and incidents doesn't work for alternative routes, which can cause inconsistency and a false fact that alternative route is faster. 
 
 ## Mapbox Navigation SDK 2.5.0 - May 26, 2022
 

@@ -8,7 +8,10 @@ import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.MapMatcherOutput
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Road
+import com.mapbox.navigator.RouteInfo
+import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteState
+import com.mapbox.navigator.RouterOrigin
 import com.mapbox.navigator.SpeedLimit
 import com.mapbox.navigator.UpcomingRouteAlert
 import com.mapbox.navigator.VoiceInstruction
@@ -121,3 +124,27 @@ fun createFixedLocation(
 
 // Add default parameters if you define properties
 fun createMapMatcherOutput() = MapMatcherOutput(emptyList(), false)
+
+fun createRouteInterface(
+    responseUUID: String = "testResponseUUID",
+    routeIndex: Int = 0,
+    responseJson: String = "",
+    requestURI: String = "",
+    routerOrigin: RouterOrigin = RouterOrigin.ONLINE,
+    routeInfo: RouteInfo = RouteInfo(emptyList())
+): RouteInterface = object : RouteInterface {
+
+    override fun getRouteId() = "$responseUuid#$routeIndex"
+
+    override fun getResponseUuid() = responseUUID
+
+    override fun getRouteIndex() = routeIndex
+
+    override fun getResponseJson() = responseJson
+
+    override fun getRequestUri() = requestURI
+
+    override fun getRouterOrigin() = routerOrigin
+
+    override fun getRouteInfo() = routeInfo
+}
