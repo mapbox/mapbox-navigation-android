@@ -16,6 +16,8 @@ import com.mapbox.navigation.core.infra.factories.createRouteLeg
 import com.mapbox.navigation.core.infra.factories.createRouteLegAnnotation
 import com.mapbox.navigation.core.infra.factories.createRouteOptions
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.add
+import com.mapbox.navigation.testing.utcToLocalTime
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import io.mockk.every
@@ -32,9 +34,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.time.Month
-import java.util.Calendar
 import java.util.Date
-import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
@@ -667,28 +667,6 @@ private fun createTestInitialAndRefreshedTestRoutes(): Pair<NavigationRoute, Nav
             )
         )
     )
-
-private fun utcToLocalTime(
-    year: Int,
-    month: Month,
-    date: Int,
-    hourOfDay: Int,
-    minute: Int,
-    second: Int
-) = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
-    set(year, month.value - 1, date, hourOfDay, minute, second)
-}.time
-
-private fun Date.add(
-    hours: Int = 0,
-    milliseconds: Long = 0
-): Date {
-    val calendar = Calendar.getInstance()
-    calendar.time = this
-    calendar.add(Calendar.HOUR_OF_DAY, hours)
-    calendar.add(Calendar.MILLISECOND, milliseconds.toInt())
-    return calendar.time
-}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 private fun <T> Deferred<T>.getCompletedTest(): T = if (isActive) {
