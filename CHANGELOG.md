@@ -8,6 +8,9 @@ Mapbox welcomes participation and contributions from everyone.
 
 #### Bug fixes and improvements
 
+#### Known issues
+- :bangbang: Expiration of congestion annotations and incidents doesn't work for alternative routes, which can cause inconsistency and a false fact that alternative route is faster. 
+
 ## Mapbox Navigation SDK 2.5.0 - May 26, 2022
 ### Changelog
 [Changes between v2.4.1 and v2.5.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.4.1...v2.5.0)
