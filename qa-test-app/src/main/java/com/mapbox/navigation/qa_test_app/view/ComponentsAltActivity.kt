@@ -9,7 +9,7 @@ import androidx.fragment.app.replace
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.dropin.installComponents
+import com.mapbox.navigation.ui.base.installComponents
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.ComponentsActivityLayoutBinding
 import com.mapbox.navigation.qa_test_app.lifecycle.DropInLocationPuck
@@ -24,6 +24,9 @@ import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.maps.routeArrowComponent
+import com.mapbox.navigation.ui.maps.routeLineComponent
+import com.mapbox.navigation.ui.voice.audioGuidanceButtonComponent
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class ComponentsAltActivity : AppCompatActivity() {
@@ -71,7 +74,8 @@ class ComponentsAltActivity : AppCompatActivity() {
         //
         val mapboxNavigation = MapboxNavigationApp.current()!!
         mapboxNavigation.installComponents(this) {
-            audioGuidanceButtonComponent(binding.soundButton)
+            // need to fix shared app flow
+            // audioGuidanceButtonComponent(binding.soundButton)
             routeLineComponent(binding.mapView) {
                 options = customRouteLineOptions()
             }

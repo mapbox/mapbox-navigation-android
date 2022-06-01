@@ -25,7 +25,6 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowNewRawLocation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.dropin.installComponents
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.ComponentsActivityLayoutBinding
 import com.mapbox.navigation.qa_test_app.lifecycle.DropInLocationPuck
@@ -34,8 +33,12 @@ import com.mapbox.navigation.qa_test_app.lifecycle.DropInStartReplayButton
 import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInLocationViewModel
 import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInNavigationViewModel
 import com.mapbox.navigation.qa_test_app.utils.Utils.getMapboxAccessToken
+import com.mapbox.navigation.ui.base.installComponents
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.NavigationStyles
+import com.mapbox.navigation.ui.maps.routeArrowComponent
+import com.mapbox.navigation.ui.maps.routeLineComponent
+import com.mapbox.navigation.ui.voice.audioGuidanceButtonComponent
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -83,7 +86,8 @@ class ComponentsActivity : AppCompatActivity() {
         // Components installation via MapboxNavigationApp Facade
         //
         MapboxNavigationApp.installComponents(this) {
-            audioGuidanceButtonComponent(binding.soundButton)
+            // need to fix shared app flow
+            // audioGuidanceButtonComponent(binding.soundButton)
             routeLineComponent(binding.mapView)
             routeArrowComponent(binding.mapView)
 
