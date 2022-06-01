@@ -5,10 +5,12 @@ import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.graphics.Color
 import android.location.Location
+import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.StepManeuver
@@ -21,15 +23,22 @@ import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.extension.observable.eventdata.MapLoadingErrorEventData
 import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.CircleLayer
+import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.plugin.annotation.annotations
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotation
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
-import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
+import com.mapbox.maps.plugin.locationcomponent.LocationConsumer
+import com.mapbox.maps.plugin.locationcomponent.LocationProvider
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -55,6 +64,8 @@ import com.mapbox.navigation.examples.core.databinding.LayoutActivityCameraBindi
 import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
+import com.mapbox.navigation.ui.maps.camera.data.ViewportData
+import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceUpdateObserver
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandler
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
@@ -68,6 +79,7 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.toPoint
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -79,7 +91,6 @@ class MapboxCameraAnimationsActivity :
     OnMapLongClickListener {
 
     private val navigationLocationProvider = NavigationLocationProvider()
-    private lateinit var locationComponent: LocationComponentPlugin
     private lateinit var mapboxMap: MapboxMap
     private lateinit var mapboxNavigation: MapboxNavigation
     private val replayRouteMapper = ReplayRouteMapper()
@@ -244,14 +255,18 @@ class MapboxCameraAnimationsActivity :
         binding = LayoutActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
         mapboxMap = binding.mapView.getMapboxMap()
-        locationComponent = binding.mapView.location.apply {
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            binding.mapView.getMapboxMap()
+        )
+        binding.mapView.location.apply {
             this.locationPuck = LocationPuck2D(
                 bearingImage = ContextCompat.getDrawable(
                     this@MapboxCameraAnimationsActivity,
                     R.drawable.mapbox_navigation_puck_icon
                 )
             )
-            setLocationProvider(navigationLocationProvider)
+            // setLocationProvider(navigationLocationProvider)
+            setLocationProvider(navigationLocationProvider.syncedWith(viewportDataSource))
             addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
             enabled = true
         }
@@ -265,9 +280,7 @@ class MapboxCameraAnimationsActivity :
         ).apply {
             enabled = true
         }
-        viewportDataSource = MapboxNavigationViewportDataSource(
-            binding.mapView.getMapboxMap()
-        )
+
         viewportDataSource.options.followingFrameOptions.pitchNearManeuvers.apply {
             // An example of maneuver exclusion from "pitch to 0 near maneuvers" updates.
             excludedManeuvers = listOf(
@@ -293,7 +306,7 @@ class MapboxCameraAnimationsActivity :
                 navigationCamera,
                 mapboxMap,
                 binding.mapView.gestures,
-                locationComponent,
+                binding.mapView.location,
                 {
                     viewportDataSource
                         .options
@@ -304,6 +317,7 @@ class MapboxCameraAnimationsActivity :
         )
 
         init()
+        initCustomPuck()
     }
 
     @SuppressLint("MissingPermission")
@@ -419,7 +433,7 @@ class MapboxCameraAnimationsActivity :
         }
 
         mapboxReplayer.pushRealLocation(this, 0.0)
-        mapboxReplayer.playbackSpeed(1.0)
+        mapboxReplayer.playbackSpeed(2.0)
         mapboxReplayer.play()
     }
 
@@ -617,4 +631,119 @@ class MapboxCameraAnimationsActivity :
     }
 
     private fun Number?.formatNumber() = "%.8f".format(this)
+
+    //region Puck Target
+
+    private lateinit var annotationManager: PointAnnotationManager
+    private var puckTarget: PointAnnotation? = null
+
+    private fun initCustomPuck() {
+        annotationManager = binding.mapView.annotations.createPointAnnotationManager()
+        mapboxNavigation.onNextRawLocationUpdate {
+            puckTarget = createPuckTarget(it.toPoint())
+        }
+        viewportDataSource.registerUpdateObserver {
+            navigationLocationProvider.lastLocation?.also { location ->
+                puckTarget?.also {
+                    it.point = location.toPoint()
+                    annotationManager.update(it)
+                }
+            }
+        }
+    }
+
+    private fun createPuckTarget(point: Point): PointAnnotation {
+        val options = PointAnnotationOptions()
+            .withPoint(point)
+            .withIconAnchor(IconAnchor.CENTER)
+        ContextCompat.getDrawable(this, R.drawable.custom_user_puck_icon)?.toBitmap()?.also {
+            options.withIconImage(it)
+        }
+
+        return annotationManager.create(options)
+    }
+
+    private fun MapboxNavigation.onNextRawLocationUpdate(cb: (Location) -> Unit) {
+        registerLocationObserver(
+            object : LocationObserver {
+                override fun onNewRawLocation(rawLocation: Location) {
+                    cb(rawLocation)
+                    unregisterLocationObserver(this)
+                }
+
+                override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) =
+                    Unit
+            }
+        )
+    }
+    //endregion
 }
+
+//region Synced Puck
+
+fun NavigationLocationProvider.syncedWith(
+    viewportDataSource: MapboxNavigationViewportDataSource
+): LocationProvider {
+    return PuckLocationAdapter(this, viewportDataSource)
+}
+
+class PuckLocationAdapter(
+    private val upstreamProvider: NavigationLocationProvider,
+    viewportDataSource: MapboxNavigationViewportDataSource,
+    private val downstreamProvider: NavigationLocationProvider = NavigationLocationProvider()
+) : LocationProvider by downstreamProvider, ViewportDataSourceUpdateObserver {
+
+    init {
+        upstreamProvider.onFirstLocation {
+            downstreamProvider.changePosition(it)
+        }
+        viewportDataSource.registerUpdateObserver(this)
+    }
+
+    override fun viewportDataSourceUpdated(viewportData: ViewportData) {
+        upstreamProvider.lastLocation?.also {
+            downstreamProvider.changePosition(it)
+        }
+    }
+
+    private fun NavigationLocationProvider.onFirstLocation(action: (Location) -> Unit) {
+        lastLocation?.also {
+            action(it)
+            return
+        }
+        registerLocationConsumer(object : AbstractLocationConsumer() {
+            override fun onLocationUpdated(
+                vararg location: Point,
+                options: (ValueAnimator.() -> Unit)?
+            ) {
+                location.firstOrNull()?.also {
+                    action(Location(LocationManager.PASSIVE_PROVIDER).apply {
+                        latitude = it.latitude()
+                        longitude = it.longitude()
+                    })
+                }
+                unRegisterLocationConsumer(this)
+            }
+        })
+    }
+
+    private abstract class AbstractLocationConsumer : LocationConsumer {
+        override fun onBearingUpdated(
+            vararg bearing: Double,
+            options: (ValueAnimator.() -> Unit)?
+        ) = Unit
+
+        override fun onLocationUpdated(
+            vararg location: Point,
+            options: (ValueAnimator.() -> Unit)?
+        ) = Unit
+
+        override fun onPuckBearingAnimatorDefaultOptionsUpdated(options: ValueAnimator.() -> Unit) =
+            Unit
+
+        override fun onPuckLocationAnimatorDefaultOptionsUpdated(options: ValueAnimator.() -> Unit) =
+            Unit
+    }
+}
+
+//endregion
