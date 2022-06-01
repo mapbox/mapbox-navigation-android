@@ -41,9 +41,11 @@ dependencies {
     // This defines the minimum version of Maps, Navigation, and Search which are included in
     // this SDK. To upgrade the SDK versions, you can specify a newer version in your downstream
     // build.gradle.
-    api("com.mapbox.navigation:android:2.6.0-alpha.2")
-    api("com.mapbox.search:mapbox-search-android:1.0.0-beta.29")
-    implementation project(":libnavui-app")
+    def carNavVersion = "2.6.0-alpha.2"
+    def carSearchVersion = "1.0.0-beta.29"
+    api("com.mapbox.navigation:android:${carNavVersion}")
+    api("com.mapbox.search:mapbox-search-android:${carSearchVersion}")
+    implementation("com.mapbox.navigation:ui-app:${carNavVersion}")
 
     implementation(dependenciesList.androidXAppCompat)
     implementation(dependenciesList.coroutinesCore)
