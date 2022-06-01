@@ -85,7 +85,7 @@ package com.mapbox.navigation.ui.voice.model {
   public final class SpeechVolume {
     ctor public SpeechVolume(@FloatRange(from=com.mapbox.navigation.ui.voice.model.SpeechVolumeKt.MINIMUM_VOLUME_LEVEL, to=com.mapbox.navigation.ui.voice.model.SpeechVolumeKt.MAXIMUM_VOLUME_LEVEL) float level);
     method public float component1();
-    method public com.mapbox.navigation.ui.voice.model.SpeechVolume copy(float level);
+    method public com.mapbox.navigation.ui.voice.model.SpeechVolume copy(@FloatRange(from=0.0, to=1.0) float level);
     method public float getLevel();
     property public final float level;
   }

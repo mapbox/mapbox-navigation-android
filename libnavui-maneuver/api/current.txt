@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maneuver.api {
 
   public final class MapboxLaneIconsApi {
     ctor public MapboxLaneIconsApi(com.mapbox.navigation.ui.maneuver.model.LaneIconResources laneIconResources = LaneIconResources.<init>().build());
+    ctor public MapboxLaneIconsApi();
     method public com.mapbox.navigation.ui.maneuver.model.LaneIcon getTurnLane(com.mapbox.navigation.ui.maneuver.model.LaneIndicator laneIndicator);
   }
 
@@ -25,7 +26,7 @@ package com.mapbox.navigation.ui.maneuver.api {
     ctor public MapboxTurnIconsApi(com.mapbox.navigation.ui.maneuver.model.TurnIconResources turnIconResources);
     method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.TurnIconError,com.mapbox.navigation.base.internal.maneuver.ManeuverTurnIcon> generateTurnIcon(String? type, Float? degrees, String? modifier, String? drivingSide);
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources getTurnIconResources();
-    method public void setTurnIconResources(com.mapbox.navigation.ui.maneuver.model.TurnIconResources p);
+    method public void setTurnIconResources(com.mapbox.navigation.ui.maneuver.model.TurnIconResources);
     method public void updateResources(com.mapbox.navigation.ui.maneuver.model.TurnIconResources resources);
     property public final com.mapbox.navigation.ui.maneuver.model.TurnIconResources turnIconResources;
   }
@@ -534,7 +535,7 @@ package com.mapbox.navigation.ui.maneuver.model {
     method @Deprecated public com.mapbox.navigation.ui.maneuver.model.RoadShield copy(String shieldUrl, byte[] shieldIcon);
     method @Deprecated public byte[] getShieldIcon();
     method @Deprecated public String getShieldUrl();
-    method @Deprecated public void setShieldIcon(byte[] p);
+    method @Deprecated public void setShieldIcon(byte[]);
     property public final byte[] shieldIcon;
     property public final String shieldUrl;
   }
@@ -597,7 +598,7 @@ package com.mapbox.navigation.ui.maneuver.model {
     method public com.mapbox.navigation.base.formatter.DistanceFormatter getDistanceFormatter();
     method public Double? getDistanceRemaining();
     method public double getTotalDistance();
-    method public void setDistanceRemaining(Double? p);
+    method public void setDistanceRemaining(Double?);
     property public final com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter;
     property public final Double? distanceRemaining;
     property public final double totalDistance;
@@ -991,7 +992,7 @@ package com.mapbox.navigation.ui.maneuver.view {
     method public void renderSub(com.mapbox.navigation.ui.maneuver.model.SubManeuver? sub, java.util.Set<? extends com.mapbox.navigation.ui.shield.model.RouteShield>? routeShields);
     method @Deprecated public void renderSubManeuver(com.mapbox.navigation.ui.maneuver.model.SubManeuver? sub, com.mapbox.navigation.ui.maneuver.model.RoadShield? roadShield = null);
     method @Deprecated public void renderSubManeuver(com.mapbox.navigation.ui.maneuver.model.SubManeuver? sub);
-    method public void setUpcomingManeuverRenderingEnabled(boolean value);
+    method public void setUpcomingManeuverRenderingEnabled(boolean);
     method @Deprecated public void updateLaneGuidanceIconStyle(@StyleRes int style);
     method public void updateManeuverViewOptions(com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions options);
     method @Deprecated public void updatePrimaryManeuverTextAppearance(@StyleRes int style);
@@ -1075,8 +1076,8 @@ package com.mapbox.navigation.ui.maneuver.view {
   public final class MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
     ctor public MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder(error.NonExistentClass viewBinding);
     method public void bindUpcomingManeuver(com.mapbox.navigation.ui.maneuver.model.Maneuver maneuver);
-    method public error.NonExistentClass getViewBinding();
-    property public final error.NonExistentClass viewBinding;
+    method public error.NonExistentClass! getViewBinding();
+    property public final error.NonExistentClass! viewBinding;
   }
 
 }
