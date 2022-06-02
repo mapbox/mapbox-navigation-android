@@ -32,8 +32,6 @@ android.libraryVariants.all { variant ->
             args = [
                     '--no-banner',
                     '--source-path', 'src/main/java',
-                    '--compatible-output=no',
-                    '--omit-common-packages=yes',
                     '--output-kotlin-nulls=yes',
                     '--hide', 'HiddenSuperclass',
                     '--hide', 'DeprecationMismatch',
@@ -63,14 +61,12 @@ android.libraryVariants.all { variant ->
             args = [
                     '--no-banner',
                     '--source-path', 'src/main/java',
-                    '--compatible-output=no',
-                    '--omit-common-packages=yes',
                     '--output-kotlin-nulls=yes',
                     '--input-kotlin-nulls=yes',
                     '--hide', 'HiddenSuperclass',
                     '--hide', 'DeprecationMismatch',
                     '--classpath', (project.files(android.getBootClasspath()) + variant.javaCompile.classpath).join(File.pathSeparator),
-                    '--check-compatibility:api:current', 'api/current.txt'
+                    '--check-compatibility:api:released', 'api/current.txt'
             ]
             if (project.hasProperty('hidePackage')) {
                 args += '--hide-package'

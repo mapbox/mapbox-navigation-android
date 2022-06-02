@@ -42,8 +42,8 @@ package com.mapbox.navigation.ui.status.view {
     method public android.widget.ProgressBar getSpinnerProgressBar();
     method public boolean isRendered();
     method @UiThread public void render(com.mapbox.navigation.ui.status.model.Status? status);
-    method public void setHideAnimRes(int p);
-    method public void setShowAnimRes(int p);
+    method public void setHideAnimRes(int);
+    method public void setShowAnimRes(int);
     property public final androidx.constraintlayout.widget.ConstraintLayout containerView;
     property public final com.mapbox.navigation.ui.status.model.Status? currentStatus;
     property public final int hideAnimRes;
