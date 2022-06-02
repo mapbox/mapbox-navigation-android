@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.LegAnnotation
+import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.route.NavigationRoute
 import kotlin.math.min
 
@@ -15,14 +16,28 @@ internal class DirectionsRouteDiffProvider {
         val newRouteLegs = newRoute.directionsRoute.legs() ?: return emptyList()
         val routeDiffs = arrayListOf<String>()
         for (legIndex in currentLegIndex until min(oldRouteLegs.size, newRouteLegs.size)) {
-            val oldLegAnnotation = oldRouteLegs[legIndex].annotation()
-            val newLegAnnotation = newRouteLegs[legIndex].annotation()
-            val updatedAnnotations = getUpdatedAnnotations(oldLegAnnotation, newLegAnnotation)
+            val oldLeg = oldRouteLegs[legIndex]
+            val newLeg = newRouteLegs[legIndex]
+            val updatedAnnotations = getUpdatedData(oldLeg, newLeg)
             if (updatedAnnotations.isNotEmpty()) {
                 routeDiffs.add("Updated ${updatedAnnotations.joinToString()} at leg $legIndex")
             }
         }
         return routeDiffs
+    }
+
+    private fun getUpdatedData(oldRouteLeg: RouteLeg, newRouteLeg: RouteLeg): List<String> {
+        val result = mutableListOf<String>()
+        result.addAll(
+            getUpdatedAnnotations(
+                oldRouteLeg.annotation(),
+                newRouteLeg.annotation()
+            )
+        )
+        if (oldRouteLeg.incidents() != newRouteLeg.incidents()) {
+            result.add("incidents")
+        }
+        return result
     }
 
     private fun getUpdatedAnnotations(

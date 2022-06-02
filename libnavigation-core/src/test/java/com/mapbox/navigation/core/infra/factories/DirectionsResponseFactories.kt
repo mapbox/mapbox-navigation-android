@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
+import com.mapbox.api.directions.v5.models.MaxSpeed
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
@@ -71,14 +72,23 @@ fun createRouteLegAnnotation(
     congestionNumeric: List<Int> = listOf(90, 50),
     distance: List<Double> = listOf(10.0, 10.0),
     duration: List<Double> = listOf(2.0, 2.0),
+    maxSpeed: List<MaxSpeed> = listOf(createMaxSpeed(40), createMaxSpeed(60)),
+    speed: List<Double> = listOf(40.4, 60.7)
 ): LegAnnotation {
     return LegAnnotation.builder()
         .distance(distance)
         .duration(duration)
         .congestion(congestion)
         .congestionNumeric(congestionNumeric)
+        .maxspeed(maxSpeed)
+        .speed(speed)
         .build()
 }
+
+fun createMaxSpeed(
+   speed: Int = 60,
+   unit: String = "km/h"
+): MaxSpeed = MaxSpeed.builder().speed(speed).unit(unit).build()
 
 fun createIncident(
     id: String = "1",
