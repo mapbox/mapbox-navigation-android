@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.RouteRefreshOptions
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
@@ -79,14 +80,16 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         setupMockRequestHandlers(coordinates)
 
         runOnMainSync {
+            val routeRefreshOptions = RouteRefreshOptions.Builder()
+                .intervalMillis(TimeUnit.SECONDS.toMillis(30))
+                .build()
+            val field = RouteRefreshOptions::class.java.getDeclaredField("intervalMillis")
+            field.isAccessible = true
+            field.set(routeRefreshOptions, 3_000L)
             mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(activity)
                     .accessToken(getMapboxAccessTokenFromResources(activity))
-                    .routeRefreshOptions(
-                        RouteRefreshOptions.Builder()
-                            .intervalMillis(TimeUnit.SECONDS.toMillis(30))
-                            .build()
-                    )
+                    .routeRefreshOptions(routeRefreshOptions)
                     .routingTilesOptions(
                         RoutingTilesOptions.Builder()
                             .tilesBaseUri(URI(mockWebServerRule.baseUrl))
@@ -149,10 +152,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         val latch = CountDownLatch(2)
         runOnMainSync {
             mapboxNavigation.registerRouteProgressObserver { routeProgress ->
-                val durationRemaining = routeProgress.durationRemaining
-                val expectedDurationRemaining = 1180.651
-                // 30 seconds margin of error
-                if ((durationRemaining - expectedDurationRemaining).absoluteValue < 30) {
+                if (isRefreshedRouteDistance(routeProgress)) {
                     latch.countDown()
                 }
             }
@@ -214,11 +214,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
 
         val refreshedRouteProgress = mapboxNavigation.routeProgressUpdates()
             // copied from the test above
-            .filter {
-                val expectedDurationRemaining = 1180.651
-                // 30 seconds margin of error
-                (it.durationRemaining - expectedDurationRemaining).absoluteValue < 30
-            }
+            .filter { isRefreshedRouteDistance(it) }
             .first()
 
         mapboxNavigation.setRoutes(listOf())
@@ -228,12 +224,14 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             .first()
         val refreshedRouteProgress2 = mapboxNavigation.routeProgressUpdates()
             // copied from the test above
-            .filter {
-                val expectedDurationRemaining = 1180.651
-                // 30 seconds margin of error
-                (it.durationRemaining - expectedDurationRemaining).absoluteValue < 30
-            }
+            .filter { isRefreshedRouteDistance(it) }
             .first()
+    }
+
+    private fun isRefreshedRouteDistance(it: RouteProgress): Boolean {
+        val expectedDurationRemaining = 1180.651
+        // 30 seconds margin of error
+        return (it.durationRemaining - expectedDurationRemaining).absoluteValue < 30
     }
 
     // Will be ignored when .baseUrl(mockWebServerRule.baseUrl) is commented out
