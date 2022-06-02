@@ -64,6 +64,7 @@ ext {
       barista                   : '4.2.0',
       svgParser                 : '1.4',
       androidStartup            : '1.0.0',
+      viewBinding               : '7.2.1',
   ]
   dependenciesList = [
       // mapbox
@@ -165,6 +166,8 @@ ext {
       multidex                  : "androidx.multidex:multidex:${version.multidex}",
 
       svgParser                 : "com.caverock:androidsvg-aar:${version.svgParser}",
+
+      viewBinding               : "com.android.databinding:viewbinding:${version.viewBinding}",
 
       // Test app crashlytics
       firebaseCrashlyticsNdk    : "com.google.firebase:firebase-crashlytics-ndk:${version.firebaseCrashlytics}"
