@@ -17,8 +17,10 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.getSuccessOrThrowException
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.requestRoutes
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.setNavigationRoutesAndWaitForUpdate
-import com.mapbox.navigation.instrumentation_tests.utils.getSuccessOrThrowException
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockRoutingTileEndpointErrorRequestHandler
@@ -28,8 +30,6 @@ import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteRequestIdli
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RoutesObserverIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
-import com.mapbox.navigation.instrumentation_tests.utils.requestRoutes
-import com.mapbox.navigation.instrumentation_tests.utils.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
@@ -272,5 +272,4 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             .baseUrl(mockWebServerRule.baseUrl) // Comment out to test a real server
             .build()
     }
-
 }

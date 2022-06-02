@@ -1,4 +1,4 @@
-package com.mapbox.navigation.instrumentation_tests.utils
+package com.mapbox.navigation.instrumentation_tests.utils.coroutines
 
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute

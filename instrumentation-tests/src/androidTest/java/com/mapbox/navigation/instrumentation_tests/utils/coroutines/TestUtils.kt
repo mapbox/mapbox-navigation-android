@@ -3,7 +3,6 @@ package com.mapbox.navigation.instrumentation_tests.utils.coroutines
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
-import com.mapbox.navigation.instrumentation_tests.utils.routesUpdates
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -35,8 +34,10 @@ suspend fun MapboxNavigation.waitForRoutesCleanup() {
     waitForRoutesUpdate(RoutesExtra.ROUTES_UPDATE_REASON_NEW)
 }
 
-private suspend fun MapboxNavigation.waitForRoutesUpdate(@RoutesExtra.RoutesUpdateReason reason: String) {
+private suspend fun MapboxNavigation.waitForRoutesUpdate(
+    @RoutesExtra.RoutesUpdateReason reason: String
+) {
     routesUpdates()
-        .filter { it.reason == reason}
+        .filter { it.reason == reason }
         .first()
 }
