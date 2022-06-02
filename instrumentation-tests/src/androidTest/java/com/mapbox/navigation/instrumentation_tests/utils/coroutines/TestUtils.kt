@@ -45,7 +45,7 @@ suspend fun MapboxNavigation.waitForNewRoute() {
 }
 
 suspend fun MapboxNavigation.waitForRoutesCleanup() {
-    waitForRoutesUpdate(RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+    waitForRoutesUpdate(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
 }
 
 private suspend fun MapboxNavigation.waitForRoutesUpdate(

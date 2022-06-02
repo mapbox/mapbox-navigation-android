@@ -17,7 +17,7 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.getSuccessResultOrThrowException
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.requestRoutes
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
@@ -199,14 +199,14 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     fun routeRefreshesAfterCleanup() = sdkTest {
         val routeOptions = generateRouteOptions(coordinates)
         val routes = mapboxNavigation.requestRoutes(routeOptions)
-            .getSuccessResultOrThrowException()
+            .getSuccessfulResultOrThrowException()
             .routes
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
         mapboxNavigation.startTripSession()
         stayOnInitialPosition()
 
         waitForRouteToRefresh()
-        mapboxNavigation.setNavigationRoutes(listOf())
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(listOf())
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
         waitForRouteToRefresh()
     }
