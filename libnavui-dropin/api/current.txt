@@ -11,7 +11,7 @@ package com.mapbox.navigation.dropin {
     method public void customizeViewStyles(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewStyleCustomization,kotlin.Unit> action);
     method public androidx.lifecycle.Lifecycle getLifecycle();
     method public boolean isReplayEnabled();
-    method public void setReplayEnabled(boolean value);
+    method public void setReplayEnabled(boolean);
     property public final boolean isReplayEnabled;
   }
 
@@ -24,13 +24,13 @@ package com.mapbox.navigation.dropin {
     method public com.mapbox.navigation.dropin.binder.UIBinder? getManeuverBinder();
     method public com.mapbox.navigation.dropin.binder.UIBinder? getRoadNameBinder();
     method public com.mapbox.navigation.dropin.binder.UIBinder? getSpeedLimitBinder();
-    method public void setActionButtonsBinder(com.mapbox.navigation.dropin.binder.UIBinder? p);
-    method public void setInfoPanelContentBinder(com.mapbox.navigation.dropin.binder.UIBinder? p);
-    method public void setInfoPanelHeaderBinder(com.mapbox.navigation.dropin.binder.UIBinder? p);
-    method public void setInfoPanelTripProgressBinder(com.mapbox.navigation.dropin.binder.UIBinder? p);
-    method public void setManeuverBinder(com.mapbox.navigation.dropin.binder.UIBinder? p);
-    method public void setRoadNameBinder(com.mapbox.navigation.dropin.binder.UIBinder? p);
-    method public void setSpeedLimitBinder(com.mapbox.navigation.dropin.binder.UIBinder? p);
+    method public void setActionButtonsBinder(com.mapbox.navigation.dropin.binder.UIBinder?);
+    method public void setInfoPanelContentBinder(com.mapbox.navigation.dropin.binder.UIBinder?);
+    method public void setInfoPanelHeaderBinder(com.mapbox.navigation.dropin.binder.UIBinder?);
+    method public void setInfoPanelTripProgressBinder(com.mapbox.navigation.dropin.binder.UIBinder?);
+    method public void setManeuverBinder(com.mapbox.navigation.dropin.binder.UIBinder?);
+    method public void setRoadNameBinder(com.mapbox.navigation.dropin.binder.UIBinder?);
+    method public void setSpeedLimitBinder(com.mapbox.navigation.dropin.binder.UIBinder?);
     property public final com.mapbox.navigation.dropin.binder.UIBinder? actionButtonsBinder;
     property public final com.mapbox.navigation.dropin.binder.UIBinder? infoPanelContentBinder;
     property public final com.mapbox.navigation.dropin.binder.UIBinder? infoPanelHeaderBinder;
@@ -46,10 +46,10 @@ package com.mapbox.navigation.dropin {
     method public String? getMapStyleUriNight();
     method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions? getRouteArrowOptions();
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions? getRouteLineOptions();
-    method public void setMapStyleUriDay(String? p);
-    method public void setMapStyleUriNight(String? p);
-    method public void setRouteArrowOptions(com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions? p);
-    method public void setRouteLineOptions(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions? p);
+    method public void setMapStyleUriDay(String?);
+    method public void setMapStyleUriNight(String?);
+    method public void setRouteArrowOptions(com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions?);
+    method public void setRouteLineOptions(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions?);
     property public final String? mapStyleUriDay;
     property public final String? mapStyleUriNight;
     property public final com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions? routeArrowOptions;
@@ -77,19 +77,19 @@ package com.mapbox.navigation.dropin {
     method public Integer? getSpeedLimitTextAppearance();
     method public Integer? getStartNavigationButtonStyle();
     method public Integer? getTripProgressStyle();
-    method public void setAudioGuidanceButtonStyle(Integer? p);
-    method public void setCameraModeButtonStyle(Integer? p);
-    method public void setDestinationMarker(Integer? p);
-    method public void setEndNavigationButtonStyle(Integer? p);
-    method public void setManeuverViewOptions(com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? p);
-    method public void setRecenterButtonStyle(Integer? p);
-    method public void setRoadNameBackground(Integer? p);
-    method public void setRoadNameTextAppearance(Integer? p);
-    method public void setRoutePreviewButtonStyle(Integer? p);
-    method public void setSpeedLimitStyle(Integer? p);
-    method public void setSpeedLimitTextAppearance(Integer? p);
-    method public void setStartNavigationButtonStyle(Integer? p);
-    method public void setTripProgressStyle(Integer? p);
+    method public void setAudioGuidanceButtonStyle(Integer?);
+    method public void setCameraModeButtonStyle(Integer?);
+    method public void setDestinationMarker(Integer?);
+    method public void setEndNavigationButtonStyle(Integer?);
+    method public void setManeuverViewOptions(com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions?);
+    method public void setRecenterButtonStyle(Integer?);
+    method public void setRoadNameBackground(Integer?);
+    method public void setRoadNameTextAppearance(Integer?);
+    method public void setRoutePreviewButtonStyle(Integer?);
+    method public void setSpeedLimitStyle(Integer?);
+    method public void setSpeedLimitTextAppearance(Integer?);
+    method public void setStartNavigationButtonStyle(Integer?);
+    method public void setTripProgressStyle(Integer?);
     property public final Integer? audioGuidanceButtonStyle;
     property public final Integer? cameraModeButtonStyle;
     property public final Integer? destinationMarker;
@@ -462,7 +462,7 @@ package com.mapbox.navigation.dropin.lifecycle {
     method protected final inline <T> void observe(kotlinx.coroutines.flow.Flow<? extends T>, kotlin.jvm.functions.Function2<? super T,? super kotlin.coroutines.Continuation<? super kotlin.Unit>,?> action);
     method @CallSuper public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     method @CallSuper public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
-    method public final void setCoroutineScope(kotlinx.coroutines.CoroutineScope p);
+    method public final void setCoroutineScope(kotlinx.coroutines.CoroutineScope);
     property public final kotlinx.coroutines.CoroutineScope coroutineScope;
     field public kotlinx.coroutines.CoroutineScope coroutineScope;
   }
@@ -473,7 +473,7 @@ package com.mapbox.navigation.dropin.lifecycle {
     method public final kotlinx.coroutines.CoroutineScope getCoroutineScope();
     method @CallSuper public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     method @CallSuper public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
-    method public final void setCoroutineScope(kotlinx.coroutines.CoroutineScope p);
+    method public final void setCoroutineScope(kotlinx.coroutines.CoroutineScope);
     property public final kotlinx.coroutines.CoroutineScope coroutineScope;
     field public kotlinx.coroutines.CoroutineScope coroutineScope;
   }
@@ -504,10 +504,10 @@ package com.mapbox.navigation.dropin.view {
     method @UiThread public void mute();
     method @UiThread public void muteAndExtend(long duration = 2000L);
     method @UiThread public void muteAndExtend();
-    method public void setMuteIconResId(int p);
-    method public void setMuteText(String? p);
-    method public void setUnMuteIconResId(int p);
-    method public void setUnMuteText(String? p);
+    method public void setMuteIconResId(int);
+    method public void setMuteText(String?);
+    method public void setUnMuteIconResId(int);
+    method public void setUnMuteText(String?);
     method @UiThread public void unMute();
     method @UiThread public void unMuteAndExtend(long duration = 2000L);
     method @UiThread public void unMuteAndExtend();
@@ -533,10 +533,10 @@ package com.mapbox.navigation.dropin.view {
     method public int getOverviewIconResId();
     method public String? getOverviewText();
     method public androidx.appcompat.widget.AppCompatTextView getTextView();
-    method public void setFollowingIconResId(int p);
-    method public void setFollowingText(String? p);
-    method public void setOverviewIconResId(int p);
-    method public void setOverviewText(String? p);
+    method public void setFollowingIconResId(int);
+    method public void setFollowingText(String?);
+    method public void setOverviewIconResId(int);
+    method public void setOverviewText(String?);
     method @UiThread public void setState(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state);
     method @UiThread public void setStateAndExtend(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state, long duration = 2000L);
     method @UiThread public void setStateAndExtend(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state);
@@ -570,7 +570,7 @@ package com.mapbox.navigation.dropin.view {
     method public int component1();
     method public String? component2();
     method public long component3();
-    method public com.mapbox.navigation.dropin.view.MapboxExtendableButton.State copy(int icon, String? text, long duration);
+    method public com.mapbox.navigation.dropin.view.MapboxExtendableButton.State copy(@DrawableRes int icon, String? text, long duration);
     method public long getDuration();
     method public int getIcon();
     method public String? getText();

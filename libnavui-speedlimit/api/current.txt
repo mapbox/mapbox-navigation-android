@@ -4,7 +4,7 @@ package com.mapbox.navigation.ui.speedlimit.api {
   public final class MapboxSpeedLimitApi {
     ctor public MapboxSpeedLimitApi(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> formatter);
     method public com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> getFormatter();
-    method public void setFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> p);
+    method public void setFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String>);
     method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError,com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue> updateSpeedLimit(com.mapbox.navigation.base.speed.model.SpeedLimit? speedLimit);
     property public final com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> formatter;
   }
