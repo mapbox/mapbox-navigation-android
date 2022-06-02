@@ -7,6 +7,21 @@ Mapbox welcomes participation and contributions from everyone.
 
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.5.1 - Jun 02, 2022
+
+The release fixes a crash in the router's retryable task.
+
+### Changelog
+[Changes between v2.5.0 and v2.5.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.5.0...v2.5.1)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.5.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.5.0))
+- Mapbox Navigation Native `v101.0.1`
+- Mapbox Core Common `v21.3.1`
+- Mapbox Java `v6.5.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.5.0))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
 
 ## Mapbox Navigation SDK 2.6.0-beta.1 - June 2, 2022
 #### Features
