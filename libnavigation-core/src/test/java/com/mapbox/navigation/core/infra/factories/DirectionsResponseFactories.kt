@@ -86,8 +86,8 @@ fun createRouteLegAnnotation(
 }
 
 fun createMaxSpeed(
-   speed: Int = 60,
-   unit: String = "km/h"
+    speed: Int = 60,
+    unit: String = "km/h"
 ): MaxSpeed = MaxSpeed.builder().speed(speed).unit(unit).build()
 
 fun createIncident(

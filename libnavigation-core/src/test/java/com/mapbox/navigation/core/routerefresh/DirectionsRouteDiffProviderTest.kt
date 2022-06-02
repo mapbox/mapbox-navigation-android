@@ -46,9 +46,11 @@ class DirectionsRouteDiffProviderTest {
     }
 
     private fun createTestNavigationRoute(vararg legs: RouteLeg): NavigationRoute {
-        return createNavigationRoute(createDirectionsRoute(
-            legs = legs.toList()
-        ))
+        return createNavigationRoute(
+            createDirectionsRoute(
+                legs = legs.toList()
+            )
+        )
     }
 
     private fun createTestLeg(
