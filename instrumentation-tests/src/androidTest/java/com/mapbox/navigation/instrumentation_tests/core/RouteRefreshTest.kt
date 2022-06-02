@@ -13,6 +13,7 @@ import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
@@ -25,10 +26,17 @@ import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteRequestIdli
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RoutesObserverIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
+import com.mapbox.navigation.instrumentation_tests.utils.routeProgressUpdates
+import com.mapbox.navigation.instrumentation_tests.utils.routesUpdates
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.utils.internal.logD
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -91,7 +99,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     }
 
     @Test
-    fun expect_route_refresh_to_update_traffic_annotations() {
+    fun expect_route_refresh_to_update_traffic_annotations_and_incidents() {
         // Request a route.
         val routes = requestDirectionsRouteSync(coordinates).reversed()
 
@@ -185,6 +193,47 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         assertEquals(sanityDuration, initialDuration, 0.0)
         assertEquals(227.918, initialDuration, 0.0001)
         assertEquals(1180.651, refreshedDuration, 0.0001)
+    }
+
+    @Test
+    fun routeRefreshesAfterCleanup() = runBlocking(Dispatchers.Main) {
+        val route = withContext(Dispatchers.IO) { requestDirectionsRouteSync(coordinates) }
+        mapboxNavigation.setRoutes(route)
+        mapboxNavigation.routesUpdates()
+            .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW }
+            .first()
+        mapboxNavigation.startTripSession()
+        mockLocationReplayerRule.loopUpdate(
+            mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = coordinates[0].latitude()
+                longitude = coordinates[0].longitude()
+                bearing = 190f
+            },
+            times = 120
+        )
+
+        val refreshedRouteProgress = mapboxNavigation.routeProgressUpdates()
+            // copied from the test above
+            .filter {
+                val expectedDurationRemaining = 1180.651
+                // 30 seconds margin of error
+                (it.durationRemaining - expectedDurationRemaining).absoluteValue < 30
+            }
+            .first()
+
+        mapboxNavigation.setRoutes(listOf())
+        mapboxNavigation.setRoutes(route)
+        mapboxNavigation.routesUpdates()
+            .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW }
+            .first()
+        val refreshedRouteProgress2 = mapboxNavigation.routeProgressUpdates()
+            // copied from the test above
+            .filter {
+                val expectedDurationRemaining = 1180.651
+                // 30 seconds margin of error
+                (it.durationRemaining - expectedDurationRemaining).absoluteValue < 30
+            }
+            .first()
     }
 
     // Will be ignored when .baseUrl(mockWebServerRule.baseUrl) is commented out
