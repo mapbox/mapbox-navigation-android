@@ -17,9 +17,10 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.getSuccessOrThrowException
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.getSuccessResultOrThrowException
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.requestRoutes
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routeProgressUpdates
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.setNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
@@ -34,11 +35,8 @@ import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.utils.internal.logD
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -198,21 +196,19 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     }
 
     @Test
-    fun routeRefreshesAfterCleanup() = runBlocking<Unit>(Dispatchers.Main) {
-        withTimeout(30_000) {
-            val routeOptions = generateRouteOptions(coordinates)
-            val routes = mapboxNavigation.requestRoutes(routeOptions)
-                .getSuccessOrThrowException()
-                .routes
-            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
-            mapboxNavigation.startTripSession()
-            stayOnInitialPosition()
+    fun routeRefreshesAfterCleanup() = sdkTest {
+        val routeOptions = generateRouteOptions(coordinates)
+        val routes = mapboxNavigation.requestRoutes(routeOptions)
+            .getSuccessResultOrThrowException()
+            .routes
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+        mapboxNavigation.startTripSession()
+        stayOnInitialPosition()
 
-            waitForRouteToRefresh()
-            mapboxNavigation.setNavigationRoutes(listOf())
-            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
-            waitForRouteToRefresh()
-        }
+        waitForRouteToRefresh()
+        mapboxNavigation.setNavigationRoutes(listOf())
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+        waitForRouteToRefresh()
     }
 
     private fun stayOnInitialPosition() {

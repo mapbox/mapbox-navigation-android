@@ -73,7 +73,7 @@ sealed class RouteRequestResult {
     ) : RouteRequestResult()
 }
 
-fun RouteRequestResult.getSuccessOrThrowException(): RouteRequestResult.Success {
+fun RouteRequestResult.getSuccessResultOrThrowException(): RouteRequestResult.Success {
     return when (this) {
         is RouteRequestResult.Success -> this
         is RouteRequestResult.Failure -> error("result is failure: ${this.reasons}")
