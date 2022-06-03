@@ -7,12 +7,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 #### Bug fixes and improvements
 
-## Mapbox Navigation SDK 2.5.1 - Jun 02, 2022
 
-The release fixes a crash in the router's retryable task.
-
+## Mapbox Navigation SDK 2.5.1 - June 2, 2022
 ### Changelog
 [Changes between v2.5.0 and v2.5.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.5.0...v2.5.1)
+
+#### Bug fixes and improvements
+- Fixed an issue where offline route requests sometimes crashed the SDK. [#5894](https://github.com/mapbox/mapbox-navigation-android/pull/5894) 
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -24,6 +25,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Android Telemetry `v8.1.1`
 
 ## Mapbox Navigation SDK 2.6.0-beta.1 - June 2, 2022
+### Changelog
+[Changes between v2.6.0-alpha.2 and v2.6.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.6.0-alpha.2...v2.6.0-beta.1)
+
 #### Features
 - :warning: Expired data in the current primary route is cleaned up if 3 consecutive refresh attempts fail. Congestion annotations become `"unknown"`. Numeric congestion annotations become `null`. Expired incidents disappear. [#5767](https://github.com/mapbox/mapbox-navigation-android/pull/5767).
 
