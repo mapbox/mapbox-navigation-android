@@ -25,7 +25,7 @@ package com.mapbox.navigation.ui.base.lifecycle {
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public class UIComponent implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
     ctor public UIComponent();
     method public final kotlinx.coroutines.CoroutineScope getCoroutineScope();
-    method protected final inline <T> void observe(kotlinx.coroutines.flow.Flow<? extends T>, kotlin.jvm.functions.Function2<? super T,? super kotlin.coroutines.Continuation<? super kotlin.Unit>,?> action);
+    method protected final <T> void observe(kotlinx.coroutines.flow.Flow<? extends T>, kotlinx.coroutines.flow.FlowCollector<? super T> action);
     method @CallSuper public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     method @CallSuper public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     method public final void setCoroutineScope(kotlinx.coroutines.CoroutineScope);

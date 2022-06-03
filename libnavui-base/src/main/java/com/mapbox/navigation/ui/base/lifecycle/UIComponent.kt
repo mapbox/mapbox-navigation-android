@@ -8,7 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
 
 /**
@@ -40,7 +40,7 @@ open class UIComponent : MapboxNavigationObserver {
         coroutineScope.cancel()
     }
 
-    protected inline fun <T> Flow<T>.observe(crossinline action: suspend (value: T) -> Unit) {
+    protected fun <T> Flow<T>.observe(action: FlowCollector<T>) {
         coroutineScope.launch { collect(action) }
     }
 }

@@ -30,6 +30,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

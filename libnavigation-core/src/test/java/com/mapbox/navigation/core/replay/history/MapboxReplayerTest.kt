@@ -10,6 +10,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkObject
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.currentTime
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

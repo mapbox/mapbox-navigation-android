@@ -30,6 +30,7 @@ import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.pauseDispatcher
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals

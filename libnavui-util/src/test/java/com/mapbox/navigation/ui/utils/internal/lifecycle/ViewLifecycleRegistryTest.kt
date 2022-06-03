@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewTreeLifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
+import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -16,15 +17,20 @@ import io.mockk.slot
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ViewLifecycleRegistryTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Before
     fun setup() {
