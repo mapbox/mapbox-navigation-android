@@ -1372,6 +1372,7 @@ class MapboxNavigationTelemetryTest {
             applicationContext.getSystemService(Context.ACTIVITY_SERVICE)
         } returns activityManager
         every { activityManager.runningAppProcesses } returns listOf()
+        every { activityManager.getRunningTasks(any()) } returns listOf()
     }
 
     private fun initTelemetry() {
