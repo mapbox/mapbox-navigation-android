@@ -1,11 +1,13 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.api.directions.v5.models.MaxSpeed
 import com.mapbox.api.directions.v5.models.RouteLeg
-import com.mapbox.api.directions.v5.models.SpeedLimit
 import com.mapbox.navigation.base.route.NavigationRoute
-import io.mockk.every
-import io.mockk.mockk
+import com.mapbox.navigation.core.infra.factories.createDirectionsRoute
+import com.mapbox.navigation.core.infra.factories.createIncident
+import com.mapbox.navigation.core.infra.factories.createMaxSpeed
+import com.mapbox.navigation.core.infra.factories.createNavigationRoute
+import com.mapbox.navigation.core.infra.factories.createRouteLeg
+import com.mapbox.navigation.core.infra.factories.createRouteLegAnnotation
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -15,21 +17,21 @@ class DirectionsRouteDiffProviderTest {
 
     @Test
     fun buildRouteDiffs() {
-        val oldRoute = createNavigationRoute(
-            createRouteLeg(57.14, 8.571, 42.85, 90, "low", 71),
-            createRouteLeg(142.8, 28.57, 71.42, 120, "unknown", 42),
-            createRouteLeg(85.71, 42.85, 57.14, 90, "unknown", 14),
-            createRouteLeg(71.42, 14.28, 85.71, 90, "low", 57),
-            createRouteLeg(42.85, 57.14, 28.57, 120, "low", 28),
+        val oldRoute = createTestNavigationRoute(
+            createTestLeg(57.14, 8.571, 42.85, 90, "low", 71),
+            createTestLeg(142.8, 28.57, 71.42, 120, "unknown", 42),
+            createTestLeg(85.71, 42.85, 57.14, 90, "unknown", 14),
+            createTestLeg(71.42, 14.28, 85.71, 90, "low", 57),
+            createTestLeg(42.85, 57.14, 28.57, 120, "low", 28),
+            createRouteLeg(),
         )
-        val newRoute = createNavigationRoute(
-            mockk {
-                every { annotation() } returns null
-            },
-            createRouteLeg(57.14, 14.28, 85.71, 120, "low", 42),
-            createRouteLeg(85.71, 42.85, 57.14, 90, "unknown", 14),
-            createRouteLeg(71.42, 28.57, 42.85, 120, "unknown", 57),
-            createRouteLeg(142.8, 57.14, 28.57, 90, "low", 71),
+        val newRoute = createTestNavigationRoute(
+            createRouteLeg(annotation = null),
+            createTestLeg(57.14, 14.28, 85.71, 120, "low", 42),
+            createTestLeg(85.71, 42.85, 57.14, 90, "unknown", 14),
+            createTestLeg(71.42, 28.57, 42.85, 120, "unknown", 57),
+            createTestLeg(142.8, 57.14, 28.57, 90, "low", 71),
+            createRouteLeg(incidents = listOf(createIncident())),
         )
 
         assertEquals(
@@ -38,19 +40,20 @@ class DirectionsRouteDiffProviderTest {
                 "Updated distance, duration, speed, congestion at leg 1",
                 "Updated duration, speed, maxSpeed, congestion at leg 3",
                 "Updated distance, maxSpeed, congestionNumeric at leg 4",
+                "Updated incidents at leg 5",
             ),
         )
     }
 
-    private fun createNavigationRoute(vararg legs: RouteLeg): NavigationRoute {
-        return mockk {
-            every { directionsRoute } returns mockk {
-                every { legs() } returns legs.asList()
-            }
-        }
+    private fun createTestNavigationRoute(vararg legs: RouteLeg): NavigationRoute {
+        return createNavigationRoute(
+            createDirectionsRoute(
+                legs = legs.toList()
+            )
+        )
     }
 
-    private fun createRouteLeg(
+    private fun createTestLeg(
         distance: Double,
         duration: Double,
         speed: Double,
@@ -58,19 +61,15 @@ class DirectionsRouteDiffProviderTest {
         congestion: String,
         congestionNumeric: Int,
     ): RouteLeg {
-        return mockk {
-            every { annotation() } returns mockk {
-                every { distance() } returns listOf(distance)
-                every { duration() } returns listOf(duration)
-                every { speed() } returns listOf(speed)
-                every { maxspeed() } returns listOf(createMaxSpeed(maxSpeed))
-                every { congestion() } returns listOf(congestion)
-                every { congestionNumeric() } returns listOf(congestionNumeric)
-            }
-        }
-    }
-
-    private fun createMaxSpeed(speed: Int): MaxSpeed {
-        return MaxSpeed.builder().speed(speed).unit(SpeedLimit.KMPH).build()
+        return createRouteLeg(
+            createRouteLegAnnotation(
+                congestion = listOf(congestion),
+                congestionNumeric = listOf(congestionNumeric),
+                maxSpeed = listOf(createMaxSpeed(speed = maxSpeed)),
+                distance = listOf(distance),
+                duration = listOf(duration),
+                speed = listOf(speed)
+            )
+        )
     }
 }

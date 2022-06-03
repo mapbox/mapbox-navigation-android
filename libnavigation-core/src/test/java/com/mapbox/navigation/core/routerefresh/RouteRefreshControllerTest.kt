@@ -207,6 +207,9 @@ class RouteRefreshControllerTest {
                     congestion = listOf("heavy", "heavy"),
                     congestionNumeric = listOf(93, 94),
                 ),
+                firstLegIncidents = listOf(
+                    createIncident(id = "1")
+                )
             )
             val directionsSession = mockk<DirectionsSession>().apply {
                 onRefresh { _, _, _, callback -> callback.onRefreshReady(refreshedRoute) }
@@ -221,7 +224,7 @@ class RouteRefreshControllerTest {
             assertTrue(refreshJob.isCompleted)
             verify {
                 logger.logI(
-                    "Updated congestion, congestionNumeric at leg 0",
+                    "Updated congestion, congestionNumeric, incidents at leg 0",
                     RouteRefreshController.LOG_CATEGORY
                 )
             }
