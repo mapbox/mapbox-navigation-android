@@ -6,18 +6,45 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
-## Mapbox Navigation SDK 2.5.1 - Jun 02, 2022
 
-The release fixes a crash in the router's retryable task.
-
+## Mapbox Navigation SDK 2.5.1 - June 2, 2022
 ### Changelog
 [Changes between v2.5.0 and v2.5.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.5.0...v2.5.1)
+
+#### Bug fixes and improvements
+- Fixed an issue where offline route requests sometimes crashed the SDK. [#5894](https://github.com/mapbox/mapbox-navigation-android/pull/5894) 
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.5.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.5.0))
 - Mapbox Navigation Native `v101.0.1`
 - Mapbox Core Common `v21.3.1`
+- Mapbox Java `v6.5.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.5.0))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.1`
+
+## Mapbox Navigation SDK 2.6.0-beta.1 - June 2, 2022
+### Changelog
+[Changes between v2.6.0-alpha.2 and v2.6.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.6.0-alpha.2...v2.6.0-beta.1)
+
+#### Features
+- :warning: Expired data in the current primary route is cleaned up if 3 consecutive refresh attempts fail. Congestion annotations become `"unknown"`. Numeric congestion annotations become `null`. Expired incidents disappear. [#5767](https://github.com/mapbox/mapbox-navigation-android/pull/5767).
+
+#### Bug fixes and improvements
+- Improved enhanced locations bearing changes calculation on corners with high frequency input signal. [#5878](https://github.com/mapbox/mapbox-navigation-android/pull/5878)
+- Fixed off-road detection in unmapped underground garages. [#5878](https://github.com/mapbox/mapbox-navigation-android/pull/5878)
+- :warning: Changed `SaveHistoryCallback` to fire on the main thread instead of a worker thread. [#5878](https://github.com/mapbox/mapbox-navigation-android/pull/5878)
+- Fixed an issue where the hosting `LifecycleOwner` used to dictate the lifecycle of the `NavigationView` was taken from the `Activity` even if the view was embedded in a `Fragment`. [#5818](https://github.com/mapbox/mapbox-navigation-android/pull/5818)
+- Added an option to use different `ViewModelStoreOwner`s with the `NavigationView` (for example the one hosted by a `Fragment`). [#5818](https://github.com/mapbox/mapbox-navigation-android/pull/5818)
+
+#### Known issues
+- :bangbang: Expiration of congestion annotations and incidents doesn't work for alternative routes, which can cause inconsistency and a false fact that alternative route is faster.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.6.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.6.0-beta.2))
+- Mapbox Navigation Native `v104.0.0`
+- Mapbox Core Common `v22.0.0-beta.1`
 - Mapbox Java `v6.5.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.5.0))
 - Mapbox Android Core `v5.0.1`
 - Mapbox Android Telemetry `v8.1.1`
