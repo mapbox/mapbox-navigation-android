@@ -81,7 +81,7 @@ internal class MapBinder(
 
     private fun routeLineComponent(lineOptions: MapboxRouteLineOptions) =
         RouteLineComponent(mapView, lineOptions, contractProvider = {
-            DropInRouteLineComponentContract(store)
+            RouteLineComponentContractImpl(store)
         })
 
     private fun longPressMapComponent(navigationState: NavigationState) =
@@ -118,7 +118,7 @@ internal class MapBinder(
 }
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal class DropInRouteLineComponentContract(
+internal class RouteLineComponentContractImpl(
     private val store: Store
 ) : RouteLineComponentContract {
     override fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>) {

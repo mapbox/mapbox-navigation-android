@@ -66,13 +66,13 @@ internal class ActionButtonBinder(
         store: Store
     ): AudioGuidanceButtonComponent {
         return AudioGuidanceButtonComponent(binding.soundButton, style, contractProvider = {
-            DropInAudioComponentContract(context.viewModel.viewModelScope, store)
+            AudioComponentContractImpl(context.viewModel.viewModelScope, store)
         })
     }
 }
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal class DropInAudioComponentContract(
+internal class AudioComponentContractImpl(
     scope: CoroutineScope,
     val store: Store
 ) : AudioComponentContract {
