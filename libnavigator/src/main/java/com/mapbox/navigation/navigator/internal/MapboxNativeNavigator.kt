@@ -99,7 +99,7 @@ interface MapboxNativeNavigator {
      *
      * @param route [DirectionsRoute]
      */
-    suspend fun refreshRoute(route: NavigationRoute)
+    suspend fun refreshRoute(route: NavigationRoute): List<RouteAlternative>?
 
     /**
      * Gets the current banner. If there is no
