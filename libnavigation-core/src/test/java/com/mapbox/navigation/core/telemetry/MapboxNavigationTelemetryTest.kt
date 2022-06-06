@@ -9,6 +9,7 @@ import android.media.AudioManager
 import android.telephony.TelephonyManager
 import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.MapboxTelemetryConstants
+import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
@@ -32,7 +33,9 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
-import com.mapbox.navigation.core.internal.utils.toTelemetryLocation
+import com.mapbox.navigation.core.internal.telemetry.UserFeedback
+import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
+import com.mapbox.navigation.core.internal.telemetry.toTelemetryLocation
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
@@ -64,9 +67,11 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.unmockkObject
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotSame
@@ -93,6 +98,9 @@ class MapboxNavigationTelemetryTest {
         private const val LAST_LOCATION_TIME = 1000L
         private const val LAST_LOCATION_ACCURACY = 222.0f
         private const val LAST_LOCATION_VERTICAL_ACCURACY = 111.0f
+
+        private const val ANOTHER_LAST_LOCATION_LAT = 66.6
+        private const val ANOTHER_LAST_LOCATION_LON = 77.7
 
         private const val ORIGINAL_ROUTE_GEOMETRY = ""
         private const val ORIGINAL_ROUTE_DISTANCE = 1.1
@@ -124,6 +132,13 @@ class MapboxNavigationTelemetryTest {
         private const val ACTIVE_GUIDANCE_SESSION_ID = "active-guidance-session-id"
         private const val FREE_DRIVE_SESSION_ID = "free-drive-session-id"
 
+        private const val DEFAULT_FEEDBACK_ID = "default feedback id"
+        private const val FEEDBACK_TYPE = "feedback type"
+        private const val DESCRIPTION = "feedback description"
+        private const val FEEDBACK_SOURCE = "feedback source"
+        private const val SCREENSHOT = "feedback screenshot"
+        private val FEEDBACK_SUBTYPE = arrayOf("feedback subtype")
+
         /**
          * Since [MapboxNavigationAccounts] is a singleton, it will effectively obtain
          * an instance of [BillingServiceInterface] from the mocked [BillingServiceProvider]
@@ -138,7 +153,7 @@ class MapboxNavigationTelemetryTest {
         private val billingService = mockk<BillingServiceInterface>(relaxed = true)
     }
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
     private val context: Context = mockk(relaxed = true)
     private val applicationContext: Context = mockk(relaxed = true)
@@ -166,15 +181,20 @@ class MapboxNavigationTelemetryTest {
     private val legProgress = mockk<RouteLegProgress>()
     private val stepProgress = mockk<RouteStepProgress>()
     private val nextRouteLegProgress = mockk<RouteLegProgress>()
+    private val globalUserFeedbackCallback = mockk<UserFeedbackCallback>()
+    private val localUserFeedbackCallback = mockk<UserFeedbackCallback>()
 
-    private var routeProgressObserverSlot = slot<RouteProgressObserver>()
-    private var sessionStateObserverSlot = slot<NavigationSessionStateObserver>()
-    private var arrivalObserverSlot = slot<ArrivalObserver>()
-    private var routesObserverSlot = slot<RoutesObserver>()
+    private val routeProgressObserverSlot = slot<RouteProgressObserver>()
+    private val sessionStateObserverSlot = slot<NavigationSessionStateObserver>()
+    private val arrivalObserverSlot = slot<ArrivalObserver>()
+    private val routesObserverSlot = slot<RoutesObserver>()
+    private val globalUserFeedbackSlot = slot<UserFeedback>()
+    private val localUserFeedbackSlot = slot<UserFeedback>()
 
     @Before
     fun setup() {
         mockkObject(BillingServiceProvider)
+        mockkStatic(TelemetryUtils::obtainUniversalUniqueIdentifier)
         every { BillingServiceProvider.getInstance() } returns billingService
         every {
             mapboxNavigation.registerRouteProgressObserver(capture(routeProgressObserverSlot))
@@ -193,11 +213,20 @@ class MapboxNavigationTelemetryTest {
         every {
             mapboxNavigation.registerRoutesObserver(capture(routesObserverSlot))
         } just runs
+
+        every {
+            globalUserFeedbackCallback.onNewUserFeedback(capture(globalUserFeedbackSlot))
+        } just runs
+
+        every {
+            localUserFeedbackCallback.onNewUserFeedback(capture(localUserFeedbackSlot))
+        } just runs
     }
 
     @After
     fun cleanUp() {
         unmockkObject(MapboxMetricsReporter)
+        unmockkStatic(TelemetryUtils::obtainUniversalUniqueIdentifier)
         unmockkObject(BillingServiceProvider)
     }
 
@@ -1193,6 +1222,66 @@ class MapboxNavigationTelemetryTest {
         resetTelemetry()
     }
 
+    @Test
+    fun `user feedback observers are invoked for event without metadata`() {
+        baseMock()
+        baseInitialization()
+        mockLocationCollector()
+        val feedbackId = "feedback id"
+        every { TelemetryUtils.obtainUniversalUniqueIdentifier() } returns feedbackId
+
+        MapboxNavigationTelemetry.registerUserFeedbackCallback(globalUserFeedbackCallback)
+        postUserFeedback()
+
+        verify(exactly = 1) { globalUserFeedbackCallback.onNewUserFeedback(any()) }
+        verify(exactly = 1) { localUserFeedbackCallback.onNewUserFeedback(any()) }
+        val userFeedback = globalUserFeedbackSlot.captured
+        assertEquals(feedbackId, userFeedback.feedbackId)
+        assertEquals(FEEDBACK_TYPE, userFeedback.feedbackType)
+        assertEquals(DESCRIPTION, userFeedback.description)
+        assertEquals(FEEDBACK_SOURCE, userFeedback.source)
+        assertEquals(SCREENSHOT, userFeedback.screenshot)
+        assertTrue(userFeedback.feedbackSubType.contentEquals(FEEDBACK_SUBTYPE))
+        assertEquals(Point.fromLngLat(LAST_LOCATION_LON, LAST_LOCATION_LAT), userFeedback.location)
+        assertEquals(userFeedback, localUserFeedbackSlot.captured)
+    }
+
+    @Test
+    fun `user feedback observers are invoked for event with metadata`() {
+        baseMock()
+        baseInitialization()
+        mockLocationCollector()
+
+        MapboxNavigationTelemetry.registerUserFeedbackCallback(globalUserFeedbackCallback)
+        postUserFeedbackCached()
+
+        verify(exactly = 1) { globalUserFeedbackCallback.onNewUserFeedback(any()) }
+        val userFeedback = globalUserFeedbackSlot.captured
+        assertEquals(DEFAULT_FEEDBACK_ID, userFeedback.feedbackId)
+        assertEquals(FEEDBACK_TYPE, userFeedback.feedbackType)
+        assertEquals(DESCRIPTION, userFeedback.description)
+        assertEquals(FEEDBACK_SOURCE, userFeedback.source)
+        assertEquals(SCREENSHOT, userFeedback.screenshot)
+        assertTrue(userFeedback.feedbackSubType.contentEquals(FEEDBACK_SUBTYPE))
+        assertEquals(
+            Point.fromLngLat(ANOTHER_LAST_LOCATION_LON, ANOTHER_LAST_LOCATION_LAT),
+            userFeedback.location,
+        )
+        assertEquals(userFeedback, localUserFeedbackSlot.captured)
+    }
+
+    @Test
+    fun `user feedback observer is not invoked after unregistering`() {
+        baseMock()
+        baseInitialization()
+
+        MapboxNavigationTelemetry.registerUserFeedbackCallback(globalUserFeedbackCallback)
+        MapboxNavigationTelemetry.unregisterUserFeedbackCallback(globalUserFeedbackCallback)
+        postUserFeedback()
+
+        verify(exactly = 0) { globalUserFeedbackCallback.onNewUserFeedback(any()) }
+    }
+
     private fun baseInitialization() {
         initTelemetry()
         updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
@@ -1401,7 +1490,10 @@ class MapboxNavigationTelemetryTest {
     }
 
     private fun postUserFeedback() {
-        MapboxNavigationTelemetry.postUserFeedback("", "", "", null, emptyArray())
+        MapboxNavigationTelemetry.postUserFeedback(
+            FEEDBACK_TYPE, DESCRIPTION, FEEDBACK_SOURCE, SCREENSHOT,
+            FEEDBACK_SUBTYPE, feedbackMetadata = null, localUserFeedbackCallback,
+        )
     }
 
     private fun postUserFeedbackCached(
@@ -1409,19 +1501,22 @@ class MapboxNavigationTelemetryTest {
             sessionIdentifier = "SESSION_ID",
             eventVersion = 0,
             phoneState = PhoneState(
-                1, 2, 3, true, "connectivity", "audioType", "appState", "01-01-2000", "5", "6"
+                1, 2, 3, true, "connectivity", "audioType",
+                "appState", "01-01-2000", DEFAULT_FEEDBACK_ID, "6",
             ),
             metricsDirectionsRoute = MetricsDirectionsRoute(route = null),
             metricsRouteProgress = MetricsRouteProgress(routeProgress = null),
+            lastLocation = Point.fromLngLat(ANOTHER_LAST_LOCATION_LON, ANOTHER_LAST_LOCATION_LAT),
         )
     ) {
         MapboxNavigationTelemetry.postUserFeedback(
-            "",
-            "",
-            "",
-            null,
-            emptyArray(),
+            FEEDBACK_TYPE,
+            DESCRIPTION,
+            FEEDBACK_SOURCE,
+            SCREENSHOT,
+            FEEDBACK_SUBTYPE,
             feedbackMetadata,
+            localUserFeedbackCallback,
         )
     }
 
