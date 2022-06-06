@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  android: circleci/android@1.0.3
+  android: circleci/android@2.0.3
 
 parameters:
   mapbox_navigation_native_upstream:
@@ -713,6 +713,7 @@ jobs:
     executor:
       name: android/android-machine
       resource-class: large
+      tag: 2022.04.1
     steps:
       - when:
           condition:
@@ -726,6 +727,7 @@ jobs:
                 post-emulator-launch-assemble-command: ./gradlew libnavui-androidauto:assembleDebugAndroidTest
                 test-command: ./gradlew libnavui-androidauto:connectedDebugAndroidTest
                 system-image: system-images;android-30;google_apis_playstore;x86
+                wait-for-emulator: false
             - run:
                 name: Save test results
                 command: |
