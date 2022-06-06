@@ -19,7 +19,6 @@ import com.mapbox.navigation.dropin.databinding.MapboxActionButtonsLayoutBinding
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
 import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
-import com.mapbox.navigation.ui.utils.internal.Provider
 import com.mapbox.navigation.ui.voice.internal.ui.AudioComponentContract
 import com.mapbox.navigation.ui.voice.internal.ui.AudioGuidanceButtonComponent
 import kotlinx.coroutines.CoroutineScope
@@ -66,11 +65,9 @@ internal class ActionButtonBinder(
         style: Int,
         store: Store
     ): AudioGuidanceButtonComponent {
-        return AudioGuidanceButtonComponent(binding.soundButton, style).apply {
-            contractProvider = Provider {
-                DropInAudioComponentContract(context.viewModel.viewModelScope, store)
-            }
-        }
+        return AudioGuidanceButtonComponent(binding.soundButton, style, contractProvider = {
+            DropInAudioComponentContract(context.viewModel.viewModelScope, store)
+        })
     }
 }
 

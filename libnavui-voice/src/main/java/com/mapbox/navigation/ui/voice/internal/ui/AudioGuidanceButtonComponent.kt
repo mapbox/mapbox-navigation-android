@@ -48,12 +48,17 @@ internal class MapboxAudioComponentContract(
 @ExperimentalPreviewMapboxNavigationAPI
 class AudioGuidanceButtonComponent(
     private val audioGuidanceButton: MapboxAudioGuidanceButton,
-    @StyleRes var audioGuidanceButtonStyle: Int = R.style.MapboxStyleAudioGuidanceButton
+    @StyleRes var audioGuidanceButtonStyle: Int = R.style.MapboxStyleAudioGuidanceButton,
+    contractProvider: Provider<AudioComponentContract>? = null
 ) : UIComponent() {
 
-    var contractProvider: Provider<AudioComponentContract> = Provider {
-        val audioGuidance = MapboxNavigationApp.getObserver(MapboxAudioGuidance::class)
-        MapboxAudioComponentContract(coroutineScope, audioGuidance)
+    private val contractProvider: Provider<AudioComponentContract>
+
+    init {
+        this.contractProvider = contractProvider ?: Provider {
+            val audioGuidance = MapboxNavigationApp.getObserver(MapboxAudioGuidance::class)
+            MapboxAudioComponentContract(coroutineScope, audioGuidance)
+        }
     }
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {

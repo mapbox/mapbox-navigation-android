@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.internal.extensions
 
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -56,6 +57,39 @@ fun <T : MapboxNavigationObserver> LifecycleOwner.attachResumed(vararg observers
 }
 
 @ExperimentalPreviewMapboxNavigationAPI
+fun LifecycleOwner.attachCreated(
+    mapboxNavigation: MapboxNavigation,
+    observer: MapboxNavigationObserver
+) = attachOnLifecycle(
+    Lifecycle.Event.ON_CREATE,
+    Lifecycle.Event.ON_DESTROY,
+    mapboxNavigation,
+    observer
+)
+
+@ExperimentalPreviewMapboxNavigationAPI
+fun LifecycleOwner.attachStarted(
+    mapboxNavigation: MapboxNavigation,
+    observer: MapboxNavigationObserver
+) = attachOnLifecycle(
+    Lifecycle.Event.ON_START,
+    Lifecycle.Event.ON_STOP,
+    mapboxNavigation,
+    observer
+)
+
+@ExperimentalPreviewMapboxNavigationAPI
+fun LifecycleOwner.attachResumed(
+    mapboxNavigation: MapboxNavigation,
+    observer: MapboxNavigationObserver
+) = attachOnLifecycle(
+    Lifecycle.Event.ON_RESUME,
+    Lifecycle.Event.ON_PAUSE,
+    mapboxNavigation,
+    observer
+)
+
+@ExperimentalPreviewMapboxNavigationAPI
 fun LifecycleOwner.attachOnLifecycle(
     attachEvent: Lifecycle.Event,
     detachEvent: Lifecycle.Event,
@@ -71,35 +105,24 @@ internal class AttachOnLifecycle(
     private val detachEvent: Lifecycle.Event,
     private val mapboxNavigation: MapboxNavigation,
     private val observer: MapboxNavigationObserver
-) : DefaultLifecycleObserver {
+) : LifecycleEventObserver {
 
-    override fun onCreate(owner: LifecycleOwner) {
-        super.onCreate(owner)
-        if (attachEvent == Lifecycle.Event.ON_CREATE) observer.onAttached(mapboxNavigation)
+    private var attached = false
+
+    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+        if (event == attachEvent) attach()
+        if (event == detachEvent || event == Lifecycle.Event.ON_DESTROY) detach()
     }
 
-    override fun onStart(owner: LifecycleOwner) {
-        super.onStart(owner)
-        if (attachEvent == Lifecycle.Event.ON_START) observer.onAttached(mapboxNavigation)
+    private fun attach() {
+        if (attached) return
+        attached = true
+        observer.onAttached(mapboxNavigation)
     }
 
-    override fun onResume(owner: LifecycleOwner) {
-        super.onResume(owner)
-        if (attachEvent == Lifecycle.Event.ON_RESUME) observer.onAttached(mapboxNavigation)
-    }
-
-    override fun onPause(owner: LifecycleOwner) {
-        super.onPause(owner)
-        if (detachEvent == Lifecycle.Event.ON_PAUSE) observer.onDetached(mapboxNavigation)
-    }
-
-    override fun onStop(owner: LifecycleOwner) {
-        super.onStop(owner)
-        if (detachEvent == Lifecycle.Event.ON_STOP) observer.onDetached(mapboxNavigation)
-    }
-
-    override fun onDestroy(owner: LifecycleOwner) {
-        super.onDestroy(owner)
-        observer.onDetached(mapboxNavigation) // we always detach in onDestroy
+    private fun detach() {
+        if (!attached) return
+        attached = false
+        observer.onDetached(mapboxNavigation)
     }
 }

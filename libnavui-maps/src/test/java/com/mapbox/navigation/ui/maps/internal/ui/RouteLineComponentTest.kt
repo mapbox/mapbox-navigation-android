@@ -33,7 +33,6 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
-import com.mapbox.navigation.ui.utils.internal.Provider
 import com.mapbox.navigator.RouteInterface
 import io.mockk.every
 import io.mockk.mockk
@@ -267,9 +266,9 @@ class RouteLineComponentTest {
         }
 
         val customContract = mockk<RouteLineComponentContract>()
-        val sut = RouteLineComponent(mockMapView, options, mockApi).apply {
-            contractProvider = Provider { customContract }
-        }
+        val sut = RouteLineComponent(mockMapView, options, mockApi, contractProvider = {
+            customContract
+        })
         sut.onAttached(mockMapboxNavigation)
         verify { mockGestures.addOnMapClickListener(capture(clickSlot)) }
 

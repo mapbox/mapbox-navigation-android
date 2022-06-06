@@ -45,11 +45,16 @@ class RouteLineComponent(
     private val mapView: MapView,
     private val options: MapboxRouteLineOptions,
     private val routeLineApi: MapboxRouteLineApi = MapboxRouteLineApi(options),
-    private val routeLineView: MapboxRouteLineView = MapboxRouteLineView(options)
+    private val routeLineView: MapboxRouteLineView = MapboxRouteLineView(options),
+    contractProvider: Provider<RouteLineComponentContract>? = null
 ) : UIComponent() {
 
-    var contractProvider: Provider<RouteLineComponentContract> = Provider {
-        MapboxRouteLineComponentContract()
+    private val contractProvider: Provider<RouteLineComponentContract>
+
+    init {
+        this.contractProvider = contractProvider ?: Provider {
+            MapboxRouteLineComponentContract()
+        }
     }
 
     private var contract: RouteLineComponentContract? = null

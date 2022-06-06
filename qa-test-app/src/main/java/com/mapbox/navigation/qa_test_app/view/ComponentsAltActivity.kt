@@ -135,7 +135,7 @@ class ComponentsAltActivity : AppCompatActivity() {
                 )
                 .build()
         )
-        .withVanishingRouteLineEnabled(false)
+        .withVanishingRouteLineEnabled(true)
         .displaySoftGradientForTraffic(true)
         .build()
 

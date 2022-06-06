@@ -6,6 +6,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.testutil.TestLifecycleOwner
 import com.mapbox.navigation.core.testutil.TestMapboxNavigationObserver
 import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import junit.framework.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,14 +18,12 @@ import org.robolectric.RobolectricTestRunner
 class MapboxLifecycleExtensionsKtTest {
 
     @Test
-    fun `LifecycleOwner attachOnLifecycle ON_CREATE - ON_DESTROY`() {
+    fun `LifecycleOwner attachCreated attaches in ON_CREATE detaches in ON_DESTROY`() {
         val lifecycleOwner = TestLifecycleOwner()
         val mapboxNavigation = mockk<MapboxNavigation>()
         val testObserver = TestMapboxNavigationObserver()
 
-        lifecycleOwner.attachOnLifecycle(
-            Lifecycle.Event.ON_CREATE,
-            Lifecycle.Event.ON_DESTROY,
+        lifecycleOwner.attachCreated(
             mapboxNavigation,
             testObserver
         )
@@ -35,15 +35,13 @@ class MapboxLifecycleExtensionsKtTest {
     }
 
     @Test
-    fun `LifecycleOwner attachOnLifecycle ON_START - ON_STOP`() {
+    fun `LifecycleOwner attachStarted attaches in ON_START detaches in ON_STOP`() {
         val lifecycleOwner = TestLifecycleOwner()
         val mapboxNavigation = mockk<MapboxNavigation>()
         val testObserver = TestMapboxNavigationObserver()
 
         lifecycleOwner.moveToState(Lifecycle.State.CREATED)
-        lifecycleOwner.attachOnLifecycle(
-            Lifecycle.Event.ON_START,
-            Lifecycle.Event.ON_STOP,
+        lifecycleOwner.attachStarted(
             mapboxNavigation,
             testObserver
         )
@@ -55,10 +53,28 @@ class MapboxLifecycleExtensionsKtTest {
     }
 
     @Test
-    fun `LifecycleOwner attachOnLifecycle ON_RESUME - ON_PAUSE`() {
+    fun `LifecycleOwner attachResumed attaches in ON_RESUME detaches in ON_PAUSE`() {
         val lifecycleOwner = TestLifecycleOwner()
         val mapboxNavigation = mockk<MapboxNavigation>()
         val testObserver = TestMapboxNavigationObserver()
+
+        lifecycleOwner.moveToState(Lifecycle.State.STARTED)
+        lifecycleOwner.attachResumed(
+            mapboxNavigation,
+            testObserver
+        )
+
+        lifecycleOwner.moveToState(Lifecycle.State.RESUMED)
+        assertEquals(mapboxNavigation, testObserver.attachedTo)
+        lifecycleOwner.moveToState(Lifecycle.State.STARTED)
+        assertEquals(null, testObserver.attachedTo)
+    }
+
+    @Test
+    fun `LifecycleOwner attachOnLifecycle attaches and detaches once`() {
+        val lifecycleOwner = TestLifecycleOwner()
+        val mapboxNavigation = mockk<MapboxNavigation>()
+        val testObserver = spyk(TestMapboxNavigationObserver())
 
         lifecycleOwner.moveToState(Lifecycle.State.STARTED)
         lifecycleOwner.attachOnLifecycle(
@@ -69,8 +85,8 @@ class MapboxLifecycleExtensionsKtTest {
         )
 
         lifecycleOwner.moveToState(Lifecycle.State.RESUMED)
-        assertEquals(mapboxNavigation, testObserver.attachedTo)
-        lifecycleOwner.moveToState(Lifecycle.State.STARTED)
-        assertEquals(null, testObserver.attachedTo)
+        verify(exactly = 1) { testObserver.onAttached(mapboxNavigation) }
+        lifecycleOwner.moveToState(Lifecycle.State.DESTROYED)
+        verify(exactly = 1) { testObserver.onDetached(mapboxNavigation) }
     }
 }

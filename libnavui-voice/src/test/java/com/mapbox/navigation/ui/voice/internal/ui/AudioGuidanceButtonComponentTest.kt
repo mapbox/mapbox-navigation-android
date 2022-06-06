@@ -8,7 +8,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.utils.internal.Provider
 import com.mapbox.navigation.ui.voice.R
 import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidance
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
@@ -50,9 +49,10 @@ class AudioGuidanceButtonComponentTest {
         mapboxNavigation = mockk()
         testContract = spyk(TestContract())
         button = spyk(MapboxAudioGuidanceButton(ctx))
-        sut = AudioGuidanceButtonComponent(button).apply {
-            contractProvider = Provider { testContract }
-        }
+        sut = AudioGuidanceButtonComponent(
+            audioGuidanceButton = button,
+            contractProvider = { testContract }
+        )
     }
 
     @After

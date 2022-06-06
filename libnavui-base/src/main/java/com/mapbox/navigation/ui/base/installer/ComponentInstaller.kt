@@ -6,7 +6,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.MapboxNavigationObserverChain
 import com.mapbox.navigation.core.internal.extensions.attachCreated
-import com.mapbox.navigation.core.internal.extensions.attachOnLifecycle
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
@@ -110,12 +109,7 @@ fun MapboxNavigation.installComponents(
     config: ComponentInstaller.() -> Unit
 ) {
     val components = NavigationComponents().apply(config)
-    lifecycleOwner.attachOnLifecycle(
-        attachEvent = Lifecycle.Event.ON_CREATE,
-        detachEvent = Lifecycle.Event.ON_DESTROY,
-        mapboxNavigation = this,
-        observer = components
-    )
+    lifecycleOwner.attachCreated(this, components)
 }
 
 @ExperimentalPreviewMapboxNavigationAPI

@@ -28,7 +28,6 @@ import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponentContract
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.utils.internal.Provider
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class MapBinder(
@@ -81,11 +80,9 @@ internal class MapBinder(
     }
 
     private fun routeLineComponent(lineOptions: MapboxRouteLineOptions) =
-        RouteLineComponent(mapView, lineOptions).apply {
-            contractProvider = Provider {
-                DropInRouteLineComponentContract(store)
-            }
-        }
+        RouteLineComponent(mapView, lineOptions, contractProvider = {
+            DropInRouteLineComponentContract(store)
+        })
 
     private fun longPressMapComponent(navigationState: NavigationState) =
         when (navigationState) {
