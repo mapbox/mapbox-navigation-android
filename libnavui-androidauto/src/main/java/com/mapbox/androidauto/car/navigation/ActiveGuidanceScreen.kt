@@ -13,6 +13,9 @@ import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.MainMapActionStrip
 import com.mapbox.androidauto.car.action.MapboxActionProvider
+import com.mapbox.androidauto.car.internal.extensions.getStyle
+import com.mapbox.androidauto.car.internal.extensions.handleStyleOnAttached
+import com.mapbox.androidauto.car.internal.extensions.handleStyleOnDetached
 import com.mapbox.androidauto.car.location.CarLocationRenderer
 import com.mapbox.androidauto.car.navigation.roadlabel.RoadLabelSurfaceLayer
 import com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer
@@ -24,6 +27,7 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
+import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.arrival.ArrivalObserver
@@ -71,13 +75,15 @@ class ActiveGuidanceScreen(
         }
     }
 
+    private var styleLoadedListener: OnStyleLoadedListener? = null
+
     private val surfaceListener = object : MapboxCarMapObserver {
 
         override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
             super.onAttached(mapboxCarMapSurface)
             logAndroidAuto("ActiveGuidanceScreen loaded")
-            mapboxCarMapSurface.mapSurface.getMapboxMap().getStyle { style ->
-                placesLayerUtil.initializePlacesListOnMapLayer(style, carContext.resources)
+            styleLoadedListener = mapboxCarMapSurface.handleStyleOnAttached {
+                placesLayerUtil.initializePlacesListOnMapLayer(it, carContext.resources)
                 carActiveGuidanceContext.mapboxNavigation.registerRoutesObserver(routesObserver)
             }
         }
@@ -86,8 +92,8 @@ class ActiveGuidanceScreen(
             super.onDetached(mapboxCarMapSurface)
             logAndroidAuto("ActiveGuidanceScreen detached")
             carActiveGuidanceContext.mapboxNavigation.unregisterRoutesObserver(routesObserver)
-            mapboxCarMapSurface.mapSurface.getMapboxMap().getStyle { style ->
-                placesLayerUtil.removePlacesListOnMapLayer(style)
+            mapboxCarMapSurface.handleStyleOnDetached(styleLoadedListener)?.let {
+                placesLayerUtil.removePlacesListOnMapLayer(it)
             }
         }
     }
@@ -100,8 +106,8 @@ class ActiveGuidanceScreen(
         val mapboxCarMapSurface = carActiveGuidanceContext.mapboxCarMap.carMapSurface
             ?: return@RoutesObserver
         val featureCollection = FeatureCollection.fromFeature(Feature.fromGeometry(coordinate))
-        mapboxCarMapSurface.mapSurface.getMapboxMap().getStyle { style ->
-            placesLayerUtil.updatePlacesListOnMapLayer(style, featureCollection)
+        mapboxCarMapSurface.getStyle()?.let {
+            placesLayerUtil.updatePlacesListOnMapLayer(it, featureCollection)
         }
     }
 

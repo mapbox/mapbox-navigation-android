@@ -1,13 +1,17 @@
 package com.mapbox.androidauto.car.preview
 
 import com.mapbox.androidauto.car.MainCarContext
+import com.mapbox.androidauto.car.internal.extensions.getStyle
+import com.mapbox.androidauto.car.internal.extensions.handleStyleOnAttached
 import com.mapbox.androidauto.car.routes.NavigationRoutesProvider
 import com.mapbox.androidauto.car.routes.RoutesListener
 import com.mapbox.androidauto.car.routes.RoutesProvider
 import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.maps.MapboxExperimental
+import com.mapbox.maps.Style
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
+import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -51,15 +55,14 @@ class CarRouteLine internal constructor(
 
     private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
         val result = routeLineApi.updateTraveledRouteLine(point)
-        val mapboxMap = mainCarContext.mapboxCarMap.carMapSurface?.mapSurface?.getMapboxMap()
-        mapboxMap?.getStyle()?.let { style ->
-            routeLineView.renderRouteLineUpdate(style, result)
+        mainCarContext.mapboxCarMap.carMapSurface?.getStyle()?.let {
+            routeLineView.renderRouteLineUpdate(it, result)
         }
     }
 
     private val routesListener = RoutesListener { routes ->
         logAndroidAuto("CarRouteLine onRoutesChanged ${routes.size}")
-        mainCarContext.mapboxCarMap.carMapSurface?.mapSurface?.getMapboxMap()?.getStyle { style ->
+        mainCarContext.mapboxCarMap.carMapSurface?.getStyle()?.let { style ->
             if (routes.isNotEmpty()) {
                 val routeLines = routes.map { NavigationRouteLine(it, identifier = null) }
                 routeLineApi.setNavigationRouteLines(routeLines) { value ->
@@ -76,7 +79,7 @@ class CarRouteLine internal constructor(
     }
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
-        mainCarContext.mapboxCarMap.carMapSurface?.mapSurface?.getMapboxMap()?.getStyle { style ->
+        mainCarContext.mapboxCarMap.carMapSurface?.getStyle()?.let { style ->
             routeLineApi.updateWithRouteProgress(routeProgress) { result ->
                 routeLineView.renderRouteLineUpdate(style, result)
             }
@@ -86,6 +89,8 @@ class CarRouteLine internal constructor(
         }
     }
 
+    private var styleLoadedListener: OnStyleLoadedListener? = null
+
     constructor(
         mainCarContext: MainCarContext,
     ) : this(mainCarContext, NavigationRoutesProvider(mainCarContext.mapboxNavigation))
@@ -93,8 +98,8 @@ class CarRouteLine internal constructor(
     override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
         logAndroidAuto("CarRouteLine carMapSurface loaded $mapboxCarMapSurface")
         val locationPlugin = mapboxCarMapSurface.mapSurface.location
-        mainCarContext.mapboxCarMap.carMapSurface?.mapSurface?.getMapboxMap()?.getStyle { style ->
-            val routeLineOptions = getMapboxRouteLineOptions(mapboxCarMapSurface)
+        styleLoadedListener = mapboxCarMapSurface.handleStyleOnAttached { style ->
+            val routeLineOptions = getMapboxRouteLineOptions(style)
             routeLineView = MapboxRouteLineView(routeLineOptions)
             routeLineApi = MapboxRouteLineApi(routeLineOptions).also {
                 routeLineView.initializeLayers(style)
@@ -120,19 +125,17 @@ class CarRouteLine internal constructor(
         routesProvider.unregisterRoutesListener(routesListener)
     }
 
-    private fun getMapboxRouteLineOptions(
-        mapboxCarMapSurface: MapboxCarMapSurface
-    ): MapboxRouteLineOptions {
+    private fun getMapboxRouteLineOptions(style: Style): MapboxRouteLineOptions {
         return MapboxRouteLineOptions.Builder(mainCarContext.carContext)
             .withRouteLineResources(routeLineResources)
-            .withRouteLineBelowLayerId(findRoadLabelsLayerId(mapboxCarMapSurface))
+            .withRouteLineBelowLayerId(findRoadLabelsLayerId(style))
             .withVanishingRouteLineEnabled(true)
             .build()
     }
 
-    private fun findRoadLabelsLayerId(mapboxCarMapSurface: MapboxCarMapSurface): String {
-        return mapboxCarMapSurface.mapSurface.getMapboxMap().getStyle()?.styleLayers
-            ?.firstOrNull { layer -> layer.id.contains("road-label") }
+    private fun findRoadLabelsLayerId(style: Style): String {
+        return style.styleLayers
+            .firstOrNull { layer -> layer.id.contains("road-label") }
             ?.id ?: "road-label-navigation"
     }
 }

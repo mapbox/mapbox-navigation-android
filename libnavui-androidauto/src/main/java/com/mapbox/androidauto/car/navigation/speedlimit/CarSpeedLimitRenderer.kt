@@ -3,6 +3,8 @@ package com.mapbox.androidauto.car.navigation.speedlimit
 import android.graphics.Rect
 import android.location.Location
 import com.mapbox.androidauto.car.MainCarContext
+import com.mapbox.androidauto.car.internal.extensions.getStyle
+import com.mapbox.androidauto.car.internal.extensions.getStyleAsync
 import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxExperimental
@@ -22,7 +24,6 @@ class CarSpeedLimitRenderer(
     private val mainCarContext: MainCarContext,
 ) : MapboxCarMapObserver {
     private val speedLimitWidget by lazy { SpeedLimitWidget() }
-
     private val locationObserver = object : LocationObserver {
 
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
@@ -57,8 +58,8 @@ class CarSpeedLimitRenderer(
 
     override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
         logAndroidAuto("CarSpeedLimitRenderer carMapSurface loaded")
-        mapboxCarMapSurface.mapSurface.getMapboxMap().getStyle { style ->
-            style.addPersistentStyleCustomLayer(
+        mapboxCarMapSurface.getStyleAsync {
+            it.addPersistentStyleCustomLayer(
                 SpeedLimitWidget.SPEED_LIMIT_WIDGET_LAYER_ID,
                 speedLimitWidget.viewWidgetHost,
                 null
@@ -70,7 +71,7 @@ class CarSpeedLimitRenderer(
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
         logAndroidAuto("CarSpeedLimitRenderer carMapSurface detached")
         mainCarContext.mapboxNavigation.unregisterLocationObserver(locationObserver)
-        mapboxCarMapSurface.mapSurface.getMapboxMap().getStyle()
+        mapboxCarMapSurface.getStyle()
             ?.removeStyleLayer(SpeedLimitWidget.SPEED_LIMIT_WIDGET_LAYER_ID)
         speedLimitWidget.clear()
     }

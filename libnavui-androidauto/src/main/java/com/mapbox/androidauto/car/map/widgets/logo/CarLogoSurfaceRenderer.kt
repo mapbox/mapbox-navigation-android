@@ -1,5 +1,7 @@
 package com.mapbox.androidauto.car.map.widgets.logo
 
+import com.mapbox.androidauto.car.internal.extensions.getStyle
+import com.mapbox.androidauto.car.internal.extensions.getStyleAsync
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
@@ -12,8 +14,8 @@ class CarLogoSurfaceRenderer(
 
     override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
         val logoWidget = LogoWidget(mapboxCarMapSurface.carContext)
-        mapboxCarMapSurface.mapSurface.getMapboxMap().getStyle { style ->
-            style.addPersistentStyleCustomLayer(
+        mapboxCarMapSurface.getStyleAsync {
+            it.addPersistentStyleCustomLayer(
                 LogoWidget.LOGO_WIDGET_LAYER_ID,
                 logoWidget.host,
                 layerPosition
@@ -22,7 +24,6 @@ class CarLogoSurfaceRenderer(
     }
 
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
-        mapboxCarMapSurface.mapSurface.getMapboxMap().getStyle()
-            ?.removeStyleLayer(LogoWidget.LOGO_WIDGET_LAYER_ID)
+        mapboxCarMapSurface.getStyle()?.removeStyleLayer(LogoWidget.LOGO_WIDGET_LAYER_ID)
     }
 }

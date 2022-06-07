@@ -18,6 +18,8 @@ import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.car.feedback.ui.routePreviewCarFeedbackProvider
+import com.mapbox.androidauto.car.internal.extensions.handleStyleOnAttached
+import com.mapbox.androidauto.car.internal.extensions.handleStyleOnDetached
 import com.mapbox.androidauto.car.location.CarLocationRenderer
 import com.mapbox.androidauto.car.navigation.CarCameraMode
 import com.mapbox.androidauto.car.navigation.CarNavigationCamera
@@ -31,6 +33,7 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
+import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.base.route.NavigationRoute
 
 /**
@@ -66,17 +69,19 @@ class CarRoutePreviewScreen(
         }
     }
 
+    private var styleLoadedListener: OnStyleLoadedListener? = null
+
     private val surfaceListener = object : MapboxCarMapObserver {
 
         override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
             super.onAttached(mapboxCarMapSurface)
             logAndroidAuto("CarRoutePreviewScreen loaded")
-            mapboxCarMapSurface.mapSurface.getMapboxMap().getStyle { style ->
+            styleLoadedListener = mapboxCarMapSurface.handleStyleOnAttached { style ->
                 placesLayerUtil.initializePlacesListOnMapLayer(
                     style,
                     carContext.resources
                 )
-                val coordinate = placeRecord.coordinate ?: return@getStyle
+                val coordinate = placeRecord.coordinate ?: return@handleStyleOnAttached
                 val featureCollection =
                     FeatureCollection.fromFeature(Feature.fromGeometry(coordinate))
                 placesLayerUtil.updatePlacesListOnMapLayer(
@@ -89,8 +94,8 @@ class CarRoutePreviewScreen(
         override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
             super.onDetached(mapboxCarMapSurface)
             logAndroidAuto("CarRoutePreviewScreen detached")
-            mapboxCarMapSurface.mapSurface.getMapboxMap().getStyle()?.let { style ->
-                placesLayerUtil.removePlacesListOnMapLayer(style)
+            mapboxCarMapSurface.handleStyleOnDetached(styleLoadedListener)?.let {
+                placesLayerUtil.removePlacesListOnMapLayer(it)
             }
         }
     }
