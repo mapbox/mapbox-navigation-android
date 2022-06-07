@@ -34,13 +34,16 @@ import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 
 /**
  * After a destination has been selected. This view previews the route and lets
  * you select alternatives. From here, you can start turn-by-turn navigation.
  */
 @MapboxExperimental
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class CarRoutePreviewScreen(
     private val routePreviewCarContext: RoutePreviewCarContext,
     private val placeRecord: PlaceRecord,
@@ -48,16 +51,19 @@ class CarRoutePreviewScreen(
     private val placesLayerUtil: PlacesListOnMapLayerUtil = PlacesListOnMapLayerUtil(),
 ) : Screen(routePreviewCarContext.carContext) {
 
-    private val routesProvider = PreviewRoutesProvider(navigationRoutes)
+    private val routesContract = PreviewRouteLineComponentContract(navigationRoutes)
     var selectedIndex = 0
-    val carRouteLine = CarRouteLine(routePreviewCarContext.mainCarContext, routesProvider)
+    val carRouteLine = CarRouteLine(
+        mainCarContext = routePreviewCarContext.mainCarContext,
+        contract = routesContract
+    )
     val carLocationRenderer = CarLocationRenderer(routePreviewCarContext.mainCarContext)
     val carSpeedLimitRenderer = CarSpeedLimitRenderer(routePreviewCarContext.mainCarContext)
     val carNavigationCamera = CarNavigationCamera(
         routePreviewCarContext.mapboxNavigation,
         CarCameraMode.OVERVIEW,
         CarCameraMode.FOLLOWING,
-        routesProvider,
+        routesContract = routesContract,
     )
 
     private val backPressCallback = object : OnBackPressedCallback(true) {
@@ -156,9 +162,9 @@ class CarRoutePreviewScreen(
                     val swap = newRouteOrder[0]
                     newRouteOrder[0] = newRouteOrder[index]
                     newRouteOrder[index] = swap
-                    routesProvider.routes = newRouteOrder
+                    routesContract.setRoutes(newRouteOrder)
                 } else {
-                    routesProvider.routes = navigationRoutes
+                    routesContract.setRoutes(navigationRoutes)
                 }
             }
         }
@@ -182,9 +188,8 @@ class CarRoutePreviewScreen(
                 Action.Builder()
                     .setTitle(carContext.getString(R.string.car_action_preview_navigate_button))
                     .setOnClickListener {
-                        routePreviewCarContext.mapboxNavigation.setNavigationRoutes(
-                            routesProvider.routes
-                        )
+                        MapboxNavigationApp.current()
+                            ?.setNavigationRoutes(routesContract.navigationRoutes.value)
                         MapboxCarApp.updateCarAppState(ActiveGuidanceState)
                     }
                     .build(),

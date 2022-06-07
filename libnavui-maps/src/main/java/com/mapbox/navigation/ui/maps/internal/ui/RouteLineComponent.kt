@@ -10,36 +10,21 @@ import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
-import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
+import com.mapbox.navigation.ui.maps.internal.ActiveRouteLineComponentContract
+import com.mapbox.navigation.ui.maps.internal.RouteLineComponentContract
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRouteLines
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
-import com.mapbox.navigation.ui.utils.internal.Provider
 import com.mapbox.navigation.utils.internal.ifNonNull
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-
-@ExperimentalPreviewMapboxNavigationAPI
-interface RouteLineComponentContract {
-    fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>)
-}
-
-@ExperimentalPreviewMapboxNavigationAPI
-internal class MapboxRouteLineComponentContract : RouteLineComponentContract {
-    override fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>) {
-        mapboxNavigation.setNavigationRoutes(routes)
-    }
-}
 
 @ExperimentalPreviewMapboxNavigationAPI
 class RouteLineComponent(
@@ -48,23 +33,14 @@ class RouteLineComponent(
     private val options: MapboxRouteLineOptions,
     private val routeLineApi: MapboxRouteLineApi = MapboxRouteLineApi(options),
     private val routeLineView: MapboxRouteLineView = MapboxRouteLineView(options),
-    contractProvider: Provider<RouteLineComponentContract>? = null
+    contract: RouteLineComponentContract? = null
 ) : UIComponent() {
 
-    private val contractProvider: Provider<RouteLineComponentContract>
-
-    init {
-        this.contractProvider = contractProvider ?: Provider {
-            MapboxRouteLineComponentContract()
-        }
-    }
-
-    private var contract: RouteLineComponentContract? = null
-
     private val routeClickPadding = Utils.dpToPx(30f)
+    val contract = contract ?: ActiveRouteLineComponentContract()
 
     private var onMapClickListener = OnMapClickListener { point ->
-        mapboxNavigation?.also { selectRoute(it, point) }
+        selectRoute(point)
         false
     }
 
@@ -75,22 +51,23 @@ class RouteLineComponent(
         }
     }
 
-    private var mapboxNavigation: MapboxNavigation? = null
-
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
-        this.mapboxNavigation = mapboxNavigation
-        contract = contractProvider.get()
         mapPlugins.gestures.addOnMapClickListener(onMapClickListener)
         mapPlugins.location.addOnIndicatorPositionChangedListener(onPositionChangedListener)
 
-        coroutineScope.launch {
-            mapboxNavigation.flowRouteProgress().collect { routeProgress ->
-                ifNonNull(mapboxMap.getStyle()) { style ->
-                    routeLineApi.updateWithRouteProgress(routeProgress) { result ->
-                        routeLineView.renderRouteLineUpdate(style, result).also {
-                            result.error?.let {
-                                Log.e(TAG, it.errorMessage, it.throwable)
+        when (contract) {
+            is MapboxNavigationObserver -> {
+                contract.onAttached(mapboxNavigation)
+                coroutineScope.launch {
+                    mapboxNavigation.flowRouteProgress().collect { routeProgress ->
+                        ifNonNull(mapboxMap.getStyle()) { style ->
+                            routeLineApi.updateWithRouteProgress(routeProgress) { result ->
+                                routeLineView.renderRouteLineUpdate(style, result).also {
+                                    result.error?.let {
+                                        Log.e(TAG, it.errorMessage, it.throwable)
+                                    }
+                                }
                             }
                         }
                     }
@@ -99,15 +76,7 @@ class RouteLineComponent(
         }
 
         coroutineScope.launch {
-            val routesFlow = mapboxNavigation.flowRoutesUpdated()
-                .map { it.navigationRoutes }
-                .stateIn(
-                    this,
-                    SharingStarted.WhileSubscribed(),
-                    mapboxNavigation.getNavigationRoutes()
-                )
-
-            routesFlow.collect { navigationRoutes ->
+            contract.navigationRoutes.collect { navigationRoutes ->
                 mapboxMap.getStyle()?.also { style ->
                     val routeLines = navigationRoutes.map {
                         NavigationRouteLine(it, null)
@@ -121,14 +90,14 @@ class RouteLineComponent(
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         super.onDetached(mapboxNavigation)
+        when (contract) { is MapboxNavigationObserver -> contract.onDetached(mapboxNavigation) }
         mapPlugins.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
+
         routeLineApi.cancel()
         routeLineView.cancel()
-        contract = null
-        this.mapboxNavigation = null
     }
 
-    private fun selectRoute(mapboxNavigation: MapboxNavigation, point: Point) {
+    private fun selectRoute(point: Point) {
         coroutineScope.launch {
             val result = routeLineApi.findClosestRoute(
                 point,
@@ -144,7 +113,7 @@ class RouteLineComponent(
                         .also {
                             it.add(0, resultValue.navigationRoute)
                         }
-                    contract?.setRoutes(mapboxNavigation, reOrderedRoutes)
+                    contract.setRoutes(reOrderedRoutes)
                 }
             }
         }

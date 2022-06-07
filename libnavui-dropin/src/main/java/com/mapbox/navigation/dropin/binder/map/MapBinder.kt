@@ -1,12 +1,12 @@
 package com.mapbox.navigation.dropin.binder.map
 
 import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.scalebar.scalebar
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.navigationListOf
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.NavigationViewContext
@@ -19,15 +19,22 @@ import com.mapbox.navigation.dropin.component.marker.MapMarkersComponent
 import com.mapbox.navigation.dropin.component.marker.RoutePreviewLongPressMapComponent
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
+import com.mapbox.navigation.dropin.component.routefetch.RoutesState
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
+import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
+import com.mapbox.navigation.ui.maps.internal.RouteLineComponentContract
 import com.mapbox.navigation.ui.maps.internal.ui.RouteArrowComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponent
-import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponentContract
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class MapBinder(
@@ -80,9 +87,15 @@ internal class MapBinder(
     }
 
     private fun routeLineComponent(lineOptions: MapboxRouteLineOptions) =
-        RouteLineComponent(mapView.getMapboxMap(), mapView, lineOptions, contractProvider = {
-            RouteLineComponentContractImpl(store)
-        })
+        RouteLineComponent(
+            mapboxMap = mapView.getMapboxMap(),
+            mapPlugins = mapView,
+            options = lineOptions,
+            contract = StoreRouteLineComponentContract(
+                store,
+                context.lifecycleOwner.lifecycleScope
+            )
+        )
 
     private fun longPressMapComponent(navigationState: NavigationState) =
         when (navigationState) {
@@ -118,10 +131,28 @@ internal class MapBinder(
 }
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal class RouteLineComponentContractImpl(
-    private val store: Store
+internal class StoreRouteLineComponentContract(
+    private val store: Store,
+    private val coroutineScope: CoroutineScope,
 ) : RouteLineComponentContract {
-    override fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>) {
+
+    override val navigationRoutes: StateFlow<List<NavigationRoute>>
+        get() {
+            return store.state.map(::mapToRoutes).stateIn(
+                coroutineScope,
+                SharingStarted.WhileSubscribed(),
+                mapToRoutes(store.state.value)
+            )
+        }
+
+    override fun setRoutes(routes: List<NavigationRoute>) {
         store.dispatch(RoutesAction.SetRoutes(routes))
+    }
+
+    private fun mapToRoutes(state: State): List<NavigationRoute> {
+        return when (state.routes) {
+            is RoutesState.Ready -> state.routes.routes
+            else -> emptyList()
+        }
     }
 }

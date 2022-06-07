@@ -3,9 +3,6 @@ package com.mapbox.androidauto.car.navigation
 import android.graphics.Rect
 import android.location.Location
 import com.mapbox.androidauto.car.RendererUtils.dpToPx
-import com.mapbox.androidauto.car.routes.NavigationRoutesProvider
-import com.mapbox.androidauto.car.routes.RoutesListener
-import com.mapbox.androidauto.car.routes.RoutesProvider
 import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -16,6 +13,7 @@ import com.mapbox.maps.extension.androidauto.DefaultMapboxCarMapGestureHandler
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -23,20 +21,27 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
+import com.mapbox.navigation.ui.maps.internal.ActiveRouteLineComponentContract
+import com.mapbox.navigation.ui.maps.internal.RouteLineComponentContract
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 private const val DEFAULT_INITIAL_ZOOM = 15.0
 
 /**
  * Integrates the Android Auto [MapboxCarMapSurface] with the [NavigationCamera].
  */
-@OptIn(MapboxExperimental::class)
+@OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)
 class CarNavigationCamera internal constructor(
     private val mapboxNavigation: MapboxNavigation,
     private val initialCarCameraMode: CarCameraMode,
     private val alternativeCarCameraMode: CarCameraMode?,
-    private val routesProvider: RoutesProvider,
+    routesContract: RouteLineComponentContract? = null,
     private val initialCameraOptions: CameraOptions? = CameraOptions.Builder()
         .zoom(DEFAULT_INITIAL_ZOOM)
         .build()
@@ -45,6 +50,9 @@ class CarNavigationCamera internal constructor(
     private var mapboxCarMapSurface: MapboxCarMapSurface? = null
     private lateinit var navigationCamera: NavigationCamera
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
+    private lateinit var coroutineScope: CoroutineScope
+    private val routesContract: RouteLineComponentContract = routesContract
+        ?: ActiveRouteLineComponentContract()
 
     private val _nextCameraMode = MutableStateFlow(alternativeCarCameraMode)
     val nextCameraMode: StateFlow<CarCameraMode?> = _nextCameraMode
@@ -91,15 +99,6 @@ class CarNavigationCamera internal constructor(
         }
     }
 
-    private val routesListener = RoutesListener { routes ->
-        if (routes.isEmpty()) {
-            viewportDataSource.clearRouteData()
-        } else {
-            viewportDataSource.onRouteChanged(routes.first())
-        }
-        viewportDataSource.evaluate()
-    }
-
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.evaluate()
@@ -143,7 +142,7 @@ class CarNavigationCamera internal constructor(
         mapboxNavigation,
         initialCarCameraMode,
         alternativeCarCameraMode,
-        NavigationRoutesProvider(mapboxNavigation),
+        ActiveRouteLineComponentContract(),
         initialCameraOptions,
     )
 
@@ -164,7 +163,18 @@ class CarNavigationCamera internal constructor(
         )
 
         mapboxNavigation.registerLocationObserver(locationObserver)
-        routesProvider.registerRoutesListener(routesListener)
+
+        coroutineScope = MainScope()
+        coroutineScope.launch {
+            routesContract.navigationRoutes.collect { routes ->
+                if (routes.isEmpty()) {
+                    viewportDataSource.clearRouteData()
+                } else {
+                    viewportDataSource.onRouteChanged(routes.first())
+                }
+                viewportDataSource.evaluate()
+            }
+        }
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
     }
 
@@ -244,7 +254,7 @@ class CarNavigationCamera internal constructor(
         super.onDetached(mapboxCarMapSurface)
         logAndroidAuto("CarNavigationCamera detached $mapboxCarMapSurface")
 
-        routesProvider.unregisterRoutesListener(routesListener)
+        coroutineScope.cancel()
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         this.mapboxCarMapSurface = null
