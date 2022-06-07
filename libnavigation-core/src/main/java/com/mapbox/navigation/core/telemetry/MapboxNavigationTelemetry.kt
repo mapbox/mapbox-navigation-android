@@ -40,6 +40,8 @@ import com.mapbox.navigation.core.telemetry.events.NavigationFreeDriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationRerouteEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationStepData
 import com.mapbox.navigation.core.telemetry.events.PhoneState
+import com.mapbox.navigation.core.telemetry.events.internal.CustomEventType
+import com.mapbox.navigation.core.telemetry.events.internal.NavigationCustomEvents
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.FreeDrive
@@ -643,6 +645,18 @@ internal object MapboxNavigationTelemetry {
         sendEvent(freeDriveEvent)
     }
 
+    private fun createCustomEvent(
+        type: CustomEventType,
+        payload: String
+    ) {
+        log("customEventType $type")
+        val customEvent =
+            NavigationCustomEvents().apply {
+                populate(type, payload)
+            }
+        sendEvent(customEvent)
+    }
+
     private fun sendEvent(metricEvent: MetricEvent) {
         log("${metricEvent::class.java} event sent")
         metricsReporter.addEvent(metricEvent)
@@ -799,6 +813,18 @@ internal object MapboxNavigationTelemetry {
             sessionIdentifier = modeId
             startTimestamp = generateCreateDateFormatted(modeStartTime)
             appMetadata = createAppMetadata()
+        }
+    }
+
+    private fun NavigationCustomEvents.populate(
+        customEventType: CustomEventType,
+        customEventPayload: String
+    ) {
+        log("populateFreeDriveEvent")
+
+        this.apply {
+            type = customEventType.type
+            payload = customEventPayload
         }
     }
 

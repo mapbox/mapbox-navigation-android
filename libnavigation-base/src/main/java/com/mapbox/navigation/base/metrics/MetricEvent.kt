@@ -90,6 +90,11 @@ object NavigationMetrics {
      * Navigation Event "FreeDrive" name
      */
     const val FREE_DRIVE = "navigation.freeDrive"
+
+    /**
+     * Navigation Event "Custom" name
+     */
+    const val CUSTOM_EVENT = "navigation.customEvent"
 }
 
 /**
