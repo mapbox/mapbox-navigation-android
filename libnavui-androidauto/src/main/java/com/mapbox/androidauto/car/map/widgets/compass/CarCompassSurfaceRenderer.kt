@@ -1,5 +1,7 @@
 package com.mapbox.androidauto.car.map.widgets.compass
 
+import com.mapbox.androidauto.car.internal.extensions.getStyle
+import com.mapbox.androidauto.car.internal.extensions.getStyleAsync
 import com.mapbox.androidauto.car.map.widgets.logo.LogoWidget
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.MapboxExperimental
@@ -25,8 +27,8 @@ class CarCompassSurfaceRenderer(
         val compassWidget = CompassWidget(mapboxCarMapSurface.carContext)
         val mapboxMap = mapboxCarMapSurface.mapSurface.getMapboxMap().also { mapboxMap = it }
         this.compassWidget = compassWidget
-        mapboxMap.getStyle { style ->
-            style.addPersistentStyleCustomLayer(
+        mapboxCarMapSurface.getStyleAsync {
+            it.addPersistentStyleCustomLayer(
                 CompassWidget.COMPASS_WIDGET_LAYER_ID,
                 compassWidget.host,
                 layerPosition
@@ -36,10 +38,9 @@ class CarCompassSurfaceRenderer(
     }
 
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
-        mapboxCarMapSurface.apply {
-            mapSurface.getMapboxMap().getStyle()?.removeStyleLayer(LogoWidget.LOGO_WIDGET_LAYER_ID)
-            mapSurface.getMapboxMap().removeOnCameraChangeListener(onCameraChangeListener)
-        }
+        mapboxCarMapSurface.mapSurface.getMapboxMap()
+            .removeOnCameraChangeListener(onCameraChangeListener)
+        mapboxCarMapSurface.getStyle()?.removeStyleLayer(LogoWidget.LOGO_WIDGET_LAYER_ID)
         compassWidget = null
         mapboxMap = null
     }
