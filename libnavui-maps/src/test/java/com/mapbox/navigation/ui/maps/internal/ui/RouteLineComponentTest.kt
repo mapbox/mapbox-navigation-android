@@ -1,3 +1,5 @@
+package com.mapbox.navigation.ui.maps.internal.ui
+
 import android.content.Context
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.android.gestures.Utils
@@ -16,16 +18,11 @@ import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
-import com.mapbox.navigation.dropin.component.routeline.RouteLineComponent
-import com.mapbox.navigation.dropin.util.TestStore
-import com.mapbox.navigation.dropin.util.TestingUtil
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
@@ -42,14 +39,12 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
-import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.json.JSONObject
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -77,8 +72,6 @@ class RouteLineComponentTest {
     }
     private val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
     private val options by lazy { MapboxRouteLineOptions.Builder(context).build() }
-
-    private lateinit var testStore: TestStore
 
     @Before
     fun setUp() {
@@ -109,7 +102,6 @@ class RouteLineComponentTest {
             }
             ExpectedFactory.createValue(nativeRoutes)
         }
-        testStore = spyk(TestStore())
     }
 
     @After
@@ -129,7 +121,7 @@ class RouteLineComponentTest {
             every { findClosestRoute(any(), any(), any(), capture(consumerSlot)) } returns Unit
         }
         val point = Point.fromLngLat(-119.27, 84.85)
-        RouteLineComponent(testStore, mockMapView, options, mockApi)
+        RouteLineComponent(mockMapView, options, mockApi)
             .onAttached(mockMapboxNavigation)
 
         verify { mockGestures.addOnMapClickListener(capture(mapClickSlot)) }
@@ -147,7 +139,7 @@ class RouteLineComponentTest {
             every { updateTraveledRouteLine(point) } returns ExpectedFactory.createError(mockk())
         }
         val mockView = mockk<MapboxRouteLineView>(relaxed = true)
-        RouteLineComponent(testStore, mockMapView, options, mockApi, mockView)
+        RouteLineComponent(mockMapView, options, mockApi, mockView)
             .onAttached(mockMapboxNavigation)
         verify {
             locationComponentPlugin.addOnIndicatorPositionChangedListener(
@@ -174,7 +166,7 @@ class RouteLineComponentTest {
         val callbackResult =
             ExpectedFactory.createError<RouteLineError, RouteLineUpdateValue>(mockError)
         val routeProgressObserverSlot = slot<RouteProgressObserver>()
-        RouteLineComponent(testStore, mockMapView, options, mockApi, mockView)
+        RouteLineComponent(mockMapView, options, mockApi, mockView)
             .onAttached(mockMapboxNavigation)
         verify {
             mockMapboxNavigation.registerRouteProgressObserver(capture(routeProgressObserverSlot))
@@ -203,7 +195,7 @@ class RouteLineComponentTest {
         }
         val callbackSlot = slot<MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>>()
         val routesObserverSlot = slot<RoutesObserver>()
-        RouteLineComponent(testStore, mockMapView, options, mockApi, mockView)
+        RouteLineComponent(mockMapView, options, mockApi, mockView)
             .onAttached(mockMapboxNavigation)
         verify {
             mockMapboxNavigation.registerRoutesObserver(capture(routesObserverSlot))
@@ -218,37 +210,76 @@ class RouteLineComponentTest {
 
     @Test
     fun selectRouteTest() {
-        val route1 = TestingUtil.loadRoute("short_route.json").toNavigationRoute()
-        val route2 = TestingUtil.loadRoute("multileg_route.json").toNavigationRoute()
-        val resultRoutesSlot = slot<RoutesAction.SetRoutes>()
-        val mockResponse = mockk<ClosestRouteValue> {
-            every { navigationRoute } returns route2
-        }
         val consumerSlot =
             slot<MapboxNavigationConsumer<Expected<RouteNotFound, ClosestRouteValue>>>()
         val clickSlot = slot<OnMapClickListener>()
+        val oldRoute = mockk<NavigationRoute> { every { directionsRoute } returns mockk() }
+        val newRoute = mockk<NavigationRoute> { every { directionsRoute } returns mockk() }
+        val clickPoint = Point.fromLngLat(0.0, 0.0)
         val mockApi = mockk<MapboxRouteLineApi>(relaxed = true) {
-            every { findClosestRoute(any(), any(), any(), capture(consumerSlot)) } returns Unit
-            every { getNavigationRoutes() } returns listOf(route1, route2)
+            every { getPrimaryNavigationRoute() } returns oldRoute
+            every { getNavigationRoutes() } returns listOf(
+                oldRoute,
+                newRoute
+            )
+            every { findClosestRoute(clickPoint, any(), any(), capture(consumerSlot)) } answers {
+                consumerSlot.captured.accept(
+                    ExpectedFactory.createValue(
+                        ClosestRouteValue(
+                            newRoute
+                        )
+                    )
+                )
+            }
         }
-        val point = Point.fromLngLat(-119.27, 84.85)
-        RouteLineComponent(testStore, mockMapView, options, mockApi)
-            .onAttached(mockMapboxNavigation)
+
+        RouteLineComponent(mockMapView, options, mockApi).onAttached(mockMapboxNavigation)
         verify { mockGestures.addOnMapClickListener(capture(clickSlot)) }
 
-        clickSlot.captured.onMapClick(point)
+        clickSlot.captured.onMapClick(clickPoint)
+        verify { mockMapboxNavigation.setNavigationRoutes(listOf(newRoute, oldRoute)) }
+    }
 
-        consumerSlot.captured.accept(ExpectedFactory.createValue(mockResponse))
-        verify { mockApi.findClosestRoute(point, mockMap, any(), any()) }
-        verify { testStore.dispatch(capture(resultRoutesSlot)) }
-        assertEquals(route2, resultRoutesSlot.captured.routes.first())
-        assertEquals(route1, resultRoutesSlot.captured.routes[1])
+    @Test
+    fun `selectRoute should call custom contract`() {
+        val consumerSlot =
+            slot<MapboxNavigationConsumer<Expected<RouteNotFound, ClosestRouteValue>>>()
+        val clickSlot = slot<OnMapClickListener>()
+        val oldRoute = mockk<NavigationRoute> { every { directionsRoute } returns mockk() }
+        val newRoute = mockk<NavigationRoute> { every { directionsRoute } returns mockk() }
+        val clickPoint = Point.fromLngLat(0.0, 0.0)
+        val mockApi = mockk<MapboxRouteLineApi>(relaxed = true) {
+            every { getPrimaryNavigationRoute() } returns oldRoute
+            every { getNavigationRoutes() } returns listOf(
+                oldRoute,
+                newRoute
+            )
+            every { findClosestRoute(clickPoint, any(), any(), capture(consumerSlot)) } answers {
+                consumerSlot.captured.accept(
+                    ExpectedFactory.createValue(
+                        ClosestRouteValue(
+                            newRoute
+                        )
+                    )
+                )
+            }
+        }
+
+        val customContract = mockk<RouteLineComponentContract>()
+        val sut = RouteLineComponent(mockMapView, options, mockApi, contractProvider = {
+            customContract
+        })
+        sut.onAttached(mockMapboxNavigation)
+        verify { mockGestures.addOnMapClickListener(capture(clickSlot)) }
+
+        clickSlot.captured.onMapClick(clickPoint)
+        verify { customContract.setRoutes(mockMapboxNavigation, listOf(newRoute, oldRoute)) }
     }
 
     @Test
     fun `onDetached cancels route line API`() {
         val mockApi = mockk<MapboxRouteLineApi>(relaxed = true)
-        val component = RouteLineComponent(testStore, mockMapView, options, mockApi)
+        val component = RouteLineComponent(mockMapView, options, mockApi)
         component.onAttached(mockMapboxNavigation)
 
         component.onDetached(mockMapboxNavigation)
@@ -260,7 +291,7 @@ class RouteLineComponentTest {
     fun `onDetached cancels route line view`() {
         val mockApi = mockk<MapboxRouteLineApi>(relaxed = true)
         val mockView = mockk<MapboxRouteLineView>(relaxed = true)
-        val component = RouteLineComponent(testStore, mockMapView, options, mockApi, mockView)
+        val component = RouteLineComponent(mockMapView, options, mockApi, mockView)
         component.onAttached(mockMapboxNavigation)
 
         component.onDetached(mockMapboxNavigation)

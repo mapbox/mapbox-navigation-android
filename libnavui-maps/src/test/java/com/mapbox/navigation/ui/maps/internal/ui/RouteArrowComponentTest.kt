@@ -1,4 +1,4 @@
-package com.mapbox.navigation.dropin.component.routearrow
+package com.mapbox.navigation.ui.maps.internal.ui
 
 import android.content.Context
 import androidx.appcompat.content.res.AppCompatResources

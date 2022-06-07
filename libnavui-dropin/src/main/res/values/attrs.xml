@@ -22,23 +22,6 @@
         <attr name="cameraModeButtonFollowText" format="string" localization="suggested" />
     </declare-styleable>
 
-    <declare-styleable name="MapboxAudioGuidanceButton">
-        <!-- Background to apply to the view. -->
-        <attr name="audioGuidanceButtonBackground" format="reference|color" />
-        <!-- Tint to apply to the icon drawable. -->
-        <attr name="audioGuidanceButtonIconTint" format="reference|color" />
-        <!-- Follow mode icon drawable -->
-        <attr name="audioGuidanceButtonMuteIcon" format="reference" />
-        <!-- Overview mode icon drawable -->
-        <attr name="audioGuidanceButtonUnmuteIcon" format="reference" />
-        <!-- Appearance of a text message. -->
-        <attr name="audioGuidanceButtonTextAppearance" format="reference" />
-        <!-- Follow mode text -->
-        <attr name="audioGuidanceButtonMuteText" format="string" localization="suggested" />
-        <!-- Overview mode text -->
-        <attr name="audioGuidanceButtonUnmuteText" format="string" localization="suggested" />
-    </declare-styleable>
-
     <declare-styleable name="MapboxExtendableButton">
         <!-- Background to apply to the view. -->
         <attr name="extendableButtonBackground" format="reference|color" />

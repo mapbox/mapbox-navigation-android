@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="mapbox_cameraModeButton_paddingStart">20dp</dimen>
-    <dimen name="mapbox_audioGuidanceButton_paddingStart">20dp</dimen>
 
     <dimen name="mapbox_infoPanel_peekHeight">104dp</dimen>
 
     <dimen name="mapbox_infoPanel_text_headline">27sp</dimen>
-    <dimen name="mapbox_button_text_regular">14sp</dimen>
     <dimen name="mapbox_speed_limit_text_regular">14sp</dimen>
     <dimen name="mapbox_road_name_text_regular">14sp</dimen>
     <dimen name="mapbox_trip_progress_text_regular">14sp</dimen>

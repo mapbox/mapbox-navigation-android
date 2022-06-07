@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="52dp"
         android:minWidth="72dp"
-        android:paddingStart="@dimen/mapbox_cameraModeButton_paddingStart">
+        android:paddingStart="@dimen/mapbox_audioGuidanceButton_paddingStart">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/iconImage"

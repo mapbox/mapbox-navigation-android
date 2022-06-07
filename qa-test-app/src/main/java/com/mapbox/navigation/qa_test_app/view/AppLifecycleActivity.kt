@@ -69,7 +69,7 @@ class AppLifecycleActivity : AppCompatActivity() {
         viewModel.triggerIdleCameraOnMoveListener = false
 
         attachResumed(
-            DropInLocationPuck(locationViewModel, binding.mapView),
+            DropInLocationPuck(binding.mapView, locationViewModel.navigationLocationProvider),
             DropInRoutesInteractor(locationViewModel, binding.mapView),
             DropInNavigationCamera(viewModel, locationViewModel, this, binding.mapView),
             DropInContinuousRoutes(),
