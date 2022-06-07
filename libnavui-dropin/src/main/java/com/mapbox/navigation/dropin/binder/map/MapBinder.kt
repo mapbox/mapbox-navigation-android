@@ -5,6 +5,8 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.scalebar.scalebar
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.navigationListOf
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.NavigationViewContext
@@ -16,12 +18,16 @@ import com.mapbox.navigation.dropin.component.marker.GeocodingComponent
 import com.mapbox.navigation.dropin.component.marker.MapMarkersComponent
 import com.mapbox.navigation.dropin.component.marker.RoutePreviewLongPressMapComponent
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.component.routearrow.RouteArrowComponent
-import com.mapbox.navigation.dropin.component.routeline.RouteLineComponent
+import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
+import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
+import com.mapbox.navigation.ui.maps.internal.ui.RouteArrowComponent
+import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponent
+import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponentContract
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class MapBinder(
@@ -49,7 +55,7 @@ internal class MapBinder(
                 context.mapStyleLoader.loadedMapStyle,
                 context.options.routeLineOptions
             ) { _, lineOptions ->
-                RouteLineComponent(store, mapView, lineOptions)
+                routeLineComponent(lineOptions)
             },
             CameraComponent(store, mapView),
             reloadOnChange(
@@ -72,6 +78,11 @@ internal class MapBinder(
             }
         )
     }
+
+    private fun routeLineComponent(lineOptions: MapboxRouteLineOptions) =
+        RouteLineComponent(mapView, lineOptions, contractProvider = {
+            RouteLineComponentContractImpl(store)
+        })
 
     private fun longPressMapComponent(navigationState: NavigationState) =
         when (navigationState) {
@@ -103,5 +114,14 @@ internal class MapBinder(
         RouteArrowComponent(mapView, arrowOptions)
     } else {
         null
+    }
+}
+
+@ExperimentalPreviewMapboxNavigationAPI
+internal class RouteLineComponentContractImpl(
+    private val store: Store
+) : RouteLineComponentContract {
+    override fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>) {
+        store.dispatch(RoutesAction.SetRoutes(routes))
     }
 }

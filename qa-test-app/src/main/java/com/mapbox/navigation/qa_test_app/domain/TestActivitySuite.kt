@@ -6,6 +6,8 @@ import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.utils.startActivity
 import com.mapbox.navigation.qa_test_app.view.AlternativeRouteActivity
 import com.mapbox.navigation.qa_test_app.view.AppLifecycleActivity
+import com.mapbox.navigation.qa_test_app.view.ComponentsActivity
+import com.mapbox.navigation.qa_test_app.view.ComponentsAltActivity
 import com.mapbox.navigation.qa_test_app.view.CustomAlternativeRouteColoringActivity
 import com.mapbox.navigation.qa_test_app.view.FeedbackActivity
 import com.mapbox.navigation.qa_test_app.view.IconsPreviewActivity
@@ -28,6 +30,18 @@ object TestActivitySuite {
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     val testActivities = listOf(
+        TestActivityDescription(
+            "Components install via MapboxNavigationApp",
+            R.string.experimental_components_install,
+        ) { activity ->
+            activity.startActivity<ComponentsActivity>()
+        },
+        TestActivityDescription(
+            "Components install via MapboxNavigation",
+            R.string.experimental_alt_components_install,
+        ) { activity ->
+            activity.startActivity<ComponentsAltActivity>()
+        },
         TestActivityDescription(
             "MapboxNavigation Lifecycle",
             R.string.mapbox_navigation_app_lifecycle_description,

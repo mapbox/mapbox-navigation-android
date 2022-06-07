@@ -7,7 +7,7 @@
     tools:orientation="vertical"
     tools:parentTag="android.widget.LinearLayout">
 
-    <com.mapbox.navigation.dropin.view.MapboxAudioGuidanceButton
+    <com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
         android:id="@+id/soundButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

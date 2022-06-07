@@ -1,4 +1,4 @@
-package com.mapbox.navigation.dropin.view
+package com.mapbox.navigation.ui.voice.view
 
 import android.content.Context
 import android.content.res.TypedArray
@@ -13,10 +13,10 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.databinding.MapboxAudioGuidanceButtonLayoutBinding
 import com.mapbox.navigation.ui.utils.internal.ExtendableButtonHelper
 import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
+import com.mapbox.navigation.ui.voice.R
+import com.mapbox.navigation.ui.voice.databinding.MapboxAudioGuidanceButtonLayoutBinding
 
 /**
  * Default button that allows user to mute and un-mute audio guidance.
@@ -87,7 +87,7 @@ class MapboxAudioGuidanceButton : FrameLayout {
      * Default button that allows user to mute and un-mute audio guidance.
      */
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
-        this(context, attrs, defStyleAttr, R.style.MapboxStyleCameraModeButton)
+        this(context, attrs, defStyleAttr, R.style.MapboxStyleAudioGuidanceButton)
 
     /**
      * Default button that allows user to mute and un-mute audio guidance.

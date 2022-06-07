@@ -447,38 +447,6 @@ package com.mapbox.navigation.dropin.model {
 
 package com.mapbox.navigation.dropin.view {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxAudioGuidanceButton extends android.widget.FrameLayout {
-    ctor public MapboxAudioGuidanceButton(android.content.Context context);
-    ctor public MapboxAudioGuidanceButton(android.content.Context context, android.util.AttributeSet? attrs);
-    ctor public MapboxAudioGuidanceButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    ctor public MapboxAudioGuidanceButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr, int defStyleRes);
-    method public androidx.constraintlayout.widget.ConstraintLayout getContainerView();
-    method public androidx.appcompat.widget.AppCompatImageView getIconImage();
-    method public int getMuteIconResId();
-    method public String? getMuteText();
-    method public androidx.appcompat.widget.AppCompatTextView getTextView();
-    method public int getUnMuteIconResId();
-    method public String? getUnMuteText();
-    method @UiThread public void mute();
-    method @UiThread public void muteAndExtend(long duration = 2000L);
-    method @UiThread public void muteAndExtend();
-    method public void setMuteIconResId(int);
-    method public void setMuteText(String?);
-    method public void setUnMuteIconResId(int);
-    method public void setUnMuteText(String?);
-    method @UiThread public void unMute();
-    method @UiThread public void unMuteAndExtend(long duration = 2000L);
-    method @UiThread public void unMuteAndExtend();
-    method public void updateStyle(@StyleRes int style);
-    property public final androidx.constraintlayout.widget.ConstraintLayout containerView;
-    property public final androidx.appcompat.widget.AppCompatImageView iconImage;
-    property public final int muteIconResId;
-    property public final String? muteText;
-    property public final androidx.appcompat.widget.AppCompatTextView textView;
-    property public final int unMuteIconResId;
-    property public final String? unMuteText;
-  }
-
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxCameraModeButton extends android.widget.FrameLayout {
     ctor public MapboxCameraModeButton(android.content.Context context);
     ctor public MapboxCameraModeButton(android.content.Context context, android.util.AttributeSet? attrs);
