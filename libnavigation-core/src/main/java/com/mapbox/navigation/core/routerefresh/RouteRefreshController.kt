@@ -7,7 +7,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshError
 import com.mapbox.navigation.base.route.RouteRefreshOptions
-import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.directions.session.RouteRefresh
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.CompletableDeferred
@@ -25,7 +25,7 @@ import kotlin.coroutines.resume
  */
 internal class RouteRefreshController(
     private val routeRefreshOptions: RouteRefreshOptions,
-    private val directionsSession: DirectionsSession,
+    private val routeRefresh: RouteRefresh,
     private val currentLegIndexProvider: () -> Int,
     private val routeDiffProvider: DirectionsRouteDiffProvider = DirectionsRouteDiffProvider(),
     private val localDateProvider: () -> Date
@@ -171,7 +171,7 @@ internal class RouteRefreshController(
         legIndex: Int
     ): RouteRefreshResult =
         suspendCancellableCoroutine { continuation ->
-            val requestId = directionsSession.requestRouteRefresh(
+            val requestId = routeRefresh.requestRouteRefresh(
                 route,
                 legIndex,
                 object : NavigationRouterRefreshCallback {
@@ -185,7 +185,7 @@ internal class RouteRefreshController(
                 }
             )
             continuation.invokeOnCancellation {
-                directionsSession.cancelRouteRefreshRequest(requestId)
+                routeRefresh.cancelRouteRefreshRequest(requestId)
             }
         }
 

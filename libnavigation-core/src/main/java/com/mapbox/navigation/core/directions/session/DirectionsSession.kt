@@ -1,13 +1,11 @@
 package com.mapbox.navigation.core.directions.session
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
-import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.Router
 
-internal interface DirectionsSession {
+internal interface DirectionsSession : RouteRefresh {
 
     /**
      * Routes that were fetched from [Router] or set manually.
@@ -47,24 +45,6 @@ internal interface DirectionsSession {
      * Interrupts a route-fetching request if one is in progress.
      */
     fun cancelRouteRequest(requestId: Long)
-
-    /**
-     * Refresh the traffic annotations for a given [DirectionsRoute]
-     *
-     * @param route DirectionsRoute the direction route to refresh
-     * @param legIndex Int the index of the current leg in the route
-     * @param callback Callback that gets notified with the results of the request
-     */
-    fun requestRouteRefresh(
-        route: NavigationRoute,
-        legIndex: Int,
-        callback: NavigationRouterRefreshCallback
-    ): Long
-
-    /**
-     * Cancels [requestRouteRefresh].
-     */
-    fun cancelRouteRefreshRequest(requestId: Long)
 
     /**
      * Interrupts all requests if any are in progress.
