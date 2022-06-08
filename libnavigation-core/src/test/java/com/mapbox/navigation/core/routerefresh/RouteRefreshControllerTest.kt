@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterFactory
 import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.directions.session.RouteRefresh
 import com.mapbox.navigation.core.infra.factories.createCoordinatesList
 import com.mapbox.navigation.core.infra.factories.createDirectionsRoute
 import com.mapbox.navigation.core.infra.factories.createIncident
@@ -15,7 +16,6 @@ import com.mapbox.navigation.core.infra.factories.createNavigationRoute
 import com.mapbox.navigation.core.infra.factories.createRouteLeg
 import com.mapbox.navigation.core.infra.factories.createRouteLegAnnotation
 import com.mapbox.navigation.core.infra.factories.createRouteOptions
-import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.add
 import com.mapbox.navigation.testing.utcToLocalTime
 import com.mapbox.navigation.utils.internal.LoggerFrontend
@@ -30,8 +30,8 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import java.time.Month
 import java.util.Date
@@ -39,9 +39,6 @@ import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
 class RouteRefreshControllerTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     private val logger = mockk<LoggerFrontend>(relaxed = true)
 
@@ -51,7 +48,7 @@ class RouteRefreshControllerTest {
     }
 
     @Test
-    fun `route with disabled refresh never refreshes`() = coroutineRule.runBlockingTest {
+    fun `route with disabled refresh never refreshes`() = runBlockingTest {
         val testRoute = createNavigationRoute(
             createDirectionsRoute(
                 routeOptions = createRouteOptions(
@@ -69,13 +66,13 @@ class RouteRefreshControllerTest {
     }
 
     @Test
-    fun `route refreshes`() = coroutineRule.runBlockingTest {
+    fun `route refreshes`() = runBlockingTest {
         val (initialRoute, refreshedRoute) = createTestInitialAndRefreshedTestRoutes()
         val directionsSession = mockk<DirectionsSession>().apply {
             onRefresh { _, _, _, callback -> callback.onRefreshReady(refreshedRoute) }
         }
         val routeRefreshController = createRouteRefreshController(
-            directionsSession = directionsSession,
+            routeRefresh = directionsSession,
             routeRefreshOptions = RouteRefreshOptions.Builder()
                 .intervalMillis(30_000)
                 .build(),
@@ -90,7 +87,7 @@ class RouteRefreshControllerTest {
     }
 
     @Test
-    fun `should refresh route with any annotation`() = coroutineRule.runBlockingTest {
+    fun `should refresh route with any annotation`() = runBlockingTest {
         val routeWithoutAnnotations = createTestTwoLegRoute(
             firstLegAnnotations = null,
             secondLegAnnotations = null
@@ -100,7 +97,7 @@ class RouteRefreshControllerTest {
             onRefresh { _, _, _, callback -> callback.onRefreshReady(refreshedRoute) }
         }
         val routeRefreshController = createRouteRefreshController(
-            directionsSession = directionsSession
+            routeRefresh = directionsSession
         )
 
         val refreshedRouteDeferred =
@@ -112,7 +109,7 @@ class RouteRefreshControllerTest {
     }
 
     @Test
-    fun `should log warning when route is not supported`() = coroutineRule.runBlockingTest {
+    fun `should log warning when route is not supported`() = runBlockingTest {
         val primaryRoute = createTestTwoLegRoute(requestUuid = null)
         val directionsSession = mockk<DirectionsSession>()
         val routeRefreshController = createRouteRefreshController()
@@ -137,7 +134,7 @@ class RouteRefreshControllerTest {
     }
 
     @Test
-    fun `refreshing of empty routes`() = coroutineRule.runBlockingTest {
+    fun `refreshing of empty routes`() = runBlockingTest {
         val routeRefreshController = createRouteRefreshController()
 
         val refreshedDeferred = async { routeRefreshController.refresh(listOf()) }
@@ -148,13 +145,13 @@ class RouteRefreshControllerTest {
     }
 
     @Test
-    fun `cancel request when stopped`() = coroutineRule.runBlockingTest {
+    fun `cancel request when stopped`() = runBlockingTest {
         val directionsSession = mockk<DirectionsSession> {
             every { requestRouteRefresh(any(), any(), any()) } returns 8
             every { cancelRouteRefreshRequest(any()) } returns Unit
         }
         val routeRefreshController = createRouteRefreshController(
-            directionsSession = directionsSession
+            routeRefresh = directionsSession
         )
 
         val refreshJob = async { routeRefreshController.refresh(listOf(createTestTwoLegRoute())) }
@@ -165,15 +162,15 @@ class RouteRefreshControllerTest {
     }
 
     @Test
-    fun `do not send a request when uuid is empty`() = coroutineRule.runBlockingTest {
+    fun `do not send a request when uuid is empty`() = runBlockingTest {
         val directionsSession = mockk<DirectionsSession>(relaxed = true)
         val routeRefreshController = createRouteRefreshController(
-            directionsSession = directionsSession
+            routeRefresh = directionsSession
         )
         val route = createTestTwoLegRoute(requestUuid = "")
 
         val refreshDeferred = launch { routeRefreshController.refresh(listOf(route)) }
-        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
+        advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
 
         assertTrue(refreshDeferred.isActive)
         verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
@@ -181,7 +178,7 @@ class RouteRefreshControllerTest {
     }
 
     @Test(expected = IllegalArgumentException::class)
-    fun `refresh route without legs`() = coroutineRule.runBlockingTest {
+    fun `refresh route without legs`() = runBlockingTest {
         val initialRoute = createNavigationRoute(
             createDirectionsRoute(
                 legs = null,
@@ -195,7 +192,7 @@ class RouteRefreshControllerTest {
 
     @Test
     fun `should log route diffs when there is a successful response`() =
-        coroutineRule.runBlockingTest {
+        runBlockingTest {
             val initialRoute = createTestTwoLegRoute(
                 firstLegAnnotations = createRouteLegAnnotation(
                     congestion = listOf("moderate", "heavy"),
@@ -215,11 +212,11 @@ class RouteRefreshControllerTest {
                 onRefresh { _, _, _, callback -> callback.onRefreshReady(refreshedRoute) }
             }
             val routeRefreshController = createRouteRefreshController(
-                directionsSession = directionsSession,
+                routeRefresh = directionsSession,
             )
 
             val refreshJob = launch { routeRefreshController.refresh(listOf(initialRoute)) }
-            coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
+            advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
 
             assertTrue(refreshJob.isCompleted)
             verify {
@@ -232,7 +229,7 @@ class RouteRefreshControllerTest {
 
     @Test
     fun `should log message when there is a successful response without route diffs`() =
-        coroutineRule.runBlockingTest {
+        runBlockingTest {
             val initialRoute = createTestTwoLegRoute()
             val refreshedRoute = createTestTwoLegRoute()
             val directionsSession = mockk<DirectionsSession>().onRefresh { _, _, _, callback ->
@@ -240,11 +237,11 @@ class RouteRefreshControllerTest {
             }
 
             val routeRefreshController = createRouteRefreshController(
-                directionsSession = directionsSession,
+                routeRefresh = directionsSession,
             )
 
             val refreshJob = launch { routeRefreshController.refresh(listOf(initialRoute)) }
-            coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
+            advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
 
             verify {
                 logger.logI("No changes to route annotations", RouteRefreshController.LOG_CATEGORY)
@@ -254,7 +251,7 @@ class RouteRefreshControllerTest {
 
     @Test
     fun `traffic annotations and incidents on all legs starting with the current(first) disappears if refresh fails`() =
-        coroutineRule.runBlockingTest {
+        runBlockingTest {
             val currentTime = utcToLocalTime(
                 year = 2022,
                 month = Month.MAY,
@@ -309,13 +306,13 @@ class RouteRefreshControllerTest {
                 routeRefreshOptions = routeRefreshOptions,
                 currentLegIndexProvider = { 0 },
                 localDateProvider = { currentTime },
-                directionsSession = directionsSession,
+                routeRefresh = directionsSession,
             )
             // act
             val refreshedRoutesDeffer = async {
                 routeRefreshController.refresh(listOf(primaryRoute))
             }
-            coroutineRule.testDispatcher.advanceTimeBy(
+            advanceTimeBy(
                 expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis)
             )
             // assert
@@ -334,7 +331,7 @@ class RouteRefreshControllerTest {
 
     @Test
     fun `after invalidation route isn't updated until successful refresh`() =
-        coroutineRule.runBlockingTest {
+        runBlockingTest {
             val initialRoute = createTestTwoLegRoute()
             val directionsSession = mockk<DirectionsSession>().onRefresh { _, _, _, callback ->
                 callback.onFailure(RouterFactory.buildNavigationRouterRefreshError())
@@ -342,7 +339,7 @@ class RouteRefreshControllerTest {
             val routeRefreshOptions = RouteRefreshOptions.Builder().build()
             val routeRefreshController = createRouteRefreshController(
                 routeRefreshOptions = routeRefreshOptions,
-                directionsSession = directionsSession
+                routeRefresh = directionsSession
             )
             val invalidatedRouteDeffer = async {
                 routeRefreshController.refresh(listOf(initialRoute))
@@ -369,7 +366,7 @@ class RouteRefreshControllerTest {
 
     @Test
     fun `after invalidation route isn't updated until incident expiration`() =
-        coroutineRule.runBlockingTest {
+        runBlockingTest {
             var currentTime = utcToLocalTime(
                 year = 2022,
                 month = Month.MAY,
@@ -392,7 +389,7 @@ class RouteRefreshControllerTest {
             val routeRefreshOptions = RouteRefreshOptions.Builder().build()
             val routeRefreshController = createRouteRefreshController(
                 routeRefreshOptions = routeRefreshOptions,
-                directionsSession = directionsSession,
+                routeRefresh = directionsSession,
                 localDateProvider = { currentTime }
             )
             val invalidatedRouteDeffer = async {
@@ -423,7 +420,7 @@ class RouteRefreshControllerTest {
 
     @Test
     fun `traffic annotations and expired annotations on current leg(second) disappear if refresh doesn't respond`() =
-        coroutineRule.runBlockingTest {
+        runBlockingTest {
             val currentTime = utcToLocalTime(
                 year = 2022,
                 month = Month.MAY,
@@ -461,7 +458,7 @@ class RouteRefreshControllerTest {
                 routeDiffProvider = DirectionsRouteDiffProvider(),
                 currentLegIndexProvider = currentLegIndexProvider,
                 localDateProvider = { currentTime },
-                directionsSession = directionsSession
+                routeRefresh = directionsSession
             )
             // act
             val refreshedRoutesDeferred = async {
@@ -494,7 +491,7 @@ class RouteRefreshControllerTest {
 
     @Test
     fun `route successfully refreshes on time if first try doesn't respond`() =
-        coroutineRule.runBlockingTest {
+        runBlockingTest {
             val initialRoute = createTestTwoLegRoute(
                 firstLegAnnotations = createRouteLegAnnotation(
                     congestion = listOf("severe", "moderate"),
@@ -516,7 +513,7 @@ class RouteRefreshControllerTest {
                 }
             val refreshInterval = 30_000L
             val refreshController = createRouteRefreshController(
-                directionsSession = directionsSession,
+                routeRefresh = directionsSession,
                 routeRefreshOptions = RouteRefreshOptions.Builder()
                     .intervalMillis(refreshInterval)
                     .build()
@@ -533,7 +530,7 @@ class RouteRefreshControllerTest {
 
     @Test
     fun `route successfully refreshes on time if first try failed`() =
-        coroutineRule.runBlockingTest {
+        runBlockingTest {
             val initialRoute = createTestTwoLegRoute(
                 firstLegAnnotations = createRouteLegAnnotation(
                     congestion = listOf("severe", "moderate"),
@@ -558,7 +555,7 @@ class RouteRefreshControllerTest {
                 }
             val refreshInterval = 30_000L
             val refreshController = createRouteRefreshController(
-                directionsSession = directionsSession,
+                routeRefresh = directionsSession,
                 routeRefreshOptions = RouteRefreshOptions.Builder()
                     .intervalMillis(refreshInterval)
                     .build()
@@ -573,19 +570,15 @@ class RouteRefreshControllerTest {
             assertEquals(listOf(refreshed), refreshedDeferred.getCompletedTest())
         }
 
-    fun `all routes successfully refreshed`() {
-
-    }
-
     private fun createRouteRefreshController(
         routeRefreshOptions: RouteRefreshOptions = RouteRefreshOptions.Builder().build(),
-        directionsSession: DirectionsSession = mockk(),
+        routeRefresh: RouteRefresh = mockk(),
         currentLegIndexProvider: () -> Int = { 0 },
         routeDiffProvider: DirectionsRouteDiffProvider = DirectionsRouteDiffProvider(),
         localDateProvider: () -> Date = { Date(1653493148247) }
     ) = RouteRefreshController(
         routeRefreshOptions,
-        directionsSession,
+        routeRefresh,
         currentLegIndexProvider,
         routeDiffProvider,
         localDateProvider
