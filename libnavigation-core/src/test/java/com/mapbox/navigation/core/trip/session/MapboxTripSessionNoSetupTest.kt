@@ -10,10 +10,10 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_NEW
 import com.mapbox.navigation.core.infra.TestLocationEngine
-import com.mapbox.navigation.core.infra.factories.createLocation
+import com.mapbox.navigation.testing.factories.createLocation
 import com.mapbox.navigation.core.infra.factories.createNavigationRoute
-import com.mapbox.navigation.core.infra.factories.createNavigationStatus
-import com.mapbox.navigation.core.infra.factories.createVoiceInstruction
+import com.mapbox.navigation.testing.factories.createNavigationStatus
+import com.mapbox.navigation.testing.factories.createVoiceInstruction
 import com.mapbox.navigation.core.infra.recorders.RouteProgressObserverRecorder
 import com.mapbox.navigation.core.infra.recorders.VoiceInstructionsObserverRecorder
 import com.mapbox.navigation.core.trip.service.TripService
