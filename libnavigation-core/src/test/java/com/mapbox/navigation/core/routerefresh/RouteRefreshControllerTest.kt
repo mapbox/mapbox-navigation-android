@@ -573,6 +573,10 @@ class RouteRefreshControllerTest {
             assertEquals(listOf(refreshed), refreshedDeferred.getCompletedTest())
         }
 
+    fun `all routes successfully refreshed`() {
+
+    }
+
     private fun createRouteRefreshController(
         routeRefreshOptions: RouteRefreshOptions = RouteRefreshOptions.Builder().build(),
         directionsSession: DirectionsSession = mockk(),
