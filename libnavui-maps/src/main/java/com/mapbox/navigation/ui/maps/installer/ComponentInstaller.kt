@@ -30,7 +30,7 @@ fun ComponentInstaller.routeLine(
     config: RouteLineComponentConfig.() -> Unit = {}
 ): Installation {
     val componentConfig = RouteLineComponentConfig(mapView.context).apply(config)
-    return component(RouteLineComponent(mapView, componentConfig.options))
+    return component(RouteLineComponent(mapView.getMapboxMap(), mapView, componentConfig.options))
 }
 
 /**

@@ -80,7 +80,7 @@ internal class MapBinder(
     }
 
     private fun routeLineComponent(lineOptions: MapboxRouteLineOptions) =
-        RouteLineComponent(mapView, lineOptions, contractProvider = {
+        RouteLineComponent(mapView.getMapboxMap(), mapView, lineOptions, contractProvider = {
             RouteLineComponentContractImpl(store)
         })
 

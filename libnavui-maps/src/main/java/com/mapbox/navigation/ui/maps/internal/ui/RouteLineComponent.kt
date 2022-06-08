@@ -3,7 +3,8 @@ package com.mapbox.navigation.ui.maps.internal.ui
 import android.util.Log
 import com.mapbox.android.gestures.Utils
 import com.mapbox.geojson.Point
-import com.mapbox.maps.MapView
+import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.plugin.delegates.MapPluginProviderDelegate
 import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
@@ -42,7 +43,8 @@ internal class MapboxRouteLineComponentContract : RouteLineComponentContract {
 
 @ExperimentalPreviewMapboxNavigationAPI
 class RouteLineComponent(
-    private val mapView: MapView,
+    private val mapboxMap: MapboxMap,
+    private val mapPlugins: MapPluginProviderDelegate,
     private val options: MapboxRouteLineOptions,
     private val routeLineApi: MapboxRouteLineApi = MapboxRouteLineApi(options),
     private val routeLineView: MapboxRouteLineView = MapboxRouteLineView(options),
@@ -68,7 +70,7 @@ class RouteLineComponent(
 
     private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
         val result = routeLineApi.updateTraveledRouteLine(point)
-        mapView.getMapboxMap().getStyle()?.apply {
+        mapboxMap.getStyle()?.apply {
             routeLineView.renderRouteLineUpdate(this, result)
         }
     }
@@ -79,12 +81,12 @@ class RouteLineComponent(
         super.onAttached(mapboxNavigation)
         this.mapboxNavigation = mapboxNavigation
         contract = contractProvider.get()
-        mapView.gestures.addOnMapClickListener(onMapClickListener)
-        mapView.location.addOnIndicatorPositionChangedListener(onPositionChangedListener)
+        mapPlugins.gestures.addOnMapClickListener(onMapClickListener)
+        mapPlugins.location.addOnIndicatorPositionChangedListener(onPositionChangedListener)
 
         coroutineScope.launch {
             mapboxNavigation.flowRouteProgress().collect { routeProgress ->
-                ifNonNull(mapView.getMapboxMap().getStyle()) { style ->
+                ifNonNull(mapboxMap.getStyle()) { style ->
                     routeLineApi.updateWithRouteProgress(routeProgress) { result ->
                         routeLineView.renderRouteLineUpdate(style, result).also {
                             result.error?.let {
@@ -106,7 +108,7 @@ class RouteLineComponent(
                 )
 
             routesFlow.collect { navigationRoutes ->
-                mapView.getMapboxMap().getStyle()?.also { style ->
+                mapboxMap.getStyle()?.also { style ->
                     val routeLines = navigationRoutes.map {
                         NavigationRouteLine(it, null)
                     }
@@ -119,7 +121,7 @@ class RouteLineComponent(
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         super.onDetached(mapboxNavigation)
-        mapView.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
+        mapPlugins.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
         routeLineApi.cancel()
         routeLineView.cancel()
         contract = null
@@ -130,7 +132,7 @@ class RouteLineComponent(
         coroutineScope.launch {
             val result = routeLineApi.findClosestRoute(
                 point,
-                mapView.getMapboxMap(),
+                mapboxMap,
                 routeClickPadding
             )
 
