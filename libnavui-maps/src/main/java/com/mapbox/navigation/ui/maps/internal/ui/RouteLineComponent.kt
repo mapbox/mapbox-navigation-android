@@ -23,12 +23,10 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
 import com.mapbox.navigation.ui.utils.internal.Provider
 import com.mapbox.navigation.utils.internal.ifNonNull
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -41,18 +39,6 @@ interface RouteLineComponentContract {
 }
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal class MapboxRouteLineComponentContract : RouteLineComponentContract {
-    override fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>) {
-        mapboxNavigation.setNavigationRoutes(routes)
-    }
-
-    override fun getRouteInPreview(): Flow<List<NavigationRoute>?> {
-        return flowOf(null)
-    }
-}
-
-@ExperimentalPreviewMapboxNavigationAPI
-@FlowPreview
 class RouteLineComponent(
     private val mapboxMap: MapboxMap,
     private val mapPlugins: MapPluginProviderDelegate,
@@ -62,13 +48,8 @@ class RouteLineComponent(
     contractProvider: Provider<RouteLineComponentContract>? = null
 ) : UIComponent() {
 
-    private val contractProvider: Provider<RouteLineComponentContract>
-
-    init {
-        this.contractProvider = contractProvider ?: Provider {
-            MapboxRouteLineComponentContract()
-        }
-    }
+    private val contractProvider: Provider<RouteLineComponentContract> = contractProvider
+        ?: Provider { ActiveRouteLineComponentContract() }
 
     private val routeClickPadding = Utils.dpToPx(30f)
 

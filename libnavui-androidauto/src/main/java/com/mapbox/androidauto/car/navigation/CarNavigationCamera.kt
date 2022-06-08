@@ -3,9 +3,6 @@ package com.mapbox.androidauto.car.navigation
 import android.graphics.Rect
 import android.location.Location
 import com.mapbox.androidauto.car.RendererUtils.dpToPx
-import com.mapbox.androidauto.car.routes.NavigationRoutesProvider
-import com.mapbox.androidauto.car.routes.RoutesListener
-import com.mapbox.androidauto.car.routes.RoutesProvider
 import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -17,6 +14,7 @@ import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -36,7 +34,6 @@ class CarNavigationCamera internal constructor(
     private val mapboxNavigation: MapboxNavigation,
     private val initialCarCameraMode: CarCameraMode,
     private val alternativeCarCameraMode: CarCameraMode?,
-    private val routesProvider: RoutesProvider,
     private val initialCameraOptions: CameraOptions? = CameraOptions.Builder()
         .zoom(DEFAULT_INITIAL_ZOOM)
         .build()
@@ -91,11 +88,11 @@ class CarNavigationCamera internal constructor(
         }
     }
 
-    private val routesListener = RoutesListener { routes ->
-        if (routes.isEmpty()) {
+    private val routesObserver = RoutesObserver { result ->
+        if (result.navigationRoutes.isEmpty()) {
             viewportDataSource.clearRouteData()
         } else {
-            viewportDataSource.onRouteChanged(routes.first())
+            viewportDataSource.onRouteChanged(result.navigationRoutes.first())
         }
         viewportDataSource.evaluate()
     }
@@ -132,21 +129,6 @@ class CarNavigationCamera internal constructor(
         }
     }
 
-    constructor(
-        mapboxNavigation: MapboxNavigation,
-        initialCarCameraMode: CarCameraMode,
-        alternativeCarCameraMode: CarCameraMode?,
-        initialCameraOptions: CameraOptions? = CameraOptions.Builder()
-            .zoom(DEFAULT_INITIAL_ZOOM)
-            .build(),
-    ) : this(
-        mapboxNavigation,
-        initialCarCameraMode,
-        alternativeCarCameraMode,
-        NavigationRoutesProvider(mapboxNavigation),
-        initialCameraOptions,
-    )
-
     override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
         super.onAttached(mapboxCarMapSurface)
         this.mapboxCarMapSurface = mapboxCarMapSurface
@@ -164,7 +146,7 @@ class CarNavigationCamera internal constructor(
         )
 
         mapboxNavigation.registerLocationObserver(locationObserver)
-        routesProvider.registerRoutesListener(routesListener)
+        mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
     }
 
@@ -244,8 +226,8 @@ class CarNavigationCamera internal constructor(
         super.onDetached(mapboxCarMapSurface)
         logAndroidAuto("CarNavigationCamera detached $mapboxCarMapSurface")
 
-        routesProvider.unregisterRoutesListener(routesListener)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
+        mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         this.mapboxCarMapSurface = null
         isLocationInitialized = false

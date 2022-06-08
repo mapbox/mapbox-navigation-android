@@ -14,16 +14,17 @@ import com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.car.preview.CarRouteLine
 import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.maps.MapboxExperimental
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
 /**
  * When the app is launched from Android Auto
  */
-@OptIn(MapboxExperimental::class)
+@OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)
 class MainCarScreen(
     private val mainCarContext: MainCarContext
 ) : Screen(mainCarContext.carContext) {
 
-    val carRouteLine = CarRouteLine(mainCarContext)
+    val carRouteLine = CarRouteLine()
     val carLocationRenderer = CarLocationRenderer(mainCarContext)
     val carSpeedLimitRenderer = CarSpeedLimitRenderer(mainCarContext)
     val carNavigationCamera = CarNavigationCamera(

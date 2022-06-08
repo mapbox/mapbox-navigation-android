@@ -28,6 +28,7 @@ import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.arrival.ArrivalObserver
@@ -37,14 +38,14 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
  * After a route has been selected. This view gives turn-by-turn instructions
  * for completing the route.
  */
-@OptIn(MapboxExperimental::class)
+@OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)
 class ActiveGuidanceScreen(
     private val carActiveGuidanceContext: CarActiveGuidanceCarContext,
     private val actionProviders: List<MapboxActionProvider>,
     private val placesLayerUtil: PlacesListOnMapLayerUtil = PlacesListOnMapLayerUtil(),
 ) : Screen(carActiveGuidanceContext.carContext) {
 
-    val carRouteLine = CarRouteLine(carActiveGuidanceContext.mainCarContext)
+    val carRouteLine = CarRouteLine()
     val carLocationRenderer = CarLocationRenderer(carActiveGuidanceContext.mainCarContext)
     val carSpeedLimitRenderer = CarSpeedLimitRenderer(carActiveGuidanceContext.mainCarContext)
     val carNavigationCamera = CarNavigationCamera(

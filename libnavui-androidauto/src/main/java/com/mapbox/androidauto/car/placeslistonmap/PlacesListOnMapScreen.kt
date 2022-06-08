@@ -32,6 +32,7 @@ import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelChildren
@@ -40,6 +41,7 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArrayList
 
 @MapboxExperimental
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class PlacesListOnMapScreen(
     private val mainCarContext: MainCarContext,
     private val placesProvider: PlacesListOnMapProvider,

@@ -18,12 +18,15 @@ import com.mapbox.androidauto.car.preview.CarRouteRequestCallback
 import com.mapbox.androidauto.car.preview.RoutePreviewCarContext
 import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.androidauto.logAndroidAutoFailure
+import com.mapbox.maps.MapboxExperimental
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.search.result.SearchSuggestion
 
 /**
  * This screen allows the user to search for a destination.
  */
+@OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)
 class SearchScreen(
     private val searchCarContext: SearchCarContext,
 ) : Screen(searchCarContext.carContext) {
@@ -38,7 +41,6 @@ class SearchScreen(
 
         override fun onRoutesReady(placeRecord: PlaceRecord, routes: List<NavigationRoute>) {
             val routePreviewCarContext = RoutePreviewCarContext(searchCarContext.mainCarContext)
-
             screenManager.push(CarRoutePreviewScreen(routePreviewCarContext, placeRecord, routes))
         }
 
@@ -134,11 +136,4 @@ class SearchScreen(
     private fun buildErrorItemList(@StringRes stringRes: Int) = ItemList.Builder()
         .setNoItemsMessage(carContext.getString(stringRes))
         .build()
-
-    companion object {
-        // TODO turn this into something typesafe
-        fun parseResult(results: Any?): Any? {
-            return results
-        }
-    }
 }

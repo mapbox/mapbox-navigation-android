@@ -12,8 +12,6 @@ import androidx.car.app.model.Template
 import androidx.car.app.navigation.model.RoutePreviewNavigationTemplate
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.mapbox.androidauto.ActiveGuidanceState
-import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
@@ -34,6 +32,7 @@ import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 
 /**
@@ -41,6 +40,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
  * you select alternatives. From here, you can start turn-by-turn navigation.
  */
 @MapboxExperimental
+@ExperimentalPreviewMapboxNavigationAPI
 class CarRoutePreviewScreen(
     private val routePreviewCarContext: RoutePreviewCarContext,
     private val placeRecord: PlaceRecord,
@@ -48,23 +48,21 @@ class CarRoutePreviewScreen(
     private val placesLayerUtil: PlacesListOnMapLayerUtil = PlacesListOnMapLayerUtil(),
 ) : Screen(routePreviewCarContext.carContext) {
 
-    private val routesProvider = PreviewRoutesProvider(navigationRoutes)
-    var selectedIndex = 0
-    val carRouteLine = CarRouteLine(routePreviewCarContext.mainCarContext, routesProvider)
-    val carLocationRenderer = CarLocationRenderer(routePreviewCarContext.mainCarContext)
-    val carSpeedLimitRenderer = CarSpeedLimitRenderer(routePreviewCarContext.mainCarContext)
-    val carNavigationCamera = CarNavigationCamera(
+    private val mainCarContext = routePreviewCarContext.mainCarContext
+    private val carRouteLineContract = CarRoutePreviewContract(navigationRoutes)
+    private val carRouteLine = CarRouteLine(carRouteLineContract)
+    private val carLocationRenderer = CarLocationRenderer(mainCarContext)
+    private val carSpeedLimitRenderer = CarSpeedLimitRenderer(mainCarContext)
+    private val carNavigationCamera = CarNavigationCamera(
         routePreviewCarContext.mapboxNavigation,
         CarCameraMode.OVERVIEW,
         CarCameraMode.FOLLOWING,
-        routesProvider,
     )
 
     private val backPressCallback = object : OnBackPressedCallback(true) {
 
         override fun handleOnBackPressed() {
             logAndroidAuto("CarRoutePreviewScreen OnBackPressedCallback")
-            routePreviewCarContext.mapboxNavigation.setNavigationRoutes(emptyList())
             screenManager.pop()
         }
     }
@@ -103,6 +101,7 @@ class CarRoutePreviewScreen(
     init {
         logAndroidAuto("CarRoutePreviewScreen constructor")
         lifecycle.muteAudioGuidance()
+
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onResume(owner: LifecycleOwner) {
                 logAndroidAuto("CarRoutePreviewScreen onResume")
@@ -148,17 +147,10 @@ class CarRoutePreviewScreen(
             )
         }
         if (navigationRoutes.isNotEmpty()) {
-            listBuilder.setSelectedIndex(selectedIndex)
+            listBuilder.setSelectedIndex(carRouteLineContract.selectedIndex)
             listBuilder.setOnSelectedListener { index ->
-                val newRouteOrder = navigationRoutes.toMutableList()
-                selectedIndex = index
-                if (index > 0) {
-                    val swap = newRouteOrder[0]
-                    newRouteOrder[0] = newRouteOrder[index]
-                    newRouteOrder[index] = swap
-                    routesProvider.routes = newRouteOrder
-                } else {
-                    routesProvider.routes = navigationRoutes
+                if (carRouteLineContract.selectIndex(index)) {
+                    invalidate()
                 }
             }
         }
@@ -182,10 +174,7 @@ class CarRoutePreviewScreen(
                 Action.Builder()
                     .setTitle(carContext.getString(R.string.car_action_preview_navigate_button))
                     .setOnClickListener {
-                        routePreviewCarContext.mapboxNavigation.setNavigationRoutes(
-                            routesProvider.routes
-                        )
-                        MapboxCarApp.updateCarAppState(ActiveGuidanceState)
+                        carRouteLineContract.startActiveNavigation()
                     }
                     .build(),
             )

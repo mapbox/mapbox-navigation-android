@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Refactor `CarRouteLine` to use the `RouteLineComponent` and `RouteArrowComponent`. [#5912](https://github.com/mapbox/mapbox-navigation-android/pull/5912)
 
 ## androidauto-v0.6.0 - Jul 29, 2022
 ### Changelog
