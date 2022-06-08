@@ -157,7 +157,14 @@ class MapboxCameraAnimationsActivity :
             val transitionOptions: (ValueAnimator.() -> Unit) = {
                 duration = if (locationMatcherResult.isTeleport) 0 else 1000
             }
-
+            val location = locationMatcherResult.enhancedLocation
+            val keyPoints = locationMatcherResult.keyPoints
+            logD("", "MapboxCameraAnimationsActivity")
+            logD("--------------------------------", "MapboxCameraAnimationsActivity")
+            logD(
+                "changePosition keyPoints(${keyPoints.size}) = ${keyPoints.asStr()}; location = ${location.asStr()};",
+                "MapboxCameraAnimationsActivity"
+            )
             navigationLocationProvider.changePosition(
                 locationMatcherResult.enhancedLocation,
                 locationMatcherResult.keyPoints,
@@ -677,9 +684,11 @@ class MapboxCameraAnimationsActivity :
         var c = 0
 
         override fun onRecordingSaved(recording: AnimRecorder.Recording) {
-            logD("recording saved ${recording.frames.size}", "AnimRecorder")
-            val color = if (c++ % 2 == 0) Color.RED else Color.BLUE
-            renderRecording(recording, color)
+            if (0 < recording.frames.size) {
+                logD("recording $c: saved ${recording.frames.size} frames", "AnimRecorder")
+                val color = if (c++ % 2 == 0) Color.RED else Color.BLUE
+                renderRecording(recording, color)
+            }
         }
     }
 

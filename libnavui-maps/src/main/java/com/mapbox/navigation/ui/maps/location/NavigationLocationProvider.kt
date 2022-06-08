@@ -126,6 +126,12 @@ class NavigationLocationProvider : LocationProvider {
         latLngTransitionOptions: (ValueAnimator.() -> Unit)? = null,
         bearingTransitionOptions: (ValueAnimator.() -> Unit)? = null
     ) {
+        listener?.onChangePosition(
+            location,
+            keyPoints,
+            latLngTransitionOptions,
+            bearingTransitionOptions
+        )
         locationConsumers.forEach {
             it.notifyLocationUpdates(
                 location,
@@ -136,6 +142,17 @@ class NavigationLocationProvider : LocationProvider {
         }
         lastLocation = location
         lastKeyPoints = keyPoints
+    }
+
+    var listener: Listener? = null
+
+    interface Listener {
+        fun onChangePosition(
+            location: Location,
+            keyPoints: List<Location>,
+            latLngTransitionOptions: (ValueAnimator.() -> Unit)?,
+            bearingTransitionOptions: (ValueAnimator.() -> Unit)?
+        )
     }
 
     private fun LocationConsumer.notifyLocationUpdates(
