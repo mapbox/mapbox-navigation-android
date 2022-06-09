@@ -15,13 +15,13 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin.Offboard
 import com.mapbox.navigation.base.route.RouterOrigin.Onboard
-import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.mapToRoutingMode
 import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
 import com.mapbox.navigation.route.internal.util.TestRouteFixtures
 import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteRefreshOptions
@@ -385,19 +385,11 @@ class RouterWrapperTests {
     @Test
     fun `route refresh set right params`() {
         mockkStatic("com.mapbox.navigation.base.route.NavigationRouteEx") {
-            val route: DirectionsRoute = mockk(relaxed = true) {
-                every { requestUuid() } returns UUID
-                every { routeIndex() } returns "1"
-                every { routeOptions() } returns routerOptions
-                every { distance() } returns 0.0
-                every { duration() } returns 0.0
-            }
-            every { route.toNavigationRoute() } returns mockk {
-                every { directionsResponse.uuid() } returns UUID
-                every { routeOptions } returns routerOptions
-                every { directionsRoute } returns route
-                every { routeIndex } returns 1
-            }
+            val route: DirectionsRoute = createDirectionsRoute(
+                routeOptions = routerOptions,
+                requestUuid = UUID,
+                routeIndex = "1"
+            )
 
             routerWrapper.getRouteRefresh(route, 0, routerRefreshCallback)
 
