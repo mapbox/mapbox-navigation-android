@@ -24,4 +24,6 @@ include ':examples',
         ':libnavui-dropin',
         ':libnavui-androidauto',
         ':libnavui-app',
-        ':qa-test-app'
+        ':qa-test-app',
+        ':libtesting-thirdparty',
+        ':libtesting-navigation-base'

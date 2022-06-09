@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.infra.factories
+package com.mapbox.navigation.testing.factories
 
 import android.location.Location
 import io.mockk.every
