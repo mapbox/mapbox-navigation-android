@@ -10,10 +10,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_NEW
 import com.mapbox.navigation.core.infra.TestLocationEngine
-import com.mapbox.navigation.testing.factories.createLocation
 import com.mapbox.navigation.core.infra.factories.createNavigationRoute
-import com.mapbox.navigation.testing.factories.createNavigationStatus
-import com.mapbox.navigation.testing.factories.createVoiceInstruction
 import com.mapbox.navigation.core.infra.recorders.RouteProgressObserverRecorder
 import com.mapbox.navigation.core.infra.recorders.VoiceInstructionsObserverRecorder
 import com.mapbox.navigation.core.trip.service.TripService
@@ -22,6 +19,9 @@ import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateU
 import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.LONGITUDE_FOR_VOICE_INSTRUCTION_NULL
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.factories.createLocation
+import com.mapbox.navigation.testing.factories.createNavigationStatus
+import com.mapbox.navigation.testing.factories.createVoiceInstruction
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.NavigationStatus

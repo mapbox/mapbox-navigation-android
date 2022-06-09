@@ -2,10 +2,10 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.infra.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createIncident
 import com.mapbox.navigation.testing.factories.createMaxSpeed
-import com.mapbox.navigation.core.infra.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteLeg
 import com.mapbox.navigation.testing.factories.createRouteLegAnnotation
 import org.junit.Assert.assertEquals

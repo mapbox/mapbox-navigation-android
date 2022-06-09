@@ -9,14 +9,14 @@ import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterFactory
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RouteRefresh
+import com.mapbox.navigation.core.infra.factories.createNavigationRoute
+import com.mapbox.navigation.testing.add
 import com.mapbox.navigation.testing.factories.createCoordinatesList
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createIncident
-import com.mapbox.navigation.core.infra.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteLeg
 import com.mapbox.navigation.testing.factories.createRouteLegAnnotation
 import com.mapbox.navigation.testing.factories.createRouteOptions
-import com.mapbox.navigation.testing.add
 import com.mapbox.navigation.testing.utcToLocalTime
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import com.mapbox.navigation.utils.internal.LoggerProvider
