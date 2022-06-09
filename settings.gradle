@@ -26,3 +26,4 @@ include ':examples',
         ':libnavui-app',
         ':qa-test-app'
 include ':libtesting-thirdparty'
+include ':libtesting-navigation-base'

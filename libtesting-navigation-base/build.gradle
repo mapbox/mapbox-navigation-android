@@ -18,7 +18,6 @@ android {
 }
 
 dependencies {
-    api dependenciesList.mapboxNavigator
-    api dependenciesList.mapboxSdkDirectionsModels
-    implementation dependenciesList.mockk
+    api project(':libtesting-thirdparty')
+    implementation(project(':libnavigation-base'))
 }
