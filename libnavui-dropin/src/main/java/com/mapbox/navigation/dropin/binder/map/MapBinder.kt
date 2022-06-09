@@ -17,11 +17,12 @@ import com.mapbox.navigation.dropin.component.marker.FreeDriveLongPressMapCompon
 import com.mapbox.navigation.dropin.component.marker.GeocodingComponent
 import com.mapbox.navigation.dropin.component.marker.MapMarkersComponent
 import com.mapbox.navigation.dropin.component.marker.RoutePreviewLongPressMapComponent
-import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
-import com.mapbox.navigation.dropin.model.Store
+import com.mapbox.navigation.ui.app.internal.SharedApp
+import com.mapbox.navigation.ui.app.internal.Store
+import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.maps.internal.ui.RouteArrowComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponent
@@ -41,7 +42,7 @@ internal class MapBinder(
         mapView.scalebar.enabled = false
     }
 
-    private val store = context.viewModel.store
+    private val store = context.store
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val navigationState = store.select { it.navigation }
@@ -49,7 +50,7 @@ internal class MapBinder(
             CameraLayoutObserver(store, mapView, binding),
             LocationComponent(
                 mapView,
-                context.viewModel.locationViewModel,
+                SharedApp.locationStateController,
             ),
             reloadOnChange(
                 context.mapStyleLoader.loadedMapStyle,

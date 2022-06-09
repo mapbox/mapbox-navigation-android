@@ -21,8 +21,7 @@ import com.mapbox.navigation.core.internal.extensions.attachCreated
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.dropin.component.backpress.OnKeyListenerComponent
-import com.mapbox.navigation.dropin.component.tripsession.LocationPermissionComponent
-import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction
+import com.mapbox.navigation.dropin.component.location.LocationPermissionComponent
 import com.mapbox.navigation.dropin.coordinator.ActionButtonsCoordinator
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
 import com.mapbox.navigation.dropin.coordinator.ManeuverCoordinator
@@ -36,7 +35,6 @@ import com.mapbox.navigation.dropin.internal.extensions.toViewModelStoreOwner
 import com.mapbox.navigation.ui.app.internal.SharedApp
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * An Android [View] that creates the drop-in UI.
@@ -70,7 +68,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
  * used by the [NavigationView] shouldn't outlive its hosting [Fragment] (in anticipation of potential [Fragment] recreation).
  */
 @ExperimentalPreviewMapboxNavigationAPI
-@OptIn(ExperimentalCoroutinesApi::class)
 class NavigationView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -116,9 +113,9 @@ class NavigationView @JvmOverloads constructor(
         MapboxNavigationApp.attach(this)
 
         attachCreated(
-            LocationPermissionComponent(context.toComponentActivityRef(), viewModel.store),
+            LocationPermissionComponent(context.toComponentActivityRef(), navigationContext.store),
             MapLayoutCoordinator(navigationContext, binding),
-            OnKeyListenerComponent(viewModel.store, this),
+            OnKeyListenerComponent(navigationContext.store, this),
             ManeuverCoordinator(navigationContext, binding.guidanceLayout),
             InfoPanelCoordinator(
                 navigationContext,
@@ -132,22 +129,14 @@ class NavigationView @JvmOverloads constructor(
     }
 
     /**
-     * Enable/Disable Trip Session Replay
-     */
-    var isReplayEnabled: Boolean
-        get() = viewModel.store.state.value.tripSession.isReplayEnabled
-        set(value) {
-            if (value) {
-                viewModel.store.dispatch(TripSessionStarterAction.EnableReplayTripSession)
-            } else {
-                viewModel.store.dispatch(TripSessionStarterAction.EnableTripSession)
-            }
-        }
-
-    /**
      * Provides access to [ViewLifecycleRegistry]
      */
     override fun getLifecycle(): Lifecycle = viewLifecycleRegistry
+
+    /**
+     * Api for changing navigation state.
+     */
+    val api: NavigationViewApi = NavigationViewApi(navigationContext.store)
 
     /**
      * Customize the views by implementing your own [UIBinder] components.

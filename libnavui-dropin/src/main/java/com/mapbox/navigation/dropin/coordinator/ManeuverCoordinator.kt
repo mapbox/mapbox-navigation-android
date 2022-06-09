@@ -6,7 +6,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.binder.EmptyBinder
 import com.mapbox.navigation.dropin.component.maneuver.ManeuverViewBinder
-import com.mapbox.navigation.dropin.component.navigation.NavigationState
+import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.base.lifecycle.UICoordinator
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -23,7 +23,7 @@ internal class ManeuverCoordinator(
     private val context: NavigationViewContext,
     guidanceLayout: ViewGroup
 ) : UICoordinator<ViewGroup>(guidanceLayout) {
-    private val store = context.viewModel.store
+    private val store = context.store
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {

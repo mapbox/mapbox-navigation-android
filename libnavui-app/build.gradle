@@ -36,6 +36,7 @@ android {
 dependencies {
     api project(":libnavui-base")
     api project(":libnavui-voice")
+    api project(":libnavui-maps")
 
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.androidXAnnotation

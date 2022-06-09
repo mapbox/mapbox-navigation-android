@@ -6,7 +6,7 @@ import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.model.Store
+import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 
 /**

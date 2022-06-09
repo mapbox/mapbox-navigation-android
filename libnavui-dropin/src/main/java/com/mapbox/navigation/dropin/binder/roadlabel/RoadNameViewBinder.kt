@@ -34,7 +34,7 @@ internal class RoadNameViewBinder(
             context.styles.roadNameBackground
         ) { style, appearance, background ->
             if (style != null) {
-                val store = context.viewModel.store
+                val store = context.store
                 RoadNameLabelComponent(store, binding.roadNameView, style, appearance, background)
             } else {
                 null

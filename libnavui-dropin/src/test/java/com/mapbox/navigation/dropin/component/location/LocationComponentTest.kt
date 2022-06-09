@@ -7,8 +7,8 @@ import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.controller.LocationStateController
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.app.internal.controller.LocationStateController
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery

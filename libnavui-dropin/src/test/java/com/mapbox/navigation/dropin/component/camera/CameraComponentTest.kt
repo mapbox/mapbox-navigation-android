@@ -17,11 +17,13 @@ import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.dropin.util.TestingUtil.makeLocationMatcherResult
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.app.internal.State
+import com.mapbox.navigation.ui.app.internal.camera.CameraAction
+import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
+import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
@@ -102,9 +104,9 @@ class CameraComponentTest {
         )
         testStore.setState(
             testStore.state.value.copy(
-                camera = CameraState(
-                    mapCameraState = cameraState
-                )
+                camera = mockk() {
+                    every { mapCameraState } returns cameraState
+                }
             )
         )
 
@@ -203,7 +205,9 @@ class CameraComponentTest {
         coroutineRule.runBlockingTest {
             testStore.setState(
                 State(
-                    camera = CameraState(cameraMode = TargetCameraMode.Following),
+                    camera = mockk(relaxed = true) {
+                        every { cameraMode } returns TargetCameraMode.Following
+                    },
                     location = locMatcherResult,
                     navigation = NavigationState.FreeDrive
                 )
@@ -212,7 +216,9 @@ class CameraComponentTest {
 
             testStore.setState(
                 testStore.state.value.copy(
-                    camera = CameraState(cameraMode = TargetCameraMode.Idle)
+                    camera = mockk {
+                        every { cameraMode } returns TargetCameraMode.Idle
+                    },
                 )
             )
 
@@ -226,7 +232,9 @@ class CameraComponentTest {
         coroutineRule.runBlockingTest {
             testStore.setState(
                 State(
-                    camera = CameraState(cameraMode = TargetCameraMode.Idle),
+                    camera = mockk(relaxed = true) {
+                        every { cameraMode } returns TargetCameraMode.Idle
+                    },
                     location = locMatcherResult,
                     navigation = NavigationState.FreeDrive
                 )
@@ -235,7 +243,9 @@ class CameraComponentTest {
 
             testStore.setState(
                 testStore.state.value.copy(
-                    camera = CameraState(cameraMode = TargetCameraMode.Following)
+                    camera = mockk {
+                        every { cameraMode } returns TargetCameraMode.Following
+                    },
                 )
             )
 

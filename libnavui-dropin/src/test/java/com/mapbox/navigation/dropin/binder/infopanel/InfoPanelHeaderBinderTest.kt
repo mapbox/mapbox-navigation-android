@@ -39,6 +39,7 @@ internal class InfoPanelHeaderBinderTest {
         ctx = ApplicationProvider.getApplicationContext()
         sut = InfoPanelHeaderBinder(mockNavContext)
 
+        every { mockNavContext.store } returns mockk()
         every { mockNavContext.uiBinders } returns ViewBinder().apply {
             applyCustomization(
                 ViewBinderCustomization().apply {

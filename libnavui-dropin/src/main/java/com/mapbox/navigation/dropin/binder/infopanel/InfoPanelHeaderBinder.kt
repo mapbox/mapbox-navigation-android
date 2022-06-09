@@ -28,7 +28,6 @@ internal class InfoPanelHeaderBinder(
         )
         TransitionManager.go(scene)
 
-        val store = context.viewModel.store
         val binding = MapboxInfoPanelHeaderLayoutBinding.bind(viewGroup)
 
         return navigationListOf(
@@ -38,7 +37,7 @@ internal class InfoPanelHeaderBinder(
                 context.styles.startNavigationButtonStyle
             ) { previewStyle, endNavStyle, startNavStyle ->
                 InfoPanelHeaderComponent(
-                    store = store,
+                    store = context.store,
                     binding = binding,
                     routePreviewStyle = previewStyle,
                     endNavigationStyle = endNavStyle,

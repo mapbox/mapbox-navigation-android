@@ -47,15 +47,8 @@ object MapboxCarApp {
      *
      * @param application used to detect when activities are foregrounded
      */
-    fun setup(
-        application: Application,
-        audioGuidance: MapboxAudioGuidance? = null,
-        carAppLocation: CarAppLocation? = null
-    ) {
-        SharedApp.setup(application, audioGuidance)
-
-        MapboxNavigationApp.registerObserver(
-            carAppLocation ?: CarAppLocationImpl()
-        )
+    fun setup(application: Application) {
+        SharedApp.setup(application)
+        MapboxNavigationApp.registerObserver(CarAppLocationImpl())
     }
 }

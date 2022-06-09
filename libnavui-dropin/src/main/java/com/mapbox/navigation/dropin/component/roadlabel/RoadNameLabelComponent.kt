@@ -11,7 +11,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
-import com.mapbox.navigation.dropin.model.Store
+import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.internal.extensions.getStyleId
 import com.mapbox.navigation.ui.maps.roadname.view.MapboxRoadNameView

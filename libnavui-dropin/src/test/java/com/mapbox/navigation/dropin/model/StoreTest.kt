@@ -1,11 +1,15 @@
 package com.mapbox.navigation.dropin.model
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
-import com.mapbox.navigation.dropin.component.routefetch.RoutesState
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.app.internal.Reducer
+import com.mapbox.navigation.ui.app.internal.State
+import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
+import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutesState
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
@@ -38,13 +42,16 @@ internal class StoreTest {
         )
         sut.register(
             Reducer { state, _ ->
-                state.copy(routes = RoutesState.Fetching(0))
+                state.copy(
+                    routes = mockk<RoutesState.Fetching> { every { requestId } returns 0 }
+                )
             }
         )
 
         sut.dispatch(NavigationStateAction.Update(NavigationState.ActiveNavigation))
 
-        assertEquals(RoutesState.Fetching(0), sut.state.value.routes)
+        val routesState: RoutesState.Fetching = sut.state.value.routes as RoutesState.Fetching
+        assertEquals(0, routesState.requestId)
         assertEquals(NavigationState.ActiveNavigation, sut.state.value.navigation)
     }
 

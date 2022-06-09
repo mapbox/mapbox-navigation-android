@@ -45,13 +45,12 @@ android {
 dependencies {
     api project(":libnavui-base")
     api project(":libnavui-maneuver")
-    api project(":libnavui-maps")
     api project(":libnavui-speedlimit")
     api project(":libnavui-tripprogress")
     api project(":libnavui-voice")
+    implementation project(":libnavui-app")
     implementation project(":libnavui-resources")
     implementation project(":libnavui-util")
-    implementation project(":libnavui-app")
 
     implementation dependenciesList.materialDesign
     implementation dependenciesList.androidXCardView
