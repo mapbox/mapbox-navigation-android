@@ -1258,11 +1258,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     /**
      * Send user feedback about an issue or problem with the Navigation SDK.
      *
-     * @param feedbackType one of [FeedbackEvent.Type]
+     * @param feedbackType one of [FeedbackEvent.Type] or a custom one
      * @param description description message
      * @param feedbackSource one of [FeedbackEvent.Source]
      * @param screenshot encoded screenshot
-     * @param feedbackSubType array of [FeedbackEvent.SubType] (optional)
+     * @param feedbackSubType optional array of [FeedbackEvent.SubType] and/or custom subtypes
      *
      * @see [FeedbackHelper.getFeedbackSubTypes]
      * to retrieve possible feedback subtypes for a given [feedbackType]
@@ -1271,11 +1271,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     @JvmOverloads
     fun postUserFeedback(
-        @FeedbackEvent.Type feedbackType: String,
+        feedbackType: String,
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String,
-        feedbackSubType: Array<@FeedbackEvent.SubType String>? = emptyArray()
+        feedbackSubType: Array<String>? = emptyArray(),
     ) {
         runInTelemetryContext { telemetry ->
             telemetry.postUserFeedback(
@@ -1296,11 +1296,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * a feedback is attached to passed location and time in the past when [FeedbackMetadata] was
      * generated (see [provideFeedbackMetadataWrapper]).
      *
-     * @param feedbackType one of [FeedbackEvent.Type]
+     * @param feedbackType one of [FeedbackEvent.Type] or a custom one
      * @param description description message
      * @param feedbackSource one of [FeedbackEvent.Source]
      * @param screenshot encoded screenshot
-     * @param feedbackSubType array of [FeedbackEvent.SubType] (optional)
+     * @param feedbackSubType optional array of [FeedbackEvent.SubType] and/or custom subtypes
      * @param feedbackMetadata use it to attach feedback to a specific passed location.
      * See [FeedbackMetadata] and [FeedbackMetadataWrapper]
      *
@@ -1312,11 +1312,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     @ExperimentalPreviewMapboxNavigationAPI
     @JvmOverloads
     fun postUserFeedback(
-        @FeedbackEvent.Type feedbackType: String,
+        feedbackType: String,
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String,
-        feedbackSubType: Array<@FeedbackEvent.SubType String>? = emptyArray(),
+        feedbackSubType: Array<String>? = emptyArray(),
         feedbackMetadata: FeedbackMetadata,
     ) {
         runInTelemetryContext { telemetry ->
