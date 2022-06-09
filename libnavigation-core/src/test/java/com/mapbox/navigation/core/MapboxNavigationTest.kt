@@ -111,7 +111,7 @@ import java.util.Locale
 class MapboxNavigationTest {
 
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
     private val accessToken = "pk.1234"
     private val directionsSession: DirectionsSession = mockk(relaxUnitFun = true)
@@ -528,7 +528,9 @@ class MapboxNavigationTest {
         mapboxNavigation.postUserFeedback(mockk(), mockk(), mockk(), mockk(), mockk(), mockk())
 
         verify(exactly = 0) {
-            MapboxNavigationTelemetry.postUserFeedback(any(), any(), any(), any(), any(), any())
+            MapboxNavigationTelemetry.postUserFeedback(
+                any(), any(), any(), any(), any(), any(), any(),
+            )
         }
     }
 
@@ -1454,7 +1456,9 @@ class MapboxNavigationTest {
         every { MapboxNavigationTelemetry.initialize(any(), any(), any(), any()) } just runs
         every { MapboxNavigationTelemetry.destroy(any()) } just runs
         every {
-            MapboxNavigationTelemetry.postUserFeedback(any(), any(), any(), any(), any(), any())
+            MapboxNavigationTelemetry.postUserFeedback(
+                any(), any(), any(), any(), any(), any(), any(),
+            )
         } just runs
     }
 

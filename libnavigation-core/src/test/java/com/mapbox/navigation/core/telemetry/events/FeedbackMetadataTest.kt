@@ -5,7 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonParser
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.core.internal.utils.toTelemetryLocations
+import com.mapbox.navigation.core.internal.telemetry.toTelemetryLocations
 import com.mapbox.navigation.testing.FileUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull

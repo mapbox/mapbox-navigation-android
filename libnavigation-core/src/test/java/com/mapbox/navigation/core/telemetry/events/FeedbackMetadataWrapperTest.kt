@@ -3,7 +3,7 @@ package com.mapbox.navigation.core.telemetry.events
 import android.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.core.internal.utils.toTelemetryLocations
+import com.mapbox.navigation.core.internal.telemetry.toTelemetryLocations
 import com.mapbox.navigation.core.telemetry.LocationsCollector
 import io.mockk.every
 import io.mockk.just

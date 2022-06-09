@@ -6,6 +6,7 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.TelemetryUtils.generateCreateDateFormatted
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsReporter
@@ -20,8 +21,10 @@ import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
-import com.mapbox.navigation.core.internal.utils.toTelemetryLocation
-import com.mapbox.navigation.core.internal.utils.toTelemetryLocations
+import com.mapbox.navigation.core.internal.telemetry.UserFeedback
+import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
+import com.mapbox.navigation.core.internal.telemetry.toTelemetryLocation
+import com.mapbox.navigation.core.internal.telemetry.toTelemetryLocations
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
@@ -54,7 +57,7 @@ import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.toPoint
 import java.util.Date
-import kotlin.collections.LinkedHashMap
+import java.util.concurrent.CopyOnWriteArraySet
 
 /**
  * Session metadata when telemetry is on Pause.
@@ -326,6 +329,8 @@ internal object MapboxNavigationTelemetry {
         }
     }
 
+    private val userFeedbackCallbacks = CopyOnWriteArraySet<UserFeedbackCallback>()
+
     /**
      * This method must be called before using the Telemetry object
      */
@@ -361,6 +366,7 @@ internal object MapboxNavigationTelemetry {
             unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
             unregisterArrivalObserver(arrivalObserver)
         }
+        userFeedbackCallbacks.clear()
     }
 
     private fun telemetryStart() {
@@ -408,6 +414,14 @@ internal object MapboxNavigationTelemetry {
         appInstance = app
     }
 
+    fun registerUserFeedbackCallback(userFeedbackCallback: UserFeedbackCallback) {
+        userFeedbackCallbacks.add(userFeedbackCallback)
+    }
+
+    fun unregisterUserFeedbackCallback(userFeedbackCallback: UserFeedbackCallback) {
+        userFeedbackCallbacks.remove(userFeedbackCallback)
+    }
+
     @ExperimentalPreviewMapboxNavigationAPI
     fun provideFeedbackMetadataWrapper(): FeedbackMetadataWrapper {
         (telemetryState as? NavTelemetryState.Running)?.sessionMetadata?.let { sessionMetadata ->
@@ -440,7 +454,8 @@ internal object MapboxNavigationTelemetry {
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?,
         feedbackSubType: Array<String>?,
-        feedbackMetadata: FeedbackMetadata? = null,
+        feedbackMetadata: FeedbackMetadata?,
+        userFeedbackCallback: UserFeedbackCallback?,
     ) {
         createUserFeedback(
             feedbackType,
@@ -449,6 +464,7 @@ internal object MapboxNavigationTelemetry {
             screenshot,
             feedbackSubType,
             feedbackMetadata,
+            userFeedbackCallback,
         ) {
             sendMetricEvent(it)
         }
@@ -462,8 +478,19 @@ internal object MapboxNavigationTelemetry {
         screenshot: String?,
         feedbackSubType: Array<String>?,
         feedbackMetadata: FeedbackMetadata?,
+        localUserFeedbackCallback: UserFeedbackCallback?,
         onEventUpdated: ((NavigationFeedbackEvent) -> Unit)?,
     ) {
+        fun notifyUserFeedbackCallbacks(feedbackEvent: NavigationFeedbackEvent) {
+            val userFeedback = UserFeedback(
+                feedbackEvent.feedbackId, feedbackType, feedbackSource, description, screenshot,
+                feedbackSubType, Point.fromLngLat(feedbackEvent.lng, feedbackEvent.lat),
+            )
+            localUserFeedbackCallback?.onNewUserFeedback(userFeedback)
+            for (callback in userFeedbackCallbacks) {
+                callback.onNewUserFeedback(userFeedback)
+            }
+        }
         if (feedbackMetadata == null) {
             ifTelemetryRunning(
                 "User Feedback event creation failed: $LOG_TELEMETRY_IS_NOT_RUNNING"
@@ -479,6 +506,7 @@ internal object MapboxNavigationTelemetry {
                     this.feedbackSubType = feedbackSubType
                     populateWithLocalVars(it)
                 }
+                notifyUserFeedbackCallbacks(feedbackEvent)
 
                 log("collect post event locations for user feedback")
                 locationsCollector.collectLocations { preEventBuffer, postEventBuffer ->
@@ -523,6 +551,7 @@ internal object MapboxNavigationTelemetry {
                     feedbackMetadata.appMetadata,
                 )
             }
+            notifyUserFeedbackCallbacks(feedbackEvent)
             onEventUpdated?.invoke(feedbackEvent)
         }
     }

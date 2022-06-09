@@ -51,6 +51,7 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.ReachabilityService
+import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.utils.InternalUtils
 import com.mapbox.navigation.core.internal.utils.ModuleParams
 import com.mapbox.navigation.core.internal.utils.isInternalImplementation
@@ -1269,6 +1270,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @see [ViewUtils.capture] to capture screenshots
      * @see [FeedbackHelper.encodeScreenshot] to encode screenshots
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     @JvmOverloads
     fun postUserFeedback(
         feedbackType: String,
@@ -1277,16 +1279,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         screenshot: String,
         feedbackSubType: Array<String>? = emptyArray(),
     ) {
-        runInTelemetryContext { telemetry ->
-            telemetry.postUserFeedback(
-                feedbackType,
-                description,
-                feedbackSource,
-                screenshot,
-                feedbackSubType,
-                null,
-            )
-        }
+        postUserFeedback(
+            feedbackType, description, feedbackSource, screenshot,
+            feedbackSubType, feedbackMetadata = null, userFeedbackCallback = null,
+        )
     }
 
     /**
@@ -1319,6 +1315,22 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         feedbackSubType: Array<String>? = emptyArray(),
         feedbackMetadata: FeedbackMetadata,
     ) {
+        postUserFeedback(
+            feedbackType, description, feedbackSource, screenshot,
+            feedbackSubType, feedbackMetadata, userFeedbackCallback = null,
+        )
+    }
+
+    @ExperimentalPreviewMapboxNavigationAPI
+    internal fun postUserFeedback(
+        feedbackType: String,
+        description: String,
+        @FeedbackEvent.Source feedbackSource: String,
+        screenshot: String,
+        feedbackSubType: Array<String>?,
+        feedbackMetadata: FeedbackMetadata?,
+        userFeedbackCallback: UserFeedbackCallback?,
+    ) {
         runInTelemetryContext { telemetry ->
             telemetry.postUserFeedback(
                 feedbackType,
@@ -1327,6 +1339,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 screenshot,
                 feedbackSubType,
                 feedbackMetadata,
+                userFeedbackCallback,
             )
         }
     }
