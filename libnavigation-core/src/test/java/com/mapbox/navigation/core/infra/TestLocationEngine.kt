@@ -7,7 +7,7 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
-import com.mapbox.navigation.core.infra.factories.createLocation
+import com.mapbox.navigation.testing.factories.createLocation
 
 class TestLocationEngine private constructor() : LocationEngine {
 
