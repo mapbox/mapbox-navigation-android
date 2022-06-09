@@ -6,9 +6,11 @@ import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -38,6 +40,19 @@ fun MapboxNavigation.routeProgressUpdates(): Flow<RouteProgress> {
         navigation.registerRouteProgressObserver(observer)
         awaitClose {
             navigation.unregisterRouteProgressObserver(observer)
+        }
+    }
+}
+
+fun MapboxNavigation.roadObjectsOnRoute(): Flow<List<UpcomingRoadObject>> {
+    val navigation = this
+    return callbackFlow {
+        val observer = RoadObjectsOnRouteObserver {
+            trySend(it)
+        }
+        navigation.registerRoadObjectsOnRouteObserver(observer)
+        awaitClose {
+            navigation.unregisterRoadObjectsOnRouteObserver(observer)
         }
     }
 }

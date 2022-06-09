@@ -12,6 +12,7 @@ import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -38,57 +39,64 @@ internal class RouteRefreshController(
 
     suspend fun refresh(routes: List<NavigationRoute>): List<NavigationRoute> {
         return if (routes.isNotEmpty()) {
-            val routeToRefresh = routes.first()
-            when (val validationResult = validateRoute(routeToRefresh)) {
-                RouteValidationResult.Valid -> {
-                    val result = routes.toMutableList()
-                    result[0] = tryRefreshingUntilRouteChanges(routeToRefresh)
-                    result
-                }
-                is RouteValidationResult.Invalid -> waitForever(validationResult.reason)
+            require(
+                routes.none { it.directionsRoute.legs().isNullOrEmpty() }
+            ) { "Can't refresh a route without legs" }
+
+            val routesValidationResults = routes.map { validateRoute(it) }
+            if (routesValidationResults.any { it is RouteValidationResult.Valid }) {
+                tryRefreshingRoutesUntilRouteChanges(routes)
+            } else {
+                val message = joinValidationErrorMessages(routesValidationResults, routes)
+                waitForever("No routes which could be refreshed. $message")
             }
         } else waitForever("routes are empty")
     }
 
-    private suspend fun tryRefreshingUntilRouteChanges(
-        initialRoute: NavigationRoute
-    ): NavigationRoute {
+    private fun joinValidationErrorMessages(
+        routeValidation: List<RouteValidationResult>,
+        routes: List<NavigationRoute>
+    ): String = routeValidation.filterIsInstance<RouteValidationResult.Invalid>()
+        .mapIndexed { index, validation -> "${routes[index].id} ${validation.reason}" }
+        .joinToString(separator = ". ")
+
+    private suspend fun tryRefreshingRoutesUntilRouteChanges(
+        initialRoutes: List<NavigationRoute>
+    ): List<NavigationRoute> {
         while (true) {
-            val refreshed = refreshRoute(initialRoute)
-            if (refreshed != initialRoute) {
+            val refreshed = refreshRoutesWithRetry(initialRoutes)
+            if (refreshed != initialRoutes) {
                 return refreshed
             }
         }
     }
 
-    private suspend fun refreshRoute(
-        route: NavigationRoute
-    ): NavigationRoute = coroutineScope {
-        val routeLegs = route.directionsRoute.legs()
-        require(routeLegs != null) { "Can't refresh route without legs" }
-
+    private suspend fun refreshRoutesWithRetry(
+        routes: List<NavigationRoute>
+    ): List<NavigationRoute> = coroutineScope {
         var timeUntilNextAttempt = async { delay(routeRefreshOptions.intervalMillis) }
         try {
             repeat(FAILED_ATTEMPTS_TO_INVALIDATE_EXPIRING_DATA) {
                 timeUntilNextAttempt.await()
                 timeUntilNextAttempt = async { delay(routeRefreshOptions.intervalMillis) }
-                val refreshedRoute = withTimeoutOrNull(routeRefreshOptions.intervalMillis) {
-                    refreshRouteOrNull(route)
-                }
-                if (refreshedRoute != null) {
-                    return@coroutineScope refreshedRoute
+                val refreshedRoutes = refreshRoutesOrNull(routes)
+                if (refreshedRoutes.any { it != null }) {
+                    return@coroutineScope refreshedRoutes.mapIndexed { index, navigationRoute ->
+                        navigationRoute ?: routes[index]
+                    }
                 }
             }
         } finally {
             timeUntilNextAttempt.cancel() // otherwise current coroutine will wait for its child
         }
-        removeExpiringDataFromRoute(route, routeLegs)
+        routes.map { removeExpiringDataFromRoute(it) }
     }
 
     private fun removeExpiringDataFromRoute(
-        route: NavigationRoute,
-        routeLegs: List<RouteLeg>
+        route: NavigationRoute
     ): NavigationRoute {
+        val routeLegs = route.directionsRoute.legs()
+        require(routeLegs != null) { "Can't refresh route without legs" }
         val currentLegIndex = currentLegIndexProvider()
         return route.updateDirectionsRouteOnly {
             toBuilder().legs(
@@ -125,6 +133,11 @@ internal class RouteRefreshController(
     private suspend fun refreshRouteOrNull(
         route: NavigationRoute
     ): NavigationRoute? {
+        val validationResult = validateRoute(route)
+        if (validationResult is RouteValidationResult.Invalid) {
+            logI("route ${route.id} can't be refreshed because ${validationResult.reason}")
+            return null
+        }
         val legIndex = currentLegIndexProvider()
         return when (val result = requestRouteRefresh(route, legIndex)) {
             is RouteRefreshResult.Fail -> {
@@ -136,7 +149,7 @@ internal class RouteRefreshController(
                 null
             }
             is RouteRefreshResult.Success -> {
-                logI("Received refreshed route", LOG_CATEGORY)
+                logI("Received refreshed route ${result.route.id}", LOG_CATEGORY)
                 logRoutesDiff(
                     newRoute = result.route,
                     oldRoute = route,
@@ -144,6 +157,20 @@ internal class RouteRefreshController(
                 )
                 result.route
             }
+        }
+    }
+
+    private suspend fun refreshRoutesOrNull(
+        routes: List<NavigationRoute>
+    ): List<NavigationRoute?> {
+        return coroutineScope {
+            routes.map { route ->
+                async {
+                    withTimeoutOrNull(routeRefreshOptions.intervalMillis) {
+                        refreshRouteOrNull(route)
+                    }
+                }
+            }.awaitAll()
         }
     }
 
@@ -158,7 +185,7 @@ internal class RouteRefreshController(
             currentLegIndex,
         )
         if (routeDiffs.isEmpty()) {
-            logI("No changes to route annotations", LOG_CATEGORY)
+            logI("No changes in annotations for route ${newRoute.id}", LOG_CATEGORY)
         } else {
             for (diff in routeDiffs) {
                 logI(diff, LOG_CATEGORY)
@@ -189,9 +216,9 @@ internal class RouteRefreshController(
             }
         }
 
-    private suspend fun waitForever(message: String): List<NavigationRoute> {
+    private suspend fun <T> waitForever(message: String): T {
         logI("Route won't be refreshed because $message", LOG_CATEGORY)
-        return CompletableDeferred<List<NavigationRoute>>().await()
+        return CompletableDeferred<T>().await()
     }
 
     private fun validateRoute(route: NavigationRoute): RouteValidationResult = when {

@@ -20,7 +20,10 @@ internal class DirectionsRouteDiffProvider {
             val newLeg = newRouteLegs[legIndex]
             val updatedAnnotations = getUpdatedData(oldLeg, newLeg)
             if (updatedAnnotations.isNotEmpty()) {
-                routeDiffs.add("Updated ${updatedAnnotations.joinToString()} at leg $legIndex")
+                routeDiffs.add(
+                    "Updated ${updatedAnnotations.joinToString()} at " +
+                        "route ${newRoute.id} leg $legIndex"
+                )
             }
         }
         return routeDiffs

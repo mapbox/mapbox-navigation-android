@@ -2,9 +2,11 @@
 
 package com.mapbox.navigation.base.internal.route
 
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.toNavigationRoute
@@ -71,6 +73,18 @@ fun createNavigationRoute(
 ): NavigationRoute =
     directionsRoute
         .toNavigationRoute(sdkRouteParser, com.mapbox.navigation.base.route.RouterOrigin.Custom())
+
+/**
+ * Internal API used for testing purposes. Needed to avoid calling native parser from unit tests.
+ */
+@TestOnly
+fun createNavigationRoutes(
+    directionsResponse: DirectionsResponse,
+    routeOptions: RouteOptions,
+    routeParser: SDKRouteParser,
+    routerOrigin: com.mapbox.navigation.base.route.RouterOrigin,
+): List<NavigationRoute> =
+    NavigationRoute.create(directionsResponse, routeOptions, routeParser, routerOrigin)
 
 /**
  * Internal API to create a new [NavigationRoute] from a native peer.
