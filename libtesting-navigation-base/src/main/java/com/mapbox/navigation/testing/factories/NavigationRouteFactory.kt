@@ -29,7 +29,7 @@ fun createNavigationRoute(
                             routeIndex = directionsRoute.routeIndex()!!.toInt(),
                             responseJson = response,
                             routerOrigin = routerOrigin.mapToNativeRouteOrigin(),
-                            requestURI = directionsRoute.routeOptions()!!.toUrl("test")
+                            requestURI = directionsRoute.routeOptions()!!.toUrl("pk.*test_token*")
                                 .toString()
                         ),
                     )
