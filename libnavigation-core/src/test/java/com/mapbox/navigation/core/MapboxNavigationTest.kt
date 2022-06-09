@@ -36,7 +36,6 @@ import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
-import com.mapbox.navigation.core.infra.factories.createNavigationRoute
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
@@ -58,6 +57,7 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
+import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.FallbackVersionsObserver

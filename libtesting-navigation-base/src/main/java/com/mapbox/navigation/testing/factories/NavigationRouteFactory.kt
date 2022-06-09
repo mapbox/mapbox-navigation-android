@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.infra.factories
+package com.mapbox.navigation.testing.factories
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.bindgen.Expected
@@ -7,8 +7,6 @@ import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.internal.utils.mapToNativeRouteOrigin
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.testing.factories.createDirectionsRoute
-import com.mapbox.navigation.testing.factories.createRouteInterface
 import com.mapbox.navigator.RouteInterface
 
 fun createNavigationRoute(
