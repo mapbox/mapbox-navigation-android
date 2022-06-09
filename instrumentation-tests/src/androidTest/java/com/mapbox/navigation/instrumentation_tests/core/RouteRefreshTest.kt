@@ -42,6 +42,8 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -198,7 +200,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
 
         assertEquals(sanityDuration, initialDuration, 0.0)
         assertEquals(227.918, initialDuration, 0.0001)
-        assertEquals(1180.651, refreshedDuration, 0.0001)
+        assertEquals(1189.651, refreshedDuration, 0.0001)
     }
 
     @Test
@@ -245,6 +247,34 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         )
         failByRequestRouteRefreshResponse.failResponse = false
         waitForRouteToSuccessfullyRefresh()
+    }
+
+    @Test
+    fun routeAlternativeMetadataUpdatedAlongWithRouteRefresh() = sdkTest {
+        val routeOptions = generateRouteOptions(coordinates)
+        val routes = mapboxNavigation.requestRoutes(routeOptions)
+            .getSuccessfulResultOrThrowException()
+            .routes
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+        val alternativesMetadataLegacy = mapboxNavigation.getAlternativeMetadataFor(routes).first()
+        mapboxNavigation.startTripSession()
+        stayOnInitialPosition()
+        mapboxNavigation.routesUpdates()
+            .first { it.reason == ROUTES_UPDATE_REASON_REFRESH }
+
+        val alternativesMetadata = mapboxNavigation.getAlternativeMetadataFor(
+            mapboxNavigation.getNavigationRoutes()
+        ).first()
+
+        assertNotNull(alternativesMetadataLegacy)
+        assertNotNull(alternativesMetadata)
+        assertEquals(
+            alternativesMetadataLegacy.navigationRoute.id,
+            alternativesMetadata.navigationRoute.id
+        )
+        assertNotEquals(alternativesMetadataLegacy, alternativesMetadata)
+        assertEquals(266.0, alternativesMetadataLegacy.infoFromStartOfPrimary.duration, 1.0)
+        assertEquals(275.0, alternativesMetadata.infoFromStartOfPrimary.duration, 1.0)
     }
 
     private fun stayOnInitialPosition() {

@@ -145,7 +145,7 @@ class MapboxTripSessionTest {
         coEvery { navigator.updateLocation(any()) } returns false
         coEvery { navigator.setRoutes(any(), any(), any()) } returns createSetRouteResult()
         coEvery { navigator.setAlternativeRoutes(any()) } returns listOf()
-        coEvery { navigator.refreshRoute(any()) } returns Unit
+        coEvery { navigator.refreshRoute(any()) } returns listOf()
         every { navigationStatus.getTripStatusFrom(any()) } returns tripStatus
 
         every { navigationStatus.location } returns fixLocation
@@ -691,17 +691,19 @@ class MapboxTripSessionTest {
         }
 
     @Test
-    fun `route set result - native alternatives are null for refresh`() =
+    fun `route set result - native alternatives are NOT null for refresh`() =
         coroutineRule.runBlockingTest {
-            tripSession.start(true)
+            val mockAlternativesMetadata = listOf<RouteAlternative>(mockk())
+            coEvery { navigator.refreshRoute(any()) } returns mockAlternativesMetadata
 
+            tripSession.start(true)
             val result = tripSession.setRoutes(
                 routes,
                 legIndex,
                 RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
             )
 
-            assertNull(result.nativeAlternatives)
+            assertEquals(mockAlternativesMetadata, result.nativeAlternatives)
         }
 
     @Test

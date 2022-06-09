@@ -101,18 +101,19 @@ internal class MapboxTripSession(
                 )
             }
             RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
-                if (routes.isNotEmpty()) {
+                val alternatives = if (routes.isNotEmpty()) {
                     val primaryRoute = routes.first()
-                    navigator.refreshRoute(primaryRoute)
+                    val alternatives = navigator.refreshRoute(primaryRoute)
                     roadObjects = getRouteInitInfo(primaryRoute.nativeRoute().routeInfo)
                         ?.roadObjects
                         ?: emptyList()
                     this@MapboxTripSession.primaryRoute = routes.first()
+                    alternatives
                 } else {
                     logW("Cannot refresh route. Route can't be null", LOG_CATEGORY)
+                    null
                 }
-
-                NativeSetRouteResult()
+                NativeSetRouteResult(alternatives)
             }
             else -> throw IllegalArgumentException("Unsupported route update reason: $reason")
         }
