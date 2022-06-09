@@ -435,11 +435,11 @@ internal object MapboxNavigationTelemetry {
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun postUserFeedback(
-        @FeedbackEvent.Type feedbackType: String,
+        feedbackType: String,
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?,
-        feedbackSubType: Array<@FeedbackEvent.SubType String>?,
+        feedbackSubType: Array<String>?,
         feedbackMetadata: FeedbackMetadata? = null,
     ) {
         createUserFeedback(
@@ -456,11 +456,11 @@ internal object MapboxNavigationTelemetry {
 
     @ExperimentalPreviewMapboxNavigationAPI
     private fun createUserFeedback(
-        @FeedbackEvent.Type feedbackType: String,
+        feedbackType: String,
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?,
-        feedbackSubType: Array<@FeedbackEvent.SubType String>?,
+        feedbackSubType: Array<String>?,
         feedbackMetadata: FeedbackMetadata?,
         onEventUpdated: ((NavigationFeedbackEvent) -> Unit)?,
     ) {
