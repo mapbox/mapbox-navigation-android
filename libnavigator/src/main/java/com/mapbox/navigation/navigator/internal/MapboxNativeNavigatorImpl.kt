@@ -205,7 +205,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * https://github.com/mapbox/mapbox-navigation-native/pull/5420 where the full response has to be provided
      * to [Navigator.refreshRoute], not only the annotations/incidents collections.
      */
-    override suspend fun refreshRoute(route: NavigationRoute) {
+    override suspend fun refreshRoute(route: NavigationRoute): List<RouteAlternative>? {
         val refreshedLegs = route.directionsRoute.legs()?.map { routeLeg ->
             RouteLegRefresh.builder()
                 .annotation(routeLeg.annotation())
@@ -224,28 +224,33 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             refreshResponse.toJson()
         }
 
-        suspendCancellableCoroutine<Unit> { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             navigator!!.refreshRoute(
                 refreshResponseJson,
                 route.nativeRoute().routeId
-            ) {
-                it.fold(
+            ) { expected ->
+                expected.fold(
                     { error ->
                         logE(
                             "Annotations update failed for route with ID '${route.id}'. " +
                                 "Reason: $error",
                             LOG_CATEGORY
                         )
+                        continuation.resume(null)
                     },
-                    { nativeRoute ->
+                    { refreshRouteResult ->
                         logD(
                             "Annotations updated successfully " +
-                                "for route with ID: '${nativeRoute.routeId}'",
+                                "for route with ID: '${refreshRouteResult.route.routeId}'. " +
+                                "Alternatives IDs: " +
+                                refreshRouteResult.alternatives
+                                    .joinToString { it.id.toString() }
+                                    .ifBlank { "[no alternatives]" },
                             LOG_CATEGORY
                         )
+                        continuation.resume(refreshRouteResult.alternatives)
                     }
                 )
-                continuation.resume(Unit)
             }
         }
     }
