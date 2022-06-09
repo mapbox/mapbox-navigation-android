@@ -167,7 +167,7 @@ ext {
 
       svgParser                 : "com.caverock:androidsvg-aar:${version.svgParser}",
 
-      viewBinding               : "com.android.databinding:viewbinding:${version.viewBinding}",
+      viewBinding               : "androidx.databinding:viewbinding:${version.viewBinding}",
 
       // Test app crashlytics
       firebaseCrashlyticsNdk    : "com.google.firebase:firebase-crashlytics-ndk:${version.firebaseCrashlytics}"
