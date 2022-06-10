@@ -1,0 +1,1335 @@
+// Signature format: 3.0
+package com.mapbox.navigation.ui.maps {
+
+  public final class NavigationStyles {
+    field public static final com.mapbox.navigation.ui.maps.NavigationStyles INSTANCE;
+    field public static final String NAVIGATION_DAY_STYLE = "mapbox://styles/mapbox/navigation-day-v1";
+    field public static final String NAVIGATION_DAY_STYLE_ID = "navigation-day-v1";
+    field public static final String NAVIGATION_DAY_STYLE_USER_ID = "mapbox";
+    field public static final String NAVIGATION_NIGHT_STYLE = "mapbox://styles/mapbox/navigation-night-v1";
+    field public static final String NAVIGATION_NIGHT_STYLE_ID = "navigation-night-v1";
+    field public static final String NAVIGATION_NIGHT_STYLE_USER_ID = "mapbox";
+  }
+
+  public final class PredictiveCacheController {
+    ctor public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions = PredictiveCacheLocationOptions.<init>().build(), com.mapbox.navigation.ui.maps.PredictiveCacheControllerErrorHandler? predictiveCacheControllerErrorHandler = null);
+    ctor public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions = PredictiveCacheLocationOptions.<init>().build());
+    ctor public PredictiveCacheController();
+    method @Deprecated public void createMapControllers(com.mapbox.maps.MapboxMap map, java.util.List<java.lang.String> sourceIdsToCache = emptyList());
+    method @Deprecated public void createMapControllers(com.mapbox.maps.MapboxMap map);
+    method public void createStyleMapControllers(com.mapbox.maps.MapboxMap map, boolean cacheCurrentMapStyle = true, java.util.List<java.lang.String> styles = emptyList());
+    method public void createStyleMapControllers(com.mapbox.maps.MapboxMap map, boolean cacheCurrentMapStyle = true);
+    method public void createStyleMapControllers(com.mapbox.maps.MapboxMap map);
+    method public void onDestroy();
+    method public void removeMapControllers(com.mapbox.maps.MapboxMap map);
+  }
+
+  public fun interface PredictiveCacheControllerErrorHandler {
+    method public void onError(String? message);
+  }
+
+  public final class PredictiveCacheControllerKt {
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.building.api {
+
+  public final class MapboxBuildingsApi {
+    ctor public MapboxBuildingsApi(com.mapbox.maps.MapboxMap mapboxMap);
+    method public void cancel();
+    method public void queryBuildingOnFinalDestination(com.mapbox.navigation.base.trip.model.RouteProgress progress, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.building.model.BuildingError,com.mapbox.navigation.ui.maps.building.model.BuildingValue>> callback);
+    method public void queryBuildingOnWaypoint(com.mapbox.navigation.base.trip.model.RouteProgress progress, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.building.model.BuildingError,com.mapbox.navigation.ui.maps.building.model.BuildingValue>> callback);
+    method public void queryBuildingToHighlight(com.mapbox.geojson.Point point, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.building.model.BuildingError,com.mapbox.navigation.ui.maps.building.model.BuildingValue>> callback);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.building.model {
+
+  public final class BuildingError {
+    method public String? getErrorMessage();
+    property public final String? errorMessage;
+  }
+
+  public final class BuildingValue {
+    method public java.util.List<com.mapbox.maps.QueriedFeature> getBuildings();
+    property public final java.util.List<com.mapbox.maps.QueriedFeature> buildings;
+  }
+
+  public final class MapboxBuildingHighlightOptions {
+    method public int getFillExtrusionColor();
+    method public double getFillExtrusionOpacity();
+    method public com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions.Builder toBuilder();
+    property public final int fillExtrusionColor;
+    property public final double fillExtrusionOpacity;
+  }
+
+  public static final class MapboxBuildingHighlightOptions.Builder {
+    ctor public MapboxBuildingHighlightOptions.Builder();
+    method public com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions build();
+    method public com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions.Builder fillExtrusionColor(@ColorInt int fillExtrusionColor);
+    method public com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions.Builder fillExtrusionOpacity(double fillExtrusionOpacity);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.building.view {
+
+  public final class MapboxBuildingView {
+    ctor public MapboxBuildingView();
+    method public void clear(com.mapbox.maps.Style style);
+    method public void highlightBuilding(com.mapbox.maps.Style style, java.util.List<com.mapbox.maps.QueriedFeature> buildings, com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions options = MapboxBuildingHighlightOptions.<init>().build());
+    method public void highlightBuilding(com.mapbox.maps.Style style, java.util.List<com.mapbox.maps.QueriedFeature> buildings);
+    method public void removeBuildingHighlight(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions options = MapboxBuildingHighlightOptions.<init>().build());
+    method public void removeBuildingHighlight(com.mapbox.maps.Style style);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.camera {
+
+  @UiThread public final class NavigationCamera {
+    ctor public NavigationCamera(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin, com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource viewportDataSource, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition stateTransition = com.mapbox.navigation.ui.maps.camera.transition.MapboxNavigationCameraStateTransition(mapboxMap, cameraPlugin));
+    method public com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger? getDebugger();
+    method public com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState getState();
+    method public void registerNavigationCameraStateChangeObserver(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver navigationCameraStateChangedObserver);
+    method public void requestNavigationCameraToFollowing(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder,kotlin.Unit> stateTransitionOptionsBlock, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder,kotlin.Unit> frameTransitionOptionsBlock, com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener? transitionEndListener = null);
+    method public void requestNavigationCameraToFollowing(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder,kotlin.Unit> stateTransitionOptionsBlock, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder,kotlin.Unit> frameTransitionOptionsBlock);
+    method public void requestNavigationCameraToFollowing(com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions stateTransitionOptions = DEFAULT_STATE_TRANSITION_OPT, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT, com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener? transitionEndListener = null);
+    method public void requestNavigationCameraToFollowing(com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions stateTransitionOptions = DEFAULT_STATE_TRANSITION_OPT, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT);
+    method public void requestNavigationCameraToFollowing(com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions stateTransitionOptions = DEFAULT_STATE_TRANSITION_OPT);
+    method public void requestNavigationCameraToFollowing();
+    method public void requestNavigationCameraToIdle();
+    method public void requestNavigationCameraToOverview(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder,kotlin.Unit> stateTransitionOptionsBlock, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder,kotlin.Unit> frameTransitionOptionsBlock, com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener? transitionEndListener = null);
+    method public void requestNavigationCameraToOverview(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder,kotlin.Unit> stateTransitionOptionsBlock, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder,kotlin.Unit> frameTransitionOptionsBlock);
+    method public void requestNavigationCameraToOverview(com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions stateTransitionOptions = DEFAULT_STATE_TRANSITION_OPT, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT, com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener? transitionEndListener = null);
+    method public void requestNavigationCameraToOverview(com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions stateTransitionOptions = DEFAULT_STATE_TRANSITION_OPT, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT);
+    method public void requestNavigationCameraToOverview(com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions stateTransitionOptions = DEFAULT_STATE_TRANSITION_OPT);
+    method public void requestNavigationCameraToOverview();
+    method public void resetFrame();
+    method public void setDebugger(com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger?);
+    method public void unregisterNavigationCameraStateChangeObserver(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver navigationCameraStateChangedObserver);
+    property public final com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger? debugger;
+    property public final com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state;
+    field public static final com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion Companion;
+    field public static final String NAVIGATION_CAMERA_OWNER = "NAVIGATION_CAMERA_OWNER";
+  }
+
+  public static final class NavigationCamera.Companion {
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.camera.data {
+
+  public final class FollowingFrameOptions {
+    method public com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.BearingSmoothing getBearingSmoothing();
+    method public boolean getBearingUpdatesAllowed();
+    method public boolean getCenterUpdatesAllowed();
+    method public double getDefaultPitch();
+    method public com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FrameGeometryAfterManeuver getFrameGeometryAfterManeuver();
+    method public com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.IntersectionDensityCalculation getIntersectionDensityCalculation();
+    method public double getMaxZoom();
+    method public boolean getMaximizeViewableGeometryWhenPitchZero();
+    method public double getMinZoom();
+    method public boolean getPaddingUpdatesAllowed();
+    method public com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.PitchNearManeuvers getPitchNearManeuvers();
+    method public boolean getPitchUpdatesAllowed();
+    method public boolean getZoomUpdatesAllowed();
+    method public void setBearingUpdatesAllowed(boolean);
+    method public void setCenterUpdatesAllowed(boolean);
+    method public void setDefaultPitch(double);
+    method public void setMaxZoom(double);
+    method public void setMaximizeViewableGeometryWhenPitchZero(boolean);
+    method public void setMinZoom(double);
+    method public void setPaddingUpdatesAllowed(boolean);
+    method public void setPitchUpdatesAllowed(boolean);
+    method public void setZoomUpdatesAllowed(boolean);
+    property public final com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.BearingSmoothing bearingSmoothing;
+    property public final boolean bearingUpdatesAllowed;
+    property public final boolean centerUpdatesAllowed;
+    property public final double defaultPitch;
+    property public final com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FrameGeometryAfterManeuver frameGeometryAfterManeuver;
+    property public final com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.IntersectionDensityCalculation intersectionDensityCalculation;
+    property public final double maxZoom;
+    property public final boolean maximizeViewableGeometryWhenPitchZero;
+    property public final double minZoom;
+    property public final boolean paddingUpdatesAllowed;
+    property public final com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.PitchNearManeuvers pitchNearManeuvers;
+    property public final boolean pitchUpdatesAllowed;
+    property public final boolean zoomUpdatesAllowed;
+  }
+
+  public static final class FollowingFrameOptions.BearingSmoothing {
+    method public boolean getEnabled();
+    method public double getMaxBearingAngleDiff();
+    method public void setEnabled(boolean);
+    method public void setMaxBearingAngleDiff(double);
+    property public final boolean enabled;
+    property public final double maxBearingAngleDiff;
+  }
+
+  public static final class FollowingFrameOptions.FrameGeometryAfterManeuver {
+    method public double getDistanceToCoalesceCompoundManeuvers();
+    method public double getDistanceToFrameAfterManeuver();
+    method public boolean getEnabled();
+    method public void setDistanceToCoalesceCompoundManeuvers(double);
+    method public void setDistanceToFrameAfterManeuver(double);
+    method public void setEnabled(boolean);
+    property public final double distanceToCoalesceCompoundManeuvers;
+    property public final double distanceToFrameAfterManeuver;
+    property public final boolean enabled;
+  }
+
+  public static final class FollowingFrameOptions.IntersectionDensityCalculation {
+    method public double getAverageDistanceMultiplier();
+    method public boolean getEnabled();
+    method public double getMinimumDistanceBetweenIntersections();
+    method public void setAverageDistanceMultiplier(double);
+    method public void setEnabled(boolean);
+    method public void setMinimumDistanceBetweenIntersections(double);
+    property public final double averageDistanceMultiplier;
+    property public final boolean enabled;
+    property public final double minimumDistanceBetweenIntersections;
+  }
+
+  public static final class FollowingFrameOptions.PitchNearManeuvers {
+    method public boolean getEnabled();
+    method public java.util.List<java.lang.String> getExcludedManeuvers();
+    method public double getTriggerDistanceFromManeuver();
+    method public void setEnabled(boolean);
+    method public void setExcludedManeuvers(java.util.List<java.lang.String>);
+    method public void setTriggerDistanceFromManeuver(double);
+    property public final boolean enabled;
+    property public final java.util.List<java.lang.String> excludedManeuvers;
+    property public final double triggerDistanceFromManeuver;
+  }
+
+  @UiThread public final class MapboxNavigationViewportDataSource implements com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource {
+    ctor public MapboxNavigationViewportDataSource(com.mapbox.maps.MapboxMap mapboxMap);
+    method public void additionalPointsToFrameForFollowing(java.util.List<com.mapbox.geojson.Point> points);
+    method public void additionalPointsToFrameForOverview(java.util.List<com.mapbox.geojson.Point> points);
+    method public void clearFollowingOverrides();
+    method public void clearOverviewOverrides();
+    method public void clearRouteData();
+    method public void evaluate();
+    method public void followingBearingPropertyOverride(Double? value);
+    method public void followingCenterPropertyOverride(com.mapbox.geojson.Point? value);
+    method public void followingPitchPropertyOverride(Double? value);
+    method public void followingZoomPropertyOverride(Double? value);
+    method public com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger? getDebugger();
+    method public com.mapbox.maps.EdgeInsets getFollowingPadding();
+    method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions getOptions();
+    method public com.mapbox.maps.EdgeInsets getOverviewPadding();
+    method public com.mapbox.navigation.ui.maps.camera.data.ViewportData getViewportData();
+    method public void onLocationChanged(android.location.Location location);
+    method @Deprecated public void onRouteChanged(com.mapbox.api.directions.v5.models.DirectionsRoute route);
+    method public void onRouteChanged(com.mapbox.navigation.base.route.NavigationRoute route);
+    method public void onRouteProgressChanged(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+    method public void overviewBearingPropertyOverride(Double? value);
+    method public void overviewCenterPropertyOverride(com.mapbox.geojson.Point? value);
+    method public void overviewPitchPropertyOverride(Double? value);
+    method public void overviewZoomPropertyOverride(Double? value);
+    method public void registerUpdateObserver(com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceUpdateObserver viewportDataSourceUpdateObserver);
+    method public void setDebugger(com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger?);
+    method public void setFollowingPadding(com.mapbox.maps.EdgeInsets);
+    method public void setOverviewPadding(com.mapbox.maps.EdgeInsets);
+    method public void unregisterUpdateObserver(com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceUpdateObserver viewportDataSourceUpdateObserver);
+    property public final com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger? debugger;
+    property public final com.mapbox.maps.EdgeInsets followingPadding;
+    property public final com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions options;
+    property public final com.mapbox.maps.EdgeInsets overviewPadding;
+  }
+
+  public final class MapboxNavigationViewportDataSourceOptions {
+    method public com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions getFollowingFrameOptions();
+    method public com.mapbox.navigation.ui.maps.camera.data.OverviewFrameOptions getOverviewFrameOptions();
+    property public final com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions followingFrameOptions;
+    property public final com.mapbox.navigation.ui.maps.camera.data.OverviewFrameOptions overviewFrameOptions;
+  }
+
+  public final class OverviewFrameOptions {
+    method public boolean getBearingUpdatesAllowed();
+    method public boolean getCenterUpdatesAllowed();
+    method public com.mapbox.navigation.ui.maps.camera.data.OverviewFrameOptions.GeometrySimplification getGeometrySimplification();
+    method public double getMaxZoom();
+    method public boolean getPaddingUpdatesAllowed();
+    method public boolean getPitchUpdatesAllowed();
+    method public boolean getZoomUpdatesAllowed();
+    method public void setBearingUpdatesAllowed(boolean);
+    method public void setCenterUpdatesAllowed(boolean);
+    method public void setMaxZoom(double);
+    method public void setPaddingUpdatesAllowed(boolean);
+    method public void setPitchUpdatesAllowed(boolean);
+    method public void setZoomUpdatesAllowed(boolean);
+    property public final boolean bearingUpdatesAllowed;
+    property public final boolean centerUpdatesAllowed;
+    property public final com.mapbox.navigation.ui.maps.camera.data.OverviewFrameOptions.GeometrySimplification geometrySimplification;
+    property public final double maxZoom;
+    property public final boolean paddingUpdatesAllowed;
+    property public final boolean pitchUpdatesAllowed;
+    property public final boolean zoomUpdatesAllowed;
+  }
+
+  public static final class OverviewFrameOptions.GeometrySimplification {
+    method public boolean getEnabled();
+    method public int getSimplificationFactor();
+    method public void setEnabled(boolean);
+    method public void setSimplificationFactor(int);
+    property public final boolean enabled;
+    property public final int simplificationFactor;
+  }
+
+  public final class ViewportData {
+    ctor public ViewportData(com.mapbox.maps.CameraOptions cameraForFollowing, com.mapbox.maps.CameraOptions cameraForOverview);
+    method public com.mapbox.maps.CameraOptions component1();
+    method public com.mapbox.maps.CameraOptions component2();
+    method public com.mapbox.navigation.ui.maps.camera.data.ViewportData copy(com.mapbox.maps.CameraOptions cameraForFollowing, com.mapbox.maps.CameraOptions cameraForOverview);
+    method public com.mapbox.maps.CameraOptions getCameraForFollowing();
+    method public com.mapbox.maps.CameraOptions getCameraForOverview();
+    property public final com.mapbox.maps.CameraOptions cameraForFollowing;
+    property public final com.mapbox.maps.CameraOptions cameraForOverview;
+  }
+
+  public interface ViewportDataSource {
+    method public com.mapbox.navigation.ui.maps.camera.data.ViewportData getViewportData();
+    method public void registerUpdateObserver(com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceUpdateObserver viewportDataSourceUpdateObserver);
+    method public void unregisterUpdateObserver(com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceUpdateObserver viewportDataSourceUpdateObserver);
+  }
+
+  public final class ViewportDataSourceProcessorKt {
+  }
+
+  public fun interface ViewportDataSourceUpdateObserver {
+    method public void viewportDataSourceUpdated(com.mapbox.navigation.ui.maps.camera.data.ViewportData viewportData);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.camera.data.debugger {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxNavigationViewportDataSourceDebugger {
+    ctor public MapboxNavigationViewportDataSourceDebugger(android.content.Context context, com.mapbox.maps.MapView mapView, String? layerAbove = null);
+    ctor public MapboxNavigationViewportDataSourceDebugger(android.content.Context context, com.mapbox.maps.MapView mapView);
+    method public boolean getEnabled();
+    method public void setEnabled(boolean);
+    property public final boolean enabled;
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.camera.lifecycle {
+
+  public final class NavigationBasicGesturesHandler implements com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener {
+    ctor public NavigationBasicGesturesHandler(com.mapbox.navigation.ui.maps.camera.NavigationCamera navigationCamera);
+    method public void onAnimatorCancelling(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator animator, String? owner);
+    method public void onAnimatorEnding(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator animator, String? owner);
+    method public void onAnimatorInterrupting(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator runningAnimator, String? runningAnimatorOwner, android.animation.ValueAnimator newAnimator, String? newAnimatorOwner);
+    method public void onAnimatorStarting(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator animator, String? owner);
+  }
+
+  public fun interface NavigationScaleGestureActionListener {
+    method public void onNavigationScaleGestureAction();
+  }
+
+  public final class NavigationScaleGestureHandler implements com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener {
+    ctor public NavigationScaleGestureHandler(android.content.Context context, com.mapbox.navigation.ui.maps.camera.NavigationCamera navigationCamera, com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.gestures.GesturesPlugin gesturesPlugin, com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin locationPlugin, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener? scaleActionListener = null, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions options = NavigationScaleGestureHandlerOptions.<init>(context).build());
+    method public void cleanup();
+    method public com.mapbox.android.gestures.AndroidGesturesManager getCustomGesturesManager();
+    method public com.mapbox.android.gestures.AndroidGesturesManager getInitialGesturesManager();
+    method public void initialize();
+    method public boolean isInitialized();
+    method public void onAnimatorCancelling(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator animator, String? owner);
+    method public void onAnimatorEnding(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator animator, String? owner);
+    method public void onAnimatorInterrupting(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator runningAnimator, String? runningAnimatorOwner, android.animation.ValueAnimator newAnimator, String? newAnimatorOwner);
+    method public void onAnimatorStarting(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator animator, String? owner);
+    property public final com.mapbox.android.gestures.AndroidGesturesManager customGesturesManager;
+    property public final com.mapbox.android.gestures.AndroidGesturesManager initialGesturesManager;
+    property public final boolean isInitialized;
+  }
+
+  public final class NavigationScaleGestureHandlerOptions {
+    method public float getFollowingInitialMoveThreshold();
+    method public float getFollowingMultiFingerMoveThreshold();
+    method public android.graphics.RectF? getFollowingMultiFingerProtectedMoveArea();
+    method public com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions.Builder toBuilder();
+    property public final float followingInitialMoveThreshold;
+    property public final float followingMultiFingerMoveThreshold;
+    property public final android.graphics.RectF? followingMultiFingerProtectedMoveArea;
+  }
+
+  public static final class NavigationScaleGestureHandlerOptions.Builder {
+    ctor public NavigationScaleGestureHandlerOptions.Builder(android.content.Context context);
+    method public com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions build();
+    method public com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions.Builder followingInitialMoveThreshold(float followingInitialMoveThreshold);
+    method public com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions.Builder followingMultiFingerMoveThreshold(float followingMultiFingerMoveThreshold);
+    method public com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions.Builder followingMultiFingerProtectedMoveArea(android.graphics.RectF? followingMultiFingerProtectedMoveArea);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.camera.state {
+
+  public enum NavigationCameraState {
+    enum_constant public static final com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState FOLLOWING;
+    enum_constant public static final com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState IDLE;
+    enum_constant public static final com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState OVERVIEW;
+    enum_constant public static final com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState TRANSITION_TO_FOLLOWING;
+    enum_constant public static final com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState TRANSITION_TO_OVERVIEW;
+  }
+
+  public fun interface NavigationCameraStateChangedObserver {
+    method public void onNavigationCameraStateChanged(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState navigationCameraState);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.camera.transition {
+
+  public final class MapboxNavigationCameraStateTransition implements com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition {
+    ctor public MapboxNavigationCameraStateTransition(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransition navigationCameraTransition = com.mapbox.navigation.ui.maps.camera.transition.MapboxNavigationCameraTransition(mapboxMap, cameraPlugin));
+    method public android.animation.AnimatorSet transitionToFollowing(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet transitionToOverview(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet updateFrameForFollowing(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet updateFrameForOverview(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+  }
+
+  public final class MapboxNavigationCameraTransition implements com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransition {
+    ctor public MapboxNavigationCameraTransition(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin);
+    method public android.animation.AnimatorSet transitionFromHighZoomToLowZoom(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet transitionFromLowZoomToHighZoom(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet transitionLinear(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+  }
+
+  public final class MapboxNavigationCameraTransitionKt {
+  }
+
+  public interface NavigationCameraStateTransition {
+    method public android.animation.AnimatorSet transitionToFollowing(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet transitionToOverview(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet updateFrameForFollowing(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet updateFrameForOverview(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+  }
+
+  public interface NavigationCameraTransition {
+    method public android.animation.AnimatorSet transitionFromHighZoomToLowZoom(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet transitionFromLowZoomToHighZoom(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet transitionLinear(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+  }
+
+  public final class NavigationCameraTransitionOptions {
+    method public long getMaxDuration();
+    method public com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder toBuilder();
+    property public final long maxDuration;
+  }
+
+  public static final class NavigationCameraTransitionOptions.Builder {
+    ctor public NavigationCameraTransitionOptions.Builder();
+    method public com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions build();
+    method public com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder maxDuration(long maxDuration);
+  }
+
+  public fun interface TransitionEndListener {
+    method public void onTransitionEnd(boolean isCanceled);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.camera.utils {
+
+  public final class MapboxNavigationCameraUtilsKt {
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.camera.view {
+
+  public final class MapboxRecenterButton extends androidx.constraintlayout.widget.ConstraintLayout {
+    ctor public MapboxRecenterButton(android.content.Context context);
+    ctor public MapboxRecenterButton(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxRecenterButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void showTextAndExtend(long duration, String text = context.getString(R.string.mapbox_recenter));
+    method public void showTextAndExtend(long duration);
+    method public void updateStyle(@StyleRes int style);
+  }
+
+  public final class MapboxRouteOverviewButton extends androidx.constraintlayout.widget.ConstraintLayout {
+    ctor public MapboxRouteOverviewButton(android.content.Context context);
+    ctor public MapboxRouteOverviewButton(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxRouteOverviewButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void showTextAndExtend(long duration, String text = context.getString(R.string.mapbox_route_overview));
+    method public void showTextAndExtend(long duration);
+    method public void updateStyle(@StyleRes int style);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.guidance.junction.api {
+
+  public final class MapboxJunctionApi {
+    ctor public MapboxJunctionApi(String accessToken);
+    method public void cancelAll();
+    method public void generateJunction(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError,com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue>> consumer);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.guidance.junction.model {
+
+  public final class JunctionError {
+    method public String? getErrorMessage();
+    method public Throwable? getThrowable();
+    property public final String? errorMessage;
+    property public final Throwable? throwable;
+  }
+
+  public final class JunctionValue {
+    method public android.graphics.Bitmap getBitmap();
+    property public final android.graphics.Bitmap bitmap;
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.guidance.junction.view {
+
+  public final class MapboxJunctionView extends androidx.appcompat.widget.AppCompatImageView {
+    ctor public MapboxJunctionView(android.content.Context context);
+    ctor public MapboxJunctionView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxJunctionView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void render(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError,com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue> result);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.guidance.signboard.api {
+
+  public class MapboxExternalFileResolver extends com.caverock.androidsvg.SVGExternalFileResolver {
+    ctor public MapboxExternalFileResolver(android.content.res.AssetManager assetManager);
+  }
+
+  public final class MapboxSignboardApi {
+    ctor public MapboxSignboardApi(String accessToken, com.mapbox.navigation.ui.maps.guidance.signboard.api.SvgToBitmapParser parser, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options = MapboxSignboardOptions.<init>().build());
+    ctor public MapboxSignboardApi(String accessToken, com.mapbox.navigation.ui.maps.guidance.signboard.api.SvgToBitmapParser parser);
+    ctor public MapboxSignboardApi(String accessToken, android.content.Context applicationContext, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options = MapboxSignboardOptions.<init>().build());
+    method public void cancelAll();
+    method public void generateSignboard(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError,com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue>> consumer);
+  }
+
+  public final class MapboxSvgToBitmapParser implements com.mapbox.navigation.ui.maps.guidance.signboard.api.SvgToBitmapParser {
+    ctor public MapboxSvgToBitmapParser(com.caverock.androidsvg.SVGExternalFileResolver externalFileResolver);
+    method public com.mapbox.bindgen.Expected<java.lang.String,android.graphics.Bitmap> parse(byte[] svg, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options);
+  }
+
+  public fun interface SvgToBitmapParser {
+    method public com.mapbox.bindgen.Expected<java.lang.String,android.graphics.Bitmap> parse(byte[] svg, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.guidance.signboard.model {
+
+  public final class MapboxSignboardOptions {
+    method public String getCssStyles();
+    method public int getDesiredSignboardWidth();
+    method public com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions.Builder toBuilder();
+    property public final String cssStyles;
+    property public final int desiredSignboardWidth;
+  }
+
+  public static final class MapboxSignboardOptions.Builder {
+    ctor public MapboxSignboardOptions.Builder();
+    method public com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions build();
+    method public com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions.Builder cssStyles(String cssStyles);
+    method public com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions.Builder desiredSignboardWidth(int desiredSignboardWidth);
+  }
+
+  public final class SignboardError {
+    method public String? getErrorMessage();
+    method public Throwable? getThrowable();
+    property public final String? errorMessage;
+    property public final Throwable? throwable;
+  }
+
+  public final class SignboardValue {
+    method public android.graphics.Bitmap getBitmap();
+    property public final android.graphics.Bitmap bitmap;
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.guidance.signboard.view {
+
+  public final class MapboxSignboardView extends androidx.appcompat.widget.AppCompatImageView {
+    ctor public MapboxSignboardView(android.content.Context context);
+    ctor public MapboxSignboardView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxSignboardView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void render(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError,com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue> result);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.installer {
+
+  public final class ComponentInstallerKt {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation routeArrow(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.maps.MapView mapView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.installer.RouteArrowComponentConfig,kotlin.Unit> config = {});
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation routeLine(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.maps.MapView mapView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.installer.RouteLineComponentConfig,kotlin.Unit> config = {});
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteArrowComponentConfig {
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions getOptions();
+    method public void setOptions(com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions);
+    property public final com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions options;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteLineComponentConfig {
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions getOptions();
+    method public void setOptions(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions);
+    property public final com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions options;
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.location {
+
+  public final class NavigationLocationProvider implements com.mapbox.maps.plugin.locationcomponent.LocationProvider {
+    ctor public NavigationLocationProvider();
+    method public void changePosition(android.location.Location location, java.util.List<? extends android.location.Location> keyPoints = emptyList(), kotlin.jvm.functions.Function1<? super android.animation.ValueAnimator,kotlin.Unit>? latLngTransitionOptions = null, kotlin.jvm.functions.Function1<? super android.animation.ValueAnimator,kotlin.Unit>? bearingTransitionOptions = null);
+    method public java.util.List<android.location.Location> getLastKeyPoints();
+    method public android.location.Location? getLastLocation();
+    method public void registerLocationConsumer(com.mapbox.maps.plugin.locationcomponent.LocationConsumer locationConsumer);
+    method public void unRegisterLocationConsumer(com.mapbox.maps.plugin.locationcomponent.LocationConsumer locationConsumer);
+    property public final java.util.List<android.location.Location> lastKeyPoints;
+    property public final android.location.Location? lastLocation;
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.roadname.api {
+
+  @Deprecated public final class MapboxRoadNameLabelApi {
+    ctor @Deprecated public MapboxRoadNameLabelApi();
+    method @Deprecated public com.mapbox.navigation.ui.maps.roadname.model.RoadLabel getRoadNameLabel(com.mapbox.navigation.base.road.model.Road road);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.roadname.model {
+
+  @Deprecated public final class RoadLabel {
+    method @Deprecated public String? getRoadName();
+    method @Deprecated public byte[]? getShield();
+    method @Deprecated public String? getShieldName();
+    property @Deprecated public final String? roadName;
+    property @Deprecated public final byte[]? shield;
+    property @Deprecated public final String? shieldName;
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.roadname.view {
+
+  @Deprecated public final class MapboxRoadNameLabelView extends android.widget.LinearLayout {
+    ctor @Deprecated public MapboxRoadNameLabelView(android.content.Context context);
+    ctor @Deprecated public MapboxRoadNameLabelView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor @Deprecated public MapboxRoadNameLabelView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method @Deprecated public void render(com.mapbox.navigation.ui.maps.roadname.model.RoadLabel roadLabel);
+    method @Deprecated public void showRoadName(boolean show);
+    method @Deprecated public void showShieldIcon(boolean show);
+    method @Deprecated public void updateRoadNameTextAppearance(@StyleRes int style);
+  }
+
+  public final class MapboxRoadNameView extends androidx.appcompat.widget.AppCompatTextView {
+    ctor public MapboxRoadNameView(android.content.Context context);
+    ctor public MapboxRoadNameView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxRoadNameView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void renderRoadName(com.mapbox.navigation.base.road.model.Road road);
+    method public void renderRoadNameWith(java.util.List<? extends com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.shield.model.RouteShieldError,com.mapbox.navigation.ui.shield.model.RouteShieldResult>> expectedShields);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.route {
+
+  public final class RouteLayerConstants {
+    field public static final String BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID = "mapbox-bottom-level-route-layer";
+    field public static final com.mapbox.navigation.ui.maps.route.RouteLayerConstants INSTANCE;
+    field public static final String TOP_LEVEL_ROUTE_LINE_LAYER_ID = "mapbox-top-level-route-layer";
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.route.arrow.api {
+
+  public final class MapboxRouteArrowApi {
+    ctor public MapboxRouteArrowApi();
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError,com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue> addArrow(com.mapbox.navigation.ui.maps.route.arrow.model.ManeuverArrow arrow);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError,com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue> addUpcomingManeuverArrow(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.ClearArrowsValue clearArrows();
+    method public java.util.List<com.mapbox.navigation.ui.maps.route.arrow.model.ManeuverArrow> getArrows();
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue hideManeuverArrow();
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue redraw();
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RemoveArrowValue removeArrow(com.mapbox.navigation.ui.maps.route.arrow.model.ManeuverArrow arrow);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue showManeuverArrow();
+  }
+
+  public final class MapboxRouteArrowView {
+    ctor public MapboxRouteArrowView(com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions options);
+    method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getVisibility(com.mapbox.maps.Style style);
+    method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue visibilityChange);
+    method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue arrowAdded);
+    method public void render(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError,com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue> expectedValue);
+    method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.arrow.model.RemoveArrowValue state);
+    method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.arrow.model.ClearArrowsValue state);
+    method public void renderManeuverUpdate(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError,com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue> expectedValue);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.route.arrow.model {
+
+  public final class ArrowAddedValue {
+    method public com.mapbox.geojson.FeatureCollection getArrowHeadFeatureCollection();
+    method public com.mapbox.geojson.FeatureCollection getArrowShaftFeatureCollection();
+    property public final com.mapbox.geojson.FeatureCollection arrowHeadFeatureCollection;
+    property public final com.mapbox.geojson.FeatureCollection arrowShaftFeatureCollection;
+  }
+
+  public final class ArrowVisibilityChangeValue {
+    method public java.util.List<kotlin.Pair<java.lang.String,com.mapbox.maps.extension.style.layers.properties.generated.Visibility>> getLayerVisibilityModifications();
+    property public final java.util.List<kotlin.Pair<java.lang.String,com.mapbox.maps.extension.style.layers.properties.generated.Visibility>> layerVisibilityModifications;
+  }
+
+  public final class ClearArrowsValue {
+    method public com.mapbox.geojson.FeatureCollection getArrowHeadFeatureCollection();
+    method public com.mapbox.geojson.FeatureCollection getArrowShaftFeatureCollection();
+    property public final com.mapbox.geojson.FeatureCollection arrowHeadFeatureCollection;
+    property public final com.mapbox.geojson.FeatureCollection arrowShaftFeatureCollection;
+  }
+
+  public final class InvalidPointError {
+    ctor public InvalidPointError(String errorMessage, Throwable? throwable);
+    method public String getErrorMessage();
+    method public Throwable? getThrowable();
+    property public final String errorMessage;
+    property public final Throwable? throwable;
+  }
+
+  public final class ManeuverArrow {
+    ctor public ManeuverArrow(java.util.List<com.mapbox.geojson.Point> points);
+    method public java.util.List<com.mapbox.geojson.Point> getPoints();
+    property public final java.util.List<com.mapbox.geojson.Point> points;
+  }
+
+  public final class RemoveArrowValue {
+    method public com.mapbox.geojson.FeatureCollection getArrowHeadFeatureCollection();
+    method public com.mapbox.geojson.FeatureCollection getArrowShaftFeatureCollection();
+    property public final com.mapbox.geojson.FeatureCollection arrowHeadFeatureCollection;
+    property public final com.mapbox.geojson.FeatureCollection arrowShaftFeatureCollection;
+  }
+
+  public final class RouteArrowOptions {
+    method public String getAboveLayerId();
+    method public int getArrowCasingColor();
+    method public int getArrowColor();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getArrowHeadCasingScaleExpression();
+    method public android.graphics.drawable.Drawable getArrowHeadIcon();
+    method public android.graphics.drawable.Drawable getArrowHeadIconCasing();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getArrowHeadScaleExpression();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getArrowShaftCasingScaleExpression();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getArrowShaftScaleExpression();
+    method public double getTolerance();
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder toBuilder(android.content.Context context);
+    property public final String aboveLayerId;
+    property public final int arrowCasingColor;
+    property public final int arrowColor;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression arrowHeadCasingScaleExpression;
+    property public final android.graphics.drawable.Drawable arrowHeadIcon;
+    property public final android.graphics.drawable.Drawable arrowHeadIconCasing;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression arrowHeadScaleExpression;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression arrowShaftCasingScaleExpression;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression arrowShaftScaleExpression;
+    property public final double tolerance;
+  }
+
+  public static final class RouteArrowOptions.Builder {
+    ctor public RouteArrowOptions.Builder(android.content.Context context);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions build();
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withAboveLayerId(String layerId);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withArrowCasingColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withArrowColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withArrowHeadIconCasingDrawable(@DrawableRes int drawable);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withArrowHeadIconDrawable(@DrawableRes int drawable);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withArrowShaftCasingScalingExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withArrowShaftScalingExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withArrowheadCasingScalingExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withArrowheadScalingExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withTolerance(double tolerance);
+  }
+
+  public final class UpdateManeuverArrowValue {
+    method public com.mapbox.geojson.Feature? getArrowHeadFeature();
+    method public com.mapbox.geojson.Feature? getArrowShaftFeature();
+    method public java.util.List<kotlin.Pair<java.lang.String,com.mapbox.maps.extension.style.layers.properties.generated.Visibility>> getLayerVisibilityModifications();
+    property public final com.mapbox.geojson.Feature? arrowHeadFeature;
+    property public final com.mapbox.geojson.Feature? arrowShaftFeature;
+    property public final java.util.List<kotlin.Pair<java.lang.String,com.mapbox.maps.extension.style.layers.properties.generated.Visibility>> layerVisibilityModifications;
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.route.line {
+
+  public final class MapboxRouteLineApiExtensions {
+    method public suspend Object? clearRouteLine(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue>>);
+    method public suspend Object? findClosestRoute(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, com.mapbox.geojson.Point target, com.mapbox.maps.MapboxMap mapboxMap, float padding, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound,com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue>>);
+    method public suspend Object? getRouteDrawData(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>>);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue> setAlternativeTrafficColor(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>, @ColorInt int color);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue> setAlternativeTrafficColor(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>, com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method public suspend Object? setNavigationRouteLines(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, java.util.List<com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine> newRoutes, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>>);
+    method public suspend Object? setNavigationRouteLines(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, java.util.List<com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine> newRoutes, java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> alternativeRoutesMetadata, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>>);
+    method public suspend Object? setNavigationRoutes(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, java.util.List<com.mapbox.navigation.base.route.NavigationRoute> newRoutes, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>>);
+    method public suspend Object? setNavigationRoutes(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, java.util.List<com.mapbox.navigation.base.route.NavigationRoute> newRoutes, java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> alternativeRoutesMetadata, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>>);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue> setPrimaryTrafficColor(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>, @ColorInt int color);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue> setPrimaryTrafficColor(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>, com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method @Deprecated public suspend Object? setRoutes(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLine> newRoutes, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>>);
+    method public suspend Object? showRouteWithLegIndexHighlighted(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, int legIndex, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue>>);
+    field public static final com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions INSTANCE;
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.route.line.api {
+
+  public final class MapboxRouteLineApi {
+    ctor public MapboxRouteLineApi(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions routeLineOptions);
+    method public void cancel();
+    method public void clearRouteLine(com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue>> consumer);
+    method public void findClosestRoute(com.mapbox.geojson.Point target, com.mapbox.maps.MapboxMap mapboxMap, float padding, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound,com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue>> resultConsumer);
+    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> getNavigationRoutes();
+    method public com.mapbox.navigation.base.route.NavigationRoute? getPrimaryNavigationRoute();
+    method @Deprecated public com.mapbox.api.directions.v5.models.DirectionsRoute? getPrimaryRoute();
+    method public void getRouteDrawData(com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> consumer);
+    method @Deprecated public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
+    method public double getVanishPointOffset();
+    method public void setNavigationRouteLines(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine> newRoutes, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> consumer);
+    method public void setNavigationRouteLines(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine> newRoutes, java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> alternativeRoutesMetadata, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> consumer);
+    method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> newRoutes, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> consumer);
+    method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> newRoutes, java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> alternativeRoutesMetadata, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> consumer);
+    method public void setRoadClasses(java.util.List<java.lang.String> roadClasses);
+    method @Deprecated public void setRoutes(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLine> newRoutes, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> consumer);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue> setVanishingOffset(double offset);
+    method public void showRouteWithLegIndexHighlighted(int legIndexToHighlight, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue>> consumer);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue> updateTraveledRouteLine(com.mapbox.geojson.Point point);
+    method public void updateWithRouteProgress(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue>> consumer);
+    field public static final com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi.Companion Companion;
+  }
+
+  public static final class MapboxRouteLineApi.Companion {
+  }
+
+  public final class MapboxRouteLineView {
+    ctor public MapboxRouteLineView(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions options);
+    method public void cancel();
+    method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getAlternativeRoutesVisibility(com.mapbox.maps.Style style);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions getOptions();
+    method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getPrimaryRouteVisibility(com.mapbox.maps.Style style);
+    method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getTrafficVisibility(com.mapbox.maps.Style style);
+    method public void hideAlternativeRoutes(com.mapbox.maps.Style style);
+    method public void hideOriginAndDestinationPoints(com.mapbox.maps.Style style);
+    method public void hidePrimaryRoute(com.mapbox.maps.Style style);
+    method public void hideTraffic(com.mapbox.maps.Style style);
+    method public void initializeLayers(com.mapbox.maps.Style style);
+    method public void renderClearRouteLineValue(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue> clearRouteLineValue);
+    method public void renderRouteDrawData(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue> routeDrawData);
+    method public void renderRouteLineUpdate(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue> update);
+    method public void setOptions(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions);
+    method public void showAlternativeRoutes(com.mapbox.maps.Style style);
+    method public void showOriginAndDestinationPoints(com.mapbox.maps.Style style);
+    method public void showPrimaryRoute(com.mapbox.maps.Style style);
+    method public void showTraffic(com.mapbox.maps.Style style);
+    property public final com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions options;
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.route.line.model {
+
+  public final class ClosestRouteValue {
+    method public com.mapbox.navigation.base.route.NavigationRoute getNavigationRoute();
+    method @Deprecated public com.mapbox.api.directions.v5.models.DirectionsRoute getRoute();
+    property public final com.mapbox.navigation.base.route.NavigationRoute navigationRoute;
+    property @Deprecated public final com.mapbox.api.directions.v5.models.DirectionsRoute route;
+  }
+
+  public final class MapboxRouteLineOptions {
+    method public android.graphics.drawable.Drawable getDestinationIcon();
+    method public boolean getDisplayRestrictedRoadSections();
+    method public boolean getDisplaySoftGradientForTraffic();
+    method public com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment getIconPitchAlignment();
+    method public android.graphics.drawable.Drawable getOriginIcon();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources getResourceProvider();
+    method public String? getRouteLineBelowLayerId();
+    method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor> getRouteStyleDescriptors();
+    method public double getSoftGradientTransition();
+    method public boolean getStyleInactiveRouteLegsIndependently();
+    method public double getTolerance();
+    method public long getVanishingRouteLineUpdateIntervalNano();
+    method public com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor getWaypointLayerIconAnchor();
+    method public java.util.List<java.lang.Double> getWaypointLayerIconOffset();
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder toBuilder(android.content.Context context);
+    property public final android.graphics.drawable.Drawable destinationIcon;
+    property public final boolean displayRestrictedRoadSections;
+    property public final boolean displaySoftGradientForTraffic;
+    property public final com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment iconPitchAlignment;
+    property public final android.graphics.drawable.Drawable originIcon;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources resourceProvider;
+    property public final String? routeLineBelowLayerId;
+    property public final java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor> routeStyleDescriptors;
+    property public final double softGradientTransition;
+    property public final boolean styleInactiveRouteLegsIndependently;
+    property public final double tolerance;
+    property public final long vanishingRouteLineUpdateIntervalNano;
+    property public final com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor waypointLayerIconAnchor;
+    property public final java.util.List<java.lang.Double> waypointLayerIconOffset;
+  }
+
+  public static final class MapboxRouteLineOptions.Builder {
+    ctor public MapboxRouteLineOptions.Builder(android.content.Context context);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions build();
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder displayRestrictedRoadSections(boolean displayRestrictedRoadSections);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder displaySoftGradientForTraffic(boolean enable);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder iconPitchAlignment(com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment iconPitchAlignment);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder softGradientTransition(int transitionDistance);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder styleInactiveRouteLegsIndependently(boolean enable);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder vanishingRouteLineUpdateInterval(long interval = 62500000L);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder waypointLayerIconAnchor(com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor iconAnchor = com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor.CENTER);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder waypointLayerIconOffset(java.util.List<java.lang.Double> iconOffset = listOf(0.0, 0.0));
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteLineBelowLayerId(String layerId);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteLineResources(com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources resourceProvider);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteStyleDescriptors(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor> routeStyleDescriptors);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withTolerance(double tolerance);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withVanishingRouteLineEnabled(boolean isEnabled);
+  }
+
+  public final class NavigationRouteLine {
+    ctor public NavigationRouteLine(com.mapbox.navigation.base.route.NavigationRoute route, String? identifier);
+    method public com.mapbox.navigation.base.route.NavigationRoute component1();
+    method public String? component2();
+    method public com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine copy(com.mapbox.navigation.base.route.NavigationRoute route, String? identifier);
+    method public String? getIdentifier();
+    method public com.mapbox.navigation.base.route.NavigationRoute getRoute();
+    property public final String? identifier;
+    property public final com.mapbox.navigation.base.route.NavigationRoute route;
+  }
+
+  public final class NavigationRouteLineEx {
+    method public static com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine toNavigationRouteLine(com.mapbox.navigation.ui.maps.route.line.model.RouteLine);
+    method public static java.util.List<com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine> toNavigationRouteLines(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLine>);
+  }
+
+  public final class RouteLine {
+    ctor public RouteLine(com.mapbox.api.directions.v5.models.DirectionsRoute route, String? identifier);
+    method public com.mapbox.api.directions.v5.models.DirectionsRoute component1();
+    method public String? component2();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLine copy(com.mapbox.api.directions.v5.models.DirectionsRoute route, String? identifier);
+    method public String? getIdentifier();
+    method public com.mapbox.api.directions.v5.models.DirectionsRoute getRoute();
+    property public final String? identifier;
+    property public final com.mapbox.api.directions.v5.models.DirectionsRoute route;
+  }
+
+  public final class RouteLineClearValue {
+    method public java.util.List<com.mapbox.geojson.FeatureCollection> getAlternativeRouteSourceSources();
+    method public com.mapbox.geojson.FeatureCollection getPrimaryRouteSource();
+    method public com.mapbox.geojson.FeatureCollection getWaypointsSource();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue.MutableRouteLineClearValue toMutableValue();
+    property public final java.util.List<com.mapbox.geojson.FeatureCollection> alternativeRouteSourceSources;
+    property public final com.mapbox.geojson.FeatureCollection primaryRouteSource;
+    property public final com.mapbox.geojson.FeatureCollection waypointsSource;
+  }
+
+  public static final class RouteLineClearValue.MutableRouteLineClearValue {
+    method public java.util.List<com.mapbox.geojson.FeatureCollection> getAlternativeRouteSourceSources();
+    method public com.mapbox.geojson.FeatureCollection getPrimaryRouteSource();
+    method public com.mapbox.geojson.FeatureCollection getWaypointsSource();
+    method public void setAlternativeRouteSourceSources(java.util.List<com.mapbox.geojson.FeatureCollection>);
+    method public void setPrimaryRouteSource(com.mapbox.geojson.FeatureCollection);
+    method public void setWaypointsSource(com.mapbox.geojson.FeatureCollection);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue toImmutableValue();
+    property public final java.util.List<com.mapbox.geojson.FeatureCollection> alternativeRouteSourceSources;
+    property public final com.mapbox.geojson.FeatureCollection primaryRouteSource;
+    property public final com.mapbox.geojson.FeatureCollection waypointsSource;
+  }
+
+  public final class RouteLineColorResources {
+    method public int getAlternativeRouteCasingColor();
+    method public int getAlternativeRouteClosureColor();
+    method public int getAlternativeRouteDefaultColor();
+    method public int getAlternativeRouteHeavyCongestionColor();
+    method public int getAlternativeRouteLowCongestionColor();
+    method public int getAlternativeRouteModerateCongestionColor();
+    method public int getAlternativeRouteRestrictedRoadColor();
+    method public int getAlternativeRouteSevereCongestionColor();
+    method public int getAlternativeRouteUnknownCongestionColor();
+    method public kotlin.ranges.IntRange getHeavyCongestionRange();
+    method public int getInActiveRouteLegsColor();
+    method public kotlin.ranges.IntRange getLowCongestionRange();
+    method public kotlin.ranges.IntRange getModerateCongestionRange();
+    method public int getRestrictedRoadColor();
+    method public int getRouteCasingColor();
+    method public int getRouteClosureColor();
+    method public int getRouteDefaultColor();
+    method public int getRouteHeavyCongestionColor();
+    method public int getRouteLineTraveledCasingColor();
+    method public int getRouteLineTraveledColor();
+    method public int getRouteLowCongestionColor();
+    method public int getRouteModerateCongestionColor();
+    method public int getRouteSevereCongestionColor();
+    method public int getRouteUnknownCongestionColor();
+    method public kotlin.ranges.IntRange getSevereCongestionRange();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder toBuilder();
+    property public final int alternativeRouteCasingColor;
+    property public final int alternativeRouteClosureColor;
+    property public final int alternativeRouteDefaultColor;
+    property public final int alternativeRouteHeavyCongestionColor;
+    property public final int alternativeRouteLowCongestionColor;
+    property public final int alternativeRouteModerateCongestionColor;
+    property public final int alternativeRouteRestrictedRoadColor;
+    property public final int alternativeRouteSevereCongestionColor;
+    property public final int alternativeRouteUnknownCongestionColor;
+    property public final kotlin.ranges.IntRange heavyCongestionRange;
+    property public final int inActiveRouteLegsColor;
+    property public final kotlin.ranges.IntRange lowCongestionRange;
+    property public final kotlin.ranges.IntRange moderateCongestionRange;
+    property public final int restrictedRoadColor;
+    property public final int routeCasingColor;
+    property public final int routeClosureColor;
+    property public final int routeDefaultColor;
+    property public final int routeHeavyCongestionColor;
+    property public final int routeLineTraveledCasingColor;
+    property public final int routeLineTraveledColor;
+    property public final int routeLowCongestionColor;
+    property public final int routeModerateCongestionColor;
+    property public final int routeSevereCongestionColor;
+    property public final int routeUnknownCongestionColor;
+    property public final kotlin.ranges.IntRange severeCongestionRange;
+  }
+
+  public static final class RouteLineColorResources.Builder {
+    ctor public RouteLineColorResources.Builder();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteCasingColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteClosureColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteDefaultColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteHeavyCongestionColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteLowCongestionColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteModerateCongestionColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteRestrictedRoadColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteSevereCongestionColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteUnknownCongestionColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources build();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder heavyCongestionRange(kotlin.ranges.IntRange range);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder inActiveRouteLegsColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder lowCongestionRange(kotlin.ranges.IntRange range);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder moderateCongestionRange(kotlin.ranges.IntRange range);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder restrictedRoadColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeCasingColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeClosureColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeDefaultColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeHeavyCongestionColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeLineTraveledCasingColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeLineTraveledColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeLowCongestionColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeModerateCongestionColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeSevereCongestionColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeUnknownCongestionColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder severeCongestionRange(kotlin.ranges.IntRange range);
+  }
+
+  public final class RouteLineData {
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData getDynamicData();
+    method public com.mapbox.geojson.FeatureCollection getFeatureCollection();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineData.MutableRouteLineData toMutableValue();
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData dynamicData;
+    property public final com.mapbox.geojson.FeatureCollection featureCollection;
+  }
+
+  public static final class RouteLineData.MutableRouteLineData {
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData getDynamicData();
+    method public com.mapbox.geojson.FeatureCollection getFeatureCollection();
+    method public void setDynamicData(com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData);
+    method public void setFeatureCollection(com.mapbox.geojson.FeatureCollection);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineData toImmutableValue();
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData dynamicData;
+    property public final com.mapbox.geojson.FeatureCollection featureCollection;
+  }
+
+  public final class RouteLineDistancesIndex {
+    ctor public RouteLineDistancesIndex(com.mapbox.geojson.Point point, double distanceRemaining);
+    method public com.mapbox.geojson.Point component1();
+    method public double component2();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex copy(com.mapbox.geojson.Point point, double distanceRemaining);
+    method public double getDistanceRemaining();
+    method public com.mapbox.geojson.Point getPoint();
+    property public final double distanceRemaining;
+    property public final com.mapbox.geojson.Point point;
+  }
+
+  public final class RouteLineDynamicData {
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider getBaseExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider getCasingExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getRestrictedSectionExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrafficExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrailCasingExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrailExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset? getTrimOffset();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData.MutableRouteLineDynamicData toMutableValue();
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider baseExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider casingExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? restrictedSectionExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trafficExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trailCasingExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trailExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset? trimOffset;
+  }
+
+  public static final class RouteLineDynamicData.MutableRouteLineDynamicData {
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider getBaseExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider getCasingExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getRestrictedSectionExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrafficExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrailCasingExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrailExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset? getTrimOffset();
+    method public void setBaseExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider);
+    method public void setCasingExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider);
+    method public void setRestrictedSectionExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider?);
+    method public void setTrafficExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider?);
+    method public void setTrailCasingExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider?);
+    method public void setTrailExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider?);
+    method public void setTrimOffset(com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset?);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData toImmutableValue();
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider baseExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider casingExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? restrictedSectionExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trafficExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trailCasingExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trailExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset? trimOffset;
+  }
+
+  public final class RouteLineError {
+    method public String getErrorMessage();
+    method public Throwable? getThrowable();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineError.MutableRouteLineError toMutableValue();
+    property public final String errorMessage;
+    property public final Throwable? throwable;
+  }
+
+  public static final class RouteLineError.MutableRouteLineError {
+    method public String getErrorMessage();
+    method public Throwable? getThrowable();
+    method public void setErrorMessage(String);
+    method public void setThrowable(Throwable?);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineError toImmutableValue();
+    property public final String errorMessage;
+    property public final Throwable? throwable;
+  }
+
+  public final class RouteLineExpressionData {
+    ctor public RouteLineExpressionData(double offset, @ColorInt int segmentColor, int legIndex);
+    method public double component1();
+    method public int component2();
+    method public int component3();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData copy(double offset, @ColorInt int segmentColor, int legIndex);
+    method public int getLegIndex();
+    method public double getOffset();
+    method public int getSegmentColor();
+    property public final int legIndex;
+    property public final double offset;
+    property public final int segmentColor;
+  }
+
+  public fun interface RouteLineExpressionProvider {
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression generateExpression();
+  }
+
+  public final class RouteLineGranularDistances {
+    ctor public RouteLineGranularDistances(double distance, android.util.SparseArray<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex> distancesArray);
+    method public double component1();
+    method public android.util.SparseArray<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex> component2();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances copy(double distance, android.util.SparseArray<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex> distancesArray);
+    method public double getDistance();
+    method public android.util.SparseArray<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex> getDistancesArray();
+    property public final double distance;
+    property public final android.util.SparseArray<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex> distancesArray;
+  }
+
+  public final class RouteLineResources {
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getAlternativeRouteCasingLineScaleExpression();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getAlternativeRouteLineScaleExpression();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getAlternativeRouteTrafficLineScaleExpression();
+    method public int getDestinationWaypointIcon();
+    method public int getOriginWaypointIcon();
+    method public java.util.List<java.lang.Double> getRestrictedRoadDashArray();
+    method public double getRestrictedRoadLineWidth();
+    method public double getRestrictedRoadOpacity();
+    method public boolean getRoundedLineCap();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteCasingLineScaleExpression();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources getRouteLineColorResources();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteLineScaleExpression();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteTrafficLineScaleExpression();
+    method public java.util.List<java.lang.String> getTrafficBackfillRoadClasses();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder toBuilder();
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression alternativeRouteCasingLineScaleExpression;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression alternativeRouteLineScaleExpression;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression alternativeRouteTrafficLineScaleExpression;
+    property public final int destinationWaypointIcon;
+    property public final int originWaypointIcon;
+    property public final java.util.List<java.lang.Double> restrictedRoadDashArray;
+    property public final double restrictedRoadLineWidth;
+    property public final double restrictedRoadOpacity;
+    property public final boolean roundedLineCap;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeCasingLineScaleExpression;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources routeLineColorResources;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeLineScaleExpression;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeTrafficLineScaleExpression;
+    property public final java.util.List<java.lang.String> trafficBackfillRoadClasses;
+  }
+
+  public static final class RouteLineResources.Builder {
+    ctor public RouteLineResources.Builder();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder alternativeRouteCasingLineScaleExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder alternativeRouteLineScaleExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder alternativeRouteTrafficLineScaleExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources build();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder destinationWaypointIcon(@DrawableRes int resource);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder originWaypointIcon(@DrawableRes int resource);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder restrictedRoadDashArray(java.util.List<java.lang.Double> dashArray);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder restrictedRoadLineWidth(double width);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder restrictedRoadOpacity(double opacity);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder roundedLineCap(boolean roundLineCap);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder routeCasingLineScaleExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder routeLineColorResources(com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources routeLineColorResources);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder routeLineScaleExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder routeTrafficLineScaleExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder trafficBackfillRoadClasses(java.util.List<java.lang.String> roadClasses);
+  }
+
+  public final class RouteLineScaleValue {
+    ctor public RouteLineScaleValue(float scaleStop, float scaleMultiplier, float scale);
+    method public float component1();
+    method public float component2();
+    method public float component3();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue copy(float scaleStop, float scaleMultiplier, float scale);
+    method public float getScale();
+    method public float getScaleMultiplier();
+    method public float getScaleStop();
+    property public final float scale;
+    property public final float scaleMultiplier;
+    property public final float scaleStop;
+  }
+
+  public fun interface RouteLineTrimExpressionProvider extends com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider {
+  }
+
+  @kotlin.jvm.JvmInline public final value class RouteLineTrimOffset {
+    ctor public RouteLineTrimOffset(double offset);
+    method public double getOffset();
+    property public final double offset;
+  }
+
+  public final class RouteLineUpdateValue {
+    method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData> getAlternativeRouteLinesDynamicData();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData getPrimaryRouteLineDynamicData();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue.MutableRouteLineUpdateValue toMutableValue();
+    property public final java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData> alternativeRouteLinesDynamicData;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData primaryRouteLineDynamicData;
+  }
+
+  public static final class RouteLineUpdateValue.MutableRouteLineUpdateValue {
+    method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData> getAlternativeRouteLinesDynamicData();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData getPrimaryRouteLineDynamicData();
+    method public void setAlternativeRouteLinesDynamicData(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData>);
+    method public void setPrimaryRouteLineDynamicData(com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue toImmutableValue();
+    property public final java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData> alternativeRouteLinesDynamicData;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData primaryRouteLineDynamicData;
+  }
+
+  public final class RouteNotFound {
+    method public String getErrorMessage();
+    method public Throwable? getThrowable();
+    property public final String errorMessage;
+    property public final Throwable? throwable;
+  }
+
+  public final class RoutePoints {
+    ctor public RoutePoints(java.util.List<? extends java.util.List<? extends java.util.List<com.mapbox.geojson.Point>>> nestedList, java.util.List<com.mapbox.geojson.Point> flatList);
+    method public java.util.List<java.util.List<java.util.List<com.mapbox.geojson.Point>>> component1();
+    method public java.util.List<com.mapbox.geojson.Point> component2();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RoutePoints copy(java.util.List<? extends java.util.List<? extends java.util.List<com.mapbox.geojson.Point>>> nestedList, java.util.List<com.mapbox.geojson.Point> flatList);
+    method public java.util.List<com.mapbox.geojson.Point> getFlatList();
+    method public java.util.List<java.util.List<java.util.List<com.mapbox.geojson.Point>>> getNestedList();
+    property public final java.util.List<com.mapbox.geojson.Point> flatList;
+    property public final java.util.List<java.util.List<java.util.List<com.mapbox.geojson.Point>>> nestedList;
+  }
+
+  public final class RouteSetValue {
+    method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineData> getAlternativeRouteLinesData();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineData getPrimaryRouteLineData();
+    method public com.mapbox.geojson.FeatureCollection getWaypointsSource();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue.MutableRouteSetValue toMutableValue();
+    property public final java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineData> alternativeRouteLinesData;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineData primaryRouteLineData;
+    property public final com.mapbox.geojson.FeatureCollection waypointsSource;
+  }
+
+  public static final class RouteSetValue.MutableRouteSetValue {
+    method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineData> getAlternativeRouteLinesData();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineData getPrimaryRouteLineData();
+    method public com.mapbox.geojson.FeatureCollection getWaypointsSource();
+    method public void setAlternativeRouteLinesData(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineData>);
+    method public void setPrimaryRouteLineData(com.mapbox.navigation.ui.maps.route.line.model.RouteLineData);
+    method public void setWaypointsSource(com.mapbox.geojson.FeatureCollection);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue toImmutableValue();
+    property public final java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineData> alternativeRouteLinesData;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineData primaryRouteLineData;
+    property public final com.mapbox.geojson.FeatureCollection waypointsSource;
+  }
+
+  public final class RouteStyleDescriptor {
+    ctor public RouteStyleDescriptor(String routeIdentifier, @ColorInt int lineColor, @ColorInt int lineCasingColor);
+    method public String component1();
+    method public int component2();
+    method public int component3();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor copy(String routeIdentifier, @ColorInt int lineColor, @ColorInt int lineCasingColor);
+    method public int getLineCasingColor();
+    method public int getLineColor();
+    method public String getRouteIdentifier();
+    property public final int lineCasingColor;
+    property public final int lineColor;
+    property public final String routeIdentifier;
+  }
+
+  public enum VanishingPointState {
+    enum_constant public static final com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState DISABLED;
+    enum_constant public static final com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState ENABLED;
+    enum_constant public static final com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState ONLY_INCREASE_PROGRESS;
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.util {
+
+  public fun interface OnViewScreenshotReady {
+    method public void onViewCaptureReady(android.graphics.Bitmap screenshot);
+  }
+
+  public final class ViewUtils {
+    method public static void capture(android.view.View, com.mapbox.navigation.ui.maps.util.OnViewScreenshotReady callback);
+    field public static final com.mapbox.navigation.ui.maps.util.ViewUtils INSTANCE;
+  }
+
+}
+

@@ -17,7 +17,6 @@ import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.RouteLineFeaturesActivityLayoutBinding
 import com.mapbox.navigation.qa_test_app.utils.Utils
-import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
@@ -154,7 +153,7 @@ class RouteLineFeaturesActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun initStyle() {
         mapboxMap.loadStyleUri(
-            NavigationStyles.NAVIGATION_DAY_STYLE,
+            "mapbox://styles/mapbox/light-v10",
             { style: Style ->
 
                 val route1 = getRoute(R.raw.basic_route4)

@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
-import android.util.Log
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.LayerPosition
@@ -54,10 +53,8 @@ import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.jetbrains.annotations.TestOnly
@@ -197,12 +194,10 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                             sourceFeaturePairings
                         ).also { sourceFeaturePairings.remove(it) }
                         ifNonNull(relatedSourceKey) { sourceKeyFeaturePair ->
-                            val updatedRouteLineData =
-                                getRouteLineDataWithCompletedExpressions(routeLineData)
                             val gradientCommands = getGradientUpdateCommands(
                                 style,
                                 sourceKeyFeaturePair.first,
-                                updatedRouteLineData,
+                                routeLineData,
                                 sourceLayerMap
                             ).reversed()
                             // Ignoring the trim offsets if the source was updated with an
@@ -621,12 +616,10 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         sourceToLayerMap: Map<RouteLineSourceKey, Set<String>>
     ) {
         sourceToLayerMap[sourceKey]?.forEach {
-            Log.e("foobar", "start call style.moveStyleLayer for layer $it")
             style.moveStyleLayer(
                 it,
                 LayerPosition(null, RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID, null)
             )
-            Log.e("foobar", "end call style.moveStyleLayer")
         }
     }
 
@@ -678,56 +671,6 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
             mutationCommands.add { updateTrimOffset(layerId, provider)(style) }
         }
         return mutationCommands
-    }
-
-    private fun getRouteLineDataWithCompletedExpressions(
-        routeLineData: RouteLineData
-    ): RouteLineData = runBlocking {
-        val baseExpDef = jobControl.scope.async {
-            routeLineData.dynamicData.baseExpressionProvider.generateExpression()
-        }
-        val casingExpDef = jobControl.scope.async {
-            routeLineData.dynamicData.casingExpressionProvider.generateExpression()
-        }
-        val trafficExpDef = jobControl.scope.async {
-            routeLineData.dynamicData.trafficExpressionProvider?.generateExpression()
-        }
-        val restrictedExpDef = jobControl.scope.async {
-            routeLineData.dynamicData.restrictedSectionExpressionProvider?.generateExpression()
-        }
-        val trailExpDef = jobControl.scope.async {
-            routeLineData.dynamicData.trailExpressionProvider?.generateExpression()
-        }
-        val trailCasingExpDef = jobControl.scope.async {
-            routeLineData.dynamicData.trailCasingExpressionProvider?.generateExpression()
-        }
-
-        val baseExp = baseExpDef.await()
-        val casingExp = casingExpDef.await()
-        val trafficExp = trafficExpDef.await()
-        val restrictedExp = restrictedExpDef.await()
-        val trailExp = trailExpDef.await()
-        val trailCasingExp = trailCasingExpDef.await()
-
-        val mutableRouteLineData = routeLineData.toMutableValue()
-        val mutableDynamicData = mutableRouteLineData.dynamicData.toMutableValue().also {
-            it.baseExpressionProvider = RouteLineExpressionProvider { baseExp }
-            it.casingExpressionProvider = RouteLineExpressionProvider { casingExp }
-            it.trafficExpressionProvider = ifNonNull(trafficExp) {
-                RouteLineExpressionProvider { it }
-            }
-            it.trafficExpressionProvider = ifNonNull(restrictedExp) {
-                RouteLineExpressionProvider { it }
-            }
-            it.trailExpressionProvider = ifNonNull(trailExp) {
-                RouteLineExpressionProvider { it }
-            }
-            it.trailCasingExpressionProvider = ifNonNull(trailCasingExp) {
-                RouteLineExpressionProvider { it }
-            }
-        }
-        mutableRouteLineData.dynamicData = mutableDynamicData.toImmutableValue()
-        mutableRouteLineData.toImmutableValue()
     }
 
     private fun getGradientUpdateCommands(
