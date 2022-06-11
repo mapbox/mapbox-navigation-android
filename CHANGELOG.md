@@ -6,7 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
-- Fixed an issue where the camera transition will now immediately transition to following when `stateTransitionOptions.maxDuration` is set to 0 instead of flying. [#5921](https://github.com/mapbox/mapbox-navigation-android/pull/5921)
+- Fixed an issue where the default `NavigationCamera` transition to the `Following` state did not respect `NavigationCameraTransitionOptions#maxDuration`. [#5921](https://github.com/mapbox/mapbox-navigation-android/pull/5921)
 
 ## Mapbox Navigation SDK 2.6.0-beta.2 - June 9, 2022
 ### Changelog

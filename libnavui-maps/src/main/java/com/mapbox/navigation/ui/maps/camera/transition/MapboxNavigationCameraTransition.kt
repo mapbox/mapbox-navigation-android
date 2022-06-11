@@ -18,6 +18,7 @@ import com.mapbox.navigation.ui.maps.camera.utils.projectedDistance
 import com.mapbox.navigation.ui.maps.camera.utils.screenDistanceFromMapCenterToTarget
 import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlin.math.abs
+import kotlin.math.min
 
 private const val LINEAR_ANIMATION_DURATION = 1000L
 private const val MAXIMUM_LOW_TO_HIGH_DURATION = 3000L
@@ -37,11 +38,7 @@ class MapboxNavigationCameraTransition(
         transitionOptions: NavigationCameraTransitionOptions
     ): AnimatorSet {
         val pluginImpl: CameraAnimationsPluginImpl? = cameraPlugin as? CameraAnimationsPluginImpl
-        val isTransitionImmediate = transitionOptions.maxDuration == 0L
 
-        if (isTransitionImmediate) {
-            return fromLowZoomToHighZoom(cameraOptions, transitionOptions)
-        }
         return ifNonNull(pluginImpl) {
             flyFromLowZoomToHighZoom(cameraOptions, it, transitionOptions)
         } ?: fromLowZoomToHighZoom(cameraOptions, transitionOptions)
@@ -318,8 +315,8 @@ class MapboxNavigationCameraTransition(
             val zoomDelta = abs(currentZL - targetZL) * 80
             duration = normalizeProjection(projection + zoomDelta).toLong()
         }
+        duration = min(duration, transitionOptions.maxDuration)
         return createAnimatorSetWith(animators)
             .setDuration(duration)
-            .constraintDurationTo(transitionOptions.maxDuration)
     }
 }
