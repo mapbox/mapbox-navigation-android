@@ -37,7 +37,11 @@ class MapboxNavigationCameraTransition(
         transitionOptions: NavigationCameraTransitionOptions
     ): AnimatorSet {
         val pluginImpl: CameraAnimationsPluginImpl? = cameraPlugin as? CameraAnimationsPluginImpl
+        val isTransitionImmediate = transitionOptions.maxDuration == 0L
 
+        if (isTransitionImmediate) {
+            return fromLowZoomToHighZoom(cameraOptions, transitionOptions)
+        }
         return ifNonNull(pluginImpl) {
             flyFromLowZoomToHighZoom(cameraOptions, it, transitionOptions)
         } ?: fromLowZoomToHighZoom(cameraOptions, transitionOptions)

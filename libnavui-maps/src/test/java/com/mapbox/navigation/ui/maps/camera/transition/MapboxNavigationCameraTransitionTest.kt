@@ -53,7 +53,7 @@ class MapboxNavigationCameraTransitionTest {
     }
 
     @Test
-    fun transitionFlyFromLowZoomToHighZoom() {
+    fun transitionFromLowZoomToHighZoomWhenImmediate() {
         val cameraOptions = CameraOptions.Builder()
             .center(Point.fromLngLat(139.7745686, 35.677573))
             .build()
@@ -65,9 +65,24 @@ class MapboxNavigationCameraTransitionTest {
         }
         val transition = MapboxNavigationCameraTransition(mapboxMap, cameraPluginImpl)
 
-        transition.transitionFromLowZoomToHighZoom(cameraOptions, DEFAULT_STATE_TRANSITION_OPT)
+        transition.transitionFromLowZoomToHighZoom(
+            cameraOptions,
+            NavigationCameraTransitionOptions.Builder().maxDuration(0L).build()
+        )
 
         verify { createAnimatorSetWith(any()) }
+    }
+
+    @Test
+    fun transitionFlyFromLowZoomToHighZoom() {
+        val cameraOptions = CameraOptions.Builder()
+            .center(Point.fromLngLat(139.7745686, 35.677573))
+            .build()
+        val transition = MapboxNavigationCameraTransition(mapboxMap, cameraPlugin)
+
+        transition.transitionFromLowZoomToHighZoom(cameraOptions, DEFAULT_STATE_TRANSITION_OPT)
+
+        verify { createAnimatorSet(any()) }
     }
 
     @Test
