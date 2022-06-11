@@ -15,6 +15,7 @@ import com.mapbox.navigation.ui.maps.camera.utils.createAnimatorSet
 import com.mapbox.navigation.ui.maps.camera.utils.createAnimatorSetWith
 import com.mapbox.navigation.ui.maps.camera.utils.normalizeBearing
 import com.mapbox.navigation.ui.maps.camera.utils.normalizeProjection
+import com.mapbox.navigation.ui.maps.camera.utils.projectedDistance
 import com.mapbox.navigation.ui.maps.camera.utils.screenDistanceFromMapCenterToTarget
 import io.mockk.every
 import io.mockk.mockk
@@ -26,6 +27,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import kotlin.math.min
 
 class MapboxNavigationCameraTransitionTest {
 
@@ -41,8 +43,9 @@ class MapboxNavigationCameraTransitionTest {
         every { createAnimatorSet(any()) } returns animatorSet
         every { createAnimatorSetWith(any()) } returns animatorSet
         every { animatorSet.constraintDurationTo(any()) } returns constrainedSet
-        every { animatorSet.setDuration(any()).constraintDurationTo(any()) } returns constrainedSet
+        every { animatorSet.setDuration(any()) } returns constrainedSet
         every { normalizeProjection(any()) } returns 2000.0
+        every { projectedDistance(any(), any(), any(), any()) } returns 1300.0
         every { screenDistanceFromMapCenterToTarget(mapboxMap, any(), any()) } returns 1000.0
         every { cameraPlugin.createCenterAnimator(any(), any()) } returns mockk()
         every { cameraPlugin.createBearingAnimator(any(), any(), any()) } returns mockk()
@@ -56,6 +59,7 @@ class MapboxNavigationCameraTransitionTest {
     fun transitionFromLowZoomToHighZoomWhenImmediate() {
         val cameraOptions = CameraOptions.Builder()
             .center(Point.fromLngLat(139.7745686, 35.677573))
+            .zoom(22.0)
             .build()
         val mockAnimators: Array<CameraAnimator<*>> = arrayOf()
         val cameraPluginImpl = mockk<CameraAnimationsPluginImpl> {
@@ -63,13 +67,15 @@ class MapboxNavigationCameraTransitionTest {
                 every { getFlyTo(cameraOptions) } returns mockAnimators
             }
         }
+        every { constrainedSet.duration } returns min(0.0, 1300.0).toLong()
         val transition = MapboxNavigationCameraTransition(mapboxMap, cameraPluginImpl)
 
-        transition.transitionFromLowZoomToHighZoom(
+        val animator = transition.transitionFromLowZoomToHighZoom(
             cameraOptions,
             NavigationCameraTransitionOptions.Builder().maxDuration(0L).build()
         )
 
+        assertEquals(0L, animator.duration)
         verify { createAnimatorSetWith(any()) }
     }
 
