@@ -1,15 +1,16 @@
 package com.mapbox.navigation.dropin.component.camera
 
 import com.mapbox.maps.MapView
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.toCameraOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
-import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.model.Store
+import com.mapbox.navigation.ui.app.internal.Store
+import com.mapbox.navigation.ui.app.internal.camera.CameraAction
+import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
+import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
@@ -24,7 +25,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @ExperimentalPreviewMapboxNavigationAPI
-@OptIn(MapboxExperimental::class)
 internal class CameraComponent constructor(
     private val store: Store,
     private val mapView: MapView,

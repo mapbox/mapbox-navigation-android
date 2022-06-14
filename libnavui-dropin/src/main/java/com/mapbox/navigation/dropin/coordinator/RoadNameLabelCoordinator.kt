@@ -9,7 +9,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.roadlabel.RoadNameViewBinder
-import com.mapbox.navigation.dropin.component.navigation.NavigationState
+import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.base.lifecycle.UICoordinator
 import kotlinx.coroutines.flow.Flow
@@ -28,7 +28,7 @@ internal class RoadNameLabelCoordinator(
 
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
         coroutineScope.launch {
-            context.viewModel.store.select { it.navigation }.collect { navigationState ->
+            context.store.select { it.navigation }.collect { navigationState ->
                 when (roadNameLabelLayout.resources.configuration.orientation) {
                     Configuration.ORIENTATION_LANDSCAPE -> {
                         adjustLandscapeConstraints(navigationState)

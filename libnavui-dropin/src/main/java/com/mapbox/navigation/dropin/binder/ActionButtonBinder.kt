@@ -11,13 +11,13 @@ import com.mapbox.navigation.core.internal.extensions.navigationListOf
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.component.audioguidance.AudioAction
 import com.mapbox.navigation.dropin.component.cameramode.CameraModeButtonComponent
-import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.recenter.RecenterButtonComponent
 import com.mapbox.navigation.dropin.databinding.MapboxActionButtonsLayoutBinding
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
-import com.mapbox.navigation.dropin.model.Store
+import com.mapbox.navigation.ui.app.internal.Store
+import com.mapbox.navigation.ui.app.internal.audioguidance.AudioAction
+import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.voice.internal.ui.AudioComponentContract
 import com.mapbox.navigation.ui.voice.internal.ui.AudioGuidanceButtonComponent
@@ -38,7 +38,7 @@ internal class ActionButtonBinder(
         TransitionManager.go(scene, Slide(Gravity.RIGHT))
 
         val binding = MapboxActionButtonsLayoutBinding.bind(viewGroup)
-        val store = context.viewModel.store
+        val store = context.store
         return navigationListOf(
             reloadOnChange(context.styles.audioGuidanceButtonStyle) { style ->
                 audioGuidanceButtonComponent(binding, style, store)

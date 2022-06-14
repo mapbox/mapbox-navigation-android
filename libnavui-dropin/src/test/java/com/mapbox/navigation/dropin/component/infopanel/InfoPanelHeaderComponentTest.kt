@@ -9,16 +9,16 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.component.destination.Destination
-import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
-import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
-import com.mapbox.navigation.dropin.component.routefetch.RoutesState
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderLayoutBinding
-import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.dropin.util.TestingUtil.makeLocationMatcherResult
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.app.internal.State
+import com.mapbox.navigation.ui.app.internal.destination.Destination
+import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
+import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutesState
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -215,7 +215,9 @@ internal class InfoPanelHeaderComponentTest {
                     ),
                     destination = Destination(destPoint),
                     navigation = NavigationState.DestinationPreview,
-                    routes = RoutesState.Ready(mockk())
+                    routes = mockk<RoutesState.Ready> {
+                        every { routes } returns mockk()
+                    }
                 )
             )
 
@@ -241,7 +243,9 @@ internal class InfoPanelHeaderComponentTest {
                 ),
                 destination = Destination(destPoint),
                 navigation = NavigationState.DestinationPreview,
-                routes = RoutesState.Ready(mockk())
+                routes = mockk<RoutesState.Ready> {
+                    every { routes } returns mockk()
+                }
             )
         )
 
@@ -267,7 +271,9 @@ internal class InfoPanelHeaderComponentTest {
                     ),
                     destination = Destination(destPoint),
                     navigation = NavigationState.DestinationPreview,
-                    routes = RoutesState.Ready(mockk())
+                    routes = mockk<RoutesState.Ready> {
+                        every { routes } returns mockk()
+                    }
                 )
             )
 

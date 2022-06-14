@@ -4,12 +4,12 @@ import com.mapbox.api.geocoding.v5.models.CarmenFeature
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.component.destination.Destination
-import com.mapbox.navigation.dropin.component.destination.DestinationAction.DidReverseGeocode
-import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.util.Geocoder
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.app.internal.State
+import com.mapbox.navigation.ui.app.internal.destination.Destination
+import com.mapbox.navigation.ui.app.internal.destination.DestinationAction.DidReverseGeocode
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify

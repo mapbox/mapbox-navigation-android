@@ -241,14 +241,13 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
             routeArrowOptions = this@MapboxNavigationViewCustomizedActivity.routeArrowOptions
         }
 
-        // This is not the intended long term solution. We have not yet decided how
-        // to expose view model actions. Considering that we need a navigationView to be created
-        // before we can interact with the view models, we will probably prefer something like this:
-        //       binding.navigationView.api.enableReplay();
-        // TODO Make a ticket with link to list of public api needs
-        binding.toggleReplay.isChecked = binding.navigationView.isReplayEnabled
+        binding.toggleReplay.isChecked = binding.navigationView.api.isReplayEnabled()
         binding.toggleReplay.setOnCheckedChangeListener { _, isChecked ->
-            binding.navigationView.isReplayEnabled = isChecked
+            if (isChecked) {
+                binding.navigationView.api.enableReplaySession()
+            } else {
+                binding.navigationView.api.enableTripSession()
+            }
         }
 
         // Demonstrate map customization

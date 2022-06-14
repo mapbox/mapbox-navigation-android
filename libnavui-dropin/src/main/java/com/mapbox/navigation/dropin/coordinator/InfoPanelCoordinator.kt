@@ -26,7 +26,7 @@ internal class InfoPanelCoordinator(
     private val infoPanel: ViewGroup,
     private val guidelineBottom: Guideline
 ) : UICoordinator<ViewGroup>(infoPanel) {
-    private val store = context.viewModel.store
+    private val store = context.store
     private val behavior = BottomSheetBehavior.from(infoPanel)
 
     init {

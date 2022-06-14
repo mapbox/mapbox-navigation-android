@@ -6,8 +6,8 @@ import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.controller.LocationStateController
+import com.mapbox.navigation.ui.app.R
+import com.mapbox.navigation.ui.app.internal.controller.LocationStateController
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import kotlinx.coroutines.launch
 

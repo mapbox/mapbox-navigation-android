@@ -7,9 +7,10 @@ import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
-import com.mapbox.navigation.dropin.model.Store
+import com.mapbox.navigation.ui.app.internal.Store
+import com.mapbox.navigation.ui.app.internal.camera.CameraAction
+import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)

@@ -12,9 +12,9 @@ import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.roadname.view.MapboxRoadNameView
 import com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi

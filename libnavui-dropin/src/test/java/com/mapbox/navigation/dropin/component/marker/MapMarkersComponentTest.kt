@@ -8,10 +8,10 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.component.destination.Destination
-import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.app.internal.State
+import com.mapbox.navigation.ui.app.internal.destination.Destination
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK

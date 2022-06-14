@@ -2,14 +2,46 @@ package com.mapbox.navigation.ui.app.internal
 
 import android.content.Context
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.core.internal.extensions.attachCreated
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.ui.app.internal.controller.AudioGuidanceStateController
+import com.mapbox.navigation.ui.app.internal.controller.CameraStateController
+import com.mapbox.navigation.ui.app.internal.controller.DestinationStateController
+import com.mapbox.navigation.ui.app.internal.controller.LocationStateController
+import com.mapbox.navigation.ui.app.internal.controller.NavigationStateController
+import com.mapbox.navigation.ui.app.internal.controller.RoutesStateController
+import com.mapbox.navigation.ui.app.internal.controller.TripSessionStarterStateController
 import com.mapbox.navigation.ui.utils.internal.datastore.NavigationDataStoreOwner
 import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidance
 import com.mapbox.navigation.ui.voice.internal.impl.MapboxAudioGuidanceImpl
 
-@ExperimentalPreviewMapboxNavigationAPI
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 object SharedApp {
     private var isSetup = false
+
+    val store = Store()
+    val state get() = store.state.value
+
+    /**
+     * These classes are accessible through MapboxNavigationApp.getObserver(..)
+     */
+    val navigationStateController = NavigationStateController(store)
+    val locationStateController = LocationStateController(store)
+    val tripSessionStarterStateController = TripSessionStarterStateController(store)
+    val audioGuidanceStateController = AudioGuidanceStateController(store)
+    val cameraStateController = CameraStateController(store)
+    val destinationStateController = DestinationStateController(store)
+    val routesStateController = RoutesStateController(store)
+    private val navigationObservers: Array<MapboxNavigationObserver> = arrayOf(
+        destinationStateController,
+        tripSessionStarterStateController,
+        audioGuidanceStateController,
+        locationStateController,
+        routesStateController,
+        cameraStateController,
+        navigationStateController,
+    )
 
     fun setup(
         context: Context,
@@ -18,8 +50,8 @@ object SharedApp {
         if (isSetup) return
         isSetup = true
 
-        val sharedAudioGuidance = audioGuidance ?: defaultAudioGuidance(context)
-        MapboxNavigationApp.registerObserver(sharedAudioGuidance)
+        MapboxNavigationApp.lifecycleOwner.attachCreated(*navigationObservers)
+        MapboxNavigationApp.registerObserver(audioGuidance ?: defaultAudioGuidance(context))
     }
 
     private fun defaultAudioGuidance(context: Context): MapboxAudioGuidance {
@@ -28,5 +60,5 @@ object SharedApp {
         }
     }
 
-    const val DEFAULT_DATA_STORE_NAME = "mapbox_navigation_preferences"
+    private const val DEFAULT_DATA_STORE_NAME = "mapbox_navigation_preferences"
 }

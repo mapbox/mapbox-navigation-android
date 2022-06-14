@@ -5,13 +5,12 @@ import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.component.camera.CameraState
-import com.mapbox.navigation.dropin.component.camera.TargetCameraMode
-import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.dropin.view.MapboxCameraModeButton
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.app.internal.State
+import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
+import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import io.mockk.Runs
 import io.mockk.every
@@ -60,7 +59,11 @@ class CameraModeButtonComponentTest {
             cameraModeButtonComponent.onAttached(mockMapboxNavigation)
 
             testStore.setState(
-                State(camera = CameraState(cameraMode = TargetCameraMode.Following))
+                State(
+                    camera = mockk {
+                        every { cameraMode } returns TargetCameraMode.Following
+                    },
+                )
             )
 
             verify { mockCameraModeButton.setState(NavigationCameraState.FOLLOWING) }
@@ -72,7 +75,11 @@ class CameraModeButtonComponentTest {
             cameraModeButtonComponent.onAttached(mockMapboxNavigation)
 
             testStore.setState(
-                State(camera = CameraState(cameraMode = TargetCameraMode.Overview))
+                State(
+                    camera = mockk {
+                        every { cameraMode } returns TargetCameraMode.Overview
+                    },
+                )
             )
 
             verify { mockCameraModeButton.setState(NavigationCameraState.OVERVIEW) }
