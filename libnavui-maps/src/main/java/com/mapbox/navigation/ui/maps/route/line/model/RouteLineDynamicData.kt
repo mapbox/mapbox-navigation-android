@@ -8,6 +8,8 @@ package com.mapbox.navigation.ui.maps.route.line.model
  * @param trafficExpressionProvider expression used to style the congestion colors on the line
  * @param restrictedSectionExpressionProvider expression used to style the restricted sections on the line
  * @param trimOffset a value representing the section of the line that should be trimmed and made transparent. Null by default
+ * @param trailExpressionProvider expression used to style the trail layer
+ * @param trailCasingExpressionProvider expression used to style the trail casing layer
  */
 class RouteLineDynamicData internal constructor(
     val baseExpressionProvider: RouteLineExpressionProvider,
@@ -15,6 +17,8 @@ class RouteLineDynamicData internal constructor(
     val trafficExpressionProvider: RouteLineExpressionProvider?,
     val restrictedSectionExpressionProvider: RouteLineExpressionProvider?,
     val trimOffset: RouteLineTrimOffset? = null,
+    val trailExpressionProvider: RouteLineExpressionProvider? = null,
+    val trailCasingExpressionProvider: RouteLineExpressionProvider? = null
 ) {
 
     /**
@@ -25,7 +29,9 @@ class RouteLineDynamicData internal constructor(
         casingExpressionProvider,
         trafficExpressionProvider,
         restrictedSectionExpressionProvider,
-        trimOffset
+        trimOffset,
+        trailExpressionProvider,
+        trailCasingExpressionProvider
     )
 
     /**
@@ -36,6 +42,8 @@ class RouteLineDynamicData internal constructor(
      * @param trafficExpressionProvider expression used to style the congestion colors on the line
      * @param restrictedSectionExpressionProvider expression used to style the restricted sections on the line
      * @param trimOffset a value representing the section of the line that should be trimmed and made transparent. Null by default
+     * @param trailExpressionProvider expression used to style the trail layer
+     * @param trailCasingExpressionProvider expression used to style the trail casing layer
      */
     class MutableRouteLineDynamicData internal constructor(
         var baseExpressionProvider: RouteLineExpressionProvider,
@@ -43,6 +51,8 @@ class RouteLineDynamicData internal constructor(
         var trafficExpressionProvider: RouteLineExpressionProvider?,
         var restrictedSectionExpressionProvider: RouteLineExpressionProvider?,
         var trimOffset: RouteLineTrimOffset? = null,
+        var trailExpressionProvider: RouteLineExpressionProvider? = null,
+        var trailCasingExpressionProvider: RouteLineExpressionProvider? = null
     ) {
 
         /**
@@ -53,7 +63,9 @@ class RouteLineDynamicData internal constructor(
             casingExpressionProvider,
             trafficExpressionProvider,
             restrictedSectionExpressionProvider,
-            trimOffset
+            trimOffset,
+            trailExpressionProvider,
+            trailCasingExpressionProvider
         )
     }
 
@@ -72,6 +84,8 @@ class RouteLineDynamicData internal constructor(
         if (restrictedSectionExpressionProvider != other.restrictedSectionExpressionProvider)
             return false
         if (trimOffset != other.trimOffset) return false
+        if (trailExpressionProvider != other.trafficExpressionProvider) return false
+        if (trailCasingExpressionProvider != other.trailCasingExpressionProvider) return false
 
         return true
     }
@@ -85,6 +99,8 @@ class RouteLineDynamicData internal constructor(
         result = 31 * result + (trafficExpressionProvider?.hashCode() ?: 0)
         result = 31 * result + (restrictedSectionExpressionProvider?.hashCode() ?: 0)
         result = 31 * result + (trimOffset?.hashCode() ?: 0)
+        result = 31 * result + (trailExpressionProvider?.hashCode() ?: 0)
+        result = 31 * result + (trailCasingExpressionProvider?.hashCode() ?: 0)
         return result
     }
 
@@ -97,7 +113,9 @@ class RouteLineDynamicData internal constructor(
             "casingExpressionProvider=$casingExpressionProvider, " +
             "trafficExpressionProvider=$trafficExpressionProvider, " +
             "restrictedSectionExpressionProvider=$restrictedSectionExpressionProvider," +
-            "trimOffset=$trimOffset" +
+            "trimOffset=$trimOffset," +
+            "trailExpressionProvider=$trailExpressionProvider," +
+            "trailCasingExpressionProvider=$trailCasingExpressionProvider," +
             ")"
     }
 }

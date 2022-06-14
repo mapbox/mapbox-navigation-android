@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.internal.route.line
 
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.util.LruCache
 import android.util.SparseArray
 import androidx.annotation.ColorInt
@@ -12,17 +13,26 @@ import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.LayerPosition
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
+import com.mapbox.maps.StyleObjectInfo
+import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
+import com.mapbox.maps.extension.style.expressions.dsl.generated.match
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.addPersistentLayer
 import com.mapbox.maps.extension.style.layers.generated.BackgroundLayer
+import com.mapbox.maps.extension.style.layers.generated.LineLayer
+import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
 import com.mapbox.maps.extension.style.layers.getLayer
+import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
+import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
+import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
+import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToLineString
 import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
+import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -34,15 +44,16 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineSourceKey
 import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
+import com.mapbox.navigation.ui.utils.internal.extensions.getBitmap
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMisc
-import java.util.UUID
 import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.sin
@@ -59,6 +70,41 @@ internal object MapboxRouteLineUtils {
             List<ExtractedRouteData>
             >,
         List<ExtractedRouteData>> by lazy { LruCache(3) }
+
+    val layerGroup1SourceKey = RouteLineSourceKey(RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID)
+    val layerGroup2SourceKey = RouteLineSourceKey(RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID)
+    val layerGroup3SourceKey = RouteLineSourceKey(RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID)
+
+    val layerGroup1SourceLayerIds = setOf(
+        RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING,
+        RouteLayerConstants.LAYER_GROUP_1_TRAIL,
+        RouteLayerConstants.LAYER_GROUP_1_CASING,
+        RouteLayerConstants.LAYER_GROUP_1_MAIN,
+        RouteLayerConstants.LAYER_GROUP_1_TRAFFIC,
+        RouteLayerConstants.LAYER_GROUP_1_RESTRICTED
+    )
+    val layerGroup2SourceLayerIds = setOf(
+        RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING,
+        RouteLayerConstants.LAYER_GROUP_2_TRAIL,
+        RouteLayerConstants.LAYER_GROUP_2_CASING,
+        RouteLayerConstants.LAYER_GROUP_2_MAIN,
+        RouteLayerConstants.LAYER_GROUP_2_TRAFFIC,
+        RouteLayerConstants.LAYER_GROUP_2_RESTRICTED
+    )
+    val layerGroup3SourceLayerIds = setOf(
+        RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING,
+        RouteLayerConstants.LAYER_GROUP_3_TRAIL,
+        RouteLayerConstants.LAYER_GROUP_3_CASING,
+        RouteLayerConstants.LAYER_GROUP_3_MAIN,
+        RouteLayerConstants.LAYER_GROUP_3_TRAFFIC,
+        RouteLayerConstants.LAYER_GROUP_3_RESTRICTED
+    )
+
+    val sourceLayerMap = mapOf<RouteLineSourceKey, Set<String>>(
+        Pair(layerGroup1SourceKey, layerGroup1SourceLayerIds),
+        Pair(layerGroup2SourceKey, layerGroup2SourceLayerIds),
+        Pair(layerGroup3SourceKey, layerGroup3SourceLayerIds)
+    )
 
     /**
      * Creates an [Expression] that can be applied to the layer style changing the appearance of
@@ -737,7 +783,7 @@ internal object MapboxRouteLineUtils {
      * LineString
      */
     private fun generateFeatureCollection(route: NavigationRoute): RouteFeatureData =
-        generateFeatureCollection(route, null)
+        generateRouteFeatureData(route, null)
 
     /**
      * Generates a FeatureCollection and LineString based on the @param route.
@@ -747,7 +793,7 @@ internal object MapboxRouteLineUtils {
      * LineString
      */
     private fun generateFeatureCollection(route: NavigationRouteLine): RouteFeatureData =
-        generateFeatureCollection(route.route, route.identifier)
+        generateRouteFeatureData(route.route, route.identifier)
 
     internal fun calculateRouteGranularDistances(
         coordinates: List<Point>
@@ -775,16 +821,17 @@ internal object MapboxRouteLineUtils {
         return RouteLineGranularDistances(distance, indexArray)
     }
 
-    private val generateFeatureCollection: (
+    private val generateRouteFeatureData: (
         route: NavigationRoute,
         identifier: String?
     ) -> RouteFeatureData = { route: NavigationRoute, identifier: String? ->
         val routeGeometry = route.directionsRoute.completeGeometryToLineString()
-        val randomId = UUID.randomUUID().toString()
         val routeFeature = when (identifier) {
-            null -> Feature.fromGeometry(routeGeometry, null, randomId)
-            else -> Feature.fromGeometry(routeGeometry, null, randomId).also {
-                it.addBooleanProperty(identifier, true)
+            null -> Feature.fromGeometry(routeGeometry, null, route.id)
+            else -> {
+                Feature.fromGeometry(routeGeometry, null, route.id).also {
+                    it.addBooleanProperty(identifier, true)
+                }
             }
         }
 
@@ -903,135 +950,310 @@ internal object MapboxRouteLineUtils {
         return expressionBuilder.build()
     }
 
-    @OptIn(MapboxExperimental::class)
-    internal fun initializeLayers(style: Style, options: MapboxRouteLineOptions) {
+    private fun addSource(
+        style: Style,
+        layerSource: String,
+        tolerance: Double,
+        useLineMetrics: Boolean
+    ) {
+        if (!style.styleSourceExists(layerSource)) {
+            geoJsonSource(layerSource) {
+                maxzoom(16)
+                lineMetrics(useLineMetrics)
+                tolerance(tolerance)
+            }.bindTo(style)
+        }
+    }
+
+    fun initializeLayers(style: Style, options: MapboxRouteLineOptions) {
         if (layersAreInitialized(style, options)) {
             return
         }
+
         val belowLayerIdToUse: String? =
             getBelowLayerIdToUse(
                 options.routeLineBelowLayerId,
                 style
             )
 
-        if (!style.styleSourceExists(RouteLayerConstants.WAYPOINT_SOURCE_ID)) {
-            geoJsonSource(RouteLayerConstants.WAYPOINT_SOURCE_ID) {
-                maxzoom(16)
-                tolerance(options.tolerance)
-            }.bindTo(style)
-        }
-
-        if (!style.styleSourceExists(RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID)) {
-            geoJsonSource(RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID) {
-                maxzoom(16)
-                lineMetrics(true)
-                tolerance(options.tolerance)
-            }.bindTo(style)
-        }
-
-        if (!style.styleSourceExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID)) {
-            geoJsonSource(RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) {
-                maxzoom(16)
-                lineMetrics(true)
-                tolerance(options.tolerance)
-            }.bindTo(style)
-        }
-
-        if (!style.styleSourceExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID)) {
-            geoJsonSource(RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) {
-                maxzoom(16)
-                lineMetrics(true)
-                tolerance(options.tolerance)
-            }.bindTo(style)
-        }
-
-        style.addPersistentLayer(
-            BackgroundLayer(
-                RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID,
-            ).apply { this.backgroundOpacity(0.0) },
-            LayerPosition(null, belowLayerIdToUse, null)
+        addSource(
+            style,
+            RouteLayerConstants.WAYPOINT_SOURCE_ID,
+            options.tolerance,
+            useLineMetrics = false
+        )
+        addSource(
+            style,
+            RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
+            options.tolerance,
+            useLineMetrics = true
+        )
+        addSource(
+            style,
+            RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID,
+            options.tolerance,
+            useLineMetrics = true
+        )
+        addSource(
+            style,
+            RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID,
+            options.tolerance,
+            useLineMetrics = true
         )
 
-        options.routeLayerProvider.buildAlternativeRouteCasingLayers(
-            style,
-            options.resourceProvider.routeLineColorResources.alternativeRouteCasingColor
-        ).forEach {
-            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
+        if (!style.styleLayerExists(RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)) {
+            style.addPersistentLayer(
+                BackgroundLayer(
+                    RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID,
+                ).apply { this.backgroundOpacity(0.0) },
+                LayerPosition(null, belowLayerIdToUse, null)
+            )
         }
 
-        options.routeLayerProvider.buildAlternativeRouteLayers(
-            style,
-            options.resourceProvider.roundedLineCap,
-            options.resourceProvider.routeLineColorResources.alternativeRouteDefaultColor
-        ).forEach {
-            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
+        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING)) {
+            LineLayer(
+                RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING,
+                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
         }
-
-        options.routeLayerProvider.buildAlternativeRouteTrafficLayers(
-            style,
-            options.resourceProvider.roundedLineCap,
-            options.resourceProvider.routeLineColorResources.alternativeRouteDefaultColor
-        ).forEach {
-            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
+        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_TRAIL)) {
+            LineLayer(
+                RouteLayerConstants.LAYER_GROUP_3_TRAIL,
+                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
         }
-
-        options.routeLayerProvider.buildPrimaryRouteCasingTrailLayer(
-            style,
-            options.resourceProvider.routeLineColorResources.routeLineTraveledCasingColor
-        ).let {
-            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
+        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_CASING)) {
+            LineLayer(
+                RouteLayerConstants.LAYER_GROUP_3_CASING,
+                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
         }
-
-        options.routeLayerProvider.buildPrimaryRouteTrailLayer(
-            style,
-            options.resourceProvider.roundedLineCap,
-            options.resourceProvider.routeLineColorResources.routeLineTraveledColor
-        ).let {
-            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
+        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_MAIN)) {
+            LineLayer(
+                RouteLayerConstants.LAYER_GROUP_3_MAIN,
+                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
         }
-
-        options.routeLayerProvider.buildPrimaryRouteCasingLayer(
-            style,
-            options.resourceProvider.routeLineColorResources.routeCasingColor
-        ).let {
-            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
+        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_TRAFFIC)) {
+            LineLayer(
+                RouteLayerConstants.LAYER_GROUP_3_TRAFFIC,
+                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
         }
-
-        options.routeLayerProvider.buildPrimaryRouteLayer(
-            style,
-            options.resourceProvider.roundedLineCap,
-            options.resourceProvider.routeLineColorResources.routeDefaultColor
-        ).let {
-            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
-        }
-
-        options.routeLayerProvider.buildPrimaryRouteTrafficLayer(
-            style,
-            options.resourceProvider.roundedLineCap,
-            options.resourceProvider.routeLineColorResources.routeDefaultColor
-        ).let {
-            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
-        }
-
         if (options.displayRestrictedRoadSections) {
-            options.routeLayerProvider.buildAccessRestrictionsLayer(
-                options.resourceProvider.restrictedRoadDashArray,
-                options.resourceProvider.restrictedRoadOpacity,
-                options.resourceProvider.routeLineColorResources.restrictedRoadColor,
-                options.resourceProvider.restrictedRoadLineWidth
-            ).let {
-                style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
+            if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_RESTRICTED)) {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_3_RESTRICTED,
+                    RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+                )
+                    .lineWidth(options.resourceProvider.restrictedRoadLineWidth)
+                    .lineJoin(LineJoin.ROUND)
+                    .lineOpacity(options.resourceProvider.restrictedRoadOpacity)
+                    .lineColor(options.resourceProvider.routeLineColorResources.restrictedRoadColor)
+                    .lineDasharray(options.resourceProvider.restrictedRoadDashArray)
+                    .lineCap(LineCap.ROUND)
+                    .apply {
+                        style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    }
             }
         }
 
-        style.addPersistentLayer(
-            BackgroundLayer(
-                RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
-            ).apply { this.backgroundOpacity(0.0) },
-            LayerPosition(null, belowLayerIdToUse, null)
-        )
+        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING)) {
+            LineLayer(
+                RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING,
+                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
+        }
+        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_TRAIL)) {
+            LineLayer(
+                RouteLayerConstants.LAYER_GROUP_2_TRAIL,
+                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
+        }
+        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_CASING)) {
+            LineLayer(
+                RouteLayerConstants.LAYER_GROUP_2_CASING,
+                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
+        }
+        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_MAIN)) {
+            LineLayer(
+                RouteLayerConstants.LAYER_GROUP_2_MAIN,
+                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
+        }
+        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_TRAFFIC)) {
+            LineLayer(
+                RouteLayerConstants.LAYER_GROUP_2_TRAFFIC,
+                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
+        }
+        if (options.displayRestrictedRoadSections) {
+            if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_RESTRICTED)) {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_2_RESTRICTED,
+                    RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+                )
+                    .lineWidth(options.resourceProvider.restrictedRoadLineWidth)
+                    .lineJoin(LineJoin.ROUND)
+                    .lineOpacity(options.resourceProvider.restrictedRoadOpacity)
+                    .lineColor(options.resourceProvider.routeLineColorResources.restrictedRoadColor)
+                    .lineDasharray(options.resourceProvider.restrictedRoadDashArray)
+                    .lineCap(LineCap.ROUND)
+                    .apply {
+                        style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    }
+            }
+        }
 
-        options.routeLayerProvider.buildWayPointLayer(
+        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING)) {
+            LineLayer(
+                RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING,
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
+        }
+        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAIL)) {
+            LineLayer(
+                RouteLayerConstants.LAYER_GROUP_1_TRAIL,
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
+        }
+        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_CASING)) {
+            LineLayer(
+                RouteLayerConstants.LAYER_GROUP_1_CASING,
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
+        }
+        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_MAIN)) {
+            LineLayer(
+                RouteLayerConstants.LAYER_GROUP_1_MAIN,
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
+        }
+        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAFFIC)) {
+            LineLayer(
+                RouteLayerConstants.LAYER_GROUP_1_TRAFFIC,
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
+        }
+        if (options.displayRestrictedRoadSections) {
+            if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_RESTRICTED)) {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_1_RESTRICTED,
+                    RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                )
+                    .lineWidth(options.resourceProvider.restrictedRoadLineWidth)
+                    .lineJoin(LineJoin.ROUND)
+                    .lineOpacity(options.resourceProvider.restrictedRoadOpacity)
+                    .lineColor(options.resourceProvider.routeLineColorResources.restrictedRoadColor)
+                    .lineDasharray(options.resourceProvider.restrictedRoadDashArray)
+                    .lineCap(LineCap.ROUND)
+                    .apply {
+                        style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    }
+            }
+        }
+
+        if (!style.styleLayerExists(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)) {
+            style.addPersistentLayer(
+                BackgroundLayer(
+                    RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
+                ).apply { this.backgroundOpacity(0.0) },
+                LayerPosition(null, belowLayerIdToUse, null)
+            )
+        }
+
+        buildWayPointLayer(
             style,
             options.originIcon,
             options.destinationIcon,
@@ -1044,21 +1266,30 @@ internal object MapboxRouteLineUtils {
     }
 
     internal fun layersAreInitialized(style: Style, options: MapboxRouteLineOptions): Boolean {
-        return style.styleSourceExists(RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID) &&
-            style.styleSourceExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) &&
-            style.styleSourceExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) &&
-            style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID) &&
-            style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID) &&
-            style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID) &&
-            style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID) &&
-            style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID) &&
-            style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID) &&
-            style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID) &&
-            style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID) &&
-            style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID) &&
+        return style.styleSourceExists(RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID) &&
+            style.styleSourceExists(RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID) &&
+            style.styleSourceExists(RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID) &&
             style.styleLayerExists(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID) &&
+            style.styleLayerExists(RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID) &&
+            style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING) &&
+            style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAIL) &&
+            style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_CASING) &&
+            style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_MAIN) &&
+            style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAFFIC) &&
+            style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING) &&
+            style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_TRAIL) &&
+            style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_CASING) &&
+            style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_MAIN) &&
+            style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_TRAFFIC) &&
+            style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING) &&
+            style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_TRAIL) &&
+            style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_CASING) &&
+            style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_MAIN) &&
+            style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_TRAFFIC) &&
             if (options.displayRestrictedRoadSections) {
-                style.styleLayerExists(RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID)
+                style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_RESTRICTED) &&
+                    style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_RESTRICTED) &&
+                    style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_RESTRICTED)
             } else {
                 true
             }
@@ -1204,6 +1435,48 @@ internal object MapboxRouteLineUtils {
         }
     }
 
+    internal fun getLayerIdsForPrimaryRoute(
+        style: Style,
+        sourceLayerMap: Map<RouteLineSourceKey, Set<String>>
+    ): Set<String> {
+        return getTopRouteLineRelatedLayerId(style)?.run {
+            when (this) {
+                in layerGroup1SourceLayerIds -> {
+                    sourceLayerMap[layerGroup1SourceKey]
+                }
+                in layerGroup2SourceLayerIds -> {
+                    sourceLayerMap[layerGroup2SourceKey]
+                }
+                in layerGroup3SourceLayerIds -> {
+                    sourceLayerMap[layerGroup3SourceKey]
+                }
+                else -> setOf()
+            }
+        } ?: setOf()
+    }
+
+    internal fun getTopRouteLineRelatedLayerId(style: Style): String? {
+        return runCatching {
+            val upperRange = style.styleLayers.indexOf(
+                StyleObjectInfo(
+                    RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID,
+                    "background"
+                )
+            )
+            val lowerRange = style.styleLayers.indexOf(
+                StyleObjectInfo(
+                    RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID,
+                    "background"
+                )
+            )
+
+            style.styleLayers.subList(lowerRange, upperRange)
+                .mapIndexed { index, styleObjectInfo ->
+                    Pair(index, styleObjectInfo.id)
+                }.maxByOrNull { it.first }?.second
+        }.getOrNull()
+    }
+
     /**
      * Looks for a property in the [FeatureCollection] matching an identifier in the
      * collection of [RouteStyleDescriptor] items and if a match is found the color from
@@ -1239,6 +1512,32 @@ internal object MapboxRouteLineUtils {
         }
     }
 
+    internal fun getAlternativeRoutesDeviationOffsets(
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>
+    ): Map<String, Double> {
+        val alternativesDeviationOffset = mutableMapOf<String, Double>()
+        alternativeRoutesMetadata.forEach { routeMetadata ->
+            var runningDistance = 0.0
+            val route = routeMetadata.navigationRoute.directionsRoute
+            route.legs()?.forEachIndexed LegLoop@{ legIndex, leg ->
+                leg.annotation()?.distance()
+                    ?.forEachIndexed AnnotationLoop@{ annotationIndex, distance ->
+                        val forkLegIndex = routeMetadata.forkIntersectionOfAlternativeRoute.legIndex
+                        val forkGeometryIndexInLeg =
+                            routeMetadata.forkIntersectionOfAlternativeRoute.geometryIndexInLeg
+                        if (legIndex == forkLegIndex && annotationIndex == forkGeometryIndexInLeg) {
+                            val percentageTraveled = runningDistance / route.distance()
+                            alternativesDeviationOffset[routeMetadata.navigationRoute.id] =
+                                percentageTraveled
+                            return@LegLoop
+                        }
+                        runningDistance += distance
+                    }
+            }
+        }
+        return alternativesDeviationOffset
+    }
+
     private fun projectX(x: Double): Double {
         return x / 360.0 + 0.5
     }
@@ -1251,5 +1550,80 @@ internal object MapboxRouteLineUtils {
             y2 > 1 -> 1.1
             else -> y2
         }
+    }
+
+    private fun buildWayPointLayer(
+        style: Style,
+        originIcon: Drawable,
+        destinationIcon: Drawable,
+        iconOffset: List<Double>,
+        iconAnchor: IconAnchor,
+        iconPitchAlignment: IconPitchAlignment
+    ): SymbolLayer {
+        if (style.styleLayerExists(RouteLayerConstants.WAYPOINT_LAYER_ID)) {
+            style.removeStyleLayer(RouteLayerConstants.WAYPOINT_LAYER_ID)
+        }
+
+        if (style.getStyleImage(RouteLayerConstants.ORIGIN_MARKER_NAME) != null) {
+            style.removeStyleImage(RouteLayerConstants.ORIGIN_MARKER_NAME)
+        }
+        originIcon.getBitmap().let {
+            style.addImage(RouteLayerConstants.ORIGIN_MARKER_NAME, it)
+        }
+
+        if (style.getStyleImage(RouteLayerConstants.DESTINATION_MARKER_NAME) != null) {
+            style.removeStyleImage(RouteLayerConstants.DESTINATION_MARKER_NAME)
+        }
+        destinationIcon.getBitmap().let {
+            style.addImage(RouteLayerConstants.DESTINATION_MARKER_NAME, it)
+        }
+
+        return SymbolLayer(
+            RouteLayerConstants.WAYPOINT_LAYER_ID,
+            RouteLayerConstants.WAYPOINT_SOURCE_ID
+        )
+            .iconOffset(iconOffset)
+            .iconAnchor(iconAnchor)
+            .iconImage(
+                match {
+                    toString {
+                        get { literal(RouteLayerConstants.WAYPOINT_PROPERTY_KEY) }
+                    }
+                    literal(RouteLayerConstants.WAYPOINT_ORIGIN_VALUE)
+                    stop {
+                        RouteLayerConstants.WAYPOINT_ORIGIN_VALUE
+                        literal(RouteLayerConstants.ORIGIN_MARKER_NAME)
+                    }
+                    stop {
+                        RouteLayerConstants.WAYPOINT_DESTINATION_VALUE
+                        literal(RouteLayerConstants.DESTINATION_MARKER_NAME)
+                    }
+                }
+            ).iconSize(
+                interpolate {
+                    exponential { literal(1.5) }
+                    zoom()
+                    stop {
+                        literal(0.0)
+                        literal(0.6)
+                    }
+                    stop {
+                        literal(10.0)
+                        literal(0.8)
+                    }
+                    stop {
+                        literal(12.0)
+                        literal(1.3)
+                    }
+                    stop {
+                        literal(22.0)
+                        literal(2.8)
+                    }
+                }
+            )
+            .iconPitchAlignment(iconPitchAlignment)
+            .iconAllowOverlap(true)
+            .iconIgnorePlacement(true)
+            .iconKeepUpright(true)
     }
 }

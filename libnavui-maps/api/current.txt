@@ -1080,12 +1080,16 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider getCasingExpressionProvider();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getRestrictedSectionExpressionProvider();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrafficExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrailCasingExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrailExpressionProvider();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset? getTrimOffset();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData.MutableRouteLineDynamicData toMutableValue();
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider baseExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider casingExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? restrictedSectionExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trafficExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trailCasingExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trailExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset? trimOffset;
   }
 
@@ -1094,17 +1098,23 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider getCasingExpressionProvider();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getRestrictedSectionExpressionProvider();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrafficExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrailCasingExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrailExpressionProvider();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset? getTrimOffset();
     method public void setBaseExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider);
     method public void setCasingExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider);
     method public void setRestrictedSectionExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider?);
     method public void setTrafficExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider?);
+    method public void setTrailCasingExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider?);
+    method public void setTrailExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider?);
     method public void setTrimOffset(com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset?);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData toImmutableValue();
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider baseExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider casingExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? restrictedSectionExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trafficExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trailCasingExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trailExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset? trimOffset;
   }
 

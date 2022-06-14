@@ -954,4 +954,47 @@ class MapboxRouteLineApiRoboTest {
                     .generateExpression().toString()
             )
         }
+
+    @Test
+    fun getAlternativeRoutesDeviationOffsetsTest() {
+        val routeData = FileUtils.loadJsonFixture("route_response_alternative_start.json")
+        val response = DirectionsResponse.fromJson(routeData)
+        val routeOptions = response.routes().first().routeOptions()!!
+        val routes = NavigationRoute.create(
+            directionsResponse = DirectionsResponse.fromJson(
+                routeData
+            ),
+            routeOptions = routeOptions
+        )
+        val alternativeRouteMetadata = mockk<AlternativeRouteMetadata> {
+            every { navigationRoute } returns routes[1]
+            every { forkIntersectionOfAlternativeRoute } returns mockk {
+                every { location } returns mockk()
+                every { geometryIndexInRoute } returns 2
+                every { geometryIndexInLeg } returns 2
+                every { legIndex } returns 0
+            }
+            every { forkIntersectionOfPrimaryRoute } returns mockk {
+                every { location } returns mockk()
+                every { geometryIndexInRoute } returns 2
+                every { geometryIndexInLeg } returns 2
+                every { legIndex } returns 0
+            }
+            every { infoFromFork } returns mockk {
+                every { distance } returns 1588.7698034413877
+                every { duration } returns 372.0307335579433
+            }
+            every { infoFromStartOfPrimary } returns mockk {
+                every { distance } returns 1652.4918669972706
+                every { duration } returns 400.6847335579434
+            }
+        }
+
+        val result = MapboxRouteLineUtils.getAlternativeRoutesDeviationOffsets(
+            listOf(alternativeRouteMetadata)
+        )
+
+        assertEquals(1, result.size)
+        assertEquals(0.038547771702788815, result["1"])
+    }
 }

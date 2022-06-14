@@ -59,6 +59,7 @@
             />
 
         <activity android:name=".view.CustomAlternativeRouteColoringActivity"/>
+        <activity android:name=".view.RouteLineFeaturesActivity"/>
 
         <service
             android:name=".car.MainCarAppService"

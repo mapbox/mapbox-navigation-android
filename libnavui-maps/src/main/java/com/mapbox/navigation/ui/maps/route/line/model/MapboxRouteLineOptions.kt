@@ -8,7 +8,6 @@ import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlig
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
-import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLayerProvider
 import com.mapbox.navigation.ui.maps.route.line.api.VanishingRouteLine
 import kotlin.math.abs
 
@@ -16,7 +15,6 @@ import kotlin.math.abs
  * Options for the configuration and appearance of the route line.
  *
  * @param resourceProvider an instance of RouteLineResources
- * @param routeLayerProvider an instance of RouteLayerProvider
  * @param routeStyleDescriptors a collection of [RouteStyleDescriptor] objects
  * @param originIcon the drawable for representing the origin icon
  * @param destinationIcon the drawable for representing the destination icon
@@ -40,7 +38,6 @@ import kotlin.math.abs
  */
 class MapboxRouteLineOptions private constructor(
     val resourceProvider: RouteLineResources,
-    internal val routeLayerProvider: MapboxRouteLayerProvider,
     val routeStyleDescriptors: List<RouteStyleDescriptor>,
     val originIcon: Drawable,
     val destinationIcon: Drawable,
@@ -93,7 +90,6 @@ class MapboxRouteLineOptions private constructor(
         other as MapboxRouteLineOptions
 
         if (resourceProvider != other.resourceProvider) return false
-        if (routeLayerProvider != other.routeLayerProvider) return false
         if (originIcon != other.originIcon) return false
         if (destinationIcon != other.destinationIcon) return false
         if (routeLineBelowLayerId != other.routeLineBelowLayerId) return false
@@ -118,7 +114,6 @@ class MapboxRouteLineOptions private constructor(
      */
     override fun hashCode(): Int {
         var result = resourceProvider.hashCode()
-        result = 31 * result + routeLayerProvider.hashCode()
         result = 31 * result + originIcon.hashCode()
         result = 31 * result + destinationIcon.hashCode()
         result = 31 * result + routeLineBelowLayerId.hashCode()
@@ -140,7 +135,6 @@ class MapboxRouteLineOptions private constructor(
      */
     override fun toString(): String {
         return "MapboxRouteLineOptions(resourceProvider=$resourceProvider, " +
-            "routeLayerProvider=$routeLayerProvider, " +
             "originIcon=$originIcon, " +
             "destinationIcon=$destinationIcon, " +
             "routeLineBelowLayerId=$routeLineBelowLayerId, " +
@@ -373,15 +367,6 @@ class MapboxRouteLineOptions private constructor(
             val resourceProvider: RouteLineResources = routeLineResources
                 ?: RouteLineResources.Builder().build()
 
-            val routeLineLayerProvider = MapboxRouteLayerProvider(
-                resourceProvider.routeLineScaleExpression,
-                resourceProvider.routeCasingLineScaleExpression,
-                resourceProvider.routeTrafficLineScaleExpression,
-                resourceProvider.alternativeRouteLineScaleExpression,
-                resourceProvider.alternativeRouteCasingLineScaleExpression,
-                resourceProvider.alternativeRouteTrafficLineScaleExpression
-            )
-
             val originIcon = AppCompatResources.getDrawable(
                 context,
                 resourceProvider.originWaypointIcon
@@ -400,7 +385,6 @@ class MapboxRouteLineOptions private constructor(
 
             return MapboxRouteLineOptions(
                 resourceProvider,
-                routeLineLayerProvider,
                 routeStyleDescriptors,
                 originIcon!!,
                 destinationIcon!!,

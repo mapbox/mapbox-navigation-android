@@ -1400,7 +1400,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     /**
      * If the provided [navigationRoute] is an alternative route in the current session,
-     * this function will return the associated with that route metadata.
+     * this function will return the associated route metadata.
      *
      * This function is guaranteed to return a valid result (if available) only after the [navigationRoute]
      * has been processed by [MapboxNavigation] and returned via [RoutesObserver] or [NavigationRouteAlternativesObserver].

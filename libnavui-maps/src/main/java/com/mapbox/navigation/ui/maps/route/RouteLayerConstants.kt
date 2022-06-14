@@ -21,66 +21,6 @@ object RouteLayerConstants {
     const val BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID = "mapbox-bottom-level-route-layer"
 
     /**
-     * Layer ID for the primary route line
-     */
-    internal const val PRIMARY_ROUTE_LAYER_ID = "mapbox-navigation-route-layer"
-
-    /**
-     * Layer ID for the traffic line
-     */
-    internal const val PRIMARY_ROUTE_TRAFFIC_LAYER_ID = "mapbox-navigation-route-traffic-layer"
-
-    /**
-     * Layer ID for the primary route casing line
-     */
-    internal const val PRIMARY_ROUTE_CASING_LAYER_ID = "mapbox-navigation-route-casing-layer"
-
-    /**
-     * Layer ID for the primary route line trail
-     */
-    internal const val PRIMARY_ROUTE_TRAIL_LAYER_ID = "mapbox-navigation-route-trail-layer"
-
-    /**
-     * Layer ID for the primary route casing line trail
-     */
-    internal const val PRIMARY_ROUTE_CASING_TRAIL_LAYER_ID =
-        "mapbox-navigation-route-casing-trail-layer"
-
-    /**
-     * Layer ID for the first alternative route line
-     */
-    internal const val ALTERNATIVE_ROUTE1_LAYER_ID = "mapbox-navigation-alt-route1-layer"
-
-    /**
-     * Layer ID for the first alternative route casing line
-     */
-    internal const val ALTERNATIVE_ROUTE1_CASING_LAYER_ID =
-        "mapbox-navigation-alt-route1-casing-layer"
-
-    /**
-     * Layer ID for the second alternative route line
-     */
-    internal const val ALTERNATIVE_ROUTE2_LAYER_ID = "mapbox-navigation-alt-route2-layer"
-
-    /**
-     * Layer ID for the second alternative route casing line
-     */
-    internal const val ALTERNATIVE_ROUTE2_CASING_LAYER_ID =
-        "mapbox-navigation-alt-route2-casing-layer"
-
-    /**
-     * Layer ID for the first alternative route traffic line
-     */
-    internal const val ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID =
-        "mapbox-navigation-alt-route1-traffic-layer"
-
-    /**
-     * Layer ID for the second alternative route traffic line
-     */
-    internal const val ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID =
-        "mapbox-navigation-alt-route2-traffic-layer"
-
-    /**
      * Layer ID for the maneuver arrow shaft casing
      */
     internal const val ARROW_SHAFT_CASING_LINE_LAYER_ID =
@@ -105,15 +45,9 @@ object RouteLayerConstants {
      * Layer ID for the waypoint icons layer
      */
     internal const val WAYPOINT_LAYER_ID = "mapbox-navigation-waypoint-layer"
-
-    /**
-     * Layer ID for the restricted area layer
-     */
-    internal const val RESTRICTED_ROAD_LAYER_ID = "mapbox-restricted-road-layer"
-
-    internal const val PRIMARY_ROUTE_SOURCE_ID = "mapbox-navigation-route-source"
-    internal const val ALTERNATIVE_ROUTE1_SOURCE_ID = "mapbox-navigation-alt-route1-source"
-    internal const val ALTERNATIVE_ROUTE2_SOURCE_ID = "mapbox-navigation-alt-route2-source"
+    internal const val LAYER_GROUP_1_SOURCE_ID = "mapbox-layerGroup:1:Source"
+    internal const val LAYER_GROUP_2_SOURCE_ID = "mapbox-layerGroup:2:Source"
+    internal const val LAYER_GROUP_3_SOURCE_ID = "mapbox-layerGroup:3:Source"
     internal const val WAYPOINT_SOURCE_ID = "mapbox-navigation-waypoint-source"
     internal const val TWO_POINTS = 2
     internal const val THIRTY = 30
@@ -251,4 +185,25 @@ object RouteLayerConstants {
     @DrawableRes
     internal val MANEUVER_ARROWHEAD_ICON_CASING_DRAWABLE: Int =
         R.drawable.mapbox_ic_arrow_head_casing
+
+    internal const val LAYER_GROUP_1_TRAIL_CASING = "mapbox-layerGroup-1-trailCasing"
+    internal const val LAYER_GROUP_1_TRAIL = "mapbox-layerGroup-1-trail"
+    internal const val LAYER_GROUP_1_CASING = "mapbox-layerGroup-1-casing"
+    internal const val LAYER_GROUP_1_MAIN = "mapbox-layerGroup-1-main"
+    internal const val LAYER_GROUP_1_TRAFFIC = "mapbox-layerGroup-1-traffic"
+    internal const val LAYER_GROUP_1_RESTRICTED = "mapbox-layerGroup-1-restricted"
+
+    internal const val LAYER_GROUP_2_TRAIL_CASING = "mapbox-layerGroup-2-trailCasing"
+    internal const val LAYER_GROUP_2_TRAIL = "mapbox-layerGroup-2-trail"
+    internal const val LAYER_GROUP_2_CASING = "mapbox-layerGroup-2-casing"
+    internal const val LAYER_GROUP_2_MAIN = "mapbox-layerGroup-2-main"
+    internal const val LAYER_GROUP_2_TRAFFIC = "mapbox-layerGroup-2-traffic"
+    internal const val LAYER_GROUP_2_RESTRICTED = "mapbox-layerGroup-2-restricted"
+
+    internal const val LAYER_GROUP_3_TRAIL_CASING = "mapbox-layerGroup-3-trailCasing"
+    internal const val LAYER_GROUP_3_TRAIL = "mapbox-layerGroup-3-trail"
+    internal const val LAYER_GROUP_3_CASING = "mapbox-layerGroup-3-casing"
+    internal const val LAYER_GROUP_3_MAIN = "mapbox-layerGroup-3-main"
+    internal const val LAYER_GROUP_3_TRAFFIC = "mapbox-layerGroup-3-traffic"
+    internal const val LAYER_GROUP_3_RESTRICTED = "mapbox-layerGroup-3-restricted"
 }

@@ -18,6 +18,7 @@ import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewCustomizedActi
 import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewFragmentActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxRouteLineActivity
 import com.mapbox.navigation.qa_test_app.view.NavigationViewFragmentLifecycleActivity
+import com.mapbox.navigation.qa_test_app.view.RouteLineFeaturesActivity
 import com.mapbox.navigation.qa_test_app.view.RouteRestrictionsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteTrafficUpdateActivity
 import com.mapbox.navigation.qa_test_app.view.StatusActivity
@@ -93,6 +94,12 @@ object TestActivitySuite {
             R.string.traffic_gradient_styling_description
         ) { activity ->
             activity.startActivity<TrafficGradientActivity>()
+        },
+        TestActivityDescription(
+            "Basic Route Line Features",
+            R.string.basic_route_line_features_description
+        ) { activity ->
+            activity.startActivity<RouteLineFeaturesActivity>()
         },
         TestActivityDescription(
             "Feedback test activity",
