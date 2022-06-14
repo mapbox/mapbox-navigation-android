@@ -12,9 +12,11 @@ package com.mapbox.navigation.ui.maps {
   }
 
   public final class PredictiveCacheController {
-    ctor public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions = PredictiveCacheLocationOptions.<init>().build(), com.mapbox.navigation.ui.maps.PredictiveCacheControllerErrorHandler? predictiveCacheControllerErrorHandler = null);
+    ctor public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions = PredictiveCacheLocationOptions.<init>().build(), com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheGuidanceLocationOptions = PredictiveCacheLocationOptions.<init>().build(), com.mapbox.navigation.ui.maps.PredictiveCacheControllerErrorHandler? predictiveCacheControllerErrorHandler = null);
+    ctor public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions = PredictiveCacheLocationOptions.<init>().build(), com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheGuidanceLocationOptions = PredictiveCacheLocationOptions.<init>().build());
     ctor public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions = PredictiveCacheLocationOptions.<init>().build());
     ctor public PredictiveCacheController();
+    ctor public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions = PredictiveCacheLocationOptions.<init>().build(), com.mapbox.navigation.ui.maps.PredictiveCacheControllerErrorHandler? predictiveCacheControllerErrorHandler = null);
     method @Deprecated public void createMapControllers(com.mapbox.maps.MapboxMap map, java.util.List<java.lang.String> sourceIdsToCache = emptyList());
     method @Deprecated public void createMapControllers(com.mapbox.maps.MapboxMap map);
     method public void createStyleMapControllers(com.mapbox.maps.MapboxMap map, boolean cacheCurrentMapStyle = true, java.util.List<java.lang.String> styles = emptyList());

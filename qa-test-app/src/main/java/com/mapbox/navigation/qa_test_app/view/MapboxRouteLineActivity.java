@@ -185,9 +185,8 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
     predictiveCacheController = new PredictiveCacheController(
         new PredictiveCacheLocationOptions.Builder().build(),
-        message -> {
-          Log.e(TAG, "predictive cache error: " + message);
-        });
+        message -> Log.e(TAG, "predictive cache error: " + message)
+    );
     predictiveCacheController.createStyleMapControllers(mapboxMap);
   }
 

@@ -31,7 +31,7 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 class PredictiveCacheControllerTest {
 
-    private val errorHandler = mockk<PredictiveCacheControllerErrorHandler>() {
+    private val errorHandler = mockk<PredictiveCacheControllerErrorHandler> {
         every { onError(any()) } just Runs
     }
 
@@ -91,7 +91,7 @@ class PredictiveCacheControllerTest {
 
         val predictiveCacheController = PredictiveCacheController(
             mockedLocationOptions,
-            errorHandler
+            errorHandler,
         )
 
         predictiveCacheController.createMapControllers(mockedMapboxMap)
@@ -148,7 +148,7 @@ class PredictiveCacheControllerTest {
 
         val predictiveCacheController = PredictiveCacheController(
             mockedLocationOptions,
-            errorHandler
+            errorHandler,
         )
 
         val slotIds = mutableListOf<String>()
@@ -248,7 +248,7 @@ class PredictiveCacheControllerTest {
 
         val predictiveCacheController = PredictiveCacheController(
             mockedLocationOptions,
-            errorHandler
+            errorHandler,
         )
 
         val slotIds = mutableListOf<String>()
@@ -333,7 +333,7 @@ class PredictiveCacheControllerTest {
 
         val predictiveCacheController = PredictiveCacheController(
             mockedLocationOptions,
-            errorHandler
+            errorHandler,
         )
         val slotIds = mutableListOf<String>()
         every {
@@ -432,7 +432,7 @@ class PredictiveCacheControllerTest {
 
         val predictiveCacheController = PredictiveCacheController(
             mockedLocationOptions,
-            errorHandler
+            errorHandler,
         )
 
         val slotIds = mutableListOf<String>()
@@ -491,7 +491,7 @@ class PredictiveCacheControllerTest {
 
         val predictiveCacheController = PredictiveCacheController(
             mockedLocationOptions,
-            errorHandler
+            errorHandler,
         )
 
         predictiveCacheController.createMapControllers(mockedMapboxMap)

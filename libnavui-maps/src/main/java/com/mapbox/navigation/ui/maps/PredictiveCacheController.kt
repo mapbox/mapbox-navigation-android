@@ -55,19 +55,71 @@ private const val MAX_ZOOM = 16.toByte()
  * - `OnboardRouterOptions` enabled you to specify a path where nav-tiles will be saved and if a
  * custom directory was used, it should be cleared as well.
  *
- * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions] location configuration for navigation predictive caching
+ * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions] location configuration for visual map predictive caching (optional)
+ * @param predictiveCacheGuidanceLocationOptions [PredictiveCacheLocationOptions] location configuration for guidance predictive caching (optional)
  * @param predictiveCacheControllerErrorHandler [PredictiveCacheControllerErrorHandler] listener (optional)
  */
 class PredictiveCacheController @JvmOverloads constructor(
     private val predictiveCacheLocationOptions: PredictiveCacheLocationOptions =
         PredictiveCacheLocationOptions.Builder().build(),
-    private val predictiveCacheControllerErrorHandler: PredictiveCacheControllerErrorHandler? = null
+    private val predictiveCacheGuidanceLocationOptions: PredictiveCacheLocationOptions =
+        PredictiveCacheLocationOptions.Builder().build(),
+    private val predictiveCacheControllerErrorHandler: PredictiveCacheControllerErrorHandler? =
+        null,
 ) {
+
+    /**
+     * Predictive caching is a system that downloads necessary visual map and guidance data resources
+     * along the route upfront, before they are needed, in an attempt to provide a smooth experience
+     * even when connectivity is lost while using the app.
+     *
+     * Once instantiated, the controller will immediately start caching guidance data.
+     *
+     * In order to start caching map data, provide an instance via [createMapControllers].
+     * To specify sources to cache, pass a list of id's via [createMapControllers].
+     * Source id's should look like "mapbox://mapbox.satellite", "mapbox://mapbox.mapbox-terrain-v2".
+     * The system only supports source hosted on Mapbox Services which URL starts with "mapbox://".
+     * If no ids are passed all available style sources will be cached.
+     *
+     * The controller as well as [MapboxNavigation] instance it's holding can have
+     * a different lifecycle than the [MapboxMap] instance, so make sure to call [removeMapControllers]
+     * whenever the [MapView] is destroyed to avoid leaking references or downloading unnecessary
+     * resources. When the map instance is recreated, set it back with [createMapControllers].
+     *
+     * The map instance has to be configured with the same [TileStore] instance that was provided to [RoutingTilesOptions.tileStore].
+     * You need to call [TileStore.create] with a path and pass it to [ResourceOptions.tileStore] or use the Maps SDK's tile store path XML attribute.
+     *
+     * Call [onDestroy] to cleanup all map and navigation state related references.
+     * This can be called when navigation session finishes and predictive caching is not needed anymore.
+     *
+     * - When migrating please ensure you have cleaned up old navigation tiles cache folder to reclaim disk space.
+     * Navigation SDK 2.0 caches navigation tiles in a default folder under `APP_FOLDER/mbx_nav/tiles/api.mapbox.com`.
+     * Previous versions of Nav SDK used to cache tiles under a default folder `APP_FOLDER/Offline/api.mapbox.com/$tilesVersion/tiles`.
+     * Old cache is not compatible with a new version of SDK 2.0.
+     * It makes sense to delete any folders used previously for caching including a default one.
+     * - `OnboardRouterOptions` enabled you to specify a path where nav-tiles will be saved and if a
+     * custom directory was used, it should be cleared as well.
+     *
+     * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions] location configuration for visual map predictive caching (optional)
+     * @param predictiveCacheControllerErrorHandler [PredictiveCacheControllerErrorHandler] listener (optional)
+     * Noting that `predictiveCacheLocationOptions` is used as `predictiveCacheGuidanceLocationOptions` when constructing `PredictiveCacheController` to retain backwards compatibility
+     */
+    constructor(
+        predictiveCacheLocationOptions: PredictiveCacheLocationOptions =
+            PredictiveCacheLocationOptions.Builder().build(),
+        predictiveCacheControllerErrorHandler: PredictiveCacheControllerErrorHandler? =
+            null,
+    ) : this(
+        predictiveCacheLocationOptions,
+        predictiveCacheLocationOptions,
+        predictiveCacheControllerErrorHandler
+    )
+
     private var mapListeners = mutableMapOf<MapboxMap, OnStyleLoadedListener>()
 
     init {
         PredictiveCache.init()
-        PredictiveCache.createNavigationController(predictiveCacheLocationOptions)
+        PredictiveCache.createNavigationController(predictiveCacheGuidanceLocationOptions)
     }
 
     /**
@@ -207,14 +259,12 @@ class PredictiveCacheController @JvmOverloads constructor(
         sourceIdsToCache: List<String>,
         fn: (String) -> Unit
     ) {
-        val sourceIds = if (sourceIdsToCache.isEmpty()) {
+        val sourceIds = sourceIdsToCache.ifEmpty {
             val filteredSources = map.getStyle()?.styleSources
                 ?.filter { it.type == VECTOR_SOURCE_TYPE || it.type == RASTER_SOURCE_TYPE }
                 ?: emptyList()
 
             filteredSources.map { it.id }
-        } else {
-            sourceIdsToCache
         }
 
         for (sourceId in sourceIds) {
