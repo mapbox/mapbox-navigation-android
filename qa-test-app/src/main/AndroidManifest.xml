@@ -33,6 +33,7 @@
         <activity android:name=".view.util.RouteDrawingActivity" />
         <activity android:name=".view.RouteRestrictionsActivity" />
         <activity android:name=".view.RouteTrafficUpdateActivity" />
+        <activity android:name=".view.RouteNumericTrafficUpdateActivity" />
         <activity android:name=".view.InactiveRouteStylingActivity" />
         <activity android:name=".view.TrafficGradientActivity" />
         <activity android:name=".view.FeedbackActivity" />

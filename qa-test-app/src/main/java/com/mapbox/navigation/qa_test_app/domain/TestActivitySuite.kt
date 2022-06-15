@@ -19,6 +19,7 @@ import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewFragmentActivi
 import com.mapbox.navigation.qa_test_app.view.MapboxRouteLineActivity
 import com.mapbox.navigation.qa_test_app.view.NavigationViewFragmentLifecycleActivity
 import com.mapbox.navigation.qa_test_app.view.RouteLineFeaturesActivity
+import com.mapbox.navigation.qa_test_app.view.RouteNumericTrafficUpdateActivity
 import com.mapbox.navigation.qa_test_app.view.RouteRestrictionsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteTrafficUpdateActivity
 import com.mapbox.navigation.qa_test_app.view.StatusActivity
@@ -74,6 +75,13 @@ object TestActivitySuite {
             launchAfterPermissionResult = false,
         ) { activity ->
             activity.startActivity<RouteTrafficUpdateActivity>()
+        },
+        TestActivityDescription(
+            "Dynamic Numeric Traffic Update",
+            R.string.dynamic_numeric_traffic_update_description,
+            launchAfterPermissionResult = false,
+        ) { activity ->
+            activity.startActivity<RouteNumericTrafficUpdateActivity>()
         },
         TestActivityDescription(
             "Inactive Route Leg Styling",
