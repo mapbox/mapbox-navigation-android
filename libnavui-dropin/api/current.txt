@@ -6,12 +6,14 @@ package com.mapbox.navigation.dropin {
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null, String accessToken = attrs.navigationViewAccessToken(context));
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public NavigationView(android.content.Context context);
+    method public void addListener(com.mapbox.navigation.dropin.NavigationViewListener listener);
     method public void customizeMapView(com.mapbox.maps.MapView? mapView);
     method public void customizeViewBinders(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewBinderCustomization,kotlin.Unit> action);
     method public void customizeViewOptions(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewOptionsCustomization,kotlin.Unit> action);
     method public void customizeViewStyles(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewStyleCustomization,kotlin.Unit> action);
     method public com.mapbox.navigation.dropin.NavigationViewApi getApi();
     method public androidx.lifecycle.Lifecycle getLifecycle();
+    method public void removeListener(com.mapbox.navigation.dropin.NavigationViewListener listener);
     property public final com.mapbox.navigation.dropin.NavigationViewApi api;
   }
 
@@ -22,6 +24,22 @@ package com.mapbox.navigation.dropin {
     method public void setDestination(com.mapbox.geojson.Point point);
     method public void setRoutes(com.mapbox.api.directions.v5.models.RouteOptions options);
     method public void setRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class NavigationViewListener {
+    ctor public NavigationViewListener();
+    method public void onActiveNavigationStared();
+    method public void onArrivalStared();
+    method public void onAudioGuidanceStateChanged(boolean muted);
+    method public void onCameraPaddingChanged(com.mapbox.maps.EdgeInsets padding);
+    method public void onDestinationChanged(com.mapbox.geojson.Point? destination);
+    method public void onDestinationPreviewStared();
+    method public void onFollowingCameraMode();
+    method public void onFreeDriveStarted();
+    method public void onIdleCameraMode();
+    method public void onMapStyleChanged(com.mapbox.maps.Style style);
+    method public void onOverviewCameraMode();
+    method public void onRoutePreviewStared();
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ViewBinderCustomization {

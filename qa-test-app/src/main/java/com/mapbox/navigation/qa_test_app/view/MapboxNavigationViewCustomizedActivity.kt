@@ -17,6 +17,7 @@ import androidx.transition.TransitionManager
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.ConstrainMode
+import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.GlyphsRasterizationMode
 import com.mapbox.maps.GlyphsRasterizationOptions
 import com.mapbox.maps.MapInitOptions
@@ -30,6 +31,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.dropin.NavigationViewListener
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultAudioGuidanceButtonStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultCameraModeButtonStyle
@@ -60,6 +62,7 @@ import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -71,6 +74,7 @@ class CustomizedViewModel : ViewModel() {
     val showCustomMapView = MutableLiveData(false)
 }
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
     private val viewModel: CustomizedViewModel by viewModels()
 
@@ -99,11 +103,14 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
             .build()
     }
 
+    private lateinit var binding: LayoutActivityNavigationViewCustomizedBinding
+
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding = LayoutActivityNavigationViewCustomizedBinding.inflate(layoutInflater)
+        binding = LayoutActivityNavigationViewCustomizedBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.navigationView.addListener(navViewListener)
 
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.getDefaultNightMode())
 
@@ -266,6 +273,92 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
 
     private fun toggleTheme(themeMode: Int) {
         AppCompatDelegate.setDefaultNightMode(themeMode)
+    }
+
+    private val navViewListener = object : NavigationViewListener() {
+        override fun onDestinationChanged(destination: Point?) {
+            logD(
+                "listener onDestinationChanged = $destination",
+                "MapboxNavigationViewCustomizedActivity"
+            )
+        }
+
+        override fun onFreeDriveStarted() {
+            logD(
+                "listener onFreeDriveStarted",
+                "MapboxNavigationViewCustomizedActivity"
+            )
+        }
+
+        override fun onDestinationPreviewStared() {
+            logD(
+                "listener onDestinationPreviewStared",
+                "MapboxNavigationViewCustomizedActivity"
+            )
+        }
+
+        override fun onRoutePreviewStared() {
+            logD(
+                "listener onRoutePreviewStared",
+                "MapboxNavigationViewCustomizedActivity"
+            )
+        }
+
+        override fun onActiveNavigationStared() {
+            logD(
+                "listener onActiveNavigationStared",
+                "MapboxNavigationViewCustomizedActivity"
+            )
+        }
+
+        override fun onArrivalStared() {
+            logD(
+                "listener onArrivalStared",
+                "MapboxNavigationViewCustomizedActivity"
+            )
+        }
+
+        override fun onIdleCameraMode() {
+            logD(
+                "listener onIdleCameraMode",
+                "MapboxNavigationViewCustomizedActivity"
+            )
+        }
+
+        override fun onOverviewCameraMode() {
+            logD(
+                "listener onOverviewCameraMode",
+                "MapboxNavigationViewCustomizedActivity"
+            )
+        }
+
+        override fun onFollowingCameraMode() {
+            logD(
+                "listener onFollowingCameraMode",
+                "MapboxNavigationViewCustomizedActivity"
+            )
+        }
+
+        override fun onMapStyleChanged(style: Style) {
+            logD(
+                "listener onMapStyleChange = ${style.styleURI}",
+                "MapboxNavigationViewCustomizedActivity"
+            )
+        }
+
+        override fun onCameraPaddingChanged(padding: EdgeInsets) {
+            logD(
+                "listener onCameraPaddingChanged = $padding",
+                "MapboxNavigationViewCustomizedActivity"
+            )
+        }
+
+        override fun onAudioGuidanceStateChanged(muted: Boolean) {
+            logD(
+                "listener onAudioGuidanceStateChanged muted = $muted",
+                "MapboxNavigationViewCustomizedActivity"
+            )
+        }
     }
 }
 
