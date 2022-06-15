@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added `ViewBinderCustomization.customActionButtons` that allows installation of custom action buttons in `NavigationView` ActionBinder [#5937](https://github.com/mapbox/mapbox-navigation-android/pull/5937)
 
 #### Bug fixes and improvements
 

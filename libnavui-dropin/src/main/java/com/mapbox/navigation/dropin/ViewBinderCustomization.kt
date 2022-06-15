@@ -64,4 +64,12 @@ class ViewBinderCustomization {
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var rightFrameBinder: UIBinder? = null
+
+    /**
+     * Add custom Action Buttons to the [NavigationView].
+     * Custom buttons can only be added to default [actionButtonsBinder] and can be placed either
+     * before or after existing controls.
+     * Setting this field to `emptyList()` will remove all custom buttons.
+     */
+    var customActionButtons: List<ActionButtonDescription>? = null
 }

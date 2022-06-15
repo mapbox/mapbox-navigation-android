@@ -24,6 +24,9 @@ internal class ViewBinder {
     private val _leftFrameBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
     private val _rightFrameBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
 
+    private val _customActionButtons: MutableStateFlow<List<ActionButtonDescription>> =
+        MutableStateFlow(emptyList())
+
     val speedLimit: StateFlow<UIBinder?> get() = _speedLimit.asStateFlow()
     val maneuver: StateFlow<UIBinder?> get() = _maneuver.asStateFlow()
     val roadName: StateFlow<UIBinder?> get() = _roadName.asStateFlow()
@@ -34,6 +37,9 @@ internal class ViewBinder {
     val actionButtonsBinder: StateFlow<UIBinder?> get() = _actionButtonsBinder.asStateFlow()
     val leftFrameContentBinder: StateFlow<UIBinder?> get() = _leftFrameBinder.asStateFlow()
     val rightFrameContentBinder: StateFlow<UIBinder?> get() = _rightFrameBinder.asStateFlow()
+
+    val customActionButtons: StateFlow<List<ActionButtonDescription>>
+        get() = _customActionButtons.asStateFlow()
 
     fun applyCustomization(customization: ViewBinderCustomization) {
         customization.speedLimitBinder?.also { _speedLimit.emitOrNull(it) }
@@ -47,6 +53,8 @@ internal class ViewBinder {
         customization.actionButtonsBinder?.also { _actionButtonsBinder.emitOrNull(it) }
         customization.leftFrameBinder?.also { _leftFrameBinder.emitOrNull(it) }
         customization.rightFrameBinder?.also { _rightFrameBinder.emitOrNull(it) }
+
+        customization.customActionButtons?.also { _customActionButtons.value = it }
     }
 
     private fun MutableStateFlow<UIBinder?>.emitOrNull(v: UIBinder) {

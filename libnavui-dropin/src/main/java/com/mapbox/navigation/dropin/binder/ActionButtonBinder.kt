@@ -1,14 +1,16 @@
 package com.mapbox.navigation.dropin.binder
 
-import android.transition.Scene
-import android.transition.Slide
-import android.transition.TransitionManager
-import android.view.Gravity
+import android.content.Context
+import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import androidx.core.view.children
 import androidx.lifecycle.viewModelScope
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.extensions.navigationListOf
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.dropin.ActionButtonDescription
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.cameramode.CameraModeButtonComponent
@@ -26,18 +28,14 @@ import kotlinx.coroutines.flow.StateFlow
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class ActionButtonBinder(
-    private val context: NavigationViewContext
+    private val context: NavigationViewContext,
+    private val customButtons: List<ActionButtonDescription>
 ) : UIBinder {
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
-        val scene = Scene.getSceneForLayout(
-            viewGroup,
-            R.layout.mapbox_action_buttons_layout,
-            viewGroup.context
-        )
-        TransitionManager.go(scene, Slide(Gravity.RIGHT))
+        val binding = inflateLayout(viewGroup)
+        installCustomButtons(binding.buttonContainer)
 
-        val binding = MapboxActionButtonsLayoutBinding.bind(viewGroup)
         val store = context.store
         return navigationListOf(
             reloadOnChange(context.styles.audioGuidanceButtonStyle) { style ->
@@ -60,6 +58,32 @@ internal class ActionButtonBinder(
         )
     }
 
+    private fun inflateLayout(viewGroup: ViewGroup): MapboxActionButtonsLayoutBinding {
+        val layoutInflater =
+            viewGroup.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        viewGroup.removeAllViews()
+        layoutInflater.inflate(R.layout.mapbox_action_buttons_layout, viewGroup)
+        return MapboxActionButtonsLayoutBinding.bind(viewGroup)
+    }
+
+    private fun installCustomButtons(buttonContainer: LinearLayout) {
+        val spacing = buttonContainer.resources
+            .getDimensionPixelSize(R.dimen.mapbox_actionList_spacing)
+        customButtons.filter { it.position == ActionButtonDescription.Position.START }
+            .reversed()
+            .forEach {
+                buttonContainer.children.firstOrNull()?.setMargins(top = spacing)
+                it.view.setMargins(bottom = spacing)
+                buttonContainer.addView(it.view, 0)
+            }
+        customButtons.filter { it.position == ActionButtonDescription.Position.END }
+            .forEach {
+                buttonContainer.children.lastOrNull()?.setMargins(bottom = spacing)
+                it.view.setMargins(top = spacing)
+                buttonContainer.addView(it.view)
+            }
+    }
+
     private fun audioGuidanceButtonComponent(
         binding: MapboxActionButtonsLayoutBinding,
         style: Int,
@@ -68,6 +92,18 @@ internal class ActionButtonBinder(
         return AudioGuidanceButtonComponent(binding.soundButton, style, contractProvider = {
             AudioComponentContractImpl(context.viewModel.viewModelScope, store)
         })
+    }
+
+    private fun View.setMargins(top: Int? = null, bottom: Int? = null) {
+        (layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
+            setMargins(
+                leftMargin,
+                top ?: topMargin,
+                rightMargin,
+                bottom ?: bottomMargin
+            )
+            layoutParams = this
+        }
     }
 }
 

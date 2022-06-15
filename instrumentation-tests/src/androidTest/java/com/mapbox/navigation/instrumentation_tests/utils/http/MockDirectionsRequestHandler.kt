@@ -40,4 +40,13 @@ data class MockDirectionsRequestHandler(
 
         return this.joinToString(";") { "${it.longitude()},${it.latitude()}" }
     }
+
+    override fun toString(): String {
+        return "MockDirectionsRequestHandler(" +
+            "profile='$profile', " +
+            "expectedCoordinates=$expectedCoordinates, " +
+            "relaxedExpectedCoordinates=$relaxedExpectedCoordinates, " +
+            "jsonResponse='$jsonResponse'" +
+            ")"
+    }
 }

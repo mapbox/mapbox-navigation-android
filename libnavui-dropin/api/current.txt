@@ -1,6 +1,19 @@
 // Signature format: 3.0
 package com.mapbox.navigation.dropin {
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ActionButtonDescription {
+    ctor public ActionButtonDescription(android.view.View view, com.mapbox.navigation.dropin.ActionButtonDescription.Position position = com.mapbox.navigation.dropin.ActionButtonDescription.Position.END);
+    method public com.mapbox.navigation.dropin.ActionButtonDescription.Position getPosition();
+    method public android.view.View getView();
+    property public final com.mapbox.navigation.dropin.ActionButtonDescription.Position position;
+    property public final android.view.View view;
+  }
+
+  public enum ActionButtonDescription.Position {
+    enum_constant public static final com.mapbox.navigation.dropin.ActionButtonDescription.Position END;
+    enum_constant public static final com.mapbox.navigation.dropin.ActionButtonDescription.Position START;
+  }
+
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NavigationView extends android.widget.FrameLayout implements androidx.lifecycle.LifecycleOwner {
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null, String accessToken = attrs.navigationViewAccessToken(context), androidx.lifecycle.ViewModelStoreOwner viewModelStoreOwner = context.toViewModelStoreOwner());
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null, String accessToken = attrs.navigationViewAccessToken(context));
@@ -45,24 +58,33 @@ package com.mapbox.navigation.dropin {
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ViewBinderCustomization {
     ctor public ViewBinderCustomization();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getActionButtonsBinder();
+    method public java.util.List<com.mapbox.navigation.dropin.ActionButtonDescription>? getCustomActionButtons();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getInfoPanelContentBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getInfoPanelHeaderBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getInfoPanelTripProgressBinder();
+    method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getLeftFrameBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getManeuverBinder();
+    method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getRightFrameBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getRoadNameBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getSpeedLimitBinder();
     method public void setActionButtonsBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
+    method public void setCustomActionButtons(java.util.List<com.mapbox.navigation.dropin.ActionButtonDescription>?);
     method public void setInfoPanelContentBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     method public void setInfoPanelHeaderBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     method public void setInfoPanelTripProgressBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
+    method public void setLeftFrameBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     method public void setManeuverBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
+    method public void setRightFrameBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     method public void setRoadNameBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     method public void setSpeedLimitBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? actionButtonsBinder;
+    property public final java.util.List<com.mapbox.navigation.dropin.ActionButtonDescription>? customActionButtons;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? infoPanelContentBinder;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? infoPanelHeaderBinder;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? infoPanelTripProgressBinder;
+    property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? leftFrameBinder;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? maneuverBinder;
+    property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? rightFrameBinder;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? roadNameBinder;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? speedLimitBinder;
   }
