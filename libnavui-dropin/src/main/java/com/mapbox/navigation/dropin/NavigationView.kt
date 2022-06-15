@@ -166,6 +166,20 @@ class NavigationView @JvmOverloads constructor(
         navigationContext.applyOptionsCustomization(action)
     }
 
+    /**
+     * Add a listener that will be notified when [NavigationView] changes.
+     */
+    fun addListener(listener: NavigationViewListener) {
+        navigationContext.listenerRegistry.registerListener(listener)
+    }
+
+    /**
+     * Remove a listener for [NavigationView] changes.
+     */
+    fun removeListener(listener: NavigationViewListener) {
+        navigationContext.listenerRegistry.unregisterListener(listener)
+    }
+
     private inline fun <reified T : ViewModel> lazyViewModel(): Lazy<T> = lazy {
         viewModelProvider[T::class.java]
     }

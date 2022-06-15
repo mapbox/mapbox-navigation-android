@@ -2,6 +2,7 @@ package com.mapbox.navigation.dropin
 
 import android.content.Context
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.component.marker.MapMarkerFactory
@@ -33,6 +34,13 @@ internal class NavigationViewContext(
     val options = NavigationViewOptions(context)
 
     val mapStyleLoader = MapStyleLoader(context, options)
+    val listenerRegistry by lazy {
+        NavigationViewListenerRegistry(
+            store,
+            mapStyleLoader,
+            lifecycleOwner.lifecycleScope
+        )
+    }
 
     fun mapAnnotationFactory() = MapMarkerFactory(
         context,
