@@ -24,8 +24,10 @@ import com.mapbox.navigation.dropin.component.backpress.OnKeyListenerComponent
 import com.mapbox.navigation.dropin.component.location.LocationPermissionComponent
 import com.mapbox.navigation.dropin.coordinator.ActionButtonsCoordinator
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
+import com.mapbox.navigation.dropin.coordinator.LeftFrameCoordinator
 import com.mapbox.navigation.dropin.coordinator.ManeuverCoordinator
 import com.mapbox.navigation.dropin.coordinator.MapLayoutCoordinator
+import com.mapbox.navigation.dropin.coordinator.RightFrameCoordinator
 import com.mapbox.navigation.dropin.coordinator.RoadNameLabelCoordinator
 import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
@@ -124,7 +126,9 @@ class NavigationView @JvmOverloads constructor(
             ),
             ActionButtonsCoordinator(navigationContext, binding.actionListLayout),
             SpeedLimitCoordinator(navigationContext, binding.speedLimitLayout),
-            RoadNameLabelCoordinator(navigationContext, binding.roadNameLayout)
+            RoadNameLabelCoordinator(navigationContext, binding.roadNameLayout),
+            LeftFrameCoordinator(navigationContext, binding.emptyLeftContainer),
+            RightFrameCoordinator(navigationContext, binding.emptyRightContainer)
         )
     }
 

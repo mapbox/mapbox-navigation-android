@@ -52,4 +52,16 @@ class ViewBinderCustomization {
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var actionButtonsBinder: UIBinder? = null
+
+    /**
+     * Customize the empty frame container on left side of the screen by providing your own [UIBinder].
+     * Use [UIBinder.USE_DEFAULT] to reset to default.
+     */
+    var leftFrameBinder: UIBinder? = null
+
+    /**
+     * Customize the empty frame container on right side of the screen by providing your own [UIBinder].
+     * Use [UIBinder.USE_DEFAULT] to reset to default.
+     */
+    var rightFrameBinder: UIBinder? = null
 }
