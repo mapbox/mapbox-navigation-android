@@ -7,6 +7,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Updated to use shared `MapboxAudioGuidance` instance. [#5846](https://github.com/mapbox/mapbox-navigation-android/pull/5846)
 - Added map style observers to handle style changes. [#5853](https://github.com/mapbox/mapbox-navigation-android/pull/5853)
+- Updated to format the distance displayed in the instrument cluster [#5928](https://github.com/mapbox/mapbox-navigation-android/pull/5928)
 
 ## androidauto-v0.2.0 - May 19, 2022
 ### Changelog

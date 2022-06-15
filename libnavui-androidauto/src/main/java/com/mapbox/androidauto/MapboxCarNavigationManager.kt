@@ -3,6 +3,7 @@ package com.mapbox.androidauto
 import androidx.car.app.CarContext
 import androidx.car.app.navigation.NavigationManager
 import androidx.car.app.navigation.NavigationManagerCallback
+import com.mapbox.androidauto.car.navigation.CarDistanceFormatter
 import com.mapbox.androidauto.car.navigation.maneuver.CarManeuverMapper
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -13,7 +14,6 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
-import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -32,13 +32,14 @@ class MapboxCarNavigationManager(
     }
 
     private var maneuverApi: MapboxManeuverApi? = null
+    private var carDistanceFormatter: CarDistanceFormatter? = null
     private var mapboxNavigation: MapboxNavigation? = null
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
-        ifNonNull(maneuverApi) {
-            val trip = CarManeuverMapper.from(routeProgress, it)
-            navigationManager.updateTrip(trip)
-        }
+        val distanceFormatter = carDistanceFormatter ?: return@RouteProgressObserver
+        val maneuverApi = maneuverApi ?: return@RouteProgressObserver
+        val trip = CarManeuverMapper.from(routeProgress, maneuverApi, distanceFormatter)
+        navigationManager.updateTrip(trip)
     }
 
     private val tripSessionStateObserver = TripSessionStateObserver { tripSessionState ->
@@ -76,6 +77,8 @@ class MapboxCarNavigationManager(
             mapboxNavigation.navigationOptions.distanceFormatterOptions
         )
         maneuverApi = MapboxManeuverApi(distanceFormatter)
+        val unitType = mapboxNavigation.navigationOptions.distanceFormatterOptions.unitType
+        carDistanceFormatter = CarDistanceFormatter(unitType)
         navigationManager.setNavigationManagerCallback(navigationManagerCallback)
         mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
