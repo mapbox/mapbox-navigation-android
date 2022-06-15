@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Overloaded `PredictiveCacheController` `constructor` adding `predictiveCacheGuidanceLocationOptions` so that Maps / Navigation controller options can be configured separately. Noting that when using the secondary constructor `predictiveCacheLocationOptions` is used as `predictiveCacheGuidanceLocationOptions` to retain backwards compatibility. [#5927](https://github.com/mapbox/mapbox-navigation-android/pull/5927)
 - Added an api for interacting with `NavigationView`. This API is experimental with the intention to become stable. [#5919](https://github.com/mapbox/mapbox-navigation-android/pull/5919)
 - Added support for `NavigationViewListener`. This listener can be registered with `NavigationView` to observe changes to: navigation state, destination setting/clearing, Map `Style`, camera modes, camera viewport size, and audio guidance mute/un-mute state. [#5922](https://github.com/mapbox/mapbox-navigation-android/pull/5922)
 
