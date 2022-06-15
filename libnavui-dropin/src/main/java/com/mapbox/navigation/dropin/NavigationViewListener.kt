@@ -66,7 +66,7 @@ abstract class NavigationViewListener {
     open fun onFollowingCameraMode() = Unit
 
     /**
-     * Called when NavigationCamera padding has changed.
+     * Called when `NavigationCamera` padding has changed. The padding is defined as a box relative to map size which the user location indicator and route geometry is fit into during camera following and overview states.
      *
      * @param padding New camera padding value.
      */
