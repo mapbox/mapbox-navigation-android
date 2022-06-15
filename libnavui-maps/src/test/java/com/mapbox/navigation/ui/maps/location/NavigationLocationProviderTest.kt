@@ -61,7 +61,7 @@ class NavigationLocationProviderTest {
 
         val expectedPoints =
             arrayOf(Point.fromLngLat(location.longitude, location.latitude))
-        verify(exactly = 1) { consumer.onLocationUpdated(*expectedPoints, options = latLngOptions) }
+        verify(exactly = 1) { consumer.onLocationUpdated(*expectedPoints, options = any()) }
         val expectedBearings = doubleArrayOf(location.bearing.toDouble())
         verify(exactly = 1) {
             consumer.onBearingUpdated(*expectedBearings, options = bearingOptions)
@@ -97,7 +97,7 @@ class NavigationLocationProviderTest {
             Point.fromLngLat(keyPoint.longitude, keyPoint.latitude),
             Point.fromLngLat(location.longitude, location.latitude),
         )
-        verify(exactly = 1) { consumer.onLocationUpdated(*expectedPoints, options = latLngOptions) }
+        verify(exactly = 1) { consumer.onLocationUpdated(*expectedPoints, options = any()) }
         val expectedBearings = doubleArrayOf(
             keyPoint.bearing.toDouble(),
             location.bearing.toDouble()
@@ -123,6 +123,8 @@ class NavigationLocationProviderTest {
         val consumer: LocationConsumer = mockk(relaxUnitFun = true)
         val latLngAnimator: ValueAnimator = mockk {
             every { setDuration(any()) } returns this
+            every { setInterpolator(any()) } returns Unit
+            every { setEvaluator(any()) } returns Unit
         }
         every { consumer.onLocationUpdated(*anyVararg(), options = captureLambda()) } answers {
             secondArg<(ValueAnimator.() -> Unit)>().invoke(latLngAnimator)

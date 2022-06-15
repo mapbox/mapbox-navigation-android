@@ -10,6 +10,7 @@ import com.mapbox.maps.plugin.locationcomponent.LocationProvider
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.ui.maps.internal.location.PuckAnimationEvaluator
 import com.mapbox.navigation.utils.internal.ifNonNull
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -154,7 +155,22 @@ class NavigationLocationProvider : LocationProvider {
         } else {
             doubleArrayOf(location.bearing.toDouble())
         }
-        this.onLocationUpdated(location = latLngUpdates, options = latLngTransitionOptions)
+
+        this.onLocationUpdated(
+            location = latLngUpdates,
+            options = locationAnimatorOptions(latLngUpdates, latLngTransitionOptions)
+        )
         this.onBearingUpdated(bearing = bearingUpdates, options = bearingTransitionOptions)
+    }
+
+    private fun locationAnimatorOptions(
+        keyPoints: Array<Point>,
+        clientOptions: (ValueAnimator.() -> Unit)?
+    ): (ValueAnimator.() -> Unit) {
+        val evaluator = PuckAnimationEvaluator(keyPoints)
+        return {
+            clientOptions?.also { apply(it) }
+            evaluator.installIn(this)
+        }
     }
 }
