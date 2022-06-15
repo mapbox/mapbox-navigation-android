@@ -21,6 +21,8 @@ internal class ViewBinder {
     private val _infoPanelHeaderBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
     private val _infoPanelContentBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
     private val _actionButtonsBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
+    private val _leftFrameBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
+    private val _rightFrameBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
 
     val speedLimit: StateFlow<UIBinder?> get() = _speedLimit.asStateFlow()
     val maneuver: StateFlow<UIBinder?> get() = _maneuver.asStateFlow()
@@ -30,6 +32,8 @@ internal class ViewBinder {
     val infoPanelHeaderBinder: StateFlow<UIBinder?> get() = _infoPanelHeaderBinder.asStateFlow()
     val infoPanelContentBinder: StateFlow<UIBinder?> get() = _infoPanelContentBinder.asStateFlow()
     val actionButtonsBinder: StateFlow<UIBinder?> get() = _actionButtonsBinder.asStateFlow()
+    val leftFrameContentBinder: StateFlow<UIBinder?> get() = _leftFrameBinder.asStateFlow()
+    val rightFrameContentBinder: StateFlow<UIBinder?> get() = _rightFrameBinder.asStateFlow()
 
     fun applyCustomization(customization: ViewBinderCustomization) {
         customization.speedLimitBinder?.also { _speedLimit.emitOrNull(it) }
@@ -41,6 +45,8 @@ internal class ViewBinder {
         customization.infoPanelHeaderBinder?.also { _infoPanelHeaderBinder.emitOrNull(it) }
         customization.infoPanelContentBinder?.also { _infoPanelContentBinder.emitOrNull(it) }
         customization.actionButtonsBinder?.also { _actionButtonsBinder.emitOrNull(it) }
+        customization.leftFrameBinder?.also { _leftFrameBinder.emitOrNull(it) }
+        customization.rightFrameBinder?.also { _rightFrameBinder.emitOrNull(it) }
     }
 
     private fun MutableStateFlow<UIBinder?>.emitOrNull(v: UIBinder) {

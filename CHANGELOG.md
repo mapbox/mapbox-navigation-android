@@ -10,6 +10,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 #### Bug fixes and improvements
 - Fixed an issue where the default `NavigationCamera` transition to the `Following` state did not respect `NavigationCameraTransitionOptions#maxDuration`. [#5921](https://github.com/mapbox/mapbox-navigation-android/pull/5921) 
+- Added empty frames to Drop-In UI on the left and right side of the screen, thereby allowing users to inject custom views. [#5930](https://github.com/mapbox/mapbox-navigation-android/pull/5930)
 
 ## Mapbox Navigation SDK 2.6.0-beta.2 - June 9, 2022
 ### Changelog
