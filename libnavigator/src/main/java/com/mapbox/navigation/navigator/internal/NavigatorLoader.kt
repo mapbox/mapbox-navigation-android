@@ -65,14 +65,13 @@ object NavigatorLoader {
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
-        historyDir: String?,
+        historyRecorder: HistoryRecorderHandle?,
     ): RouterInterface {
         val config = ConfigFactory.build(
             settingsProfile(deviceProfile),
             navigatorConfig,
             deviceProfile.customConfig
         )
-        val historyRecorder = buildHistoryRecorder(historyDir, config)
         val cache = CacheFactory.build(tilesConfig, config, historyRecorder)
         return RouterFactory.build(
             RouterType.HYBRID,
