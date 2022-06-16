@@ -115,13 +115,13 @@ class MapboxNavigationTest {
 
     private val accessToken = "pk.1234"
     private val directionsSession: DirectionsSession = mockk(relaxUnitFun = true)
-    private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
+    private val navigator: MapboxNativeNavigator = mockk(relaxed = true)
     private val tripService: TripService = mockk(relaxUnitFun = true)
     private val tripSession: TripSession = mockk(relaxUnitFun = true)
     private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
     private val distanceFormatterOptions: DistanceFormatterOptions = mockk(relaxed = true)
     private val routingTilesOptions: RoutingTilesOptions = mockk(relaxed = true)
-    private val routeRefreshController: RouteRefreshController = mockk(relaxUnitFun = true)
+    private val routeRefreshController: RouteRefreshController = mockk(relaxed = true)
     private val routeAlternativesController: RouteAlternativesController = mockk(relaxed = true)
     private val routeProgress: RouteProgress = mockk(relaxed = true)
     private val navigationSession: NavigationSession = mockk(relaxed = true)
@@ -1412,6 +1412,9 @@ class MapboxNavigationTest {
                 any(),
             )
         } returns navigator
+        coEvery { navigator.setRoutes(any(), any(), any()) } answers {
+            createSetRouteResult()
+        }
     }
 
     private fun mockTripService() {
