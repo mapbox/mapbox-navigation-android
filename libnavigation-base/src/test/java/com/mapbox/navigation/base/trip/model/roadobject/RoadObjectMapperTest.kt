@@ -20,6 +20,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollColle
 import com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollectionType
 import com.mapbox.navigation.base.trip.model.roadobject.tunnel.Tunnel
 import com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo
+import com.mapbox.navigator.Amenity
 import com.mapbox.navigator.IncidentCongestionDescription
 import com.mapbox.navigator.MatchedRoadObjectLocation
 import com.mapbox.navigator.OpenLRStandard
@@ -324,7 +325,8 @@ class RoadObjectMapperTest {
         type = com.mapbox.navigator.RoadObjectType.SERVICE_AREA,
         serviceAreaInfo = com.mapbox.navigator.ServiceAreaInfo(
             com.mapbox.navigator.ServiceAreaType.REST_AREA,
-            "rest_stop_name"
+            "rest_stop_name",
+            listOf(Amenity(com.mapbox.navigator.AmenityType.ATM, "amenity_1", "brand_1"))
         )
     )
 
@@ -332,7 +334,8 @@ class RoadObjectMapperTest {
         type = com.mapbox.navigator.RoadObjectType.SERVICE_AREA,
         serviceAreaInfo = com.mapbox.navigator.ServiceAreaInfo(
             com.mapbox.navigator.ServiceAreaType.SERVICE_AREA,
-            "rest_area_name"
+            "rest_area_name",
+            listOf(Amenity(com.mapbox.navigator.AmenityType.ATM, "amenity_1", "brand_1")),
         )
     )
 
