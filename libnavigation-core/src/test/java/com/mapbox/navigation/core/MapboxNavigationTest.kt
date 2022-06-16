@@ -1253,11 +1253,15 @@ class MapboxNavigationTest {
             mapboxNavigation.setNavigationRoutes(routes)
 
             coVerifyOrder {
+                // See MapboxNavigation#internalSetNavigationRoutes
+                // Order must be `directionsSession.setRoutes` and then `tripSession.setRoutes` so that the `NavigationSessionStateObserver`
+                // is fired off before the `Navigator` adds the `setRoute` event to the history file
+                // so `setRoute` events are recorded properly when the navigation session state changes
+                directionsSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
                 routeAlternativesController.pauseUpdates()
                 tripSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
                 routeAlternativesController.processAlternativesMetadata(routes, nativeAlternatives)
                 routeAlternativesController.resumeUpdates()
-                directionsSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
             }
         }
 
@@ -1321,8 +1325,12 @@ class MapboxNavigationTest {
             }
 
             coVerifyOrder {
-                tripSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+                // See MapboxNavigation#internalSetNavigationRoutes
+                // Order must be `directionsSession.setRoutes` and then `tripSession.setRoutes` so that the `NavigationSessionStateObserver`
+                // is fired off before the `Navigator` adds the `setRoute` event to the history file
+                // so `setRoute` events are recorded properly when the navigation session state changes
                 directionsSession.setRoutes(routes, any(), any())
+                tripSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
                 tripSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
             }
 

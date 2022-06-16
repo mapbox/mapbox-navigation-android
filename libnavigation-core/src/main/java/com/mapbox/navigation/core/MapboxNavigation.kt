@@ -804,8 +804,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         restartRouteScope()
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
-                setRoutesToTripSession(routes, legIndex, reason)
+                // Order MUST be `directionsSession.setRoutes` and then `tripSession.setRoutes` so that the `NavigationSessionStateObserver`
+                // is fired off before the `Navigator` adds the `setRoute` event to the history file
+                // so `setRoute` events are recorded properly when the navigation session state changes
                 directionsSession.setRoutes(routes, legIndex, reason)
+                setRoutesToTripSession(routes, legIndex, reason)
             }
         }
     }
