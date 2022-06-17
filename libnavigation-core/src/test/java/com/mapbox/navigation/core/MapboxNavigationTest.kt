@@ -121,7 +121,7 @@ class MapboxNavigationTest {
     private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
     private val distanceFormatterOptions: DistanceFormatterOptions = mockk(relaxed = true)
     private val routingTilesOptions: RoutingTilesOptions = mockk(relaxed = true)
-    private val routeRefreshController: RouteRefreshController = mockk(relaxUnitFun = true)
+    private val routeRefreshController: RouteRefreshController = mockk(relaxed = true)
     private val routeAlternativesController: RouteAlternativesController = mockk(relaxed = true)
     private val routeProgress: RouteProgress = mockk(relaxed = true)
     private val navigationSession: NavigationSession = mockk(relaxed = true)
