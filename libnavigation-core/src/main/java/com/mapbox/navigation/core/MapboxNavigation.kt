@@ -468,7 +468,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 connectivityHandler
             )
         }
-        directionsSession.registerRoutesObserver(navigationSession)
 
         arrivalProgressObserver = NavigationComponentProvider.createArrivalProgressObserver(
             tripSession
@@ -804,6 +803,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         restartRouteScope()
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
+                navigationSession.setRoutes(routes)
                 setRoutesToTripSession(routes, legIndex, reason)
                 directionsSession.setRoutes(routes, legIndex, reason)
             }

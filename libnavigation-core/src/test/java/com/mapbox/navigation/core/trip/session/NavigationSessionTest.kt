@@ -1,8 +1,6 @@
 package com.mapbox.navigation.core.trip.session
 
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.core.directions.session.RoutesExtra
-import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.FreeDrive
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.Idle
@@ -52,9 +50,7 @@ class NavigationSessionTest {
         val routes = mutableListOf<NavigationRoute>()
         val navigationSession = NavigationSession()
         routes.add(route)
-        navigationSession.onRoutesChanged(
-            RoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
-        )
+        navigationSession.setRoutes(routes)
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
 
         navigationSession.registerNavigationSessionStateObserver(stateObserver)
@@ -102,9 +98,7 @@ class NavigationSessionTest {
         navigationSession.registerNavigationSessionStateObserver(stateObserver)
 
         routes.add(route)
-        navigationSession.onRoutesChanged(
-            RoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
-        )
+        navigationSession.setRoutes(routes)
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
 
         verify(exactly = 1) {
@@ -153,9 +147,7 @@ class NavigationSessionTest {
         navigationSession.unregisterNavigationSessionStateObserver(stateObserver)
 
         routes.add(route)
-        navigationSession.onRoutesChanged(
-            RoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
-        )
+        navigationSession.setRoutes(routes)
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
 
         verify(exactly = 0) {
@@ -248,9 +240,7 @@ class NavigationSessionTest {
         navigationSession.registerNavigationSessionStateObserver(mockedStateObserver)
 
         routes.add(route)
-        navigationSession.onRoutesChanged(
-            RoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
-        )
+        navigationSession.setRoutes(routes)
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
 
         assertTrue(navigationSessionStateSlot.captured.sessionId.isNotEmpty())
@@ -281,14 +271,10 @@ class NavigationSessionTest {
                 every { directionsRoute } returns mockk()
             }
         )
-        navigationSession.onRoutesChanged(
-            RoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
-        )
+        navigationSession.setRoutes(routes)
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
         routes.clear()
-        navigationSession.onRoutesChanged(
-            RoutesUpdatedResult(emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
-        )
+        navigationSession.setRoutes(emptyList())
         val two = navigationSessionStateSlots[1].sessionId
 
         assertEquals(one, two)

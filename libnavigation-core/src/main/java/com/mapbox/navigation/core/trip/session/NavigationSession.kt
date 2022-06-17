@@ -1,8 +1,7 @@
 package com.mapbox.navigation.core.trip.session
 
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.telemetry.navObtainUniversalSessionId
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance
@@ -10,7 +9,7 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionState.FreeDrive
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.Idle
 import java.util.concurrent.CopyOnWriteArraySet
 
-internal class NavigationSession : RoutesObserver, TripSessionStateObserver {
+internal class NavigationSession : TripSessionStateObserver {
 
     private val stateObservers = CopyOnWriteArraySet<NavigationSessionStateObserver>()
 
@@ -71,8 +70,8 @@ internal class NavigationSession : RoutesObserver, TripSessionStateObserver {
         stateObservers.clear()
     }
 
-    override fun onRoutesChanged(result: RoutesUpdatedResult) {
-        hasRoutes = result.navigationRoutes.isNotEmpty()
+    fun setRoutes(routes: List<NavigationRoute>) {
+        hasRoutes = routes.isNotEmpty()
     }
 
     override fun onSessionStateChanged(tripSessionState: TripSessionState) {
