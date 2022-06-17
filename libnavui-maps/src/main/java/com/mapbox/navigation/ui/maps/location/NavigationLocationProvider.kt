@@ -156,10 +156,13 @@ class NavigationLocationProvider : LocationProvider {
             doubleArrayOf(location.bearing.toDouble())
         }
 
-        this.onLocationUpdated(
-            location = latLngUpdates,
-            options = locationAnimatorOptions(latLngUpdates, latLngTransitionOptions)
-        )
+        // Disabling Puck Velocity fix introduced in https://github.com/mapbox/mapbox-navigation-android/pull/5925
+        // TODO: Investigate why Puck jumps when using Mock Locations app but doesn't when using MapboxReplayer.
+        // this.onLocationUpdated(
+        //     location = latLngUpdates,
+        //     options = locationAnimatorOptions(latLngUpdates, latLngTransitionOptions)
+        // )
+        this.onLocationUpdated(location = latLngUpdates, options = latLngTransitionOptions)
         this.onBearingUpdated(bearing = bearingUpdates, options = bearingTransitionOptions)
     }
 

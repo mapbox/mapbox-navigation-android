@@ -9,8 +9,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Added support for `NavigationViewListener`. This listener can be registered with `NavigationView` to observe changes to: navigation state, destination setting/clearing, Map `Style`, camera modes, camera viewport size, and audio guidance mute/un-mute state. [#5922](https://github.com/mapbox/mapbox-navigation-android/pull/5922)
 
 #### Bug fixes and improvements
-- Fixed an issue where the default `NavigationCamera` transition to the `Following` state did not respect `NavigationCameraTransitionOptions#maxDuration`. [#5921](https://github.com/mapbox/mapbox-navigation-android/pull/5921)
-- Fixed user location indicator's velocity when `NavigationLocationProvider` is used together with `keyPoints`. [#5925](https://github.com/mapbox/mapbox-navigation-android/pull/5925) 
+- Fixed an issue where the default `NavigationCamera` transition to the `Following` state did not respect `NavigationCameraTransitionOptions#maxDuration`. [#5921](https://github.com/mapbox/mapbox-navigation-android/pull/5921) 
 
 ## Mapbox Navigation SDK 2.6.0-beta.2 - June 9, 2022
 ### Changelog
