@@ -4,6 +4,14 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.6.0-beta.3 - June 17, 2022
+### Changelog
+[Changes between v2.6.0-beta.2 and v2.6.0-beta.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.6.0-beta.2...v2.6.0-beta.3)
+
+#### Features
 - Overloaded `PredictiveCacheController` `constructor` adding `predictiveCacheGuidanceLocationOptions` so that Maps / Navigation controller options can be configured separately. Noting that when using the secondary constructor `predictiveCacheLocationOptions` is used as `predictiveCacheGuidanceLocationOptions` to retain backwards compatibility. [#5927](https://github.com/mapbox/mapbox-navigation-android/pull/5927)
 - Added an api for interacting with `NavigationView`. This API is experimental with the intention to become stable. [#5919](https://github.com/mapbox/mapbox-navigation-android/pull/5919)
 - Added support for `NavigationViewListener`. This listener can be registered with `NavigationView` to observe changes to: navigation state, destination setting/clearing, Map `Style`, camera modes, camera viewport size, and audio guidance mute/un-mute state. [#5922](https://github.com/mapbox/mapbox-navigation-android/pull/5922)
@@ -11,6 +19,16 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Fixed an issue where the default `NavigationCamera` transition to the `Following` state did not respect `NavigationCameraTransitionOptions#maxDuration`. [#5921](https://github.com/mapbox/mapbox-navigation-android/pull/5921) 
 - Added empty frames to Drop-In UI on the left and right side of the screen, thereby allowing users to inject custom views. [#5930](https://github.com/mapbox/mapbox-navigation-android/pull/5930)
+- Improvements in route line layer management to eliminate blinking when alternative routes are recomputed and redrawn after passing a fork, in addition to improving performance by reducing route line layer redraws. [#5859](https://github.com/mapbox/mapbox-navigation-android/pull/5859)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.6.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.6.0))
+- Mapbox Navigation Native `v106.0.0`
+- Mapbox Core Common `v22.0.0`
+- Mapbox Java `v6.5.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.5.0))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.2`
 
 ## Mapbox Navigation SDK 2.6.0-beta.2 - June 9, 2022
 ### Changelog
