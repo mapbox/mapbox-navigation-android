@@ -15,6 +15,7 @@ import com.mapbox.navigator.RouterOrigin
 import com.mapbox.navigator.SpeedLimit
 import com.mapbox.navigator.UpcomingRouteAlert
 import com.mapbox.navigator.VoiceInstruction
+import com.mapbox.navigator.Waypoint
 import java.time.Instant
 import java.util.Date
 
@@ -131,7 +132,9 @@ fun createRouteInterface(
     responseJson: String = "",
     requestURI: String = "",
     routerOrigin: RouterOrigin = RouterOrigin.ONLINE,
-    routeInfo: RouteInfo = RouteInfo(emptyList())
+    routeInfo: RouteInfo = RouteInfo(emptyList()),
+    waypoints: List<Waypoint> = emptyList(),
+    waypointsJson: String = "",
 ): RouteInterface = object : RouteInterface {
 
     override fun getRouteId() = "$responseUuid#$routeIndex"
@@ -147,4 +150,8 @@ fun createRouteInterface(
     override fun getRouterOrigin() = routerOrigin
 
     override fun getRouteInfo() = routeInfo
+
+    override fun getWaypoints() = waypoints
+
+    override fun getWaypointsJson() = waypointsJson
 }
