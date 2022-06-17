@@ -36,7 +36,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.ActionButtonDescription
-import com.mapbox.navigation.dropin.ActionButtonDescription.Position.*
+import com.mapbox.navigation.dropin.ActionButtonDescription.Position.END
+import com.mapbox.navigation.dropin.ActionButtonDescription.Position.START
 import com.mapbox.navigation.dropin.NavigationViewListener
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultAudioGuidanceButtonStyle
