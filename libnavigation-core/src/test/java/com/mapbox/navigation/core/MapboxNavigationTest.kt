@@ -330,7 +330,7 @@ class MapboxNavigationTest {
     @Test
     fun init_routesObs_internalRouteObs_navigationSession_and_TelemetryLocAndProgressDispatcher() {
         createMapboxNavigation()
-        verify(exactly = 2) { directionsSession.registerRoutesObserver(any()) }
+        verify(exactly = 1) { directionsSession.registerRoutesObserver(any()) }
     }
 
     @Test
@@ -1253,6 +1253,7 @@ class MapboxNavigationTest {
             mapboxNavigation.setNavigationRoutes(routes)
 
             coVerifyOrder {
+                navigationSession.setRoutes(routes)
                 routeAlternativesController.pauseUpdates()
                 tripSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
                 routeAlternativesController.processAlternativesMetadata(routes, nativeAlternatives)
@@ -1321,6 +1322,7 @@ class MapboxNavigationTest {
             }
 
             coVerifyOrder {
+                navigationSession.setRoutes(routes)
                 tripSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
                 directionsSession.setRoutes(routes, any(), any())
                 tripSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
@@ -1404,6 +1406,9 @@ class MapboxNavigationTest {
                 any(),
             )
         } returns navigator
+        coEvery { navigator.setRoutes(any(), any(), any()) } answers {
+            createSetRouteResult()
+        }
     }
 
     private fun mockTripService() {
