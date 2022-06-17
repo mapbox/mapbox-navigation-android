@@ -269,7 +269,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 isFallback = false,
                 tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
             ),
-            historyRecorder.fileDirectory(),
+            historyRecorder.historyRecorderHandle,
         )
     }
 
