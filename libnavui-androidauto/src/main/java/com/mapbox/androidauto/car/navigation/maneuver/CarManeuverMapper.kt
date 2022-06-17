@@ -1,11 +1,11 @@
 package com.mapbox.androidauto.car.navigation.maneuver
 
 import androidx.car.app.model.DateTimeWithZone
-import androidx.car.app.model.Distance
 import androidx.car.app.navigation.model.Maneuver
 import androidx.car.app.navigation.model.Step
 import androidx.car.app.navigation.model.TravelEstimate
 import androidx.car.app.navigation.model.Trip
+import com.mapbox.androidauto.car.navigation.CarDistanceFormatter
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.Expected
@@ -17,13 +17,17 @@ import java.util.TimeZone
 
 object CarManeuverMapper {
 
-    fun from(routeProgress: RouteProgress, maneuverApi: MapboxManeuverApi): Trip {
+    fun from(
+        routeProgress: RouteProgress,
+        maneuverApi: MapboxManeuverApi,
+        distanceFormatter: CarDistanceFormatter,
+    ): Trip {
         val etaAsCalendar = Calendar.getInstance().also {
             it.add(Calendar.SECOND, routeProgress.durationRemaining.toInt())
         }
 
         val eta = TravelEstimate.Builder(
-            Distance.create(routeProgress.distanceRemaining.toDouble(), Distance.UNIT_METERS),
+            distanceFormatter.carDistance(routeProgress.distanceRemaining.toDouble()),
             DateTimeWithZone.create(etaAsCalendar.timeInMillis, TimeZone.getDefault())
         ).build()
         val maneuvers = maneuverApi.getManeuvers(routeProgress)

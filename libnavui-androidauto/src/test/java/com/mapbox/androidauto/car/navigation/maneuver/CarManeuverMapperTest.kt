@@ -1,6 +1,8 @@
 package com.mapbox.androidauto.car.navigation.maneuver
 
+import androidx.car.app.model.Distance
 import androidx.car.app.navigation.model.Maneuver
+import com.mapbox.androidauto.car.navigation.CarDistanceFormatter
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.ExpectedFactory
@@ -407,19 +409,20 @@ class CarManeuverMapperTest {
         val expectedEta = Calendar.getInstance().also {
             it.timeInMillis = it.timeInMillis + mockRouteProgress.durationRemaining.toLong()
         }
-        val trip = CarManeuverMapper.from(mockRouteProgress, mockManeuverApi)
+        val remainingDistance = mockk<Distance>()
+        val distanceFormatter = mockk<CarDistanceFormatter> {
+            every {
+                carDistance(range(1609.34 - 0.1, 1609.34 + 0.1))
+            } returns remainingDistance
+        }
+        val trip = CarManeuverMapper.from(mockRouteProgress, mockManeuverApi, distanceFormatter)
 
         val timeDelta = expectedEta.timeInMillis - trip.stepTravelEstimates
             .first()
             .arrivalTimeAtDestination!!
             .timeSinceEpochMillis
         assertEquals(Maneuver.TYPE_TURN_NORMAL_RIGHT, trip.steps.first().maneuver!!.type)
-        assertEquals(
-            1609.34,
-            trip.stepTravelEstimates.first().remainingDistance!!.displayDistance,
-            0.1
-        )
-        assertEquals(1, trip.stepTravelEstimates.first().remainingDistance!!.displayUnit)
+        assertEquals(remainingDistance, trip.stepTravelEstimates.first().remainingDistance!!)
         assertTrue(timeDelta < 20)
     }
 
