@@ -21,7 +21,7 @@ internal class NavigationSession : TripSessionStateObserver {
             }
             field = value
 
-            Log.d("qwerty", "NavigationSession notify observers ${System.currentTimeMillis()}")
+            Log.d("qwerty", "NavigationSession notify observers. count = ${stateObservers.size} ${System.currentTimeMillis()}")
 
             stateObservers.forEach { it.onNavigationSessionStateChanged(value) }
         }
