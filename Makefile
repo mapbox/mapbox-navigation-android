@@ -151,7 +151,7 @@ ui-unit-tests-jacoco:
 	$(call run-gradle-tasks,$(UI_MODULES),jacocoTestReport)
 
 .PHONY: publish-local
-core-publish-local:
+publish-local:
 	./gradlew publishToMavenLocal
 
 .PHONY: upload-to-sdk-registry-snapshot
