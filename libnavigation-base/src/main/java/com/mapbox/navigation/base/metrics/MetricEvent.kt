@@ -22,7 +22,8 @@ interface MetricEvent {
         NavigationMetrics.INITIAL_GPS,
         NavigationMetrics.FASTER_ROUTE,
         NavigationMetrics.APP_USER_TURNSTILE,
-        NavigationMetrics.FREE_DRIVE
+        NavigationMetrics.FREE_DRIVE,
+        NavigationMetrics.CUSTOM_EVENT,
     )
     annotation class Metric
 
@@ -90,6 +91,11 @@ object NavigationMetrics {
      * Navigation Event "FreeDrive" name
      */
     const val FREE_DRIVE = "navigation.freeDrive"
+
+    /**
+     * Navigation Event "Custom" name
+     */
+    const val CUSTOM_EVENT = "navigation.customEvent"
 }
 
 /**

@@ -33,6 +33,7 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
+import com.mapbox.navigation.core.internal.telemetry.NavigationCustomEventType
 import com.mapbox.navigation.core.internal.telemetry.UserFeedback
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.toTelemetryLocation
@@ -45,6 +46,7 @@ import com.mapbox.navigation.core.telemetry.events.MetricsDirectionsRoute
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
 import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationCancelEvent
+import com.mapbox.navigation.core.telemetry.events.NavigationCustomEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationDepartEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationFeedbackEvent
@@ -1282,6 +1284,21 @@ class MapboxNavigationTelemetryTest {
         verify(exactly = 0) { globalUserFeedbackCallback.onNewUserFeedback(any()) }
     }
 
+    @Test
+    fun `custom event is dispatched when posted`() {
+        baseMock()
+        baseInitialization()
+
+        postCustomEvent()
+
+        val events = captureAndVerifyMetricsReporter(3)
+        events.checkSequence(
+            NavigationAppUserTurnstileEvent::class,
+            NavigationDepartEvent::class,
+            NavigationCustomEvent::class,
+        )
+    }
+
     private fun baseInitialization() {
         initTelemetry()
         updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
@@ -1487,6 +1504,12 @@ class MapboxNavigationTelemetryTest {
         initTelemetry()
         resetTelemetry()
         block()
+    }
+
+    private fun postCustomEvent() {
+        MapboxNavigationTelemetry.postCustomEvent(
+            "testPayload", NavigationCustomEventType.ANALYTICS, "1.2.3"
+        )
     }
 
     private fun postUserFeedback() {
