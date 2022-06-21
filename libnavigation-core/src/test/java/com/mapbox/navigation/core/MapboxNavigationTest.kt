@@ -36,6 +36,7 @@ import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.internal.telemetry.NavigationCustomEventType
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
@@ -1390,6 +1391,40 @@ class MapboxNavigationTest {
                 )
             }
         }
+
+    @Test
+    fun `when telemetry is enabled custom event is posted`() = coroutineRule.runBlockingTest {
+        createMapboxNavigation()
+        mockkStatic(TelemetryEnabler::class)
+        every {
+            TelemetryEnabler.isEventsEnabled(navigationOptions.applicationContext)
+        } returns true
+        every { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) } just Runs
+        every { MapboxNavigationTelemetry.destroy(any()) } just Runs
+
+        mapboxNavigation.postCustomEvent("", NavigationCustomEventType.ANALYTICS, "1.0")
+
+        verify(exactly = 1) { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) }
+
+        unmockkStatic(TelemetryEnabler::class)
+    }
+
+    @Test
+    fun `when telemetry is disabled custom event is not posted`() = coroutineRule.runBlockingTest {
+        createMapboxNavigation()
+        mockkStatic(TelemetryEnabler::class)
+        every {
+            TelemetryEnabler.isEventsEnabled(navigationOptions.applicationContext)
+        } returns false
+        every { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) } just Runs
+        every { MapboxNavigationTelemetry.destroy(any()) } just Runs
+
+        mapboxNavigation.postCustomEvent("", NavigationCustomEventType.ANALYTICS, "1.0")
+
+        verify(exactly = 0) { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) }
+
+        unmockkStatic(TelemetryEnabler::class)
+    }
 
     private fun createMapboxNavigation() {
         mapboxNavigation = MapboxNavigation(navigationOptions, threadController)

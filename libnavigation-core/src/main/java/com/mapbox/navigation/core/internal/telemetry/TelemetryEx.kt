@@ -90,3 +90,12 @@ fun MapboxNavigation.postUserFeedback(
         feedbackSubType, feedbackMetadata, userFeedbackCallback,
     )
 }
+
+@ExperimentalPreviewMapboxNavigationAPI
+fun MapboxNavigation.sendCustomEvent(
+    payload: String,
+    @CustomEvent.Type customEventType: String,
+    customEventVersion: String,
+) {
+    postCustomEvent(payload, customEventType, customEventVersion)
+}

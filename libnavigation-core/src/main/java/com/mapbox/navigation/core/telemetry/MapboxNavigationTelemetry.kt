@@ -36,6 +36,7 @@ import com.mapbox.navigation.core.telemetry.events.MetricsDirectionsRoute
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
 import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationCancelEvent
+import com.mapbox.navigation.core.telemetry.events.NavigationCustomEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationDepartEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationFeedbackEvent
@@ -422,6 +423,21 @@ internal object MapboxNavigationTelemetry {
         userFeedbackCallbacks.remove(userFeedbackCallback)
     }
 
+    fun postCustomEvent(
+        payload: String,
+        customEventType: String,
+        customEventVersion: String
+    ) {
+        createCustomEvent(
+            payload = payload,
+            customEventType = customEventType,
+            customEventVersion = customEventVersion,
+            phoneState = PhoneState.newInstance(applicationContext)
+        ) {
+            sendMetricEvent(it)
+        }
+    }
+
     @ExperimentalPreviewMapboxNavigationAPI
     fun provideFeedbackMetadataWrapper(): FeedbackMetadataWrapper {
         (telemetryState as? NavTelemetryState.Running)?.sessionMetadata?.let { sessionMetadata ->
@@ -670,6 +686,29 @@ internal object MapboxNavigationTelemetry {
                 )
             }
         sendEvent(freeDriveEvent)
+    }
+
+    private fun createCustomEvent(
+        payload: String,
+        customEventType: String,
+        customEventVersion: String,
+        phoneState: PhoneState,
+        onEventUpdated: ((NavigationCustomEvent) -> Unit)?
+    ) {
+        log("customEventType: $customEventType")
+        val customEvent =
+            NavigationCustomEvent().apply {
+                this.payload = payload.plus(", userId = ${phoneState.userId}")
+                this.type = customEventType
+                this.driverMode = "freeDrive"
+                this.eventVersion = EVENT_VERSION
+                this.customEventVersion = customEventVersion
+                lat = locationsCollector.lastLocation?.latitude ?: 0.0
+                lng = locationsCollector.lastLocation?.longitude ?: 0.0
+                sdkIdentifier = this@MapboxNavigationTelemetry.sdkIdentifier
+                locationEngine = this@MapboxNavigationTelemetry.locationEngineNameExternal
+            }
+        onEventUpdated?.invoke(customEvent)
     }
 
     private fun sendEvent(metricEvent: MetricEvent) {
