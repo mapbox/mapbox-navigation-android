@@ -16,6 +16,7 @@ internal fun MetricEvent.toTelemetryEvent(): Event? =
         NavigationMetrics.FEEDBACK,
         NavigationMetrics.INITIAL_GPS,
         NavigationMetrics.FASTER_ROUTE,
+        NavigationMetrics.CUSTOM_EVENT,
         NavigationMetrics.FREE_DRIVE -> this as Event
         NavigationMetrics.APP_USER_TURNSTILE -> (this as NavigationAppUserTurnstileEvent).event
         else -> null

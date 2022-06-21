@@ -51,6 +51,7 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.ReachabilityService
+import com.mapbox.navigation.core.internal.telemetry.CustomEvent
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.utils.InternalUtils
 import com.mapbox.navigation.core.internal.utils.ModuleParams
@@ -1340,6 +1341,21 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 feedbackSubType,
                 feedbackMetadata,
                 userFeedbackCallback,
+            )
+        }
+    }
+
+    @ExperimentalPreviewMapboxNavigationAPI
+    internal fun postCustomEvent(
+        payload: String,
+        @CustomEvent.Type customEventType: String,
+        customEventVersion: String,
+    ) {
+        runInTelemetryContext { telemetry ->
+            telemetry.postCustomEvent(
+                payload = payload,
+                customEventType = customEventType,
+                customEventVersion = customEventVersion
             )
         }
     }
