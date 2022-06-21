@@ -103,7 +103,7 @@ sealed class NavigationSessionState {
 
     /**
      * Random session UUID.
-     * This is generated internally based on the current state within an trip session.
+     * This is generated internally based on the current state within a trip session.
      * I.e. will change when transitioning across states of a trip session. Empty when [Idle].
      *
      * Useful to use it in combination with the [MapboxHistoryRecorder].

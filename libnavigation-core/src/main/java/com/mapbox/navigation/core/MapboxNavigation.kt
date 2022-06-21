@@ -1183,7 +1183,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * navigating to the next stop. Use the [ArrivalController] to control when to
      * call [navigateNextRouteLeg].
      *
-     * @return true if navigation to next stop could be started, false otherwise
+     * @param callback [LegIndexUpdatedCallback] callback to handle leg index updates.
      */
     fun navigateNextRouteLeg(callback: LegIndexUpdatedCallback) {
         arrivalProgressObserver.navigateNextRouteLeg(callback)
