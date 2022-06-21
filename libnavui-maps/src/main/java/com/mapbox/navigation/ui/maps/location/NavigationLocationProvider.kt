@@ -170,6 +170,7 @@ class NavigationLocationProvider : LocationProvider {
     ): (ValueAnimator.() -> Unit) {
         val evaluator = PuckAnimationEvaluator(keyPoints)
         return {
+            // TODO: Remove setDuration once patched in MapsSDK https://github.com/mapbox/mapbox-maps-android/issues/1446
             duration = LocationComponentConstants.DEFAULT_INTERVAL_MILLIS
             evaluator.installIn(this)
             clientOptions?.also { apply(it) }
