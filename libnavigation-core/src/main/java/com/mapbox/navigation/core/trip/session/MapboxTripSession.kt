@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.trip.session
 
 import android.location.Location
+import android.util.Log
 import androidx.annotation.MainThread
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.BannerInstructions
@@ -81,6 +82,8 @@ internal class MapboxTripSession(
         legIndex: Int,
         @RoutesExtra.RoutesUpdateReason reason: String
     ): NativeSetRouteResult {
+        Log.d("qwerty", "MapboxTripSession setRoutes size = ${routes.size}, reason = $reason")
+
         logD("routes update (reason: $reason, count: ${routes.size}) - starting", LOG_CATEGORY)
         isUpdatingRoute = true
         val result = when (reason) {
