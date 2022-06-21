@@ -573,11 +573,37 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun setRoutes() = coroutineRule.runBlockingTest {
+    fun setRoutesUsesCorrectArguments() = coroutineRule.runBlockingTest {
+        val expectedAlternatives = listOf(mockk<RouteAlternative>(), mockk())
+        coEvery {
+            navigator.setRoutes(any(), any())
+        } returns createSetRouteResult(expectedAlternatives)
         val alternative: NavigationRoute = mockk()
         tripSession.setRoutes(routes + alternative, legIndex, updateReason)
 
         coVerify(exactly = 1) { navigator.setRoutes(routes.first(), legIndex, listOf(alternative)) }
+    }
+
+    @Test
+    fun setRoutesReturnsValue() = coroutineRule.runBlockingTest {
+        val expectedAlternatives = listOf(mockk<RouteAlternative>(), mockk())
+        coEvery {
+            navigator.setRoutes(any(), any(), any())
+        } returns createSetRouteResult(expectedAlternatives)
+        val alternative: NavigationRoute = mockk()
+        val actual = tripSession.setRoutes(routes + alternative, legIndex, updateReason)
+        assertEquals(expectedAlternatives, actual.nativeAlternatives)
+        assertNull(actual.error)
+    }
+
+    @Test
+    fun setRoutesReturnsError() = coroutineRule.runBlockingTest {
+        val error = "some error"
+        coEvery { navigator.setRoutes(any(), any(), any()) } returns createSetRouteError(error)
+        val alternative: NavigationRoute = mockk()
+        val actual = tripSession.setRoutes(routes + alternative, legIndex, updateReason)
+        assertEquals(emptyList<RouteAlternative>(), actual.nativeAlternatives)
+        assertEquals(error, actual.error)
     }
 
     @Test
@@ -633,6 +659,7 @@ class MapboxTripSessionTest {
             )
 
             assertEquals(nativeAlternatives, result.nativeAlternatives)
+            assertNull(result.error)
         }
 
     @Test
@@ -704,6 +731,7 @@ class MapboxTripSessionTest {
             )
 
             assertEquals(mockAlternativesMetadata, result.nativeAlternatives)
+            assertNull(result.error)
         }
 
     @Test

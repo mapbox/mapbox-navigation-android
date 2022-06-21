@@ -84,8 +84,8 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LegIndexUpdatedCallback
-import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.core.trip.session.NativeSetRouteResult
 import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance
@@ -113,6 +113,7 @@ import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
+import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import com.mapbox.navigator.AlertsServiceOptions
 import com.mapbox.navigator.ElectronicHorizonOptions
@@ -805,8 +806,12 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
                 navigationSession.setRoutes(routes)
-                setRoutesToTripSession(routes, legIndex, reason)
-                directionsSession.setRoutes(routes, legIndex, reason)
+                val processedRoutes = setRoutesToTripSession(routes, legIndex, reason)
+                if (processedRoutes.error == null) {
+                    directionsSession.setRoutes(routes, legIndex, reason)
+                } else {
+                    logW("Routes $routes will be ignored as they are not valid")
+                }
             }
         }
     }
@@ -829,17 +834,18 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routes: List<NavigationRoute>,
         legIndex: Int = 0,
         @RoutesExtra.RoutesUpdateReason reason: String,
-    ) {
+    ): NativeSetRouteResult {
         routeAlternativesController.pauseUpdates()
-        tripSession.setRoutes(routes, legIndex, reason).run {
+        return tripSession.setRoutes(routes, legIndex, reason).apply {
             if (nativeAlternatives != null) {
                 routeAlternativesController.processAlternativesMetadata(
                     routes,
                     nativeAlternatives
                 )
             }
+        }.also {
+            routeAlternativesController.resumeUpdates()
         }
-        routeAlternativesController.resumeUpdates()
     }
 
     /**

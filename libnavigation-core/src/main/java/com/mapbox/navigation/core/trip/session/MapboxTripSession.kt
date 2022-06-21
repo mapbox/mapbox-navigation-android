@@ -132,14 +132,15 @@ internal class MapboxTripSession(
             newPrimaryRoute,
             legIndex,
             routes.drop(1)
-        ).mapValue { it.alternatives }.getValueOrElse { emptyList() }
+        ).mapValue { it.alternatives }
         this@MapboxTripSession.primaryRoute = newPrimaryRoute
         roadObjects = newPrimaryRoute?.let {
             getRouteInitInfo(it.nativeRoute().routeInfo)?.roadObjects
         } ?: emptyList()
         logD("primary route update - finished", LOG_CATEGORY)
         return NativeSetRouteResult(
-            nativeAlternatives = processedAlternatives
+            nativeAlternatives = processedAlternatives.getValueOrElse { emptyList() },
+            error = processedAlternatives.error
         )
     }
 
