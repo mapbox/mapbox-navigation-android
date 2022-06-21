@@ -4,6 +4,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutesState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -32,6 +33,33 @@ internal class NavigationViewListenerRegistry(
             launch {
                 store.select { it.destination?.point }.collect {
                     listener.onDestinationChanged(it)
+                }
+            }
+            launch {
+                store.select { it.routes }.collect {
+                    when (it) {
+                        is RoutesState.Empty -> {
+                            listener.onRouteFetchSuccessful(routes = emptyList())
+                        }
+                        is RoutesState.Ready -> {
+                            listener.onRouteFetchSuccessful(routes = it.routes)
+                        }
+                        is RoutesState.Failed -> {
+                            listener.onRouteFetchFailed(
+                                reasons = it.reasons,
+                                routeOptions = it.routeOptions
+                            )
+                        }
+                        is RoutesState.Canceled -> {
+                            listener.onRouteFetchCanceled(
+                                routeOptions = it.routeOptions,
+                                routerOrigin = it.routerOrigin
+                            )
+                        }
+                        is RoutesState.Fetching -> {
+                            listener.onRouteFetching(requestId = it.requestId)
+                        }
+                    }
                 }
             }
             launch {
@@ -64,11 +92,11 @@ internal class NavigationViewListenerRegistry(
 
     private fun NavigationViewListener.onNavigationStateChanged(state: NavigationState) {
         when (state) {
-            is NavigationState.FreeDrive -> onFreeDriveStarted()
-            is NavigationState.DestinationPreview -> onDestinationPreviewStared()
-            is NavigationState.RoutePreview -> onRoutePreviewStared()
-            is NavigationState.ActiveNavigation -> onActiveNavigationStared()
-            is NavigationState.Arrival -> onArrivalStared()
+            is NavigationState.FreeDrive -> onFreeDrive()
+            is NavigationState.DestinationPreview -> onDestinationPreview()
+            is NavigationState.RoutePreview -> onRoutePreview()
+            is NavigationState.ActiveNavigation -> onActiveNavigation()
+            is NavigationState.Arrival -> onArrival()
         }
     }
 

@@ -43,28 +43,28 @@ public class NavigationViewFragment extends Fragment {
             }
 
             @Override
-            public void onFreeDriveStarted() {
-                Log.d(TAG, "onFreeDriveStarted");
+            public void onFreeDrive() {
+                Log.d(TAG, "onFreeDrive");
             }
 
             @Override
-            public void onDestinationPreviewStared() {
-                Log.d(TAG, "onDestinationPreviewStared");
+            public void onDestinationPreview() {
+                Log.d(TAG, "onDestinationPreview");
             }
 
             @Override
-            public void onRoutePreviewStared() {
-                Log.d(TAG, "onRoutePreviewStared");
+            public void onRoutePreview() {
+                Log.d(TAG, "onRoutePreview");
             }
 
             @Override
-            public void onActiveNavigationStared() {
-                Log.d(TAG, "onActiveNavigationStared");
+            public void onActiveNavigation() {
+                Log.d(TAG, "onActiveNavigation");
             }
 
             @Override
-            public void onArrivalStared() {
-                Log.d(TAG, "onArrivalStared");
+            public void onArrival() {
+                Log.d(TAG, "onArrival");
             }
         });
     }

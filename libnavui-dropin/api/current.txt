@@ -41,18 +41,22 @@ package com.mapbox.navigation.dropin {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class NavigationViewListener {
     ctor public NavigationViewListener();
-    method public void onActiveNavigationStared();
-    method public void onArrivalStared();
+    method public void onActiveNavigation();
+    method public void onArrival();
     method public void onAudioGuidanceStateChanged(boolean muted);
     method public void onCameraPaddingChanged(com.mapbox.maps.EdgeInsets padding);
     method public void onDestinationChanged(com.mapbox.geojson.Point? destination);
-    method public void onDestinationPreviewStared();
+    method public void onDestinationPreview();
     method public void onFollowingCameraMode();
-    method public void onFreeDriveStarted();
+    method public void onFreeDrive();
     method public void onIdleCameraMode();
     method public void onMapStyleChanged(com.mapbox.maps.Style style);
     method public void onOverviewCameraMode();
-    method public void onRoutePreviewStared();
+    method public void onRouteFetchCanceled(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
+    method public void onRouteFetchFailed(java.util.List<com.mapbox.navigation.base.route.RouterFailure> reasons, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public void onRouteFetchSuccessful(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    method public void onRouteFetching(long requestId);
+    method public void onRoutePreview();
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ViewBinderCustomization {
