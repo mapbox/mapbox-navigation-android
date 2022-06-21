@@ -1,5 +1,6 @@
 package com.mapbox.navigation.navigator.internal
 
+import android.util.Log
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
 import com.mapbox.api.directionsrefresh.v1.models.RouteLegRefresh
@@ -160,6 +161,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         startingLeg: Int,
         alternatives: List<NavigationRoute>,
     ): Expected<String, SetRoutesResult> = suspendCancellableCoroutine { continuation ->
+        Log.d("qwerty", "navigator!!.setRoutes ${System.currentTimeMillis()}")
+
         navigator!!.setRoutes(
             primaryRoute?.let { route ->
                 SetRoutesParams(
@@ -169,6 +172,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 )
             }
         ) { result ->
+            Log.d("qwerty", "navigator!!.setRoutes RESULT ${System.currentTimeMillis()}")
+
             result.onError {
                 logE(
                     "Failed to set the primary route with alternatives, " +

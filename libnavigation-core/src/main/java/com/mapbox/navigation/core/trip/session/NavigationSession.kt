@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.trip.session
 
+import android.util.Log
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
@@ -19,6 +20,8 @@ internal class NavigationSession : TripSessionStateObserver {
                 return
             }
             field = value
+
+            Log.d("qwerty", "NavigationSession notify observers ${System.currentTimeMillis()}")
 
             stateObservers.forEach { it.onNavigationSessionStateChanged(value) }
         }

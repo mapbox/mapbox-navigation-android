@@ -6,6 +6,7 @@ package com.mapbox.navigation.core
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
@@ -803,6 +804,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         restartRouteScope()
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
+                Log.d("qwerty", "internalSetNavigationRoutes ${System.currentTimeMillis()}")
                 navigationSession.setRoutes(routes)
                 setRoutesToTripSession(routes, legIndex, reason)
                 directionsSession.setRoutes(routes, legIndex, reason)
