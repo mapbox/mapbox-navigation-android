@@ -79,6 +79,7 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
+import com.mapbox.navigation.core.telemetry.events.internal.CustomEventType
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LegIndexUpdatedCallback
@@ -1346,6 +1347,18 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         } ?: throw java.lang.IllegalStateException(
             "To get FeedbackMetadataWrapper Telemetry must be enabled"
         )
+
+    fun postCustomEvent(
+        payload: String,
+        type: CustomEventType,
+        customEventVersion: String
+    ) {
+        runInTelemetryContext { telemetry ->
+            telemetry.postCustomEvent(
+                payload = payload, type = type, customEventVersion = customEventVersion
+            )
+        }
+    }
 
     /**
      * Start observing alternatives routes for a trip session via [RouteAlternativesObserver].

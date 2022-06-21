@@ -410,6 +410,10 @@ internal object MapboxNavigationTelemetry {
         appInstance = app
     }
 
+    fun postCustomEvent(payload: String, type: CustomEventType, customEventVersion: String) {
+        createCustomEvent(payload = payload, type = type, customEventVersion = customEventVersion)
+    }
+
     @ExperimentalPreviewMapboxNavigationAPI
     fun provideFeedbackMetadataWrapper(): FeedbackMetadataWrapper {
         (telemetryState as? NavTelemetryState.Running)?.sessionMetadata?.let { sessionMetadata ->
@@ -646,15 +650,20 @@ internal object MapboxNavigationTelemetry {
     }
 
     private fun createCustomEvent(
+        payload: String,
         type: CustomEventType,
-        payload: String
+        customEventVersion: String
     ) {
         log("customEventType $type")
-        val customEvent =
-            NavigationCustomEvents().apply {
-                populate(type, payload)
-            }
-        sendEvent(customEvent)
+        ifTelemetryRunning(
+            "cannot handle custom events: $LOG_TELEMETRY_IS_NOT_RUNNING"
+        ) {
+            val customEvent =
+                NavigationCustomEvents().apply {
+                    populate(type, payload, customEventVersion)
+                }
+            sendEvent(customEvent)
+        }
     }
 
     private fun sendEvent(metricEvent: MetricEvent) {
@@ -818,13 +827,15 @@ internal object MapboxNavigationTelemetry {
 
     private fun NavigationCustomEvents.populate(
         customEventType: CustomEventType,
-        customEventPayload: String
+        customEventPayload: String,
+        customEventVersion: String
     ) {
         log("populateFreeDriveEvent")
 
         this.apply {
-            type = customEventType.type
-            payload = customEventPayload
+            this.type = customEventType.type
+            this.payload = customEventPayload
+            this.customEventVersion = customEventVersion
         }
     }
 

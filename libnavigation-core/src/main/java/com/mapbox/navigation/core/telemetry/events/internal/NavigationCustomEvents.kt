@@ -12,10 +12,10 @@ import com.mapbox.navigation.core.telemetry.events.PhoneState
 internal class NavigationCustomEvents: Event(), MetricEvent {
 
     val version = "2.4"
-    val customEventVersion = "2.4"
     val event: String = NavigationMetrics.CUSTOM_EVENT
 
-    var type: String = ""
+    var type: String = CustomEventType.CORE.type
+    var customEventVersion = "1.0"
     var payload: String? = null
 
     override val metricName: String
@@ -31,7 +31,9 @@ internal class NavigationCustomEvents: Event(), MetricEvent {
     }
 }
 
-internal enum class CustomEventType(val type: String) {
+enum class CustomEventType(val type: String) {
+    UI("ui"),
+    CORE("core"),
     DropInUI("dropInUI"),
     AndroidAuto("androidAuto")
 }
