@@ -32,13 +32,14 @@ def getReleaseVersion(String version) {
 }
 
 def getSnapshotVersion(String version) {
-    if (version.isEmpty()) {
-        return "0.1.0-SNAPSHOT"
-    } else {
-        def prefix = project.ext.releaseTagPrefix
-        def matcher = version =~ /$prefix(\d+).(\d+)?.*/
-        def major = (matcher[0][1] as Integer)
-        def minor = (matcher[0][2] as Integer) + 1
-        return "${major}.${minor}.0-SNAPSHOT"
-    }
+    return "2.7.0-alpha.1-puck-fix-SNAPSHOT"
+//    if (version.isEmpty()) {
+//        return "0.1.0-SNAPSHOT"
+//    } else {
+//        def prefix = project.ext.releaseTagPrefix
+//        def matcher = version =~ /$prefix(\d+).(\d+)?.*/
+//        def major = (matcher[0][1] as Integer)
+//        def minor = (matcher[0][2] as Integer) + 1
+//        return "${major}.${minor}.0-SNAPSHOT"
+//    }
 }

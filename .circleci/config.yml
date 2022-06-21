@@ -38,6 +38,7 @@ workflows:
               only:
                 - main
                 - release-v.*
+                - tr-enable-puck-velocity-fix-snapshot
       - release:
           filters:
             tags:
