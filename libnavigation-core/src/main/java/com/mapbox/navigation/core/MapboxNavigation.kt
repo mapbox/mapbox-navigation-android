@@ -1116,26 +1116,26 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * By default uses [MapboxRerouteController].
      */
     fun setRerouteController(rerouteController: RerouteController) {
-        val currentController = this.rerouteController
-        this.rerouteController = LegacyRerouteControllerAdapter(rerouteController)
-
-        if (currentController?.state == RerouteState.FetchingRoute) {
-            currentController.interrupt()
-            reroute()
-        }
+        setRerouteController(
+            LegacyRerouteControllerAdapter(rerouteController) as NavigationRerouteController?
+        )
     }
 
     /**
-     * Set [RerouteOptionsAdapter]. It allows to modify [RouteOptions] before a reroute request
-     * is sent if the default reroute controller is used. Pass `null` to clear the adapter.
+     * Set [NavigationRerouteController] that's automatically invoked when user is off-route.
+     *
+     * By default [MapboxRerouteController] is used.
+     * Pass `null` to disable automatic reroute.
+     * A user will stay in `OFF_ROUTE` state until a new route is set or the user gets back to the route.
      */
     @JvmOverloads
     fun setRerouteController(
         rerouteController: NavigationRerouteController? = defaultRerouteController
     ) {
+        val oldController = this.rerouteController
         this.rerouteController = rerouteController
-        if (rerouteController?.state == RerouteState.FetchingRoute) {
-            rerouteController.interrupt()
+        if (oldController?.state == RerouteState.FetchingRoute) {
+            oldController.interrupt()
             reroute()
         }
     }
