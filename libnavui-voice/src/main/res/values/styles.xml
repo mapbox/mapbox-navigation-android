@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="MapboxStyleSound">
         <item name="soundButtonMuteDrawable">@drawable/mapbox_ic_sound_off</item>
         <item name="soundButtonUnmuteDrawable">@drawable/mapbox_ic_sound_on</item>
@@ -12,13 +13,32 @@
     </style>
 
     <style name="MapboxStyleAudioGuidanceButton">
+        <item name="android:minHeight">52dp</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:paddingEnd">10dp</item>
         <item name="android:elevation">0dp</item>
         <item name="audioGuidanceButtonBackground">@drawable/mapbox_bg_button</item>
         <item name="audioGuidanceButtonIconTint">@color/colorOnSurface</item>
         <item name="audioGuidanceButtonMuteIcon">@drawable/mapbox_ic_sound_off</item>
         <item name="audioGuidanceButtonUnmuteIcon">@drawable/mapbox_ic_sound_on</item>
-        <item name="audioGuidanceButtonTextAppearance">@style/MapboxAudioGuidanceButtonTextAppearance</item>
+        <item name="audioGuidanceButtonTextAppearance">
+            @style/MapboxAudioGuidanceButtonTextAppearance
+        </item>
         <item name="audioGuidanceButtonMuteText">@string/mapbox_muted</item>
         <item name="audioGuidanceButtonUnmuteText">@string/mapbox_unmuted</item>
+    </style>
+
+    <style name="MapboxStyleAudioGuidanceButton.Oval" parent="MapboxStyleAudioGuidanceButton">
+        <item name="audioGuidanceButtonBackground">@drawable/mapbox_bg_circle_outline</item>
+    </style>
+
+    <style name="MapboxStyleAudioGuidanceButton.Square" parent="MapboxStyleAudioGuidanceButton">
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:minHeight">0dp</item>
+    </style>
+
+    <style name="MapboxStyleAudioGuidanceButton.Circle" parent="MapboxStyleAudioGuidanceButton.Square">
+        <item name="audioGuidanceButtonBackground">@drawable/mapbox_bg_circle_outline</item>
     </style>
 </resources>

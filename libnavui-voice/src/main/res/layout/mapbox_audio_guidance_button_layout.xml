@@ -11,9 +11,11 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/container"
         android:layout_width="wrap_content"
-        android:layout_height="52dp"
-        android:minWidth="72dp"
-        android:paddingStart="@dimen/mapbox_audioGuidanceButton_paddingStart">
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingStart="10dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/iconImage"
@@ -23,6 +25,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
+
+        <!-- Spacing to ensure left-right symmetry when shrunk -->
+        <Space
+            android:layout_marginLeft="10dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/iconImage"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/buttonText"

@@ -62,6 +62,8 @@
         <activity android:name=".view.CustomAlternativeRouteColoringActivity"/>
         <activity android:name=".view.RouteLineFeaturesActivity"/>
 
+        <activity android:name=".view.DropInButtonsActivity" />
+
         <service
             android:name=".car.MainCarAppService"
             android:exported="true"

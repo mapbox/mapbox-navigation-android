@@ -18,7 +18,7 @@
     <dimen name="mapbox_actionList_spacing">5dp</dimen>
 
     <!-- MapboxExtendableButton -->
-    <dimen name="mapbox_extendableButton_paddingStart">20dp</dimen>
+    <dimen name="mapbox_extendableButton_paddingStart">10dp</dimen>
     <dimen name="mapbox_extendableButton_minHeight">52dp</dimen>
     <dimen name="mapbox_extendableButton_minWidth">72dp</dimen>
     <dimen name="mapbox_extendableButton_iconSize">32dp</dimen>

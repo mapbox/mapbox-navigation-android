@@ -11,9 +11,11 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/container"
         android:layout_width="wrap_content"
-        android:layout_height="52dp"
-        android:minWidth="72dp"
-        android:paddingStart="@dimen/mapbox_cameraModeButton_paddingStart">
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingStart="@dimen/mapbox_extendableButton_paddingStart"
+        android:paddingTop="@dimen/mapbox_extendableButton_paddingStart"
+        android:paddingBottom="@dimen/mapbox_extendableButton_paddingStart">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/iconImage"
@@ -24,11 +26,20 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
 
+        <!-- Spacing to ensure left-right symmetry when shrunk -->
+        <Space
+            android:layout_marginLeft="@dimen/mapbox_extendableButton_paddingStart"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/iconImage"
+            app:layout_constraintEnd_toEndOf="parent" />
+
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/buttonText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="8dp"
+            android:paddingLeft="@dimen/mapbox_extendableButton_spacing"
             android:text=""
             android:maxLines="1"
             android:textColor="@color/colorOnSurface"

@@ -30,11 +30,8 @@ class MapboxCameraModeButton : FrameLayout {
 
     private val helper = ExtendableButtonHelper(
         binding.buttonText,
-        { 0 },
-        { text ->
-            binding.buttonText.measureTextWidth(text).toInt() +
-                resources.getDimensionPixelSize(R.dimen.mapbox_cameraModeButton_paddingStart)
-        },
+        { binding.iconImage.left },
+        { text -> binding.buttonText.measureTextWidth(text).toInt() + binding.iconImage.left },
     )
 
     /**
