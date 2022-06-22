@@ -8,7 +8,7 @@ import com.mapbox.navigation.dropin.binder.ActionButtonBinder
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.base.lifecycle.UICoordinator
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 
 /**
  * Coordinator for navigation actions.
@@ -21,8 +21,11 @@ internal class ActionButtonsCoordinator(
 ) : UICoordinator<ViewGroup>(actionList) {
 
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
-        return context.uiBinders.actionButtonsBinder.map {
-            it ?: ActionButtonBinder(context)
+        return combine(
+            context.uiBinders.actionButtonsBinder,
+            context.uiBinders.customActionButtons
+        ) { uiBinder, customButtons ->
+            uiBinder ?: ActionButtonBinder(context, customButtons)
         }
     }
 }

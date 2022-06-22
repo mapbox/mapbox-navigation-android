@@ -5,11 +5,15 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
+import android.view.Gravity
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.AppCompatTextView
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.transition.Fade
@@ -31,6 +35,9 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.dropin.ActionButtonDescription
+import com.mapbox.navigation.dropin.ActionButtonDescription.Position.END
+import com.mapbox.navigation.dropin.ActionButtonDescription.Position.START
 import com.mapbox.navigation.dropin.NavigationViewListener
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultAudioGuidanceButtonStyle
@@ -195,14 +202,21 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
         }
         // This demonstrates that you can customize views at any time. You can also reset to
         // the default views.
+        val activity = this
         viewModel.useCustomViews.observe(this) { showCustomViews ->
             binding.toggleCustomViews.isChecked = showCustomViews
             if (showCustomViews) {
                 binding.navigationView.customizeViewBinders {
                     speedLimitBinder = CustomSpeedLimitViewBinder()
+                    customActionButtons = listOf(
+                        ActionButtonDescription(customActionButton("button 1"), START),
+                        ActionButtonDescription(customActionButton("button 2"), START),
+                        ActionButtonDescription(customActionButton("button 3"), END),
+                        ActionButtonDescription(customActionButton("button 4"), END)
+                    )
                 }
                 binding.navigationView.customizeViewOptions {
-                    routeLineOptions = this@MapboxNavigationViewCustomizedActivity.routeLineOptions
+                    routeLineOptions = activity.routeLineOptions
                     mapStyleUriDay = Style.LIGHT
                     mapStyleUriNight = Style.DARK
                 }
@@ -210,6 +224,7 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
                 // Reset defaults
                 binding.navigationView.customizeViewBinders {
                     speedLimitBinder = UIBinder.USE_DEFAULT
+                    customActionButtons = emptyList()
                 }
                 binding.navigationView.customizeViewOptions {
                     routeLineOptions = defaultRouteLineOptions(applicationContext)
@@ -271,94 +286,81 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
         }
     }
 
+    private fun customActionButton(text: String): View {
+        return AppCompatTextView(this).apply {
+            val w = resources.getDimensionPixelSize(R.dimen.mapbox_actionList_width)
+            layoutParams = ViewGroup.MarginLayoutParams(
+                72.dp,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            )
+            setPadding(0, 20.dp, 0, 20.dp)
+            gravity = Gravity.CENTER
+            setTextColor(Color.BLACK)
+            setBackgroundColor(Color.WHITE)
+            setText(text)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+            setOnClickListener {
+                Toast.makeText(context, "'$text' clicked", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private fun toggleTheme(themeMode: Int) {
         AppCompatDelegate.setDefaultNightMode(themeMode)
     }
 
     private val navViewListener = object : NavigationViewListener() {
         override fun onDestinationChanged(destination: Point?) {
-            logD(
-                "listener onDestinationChanged = $destination",
-                "MapboxNavigationViewCustomizedActivity"
-            )
+            log("listener onDestinationChanged = $destination")
         }
 
         override fun onFreeDriveStarted() {
-            logD(
-                "listener onFreeDriveStarted",
-                "MapboxNavigationViewCustomizedActivity"
-            )
+            log("listener onFreeDriveStarted")
         }
 
         override fun onDestinationPreviewStared() {
-            logD(
-                "listener onDestinationPreviewStared",
-                "MapboxNavigationViewCustomizedActivity"
-            )
+            log("listener onDestinationPreviewStared")
         }
 
         override fun onRoutePreviewStared() {
-            logD(
-                "listener onRoutePreviewStared",
-                "MapboxNavigationViewCustomizedActivity"
-            )
+            log("listener onRoutePreviewStared")
         }
 
         override fun onActiveNavigationStared() {
-            logD(
-                "listener onActiveNavigationStared",
-                "MapboxNavigationViewCustomizedActivity"
-            )
+            log("listener onActiveNavigationStared")
         }
 
         override fun onArrivalStared() {
-            logD(
-                "listener onArrivalStared",
-                "MapboxNavigationViewCustomizedActivity"
-            )
+            log("listener onArrivalStared")
         }
 
         override fun onIdleCameraMode() {
-            logD(
-                "listener onIdleCameraMode",
-                "MapboxNavigationViewCustomizedActivity"
-            )
+            log("listener onIdleCameraMode")
         }
 
         override fun onOverviewCameraMode() {
-            logD(
-                "listener onOverviewCameraMode",
-                "MapboxNavigationViewCustomizedActivity"
-            )
+            log("listener onOverviewCameraMode")
         }
 
         override fun onFollowingCameraMode() {
-            logD(
-                "listener onFollowingCameraMode",
-                "MapboxNavigationViewCustomizedActivity"
-            )
+            log("listener onFollowingCameraMode")
         }
 
         override fun onMapStyleChanged(style: Style) {
-            logD(
-                "listener onMapStyleChange = ${style.styleURI}",
-                "MapboxNavigationViewCustomizedActivity"
-            )
+            log("listener onMapStyleChange = ${style.styleURI}")
         }
 
         override fun onCameraPaddingChanged(padding: EdgeInsets) {
-            logD(
-                "listener onCameraPaddingChanged = $padding",
-                "MapboxNavigationViewCustomizedActivity"
-            )
+            log("listener onCameraPaddingChanged = $padding")
         }
 
         override fun onAudioGuidanceStateChanged(muted: Boolean) {
-            logD(
-                "listener onAudioGuidanceStateChanged muted = $muted",
-                "MapboxNavigationViewCustomizedActivity"
-            )
+            log("listener onAudioGuidanceStateChanged muted = $muted")
         }
+    }
+
+    private fun log(message: String) {
+        logD(message, "MapboxNavigationViewCustomizedActivity")
     }
 }
 
@@ -446,3 +448,5 @@ private fun customMapViewFromCode(context: Context): MapView {
     customMapView.getMapboxMap().loadStyleUri(NavigationStyles.NAVIGATION_DAY_STYLE)
     return customMapView
 }
+
+private val Number.dp get() = com.mapbox.android.gestures.Utils.dpToPx(toFloat()).toInt()

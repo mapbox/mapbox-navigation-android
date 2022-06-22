@@ -83,17 +83,17 @@
                 tools:layout_width="76dp"
                 android:layout_gravity="start|top"/>
 
-            <LinearLayout
+            <FrameLayout
                 android:id="@+id/actionListLayout"
                 android:layout_width="@dimen/mapbox_actionList_width"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center|right"
-                android:layout_margin="8dp"
-                app:layout_constraintTop_toBottomOf="@id/guidanceLayout"
+                android:gravity="top|right"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                tools:layout_height="200dp"
-                tools:background="#eee" />
+                app:layout_constraintTop_toBottomOf="@id/guidanceLayout"
+                tools:background="#eee"
+                tools:layout_height="200dp" />
 
             <FrameLayout
                 android:id="@+id/roadNameLayout"

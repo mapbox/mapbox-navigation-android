@@ -91,12 +91,11 @@
                 tools:layout_width="76dp"
                 android:layout_gravity="start|top"/>
 
-            <LinearLayout
+            <FrameLayout
                 android:id="@+id/actionListLayout"
                 android:layout_width="@dimen/mapbox_actionList_width"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center|right"
+                android:gravity="top|right"
                 android:layout_marginEnd="8dp"
                 app:layout_constraintTop_toTopOf="@id/speedLimitLayout"
                 app:layout_constraintEnd_toEndOf="parent"
