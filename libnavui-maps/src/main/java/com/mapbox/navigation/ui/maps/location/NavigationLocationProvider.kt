@@ -4,6 +4,7 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.location.Location
 import com.mapbox.geojson.Point
+import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.LocationConsumer
 import com.mapbox.maps.plugin.locationcomponent.LocationProvider
@@ -156,13 +157,10 @@ class NavigationLocationProvider : LocationProvider {
             doubleArrayOf(location.bearing.toDouble())
         }
 
-        // Disabling Puck Velocity fix introduced in https://github.com/mapbox/mapbox-navigation-android/pull/5925
-        // TODO: Investigate why Puck jumps when using Mock Locations app but doesn't when using MapboxReplayer.
-        // this.onLocationUpdated(
-        //     location = latLngUpdates,
-        //     options = locationAnimatorOptions(latLngUpdates, latLngTransitionOptions)
-        // )
-        this.onLocationUpdated(location = latLngUpdates, options = latLngTransitionOptions)
+        this.onLocationUpdated(
+            location = latLngUpdates,
+            options = locationAnimatorOptions(latLngUpdates, latLngTransitionOptions)
+        )
         this.onBearingUpdated(bearing = bearingUpdates, options = bearingTransitionOptions)
     }
 
@@ -172,8 +170,10 @@ class NavigationLocationProvider : LocationProvider {
     ): (ValueAnimator.() -> Unit) {
         val evaluator = PuckAnimationEvaluator(keyPoints)
         return {
-            clientOptions?.also { apply(it) }
+            // TODO: Remove setDuration once patched in MapsSDK https://github.com/mapbox/mapbox-maps-android/issues/1446
+            duration = LocationComponentConstants.DEFAULT_INTERVAL_MILLIS
             evaluator.installIn(this)
+            clientOptions?.also { apply(it) }
         }
     }
 }
