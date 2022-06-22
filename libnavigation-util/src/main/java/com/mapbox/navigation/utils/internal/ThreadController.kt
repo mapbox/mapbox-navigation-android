@@ -6,14 +6,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.util.concurrent.Executors
 
 fun <T> CoroutineScope.monitorChannelWithException(
     channel: ReceiveChannel<T>,
@@ -47,18 +45,10 @@ fun Exception.ifChannelException(action: () -> Unit) {
 
 data class JobControl(val job: Job, val scope: CoroutineScope)
 
-private const val MAX_THREAD_COUNT = 2
-
 class ThreadController {
 
     companion object {
-
-        private val maxCoresUsed = Runtime.getRuntime().availableProcessors().coerceAtMost(
-            MAX_THREAD_COUNT,
-        )
-        val IODispatcher: CoroutineDispatcher =
-            Executors.newFixedThreadPool(maxCoresUsed).asCoroutineDispatcher()
-
+        val IODispatcher: CoroutineDispatcher = Dispatchers.IO
         val DefaultDispatcher: CoroutineDispatcher = Dispatchers.Default
     }
 
