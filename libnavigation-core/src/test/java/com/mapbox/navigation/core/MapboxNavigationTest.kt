@@ -1,69 +1,38 @@
 package com.mapbox.navigation.core
 
-import android.app.AlarmManager
-import android.app.NotificationManager
-import android.content.Context
-import android.net.ConnectivityManager
-import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.telemetry.MapboxTelemetryConstants.MAPBOX_SHARED_PREFERENCES
 import com.mapbox.android.telemetry.TelemetryEnabler
-import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.common.MapboxSDKCommon
-import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
-import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
-import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
-import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.options.IncidentsOptions
-import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
-import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.notification.TripNotification
-import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
-import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
-import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
-import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
-import com.mapbox.navigation.core.routerefresh.RouteRefreshController
-import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
-import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.NativeSetRouteResult
 import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
-import com.mapbox.navigation.core.trip.session.TripSession
-import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.createSetRouteResult
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
-import com.mapbox.navigation.navigator.internal.NavigatorLoader
-import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
-import com.mapbox.navigation.utils.internal.LoggerProvider
-import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RouteAlternative
-import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.TilesConfig
 import io.mockk.Ordering
 import io.mockk.Runs
@@ -73,12 +42,7 @@ import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.mockkStatic
-import io.mockk.runs
 import io.mockk.slot
-import io.mockk.unmockkObject
-import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.CompletableDeferred
@@ -86,190 +50,22 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.json.JSONObject
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import java.io.File
-import java.util.Locale
 
 @ExperimentalPreviewMapboxNavigationAPI
 @Config(shadows = [ShadowReachabilityFactory::class])
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class MapboxNavigationTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
-
-    private val accessToken = "pk.1234"
-    private val directionsSession: DirectionsSession = mockk(relaxUnitFun = true)
-    private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
-    private val tripService: TripService = mockk(relaxUnitFun = true)
-    private val tripSession: TripSession = mockk(relaxUnitFun = true)
-    private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
-    private val distanceFormatterOptions: DistanceFormatterOptions = mockk(relaxed = true)
-    private val routingTilesOptions: RoutingTilesOptions = mockk(relaxed = true)
-    private val routeRefreshController: RouteRefreshController = mockk(relaxed = true)
-    private val routeAlternativesController: RouteAlternativesController = mockk(relaxed = true)
-    private val routeProgress: RouteProgress = mockk(relaxed = true)
-    private val navigationSession: NavigationSession = mockk(relaxed = true)
-    private val billingController: BillingController = mockk(relaxUnitFun = true)
-    private val rerouteController: RerouteController = mockk(relaxUnitFun = true) {
-        every { state } returns RerouteState.Idle
-    }
-    private val tripSessionLocationEngine: TripSessionLocationEngine = mockk(relaxUnitFun = true)
-    private lateinit var navigationOptions: NavigationOptions
-    private val arrivalProgressObserver: ArrivalProgressObserver = mockk(relaxUnitFun = true)
-    private val threadController = ThreadController()
-
-    private val applicationContext: Context = mockk(relaxed = true) {
-        every { inferDeviceLocale() } returns Locale.US
-        every {
-            getSystemService(Context.NOTIFICATION_SERVICE)
-        } returns mockk<NotificationManager>()
-        every { getSystemService(Context.ALARM_SERVICE) } returns mockk<AlarmManager>()
-        every {
-            getSharedPreferences(
-                MAPBOX_SHARED_PREFERENCES,
-                Context.MODE_PRIVATE
-            )
-        } returns mockk(relaxed = true) {
-            every { getString("mapboxTelemetryState", "ENABLED"); } returns "DISABLED"
-        }
-        every { packageManager } returns mockk(relaxed = true)
-        every { packageName } returns "com.mapbox.navigation.core.MapboxNavigationTest"
-        every { filesDir } returns File("some/path")
-        every { navigator.cache } returns mockk()
-        every { navigator.getHistoryRecorderHandle() } returns null
-        every { navigator.experimental } returns mockk()
-    }
-
-    private lateinit var mapboxNavigation: MapboxNavigation
-
-    companion object {
-        @BeforeClass
-        @JvmStatic
-        fun initialize() {
-            mockkStatic("com.mapbox.navigation.base.internal.extensions.ContextEx")
-        }
-    }
-
-    @Before
-    fun setUp() {
-        mockkObject(LoggerProvider)
-        every { LoggerProvider.initialize() } just Runs
-        mockkObject(NavigatorLoader)
-        every {
-            NavigatorLoader.createNativeRouterInterface(any(), any(), any(), any())
-        } returns mockk()
-
-        mockkObject(MapboxSDKCommon)
-        every {
-            MapboxSDKCommon.getContext().getSystemService(Context.CONNECTIVITY_SERVICE)
-        } returns mockk<ConnectivityManager>()
-        mockkObject(MapboxModuleProvider)
-
-        val hybridRouter: Router = mockk(relaxUnitFun = true)
-        every {
-            MapboxModuleProvider.createModule<Router>(
-                MapboxModuleType.NavigationRouter,
-                any()
-            )
-        } returns hybridRouter
-        every {
-            MapboxModuleProvider.createModule<TripNotification>(
-                MapboxModuleType.NavigationTripNotification,
-                any()
-            )
-        } returns mockk()
-
-        mockkObject(NavigationComponentProvider)
-        mockkObject(RouteRefreshControllerProvider)
-        every {
-            RouteRefreshControllerProvider.createRouteRefreshController(
-                any(), any(), any(),
-            )
-        } returns routeRefreshController
-        mockkObject(RouteAlternativesControllerProvider)
-        every {
-            RouteAlternativesControllerProvider.create(any(), any(), any(), any())
-        } returns routeAlternativesController
-
-        every { applicationContext.applicationContext } returns applicationContext
-
-        navigationOptions = provideNavigationOptions().build()
-
-        mockNativeNavigator()
-        mockTripService()
-        mockTripSession()
-        mockDirectionSession()
-        mockNavigationSession()
-        mockNavTelemetry()
-        every {
-            NavigationComponentProvider.createBillingController(any(), any(), any(), any())
-        } returns billingController
-        every {
-            NavigationComponentProvider.createArrivalProgressObserver(tripSession)
-        } returns arrivalProgressObserver
-
-        every { navigator.create(any(), any(), any(), any(), any(), any()) } returns navigator
-        mockkStatic(TelemetryEnabler::class)
-        every { TelemetryEnabler.isEventsEnabled(any()) } returns true
-
-        mockkObject(NativeRouteParserWrapper)
-        every {
-            NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
-        } answers {
-            val routesCount =
-                JSONObject(this.firstArg<String>())
-                    .getJSONArray("routes")
-                    .length()
-            val nativeRoutes = mutableListOf<RouteInterface>().apply {
-                repeat(routesCount) {
-                    add(
-                        mockk {
-                            every { routeId } returns "$it"
-                            every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
-                        }
-                    )
-                }
-            }
-            ExpectedFactory.createValue(nativeRoutes)
-        }
-    }
-
-    @After
-    fun tearDown() {
-        if (this::mapboxNavigation.isInitialized) {
-            mapboxNavigation.onDestroy()
-        }
-
-        unmockkObject(LoggerProvider)
-        unmockkObject(NavigatorLoader)
-        unmockkObject(MapboxSDKCommon)
-        unmockkObject(MapboxModuleProvider)
-        unmockkObject(NavigationComponentProvider)
-        unmockkObject(RouteRefreshControllerProvider)
-        unmockkObject(RouteAlternativesControllerProvider)
-        unmockkObject(MapboxNavigationTelemetry)
-        unmockkStatic(TelemetryEnabler::class)
-        unmockkObject(NativeRouteParserWrapper)
-
-        threadController.cancelAllNonUICoroutines()
-        threadController.cancelAllUICoroutines()
-    }
+internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test
     fun sanity() {
@@ -1391,89 +1187,19 @@ class MapboxNavigationTest {
             }
         }
 
-    private fun createMapboxNavigation() {
-        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
+    @Test
+    fun `set reroute controller`() = coroutineRule.runBlockingTest {
+        createMapboxNavigation()
+        val oldRerouteController = mapboxNavigation.getRerouteController()
+        mapboxNavigation.setRerouteController(rerouteController)
+        assertFalse(mapboxNavigation.getRerouteController() === oldRerouteController)
     }
 
-    private fun mockNativeNavigator() {
-        every {
-            NavigationComponentProvider.createNativeNavigator(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-            )
-        } returns navigator
-        coEvery { navigator.setRoutes(any(), any(), any()) } answers {
-            createSetRouteResult()
-        }
+    @Test
+    fun `set navigation reroute controller`() = coroutineRule.runBlockingTest {
+        val navigationRerouteController: NavigationRerouteController? = mockk(relaxed = true)
+        createMapboxNavigation()
+        mapboxNavigation.setRerouteController(navigationRerouteController)
+        assertEquals(navigationRerouteController, mapboxNavigation.getRerouteController())
     }
-
-    private fun mockTripService() {
-        every {
-            NavigationComponentProvider.createTripService(
-                applicationContext,
-                any(),
-                threadController,
-            )
-        } returns tripService
-    }
-
-    private fun mockTripSession() {
-        every {
-            NavigationComponentProvider.createTripSessionLocationEngine(
-                navigationOptions = navigationOptions
-            )
-        } returns tripSessionLocationEngine
-
-        every {
-            NavigationComponentProvider.createTripSession(
-                tripService = tripService,
-                tripSessionLocationEngine = tripSessionLocationEngine,
-                navigator = navigator,
-                threadController,
-            )
-        } returns tripSession
-        every { tripSession.getRouteProgress() } returns routeProgress
-        coEvery { tripSession.setRoutes(any(), any(), any()) } returns NativeSetRouteResult(
-            nativeAlternatives = emptyList()
-        )
-    }
-
-    private fun mockDirectionSession() {
-        every { NavigationComponentProvider.createDirectionsSession(any()) } answers {
-            directionsSession
-        }
-        // TODO Needed for telemetry - Free Drive (empty list) for now
-        every { directionsSession.routes } returns emptyList()
-    }
-
-    private fun mockNavigationSession() {
-        every { NavigationComponentProvider.createNavigationSession() } answers {
-            navigationSession
-        }
-    }
-
-    private fun mockNavTelemetry() {
-        mockkObject(MapboxNavigationTelemetry)
-        every { MapboxNavigationTelemetry.initialize(any(), any(), any(), any()) } just runs
-        every { MapboxNavigationTelemetry.destroy(any()) } just runs
-        every {
-            MapboxNavigationTelemetry.postUserFeedback(
-                any(), any(), any(), any(), any(), any(), any(),
-            )
-        } just runs
-    }
-
-    private fun provideNavigationOptions() =
-        NavigationOptions
-            .Builder(applicationContext)
-            .accessToken(accessToken)
-            .distanceFormatterOptions(distanceFormatterOptions)
-            .navigatorPredictionMillis(1500L)
-            .routingTilesOptions(routingTilesOptions)
-            .timeFormatType(NONE_SPECIFIED)
-            .locationEngine(locationEngine)
 }
