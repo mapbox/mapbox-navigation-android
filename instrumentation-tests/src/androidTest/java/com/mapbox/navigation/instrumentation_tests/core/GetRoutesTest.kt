@@ -12,9 +12,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.utils.getMapboxAccessTokenFromResources
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
@@ -39,7 +37,7 @@ fun requestManyRoutes() = sdkTest {
         coroutineScope {
             repeat(20) {
                 val options = RouteOptions.fromUrl(url)
-                launch { val route = mapboxNavigation.requestRoutes(options).getSuccessfulResultOrThrowException() }
+                val route = mapboxNavigation.requestRoutes(options).getSuccessfulResultOrThrowException()
             }
         }
     } finally {
