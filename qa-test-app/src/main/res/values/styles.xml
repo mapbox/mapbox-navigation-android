@@ -156,7 +156,7 @@
 
     <style name="MyCustomEndNavigationButton">
         <item name="extendableButtonIconTint">@color/primary</item>
-        <item name="extendableButtonIcon">@drawable/mapbox_ic_close</item>
+        <item name="extendableButtonIcon">@drawable/mapbox_ic_stop_navigation</item>
     </style>
 
     <style name="MyCustomStartNavigationButton">

@@ -141,7 +141,7 @@
 
     <!-- Stop navigation button -->
     <style name="DropInStyleExitButton" parent="MapboxStyleExtendableButton">
-        <item name="extendableButtonIcon">@drawable/mapbox_ic_close</item>
+        <item name="extendableButtonIcon">@drawable/mapbox_ic_stop_navigation</item>
     </style>
 
     <!-- Recenter button -->
