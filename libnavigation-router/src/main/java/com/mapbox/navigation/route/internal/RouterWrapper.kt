@@ -55,6 +55,7 @@ class RouterWrapper(
 
         return router.getRoute(routeUrl) { result, origin ->
             val urlWithoutToken = URL(routeUrl.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM))
+            logI("received result from route.getRoute for $urlWithoutToken", LOG_CATEGORY)
             result.fold(
                 {
                     mainJobControl.scope.launch {
@@ -92,6 +93,10 @@ class RouterWrapper(
                 },
                 {
                     mainJobControl.scope.launch {
+                        logI(
+                            "processing successful response from router.getRoute for $urlWithoutToken",
+                            LOG_CATEGORY
+                        )
                         parseDirectionsResponse(
                             ThreadController.IODispatcher,
                             it,

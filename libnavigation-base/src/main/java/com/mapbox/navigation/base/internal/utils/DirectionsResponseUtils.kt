@@ -6,6 +6,7 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.internal.route.toNavigationRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigator.RouteAlternative
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
