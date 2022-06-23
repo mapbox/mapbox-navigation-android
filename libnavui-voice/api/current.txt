@@ -24,14 +24,15 @@ package com.mapbox.navigation.ui.voice.api {
   }
 
   @UiThread public final class MapboxVoiceInstructionsPlayer {
-    ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options = VoiceInstructionsPlayerOptions.<init>().build(), com.mapbox.navigation.ui.voice.api.AsyncAudioFocusDelegate audioFocusDelegate = buildAndroidAudioFocus(context, options));
-    ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options = VoiceInstructionsPlayerOptions.<init>().build());
+    ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options = defaultOptions(), com.mapbox.navigation.ui.voice.api.AsyncAudioFocusDelegate audioFocusDelegate = defaultAudioFocusDelegate(context, options), com.mapbox.navigation.ui.utils.internal.Provider<java.util.Timer> timerFactory = defaultTimerFactory());
+    ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options = defaultOptions(), com.mapbox.navigation.ui.voice.api.AsyncAudioFocusDelegate audioFocusDelegate = defaultAudioFocusDelegate(context, options));
+    ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options = defaultOptions());
     ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language);
-    ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options = VoiceInstructionsPlayerOptions.<init>().build(), com.mapbox.navigation.ui.voice.api.AudioFocusDelegate audioFocusDelegate);
+    ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options = defaultOptions(), com.mapbox.navigation.ui.voice.api.AudioFocusDelegate audioFocusDelegate);
     method public void clear();
     method public void play(com.mapbox.navigation.ui.voice.model.SpeechAnnouncement announcement, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.voice.model.SpeechAnnouncement> consumer);
     method public void shutdown();
-    method public void volume(com.mapbox.navigation.ui.voice.model.SpeechVolume state);
+    method @kotlin.jvm.Throws(exceptionClasses=IllegalArgumentException::class) public void volume(com.mapbox.navigation.ui.voice.model.SpeechVolume state) throws java.lang.IllegalArgumentException;
   }
 
   public abstract sealed class VoiceInstructionsPlayerAttributes {
@@ -118,6 +119,7 @@ package com.mapbox.navigation.ui.voice.options {
   }
 
   public final class VoiceInstructionsPlayerOptions {
+    method public long getAbandonFocusDelay();
     method public boolean getCheckIsLanguageAvailable();
     method public int getContentType();
     method public int getFocusGain();
@@ -126,6 +128,7 @@ package com.mapbox.navigation.ui.voice.options {
     method public int getUsage();
     method public boolean getUseLegacyApi();
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder toBuilder();
+    property public final long abandonFocusDelay;
     property public final boolean checkIsLanguageAvailable;
     property public final int contentType;
     property public final int focusGain;
@@ -137,6 +140,7 @@ package com.mapbox.navigation.ui.voice.options {
 
   public static final class VoiceInstructionsPlayerOptions.Builder {
     ctor public VoiceInstructionsPlayerOptions.Builder();
+    method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder abandonFocusDelay(long milliseconds);
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions build();
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder checkIsLanguageAvailable(boolean checkIsLanguageAvailable);
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder contentType(int contentType);

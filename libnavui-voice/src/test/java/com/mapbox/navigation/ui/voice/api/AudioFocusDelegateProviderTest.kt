@@ -27,7 +27,7 @@ class AudioFocusDelegateProviderTest {
             mockedPlayerAttributes.options
         } returns mockedPlayerOptions
 
-        val actual = AudioFocusDelegateProvider.retrieveAudioFocusDelegate(
+        val actual = AudioFocusDelegateProvider.createAudioFocusDelegate(
             mockedAudioManager,
             mockedPlayerAttributes
         )
@@ -49,7 +49,7 @@ class AudioFocusDelegateProviderTest {
             mockedPlayerAttributes.options
         } returns mockedPlayerOptions
 
-        val actual = AudioFocusDelegateProvider.retrieveAudioFocusDelegate(
+        val actual = AudioFocusDelegateProvider.createAudioFocusDelegate(
             mockedAudioManager,
             mockedPlayerAttributes
         )

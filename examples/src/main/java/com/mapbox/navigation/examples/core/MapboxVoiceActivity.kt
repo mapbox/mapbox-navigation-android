@@ -1,9 +1,11 @@
 package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
+import android.content.res.Resources
 import android.location.Location
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
@@ -11,11 +13,9 @@ import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadProgress
 import com.mapbox.common.ResourceLoadResult
 import com.mapbox.geojson.Point
-import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
-import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
@@ -40,6 +40,10 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityVoiceBinding
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
+import com.mapbox.navigation.ui.maps.camera.NavigationCamera
+import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
+import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
+import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
@@ -59,6 +63,7 @@ import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
+import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.CoroutineScope
@@ -101,10 +106,14 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
      * and plays them using the appropriate TTS player.
      */
     private val voiceInstructionsPlayer: MapboxVoiceInstructionsPlayer by lazy {
+        val options = VoiceInstructionsPlayerOptions.Builder()
+            .abandonFocusDelay(PLAYER_ABANDON_FOCUS_DELAY)
+            .build()
         MapboxVoiceInstructionsPlayer(
             this,
             getMapboxAccessTokenFromResources(),
-            Locale.US.language
+            Locale.US.language,
+            options
         )
     }
 
@@ -135,6 +144,9 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         MapboxRouteArrowView(RouteArrowOptions.Builder(this).build())
     }
 
+    private lateinit var navigationCamera: NavigationCamera
+    private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
+
     /**
      * The result of invoking [MapboxVoiceInstructionsPlayer.play] is returned as a callback
      * containing [SpeechAnnouncement].
@@ -151,6 +163,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> { expected ->
             expected.fold(
                 { error ->
+                    logD("play(fallback): '${error.fallback.announcement}'", TAG)
                     // The data obtained in the form of an error is played using
                     // voiceInstructionsPlayer.
                     voiceInstructionsPlayer.play(
@@ -159,6 +172,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
                     )
                 },
                 { value ->
+                    logD("play: '${value.announcement.announcement}'", TAG)
                     // The data obtained in the form of speech announcement is played using
                     // voiceInstructionsPlayer.
                     voiceInstructionsPlayer.play(
@@ -178,7 +192,10 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
                 locationMatcherResult.enhancedLocation,
                 locationMatcherResult.keyPoints,
             )
-            updateCamera(locationMatcherResult.enhancedLocation)
+
+            // update camera position to account for new location
+            viewportDataSource.onLocationChanged(locationMatcherResult.enhancedLocation)
+            viewportDataSource.evaluate()
         }
     }
 
@@ -215,10 +232,6 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
             }
         }
 
-    private companion object {
-        private const val SOUND_BUTTON_TEXT_APPEAR_DURATION = 1000L
-    }
-
     @SuppressLint("MissingPermission")
     private fun init() {
         initNavigation()
@@ -237,6 +250,33 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxNavigation.startTripSession()
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.play()
+
+        // initialize Navigation Camera
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            binding.mapView.getMapboxMap()
+        ).apply {
+            followingPadding = EdgeInsets(180.0.dp, 40.0.dp, 150.0.dp, 40.0.dp)
+        }
+
+        navigationCamera = NavigationCamera(
+            binding.mapView.getMapboxMap(),
+            binding.mapView.camera,
+            viewportDataSource
+        ).apply {
+            requestNavigationCameraToFollowing()
+            registerNavigationCameraStateChangeObserver { navigationCameraState ->
+                binding.recenterButton.isVisible =
+                    navigationCameraState in listOf(
+                    NavigationCameraState.TRANSITION_TO_OVERVIEW,
+                    NavigationCameraState.OVERVIEW,
+                    NavigationCameraState.IDLE
+                )
+            }
+        }
+
+        binding.mapView.camera.addCameraAnimationsLifecycleListener(
+            NavigationBasicGesturesHandler(navigationCamera)
+        )
     }
 
     private fun initStyle() {
@@ -258,6 +298,10 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
                 SpeechAnnouncement.Builder("Test hybrid speech player.").build(),
                 voiceInstructionsPlayerCallback
             )
+        }
+
+        binding.recenterButton.setOnClickListener {
+            navigationCamera.requestNavigationCameraToFollowing()
         }
     }
 
@@ -285,6 +329,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         return getString(this.resources.getIdentifier("mapbox_access_token", "string", packageName))
     }
 
+    @SuppressLint("MissingPermission")
     private fun startSimulation(route: DirectionsRoute) {
         mapboxReplayer.stop()
         mapboxReplayer.clearEvents()
@@ -324,21 +369,6 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
                     // no impl
                 }
             }
-        )
-    }
-
-    private fun updateCamera(location: Location) {
-        val mapAnimationOptionsBuilder = MapAnimationOptions.Builder()
-        mapAnimationOptionsBuilder.duration(1500L)
-        binding.mapView.camera.easeTo(
-            CameraOptions.Builder()
-                .center(Point.fromLngLat(location.longitude, location.latitude))
-                .bearing(location.bearing.toDouble())
-                .pitch(45.0)
-                .zoom(17.0)
-                .padding(EdgeInsets(1000.0, 0.0, 0.0, 0.0))
-                .build(),
-            mapAnimationOptionsBuilder.build()
         )
     }
 
@@ -425,5 +455,13 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
                 logD("onFinish: $values", "ResourceLoadObserver")
             }
         }
+    }
+
+    private val Number.dp: Double get() = toDouble() * Resources.getSystem().displayMetrics.density
+
+    private companion object {
+        private const val TAG = "MapboxVoiceActivity"
+        private const val SOUND_BUTTON_TEXT_APPEAR_DURATION = 1000L
+        private const val PLAYER_ABANDON_FOCUS_DELAY = 2000L
     }
 }

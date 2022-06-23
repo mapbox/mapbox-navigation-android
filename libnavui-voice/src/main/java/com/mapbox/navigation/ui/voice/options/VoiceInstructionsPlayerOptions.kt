@@ -69,6 +69,12 @@ class VoiceInstructionsPlayerOptions private constructor(
      * @see <a href="https://developer.android.com/reference/android/speech/tts/TextToSpeech#isLanguageAvailable(java.util.Locale)">TextToSpeech documentation</a>
      */
     val checkIsLanguageAvailable: Boolean,
+
+    /**
+     * Delay in milliseconds until the player abandons audio focus after playing all queued voice instructions.
+     * Defaults to 0.
+     */
+    val abandonFocusDelay: Long
 ) {
 
     /**
@@ -82,6 +88,7 @@ class VoiceInstructionsPlayerOptions private constructor(
         contentType(contentType)
         useLegacyApi(useLegacyApi)
         checkIsLanguageAvailable(checkIsLanguageAvailable)
+        abandonFocusDelay(abandonFocusDelay)
     }
 
     /**
@@ -100,6 +107,7 @@ class VoiceInstructionsPlayerOptions private constructor(
         if (contentType != other.contentType) return false
         if (useLegacyApi != other.useLegacyApi) return false
         if (checkIsLanguageAvailable != other.checkIsLanguageAvailable) return false
+        if (abandonFocusDelay != other.abandonFocusDelay) return false
 
         return true
     }
@@ -115,6 +123,7 @@ class VoiceInstructionsPlayerOptions private constructor(
         result = 31 * result + contentType
         result = 31 * result + useLegacyApi.hashCode()
         result = 31 * result + checkIsLanguageAvailable.hashCode()
+        result = 31 * result + abandonFocusDelay.hashCode()
         return result
     }
 
@@ -128,7 +137,8 @@ class VoiceInstructionsPlayerOptions private constructor(
             "usage=$usage, " +
             "contentType=$contentType, " +
             "useLegacyApi=$useLegacyApi, " +
-            "checkIsLanguageAvailable=$checkIsLanguageAvailable)"
+            "checkIsLanguageAvailable=$checkIsLanguageAvailable, " +
+            "abandonFocusDelay=$abandonFocusDelay)"
     }
 
     /**
@@ -143,6 +153,7 @@ class VoiceInstructionsPlayerOptions private constructor(
         private var contentType: Int = AudioAttributes.CONTENT_TYPE_MUSIC
         private var useLegacyApi: Boolean = false
         private var checkIsLanguageAvailable: Boolean = true
+        private var abandonFocusDelay: Long = 0L
 
         /**
          * Specifies how audio focus will be requested.
@@ -230,6 +241,15 @@ class VoiceInstructionsPlayerOptions private constructor(
             }
 
         /**
+         * Delay in milliseconds until the player abandons audio focus after playing all queued voice instructions.
+         * Defaults to 0.
+         */
+        fun abandonFocusDelay(milliseconds: Long): Builder =
+            apply {
+                this.abandonFocusDelay = milliseconds
+            }
+
+        /**
          * Build the [VoiceInstructionsPlayerOptions]
          */
         fun build(): VoiceInstructionsPlayerOptions {
@@ -241,6 +261,7 @@ class VoiceInstructionsPlayerOptions private constructor(
                 contentType = contentType,
                 useLegacyApi = useLegacyApi,
                 checkIsLanguageAvailable = checkIsLanguageAvailable,
+                abandonFocusDelay = abandonFocusDelay
             )
         }
 
