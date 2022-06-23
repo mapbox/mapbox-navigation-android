@@ -18,20 +18,20 @@ sealed class RoutesState {
      * Represents the state when the route is being fetched.
      * @param requestId of the route requested
      */
-    data class Fetching internal constructor(val requestId: Long) : RoutesState()
+    data class Fetching constructor(val requestId: Long) : RoutesState()
 
     /**
      * Represents the state when route fetching is complete and the route is ready.
      * @param routes fetched as a result of network request
      */
-    data class Ready internal constructor(val routes: List<NavigationRoute>) : RoutesState()
+    data class Ready constructor(val routes: List<NavigationRoute>) : RoutesState()
 
     /**
      * Represents the state when route fetching is canceled.
      * @param routeOptions used to fetch the route
      * @param routerOrigin origin of the route request
      */
-    data class Canceled internal constructor(
+    data class Canceled constructor(
         val routeOptions: RouteOptions,
         val routerOrigin: RouterOrigin
     ) : RoutesState()
@@ -41,7 +41,7 @@ sealed class RoutesState {
      * @param reasons for why the request failed
      * @param routeOptions used to fetch the route
      */
-    data class Failed internal constructor(
+    data class Failed constructor(
         val reasons: List<RouterFailure>,
         val routeOptions: RouteOptions
     ) : RoutesState()

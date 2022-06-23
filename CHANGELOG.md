@@ -9,6 +9,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Fixed user location indicator's velocity when `NavigationLocationProvider` is used together with `keyPoints`. [#5925](https://github.com/mapbox/mapbox-navigation-android/pull/5925)
 - Fixed the issue with the close icon in the trip notification occasionally using wrong color when including ui-dropin dependency. [#5956](https://github.com/mapbox/mapbox-navigation-android/pull/5956) 
+- Added more callbacks to `NavigationViewListener` to allow for observing events related to fecthing a route. [#5948](https://github.com/mapbox/mapbox-navigation-android/pull/5948)
 
 ## Mapbox Navigation SDK 2.6.0-beta.3 - June 17, 2022
 ### Changelog

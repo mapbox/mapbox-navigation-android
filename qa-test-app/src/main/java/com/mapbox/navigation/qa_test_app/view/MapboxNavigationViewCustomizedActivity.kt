@@ -18,6 +18,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.ConstrainMode
@@ -32,6 +33,9 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.TileStoreUsageMode
 import com.mapbox.maps.applyDefaultParams
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -314,24 +318,24 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
             log("listener onDestinationChanged = $destination")
         }
 
-        override fun onFreeDriveStarted() {
-            log("listener onFreeDriveStarted")
+        override fun onFreeDrive() {
+            log("listener onFreeDrive")
         }
 
-        override fun onDestinationPreviewStared() {
-            log("listener onDestinationPreviewStared")
+        override fun onDestinationPreview() {
+            log("listener onDestinationPreview")
         }
 
-        override fun onRoutePreviewStared() {
-            log("listener onRoutePreviewStared")
+        override fun onRoutePreview() {
+            log("listener onRoutePreview")
         }
 
-        override fun onActiveNavigationStared() {
-            log("listener onActiveNavigationStared")
+        override fun onActiveNavigation() {
+            log("listener onActiveNavigation")
         }
 
-        override fun onArrivalStared() {
-            log("listener onArrivalStared")
+        override fun onArrival() {
+            log("listener onArrival")
         }
 
         override fun onIdleCameraMode() {
@@ -356,6 +360,25 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
 
         override fun onAudioGuidanceStateChanged(muted: Boolean) {
             log("listener onAudioGuidanceStateChanged muted = $muted")
+        }
+
+        override fun onRouteFetching(requestId: Long) {
+            log("listener onRouteFetching requestId = $requestId")
+        }
+
+        override fun onRouteFetchFailed(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
+            log("listener onRouteFetchFailed reasons = $reasons -- routeOptions = $routeOptions")
+        }
+
+        override fun onRouteFetchCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
+            log(
+                "listener onRouteFetchCanceled routeOptions = " +
+                    "$routeOptions -- routerOrigin = $routerOrigin"
+            )
+        }
+
+        override fun onRouteFetchSuccessful(routes: List<NavigationRoute>) {
+            log("listener onRouteFetchSuccessful routes = $routes")
         }
     }
 
