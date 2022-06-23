@@ -1,16 +1,19 @@
 package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
-import android.media.AudioManager
 import androidx.annotation.UiThread
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
+import com.mapbox.navigation.ui.utils.internal.Provider
+import com.mapbox.navigation.ui.voice.api.AudioFocusDelegateProvider.defaultAudioFocusDelegate
 import com.mapbox.navigation.ui.voice.model.AudioFocusOwner
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import java.util.Locale
 import java.util.Queue
+import java.util.Timer
 import java.util.concurrent.ConcurrentLinkedQueue
+import kotlin.concurrent.schedule
 
 /**
  * Hybrid implementation of [MapboxVoiceInstructionsPlayer] combining [VoiceInstructionsTextPlayer] and
@@ -20,23 +23,23 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * @property language [Locale] language (ISO 639)
  * @property options [VoiceInstructionsPlayerOptions] (optional)
  * @property audioFocusDelegate [AsyncAudioFocusDelegate] (optional)
+ * @property timerFactory [Provider] (optional)
  */
 @UiThread
 class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
     private val context: Context,
     private val accessToken: String,
     private val language: String,
-    private val options: VoiceInstructionsPlayerOptions = VoiceInstructionsPlayerOptions.Builder()
-        .build(),
+    private val options: VoiceInstructionsPlayerOptions = defaultOptions(),
     private val audioFocusDelegate: AsyncAudioFocusDelegate =
-        buildAndroidAudioFocus(context, options),
+        defaultAudioFocusDelegate(context, options),
+    private var timerFactory: Provider<Timer> = defaultTimerFactory()
 ) {
     constructor(
         context: Context,
         accessToken: String,
         language: String,
-        options: VoiceInstructionsPlayerOptions = VoiceInstructionsPlayerOptions.Builder()
-            .build(),
+        options: VoiceInstructionsPlayerOptions = defaultOptions(),
         audioFocusDelegate: AudioFocusDelegate,
     ) : this(context, accessToken, language, options, wrapDelegate(audioFocusDelegate))
 
@@ -55,15 +58,20 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
             language,
             attributes,
         )
-    private val localCallback: VoiceInstructionsPlayerCallback =
+
+    private var abandonFocusTimer: Timer? = null
+
+    private val doneCallback: VoiceInstructionsPlayerCallback =
         VoiceInstructionsPlayerCallback {
-            audioFocusDelegate.abandonFocus {
-                val currentPlayCallback = playCallbackQueue.poll()
-                val currentAnnouncement = currentPlayCallback.announcement
-                val currentClientCallback = currentPlayCallback.consumer
-                currentClientCallback.accept(currentAnnouncement)
-                play()
+            val currentPlayCallback = playCallbackQueue.poll()
+            if (playCallbackQueue.isEmpty()) {
+                abandonFocus()
             }
+
+            val currentAnnouncement = currentPlayCallback.announcement
+            val currentClientCallback = currentPlayCallback.consumer
+            currentClientCallback.accept(currentAnnouncement)
+            play()
         }
 
     /**
@@ -88,14 +96,14 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
      * The method will set the volume to the specified level from [SpeechVolume].
      * Volume is specified as a float ranging from 0 to 1
      * where 0 is silence, and 1 is the maximum volume (the default behavior).
+     *
+     * Throws an [IllegalArgumentException] if the [SpeechVolume.level] is not in 0..1 range.
+     *
      * @param state volume level.
      */
+    @Throws(IllegalArgumentException::class)
     fun volume(state: SpeechVolume) {
-        if (state.level < MIN_VOLUME_LEVEL || state.level > MAX_VOLUME_LEVEL) {
-            throw IllegalArgumentException(
-                "Volume level needs to be a float ranging from 0 to 1."
-            )
-        }
+        require(state.level in 0.0f..1.0f) { "Volume must be in 0..1 range." }
         filePlayer.volume(state)
         textPlayer.volume(state)
     }
@@ -121,34 +129,50 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
     }
 
     private fun play() {
-        if (playCallbackQueue.isNotEmpty()) {
-            val currentPlayCallback = playCallbackQueue.peek()
-            val currentPlay = currentPlayCallback.announcement
+        val currentPlayCallback = playCallbackQueue.peek() ?: return
 
-            val owner = when (currentPlay.file) {
-                null -> AudioFocusOwner.TextToSpeech
-                else -> AudioFocusOwner.MediaPlayer
-            }
+        val currentPlay = currentPlayCallback.announcement
+        val owner = when (currentPlay.file) {
+            null -> AudioFocusOwner.TextToSpeech
+            else -> AudioFocusOwner.MediaPlayer
+        }
 
-            audioFocusDelegate.requestFocus(owner) { isGranted ->
-                if (isGranted) {
-                    when (owner) {
-                        AudioFocusOwner.MediaPlayer -> filePlayer.play(currentPlay, localCallback)
-                        AudioFocusOwner.TextToSpeech -> textPlayer.play(currentPlay, localCallback)
-                    }
-                } else {
-                    localCallback.onDone(currentPlay)
+        requestFocus(owner) { isGranted ->
+            if (isGranted) {
+                when (owner) {
+                    AudioFocusOwner.MediaPlayer -> filePlayer.play(currentPlay, doneCallback)
+                    AudioFocusOwner.TextToSpeech -> textPlayer.play(currentPlay, doneCallback)
                 }
+            } else {
+                doneCallback.onDone(currentPlay)
             }
         }
     }
 
     private fun finalize() {
         playCallbackQueue.clear()
-        audioFocusDelegate.abandonFocus {
-            // Ignore
+        abandonFocus(true)
+    }
+
+    private fun requestFocus(owner: AudioFocusOwner, callback: AudioFocusRequestCallback) {
+        abandonFocusTimer?.cancel()
+        audioFocusDelegate.requestFocus(owner, callback)
+    }
+
+    private fun abandonFocus(immediate: Boolean = false) {
+        abandonFocusTimer?.cancel()
+        if (immediate) {
+            audioFocusDelegate.abandonFocus()
+        } else {
+            abandonFocusTimer = timerFactory.get().apply {
+                schedule(options.abandonFocusDelay) {
+                    audioFocusDelegate.abandonFocus()
+                }
+            }
         }
     }
+
+    private fun AsyncAudioFocusDelegate.abandonFocus() = abandonFocus { /* no-op */ }
 
     private companion object {
 
@@ -167,15 +191,8 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
             }
         }
 
-        private fun buildAndroidAudioFocus(
-            context: Context,
-            options: VoiceInstructionsPlayerOptions,
-        ) = AudioFocusDelegateProvider.retrieveAudioFocusDelegate(
-            context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
-            VoiceInstructionsPlayerAttributesProvider.retrievePlayerAttributes(options)
-        )
+        private fun defaultOptions() = VoiceInstructionsPlayerOptions.Builder().build()
 
-        private const val MAX_VOLUME_LEVEL = 1.0f
-        private const val MIN_VOLUME_LEVEL = 0.0f
+        private fun defaultTimerFactory() = Provider { Timer() }
     }
 }
