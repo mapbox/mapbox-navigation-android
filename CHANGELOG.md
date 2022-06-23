@@ -4,12 +4,29 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.6.0-rc.1 - June 23, 2022
+### Changelog
+[Changes between v2.6.0-beta.3 and v2.6.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.6.0-beta.3...v2.6.0-rc.1)
+
+#### Features
 - Added `ViewBinderCustomization.customActionButtons` that allows installation of custom action buttons in `NavigationView` ActionBinder [#5937](https://github.com/mapbox/mapbox-navigation-android/pull/5937)
 
 #### Bug fixes and improvements
 - Fixed user location indicator's velocity when `NavigationLocationProvider` is used together with `keyPoints`. [#5925](https://github.com/mapbox/mapbox-navigation-android/pull/5925)
-- Fixed the issue with the close icon in the trip notification occasionally using wrong color when including ui-dropin dependency. [#5956](https://github.com/mapbox/mapbox-navigation-android/pull/5956) 
-- Added more callbacks to `NavigationViewListener` to allow for observing events related to fecthing a route. [#5948](https://github.com/mapbox/mapbox-navigation-android/pull/5948)
+- Fixed the issue with the close icon in the trip notification occasionally using wrong color when including ui-dropin dependency. [#5956](https://github.com/mapbox/mapbox-navigation-android/pull/5956)
+- Added more callbacks to `NavigationViewListener` to allow for observing events related to fetching a route. [#5948](https://github.com/mapbox/mapbox-navigation-android/pull/5948)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.6.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.6.0))
+- Mapbox Navigation Native `v106.0.0`
+- Mapbox Core Common `v22.0.0`
+- Mapbox Java `v6.5.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.5.0))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.2`
 
 ## Mapbox Navigation SDK 2.6.0-beta.3 - June 17, 2022
 ### Changelog
