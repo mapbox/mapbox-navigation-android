@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added `VoiceInstructionsPlayerOptions.abandonFocusDelay` option that allows specifying a delay in milliseconds until the player abandons audio focus after playing all queued voice instructions.[#5969](https://github.com/mapbox/mapbox-navigation-android/pull/5969)
 
 #### Bug fixes and improvements
 - Fixed reroute request interruption when setting the `NavigationRerouteController` [#5950](https://github.com/mapbox/mapbox-navigation-android/pull/5950).
