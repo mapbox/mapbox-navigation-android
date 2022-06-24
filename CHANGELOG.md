@@ -6,7 +6,24 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.7.0-alpha.1 - June 24, 2022
+### Changelog
+[Changes between v2.6.0-rc.1 and v2.7.0-alpha.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.6.0-rc.1...v2.7.0-alpha.1)
+
+#### Bug fixes and improvements
+
 - Updated `MapboxSpeechApi` to use persistent cache to decrease the bandwidth consumption. [#5790](https://github.com/mapbox/mapbox-navigation-android/pull/5790)
+- Updated `DefaultResourceLoader` offline behaviour to return resources from the disk cache when available. [#5970](https://github.com/mapbox/mapbox-navigation-android/pull/5970)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.6.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.6.0))
+- Mapbox Navigation Native `v107.0.0`
+- Mapbox Core Common `v22.0.0`
+- Mapbox Java `v6.5.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.5.0))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.2`
 
 ## Mapbox Navigation SDK 2.6.0-rc.1 - June 23, 2022
 ### Changelog
