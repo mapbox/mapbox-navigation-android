@@ -94,7 +94,8 @@ class RouterWrapper(
                 {
                     mainJobControl.scope.launch {
                         logI(
-                            "processing successful response from router.getRoute for $urlWithoutToken",
+                            "processing successful response " +
+                                "from router.getRoute for $urlWithoutToken",
                             LOG_CATEGORY
                         )
                         parseDirectionsResponse(
