@@ -85,6 +85,7 @@ import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LegIndexUpdatedCallback
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.core.trip.session.NativeSetRouteError
 import com.mapbox.navigation.core.trip.session.NativeSetRouteResult
 import com.mapbox.navigation.core.trip.session.NativeSetRouteValue
 import com.mapbox.navigation.core.trip.session.NavigationSession
@@ -770,10 +771,15 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *
      * @param routes a list of [NavigationRoute]s
      * @param initialLegIndex starting leg to follow. By default the first leg is used.
+     * @param callback callback to be called when routes are set or ignored. See [SetRoutesCallback].
      * @see [requestRoutes]
      */
     @JvmOverloads
-    fun setNavigationRoutes(routes: List<NavigationRoute>, initialLegIndex: Int = 0) {
+    fun setNavigationRoutes(
+        routes: List<NavigationRoute>,
+        initialLegIndex: Int = 0,
+        callback: SetRoutesCallback? = null
+    ) {
         if (routes.isNotEmpty()) {
             billingController.onExternalRouteSet(routes.first())
         }
@@ -794,6 +800,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             routes,
             initialLegIndex,
             reason,
+            callback,
         )
     }
 
@@ -801,17 +808,22 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routes: List<NavigationRoute>,
         legIndex: Int = 0,
         @RoutesExtra.RoutesUpdateReason reason: String,
+        callback: SetRoutesCallback? = null,
     ) {
         rerouteController?.interrupt()
         restartRouteScope()
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
                 navigationSession.setRoutes(routes)
-                val processedRoutes = setRoutesToTripSession(routes, legIndex, reason)
-                if (processedRoutes is NativeSetRouteValue) {
-                    directionsSession.setRoutes(routes, legIndex, reason)
-                } else {
-                    logW("Routes $routes will be ignored as they are not valid")
+                when (val processedRoutes = setRoutesToTripSession(routes, legIndex, reason)) {
+                    is NativeSetRouteValue -> {
+                        directionsSession.setRoutes(routes, legIndex, reason)
+                        callback?.onRoutesSetResult(routes)
+                    }
+                    is NativeSetRouteError -> {
+                        logW("Routes $routes will be ignored as they are not valid")
+                        callback?.onRoutesSetError(routes, processedRoutes.error)
+                    }
                 }
             }
         }

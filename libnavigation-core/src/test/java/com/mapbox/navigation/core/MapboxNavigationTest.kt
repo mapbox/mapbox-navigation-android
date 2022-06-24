@@ -824,6 +824,41 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
 
     @Test
+    fun `setNavigationRoutes calls callback with successfully set routes`() =
+        coroutineRule.runBlockingTest {
+            createMapboxNavigation()
+            val routes = listOf(mockk<NavigationRoute>(relaxed = true))
+            val callback = mockk<SetRoutesCallback>(relaxed = true)
+            val initialLegIndex = 2
+
+            coEvery {
+                tripSession.setRoutes(routes, initialLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            } returns NativeSetRouteValue(emptyList())
+            mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)
+
+            verify(exactly = 1) { callback.onRoutesSetResult(routes) }
+            verify(exactly = 0) { callback.onRoutesSetError(any(), any()) }
+        }
+
+    @Test
+    fun `setNavigationRoutes calls callback with error for invalid routes`() =
+        coroutineRule.runBlockingTest {
+            createMapboxNavigation()
+            val routes = listOf(mockk<NavigationRoute>(relaxed = true))
+            val callback = mockk<SetRoutesCallback>(relaxed = true)
+            val initialLegIndex = 2
+            val error = "some error"
+
+            coEvery {
+                tripSession.setRoutes(routes, initialLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            } returns NativeSetRouteError(error)
+            mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)
+
+            verify(exactly = 1) { callback.onRoutesSetError(routes, error) }
+            verify(exactly = 0) { callback.onRoutesSetResult(any()) }
+        }
+
+    @Test
     fun `deprecated setRoutes pushes the route to the directions session`() =
         coroutineRule.runBlockingTest {
             createMapboxNavigation()
