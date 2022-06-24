@@ -7,6 +7,9 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
+import com.mapbox.common.ResourceLoadError
+import com.mapbox.common.ResourceLoadProgress
+import com.mapbox.common.ResourceLoadResult
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -47,6 +50,9 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadObserver
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoaderFactory
 import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
@@ -54,6 +60,7 @@ import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -183,28 +190,30 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
-    private val voiceInstructionsObserver = VoiceInstructionsObserver { voiceInstructions -> // The data obtained must be used to generate the synthesized speech mp3 file.
-        speechApi.generate(
-            voiceInstructions,
-            speechCallback
-        )
-    }
-
-    private val routesObserver = RoutesObserver { result -> // Every time a new route is obtained make sure to cancel the [MapboxSpeechApi] and
-        // clear the [MapboxVoiceInstructionsPlayer]
-        speechApi.cancel()
-        voiceInstructionsPlayer.clear()
-        if (result.routes.isNotEmpty()) {
-            CoroutineScope(Dispatchers.Main).launch {
-                routeLineApi.setRoutes(
-                    listOf(RouteLine(result.routes[0], null))
-                ).apply {
-                    routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
-                }
-            }
-            startSimulation(result.routes[0])
+    private val voiceInstructionsObserver =
+        VoiceInstructionsObserver { voiceInstructions -> // The data obtained must be used to generate the synthesized speech mp3 file.
+            speechApi.generate(
+                voiceInstructions,
+                speechCallback
+            )
         }
-    }
+
+    private val routesObserver =
+        RoutesObserver { result -> // Every time a new route is obtained make sure to cancel the [MapboxSpeechApi] and
+            // clear the [MapboxVoiceInstructionsPlayer]
+            speechApi.cancel()
+            voiceInstructionsPlayer.clear()
+            if (result.routes.isNotEmpty()) {
+                CoroutineScope(Dispatchers.Main).launch {
+                    routeLineApi.setRoutes(
+                        listOf(RouteLine(result.routes[0], null))
+                    ).apply {
+                        routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
+                    }
+                }
+                startSimulation(result.routes[0])
+            }
+        }
 
     private companion object {
         private const val SOUND_BUTTON_TEXT_APPEAR_DURATION = 1000L
@@ -354,10 +363,12 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
             mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
             mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
         }
+        ResourceLoaderFactory.getInstance().registerObserver(resourceLoadObserver)
     }
 
     override fun onStop() {
         super.onStop()
+        ResourceLoaderFactory.getInstance().unregisterObserver(resourceLoadObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
@@ -385,5 +396,34 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
             findRoute(originPoint, point)
         }
         return false
+    }
+
+    // ResourceLoadObserver that logs ResourceLoader operations
+    private val resourceLoadObserver = object : ResourceLoadObserver {
+        override fun onStart(request: ResourceLoadRequest) = Unit
+
+        override fun onProgress(
+            request: ResourceLoadRequest,
+            progress: ResourceLoadProgress
+        ) = Unit
+
+        override fun onFinish(
+            request: ResourceLoadRequest,
+            result: Expected<ResourceLoadError, ResourceLoadResult>
+        ) {
+            result.value?.also { v ->
+                val cleanURL = request.url.replace(
+                    Regex("access_token=([a-zA-Z0-9.]+)"),
+                    "access_token=REDACTED"
+                )
+                val values = mutableMapOf(
+                    "status" to v.status,
+                    "totalBytes" to v.totalBytes,
+                    "transferredBytes" to v.transferredBytes,
+                    "url" to cleanURL
+                )
+                logD("onFinish: $values", "ResourceLoadObserver")
+            }
+        }
     }
 }
