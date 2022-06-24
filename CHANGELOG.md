@@ -6,6 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
+- Updated `MapboxSpeechApi` to use persistent cache to decrease the bandwidth consumption. [#5790](https://github.com/mapbox/mapbox-navigation-android/pull/5790)
 
 ## Mapbox Navigation SDK 2.6.0-rc.1 - June 23, 2022
 ### Changelog
