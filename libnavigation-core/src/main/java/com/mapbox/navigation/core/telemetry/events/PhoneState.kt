@@ -7,7 +7,6 @@ import com.mapbox.android.telemetry.TelemetryUtils.obtainBatteryLevel
 import com.mapbox.android.telemetry.TelemetryUtils.obtainCellularNetworkType
 import com.mapbox.android.telemetry.TelemetryUtils.obtainCurrentDate
 import com.mapbox.android.telemetry.TelemetryUtils.obtainUniversalUniqueIdentifier
-import com.mapbox.android.telemetry.TelemetryUtils.retrieveVendorId
 import com.mapbox.navigation.core.telemetry.obtainAudioType
 import com.mapbox.navigation.core.telemetry.obtainScreenBrightness
 import com.mapbox.navigation.core.telemetry.obtainVolumeLevel
@@ -39,7 +38,8 @@ internal data class PhoneState(
                 applicationState = obtainApplicationState(context),
                 created = obtainCurrentDate(),
                 feedbackId = obtainUniversalUniqueIdentifier(),
-                userId = retrieveVendorId(),
+                // Hardcoded to '-' for privacy concerns
+                userId = "-",
             )
     }
 }

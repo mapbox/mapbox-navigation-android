@@ -10,6 +10,7 @@ class EventsAppMetadataTest : BuilderTest<EventsAppMetadata, EventsAppMetadata.B
     override fun getFilledUpBuilder(): EventsAppMetadata.Builder {
         return EventsAppMetadata.Builder("name", "version")
             .userId("userId")
+            .sessionId("sessionId")
     }
 
     @Test

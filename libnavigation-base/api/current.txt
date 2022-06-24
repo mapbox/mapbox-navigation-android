@@ -366,10 +366,12 @@ package com.mapbox.navigation.base.options {
 
   public final class EventsAppMetadata {
     method public String getName();
+    method public String? getSessionId();
     method public String? getUserId();
     method public String getVersion();
     method public com.mapbox.navigation.base.options.EventsAppMetadata.Builder toBuilder();
     property public final String name;
+    property public final String? sessionId;
     property public final String? userId;
     property public final String version;
   }
@@ -377,6 +379,7 @@ package com.mapbox.navigation.base.options {
   public static final class EventsAppMetadata.Builder {
     ctor public EventsAppMetadata.Builder(String name, String version);
     method public com.mapbox.navigation.base.options.EventsAppMetadata build();
+    method public com.mapbox.navigation.base.options.EventsAppMetadata.Builder sessionId(String? sessionId);
     method public com.mapbox.navigation.base.options.EventsAppMetadata.Builder userId(String? userId);
   }
 

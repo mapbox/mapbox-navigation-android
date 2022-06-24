@@ -18,6 +18,11 @@ class EventsAppMetadata private constructor(
      * User ID relevant for the application context.
      */
     val userId: String?,
+
+    /**
+     * Session ID relevant for the application context.
+     */
+    val sessionId: String?,
 ) {
 
     /**
@@ -25,6 +30,7 @@ class EventsAppMetadata private constructor(
      */
     fun toBuilder(): Builder = Builder(name, version).apply {
         userId(userId)
+        sessionId(sessionId)
     }
 
     /**
@@ -39,6 +45,7 @@ class EventsAppMetadata private constructor(
         if (name != other.name) return false
         if (version != other.version) return false
         if (userId != other.userId) return false
+        if (sessionId != other.sessionId) return false
 
         return true
     }
@@ -50,6 +57,7 @@ class EventsAppMetadata private constructor(
         var result = name.hashCode()
         result = 31 * result + version.hashCode()
         result = 31 * result + userId.hashCode()
+        result = 31 * result + sessionId.hashCode()
         return result
     }
 
@@ -57,7 +65,9 @@ class EventsAppMetadata private constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "EventsAppMetadata(name='$name', version='$version', userId=$userId)"
+        return "EventsAppMetadata(" +
+            "name='$name', version='$version', userId='$userId', sessionId='$sessionId'" +
+            ")"
     }
 
     /**
@@ -74,13 +84,22 @@ class EventsAppMetadata private constructor(
          */
         private val version: String // min length 1
     ) {
+
         private var userId: String? = null
+        private var sessionId: String? = null
 
         /**
          * User ID relevant for the application context.
          */
         fun userId(userId: String?) = apply {
             this.userId = userId
+        }
+
+        /**
+         * Session ID relevant for the application context.
+         */
+        fun sessionId(sessionId: String?) = apply {
+            this.sessionId = sessionId
         }
 
         /**
@@ -94,6 +113,7 @@ class EventsAppMetadata private constructor(
                 name = name,
                 version = version,
                 userId = userId,
+                sessionId = sessionId,
             )
         }
     }
