@@ -164,11 +164,6 @@ class MapboxSpeechApiTest {
         sut.generate(voiceInstructions, speechConsumer)
 
         assertTrue(exceptions[0] is java.lang.IllegalStateException)
-        assertEquals(
-            "Invalid state: processVoiceAnnouncement can't produce " +
-                "Fallback VoiceTypeAndAnnouncement VoiceResult",
-            exceptions[0].localizedMessage
-        )
     }
 
     @Test

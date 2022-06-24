@@ -106,11 +106,8 @@ class MapboxSpeechApi @JvmOverloads constructor(
 
     @Throws(IllegalStateException::class)
     private fun getFallbackAnnouncement(voiceInstruction: VoiceInstructions): SpeechAnnouncement {
-        if (VoiceInstructionsParser.parse(voiceInstruction).isError) {
-            throw IllegalStateException(
-                "Invalid state: processVoiceAnnouncement can't produce " +
-                    "Fallback VoiceTypeAndAnnouncement VoiceResult"
-            )
+        VoiceInstructionsParser.parse(voiceInstruction).error?.also {
+            throw IllegalStateException(it.message)
         }
 
         val announcement = voiceInstruction.announcement()
