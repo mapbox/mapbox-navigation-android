@@ -265,11 +265,10 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         ).apply {
             requestNavigationCameraToFollowing()
             registerNavigationCameraStateChangeObserver { navigationCameraState ->
-                binding.recenterButton.isVisible =
-                    navigationCameraState in listOf(
+                binding.recenterButton.isVisible = navigationCameraState in listOf(
                     NavigationCameraState.TRANSITION_TO_OVERVIEW,
                     NavigationCameraState.OVERVIEW,
-                    NavigationCameraState.IDLE
+                    NavigationCameraState.IDLE,
                 )
             }
         }
