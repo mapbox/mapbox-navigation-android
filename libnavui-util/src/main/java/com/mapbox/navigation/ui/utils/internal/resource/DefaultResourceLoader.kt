@@ -1,13 +1,12 @@
 package com.mapbox.navigation.ui.utils.internal.resource
 
 import com.mapbox.bindgen.Expected
-import com.mapbox.bindgen.ExpectedFactory.createError
 import com.mapbox.common.Cancelable
 import com.mapbox.common.NetworkRestriction
 import com.mapbox.common.ReachabilityInterface
 import com.mapbox.common.ResourceDescription
 import com.mapbox.common.ResourceLoadError
-import com.mapbox.common.ResourceLoadErrorType
+import com.mapbox.common.ResourceLoadFlags
 import com.mapbox.common.ResourceLoadOptions
 import com.mapbox.common.ResourceLoadProgress
 import com.mapbox.common.ResourceLoadProgressCallback
@@ -48,35 +47,42 @@ internal class DefaultResourceLoader(
     ): Long {
         val requestId = nextRequestId.incrementAndGet()
         val callbackAdapter = CallbackAdapter(request, callback, observers)
-        val requiresNetwork = request.networkRestriction != NetworkRestriction.DISALLOW_ALL
 
         callbackAdapter.notifyOnStart(request)
-        // Since the TileStore (commonSDK 21.3.1) will defer any requests that require internet connection,
-        // we must verify network requirement here and fail fast if the network is not available.
-        if (requiresNetwork && !reachability.isReachable) {
-            callbackAdapter.run(createError(connectionError()))
-        } else {
-            cancelableMap[requestId] = tileStore.loadResource(
-                /* description */ request.toResourceDescription(),
-                /* options */ request.toResourceLoadOptions("DefaultResourceLoader-$requestId"),
-                /* progressCallback */ callbackAdapter
-            ) {
-                cancelableMap.remove(requestId)
-                callbackAdapter.run(it)
-            }
+        cancelableMap[requestId] = tileStore.loadResource(
+            /* description */ request.toResourceDescription(),
+            /* options */ loadOptions(request, requestId),
+            /* progressCallback */ callbackAdapter
+        ) {
+            cancelableMap.remove(requestId)
+            callbackAdapter.run(it)
         }
 
         return requestId
     }
 
-    private fun connectionError() = ResourceLoadError(
-        ResourceLoadErrorType.UNSATISFIED,
-        "No internet connection",
-        0L
-    )
-
     override fun cancel(requestId: Long) {
         cancelableMap.remove(requestId)?.cancel()
+    }
+
+    private fun loadOptions(request: ResourceLoadRequest, requestId: Long): ResourceLoadOptions {
+        val requiresNetwork = request.networkRestriction != NetworkRestriction.DISALLOW_ALL
+        val tag = "DefaultResourceLoader-$requestId"
+        return if (requiresNetwork && !reachability.isReachable) {
+            ResourceLoadOptions(
+                tag,
+                ResourceLoadFlags.ACCEPT_EXPIRED,
+                NetworkRestriction.DISALLOW_ALL,
+                null
+            )
+        } else {
+            ResourceLoadOptions(
+                tag,
+                request.flags,
+                request.networkRestriction,
+                null
+            )
+        }
     }
 
     override fun registerObserver(observer: ResourceLoadObserver) {
@@ -89,9 +95,6 @@ internal class DefaultResourceLoader(
 
     private fun ResourceLoadRequest.toResourceDescription() =
         ResourceDescription(url, TileDataDomain.NAVIGATION)
-
-    private fun ResourceLoadRequest.toResourceLoadOptions(tag: String) =
-        ResourceLoadOptions(tag, flags, networkRestriction, null)
 
     private class CallbackAdapter(
         private val request: ResourceLoadRequest,

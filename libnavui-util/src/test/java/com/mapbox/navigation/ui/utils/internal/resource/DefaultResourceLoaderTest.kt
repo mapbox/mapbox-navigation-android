@@ -24,7 +24,6 @@ import io.mockk.spyk
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.util.Date
@@ -106,28 +105,24 @@ class DefaultResourceLoaderTest {
     }
 
     @Test
-    fun `load - should fail fast if request requires network and network is not reachable`() {
+    fun `load - should force load from disk cache when network is not reachable`() {
         val callback = mockk<ResourceLoadCallback>(relaxed = true)
         val loadRequest = ResourceLoadRequest("http://example.com/some-resource")
         every { mockReachability.isReachable } returns false
         sut.load(loadRequest, callback)
 
-        val errorCapture = slot<Expected<ResourceLoadError, ResourceLoadResult>>()
-        verifyOrder {
-            callback.onStart(loadRequest)
-            callback.onFinish(loadRequest, capture(errorCapture))
+        val optionsCapture = slot<ResourceLoadOptions>()
+        verify {
+            mockTileStore.loadResource(
+                ResourceDescription(loadRequest.url, TileDataDomain.NAVIGATION),
+                capture(optionsCapture),
+                any(),
+                any()
+            )
         }
-        assertTrue(errorCapture.captured.isError)
-    }
 
-    @Test
-    fun `load - should NOT call TileStore if request requires network and network is not reachable`() {
-        val callback = mockk<ResourceLoadCallback>(relaxed = true)
-        val loadRequest = ResourceLoadRequest("http://example.com/some-resource")
-        every { mockReachability.isReachable } returns false
-        sut.load(loadRequest, callback)
-
-        verify(exactly = 0) { mockTileStore.loadResource(any(), any(), any(), any()) }
+        assertEquals(ResourceLoadFlags.ACCEPT_EXPIRED, optionsCapture.captured.flags)
+        assertEquals(NetworkRestriction.DISALLOW_ALL, optionsCapture.captured.networkRestriction)
     }
 
     @Test
