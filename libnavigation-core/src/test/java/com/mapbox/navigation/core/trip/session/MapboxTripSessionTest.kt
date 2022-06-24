@@ -592,8 +592,7 @@ class MapboxTripSessionTest {
         } returns createSetRouteResult(expectedAlternatives)
         val alternative: NavigationRoute = mockk()
         val actual = tripSession.setRoutes(routes + alternative, legIndex, updateReason)
-        assertEquals(expectedAlternatives, actual.nativeAlternatives)
-        assertNull(actual.error)
+        assertEquals(expectedAlternatives, (actual as NativeSetRouteValue).nativeAlternatives)
     }
 
     @Test
@@ -602,8 +601,7 @@ class MapboxTripSessionTest {
         coEvery { navigator.setRoutes(any(), any(), any()) } returns createSetRouteError(error)
         val alternative: NavigationRoute = mockk()
         val actual = tripSession.setRoutes(routes + alternative, legIndex, updateReason)
-        assertEquals(emptyList<RouteAlternative>(), actual.nativeAlternatives)
-        assertEquals(error, actual.error)
+        assertEquals(error, (actual as NativeSetRouteError).error)
     }
 
     @Test
@@ -658,8 +656,7 @@ class MapboxTripSessionTest {
                 RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
             )
 
-            assertEquals(nativeAlternatives, result.nativeAlternatives)
-            assertNull(result.error)
+            assertEquals(nativeAlternatives, (result as NativeSetRouteValue).nativeAlternatives)
         }
 
     @Test
@@ -678,7 +675,7 @@ class MapboxTripSessionTest {
                 RoutesExtra.ROUTES_UPDATE_REASON_NEW
             )
 
-            assertEquals(nativeAlternatives, result.nativeAlternatives)
+            assertEquals(nativeAlternatives, (result as NativeSetRouteValue).nativeAlternatives)
         }
 
     @Test
@@ -695,7 +692,7 @@ class MapboxTripSessionTest {
                 RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
             )
 
-            assertTrue(result.nativeAlternatives!!.isEmpty())
+            assertTrue((result as NativeSetRouteValue).nativeAlternatives.isEmpty())
         }
 
     @Test
@@ -714,7 +711,7 @@ class MapboxTripSessionTest {
                 RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
             )
 
-            assertEquals(nativeAlternatives, result.nativeAlternatives)
+            assertEquals(nativeAlternatives, (result as NativeSetRouteValue).nativeAlternatives)
         }
 
     @Test
@@ -730,8 +727,7 @@ class MapboxTripSessionTest {
                 RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
             )
 
-            assertEquals(mockAlternativesMetadata, result.nativeAlternatives)
-            assertNull(result.error)
+            assertEquals(mockAlternativesMetadata, (result as NativeSetRouteValue).nativeAlternatives)
         }
 
     @Test

@@ -2,7 +2,12 @@ package com.mapbox.navigation.core.trip.session
 
 import com.mapbox.navigator.RouteAlternative
 
-internal data class NativeSetRouteResult(
-    val nativeAlternatives: List<RouteAlternative>? = null,
+internal sealed class NativeSetRouteResult
+
+internal class NativeSetRouteValue(
+    val nativeAlternatives: List<RouteAlternative>
+) : NativeSetRouteResult()
+
+internal class NativeSetRouteError(
     val error: String? = null,
-)
+) : NativeSetRouteResult()

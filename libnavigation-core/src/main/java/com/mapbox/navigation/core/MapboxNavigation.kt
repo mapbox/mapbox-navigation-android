@@ -86,6 +86,7 @@ import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LegIndexUpdatedCallback
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.NativeSetRouteResult
+import com.mapbox.navigation.core.trip.session.NativeSetRouteValue
 import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance
@@ -807,7 +808,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             routeUpdateMutex.withLock {
                 navigationSession.setRoutes(routes)
                 val processedRoutes = setRoutesToTripSession(routes, legIndex, reason)
-                if (processedRoutes.error == null) {
+                if (processedRoutes is NativeSetRouteValue) {
                     directionsSession.setRoutes(routes, legIndex, reason)
                 } else {
                     logW("Routes $routes will be ignored as they are not valid")
@@ -837,7 +838,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     ): NativeSetRouteResult {
         routeAlternativesController.pauseUpdates()
         return tripSession.setRoutes(routes, legIndex, reason).apply {
-            if (nativeAlternatives != null) {
+            if (this is NativeSetRouteValue) {
                 routeAlternativesController.processAlternativesMetadata(
                     routes,
                     nativeAlternatives

@@ -96,11 +96,12 @@ internal class MapboxTripSession(
                 setRouteToNativeNavigator(routes, legIndex)
             }
             RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE -> {
-                NativeSetRouteResult(
+                NativeSetRouteValue(
                     nativeAlternatives = navigator.setAlternativeRoutes(routes.drop(1))
                 )
             }
             RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
+                var errorMessage: String? = null
                 val alternatives = if (routes.isNotEmpty()) {
                     val primaryRoute = routes.first()
                     val alternatives = navigator.refreshRoute(primaryRoute)
@@ -110,10 +111,13 @@ internal class MapboxTripSession(
                     this@MapboxTripSession.primaryRoute = routes.first()
                     alternatives
                 } else {
-                    logW("Cannot refresh route. Route can't be null", LOG_CATEGORY)
+                    with("Cannot refresh route. Route can't be null") {
+                        errorMessage = this
+                        logW(this, LOG_CATEGORY)
+                    }
                     null
                 }
-                NativeSetRouteResult(alternatives)
+                alternatives?.let { NativeSetRouteValue(it) } ?: NativeSetRouteError(errorMessage)
             }
             else -> throw IllegalArgumentException("Unsupported route update reason: $reason")
         }
@@ -138,10 +142,7 @@ internal class MapboxTripSession(
             getRouteInitInfo(it.nativeRoute().routeInfo)?.roadObjects
         } ?: emptyList()
         logD("primary route update - finished", LOG_CATEGORY)
-        return NativeSetRouteResult(
-            nativeAlternatives = processedAlternatives.getValueOrElse { emptyList() },
-            error = processedAlternatives.error
-        )
+        return processedAlternatives.fold({ NativeSetRouteError(it) }, { NativeSetRouteValue(it) })
     }
 
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
