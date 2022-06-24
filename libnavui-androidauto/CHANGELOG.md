@@ -5,14 +5,26 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+
+## androidauto-v0.3.0 - Jun 24, 2022
+### Changelog
+[Changes between 0.2.0 and 0.3.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.2.0...androidauto-v0.3.0)
+
+#### Bug fixes and improvements
 - Updated to use shared `MapboxAudioGuidance` instance. [#5846](https://github.com/mapbox/mapbox-navigation-android/pull/5846)
 - Added map style observers to handle style changes. [#5853](https://github.com/mapbox/mapbox-navigation-android/pull/5853)
-- Updated to format the distance displayed in the instrument cluster [#5928](https://github.com/mapbox/mapbox-navigation-android/pull/5928)
-- Refactor `MainScreenManager` to be `MapboxScreenManager` with customizable `MapboxScreenProvider`. [#5866](https://github.com/mapbox/mapbox-navigation-android/pull/5866)
+- Updated to format the distance displayed in the instrument cluster. [#5928](https://github.com/mapbox/mapbox-navigation-android/pull/5928)
+- Refactored `MainScreenManager` to be `MapboxScreenManager` with customizable `MapboxScreenProvider`. [#5866](https://github.com/mapbox/mapbox-navigation-android/pull/5866)
+
+### Mapbox dependencies
+This release defines minimum versions for the Mapbox dependencies.
+- Mapbox Maps Android Auto Extension `v0.1.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/extension-androidauto-v0.1.0))
+- Mapbox Navigation `v2.6.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/v2.6.0-rc.1))
+- Mapbox Search `v1.0.0-beta.29` ([release notes](https://github.com/mapbox/mapbox-search-android/releases/tag/v1.0.0-beta.29))
 
 ## androidauto-v0.2.0 - May 19, 2022
 ### Changelog
-[Changes between 0.1.0 and 0.2.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.1.0...androidauto-v0.1.0)
+[Changes between 0.1.0 and 0.2.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.1.0...androidauto-v0.2.0)
 
 #### Features
 - Added a notification interceptor for Android Auto. [#5778](https://github.com/mapbox/mapbox-navigation-android/pull/5778)
