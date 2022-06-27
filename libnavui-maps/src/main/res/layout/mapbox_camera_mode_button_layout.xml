@@ -19,8 +19,8 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/iconImage"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="@dimen/mapbox_extendableButton_iconSize"
+            android:layout_height="@dimen/mapbox_extendableButton_iconSize"
             android:src="@drawable/mapbox_ic_camera_overview"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
