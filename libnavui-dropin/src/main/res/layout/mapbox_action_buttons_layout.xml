@@ -21,14 +21,14 @@
             app:extendableButtonIcon="@drawable/mapbox_ic_sound_on"
             tools:visibility="visible" />
 
-        <com.mapbox.navigation.dropin.view.MapboxCameraModeButton
+        <com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton
             android:id="@+id/cameraModeButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/mapbox_actionList_spacing"
             android:layout_marginBottom="@dimen/mapbox_actionList_spacing"/>
 
-        <com.mapbox.navigation.dropin.view.MapboxExtendableButton
+        <com.mapbox.navigation.ui.base.view.MapboxExtendableButton
             android:id="@+id/recenterButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

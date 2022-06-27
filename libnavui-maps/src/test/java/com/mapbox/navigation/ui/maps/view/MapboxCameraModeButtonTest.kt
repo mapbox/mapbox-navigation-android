@@ -1,10 +1,10 @@
-package com.mapbox.navigation.dropin.view
+package com.mapbox.navigation.ui.maps.view
 
 import android.content.Context
 import android.view.View
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.R
+import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertEquals
@@ -23,12 +23,12 @@ import org.robolectric.annotation.LooperMode
 class MapboxCameraModeButtonTest {
 
     private lateinit var ctx: Context
-    private lateinit var sut: com.mapbox.navigation.dropin.view.MapboxCameraModeButton
+    private lateinit var sut: MapboxCameraModeButton
 
     @Before
     fun setUp() {
         ctx = ApplicationProvider.getApplicationContext()
-        sut = com.mapbox.navigation.dropin.view.MapboxCameraModeButton(ctx, null, 0)
+        sut = MapboxCameraModeButton(ctx, null, 0)
     }
 
     @Test

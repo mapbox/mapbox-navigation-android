@@ -17,13 +17,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="10dp">
 
-        <com.mapbox.navigation.dropin.view.MapboxCameraModeButton
+        <com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton
             android:id="@+id/cameraModeButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onCameraModeButtonClick" />
 
-        <com.mapbox.navigation.dropin.view.MapboxCameraModeButton
+        <com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton
             style="@style/MapboxStyleCameraModeButton.Circle"
             android:id="@+id/circleCameraModeButton"
             android:layout_width="wrap_content"
@@ -70,14 +70,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="10dp">
 
-        <com.mapbox.navigation.dropin.view.MapboxExtendableButton
+        <com.mapbox.navigation.ui.base.view.MapboxExtendableButton
             android:id="@+id/recenterButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onRecenterButtonClick"
             app:extendableButtonIcon="@drawable/mapbox_ic_camera_recenter" />
 
-        <com.mapbox.navigation.dropin.view.MapboxExtendableButton
+        <com.mapbox.navigation.ui.base.view.MapboxExtendableButton
             style="@style/MapboxStyleExtendableButton.Oval"
             android:id="@+id/ovalRecenterButton"
             android:layout_width="wrap_content"
@@ -86,7 +86,7 @@
             android:onClick="onRecenterButtonClick"
             app:extendableButtonIcon="@drawable/mapbox_ic_camera_recenter" />
 
-        <com.mapbox.navigation.dropin.view.MapboxExtendableButton
+        <com.mapbox.navigation.ui.base.view.MapboxExtendableButton
             style="@style/MapboxStyleExtendableButton.Circle"
             android:id="@+id/circleRecenterButton"
             android:layout_width="wrap_content"
@@ -108,14 +108,14 @@
         app:layout_constraintTop_toTopOf="@id/container_cameraModeButtons"
         app:layout_constraintStart_toStartOf="parent">
 
-        <com.mapbox.navigation.dropin.view.MapboxCameraModeButton
+        <com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton
             style="@style/CustomCameraModeButton"
             android:id="@+id/customCameraModeButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onCameraModeButtonClick" />
 
-        <com.mapbox.navigation.dropin.view.MapboxExtendableButton
+        <com.mapbox.navigation.ui.base.view.MapboxExtendableButton
             style="@style/CustomRecenterButton"
             android:id="@+id/customRecenterButton"
             android:layout_width="wrap_content"
@@ -124,7 +124,7 @@
             android:onClick="onRecenterButtonClick"
             app:extendableButtonIcon="@drawable/mapbox_ic_camera_recenter" />
 
-        <com.mapbox.navigation.dropin.view.MapboxExtendableButton
+        <com.mapbox.navigation.ui.base.view.MapboxExtendableButton
             style="@style/CustomRecenterButton.Circle"
             android:id="@+id/customCircleRecenterButton"
             android:layout_width="wrap_content"

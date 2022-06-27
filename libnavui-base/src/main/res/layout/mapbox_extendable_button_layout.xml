@@ -24,7 +24,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            tools:src="@drawable/mapbox_ic_camera_overview" />
+            tools:tint="#ccc"
+            tools:src="@drawable/mapbox_ic_navigation" />
 
         <!-- Spacing to ensure left-right symmetry when shrunk -->
         <Space

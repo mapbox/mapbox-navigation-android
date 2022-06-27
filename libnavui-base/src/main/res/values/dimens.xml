@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- MapboxExtendableButton -->
+    <dimen name="mapbox_extendableButton_paddingStart">10dp</dimen>
+    <dimen name="mapbox_extendableButton_minHeight">52dp</dimen>
+    <dimen name="mapbox_extendableButton_minWidth">72dp</dimen>
+    <dimen name="mapbox_extendableButton_iconSize">32dp</dimen>
+    <dimen name="mapbox_extendableButton_spacing">8dp</dimen>
+
+</resources>
