@@ -6,12 +6,12 @@ import android.view.View
 import androidx.lifecycle.MutableLiveData
 import com.mapbox.maps.CameraOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton
-import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.LayoutActivityDropinButtonsBinding
 import com.mapbox.navigation.qa_test_app.view.base.BaseNavigationActivity
+import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
+import com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton
 import com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
 import com.mapbox.navigation.utils.internal.toPoint
 
