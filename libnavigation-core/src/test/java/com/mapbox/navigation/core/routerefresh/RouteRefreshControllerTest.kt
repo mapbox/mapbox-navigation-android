@@ -305,7 +305,6 @@ class RouteRefreshControllerTest {
             val routeRefreshStub = RouteRefreshStub().apply {
                 setRefreshedRoute(refreshedRoutes[0])
             }
-
             val routeRefreshController = createRouteRefreshController(
                 routeRefresh = routeRefreshStub,
             )
@@ -316,7 +315,10 @@ class RouteRefreshControllerTest {
 
             verify {
                 logger.logI(
-                    "No changes in annotations for route testNoDiff#0",
+                    withArg {
+                        it.contains("no changes", ignoreCase = true) &&
+                            it.contains("testNoDiff#0")
+                    },
                     RouteRefreshController.LOG_CATEGORY
                 )
             }
