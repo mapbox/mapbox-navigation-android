@@ -39,10 +39,6 @@ internal class RouteRefreshController(
 
     suspend fun refresh(routes: List<NavigationRoute>): List<NavigationRoute> {
         return if (routes.isNotEmpty()) {
-            require(
-                routes.none { it.directionsRoute.legs().isNullOrEmpty() }
-            ) { "Can't refresh a route without legs" }
-
             val routesValidationResults = routes.map { validateRoute(it) }
             if (routesValidationResults.any { it is RouteValidationResult.Valid }) {
                 tryRefreshingRoutesUntilRouteChanges(routes)
@@ -96,11 +92,10 @@ internal class RouteRefreshController(
         route: NavigationRoute
     ): NavigationRoute {
         val routeLegs = route.directionsRoute.legs()
-        require(routeLegs != null) { "Can't refresh route without legs" }
         val currentLegIndex = currentLegIndexProvider()
         return route.updateDirectionsRouteOnly {
             toBuilder().legs(
-                routeLegs.mapIndexed { legIndex, leg ->
+                routeLegs?.mapIndexed { legIndex, leg ->
                     val legHasAlreadyBeenPassed = legIndex < currentLegIndex
                     if (legHasAlreadyBeenPassed) {
                         leg

@@ -186,19 +186,26 @@ class RouteRefreshControllerTest {
         refreshDeferred.cancel()
     }
 
-    @Test(expected = IllegalArgumentException::class)
-    fun `refresh route without legs`() = runBlockingTest {
+    @Test
+    fun `clean up of a route without legs never returns`() = runBlockingTest {
         val initialRoute = createNavigationRoute(
             createDirectionsRoute(
                 legs = null,
                 createRouteOptions(enableRefresh = true)
             )
         )
-        val routeRefreshController = createRouteRefreshController()
+        val routeRefresh = RouteRefreshStub().apply {
+            failRouteRefresh(initialRoute.id)
+        }
+        val routeRefreshController = createRouteRefreshController(
+            routeRefresh = routeRefresh
+        )
 
         val result = async { routeRefreshController.refresh(listOf(initialRoute)) }
+        advanceTimeBy(TimeUnit.HOURS.toMillis(6))
 
-        throw result.getCompletionExceptionOrNull()!!
+        assertTrue("route refresh has finished $result", result.isActive)
+        result.cancel()
     }
 
     @Test(expected = IllegalArgumentException::class)
