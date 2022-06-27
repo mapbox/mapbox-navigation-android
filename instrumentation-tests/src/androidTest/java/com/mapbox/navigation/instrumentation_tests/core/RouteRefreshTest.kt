@@ -149,9 +149,9 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             )
 
             assertEquals(
-                requestedRoutes[0].getDurationOfLeg(0),
-                initialRoutes[0].getDurationOfLeg(0),
-                0.0
+                "initial should be the same as requested",
+                requestedRoutes[0].getDurationAnnotationsFromLeg(0),
+                initialRoutes[0].getDurationAnnotationsFromLeg(0)
             )
             assertEquals(227.918, initialRoutes[0].getDurationOfLeg(0), 0.0001)
             assertEquals(1189.651, refreshedRoutes[0].getDurationOfLeg(0), 0.0001)
@@ -294,10 +294,13 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
 }
 
 private fun NavigationRoute.getDurationOfLeg(legIndex: Int): Double =
-    directionsRoute.legs()!![legIndex]
-        .annotation()
-        ?.duration()
+    getDurationAnnotationsFromLeg(legIndex)
         ?.sum()!!
+
+private fun NavigationRoute.getDurationAnnotationsFromLeg(legIndex: Int): List<Double>? =
+    directionsRoute.legs()?.get(legIndex)
+        ?.annotation()
+        ?.duration()
 
 private fun NavigationRoute.getIncidentsIdFromTheRoute(legIndex: Int): List<String>? =
     directionsRoute.legs()?.get(legIndex)
