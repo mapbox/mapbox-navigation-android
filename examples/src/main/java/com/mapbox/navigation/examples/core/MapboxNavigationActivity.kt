@@ -29,7 +29,6 @@ import com.mapbox.navigation.base.options.EventsAppMetadata
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
-import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
@@ -292,7 +291,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
         mapboxNavigation = MapboxNavigationProvider.create(
             NavigationOptions.Builder(this)
                 .accessToken(getMapboxAccessTokenFromResources())
-                .routeRefreshOptions(RouteRefreshOptions.Builder().intervalMillis(30_000).build())
                 .eventsAppMetadata(
                     EventsAppMetadata.Builder(
                         BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME
@@ -471,7 +469,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
                 .coordinatesList(listOf(origin, destination))
-                .alternatives(true)
                 .layersList(listOf(mapboxNavigation.getZLevel(), null))
                 .build(),
             object : NavigationRouterCallback {
