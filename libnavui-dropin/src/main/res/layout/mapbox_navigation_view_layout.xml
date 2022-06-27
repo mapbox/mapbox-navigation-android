@@ -15,7 +15,8 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/coordinatorLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/container"
@@ -52,7 +53,7 @@
                 tools:background="#eee"
                 tools:layout_height="60dp"
                 tools:layout_width="50dp"
-                android:layout_gravity="start|top"/>
+                android:layout_gravity="start|top" />
 
             <FrameLayout
                 android:id="@+id/emptyLeftContainer"
@@ -66,7 +67,7 @@
                 tools:background="#F6A1A1"
                 tools:layout_height="350dp"
                 tools:layout_width="50dp"
-                android:layout_gravity="start|top"/>
+                android:layout_gravity="start|top" />
 
             <FrameLayout
                 android:id="@+id/emptyRightContainer"
@@ -81,7 +82,7 @@
                 tools:background="#F6A1A1"
                 tools:layout_height="220dp"
                 tools:layout_width="76dp"
-                android:layout_gravity="start|top"/>
+                android:layout_gravity="start|top" />
 
             <FrameLayout
                 android:id="@+id/actionListLayout"
@@ -107,7 +108,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginBottom="15dp"
-                app:layout_constraintHeight_max="62dp"/>
+                app:layout_constraintHeight_max="62dp" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
