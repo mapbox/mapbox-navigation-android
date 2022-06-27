@@ -208,21 +208,36 @@ class RouteRefreshControllerTest {
         result.cancel()
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
     fun `refresh alternative route without legs`() = runBlockingTest {
         val initialRoutes = createNavigationRoutes(
             createDirectionsResponse(
                 routes = listOf(
-                    createTestTwoLegRoute(),
-                    createTestTwoLegRoute().toBuilder().legs(emptyList()).build()
+                    createTestTwoLegRoute(requestUuid = "test1"),
+                    createTestTwoLegRoute(requestUuid = "test2")
+                        .toBuilder().legs(emptyList()).build()
                 )
             )
         )
-        val routeRefreshController = createRouteRefreshController()
+        val refreshedRoutes = createNavigationRoutes(
+            createDirectionsResponse(
+                routes = listOf(
+                    initialRoutes.first().directionsRoute,
+                    createTestTwoLegRoute(requestUuid = "test2")
+                )
+            )
+        )
+        val routeRefresh = RouteRefreshStub().apply {
+            setRefreshedRoute(refreshedRoutes[0])
+            setRefreshedRoute(refreshedRoutes[1])
+        }
+        val routeRefreshController = createRouteRefreshController(
+            routeRefresh = routeRefresh
+        )
 
-        val result = async { routeRefreshController.refresh(initialRoutes) }
+        val result = routeRefreshController.refresh(initialRoutes)
 
-        throw result.getCompletionExceptionOrNull()!!
+        assertEquals(refreshedRoutes, result)
     }
 
     @Test
