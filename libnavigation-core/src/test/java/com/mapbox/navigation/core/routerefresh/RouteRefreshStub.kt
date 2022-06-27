@@ -5,6 +5,11 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.RouterFactory.buildNavigationRouterRefreshError
 import com.mapbox.navigation.core.directions.session.RouteRefresh
+import com.mapbox.navigation.testing.factories.createDirectionsRoute
+import com.mapbox.navigation.testing.factories.createNavigationRoute
+import io.mockk.mockk
+import io.mockk.verify
+import org.junit.Test
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
 class RouteRefreshStub : RouteRefresh {
@@ -64,3 +69,73 @@ private typealias RouteRefreshHandler = (
     legIndex: Int,
     callback: NavigationRouterRefreshCallback
 ) -> Unit
+
+class RouteRefreshStubTest {
+
+    @Test
+    fun `refresh fails if no route`() {
+        val stub = RouteRefreshStub()
+        val callback = mockk<NavigationRouterRefreshCallback>(relaxed = true)
+
+        stub.requestRouteRefresh(createNavigationRoute(), 0, callback)
+
+        verify(exactly = 1) { callback.onFailure(any()) }
+        verify(exactly = 0) { callback.onRefreshReady(any()) }
+    }
+
+    @Test
+    fun `route successfully refreshed if refreshed was set`() {
+        val stub = RouteRefreshStub()
+        val originalRoute = createNavigationRoute(
+            createDirectionsRoute(
+                duration = 1.0, requestUuid = "test"
+            )
+        )
+        val refreshed = createNavigationRoute(
+            createDirectionsRoute(
+                duration = 2.0, requestUuid = "test"
+            )
+        )
+        stub.setRefreshedRoute(refreshed)
+
+        val callback = mockk<NavigationRouterRefreshCallback>(relaxed = true)
+        stub.requestRouteRefresh(originalRoute, 0, callback)
+
+        verify(exactly = 1) { callback.onRefreshReady(refreshed) }
+        verify(exactly = 0) { callback.onFailure(any()) }
+    }
+
+    @Test
+    fun `refresh fails if stub was asked for`() {
+        val testRoute = createNavigationRoute(
+            createDirectionsRoute(requestUuid = "test-fail")
+        )
+        val stub = RouteRefreshStub().apply {
+            setRefreshedRoute(testRoute) // make sure that it overrides old setup
+            failRouteRefresh(testRoute.id)
+        }
+        val callback = mockk<NavigationRouterRefreshCallback>(relaxed = true)
+
+        stub.requestRouteRefresh(testRoute, 0, callback)
+
+        verify(exactly = 1) { callback.onFailure(any()) }
+        verify(exactly = 0) { callback.onRefreshReady(any()) }
+    }
+
+    @Test
+    fun `refresh won't respond if stub was asked for`() {
+        val testRoute = createNavigationRoute(
+            createDirectionsRoute(requestUuid = "test-fail")
+        )
+        val stub = RouteRefreshStub().apply {
+            setRefreshedRoute(testRoute) // make sure that it overrides old setup
+            doNotRespondForRouteRefresh(testRoute.id)
+        }
+        val callback = mockk<NavigationRouterRefreshCallback>(relaxed = true)
+
+        stub.requestRouteRefresh(testRoute, 0, callback)
+
+        verify(exactly = 0) { callback.onFailure(any()) }
+        verify(exactly = 0) { callback.onRefreshReady(any()) }
+    }
+}
