@@ -57,12 +57,19 @@ internal class LogoAttributionComponentTest {
         )
 
         val bottomInset = 123.0f
-        systemBarsInsets.value = Insets.of(0, 0, 0, bottomInset.toInt())
+        val leftInset = 10.0f
+        val rightInset = 20.0f
+        systemBarsInsets.value =
+            Insets.of(leftInset.toInt(), 0, rightInset.toInt(), bottomInset.toInt())
 
         sut.onAttached(mockk())
 
         assertEquals(bottomInset, logoSettings.marginBottom)
+        assertEquals(leftInset, logoSettings.marginLeft)
+        assertEquals(rightInset, logoSettings.marginRight)
         assertEquals(bottomInset, attributionSettings.marginBottom)
+        assertEquals(leftInset, attributionSettings.marginLeft)
+        assertEquals(rightInset, attributionSettings.marginRight)
     }
 
     private fun captureUpdatedSettings(

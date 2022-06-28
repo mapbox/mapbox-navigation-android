@@ -21,11 +21,17 @@ internal class LogoAttributionComponent(
         systemBarInsets.observe { insets ->
             if (insets != null) {
                 val bottom = insets.bottom.toFloat()
+                val left = insets.left.toFloat()
+                val right = insets.right.toFloat()
                 mapView.logo.updateSettings {
                     marginBottom = bottom
+                    marginLeft = left
+                    marginRight = right
                 }
                 mapView.attribution.updateSettings {
                     marginBottom = bottom
+                    marginLeft = left
+                    marginRight = right
                 }
             }
         }
