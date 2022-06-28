@@ -11,9 +11,11 @@ import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RouteRefresh
 import com.mapbox.navigation.testing.add
 import com.mapbox.navigation.testing.factories.createCoordinatesList
+import com.mapbox.navigation.testing.factories.createDirectionsResponse
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createIncident
 import com.mapbox.navigation.testing.factories.createNavigationRoute
+import com.mapbox.navigation.testing.factories.createNavigationRoutes
 import com.mapbox.navigation.testing.factories.createRouteLeg
 import com.mapbox.navigation.testing.factories.createRouteLegAnnotation
 import com.mapbox.navigation.testing.factories.createRouteOptions
@@ -68,11 +70,11 @@ class RouteRefreshControllerTest {
     @Test
     fun `route refreshes`() = runBlockingTest {
         val (initialRoute, refreshedRoute) = createTestInitialAndRefreshedTestRoutes()
-        val directionsSession = mockk<DirectionsSession>().apply {
-            onRefresh { _, _, _, callback -> callback.onRefreshReady(refreshedRoute) }
+        val routeRefreshStub = RouteRefreshStub().apply {
+            setRefreshedRoute(refreshedRoute)
         }
         val routeRefreshController = createRouteRefreshController(
-            routeRefresh = directionsSession,
+            routeRefresh = routeRefreshStub,
             routeRefreshOptions = RouteRefreshOptions.Builder()
                 .intervalMillis(30_000)
                 .build(),
@@ -82,22 +84,22 @@ class RouteRefreshControllerTest {
         advanceTimeBy(TimeUnit.SECONDS.toMillis(30))
 
         assertEquals(listOf(refreshedRoute), refreshJob.getCompletedTest())
-        verify(exactly = 1) { directionsSession.requestRouteRefresh(any(), any(), any()) }
-        verify(exactly = 0) { directionsSession.cancelRouteRefreshRequest(any()) }
     }
 
     @Test
     fun `should refresh route with any annotation`() = runBlockingTest {
-        val routeWithoutAnnotations = createTestTwoLegRoute(
-            firstLegAnnotations = null,
-            secondLegAnnotations = null
+        val routeWithoutAnnotations = createNavigationRoute(
+            createTestTwoLegRoute(
+                firstLegAnnotations = null,
+                secondLegAnnotations = null
+            )
         )
         val refreshedRoute = createNavigationRoute()
-        val directionsSession = mockk<DirectionsSession>().apply {
-            onRefresh { _, _, _, callback -> callback.onRefreshReady(refreshedRoute) }
+        val routeRefreshStub = RouteRefreshStub().apply {
+            setRefreshedRoute(refreshedRoute)
         }
         val routeRefreshController = createRouteRefreshController(
-            routeRefresh = directionsSession
+            routeRefresh = routeRefreshStub
         )
 
         val refreshedRouteDeferred =
@@ -105,20 +107,17 @@ class RouteRefreshControllerTest {
         advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
 
         assertEquals(listOf(refreshedRoute), refreshedRouteDeferred.getCompletedTest())
-        verify(exactly = 1) { directionsSession.requestRouteRefresh(any(), any(), any()) }
     }
 
     @Test
-    fun `should log warning when route is not supported`() = runBlockingTest {
-        val primaryRoute = createTestTwoLegRoute(requestUuid = null)
-        val directionsSession = mockk<DirectionsSession>()
+    fun `should log warning when the only route is not supported`() = runBlockingTest {
+        val primaryRoute = createNavigationRoute(createTestTwoLegRoute(requestUuid = null))
         val routeRefreshController = createRouteRefreshController()
 
         val refreshedDeferred = async { routeRefreshController.refresh(listOf(primaryRoute)) }
         advanceTimeBy(TimeUnit.HOURS.toMillis(6))
 
         assertTrue(refreshedDeferred.isActive)
-        verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
         verify(exactly = 1) {
             logger.logI(
                 withArg {
@@ -146,82 +145,158 @@ class RouteRefreshControllerTest {
 
     @Test
     fun `cancel request when stopped`() = runBlockingTest {
-        val directionsSession = mockk<DirectionsSession> {
+        val routeRefresh = mockk<RouteRefresh> {
             every { requestRouteRefresh(any(), any(), any()) } returns 8
             every { cancelRouteRefreshRequest(any()) } returns Unit
         }
         val routeRefreshController = createRouteRefreshController(
-            routeRefresh = directionsSession
+            routeRefresh = routeRefresh
         )
 
-        val refreshJob = async { routeRefreshController.refresh(listOf(createTestTwoLegRoute())) }
+        val refreshJob =
+            async {
+                routeRefreshController.refresh(
+                    listOf(
+                        createNavigationRoute(
+                            createTestTwoLegRoute()
+                        )
+                    )
+                )
+            }
         advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
         refreshJob.cancel()
 
-        verify(exactly = 1) { directionsSession.cancelRouteRefreshRequest(8) }
+        verify(exactly = 1) { routeRefresh.requestRouteRefresh(any(), any(), any()) }
+        verify(exactly = 1) { routeRefresh.cancelRouteRefreshRequest(8) }
     }
 
     @Test
     fun `do not send a request when uuid is empty`() = runBlockingTest {
-        val directionsSession = mockk<DirectionsSession>(relaxed = true)
+        val routeRefresh = mockk<RouteRefresh>(relaxed = true)
         val routeRefreshController = createRouteRefreshController(
-            routeRefresh = directionsSession
+            routeRefresh = routeRefresh
         )
-        val route = createTestTwoLegRoute(requestUuid = "")
+        val route = createNavigationRoute(createTestTwoLegRoute(requestUuid = ""))
 
         val refreshDeferred = launch { routeRefreshController.refresh(listOf(route)) }
         advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
 
         assertTrue(refreshDeferred.isActive)
-        verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
+        verify(exactly = 0) { routeRefresh.requestRouteRefresh(any(), any(), any()) }
         refreshDeferred.cancel()
     }
 
-    @Test(expected = IllegalArgumentException::class)
-    fun `refresh route without legs`() = runBlockingTest {
+    @Test
+    fun `clean up of a route without legs never returns`() = runBlockingTest {
         val initialRoute = createNavigationRoute(
             createDirectionsRoute(
                 legs = null,
                 createRouteOptions(enableRefresh = true)
             )
         )
-        val routeRefreshController = createRouteRefreshController()
+        val routeRefresh = RouteRefreshStub().apply {
+            failRouteRefresh(initialRoute.id)
+        }
+        val routeRefreshController = createRouteRefreshController(
+            routeRefresh = routeRefresh
+        )
 
-        routeRefreshController.refresh(listOf(initialRoute))
+        val result = async { routeRefreshController.refresh(listOf(initialRoute)) }
+        advanceTimeBy(TimeUnit.HOURS.toMillis(6))
+
+        assertTrue("route refresh has finished $result", result.isActive)
+        result.cancel()
+    }
+
+    @Test
+    fun `refresh alternative route without legs`() = runBlockingTest {
+        val initialRoutes = createNavigationRoutes(
+            createDirectionsResponse(
+                routes = listOf(
+                    createTestTwoLegRoute(requestUuid = "test1"),
+                    createTestTwoLegRoute(requestUuid = "test2")
+                        .toBuilder().legs(emptyList()).build()
+                )
+            )
+        )
+        val refreshedRoutes = createNavigationRoutes(
+            createDirectionsResponse(
+                routes = listOf(
+                    initialRoutes.first().directionsRoute,
+                    createTestTwoLegRoute(requestUuid = "test2")
+                )
+            )
+        )
+        val routeRefresh = RouteRefreshStub().apply {
+            setRefreshedRoute(refreshedRoutes[0])
+            setRefreshedRoute(refreshedRoutes[1])
+        }
+        val routeRefreshController = createRouteRefreshController(
+            routeRefresh = routeRefresh
+        )
+
+        val result = routeRefreshController.refresh(initialRoutes)
+
+        assertEquals(refreshedRoutes, result)
     }
 
     @Test
     fun `should log route diffs when there is a successful response`() =
         runBlockingTest {
-            val initialRoute = createTestTwoLegRoute(
-                firstLegAnnotations = createRouteLegAnnotation(
-                    congestion = listOf("moderate", "heavy"),
-                    congestionNumeric = listOf(50, 94)
-                ),
-            )
-            val refreshedRoute = createTestTwoLegRoute(
-                firstLegAnnotations = createRouteLegAnnotation(
-                    congestion = listOf("heavy", "heavy"),
-                    congestionNumeric = listOf(93, 94),
-                ),
-                firstLegIncidents = listOf(
-                    createIncident(id = "1")
+            val initialRoutes = createNavigationRoutes(
+                createDirectionsResponse(
+                    uuid = "test",
+                    routes = listOf(
+                        createTestTwoLegRoute(
+                            firstLegAnnotations = createRouteLegAnnotation(
+                                congestion = listOf("moderate", "heavy"),
+                                congestionNumeric = listOf(50, 94)
+                            ),
+                        ),
+                        createTestTwoLegRoute(
+                            firstLegAnnotations = createRouteLegAnnotation(
+                                congestion = listOf("moderate", "heavy"),
+                                congestionNumeric = listOf(50, 94)
+                            ),
+                        )
+                    )
                 )
             )
-            val directionsSession = mockk<DirectionsSession>().apply {
-                onRefresh { _, _, _, callback -> callback.onRefreshReady(refreshedRoute) }
+            val refreshedRoutes = createNavigationRoutes(
+                createDirectionsResponse(
+                    uuid = "test",
+                    routes = listOf(
+                        createTestTwoLegRoute(
+                            firstLegAnnotations = createRouteLegAnnotation(
+                                congestion = listOf("heavy", "heavy"),
+                                congestionNumeric = listOf(93, 94),
+                            ),
+                            firstLegIncidents = listOf(
+                                createIncident(id = "1")
+                            )
+                        ),
+                        createTestTwoLegRoute(
+                            firstLegAnnotations = createRouteLegAnnotation(
+                                congestion = listOf("moderate", "heavy"),
+                                congestionNumeric = listOf(50, 94)
+                            ),
+                        )
+                    )
+                )
+            )
+            val routeRefresh = RouteRefreshStub().apply {
+                setRefreshedRoute(refreshedRoutes[0])
+                setRefreshedRoute(refreshedRoutes[1])
             }
             val routeRefreshController = createRouteRefreshController(
-                routeRefresh = directionsSession,
+                routeRefresh = routeRefresh,
             )
 
-            val refreshJob = launch { routeRefreshController.refresh(listOf(initialRoute)) }
-            advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
+            routeRefreshController.refresh(initialRoutes)
 
-            assertTrue(refreshJob.isCompleted)
             verify {
                 logger.logI(
-                    "Updated congestion, congestionNumeric, incidents at leg 0",
+                    "Updated congestion, congestionNumeric, incidents at route test#0 leg 0",
                     RouteRefreshController.LOG_CATEGORY
                 )
             }
@@ -230,23 +305,38 @@ class RouteRefreshControllerTest {
     @Test
     fun `should log message when there is a successful response without route diffs`() =
         runBlockingTest {
-            val initialRoute = createTestTwoLegRoute()
-            val refreshedRoute = createTestTwoLegRoute()
-            val directionsSession = mockk<DirectionsSession>().onRefresh { _, _, _, callback ->
-                callback.onRefreshReady(refreshedRoute)
+            val initialRoutes = createNavigationRoutes(
+                createDirectionsResponse(
+                    routes = listOf(createTestTwoLegRoute()),
+                    uuid = "testNoDiff"
+                )
+            )
+            val refreshedRoutes = createNavigationRoutes(
+                createDirectionsResponse(
+                    routes = listOf(createTestTwoLegRoute()),
+                    uuid = "testNoDiff"
+                )
+            )
+            val routeRefreshStub = RouteRefreshStub().apply {
+                setRefreshedRoute(refreshedRoutes[0])
             }
-
             val routeRefreshController = createRouteRefreshController(
-                routeRefresh = directionsSession,
+                routeRefresh = routeRefreshStub,
             )
 
-            val refreshJob = launch { routeRefreshController.refresh(listOf(initialRoute)) }
+            val refreshJob = launch { routeRefreshController.refresh(initialRoutes) }
             advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
+            refreshJob.cancel()
 
             verify {
-                logger.logI("No changes to route annotations", RouteRefreshController.LOG_CATEGORY)
+                logger.logI(
+                    withArg {
+                        it.contains("no changes", ignoreCase = true) &&
+                            it.contains("testNoDiff#0")
+                    },
+                    RouteRefreshController.LOG_CATEGORY
+                )
             }
-            refreshJob.cancel()
         }
 
     @Test
@@ -260,45 +350,45 @@ class RouteRefreshControllerTest {
                 minute = 30,
                 second = 0
             )
-            val primaryRoute = createTestTwoLegRoute(
-                firstLegIncidents = listOf(
-                    createIncident(
-                        id = "1",
-                        endTime = "2022-05-22T14:00:00Z",
+            val primaryRoute = createNavigationRoute(
+                createTestTwoLegRoute(
+                    firstLegIncidents = listOf(
+                        createIncident(
+                            id = "1",
+                            endTime = "2022-05-22T14:00:00Z",
+                        ),
+                        createIncident(
+                            id = "2",
+                            endTime = "2022-05-22T12:00:00Z", // expired
+                        ),
+                        createIncident(
+                            id = "3",
+                            endTime = "2022-05-22T12:00:00-01",
+                        ),
+                        createIncident(
+                            id = "4",
+                            endTime = null,
+                        )
                     ),
-                    createIncident(
-                        id = "2",
-                        endTime = "2022-05-22T12:00:00Z", // expired
-                    ),
-                    createIncident(
-                        id = "3",
-                        endTime = "2022-05-22T12:00:00-01",
-                    ),
-                    createIncident(
-                        id = "4",
-                        endTime = null,
-                    )
-                ),
-                secondLegIncidents = listOf(
-                    createIncident(
-                        id = "5",
-                        endTime = "2022-05-23T10:00:00Z",
-                    ),
-                    createIncident(
-                        id = "6",
-                        endTime = "2022-05-22T12:29:00Z", // expired
-                    ),
-                    createIncident(
-                        id = "7",
-                        endTime = "wrong date format",
+                    secondLegIncidents = listOf(
+                        createIncident(
+                            id = "5",
+                            endTime = "2022-05-23T10:00:00Z",
+                        ),
+                        createIncident(
+                            id = "6",
+                            endTime = "2022-05-22T12:29:00Z", // expired
+                        ),
+                        createIncident(
+                            id = "7",
+                            endTime = "wrong date format",
+                        )
                     )
                 )
             )
-            val directionsSession = mockk<DirectionsSession>()
-                .onRefresh { _, _, _, callback ->
-                    callback.onFailure(RouterFactory.buildNavigationRouterRefreshError())
-                }
-
+            val routeRefreshStub = RouteRefreshStub().apply {
+                failRouteRefresh(primaryRoute.id)
+            }
             val routeRefreshOptions = RouteRefreshOptions.Builder()
                 .intervalMillis(30_000)
                 .build()
@@ -306,7 +396,7 @@ class RouteRefreshControllerTest {
                 routeRefreshOptions = routeRefreshOptions,
                 currentLegIndexProvider = { 0 },
                 localDateProvider = { currentTime },
-                routeRefresh = directionsSession,
+                routeRefresh = routeRefreshStub,
             )
             // act
             val refreshedRoutesDeffer = async {
@@ -332,14 +422,14 @@ class RouteRefreshControllerTest {
     @Test
     fun `after invalidation route isn't updated until successful refresh`() =
         runBlockingTest {
-            val initialRoute = createTestTwoLegRoute()
-            val directionsSession = mockk<DirectionsSession>().onRefresh { _, _, _, callback ->
-                callback.onFailure(RouterFactory.buildNavigationRouterRefreshError())
+            val initialRoute = createNavigationRoute(createTestTwoLegRoute())
+            val routeRefreshStub = RouteRefreshStub().apply {
+                failRouteRefresh(initialRoute.id)
             }
             val routeRefreshOptions = RouteRefreshOptions.Builder().build()
             val routeRefreshController = createRouteRefreshController(
                 routeRefreshOptions = routeRefreshOptions,
-                routeRefresh = directionsSession
+                routeRefresh = routeRefreshStub
             )
             val invalidatedRouteDeffer = async {
                 routeRefreshController.refresh(listOf(initialRoute))
@@ -356,9 +446,7 @@ class RouteRefreshControllerTest {
                 expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis) * 100
             )
             assertFalse(refreshedRoute.isCompleted)
-            directionsSession.onRefresh { _, _, _, callback ->
-                callback.onRefreshReady(initialRoute)
-            }
+            routeRefreshStub.setRefreshedRoute(initialRoute)
             advanceTimeBy(routeRefreshOptions.intervalMillis)
             // assert
             assertEquals(listOf(initialRoute), refreshedRoute.getCompletedTest())
@@ -375,21 +463,23 @@ class RouteRefreshControllerTest {
                 minute = 0,
                 second = 0
             )
-            val initialRoute = createTestTwoLegRoute(
-                firstLegIncidents = listOf(
-                    createIncident(
-                        id = "1",
-                        endTime = "2022-05-22T12:00:00Z" // expires in 3 hours
+            val initialRoute = createNavigationRoute(
+                createTestTwoLegRoute(
+                    firstLegIncidents = listOf(
+                        createIncident(
+                            id = "1",
+                            endTime = "2022-05-22T12:00:00Z" // expires in 3 hours
+                        )
                     )
                 )
             )
-            val directionsSession = mockk<DirectionsSession>().onRefresh { _, _, _, callback ->
-                callback.onFailure(RouterFactory.buildNavigationRouterRefreshError())
+            val routeRefreshStub = RouteRefreshStub().apply {
+                failRouteRefresh(initialRoute.id)
             }
             val routeRefreshOptions = RouteRefreshOptions.Builder().build()
             val routeRefreshController = createRouteRefreshController(
                 routeRefreshOptions = routeRefreshOptions,
-                routeRefresh = directionsSession,
+                routeRefresh = routeRefreshStub,
                 localDateProvider = { currentTime }
             )
             val invalidatedRouteDeffer = async {
@@ -429,27 +519,30 @@ class RouteRefreshControllerTest {
                 minute = 0,
                 second = 0
             )
-            val currentRoute = createTestTwoLegRoute(
-                firstLegIncidents = listOf(
-                    createIncident(
-                        id = "1",
-                        endTime = "2022-05-22T09:00:00Z",
+            val currentRoute = createNavigationRoute(
+                createTestTwoLegRoute(
+                    firstLegIncidents = listOf(
+                        createIncident(
+                            id = "1",
+                            endTime = "2022-05-22T09:00:00Z",
+                        ),
                     ),
-                ),
-                secondLegIncidents = listOf(
-                    createIncident(
-                        id = "2",
-                        endTime = "2022-05-22T09:59:00Z"
-                    ),
-                    createIncident(
-                        id = "3",
-                        endTime = "2022-05-22T10:00:01Z"
-                    ),
+                    secondLegIncidents = listOf(
+                        createIncident(
+                            id = "2",
+                            endTime = "2022-05-22T09:59:00Z"
+                        ),
+                        createIncident(
+                            id = "3",
+                            endTime = "2022-05-22T10:00:01Z"
+                        ),
+                    )
                 )
             )
             val currentLegIndexProvider = { 1 }
-            val directionsSession = mockk<DirectionsSession>(relaxed = true)
-                .onRefresh { _, _, _, _ -> }
+            val routeRefreshStub = RouteRefreshStub().apply {
+                doNotRespondForRouteRefresh(currentRoute.id)
+            }
             val routeRefreshOptions = RouteRefreshOptions.Builder()
                 .intervalMillis(30_000L)
                 .build()
@@ -458,17 +551,16 @@ class RouteRefreshControllerTest {
                 routeDiffProvider = DirectionsRouteDiffProvider(),
                 currentLegIndexProvider = currentLegIndexProvider,
                 localDateProvider = { currentTime },
-                routeRefresh = directionsSession
+                routeRefresh = routeRefreshStub
             )
             // act
             val refreshedRoutesDeferred = async {
                 routeRefreshController.refresh(listOf(currentRoute))
             }
-            // in case of timeout controller will wait for the third response, so congestion will be
-            // invalidated after 4X refresh intervals
             advanceTimeBy(
-                expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis) +
+                expectedTimeToInvalidateCongestionsInCaseOfTimeout(
                     routeRefreshOptions.intervalMillis
+                )
             )
             // assert
             val refreshedRoute = refreshedRoutesDeferred.getCompletedTest().first()
@@ -492,16 +584,20 @@ class RouteRefreshControllerTest {
     @Test
     fun `route successfully refreshes on time if first try doesn't respond`() =
         runBlockingTest {
-            val initialRoute = createTestTwoLegRoute(
-                firstLegAnnotations = createRouteLegAnnotation(
-                    congestion = listOf("severe", "moderate"),
-                    congestionNumeric = listOf(90, 50),
+            val initialRoute = createNavigationRoute(
+                createTestTwoLegRoute(
+                    firstLegAnnotations = createRouteLegAnnotation(
+                        congestion = listOf("severe", "moderate"),
+                        congestionNumeric = listOf(90, 50),
+                    )
                 )
             )
-            val refreshed = createTestTwoLegRoute(
-                firstLegAnnotations = createRouteLegAnnotation(
-                    congestion = listOf("severe", "severe"),
-                    congestionNumeric = listOf(90, 90),
+            val refreshed = createNavigationRoute(
+                createTestTwoLegRoute(
+                    firstLegAnnotations = createRouteLegAnnotation(
+                        congestion = listOf("severe", "severe"),
+                        congestionNumeric = listOf(90, 90),
+                    )
                 )
             )
             var currentRoute = initialRoute
@@ -531,16 +627,20 @@ class RouteRefreshControllerTest {
     @Test
     fun `route successfully refreshes on time if first try failed`() =
         runBlockingTest {
-            val initialRoute = createTestTwoLegRoute(
-                firstLegAnnotations = createRouteLegAnnotation(
-                    congestion = listOf("severe", "moderate"),
-                    congestionNumeric = listOf(90, 50),
+            val initialRoute = createNavigationRoute(
+                createTestTwoLegRoute(
+                    firstLegAnnotations = createRouteLegAnnotation(
+                        congestion = listOf("severe", "moderate"),
+                        congestionNumeric = listOf(90, 50),
+                    )
                 )
             )
-            val refreshed = createTestTwoLegRoute(
-                firstLegAnnotations = createRouteLegAnnotation(
-                    congestion = listOf("severe", "severe"),
-                    congestionNumeric = listOf(90, 90),
+            val refreshed = createNavigationRoute(
+                createTestTwoLegRoute(
+                    firstLegAnnotations = createRouteLegAnnotation(
+                        congestion = listOf("severe", "severe"),
+                        congestionNumeric = listOf(90, 90),
+                    )
                 )
             )
             var currentRoute = initialRoute
@@ -570,9 +670,396 @@ class RouteRefreshControllerTest {
             assertEquals(listOf(refreshed), refreshedDeferred.getCompletedTest())
         }
 
+    @Test
+    fun `successful refresh of two routes`() = runBlockingTest {
+        val initialRoutes = createNavigationRoutes(
+            createDirectionsResponse(
+                routes = listOf(
+                    createTestTwoLegRoute(
+                        firstLegAnnotations = createRouteLegAnnotation(
+                            congestion = listOf("severe", "moderate"),
+                            congestionNumeric = listOf(90, 50),
+                        )
+                    ),
+                    createTestTwoLegRoute(
+                        firstLegAnnotations = createRouteLegAnnotation(
+                            congestion = listOf("severe", "moderate"),
+                            congestionNumeric = listOf(90, 50),
+                        )
+                    )
+                )
+            )
+        )
+        val refreshedRoutes = createNavigationRoutes(
+            createDirectionsResponse(
+                routes = listOf(
+                    createTestTwoLegRoute(
+                        firstLegAnnotations = createRouteLegAnnotation(
+                            congestion = listOf("severe", "severe"),
+                            congestionNumeric = listOf(90, 90),
+                        )
+                    ),
+                    createTestTwoLegRoute(
+                        firstLegAnnotations = createRouteLegAnnotation(
+                            congestion = listOf("severe", "severe"),
+                            congestionNumeric = listOf(90, 90),
+                        )
+                    )
+                )
+            )
+        )
+        val routeRefreshStub = RouteRefreshStub().apply {
+            setRefreshedRoute(refreshedRoutes[0])
+            setRefreshedRoute(refreshedRoutes[1])
+        }
+        val refreshOptions = RouteRefreshOptions.Builder().build()
+        val routeRefreshController = createRouteRefreshController(
+            routeRefresh = routeRefreshStub,
+            routeRefreshOptions = refreshOptions
+        )
+
+        val refreshedRoutesDeferred = async {
+            routeRefreshController.refresh(initialRoutes)
+        }
+        advanceTimeBy(refreshOptions.intervalMillis)
+
+        val result = refreshedRoutesDeferred.getCompletedTest()
+
+        assertEquals(
+            refreshedRoutes,
+            result
+        )
+    }
+
+    @Test
+    fun `primary route refresh failed, alternative route refreshed successfully`() =
+        runBlockingTest {
+            val initialRoutes = createNavigationRoutes(
+                createDirectionsResponse(
+                    routes = listOf(
+                        createTestTwoLegRoute(
+                            firstLegAnnotations = createRouteLegAnnotation(
+                                congestion = listOf("severe", "moderate"),
+                                congestionNumeric = listOf(90, 50),
+                            )
+                        ),
+                        createTestTwoLegRoute(
+                            firstLegAnnotations = createRouteLegAnnotation(
+                                congestion = listOf("severe", "moderate"),
+                                congestionNumeric = listOf(90, 50),
+                            )
+                        )
+                    )
+                )
+            )
+            val expectedRefreshedRoutes = createNavigationRoutes(
+                createDirectionsResponse(
+                    routes = listOf(
+                        initialRoutes[0].directionsRoute,
+                        createTestTwoLegRoute(
+                            firstLegAnnotations = createRouteLegAnnotation(
+                                congestion = listOf("severe", "severe"),
+                                congestionNumeric = listOf(90, 90),
+                            )
+                        )
+                    )
+                )
+            )
+            val routeRefreshStub = RouteRefreshStub().apply {
+                failRouteRefresh(expectedRefreshedRoutes[0].id)
+                setRefreshedRoute(expectedRefreshedRoutes[1])
+            }
+            val refreshOptions = RouteRefreshOptions.Builder().build()
+            val routeRefreshController = createRouteRefreshController(
+                routeRefresh = routeRefreshStub,
+                routeRefreshOptions = refreshOptions
+            )
+
+            val refreshedRoutesDeferred = async {
+                routeRefreshController.refresh(initialRoutes)
+            }
+            advanceTimeBy(refreshOptions.intervalMillis)
+            val result = refreshedRoutesDeferred.getCompletedTest()
+
+            assertEquals(
+                expectedRefreshedRoutes,
+                result
+            )
+        }
+
+    @Test
+    fun `routes won't refresh until one of them(second) changes`() = runBlockingTest {
+        val routeRefreshStub = RouteRefreshStub()
+        val initialRoutes = createNavigationRoutes(
+            createDirectionsResponse(
+                routes = listOf(
+                    createTestTwoLegRoute(
+                        firstLegAnnotations = createRouteLegAnnotation(
+                            congestion = listOf("severe", "moderate"),
+                            congestionNumeric = listOf(90, 50),
+                        )
+                    ),
+                    createTestTwoLegRoute(
+                        firstLegAnnotations = createRouteLegAnnotation(
+                            congestion = listOf("severe", "moderate"),
+                            congestionNumeric = listOf(90, 50),
+                        )
+                    )
+                )
+            )
+        )
+        val refreshedRoutes = createNavigationRoutes(
+            createDirectionsResponse(
+                routes = listOf(
+                    initialRoutes[0].directionsRoute,
+                    createTestTwoLegRoute(
+                        firstLegAnnotations = createRouteLegAnnotation(
+                            congestion = listOf("severe", "severe"),
+                            congestionNumeric = listOf(90, 90),
+                        )
+                    )
+                )
+            )
+        )
+        val refreshOptions = RouteRefreshOptions.Builder().build()
+        val routeRefreshController = createRouteRefreshController(
+            routeRefresh = routeRefreshStub,
+            routeRefreshOptions = refreshOptions
+        )
+
+        val refreshedRoutesDeferred = async {
+            routeRefreshController.refresh(initialRoutes)
+        }
+        routeRefreshStub.setRefreshedRoute(initialRoutes[0])
+        routeRefreshStub.setRefreshedRoute(initialRoutes[1])
+        advanceTimeBy(TimeUnit.HOURS.toMillis(7))
+        assertFalse(refreshedRoutesDeferred.isCompleted)
+        routeRefreshStub.setRefreshedRoute(refreshedRoutes[1])
+        advanceTimeBy(refreshOptions.intervalMillis)
+
+        val result = refreshedRoutesDeferred.getCompletedTest()
+
+        assertEquals(
+            refreshedRoutes,
+            result
+        )
+    }
+
+    @Test
+    fun `should updated primary and log warning when only alternative route is not supported`() =
+        runBlockingTest {
+            val primaryRoute = createNavigationRoute(createTestTwoLegRoute(requestUuid = "testid"))
+            val alternativeRoute = createNavigationRoute(createTestTwoLegRoute(requestUuid = null))
+            val updatedPrimary = createNavigationRoute(
+                createTestTwoLegRoute(
+                    requestUuid = "testid",
+                    firstLegAnnotations = createRouteLegAnnotation(
+                        congestion = listOf("severe", "severe"),
+                        congestionNumeric = listOf(95, 93),
+                    )
+                )
+            )
+            val routeRefresh = RouteRefreshStub().apply {
+                setRefreshedRoute(updatedPrimary)
+            }
+            val refreshOptions = RouteRefreshOptions.Builder().build()
+            val routeRefreshController = createRouteRefreshController(
+                routeRefresh = routeRefresh,
+                routeRefreshOptions = refreshOptions
+            )
+
+            val refreshedDeferred = async {
+                routeRefreshController.refresh(listOf(primaryRoute, alternativeRoute))
+            }
+            advanceTimeBy(refreshOptions.intervalMillis)
+            val result = refreshedDeferred.getCompletedTest()
+
+            assertEquals(
+                listOf(updatedPrimary, alternativeRoute),
+                result
+            )
+            verify(exactly = 1) {
+                logger.logI(
+                    withArg {
+                        assertTrue(
+                            "message doesn't mention the reason of failure - empty uuid: $it",
+                            it.contains("uuid", ignoreCase = true)
+                        )
+                        assertTrue(
+                            "message doesn't mention the route index",
+                            it.contains("0", ignoreCase = true)
+                        )
+                    },
+                    any()
+                )
+            }
+        }
+
+    @Test
+    fun `no refreshes when all routes disable refresh`() = runBlockingTest {
+        val routes = createNavigationRoutes(
+            createDirectionsResponse(
+                routes = listOf(
+                    createDirectionsRoute(
+                        routeOptions = createRouteOptions(enableRefresh = false)
+                    ),
+                    createDirectionsRoute(
+                        routeOptions = createRouteOptions(enableRefresh = false)
+                    ),
+                )
+            )
+        )
+        val routeRefresh = RouteRefreshStub()
+        val routeRefreshController = createRouteRefreshController(
+            routeRefresh = routeRefresh
+        )
+
+        val refreshedDeferred = async { routeRefreshController.refresh(routes) }
+        advanceTimeBy(TimeUnit.HOURS.toMillis(8))
+        assertFalse(refreshedDeferred.isCompleted)
+        refreshedDeferred.cancel()
+        verify(exactly = 1) {
+            logger.logI(
+                withArg {
+                    assertTrue(
+                        "message doesn't mention the reason of failure - enableRefresh=false: $it",
+                        it.contains("enableRefresh", ignoreCase = true)
+                    )
+                    assertTrue(
+                        "message doesn't mention the route index",
+                        it.contains("0", ignoreCase = true)
+                    )
+                },
+                any()
+            )
+            logger.logI(
+                withArg {
+                    assertTrue(
+                        "message doesn't mention the reason of failure - enableRefresh=false: $it",
+                        it.contains("enableRefresh", ignoreCase = true)
+                    )
+                    assertTrue(
+                        "message doesn't mention the route index",
+                        it.contains("1", ignoreCase = true)
+                    )
+                },
+                any()
+            )
+        }
+    }
+
+    @Test
+    fun `traffic annotations are cleaned up if all routes refresh fails`() =
+        runBlockingTest {
+            val initialRoutes = createNavigationRoutes(
+                createDirectionsResponse(
+                    routes = listOf(
+                        createTestTwoLegRoute(),
+                        createTestTwoLegRoute()
+                    )
+                )
+            )
+            val routeRefresh = RouteRefreshStub().apply {
+                failRouteRefresh(initialRoutes[0].id)
+                failRouteRefresh(initialRoutes[1].id)
+            }
+            val currentLegIndexProvider = { 1 }
+            val routeRefreshOptions = RouteRefreshOptions.Builder().build()
+            val routeRefreshController = createRouteRefreshController(
+                routeRefreshOptions = routeRefreshOptions,
+                routeDiffProvider = DirectionsRouteDiffProvider(),
+                currentLegIndexProvider = currentLegIndexProvider,
+                routeRefresh = routeRefresh
+            )
+            // act
+            val refreshedRoutesDeferred = async {
+                routeRefreshController.refresh(initialRoutes)
+            }
+            advanceTimeBy(
+                expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis)
+            )
+            // assert
+            val refreshedRoutes = refreshedRoutesDeferred.getCompletedTest()
+            refreshedRoutes[0].assertCongestionExpiredForLeg(1)
+            refreshedRoutes[1].assertCongestionExpiredForLeg(1)
+        }
+
+    @Test
+    fun `if route refresh works only for one route, the controller updates only one route`() =
+        runBlockingTest {
+            val currentTime = utcToLocalTime(
+                year = 2022,
+                month = Month.MAY,
+                date = 22,
+                hourOfDay = 12,
+                minute = 30,
+                second = 0
+            )
+            val routeRefreshStub = RouteRefreshStub()
+            val initialRoutes = createNavigationRoutes(
+                createDirectionsResponse(
+                    routes = listOf(
+                        createTestTwoLegRoute(),
+                        createTestTwoLegRoute(
+                            secondLegIncidents = listOf(
+                                createIncident(
+                                    id = "1",
+                                    endTime = "2022-05-21T14:00:00Z", // expired
+                                ),
+                                createIncident(
+                                    id = "2",
+                                    endTime = "2022-05-22T14:00:00Z",
+                                ),
+                            )
+                        )
+                    )
+                )
+            )
+            val refreshedRoutes = createNavigationRoutes(
+                createDirectionsResponse(
+                    routes = listOf(
+                        createTestTwoLegRoute(
+                            firstLegAnnotations = createRouteLegAnnotation(
+                                congestion = listOf("severe", "severe"),
+                                congestionNumeric = listOf(90, 99),
+                            )
+                        ),
+                        createTestTwoLegRoute()
+                    )
+                )
+            )
+            routeRefreshStub.setRefreshedRoute(refreshedRoutes[0])
+            routeRefreshStub.doNotRespondForRouteRefresh(refreshedRoutes[1].id)
+            val refreshOptions = RouteRefreshOptions.Builder().build()
+            val routeRefreshController = createRouteRefreshController(
+                routeRefresh = routeRefreshStub,
+                routeRefreshOptions = refreshOptions,
+                localDateProvider = { currentTime },
+                currentLegIndexProvider = { 1 }
+            )
+
+            val refreshedRoutesDeferred = async {
+                routeRefreshController.refresh(initialRoutes)
+            }
+            advanceTimeBy(
+                expectedTimeToInvalidateCongestionsInCaseOfTimeout(refreshOptions.intervalMillis)
+            )
+
+            val result = refreshedRoutesDeferred.getCompletedTest()
+
+            assertEquals(
+                refreshedRoutes[0],
+                result[0]
+            )
+            assertEquals(
+                initialRoutes[1], // no cleanup happens
+                result[1]
+            )
+        }
+
     private fun createRouteRefreshController(
         routeRefreshOptions: RouteRefreshOptions = RouteRefreshOptions.Builder().build(),
-        routeRefresh: RouteRefresh = mockk(),
+        routeRefresh: RouteRefresh = RouteRefreshStub(),
         currentLegIndexProvider: () -> Int = { 0 },
         routeDiffProvider: DirectionsRouteDiffProvider = DirectionsRouteDiffProvider(),
         localDateProvider: () -> Date = { Date(1653493148247) }
@@ -599,7 +1086,7 @@ private fun createTestTwoLegRoute(
         distance = listOf(28.0, 29.0)
     ),
     requestUuid: String? = "testUUID"
-) = createNavigationRoute(
+) =
     createDirectionsRoute(
         legs = listOf(
             createRouteLeg(
@@ -617,7 +1104,6 @@ private fun createTestTwoLegRoute(
         ),
         requestUuid = requestUuid
     )
-)
 
 private fun NavigationRoute.assertCongestionExpiredForLeg(legIndex: Int) {
     val legToCheck = this.directionsRoute.legs()!![legIndex].annotation()!!
@@ -652,18 +1138,27 @@ private fun DirectionsSession.onRefresh(
 
 private fun expectedTimeToInvalidateCongestions(refreshInterval: Long): Long = refreshInterval * 3
 
+// in case of timeout controller will wait for the one more response
+private fun expectedTimeToInvalidateCongestionsInCaseOfTimeout(refreshInterval: Long) =
+    expectedTimeToInvalidateCongestions(refreshInterval) +
+        refreshInterval
+
 private fun createTestInitialAndRefreshedTestRoutes(): Pair<NavigationRoute, NavigationRoute> =
     Pair(
-        createTestTwoLegRoute(
-            firstLegAnnotations = createRouteLegAnnotation(
-                congestion = listOf("moderate", "heavy"),
-                congestionNumeric = listOf(50, 94),
-            ),
+        createNavigationRoute(
+            createTestTwoLegRoute(
+                firstLegAnnotations = createRouteLegAnnotation(
+                    congestion = listOf("moderate", "heavy"),
+                    congestionNumeric = listOf(50, 94),
+                ),
+            )
         ),
-        createTestTwoLegRoute(
-            firstLegAnnotations = createRouteLegAnnotation(
-                congestion = listOf("heavy", "heavy"),
-                congestionNumeric = listOf(93, 94),
+        createNavigationRoute(
+            createTestTwoLegRoute(
+                firstLegAnnotations = createRouteLegAnnotation(
+                    congestion = listOf("heavy", "heavy"),
+                    congestionNumeric = listOf(93, 94),
+                )
             )
         )
     )

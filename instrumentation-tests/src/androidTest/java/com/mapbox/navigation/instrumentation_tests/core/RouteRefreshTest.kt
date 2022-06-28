@@ -1,17 +1,15 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
-import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
@@ -20,6 +18,7 @@ import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.requestRoutes
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.roadObjectsOnRoute
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routesUpdates
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
@@ -29,18 +28,16 @@ import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefr
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockRoutingTileEndpointErrorRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.idling.IdlingPolicyTimeoutRule
-import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
-import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteRequestIdlingResource
-import com.mapbox.navigation.instrumentation_tests.utils.idling.RoutesObserverIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
-import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
@@ -49,15 +46,10 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.net.URI
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
 
 class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
-
-    private companion object {
-        private const val LOG_CATEGORY = "RouteRefreshTest"
-    }
 
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
@@ -110,98 +102,73 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     }
 
     @Test
-    fun expect_route_refresh_to_update_traffic_annotations_and_incidents() {
-        // Request a route.
-        val routes = requestDirectionsRouteSync(coordinates).reversed()
+    fun expect_route_refresh_to_update_traffic_annotations_and_incidents_for_all_routes() =
+        sdkTest {
+            val routeOptions = generateRouteOptions(coordinates)
+            val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+                .reversed()
 
-        // Create an observer resource that captures the routes.
-        val initialRouteIdlingResource = RoutesObserverIdlingResource(mapboxNavigation)
-            .register()
-
-        // Set navigation with the route.
-        runOnMainSync {
-            mapboxNavigation.setRoutes(routes)
+            mapboxNavigation.setNavigationRoutes(requestedRoutes)
             mapboxNavigation.startTripSession()
-            mockLocationReplayerRule.loopUpdate(
-                mockLocationUpdatesRule.generateLocationUpdate {
-                    latitude = coordinates[0].latitude()
-                    longitude = coordinates[0].longitude()
-                    bearing = 190f
-                },
-                times = 60
-            )
-            mapboxNavigation.registerRouteProgressObserver { routeProgress ->
-                logD(
-                    "progress state: ${routeProgress.currentState}",
-                    LOG_CATEGORY
-                )
-                logD(
-                    "progress duration remaining: ${routeProgress.durationRemaining}",
-                    LOG_CATEGORY
-                )
-            }
-        }
+            stayOnInitialPosition()
+            val routeUpdates = mapboxNavigation.routesUpdates()
+                .take(2)
+                .map { it.navigationRoutes }
+                .toList()
+            val initialRoutes = routeUpdates[0]
+            val refreshedRoutes = routeUpdates[1]
 
-        // Wait for the initial route.
-        val initialRoutes = initialRouteIdlingResource.next()
-
-        // Wait for the route refresh.
-        val refreshedRoutes = initialRouteIdlingResource.next()
-        initialRouteIdlingResource.unregister()
-
-        val progressIdlingResource = RouteProgressStateIdlingResource(
-            mapboxNavigation,
-            RouteProgressState.TRACKING
-        )
-        progressIdlingResource.register()
-        Espresso.onIdle()
-        progressIdlingResource.unregister()
-
-        val latch = CountDownLatch(2)
-        runOnMainSync {
-            mapboxNavigation.registerRouteProgressObserver { routeProgress ->
-                if (isRefreshedRouteDistance(routeProgress)) {
-                    latch.countDown()
+            mapboxNavigation.routeProgressUpdates()
+                .filter { routeProgress -> isRefreshedRouteDistance(routeProgress) }
+                .first()
+            mapboxNavigation.roadObjectsOnRoute()
+                .filter { upcomingRoadObjects ->
+                    upcomingRoadObjects.size == 2 &&
+                        upcomingRoadObjects.map { it.roadObject.id }
+                            .containsAll(listOf("11589180127444257", "14158569638505033"))
                 }
-            }
-            mapboxNavigation.registerRoadObjectsOnRouteObserver { upcomingRoadObjects ->
-                // upcoming road's objects mut be exact 2 with following ids
-                if (upcomingRoadObjects.size == 2 &&
-                    upcomingRoadObjects.map { it.roadObject.id }
-                        .containsAll(listOf("11589180127444257", "14158569638505033"))
-                ) {
-                    latch.countDown()
-                }
-            }
-        }
-        if (!latch.await(10, TimeUnit.SECONDS)) {
-            throw AssertionError(
-                """progress duration remaining or upcoming road objects weren't  
-                    refreshed by native navigator
-                """.trimMargin()
+                .first()
+
+            assertEquals(
+                "the test works only with 2 routes",
+                2,
+                requestedRoutes.size
             )
+            assertEquals(
+                listOf("11589180127444257"),
+                initialRoutes[0].getIncidentsIdFromTheRoute(0)
+            )
+            assertEquals(
+                listOf("11589180127444257", "14158569638505033").sorted(),
+                refreshedRoutes[0].getIncidentsIdFromTheRoute(0)?.sorted()
+            )
+            assertEquals(
+                listOf("11589180127444257"),
+                initialRoutes[1].getIncidentsIdFromTheRoute(0)
+            )
+            assertEquals(
+                listOf("11589180127444257", "14158569638505033").sorted(),
+                refreshedRoutes[1].getIncidentsIdFromTheRoute(0)?.sorted()
+            )
+
+            assertEquals(
+                "initial should be the same as requested",
+                requestedRoutes[0].getDurationAnnotationsFromLeg(0),
+                initialRoutes[0].getDurationAnnotationsFromLeg(0)
+            )
+            assertEquals(227.918, initialRoutes[0].getDurationOfLeg(0), 0.0001)
+            assertEquals(1189.651, refreshedRoutes[0].getDurationOfLeg(0), 0.0001)
+
+            assertEquals(
+                requestedRoutes[1].getDurationOfLeg(0),
+                initialRoutes[1].getDurationOfLeg(0),
+                0.0
+            )
+            assertEquals(224.2239, initialRoutes[1].getDurationOfLeg(0), 0.0001)
+            assertEquals(1189.651, refreshedRoutes[1].getDurationOfLeg(0), 0.0001)
         }
-
-        // Only the annotations AND incidents are refreshed. So sum up the duration from the old and new.
-        val sanityLeg = routes.first().legs()!!
-        val sanityDuration = sanityLeg.first().annotation()?.duration()?.sum()!!
-        val initialLeg = initialRoutes.first().legs()?.first()!!
-        val initialDuration = initialLeg.annotation()?.duration()?.sum()!!
-        val refreshedLeg = refreshedRoutes.first().legs()?.first()!!
-        val refreshedDuration = refreshedLeg.annotation()?.duration()?.sum()!!
-
-        assertEquals(1, initialLeg.incidents()!!.size)
-        assertEquals("11589180127444257", initialLeg.incidents()!!.first().id())
-        assertEquals(2, refreshedLeg.incidents()!!.size)
-        assertTrue(
-            refreshedLeg.incidents()!!.map { it.id() }
-                .containsAll(listOf("11589180127444257", "14158569638505033"))
-        )
-
-        assertEquals(sanityDuration, initialDuration, 0.0)
-        assertEquals(227.918, initialDuration, 0.0001)
-        assertEquals(1189.651, refreshedDuration, 0.0001)
-    }
 
     @Test
     fun routeRefreshesWorksAfterSettingsNewRoutes() = sdkTest {
@@ -321,12 +288,6 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         )
     }
 
-    private fun requestDirectionsRouteSync(coordinates: List<Point>): List<DirectionsRoute> {
-        val routeOptions = generateRouteOptions(coordinates)
-        val routeRequestIdlingResource = RouteRequestIdlingResource(mapboxNavigation, routeOptions)
-        return routeRequestIdlingResource.requestRoutesSync()
-    }
-
     private fun generateRouteOptions(coordinates: List<Point>): RouteOptions {
         return RouteOptions.builder().applyDefaultNavigationOptions()
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
@@ -336,3 +297,17 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             .build()
     }
 }
+
+private fun NavigationRoute.getDurationOfLeg(legIndex: Int): Double =
+    getDurationAnnotationsFromLeg(legIndex)
+        ?.sum()!!
+
+private fun NavigationRoute.getDurationAnnotationsFromLeg(legIndex: Int): List<Double>? =
+    directionsRoute.legs()?.get(legIndex)
+        ?.annotation()
+        ?.duration()
+
+private fun NavigationRoute.getIncidentsIdFromTheRoute(legIndex: Int): List<String>? =
+    directionsRoute.legs()?.get(legIndex)
+        ?.incidents()
+        ?.map { it.id() }

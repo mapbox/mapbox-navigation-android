@@ -37,10 +37,10 @@ class DirectionsRouteDiffProviderTest {
         assertEquals(
             routeDiffProvider.buildRouteDiffs(oldRoute, newRoute, currentLegIndex = 1),
             listOf(
-                "Updated distance, duration, speed, congestion at leg 1",
-                "Updated duration, speed, maxSpeed, congestion at leg 3",
-                "Updated distance, maxSpeed, congestionNumeric at leg 4",
-                "Updated incidents at leg 5",
+                "Updated distance, duration, speed, congestion at route testDiff#0 leg 1",
+                "Updated duration, speed, maxSpeed, congestion at route testDiff#0 leg 3",
+                "Updated distance, maxSpeed, congestionNumeric at route testDiff#0 leg 4",
+                "Updated incidents at route testDiff#0 leg 5",
             ),
         )
     }
@@ -48,6 +48,7 @@ class DirectionsRouteDiffProviderTest {
     private fun createTestNavigationRoute(vararg legs: RouteLeg): NavigationRoute {
         return createNavigationRoute(
             createDirectionsRoute(
+                requestUuid = "testDiff",
                 legs = legs.toList()
             )
         )

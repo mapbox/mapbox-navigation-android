@@ -10,7 +10,6 @@ import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
@@ -28,7 +27,8 @@ import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.EventsAppMetadata
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
@@ -471,12 +471,12 @@ class MapboxNavigationActivity : AppCompatActivity() {
                 .coordinatesList(listOf(origin, destination))
                 .layersList(listOf(mapboxNavigation.getZLevel(), null))
                 .build(),
-            object : RouterCallback {
+            object : NavigationRouterCallback {
                 override fun onRoutesReady(
-                    routes: List<DirectionsRoute>,
+                    routes: List<NavigationRoute>,
                     routerOrigin: RouterOrigin
                 ) {
-                    setRouteAndStartNavigation(routes.first())
+                    setRouteAndStartNavigation(routes)
                 }
 
                 override fun onFailure(
@@ -493,9 +493,9 @@ class MapboxNavigationActivity : AppCompatActivity() {
         )
     }
 
-    private fun setRouteAndStartNavigation(route: DirectionsRoute) {
+    private fun setRouteAndStartNavigation(route: List<NavigationRoute>) {
         // set route
-        mapboxNavigation.setRoutes(listOf(route))
+        mapboxNavigation.setNavigationRoutes(route)
 
         // show UI elements
         binding.soundButton.visibility = VISIBLE

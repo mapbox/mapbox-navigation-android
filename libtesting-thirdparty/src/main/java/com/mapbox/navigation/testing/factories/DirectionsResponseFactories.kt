@@ -1,6 +1,7 @@
 package com.mapbox.navigation.testing.factories
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
@@ -8,6 +9,20 @@ import com.mapbox.api.directions.v5.models.MaxSpeed
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+
+fun createDirectionsResponse(
+    uuid: String = "testUUID",
+    routes: List<DirectionsRoute> = listOf(createDirectionsRoute())
+): DirectionsResponse {
+    val processedRoutes = routes.map {
+        it.toBuilder().requestUuid(uuid).build()
+    }
+    return DirectionsResponse.builder()
+        .uuid(uuid)
+        .code("Ok")
+        .routes(processedRoutes)
+        .build()
+}
 
 fun createDirectionsRoute(
     legs: List<RouteLeg>? = listOf(createRouteLeg()),
