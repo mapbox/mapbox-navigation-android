@@ -109,11 +109,6 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 .getSuccessfulResultOrThrowException()
                 .routes
                 .reversed()
-            assertEquals(
-                "the test works only with 2 routes",
-                2,
-                requestedRoutes.size
-            )
 
             mapboxNavigation.setNavigationRoutes(requestedRoutes)
             mapboxNavigation.startTripSession()
@@ -136,6 +131,11 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 }
                 .first()
 
+            assertEquals(
+                "the test works only with 2 routes",
+                2,
+                requestedRoutes.size
+            )
             assertEquals(
                 listOf("11589180127444257"),
                 initialRoutes[0].getIncidentsIdFromTheRoute(0)
