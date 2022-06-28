@@ -63,24 +63,25 @@
         <item name="tripProgressViewBackgroundColor">@color/colorSurface</item>
         <item name="timeRemainingTextAppearance">@style/DropInStyleTimeRemaining</item>
         <item name="distanceRemainingTextAppearance">@style/DropInStyleDistanceRemaining</item>
-        <item name="estimatedArrivalTimeTextAppearance">@style/DropInStyleEstimatedArrivalTime</item>
+        <item name="estimatedArrivalTimeTextAppearance">@style/DropInStyleEstimatedArrivalTime
+        </item>
     </style>
 
-    <style name="DropInStyleTimeRemaining" parent="TextAppearance.AppCompat" >
+    <style name="DropInStyleTimeRemaining" parent="TextAppearance.AppCompat">
         <item name="android:textSize">16sp</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:textColor">@color/textPrimary</item>
     </style>
 
-    <style name="DropInStyleDistanceRemaining" parent="TextAppearance.AppCompat" >
+    <style name="DropInStyleDistanceRemaining" parent="TextAppearance.AppCompat">
         <item name="android:textSize">16sp</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:textColor">@color/colorOnSurface</item>
     </style>
 
-    <style name="DropInStyleEstimatedArrivalTime" parent="TextAppearance.AppCompat" >
+    <style name="DropInStyleEstimatedArrivalTime" parent="TextAppearance.AppCompat">
         <item name="android:textSize">16sp</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:includeFontPadding">false</item>
@@ -149,33 +150,4 @@
         <item name="extendableButtonIcon">@drawable/mapbox_ic_camera_recenter</item>
     </style>
 
-    <!-- Camera mode button -->
-    <style name="MapboxCameraModeButtonTextAppearance">
-        <item name="android:textColor">@color/colorOnSurface</item>
-        <item name="android:textSize">@dimen/mapbox_button_text_regular</item>
-    </style>
-
-    <style name="MapboxStyleCameraModeButton">
-        <item name="android:elevation">0dp</item>
-        <item name="cameraModeButtonBackground">@drawable/mapbox_bg_button</item>
-        <item name="cameraModeButtonIconTint">@color/colorOnSurface</item>
-        <item name="cameraModeButtonFollowIcon">@drawable/mapbox_ic_camera_follow</item>
-        <item name="cameraModeButtonOverviewIcon">@drawable/mapbox_ic_camera_overview</item>
-        <item name="cameraModeButtonTextAppearance">@style/MapboxCameraModeButtonTextAppearance</item>
-        <item name="cameraModeButtonFollowText">@string/mapbox_route_follow</item>
-        <item name="cameraModeButtonOverviewText">@string/mapbox_route_overview</item>
-    </style>
-
-    <!-- Extendable button -->
-    <style name="MapboxExtendableButtonTextAppearance">
-        <item name="android:textColor">@color/colorOnSurface</item>
-        <item name="android:textSize">@dimen/mapbox_button_text_regular</item>
-    </style>
-
-    <style name="MapboxStyleExtendableButton">
-        <item name="android:elevation">0dp</item>
-        <item name="extendableButtonBackground">@drawable/mapbox_bg_button</item>
-        <item name="extendableButtonIconTint">@color/colorOnSurface</item>
-        <item name="extendableButtonTextAppearance">@style/MapboxExtendableButtonTextAppearance</item>
-    </style>
 </resources>

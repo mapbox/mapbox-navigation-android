@@ -5,31 +5,4 @@
         <attr name="accessToken" format="string"/>
     </declare-styleable>
 
-    <declare-styleable name="MapboxCameraModeButton">
-        <!-- Background to apply to the view. -->
-        <attr name="cameraModeButtonBackground" format="reference|color" />
-        <!-- Tint to apply to the icon drawable. -->
-        <attr name="cameraModeButtonIconTint" format="reference|color" />
-        <!-- Follow mode icon drawable -->
-        <attr name="cameraModeButtonFollowIcon" format="reference" />
-        <!-- Overview mode icon drawable -->
-        <attr name="cameraModeButtonOverviewIcon" format="reference" />
-        <!-- Appearance of a text message. -->
-        <attr name="cameraModeButtonTextAppearance" format="reference" />
-        <!-- Follow mode text -->
-        <attr name="cameraModeButtonOverviewText" format="string" localization="suggested" />
-        <!-- Overview mode text -->
-        <attr name="cameraModeButtonFollowText" format="string" localization="suggested" />
-    </declare-styleable>
-
-    <declare-styleable name="MapboxExtendableButton">
-        <!-- Background to apply to the view. -->
-        <attr name="extendableButtonBackground" format="reference|color" />
-        <!-- Default icon drawable -->
-        <attr name="extendableButtonIcon" format="reference" />
-        <!-- Tint to apply to the icon drawable. -->
-        <attr name="extendableButtonIconTint" format="reference|color" />
-        <!-- Appearance of a text message. -->
-        <attr name="extendableButtonTextAppearance" format="reference" />
-    </declare-styleable>
 </resources>

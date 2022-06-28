@@ -17,4 +17,21 @@
         <!-- Defines the text color of recenter button. -->
         <attr name="recenterButtonTextColor" format="color" />
     </declare-styleable>
+
+    <declare-styleable name="MapboxCameraModeButton">
+        <!-- Background to apply to the view. -->
+        <attr name="cameraModeButtonBackground" format="reference|color" />
+        <!-- Tint to apply to the icon drawable. -->
+        <attr name="cameraModeButtonIconTint" format="reference|color" />
+        <!-- Follow mode icon drawable -->
+        <attr name="cameraModeButtonFollowIcon" format="reference" />
+        <!-- Overview mode icon drawable -->
+        <attr name="cameraModeButtonOverviewIcon" format="reference" />
+        <!-- Appearance of a text message. -->
+        <attr name="cameraModeButtonTextAppearance" format="reference" />
+        <!-- Follow mode text -->
+        <attr name="cameraModeButtonOverviewText" format="string" localization="suggested" />
+        <!-- Overview mode text -->
+        <attr name="cameraModeButtonFollowText" format="string" localization="suggested" />
+    </declare-styleable>
 </resources>

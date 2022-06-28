@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Extendable button -->
+    <style name="MapboxExtendableButtonTextAppearance">
+        <item name="android:textColor">@color/colorOnSurface</item>
+        <item name="android:textSize">@dimen/mapbox_button_text_regular</item>
+    </style>
+
+    <style name="MapboxStyleExtendableButton">
+        <item name="android:minHeight">@dimen/mapbox_extendableButton_minHeight</item>
+        <item name="android:paddingStart">@dimen/mapbox_extendableButton_paddingStart</item>
+        <item name="android:paddingEnd">@dimen/mapbox_extendableButton_paddingStart</item>
+        <item name="android:elevation">0dp</item>
+        <item name="extendableButtonBackground">@drawable/mapbox_bg_button</item>
+        <item name="extendableButtonIconTint">@color/colorOnSurface</item>
+        <item name="extendableButtonTextAppearance">@style/MapboxExtendableButtonTextAppearance
+        </item>
+    </style>
+
+    <style name="MapboxStyleExtendableButton.Oval" parent="MapboxStyleExtendableButton">
+        <item name="extendableButtonBackground">@drawable/mapbox_bg_circle_outline</item>
+    </style>
+
+    <style name="MapboxStyleExtendableButton.Square" parent="MapboxStyleExtendableButton">
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:minHeight">0dp</item>
+    </style>
+
+    <style name="MapboxStyleExtendableButton.Circle" parent="MapboxStyleExtendableButton.Square">
+        <item name="extendableButtonBackground">@drawable/mapbox_bg_circle_outline</item>
+    </style>
+
+</resources>

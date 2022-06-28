@@ -1,10 +1,10 @@
-package com.mapbox.navigation.dropin.view
+package com.mapbox.navigation.ui.base.view
 
 import android.content.Context
 import android.view.View
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.view.MapboxExtendableButton.State
+import com.mapbox.navigation.ui.base.view.MapboxExtendableButton.State
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

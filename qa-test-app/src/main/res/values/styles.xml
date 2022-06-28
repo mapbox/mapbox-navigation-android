@@ -165,4 +165,33 @@
         <item name="extendableButtonTextAppearance">@style/DropInStartButtonTextAppearance</item>
     </style>
 
+    <style name="CustomCameraModeButton">
+        <item name="android:elevation">4dp</item>
+        <item name="cameraModeButtonBackground">@drawable/bg_custom_button</item>
+        <item name="cameraModeButtonIconTint">#ffffff</item>
+        <item name="cameraModeButtonTextAppearance">@style/CursiveFontTextAppearance</item>
+    </style>
+
+    <style name="CursiveFontTextAppearance">
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">cursive</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="CustomRecenterButton" parent="MapboxStyleExtendableButton">
+        <item name="extendableButtonTextAppearance">@style/CursiveFontTextAppearance</item>
+        <item name="extendableButtonIconTint">#ffffff</item>
+        <item name="android:elevation">4dp</item>
+        <item name="extendableButtonBackground">@drawable/bg_custom_button</item>
+    </style>
+
+    <style name="CustomRecenterButton.Circle" parent="MapboxStyleExtendableButton.Circle">
+        <item name="extendableButtonTextAppearance">@style/CursiveFontTextAppearance</item>
+        <item name="extendableButtonIconTint">#ffffff</item>
+        <item name="android:elevation">4dp</item>
+        <item name="extendableButtonBackground">@drawable/bg_custom_circle_button</item>
+    </style>
+
 </resources>

@@ -9,6 +9,7 @@ import com.mapbox.navigation.qa_test_app.view.AppLifecycleActivity
 import com.mapbox.navigation.qa_test_app.view.ComponentsActivity
 import com.mapbox.navigation.qa_test_app.view.ComponentsAltActivity
 import com.mapbox.navigation.qa_test_app.view.CustomAlternativeRouteColoringActivity
+import com.mapbox.navigation.qa_test_app.view.DropInButtonsActivity
 import com.mapbox.navigation.qa_test_app.view.FeedbackActivity
 import com.mapbox.navigation.qa_test_app.view.IconsPreviewActivity
 import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingActivity
@@ -160,5 +161,11 @@ object TestActivitySuite {
             R.string.navigation_view_fragment_lifecycle_description,
             launchAfterPermissionResult = false
         ) { activity -> activity.startActivity<NavigationViewFragmentLifecycleActivity>() },
+        TestActivityDescription(
+            "Drop In Buttons",
+            R.string.drop_in_buttons_activity_description
+        ) { activity ->
+            activity.startActivity<DropInButtonsActivity>()
+        },
     )
 }
