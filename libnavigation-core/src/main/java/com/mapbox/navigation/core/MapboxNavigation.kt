@@ -771,7 +771,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *
      * @param routes a list of [NavigationRoute]s
      * @param initialLegIndex starting leg to follow. By default the first leg is used.
-     * @param callback callback to be called when routes are set or ignored. See [RoutesSetCallback].
+     * @param callback callback to be called when routes are set or ignored due to an error. See [RoutesSetCallback].
      * @see [requestRoutes]
      */
     @JvmOverloads

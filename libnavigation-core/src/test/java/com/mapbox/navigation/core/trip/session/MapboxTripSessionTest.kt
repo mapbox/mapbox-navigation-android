@@ -727,7 +727,10 @@ class MapboxTripSessionTest {
                 RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
             )
 
-            assertEquals(mockAlternativesMetadata, (result as NativeSetRouteValue).nativeAlternatives)
+            assertEquals(
+                mockAlternativesMetadata,
+                (result as NativeSetRouteValue).nativeAlternatives
+            )
         }
 
     @Test
