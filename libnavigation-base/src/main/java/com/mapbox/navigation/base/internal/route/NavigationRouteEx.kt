@@ -2,6 +2,7 @@
 
 package com.mapbox.navigation.base.internal.route
 
+import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.Incident
@@ -77,7 +78,7 @@ fun createNavigationRoute(
 /**
  * Internal API used for testing purposes. Needed to avoid calling native parser from unit tests.
  */
-@TestOnly
+@VisibleForTesting
 fun createNavigationRoutes(
     directionsResponse: DirectionsResponse,
     routeOptions: RouteOptions,
