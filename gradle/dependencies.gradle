@@ -60,7 +60,7 @@ ext {
       okhttp                    : '4.9.0',
       okio                      : '2.10.0',
       androidxTestJunit         : '1.1.3',
-      androidxTest              : '1.4.0',
+      androidxTest              : '1.4.1-alpha03',
       barista                   : '4.2.0',
       svgParser                 : '1.4',
       androidStartup            : '1.0.0',
