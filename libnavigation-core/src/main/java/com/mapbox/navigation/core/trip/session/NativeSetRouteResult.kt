@@ -21,5 +21,5 @@ internal class NativeSetRouteValue(
  * @param error Reason why the routes were not set.
  */
 internal class NativeSetRouteError(
-    val error: String? = null,
+    val error: String
 ) : NativeSetRouteResult()

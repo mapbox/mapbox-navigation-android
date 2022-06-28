@@ -1348,7 +1348,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                     initialLegIndex,
                     RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
                 )
-            } returns NativeSetRouteError()
+            } returns NativeSetRouteError("some error")
             coEvery { routeRefreshController.refresh(routes) } returns refreshedRoutes
 
             verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
