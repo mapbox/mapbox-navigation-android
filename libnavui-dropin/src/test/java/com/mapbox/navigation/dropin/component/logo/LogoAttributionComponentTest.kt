@@ -1,0 +1,81 @@
+package com.mapbox.navigation.dropin.component.logo
+
+import androidx.core.graphics.Insets
+import com.mapbox.maps.MapView
+import com.mapbox.maps.plugin.attribution.AttributionPlugin
+import com.mapbox.maps.plugin.attribution.attribution
+import com.mapbox.maps.plugin.attribution.generated.AttributionSettings
+import com.mapbox.maps.plugin.logo.LogoPlugin
+import com.mapbox.maps.plugin.logo.generated.LogoSettings
+import com.mapbox.maps.plugin.logo.logo
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.testing.MainCoroutineRule
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
+internal class LogoAttributionComponentTest {
+
+    @get:Rule
+    var coroutineRule = MainCoroutineRule()
+
+    private lateinit var sut: LogoAttributionComponent
+
+    private lateinit var systemBarsInsets: MutableStateFlow<Insets?>
+    private lateinit var mockLogoPlugin: LogoPlugin
+    private lateinit var mockAttributionPlugin: AttributionPlugin
+
+    @Before
+    fun setUp() {
+        mockLogoPlugin = mockk(relaxed = true)
+        mockAttributionPlugin = mockk(relaxed = true)
+        val mockMapView = mockk<MapView> {
+            every { logo } returns mockLogoPlugin
+            every { attribution } returns mockAttributionPlugin
+        }
+        systemBarsInsets = MutableStateFlow(null)
+        sut = LogoAttributionComponent(mockMapView, systemBarsInsets)
+    }
+
+    @Test
+    fun `onAttached - should update map logo and attribution margins`() {
+        val logoSettings = LogoSettings()
+        val attributionSettings = AttributionSettings()
+        captureUpdatedSettings(
+            logoSettings = logoSettings,
+            attributionSettings = attributionSettings
+        )
+
+        val bottomInset = 123.0f
+        systemBarsInsets.value = Insets.of(0, 0, 0, bottomInset.toInt())
+
+        sut.onAttached(mockk())
+
+        assertEquals(bottomInset, logoSettings.marginBottom)
+        assertEquals(bottomInset, attributionSettings.marginBottom)
+    }
+
+    private fun captureUpdatedSettings(
+        logoSettings: LogoSettings,
+        attributionSettings: AttributionSettings
+    ) {
+        val logoLambdaCapture = slot<LogoSettings.() -> Unit>()
+        val attributionLambdaCapture = slot<AttributionSettings.() -> Unit>()
+        every { mockLogoPlugin.updateSettings(capture(logoLambdaCapture)) } answers {
+            logoSettings.apply(logoLambdaCapture.captured)
+        }
+        every { mockAttributionPlugin.updateSettings(capture(attributionLambdaCapture)) } answers {
+            attributionSettings.apply(attributionLambdaCapture.captured)
+        }
+    }
+}

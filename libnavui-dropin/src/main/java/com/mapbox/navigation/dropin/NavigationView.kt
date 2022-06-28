@@ -105,7 +105,7 @@ class NavigationView @JvmOverloads constructor(
 
     init {
         keepScreenOn = true
-        adjustForSystemBars()
+        captureSystemBarsInsets()
 
         SharedApp.setup(context.applicationContext as Application)
         if (!MapboxNavigationApp.isSetup()) {
@@ -137,15 +137,10 @@ class NavigationView @JvmOverloads constructor(
         )
     }
 
-    private fun adjustForSystemBars() {
+    private fun captureSystemBarsInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
-            val navigationBarInsets =
-                insets.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.navigationBars())
-
-            val lp = (binding.coordinatorLayout.layoutParams as MarginLayoutParams)
-            lp.bottomMargin = navigationBarInsets.bottom
-            binding.coordinatorLayout.layoutParams = lp
-
+            val systemBarsInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            navigationContext.systemBarsInsets.value = systemBarsInsets
             insets
         }
     }
