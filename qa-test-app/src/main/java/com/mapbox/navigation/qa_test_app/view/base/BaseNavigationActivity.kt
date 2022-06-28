@@ -20,6 +20,7 @@ import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.LocationPuck2D
+import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
@@ -75,6 +76,8 @@ abstract class BaseNavigationActivity : AppCompatActivity(), OnMapLongClickListe
     private lateinit var baseBinding: LayoutActivityBaseNavigationBinding
 
     val mapView: MapView get() = baseBinding.mapView
+    val camera: CameraAnimationsPlugin get() = mapView.camera
+    val lastLocation get() = navigationLocationProvider.lastLocation
 
     lateinit var mapboxNavigation: MapboxNavigation
 

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.dropin.view
+package com.mapbox.navigation.ui.base.view
 
 import android.content.Context
 import android.content.res.TypedArray
@@ -12,8 +12,8 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.databinding.MapboxExtendableButtonLayoutBinding
+import com.mapbox.navigation.ui.base.R
+import com.mapbox.navigation.ui.base.databinding.MapboxExtendableButtonLayoutBinding
 import com.mapbox.navigation.ui.utils.internal.ExtendableButtonHelper
 import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
 
@@ -24,15 +24,15 @@ import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
 class MapboxExtendableButton : FrameLayout {
 
     private val binding =
-        MapboxExtendableButtonLayoutBinding.inflate(LayoutInflater.from(context), this)
+        MapboxExtendableButtonLayoutBinding.inflate(
+            LayoutInflater.from(context),
+            this
+        )
 
     private val helper = ExtendableButtonHelper(
         binding.buttonText,
-        { 0 },
-        { text ->
-            binding.buttonText.measureTextWidth(text).toInt() +
-                resources.getDimensionPixelSize(R.dimen.mapbox_extendableButton_paddingStart)
-        },
+        { binding.iconImage.left },
+        { text -> binding.buttonText.measureTextWidth(text).toInt() + binding.iconImage.left }
     )
 
     /**
@@ -64,7 +64,10 @@ class MapboxExtendableButton : FrameLayout {
      * Button with an icon and expand behaviour.
      */
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
-        this(context, attrs, defStyleAttr, R.style.MapboxStyleExtendableButton)
+        this(
+            context, attrs, defStyleAttr,
+            R.style.MapboxStyleExtendableButton
+        )
 
     /**
      * Button with an icon and expand behaviour.
@@ -111,7 +114,10 @@ class MapboxExtendableButton : FrameLayout {
      * @param style Int
      */
     fun updateStyle(@StyleRes style: Int) {
-        context.obtainStyledAttributes(style, R.styleable.MapboxExtendableButton).apply {
+        context.obtainStyledAttributes(
+            style,
+            R.styleable.MapboxExtendableButton
+        ).apply {
             try {
                 applyAttributes(this)
             } finally {
