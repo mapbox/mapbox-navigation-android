@@ -73,6 +73,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Android Core `v5.0.1`
 - Mapbox Android Telemetry `v8.1.2`
 - Introduced `SetRoutesCallback` parameter to `MapboxNavigation#setNavigationRoutes`, which is called after the routes are set or they have been declared invalid. If invalid, they will not be passed to `RoutesObserver#onRoutesChanged` [#5945](https://github.com/mapbox/mapbox-navigation-android/pull/5945).
+- Introduced `RoutesSetCallback` parameter to `MapboxNavigation#setNavigationRoutes`, which is called after the routes are set or they have been declared invalid. If invalid, they will not be passed to `RoutesObserver#onRoutesChanged` [#5945](https://github.com/mapbox/mapbox-navigation-android/pull/5945).
 
 ## Mapbox Navigation SDK 2.6.0-rc.1 - June 23, 2022
 ### Changelog
@@ -94,7 +95,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v6.5.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.5.0))
 - Mapbox Android Core `v5.0.1`
 - Mapbox Android Telemetry `v8.1.2`
-- Fixed the issue with the close icon in the trip notification occasionally using wrong color when including ui-dropin dependency. [#5956](https://github.com/mapbox/mapbox-navigation-android/pull/5956) 
 
 ## Mapbox Navigation SDK 2.6.0-beta.3 - June 17, 2022
 ### Changelog
