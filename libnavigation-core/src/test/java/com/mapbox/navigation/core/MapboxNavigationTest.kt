@@ -828,7 +828,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         coroutineRule.runBlockingTest {
             createMapboxNavigation()
             val routes = listOf(mockk<NavigationRoute>(relaxed = true))
-            val callback = mockk<SetRoutesCallback>(relaxed = true)
+            val callback = mockk<RoutesSetCallback>(relaxed = true)
             val initialLegIndex = 2
 
             coEvery {
@@ -836,8 +836,13 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             } returns NativeSetRouteValue(emptyList())
             mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)
 
-            verify(exactly = 1) { callback.onRoutesSetResult(routes) }
-            verify(exactly = 0) { callback.onRoutesSetError(any(), any()) }
+            val successes = mutableListOf<RoutesSetCallbackSuccess>()
+            verify(exactly = 1) { callback.onRoutesSetResult(capture(successes)) }
+            verify(exactly = 0) { callback.onRoutesSetError(any()) }
+
+            successes[0].run {
+                assertEquals(routes, this.routes)
+            }
         }
 
     @Test
@@ -845,7 +850,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         coroutineRule.runBlockingTest {
             createMapboxNavigation()
             val routes = listOf(mockk<NavigationRoute>(relaxed = true))
-            val callback = mockk<SetRoutesCallback>(relaxed = true)
+            val callback = mockk<RoutesSetCallback>(relaxed = true)
             val initialLegIndex = 2
             val error = "some error"
 
@@ -854,8 +859,14 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             } returns NativeSetRouteError(error)
             mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)
 
-            verify(exactly = 1) { callback.onRoutesSetError(routes, error) }
+            val errors = mutableListOf<RoutesSetCallbackError>()
+            verify(exactly = 1) { callback.onRoutesSetError(capture(errors)) }
             verify(exactly = 0) { callback.onRoutesSetResult(any()) }
+
+            errors[0].run {
+                assertEquals(routes, this.routes)
+                assertEquals(error, this.error)
+            }
         }
 
     @Test

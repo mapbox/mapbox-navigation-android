@@ -771,14 +771,14 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *
      * @param routes a list of [NavigationRoute]s
      * @param initialLegIndex starting leg to follow. By default the first leg is used.
-     * @param callback callback to be called when routes are set or ignored. See [SetRoutesCallback].
+     * @param callback callback to be called when routes are set or ignored. See [RoutesSetCallback].
      * @see [requestRoutes]
      */
     @JvmOverloads
     fun setNavigationRoutes(
         routes: List<NavigationRoute>,
         initialLegIndex: Int = 0,
-        callback: SetRoutesCallback? = null
+        callback: RoutesSetCallback? = null
     ) {
         if (routes.isNotEmpty()) {
             billingController.onExternalRouteSet(routes.first())
@@ -808,7 +808,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routes: List<NavigationRoute>,
         legIndex: Int = 0,
         @RoutesExtra.RoutesUpdateReason reason: String,
-        callback: SetRoutesCallback? = null,
+        callback: RoutesSetCallback? = null,
     ) {
         rerouteController?.interrupt()
         restartRouteScope()
@@ -818,11 +818,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 when (val processedRoutes = setRoutesToTripSession(routes, legIndex, reason)) {
                     is NativeSetRouteValue -> {
                         directionsSession.setRoutes(routes, legIndex, reason)
-                        callback?.onRoutesSetResult(routes)
+                        callback?.onRoutesSetResult(RoutesSetCallbackSuccess(routes))
                     }
                     is NativeSetRouteError -> {
                         logW("Routes $routes will be ignored as they are not valid")
-                        callback?.onRoutesSetError(routes, processedRoutes.error)
+                        callback?.onRoutesSetError(
+                            RoutesSetCallbackError(routes, processedRoutes.error)
+                        )
                     }
                 }
             }
