@@ -54,6 +54,8 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v6.6.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.6.0))
 - Mapbox Android Core `v5.0.1`
 - Mapbox Android Telemetry `v8.1.2`
+- Introduced `RoutesSetCallback` parameter to `MapboxNavigation#setNavigationRoutes`, which is called after the routes passed to `MapboxNavigation#setNavigationRoutes` are processed or are failed to be processed [#5945](https://github.com/mapbox/mapbox-navigation-android/pull/5945).
+- `RoutesObserver#onRoutesChanged` will not be triggered if tha navigator fails to process the routes passed via `MapboxNavigation#setNavigationRoutes` [#5945](https://github.com/mapbox/mapbox-navigation-android/pull/5945).
 
 ## Mapbox Navigation SDK 2.7.0-alpha.1 - June 24, 2022
 ### Changelog
@@ -72,10 +74,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v6.5.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.5.0))
 - Mapbox Android Core `v5.0.1`
 - Mapbox Android Telemetry `v8.1.2`
-- Introduced `SetRoutesCallback` parameter to `MapboxNavigation#setNavigationRoutes`, which is called after the routes are set or they have been declared invalid. If invalid, they will not be passed to `RoutesObserver#onRoutesChanged` [#5945](https://github.com/mapbox/mapbox-navigation-android/pull/5945).
-- Introduced `RoutesSetCallback` parameter to `MapboxNavigation#setNavigationRoutes`, which is called after the routes are set or they have been declared invalid. If invalid, they will not be passed to `RoutesObserver#onRoutesChanged` [#5945](https://github.com/mapbox/mapbox-navigation-android/pull/5945).
-- Introduced `RoutesSetCallback` parameter to `MapboxNavigation#setNavigationRoutes`, which is called after the routes are set or they have been declared invalid [#5945](https://github.com/mapbox/mapbox-navigation-android/pull/5945).
-- `RoutesObserver#onRoutesChanged` will not be triggered if tha navigator fails to process the routes passed via `MapboxNavigation#setNavigationRoutes` [#5945](https://github.com/mapbox/mapbox-navigation-android/pull/5945).
 
 ## Mapbox Navigation SDK 2.6.0-rc.1 - June 23, 2022
 ### Changelog

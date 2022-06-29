@@ -469,8 +469,10 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @Test
     fun `set reroute controller in fetching state sets routes to session`() {
         val newRoutes = listOf(mockk<NavigationRoute>(), mockk())
-        val navigationRerouteController: NavigationRerouteController? = mockk(relaxed = true) {
+        val oldController = mockk<RerouteController>(relaxed = true) {
             every { state } returns RerouteState.FetchingRoute
+        }
+        val navigationRerouteController: NavigationRerouteController? = mockk(relaxed = true) {
             every { reroute(any<NavigationRerouteController.RoutesCallback>()) } answers {
                 (firstArg() as NavigationRerouteController.RoutesCallback)
                     .onNewRoutes(newRoutes, mockk())
@@ -481,6 +483,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         } returns NativeSetRouteValue(emptyList())
 
         createMapboxNavigation()
+        mapboxNavigation.setRerouteController(oldController)
         mapboxNavigation.setRerouteController(navigationRerouteController)
         coVerify(exactly = 1) {
             directionsSession.setRoutes(newRoutes, 0, RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
@@ -490,8 +493,10 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @Test
     fun `set reroute controller in fetching state does not set invalid routes to session`() {
         val newRoutes = listOf(mockk<NavigationRoute>(), mockk())
-        val navigationRerouteController: NavigationRerouteController? = mockk(relaxed = true) {
+        val oldController = mockk<RerouteController>(relaxed = true) {
             every { state } returns RerouteState.FetchingRoute
+        }
+        val navigationRerouteController: NavigationRerouteController? = mockk(relaxed = true) {
             every { reroute(any<NavigationRerouteController.RoutesCallback>()) } answers {
                 (firstArg() as NavigationRerouteController.RoutesCallback)
                     .onNewRoutes(newRoutes, mockk())
@@ -502,6 +507,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         } returns NativeSetRouteError("some error")
 
         createMapboxNavigation()
+        mapboxNavigation.setRerouteController(oldController)
         mapboxNavigation.setRerouteController(navigationRerouteController)
         coVerify(exactly = 0) {
             directionsSession.setRoutes(any(), any(), any())
