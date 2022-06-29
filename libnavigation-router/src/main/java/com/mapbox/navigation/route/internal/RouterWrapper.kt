@@ -192,6 +192,7 @@ class RouterWrapper(
         return router.getRouteRefresh(
             refreshOptions
         ) { result, _ ->
+            logI("Received result from router.getRoutRefresh for ${route.id}", LOG_CATEGORY)
             result.fold(
                 {
                     mainJobControl.scope.launch {
@@ -217,17 +218,27 @@ class RouterWrapper(
                 {
                     mainJobControl.scope.launch {
                         withContext(ThreadController.IODispatcher) {
-                            parseDirectionsRouteRefresh(it).mapValue { routeRefresh ->
-                                route.refreshRoute(
-                                    initialLegIndex = refreshOptions.legIndex,
-                                    legAnnotations = routeRefresh.legs()?.map {
-                                        it.annotation()
-                                    },
-                                    incidents = routeRefresh.legs()?.map {
-                                        it.incidents()
-                                    }
-                                )
-                            }
+                            parseDirectionsRouteRefresh(it)
+                                .onValue {
+                                    logI("Parsed route refresh response for route(${route.id})")
+                                }
+                                .onError {
+                                    logI(
+                                        "Failed to parse route refresh response for " +
+                                            "route(${route.id})"
+                                    )
+                                }
+                                .mapValue { routeRefresh ->
+                                    route.refreshRoute(
+                                        initialLegIndex = refreshOptions.legIndex,
+                                        legAnnotations = routeRefresh.legs()?.map {
+                                            it.annotation()
+                                        },
+                                        incidents = routeRefresh.legs()?.map {
+                                            it.incidents()
+                                        }
+                                    )
+                                }
                         }.fold(
                             { throwable ->
                                 callback.onFailure(
