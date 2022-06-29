@@ -155,7 +155,7 @@ class NavigationRoute internal constructor(
             routerOrigin: RouterOrigin,
             routeParser: SDKRouteParser = NativeRouteParserWrapper
         ): List<NavigationRoute> {
-            logI("NavigationRoute.createAsync called for $routeRequestUrl", LOG_CATEGORY)
+            logI("NavigationRoute.createAsync is called", LOG_CATEGORY)
             return coroutineScope {
                 val deferredResponseParsing = async(ThreadController.DefaultDispatcher) {
                     DirectionsResponse.fromJson(directionsResponseJson).also {
