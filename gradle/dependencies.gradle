@@ -1,5 +1,5 @@
 ext {
-  def kotlinVersion = "1.5.31"
+  def kotlinVersion = "1.6.0"
 
   androidVersions = [
       minSdkVersion           : 21,
@@ -56,7 +56,7 @@ ext {
       firebaseCrashlytics       : '17.3.1',
       multidex                  : '2.0.1',
       json                      : '20180813',
-      coroutinesAndroid         : '1.5.1',
+      coroutinesAndroid         : '1.6.0',
       okhttp                    : '4.9.0',
       okio                      : '2.10.0',
       androidxTestJunit         : '1.1.3',

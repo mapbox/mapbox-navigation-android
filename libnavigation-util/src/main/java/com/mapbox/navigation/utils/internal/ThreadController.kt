@@ -59,7 +59,9 @@ class ThreadController {
         val IODispatcher: CoroutineDispatcher =
             Executors.newFixedThreadPool(maxCoresUsed).asCoroutineDispatcher()
 
-        val DefaultDispatcher: CoroutineDispatcher = Dispatchers.Default
+        val DefaultDispatcher: CoroutineDispatcher = Dispatchers.Default.limitedParallelism(
+            200
+        )
     }
 
     internal var ioRootJob = SupervisorJob()
