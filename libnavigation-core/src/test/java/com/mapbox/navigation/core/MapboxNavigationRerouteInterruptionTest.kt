@@ -55,14 +55,31 @@ internal class MapboxNavigationRerouteInterruptionTest(
             }
         } else null
         val newController = mockk<RerouteController>(relaxed = true)
-
         oldController?.let { mapboxNavigation.setRerouteController(it) }
+
         mapboxNavigation.setRerouteController(newController)
 
         if (oldController != null) {
             verify(exactly = expectedNumberOfInterruptions) { oldController.interrupt() }
         }
         verify(exactly = expectedNumberOfInterruptions) { newController.reroute(any()) }
+    }
+
+    @Test
+    fun setNullRerouteController() {
+        val oldController = if (previousState != null) {
+            mockk<RerouteController>(relaxed = true) {
+                every { state } returns previousState
+            }
+        } else null
+        val newController: RerouteController? = null
+        oldController?.let { mapboxNavigation.setRerouteController(it) }
+
+        mapboxNavigation.setRerouteController(newController)
+
+        if (oldController != null) {
+            verify(exactly = expectedNumberOfInterruptions) { oldController.interrupt() }
+        }
     }
 
     @Test
@@ -73,17 +90,36 @@ internal class MapboxNavigationRerouteInterruptionTest(
             }
         } else null
         val newController = mockk<NavigationRerouteController>(relaxed = true)
-
         oldController?.let {
-            mapboxNavigation.setRerouteController(it as NavigationRerouteController?)
+            mapboxNavigation.setRerouteController(it)
         }
-        mapboxNavigation.setRerouteController(newController as NavigationRerouteController?)
+
+        mapboxNavigation.setRerouteController(newController)
 
         if (oldController != null) {
             verify(exactly = expectedNumberOfInterruptions) { oldController.interrupt() }
         }
         verify(exactly = expectedNumberOfInterruptions) {
             newController.reroute(any<NavigationRerouteController.RoutesCallback>())
+        }
+    }
+
+    @Test
+    fun setNullNavigationRerouteController() {
+        val oldController = if (previousState != null) {
+            mockk<NavigationRerouteController>(relaxed = true) {
+                every { state } returns previousState
+            }
+        } else null
+        val newController: NavigationRerouteController? = null
+        oldController?.let {
+            mapboxNavigation.setRerouteController(it)
+        }
+
+        mapboxNavigation.setRerouteController(newController)
+
+        if (oldController != null) {
+            verify(exactly = expectedNumberOfInterruptions) { oldController.interrupt() }
         }
     }
 }
