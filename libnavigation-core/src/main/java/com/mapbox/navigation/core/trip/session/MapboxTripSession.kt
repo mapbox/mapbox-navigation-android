@@ -108,11 +108,11 @@ internal class MapboxTripSession(
                         ?.roadObjects
                         ?: emptyList()
                     this@MapboxTripSession.primaryRoute = routes.first()
-                    if (alternatives != null) {
-                        NativeSetRouteValue(alternatives)
-                    } else {
-                        NativeSetRouteError("Failed to process alternatives")
-                    }
+                    alternatives.fold({
+                        NativeSetRouteError(it)                  
+                    }, {
+                        NativeSetRouteValue(it)
+                    })
                 } else {
                     with("Cannot refresh route. Route can't be null") {
                         logW(this, LOG_CATEGORY)

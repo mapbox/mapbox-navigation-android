@@ -4,6 +4,7 @@ import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
 import com.mapbox.api.directionsrefresh.v1.models.RouteLegRefresh
 import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.internal.route.nativeRoute
@@ -205,7 +206,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * https://github.com/mapbox/mapbox-navigation-native/pull/5420 where the full response has to be provided
      * to [Navigator.refreshRoute], not only the annotations/incidents collections.
      */
-    override suspend fun refreshRoute(route: NavigationRoute): List<RouteAlternative>? {
+    override suspend fun refreshRoute(route: NavigationRoute): Expected<String, List<RouteAlternative>> {
         val refreshedLegs = route.directionsRoute.legs()?.map { routeLeg ->
             RouteLegRefresh.builder()
                 .annotation(routeLeg.annotation())
@@ -236,7 +237,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                                 "Reason: $error",
                             LOG_CATEGORY
                         )
-                        continuation.resume(null)
+                        continuation.resume(ExpectedFactory.createError(error))
                     },
                     { refreshRouteResult ->
                         logD(
@@ -248,7 +249,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                                     .ifBlank { "[no alternatives]" },
                             LOG_CATEGORY
                         )
-                        continuation.resume(refreshRouteResult.alternatives)
+                        continuation.resume(ExpectedFactory.createValue(refreshRouteResult.alternatives))
                     }
                 )
             }
