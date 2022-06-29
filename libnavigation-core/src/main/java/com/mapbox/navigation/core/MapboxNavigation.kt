@@ -1114,11 +1114,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     /**
      * Set [RerouteController] that's automatically invoked when user is off-route.
      *
-     * By default uses [MapboxRerouteController].
+     * By default [MapboxRerouteController] is used.
+     * Pass `null` to disable automatic reroute.
+     * A user will stay in `OFF_ROUTE` state until a new route is set or the user gets back to the route.
      */
-    fun setRerouteController(rerouteController: RerouteController) {
+    fun setRerouteController(rerouteController: RerouteController?) {
         setRerouteController(
-            LegacyRerouteControllerAdapter(rerouteController) as NavigationRerouteController?
+            rerouteController?.let { LegacyRerouteControllerAdapter(it) }
         )
     }
 

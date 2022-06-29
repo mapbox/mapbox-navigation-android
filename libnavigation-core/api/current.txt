@@ -53,7 +53,7 @@ package com.mapbox.navigation.core {
     method public void setArrivalController();
     method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, int initialLegIndex = 0);
     method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
-    method public void setRerouteController(com.mapbox.navigation.core.reroute.RerouteController rerouteController);
+    method public void setRerouteController(com.mapbox.navigation.core.reroute.RerouteController? rerouteController);
     method public void setRerouteController(com.mapbox.navigation.core.reroute.NavigationRerouteController? rerouteController = com.mapbox.navigation.core.MapboxNavigation.defaultRerouteController);
     method public void setRerouteController();
     method public void setRerouteOptionsAdapter(com.mapbox.navigation.core.reroute.RerouteOptionsAdapter? rerouteOptionsAdapter);

@@ -1199,6 +1199,38 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
+    fun `set null reroute controller`() = coroutineRule.runBlockingTest {
+        val oldController: RerouteController = mockk(relaxed = true)
+        val newController: RerouteController? = null
+        createMapboxNavigation()
+        mapboxNavigation.setRerouteController(oldController)
+
+        mapboxNavigation.setRerouteController(newController)
+
+        assertNull(mapboxNavigation.getRerouteController())
+    }
+
+    @Test
+    fun `set navigation reroute controller`() = coroutineRule.runBlockingTest {
+        val navigationRerouteController: NavigationRerouteController = mockk(relaxed = true)
+        createMapboxNavigation()
+        mapboxNavigation.setRerouteController(navigationRerouteController)
+        assertEquals(navigationRerouteController, mapboxNavigation.getRerouteController())
+    }
+
+    @Test
+    fun `set null navigation reroute controller`() = coroutineRule.runBlockingTest {
+        val oldController: NavigationRerouteController = mockk(relaxed = true)
+        val newController: NavigationRerouteController? = null
+        createMapboxNavigation()
+        mapboxNavigation.setRerouteController(oldController)
+
+        mapboxNavigation.setRerouteController(newController)
+
+        assertNull(mapboxNavigation.getRerouteController())
+    }
+
+    @Test
     fun `when telemetry is enabled custom event is posted`() = coroutineRule.runBlockingTest {
         createMapboxNavigation()
         mockkStatic(TelemetryEnabler::class)
@@ -1230,13 +1262,5 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         verify(exactly = 0) { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) }
 
         unmockkStatic(TelemetryEnabler::class)
-    }
-
-    @Test
-    fun `set navigation reroute controller`() = coroutineRule.runBlockingTest {
-        val navigationRerouteController: NavigationRerouteController? = mockk(relaxed = true)
-        createMapboxNavigation()
-        mapboxNavigation.setRerouteController(navigationRerouteController)
-        assertEquals(navigationRerouteController, mapboxNavigation.getRerouteController())
     }
 }
