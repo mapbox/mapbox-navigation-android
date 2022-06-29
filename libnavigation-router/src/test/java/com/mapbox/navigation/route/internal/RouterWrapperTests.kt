@@ -22,8 +22,8 @@ import com.mapbox.navigation.route.internal.util.TestRouteFixtures
 import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
+import com.mapbox.navigation.testing.factories.createRouteInterfacesFromDirectionRequestResponse
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteRefreshOptions
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterErrorType
@@ -42,7 +42,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -74,17 +73,9 @@ class RouterWrapperTests {
 
     private val testRouteFixtures = TestRouteFixtures()
 
-    private val routerResultSuccess: Expected<RouterError, String> = mockk {
-        every { isValue } returns true
-        every { isError } returns false
-        every { value } returns testRouteFixtures.loadTwoLegRoute()
-        every { error } returns null
-
-        val valueSlot = slot<Expected.Transformer<String, Unit>>()
-        every { fold(any(), capture(valueSlot)) } answers {
-            valueSlot.captured.invoke(this@mockk.value!!)
-        }
-    }
+    private val routerResultSuccess: Expected<RouterError, String> = ExpectedFactory.createValue(
+        testRouteFixtures.loadTwoLegRoute()
+    )
     private val routerResultFailure: Expected<RouterError, String> = mockk {
         every { isValue } returns false
         every { isError } returns true
@@ -178,20 +169,10 @@ class RouterWrapperTests {
         every {
             NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
         } answers {
-            val routesCount =
-                JSONObject(this.firstArg<String>())
-                    .getJSONArray("routes")
-                    .length()
-            val nativeRoutes = mutableListOf<RouteInterface>().apply {
-                repeat(routesCount) {
-                    add(
-                        mockk {
-                            every { routeId } returns "$it"
-                            every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
-                        }
-                    )
-                }
-            }
+            val nativeRoutes = createRouteInterfacesFromDirectionRequestResponse(
+                response = firstArg(),
+                requestUri = secondArg(),
+            )
             ExpectedFactory.createValue(nativeRoutes)
         }
 
