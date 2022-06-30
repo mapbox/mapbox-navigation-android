@@ -206,7 +206,9 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * https://github.com/mapbox/mapbox-navigation-native/pull/5420 where the full response has to be provided
      * to [Navigator.refreshRoute], not only the annotations/incidents collections.
      */
-    override suspend fun refreshRoute(route: NavigationRoute): Expected<String, List<RouteAlternative>> {
+    override suspend fun refreshRoute(
+        route: NavigationRoute
+    ): Expected<String, List<RouteAlternative>> {
         val refreshedLegs = route.directionsRoute.legs()?.map { routeLeg ->
             RouteLegRefresh.builder()
                 .annotation(routeLeg.annotation())
@@ -249,7 +251,9 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                                     .ifBlank { "[no alternatives]" },
                             LOG_CATEGORY
                         )
-                        continuation.resume(ExpectedFactory.createValue(refreshRouteResult.alternatives))
+                        continuation.resume(
+                            ExpectedFactory.createValue(refreshRouteResult.alternatives)
+                        )
                     }
                 )
             }

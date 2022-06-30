@@ -61,7 +61,7 @@ class RoutesSetCallbackSuccess internal constructor(
  */
 class RoutesSetCallbackError internal constructor(
     val routes: List<NavigationRoute>,
-    val error: String?
+    val error: String
 ) {
 
     override fun equals(other: Any?): Boolean {
@@ -78,7 +78,7 @@ class RoutesSetCallbackError internal constructor(
 
     override fun hashCode(): Int {
         var result = routes.hashCode()
-        result = 31 * result + (error?.hashCode() ?: 0)
+        result = 31 * result + error.hashCode()
         return result
     }
 

@@ -112,9 +112,9 @@ package com.mapbox.navigation.core {
   }
 
   public final class RoutesSetCallbackError {
-    method public String? getError();
+    method public String getError();
     method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> getRoutes();
-    property public final String? error;
+    property public final String error;
     property public final java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes;
   }
 
