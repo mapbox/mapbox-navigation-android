@@ -661,15 +661,17 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         sourceLayerMap: Map<RouteLineSourceKey, Set<String>>
     ): List<() -> Unit> {
         val mutationCommands = mutableListOf<() -> Unit>()
-        sourceLayerMap[routeLineSourceKey]?.forEach { layerId ->
-            val provider = ifNonNull(routeLineData.dynamicData.trimOffset?.offset) { offset ->
-                RouteLineExpressionProvider {
-                    literal(listOf(0.0, offset))
+        val trailLayerIds = trailCasingLayerIds.plus(trailLayerIds)
+        sourceLayerMap[routeLineSourceKey]?.filter { !trailLayerIds.contains(it) }
+            ?.forEach { layerId ->
+                val provider = ifNonNull(routeLineData.dynamicData.trimOffset?.offset) { offset ->
+                    RouteLineExpressionProvider {
+                        literal(listOf(0.0, offset))
+                    }
                 }
-            }
 
-            mutationCommands.add { updateTrimOffset(layerId, provider)(style) }
-        }
+                mutationCommands.add { updateTrimOffset(layerId, provider)(style) }
+            }
         return mutationCommands
     }
 
