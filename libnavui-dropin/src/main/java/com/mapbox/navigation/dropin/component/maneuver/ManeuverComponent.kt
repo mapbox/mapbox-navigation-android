@@ -1,6 +1,5 @@
 package com.mapbox.navigation.dropin.component.maneuver
 
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
@@ -15,6 +14,7 @@ import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
 import com.mapbox.navigation.ui.maps.internal.extensions.getStyleId
+import com.mapbox.navigation.ui.maps.internal.extensions.getUserId
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -49,7 +49,7 @@ internal class ManeuverComponent(
 
                     value.onValue { maneuvers ->
                         maneuverApi.getRoadShields(
-                            DirectionsCriteria.PROFILE_DEFAULT_USER,
+                            mapStyle.getUserId(),
                             mapStyle.getStyleId(),
                             mapboxNavigation.navigationOptions.accessToken,
                             maneuvers

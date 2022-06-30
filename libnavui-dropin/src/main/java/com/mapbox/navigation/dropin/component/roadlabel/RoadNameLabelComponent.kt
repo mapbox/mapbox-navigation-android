@@ -4,7 +4,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StyleRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.bindgen.Expected
 import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -14,6 +13,7 @@ import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.internal.extensions.getStyleId
+import com.mapbox.navigation.ui.maps.internal.extensions.getUserId
 import com.mapbox.navigation.ui.maps.roadname.view.MapboxRoadNameView
 import com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi
 import com.mapbox.navigation.ui.shield.model.RouteShieldError
@@ -46,7 +46,7 @@ internal class RoadNameLabelComponent(
 
                 val result = routeShieldApi.getRouteShields(
                     matcherResult.road,
-                    DirectionsCriteria.PROFILE_DEFAULT_USER,
+                    mapStyle.getUserId(),
                     mapStyle.getStyleId(),
                     mapboxNavigation.navigationOptions.accessToken,
                 )

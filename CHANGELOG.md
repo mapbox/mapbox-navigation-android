@@ -8,6 +8,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Fixed reroute request interruption when setting the `NavigationRerouteController` [#5950](https://github.com/mapbox/mapbox-navigation-android/pull/5950).
 - Fixed setting trim offsets to route line trail layers. [#5982](https://github.com/mapbox/mapbox-navigation-android/pull/5982)
+- Fixed a Drop-In UI issue where legacy shields were displayed instead of Mapbox designed ones with some of the map styles. [#5984](https://github.com/mapbox/mapbox-navigation-android/pull/5984)
 
 ## Mapbox Navigation SDK 2.7.0-alpha.1 - June 24, 2022
 ### Changelog
