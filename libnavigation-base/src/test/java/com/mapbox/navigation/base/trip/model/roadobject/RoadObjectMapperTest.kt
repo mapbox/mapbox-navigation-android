@@ -283,7 +283,8 @@ class RoadObjectMapperTest {
             INCIDENT_ALERT_CODES,
             INCIDENT_LONG_DESCRIPTION,
             INCIDENT_LANES_CLEAR_DESC,
-            INCIDENT_NUM_LANES_BLOCKED
+            INCIDENT_NUM_LANES_BLOCKED,
+            emptyList(),
         )
     )
 
