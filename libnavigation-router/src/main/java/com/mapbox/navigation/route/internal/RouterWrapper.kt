@@ -192,7 +192,7 @@ class RouterWrapper(
         return router.getRouteRefresh(
             refreshOptions
         ) { result, _ ->
-            logI("Received result from router.getRoutRefresh for ${route.id}", LOG_CATEGORY)
+            logI("Received result from router.getRouteRefresh for ${route.id}", LOG_CATEGORY)
             result.fold(
                 {
                     mainJobControl.scope.launch {
