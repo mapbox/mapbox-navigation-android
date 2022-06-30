@@ -305,7 +305,10 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         provider: RouteLineExpressionProvider?
     ): (Style) -> Unit {
         return when (provider) {
-            is RouteLineTrimExpressionProvider -> updateTrimOffset(layerId, provider)
+            is RouteLineTrimExpressionProvider -> {
+                println("Trim from getExpressionUpdateFun")
+                updateTrimOffset(layerId, provider)
+            }
             else -> updateLineGradient(layerId, provider)
         }
     }
@@ -588,6 +591,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
     ): (Style) -> Unit = { style: Style ->
         ifNonNull(expressionProvider) { provider ->
             style.getLayer(layerId)?.let {
+                println("Set line trim offset ${provider.generateExpression()} for $layerId")
                 (it as LineLayer).lineTrimOffset(provider.generateExpression())
             }
         }
@@ -605,6 +609,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
     private fun updateLineGradient(style: Style, expression: Expression, vararg layerIds: String) {
         layerIds.forEach { layerId ->
             style.getLayer(layerId)?.let {
+                println("Set line gradient $expression for $layerId")
                 (it as LineLayer).lineGradient(expression)
             }
         }
@@ -668,7 +673,9 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                 }
             }
 
-            mutationCommands.add { updateTrimOffset(layerId, provider)(style) }
+            mutationCommands.add {
+                updateTrimOffset(layerId, provider)(style)
+            }
         }
         return mutationCommands
     }

@@ -485,6 +485,7 @@ class MapboxRouteLineApi(
                     routeLineOptions.displaySoftGradientForTraffic,
                 )
             } else {
+                println("getTraveledRouteLineExpressions")
                 routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(point)
             }
 
@@ -548,6 +549,7 @@ class MapboxRouteLineApi(
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 routeLineOptions.vanishingRouteLine?.clear()
+                println("clear vanishPointOffset = 0.0")
                 routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
                 activeLegIndex = INVALID_ACTIVE_LEG_INDEX
                 routes.clear()
@@ -1144,6 +1146,7 @@ class MapboxRouteLineApi(
     ): Expected<RouteLineError, RouteSetValue> {
         ifNonNull(newRoutes.firstOrNull()) { primaryRouteCandidate ->
             if (!primaryRouteCandidate.directionsRoute.isSameRoute(primaryRoute?.directionsRoute)) {
+                println("Is NOT same route, vanishPointOffset = 0.0")
                 routeLineOptions.vanishingRouteLine?.clear()
                 routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
             }
@@ -1218,6 +1221,8 @@ class MapboxRouteLineApi(
         }
 
         val primaryRouteTrailExpressionDef = jobControl.scope.async {
+            // FIXME here and in the rest of asyncs race is also possible, shared variable from different thread
+            println("Get route trail expression ${routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0}")
             MapboxRouteLineUtils.getRouteLineExpression(
                 routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
                 routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor,
@@ -1405,6 +1410,10 @@ class MapboxRouteLineApi(
         }
 
         val wayPointsFeatureCollectionDef = jobControl.scope.async {
+            println("wayPointsFeatureCollectionDef before delay")
+            // simulate delay to ease reproducing
+//            delay(100)
+            println("wayPointsFeatureCollectionDef after delay")
             partitionedRoutes.first.firstOrNull()?.route?.run {
                 MapboxRouteLineUtils.buildWayPointFeatureCollection(this)
             } ?: FeatureCollection.fromFeatures(listOf())
@@ -1560,7 +1569,9 @@ class MapboxRouteLineApi(
                         primaryRouteTrafficLineExpressionProducer,
                         primaryRouteRestrictedSectionsExpressionProducer,
                         RouteLineTrimOffset(
-                            routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0
+                            (routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0).also {
+                                println("Create trim offset $it")
+                            }
                         ),
                         primaryRouteTrailExpressionProducer,
                         primaryRouteTrailCasingExpressionProducer

@@ -175,6 +175,7 @@ internal class VanishingRouteLine {
             primaryRouteRemainingDistancesIndex
         ) { granularDistances, index ->
             ifNonNull(getOffset(point, granularDistances, index)) { offset ->
+                println("getTraveledRouteLineExpressions point $point set vanishing offset $offset")
                 vanishPointOffset = offset
                 val trimmedOffsetExpression = literal(listOf(0.0, offset))
                 val trafficLineExpressionProvider = RouteLineTrimExpressionProvider {
@@ -213,6 +214,7 @@ internal class VanishingRouteLine {
             primaryRouteRemainingDistancesIndex
         ) { granularDistances, index ->
             ifNonNull(getOffset(point, granularDistances, index)) { offset ->
+                println("getTraveledRouteLineExpressions full set vanishing offset $offset")
                 vanishPointOffset = offset
                 val trafficLineExpressionProvider = if (useSoftGradient) {
                     {
