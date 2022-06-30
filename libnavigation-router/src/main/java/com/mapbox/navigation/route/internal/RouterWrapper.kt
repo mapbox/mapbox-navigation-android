@@ -55,6 +55,7 @@ class RouterWrapper(
 
         return router.getRoute(routeUrl) { result, origin ->
             val urlWithoutToken = URL(routeUrl.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM))
+            logI("received result from route.getRoute for $urlWithoutToken", LOG_CATEGORY)
             result.fold(
                 {
                     mainJobControl.scope.launch {
@@ -92,6 +93,11 @@ class RouterWrapper(
                 },
                 {
                     mainJobControl.scope.launch {
+                        logI(
+                            "processing successful response " +
+                                "from router.getRoute for $urlWithoutToken",
+                            LOG_CATEGORY
+                        )
                         parseDirectionsResponse(
                             ThreadController.IODispatcher,
                             it,
@@ -186,6 +192,7 @@ class RouterWrapper(
         return router.getRouteRefresh(
             refreshOptions
         ) { result, _ ->
+            logI("Received result from router.getRouteRefresh for ${route.id}", LOG_CATEGORY)
             result.fold(
                 {
                     mainJobControl.scope.launch {
@@ -211,17 +218,31 @@ class RouterWrapper(
                 {
                     mainJobControl.scope.launch {
                         withContext(ThreadController.IODispatcher) {
-                            parseDirectionsRouteRefresh(it).mapValue { routeRefresh ->
-                                route.refreshRoute(
-                                    initialLegIndex = refreshOptions.legIndex,
-                                    legAnnotations = routeRefresh.legs()?.map {
-                                        it.annotation()
-                                    },
-                                    incidents = routeRefresh.legs()?.map {
-                                        it.incidents()
-                                    }
-                                )
-                            }
+                            parseDirectionsRouteRefresh(it)
+                                .onValue {
+                                    logI(
+                                        "Parsed route refresh response for route(${route.id})",
+                                        LOG_CATEGORY
+                                    )
+                                }
+                                .onError {
+                                    logI(
+                                        "Failed to parse route refresh response for " +
+                                            "route(${route.id})",
+                                        LOG_CATEGORY
+                                    )
+                                }
+                                .mapValue { routeRefresh ->
+                                    route.refreshRoute(
+                                        initialLegIndex = refreshOptions.legIndex,
+                                        legAnnotations = routeRefresh.legs()?.map {
+                                            it.annotation()
+                                        },
+                                        incidents = routeRefresh.legs()?.map {
+                                            it.incidents()
+                                        }
+                                    )
+                                }
                         }.fold(
                             { throwable ->
                                 callback.onFailure(

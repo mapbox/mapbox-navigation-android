@@ -50,22 +50,13 @@ fun createNavigationRoutes(
             request: String,
             routerOrigin: RouterOrigin
         ): Expected<String, List<RouteInterface>> {
-            val directionsResponse = DirectionsResponse.fromJson(response)
-            val result = mutableListOf<RouteInterface>()
-            for (directionsRoute in directionsResponse.routes()) {
-                val route = createRouteInterface(
-                    responseUUID = directionsRoute.requestUuid() ?: "null",
-                    routeIndex = directionsRoute.routeIndex()!!.toInt(),
-                    responseJson = response,
-                    routerOrigin = routerOrigin.mapToNativeRouteOrigin(),
-                    requestURI = directionsRoute.routeOptions()!!.toUrl("pk.*test_token*")
-                        .toString()
-                )
-                result.add(route)
-            }
+            val result = createRouteInterfacesFromDirectionRequestResponse(
+                requestUri = request,
+                response = response,
+                routerOrigin = routerOrigin
+            )
             return ExpectedFactory.createValue(result)
         }
-
     }
     return com.mapbox.navigation.base.internal.route.createNavigationRoutes(
         response,
@@ -73,4 +64,21 @@ fun createNavigationRoutes(
         parser,
         routerOrigin
     )
+}
+
+fun createRouteInterfacesFromDirectionRequestResponse(
+    requestUri: String,
+    response: String,
+    routerOrigin: RouterOrigin = RouterOrigin.Offboard
+): List<RouteInterface> {
+    return DirectionsResponse.fromJson(response).routes()
+        .map { directionsRoute ->
+            createRouteInterface(
+                responseUUID = directionsRoute.requestUuid() ?: "null",
+                routeIndex = directionsRoute.routeIndex()!!.toInt(),
+                responseJson = response,
+                routerOrigin = routerOrigin.mapToNativeRouteOrigin(),
+                requestURI = requestUri
+            )
+        }
 }
