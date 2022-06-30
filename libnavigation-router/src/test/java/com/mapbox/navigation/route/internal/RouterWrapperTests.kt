@@ -76,76 +76,34 @@ class RouterWrapperTests {
     private val routerResultSuccess: Expected<RouterError, String> = ExpectedFactory.createValue(
         testRouteFixtures.loadTwoLegRoute()
     )
-    private val routerResultFailure: Expected<RouterError, String> = mockk {
-        every { isValue } returns false
-        every { isError } returns true
-        every { value } returns null
-        every { error } returns RouterError(
+    private val routerResultFailure: Expected<RouterError, String> = ExpectedFactory.createError(
+        RouterError(
             FAILURE_MESSAGE,
             FAILURE_CODE,
             FAILURE_TYPE,
             REQUEST_ID
         )
-
-        val errorSlot = slot<Expected.Transformer<RouterError, Unit>>()
-        every { fold(capture(errorSlot), any()) } answers {
-            errorSlot.captured.invoke(this@mockk.error!!)
-        }
-    }
-    private val routerResultCancelled: Expected<RouterError, String> = mockk {
-        every { isValue } returns false
-        every { isError } returns true
-        every { value } returns null
-        every { error } returns RouterError(
+    )
+    private val routerResultCancelled: Expected<RouterError, String> = ExpectedFactory.createError(
+        RouterError(
             CANCELLED_MESSAGE,
             FAILURE_CODE,
             CANCELED_TYPE,
             REQUEST_ID
         )
-
-        val errorSlot = slot<Expected.Transformer<RouterError, Unit>>()
-        every { fold(capture(errorSlot), any()) } answers {
-            errorSlot.captured.invoke(this@mockk.error!!)
-        }
-    }
-    private val routerResultSuccessEmptyRoutes: Expected<RouterError, String> = mockk {
-        every { isValue } returns true
-        every { isError } returns false
-        every { value } returns testRouteFixtures.loadEmptyRoutesResponse()
-        every { error } returns null
-
-        val valueSlot = slot<Expected.Transformer<String, Unit>>()
-        every { fold(any(), capture(valueSlot)) } answers {
-            valueSlot.captured.invoke(this@mockk.value!!)
-        }
-    }
+    )
+    private val routerResultSuccessEmptyRoutes: Expected<RouterError, String> = ExpectedFactory
+        .createValue(testRouteFixtures.loadEmptyRoutesResponse())
     private val routerResultSuccessErroneousValue: Expected<RouterError, String> =
         ExpectedFactory.createValue(
             "{\"message\":\"should be >= 1\",\"code\":\"InvalidInput\"}"
         )
 
-    private val routerRefreshSuccess: Expected<RouterError, String> = mockk {
-        every { isValue } returns true
-        every { isError } returns false
-        every { value } returns testRouteFixtures.loadRefreshForMultiLegRoute()
-        every { error } returns null
-
-        val valueSlot = slot<Expected.Transformer<String, Unit>>()
-        every { fold(any(), capture(valueSlot)) } answers {
-            valueSlot.captured.invoke(this@mockk.value!!)
-        }
-    }
-    private val routerRefreshSuccessSecondLeg: Expected<RouterError, String> = mockk {
-        every { isValue } returns true
-        every { isError } returns false
-        every { value } returns testRouteFixtures.loadRefreshForMultiLegRouteSecondLeg()
-        every { error } returns null
-
-        val valueSlot = slot<Expected.Transformer<String, Unit>>()
-        every { fold(any(), capture(valueSlot)) } answers {
-            valueSlot.captured.invoke(this@mockk.value!!)
-        }
-    }
+    private val routerRefreshSuccess: Expected<RouterError, String> = ExpectedFactory.createValue(
+        testRouteFixtures.loadRefreshForMultiLegRoute()
+    )
+    private val routerRefreshSuccessSecondLeg: Expected<RouterError, String> = ExpectedFactory
+        .createValue(testRouteFixtures.loadRefreshForMultiLegRouteSecondLeg())
     private val nativeOriginOnline: RouterOrigin = RouterOrigin.ONLINE
     private val nativeOriginOnboard: RouterOrigin = RouterOrigin.ONBOARD
     private val getRouteSlot = slot<com.mapbox.navigator.RouterCallback>()
