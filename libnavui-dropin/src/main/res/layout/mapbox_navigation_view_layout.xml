@@ -41,6 +41,14 @@
                     app:layout_constraintGuide_end="0dp"
                     tools:layout_constraintGuide_end="100dp" />
 
+                <View
+                    android:layout_height="1dp"
+                    android:layout_width="match_parent"
+                    android:background="#000"
+                    app:layout_constraintTop_toBottomOf="@id/guidelineBottom"
+                    />
+
+
                 <FrameLayout
                     android:id="@+id/guidanceLayout"
                     android:layout_width="match_parent"

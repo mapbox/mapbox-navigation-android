@@ -39,6 +39,11 @@ class ViewOptionsCustomization {
      */
     var routeArrowOptions: RouteArrowOptions? = null
 
+    /**
+     * Set if Info Panel should hide for the Free Drive state.
+     */
+    var showInfoPanelInFreeDrive: Boolean? = null
+
     companion object {
         /**
          * Default route line options.
