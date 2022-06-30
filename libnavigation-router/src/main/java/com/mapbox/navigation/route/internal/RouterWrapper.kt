@@ -220,12 +220,16 @@ class RouterWrapper(
                         withContext(ThreadController.IODispatcher) {
                             parseDirectionsRouteRefresh(it)
                                 .onValue {
-                                    logI("Parsed route refresh response for route(${route.id})")
+                                    logI(
+                                        "Parsed route refresh response for route(${route.id})",
+                                        LOG_CATEGORY
+                                    )
                                 }
                                 .onError {
                                     logI(
                                         "Failed to parse route refresh response for " +
-                                            "route(${route.id})"
+                                            "route(${route.id})",
+                                        LOG_CATEGORY
                                     )
                                 }
                                 .mapValue { routeRefresh ->
