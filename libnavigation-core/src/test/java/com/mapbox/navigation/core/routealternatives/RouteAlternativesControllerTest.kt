@@ -71,6 +71,7 @@ class RouteAlternativesControllerTest {
     fun setup() {
         mockkObject(ThreadController)
         every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
+        every { ThreadController.DefaultDispatcher } returns coroutineRule.testDispatcher
 
         mockkObject(NativeRouteParserWrapper)
         every {

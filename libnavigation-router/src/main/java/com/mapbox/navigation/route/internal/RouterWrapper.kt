@@ -99,7 +99,7 @@ class RouterWrapper(
                             LOG_CATEGORY
                         )
                         parseDirectionsResponse(
-                            ThreadController.IODispatcher,
+                            ThreadController.DefaultDispatcher,
                             it,
                             routeUrl,
                             origin.mapToSdkRouteOrigin(),
@@ -217,7 +217,7 @@ class RouterWrapper(
                 },
                 {
                     mainJobControl.scope.launch {
-                        withContext(ThreadController.IODispatcher) {
+                        withContext(ThreadController.DefaultDispatcher) {
                             parseDirectionsRouteRefresh(it)
                                 .onValue {
                                     logI(

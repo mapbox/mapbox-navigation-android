@@ -211,7 +211,7 @@ internal class RouteAlternativesController constructor(
         val alternatives: List<NavigationRoute> =
             nativeAlternatives.mapIndexedNotNull { index, routeAlternative ->
                 val expected = parseNativeDirectionsAlternative(
-                    ThreadController.IODispatcher,
+                    ThreadController.DefaultDispatcher,
                     routeAlternative
                 )
                 if (expected.isValue) {
