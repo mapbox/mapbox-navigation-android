@@ -142,22 +142,22 @@ object TestActivitySuite {
             activity.startActivity<IconsPreviewActivity>()
         },
         TestActivityDescription(
-            "Navigation View test",
+            "Default NavigationView",
             R.string.navigation_view_description,
             launchAfterPermissionResult = false
         ) { activity -> activity.startActivity<MapboxNavigationViewActivity>() },
         TestActivityDescription(
-            "Customized navigation View test",
+            "Customized NavigationView",
             R.string.navigation_view_customized_description,
             launchAfterPermissionResult = false
         ) { activity -> activity.startActivity<MapboxNavigationViewCustomizedActivity>() },
         TestActivityDescription(
-            "Navigation View in a Fragment test",
+            "Fullscreen NavigationView in a Fragment",
             R.string.navigation_view_fragment_description,
             launchAfterPermissionResult = false
         ) { activity -> activity.startActivity<MapboxNavigationViewFragmentActivity>() },
         TestActivityDescription(
-            "Navigation View lifecycle test with Fragments",
+            "NavigationView lifecycle test with Fragments",
             R.string.navigation_view_fragment_lifecycle_description,
             launchAfterPermissionResult = false
         ) { activity -> activity.startActivity<NavigationViewFragmentLifecycleActivity>() },

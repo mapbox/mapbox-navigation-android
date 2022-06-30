@@ -52,7 +52,7 @@
             />
         <activity
             android:name=".view.MapboxNavigationViewFragmentActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:theme="@style/Theme.Fullscreen"
             />
         <activity
             android:name=".view.NavigationViewFragmentLifecycleActivity"
