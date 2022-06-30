@@ -6,6 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
+- Fixed a Drop-In UI issue where legacy shields were displayed instead of Mapbox designed ones with some of the map styles. [#5984](https://github.com/mapbox/mapbox-navigation-android/pull/5984)
 
 ## Mapbox Navigation SDK 2.6.0-rc.1 - June 23, 2022
 ### Changelog
