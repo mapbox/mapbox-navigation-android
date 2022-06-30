@@ -9,25 +9,41 @@ import org.junit.Test
 
 class MapboxStyleExtensionsKtTest {
 
-    // Map of (URI to EXPECTED_STYLE_ID)
-    private val fixtures: Map<String, String?> = mapOf(
-        NavigationStyles.NAVIGATION_NIGHT_STYLE to NavigationStyles.NAVIGATION_NIGHT_STYLE_ID,
-        "mapbox://styles/mapbox/dark-v10" to "dark-v10",
-        "mapbox://styles/mapbox/navigation-day-v1" to "navigation-day-v1",
-        "mapbox://styles/mapbox/mnuhbadfvads803124" to "mnuhbadfvads803124",
-        "mapbox://styles/user/styleId" to "styleId",
-        "mapbox://styles/some-user-id/custom-style-2123" to "custom-style-2123",
-        "http://asdasd/asdas" to null,
-        "some random string" to null
+    // List of (URI, EXPECTED_USER_ID, EXPECTED_STYLE_ID)
+    private val fixtures = listOf(
+        Triple(
+            NavigationStyles.NAVIGATION_NIGHT_STYLE,
+            NavigationStyles.NAVIGATION_NIGHT_STYLE_USER_ID,
+            NavigationStyles.NAVIGATION_NIGHT_STYLE_ID,
+        ),
+        Triple("mapbox://styles/mapbox/dark-v10", "mapbox", "dark-v10"),
+        Triple("mapbox://styles/mapbox/navigation-day-v1", "mapbox", "navigation-day-v1"),
+        Triple("mapbox://styles/mapbox/mnuhbadfvads803124", "mapbox", "mnuhbadfvads803124"),
+        Triple("mapbox://styles/user/styleId", "user", "styleId"),
+        Triple(
+            "mapbox://styles/some-user-id/custom-style-2123", "some-user-id", "custom-style-2123",
+        ),
+        Triple("http://asdasd/asdas", null, null),
+        Triple("some random string", null, null),
     )
 
     @Test
-    fun `getStyleId should return STYLE_ID`() {
-        fixtures.forEach { (uri, expectedId) ->
+    fun `getUserId should return USER_ID`() {
+        for ((uri, userId, _) in fixtures) {
             val style = mockk<Style> {
                 every { styleURI } returns uri
             }
-            assertEquals(expectedId, style.getStyleId())
+            assertEquals(userId, style.getUserId())
+        }
+    }
+
+    @Test
+    fun `getStyleId should return STYLE_ID`() {
+        for ((uri, _, styleId) in fixtures) {
+            val style = mockk<Style> {
+                every { styleURI } returns uri
+            }
+            assertEquals(styleId, style.getStyleId())
         }
     }
 }
