@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
@@ -258,7 +257,7 @@ abstract class BaseNavigationActivity : AppCompatActivity(), OnMapLongClickListe
             }
             baseBinding.maneuverView.renderManeuvers(maneuvers)
             maneuverApi.getRoadShields(
-                DirectionsCriteria.PROFILE_DEFAULT_USER,
+                NavigationStyles.NAVIGATION_DAY_STYLE_USER_ID,
                 NavigationStyles.NAVIGATION_DAY_STYLE_ID,
                 getMapboxAccessToken("mapbox_access_token"),
                 it,

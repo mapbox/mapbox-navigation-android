@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
@@ -46,6 +45,7 @@ import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
 import com.mapbox.navigation.ui.maps.NavigationStyles.NAVIGATION_DAY_STYLE
 import com.mapbox.navigation.ui.maps.NavigationStyles.NAVIGATION_DAY_STYLE_ID
+import com.mapbox.navigation.ui.maps.NavigationStyles.NAVIGATION_DAY_STYLE_USER_ID
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
@@ -182,7 +182,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
             }
             binding.maneuverView.renderManeuvers(maneuvers)
             maneuverApi.getRoadShields(
-                DirectionsCriteria.PROFILE_DEFAULT_USER,
+                NAVIGATION_DAY_STYLE_USER_ID,
                 NAVIGATION_DAY_STYLE_ID,
                 getString(R.string.mapbox_access_token),
                 it,
