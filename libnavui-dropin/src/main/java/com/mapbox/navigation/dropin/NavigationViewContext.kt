@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin
 
 import android.content.Context
+import androidx.core.graphics.Insets
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.mapbox.maps.MapView
@@ -28,6 +29,8 @@ internal class NavigationViewContext(
     val store by lazy { SharedApp.store }
 
     val mapView = MutableStateFlow<MapView?>(null)
+
+    val systemBarsInsets = MutableStateFlow<Insets?>(null)
 
     val uiBinders = ViewBinder()
     val styles = NavigationViewStyles(context)

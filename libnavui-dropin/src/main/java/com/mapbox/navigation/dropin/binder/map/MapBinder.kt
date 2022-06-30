@@ -13,6 +13,7 @@ import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.component.camera.CameraComponent
 import com.mapbox.navigation.dropin.component.camera.CameraLayoutObserver
 import com.mapbox.navigation.dropin.component.location.LocationComponent
+import com.mapbox.navigation.dropin.component.logo.LogoAttributionComponent
 import com.mapbox.navigation.dropin.component.marker.FreeDriveLongPressMapComponent
 import com.mapbox.navigation.dropin.component.marker.GeocodingComponent
 import com.mapbox.navigation.dropin.component.marker.MapMarkersComponent
@@ -48,10 +49,8 @@ internal class MapBinder(
         val navigationState = store.select { it.navigation }
         return navigationListOf(
             CameraLayoutObserver(store, mapView, binding),
-            LocationComponent(
-                mapView,
-                SharedApp.locationStateController,
-            ),
+            LocationComponent(mapView, SharedApp.locationStateController),
+            LogoAttributionComponent(mapView, context.systemBarsInsets),
             reloadOnChange(
                 context.mapStyleLoader.loadedMapStyle,
                 context.options.routeLineOptions
