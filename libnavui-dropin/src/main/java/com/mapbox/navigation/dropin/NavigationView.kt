@@ -8,6 +8,8 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -103,6 +105,7 @@ class NavigationView @JvmOverloads constructor(
 
     init {
         keepScreenOn = true
+        captureSystemBarsInsets()
 
         SharedApp.setup(context.applicationContext as Application)
         if (!MapboxNavigationApp.isSetup()) {
@@ -132,6 +135,14 @@ class NavigationView @JvmOverloads constructor(
             LeftFrameCoordinator(navigationContext, binding.emptyLeftContainer),
             RightFrameCoordinator(navigationContext, binding.emptyRightContainer)
         )
+    }
+
+    private fun captureSystemBarsInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
+            val systemBarsInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            navigationContext.systemBarsInsets.value = systemBarsInsets
+            insets
+        }
     }
 
     /**
