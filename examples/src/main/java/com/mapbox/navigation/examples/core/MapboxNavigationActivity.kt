@@ -195,6 +195,10 @@ class MapboxNavigationActivity : AppCompatActivity() {
         }
     }
 
+    private val debugRouteProgressObserver = RouteProgressObserver { routeProgress ->
+        logD("vadzim-debug", "${routeProgress.navigationRoute.id}")
+    }
+
     private val routeProgressObserver =
         RouteProgressObserver { routeProgress ->
             // update the camera position to account for the progressed fragment of the route
@@ -436,6 +440,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerNavigationSessionStateObserver(navigationSessionStateObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.registerRouteProgressObserver(debugRouteProgressObserver)
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
     }
@@ -445,6 +450,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.unregisterRouteProgressObserver(debugRouteProgressObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
     }
@@ -495,7 +501,10 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     private fun setRouteAndStartNavigation(route: List<NavigationRoute>) {
         // set route
+        logD("vadzim-debug", "settingRoute ${route.first().id}")
+        mapboxNavigation.unregisterRouteProgressObserver(debugRouteProgressObserver)
         mapboxNavigation.setNavigationRoutes(route)
+        mapboxNavigation.registerRouteProgressObserver(debugRouteProgressObserver)
 
         // show UI elements
         binding.soundButton.visibility = VISIBLE
