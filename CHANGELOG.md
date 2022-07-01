@@ -6,10 +6,35 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.7.0-alpha.2 - July 1, 2022
+### Changelog
+[Changes between v2.7.0-alpha.1 and v2.7.0-alpha.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.7.0-alpha.1...v2.7.0-alpha.2)
+
+#### Features
+
+- Added refresh of alternatives routes. [#5923](https://github.com/mapbox/mapbox-navigation-android/pull/5923)
+- Moved `MapboxCameraModeButton` to `libnavui-maps` module. Moved `MapboxExtendableButton` to `libnavui-base` module. Added new styles for `MapboxAudioGuidanceButton`, `MapboxCameraModeButton` and `MapboxExtendableButton` views. Those styles can be used to change the default button shape to "Oval," "Square" or "Circle" [#5962](https://github.com/mapbox/mapbox-navigation-android/pull/5962)
+
+#### Bug fixes and improvements
+
 - Fixed reroute request interruption when setting the `NavigationRerouteController` [#5950](https://github.com/mapbox/mapbox-navigation-android/pull/5950).
 - Fixed setting trim offsets to route line trail layers. [#5982](https://github.com/mapbox/mapbox-navigation-android/pull/5982)
 - Fixed a Drop-In UI issue where legacy shields were displayed instead of Mapbox designed ones with some of the map styles. [#5984](https://github.com/mapbox/mapbox-navigation-android/pull/5984)
 - Updated `NavigationView` to support edge-to-edge display. [#5976](https://github.com/mapbox/mapbox-navigation-android/pull/5976)
+
+#### Known issues
+
+:bangbang: We are observing an [intermittent native crash](https://github.com/mapbox/mapbox-navigation-android/issues/5985) with this pre-release version when starting an active guidance session and then stopping the session by clicking on device back button. The root cause is still unknown and it only seems to affect specific devices. We are working to understand the issue and a fix is expected ahead of the final v2.7 release.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.7.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.7.0-beta.1))
+- Mapbox Navigation Native `v108.0.0`
+- Mapbox Core Common `v22.1.0-beta.1`
+- Mapbox Java `v6.6.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.6.0))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.2`
 
 ## Mapbox Navigation SDK 2.6.0-rc.2 - July 1, 2022
 ### Changelog
@@ -53,7 +78,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 #### Features
 - Added `ViewBinderCustomization.customActionButtons` that allows installation of custom action buttons in `NavigationView` ActionBinder [#5937](https://github.com/mapbox/mapbox-navigation-android/pull/5937)
-- Moved `MapboxCameraModeButton` to `libnavui-maps` module. Moved `MapboxExtendableButton` to `libnavui-base` module. Added new styles for `MapboxAudioGuidanceButton`, `MapboxCameraModeButton` and `MapboxExtendableButton` views. Those styles can be used to change the default button shape to "Oval," "Square" or "Circle" [#5962](https://github.com/mapbox/mapbox-navigation-android/pull/5962)
 
 #### Bug fixes and improvements
 - Fixed user location indicator's velocity when `NavigationLocationProvider` is used together with `keyPoints`. [#5925](https://github.com/mapbox/mapbox-navigation-android/pull/5925)
@@ -99,7 +123,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 #### Features
 - Added `MapboxNavigationApp#installComponents()` and `MapboxNavigation#installComponents()` APIs that offer simplified integration of voice, route line and route arrow APIs. These extensions allow to instantiate wrappers that automatically integrate `MapboxNavigation` with the selected components, taking care of data and lifecycle management. See documentation for `RouteLineComponent`, `RouteArrowComponent` and `AudioGuidanceButtonComponent`. [#5874](https://github.com/mapbox/mapbox-navigation-android/pull/5874)
 - Added support for user feedbacks with custom types and subtypes. [#5915](https://github.com/mapbox/mapbox-navigation-android/pull/5915)
-- Added refresh of alternatives routes. [#5923](https://github.com/mapbox/mapbox-navigation-android/pull/5923)
 
 #### Bug fixes and improvements
 - :warning: Moved `MapboxAudioGuidanceButton` from Drop-in UI to Voice module. [#5874](https://github.com/mapbox/mapbox-navigation-android/pull/5874)
