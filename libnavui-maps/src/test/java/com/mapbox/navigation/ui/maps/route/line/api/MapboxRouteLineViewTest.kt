@@ -550,22 +550,22 @@ class MapboxRouteLineViewTest {
         verify { route3Traffic.lineGradient(layerGroup3Expression) }
         verify { route3Restricted.lineGradient(layerGroup3Expression) }
 
-        verify { route1TrailCasing.lineTrimOffset(literal(listOf(0.0, 9.9))) }
-        verify { route1Trail.lineTrimOffset(literal(listOf(0.0, 9.9))) }
+        verify(exactly = 0) { route1TrailCasing.lineTrimOffset(literal(listOf(0.0, 9.9))) }
+        verify(exactly = 0) { route1Trail.lineTrimOffset(literal(listOf(0.0, 9.9))) }
         verify { route1Casing.lineTrimOffset(literal(listOf(0.0, 9.9))) }
         verify { route1Main.lineTrimOffset(literal(listOf(0.0, 9.9))) }
         verify { route1Traffic.lineTrimOffset(literal(listOf(0.0, 9.9))) }
         verify { route1Restricted.lineTrimOffset(literal(listOf(0.0, 9.9))) }
 
-        verify { route2TrailCasing.lineTrimOffset(literal(listOf(0.0, 0.0))) }
-        verify { route2Trail.lineTrimOffset(literal(listOf(0.0, 0.0))) }
+        verify(exactly = 0) { route2TrailCasing.lineTrimOffset(literal(listOf(0.0, 0.0))) }
+        verify(exactly = 0) { route2Trail.lineTrimOffset(literal(listOf(0.0, 0.0))) }
         verify { route2Casing.lineTrimOffset(literal(listOf(0.0, 0.0))) }
         verify { route2Main.lineTrimOffset(literal(listOf(0.0, 0.0))) }
         verify { route2Traffic.lineTrimOffset(literal(listOf(0.0, 0.0))) }
         verify { route2Restricted.lineTrimOffset(literal(listOf(0.0, 0.0))) }
 
-        verify { route3TrailCasing.lineTrimOffset(literal(listOf(0.0, 0.1))) }
-        verify { route3Trail.lineTrimOffset(literal(listOf(0.0, 0.1))) }
+        verify(exactly = 0) { route3TrailCasing.lineTrimOffset(literal(listOf(0.0, 0.1))) }
+        verify(exactly = 0) { route3Trail.lineTrimOffset(literal(listOf(0.0, 0.1))) }
         verify { route3Casing.lineTrimOffset(literal(listOf(0.0, 0.1))) }
         verify { route3Main.lineTrimOffset(literal(listOf(0.0, 0.1))) }
         verify { route3Traffic.lineTrimOffset(literal(listOf(0.0, 0.1))) }

@@ -1180,7 +1180,7 @@ class MapboxRouteLineApi(
         val partitionedRoutes = routeFeatureData.partition {
             it.route == routes.first()
         }
-
+        val vanishingPointOffset = routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0
         val primaryRouteTrafficLineExpressionDef = jobControl.scope.async {
             partitionedRoutes.first.firstOrNull()?.route?.run {
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
@@ -1188,7 +1188,7 @@ class MapboxRouteLineApi(
                     routeLineOptions.resourceProvider.routeLineColorResources,
                     trafficBackfillRoadClasses,
                     true,
-                    routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
+                    vanishingPointOffset,
                     Color.TRANSPARENT,
                     routeLineOptions.resourceProvider.routeLineColorResources
                         .routeUnknownCongestionColor,
@@ -1200,7 +1200,7 @@ class MapboxRouteLineApi(
 
         val primaryRouteBaseExpressionDef = jobControl.scope.async {
             MapboxRouteLineUtils.getRouteLineExpression(
-                routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
+                vanishingPointOffset,
                 routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor,
                 routeLineOptions.resourceProvider.routeLineColorResources.routeDefaultColor
             )
@@ -1208,7 +1208,7 @@ class MapboxRouteLineApi(
 
         val primaryRouteCasingExpressionDef = jobControl.scope.async {
             MapboxRouteLineUtils.getRouteLineExpression(
-                routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
+                vanishingPointOffset,
                 routeLineOptions
                     .resourceProvider
                     .routeLineColorResources
@@ -1219,7 +1219,7 @@ class MapboxRouteLineApi(
 
         val primaryRouteTrailExpressionDef = jobControl.scope.async {
             MapboxRouteLineUtils.getRouteLineExpression(
-                routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
+                vanishingPointOffset,
                 routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor,
                 routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor
             )
@@ -1227,7 +1227,7 @@ class MapboxRouteLineApi(
 
         val primaryRouteTrailCasingExpressionDef = jobControl.scope.async {
             MapboxRouteLineUtils.getRouteLineExpression(
-                routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
+                vanishingPointOffset,
                 routeLineOptions
                     .resourceProvider
                     .routeLineColorResources
@@ -1559,9 +1559,7 @@ class MapboxRouteLineApi(
                         primaryRouteCasingExpressionProducer,
                         primaryRouteTrafficLineExpressionProducer,
                         primaryRouteRestrictedSectionsExpressionProducer,
-                        RouteLineTrimOffset(
-                            routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0
-                        ),
+                        RouteLineTrimOffset(vanishingPointOffset),
                         primaryRouteTrailExpressionProducer,
                         primaryRouteTrailCasingExpressionProducer
                     )

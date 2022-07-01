@@ -84,7 +84,7 @@ class RouteLineDynamicData internal constructor(
         if (restrictedSectionExpressionProvider != other.restrictedSectionExpressionProvider)
             return false
         if (trimOffset != other.trimOffset) return false
-        if (trailExpressionProvider != other.trafficExpressionProvider) return false
+        if (trailExpressionProvider != other.trailExpressionProvider) return false
         if (trailCasingExpressionProvider != other.trailCasingExpressionProvider) return false
 
         return true
