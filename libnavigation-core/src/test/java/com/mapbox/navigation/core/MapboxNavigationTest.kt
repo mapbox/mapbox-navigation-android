@@ -1,7 +1,6 @@
 package com.mapbox.navigation.core
 
 import com.mapbox.android.telemetry.TelemetryEnabler
-import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -34,6 +33,7 @@ import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.createSetRouteResult
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
+import com.mapbox.navigation.testing.factories.createRouteOptions
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RouteAlternative
@@ -782,12 +782,10 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun `setRoute pushes the route to the directions session`() = coroutineRule.runBlockingTest {
         createMapboxNavigation()
         val route: NavigationRoute = mockk()
-        val routeOptions: RouteOptions = mockk()
+        val routeOptions = createRouteOptions()
         every { route.routeOptions } returns routeOptions
         every { route.directionsRoute.geometry() } returns "geometry"
         every { route.directionsRoute.legs() } returns emptyList()
-        every { routeOptions.overview() } returns "full"
-        every { routeOptions.annotationsList() } returns emptyList()
 
         val routes = listOf(route)
         val initialLegIndex = 2
@@ -809,12 +807,10 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         coroutineRule.runBlockingTest {
             createMapboxNavigation()
             val route: NavigationRoute = mockk()
-            val routeOptions: RouteOptions = mockk()
+            val routeOptions = createRouteOptions()
             every { route.routeOptions } returns routeOptions
             every { route.directionsRoute.geometry() } returns "geometry"
             every { route.directionsRoute.legs() } returns emptyList()
-            every { routeOptions.overview() } returns "full"
-            every { routeOptions.annotationsList() } returns emptyList()
 
             val routes = listOf(route)
             val initialLegIndex = 2

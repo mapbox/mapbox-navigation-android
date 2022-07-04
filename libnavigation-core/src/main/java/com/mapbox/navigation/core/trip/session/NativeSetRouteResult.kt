@@ -14,7 +14,27 @@ internal sealed class NativeSetRouteResult
  */
 internal class NativeSetRouteValue(
     val nativeAlternatives: List<RouteAlternative>
-) : NativeSetRouteResult()
+) : NativeSetRouteResult() {
+
+    override fun toString(): String {
+        return "NativeSetRouteValue(nativeAlternatives=$nativeAlternatives)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as NativeSetRouteValue
+
+        if (nativeAlternatives != other.nativeAlternatives) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return nativeAlternatives.hashCode()
+    }
+}
 
 /**
  * Represents a failure of setting routes to native navigator.
@@ -22,4 +42,24 @@ internal class NativeSetRouteValue(
  */
 internal class NativeSetRouteError(
     val error: String
-) : NativeSetRouteResult()
+) : NativeSetRouteResult() {
+
+    override fun toString(): String {
+        return "NativeSetRouteError(error='$error')"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as NativeSetRouteError
+
+        if (error != other.error) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return error.hashCode()
+    }
+}

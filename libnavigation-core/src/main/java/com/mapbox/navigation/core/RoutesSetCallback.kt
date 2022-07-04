@@ -33,6 +33,10 @@ interface RoutesSetCallback {
 class RoutesSetCallbackSuccess internal constructor(
     val routes: List<NavigationRoute>
 ) {
+
+    /**
+     * Regenerate whenever a change is made
+     */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -44,10 +48,16 @@ class RoutesSetCallbackSuccess internal constructor(
         return true
     }
 
+    /**
+     * Regenerate whenever a change is made
+     */
     override fun hashCode(): Int {
         return routes.hashCode()
     }
 
+    /**
+     * Regenerate whenever a change is made
+     */
     override fun toString(): String {
         return "RoutesSetCallbackSuccess(routes=$routes)"
     }
@@ -64,6 +74,9 @@ class RoutesSetCallbackError internal constructor(
     val error: String
 ) {
 
+    /**
+     * Regenerate whenever a change is made
+     */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -76,12 +89,18 @@ class RoutesSetCallbackError internal constructor(
         return true
     }
 
+    /**
+     * Regenerate whenever a change is made
+     */
     override fun hashCode(): Int {
         var result = routes.hashCode()
         result = 31 * result + error.hashCode()
         return result
     }
 
+    /**
+     * Regenerate whenever a change is made
+     */
     override fun toString(): String {
         return "RoutesSetCallbackFailure(routes=$routes, error=$error)"
     }
