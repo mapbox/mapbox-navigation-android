@@ -7,6 +7,8 @@ Mapbox welcomes participation and contributions from everyone.
 
 #### Bug fixes and improvements
 - Made `rerouteController` argument in `MapboxNavigation#setRerouteController` nullable. Null can be passed to disable automatic rerouting. [#5977](https://github.com/mapbox/mapbox-navigation-android/pull/5977)
+- Introduced `RoutesSetCallback` parameter to `MapboxNavigation#setNavigationRoutes`, which is called after the routes passed to `MapboxNavigation#setNavigationRoutes` are processed or are failed to be processed. [#5946](https://github.com/mapbox/mapbox-navigation-android/pull/5946)
+- Changed the behaviour of `RoutesObserver`: `onRoutesChanged` method will not be triggered if the navigator fails to process routes passed via `MapboxNavigation#setNavigationRoutes`. [#5946](https://github.com/mapbox/mapbox-navigation-android/pull/5946)
 
 ## Mapbox Navigation SDK 2.7.0-alpha.2 - July 1, 2022
 ### Changelog
@@ -54,8 +56,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v6.6.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.6.0))
 - Mapbox Android Core `v5.0.1`
 - Mapbox Android Telemetry `v8.1.2`
-- Introduced `RoutesSetCallback` parameter to `MapboxNavigation#setNavigationRoutes`, which is called after the routes passed to `MapboxNavigation#setNavigationRoutes` are processed or are failed to be processed [#5945](https://github.com/mapbox/mapbox-navigation-android/pull/5945).
-- `RoutesObserver#onRoutesChanged` will not be triggered if the navigator fails to process routes passed via `MapboxNavigation#setNavigationRoutes` [#5945](https://github.com/mapbox/mapbox-navigation-android/pull/5945).
 
 ## Mapbox Navigation SDK 2.7.0-alpha.1 - June 24, 2022
 ### Changelog
