@@ -96,24 +96,25 @@ internal class MapboxTripSession(
                 setRouteToNativeNavigator(routes, legIndex)
             }
             RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE -> {
-                NativeSetRouteResult(
+                NativeSetRouteValue(
                     nativeAlternatives = navigator.setAlternativeRoutes(routes.drop(1))
                 )
             }
             RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
-                val alternatives = if (routes.isNotEmpty()) {
+                if (routes.isNotEmpty()) {
                     val primaryRoute = routes.first()
                     val alternatives = navigator.refreshRoute(primaryRoute)
                     roadObjects = getRouteInitInfo(primaryRoute.nativeRoute().routeInfo)
                         ?.roadObjects
                         ?: emptyList()
                     this@MapboxTripSession.primaryRoute = routes.first()
-                    alternatives
+                    alternatives.fold({ NativeSetRouteError(it) }, { NativeSetRouteValue(it) })
                 } else {
-                    logW("Cannot refresh route. Route can't be null", LOG_CATEGORY)
-                    null
+                    with("Cannot refresh route. Route can't be null") {
+                        logW(this, LOG_CATEGORY)
+                        NativeSetRouteError(this)
+                    }
                 }
-                NativeSetRouteResult(alternatives)
             }
             else -> throw IllegalArgumentException("Unsupported route update reason: $reason")
         }
@@ -132,15 +133,13 @@ internal class MapboxTripSession(
             newPrimaryRoute,
             legIndex,
             routes.drop(1)
-        ).mapValue { it.alternatives }.getValueOrElse { emptyList() }
+        ).mapValue { it.alternatives }
         this@MapboxTripSession.primaryRoute = newPrimaryRoute
         roadObjects = newPrimaryRoute?.let {
             getRouteInitInfo(it.nativeRoute().routeInfo)?.roadObjects
         } ?: emptyList()
         logD("primary route update - finished", LOG_CATEGORY)
-        return NativeSetRouteResult(
-            nativeAlternatives = processedAlternatives
-        )
+        return processedAlternatives.fold({ NativeSetRouteError(it) }, { NativeSetRouteValue(it) })
     }
 
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()

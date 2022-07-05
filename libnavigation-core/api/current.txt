@@ -51,6 +51,7 @@ package com.mapbox.navigation.core {
     method public void resetTripSession();
     method public void setArrivalController(com.mapbox.navigation.core.arrival.ArrivalController? arrivalController = com.mapbox.navigation.core.arrival.AutoArrivalController());
     method public void setArrivalController();
+    method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, int initialLegIndex = 0, com.mapbox.navigation.core.RoutesSetCallback? callback = null);
     method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, int initialLegIndex = 0);
     method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
     method public void setRerouteController(com.mapbox.navigation.core.reroute.RerouteController? rerouteController);
@@ -103,6 +104,23 @@ package com.mapbox.navigation.core {
   public interface NavigationVersionSwitchObserver {
     method public void onSwitchToFallbackVersion(String? tilesVersion);
     method public void onSwitchToTargetVersion(String? tilesVersion);
+  }
+
+  public interface RoutesSetCallback {
+    method public void onRoutesSetError(com.mapbox.navigation.core.RoutesSetCallbackError result);
+    method public void onRoutesSetResult(com.mapbox.navigation.core.RoutesSetCallbackSuccess result);
+  }
+
+  public final class RoutesSetCallbackError {
+    method public String getError();
+    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> getRoutes();
+    property public final String error;
+    property public final java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes;
+  }
+
+  public final class RoutesSetCallbackSuccess {
+    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> getRoutes();
+    property public final java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes;
   }
 
 }

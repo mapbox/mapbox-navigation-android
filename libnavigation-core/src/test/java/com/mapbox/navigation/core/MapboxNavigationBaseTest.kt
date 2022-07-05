@@ -31,7 +31,7 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.trip.service.TripService
-import com.mapbox.navigation.core.trip.session.NativeSetRouteResult
+import com.mapbox.navigation.core.trip.session.NativeSetRouteValue
 import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
@@ -270,7 +270,7 @@ internal open class MapboxNavigationBaseTest {
             )
         } returns tripSession
         every { tripSession.getRouteProgress() } returns routeProgress
-        coEvery { tripSession.setRoutes(any(), any(), any()) } returns NativeSetRouteResult(
+        coEvery { tripSession.setRoutes(any(), any(), any()) } returns NativeSetRouteValue(
             nativeAlternatives = emptyList()
         )
     }
