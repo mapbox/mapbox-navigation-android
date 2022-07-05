@@ -18,6 +18,7 @@ internal class LogoAttributionComponent(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
+        val initialAttributionMarginLeft = mapView.attribution.getSettings().marginLeft
         systemBarInsets.observe { insets ->
             if (insets != null) {
                 val bottom = insets.bottom.toFloat()
@@ -30,7 +31,7 @@ internal class LogoAttributionComponent(
                 }
                 mapView.attribution.updateSettings {
                     marginBottom = bottom
-                    marginLeft = left
+                    marginLeft = initialAttributionMarginLeft + left
                     marginRight = right
                 }
             }

@@ -6,6 +6,39 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
+- Made `rerouteController` argument in `MapboxNavigation#setRerouteController` nullable. Null can be passed to disable automatic rerouting. [#5977](https://github.com/mapbox/mapbox-navigation-android/pull/5977)
+- Introduced `RoutesSetCallback` parameter to `MapboxNavigation#setNavigationRoutes`, which is called after the routes passed to `MapboxNavigation#setNavigationRoutes` are processed or are failed to be processed. [#5946](https://github.com/mapbox/mapbox-navigation-android/pull/5946)
+- Changed the behaviour of `RoutesObserver`: `onRoutesChanged` method will not be triggered if the navigator fails to process routes passed via `MapboxNavigation#setNavigationRoutes`. [#5946](https://github.com/mapbox/mapbox-navigation-android/pull/5946)
+- Fixed Attribution Icon position in `NavigationView` [#6012](https://github.com/mapbox/mapbox-navigation-android/pull/6012) 
+
+## Mapbox Navigation SDK 2.7.0-alpha.2 - July 1, 2022
+### Changelog
+[Changes between v2.7.0-alpha.1 and v2.7.0-alpha.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.7.0-alpha.1...v2.7.0-alpha.2)
+
+#### Features
+
+- Added refresh of alternatives routes. [#5923](https://github.com/mapbox/mapbox-navigation-android/pull/5923)
+- Moved `MapboxCameraModeButton` to `libnavui-maps` module. Moved `MapboxExtendableButton` to `libnavui-base` module. Added new styles for `MapboxAudioGuidanceButton`, `MapboxCameraModeButton` and `MapboxExtendableButton` views. Those styles can be used to change the default button shape to "Oval," "Square" or "Circle" [#5962](https://github.com/mapbox/mapbox-navigation-android/pull/5962)
+
+#### Bug fixes and improvements
+
+- Fixed reroute request interruption when setting the `NavigationRerouteController` [#5950](https://github.com/mapbox/mapbox-navigation-android/pull/5950).
+- Fixed setting trim offsets to route line trail layers. [#5982](https://github.com/mapbox/mapbox-navigation-android/pull/5982)
+- Fixed a Drop-In UI issue where legacy shields were displayed instead of Mapbox designed ones with some of the map styles. [#5984](https://github.com/mapbox/mapbox-navigation-android/pull/5984)
+- Updated `NavigationView` to support edge-to-edge display. [#5976](https://github.com/mapbox/mapbox-navigation-android/pull/5976)
+
+#### Known issues
+
+:bangbang: We are observing an [intermittent native crash](https://github.com/mapbox/mapbox-navigation-android/issues/5985) with this pre-release version when starting an active guidance session and then stopping the session by clicking on device back button. The root cause is still unknown and it only seems to affect specific devices. We are working to understand the issue and a fix is expected ahead of the final v2.7 release.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.7.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.7.0-beta.1))
+- Mapbox Navigation Native `v108.0.0`
+- Mapbox Core Common `v22.1.0-beta.1`
+- Mapbox Java `v6.6.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.6.0))
+- Mapbox Android Core `v5.0.1`
+- Mapbox Android Telemetry `v8.1.2`
 
 ## Mapbox Navigation SDK 2.6.0-rc.2 - July 1, 2022
 ### Changelog
