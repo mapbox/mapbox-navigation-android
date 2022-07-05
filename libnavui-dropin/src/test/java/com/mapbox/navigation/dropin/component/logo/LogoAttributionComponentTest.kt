@@ -51,6 +51,10 @@ internal class LogoAttributionComponentTest {
     fun `onAttached - should update map logo and attribution margins`() {
         val logoSettings = LogoSettings()
         val attributionSettings = AttributionSettings()
+        val initialAttributionSettings = AttributionSettings().apply {
+            marginLeft = 123f
+        }
+        every { mockAttributionPlugin.getSettings() } returns initialAttributionSettings
         captureUpdatedSettings(
             logoSettings = logoSettings,
             attributionSettings = attributionSettings
@@ -68,7 +72,10 @@ internal class LogoAttributionComponentTest {
         assertEquals(leftInset, logoSettings.marginLeft)
         assertEquals(rightInset, logoSettings.marginRight)
         assertEquals(bottomInset, attributionSettings.marginBottom)
-        assertEquals(leftInset, attributionSettings.marginLeft)
+        assertEquals(
+            initialAttributionSettings.marginLeft + leftInset,
+            attributionSettings.marginLeft
+        )
         assertEquals(rightInset, attributionSettings.marginRight)
     }
 
