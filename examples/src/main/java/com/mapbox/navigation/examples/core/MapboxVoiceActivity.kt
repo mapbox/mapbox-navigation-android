@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
@@ -24,7 +25,8 @@ import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
@@ -44,11 +46,10 @@ import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
-import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setRoutes
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRoutes
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadObserver
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
@@ -61,8 +62,6 @@ import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -93,7 +92,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
      * in the form of speech.
      */
     private val speechApi: MapboxSpeechApi by lazy {
-        MapboxSpeechApi(this, getMapboxAccessTokenFromResources(), Locale.US.language)
+        MapboxSpeechApi(this, getMapboxAccessTokenFromResources(), Locale.US.toLanguageTag())
     }
 
     /**
@@ -104,7 +103,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         MapboxVoiceInstructionsPlayer(
             this,
             getMapboxAccessTokenFromResources(),
-            Locale.US.language
+            Locale.US.toLanguageTag()
         )
     }
 
@@ -203,15 +202,15 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
             // clear the [MapboxVoiceInstructionsPlayer]
             speechApi.cancel()
             voiceInstructionsPlayer.clear()
-            if (result.routes.isNotEmpty()) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    routeLineApi.setRoutes(
-                        listOf(RouteLine(result.routes[0], null))
+            if (result.navigationRoutes.isNotEmpty()) {
+                lifecycleScope.launch {
+                    routeLineApi.setNavigationRoutes(
+                        listOf(result.navigationRoutes[0])
                     ).apply {
                         routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
                     }
                 }
-                startSimulation(result.routes[0])
+                startSimulation(result.navigationRoutes[0].directionsRoute)
             }
         }
 
@@ -285,6 +284,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         return getString(this.resources.getIdentifier("mapbox_access_token", "string", packageName))
     }
 
+    @SuppressLint("MissingPermission")
     private fun startSimulation(route: DirectionsRoute) {
         mapboxReplayer.stop()
         mapboxReplayer.clearEvents()
@@ -305,12 +305,12 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
             .build()
         mapboxNavigation.requestRoutes(
             routeOptions,
-            object : RouterCallback {
+            object : NavigationRouterCallback {
                 override fun onRoutesReady(
-                    routes: List<DirectionsRoute>,
+                    routes: List<NavigationRoute>,
                     routerOrigin: RouterOrigin
                 ) {
-                    mapboxNavigation.setRoutes(routes)
+                    mapboxNavigation.setNavigationRoutes(routes)
                 }
 
                 override fun onFailure(
