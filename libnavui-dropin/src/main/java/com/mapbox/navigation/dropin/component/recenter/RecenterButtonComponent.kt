@@ -5,7 +5,7 @@ import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.app.internal.Store
-import com.mapbox.navigation.ui.app.internal.camera.CameraAction
+import com.mapbox.navigation.ui.app.internal.camera.CameraAction.SetCameraMode
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
@@ -26,7 +26,7 @@ internal class RecenterButtonComponent(
 
         recenterButton.updateStyle(recenterStyle)
         recenterButton.setOnClickListener {
-            store.dispatch(CameraAction.ToFollowing)
+            store.dispatch(SetCameraMode(TargetCameraMode.Following))
         }
 
         coroutineScope.launch {

@@ -9,14 +9,15 @@ import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.camera.CameraAction
+import com.mapbox.navigation.ui.app.internal.camera.CameraAction.SetCameraMode
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
+import com.mapbox.navigation.ui.app.internal.camera.toTargetCameraMode
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
-import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import com.mapbox.navigation.ui.maps.internal.extensions.flowNavigationCameraState
 import com.mapbox.navigation.utils.internal.logD
@@ -70,9 +71,9 @@ internal class CameraComponent constructor(
 
         restoreCameraState()
         controlCameraFrameOverrides()
-        updateCameraFrame()
+        syncNavigationCameraState()
         updateCameraLocation()
-        onNavigationCameraStateChanged()
+
         onRouteProgressUpdates(mapboxNavigation)
         onRouteUpdates(mapboxNavigation)
     }
@@ -115,13 +116,24 @@ internal class CameraComponent constructor(
         }
     }
 
-    private fun updateCameraFrame() {
-        store.select { it.camera.cameraMode }
-            .observe {
-                if (isCameraInitialized) {
-                    requestCameraModeTo(cameraMode = it)
+    private fun syncNavigationCameraState() {
+        navigationCamera.flowNavigationCameraState().observe {
+            store.dispatch(SetCameraMode(it.toTargetCameraMode()))
+        }
+
+        store.select { it.camera.cameraMode }.observe {
+            val currentMode = navigationCamera.state.toTargetCameraMode()
+            if (isCameraInitialized && it != currentMode) {
+                when (it) {
+                    is TargetCameraMode.Idle ->
+                        navigationCamera.requestNavigationCameraToIdle()
+                    is TargetCameraMode.Overview ->
+                        navigationCamera.requestNavigationCameraToOverview()
+                    is TargetCameraMode.Following ->
+                        navigationCamera.requestNavigationCameraToFollowing()
                 }
             }
+        }
     }
 
     private fun updateCameraLocation() {
@@ -143,7 +155,7 @@ internal class CameraComponent constructor(
                                         .maxDuration(0) // instant transition
                                         .build()
                                 )
-                                store.dispatch(CameraAction.ToFollowing)
+                                store.dispatch(SetCameraMode(TargetCameraMode.Following))
                             }
                             else -> {
                                 navigationCamera.requestNavigationCameraToOverview(
@@ -152,28 +164,13 @@ internal class CameraComponent constructor(
                                         .maxDuration(0) // instant transition
                                         .build()
                                 )
-                                store.dispatch(CameraAction.ToOverview)
+                                store.dispatch(SetCameraMode(TargetCameraMode.Overview))
                             }
                         }
                     }
                     isCameraInitialized = true
                 }
             }.collect()
-        }
-    }
-
-    private fun onNavigationCameraStateChanged() {
-        coroutineScope.launch {
-            navigationCamera.flowNavigationCameraState().collect {
-                when (it) {
-                    NavigationCameraState.IDLE -> {
-                        store.dispatch(CameraAction.ToIdle)
-                    }
-                    else -> {
-                        // no op
-                    }
-                }
-            }
         }
     }
 
@@ -198,10 +195,10 @@ internal class CameraComponent constructor(
                     when (navigationState) {
                         NavigationState.ActiveNavigation,
                         NavigationState.Arrival -> {
-                            store.dispatch(CameraAction.ToFollowing)
+                            store.dispatch(SetCameraMode(TargetCameraMode.Following))
                         }
                         else -> {
-                            store.dispatch(CameraAction.ToOverview)
+                            store.dispatch(SetCameraMode(TargetCameraMode.Overview))
                         }
                     }
                 } else {
@@ -209,20 +206,6 @@ internal class CameraComponent constructor(
                     viewportDataSource.evaluate()
                 }
             }.collect()
-        }
-    }
-
-    private fun requestCameraModeTo(cameraMode: TargetCameraMode) {
-        when (cameraMode) {
-            is TargetCameraMode.Idle -> {
-                navigationCamera.requestNavigationCameraToIdle()
-            }
-            is TargetCameraMode.Overview -> {
-                navigationCamera.requestNavigationCameraToOverview()
-            }
-            is TargetCameraMode.Following -> {
-                navigationCamera.requestNavigationCameraToFollowing()
-            }
         }
     }
 
