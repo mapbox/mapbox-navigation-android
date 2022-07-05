@@ -32,6 +32,7 @@ import java.util.Date
  *  - only shoulder gets by
  *  - two left lanes get by
  * @param numLanesBlocked number of lanes blocked.
+ * @param affectedRoadNames affected road names.
  */
 class IncidentInfo internal constructor(
     val id: String,
