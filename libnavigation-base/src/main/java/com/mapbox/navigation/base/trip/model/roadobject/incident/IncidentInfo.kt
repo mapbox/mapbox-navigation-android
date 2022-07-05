@@ -52,6 +52,7 @@ class IncidentInfo internal constructor(
     val longDescription: String?,
     val lanesClearDesc: String?,
     val numLanesBlocked: Long?,
+    val affectedRoadsName: List<String>?
 ) {
 
     /**
