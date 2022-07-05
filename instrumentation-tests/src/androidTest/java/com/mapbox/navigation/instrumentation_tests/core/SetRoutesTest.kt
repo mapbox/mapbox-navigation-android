@@ -4,29 +4,25 @@ import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
-import com.mapbox.navigation.core.RoutesSetCallback
-import com.mapbox.navigation.core.RoutesSetCallbackError
-import com.mapbox.navigation.core.RoutesSetCallbackSuccess
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.SetRoutesResult
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.setNavigationRoutesAsync
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
-import com.mapbox.navigation.utils.internal.logD
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-
-private const val TAG = "[SetRoutesTest]"
 
 class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
@@ -38,25 +34,6 @@ class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
     private lateinit var mapboxNavigation: MapboxNavigation
-    private val countDownLatch = CountDownLatch(1)
-
-    private val callback = object : RoutesSetCallback {
-
-        var success: RoutesSetCallbackSuccess? = null
-        var error: RoutesSetCallbackError? = null
-
-        override fun onRoutesSetResult(result: RoutesSetCallbackSuccess) {
-            logD("Invoked onRoutesSetResult with result: {$result}", TAG)
-            this.success = result
-            countDownLatch.countDown()
-        }
-
-        override fun onRoutesSetError(result: RoutesSetCallbackError) {
-            logD("Invoked onRoutesSetError with result: {$result}", TAG)
-            this.error = result
-            countDownLatch.countDown()
-        }
-    }
 
     @Before
     fun setUp() {
@@ -70,42 +47,35 @@ class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
     }
 
     @Test
-    fun set_navigation_routes_successfully() {
+    fun set_navigation_routes_successfully() = sdkTest {
         val mockRoute = MockRoutesProvider.dc_very_short(activity)
-        val route = mockRoute.routeResponse.routes()[0]
-            .toBuilder()
-            .routeOptions(
-                RouteOptions.builder()
-                    .coordinatesList(mockRoute.routeWaypoints)
-                    .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                    .build()
-            )
-            .build()
-            .toNavigationRoute(RouterOrigin.Custom())
-        val routes = listOf(route)
-        mapboxNavigation.setNavigationRoutes(routes, callback = callback)
-        countDownLatch.await(5, TimeUnit.SECONDS)
-        assertEquals(routes, callback.success!!.routes)
+        val routes = NavigationRoute.create(
+            mockRoute.routeResponse,
+            RouteOptions.builder()
+                .coordinatesList(mockRoute.routeWaypoints)
+                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                .build(),
+            RouterOrigin.Custom()
+        )
+        val result = mapboxNavigation.setNavigationRoutesAsync(routes)
+        assertTrue(result is SetRoutesResult.Success)
+        assertEquals(routes, (result as SetRoutesResult.Success).routes)
     }
 
     @Test
-    fun set_navigation_routes_failed() {
+    fun set_navigation_routes_failed() = sdkTest {
         val mockRoute = MockRoutesProvider.dc_very_short(activity)
-        val directionsRoute = mockRoute.routeResponse.routes()[0]
-        val route = directionsRoute
-            .toBuilder()
-            .routeOptions(
-                RouteOptions.builder()
-                    .coordinatesList(mockRoute.routeWaypoints)
-                    .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                    .build()
-            )
-            .build()
-            .toNavigationRoute(RouterOrigin.Custom())
-        val routes = listOf(route)
-        mapboxNavigation.setNavigationRoutes(routes, 6, callback = callback)
-        countDownLatch.await(5, TimeUnit.SECONDS)
-        callback.error!!.run {
+        val routes = NavigationRoute.create(
+            mockRoute.routeResponse,
+            RouteOptions.builder()
+                .coordinatesList(mockRoute.routeWaypoints)
+                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                .build(),
+            RouterOrigin.Custom()
+        )
+        val result = mapboxNavigation.setNavigationRoutesAsync(routes, 6)
+        assertTrue(result is SetRoutesResult.Failure)
+        (result as SetRoutesResult.Failure).run {
             assertEquals(routes, this.routes)
             assertNotEquals("", this.error)
         }

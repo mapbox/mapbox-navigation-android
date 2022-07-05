@@ -8,6 +8,9 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.RoutesSetCallback
+import com.mapbox.navigation.core.RoutesSetCallbackError
+import com.mapbox.navigation.core.RoutesSetCallbackSuccess
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
@@ -17,6 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 fun MapboxNavigation.routesUpdates(): Flow<RoutesUpdatedResult> {
     val navigation = this
@@ -77,6 +81,22 @@ suspend fun MapboxNavigation.requestRoutes(options: RouteOptions) =
         }
     }
 
+suspend fun MapboxNavigation.setNavigationRoutesAsync(
+    routes: List<NavigationRoute>,
+    initialLegIndex: Int = 0,
+) = suspendCoroutine<SetRoutesResult> { continuation ->
+    val callback = object : RoutesSetCallback {
+        override fun onRoutesSetResult(result: RoutesSetCallbackSuccess) {
+            continuation.resume(SetRoutesResult.Success(result.routes))
+        }
+
+        override fun onRoutesSetError(result: RoutesSetCallbackError) {
+            continuation.resume(SetRoutesResult.Failure(result.routes, result.error))
+        }
+    }
+    setNavigationRoutes(routes, initialLegIndex, callback)
+}
+
 sealed class RouteRequestResult {
     data class Success(
         val routes: List<NavigationRoute>,
@@ -86,6 +106,17 @@ sealed class RouteRequestResult {
     data class Failure(
         val reasons: List<RouterFailure>
     ) : RouteRequestResult()
+}
+
+sealed class SetRoutesResult {
+    data class Success(
+        val routes: List<NavigationRoute>,
+    ) : SetRoutesResult()
+
+    data class Failure(
+        val routes: List<NavigationRoute>,
+        val error: String,
+    ) : SetRoutesResult()
 }
 
 fun RouteRequestResult.getSuccessfulResultOrThrowException(): RouteRequestResult.Success {
