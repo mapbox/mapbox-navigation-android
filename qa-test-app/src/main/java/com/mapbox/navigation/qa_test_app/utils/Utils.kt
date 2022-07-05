@@ -17,6 +17,16 @@ object Utils {
         )
     }
 
+    fun getMapboxSapaAccessToken(context: Context): String {
+        val tokenResId = context.resources
+            .getIdentifier("mapbox_access_token_sapa", "string", context.packageName)
+        return if (tokenResId != 0) {
+            context.getString(tokenResId)
+        } else {
+            getMapboxAccessToken(context)
+        }
+    }
+
     fun readRawFileText(context: Context, res: Int): String =
         context.resources.openRawResource(res).bufferedReader().use { it.readText() }
 

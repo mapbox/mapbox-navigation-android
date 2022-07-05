@@ -4,6 +4,9 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added extension function `NavigationRoute.getAllRestStops` to fetch all `RestStop` containing `SAPA` amenities if available. [#6007](https://github.com/mapbox/mapbox-navigation-android/pull/6007)
+- Added extension function `List<UpcomingRoadObject>.getAllRestStops()` to fetch all `RestStop` containing `SAPA` amenities if available. [#6007](https://github.com/mapbox/mapbox-navigation-android/pull/6007)
+- Added extension function `List<UpcomingRoadObject>.getFirstUpcomingRestStop()` to fetch first upcoming `RestStop` containing `SAPA` amenities if available. [#6007](https://github.com/mapbox/mapbox-navigation-android/pull/6007)
 
 #### Bug fixes and improvements
 

@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocat
  *
  * @param restStopType information about a rest stop. See [RestStopType].
  * @param name name of the rest stop.
+ * @param amenities facilities associated with the rest stop. See [AmenityType]
  * @see RoadObject
  * @see RoadObjectType.REST_STOP
  */
@@ -17,6 +18,7 @@ class RestStop internal constructor(
     id: String,
     @RestStopType.Type val restStopType: Int,
     val name: String?,
+    val amenities: List<Amenity>?,
     length: Double?,
     location: RoadObjectLocation,
     @RoadObjectProvider.Type provider: String,
@@ -35,6 +37,7 @@ class RestStop internal constructor(
 
         if (restStopType != other.restStopType) return false
         if (name != other.name) return false
+        if (amenities != other.amenities) return false
 
         return true
     }
@@ -46,6 +49,7 @@ class RestStop internal constructor(
         var result = super.hashCode()
         result = 31 * result + restStopType
         result = 31 * result + name.hashCode()
+        result = 31 * result + amenities.hashCode()
         return result
     }
 
@@ -55,6 +59,7 @@ class RestStop internal constructor(
     override fun toString(): String {
         return "RestStop(" +
             "restStopType=$restStopType, " +
+            "amenities=$amenities, " +
             "name=$name), ${super.toString()}"
     }
 }
