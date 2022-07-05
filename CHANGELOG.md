@@ -15,6 +15,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 - Added refresh of alternatives routes. [#5923](https://github.com/mapbox/mapbox-navigation-android/pull/5923)
 - Moved `MapboxCameraModeButton` to `libnavui-maps` module. Moved `MapboxExtendableButton` to `libnavui-base` module. Added new styles for `MapboxAudioGuidanceButton`, `MapboxCameraModeButton` and `MapboxExtendableButton` views. Those styles can be used to change the default button shape to "Oval," "Square" or "Circle" [#5962](https://github.com/mapbox/mapbox-navigation-android/pull/5962)
+- Added `IncidentInfo#affectedRoadNames`. [#1457](https://github.com/mapbox/mapbox-java/pull/1457)
 
 #### Bug fixes and improvements
 
