@@ -9,6 +9,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Made `rerouteController` argument in `MapboxNavigation#setRerouteController` nullable. Null can be passed to disable automatic rerouting. [#5977](https://github.com/mapbox/mapbox-navigation-android/pull/5977)
 - Introduced `RoutesSetCallback` parameter to `MapboxNavigation#setNavigationRoutes`, which is called after the routes passed to `MapboxNavigation#setNavigationRoutes` are processed or are failed to be processed. [#5946](https://github.com/mapbox/mapbox-navigation-android/pull/5946)
 - Changed the behaviour of `RoutesObserver`: `onRoutesChanged` method will not be triggered if the navigator fails to process routes passed via `MapboxNavigation#setNavigationRoutes`. [#5946](https://github.com/mapbox/mapbox-navigation-android/pull/5946)
+- Fixed Attribution Icon position in `NavigationView` [#6012](https://github.com/mapbox/mapbox-navigation-android/pull/6012) 
 
 ## Mapbox Navigation SDK 2.7.0-alpha.2 - July 1, 2022
 ### Changelog
