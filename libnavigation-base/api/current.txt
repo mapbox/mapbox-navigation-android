@@ -1531,9 +1531,46 @@ package com.mapbox.navigation.base.trip.model.roadobject.restrictedarea {
 
 package com.mapbox.navigation.base.trip.model.roadobject.reststop {
 
+  public final class Amenity {
+    method public String? getBrand();
+    method public String? getName();
+    method public String getType();
+    property public final String? brand;
+    property public final String? name;
+    property public final String type;
+  }
+
+  public final class AmenityType {
+    field public static final String ATM = "atm";
+    field public static final String BABY_CARE = "baby_care";
+    field public static final String COFFEE = "coffee";
+    field public static final String ELECTRIC_CHARGING_STATION = "electric_charging_station";
+    field public static final String FACILITIES_FOR_DISABLED = "facilities_for_disabled";
+    field public static final String FAX = "fax";
+    field public static final String GAS_STATION = "gas_station";
+    field public static final String HOTEL = "hotel";
+    field public static final String HOTSPRING = "hotspring";
+    field public static final String INFO = "info";
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType INSTANCE;
+    field public static final String PICNIC_SHELTER = "picnic_shelter";
+    field public static final String POST = "post";
+    field public static final String RESTAURANT = "restaurant";
+    field public static final String SHOP = "shop";
+    field public static final String SHOWER = "shower";
+    field public static final String SNACK = "snack";
+    field public static final String TELEPHONE = "telephone";
+    field public static final String TOILET = "toilet";
+    field public static final String UNDEFINED = "undefined";
+  }
+
+  @StringDef({com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.UNDEFINED, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.GAS_STATION, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.ELECTRIC_CHARGING_STATION, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.TOILET, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.COFFEE, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.RESTAURANT, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.SNACK, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.ATM, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.INFO, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.BABY_CARE, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.FACILITIES_FOR_DISABLED, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.SHOP, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.TELEPHONE, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.HOTEL, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.HOTSPRING, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.SHOWER, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.PICNIC_SHELTER, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.POST, com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType.FAX}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface AmenityType.Type {
+  }
+
   public final class RestStop extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.reststop.Amenity>? getAmenities();
     method public String? getName();
     method public int getRestStopType();
+    property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.reststop.Amenity>? amenities;
     property public final String? name;
     property public final int restStopType;
   }

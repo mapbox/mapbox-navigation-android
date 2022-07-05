@@ -16,6 +16,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollColle
 import com.mapbox.navigation.base.trip.model.roadobject.tunnel.Tunnel
 import com.mapbox.navigation.base.utils.ifNonNull
 import com.mapbox.navigator.AdminInfo
+import com.mapbox.navigator.AmenityType
 import com.mapbox.navigator.IncidentCongestion
 import com.mapbox.navigator.IncidentImpact
 import com.mapbox.navigator.IncidentInfo
@@ -30,6 +31,12 @@ import com.mapbox.navigator.TunnelInfo
 
 internal typealias SDKTollCollectionType =
     com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollectionType
+
+internal typealias SDKAmenity =
+    com.mapbox.navigation.base.trip.model.roadobject.reststop.Amenity
+
+internal typealias SDKAmenityType =
+    com.mapbox.navigation.base.trip.model.roadobject.reststop.AmenityType
 
 internal typealias SDKIncidentType =
     com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType
@@ -98,6 +105,7 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
                 id,
                 metadata.serviceAreaInfo.toRestStopType(),
                 metadata.serviceAreaInfo.name,
+                metadata.serviceAreaInfo.amenities.toAmenities(),
                 length,
                 location,
                 provider,
@@ -136,6 +144,38 @@ private fun ServiceAreaInfo.toRestStopType() =
     when (type) {
         ServiceAreaType.REST_AREA -> RestStopType.REST_AREA
         ServiceAreaType.SERVICE_AREA -> RestStopType.SERVICE_AREA
+    }
+
+private fun List<com.mapbox.navigator.Amenity>.toAmenities(): List<SDKAmenity> =
+    map { amenity ->
+        SDKAmenity(
+            type = amenity.type.toAmenityType(),
+            name = amenity.name,
+            brand = amenity.brand
+        )
+    }
+
+private fun AmenityType.toAmenityType(): String =
+    when (this) {
+        AmenityType.ATM -> SDKAmenityType.ATM
+        AmenityType.BABY_CARE -> SDKAmenityType.BABY_CARE
+        AmenityType.COFFEE -> SDKAmenityType.COFFEE
+        AmenityType.ELECTRIC_CHARGING_STATION -> SDKAmenityType.ELECTRIC_CHARGING_STATION
+        AmenityType.FAX -> SDKAmenityType.FAX
+        AmenityType.FACILITIES_FOR_DISABLED -> SDKAmenityType.FACILITIES_FOR_DISABLED
+        AmenityType.GAS_STATION -> SDKAmenityType.GAS_STATION
+        AmenityType.HOTEL -> SDKAmenityType.HOTEL
+        AmenityType.HOTSPRING -> SDKAmenityType.HOTSPRING
+        AmenityType.INFO -> SDKAmenityType.INFO
+        AmenityType.POST -> SDKAmenityType.POST
+        AmenityType.PICNIC_SHELTER -> SDKAmenityType.PICNIC_SHELTER
+        AmenityType.RESTAURANT -> SDKAmenityType.RESTAURANT
+        AmenityType.SHOP -> SDKAmenityType.SHOP
+        AmenityType.SHOWER -> SDKAmenityType.SHOWER
+        AmenityType.SNACK -> SDKAmenityType.SNACK
+        AmenityType.TELEPHONE -> SDKAmenityType.TELEPHONE
+        AmenityType.TOILET -> SDKAmenityType.TOILET
+        AmenityType.UNDEFINED -> SDKAmenityType.UNDEFINED
     }
 
 private fun IncidentInfo.toIncidentInfo() =

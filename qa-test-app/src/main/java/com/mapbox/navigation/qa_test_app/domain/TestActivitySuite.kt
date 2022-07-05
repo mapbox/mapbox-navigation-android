@@ -19,6 +19,7 @@ import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewCustomizedActi
 import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewFragmentActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxRouteLineActivity
 import com.mapbox.navigation.qa_test_app.view.NavigationViewFragmentLifecycleActivity
+import com.mapbox.navigation.qa_test_app.view.RestStopActivity
 import com.mapbox.navigation.qa_test_app.view.RouteLineFeaturesActivity
 import com.mapbox.navigation.qa_test_app.view.RouteNumericTrafficUpdateActivity
 import com.mapbox.navigation.qa_test_app.view.RouteRestrictionsActivity
@@ -69,6 +70,13 @@ object TestActivitySuite {
             launchAfterPermissionResult = false,
         ) { activity ->
             activity.startActivity<RouteRestrictionsActivity>()
+        },
+        TestActivityDescription(
+            "Log rest stops",
+            R.string.rest_stop_activity_description,
+            launchAfterPermissionResult = false,
+        ) { activity ->
+            activity.startActivity<RestStopActivity>()
         },
         TestActivityDescription(
             "Dynamic Traffic Update",
