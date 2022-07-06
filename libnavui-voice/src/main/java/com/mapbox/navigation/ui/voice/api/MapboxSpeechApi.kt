@@ -18,7 +18,7 @@ import java.util.Locale
  * Mapbox Speech Api that allows you to generate an announcement based on [VoiceInstructions]
  * @property context Context
  * @property accessToken String
- * @property language [Locale] language (ISO 639)
+ * @property language [Locale] language (IETF BCP 47)
  * @property options [MapboxSpeechApiOptions] (optional)
  */
 class MapboxSpeechApi @JvmOverloads constructor(

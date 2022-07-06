@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.flowOf
 /**
  * Controls voice guidance for the car.
  *
- * @param mapboxSpeechApi language (ISO 639)
+ * @param mapboxSpeechApi instance of [MapboxSpeechApi]
  * @param mapboxVoiceInstructionsPlayer stream of [VoiceInstructions].
  */
 class MapboxAudioGuidanceVoice(

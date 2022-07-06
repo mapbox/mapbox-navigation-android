@@ -20,7 +20,7 @@ import kotlin.concurrent.schedule
  * [VoiceInstructionsFilePlayer] speech players.
  * @property context Context
  * @property accessToken String
- * @property language [Locale] language (ISO 639)
+ * @property language [Locale] language (in a format acceptable by [Locale])
  * @property options [VoiceInstructionsPlayerOptions] (optional)
  * @property audioFocusDelegate [AsyncAudioFocusDelegate] (optional)
  * @property timerFactory [Provider] (optional)

@@ -12,7 +12,7 @@ import java.util.Locale
 /**
  * Offline implementation of [VoiceInstructionsPlayer].
  * @property context Context
- * @property language [Locale] language (ISO 639)
+ * @property language [Locale] language (in a format acceptable by [Locale])
  * @property playerAttributes [VoiceInstructionsPlayerAttributes]
  */
 internal class VoiceInstructionsTextPlayer(
