@@ -6,7 +6,10 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.camera.CameraAction
+import com.mapbox.navigation.ui.app.internal.camera.CameraAction.SetCameraMode
+import com.mapbox.navigation.ui.app.internal.camera.CameraState
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
 import com.mapbox.navigation.ui.app.testing.TestStore
 import io.mockk.every
@@ -16,7 +19,7 @@ import io.mockk.spyk
 import io.mockk.unmockkObject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
-import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -45,21 +48,35 @@ class CameraStateControllerTest {
         val sut = CameraStateController(testStore)
         sut.onAttached(mockMapboxNavigation())
 
-        testStore.dispatch(CameraAction.ToIdle)
+        testStore.dispatch(SetCameraMode(TargetCameraMode.Idle))
 
         val cameraState = testStore.state.value.camera
-        Assert.assertEquals(TargetCameraMode.Idle, cameraState.cameraMode)
+        assertEquals(TargetCameraMode.Idle, cameraState.cameraMode)
     }
+
+    @Test
+    fun `when action toIdle should copy currentCamera mode value to savedCameraMode`() =
+        coroutineRule.runBlockingTest {
+            val initialState = State(camera = CameraState(cameraMode = TargetCameraMode.Following))
+            testStore.setState(initialState)
+
+            val sut = CameraStateController(testStore)
+            sut.onAttached(mockMapboxNavigation())
+            testStore.dispatch(SetCameraMode(TargetCameraMode.Idle))
+
+            val cameraState = testStore.state.value.camera
+            assertEquals(initialState.camera.cameraMode, cameraState.savedCameraMode)
+        }
 
     @Test
     fun `when action toOverview updates camera mode`() = coroutineRule.runBlockingTest {
         val sut = CameraStateController(testStore)
         sut.onAttached(mockMapboxNavigation())
 
-        testStore.dispatch(CameraAction.ToOverview)
+        testStore.dispatch(SetCameraMode(TargetCameraMode.Overview))
 
         val cameraState = testStore.state.value.camera
-        Assert.assertEquals(TargetCameraMode.Overview, cameraState.cameraMode)
+        assertEquals(TargetCameraMode.Overview, cameraState.cameraMode)
     }
 
     @Test
@@ -68,10 +85,10 @@ class CameraStateControllerTest {
             val sut = CameraStateController(testStore)
             sut.onAttached(mockMapboxNavigation())
 
-            testStore.dispatch(CameraAction.ToFollowing)
+            testStore.dispatch(SetCameraMode(TargetCameraMode.Following))
 
             val cameraState = testStore.state.value.camera
-            Assert.assertEquals(TargetCameraMode.Following, cameraState.cameraMode)
+            assertEquals(TargetCameraMode.Following, cameraState.cameraMode)
         }
 
     @Test
@@ -84,7 +101,7 @@ class CameraStateControllerTest {
             testStore.dispatch(CameraAction.UpdatePadding(padding))
 
             val cameraState = testStore.state.value.camera
-            Assert.assertEquals(padding, cameraState.cameraPadding)
+            assertEquals(padding, cameraState.cameraPadding)
         }
 
     @Test
@@ -102,7 +119,7 @@ class CameraStateControllerTest {
 
         testStore.dispatch(CameraAction.SaveMapState(cameraState))
 
-        Assert.assertEquals(cameraState, testStore.state.value.camera.mapCameraState)
+        assertEquals(cameraState, testStore.state.value.camera.mapCameraState)
     }
 
     private fun mockMapboxNavigation(): MapboxNavigation {

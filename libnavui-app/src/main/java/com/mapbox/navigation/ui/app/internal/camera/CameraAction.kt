@@ -8,19 +8,9 @@ import com.mapbox.navigation.ui.app.internal.Action
  */
 sealed class CameraAction : Action {
     /**
-     * Sets the [NavigationCamera] to Idle
+     * Sets the [NavigationCamera] to given [mode]
      */
-    object ToIdle : CameraAction()
-
-    /**
-     * Sets the [NavigationCamera] to overview
-     */
-    object ToOverview : CameraAction()
-
-    /**
-     * Sets the [NavigationCamera] to following
-     */
-    object ToFollowing : CameraAction()
+    data class SetCameraMode(val mode: TargetCameraMode) : CameraAction()
 
     /**
      * Updates the padding for camera viewport
