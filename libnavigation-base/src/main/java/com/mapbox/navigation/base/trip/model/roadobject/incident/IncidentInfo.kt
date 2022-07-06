@@ -32,6 +32,7 @@ import java.util.Date
  *  - only shoulder gets by
  *  - two left lanes get by
  * @param numLanesBlocked number of lanes blocked.
+ * @param affectedRoadNames affected road names.
  */
 class IncidentInfo internal constructor(
     val id: String,
@@ -52,6 +53,7 @@ class IncidentInfo internal constructor(
     val longDescription: String?,
     val lanesClearDesc: String?,
     val numLanesBlocked: Long?,
+    val affectedRoadNames: List<String>?,
 ) {
 
     /**
@@ -81,6 +83,7 @@ class IncidentInfo internal constructor(
         if (longDescription != other.longDescription) return false
         if (lanesClearDesc != other.lanesClearDesc) return false
         if (numLanesBlocked != other.numLanesBlocked) return false
+        if (affectedRoadNames != other.affectedRoadNames) return false
 
         return true
     }
@@ -107,6 +110,7 @@ class IncidentInfo internal constructor(
         result = 31 * result + longDescription.hashCode()
         result = 31 * result + lanesClearDesc.hashCode()
         result = 31 * result + numLanesBlocked.hashCode()
+        result = 31 * result + affectedRoadNames.hashCode()
         return result
     }
 
@@ -132,7 +136,8 @@ class IncidentInfo internal constructor(
             "lanesBlocked=$lanesBlocked, " +
             "longDescription=$longDescription, " +
             "lanesClearDesc=$lanesClearDesc, " +
-            "numLanesBlocked=$numLanesBlocked" +
+            "numLanesBlocked=$numLanesBlocked, " +
+            "affectedRoadNames=$affectedRoadNames" +
             ")"
     }
 }

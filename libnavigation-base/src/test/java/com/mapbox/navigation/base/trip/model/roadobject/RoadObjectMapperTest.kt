@@ -225,7 +225,8 @@ class RoadObjectMapperTest {
                 listOf(INCIDENT_LANES_BLOCKED),
                 INCIDENT_LONG_DESCRIPTION,
                 INCIDENT_LANES_CLEAR_DESC,
-                INCIDENT_NUM_LANES_BLOCKED
+                INCIDENT_NUM_LANES_BLOCKED,
+                listOf(INCIDENT_AFFECTED_ROAD_NAME),
             ),
             LENGTH,
             location,
@@ -284,7 +285,7 @@ class RoadObjectMapperTest {
             INCIDENT_LONG_DESCRIPTION,
             INCIDENT_LANES_CLEAR_DESC,
             INCIDENT_NUM_LANES_BLOCKED,
-            emptyList(),
+            listOf(INCIDENT_AFFECTED_ROAD_NAME),
         )
     )
 
@@ -390,6 +391,7 @@ class RoadObjectMapperTest {
         private const val INCIDENT_ID = "incident_id"
         private const val INCIDENT_OPEN_LR = "incident_open_lr"
         private const val INCIDENT_LANES_BLOCKED = "incident_lanes_blocked"
+        private const val INCIDENT_AFFECTED_ROAD_NAME = "affected_road_name"
         private const val INCIDENT_DESCRIPTION = "incident_description"
         private const val INCIDENT_LONG_DESCRIPTION = "incident_long_description"
         private const val INCIDENT_SUB_TYPE = "incident_sub_type"
