@@ -226,7 +226,7 @@ class RoadObjectMapperTest {
                 INCIDENT_LONG_DESCRIPTION,
                 INCIDENT_LANES_CLEAR_DESC,
                 INCIDENT_NUM_LANES_BLOCKED,
-                listOf(INCIDENT_AFFECTED_ROAD_NAME)
+                listOf(INCIDENT_AFFECTED_ROAD_NAME),
             ),
             LENGTH,
             location,
