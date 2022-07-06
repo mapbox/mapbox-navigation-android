@@ -22,10 +22,13 @@ import com.mapbox.navigation.dropin.util.TestingUtil.makeLocationMatcherResult
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.camera.CameraAction
+import com.mapbox.navigation.ui.app.internal.camera.CameraAction.SetCameraMode
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
+import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
+import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import io.mockk.Runs
 import io.mockk.every
@@ -201,30 +204,56 @@ class CameraComponentTest {
         }
 
     @Test
-    fun `camera frame updates to idle when requested`() =
+    fun `should update CameraState#cameraMode when NavigationCamera#state changes`() =
         coroutineRule.runBlockingTest {
+            val initialState = State(
+                camera = testStore.state.value.camera.copy(cameraMode = TargetCameraMode.Idle),
+            )
+            testStore.setState(initialState)
+            val observer = slot<NavigationCameraStateChangedObserver>().also {
+                every {
+                    mockNavigationCamera.registerNavigationCameraStateChangeObserver(capture(it))
+                } returns Unit
+            }
+            cameraComponent.onAttached(mockMapboxNavigation)
+
+            mapOf(
+                NavigationCameraState.TRANSITION_TO_FOLLOWING to TargetCameraMode.Following,
+                NavigationCameraState.FOLLOWING to TargetCameraMode.Following,
+                NavigationCameraState.TRANSITION_TO_OVERVIEW to TargetCameraMode.Overview,
+                NavigationCameraState.OVERVIEW to TargetCameraMode.Overview,
+                NavigationCameraState.IDLE to TargetCameraMode.Idle,
+            ).forEach { (cameraState, mode) ->
+                observer.captured.onNavigationCameraStateChanged(cameraState)
+
+                verify { testStore.dispatch(SetCameraMode(mode)) }
+            }
+        }
+
+    @Test
+    fun `should update NavigationCamera#state when CameraState#cameraMode changes`() =
+        coroutineRule.runBlockingTest {
+            val cameraState = testStore.state.value.camera.copy(cameraMode = TargetCameraMode.Idle)
             testStore.setState(
                 State(
-                    camera = mockk(relaxed = true) {
-                        every { cameraMode } returns TargetCameraMode.Following
-                    },
+                    camera = cameraState,
                     location = locMatcherResult,
                     navigation = NavigationState.FreeDrive
                 )
             )
             cameraComponent.onAttached(mockMapboxNavigation)
 
-            testStore.setState(
-                testStore.state.value.copy(
-                    camera = mockk {
-                        every { cameraMode } returns TargetCameraMode.Idle
-                    },
-                )
-            )
+            every { mockNavigationCamera.state } returns NavigationCameraState.IDLE
+            testStore.setState(State(camera = cameraState.copy(TargetCameraMode.Following)))
+            verify { mockNavigationCamera.requestNavigationCameraToFollowing() }
 
-            verify(exactly = 1) {
-                mockNavigationCamera.requestNavigationCameraToIdle()
-            }
+            every { mockNavigationCamera.state } returns NavigationCameraState.FOLLOWING
+            testStore.setState(State(camera = cameraState.copy(TargetCameraMode.Overview)))
+            verify { mockNavigationCamera.requestNavigationCameraToOverview() }
+
+            every { mockNavigationCamera.state } returns NavigationCameraState.OVERVIEW
+            testStore.setState(State(camera = cameraState.copy(TargetCameraMode.Idle)))
+            verify { mockNavigationCamera.requestNavigationCameraToIdle() }
         }
 
     @Test
@@ -343,7 +372,7 @@ class CameraComponentTest {
             )
 
             verify {
-                testStore.dispatch(CameraAction.ToFollowing)
+                testStore.dispatch(SetCameraMode(TargetCameraMode.Following))
             }
         }
 
