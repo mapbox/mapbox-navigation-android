@@ -136,7 +136,7 @@ class IncidentInfo internal constructor(
             "lanesBlocked=$lanesBlocked, " +
             "longDescription=$longDescription, " +
             "lanesClearDesc=$lanesClearDesc, " +
-            "numLanesBlocked=$numLanesBlocked," +
+            "numLanesBlocked=$numLanesBlocked, " +
             "affectedRoadNames=$affectedRoadNames" +
             ")"
     }
