@@ -25,14 +25,13 @@ class CameraStateController(
 
     private fun processCameraAction(state: CameraState, action: CameraAction): CameraState {
         return when (action) {
-            is CameraAction.ToIdle -> {
-                state.copy(cameraMode = TargetCameraMode.Idle)
-            }
-            is CameraAction.ToOverview -> {
-                state.copy(cameraMode = TargetCameraMode.Overview)
-            }
-            is CameraAction.ToFollowing -> {
-                state.copy(cameraMode = TargetCameraMode.Following)
+            is CameraAction.SetCameraMode -> {
+                when (action.mode) {
+                    TargetCameraMode.Idle ->
+                        state.copy(cameraMode = action.mode, savedCameraMode = state.cameraMode)
+                    else ->
+                        state.copy(cameraMode = action.mode)
+                }
             }
             is CameraAction.UpdatePadding -> {
                 state.copy(cameraPadding = action.padding)

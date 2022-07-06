@@ -5,11 +5,11 @@ import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.app.internal.Store
-import com.mapbox.navigation.ui.app.internal.camera.CameraAction
+import com.mapbox.navigation.ui.app.internal.camera.CameraAction.SetCameraMode
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
+import com.mapbox.navigation.ui.app.internal.camera.toNavigationCameraState
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
-import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton
 
 @ExperimentalPreviewMapboxNavigationAPI
@@ -19,24 +19,18 @@ internal class CameraModeButtonComponent(
     @StyleRes private val cameraModeStyle: Int,
 ) : UIComponent() {
 
-    private var buttonIconState: TargetCameraMode = TargetCameraMode.Idle
-
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
         cameraModeButton.updateStyle(cameraModeStyle)
-        store.select { it.camera }.observe {
-            when (it.cameraMode) {
-                TargetCameraMode.Following -> {
-                    buttonIconState = TargetCameraMode.Overview
-                    cameraModeButton.setState(NavigationCameraState.FOLLOWING)
-                }
-                TargetCameraMode.Overview -> {
-                    buttonIconState = TargetCameraMode.Following
-                    cameraModeButton.setState(NavigationCameraState.OVERVIEW)
+        store.select { it.camera.cameraMode }.observe { mode ->
+            when (mode) {
+                TargetCameraMode.Idle -> {
+                    val savedMode = store.state.value.camera.savedCameraMode
+                    cameraModeButton.setState(savedMode.toNavigationCameraState())
                 }
                 else -> {
-                    // no op
+                    cameraModeButton.setState(mode.toNavigationCameraState())
                 }
             }
         }
@@ -46,26 +40,15 @@ internal class CameraModeButtonComponent(
         }
 
         cameraModeButton.setOnClickListener {
-            when (store.state.value.camera.cameraMode) {
-                TargetCameraMode.Following -> {
-                    store.dispatch(CameraAction.ToOverview)
-                }
-                TargetCameraMode.Overview -> {
-                    store.dispatch(CameraAction.ToFollowing)
-                }
-                else -> {
-                    when (buttonIconState) {
-                        TargetCameraMode.Overview -> {
-                            store.dispatch(CameraAction.ToOverview)
-                        }
-                        TargetCameraMode.Following -> {
-                            store.dispatch(CameraAction.ToFollowing)
-                        }
-                        else -> {
-                            // no op
-                        }
-                    }
-                }
+            val cameraMode = store.state.value.camera.cameraMode.let {
+                if (it != TargetCameraMode.Idle) it
+                else store.state.value.camera.savedCameraMode
+            }
+            when (cameraMode) {
+                TargetCameraMode.Following ->
+                    store.dispatch(SetCameraMode(TargetCameraMode.Overview))
+                else ->
+                    store.dispatch(SetCameraMode(TargetCameraMode.Following))
             }
         }
     }
