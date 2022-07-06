@@ -23,6 +23,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 #### Bug fixes and improvements
 
+- :warning: Changed the default log level from `Debug` to `Info`. To change the level for logs produced by Mapbox SDKs use `LogConfiguration.setLoggingLevel(LoggingLevel)`. [#5987](https://github.com/mapbox/mapbox-navigation-android/pull/5987)
 - Fixed reroute request interruption when setting the `NavigationRerouteController` [#5950](https://github.com/mapbox/mapbox-navigation-android/pull/5950).
 - Fixed setting trim offsets to route line trail layers. [#5982](https://github.com/mapbox/mapbox-navigation-android/pull/5982)
 - Fixed a Drop-In UI issue where legacy shields were displayed instead of Mapbox designed ones with some of the map styles. [#5984](https://github.com/mapbox/mapbox-navigation-android/pull/5984)
