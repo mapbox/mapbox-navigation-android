@@ -1,13 +1,18 @@
 package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.res.Resources
 import android.location.Location
+import android.media.AudioManager
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadProgress
@@ -57,8 +62,11 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadObserver
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoaderFactory
+import com.mapbox.navigation.ui.voice.api.AsyncAudioFocusDelegate
+import com.mapbox.navigation.ui.voice.api.AudioFocusRequestCallback
 import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
+import com.mapbox.navigation.ui.voice.model.AudioFocusOwner
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
@@ -105,15 +113,59 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
      * The [MapboxVoiceInstructionsPlayer] consumes the voice instructions data
      * and plays them using the appropriate TTS player.
      */
+    private val audioManager: AudioManager by lazy {
+        getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    }
+
+    private val audioOptions = VoiceInstructionsPlayerOptions.Builder()
+        .abandonFocusDelay(PLAYER_ABANDON_FOCUS_DELAY)
+        .build()
+
     private val voiceInstructionsPlayer: MapboxVoiceInstructionsPlayer by lazy {
-        val options = VoiceInstructionsPlayerOptions.Builder()
-            .abandonFocusDelay(PLAYER_ABANDON_FOCUS_DELAY)
-            .build()
         MapboxVoiceInstructionsPlayer(
             this,
             getMapboxAccessTokenFromResources(),
             Locale.US.language,
-            options
+            audioOptions,
+            audioFocusDelegate = object : AsyncAudioFocusDelegate {
+                override fun requestFocus(
+                    owner: AudioFocusOwner,
+                    callback: AudioFocusRequestCallback
+                ) {
+                    Toast.makeText(this@MapboxVoiceActivity, "requestFocus", Toast.LENGTH_SHORT)
+                        .show()
+                    val streamType = when (owner) {
+                        AudioFocusOwner.MediaPlayer -> audioOptions.streamType
+                        AudioFocusOwner.TextToSpeech -> audioOptions.ttsStreamType
+                    }
+                    val result = audioManager.requestAudioFocus(
+                        null,
+                        streamType,
+                        audioOptions.focusGain
+                    )
+                    callback(
+                        when (result) {
+                            AudioManager.AUDIOFOCUS_REQUEST_GRANTED,
+                            AudioManager.AUDIOFOCUS_REQUEST_DELAYED -> true
+                            else -> false
+                        }
+                    )
+                }
+
+                override fun abandonFocus(callback: AudioFocusRequestCallback) {
+                    binding.mapView.post {
+                        Toast.makeText(this@MapboxVoiceActivity, "abandonFocus", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                    callback(
+                        when (audioManager.abandonAudioFocus(null)) {
+                            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> true
+                            else -> false
+                        }
+                    )
+                }
+
+            }
         )
     }
 
@@ -381,6 +433,21 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
             enabled = true
         }
         init()
+
+        lifecycleScope.launch {
+            for (i in 1..5) {
+                val distance = 500 - 100 * i
+                val voiceInstructions = VoiceInstructions.builder()
+                    .distanceAlongGeometry(distance.toDouble())
+                    .announcement("Move forward for ${100 * i} meters")
+                    .ssmlAnnouncement("<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In $distance meters, Your destination will be on the right.</prosody></amazon:effect></speak>")
+                    .build()
+                speechApi.generate(
+                    voiceInstructions,
+                    speechCallback
+                )
+            }
+        }
     }
 
     override fun onStart() {
@@ -459,6 +526,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
     private val Number.dp: Double get() = toDouble() * Resources.getSystem().displayMetrics.density
 
     private companion object {
+
         private const val TAG = "MapboxVoiceActivity"
         private const val SOUND_BUTTON_TEXT_APPEAR_DURATION = 1000L
         private const val PLAYER_ABANDON_FOCUS_DELAY = 2000L
