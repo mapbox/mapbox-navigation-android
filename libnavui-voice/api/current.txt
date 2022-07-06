@@ -11,6 +11,12 @@ package com.mapbox.navigation.ui.voice.api {
     method public boolean requestFocus();
   }
 
+  public final class AudioFocusDelegateProvider {
+    method public com.mapbox.navigation.ui.voice.api.AsyncAudioFocusDelegate defaultAudioFocusDelegate(android.content.Context context, com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options);
+    method public com.mapbox.navigation.ui.voice.api.AsyncAudioFocusDelegate defaultAudioFocusDelegate(android.media.AudioManager audioManager, com.mapbox.navigation.ui.voice.api.VoiceInstructionsPlayerAttributes playerAttributes);
+    field public static final com.mapbox.navigation.ui.voice.api.AudioFocusDelegateProvider INSTANCE;
+  }
+
   public fun interface AudioFocusRequestCallback {
     method public operator void invoke(boolean result);
   }

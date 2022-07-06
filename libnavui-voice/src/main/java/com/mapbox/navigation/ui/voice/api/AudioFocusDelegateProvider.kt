@@ -5,17 +5,34 @@ import android.media.AudioManager
 import android.os.Build
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 
-internal object AudioFocusDelegateProvider {
+/**
+ * Factory for creating default instance of AsyncAudioFocusDelegate.
+ */
+object AudioFocusDelegateProvider {
 
+    /**
+     * Create a default instance of AsyncAudioFocusDelegate.
+     *
+     * @param context Context
+     * @param options VoiceInstructionsPlayerOptions
+     * @return AsyncAudioFocusDelegate instance
+     */
     fun defaultAudioFocusDelegate(
         context: Context,
         options: VoiceInstructionsPlayerOptions,
-    ) = createAudioFocusDelegate(
+    ): AsyncAudioFocusDelegate = defaultAudioFocusDelegate(
         context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
         VoiceInstructionsPlayerAttributesProvider.retrievePlayerAttributes(options)
     )
 
-    fun createAudioFocusDelegate(
+    /**
+     * Create a default instance of AsyncAudioFocusDelegate.
+     *
+     * @param audioManager AudioManager
+     * @param playerAttributes VoiceInstructionsPlayerAttributes
+     * @return AsyncAudioFocusDelegate instance
+     */
+    fun defaultAudioFocusDelegate(
         audioManager: AudioManager,
         playerAttributes: VoiceInstructionsPlayerAttributes,
     ): AsyncAudioFocusDelegate {

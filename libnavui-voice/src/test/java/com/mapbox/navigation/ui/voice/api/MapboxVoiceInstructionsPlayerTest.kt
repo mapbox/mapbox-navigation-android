@@ -46,7 +46,7 @@ class MapboxVoiceInstructionsPlayerTest {
         } returns audioManager
         every { mockedPlayerAttributes.options } returns mockedPlayerOptions
         every {
-            AudioFocusDelegateProvider.createAudioFocusDelegate(
+            AudioFocusDelegateProvider.defaultAudioFocusDelegate(
                 audioManager,
                 mockedPlayerAttributes
             )
