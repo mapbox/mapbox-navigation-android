@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Moved `MapboxCameraModeButton` to `libnavui-maps` module. Moved `MapboxExtendableButton` to `libnavui-base` module. Added new styles for `MapboxAudioGuidanceButton`, `MapboxCameraModeButton` and `MapboxExtendableButton` views. Those styles can be used to change the default button shape to "Oval," "Square" or "Circle" [#5962](https://github.com/mapbox/mapbox-navigation-android/pull/5962)
 
 #### Bug fixes and improvements
 

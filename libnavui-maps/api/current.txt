@@ -1335,3 +1335,36 @@ package com.mapbox.navigation.ui.maps.util {
 
 }
 
+package com.mapbox.navigation.ui.maps.view {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxCameraModeButton extends android.widget.FrameLayout {
+    ctor public MapboxCameraModeButton(android.content.Context context);
+    ctor public MapboxCameraModeButton(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxCameraModeButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    ctor public MapboxCameraModeButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr, int defStyleRes);
+    method public androidx.constraintlayout.widget.ConstraintLayout getContainerView();
+    method public int getFollowingIconResId();
+    method public String? getFollowingText();
+    method public androidx.appcompat.widget.AppCompatImageView getIconImage();
+    method public int getOverviewIconResId();
+    method public String? getOverviewText();
+    method public androidx.appcompat.widget.AppCompatTextView getTextView();
+    method public void setFollowingIconResId(int);
+    method public void setFollowingText(String?);
+    method public void setOverviewIconResId(int);
+    method public void setOverviewText(String?);
+    method @UiThread public void setState(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state);
+    method @UiThread public void setStateAndExtend(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state, long duration = 2000L);
+    method @UiThread public void setStateAndExtend(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state);
+    method public void updateStyle(@StyleRes int style);
+    property public final androidx.constraintlayout.widget.ConstraintLayout containerView;
+    property public final int followingIconResId;
+    property public final String? followingText;
+    property public final androidx.appcompat.widget.AppCompatImageView iconImage;
+    property public final int overviewIconResId;
+    property public final String? overviewText;
+    property public final androidx.appcompat.widget.AppCompatTextView textView;
+  }
+
+}
+

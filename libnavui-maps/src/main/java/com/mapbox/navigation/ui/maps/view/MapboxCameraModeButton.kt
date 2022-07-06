@@ -1,4 +1,4 @@
-package com.mapbox.navigation.dropin.view
+package com.mapbox.navigation.ui.maps.view
 
 import android.content.Context
 import android.content.res.TypedArray
@@ -13,9 +13,9 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.databinding.MapboxCameraModeButtonLayoutBinding
+import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
+import com.mapbox.navigation.ui.maps.databinding.MapboxCameraModeButtonLayoutBinding
 import com.mapbox.navigation.ui.utils.internal.ExtendableButtonHelper
 import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
 
@@ -30,11 +30,8 @@ class MapboxCameraModeButton : FrameLayout {
 
     private val helper = ExtendableButtonHelper(
         binding.buttonText,
-        { 0 },
-        { text ->
-            binding.buttonText.measureTextWidth(text).toInt() +
-                resources.getDimensionPixelSize(R.dimen.mapbox_cameraModeButton_paddingStart)
-        },
+        { binding.iconImage.left },
+        { text -> binding.buttonText.measureTextWidth(text).toInt() + binding.iconImage.left },
     )
 
     /**
