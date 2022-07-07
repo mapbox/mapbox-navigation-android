@@ -6,3 +6,8 @@
 
 # --- com.mapbox.api.directions.v5.MapboxDirections ---
 -dontwarn com.sun.xml.internal.ws.spi.db.BindingContextFactory
+
+-keepclassmembers class com.mapbox.auto.value.gson.SerializableJsonElement {
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+}
