@@ -15,7 +15,6 @@ import com.mapbox.navigation.qa_test_app.view.IconsPreviewActivity
 import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingActivity
 import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingWithRestrictionsActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewActivity
-import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewCustomizedActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewFragmentActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxRouteLineActivity
 import com.mapbox.navigation.qa_test_app.view.NavigationViewFragmentLifecycleActivity
@@ -25,6 +24,7 @@ import com.mapbox.navigation.qa_test_app.view.RouteRestrictionsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteTrafficUpdateActivity
 import com.mapbox.navigation.qa_test_app.view.StatusActivity
 import com.mapbox.navigation.qa_test_app.view.TrafficGradientActivity
+import com.mapbox.navigation.qa_test_app.view.customnavview.MapboxNavigationViewCustomizedActivity
 import com.mapbox.navigation.qa_test_app.view.util.RouteDrawingActivity
 
 typealias LaunchActivityFun = (Activity) -> Unit

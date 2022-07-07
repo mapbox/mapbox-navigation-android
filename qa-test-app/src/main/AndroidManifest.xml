@@ -47,7 +47,7 @@
             android:theme="@style/Theme.AppCompat.NoActionBar"
             />
         <activity
-            android:name=".view.MapboxNavigationViewCustomizedActivity"
+            android:name=".view.customnavview.MapboxNavigationViewCustomizedActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             />
         <activity
