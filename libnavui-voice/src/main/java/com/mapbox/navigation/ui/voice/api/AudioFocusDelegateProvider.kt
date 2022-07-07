@@ -1,23 +1,45 @@
 package com.mapbox.navigation.ui.voice.api
 
+import android.content.Context
 import android.media.AudioManager
 import android.os.Build
+import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 
-internal object AudioFocusDelegateProvider {
+/**
+ * Factory for creating default instance of AsyncAudioFocusDelegate.
+ */
+object AudioFocusDelegateProvider {
 
-    fun retrieveAudioFocusDelegate(
-        audioManager: AudioManager,
-        playerAttributes: VoiceInstructionsPlayerAttributes,
-    ): AsyncAudioFocusDelegate {
-        return buildAudioFocusDelegate(audioManager, playerAttributes)
-    }
+    /**
+     * Create a default instance of AsyncAudioFocusDelegate.
+     *
+     * @param context Context
+     * @param options VoiceInstructionsPlayerOptions
+     * @return AsyncAudioFocusDelegate instance
+     */
+    fun defaultAudioFocusDelegate(
+        context: Context,
+        options: VoiceInstructionsPlayerOptions,
+    ): AsyncAudioFocusDelegate = defaultAudioFocusDelegate(
+        context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
+        VoiceInstructionsPlayerAttributesProvider.retrievePlayerAttributes(options)
+    )
 
-    private fun buildAudioFocusDelegate(
+    /**
+     * Create a default instance of AsyncAudioFocusDelegate.
+     *
+     * @param audioManager AudioManager
+     * @param playerAttributes VoiceInstructionsPlayerAttributes
+     * @return AsyncAudioFocusDelegate instance
+     */
+    fun defaultAudioFocusDelegate(
         audioManager: AudioManager,
         playerAttributes: VoiceInstructionsPlayerAttributes,
     ): AsyncAudioFocusDelegate {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             OreoAndLaterAudioFocusDelegate(audioManager, playerAttributes)
-        } else PreOreoAudioFocusDelegate(audioManager, playerAttributes)
+        } else {
+            PreOreoAudioFocusDelegate(audioManager, playerAttributes)
+        }
     }
 }

@@ -24,6 +24,7 @@ class VoiceInstructionsPlayerOptionsTest :
             .contentType(AudioAttributes.CONTENT_TYPE_MOVIE)
             .useLegacyApi(true)
             .checkIsLanguageAvailable(false)
+            .abandonFocusDelay(2000L)
 
     @Test
     override fun trigger() {
