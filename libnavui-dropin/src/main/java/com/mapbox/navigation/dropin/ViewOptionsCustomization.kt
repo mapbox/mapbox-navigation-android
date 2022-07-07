@@ -40,7 +40,10 @@ class ViewOptionsCustomization {
     var routeArrowOptions: RouteArrowOptions? = null
 
     /**
-     * Set if the Info Panel should be visible for the Free Drive state.
+     * Set if the Info Panel should be visible for the Free Drive state. When set to `true`
+     * [InfoPanelBinder] will only render an empty info panel. You are responsible to inflate
+     * appropriate [Binder] to render the content you would like to show on the info panel during
+     * free drive.
      * Set to `false` for the default behavior.
      */
     var showInfoPanelInFreeDrive: Boolean? = null
