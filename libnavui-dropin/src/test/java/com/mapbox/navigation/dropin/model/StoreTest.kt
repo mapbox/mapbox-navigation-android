@@ -1,10 +1,12 @@
 package com.mapbox.navigation.dropin.model
 
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.Reducer
 import com.mapbox.navigation.ui.app.internal.State
+import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesState
@@ -15,6 +17,7 @@ import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -90,4 +93,13 @@ internal class StoreTest {
             val expected = listOf(NavigationState.FreeDrive, NavigationState.ActiveNavigation)
             assertEquals(expected, collectedStates)
         }
+
+    @Test
+    fun `reset should restore initial state`() {
+        sut.setState(State(destination = Destination(Point.fromLngLat(1.0, 2.0))))
+        assertNotEquals(State(), sut.state.value)
+
+        sut.reset()
+        assertEquals(State(), sut.state.value)
+    }
 }

@@ -75,4 +75,11 @@ open class Store {
     fun unregister(vararg reducers: Reducer) {
         this.reducers.removeAll(reducers)
     }
+
+    /**
+     * Resets [state] back to the initial state.
+     */
+    fun reset() {
+        _state.value = State()
+    }
 }

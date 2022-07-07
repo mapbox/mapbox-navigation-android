@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.app.internal.controller
 import android.annotation.SuppressLint
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.ui.app.internal.Action
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.Store
@@ -11,10 +12,8 @@ import com.mapbox.navigation.ui.app.internal.tripsession.ReplayRouteTripSession
 import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterAction
 import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterState
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.launch
 
 /**
  * The class is responsible to start and stop the `TripSession` for NavigationView.
@@ -65,19 +64,20 @@ class TripSessionStarterStateController(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        coroutineScope.launch {
-            flowStartReplaySession().collect { starterState ->
-                if (!starterState.isLocationPermissionGranted) {
-                    mapboxNavigation.stopTripSession()
-                } else if (starterState.isReplayEnabled) {
-                    replayRouteTripSession?.stop(mapboxNavigation)
-                    replayRouteTripSession = ReplayRouteTripSession()
-                    replayRouteTripSession?.start(mapboxNavigation)
-                } else {
-                    replayRouteTripSession?.stop(mapboxNavigation)
-                    replayRouteTripSession = null
-                    mapboxNavigation.startTripSession()
-                }
+        flowStartReplaySession().observe { starterState ->
+            when (starterState.isLocationPermissionGranted) {
+                true ->
+                    if (starterState.isReplayEnabled) {
+                        replayRouteTripSession?.stop(mapboxNavigation)
+                        replayRouteTripSession = ReplayRouteTripSession()
+                        replayRouteTripSession?.start(mapboxNavigation)
+                    } else {
+                        replayRouteTripSession?.stop(mapboxNavigation)
+                        replayRouteTripSession = null
+                        mapboxNavigation.ensureTripSessionStarted()
+                    }
+                false ->
+                    mapboxNavigation.ensureTripSessionStopped()
             }
         }
     }
@@ -103,4 +103,16 @@ class TripSessionStarterStateController(
             tripSessionStarterState
         }
     }.distinctUntilChanged()
+
+    private fun MapboxNavigation.ensureTripSessionStarted() {
+        if (getTripSessionState() != TripSessionState.STARTED) {
+            startTripSession()
+        }
+    }
+
+    private fun MapboxNavigation.ensureTripSessionStopped() {
+        if (getTripSessionState() != TripSessionState.STOPPED) {
+            stopTripSession()
+        }
+    }
 }
