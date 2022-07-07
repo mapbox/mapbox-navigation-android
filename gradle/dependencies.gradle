@@ -20,8 +20,8 @@ ext {
   version = [
       mapboxMapSdk              : '10.7.0-beta.1',
       mapboxSdkServices         : '6.6.0',
-      mapboxEvents              : '8.1.2',
-      mapboxCore                : '5.0.1',
+      mapboxEvents              : '8.1.4',
+      mapboxCore                : '5.0.2',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
       mapboxCommonNative        : '22.1.0-beta.1',
       mapboxSearchSdk           : '1.0.0-beta.29',
@@ -37,6 +37,7 @@ ext {
       androidXAnnotationVersion : '1.2.0',
       androidXFragmentVersion   : '1.4.0',
       androidXDataStore         : '1.0.0',
+      androidXWorkManager       : '2.7.1',
       cardViewVersion           : '1.0.0',
       recyclerViewVersion       : '1.1.0',
       materialDesignVersion     : '1.1.0',
@@ -132,6 +133,7 @@ ext {
       androidXFragment          : "androidx.fragment:fragment-ktx:${version.androidXFragmentVersion}",
       androidXArchCoreTesting   : "androidx.arch.core:core-testing:${version.androidXArchCoreVersion}",
       androidXDataStore         : "androidx.datastore:datastore-preferences:${version.androidXDataStore}",
+      androidXWorkManager       : "androidx.work:work-runtime:${version.androidXWorkManager}",
 
       // lifecycle
       androidXLifecycleRuntime  : "androidx.lifecycle:lifecycle-runtime-ktx:${version.androidXLifecycle}",
