@@ -99,14 +99,17 @@ package com.mapbox.navigation.dropin {
     method public String? getMapStyleUriNight();
     method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions? getRouteArrowOptions();
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions? getRouteLineOptions();
+    method public Boolean? getShowInfoPanelInFreeDrive();
     method public void setMapStyleUriDay(String?);
     method public void setMapStyleUriNight(String?);
     method public void setRouteArrowOptions(com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions?);
     method public void setRouteLineOptions(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions?);
+    method public void setShowInfoPanelInFreeDrive(Boolean?);
     property public final String? mapStyleUriDay;
     property public final String? mapStyleUriNight;
     property public final com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions? routeArrowOptions;
     property public final com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions? routeLineOptions;
+    property public final Boolean? showInfoPanelInFreeDrive;
     field public static final com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion Companion;
   }
 

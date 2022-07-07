@@ -38,6 +38,7 @@ internal class NavigationViewOptionsTest {
         assertEquals(c.mapStyleUriNight, sut.mapStyleUriNight.value)
         assertEquals(c.routeLineOptions, sut.routeLineOptions.value)
         assertEquals(c.routeArrowOptions, sut.routeArrowOptions.value)
+        assertEquals(c.showInfoPanelInFreeDrive, sut.showInfoPanelInFreeDrive.value)
     }
 
     private fun customization() =
@@ -54,5 +55,6 @@ internal class NavigationViewOptionsTest {
                 .withAboveLayerId(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
                 .withArrowColor(Color.YELLOW)
                 .build()
+            showInfoPanelInFreeDrive = true
         }
 }

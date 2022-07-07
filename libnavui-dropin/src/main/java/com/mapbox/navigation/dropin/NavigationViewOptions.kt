@@ -25,16 +25,20 @@ internal class NavigationViewOptions(context: Context) {
         MutableStateFlow(defaultRouteLineOptions(context))
     private var _routeArrowOptions: MutableStateFlow<RouteArrowOptions> =
         MutableStateFlow(defaultRouteArrowOptions(context))
+    private var _showInfoPanelInFreeDrive: MutableStateFlow<Boolean> =
+        MutableStateFlow(false)
 
     var mapStyleUriDay: StateFlow<String> = _mapStyleUriDay.asStateFlow()
     var mapStyleUriNight: StateFlow<String> = _mapStyleUriNight.asStateFlow()
     val routeLineOptions: StateFlow<MapboxRouteLineOptions> = _routeLineOptions.asStateFlow()
     val routeArrowOptions: StateFlow<RouteArrowOptions> = _routeArrowOptions.asStateFlow()
+    val showInfoPanelInFreeDrive: StateFlow<Boolean> = _showInfoPanelInFreeDrive.asStateFlow()
 
     fun applyCustomization(customization: ViewOptionsCustomization) {
         customization.mapStyleUriDay?.also { _mapStyleUriDay.tryEmit(it) }
         customization.mapStyleUriNight?.also { _mapStyleUriNight.tryEmit(it) }
         customization.routeLineOptions?.also { _routeLineOptions.tryEmit(it) }
         customization.routeArrowOptions?.also { _routeArrowOptions.tryEmit(it) }
+        customization.showInfoPanelInFreeDrive?.also { _showInfoPanelInFreeDrive.tryEmit(it) }
     }
 }
