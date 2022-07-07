@@ -18,6 +18,62 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed Toggle Camera Mode Button behavior in `NavigationView`. [#6014](https://github.com/mapbox/mapbox-navigation-android/pull/6014)
 - Increased `AudioFocusDelegateProvider` visibility to public to allow instantiation of the default `AsyncAudioFocusDelegate`. [#5969](https://github.com/mapbox/mapbox-navigation-android/pull/5969)
 
+## Mapbox Navigation SDK 2.6.0 - July 7, 2022
+### Changelog
+[Changes between v2.5.1 and v2.6.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.5.1...v2.6.0)
+
+#### Features
+- Moved `MapboxCameraModeButton` to `libnavui-maps` module. Moved `MapboxExtendableButton` to `libnavui-base` module. Added new styles for `MapboxAudioGuidanceButton`, `MapboxCameraModeButton` and `MapboxExtendableButton` views. Those styles can be used to change the default button shape to "Oval," "Square" or "Circle" [#5962](https://github.com/mapbox/mapbox-navigation-android/pull/5962)
+- Introduced `NavigationViewOptions.showInfoPanelInFreeDrive` option that allows showing of the BottomSheet Info Panel when `NavigationView` is in the Free Drive state. [#6011](https://github.com/mapbox/mapbox-navigation-android/pull/6011)
+- Added `ViewBinderCustomization.customActionButtons` that allows installation of custom action buttons in `NavigationView` ActionBinder [#5937](https://github.com/mapbox/mapbox-navigation-android/pull/5937)
+- Overloaded `PredictiveCacheController` `constructor` adding `predictiveCacheGuidanceLocationOptions` so that Maps / Navigation controller options can be configured separately. Noting that when using the secondary constructor `predictiveCacheLocationOptions` is used as `predictiveCacheGuidanceLocationOptions` to retain backwards compatibility. [#5927](https://github.com/mapbox/mapbox-navigation-android/pull/5927)
+- Added an api for interacting with `NavigationView`. This API is experimental with the intention to become stable. [#5919](https://github.com/mapbox/mapbox-navigation-android/pull/5919)
+- Added support for `NavigationViewListener`. This listener can be registered with `NavigationView` to observe changes to: navigation state, destination setting/clearing, Map `Style`, camera modes, camera viewport size, and audio guidance mute/un-mute state. [#5922](https://github.com/mapbox/mapbox-navigation-android/pull/5922)
+- Added `MapboxNavigationApp#installComponents()` and `MapboxNavigation#installComponents()` APIs that offer simplified integration of voice, route line and route arrow APIs. These extensions allow to instantiate wrappers that automatically integrate `MapboxNavigation` with the selected components, taking care of data and lifecycle management. See documentation for `RouteLineComponent`, `RouteArrowComponent` and `AudioGuidanceButtonComponent`. [#5874](https://github.com/mapbox/mapbox-navigation-android/pull/5874)
+- Added support for user feedbacks with custom types and subtypes. [#5915](https://github.com/mapbox/mapbox-navigation-android/pull/5915)
+- :warning: Expired data in the current primary route is cleaned up if 3 consecutive refresh attempts fail. Congestion annotations become `"unknown"`. Numeric congestion annotations become `null`. Expired incidents disappear. [#5767](https://github.com/mapbox/mapbox-navigation-android/pull/5767).
+- `RouteLineTrimOffset` exposed in `RouteLineDynamicData` to override the vanishing point offset produced by the `MapboxRouteLineApi`. [#5858](https://github.com/mapbox/mapbox-navigation-android/pull/5858)
+- Added capabilities for Drop-In UI to render in landscape mode. [#5823](https://github.com/mapbox/mapbox-navigation-android/pull/5823)
+- Added support for sharing multiple instances of `MapboxNavigationObserver`. [#5829](https://github.com/mapbox/mapbox-navigation-android/pull/5829)
+- Added support for patches in Tile store. Tile store may download a patch to update an existing tile instead of downloading a new one. [#5861](https://github.com/mapbox/mapbox-navigation-android/pull/5861)
+
+#### Bug fixes and improvements
+- Fixed Attribution Icon position in `NavigationView` [#6012](https://github.com/mapbox/mapbox-navigation-android/pull/6012)
+- Fixed Toggle Camera Mode Button behavior in `NavigationView`. [#6014](https://github.com/mapbox/mapbox-navigation-android/pull/6014)
+- Fixed a Drop-In UI issue where legacy shields were displayed instead of Mapbox designed ones with some of the map styles. [#5984](https://github.com/mapbox/mapbox-navigation-android/pull/5984)
+- Fixed setting trim offsets to route line trail layers. [#5982](https://github.com/mapbox/mapbox-navigation-android/pull/5982)
+- Updated `NavigationView` to support edge-to-edge display. [#5976](https://github.com/mapbox/mapbox-navigation-android/pull/5976)
+- Fixed user location indicator's velocity when `NavigationLocationProvider` is used together with `keyPoints`. [#5925](https://github.com/mapbox/mapbox-navigation-android/pull/5925)
+- Fixed the issue with the close icon in the trip notification occasionally using wrong color when including ui-dropin dependency. [#5956](https://github.com/mapbox/mapbox-navigation-android/pull/5956)
+- Added more callbacks to `NavigationViewListener` to allow for observing events related to fetching a route. [#5948](https://github.com/mapbox/mapbox-navigation-android/pull/5948)
+- Fixed an issue where the default `NavigationCamera` transition to the `Following` state did not respect `NavigationCameraTransitionOptions#maxDuration`. [#5921](https://github.com/mapbox/mapbox-navigation-android/pull/5921)
+- Added empty frames to Drop-In UI on the left and right side of the screen, thereby allowing users to inject custom views. [#5930](https://github.com/mapbox/mapbox-navigation-android/pull/5930)
+- Improvements in route line layer management to eliminate blinking when alternative routes are recomputed and redrawn after passing a fork, in addition to improving performance by reducing route line layer redraws. [#5859](https://github.com/mapbox/mapbox-navigation-android/pull/5859)
+- :warning: Moved `MapboxAudioGuidanceButton` from Drop-in UI to Voice module. [#5874](https://github.com/mapbox/mapbox-navigation-android/pull/5874)
+- Changed `Onboard` router to fail fast and deliver an appropriate message when EV route requests are made, which are not supported yet. [#5905](https://github.com/mapbox/mapbox-navigation-android/pull/5905)
+- Fixed an issue where offline route requests sometimes crashed the SDK. [#5905](https://github.com/mapbox/mapbox-navigation-android/pull/5905)
+- :warning: Changed  default `NavigationCamera` transitions to use the `flyTo` animation when transitioning to `NavigationCameraState#FOLLOWING` mode. [#5871](https://github.com/mapbox/mapbox-navigation-android/pull/5871)
+- Improved enhanced locations bearing changes calculation on corners with high frequency input signal. [#5878](https://github.com/mapbox/mapbox-navigation-android/pull/5878)
+- Fixed off-road detection in unmapped underground garages. [#5878](https://github.com/mapbox/mapbox-navigation-android/pull/5878)
+- :warning: Changed `SaveHistoryCallback` to fire on the main thread instead of a worker thread. [#5878](https://github.com/mapbox/mapbox-navigation-android/pull/5878)
+- Fixed an issue where the hosting `LifecycleOwner` used to dictate the lifecycle of the `NavigationView` was taken from the `Activity` even if the view was embedded in a `Fragment`. [#5818](https://github.com/mapbox/mapbox-navigation-android/pull/5818)
+- Added an option to use different `ViewModelStoreOwner`s with the `NavigationView` (for example the one hosted by a `Fragment`). [#5818](https://github.com/mapbox/mapbox-navigation-android/pull/5818)
+- Reduced memory consumptions on startup by not decoding tiles in predictive cache and latest version controller. [#5848](https://github.com/mapbox/mapbox-navigation-android/pull/5847)
+- Fixed an issue where the vanishing point of the primary route line was not always reset when new routes were drawn following a previous active navigation session. [#5842](https://github.com/mapbox/mapbox-navigation-android/pull/5842)
+- Fixed `LocationMatcherResult#location#time`. Now it follows Android conventions, i.e. contains UTC time in milliseconds instead of elapsed time. [#5861](https://github.com/mapbox/mapbox-navigation-android/pull/5861)
+- Fixed map-matching for some corner cases. [#5861](https://github.com/mapbox/mapbox-navigation-android/pull/5861)
+- Improved off-route detection in case of a teleport. [#5861](https://github.com/mapbox/mapbox-navigation-android/pull/5861)
+- Reduced cache misses in tile store. [#5861](https://github.com/mapbox/mapbox-navigation-android/pull/5861)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.6.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.6.0))
+- Mapbox Navigation Native `v106.0.0`
+- Mapbox Core Common `v22.0.0`
+- Mapbox Java `v6.6.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.6.0))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+- Mapbox Android Telemetry `v8.1.3`([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.3-core-5.0.2))
+
 ## Mapbox Navigation SDK 2.7.0-alpha.2 - July 1, 2022
 ### Changelog
 [Changes between v2.7.0-alpha.1 and v2.7.0-alpha.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.7.0-alpha.1...v2.7.0-alpha.2)
