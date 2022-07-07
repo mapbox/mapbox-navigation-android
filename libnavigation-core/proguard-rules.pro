@@ -7,6 +7,7 @@
 # --- com.mapbox.api.directions.v5.MapboxDirections ---
 -dontwarn com.sun.xml.internal.ws.spi.db.BindingContextFactory
 
+# please remove this workaround after update of auto-value-gson with the fix https://github.com/mapbox/auto-value-gson/pull/3
 -keepclassmembers class com.mapbox.auto.value.gson.SerializableJsonElement {
     private void writeObject(java.io.ObjectOutputStream);
     private void readObject(java.io.ObjectInputStream);
