@@ -57,13 +57,6 @@ android {
         debug {
             testCoverageEnabled = false
             manifestPlaceholders = [enableCrashReporting: "false"]
-            minifyEnabled true
-            debuggable false
-            firebaseCrashlytics {
-                mappingFileUploadEnabled = false
-                nativeSymbolUploadEnabled = false
-            }
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
         }
         release {
             minifyEnabled true
@@ -125,6 +118,8 @@ dependencies {
 
     implementation dependenciesList.multidex
 
+    // Leak Canary
+    debugImplementation dependenciesList.leakCanaryDebug
 
     // Crashlytics
     implementation dependenciesList.firebaseCrashlyticsNdk
