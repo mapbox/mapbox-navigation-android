@@ -4,26 +4,8 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
-- Added extension function `NavigationRoute.getAllRestStops` to fetch all `RestStop` containing `SAPA` amenities if available. [#6007](https://github.com/mapbox/mapbox-navigation-android/pull/6007)
-- Added extension function `List<UpcomingRoadObject>.getAllRestStops()` to fetch all `RestStop` containing `SAPA` amenities if available. [#6007](https://github.com/mapbox/mapbox-navigation-android/pull/6007)
-- Added extension function `List<UpcomingRoadObject>.getFirstUpcomingRestStop()` to fetch first upcoming `RestStop` containing `SAPA` amenities if available. [#6007](https://github.com/mapbox/mapbox-navigation-android/pull/6007)
-- Introduced `NavigationViewOptions.showInfoPanelInFreeDrive` option that allows showing of the BottomSheet Info Panel when `NavigationView` is in the Free Drive state. [#6011](https://github.com/mapbox/mapbox-navigation-android/pull/6011)
-
-#### Bug fixes and improvements
-- Made `rerouteController` argument in `MapboxNavigation#setRerouteController` nullable. Null can be passed to disable automatic rerouting. [#5977](https://github.com/mapbox/mapbox-navigation-android/pull/5977)
-- Introduced `RoutesSetCallback` parameter to `MapboxNavigation#setNavigationRoutes`, which is called after the routes passed to `MapboxNavigation#setNavigationRoutes` are processed or are failed to be processed. [#5946](https://github.com/mapbox/mapbox-navigation-android/pull/5946)
-- Changed the behaviour of `RoutesObserver`: `onRoutesChanged` method will not be triggered if the navigator fails to process routes passed via `MapboxNavigation#setNavigationRoutes`. [#5946](https://github.com/mapbox/mapbox-navigation-android/pull/5946)
-- Fixed Attribution Icon position in `NavigationView` [#6012](https://github.com/mapbox/mapbox-navigation-android/pull/6012) 
-- Fixed Toggle Camera Mode Button behavior in `NavigationView`. [#6014](https://github.com/mapbox/mapbox-navigation-android/pull/6014)
-
-## Mapbox Navigation SDK 2.7.0-alpha.2 - July 1, 2022
-### Changelog
-[Changes between v2.7.0-alpha.1 and v2.7.0-alpha.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.7.0-alpha.1...v2.7.0-alpha.2)
-
-#### Features
-
-- Added refresh of alternatives routes. [#5923](https://github.com/mapbox/mapbox-navigation-android/pull/5923)
 - Moved `MapboxCameraModeButton` to `libnavui-maps` module. Moved `MapboxExtendableButton` to `libnavui-base` module. Added new styles for `MapboxAudioGuidanceButton`, `MapboxCameraModeButton` and `MapboxExtendableButton` views. Those styles can be used to change the default button shape to "Oval," "Square" or "Circle" [#5962](https://github.com/mapbox/mapbox-navigation-android/pull/5962)
+- Introduced `NavigationViewOptions.showInfoPanelInFreeDrive` option that allows showing of the BottomSheet Info Panel when `NavigationView` is in the Free Drive state. [#6011](https://github.com/mapbox/mapbox-navigation-android/pull/6011)
 
 #### Bug fixes and improvements
 - Fixed Attribution Icon position in `NavigationView` [#6012](https://github.com/mapbox/mapbox-navigation-android/pull/6012)
