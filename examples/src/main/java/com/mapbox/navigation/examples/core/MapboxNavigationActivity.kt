@@ -10,6 +10,7 @@ import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
@@ -40,6 +41,7 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
+import com.mapbox.navigation.examples.SerializeUtil
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityNavigationBinding
 import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
@@ -73,6 +75,12 @@ import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
+import java.io.Serializable
 import java.util.Locale
 
 class MapboxNavigationActivity : AppCompatActivity() {
@@ -476,7 +484,12 @@ class MapboxNavigationActivity : AppCompatActivity() {
                     routes: List<NavigationRoute>,
                     routerOrigin: RouterOrigin
                 ) {
-                    setRouteAndStartNavigation(routes)
+                    val serialized = SerializeUtil.serialize(routes.first().directionsResponse)
+                    val deserialized = SerializeUtil.deserialize(serialized, DirectionsResponse::class.java)
+                    val text = deserialized.toJson()
+                    logD("vadzim-test", text)
+                    val newRoutes = NavigationRoute.create(deserialized, routes.first().routeOptions)
+                    setRouteAndStartNavigation(newRoutes)
                 }
 
                 override fun onFailure(
