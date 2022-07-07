@@ -4,13 +4,8 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
-- Moved `MapboxCameraModeButton` to `libnavui-maps` module. Moved `MapboxExtendableButton` to `libnavui-base` module. Added new styles for `MapboxAudioGuidanceButton`, `MapboxCameraModeButton` and `MapboxExtendableButton` views. Those styles can be used to change the default button shape to "Oval," "Square" or "Circle" [#5962](https://github.com/mapbox/mapbox-navigation-android/pull/5962)
-- Introduced `NavigationViewOptions.showInfoPanelInFreeDrive` option that allows showing of the BottomSheet Info Panel when `NavigationView` is in the Free Drive state. [#6011](https://github.com/mapbox/mapbox-navigation-android/pull/6011)
 
 #### Bug fixes and improvements
-- Fixed Attribution Icon position in `NavigationView` [#6012](https://github.com/mapbox/mapbox-navigation-android/pull/6012)
-- Fixed Toggle Camera Mode Button behavior in `NavigationView`. [#6014](https://github.com/mapbox/mapbox-navigation-android/pull/6014)
-- Increased `AudioFocusDelegateProvider` visibility to public to allow instantiation of the default `AsyncAudioFocusDelegate`. [#5969](https://github.com/mapbox/mapbox-navigation-android/pull/5969)
 
 ## Mapbox Navigation SDK 2.6.0 - July 7, 2022
 ### Changelog
@@ -67,37 +62,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v6.6.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.6.0))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
 - Mapbox Android Telemetry `v8.1.3`([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.3-core-5.0.2))
-
-## Mapbox Navigation SDK 2.7.0-alpha.2 - July 1, 2022
-### Changelog
-[Changes between v2.7.0-alpha.1 and v2.7.0-alpha.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.7.0-alpha.1...v2.7.0-alpha.2)
-
-#### Features
-
-- Added refresh of alternatives routes. [#5923](https://github.com/mapbox/mapbox-navigation-android/pull/5923)
-- Moved `MapboxCameraModeButton` to `libnavui-maps` module. Moved `MapboxExtendableButton` to `libnavui-base` module. Added new styles for `MapboxAudioGuidanceButton`, `MapboxCameraModeButton` and `MapboxExtendableButton` views. Those styles can be used to change the default button shape to "Oval," "Square" or "Circle" [#5962](https://github.com/mapbox/mapbox-navigation-android/pull/5962)
-- Added `IncidentInfo#affectedRoadNames`. [#6008](https://github.com/mapbox/mapbox-navigation-android/pull/6008)
-
-#### Bug fixes and improvements
-
-- :warning: Changed the default log level from `Debug` to `Info`. To change the level for logs produced by Mapbox SDKs use `LogConfiguration.setLoggingLevel(LoggingLevel)`. [#5987](https://github.com/mapbox/mapbox-navigation-android/pull/5987)
-- Fixed reroute request interruption when setting the `NavigationRerouteController` [#5950](https://github.com/mapbox/mapbox-navigation-android/pull/5950).
-- Fixed setting trim offsets to route line trail layers. [#5982](https://github.com/mapbox/mapbox-navigation-android/pull/5982)
-- Fixed a Drop-In UI issue where legacy shields were displayed instead of Mapbox designed ones with some of the map styles. [#5984](https://github.com/mapbox/mapbox-navigation-android/pull/5984)
-- Updated `NavigationView` to support edge-to-edge display. [#5976](https://github.com/mapbox/mapbox-navigation-android/pull/5976)
-
-#### Known issues
-
-:bangbang: We are observing an [intermittent native crash](https://github.com/mapbox/mapbox-navigation-android/issues/5985) with this pre-release version when starting an active guidance session and then stopping the session by clicking on device back button. The root cause is still unknown and it only seems to affect specific devices. We are working to understand the issue and a fix is expected ahead of the final v2.7 release.
-
-### Mapbox dependencies
-This release depends on, and has been tested with, the following Mapbox dependencies:
-- Mapbox Maps SDK `v10.7.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.7.0-beta.1))
-- Mapbox Navigation Native `v108.0.0`
-- Mapbox Core Common `v22.1.0-beta.1`
-- Mapbox Java `v6.6.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.6.0))
-- Mapbox Android Core `v5.0.1`
-- Mapbox Android Telemetry `v8.1.2`
 
 ## Mapbox Navigation SDK 2.6.0-rc.2 - July 1, 2022
 ### Changelog
