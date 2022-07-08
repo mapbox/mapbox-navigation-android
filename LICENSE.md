@@ -621,6 +621,12 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 
 #### Metrics SDK module
+Mapbox Navigation uses portions of the Android App Startup Runtime.
+URL: [https://developer.android.com/jetpack/androidx/releases/startup#1.0.0](https://developer.android.com/jetpack/androidx/releases/startup#1.0.0)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Android Arch-Common.
 URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -628,6 +634,12 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 ===========================================================================
 
 Mapbox Navigation uses portions of the Android Arch-Runtime.
+URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android DB.
 URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -651,6 +663,12 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Android Lifecycle Service.
+URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Android Lifecycle ViewModel.
 URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -658,6 +676,18 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 ===========================================================================
 
 Mapbox Navigation uses portions of the Android Lifecycle-Common.
+URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Room-Common.
+URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Room-Runtime.
 URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -676,7 +706,7 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 ===========================================================================
 
 Mapbox Navigation uses portions of the Android Support Library compat (The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs. Compatible on devices running API 14 or later.).
-URL: [https://developer.android.com/jetpack/androidx/releases/core#1.5.0](https://developer.android.com/jetpack/androidx/releases/core#1.5.0)
+URL: [https://developer.android.com/jetpack/androidx/releases/core#1.6.0](https://developer.android.com/jetpack/androidx/releases/core#1.6.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
@@ -711,8 +741,53 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Android Support SQLite - Framework Implementation (The implementation of Support SQLite library using the framework code.).
+URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Tracing.
+URL: [https://developer.android.com/jetpack/androidx/releases/tracing#1.0.0](https://developer.android.com/jetpack/androidx/releases/tracing#1.0.0)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android WorkManager Runtime (Android WorkManager runtime library).
+URL: [https://developer.android.com/jetpack/androidx/releases/work#2.7.1](https://developer.android.com/jetpack/androidx/releases/work#2.7.1)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Experimental annotation (Java annotation for use on unstable Android API surfaces. When used in conjunction with the Experimental annotation lint checks, this annotation provides functional parity with Kotlin's Experimental annotation.).
+URL: [https://developer.android.com/jetpack/androidx/releases/annotation#1.1.0](https://developer.android.com/jetpack/androidx/releases/annotation#1.1.0)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Gson.
 License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Guava ListenableFuture only (Contains Guava's com.google.common.util.concurrent.ListenableFuture class,
+    without any of its other classes -- but is also available in a second
+    "version" that omits the class to avoid conflicts with the copy in Guava
+    itself. The idea is:
+
+    - If users want only ListenableFuture, they depend on listenablefuture-1.0.
+
+    - If users want all of Guava, they depend on guava, which, as of Guava
+    27.0, depends on
+    listenablefuture-9999.0-empty-to-avoid-conflict-with-guava. The 9999.0-...
+    version number is enough for some build systems (notably, Gradle) to select
+    that empty artifact over the "real" listenablefuture-1.0 -- avoiding a
+    conflict with the copy of ListenableFuture in guava itself. If users are
+    using an older version of Guava or a build system other than Gradle, they
+    may see class conflicts. If so, they can solve them by manually excluding
+    the listenablefuture artifact or manually forcing their build systems to
+    use 9999.0-....).
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
