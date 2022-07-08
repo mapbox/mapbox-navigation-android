@@ -18,6 +18,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed Toggle Camera Mode Button behavior in `NavigationView`. [#6014](https://github.com/mapbox/mapbox-navigation-android/pull/6014)
 - Increased `AudioFocusDelegateProvider` visibility to public to allow instantiation of the default `AsyncAudioFocusDelegate`. [#5969](https://github.com/mapbox/mapbox-navigation-android/pull/5969)
 - Fixed serialization of models with unrecognized properties. [#6021](https://github.com/mapbox/mapbox-navigation-android/pull/6021)
+- Fixed the intermittent native crash caused during _Free Drive_ transition from _Active Guidance with alternatives. [#6034](https://github.com/mapbox/mapbox-navigation-android/pull/6034)
 
 ## Mapbox Navigation SDK 2.6.0 - July 7, 2022
 ### Changelog
