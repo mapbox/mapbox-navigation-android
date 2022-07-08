@@ -850,61 +850,6 @@ package com.mapbox.navigation.core.telemetry.events {
 
 }
 
-package com.mapbox.navigation.core.trip.roadobject {
-
-  public final class RoadObjectEx {
-    method public static java.util.List<com.mapbox.navigation.core.trip.roadobject.reststop.RestStopFromRoadObject> getAllRestStops(java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject>);
-    method public static com.mapbox.navigation.core.trip.roadobject.RoadObjectExtra<com.mapbox.navigation.core.trip.roadobject.reststop.RestStopFromIntersection> getAllRestStops(com.mapbox.navigation.base.route.NavigationRoute);
-    method public static com.mapbox.navigation.core.trip.roadobject.reststop.RestStopFromRoadObject? getFirstUpcomingRestStop(java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject>);
-  }
-
-  public final class RoadObjectExtra<T> {
-    method public java.util.Map<java.lang.Integer,java.util.List<T>> getLegIndexToRoadObject();
-    method public String getRouteId();
-    property public final java.util.Map<java.lang.Integer,java.util.List<T>> legIndexToRoadObject;
-    property public final String routeId;
-  }
-
-}
-
-package com.mapbox.navigation.core.trip.roadobject.reststop {
-
-  public final class RestStopFromIntersection {
-    method public java.util.List<com.mapbox.api.directions.v5.models.Amenity>? getAmenities();
-    method public com.mapbox.geojson.Point getLocation();
-    method public String? getName();
-    method public String? getType();
-    method public com.mapbox.navigation.core.trip.roadobject.reststop.RestStopFromIntersection.Builder toBuilder();
-    property public final java.util.List<com.mapbox.api.directions.v5.models.Amenity>? amenities;
-    property public final com.mapbox.geojson.Point location;
-    property public final String? name;
-    property public final String? type;
-  }
-
-  public static final class RestStopFromIntersection.Builder {
-    ctor public RestStopFromIntersection.Builder(com.mapbox.geojson.Point location);
-    method public com.mapbox.navigation.core.trip.roadobject.reststop.RestStopFromIntersection.Builder amenities(java.util.List<? extends com.mapbox.api.directions.v5.models.Amenity>? amenities);
-    method public com.mapbox.navigation.core.trip.roadobject.reststop.RestStopFromIntersection build();
-    method public com.mapbox.navigation.core.trip.roadobject.reststop.RestStopFromIntersection.Builder name(String? name);
-    method public com.mapbox.navigation.core.trip.roadobject.reststop.RestStopFromIntersection.Builder type(String? type);
-  }
-
-  public final class RestStopFromRoadObject {
-    method public Double? getDistanceToStart();
-    method public com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop getRestStop();
-    method public com.mapbox.navigation.core.trip.roadobject.reststop.RestStopFromRoadObject.Builder toBuilder();
-    property public final Double? distanceToStart;
-    property public final com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop restStop;
-  }
-
-  public static final class RestStopFromRoadObject.Builder {
-    ctor public RestStopFromRoadObject.Builder(com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop restStop);
-    method public com.mapbox.navigation.core.trip.roadobject.reststop.RestStopFromRoadObject build();
-    method public com.mapbox.navigation.core.trip.roadobject.reststop.RestStopFromRoadObject.Builder distanceToStart(Double? distanceToStart);
-  }
-
-}
-
 package com.mapbox.navigation.core.trip.session {
 
   public fun interface BannerInstructionsObserver {
@@ -976,8 +921,8 @@ package com.mapbox.navigation.core.trip.session {
     method public void onOffRouteStateChanged(boolean offRoute);
   }
 
-  public fun interface RoadObjectsOnRouteObserver {
-    method public void onNewRoadObjectsOnTheRoute(java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> roadObjects);
+  @Deprecated public fun interface RoadObjectsOnRouteObserver {
+    method @Deprecated public void onNewRoadObjectsOnTheRoute(java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> roadObjects);
   }
 
   public fun interface RouteProgressObserver {

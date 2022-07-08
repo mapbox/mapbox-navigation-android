@@ -12,6 +12,7 @@ import com.mapbox.navigation.base.extensions.RouteOptionsExtensions;
 import com.mapbox.navigation.base.internal.SDKRouteParser;
 import com.mapbox.navigation.base.internal.route.NavigationRouteEx;
 import com.mapbox.navigation.testing.FileUtils;
+import com.mapbox.navigator.RouteInfo;
 import com.mapbox.navigator.RouteInterface;
 import com.mapbox.navigator.RouterOrigin;
 
@@ -36,9 +37,11 @@ public class RouteExclusionsJavaTest {
   @Before
   public void setup() {
     List<RouteInterface> nativeRoutes = new ArrayList<>();
+    RouteInfo routeInfo = Mockito.mock(RouteInfo.class);
     RouteInterface nativeRoute = Mockito.mock(RouteInterface.class);
     Mockito.doReturn("route_id").when(nativeRoute).getRouteId();
     Mockito.doReturn(RouterOrigin.ONLINE).when(nativeRoute).getRouterOrigin();
+    Mockito.doReturn(routeInfo).when(nativeRoute).getRouteInfo();
     nativeRoutes.add(nativeRoute);
     Mockito.doReturn(
         ExpectedFactory.createValue(nativeRoutes)

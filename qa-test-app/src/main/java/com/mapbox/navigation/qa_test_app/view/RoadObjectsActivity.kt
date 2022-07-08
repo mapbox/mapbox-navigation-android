@@ -3,8 +3,9 @@ package com.mapbox.navigation.qa_test_app.view
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
+import android.text.SpannableStringBuilder
 import android.view.View
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
@@ -14,15 +15,22 @@ import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
+import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
+import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop
+import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStopType
+import com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollection
+import com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollectionType
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
-import com.mapbox.navigation.core.trip.roadobject.getAllRestStops
-import com.mapbox.navigation.core.trip.roadobject.getFirstUpcomingRestStop
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -40,11 +48,13 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
+import com.mapbox.navigation.utils.internal.ifNonNull
 
-class RestStopActivity : AppCompatActivity() {
+class RoadObjectsActivity : AppCompatActivity() {
 
     private companion object {
-        private const val TAG = "RestStopActivity"
+        private const val TAG = "RoadObjectsActivity"
     }
 
     private val replayRouteMapper = ReplayRouteMapper()
@@ -53,6 +63,14 @@ class RestStopActivity : AppCompatActivity() {
 
     private val binding: LayoutActivityRestStopBinding by lazy {
         LayoutActivityRestStopBinding.inflate(layoutInflater)
+    }
+
+    private val distanceFormatterOptions: DistanceFormatterOptions by lazy {
+        DistanceFormatterOptions.Builder(this).build()
+    }
+
+    private val formatter: DistanceRemainingFormatter by lazy {
+        DistanceRemainingFormatter(distanceFormatterOptions)
     }
 
     private val mapboxNavigation: MapboxNavigation by lazy {
@@ -109,6 +127,7 @@ class RestStopActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
+        mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
@@ -143,6 +162,7 @@ class RestStopActivity : AppCompatActivity() {
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }
+        mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.setRoutes(listOf(getRoute()))
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
@@ -197,6 +217,44 @@ class RestStopActivity : AppCompatActivity() {
         mapboxReplayer.play()
     }
 
+    private val routesObserver = RoutesObserver {
+        val builder = SpannableStringBuilder("The route has\n\n")
+        val navigationRoute = it.navigationRoutes.first()
+        val allBridges = navigationRoute.upcomingRoadObjects.filter { upcoming ->
+            upcoming.roadObject.objectType == RoadObjectType.BRIDGE
+        }
+        val allBorderCrossings = navigationRoute.upcomingRoadObjects.filter { upcoming ->
+            upcoming.roadObject.objectType == RoadObjectType.COUNTRY_BORDER_CROSSING
+        }
+        val allIncidents = navigationRoute.upcomingRoadObjects.filter { upcoming ->
+            upcoming.roadObject.objectType == RoadObjectType.INCIDENT
+        }
+        val allRailwayCrossings = navigationRoute.upcomingRoadObjects.filter { upcoming ->
+            upcoming.roadObject.objectType == RoadObjectType.RAILWAY_CROSSING
+        }
+        val allRestrictedAreas = navigationRoute.upcomingRoadObjects.filter { upcoming ->
+            upcoming.roadObject.objectType == RoadObjectType.RESTRICTED_AREA
+        }
+        val allRestStops = navigationRoute.upcomingRoadObjects.filter { upcoming ->
+            upcoming.roadObject.objectType == RoadObjectType.REST_STOP
+        }
+        val allTollCollections = navigationRoute.upcomingRoadObjects.filter { upcoming ->
+            upcoming.roadObject.objectType == RoadObjectType.TOLL_COLLECTION
+        }
+        val allTunnels = navigationRoute.upcomingRoadObjects.filter { upcoming ->
+            upcoming.roadObject.objectType == RoadObjectType.TUNNEL
+        }
+        builder.append("${allBridges.size} bridges\n")
+        builder.append("${allBorderCrossings.size} border crossings\n")
+        builder.append("${allIncidents.size} incidents\n")
+        builder.append("${allRailwayCrossings.size} railway crossings\n")
+        builder.append("${allRestrictedAreas.size} restricted areas\n")
+        builder.append("${allRestStops.size} rest stops\n")
+        builder.append("${allTollCollections.size} toll collections\n")
+        builder.append("${allTunnels.size} tunnels\n")
+        binding.allRoadObjects.text = builder
+    }
+
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         routeLineApi.updateWithRouteProgress(routeProgress) { result ->
             binding.mapView.getMapboxMap().getStyle()?.apply {
@@ -209,24 +267,79 @@ class RestStopActivity : AppCompatActivity() {
             routeArrowView.renderManeuverUpdate(this, arrowUpdate)
         }
 
-        val allRestStops = routeProgress.upcomingRoadObjects.getAllRestStops()
-        val firstUpcomingRestStop = routeProgress.upcomingRoadObjects.getFirstUpcomingRestStop()
-        Log.d(
-            "RestStopActivity",
-            "first upcoming restStop: " +
-                "${firstUpcomingRestStop?.restStop?.name} -- " +
-                "${firstUpcomingRestStop?.restStop?.restStopType} -- " +
-                "${firstUpcomingRestStop?.restStop?.amenities}"
+        val upcomingBridge = routeProgress.getFirstUpcomingRoadObject(RoadObjectType.BRIDGE)
+        val upcomingBorderCrossing = routeProgress.getFirstUpcomingRoadObject(
+            RoadObjectType.COUNTRY_BORDER_CROSSING
         )
-        allRestStops.forEach {
-            Log.d(
-                "RestStopActivity",
-                "all rest stops with route progress: " +
-                    "${it.restStop?.name} -- " +
-                    "${it.restStop?.restStopType} -- " +
-                    "${it.restStop?.amenities}"
-            )
-        }
+        val upcomingIncident = routeProgress.getFirstUpcomingRoadObject(RoadObjectType.INCIDENT)
+        val upcomingRailwayCrossing = routeProgress.getFirstUpcomingRoadObject(
+            RoadObjectType.RAILWAY_CROSSING
+        )
+        val upcomingRestrictedArea = routeProgress.getFirstUpcomingRoadObject(
+            RoadObjectType.RESTRICTED_AREA
+        )
+        val upcomingRestStop = routeProgress.getFirstUpcomingRoadObject(RoadObjectType.REST_STOP)
+        val upcomingTollCollection = routeProgress.getFirstUpcomingRoadObject(
+            RoadObjectType.TOLL_COLLECTION
+        )
+        val upcomingTunnel = routeProgress.getFirstUpcomingRoadObject(RoadObjectType.TUNNEL)
+
+        binding.bridge.text = ifNonNull(upcomingBridge?.distanceToStart) { distance ->
+            getRoadObject(R.string.upcoming_bridge, distance)
+        } ?: getString(R.string.no_upcoming_bridge)
+
+        binding.border.text = ifNonNull(upcomingBorderCrossing?.distanceToStart) { distance ->
+            getRoadObject(R.string.upcoming_border_crossing, distance)
+        } ?: getString(R.string.no_upcoming_border_crossing)
+
+        binding.incident.text = ifNonNull(upcomingIncident?.distanceToStart) { distance ->
+            getRoadObject(R.string.upcoming_incident, distance)
+        } ?: getString(R.string.no_upcoming_incident)
+
+        binding.railway.text = ifNonNull(upcomingRailwayCrossing?.distanceToStart) { distance ->
+            getRoadObject(R.string.upcoming_railway_crossing, distance)
+        } ?: getString(R.string.no_upcoming_railway_crossing)
+
+        binding.restricted.text = ifNonNull(upcomingRestrictedArea?.distanceToStart) { distance ->
+            getRoadObject(R.string.upcoming_restricted_area, distance)
+        } ?: getString(R.string.no_upcoming_restricted_area)
+
+        binding.rest.text = upcomingRestStop?.let { restStop ->
+            restStop.distanceToStart?.let { distance ->
+                when ((restStop.roadObject as RestStop).restStopType) {
+                    RestStopType.REST_AREA ->
+                        getRoadObject(R.string.upcoming_rest_area, distance)
+                    RestStopType.SERVICE_AREA ->
+                        getRoadObject(R.string.upcoming_service_area, distance)
+                    else -> getString(R.string.no_upcoming_rest_stop)
+                }
+            } ?: getString(R.string.no_upcoming_rest_stop)
+        } ?: getString(R.string.no_upcoming_rest_stop)
+
+        binding.toll.text = upcomingTollCollection?.let { tollCollection ->
+            tollCollection.distanceToStart?.let { distance ->
+                when ((tollCollection.roadObject as TollCollection).tollCollectionType) {
+                    TollCollectionType.TOLL_BOOTH -> {
+                        getRoadObject(R.string.upcoming_toll_booth, distance)
+                    }
+                    TollCollectionType.TOLL_GANTRY -> {
+                        getRoadObject(R.string.upcoming_toll_gantry, distance)
+                    }
+                    else -> getString(R.string.no_upcoming_toll_collection)
+                }
+            } ?: getString(R.string.no_upcoming_toll_collection)
+        } ?: getString(R.string.no_upcoming_toll_collection)
+
+        binding.tunnel.text = ifNonNull(upcomingTunnel?.distanceToStart) { distance ->
+            getRoadObject(R.string.upcoming_tunnel, distance)
+        } ?: getString(R.string.no_upcoming_tunnel)
+    }
+
+    private fun getRoadObject(
+        @StringRes stringResource: Int,
+        distance: Double
+    ): String {
+        return getString(stringResource, formatter.format(distance))
     }
 
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
@@ -234,5 +347,18 @@ class RestStopActivity : AppCompatActivity() {
     private fun getRoute(): DirectionsRoute {
         val routeAsString = Utils.readRawFileText(this, R.raw.route_with_sapa)
         return DirectionsRoute.fromJson(routeAsString)
+    }
+
+    private fun RouteProgress.getFirstUpcomingRoadObject(
+        @RoadObjectType.Type type: Int
+    ): UpcomingRoadObject? {
+        return this.upcomingRoadObjects.firstOrNull {
+            if (it.roadObject.objectType == type) {
+                val distanceToStart = it.distanceToStart
+                distanceToStart != null && distanceToStart > 0
+            } else {
+                false
+            }
+        }
     }
 }

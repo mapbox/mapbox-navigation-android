@@ -4,9 +4,8 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
-- Added extension function `NavigationRoute.getAllRestStops` to fetch all `RestStop` containing `SAPA` amenities if available. [#6007](https://github.com/mapbox/mapbox-navigation-android/pull/6007)
-- Added extension function `List<UpcomingRoadObject>.getAllRestStops()` to fetch all `RestStop` containing `SAPA` amenities if available. [#6007](https://github.com/mapbox/mapbox-navigation-android/pull/6007)
-- Added extension function `List<UpcomingRoadObject>.getFirstUpcomingRestStop()` to fetch first upcoming `RestStop` containing `SAPA` amenities if available. [#6007](https://github.com/mapbox/mapbox-navigation-android/pull/6007)
+- :warning: Deprecated `RoadObjectsOnRouteObserver` in favor of a new getter `NavigationRoute.upcomingRoadObjects` to get access to list of `UpcomingRoadObject`.Added extension function `RouteProgress.getFirstUpcomingRoadObject` providing access to first upcoming road object of type `RoadObject`. [#6032](https://github.com/mapbox/mapbox-navigation-android/pull/6032)
+- Added `amenities` to `RestStop`. [#6007](https://github.com/mapbox/mapbox-navigation-android/pull/6007)
 - Introduced `NavigationViewOptions.showInfoPanelInFreeDrive` option that allows showing of the BottomSheet Info Panel when `NavigationView` is in the Free Drive state. [#6011](https://github.com/mapbox/mapbox-navigation-android/pull/6011)
 - Added `VoiceInstructionsPlayerOptions.abandonFocusDelay` option that allows specifying a delay in milliseconds until the player abandons audio focus after playing all queued voice instructions. [#5969](https://github.com/mapbox/mapbox-navigation-android/pull/5969)
 

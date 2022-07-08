@@ -605,12 +605,14 @@ package com.mapbox.navigation.base.route {
     method public com.mapbox.navigation.base.route.RouterOrigin getOrigin();
     method public int getRouteIndex();
     method public com.mapbox.api.directions.v5.models.RouteOptions getRouteOptions();
+    method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> getUpcomingRoadObjects();
     property public final com.mapbox.api.directions.v5.models.DirectionsResponse directionsResponse;
     property public final com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute;
     property public final String id;
     property public final com.mapbox.navigation.base.route.RouterOrigin origin;
     property public final int routeIndex;
     property public final com.mapbox.api.directions.v5.models.RouteOptions routeOptions;
+    property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> upcomingRoadObjects;
     field public static final com.mapbox.navigation.base.route.NavigationRoute.Companion Companion;
   }
 
@@ -1341,6 +1343,7 @@ package com.mapbox.navigation.base.trip.model.roadobject.incident {
   }
 
   public final class IncidentInfo {
+    method public java.util.List<java.lang.String>? getAffectedRoadNames();
     method public java.util.List<java.lang.Integer>? getAlertcCodes();
     method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongestion? getCongestion();
     method public String? getCountryCodeAlpha2();
@@ -1359,6 +1362,7 @@ package com.mapbox.navigation.base.trip.model.roadobject.incident {
     method public String? getSubTypeDescription();
     method public int getType();
     method public boolean isClosed();
+    property public final java.util.List<java.lang.String>? affectedRoadNames;
     property public final java.util.List<java.lang.Integer>? alertcCodes;
     property public final com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongestion? congestion;
     property public final String? countryCodeAlpha2;

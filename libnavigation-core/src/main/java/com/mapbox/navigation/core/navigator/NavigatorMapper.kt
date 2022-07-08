@@ -13,7 +13,7 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.toMapboxShield
-import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
+import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
 import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory.buildRouteLegProgressObject
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory.buildRouteProgressObject
 import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buildRouteStepProgressObject
@@ -22,7 +22,6 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
-import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.navigator.internal.TripStatus
@@ -32,24 +31,11 @@ import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
-import com.mapbox.navigator.RoadObjectType
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.SpeedLimitSign
 import com.mapbox.navigator.SpeedLimitUnit
 import com.mapbox.navigator.VoiceInstruction
-
-private val SUPPORTED_ROAD_OBJECTS = arrayOf(
-    RoadObjectType.INCIDENT,
-    RoadObjectType.TOLL_COLLECTION_POINT,
-    RoadObjectType.BORDER_CROSSING,
-    RoadObjectType.TUNNEL,
-    RoadObjectType.RESTRICTED_AREA,
-    RoadObjectType.SERVICE_AREA,
-    RoadObjectType.BRIDGE,
-    RoadObjectType.CUSTOM,
-    RoadObjectType.RAILWAY_CROSSING,
-)
 
 private const val ONE_INDEX = 1
 private const val ONE_SECOND_IN_MILLISECONDS = 1000.0
@@ -292,19 +278,6 @@ private fun RouteInfo?.toRouteInitInfo(): RouteInitInfo? {
     return this?.let {
         RouteInitInfo(alerts.toUpcomingRoadObjects())
     }
-}
-
-private fun List<com.mapbox.navigator.UpcomingRouteAlert>.toUpcomingRoadObjects():
-    List<UpcomingRoadObject> {
-    return this
-        .filter { SUPPORTED_ROAD_OBJECTS.contains(it.roadObject.type) }
-        .map {
-            RoadObjectFactory.buildUpcomingRoadObject(
-                RoadObjectFactory.buildRoadObject(it.roadObject),
-                it.distanceToStart,
-                null
-            )
-        }
 }
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
