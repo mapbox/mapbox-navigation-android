@@ -18,6 +18,7 @@ import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigator.RouteInterface
@@ -159,7 +160,7 @@ class NavigationRoute internal constructor(
             return coroutineScope {
                 val deferredResponseParsing = async(ThreadController.DefaultDispatcher) {
                     DirectionsResponse.fromJson(directionsResponseJson).also {
-                        logI(
+                        logD(
                             "parsed directions response to java model for ${it.uuid()}",
                             LOG_CATEGORY
                         )
@@ -171,7 +172,7 @@ class NavigationRoute internal constructor(
                         routeRequestUrl,
                         routerOrigin,
                     ).also {
-                        logI(
+                        logD(
                             "parsed directions response to RouteInterface " +
                                 "for ${it.value?.firstOrNull()?.responseUuid}",
                             LOG_CATEGORY
@@ -180,7 +181,7 @@ class NavigationRoute internal constructor(
                 }
                 val deferredRouteOptionsParsing = async(ThreadController.DefaultDispatcher) {
                     RouteOptions.fromUrl(URL(routeRequestUrl)).also {
-                        logI(
+                        logD(
                             "parsed request url to RouteOptions: ${it.toUrl("***")}",
                             LOG_CATEGORY
                         )
@@ -191,7 +192,7 @@ class NavigationRoute internal constructor(
                     deferredResponseParsing.await(),
                     deferredRouteOptionsParsing.await()
                 ).also {
-                    logI(
+                    logD(
                         "NavigationRoute.createAsync finished " +
                             "for ${it.firstOrNull()?.directionsResponse?.uuid()}",
                         LOG_CATEGORY
