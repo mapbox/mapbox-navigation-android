@@ -15,8 +15,10 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.SDKRouteParser
+import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
 import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
+import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
@@ -272,6 +274,11 @@ class NavigationRoute internal constructor(
         .routeIndex(routeIndex.toString())
         .routeOptions(routeOptions)
         .build()
+
+    /**
+     * Returns a list of [UpcomingRoadObject] present in a route.
+     */
+    val upcomingRoadObjects = nativeRoute.routeInfo.alerts.toUpcomingRoadObjects()
 
     /**
      * Indicates whether some other object is "equal to" this one.

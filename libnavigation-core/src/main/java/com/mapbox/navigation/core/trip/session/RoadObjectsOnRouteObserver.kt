@@ -8,6 +8,7 @@ import com.mapbox.navigation.core.MapboxNavigation
  *
  * @see MapboxNavigation.registerRoadObjectsOnRouteObserver
  */
+@Deprecated("use #NavigationRoute.upcomingRoadObject instead")
 fun interface RoadObjectsOnRouteObserver {
 
     /**
@@ -16,5 +17,6 @@ fun interface RoadObjectsOnRouteObserver {
      *
      * @param roadObjects road objects for the current route, or empty list if the route is cleared.
      */
+    @Deprecated("use #NavigationRoute.upcomingRoadObject instead")
     fun onNewRoadObjectsOnTheRoute(roadObjects: List<UpcomingRoadObject>)
 }

@@ -96,6 +96,7 @@ class VanishingRouteLineTest {
                 repeat(routesCount) {
                     add(
                         mockk {
+                            every { routeInfo } returns mockk(relaxed = true)
                             every { routeId } returns "$it"
                             every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
                         }

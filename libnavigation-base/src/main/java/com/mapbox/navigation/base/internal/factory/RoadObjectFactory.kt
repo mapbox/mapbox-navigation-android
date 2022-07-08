@@ -5,11 +5,37 @@ import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectMatcherError
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo
 import com.mapbox.navigation.base.trip.model.roadobject.mapToRoadObject
+import com.mapbox.navigator.RoadObjectType
 
 /**
  * Internal factory to build road objects
  */
 object RoadObjectFactory {
+
+    private val SUPPORTED_ROAD_OBJECTS = arrayOf(
+        RoadObjectType.INCIDENT,
+        RoadObjectType.TOLL_COLLECTION_POINT,
+        RoadObjectType.BORDER_CROSSING,
+        RoadObjectType.TUNNEL,
+        RoadObjectType.RESTRICTED_AREA,
+        RoadObjectType.SERVICE_AREA,
+        RoadObjectType.BRIDGE,
+        RoadObjectType.CUSTOM,
+        RoadObjectType.RAILWAY_CROSSING,
+    )
+
+    fun List<com.mapbox.navigator.UpcomingRouteAlert>.toUpcomingRoadObjects():
+        List<UpcomingRoadObject> {
+        return this
+            .filter { SUPPORTED_ROAD_OBJECTS.contains(it.roadObject.type) }
+            .map {
+                buildUpcomingRoadObject(
+                    buildRoadObject(it.roadObject),
+                    it.distanceToStart,
+                    null
+                )
+            }
+    }
 
     /**
      * Build road object from native object

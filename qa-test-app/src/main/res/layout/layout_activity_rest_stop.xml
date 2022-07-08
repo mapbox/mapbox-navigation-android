@@ -25,4 +25,146 @@
       android:text="@string/label_start_navigation"
       android:textColor="@android:color/white" />
 
+  <androidx.appcompat.widget.AppCompatTextView
+      android:id="@+id/allRoadObjects"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:padding="8dp"
+      android:textSize="14sp"
+      android:background="#B3FFFFFF"
+      android:textColor="@android:color/black"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintBottom_toTopOf="@id/startNavigation" />
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:id="@+id/upcomingRoadObjectContainer"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toTopOf="@id/allRoadObjects"
+      app:layout_constraintStart_toEndOf="@id/allRoadObjects"
+      app:layout_constraintBottom_toBottomOf="@id/allRoadObjects"
+      >
+      
+      <TextView
+          android:id="@+id/bridge"
+          android:layout_width="0dp"
+          android:layout_height="0dp"
+          android:textSize="12sp"
+          android:background="#D9FF5722"
+          android:textColor="@android:color/black"
+          android:layout_margin="1dp"
+          android:gravity="center"
+          app:layout_constraintTop_toTopOf="parent"
+          app:layout_constraintEnd_toStartOf="@id/border"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintBottom_toTopOf="@id/restricted"
+          />
+
+      <TextView
+          android:id="@+id/border"
+          android:layout_width="0dp"
+          android:layout_height="0dp"
+          android:textSize="12sp"
+          android:background="#D9FF5722"
+          android:textColor="@android:color/black"
+          android:layout_margin="1dp"
+          android:gravity="center"
+          app:layout_constraintTop_toTopOf="parent"
+          app:layout_constraintEnd_toStartOf="@id/incident"
+          app:layout_constraintStart_toEndOf="@id/bridge"
+          app:layout_constraintBottom_toTopOf="@id/rest"
+          />
+
+      <TextView
+          android:id="@+id/incident"
+          android:layout_width="0dp"
+          android:layout_height="0dp"
+          android:textSize="12sp"
+          android:background="#D9FF5722"
+          android:textColor="@android:color/black"
+          android:layout_margin="1dp"
+          android:gravity="center"
+          app:layout_constraintTop_toTopOf="parent"
+          app:layout_constraintEnd_toStartOf="@id/railway"
+          app:layout_constraintStart_toEndOf="@id/border"
+          app:layout_constraintBottom_toTopOf="@id/toll"
+          />
+
+      <TextView
+          android:id="@+id/railway"
+          android:layout_width="0dp"
+          android:layout_height="0dp"
+          android:textSize="12sp"
+          android:background="#D9FF5722"
+          android:textColor="@android:color/black"
+          android:layout_margin="1dp"
+          android:gravity="center"
+          app:layout_constraintTop_toTopOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toEndOf="@id/incident"
+          app:layout_constraintBottom_toTopOf="@id/tunnel"
+          />
+
+      <TextView
+          android:id="@+id/restricted"
+          android:layout_width="0dp"
+          android:layout_height="0dp"
+          android:textSize="12sp"
+          android:background="#D9FF5722"
+          android:textColor="@android:color/black"
+          android:layout_margin="1dp"
+          android:gravity="center"
+          app:layout_constraintTop_toBottomOf="@id/bridge"
+          app:layout_constraintEnd_toStartOf="@id/rest"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintBottom_toBottomOf="parent"
+          />
+
+      <TextView
+          android:id="@+id/rest"
+          android:layout_width="0dp"
+          android:layout_height="0dp"
+          android:textSize="12sp"
+          android:background="#D9FF5722"
+          android:textColor="@android:color/black"
+          android:layout_margin="1dp"
+          android:gravity="center"
+          app:layout_constraintTop_toBottomOf="@id/border"
+          app:layout_constraintEnd_toStartOf="@id/toll"
+          app:layout_constraintStart_toEndOf="@id/restricted"
+          app:layout_constraintBottom_toBottomOf="parent"
+          />
+
+      <TextView
+          android:id="@+id/toll"
+          android:layout_width="0dp"
+          android:layout_height="0dp"
+          android:textSize="12sp"
+          android:background="#D9FF5722"
+          android:textColor="@android:color/black"
+          android:layout_margin="1dp"
+          android:gravity="center"
+          app:layout_constraintTop_toBottomOf="@id/incident"
+          app:layout_constraintEnd_toStartOf="@id/tunnel"
+          app:layout_constraintStart_toEndOf="@id/rest"
+          app:layout_constraintBottom_toBottomOf="parent"
+          />
+
+      <TextView
+          android:id="@+id/tunnel"
+          android:layout_width="0dp"
+          android:layout_height="0dp"
+          android:textSize="12sp"
+          android:background="#D9FF5722"
+          android:textColor="@android:color/black"
+          android:layout_margin="1dp"
+          android:gravity="center"
+          app:layout_constraintTop_toBottomOf="@id/railway"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toEndOf="@id/toll"
+          app:layout_constraintBottom_toBottomOf="parent"
+          />
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

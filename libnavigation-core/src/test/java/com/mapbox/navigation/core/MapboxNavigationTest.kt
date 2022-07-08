@@ -9,7 +9,6 @@ import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.arrival.ArrivalController
@@ -417,7 +416,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @Test
     fun `new routes are set after reroute`() {
         val newRoutes = listOf(mockk<NavigationRoute>(), mockk())
-        val navigationRerouteController: NavigationRerouteController? = mockk(relaxed = true) {
+        val navigationRerouteController: NavigationRerouteController = mockk(relaxed = true) {
             every { reroute(any<NavigationRerouteController.RoutesCallback>()) } answers {
                 (firstArg() as NavigationRerouteController.RoutesCallback)
                     .onNewRoutes(newRoutes, mockk())
@@ -443,7 +442,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @Test
     fun `new routes are not set after reroute if they are invalid`() {
         val newRoutes = listOf(mockk<NavigationRoute>(), mockk())
-        val navigationRerouteController: NavigationRerouteController? = mockk(relaxed = true) {
+        val navigationRerouteController: NavigationRerouteController = mockk(relaxed = true) {
             every { reroute(any<NavigationRerouteController.RoutesCallback>()) } answers {
                 (firstArg() as NavigationRerouteController.RoutesCallback)
                     .onNewRoutes(newRoutes, mockk())
@@ -472,7 +471,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val oldController = mockk<RerouteController>(relaxed = true) {
             every { state } returns RerouteState.FetchingRoute
         }
-        val navigationRerouteController: NavigationRerouteController? = mockk(relaxed = true) {
+        val navigationRerouteController: NavigationRerouteController = mockk(relaxed = true) {
             every { reroute(any<NavigationRerouteController.RoutesCallback>()) } answers {
                 (firstArg() as NavigationRerouteController.RoutesCallback)
                     .onNewRoutes(newRoutes, mockk())
@@ -496,7 +495,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val oldController = mockk<RerouteController>(relaxed = true) {
             every { state } returns RerouteState.FetchingRoute
         }
-        val navigationRerouteController: NavigationRerouteController? = mockk(relaxed = true) {
+        val navigationRerouteController: NavigationRerouteController = mockk(relaxed = true) {
             every { reroute(any<NavigationRerouteController.RoutesCallback>()) } answers {
                 (firstArg() as NavigationRerouteController.RoutesCallback)
                     .onNewRoutes(newRoutes, mockk())
@@ -876,13 +875,13 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         coroutineRule.runBlockingTest {
             createMapboxNavigation()
 
-            val routes = emptyList<DirectionsRoute>()
+            val routes = emptyList<NavigationRoute>()
             val initialLegIndex = 2
 
             coEvery {
                 tripSession.setRoutes(any(), any(), any())
             } returns NativeSetRouteValue(emptyList())
-            mapboxNavigation.setRoutes(routes, initialLegIndex)
+            mapboxNavigation.setNavigationRoutes(routes, initialLegIndex)
 
             verify(exactly = 1) {
                 directionsSession.setRoutes(any(), any(), any())
@@ -894,13 +893,13 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         coroutineRule.runBlockingTest {
             createMapboxNavigation()
 
-            val routes = emptyList<DirectionsRoute>()
+            val routes = emptyList<NavigationRoute>()
             val initialLegIndex = 2
 
             coEvery {
                 tripSession.setRoutes(any(), any(), any())
             } returns NativeSetRouteError("some error")
-            mapboxNavigation.setRoutes(routes, initialLegIndex)
+            mapboxNavigation.setNavigationRoutes(routes, initialLegIndex)
 
             verify(exactly = 0) {
                 directionsSession.setRoutes(any(), any(), any())
@@ -1170,7 +1169,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @Test
     fun `verify that empty routes are not passed to the billing controller`() {
         createMapboxNavigation()
-        mapboxNavigation.setRoutes(emptyList())
+        mapboxNavigation.setNavigationRoutes(emptyList())
 
         verify(exactly = 0) { billingController.onExternalRouteSet(any()) }
     }
@@ -1194,12 +1193,13 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @Test
     fun `adding or removing alternative routes creates alternative reason`() {
         createMapboxNavigation()
-        val primaryRoute = createDirectionsRoute()
-        val alternativeRoute = createDirectionsRoute()
-        every { directionsSession.routes } returns listOf(primaryRoute.toNavigationRoute())
+        val primaryRoute = createNavigationRoute()
+        val alternativeRoute = createNavigationRoute()
 
-        mapboxNavigation.setRoutes(listOf(primaryRoute, alternativeRoute))
-        mapboxNavigation.setRoutes(listOf(primaryRoute))
+        every { directionsSession.routes } returns listOf(primaryRoute)
+
+        mapboxNavigation.setNavigationRoutes(listOf(primaryRoute, alternativeRoute))
+        mapboxNavigation.setNavigationRoutes(listOf(primaryRoute))
 
         verifyOrder {
             directionsSession.setRoutes(any(), any(), RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE)

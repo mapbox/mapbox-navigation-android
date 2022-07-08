@@ -9,7 +9,7 @@
     <string name="label_start_navigation" translatable="false">Start Navigation</string>
     <string name="route_drawing_utility" translatable="false">Internal Route Drawing Utility</string>
     <string name="route_restriction_activity_description" translatable="false">Displays two restricted sections of a route. \n\nYou should see two dashed lines near the middle of the route that have a magenta coloring. \n\nThe first line should end at an intersection with the second dashed line starting at the next intersection.  \n\nDuring navigation the restricted section should vanish along with the rest of the route line.</string>
-    <string name="rest_stop_activity_description" translatable="false">Log rest stop along the route. \n\n Upon starting the activity, long press anywhere on the map. Upon long press active navigation will start and you should start seeing log statements  with tag `RestStopActivity` when rest stops are available.</string>
+    <string name="road_object_activity_description" translatable="false">Displays all road objects on a route line. It also displays upcoming road objects as the route progresses. \n\n Upon starting the activity, you should see all the road objects present in the route in the form of text at bottom left corner of the screen.\n\nOnce you press start navigation, you should see upcoming road objects as you progress.\n\nYou would need a special access token to make this activity work.</string>
     <string name="dynamic_traffic_update_description" translatable="false">Dynamically adjusts the traffic congestion on a route line. \n\nBriefly after the activity starts the traffic congestion on the route line will be randomly updated. \n\nNotice the route line is partially \"vanished\". There should be no redrawing or blinking of the \"vanished\" section of the route line.</string>
     <string name="dynamic_numeric_traffic_update_description" translatable="false">Dynamically adjusts the traffic congestion on a route line using the numeric congestion source. \n\nBriefly after the activity starts the traffic congestion on the route line will be randomly updated. \n\nNotice the route line is partially \"vanished\". There should be no redrawing or blinking of the \"vanished\" section of the route line.</string>
     <string name="inactive_route_styling_description" translatable="false">The inactive leg of the route should be colored differently than the active leg. \n\nWhen the activity starts you should see a route with a waypoint roughly in the middle. Notice the styling of the route which includes traffic congestion. \n\nStart navigation and the second leg of the route should change color. \n\nWhen the puck reaches the waypoint and transitions to the second leg the first leg should take on the coloring of the second leg and the second leg should appear as it did before navigation with the traffic congestion markers.</string>
@@ -18,6 +18,24 @@
     <string name="feedback_activity_description" translatable="false">Screen to test feedback in ActiveGuidance and FreeDrive. Click on "START NAVIGATION" button to start FreeDrive session or long click on the map to get a route from current location to tapped and then click "START NAVIGATION" button to start ActiveGuidance session. Then you can observe in logcat how feedback is sent by clicking on `Feedback` button on the screen.</string>
     <string name="status_activity_description" translatable="false">Screen to test StatusView.</string>
     <string name="icons_preview_activity_description" translatable="false">Screen for viewing SDK icons.</string>
+    <string name="upcoming_bridge" translatable="false">Upcoming bridge in %1$s</string>
+    <string name="no_upcoming_bridge" translatable="false">No upcoming bridge</string>
+    <string name="upcoming_border_crossing" translatable="false">Upcoming border crossing in %1$s</string>
+    <string name="no_upcoming_border_crossing" translatable="false">No upcoming border crossing</string>
+    <string name="upcoming_incident" translatable="false">Upcoming incident in %1$s</string>
+    <string name="no_upcoming_incident" translatable="false">No upcoming incident</string>
+    <string name="upcoming_railway_crossing" translatable="false">Upcoming railway crossing in %1$s</string>
+    <string name="no_upcoming_railway_crossing" translatable="false">No upcoming railway crossing</string>
+    <string name="upcoming_restricted_area" translatable="false">Upcoming restricted area in %1$s</string>
+    <string name="no_upcoming_restricted_area" translatable="false">No upcoming restricted area</string>
+    <string name="upcoming_rest_area" translatable="false">Upcoming rest area in %1$s</string>
+    <string name="upcoming_service_area" translatable="false">Upcoming service area in %1$s</string>
+    <string name="no_upcoming_rest_stop" translatable="false">No upcoming rest or service area</string>
+    <string name="upcoming_toll_booth" translatable="false">Upcoming toll booth in %1$s</string>
+    <string name="upcoming_toll_gantry" translatable="false">Upcoming toll gantry in %1$s</string>
+    <string name="no_upcoming_toll_collection" translatable="false">No upcoming toll booth or gantry</string>
+    <string name="upcoming_tunnel" translatable="false">Upcoming tunnel in %1$s</string>
+    <string name="no_upcoming_tunnel" translatable="false">No upcoming tunnel</string>
 
     <string name="navigation_view_description" translatable="false">Utility for testing Drop-In UI.</string>
     <string name="navigation_view_customized_description" translatable="false">Utility for testing customized Drop-In UI.</string>

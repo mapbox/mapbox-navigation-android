@@ -175,6 +175,7 @@ class NavigationRouteExTest {
             0,
             mockk(),
             mockk {
+                every { routeInfo } returns mockk(relaxed = true)
                 every { routeId } returns ""
                 every { routerOrigin } returns RouterOrigin.ONLINE
             }

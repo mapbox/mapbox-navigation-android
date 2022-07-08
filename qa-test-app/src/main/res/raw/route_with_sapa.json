@@ -1,20 +1,20 @@
 {
   "country_crossed": false,
-  "weight_typical": 74.295,
+  "weight_typical": 110.394,
   "routeIndex": "0",
-  "distance": 1446.08,
-  "duration": 70.385,
-  "duration_typical": 74.415,
-  "geometry": "gd}|aAqwkwiGohAfJYBgsAtKoQpB{WnGoM~CiL|CmMtDeZnLiWzMk[hTi[hTyO`PgSlVmXj`@oQpXuRtZaYrd@cVvZsNvPsC|CqUrS{WzR_`@dWo\\tPwVbKuVrIuGfCaDpA??",
-  "weight": 70.313,
+  "distance": 2148.009,
+  "duration": 103.203,
+  "duration_typical": 110.514,
+  "geometry": "gd}|aAqwkwiGohAfJatAxKoQpB{WnGoM~CiL|CmMtDeZnLiWzMk[hTi[hTyO`PgSlVmXj`@oQpXuRtZaYrd@cVvZsNvPsC|CqUrS{WzR_`@dWo\\tPwVbKuVrIuGfC_k@`UkT`Kk|@xa@_z@he@{WxK_v@pXqz@dMcGl@cVfCqN?",
+  "weight": 103.13,
   "weight_name": "auto",
   "legs": [{
-    "weight_typical": 74.295,
-    "weight": 70.313,
+    "weight_typical": 110.394,
+    "weight": 103.13,
     "via_waypoints": [],
-    "distance": 1446.08,
-    "duration": 70.385,
-    "duration_typical": 74.415,
+    "distance": 2148.009,
+    "duration": 103.203,
+    "duration_typical": 110.514,
     "summary": "Futtsutateyama Road",
     "admins": [{
       "iso_3166_1": "JP",
@@ -27,7 +27,7 @@
       "duration_typical": 20.09,
       "speedLimitUnit": "km/h",
       "speedLimitSign": "vienna",
-      "geometry": "gd}|aAqwkwiGohAfJYBgsAtKoQpB{WnGoM~C",
+      "geometry": "gd}|aAqwkwiGohAfJatAxKoQpB{WnGoM~C",
       "name": "Futtsutateyama Road",
       "mode": "driving",
       "maneuver": {
@@ -61,17 +61,6 @@
       "driving_side": "left",
       "weight": 17.73,
       "intersections": [{
-        "rest_stop": {
-          "type": "service_area",
-          "name": "富楽里",
-          "amenities": [{
-            "type": "info"
-          }, {
-            "type": "facilities_for_disabled"
-          }, {
-            "type": "shop"
-          }]
-        },
         "duration": 6.076,
         "weight": 5.924,
         "location": [139.860361, 35.093588],
@@ -100,13 +89,13 @@
         }
       }]
     }, {
-      "weight_typical": 54.707,
-      "distance": 1055.44,
-      "duration": 52.2,
-      "duration_typical": 54.325,
+      "weight_typical": 90.806,
+      "distance": 1757.369,
+      "duration": 85.018,
+      "duration_typical": 90.424,
       "speedLimitUnit": "km/h",
       "speedLimitSign": "vienna",
-      "geometry": "u|c}aAmnjwiGiL|CmMtDeZnLiWzMk[hTi[hTyO`PgSlVmXj`@oQpXuRtZaYrd@cVvZsNvPsC|CqUrS{WzR_`@dWo\\tPwVbKuVrIuGfCaDpA??",
+      "geometry": "u|c}aAmnjwiGiL|CmMtDeZnLiWzMk[hTi[hTyO`PgSlVmXj`@oQpXuRtZaYrd@cVvZsNvPsC|CqUrS{WzR_`@dWo\\tPwVbKuVrIuGfC_k@`UkT`Kk|@xa@_z@he@{WxK_v@pXqz@dMcGl@cVfCqN?",
       "name": "Futtsutateyama Road",
       "mode": "driving",
       "maneuver": {
@@ -118,43 +107,43 @@
         "modifier": "slight right"
       },
       "voiceInstructions": [{
-        "distanceAlongGeometry": 1032.106,
-        "announcement": "Continue for a half mile.",
-        "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eContinue for a half mile.\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+        "distanceAlongGeometry": 1734.036,
+        "announcement": "Continue for 1 mile.",
+        "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eContinue for 1 mile.\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
       }, {
         "distanceAlongGeometry": 402.336,
-        "announcement": "In a quarter mile, You will arrive at your destination.",
-        "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eIn a quarter mile, You will arrive at your destination.\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+        "announcement": "In a quarter mile, Your destination will be on the right.",
+        "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eIn a quarter mile, Your destination will be on the right.\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
       }, {
         "distanceAlongGeometry": 97.222,
-        "announcement": "You have arrived at your destination.",
-        "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eYou have arrived at your destination.\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+        "announcement": "Your destination is on the right.",
+        "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eYour destination is on the right.\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
       }],
       "bannerInstructions": [{
-        "distanceAlongGeometry": 1055.44,
+        "distanceAlongGeometry": 1757.369,
         "primary": {
-          "text": "You will arrive at your destination",
+          "text": "Your destination will be on the right",
           "components": [{
-            "text": "You will arrive at your destination",
+            "text": "Your destination will be on the right",
             "type": "text"
           }],
           "type": "arrive",
-          "modifier": "straight"
+          "modifier": "right"
         }
       }, {
         "distanceAlongGeometry": 97.222,
         "primary": {
-          "text": "You have arrived at your destination",
+          "text": "Your destination is on the right",
           "components": [{
-            "text": "You have arrived at your destination",
+            "text": "Your destination is on the right",
             "type": "text"
           }],
           "type": "arrive",
-          "modifier": "straight"
+          "modifier": "right"
         }
       }],
       "driving_side": "left",
-      "weight": 52.582,
+      "weight": 85.4,
       "intersections": [{
         "weight": 30.136,
         "duration": 30.928,
@@ -165,7 +154,7 @@
         "entry": [false, true, true],
         "in": 0,
         "out": 2,
-        "geometry_index": 6,
+        "geometry_index": 5,
         "is_urban": false,
         "admin_index": 0,
         "rest_stop": {
@@ -203,7 +192,7 @@
         "entry": [false, false, true],
         "in": 0,
         "out": 2,
-        "geometry_index": 18,
+        "geometry_index": 17,
         "is_urban": false,
         "admin_index": 0,
         "mapbox_streets_v8": {
@@ -218,7 +207,7 @@
         "entry": [false, true],
         "in": 0,
         "out": 1,
-        "geometry_index": 19,
+        "geometry_index": 18,
         "is_urban": false,
         "admin_index": 0,
         "mapbox_streets_v8": {
@@ -233,7 +222,7 @@
         "entry": [false, true],
         "in": 0,
         "out": 1,
-        "geometry_index": 20,
+        "geometry_index": 19,
         "is_urban": false,
         "admin_index": 0,
         "mapbox_streets_v8": {
@@ -242,7 +231,7 @@
       }, {
         "rest_stop": {
           "type": "service_area",
-          "name": "ハシス富楽里",
+          "name": "ハイウェイオアシスSA",
           "amenities": [{
             "type": "info"
           }, {
@@ -251,8 +240,6 @@
             "type": "shop"
           }, {
             "type": "telephone"
-          }, {
-            "type": "picnic_shelter"
           }]
         },
         "duration": 8.088,
@@ -263,7 +250,7 @@
         "entry": [false, true],
         "in": 0,
         "out": 1,
-        "geometry_index": 23,
+        "geometry_index": 22,
         "is_urban": false,
         "admin_index": 0,
         "mapbox_streets_v8": {
@@ -278,6 +265,21 @@
         "entry": [false, true],
         "in": 0,
         "out": 1,
+        "geometry_index": 25,
+        "is_urban": false,
+        "admin_index": 0,
+        "mapbox_streets_v8": {
+          "class": "trunk"
+        }
+      }, {
+        "duration": 6.686,
+        "weight": 6.686,
+        "location": [139.853272, 35.104466],
+        "bearings": [160, 338],
+        "classes": ["toll"],
+        "entry": [false, true],
+        "in": 0,
+        "out": 1,
         "geometry_index": 26,
         "is_urban": false,
         "admin_index": 0,
@@ -285,13 +287,59 @@
           "class": "trunk"
         }
       }, {
-        "location": [139.853272, 35.104466],
-        "bearings": [160, 338],
+        "duration": 5.657,
+        "weight": 5.657,
+        "location": [139.852658, 35.105651],
+        "bearings": [155, 335],
         "classes": ["toll"],
         "entry": [false, true],
         "in": 0,
         "out": 1,
-        "geometry_index": 27,
+        "geometry_index": 29,
+        "is_urban": false,
+        "admin_index": 0,
+        "mapbox_streets_v8": {
+          "class": "trunk"
+        }
+      }, {
+        "duration": 17.766,
+        "weight": 17.766,
+        "location": [139.852101, 35.106633],
+        "bearings": [155, 332],
+        "classes": ["tunnel", "toll"],
+        "entry": [false, true],
+        "in": 0,
+        "out": 1,
+        "geometry_index": 30,
+        "is_urban": false,
+        "admin_index": 0,
+        "mapbox_streets_v8": {
+          "class": "trunk"
+        }
+      }, {
+        "duration": 0.701,
+        "weight": 0.701,
+        "location": [139.850647, 35.109808],
+        "bearings": [169, 352],
+        "classes": ["tunnel", "toll"],
+        "entry": [false, true],
+        "in": 0,
+        "out": 1,
+        "railway_crossing": true,
+        "geometry_index": 34,
+        "is_urban": false,
+        "admin_index": 0,
+        "mapbox_streets_v8": {
+          "class": "trunk"
+        }
+      }, {
+        "location": [139.850624, 35.109938],
+        "bearings": [172, 351],
+        "classes": ["toll"],
+        "entry": [false, true],
+        "in": 0,
+        "out": 1,
+        "geometry_index": 35,
         "is_urban": false,
         "admin_index": 0,
         "mapbox_streets_v8": {
@@ -305,52 +353,34 @@
       "duration_typical": 0.0,
       "speedLimitUnit": "km/h",
       "speedLimitSign": "vienna",
-      "geometry": "{yr}aAuu}viG??",
+      "geometry": "yh~}aAwrxviG??",
       "name": "Futtsutateyama Road",
       "mode": "driving",
       "maneuver": {
-        "location": [139.853163, 35.104686],
-        "bearing_before": 338.0,
+        "location": [139.850556, 35.110557],
+        "bearing_before": 0.0,
         "bearing_after": 0.0,
-        "instruction": "You have arrived at your destination.",
-        "type": "arrive"
+        "instruction": "Your destination is on the right.",
+        "type": "arrive",
+        "modifier": "right"
       },
       "voiceInstructions": [],
       "bannerInstructions": [],
       "driving_side": "left",
       "weight": 0.0,
       "intersections": [{
-        "location": [139.853163, 35.104686],
-        "bearings": [158],
+        "location": [139.850556, 35.110557],
+        "bearings": [180],
         "entry": [true],
         "in": 0,
-        "geometry_index": 30,
+        "geometry_index": 37,
         "admin_index": 0
       }]
     }],
-    "incidents": [{
-      "length": 19406,
-      "affected_road_names": ["E14/国道１２７号線/富津館山道路/Futtsutateyama Road"],
-      "id": "5703576799456217",
-      "type": "miscellaneous",
-      "congestion": {
-        "value": 101
-      },
-      "description": "Smoothly",
-      "alertc_codes": [701],
-      "geometry_index_start": 0,
-      "geometry_index_end": 29,
-      "creation_time": "2022-07-05T20:55:00Z",
-      "start_time": "2022-07-05T20:55:00Z",
-      "end_time": "2022-07-05T21:10:00Z",
-      "iso_3166_1_alpha2": "JP",
-      "iso_3166_1_alpha3": "JPN",
-      "lanes_blocked": []
-    }],
     "annotation": {
-      "distance": [131.9, 1.4, 151.2, 33.4, 46.0, 26.8, 24.8, 27.0, 52.3, 48.4, 59.3, 59.2, 38.9, 49.7, 66.5, 49.7, 53.5, 71.8, 57.7, 38.0, 10.9, 50.2, 52.9, 68.5, 58.5, 45.8, 44.9, 16.7, 9.8, 0.0],
-      "duration": [6.088, 0.067, 7.07, 1.56, 2.151, 1.255, 1.274, 1.389, 2.688, 2.49, 3.051, 3.046, 2.002, 2.555, 3.418, 2.558, 2.749, 3.695, 2.699, 1.776, 0.511, 2.346, 2.475, 3.204, 2.736, 2.143, 2.101, 0.779, 0.457, 0.0],
-      "speed": [21.7, 21.4, 21.4, 21.4, 21.4, 21.4, 19.4, 19.4, 19.4, 19.4, 19.4, 19.4, 19.4, 19.4, 19.4, 19.4, 19.4, 19.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4],
+      "distance": [131.9, 152.7, 33.4, 46.0, 26.8, 24.8, 27.0, 52.3, 48.4, 59.3, 59.2, 38.9, 49.7, 66.5, 49.7, 53.5, 71.8, 57.7, 38.0, 10.9, 50.2, 52.9, 68.5, 58.5, 45.8, 44.9, 16.7, 84.7, 41.9, 120.5, 119.0, 48.1, 104.8, 108.1, 14.6, 41.7, 27.7],
+      "duration": [6.088, 7.137, 1.56, 2.151, 1.255, 1.274, 1.389, 2.688, 2.49, 3.051, 3.046, 2.002, 2.555, 3.418, 2.558, 2.749, 3.695, 2.699, 1.776, 0.511, 2.346, 2.475, 3.204, 2.736, 2.143, 2.101, 0.779, 3.96, 1.96, 5.634, 5.563, 2.248, 4.9, 5.053, 0.684, 1.947, 1.296],
+      "speed": [21.7, 21.4, 21.4, 21.4, 21.4, 19.4, 19.4, 19.4, 19.4, 19.4, 19.4, 19.4, 19.4, 19.4, 19.4, 19.4, 19.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4, 21.4],
       "maxspeed": [{
         "unknown": true
       }, {
@@ -411,15 +441,29 @@
         "unknown": true
       }, {
         "unknown": true
+      }, {
+        "unknown": true
+      }, {
+        "unknown": true
+      }, {
+        "unknown": true
+      }, {
+        "unknown": true
+      }, {
+        "unknown": true
+      }, {
+        "unknown": true
+      }, {
+        "unknown": true
       }],
-      "congestion_numeric": [0, 0, 0, 0, 0, 0, null, null, null, null, null, null, null, null, null, null, null, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      "congestion_numeric": [0, 0, 0, 0, 0, null, null, null, null, null, null, null, null, null, null, null, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     }
   }],
   "routeOptions": {
     "baseUrl": "https://api.mapbox.com",
     "user": "mapbox",
     "profile": "driving-traffic",
-    "coordinates": "139.8603449,35.0935866;139.8531617,35.1046857",
+    "coordinates": "139.8603449,35.0935866;139.850572,35.110557",
     "language": "en",
     "layers": ";",
     "continue_straight": true,
@@ -434,5 +478,5 @@
     "enable_refresh": true
   },
   "voiceLocale": "en-US",
-  "requestUuid": "edwXWbd3wG0Ha9PKndl0s-LSVhTC4v5-GVb1t9_K1EuP46fY-H3jXA\u003d\u003d"
+  "requestUuid": "QOzd0NZoIXfqzVDphY99d4sEMb4qRG8nMyaOj6gpV-PfOi1u-JmXgQ\u003d\u003d"
 }
