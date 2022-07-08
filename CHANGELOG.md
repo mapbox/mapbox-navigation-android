@@ -4,7 +4,15 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
-- :warning: Deprecated `RoadObjectsOnRouteObserver` in favor of a new getter `NavigationRoute.upcomingRoadObjects` to get access to list of `UpcomingRoadObject`.Added extension function `RouteProgress.getFirstUpcomingRoadObject` providing access to first upcoming road object of type `RoadObject`. [#6032](https://github.com/mapbox/mapbox-navigation-android/pull/6032)
+
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.7.0-alpha.3 - July 8, 2022
+### Changelog
+[Changes between v2.7.0-alpha.2 and v2.7.0-alpha.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.7.0-alpha.2...v2.7.0-alpha.3)
+
+#### Features
+- :warning: Deprecated `RoadObjectsOnRouteObserver` in favor of a new getter `NavigationRoute.upcomingRoadObjects` to get access to list of `UpcomingRoadObject`. [#6032](https://github.com/mapbox/mapbox-navigation-android/pull/6032)
 - Added `amenities` to `RestStop`. [#6007](https://github.com/mapbox/mapbox-navigation-android/pull/6007)
 - Introduced `NavigationViewOptions.showInfoPanelInFreeDrive` option that allows showing of the BottomSheet Info Panel when `NavigationView` is in the Free Drive state. [#6011](https://github.com/mapbox/mapbox-navigation-android/pull/6011)
 - Added `VoiceInstructionsPlayerOptions.abandonFocusDelay` option that allows specifying a delay in milliseconds until the player abandons audio focus after playing all queued voice instructions. [#5969](https://github.com/mapbox/mapbox-navigation-android/pull/5969)
@@ -13,11 +21,20 @@ Mapbox welcomes participation and contributions from everyone.
 - Made `rerouteController` argument in `MapboxNavigation#setRerouteController` nullable. Null can be passed to disable automatic rerouting. [#5977](https://github.com/mapbox/mapbox-navigation-android/pull/5977)
 - Introduced `RoutesSetCallback` parameter to `MapboxNavigation#setNavigationRoutes`, which is called after the routes passed to `MapboxNavigation#setNavigationRoutes` are processed or are failed to be processed. [#5946](https://github.com/mapbox/mapbox-navigation-android/pull/5946)
 - Changed the behaviour of `RoutesObserver`: `onRoutesChanged` method will not be triggered if the navigator fails to process routes passed via `MapboxNavigation#setNavigationRoutes`. [#5946](https://github.com/mapbox/mapbox-navigation-android/pull/5946)
-- Fixed Attribution Icon position in `NavigationView` [#6012](https://github.com/mapbox/mapbox-navigation-android/pull/6012) 
+- Fixed Attribution Icon position in `NavigationView`. [#6012](https://github.com/mapbox/mapbox-navigation-android/pull/6012)
 - Fixed Toggle Camera Mode Button behavior in `NavigationView`. [#6014](https://github.com/mapbox/mapbox-navigation-android/pull/6014)
 - Increased `AudioFocusDelegateProvider` visibility to public to allow instantiation of the default `AsyncAudioFocusDelegate`. [#5969](https://github.com/mapbox/mapbox-navigation-android/pull/5969)
 - Fixed serialization of models with unrecognized properties. [#6021](https://github.com/mapbox/mapbox-navigation-android/pull/6021)
 - Fixed the intermittent native crash caused during _Free Drive_ transition from _Active Guidance with alternatives. [#6034](https://github.com/mapbox/mapbox-navigation-android/pull/6034)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.7.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.7.0-beta.1))
+- Mapbox Navigation Native `v108.0.1`
+- Mapbox Core Common `v22.1.0-beta.1`
+- Mapbox Java `v6.6.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.6.0))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+- Mapbox Android Telemetry `v8.1.4`([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.4-core-5.0.2))
 
 ## Mapbox Navigation SDK 2.6.0 - July 7, 2022
 ### Changelog
