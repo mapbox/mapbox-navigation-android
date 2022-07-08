@@ -11,9 +11,9 @@ import java.util.Locale
 
 /**
  * Offline implementation of [VoiceInstructionsPlayer].
- * @property context Context
- * @property language [Locale] language (in a format acceptable by [Locale])
- * @property playerAttributes [VoiceInstructionsPlayerAttributes]
+ * @param context Context
+ * @param language [Locale] language (in a format acceptable by [Locale])
+ * @param playerAttributes [VoiceInstructionsPlayerAttributes]
  */
 internal class VoiceInstructionsTextPlayer(
     private val context: Context,

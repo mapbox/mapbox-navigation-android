@@ -16,10 +16,10 @@ import java.util.Locale
 
 /**
  * Mapbox Speech Api that allows you to generate an announcement based on [VoiceInstructions]
- * @property context Context
- * @property accessToken String
- * @property language [Locale] language (IETF BCP 47)
- * @property options [MapboxSpeechApiOptions] (optional)
+ * @param context Context
+ * @param accessToken String
+ * @param language [Locale] language (IETF BCP 47)
+ * @param options [MapboxSpeechApiOptions] (optional)
  */
 class MapboxSpeechApi @JvmOverloads constructor(
     private val context: Context,

@@ -18,12 +18,12 @@ import kotlin.concurrent.schedule
 /**
  * Hybrid implementation of [MapboxVoiceInstructionsPlayer] combining [VoiceInstructionsTextPlayer] and
  * [VoiceInstructionsFilePlayer] speech players.
- * @property context Context
- * @property accessToken String
- * @property language [Locale] language (in a format acceptable by [Locale])
- * @property options [VoiceInstructionsPlayerOptions] (optional)
- * @property audioFocusDelegate [AsyncAudioFocusDelegate] (optional)
- * @property timerFactory [Provider] (optional)
+ * @param context Context
+ * @param accessToken String
+ * @param language [Locale] language (in a format acceptable by [Locale])
+ * @param options [VoiceInstructionsPlayerOptions] (optional)
+ * @param audioFocusDelegate [AsyncAudioFocusDelegate] (optional)
+ * @param timerFactory [Provider] (optional)
  */
 @UiThread
 class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
