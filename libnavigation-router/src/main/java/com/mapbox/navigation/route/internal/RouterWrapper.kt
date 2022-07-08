@@ -31,6 +31,7 @@ import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
 import com.mapbox.navigation.route.internal.util.parseDirectionsRouteRefresh
 import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigator.RouteRefreshOptions
@@ -55,7 +56,7 @@ class RouterWrapper(
 
         return router.getRoute(routeUrl) { result, origin ->
             val urlWithoutToken = URL(routeUrl.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM))
-            logI("received result from route.getRoute for $urlWithoutToken", LOG_CATEGORY)
+            logD("received result from route.getRoute for $urlWithoutToken", LOG_CATEGORY)
             result.fold(
                 {
                     mainJobControl.scope.launch {
@@ -220,13 +221,13 @@ class RouterWrapper(
                         withContext(ThreadController.DefaultDispatcher) {
                             parseDirectionsRouteRefresh(it)
                                 .onValue {
-                                    logI(
+                                    logD(
                                         "Parsed route refresh response for route(${route.id})",
                                         LOG_CATEGORY
                                     )
                                 }
                                 .onError {
-                                    logI(
+                                    logD(
                                         "Failed to parse route refresh response for " +
                                             "route(${route.id})",
                                         LOG_CATEGORY
