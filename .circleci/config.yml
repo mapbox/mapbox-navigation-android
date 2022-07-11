@@ -746,6 +746,7 @@ jobs:
 
   release-snapshot:
     executor: ndk-r22-latest-executor
+    resource_class: medium+
     steps:
       - checkout
       - assemble-core-release
