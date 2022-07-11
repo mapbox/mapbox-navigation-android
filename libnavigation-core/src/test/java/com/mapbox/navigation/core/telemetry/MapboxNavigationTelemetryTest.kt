@@ -362,20 +362,6 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
-    fun departEvent_app_metadata_sessionId_is_active_guidance() {
-        baseMock()
-
-        baseInitialization()
-
-        val events = captureAndVerifyMetricsReporter(exactly = 2)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertEquals(
-            ACTIVE_GUIDANCE_SESSION_ID,
-            (events[1] as NavigationDepartEvent).appMetadata?.sessionId
-        )
-    }
-
-    @Test
     fun departEvent_not_sent_without_route_and_routeProgress() {
         baseMock()
 
@@ -425,28 +411,6 @@ class MapboxNavigationTelemetryTest {
         assertEquals(4, events.size)
         verify { locationsCollector.flushBuffers() }
         checkEventsDividedBySessionsInSameNavSession(events.subList(0, 3), events.subList(3, 4))
-    }
-
-    @Test
-    fun cancelEvent_app_metadata_sessionId_is_active_guidance() {
-        baseMock()
-
-        baseInitialization()
-        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
-
-        val events = captureAndVerifyMetricsReporter(exactly = 4)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
-        assertTrue(events[2] is NavigationCancelEvent)
-        assertTrue(events[3] is NavigationFreeDriveEvent)
-        assertEquals(
-            ACTIVE_GUIDANCE_SESSION_ID,
-            (events[2] as NavigationCancelEvent).appMetadata?.sessionId
-        )
-        assertEquals(
-            FREE_DRIVE_SESSION_ID,
-            (events[3] as NavigationFreeDriveEvent).appMetadata?.sessionId
-        )
     }
 
     @Test
@@ -939,20 +903,6 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
-    fun freeDriveEvent_app_metadata_sessionId_is_free_drive() {
-        baseMock()
-
-        initTelemetry()
-        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
-
-        val events = captureAndVerifyMetricsReporter(exactly = 2)
-        assertEquals(
-            FREE_DRIVE_SESSION_ID,
-            (events[1] as NavigationFreeDriveEvent).appMetadata?.sessionId
-        )
-    }
-
-    @Test
     fun freeDrive_sent_when_state_changes_from_active_guidance_to_free_drive() {
         baseMock()
 
@@ -965,24 +915,6 @@ class MapboxNavigationTelemetryTest {
         assertTrue(events[2] is NavigationCancelEvent)
         assertTrue(events[3] is NavigationFreeDriveEvent)
         checkEventsDividedBySessionsInSameNavSession(events.subList(0, 3), events.subList(3, 4))
-    }
-
-    @Test
-    fun freeDriveEvent_app_metadata_sessionId_updated_from_active_guidance_to_free_drive() {
-        baseMock()
-
-        baseInitialization()
-        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
-
-        val events = captureAndVerifyMetricsReporter(exactly = 4)
-        assertEquals(
-            ACTIVE_GUIDANCE_SESSION_ID,
-            (events[2] as NavigationCancelEvent).appMetadata?.sessionId
-        )
-        assertEquals(
-            FREE_DRIVE_SESSION_ID,
-            (events[3] as NavigationFreeDriveEvent).appMetadata?.sessionId
-        )
     }
 
     @Test
@@ -1005,31 +937,6 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
-    fun freeDriveEvent_app_metadata_sessionId_updated_from_free_drive_to_active_guidance() {
-        baseMock()
-
-        initTelemetry()
-        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
-        updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
-        updateRoute(originalRoute)
-        updateRouteProgress()
-
-        val events = captureAndVerifyMetricsReporter(exactly = 4)
-        assertEquals(
-            FREE_DRIVE_SESSION_ID,
-            (events[1] as NavigationFreeDriveEvent).appMetadata?.sessionId
-        )
-        assertEquals(
-            FREE_DRIVE_SESSION_ID,
-            (events[2] as NavigationFreeDriveEvent).appMetadata?.sessionId
-        )
-        assertEquals(
-            ACTIVE_GUIDANCE_SESSION_ID,
-            (events[3] as NavigationDepartEvent).appMetadata?.sessionId
-        )
-    }
-
-    @Test
     fun freeDrive_sent_when_state_changes_from_free_drive_to_idle() {
         baseMock()
 
@@ -1042,25 +949,6 @@ class MapboxNavigationTelemetryTest {
         assertTrue(events[1] is NavigationFreeDriveEvent) // start free drive
         assertTrue(events[2] is NavigationFreeDriveEvent) // stop free drive
         checkEventsInSameSession(events)
-    }
-
-    @Test
-    fun freeDriveEvent_app_metadata_sessionId_updated_from_free_drive_to_idle() {
-        baseMock()
-
-        initTelemetry()
-        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
-        updateSessionState(Idle)
-
-        val events = captureAndVerifyMetricsReporter(exactly = 3)
-        assertEquals(
-            FREE_DRIVE_SESSION_ID,
-            (events[1] as NavigationFreeDriveEvent).appMetadata?.sessionId
-        )
-        assertEquals(
-            FREE_DRIVE_SESSION_ID,
-            (events[2] as NavigationFreeDriveEvent).appMetadata?.sessionId
-        )
     }
 
     @Test

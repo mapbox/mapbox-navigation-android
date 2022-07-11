@@ -184,8 +184,6 @@ internal object MapboxNavigationTelemetry {
 
     private var sessionState: NavigationSessionState = Idle
 
-    private var appMetadataSessionId: String = ""
-
     private val routeData = RouteData()
 
     private class RouteData {
@@ -289,17 +287,14 @@ internal object MapboxNavigationTelemetry {
 
         when (val freeDriveEvent = getFreeDriveEvent(legacyState, this.sessionState)) {
             START -> {
-                appMetadataSessionId = sessionState.sessionId
                 handleTelemetryState()
                 trackFreeDrive(freeDriveEvent)
             }
             STOP -> {
                 trackFreeDrive(freeDriveEvent)
-                appMetadataSessionId = sessionState.sessionId
                 handleTelemetryState()
             }
             null -> {
-                appMetadataSessionId = sessionState.sessionId
                 handleTelemetryState()
             }
         }
@@ -876,7 +871,7 @@ internal object MapboxNavigationTelemetry {
 
     private fun createAppMetadata(): AppMetadata? {
         navigationOptions.eventsAppMetadata?.let {
-            return AppMetadata(it.name, it.version, it.userId, appMetadataSessionId)
+            return AppMetadata(it.name, it.version, it.userId, it.sessionId)
         } ?: return null
     }
 
