@@ -70,7 +70,7 @@ class FavoritesApi(
     ): Expected<GetPlacesError, FavoriteRecord> {
         addFavoriteTask?.cancel()
         return suspendCoroutine { continuation ->
-            addFavoriteTask = favoritesProvider.add(
+            addFavoriteTask = favoritesProvider.upsert(
                 favoriteRecord,
                 object : CompletionCallback<Unit> {
                     override fun onComplete(result: Unit) {
