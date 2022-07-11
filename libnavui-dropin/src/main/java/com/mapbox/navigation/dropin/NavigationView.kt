@@ -25,6 +25,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.dropin.component.analytics.AnalyticsComponent
 import com.mapbox.navigation.dropin.component.backpress.OnKeyListenerComponent
 import com.mapbox.navigation.dropin.component.location.LocationPermissionComponent
+import com.mapbox.navigation.dropin.component.tripsession.TripSessionComponent
 import com.mapbox.navigation.dropin.coordinator.ActionButtonsCoordinator
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
 import com.mapbox.navigation.dropin.coordinator.LeftFrameCoordinator
@@ -121,6 +122,7 @@ class NavigationView @JvmOverloads constructor(
         attachCreated(
             AnalyticsComponent(),
             LocationPermissionComponent(context.toComponentActivityRef(), navigationContext.store),
+            TripSessionComponent(lifecycle, navigationContext.store),
             MapLayoutCoordinator(navigationContext, binding),
             OnKeyListenerComponent(navigationContext.store, this),
             ManeuverCoordinator(navigationContext, binding.guidanceLayout),

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.app.internal.tripsession
+package com.mapbox.navigation.dropin.component.tripsession
 
 import android.annotation.SuppressLint
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
