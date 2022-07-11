@@ -10,6 +10,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Changed `RouteOptionsUpdater` to use `snapping_include_closures=true` for origin of each re-route request. This resolves a situation when Nav SDK returned a route in an opposite direction or on a parallel road when a driver caused a re-route by entering a closed section of a road. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)
 - :warning: Added checks to `DirectionsRoute#toNavigationRoute` and `NavigationRoute#toDirectionsRoute` mappers which restrict mapping `NavigationRoute` to `DirectionsRoute` and vice versa for some Directions API features and properties (currently including only preview EV routing features), because the `DirectionsRoute` cannot carry information necessary to support turn-by-turn navigation when these features are enabled. If you are using EV routing preview feature, make sure to only interact with `MapboxNavigation#requestRoutes(RouteOptions, NavigationRouterCallback)`, `MapboxNavigation#setNavigationRoutes(List<NavigationRoute>)`, and equivalent `NavigationRoute` APIs. [#6004](https://github.com/mapbox/mapbox-navigation-android/pull/6004)
 - Adjusted the `RoutesSetCallback` API. [#6040](https://github.com/mapbox/mapbox-navigation-android/pull/6040)
+- Updated `NavigationView` to reset `SharedApp` state when `MapboxNavigation`is destroyed. [#6039](https://github.com/mapbox/mapbox-navigation-android/pull/6039)
 
 ## Mapbox Navigation SDK 2.7.0-alpha.3 - July 8, 2022
 ### Changelog
