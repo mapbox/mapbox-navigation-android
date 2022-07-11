@@ -8,18 +8,19 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.RouteStatus
+import com.mapbox.navigation.core.RoutesSetResult
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.SetRoutesResult
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.setNavigationRoutesAsync
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import junit.framework.Assert.assertNull
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -58,8 +59,55 @@ class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
             RouterOrigin.Custom()
         )
         val result = mapboxNavigation.setNavigationRoutesAsync(routes)
-        assertTrue(result is SetRoutesResult.Success)
-        assertEquals(routes, (result as SetRoutesResult.Success).routes)
+        result.run {
+            assertEquals(RoutesSetResult.SUCCESS, status)
+            assertEquals(routes, passedRoutes)
+            assertNotNull(primaryRoute)
+            primaryRoute!!.run {
+                assertEquals(routes[0], route)
+                assertEquals(true, wasSet)
+                assertNull(error)
+            }
+            assertEquals(emptyList<RouteStatus>(), acceptedAlternatives)
+            assertEquals(emptyList<RouteStatus>(), ignoredAlternatives)
+        }
+    }
+
+    @Test
+    fun set_navigation_routes_ignore_alternatives() = sdkTest {
+        val mockRoute = MockRoutesProvider.dc_very_short_with_invalid_alternatives(activity)
+        val routes = NavigationRoute.create(
+            mockRoute.routeResponse,
+            RouteOptions.builder()
+                .coordinatesList(mockRoute.routeWaypoints)
+                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                .build(),
+            RouterOrigin.Custom()
+        )
+
+        val result = mapboxNavigation.setNavigationRoutesAsync(routes)
+        result.run {
+            assertEquals(RoutesSetResult.ALTERNATIVES_ARE_FILTERED, status)
+            assertEquals(routes, passedRoutes)
+            assertNotNull(primaryRoute)
+            primaryRoute!!.run {
+                assertEquals(routes[0], route)
+                assertEquals(true, wasSet)
+                assertNull(error)
+            }
+            assertEquals(1, acceptedAlternatives.size)
+            acceptedAlternatives[0].run {
+                assertEquals(routes[2], route)
+                assertEquals(true, wasSet)
+                assertNull(error)
+            }
+            assertEquals(1, ignoredAlternatives.size)
+            ignoredAlternatives[0].run {
+                assertEquals(routes[1], route)
+                assertEquals(false, wasSet)
+                assertNotNull(error)
+            }
+        }
     }
 
     @Test
@@ -74,10 +122,29 @@ class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
             RouterOrigin.Custom()
         )
         val result = mapboxNavigation.setNavigationRoutesAsync(routes, 6)
-        assertTrue(result is SetRoutesResult.Failure)
-        (result as SetRoutesResult.Failure).run {
-            assertEquals(routes, this.routes)
-            assertNotEquals("", this.error)
+        result.run {
+            assertEquals(RoutesSetResult.PRIMARY_ROUTE_IGNORED, status)
+            assertEquals(routes, passedRoutes)
+            assertNotNull(primaryRoute)
+            primaryRoute!!.run {
+                assertEquals(routes[0], route)
+                assertEquals(false, wasSet)
+                assertNotNull(error)
+            }
+            assertEquals(emptyList<RouteStatus>(), acceptedAlternatives)
+            assertEquals(emptyList<RouteStatus>(), ignoredAlternatives)
+        }
+    }
+
+    @Test
+    fun set_navigation_routes_empty() = sdkTest {
+        val result = mapboxNavigation.setNavigationRoutesAsync(emptyList())
+        result.run {
+            assertEquals(RoutesSetResult.SUCCESS, status)
+            assertEquals(emptyList<NavigationRoute>(), passedRoutes)
+            assertNull(primaryRoute)
+            assertEquals(emptyList<RouteStatus>(), acceptedAlternatives)
+            assertEquals(emptyList<RouteStatus>(), ignoredAlternatives)
         }
     }
 }

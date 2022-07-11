@@ -48,6 +48,28 @@ object MockRoutesProvider {
         )
     }
 
+    // valid primary route, first invalid alternative, second valid alternative
+    fun dc_very_short_with_invalid_alternatives(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(context, R.raw.route_response_dc_very_short_with_invalid_alternatives)
+        val coordinates = listOf(
+            Point.fromLngLat(-77.031991, 38.894721),
+            Point.fromLngLat(-77.030923, 38.895433)
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates
+                )
+            ),
+            coordinates,
+            emptyList()
+        )
+    }
+
     fun dc_very_short_two_legs(context: Context): MockRoute {
         val jsonResponse = readRawFileText(context, R.raw.route_response_dc_very_short_two_legs)
         val coordinates = listOf(

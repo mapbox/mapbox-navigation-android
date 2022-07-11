@@ -822,18 +822,47 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
                 navigationSession.setRoutes(routes)
+                val routesSetResult: RoutesSetResult
                 when (val processedRoutes = setRoutesToTripSession(routes, legIndex, reason)) {
                     is NativeSetRouteValue -> {
+                        val (acceptedAlternatives, ignoredAlternatives) = routes
+                            .drop(1)
+                            .partition { passedRoute ->
+                                processedRoutes.nativeAlternatives.any { processedRoute ->
+                                    processedRoute.route.routeId == passedRoute.id
+                                }
+                            }
+                        val status = if (ignoredAlternatives.isEmpty()) {
+                            RoutesSetResult.SUCCESS
+                        } else {
+                            RoutesSetResult.ALTERNATIVES_ARE_FILTERED
+                        }
                         directionsSession.setRoutes(routes, legIndex, reason)
-                        callback?.onRoutesSetResult(RoutesSetCallbackSuccess(routes))
+                        routesSetResult = RoutesSetResult(
+                            status = status,
+                            passedRoutes = routes,
+                            primaryRoute = routes.firstOrNull()
+                                ?.let { RouteStatus(it, true, null) },
+                            acceptedAlternatives = acceptedAlternatives
+                                .map { RouteStatus(it, true, null) },
+                            ignoredAlternatives = ignoredAlternatives
+                                .map { RouteStatus(it, false, "invalid alternative") },
+                        )
                     }
                     is NativeSetRouteError -> {
                         logW("Routes $routes will be ignored as they are not valid")
-                        callback?.onRoutesSetError(
-                            RoutesSetCallbackError(routes, processedRoutes.error)
+                        routesSetResult = RoutesSetResult(
+                            status = RoutesSetResult.PRIMARY_ROUTE_IGNORED,
+                            passedRoutes = routes,
+                            primaryRoute = routes.firstOrNull()
+                                ?.let { RouteStatus(it, false, processedRoutes.error) },
+                            acceptedAlternatives = emptyList(),
+                            ignoredAlternatives = routes.drop(1)
+                                .map { RouteStatus(it, false, processedRoutes.error) },
                         )
                     }
                 }
+                callback?.onRoutesSet(routesSetResult)
             }
         }
     }
