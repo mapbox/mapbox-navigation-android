@@ -5,7 +5,8 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
-- Allow injection of your own SearchEngine. [#6042](https://github.com/mapbox/mapbox-navigation-android/pull/6042)
+- Added an option to inject your own SearchEngine. [#6042](https://github.com/mapbox/mapbox-navigation-android/pull/6042)
+- Reverted `MainScreenManager` refactor due to incompatibility with Drop-In UI. [#6043](https://github.com/mapbox/mapbox-navigation-android/pull/6043)
 
 ## androidauto-v0.3.0 - Jun 24, 2022
 ### Changelog

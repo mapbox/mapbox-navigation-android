@@ -1,8 +1,5 @@
 package com.mapbox.androidauto
 
-import com.mapbox.androidauto.car.search.PlaceRecord
-import com.mapbox.navigation.base.route.NavigationRoute
-
 /**
  * These states are communicated between the car and app.
  *
@@ -12,9 +9,6 @@ import com.mapbox.navigation.base.route.NavigationRoute
  */
 sealed class CarAppState
 object FreeDriveState : CarAppState()
-data class RoutePreviewState(
-    val placeRecord: PlaceRecord,
-    val routes: List<NavigationRoute>,
-) : CarAppState()
+object RoutePreviewState : CarAppState()
 object ActiveGuidanceState : CarAppState()
 object ArrivalState : CarAppState()

@@ -3,7 +3,9 @@ package com.mapbox.navigation.qa_test_app.car
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
+import androidx.car.app.CarContext
 import androidx.car.app.Screen
+import androidx.car.app.ScreenManager
 import androidx.car.app.Session
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
@@ -11,11 +13,13 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.android.core.permissions.PermissionsManager
+import com.mapbox.androidauto.MapboxCarNavigationManager
 import com.mapbox.androidauto.car.MainCarContext
-import com.mapbox.androidauto.car.MapboxCarNavigationManager
-import com.mapbox.androidauto.car.MapboxScreenManager
+import com.mapbox.androidauto.car.MainScreenManager
 import com.mapbox.androidauto.car.map.widgets.compass.CarCompassSurfaceRenderer
 import com.mapbox.androidauto.car.map.widgets.logo.CarLogoSurfaceRenderer
+import com.mapbox.androidauto.car.permissions.NeedsLocationPermissionsScreen
+import com.mapbox.androidauto.deeplink.GeoDeeplinkNavigateAction
 import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.androidauto.notification.CarNotificationInterceptor
 import com.mapbox.maps.MapInitOptions
@@ -23,7 +27,6 @@ import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.core.internal.extensions.attachStarted
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.qa_test_app.car.search.CarSearchLocationProvider
@@ -37,7 +40,7 @@ import kotlinx.coroutines.launch
 class MainCarSession : Session() {
 
     private var mainCarContext: MainCarContext? = null
-    private lateinit var mapboxScreenManager: MapboxScreenManager
+    private lateinit var mainScreenManager: MainScreenManager
     private lateinit var mapboxCarMap: MapboxCarMap
     private lateinit var mapboxNavigationManager: MapboxCarNavigationManager
     private val carMapStyleLoader = MainCarMapLoader()
@@ -73,14 +76,12 @@ class MainCarSession : Session() {
                 )
                 val mainCarContext = MainCarContext(carContext, mapboxCarMap, searchEngine)
                     .also { mainCarContext = it }
-
-                val mapboxScreenManager = MapboxScreenManager(mainCarContext)
-                    .also { mapboxScreenManager = it }
-                attachStarted(mapboxScreenManager)
-
+                val mainScreenManager = MainScreenManager(mainCarContext)
+                    .also { mainScreenManager = it }
                 repeatWhenStarted {
                     if (hasLocationPermission()) {
                         startTripSession(mainCarContext)
+                        mainScreenManager.observeCarAppState()
                     }
                 }
                 MapboxNavigationApp.registerObserver(notificationInterceptor)
@@ -117,7 +118,10 @@ class MainCarSession : Session() {
     override fun onCreateScreen(intent: Intent): Screen {
         logAndroidAuto("MainCarSession onCreateScreen")
 
-        return mapboxScreenManager.currentScreen()
+        return when (hasLocationPermission()) {
+            true -> mainScreenManager.currentScreen()
+            false -> NeedsLocationPermissionsScreen(carContext)
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -143,7 +147,19 @@ class MainCarSession : Session() {
         super.onNewIntent(intent)
         logAndroidAuto("onNewIntent $intent")
 
-        mapboxScreenManager.handleNewIntent(intent)
+        val currentScreen: Screen = when (hasLocationPermission()) {
+            true -> {
+                if (intent.action == CarContext.ACTION_NAVIGATE) {
+                    mainCarContext?.let { context ->
+                        GeoDeeplinkNavigateAction(context, lifecycle).onNewIntent(intent)
+                    }
+                } else {
+                    null
+                }
+            }
+            false -> NeedsLocationPermissionsScreen(carContext)
+        } ?: mainScreenManager.currentScreen()
+        carContext.getCarService(ScreenManager::class.java).push(currentScreen)
     }
 }
 

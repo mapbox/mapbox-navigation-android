@@ -9,13 +9,13 @@ import androidx.car.app.model.ItemList
 import androidx.car.app.model.Row
 import androidx.car.app.model.SearchTemplate
 import androidx.car.app.model.Template
-import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.R
-import com.mapbox.androidauto.RoutePreviewState
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.car.feedback.ui.buildSearchPlacesCarFeedbackProvider
+import com.mapbox.androidauto.car.preview.CarRoutePreviewScreen
 import com.mapbox.androidauto.car.preview.CarRouteRequestCallback
+import com.mapbox.androidauto.car.preview.RoutePreviewCarContext
 import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.androidauto.logAndroidAutoFailure
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -37,7 +37,9 @@ class SearchScreen(
     private val carRouteRequestCallback = object : CarRouteRequestCallback {
 
         override fun onRoutesReady(placeRecord: PlaceRecord, routes: List<NavigationRoute>) {
-            MapboxCarApp.updateCarAppState(RoutePreviewState(placeRecord, routes))
+            val routePreviewCarContext = RoutePreviewCarContext(searchCarContext.mainCarContext)
+
+            screenManager.push(CarRoutePreviewScreen(routePreviewCarContext, placeRecord, routes))
         }
 
         override fun onUnknownCurrentLocation() {
@@ -132,4 +134,11 @@ class SearchScreen(
     private fun buildErrorItemList(@StringRes stringRes: Int) = ItemList.Builder()
         .setNoItemsMessage(carContext.getString(stringRes))
         .build()
+
+    companion object {
+        // TODO turn this into something typesafe
+        fun parseResult(results: Any?): Any? {
+            return results
+        }
+    }
 }
