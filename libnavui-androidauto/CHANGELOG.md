@@ -5,8 +5,20 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+
+## androidauto-v0.4.0 - Jul 12, 2022
+### Changelog
+[Changes between 0.3.0 and 0.4.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.3.0...androidauto-v0.4.0)
+
+#### Bug fixes and improvements
 - Added an option to inject your own SearchEngine. [#6042](https://github.com/mapbox/mapbox-navigation-android/pull/6042)
 - Reverted `MainScreenManager` refactor due to incompatibility with Drop-In UI. [#6043](https://github.com/mapbox/mapbox-navigation-android/pull/6043)
+
+### Mapbox dependencies
+This release defines minimum versions for the Mapbox dependencies.
+- Mapbox Maps Android Auto Extension `v0.1.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/extension-androidauto-v0.1.0))
+- Mapbox Navigation `v2.7.0-alpha.3` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/v2.7.0-alpha.3))
+- Mapbox Search `v1.0.0-beta.33` ([release notes](https://github.com/mapbox/mapbox-search-android/releases/tag/v1.0.0-beta.33))
 
 ## androidauto-v0.3.0 - Jun 24, 2022
 ### Changelog
