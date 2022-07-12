@@ -27,8 +27,6 @@ dependencies {
     api (dependenciesList.mapboxEvents) {
         exclude group: "com.mapbox.mapboxsdk", module: "mapbox-android-core"
     }
-    // TODO Remove when MME uses WorkManager 2.7.0+
-    implementation dependenciesList.androidXWorkManager
 
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
