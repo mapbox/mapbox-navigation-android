@@ -111,7 +111,7 @@ class FavoritesApiTest {
         val expected = mockk<FavoriteRecord>(relaxed = true)
         val callbackSlot = slot<CompletionCallback<Unit>>()
         val mockFavoritesProvider = mockk<FavoritesDataProvider>(relaxed = true) {
-            every { add(expected, capture(callbackSlot)) } answers {
+            every { upsert(expected, capture(callbackSlot)) } answers {
                 callbackSlot.captured.onComplete(Unit)
                 mockk()
             }
@@ -129,7 +129,7 @@ class FavoritesApiTest {
         val callbackSlot = slot<CompletionCallback<Unit>>()
 
         val mockFavoritesProvider = mockk<FavoritesDataProvider>(relaxed = true) {
-            every { add(favoriteRecord, capture(callbackSlot)) } answers {
+            every { upsert(favoriteRecord, capture(callbackSlot)) } answers {
                 callbackSlot.captured.onComplete(Unit)
                 expectedAsyncOperationTask
             }
@@ -189,7 +189,7 @@ class FavoritesApiTest {
                 removeCallbackSlot.captured.onComplete(true)
                 removeFavoriteTask
             }
-            every { add(any(), capture(addCallbackSlot)) } coAnswers {
+            every { upsert(any(), capture(addCallbackSlot)) } coAnswers {
                 addCallbackSlot.captured.onComplete(Unit)
                 getAllTask
             }

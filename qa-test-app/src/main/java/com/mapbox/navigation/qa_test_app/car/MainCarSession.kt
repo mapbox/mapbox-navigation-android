@@ -26,7 +26,10 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.internal.extensions.attachStarted
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.TripSessionState
+import com.mapbox.navigation.qa_test_app.car.search.CarSearchLocationProvider
 import com.mapbox.navigation.qa_test_app.utils.Utils
+import com.mapbox.search.MapboxSearchSdk
+import com.mapbox.search.SearchEngineSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -62,7 +65,13 @@ class MainCarSession : Session() {
 
                 mapboxCarMap = MapboxCarMap(MapInitOptions(context = carContext))
                 mapboxCarMap.registerObserver(carMapStyleLoader)
-                val mainCarContext = MainCarContext(carContext, mapboxCarMap)
+                val searchEngine = MapboxSearchSdk.createSearchEngineWithBuiltInDataProviders(
+                    SearchEngineSettings(
+                        Utils.getMapboxAccessToken(carContext.applicationContext),
+                        MapboxNavigationApp.getObserver(CarSearchLocationProvider::class),
+                    ),
+                )
+                val mainCarContext = MainCarContext(carContext, mapboxCarMap, searchEngine)
                     .also { mainCarContext = it }
 
                 val mapboxScreenManager = MapboxScreenManager(mainCarContext)

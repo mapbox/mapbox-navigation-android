@@ -10,6 +10,6 @@ class QaTestApplication : Application() {
         super.onCreate()
 
         MapboxCarApp.setup(this)
-        MapboxCarSearchApp.setup(this)
+        MapboxCarSearchApp.setup()
     }
 }
