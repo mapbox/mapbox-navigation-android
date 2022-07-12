@@ -120,6 +120,8 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logI
+import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import com.mapbox.navigator.AlertsServiceOptions
 import com.mapbox.navigator.ElectronicHorizonOptions
@@ -240,6 +242,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val tripService: TripService
     private val tripSession: TripSession
     private val navigationSession: NavigationSession
+    private val historyRecordingStateHandler: HistoryRecordingStateHandler
     private val tripSessionLocationEngine: TripSessionLocationEngine
     private val billingController: BillingController
     private val connectivityHandler: ConnectivityHandler = ConnectivityHandler(
@@ -434,6 +437,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         )
         historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
         navigationSession = NavigationComponentProvider.createNavigationSession()
+        historyRecordingStateHandler = HistoryRecordingStateHandler(navigationSession.state)
+        navigationSession.registerNavigationSessionStateObserver(historyRecordingStateHandler)
 
         val notification: TripNotification = MapboxModuleProvider
             .createModule(
@@ -840,6 +845,15 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         CacheHandleWrapper.requestRoadGraphDataUpdate(navigator.cache, callback)
     }
 
+    // call before starting session - to docs
+    fun registerHistoryRecordingStateChangeObserver(observer: HistoryRecordingStateChangeObserver) {
+        historyRecordingStateHandler.registerHistoryRecordingStateChangeObserver(observer)
+    }
+
+    fun unregisterHistoryRecordingStateChangeObserver(observer: HistoryRecordingStateChangeObserver) {
+        historyRecordingStateHandler.unregisterHistoryRecordingStateChangeObserver(observer)
+    }
+
     private fun internalSetNavigationRoutes(
         routes: List<NavigationRoute>,
         legIndex: Int = 0,
@@ -850,6 +864,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         restartRouteScope()
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
+                val prevState = navigationSession.state
+                val potentialNewState = navigationSession.setRoutesPreview(routes)
+                historyRecordingStateHandler.onNavigationSessionStateChanged(potentialNewState)
                 navigationSession.setRoutes(routes)
                 val routesSetResult: Expected<RoutesSetError, RoutesSetSuccess>
                 when (val processedRoutes = setRoutesToTripSession(routes, legIndex, reason)) {
@@ -875,6 +892,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                         routesSetResult = ExpectedFactory.createError(
                             RoutesSetError(processedRoutes.error)
                         )
+                        historyRecordingStateHandler.onNavigationSessionStateChanged(prevState)
                     }
                 }
                 callback?.onRoutesSet(routesSetResult)

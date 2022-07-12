@@ -40,7 +40,11 @@ internal class NavigationSession : TripSessionStateObserver {
         }
 
     private fun updateState() {
-        state = when {
+        state = getNewState(hasRoutes, isDriving)
+    }
+
+    private fun getNewState(hasRoutes: Boolean, isDriving: Boolean): NavigationSessionState {
+        return  when {
             hasRoutes && isDriving -> {
                 ActiveGuidance(navObtainUniversalSessionId())
             }
@@ -52,6 +56,8 @@ internal class NavigationSession : TripSessionStateObserver {
             }
         }
     }
+
+    private fun getHasRoutesValue(routes: List<NavigationRoute>): Boolean = routes.isNotEmpty()
 
     internal fun registerNavigationSessionStateObserver(
         navigationSessionStateObserver: NavigationSessionStateObserver
@@ -71,7 +77,11 @@ internal class NavigationSession : TripSessionStateObserver {
     }
 
     fun setRoutes(routes: List<NavigationRoute>) {
-        hasRoutes = routes.isNotEmpty()
+        hasRoutes = getHasRoutesValue(routes)
+    }
+
+    fun setRoutesPreview(routes: List<NavigationRoute>): NavigationSessionState {
+        return getNewState(getHasRoutesValue(routes), isDriving)
     }
 
     override fun onSessionStateChanged(tripSessionState: TripSessionState) {
