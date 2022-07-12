@@ -2,6 +2,7 @@ package com.mapbox.androidauto.deeplink
 
 import android.content.Intent
 import androidx.car.app.Screen
+import androidx.lifecycle.Lifecycle
 import com.mapbox.androidauto.car.MainCarContext
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
@@ -9,13 +10,12 @@ import com.mapbox.androidauto.car.placeslistonmap.PlaceMarkerRenderer
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListItemMapper
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapScreen
 import com.mapbox.androidauto.logAndroidAuto
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplink
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplinkParser
 
-@MapboxExperimental
 class GeoDeeplinkNavigateAction(
     val mainCarContext: MainCarContext,
+    val lifecycle: Lifecycle
 ) {
     fun onNewIntent(intent: Intent): Screen? {
         val geoDeeplink = GeoDeeplinkParser.parse(intent.dataString)
