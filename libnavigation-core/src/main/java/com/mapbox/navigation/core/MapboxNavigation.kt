@@ -15,6 +15,8 @@ import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -116,7 +118,7 @@ import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
-import com.mapbox.navigation.utils.internal.logW
+import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import com.mapbox.navigator.AlertsServiceOptions
 import com.mapbox.navigator.ElectronicHorizonOptions
@@ -822,7 +824,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
                 navigationSession.setRoutes(routes)
-                val routesSetResult: RoutesSetResult
+                val routesSetResult: Expected<RoutesSetError, RoutesSetSuccess>
                 when (val processedRoutes = setRoutesToTripSession(routes, legIndex, reason)) {
                     is NativeSetRouteValue -> {
                         val (acceptedAlternatives, ignoredAlternatives) = routes
@@ -832,33 +834,19 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                                     processedRoute.route.routeId == passedRoute.id
                                 }
                             }
-                        val status = if (ignoredAlternatives.isEmpty()) {
-                            RoutesSetResult.SUCCESS
-                        } else {
-                            RoutesSetResult.ALTERNATIVES_ARE_FILTERED
-                        }
                         directionsSession.setRoutes(routes, legIndex, reason)
-                        routesSetResult = RoutesSetResult(
-                            status = status,
-                            passedRoutes = routes,
-                            primaryRoute = routes.firstOrNull()
-                                ?.let { RouteStatus(it, true, null) },
-                            acceptedAlternatives = acceptedAlternatives
-                                .map { RouteStatus(it, true, null) },
-                            ignoredAlternatives = ignoredAlternatives
-                                .map { RouteStatus(it, false, "invalid alternative") },
+                        routesSetResult = ExpectedFactory.createValue(
+                            RoutesSetSuccess(
+                                ignoredAlternatives.associate {
+                                    it.id to RoutesSetError("invalid alternative")
+                                }
+                            )
                         )
                     }
                     is NativeSetRouteError -> {
-                        logW("Routes $routes will be ignored as they are not valid")
-                        routesSetResult = RoutesSetResult(
-                            status = RoutesSetResult.PRIMARY_ROUTE_IGNORED,
-                            passedRoutes = routes,
-                            primaryRoute = routes.firstOrNull()
-                                ?.let { RouteStatus(it, false, processedRoutes.error) },
-                            acceptedAlternatives = emptyList(),
-                            ignoredAlternatives = routes.drop(1)
-                                .map { RouteStatus(it, false, processedRoutes.error) },
+                        logE("Routes $routes will be ignored as they are not valid")
+                        routesSetResult = ExpectedFactory.createError(
+                            RoutesSetError(processedRoutes.error)
                         )
                     }
                 }

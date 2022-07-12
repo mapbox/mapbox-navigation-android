@@ -1,6 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.utils.coroutines
 
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
@@ -9,7 +10,8 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.RoutesSetCallback
-import com.mapbox.navigation.core.RoutesSetResult
+import com.mapbox.navigation.core.RoutesSetError
+import com.mapbox.navigation.core.RoutesSetSuccess
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
@@ -83,7 +85,7 @@ suspend fun MapboxNavigation.requestRoutes(options: RouteOptions) =
 suspend fun MapboxNavigation.setNavigationRoutesAsync(
     routes: List<NavigationRoute>,
     initialLegIndex: Int = 0,
-) = suspendCoroutine<RoutesSetResult> { continuation ->
+) = suspendCoroutine<Expected<RoutesSetError, RoutesSetSuccess>> { continuation ->
     val callback = RoutesSetCallback { result -> continuation.resume(result) }
     setNavigationRoutes(routes, initialLegIndex, callback)
 }

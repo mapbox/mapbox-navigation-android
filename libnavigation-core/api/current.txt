@@ -106,40 +106,18 @@ package com.mapbox.navigation.core {
     method public void onSwitchToTargetVersion(String? tilesVersion);
   }
 
-  public final class RouteStatus {
-    method public String? getError();
-    method public com.mapbox.navigation.base.route.NavigationRoute getRoute();
-    method public boolean getWasSet();
-    property public final String? error;
-    property public final com.mapbox.navigation.base.route.NavigationRoute route;
-    property public final boolean wasSet;
-  }
-
   public fun interface RoutesSetCallback {
-    method public void onRoutesSet(com.mapbox.navigation.core.RoutesSetResult result);
+    method public void onRoutesSet(com.mapbox.bindgen.Expected<com.mapbox.navigation.core.RoutesSetError,com.mapbox.navigation.core.RoutesSetSuccess> result);
   }
 
-  public final class RoutesSetResult {
-    method public java.util.List<com.mapbox.navigation.core.RouteStatus> getAcceptedAlternatives();
-    method public java.util.List<com.mapbox.navigation.core.RouteStatus> getIgnoredAlternatives();
-    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> getPassedRoutes();
-    method public com.mapbox.navigation.core.RouteStatus? getPrimaryRoute();
-    method public int getStatus();
-    property public final java.util.List<com.mapbox.navigation.core.RouteStatus> acceptedAlternatives;
-    property public final java.util.List<com.mapbox.navigation.core.RouteStatus> ignoredAlternatives;
-    property public final java.util.List<com.mapbox.navigation.base.route.NavigationRoute> passedRoutes;
-    property public final com.mapbox.navigation.core.RouteStatus? primaryRoute;
-    property public final int status;
-    field public static final int ALTERNATIVES_ARE_FILTERED = 3; // 0x3
-    field public static final com.mapbox.navigation.core.RoutesSetResult.Companion Companion;
-    field public static final int PRIMARY_ROUTE_IGNORED = 2; // 0x2
-    field public static final int SUCCESS = 1; // 0x1
+  public final class RoutesSetError {
+    method public String getMessage();
+    property public final String message;
   }
 
-  public static final class RoutesSetResult.Companion {
-  }
-
-  @IntDef({com.mapbox.navigation.core.RoutesSetResult.SUCCESS, com.mapbox.navigation.core.RoutesSetResult.PRIMARY_ROUTE_IGNORED, com.mapbox.navigation.core.RoutesSetResult.ALTERNATIVES_ARE_FILTERED}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface RoutesSetResult.Companion.Status {
+  public final class RoutesSetSuccess {
+    method public java.util.Map<java.lang.String,com.mapbox.navigation.core.RoutesSetError> getIgnoredAlternatives();
+    property public final java.util.Map<java.lang.String,com.mapbox.navigation.core.RoutesSetError> ignoredAlternatives;
   }
 
 }

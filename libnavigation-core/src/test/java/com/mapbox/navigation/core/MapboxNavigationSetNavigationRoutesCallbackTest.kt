@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core
 
+import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.directions.session.RoutesExtra
@@ -13,8 +14,7 @@ import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -37,9 +37,9 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
         every { id } returns alternativeId2
     }
     private val callback = mockk<RoutesSetCallback>(relaxed = true)
-    private val results = mutableListOf<RoutesSetResult>()
+    private val results = mutableListOf<Expected<RoutesSetError, RoutesSetSuccess>>()
     private val initialLegIndex = 2
-    private val error = "some error"
+    private val errorMessage = "some error"
     private val invalidAlternativeError = "invalid alternative"
 
     @Test
@@ -60,17 +60,8 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
 
             verify(exactly = 1) { callback.onRoutesSet(capture(results)) }
             results[0].run {
-                assertEquals(RoutesSetResult.SUCCESS, this.status)
-                assertEquals(routes, this.passedRoutes)
-                assertEquals(RouteStatus(passedPrimaryRoute, true, null), this.primaryRoute)
-                assertEquals(
-                    listOf(
-                        RouteStatus(alternativeRoute1, true, null),
-                        RouteStatus(alternativeRoute2, true, null),
-                    ),
-                    this.acceptedAlternatives
-                )
-                assertEquals(emptyList<RoutesSetResult>(), this.ignoredAlternatives)
+                assertTrue(this.isValue)
+                assertEquals(emptyMap<String, RoutesSetError>(), this.value!!.ignoredAlternatives)
             }
         }
 
@@ -87,11 +78,8 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
 
             verify(exactly = 1) { callback.onRoutesSet(capture(results)) }
             results[0].run {
-                assertEquals(RoutesSetResult.SUCCESS, this.status)
-                assertEquals(routes, this.passedRoutes)
-                assertEquals(RouteStatus(passedPrimaryRoute, true, null), this.primaryRoute)
-                assertEquals(emptyList<RoutesSetResult>(), this.acceptedAlternatives)
-                assertEquals(emptyList<RoutesSetResult>(), this.ignoredAlternatives)
+                assertTrue(this.isValue)
+                assertEquals(emptyMap<String, RoutesSetError>(), this.value!!.ignoredAlternatives)
             }
         }
 
@@ -102,44 +90,14 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             val routes = listOf(passedPrimaryRoute, alternativeRoute1, alternativeRoute2)
             coEvery {
                 tripSession.setRoutes(routes, initialLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
-            } returns NativeSetRouteError(error)
+            } returns NativeSetRouteError(errorMessage)
 
             mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)
 
             verify(exactly = 1) { callback.onRoutesSet(capture(results)) }
             results[0].run {
-                assertEquals(RoutesSetResult.PRIMARY_ROUTE_IGNORED, this.status)
-                assertEquals(routes, this.passedRoutes)
-                assertEquals(RouteStatus(passedPrimaryRoute, false, error), this.primaryRoute)
-                assertEquals(emptyList<RoutesSetResult>(), this.acceptedAlternatives)
-                assertEquals(
-                    listOf(
-                        RouteStatus(alternativeRoute1, false, error),
-                        RouteStatus(alternativeRoute2, false, error),
-                    ),
-                    this.ignoredAlternatives
-                )
-            }
-        }
-
-    @Test
-    fun `calls callback with error for invalid primary route without alternatives`() =
-        coroutineRule.runBlockingTest {
-            createMapboxNavigation()
-            val routes = listOf(passedPrimaryRoute)
-            coEvery {
-                tripSession.setRoutes(routes, initialLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
-            } returns NativeSetRouteError(error)
-
-            mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)
-
-            verify(exactly = 1) { callback.onRoutesSet(capture(results)) }
-            results[0].run {
-                assertEquals(RoutesSetResult.PRIMARY_ROUTE_IGNORED, this.status)
-                assertEquals(routes, this.passedRoutes)
-                assertEquals(RouteStatus(passedPrimaryRoute, false, error), this.primaryRoute)
-                assertEquals(emptyList<RoutesSetResult>(), this.acceptedAlternatives)
-                assertEquals(emptyList<RoutesSetResult>(), this.ignoredAlternatives)
+                assertTrue(this.isError)
+                assertEquals(errorMessage, this.error!!.message)
             }
         }
 
@@ -149,18 +107,19 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             createMapboxNavigation()
             val routes = emptyList<NavigationRoute>()
             coEvery {
-                tripSession.setRoutes(routes, initialLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+                tripSession.setRoutes(
+                    routes,
+                    initialLegIndex,
+                    RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+                )
             } returns NativeSetRouteValue(emptyList())
 
             mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)
 
             verify(exactly = 1) { callback.onRoutesSet(capture(results)) }
             results[0].run {
-                assertEquals(RoutesSetResult.SUCCESS, this.status)
-                assertEquals(routes, this.passedRoutes)
-                assertNull(this.primaryRoute)
-                assertEquals(emptyList<RoutesSetResult>(), this.acceptedAlternatives)
-                assertEquals(emptyList<RoutesSetResult>(), this.ignoredAlternatives)
+                assertTrue(this.isValue)
+                assertEquals(emptyMap<String, RoutesSetError>(), this.value!!.ignoredAlternatives)
             }
         }
 
@@ -177,16 +136,13 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
 
             verify(exactly = 1) { callback.onRoutesSet(capture(results)) }
             results[0].run {
-                assertEquals(RoutesSetResult.ALTERNATIVES_ARE_FILTERED, this.status)
-                assertEquals(routes, this.passedRoutes)
-                assertNotNull(this.primaryRoute)
-                assertEquals(emptyList<RoutesSetResult>(), this.acceptedAlternatives)
+                assertTrue(this.isValue)
                 assertEquals(
-                    listOf(
-                        RouteStatus(alternativeRoute1, false, invalidAlternativeError),
-                        RouteStatus(alternativeRoute2, false, invalidAlternativeError),
+                    mapOf(
+                        alternativeId1 to RoutesSetError(invalidAlternativeError),
+                        alternativeId2 to RoutesSetError(invalidAlternativeError)
                     ),
-                    this.ignoredAlternatives
+                    this.value!!.ignoredAlternatives
                 )
             }
         }
@@ -206,16 +162,13 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
 
             verify(exactly = 1) { callback.onRoutesSet(capture(results)) }
             results[0].run {
-                assertEquals(RoutesSetResult.ALTERNATIVES_ARE_FILTERED, this.status)
-                assertEquals(routes, this.passedRoutes)
-                assertNotNull(this.primaryRoute)
-                assertEquals(emptyList<RoutesSetResult>(), this.acceptedAlternatives)
+                assertTrue(this.isValue)
                 assertEquals(
-                    listOf(
-                        RouteStatus(alternativeRoute1, false, invalidAlternativeError),
-                        RouteStatus(alternativeRoute2, false, invalidAlternativeError),
+                    mapOf(
+                        alternativeId1 to RoutesSetError(invalidAlternativeError),
+                        alternativeId2 to RoutesSetError(invalidAlternativeError)
                     ),
-                    this.ignoredAlternatives
+                    this.value!!.ignoredAlternatives
                 )
             }
         }
@@ -233,16 +186,10 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
 
             verify(exactly = 1) { callback.onRoutesSet(capture(results)) }
             results[0].run {
-                assertEquals(RoutesSetResult.ALTERNATIVES_ARE_FILTERED, this.status)
-                assertEquals(routes, this.passedRoutes)
-                assertNotNull(this.primaryRoute)
+                assertTrue(this.isValue)
                 assertEquals(
-                    listOf(RouteStatus(alternativeRoute2, true, null)),
-                    this.acceptedAlternatives
-                )
-                assertEquals(
-                    listOf(RouteStatus(alternativeRoute1, false, invalidAlternativeError)),
-                    this.ignoredAlternatives
+                    mapOf(alternativeId1 to RoutesSetError(invalidAlternativeError)),
+                    this.value!!.ignoredAlternatives
                 )
             }
         }
