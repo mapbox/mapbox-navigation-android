@@ -7,5 +7,8 @@ class CustomizedViewModel : ViewModel() {
     val useCustomViews = MutableLiveData(false)
     val useCustomStyles = MutableLiveData(false)
     val showCustomMapView = MutableLiveData(false)
+    val useCustomInfoPanelLayout = MutableLiveData(false)
+    val useCustomInfoPanelStyles = MutableLiveData(false)
+    val showCustomInfoPanelContent = MutableLiveData(false)
     val showBottomSheetInFreeDrive = MutableLiveData(false)
 }

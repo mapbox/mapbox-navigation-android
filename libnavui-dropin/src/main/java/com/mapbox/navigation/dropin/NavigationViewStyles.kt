@@ -10,6 +10,14 @@ import kotlinx.coroutines.flow.asStateFlow
 @ExperimentalPreviewMapboxNavigationAPI
 internal class NavigationViewStyles(context: Context) {
 
+    private var _infoPanelPeekHeight: MutableStateFlow<Int> =
+        MutableStateFlow(ViewStyleCustomization.defaultInfoPanelPeekHeight(context))
+    private var _infoPanelMarginStart: MutableStateFlow<Int> =
+        MutableStateFlow(ViewStyleCustomization.defaultInfoPanelMarginStart())
+    private var _infoPanelMarginEnd: MutableStateFlow<Int> =
+        MutableStateFlow(ViewStyleCustomization.defaultInfoPanelMarginEnd())
+    private var _infoPanelBackground: MutableStateFlow<Int> =
+        MutableStateFlow(ViewStyleCustomization.defaultInfoPanelBackground())
     private var _tripProgressStyle: MutableStateFlow<Int> =
         MutableStateFlow(ViewStyleCustomization.defaultTripProgressStyle())
     private var _audioGuidanceButtonStyle: MutableStateFlow<Int> =
@@ -37,6 +45,10 @@ internal class NavigationViewStyles(context: Context) {
     private var _maneuverViewOptions: MutableStateFlow<ManeuverViewOptions> =
         MutableStateFlow(ViewStyleCustomization.defaultManeuverViewOptions())
 
+    val infoPanelPeekHeight: StateFlow<Int> = _infoPanelPeekHeight.asStateFlow()
+    val infoPanelMarginStart: StateFlow<Int> = _infoPanelMarginStart.asStateFlow()
+    val infoPanelMarginEnd: StateFlow<Int> = _infoPanelMarginEnd.asStateFlow()
+    val infoPanelBackground: StateFlow<Int> = _infoPanelBackground.asStateFlow()
     val tripProgressStyle: StateFlow<Int> = _tripProgressStyle.asStateFlow()
     val recenterButtonStyle: StateFlow<Int> = _recenterButtonStyle.asStateFlow()
     val audioGuidanceButtonStyle: StateFlow<Int> = _audioGuidanceButtonStyle.asStateFlow()
@@ -52,6 +64,10 @@ internal class NavigationViewStyles(context: Context) {
     val maneuverViewOptions: StateFlow<ManeuverViewOptions> = _maneuverViewOptions.asStateFlow()
 
     fun applyCustomization(customization: ViewStyleCustomization) {
+        customization.infoPanelPeekHeight?.also { _infoPanelPeekHeight.tryEmit(it) }
+        customization.infoPanelMarginStart?.also { _infoPanelMarginStart.tryEmit(it) }
+        customization.infoPanelMarginEnd?.also { _infoPanelMarginEnd.tryEmit(it) }
+        customization.infoPanelBackground?.also { _infoPanelBackground.tryEmit(it) }
         customization.tripProgressStyle?.also { _tripProgressStyle.tryEmit(it) }
         customization.recenterButtonStyle?.also { _recenterButtonStyle.tryEmit(it) }
         customization.cameraModeButtonStyle?.also { _cameraModeButtonStyle.tryEmit(it) }

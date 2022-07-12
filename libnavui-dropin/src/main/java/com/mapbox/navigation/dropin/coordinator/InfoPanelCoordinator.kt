@@ -33,6 +33,7 @@ internal class InfoPanelCoordinator(
 
     init {
         infoPanel.addOnLayoutChangeListener(FixBottomSheetLayoutWhenHidden(infoPanel, behavior))
+        behavior.peekHeight = context.styles.infoPanelPeekHeight.value
         behavior.hide()
     }
 
@@ -49,6 +50,11 @@ internal class InfoPanelCoordinator(
                 setGuidelinePosition(infoPanel)
             }
         }
+        coroutineScope.launch {
+            context.styles.infoPanelPeekHeight.collect { peekHeight ->
+                behavior.peekHeight = peekHeight
+            }
+        }
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
@@ -58,13 +64,17 @@ internal class InfoPanelCoordinator(
 
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
         return combine(
+            context.uiBinders.infoPanelBinder,
             context.uiBinders.infoPanelHeaderBinder,
             context.uiBinders.infoPanelContentBinder
-        ) { headerBinder, contentBinder ->
-            InfoPanelBinder(
-                headerBinder ?: InfoPanelHeaderBinder(context),
-                contentBinder
-            )
+        ) { infoPanelBinder, headerBinder, contentBinder ->
+            (infoPanelBinder ?: InfoPanelBinder.defaultBinder()).also {
+                it.setNavigationViewContext(context)
+                it.setBinders(
+                    headerBinder ?: InfoPanelHeaderBinder(context),
+                    contentBinder
+                )
+            }
         }
     }
 

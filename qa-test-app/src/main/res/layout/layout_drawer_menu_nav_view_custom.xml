@@ -71,11 +71,38 @@
         </TableRow>
         <TableRow android:padding="5dp">
             <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/toggleCustomInfoPanel"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Custom Info Panel Layout"
+                android:textAllCaps="true" />
+        </TableRow>
+        <TableRow android:padding="5dp">
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/toggleCustomInfoPanelStyles"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Custom Info Panel Styles"
+                android:textAllCaps="true" />
+        </TableRow>
+        <TableRow android:padding="5dp">
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/toggleCustomInfoPanelContent"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Custom Info Panel Content"
+                android:textAllCaps="true" />
+        </TableRow>
+        <TableRow android:padding="5dp">
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/toggleBottomSheetFD"
                 android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="SHOW BOTTOM SHEET IN \nFree Drive"
+                android:text="Show Info Panel IN \nFree Drive"
                 android:textAllCaps="true" />
         </TableRow>
     </TableLayout>

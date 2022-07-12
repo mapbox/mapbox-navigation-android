@@ -122,29 +122,16 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <LinearLayout
+            <FrameLayout
                 android:id="@+id/infoPanelLayout"
-                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:elevation="8dp"
-                android:background="@drawable/mapbox_bg_info_panel"
                 app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
                 app:behavior_hideable="true"
                 app:behavior_fitToContents="true"
-                app:behavior_peekHeight="@dimen/mapbox_infoPanel_peekHeight">
-
-                <FrameLayout
-                    android:id="@+id/infoPanelHeader"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/mapbox_infoPanel_peekHeight" />
-
-                <FrameLayout
-                    android:id="@+id/infoPanelContent"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
+                tools:behavior_peekHeight="@dimen/mapbox_infoPanel_peekHeight"
+                tools:background="@drawable/mapbox_bg_info_panel"
+                tools:minHeight="@dimen/mapbox_infoPanel_peekHeight" />
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

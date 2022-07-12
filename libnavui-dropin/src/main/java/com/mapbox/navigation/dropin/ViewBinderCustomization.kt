@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 
 /**
@@ -28,6 +29,12 @@ class ViewBinderCustomization {
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var roadNameBinder: UIBinder? = null
+
+    /**
+     * Customize the Info Panel layout by providing your own [InfoPanelBinder].
+     * Use [InfoPanelBinder.defaultBinder] to reset to default.
+     */
+    var infoPanelBinder: InfoPanelBinder? = null
 
     /**
      * Customize the Info Panel Trip Progress by providing your own [UIBinder].
