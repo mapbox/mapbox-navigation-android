@@ -46,6 +46,7 @@ package com.mapbox.navigation.core {
     method public void requestAlternativeRoutes();
     method public void requestAlternativeRoutes(com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesRequestCallback? callback = null);
     method public void requestAlternativeRoutes(com.mapbox.navigation.core.routealternatives.RouteAlternativesRequestCallback callback);
+    method public void requestRoadGraphDataUpdate(com.mapbox.navigation.core.RoadGraphDataUpdateCallback callback);
     method @Deprecated public long requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterCallback routesRequestCallback);
     method public long requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.NavigationRouterCallback callback);
     method public void resetTripSession();
@@ -104,6 +105,17 @@ package com.mapbox.navigation.core {
   public interface NavigationVersionSwitchObserver {
     method public void onSwitchToFallbackVersion(String? tilesVersion);
     method public void onSwitchToTargetVersion(String? tilesVersion);
+  }
+
+  public interface RoadGraphDataUpdateCallback {
+    method public void onRoadGraphDataUpdateInfoAvailable(boolean isUpdateAvailable, com.mapbox.navigation.core.RoadGraphVersionInfo? versionInfo);
+  }
+
+  public final class RoadGraphVersionInfo {
+    method public String getDataset();
+    method public String getVersion();
+    property public final String dataset;
+    property public final String version;
   }
 
   public fun interface RoutesSetCallback {
@@ -328,6 +340,9 @@ package com.mapbox.navigation.core.lifecycle {
 }
 
 package com.mapbox.navigation.core.navigator {
+
+  public final class CacheHandleWrapperKt {
+  }
 
   public final class LocationEx {
   }

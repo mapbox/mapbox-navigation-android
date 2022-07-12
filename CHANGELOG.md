@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added `MapboxNavigation.requestRoadGraphDataUpdate` method and `RoadGraphDataUpdateCallback` class to request road graph data update and recreate `MapboxNavigation` instance in the callback to be able to use latest data even if the application lifecycle is very long. [#6044](https://github.com/mapbox/mapbox-navigation-android/pull/6044)
 
 #### Bug fixes and improvements
 - Changed `RouteOptionsUpdater` to use `snapping_include_closures=true` for origin of each re-route request. This resolves a situation when Nav SDK returned a route in an opposite direction or on a parallel road when a driver caused a re-route by entering a closed section of a road. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)

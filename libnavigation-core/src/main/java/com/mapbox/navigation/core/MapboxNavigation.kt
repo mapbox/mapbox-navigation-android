@@ -60,6 +60,7 @@ import com.mapbox.navigation.core.internal.utils.InternalUtils
 import com.mapbox.navigation.core.internal.utils.ModuleParams
 import com.mapbox.navigation.core.internal.utils.isInternalImplementation
 import com.mapbox.navigation.core.internal.utils.paramsProvider
+import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.reroute.LegacyRerouteControllerAdapter
@@ -811,6 +812,32 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             reason,
             callback,
         )
+    }
+
+    /**
+     * Requests road graph data update and invokes the callback on result.
+     * Use this method if the frequency of application relaunch is too low
+     * to always get the latest road graph data.
+     * Recreate [MapboxNavigation] instance in the callback when updates are available:
+     * ```
+     *   mapboxNavigation.requestRoadGraphDataUpdate(object : RoadGraphDataUpdateCallback {
+     *       override fun onRoadGraphDataUpdateInfoAvailable(
+     *           isUpdateAvailable: Boolean,
+     *           versionInfo: RoadGraphVersionInfo?
+     *       ) {
+     *           if (isUpdateAvailable) {
+     *               mapboxNavigation.onDestroy()
+     *               mapboxNavigation = MapboxNavigationProvider.create(...)
+     *           }
+     *       }
+     *   })
+     * ```
+     *
+     * @param callback callback to be invoked when the information about available
+     *   updates is received. See [RoadGraphDataUpdateCallback].
+     */
+    fun requestRoadGraphDataUpdate(callback: RoadGraphDataUpdateCallback) {
+        CacheHandleWrapper.requestRoadGraphDataUpdate(navigator.cache, callback)
     }
 
     private fun internalSetNavigationRoutes(
