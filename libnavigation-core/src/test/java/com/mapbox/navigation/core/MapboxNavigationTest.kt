@@ -18,6 +18,7 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.internal.telemetry.NavigationCustomEventType
+import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
@@ -1521,5 +1522,13 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         verify(exactly = 0) { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) }
 
         unmockkStatic(TelemetryEnabler::class)
+    }
+
+    @Test
+    fun requestRoadGraphDataUpdate() {
+        val callback = mockk<RoadGraphDataUpdateCallback>()
+        createMapboxNavigation()
+        mapboxNavigation.requestRoadGraphDataUpdate(callback)
+        verify { CacheHandleWrapper.requestRoadGraphDataUpdate(cache, callback) }
     }
 }

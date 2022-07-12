@@ -23,6 +23,7 @@ import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
@@ -41,6 +42,7 @@ import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouterOrigin
 import io.mockk.Runs
@@ -68,6 +70,7 @@ internal open class MapboxNavigationBaseTest {
 
     val accessToken = "pk.1234"
     val directionsSession: DirectionsSession = mockk(relaxUnitFun = true)
+    val cache: CacheHandle = mockk(relaxUnitFun = true)
     val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     val tripService: TripService = mockk(relaxUnitFun = true)
     val tripSession: TripSession = mockk(relaxUnitFun = true)
@@ -104,7 +107,6 @@ internal open class MapboxNavigationBaseTest {
         every { packageManager } returns mockk(relaxed = true)
         every { packageName } returns "com.mapbox.navigation.core.MapboxNavigationTest"
         every { filesDir } returns File("some/path")
-        every { navigator.cache } returns mockk()
         every { navigator.getHistoryRecorderHandle() } returns null
         every { navigator.experimental } returns mockk()
     }
@@ -149,6 +151,8 @@ internal open class MapboxNavigationBaseTest {
         } returns mockk()
 
         mockkObject(NavigationComponentProvider)
+        mockkObject(CacheHandleWrapper)
+        every { CacheHandleWrapper.requestRoadGraphDataUpdate(any(), any()) } just runs
         mockkObject(RouteRefreshControllerProvider)
         every {
             RouteRefreshControllerProvider.createRouteRefreshController(
@@ -214,6 +218,7 @@ internal open class MapboxNavigationBaseTest {
         unmockkObject(MapboxSDKCommon)
         unmockkObject(MapboxModuleProvider)
         unmockkObject(NavigationComponentProvider)
+        unmockkObject(CacheHandleWrapper)
         unmockkObject(RouteRefreshControllerProvider)
         unmockkObject(RouteAlternativesControllerProvider)
         unmockkObject(MapboxNavigationTelemetry)
@@ -242,6 +247,7 @@ internal open class MapboxNavigationBaseTest {
         coEvery { navigator.setRoutes(any(), any(), any()) } answers {
             createSetRouteResult()
         }
+        every { navigator.cache } returns cache
     }
 
     private fun mockTripService() {
