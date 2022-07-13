@@ -106,21 +106,18 @@ package com.mapbox.navigation.core {
     method public void onSwitchToTargetVersion(String? tilesVersion);
   }
 
-  public interface RoutesSetCallback {
-    method public void onRoutesSetError(com.mapbox.navigation.core.RoutesSetCallbackError result);
-    method public void onRoutesSetResult(com.mapbox.navigation.core.RoutesSetCallbackSuccess result);
+  public fun interface RoutesSetCallback {
+    method public void onRoutesSet(com.mapbox.bindgen.Expected<com.mapbox.navigation.core.RoutesSetError,com.mapbox.navigation.core.RoutesSetSuccess> result);
   }
 
-  public final class RoutesSetCallbackError {
-    method public String getError();
-    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> getRoutes();
-    property public final String error;
-    property public final java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes;
+  public final class RoutesSetError {
+    method public String getMessage();
+    property public final String message;
   }
 
-  public final class RoutesSetCallbackSuccess {
-    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> getRoutes();
-    property public final java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes;
+  public final class RoutesSetSuccess {
+    method public java.util.Map<java.lang.String,com.mapbox.navigation.core.RoutesSetError> getIgnoredAlternatives();
+    property public final java.util.Map<java.lang.String,com.mapbox.navigation.core.RoutesSetError> ignoredAlternatives;
   }
 
 }

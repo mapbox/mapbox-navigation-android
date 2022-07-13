@@ -1,107 +1,96 @@
 package com.mapbox.navigation.core
 
+import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.route.NavigationRoute
 
 /**
  * Interface definition for a callback that gets notified whenever routes
  * passed to [MapboxNavigation.setNavigationRoutes] are set or produce an error and ignored.
  */
-interface RoutesSetCallback {
+fun interface RoutesSetCallback {
 
     /**
-     * Invoked whenever the routes passed to [MapboxNavigation.setNavigationRoutes]
-     * are successfully set.
+     * Invoked on result of [MapboxNavigation.setNavigationRoutes].
      *
-     * @param result [RoutesSetCallbackSuccess] object that describes the set routes
+     * @param result [Expected] object with [RoutesSetError] in case of a failed
+     *   and [RoutesSetSuccess] in case of a successful
+     *   [MapboxNavigation.setNavigationRoutes] invocation.
      */
-    fun onRoutesSetResult(result: RoutesSetCallbackSuccess)
-
-    /**
-     * Invoked whenever the routes passed to [MapboxNavigation.setNavigationRoutes]
-     * produce an error and are ignored.
-     *
-     * @param result [RoutesSetCallbackError] object that describes the failure.
-     */
-    fun onRoutesSetError(result: RoutesSetCallbackError)
+    fun onRoutesSet(result: Expected<RoutesSetError, RoutesSetSuccess>)
 }
 
 /**
- * Represents the result of setting routes. See [RoutesSetCallback.onRoutesSetResult].
+ * Result when the primary route has been successfully set and we can begin Active Guidance.
  *
- * @param routes List of routes that were successfully set.
+ * @param ignoredAlternatives alternative routes that were ignored by the navigator.
+ *   Key is the [NavigationRoute.id], [RoutesSetError] value describes the error.
  */
-class RoutesSetCallbackSuccess internal constructor(
-    val routes: List<NavigationRoute>
+class RoutesSetSuccess internal constructor(
+    val ignoredAlternatives: Map<String, RoutesSetError>,
 ) {
 
     /**
-     * Regenerate whenever a change is made
+     * Returns a string representation of the object.
+     */
+    override fun toString(): String {
+        return "RoutesSetSuccess(ignoredAlternatives=$ignoredAlternatives)"
+    }
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
      */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as RoutesSetCallbackSuccess
+        other as RoutesSetSuccess
 
-        if (routes != other.routes) return false
+        if (ignoredAlternatives != other.ignoredAlternatives) return false
 
         return true
     }
 
     /**
-     * Regenerate whenever a change is made
+     * Returns a hash code value for the object.
      */
     override fun hashCode(): Int {
-        return routes.hashCode()
-    }
-
-    /**
-     * Regenerate whenever a change is made
-     */
-    override fun toString(): String {
-        return "RoutesSetCallbackSuccess(routes=$routes)"
+        return ignoredAlternatives.hashCode()
     }
 }
-
 /**
- * Represents the error of setting routes. See [RoutesSetCallback.onRoutesSetError].
+ * Result when a route failed to be set.
  *
- * @param routes List of routes that were ignored.
- * @param error Reason why routes were ignored.
+ * @param message a string describing the reason why the route was ignored.
  */
-class RoutesSetCallbackError internal constructor(
-    val routes: List<NavigationRoute>,
-    val error: String
+class RoutesSetError internal constructor(
+    val message: String,
 ) {
 
     /**
-     * Regenerate whenever a change is made
+     * Returns a string representation of the object.
+     */
+    override fun toString(): String {
+        return "RoutesSetError(message='$message')"
+    }
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
      */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as RoutesSetCallbackError
+        other as RoutesSetError
 
-        if (routes != other.routes) return false
-        if (error != other.error) return false
+        if (message != other.message) return false
 
         return true
     }
 
     /**
-     * Regenerate whenever a change is made
+     * Returns a hash code value for the object.
      */
     override fun hashCode(): Int {
-        var result = routes.hashCode()
-        result = 31 * result + error.hashCode()
-        return result
-    }
-
-    /**
-     * Regenerate whenever a change is made
-     */
-    override fun toString(): String {
-        return "RoutesSetCallbackFailure(routes=$routes, error=$error)"
+        return message.hashCode()
     }
 }
