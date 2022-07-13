@@ -35,6 +35,8 @@ class RoutesUpdatedResult internal constructor(
 ) {
     /**
      * List of currently maintained routes.
+     *
+     * @throws IllegalStateException see [toDirectionsRoutes]
      */
     @Deprecated(
         "use #navigationRoutes instead",
@@ -43,5 +45,5 @@ class RoutesUpdatedResult internal constructor(
             "com.mapbox.navigation.base.route.toDirectionsRoutes"
         )
     )
-    val routes: List<DirectionsRoute> = navigationRoutes.toDirectionsRoutes()
+    val routes: List<DirectionsRoute> by lazy { navigationRoutes.toDirectionsRoutes() }
 }

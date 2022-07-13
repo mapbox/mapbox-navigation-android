@@ -138,7 +138,9 @@ class MapboxRerouteControllerTest {
         addRerouteStateObserver()
         val routes = listOf(
             mockk<NavigationRoute> {
-                every { directionsRoute } returns mockk()
+                every { directionsRoute } returns mockk {
+                    every { routeOptions() } returns null
+                }
             }
         )
         val origin = mockk<RouterOrigin>()

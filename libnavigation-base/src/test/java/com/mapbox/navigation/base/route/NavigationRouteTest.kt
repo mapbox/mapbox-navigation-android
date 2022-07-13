@@ -8,6 +8,7 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
+import com.mapbox.navigation.base.internal.utils.DirectionsRouteMissingConditionsCheck
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigator.RouteInterface
 import io.mockk.every
@@ -18,6 +19,7 @@ import io.mockk.verify
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -276,5 +278,36 @@ class NavigationRouteTest {
         )
 
         assertTrue(navigationRoute.all { it.id == "some_id" })
+    }
+
+    @Test
+    fun `map from NavigationRoute to DirectionsRoute produce exception if not pass check`() {
+        mockkObject(DirectionsRouteMissingConditionsCheck) {
+            val mockDirectionsRoute = mockk<DirectionsRoute>()
+            val mockNavigationRoute = mockk<NavigationRoute> {
+                every { directionsRoute } returns mockDirectionsRoute
+            }
+            every {
+                DirectionsRouteMissingConditionsCheck.checkDirectionsRoute(mockDirectionsRoute)
+            } throws IllegalStateException()
+
+            assertThrows(IllegalStateException::class.java) {
+                listOf(mockNavigationRoute).toDirectionsRoutes()
+            }
+        }
+    }
+
+    @Test
+    fun `map from DirectionsRoute to NavigationRoute produce exception if not pass check`() {
+        mockkObject(DirectionsRouteMissingConditionsCheck, NavigationRoute) {
+            val mockDirectionsRoute = mockk<DirectionsRoute>()
+            every {
+                DirectionsRouteMissingConditionsCheck.checkDirectionsRoute(mockDirectionsRoute)
+            } throws IllegalStateException()
+
+            assertThrows(IllegalStateException::class.java) {
+                listOf(mockDirectionsRoute).toNavigationRoutes(RouterOrigin.Offboard)
+            }
+        }
     }
 }
