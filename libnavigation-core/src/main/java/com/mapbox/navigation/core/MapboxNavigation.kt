@@ -12,6 +12,7 @@ import androidx.annotation.VisibleForTesting
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.telemetry.TelemetryEnabler
 import com.mapbox.annotation.module.MapboxModuleType
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.common.TilesetDescriptor
@@ -741,7 +742,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *
      * If the list is empty, the SDK will exit the `Active Guidance` state.
      *
-     * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the routes list reference managed by the SDK changes, regardless of a source.
+     * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the
+     * routes list reference managed by the SDK changes, regardless of a source.
+     *
+     * **Deprecated**: use #setNavigationRoutes(List<NavigationRoute>) instead. To fetch [NavigationRoute]
+     * list use #requestRoutes(RouteOptions, NavigationRouterCallback) or create an instance of
+     * [NavigationRoute] via [NavigationRoute.create], which requires an original [DirectionsResponse]
+     * object or a raw JSON response.
      *
      * @param routes a list of [DirectionsRoute]s
      * @param initialLegIndex starting leg to follow. By default the first leg is used.
