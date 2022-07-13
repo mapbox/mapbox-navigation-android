@@ -6,14 +6,14 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 private const val MAX_TIME_TO_UPDATE_ROUTE = 5_000L
 private const val DEFAULT_TIMEOUT_FOR_SDK_TEST = 30_000L
@@ -29,23 +29,28 @@ fun sdkTest(
     }
 }
 
-fun MapboxNavigation.clearNavigationRoutesAndWaitForUpdate() {
-    val latch = CountDownLatch(1)
-    val observer = object : RoutesObserver {
-        override fun onRoutesChanged(result: RoutesUpdatedResult) {
-            if (result.reason == RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP) {
-                unregisterRoutesObserver(this)
-                latch.countDown()
+@OptIn(ExperimentalCoroutinesApi::class)
+suspend fun MapboxNavigation.clearNavigationRoutesAndWaitForUpdate() =
+    withTimeout(MAX_TIME_TO_UPDATE_ROUTE) {
+        suspendCancellableCoroutine<Unit?> {
+            val observer = object : RoutesObserver {
+                override fun onRoutesChanged(result: RoutesUpdatedResult) {
+                    if (result.reason == RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP) {
+                        unregisterRoutesObserver(this)
+                        it.resume(null) {}
+                    }
+                }
+            }
+            it.invokeOnCancellation { unregisterRoutesObserver(observer) }
+            val hadRoutes = getNavigationRoutes().isNotEmpty()
+            registerRoutesObserver(observer)
+            setNavigationRoutes(emptyList())
+            if (!hadRoutes) {
+                unregisterRoutesObserver(observer)
+                it.resume(null) {}
             }
         }
     }
-    registerRoutesObserver(observer)
-    setNavigationRoutes(emptyList())
-    if (getNavigationRoutes().isEmpty()) {
-        latch.countDown()
-    }
-    latch.await(MAX_TIME_TO_UPDATE_ROUTE, TimeUnit.MILLISECONDS)
-}
 
 suspend fun MapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes: List<NavigationRoute>) {
     if (routes.isEmpty()) {
