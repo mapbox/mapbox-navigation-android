@@ -55,19 +55,6 @@ class RouteOptionsUpdaterTest {
                 )
                 .build()
 
-        private fun provideRouteOptionsWithCoordinatesAndSnappingClosures() =
-            provideRouteOptionsWithCoordinates()
-                .toBuilder()
-                .snappingIncludeClosuresList(
-                    listOf(
-                        true,
-                        false,
-                        true,
-                        false
-                    )
-                )
-                .build()
-
         private fun provideRouteOptionsWithCoordinatesAndArriveByDepartAt() =
             provideRouteOptionsWithCoordinates()
                 .toBuilder()
@@ -475,7 +462,17 @@ class RouteOptionsUpdaterTest {
             @Parameterized.Parameters
             fun params() = listOf(
                 arrayOf(
-                    provideRouteOptionsWithCoordinatesAndSnappingClosures(),
+                    provideRouteOptionsWithCoordinates()
+                        .toBuilder()
+                        .snappingIncludeClosuresList(
+                            listOf(
+                                true,
+                                false,
+                                true,
+                                false
+                            )
+                        )
+                        .build(),
                     3,
                     0,
                     "true;false;true;false"
@@ -484,10 +481,11 @@ class RouteOptionsUpdaterTest {
                     provideRouteOptionsWithCoordinates(),
                     1,
                     2,
-                    null
+                    "true;"
                 ),
                 arrayOf(
-                    provideRouteOptionsWithCoordinates().toBuilder()
+                    provideRouteOptionsWithCoordinates()
+                        .toBuilder()
                         .snappingIncludeClosuresList(
                             listOf(
                                 true,
@@ -499,7 +497,7 @@ class RouteOptionsUpdaterTest {
                         .build(),
                     2,
                     1,
-                    "false;false;false"
+                    "true;false;false"
                 ),
                 arrayOf(
                     provideRouteOptionsWithCoordinates().toBuilder()
