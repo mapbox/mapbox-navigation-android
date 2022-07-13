@@ -219,7 +219,7 @@ class TripSessionComponentTest {
     }
 
     private fun tripSessionStarterState(
-        isLocationPermissionGranted: Boolean?,
+        isLocationPermissionGranted: Boolean,
         isReplayEnabled: Boolean
     ): TripSessionStarterState {
         return testStore.state.value.tripSession.copy(isLocationPermissionGranted, isReplayEnabled)

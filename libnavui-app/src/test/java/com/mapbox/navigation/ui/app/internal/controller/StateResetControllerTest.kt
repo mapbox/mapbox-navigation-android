@@ -7,7 +7,10 @@ import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.destination.Destination
+import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
+import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
 import com.mapbox.navigation.ui.app.testing.TestStore
 import io.mockk.every
 import io.mockk.mockk
@@ -47,7 +50,7 @@ internal class StateResetControllerTest {
 
     @Test
     @Suppress("MaxLineLength")
-    fun `onAttached, should only reset store State when TripSessionState transitions from STARTED to STOPPED`() =
+    fun `onAttached, should dispatch actions that end navigation only when TripSessionState transitions from STARTED to STOPPED`() =
         coroutineRule.runBlockingTest {
             val observer = slot<TripSessionStateObserver>()
             every {
@@ -58,43 +61,21 @@ internal class StateResetControllerTest {
             // STOPPED -> STOPPED
             observer.captured.onSessionStateChanged(TripSessionState.STOPPED)
             coroutineRule.testDispatcher.advanceTimeBy(200)
-            verify(exactly = 0) { store.reset() }
+            verify(exactly = 0) { store.dispatch(any()) }
 
             // STOPPED -> STARTED
             observer.captured.onSessionStateChanged(TripSessionState.STARTED)
             coroutineRule.testDispatcher.advanceTimeBy(200)
-            verify(exactly = 0) { store.reset() }
+            verify(exactly = 0) { store.dispatch(any()) }
 
             // STARTED -> STOPPED
             observer.captured.onSessionStateChanged(TripSessionState.STOPPED)
             coroutineRule.testDispatcher.advanceTimeBy(200)
-            verify(exactly = 1) { store.reset() }
-        }
-
-    @Test
-    @Suppress("MaxLineLength")
-    fun `onAttached, should only reset NavigationRoutes when TripSessionState transitions from STARTED to STOPPED`() =
-        coroutineRule.runBlockingTest {
-            val observer = slot<TripSessionStateObserver>()
-            every {
-                mapboxNavigation.registerTripSessionStateObserver(capture(observer))
-            } returns Unit
-            sut.onAttached(mapboxNavigation)
-
-            // STOPPED -> STOPPED
-            observer.captured.onSessionStateChanged(TripSessionState.STOPPED)
-            coroutineRule.testDispatcher.advanceTimeBy(200)
-            verify(exactly = 0) { mapboxNavigation.setNavigationRoutes(emptyList()) }
-
-            // STOPPED -> STARTED
-            observer.captured.onSessionStateChanged(TripSessionState.STARTED)
-            coroutineRule.testDispatcher.advanceTimeBy(200)
-            verify(exactly = 0) { mapboxNavigation.setNavigationRoutes(emptyList()) }
-
-            // STARTED -> STOPPED
-            observer.captured.onSessionStateChanged(TripSessionState.STOPPED)
-            coroutineRule.testDispatcher.advanceTimeBy(200)
-            verify(exactly = 1) { mapboxNavigation.setNavigationRoutes(emptyList()) }
+            verify(exactly = 1) {
+                store.dispatch(RoutesAction.SetRoutes(emptyList()))
+                store.dispatch(DestinationAction.SetDestination(null))
+                store.dispatch(NavigationStateAction.Update(NavigationState.FreeDrive))
+            }
         }
 
     @Test

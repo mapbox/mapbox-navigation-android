@@ -30,10 +30,12 @@ internal class LocationPermissionComponent(
 ) : UIComponent() {
 
     private val callback = ActivityResultCallback { permissions: Map<String, Boolean> ->
-        val accessFineLocation = permissions[FINE_LOCATION_PERMISSIONS] ?: false
-        val accessCoarseLocation = permissions[COARSE_LOCATION_PERMISSIONS] ?: false
+        val accessFineLocation = permissions[FINE_LOCATION_PERMISSIONS]
+            ?: false
+        val accessCoarseLocation = permissions[COARSE_LOCATION_PERMISSIONS]
+            ?: false
         val granted = accessFineLocation || accessCoarseLocation
-        onPermissionsResult(granted)
+        store.dispatch(TripSessionStarterAction.OnLocationPermission(granted))
     }
 
     private val launcher = try {
@@ -52,10 +54,41 @@ internal class LocationPermissionComponent(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        componentActivityRef?.get()?.also { activity ->
+        val isGranted = PermissionsManager.areLocationPermissionsGranted(
+            mapboxNavigation.navigationOptions.applicationContext
+        )
+
+        if (isGranted) {
+            // There can be a race condition between components and view models.
+            // The view model attaches, and then launches a coroutine to collect actions.
+            // The LocationPermissionComponent surfaces this issue because it is not owned by
+            // a coordinator and flowable binder. This issue was also difficult to reproduce on
+            // all devices. Launching a coroutine to update the state is a temporary solution.
             coroutineScope.launch {
-                activity.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    checkPermissions(mapboxNavigation.navigationOptions.applicationContext)
+                store.dispatch(TripSessionStarterAction.OnLocationPermission(true))
+            }
+        } else {
+            launcher?.launch(LOCATION_PERMISSIONS)
+
+            notifyGrantedOnForegrounded(mapboxNavigation.navigationOptions.applicationContext)
+        }
+    }
+
+    /**
+     * When the app is launched without location permissions. Run a check to see if location
+     * permissions have been accepted yet. This will catch the case where a user will enable
+     * location permissions through the app settings.
+     */
+    private fun notifyGrantedOnForegrounded(applicationContext: Context) {
+        coroutineScope.launch {
+            componentActivityRef?.get()?.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                if (!store.state.value.tripSession.isLocationPermissionGranted) {
+                    val isGranted = PermissionsManager.areLocationPermissionsGranted(
+                        applicationContext
+                    )
+                    if (isGranted) {
+                        store.dispatch(TripSessionStarterAction.OnLocationPermission(true))
+                    }
                 }
             }
         }
@@ -65,21 +98,6 @@ internal class LocationPermissionComponent(
         super.onDetached(mapboxNavigation)
 
         launcher?.unregister()
-    }
-
-    private fun checkPermissions(applicationContext: Context) {
-        val isGranted = PermissionsManager.areLocationPermissionsGranted(applicationContext)
-
-        if (isGranted) {
-            onPermissionsResult(isGranted)
-        } else {
-            launcher?.launch(LOCATION_PERMISSIONS)
-            //  ActivityResultLauncher result is dispatched in ActivityResultCallback
-        }
-    }
-
-    private fun onPermissionsResult(granted: Boolean) {
-        store.dispatch(TripSessionStarterAction.OnLocationPermission(granted))
     }
 
     internal companion object {
