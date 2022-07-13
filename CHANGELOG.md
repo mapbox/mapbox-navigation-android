@@ -6,6 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 
 #### Bug fixes and improvements
+- Changed `RouteOptionsUpdater` to use `snapping_include_closures=true` for origin of each re-route request. This resolves a situation when Nav SDK returned a route in an opposite direction or on a parallel road when a driver caused a re-route by entering a closed section of a road. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)
 
 ## Mapbox Navigation SDK 2.7.0-alpha.3 - July 8, 2022
 ### Changelog

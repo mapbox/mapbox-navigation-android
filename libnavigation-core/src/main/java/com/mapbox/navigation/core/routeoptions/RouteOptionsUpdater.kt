@@ -5,7 +5,8 @@ import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
+import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.reroute.MapboxRerouteController
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.utils.internal.logE
@@ -15,16 +16,20 @@ private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
 private const val LOG_CATEGORY = "RouteOptionsUpdater"
 
 /**
- * Updater is used for *Reroute* and *Route Alternatives* flow.
+ * The updater can be used to create a new set of route request options to the existing destination, accounting for the progress along the route.
  *
- * It's used when turn-by-turn navigation goes off-route (see [OffRouteObserver])
- * and when route alternatives (see [RouteAlternativesController]) are requested.
- * For example, this is needed in order to filter the waypoints that have been completed.
+ * It's used by the default [MapboxRerouteController] (see [OffRouteObserver] and [MapboxNavigation.setRerouteController]).
  */
 class RouteOptionsUpdater {
 
     /**
      * Provides a new [RouteOptions] instance based on the original request options, the current route progress and location matcher result.
+     *
+     * This carries over or adapts all of the request parameters to best fit the existing situation and remaining portion of the route.
+     *
+     * Notable adjustments:
+     * - `snapping_include_closures=true` is set for the origin of the request to aid with potential need to navigate out of a closed section of the road
+     * - `depart_at`/`arrive_by` parameters are cleared as they are not applicable in update/re-route scenario
      *
      * @return `RouteOptionsResult.Error` if a new [RouteOptions] instance cannot be combined based on the input given.
      * `RouteOptionsResult.Success` with a new [RouteOptions] instance if successfully combined.
@@ -99,11 +104,21 @@ class RouteOptionsUpdater {
                     .snappingIncludeClosuresList(
                         let snappingClosures@{
                             val snappingClosures = routeOptions.snappingIncludeClosuresList()
-                            if (snappingClosures.isNullOrEmpty()) {
-                                return@snappingClosures emptyList<Boolean>()
-                            }
-                            mutableListOf<Boolean>().also {
-                                it.addAll(snappingClosures.subList(index, coordinatesList.size))
+                            mutableListOf<Boolean?>().apply {
+                                // append true for the origin of the re-route request
+                                add(true)
+                                if (snappingClosures.isNullOrEmpty()) {
+                                    // create `null` value for each upcoming waypoint
+                                    addAll(arrayOfNulls<Boolean>(remainingWaypoints))
+                                } else {
+                                    // get existing values for each upcoming waypoint
+                                    addAll(
+                                        snappingClosures.subList(
+                                            index + 1,
+                                            coordinatesList.size
+                                        )
+                                    )
+                                }
                             }
                         }
                     )
