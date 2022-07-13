@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Remove the `MapView` from the `RouteArrowComponent` so that it can be used by Android Auto. [#6053](https://github.com/mapbox/mapbox-navigation-android/pull/6053)
 
 ## Mapbox Navigation SDK 2.7.0-beta.1 - 14 July, 2022
 ### Changelog

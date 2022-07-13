@@ -45,7 +45,7 @@ fun ComponentInstaller.routeArrow(
     config: RouteArrowComponentConfig.() -> Unit = {}
 ): Installation {
     val componentConfig = RouteArrowComponentConfig(mapView.context).apply(config)
-    return component(RouteArrowComponent(mapView, componentConfig.options))
+    return component(RouteArrowComponent(mapView.getMapboxMap(), componentConfig.options))
 }
 
 /**

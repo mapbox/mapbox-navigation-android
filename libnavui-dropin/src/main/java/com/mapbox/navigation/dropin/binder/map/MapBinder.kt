@@ -111,7 +111,7 @@ internal class MapBinder(
         navigationState: NavigationState,
         arrowOptions: RouteArrowOptions
     ) = if (navigationState == NavigationState.ActiveNavigation) {
-        RouteArrowComponent(mapView, arrowOptions)
+        RouteArrowComponent(mapView.getMapboxMap(), arrowOptions)
     } else {
         null
     }
