@@ -481,6 +481,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 connectivityHandler
             )
         }
+        directionsSession.registerRoutesObserver(navigationSession)
 
         arrivalProgressObserver = NavigationComponentProvider.createArrivalProgressObserver(
             tripSession
@@ -867,7 +868,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 val prevState = navigationSession.state
                 val potentialNewState = navigationSession.setRoutesPreview(routes)
                 historyRecordingStateHandler.onNavigationSessionStateChanged(potentialNewState)
-                navigationSession.setRoutes(routes)
                 val routesSetResult: Expected<RoutesSetError, RoutesSetSuccess>
                 when (val processedRoutes = setRoutesToTripSession(routes, legIndex, reason)) {
                     is NativeSetRouteValue -> {
