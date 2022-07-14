@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
+import android.util.Log
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -131,10 +132,12 @@ internal class VanishingRouteLine {
                 granularDistances,
                 index
             )
+            Log.e("foobar", "Puck point distance is $distanceToLine")
             if (
                 distanceToLine >
                 RouteLayerConstants.ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS
             ) {
+                Log.e("foobar", "Puck point distance is greater than vanishing route line threshold.")
                 return null
             }
         }

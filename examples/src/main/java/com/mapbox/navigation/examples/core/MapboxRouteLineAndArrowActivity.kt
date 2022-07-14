@@ -38,11 +38,16 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.history.MapboxHistoryReader
+import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
+import com.mapbox.navigation.core.replay.history.ReplayHistoryMapper
+import com.mapbox.navigation.core.replay.history.ReplaySetNavigationRoute
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -203,7 +208,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
             null,
             ContextCompat.getDrawable(
                 this@MapboxRouteLineAndArrowActivity,
-                R.drawable.mapbox_navigation_puck_icon
+                R.drawable.custom_user_puck_icon
             ),
             null,
             null
@@ -267,7 +272,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
         val arrowUpdate = routeArrowApi.addUpcomingManeuverArrow(routeProgress)
         mapboxMap.getStyle()?.apply {
             // Render the result to update the map.
-            routeArrowView.renderManeuverUpdate(this, arrowUpdate)
+           // routeArrowView.renderManeuverUpdate(this, arrowUpdate)
         }
     }
 
@@ -359,6 +364,9 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
                     locationEngineCallback
                 )
                 viewBinding.mapView.gestures.addOnMapLongClickListener(this)
+
+
+                initHistory()
             },
             object : OnMapLoadErrorListener {
                 override fun onMapLoadError(eventData: MapLoadingErrorEventData) {
@@ -458,12 +466,12 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
 
     // Starts the navigation simulator
     private fun startSimulation(route: DirectionsRoute) {
-        mapboxReplayer.stop()
-        mapboxReplayer.clearEvents()
-        val replayData: List<ReplayEventBase> = replayRouteMapper.mapDirectionsRouteGeometry(route)
-        mapboxReplayer.pushEvents(replayData)
-        mapboxReplayer.seekTo(replayData[0])
-        mapboxReplayer.play()
+//        mapboxReplayer.stop()
+//        mapboxReplayer.clearEvents()
+//        val replayData: List<ReplayEventBase> = replayRouteMapper.mapDirectionsRouteGeometry(route)
+//        mapboxReplayer.pushEvents(replayData)
+//        mapboxReplayer.seekTo(replayData[0])
+//        mapboxReplayer.play()
     }
 
     override fun onStart() {
@@ -501,17 +509,52 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
         }
 
         override fun onSuccess(result: LocationEngineResult?) {
-            val location = result?.lastLocation
-            val activity = activityRef.get()
-            if (location != null && activity != null) {
-                val point = Point.fromLngLat(location.longitude, location.latitude)
-                val cameraOptions = CameraOptions.Builder().center(point).zoom(13.0).build()
-                activity.mapboxMap.setCamera(cameraOptions)
-                activity.navigationLocationProvider.changePosition(location, listOf(), null, null)
-            }
+//            val location = result?.lastLocation
+//            val activity = activityRef.get()
+//            if (location != null && activity != null) {
+//                val point = Point.fromLngLat(location.longitude, location.latitude)
+//                val cameraOptions = CameraOptions.Builder().center(point).zoom(13.0).build()
+//                activity.mapboxMap.setCamera(cameraOptions)
+//                activity.navigationLocationProvider.changePosition(location, listOf(), null, null)
+//            }
         }
 
         override fun onFailure(exception: Exception) {
         }
     }
+
+    fun initHistory() {
+        val filePath = "/data/data/com.mapbox.navigation.examples/files/replay/vanish-history.pbf.gz"
+        val historyReader = MapboxHistoryReader(filePath)
+
+        historyReader.asSequence().filter {
+            it is HistoryEventSetRoute
+        }.firstOrNull()?.apply {
+            val event = this as HistoryEventSetRoute
+            mapboxNavigation.setNavigationRoutes(listOf(event.navigationRoute!!))
+
+            val routeOrigin = event.navigationRoute!!.directionsRoute.completeGeometryToPoints().first()
+            val loc = Location("").also {
+                it.latitude = routeOrigin.latitude()
+                it.longitude = routeOrigin.longitude()
+            }
+            updateCamera(loc)
+            navigationLocationProvider.changePosition(loc, listOf(), null, null)
+            viewBinding.startNavigation.visibility = View.VISIBLE
+
+            val events = historyReader.asSequence().mapNotNull { historyEvent ->
+                replayHistoryMapper.mapToReplayEvent(historyEvent)
+            }.toList()
+
+            mapboxReplayer.clearEvents()
+            mapboxReplayer.pushEvents(events)
+            mapboxReplayer.playFirstLocation()
+        }
+    }
+
+    private val replayHistoryMapper = ReplayHistoryMapper.Builder().setRouteMapper {
+        ReplaySetNavigationRoute.Builder(eventTimestamp = it.eventTimestamp)
+            .route(it.navigationRoute)
+            .build()
+    }.build()
 }
