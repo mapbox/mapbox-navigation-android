@@ -11,6 +11,15 @@ Mapbox welcomes participation and contributions from everyone.
 - :warning: Added checks to `DirectionsRoute#toNavigationRoute` and `NavigationRoute#toDirectionsRoute` mappers which restrict mapping `NavigationRoute` to `DirectionsRoute` and vice versa for some Directions API features and properties (currently including only preview EV routing features), because the `DirectionsRoute` cannot carry information necessary to support turn-by-turn navigation when these features are enabled. If you are using EV routing preview feature, make sure to only interact with `MapboxNavigation#requestRoutes(RouteOptions, NavigationRouterCallback)`, `MapboxNavigation#setNavigationRoutes(List<NavigationRoute>)`, and equivalent `NavigationRoute` APIs. [#6004](https://github.com/mapbox/mapbox-navigation-android/pull/6004)
 - Adjusted the `RoutesSetCallback` API. [#6040](https://github.com/mapbox/mapbox-navigation-android/pull/6040)
 - Updated `NavigationView` to reset `SharedApp` state when `MapboxNavigation`is destroyed. [#6039](https://github.com/mapbox/mapbox-navigation-android/pull/6039)
+- Updated `NavigationView` to enable vanishing route line by default. Previous behaviour can be restored by setting `MapboxRouteLineOptions` with `vanishingRouteLineEnabled` flag set to `false` [#6055](https://github.com/mapbox/mapbox-navigation-android/pull/6055)
+  ```kotlin
+  navigationView.customizeViewOptions {
+      routeLineOptions = ViewOptionsCustomization.defaultRouteLineOptions(context)
+          .toBuilder(context)
+          .withVanishingRouteLineEnabled(false)
+          .build()
+  }
+  ```
 
 ## Mapbox Navigation SDK 2.7.0-alpha.3 - July 8, 2022
 ### Changelog
