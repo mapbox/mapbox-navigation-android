@@ -6,6 +6,9 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 - Remove the `MapView` from the `RouteArrowComponent` so that it can be used by Android Auto. [#6053](https://github.com/mapbox/mapbox-navigation-android/pull/6053)
+- Enabled tunnel dead reckoning drift compensation by default for Auto profile. [#6061](https://github.com/mapbox/mapbox-navigation-android/pull/6061)
+- Increased route line stickiness for Auto profile. [#6061](https://github.com/mapbox/mapbox-navigation-android/pull/6061)
+- Improved off-road detection for Auto profile by relying more on the heading change relative to the road. [#6061](https://github.com/mapbox/mapbox-navigation-android/pull/6061)
 
 ## Mapbox Navigation SDK 2.7.0-beta.1 - 14 July, 2022
 ### Changelog
