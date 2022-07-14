@@ -11,6 +11,7 @@ import com.mapbox.navigation.ui.app.internal.controller.DestinationStateControll
 import com.mapbox.navigation.ui.app.internal.controller.LocationStateController
 import com.mapbox.navigation.ui.app.internal.controller.NavigationStateController
 import com.mapbox.navigation.ui.app.internal.controller.RoutesStateController
+import com.mapbox.navigation.ui.app.internal.controller.StateResetController
 import com.mapbox.navigation.ui.app.internal.controller.TripSessionStarterStateController
 import com.mapbox.navigation.ui.utils.internal.datastore.NavigationDataStoreOwner
 import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidance
@@ -50,6 +51,7 @@ object SharedApp {
         if (isSetup) return
         isSetup = true
 
+        MapboxNavigationApp.registerObserver(StateResetController(store))
         MapboxNavigationApp.lifecycleOwner.attachCreated(*navigationObservers)
         MapboxNavigationApp.registerObserver(audioGuidance ?: defaultAudioGuidance(context))
     }

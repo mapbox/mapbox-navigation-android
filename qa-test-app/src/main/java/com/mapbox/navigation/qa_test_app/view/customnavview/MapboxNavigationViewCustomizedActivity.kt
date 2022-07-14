@@ -97,6 +97,22 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         )
 
         bindSwitch(
+            menuBinding.toggleCustomMap,
+            viewModel.showCustomMapView,
+            ::customizeMap
+        )
+
+        bindSwitch(
+            menuBinding.toggleBottomSheetFD,
+            viewModel.showBottomSheetInFreeDrive,
+            ::toggleShowInfoPanelInFreeDrive
+        )
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        bindSwitch(
             menuBinding.toggleTheme,
             getValue = resources.configuration::isNightMode,
             setValue = {
@@ -117,18 +133,6 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                     binding.navigationView.api.enableTripSession()
                 }
             }
-        )
-
-        bindSwitch(
-            menuBinding.toggleCustomMap,
-            viewModel.showCustomMapView,
-            ::customizeMap
-        )
-
-        bindSwitch(
-            menuBinding.toggleBottomSheetFD,
-            viewModel.showBottomSheetInFreeDrive,
-            ::toggleShowInfoPanelInFreeDrive
         )
     }
 

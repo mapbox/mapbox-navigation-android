@@ -2,19 +2,11 @@ package com.mapbox.navigation.ui.app.internal.controller
 
 import android.annotation.SuppressLint
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.app.internal.Action
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.Store
-import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
-import com.mapbox.navigation.ui.app.internal.tripsession.ReplayRouteTripSession
 import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterAction
 import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterState
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.launch
 
 /**
  * The class is responsible to start and stop the `TripSession` for NavigationView.
@@ -22,14 +14,10 @@ import kotlinx.coroutines.launch
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @SuppressLint("MissingPermission")
-class TripSessionStarterStateController(
-    private val store: Store
-) : StateController() {
+class TripSessionStarterStateController(store: Store) : StateController() {
     init {
         store.register(this)
     }
-
-    private var replayRouteTripSession: ReplayRouteTripSession? = null
 
     override fun process(state: State, action: Action): State {
         if (action is TripSessionStarterAction) {
@@ -56,51 +44,4 @@ class TripSessionStarterStateController(
             }
         }
     }
-
-    /**
-     * Signals that the [mapboxNavigation] instance is ready for use.
-     * @param mapboxNavigation
-     */
-    @SuppressLint("MissingPermission")
-    override fun onAttached(mapboxNavigation: MapboxNavigation) {
-        super.onAttached(mapboxNavigation)
-
-        coroutineScope.launch {
-            flowStartReplaySession().collect { starterState ->
-                if (!starterState.isLocationPermissionGranted) {
-                    mapboxNavigation.stopTripSession()
-                } else if (starterState.isReplayEnabled) {
-                    replayRouteTripSession?.stop(mapboxNavigation)
-                    replayRouteTripSession = ReplayRouteTripSession()
-                    replayRouteTripSession?.start(mapboxNavigation)
-                } else {
-                    replayRouteTripSession?.stop(mapboxNavigation)
-                    replayRouteTripSession = null
-                    mapboxNavigation.startTripSession()
-                }
-            }
-        }
-    }
-
-    /**
-     * Signals that the [mapboxNavigation] instance is being detached.
-     * @param mapboxNavigation
-     */
-    override fun onDetached(mapboxNavigation: MapboxNavigation) {
-        super.onDetached(mapboxNavigation)
-        replayRouteTripSession?.stop(mapboxNavigation)
-        replayRouteTripSession = null
-        super.onDetached(mapboxNavigation)
-    }
-
-    private fun flowStartReplaySession(): Flow<TripSessionStarterState> = combine(
-        store.select { it.navigation },
-        store.select { it.tripSession }
-    ) { navigationState, tripSessionStarterState ->
-        if (navigationState !is NavigationState.ActiveNavigation) {
-            tripSessionStarterState.copy(isReplayEnabled = false)
-        } else {
-            tripSessionStarterState
-        }
-    }.distinctUntilChanged()
 }

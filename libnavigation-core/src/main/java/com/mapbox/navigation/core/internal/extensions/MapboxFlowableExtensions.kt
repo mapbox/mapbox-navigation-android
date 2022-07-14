@@ -12,6 +12,8 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.core.trip.session.NavigationSessionState
+import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
@@ -96,4 +98,11 @@ fun MapboxNavigation.flowOnFinalDestinationArrival(): Flow<RouteProgress> = call
     }
     registerArrivalObserver(observer)
     awaitClose { unregisterArrivalObserver(observer) }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+fun MapboxNavigation.flowNavigationSessionState(): Flow<NavigationSessionState> = callbackFlow {
+    val observer = NavigationSessionStateObserver { trySend(it) }
+    registerNavigationSessionStateObserver(observer)
+    awaitClose { unregisterNavigationSessionStateObserver(observer) }
 }
