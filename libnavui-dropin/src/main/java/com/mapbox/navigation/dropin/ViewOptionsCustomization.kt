@@ -55,6 +55,7 @@ class ViewOptionsCustomization {
         fun defaultRouteLineOptions(context: Context) = MapboxRouteLineOptions.Builder(context)
             .withRouteLineResources(RouteLineResources.Builder().build())
             .withRouteLineBelowLayerId("road-label-navigation")
+            .withVanishingRouteLineEnabled(true)
             .build()
 
         /**
