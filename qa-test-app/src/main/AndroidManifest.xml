@@ -15,14 +15,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Mapboxnavigationandroid">
+
         <activity
-            android:name=".view.MainActivity"
-            android:exported="true">
+            android:name="androidx.car.app.activity.CarAppActivity"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
+            android:exported="true"
+            android:launchMode="singleTask">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data android:name="distractionOptimized" android:value="true"/>
         </activity>
 
         <activity
@@ -33,6 +37,17 @@
             android:name=".view.ComponentsAltActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             />
+
+<!--        <activity-->
+<!--            android:name=".view.MainActivity"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
+
         <activity android:name=".view.AppLifecycleActivity" />
         <activity android:name=".view.AlternativeRouteActivity" />
         <activity android:name=".view.MapboxRouteLineActivity" />

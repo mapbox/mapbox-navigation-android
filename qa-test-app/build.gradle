@@ -28,7 +28,7 @@ android {
 
     defaultConfig {
         applicationId "com.mapbox.navigation.qa_test_app"
-        minSdkVersion androidVersions.carMinSdkVersion
+        minSdkVersion 29 // androidVersions.carMinSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
         multiDexEnabled true
         versionCode gitVersionCode
@@ -96,6 +96,7 @@ dependencies {
 
     // Android Auto
     implementation project(':libnavui-androidauto')
+    implementation "androidx.car.app:app-automotive:1.1.0"
     implementation dependenciesList.mapboxSearchSdk
 
     // test
