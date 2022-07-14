@@ -28,8 +28,6 @@ import com.mapbox.navigator.MatchableGeometry
 import com.mapbox.navigator.MatchableOpenLr
 import com.mapbox.navigator.MatchablePoint
 import com.mapbox.navigator.MatchedRoadObjectLocation
-import com.mapbox.navigator.OpenLROrientation
-import com.mapbox.navigator.OpenLRSideOfRoad
 import com.mapbox.navigator.Position
 import com.mapbox.navigator.RoadObjectDistance
 import com.mapbox.navigator.RoadObjectDistanceInfo
@@ -40,6 +38,8 @@ import com.mapbox.navigator.RoadObjectProvider
 import com.mapbox.navigator.RoadObjectType
 import com.mapbox.navigator.RoadSurface
 import com.mapbox.navigator.SubgraphEdge
+import com.mapbox.navigator.match.openlr.Orientation
+import com.mapbox.navigator.match.openlr.SideOfRoad
 
 private typealias SDKRoadObjectType =
     com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
@@ -274,22 +274,22 @@ internal fun RoadObjectType.mapToRoadObjectType(): Int {
     }
 }
 
-internal fun OpenLRSideOfRoad.mapToSideOfRoad(): Int {
+internal fun SideOfRoad.mapToSideOfRoad(): Int {
     return when (this) {
-        OpenLRSideOfRoad.BOTH -> SDKOpenLRSideOfRoad.BOTH
-        OpenLRSideOfRoad.LEFT -> SDKOpenLRSideOfRoad.LEFT
-        OpenLRSideOfRoad.RIGHT -> SDKOpenLRSideOfRoad.RIGHT
-        OpenLRSideOfRoad.ON_ROAD_OR_UNKNOWN -> SDKOpenLRSideOfRoad.ON_ROAD_OR_UNKNOWN
+        SideOfRoad.BOTH -> SDKOpenLRSideOfRoad.BOTH
+        SideOfRoad.LEFT -> SDKOpenLRSideOfRoad.LEFT
+        SideOfRoad.RIGHT -> SDKOpenLRSideOfRoad.RIGHT
+        SideOfRoad.ON_ROAD_OR_UNKNOWN -> SDKOpenLRSideOfRoad.ON_ROAD_OR_UNKNOWN
     }
 }
 
-internal fun OpenLROrientation.mapToOrientation(): Int {
+internal fun Orientation.mapToOrientation(): Int {
     return when (this) {
-        OpenLROrientation.BOTH -> SDKOpenLROrientation.BOTH
-        OpenLROrientation.NO_ORIENTATION_OR_UNKNOWN ->
+        Orientation.BOTH -> SDKOpenLROrientation.BOTH
+        Orientation.NO_ORIENTATION_OR_UNKNOWN ->
             SDKOpenLROrientation.NO_ORIENTATION_OR_UNKNOWN
-        OpenLROrientation.WITH_LINE_DIRECTION -> SDKOpenLROrientation.WITH_LINE_DIRECTION
-        OpenLROrientation.AGAINST_LINE_DIRECTION -> SDKOpenLROrientation.AGAINST_LINE_DIRECTION
+        Orientation.WITH_LINE_DIRECTION -> SDKOpenLROrientation.WITH_LINE_DIRECTION
+        Orientation.AGAINST_LINE_DIRECTION -> SDKOpenLROrientation.AGAINST_LINE_DIRECTION
     }
 }
 
@@ -341,10 +341,10 @@ internal fun EdgeMetadata.mapToEHorizonEdgeMetadata(): EHorizonEdgeMetadata {
     )
 }
 
-internal fun String.mapToOpenLRStandard(): com.mapbox.navigator.OpenLRStandard {
+internal fun String.mapToOpenLRStandard(): com.mapbox.navigator.match.openlr.Standard {
     return when (this) {
-        OpenLRStandard.TOM_TOM -> com.mapbox.navigator.OpenLRStandard.TOM_TOM
-        OpenLRStandard.TPEG -> com.mapbox.navigator.OpenLRStandard.TPEG
+        OpenLRStandard.TOM_TOM -> com.mapbox.navigator.match.openlr.Standard.TOM_TOM
+        OpenLRStandard.TPEG -> com.mapbox.navigator.match.openlr.Standard.TPEG
         else -> throw Exception("Invalid OpenLRStandard.")
     }
 }
