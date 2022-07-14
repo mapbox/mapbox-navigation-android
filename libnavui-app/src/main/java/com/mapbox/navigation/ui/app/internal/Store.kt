@@ -33,6 +33,21 @@ fun interface Reducer {
 }
 
 /**
+ * Implementation of this interface can be registered with the [Store]
+ * to intercept dispatched [Action]'s.
+ */
+interface Middleware {
+    /**
+     * The callback invoked for each dispatched [Action].
+     *
+     * @param state current [State]
+     * @param action dispatched [Action]
+     * @return `true` if [action] was consumed by this middleware and should not be processed by the Store.
+     */
+    fun onDispatch(state: State, action: Action): Boolean
+}
+
+/**
  * A store that holds observable, drop-in UI [State]. The [State] can only be modified by
  * registered [Reducer], as a result of [Action] processing.
  */
@@ -40,6 +55,7 @@ open class Store {
     protected val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state.asStateFlow()
 
+    private val middlewares = ConcurrentLinkedQueue<Middleware>()
     private val reducers = ConcurrentLinkedQueue<Reducer>()
     private var isDispatching = false
 
@@ -62,10 +78,23 @@ open class Store {
         }
 
         isDispatching = true
+        if (!intercept(action)) {
+            reduce(action)
+        }
+        isDispatching = false
+    }
+
+    private fun intercept(action: Action): Boolean {
+        middlewares.forEach {
+            if (it.onDispatch(_state.value, action)) return true
+        }
+        return false
+    }
+
+    private fun reduce(action: Action) {
         reducers.forEach { reducer ->
             _state.value = reducer.process(_state.value, action)
         }
-        isDispatching = false
     }
 
     fun register(vararg reducers: Reducer) {
@@ -74,6 +103,14 @@ open class Store {
 
     fun unregister(vararg reducers: Reducer) {
         this.reducers.removeAll(reducers)
+    }
+
+    fun registerMiddleware(vararg middlewares: Middleware) {
+        this.middlewares.addAll(middlewares)
+    }
+
+    fun unregisterMiddleware(vararg middlewares: Middleware) {
+        this.middlewares.removeAll(middlewares)
     }
 
     /**
