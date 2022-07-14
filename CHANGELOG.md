@@ -4,6 +4,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.7.0-beta.1 - 14 July, 2022
+### Changelog
+[Changes between v2.7.0-alpha.3 and v2.7.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.7.0-alpha.3...v2.7.0-beta.1)
+
+#### Features
 - Added `MapboxNavigation.requestRoadGraphDataUpdate` method and `RoadGraphDataUpdateCallback` class to request road graph data update and recreate `MapboxNavigation` instance in the callback to be able to use latest data even if the application lifecycle is very long. [#6044](https://github.com/mapbox/mapbox-navigation-android/pull/6044)
 
 #### Bug fixes and improvements
@@ -20,6 +27,16 @@ Mapbox welcomes participation and contributions from everyone.
           .build()
   }
   ```
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.7.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.7.0-beta.1))
+- Mapbox Navigation Native `v108.0.1`
+- Mapbox Core Common `v22.1.0-beta.1`
+- Mapbox Java `v6.6.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.6.0))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+- Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
+
 
 ## Mapbox Navigation SDK 2.7.0-alpha.3 - July 8, 2022
 ### Changelog
