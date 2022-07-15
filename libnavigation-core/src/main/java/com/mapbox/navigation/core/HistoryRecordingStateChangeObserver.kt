@@ -10,4 +10,6 @@ interface HistoryRecordingStateChangeObserver {
     fun onShouldStartRecording(state: NavigationSessionState)
 
     fun onShouldStopRecording(state: NavigationSessionState)
+
+    fun onShouldCancelRecording(state: NavigationSessionState)
 }

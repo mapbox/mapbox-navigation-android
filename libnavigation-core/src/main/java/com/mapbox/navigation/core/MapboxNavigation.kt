@@ -892,7 +892,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                         routesSetResult = ExpectedFactory.createError(
                             RoutesSetError(processedRoutes.error)
                         )
-                        historyRecordingStateHandler.onNavigationSessionStateChanged(prevState)
+                        historyRecordingStateHandler.onNavigationSessionStateChangeReverted(prevState)
                     }
                 }
                 callback?.onRoutesSet(routesSetResult)
