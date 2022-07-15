@@ -20,7 +20,7 @@ task verifyCommonSdkVersion(dependsOn: generateDependencyReportFile) {
 
         // find all Common SDK versions
         Set<String> commonVersions = new ArrayList<>()
-        Pattern p = Pattern.compile("com.mapbox.common:common:\\d+\\.\\d+\\.\\d+")
+        Pattern p = Pattern.compile("com.mapbox.common:common:\\d+\\.\\d+\\.[^\\s]+")
         Matcher m = p.matcher(dependenciesString)
         while (m.find()) {
             String[] elements = m.group().split(":")
@@ -38,6 +38,9 @@ task verifyCommonSdkVersion(dependsOn: generateDependencyReportFile) {
                 mismatchArea = "MAJOR"
             } else if (Arrays.stream(versionComponents).map({ it[1] }).distinct().count() != 1) {
                 mismatchArea = "MINOR"
+            } else if (!Arrays.stream(versionComponents).allMatch({ it[2].matches("^\\d+") })) {
+                // If there are more than one version of Common SDK, and any of them is a pre-release, we have no compatibility guarantees
+                mismatchArea = "PRE-RELEASE"
             }
 
             if (mismatchArea != null) {
@@ -45,7 +48,7 @@ task verifyCommonSdkVersion(dependsOn: generateDependencyReportFile) {
                 println(dependenciesString)
                 throw new IllegalArgumentException(
                         mismatchArea + " Common SDK versions across dependencies are mismatched."
-                                + " All projects should use the same major and minor versions of the Common SDK.\n"
+                                + " All projects should use the same major, minor, and pre-release versions of the Common SDK. Only mismatched patches of stable versions are allowed.\n"
                                 + " Found versions: " + commonVersions
                 )
             } else if (Arrays.stream(versionComponents).map({ it[2] }).distinct().count() != 1) {
