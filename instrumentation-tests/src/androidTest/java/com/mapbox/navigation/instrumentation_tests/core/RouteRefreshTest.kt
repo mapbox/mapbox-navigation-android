@@ -16,6 +16,7 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_R
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.clearNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.requestRoutes
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.roadObjectsOnRoute
@@ -181,7 +182,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         stayOnInitialPosition()
 
         waitForRouteToSuccessfullyRefresh()
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(listOf())
+        mapboxNavigation.clearNavigationRoutesAndWaitForUpdate()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
         waitForRouteToSuccessfullyRefresh()
     }
