@@ -65,6 +65,7 @@ class CarSpeedLimitRenderer(
                 null
             )
         }
+        speedLimitWidget.redraw()
         mainCarContext.mapboxNavigation.registerLocationObserver(locationObserver)
     }
 
