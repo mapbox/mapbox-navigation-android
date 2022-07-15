@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Fixed an issue with speed limit widget that caused it to turn into a back rectangle. [#6064](https://github.com/mapbox/mapbox-navigation-android/pull/6064)
 
 ## androidauto-v0.4.0 - Jul 12, 2022
 ### Changelog
