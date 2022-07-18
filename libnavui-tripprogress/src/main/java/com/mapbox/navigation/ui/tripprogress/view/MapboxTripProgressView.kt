@@ -8,10 +8,15 @@ import android.widget.TextView
 import androidx.annotation.StyleRes
 import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
+import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.ui.tripprogress.R
 import com.mapbox.navigation.ui.tripprogress.databinding.MapboxTripProgressLayoutBinding
+import com.mapbox.navigation.ui.tripprogress.model.TripOverviewError
+import com.mapbox.navigation.ui.tripprogress.model.TripOverviewValue
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions
+import com.mapbox.navigation.utils.internal.ifNonNull
 
 /**
  * A view that can be added to activity layouts which displays trip progress.
@@ -114,6 +119,64 @@ class MapboxTripProgressView : FrameLayout {
             ),
             TextView.BufferType.SPANNABLE
         )
+    }
+
+    /**
+     * Draws `totalTime`, totalDistance` and `totalEstimatedTimeToArrival` based on the total time
+     * of the route (including all upcoming legs).
+     *
+     * @param result a [TripOverviewValue] containing the data that should be rendered.
+     */
+    fun renderTripOverview(result: Expected<TripOverviewError, TripOverviewValue>) {
+        result.onValue { tripOverview ->
+            binding.timeRemainingText.renderTimeRemaining(
+                tripOverview.formatter.getTimeRemaining(tripOverview.totalTime),
+                TextView.BufferType.SPANNABLE
+            )
+
+            binding.distanceRemainingText.renderDistanceRemaining(
+                tripOverview.formatter.getDistanceRemaining(tripOverview.totalDistance),
+                TextView.BufferType.SPANNABLE
+            )
+
+            binding.estimatedTimeToArriveText.renderEstimatedArrivalTime(
+                tripOverview.formatter.getEstimatedTimeToArrival(
+                    tripOverview.totalEstimatedTimeToArrival
+                ),
+                TextView.BufferType.SPANNABLE
+            )
+        }
+    }
+
+    /**
+     * Draws `legTime`, legDistance` and `estimatedTimeToArrival` based on the [RouteLeg] passed
+     * to the API.
+     *
+     * @param legIndex index of the [RouteLeg] for which to display the trip overview
+     * @param result a [TripOverviewValue] containing the data that should be rendered.
+     */
+    fun renderLegOverview(legIndex: Int, result: Expected<TripOverviewError, TripOverviewValue>) {
+        result.onValue { tripOverview ->
+            val legOverview = tripOverview.routeLegTripDetail.find { it.legIndex == legIndex }
+            ifNonNull(legOverview) { overview ->
+                binding.timeRemainingText.renderTimeRemaining(
+                    tripOverview.formatter.getTimeRemaining(overview.legTime),
+                    TextView.BufferType.SPANNABLE
+                )
+
+                binding.distanceRemainingText.renderDistanceRemaining(
+                    tripOverview.formatter.getDistanceRemaining(overview.legDistance),
+                    TextView.BufferType.SPANNABLE
+                )
+
+                binding.estimatedTimeToArriveText.renderEstimatedArrivalTime(
+                    tripOverview.formatter.getEstimatedTimeToArrival(
+                        overview.estimatedTimeToArrival
+                    ),
+                    TextView.BufferType.SPANNABLE
+                )
+            }
+        }
     }
 
     /**

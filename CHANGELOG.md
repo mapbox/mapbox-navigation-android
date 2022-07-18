@@ -7,6 +7,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Added `ViewBinderCustomization.infoPanelBinder` that allows installation of a custom info panel layout in `NavigationView`. [#6049](https://github.com/mapbox/mapbox-navigation-android/pull/6049) 
 - Added `ViewStyleCustomization.infoPanelPeekHeight` that allows customization of `NavigationView` info panel bottom sheet peek height. [#6049](https://github.com/mapbox/mapbox-navigation-android/pull/6049) 
 - Added `ViewStyleCustomization.infoPanelMarginStart`, `ViewStyleCustomization.infoPanelMarginEnd`, `ViewStyleCustomization.infoPanelBackground` that allows customization of a `NavigatioView` default info panel margins and background. [#6049](https://github.com/mapbox/mapbox-navigation-android/pull/6049)
+- Introduced new API(s) `MapboxTripProgressApi#getTripDetails()`, `MapboxTripProgressView#renderTripOverview()` and `MapboxTripProgressView#renderLegOverview()` to allow users to visualize trip related details for the entire route or a given leg of a route, before starting active navigation. [#6068](https://github.com/mapbox/mapbox-navigation-android/pull/6068)
 
 #### Bug fixes and improvements
 - :warning: Fixed an issue where `RoutesObserver` would be called with the previous routes set upon registration while a new routes set was already being processed. Now, the observer waits for the processing of `MapboxNavigation#setNavigationRoutes` to finish before delivering the result. [#6079](https://github.com/mapbox/mapbox-navigation-android/pull/6079)

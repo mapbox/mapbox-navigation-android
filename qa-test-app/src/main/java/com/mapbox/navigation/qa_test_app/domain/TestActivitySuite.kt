@@ -25,6 +25,7 @@ import com.mapbox.navigation.qa_test_app.view.RouteRestrictionsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteTrafficUpdateActivity
 import com.mapbox.navigation.qa_test_app.view.StatusActivity
 import com.mapbox.navigation.qa_test_app.view.TrafficGradientActivity
+import com.mapbox.navigation.qa_test_app.view.TripOverviewActivity
 import com.mapbox.navigation.qa_test_app.view.customnavview.MapboxNavigationViewCustomizedActivity
 import com.mapbox.navigation.qa_test_app.view.util.RouteDrawingActivity
 
@@ -148,6 +149,12 @@ object TestActivitySuite {
             R.string.icons_preview_activity_description
         ) { activity ->
             activity.startActivity<IconsPreviewActivity>()
+        },
+        TestActivityDescription(
+            "Visualize Trip Overview",
+            R.string.trip_overview_activity_description
+        ) { activity ->
+            activity.startActivity<TripOverviewActivity>()
         },
         TestActivityDescription(
             "Default NavigationView",

@@ -2,12 +2,62 @@ package com.mapbox.navigation.ui.tripprogress
 
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.utils.internal.ifNonNull
 import java.util.Calendar
+import kotlin.jvm.Throws
 
 internal class TripProgressProcessor {
 
     fun process(action: TripProgressAction): TripProgressResult {
-        return calculateTripProgress(action as TripProgressAction.CalculateTripProgress)
+        return when (action) {
+            is TripProgressAction.CalculateTripDetails -> {
+                calculateTripDetails(action)
+            }
+            is TripProgressAction.CalculateTripProgress -> {
+                calculateTripProgress(action)
+            }
+        }
+    }
+
+    @Throws
+    private fun calculateTripDetails(
+        action: TripProgressAction.CalculateTripDetails
+    ): TripProgressResult.TripOverview {
+        val tripDetailsList = mutableListOf<TripProgressResult.TripOverview.RouteLegTripOverview>()
+        ifNonNull(action.route.directionsRoute.legs()) { legs ->
+            legs.forEachIndexed { index, leg ->
+                ifNonNull(leg.duration(), leg.distance()) { duration, distance ->
+                    val eta = Calendar.getInstance().also {
+                        it.add(Calendar.SECOND, duration.toInt())
+                    }.timeInMillis
+                    tripDetailsList.add(
+                        TripProgressResult.TripOverview.RouteLegTripOverview(
+                            legIndex = index,
+                            estimatedTimeToArrival = eta,
+                            legTime = duration,
+                            legDistance = distance,
+                        )
+                    )
+                } ?: return TripProgressResult.TripOverview.Failure(
+                    errorMessage = "RouteLeg duration and RouteLeg distance cannot be null",
+                    throwable = null
+                )
+            }
+        } ?: return TripProgressResult.TripOverview.Failure(
+            errorMessage = "Directions route should not have null RouteLegs",
+            throwable = null
+        )
+        val totalTime = action.route.directionsRoute.duration()
+        val totalDistance = action.route.directionsRoute.distance()
+        val totalEstimatedArrivalTime = Calendar.getInstance().also {
+            it.add(Calendar.SECOND, action.route.directionsRoute.duration().toInt())
+        }.timeInMillis
+        return TripProgressResult.TripOverview.Success(
+            routeLegTripDetail = tripDetailsList,
+            totalTime = totalTime,
+            totalDistance = totalDistance,
+            totalEstimatedTimeToArrival = totalEstimatedArrivalTime
+        )
     }
 
     private fun calculateTripProgress(
