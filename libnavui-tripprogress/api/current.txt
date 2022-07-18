@@ -4,6 +4,7 @@ package com.mapbox.navigation.ui.tripprogress.api {
   public final class MapboxTripProgressApi {
     ctor public MapboxTripProgressApi(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter formatter);
     method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter getFormatter();
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.tripprogress.model.TripOverviewError,com.mapbox.navigation.ui.tripprogress.model.TripOverviewValue> getTripDetails(com.mapbox.navigation.base.route.NavigationRoute route);
     method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue getTripProgress(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
     method public void setFormatter(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter);
     property public final com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter formatter;
@@ -28,12 +29,43 @@ package com.mapbox.navigation.ui.tripprogress.model {
     method public android.text.SpannableString format(double update);
   }
 
+  public final class RouteLegTripOverview {
+    method public long getEstimatedTimeToArrival();
+    method public double getLegDistance();
+    method public int getLegIndex();
+    method public double getLegTime();
+    property public final long estimatedTimeToArrival;
+    property public final double legDistance;
+    property public final int legIndex;
+    property public final double legTime;
+  }
+
   public final class TimeRemainingFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<java.lang.Double,android.text.SpannableString> {
     ctor public TimeRemainingFormatter(android.content.Context context, java.util.Locale? locale = null);
     method public android.text.SpannableString format(double update);
     method public java.util.Locale? getLocale();
     method public void setLocale(java.util.Locale?);
     property public final java.util.Locale? locale;
+  }
+
+  public final class TripOverviewError {
+    method public String? getErrorMessage();
+    method public Throwable? getThrowable();
+    property public final String? errorMessage;
+    property public final Throwable? throwable;
+  }
+
+  public final class TripOverviewValue {
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter getFormatter();
+    method public java.util.List<com.mapbox.navigation.ui.tripprogress.model.RouteLegTripOverview> getRouteLegTripDetail();
+    method public double getTotalDistance();
+    method public long getTotalEstimatedTimeToArrival();
+    method public double getTotalTime();
+    property public final com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter formatter;
+    property public final java.util.List<com.mapbox.navigation.ui.tripprogress.model.RouteLegTripOverview> routeLegTripDetail;
+    property public final double totalDistance;
+    property public final long totalEstimatedTimeToArrival;
+    property public final double totalTime;
   }
 
   public final class TripProgressUpdateFormatter {
@@ -113,6 +145,8 @@ package com.mapbox.navigation.ui.tripprogress.view {
     ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
     method public void render(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue result);
+    method public void renderLegOverview(int legIndex, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.tripprogress.model.TripOverviewError,com.mapbox.navigation.ui.tripprogress.model.TripOverviewValue> result);
+    method public void renderTripOverview(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.tripprogress.model.TripOverviewError,com.mapbox.navigation.ui.tripprogress.model.TripOverviewValue> result);
     method public void updateOptions(com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions options);
     method @Deprecated public void updateStyle(@StyleRes int style);
   }

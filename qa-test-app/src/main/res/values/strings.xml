@@ -18,6 +18,7 @@
     <string name="feedback_activity_description" translatable="false">Screen to test feedback in ActiveGuidance and FreeDrive. Click on "START NAVIGATION" button to start FreeDrive session or long click on the map to get a route from current location to tapped and then click "START NAVIGATION" button to start ActiveGuidance session. Then you can observe in logcat how feedback is sent by clicking on `Feedback` button on the screen.</string>
     <string name="status_activity_description" translatable="false">Screen to test StatusView.</string>
     <string name="icons_preview_activity_description" translatable="false">Screen for viewing SDK icons.</string>
+    <string name="trip_overview_activity_description" translatable="false">Visualize trip and leg overview.</string>
     <string name="upcoming_bridge" translatable="false">Upcoming bridge in %1$s</string>
     <string name="no_upcoming_bridge" translatable="false">No upcoming bridge</string>
     <string name="upcoming_border_crossing" translatable="false">Upcoming border crossing in %1$s</string>

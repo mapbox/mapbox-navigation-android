@@ -6,7 +6,11 @@ import android.text.SpannableString
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.ui.tripprogress.R
+import com.mapbox.navigation.ui.tripprogress.model.RouteLegTripOverview
+import com.mapbox.navigation.ui.tripprogress.model.TripOverviewError
+import com.mapbox.navigation.ui.tripprogress.model.TripOverviewValue
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue
 import io.mockk.every
@@ -122,6 +126,169 @@ class MapboxTripProgressViewTest {
 
         val view = MapboxTripProgressView(ctx).also {
             it.render(state)
+        }
+
+        assertEquals(
+            "44 mi",
+            view.findViewById<TextView>(R.id.distanceRemainingText).text.toString()
+        )
+        assertEquals(
+            "11:59",
+            view.findViewById<TextView>(
+                R.id.estimatedTimeToArriveText
+            ).text.toString()
+        )
+        assertEquals(
+            "5 min",
+            view.findViewById<TextView>(R.id.timeRemainingText).text.toString()
+        )
+    }
+
+    @Test
+    fun `do not render trip overview when error`() {
+        val result = ExpectedFactory.createError<TripOverviewError, TripOverviewValue>(
+            TripOverviewError(
+                errorMessage = "Some error",
+                throwable = null
+            )
+        )
+
+        val view = MapboxTripProgressView(ctx).also {
+            it.renderTripOverview(result)
+        }
+
+        assertEquals(
+            "",
+            view.findViewById<TextView>(R.id.distanceRemainingText).text.toString()
+        )
+        assertEquals(
+            "",
+            view.findViewById<TextView>(
+                R.id.estimatedTimeToArriveText
+            ).text.toString()
+        )
+        assertEquals(
+            "",
+            view.findViewById<TextView>(R.id.timeRemainingText).text.toString()
+        )
+    }
+
+    @Test
+    fun `render trip overview`() {
+        val formatter = TripProgressUpdateFormatter.Builder(ctx)
+            .estimatedTimeToArrivalFormatter(
+                mockk {
+                    every { format(1L) } returns SpannableString("11:59")
+                }
+            )
+            .distanceRemainingFormatter(
+                mockk {
+                    every { format(2.0) } returns SpannableString("44 mi")
+                }
+            )
+            .timeRemainingFormatter(
+                mockk {
+                    every { format(3.0) } returns SpannableString("5 min")
+                }
+            )
+            .build()
+        val result = ExpectedFactory.createValue<TripOverviewError, TripOverviewValue>(
+            TripOverviewValue(
+                emptyList(),
+                3.0,
+                2.0,
+                1L,
+                formatter
+            )
+        )
+
+        val view = MapboxTripProgressView(ctx).also {
+            it.renderTripOverview(result)
+        }
+
+        assertEquals(
+            "44 mi",
+            view.findViewById<TextView>(R.id.distanceRemainingText).text.toString()
+        )
+        assertEquals(
+            "11:59",
+            view.findViewById<TextView>(
+                R.id.estimatedTimeToArriveText
+            ).text.toString()
+        )
+        assertEquals(
+            "5 min",
+            view.findViewById<TextView>(R.id.timeRemainingText).text.toString()
+        )
+    }
+
+    @Test
+    fun `do not render leg overview when error`() {
+        val result = ExpectedFactory.createError<TripOverviewError, TripOverviewValue>(
+            TripOverviewError(
+                errorMessage = "Some error",
+                throwable = null
+            )
+        )
+
+        val view = MapboxTripProgressView(ctx).also {
+            it.renderLegOverview(0, result)
+        }
+
+        assertEquals(
+            "",
+            view.findViewById<TextView>(R.id.distanceRemainingText).text.toString()
+        )
+        assertEquals(
+            "",
+            view.findViewById<TextView>(
+                R.id.estimatedTimeToArriveText
+            ).text.toString()
+        )
+        assertEquals(
+            "",
+            view.findViewById<TextView>(R.id.timeRemainingText).text.toString()
+        )
+    }
+
+    @Test
+    fun `render leg overview`() {
+        val formatter = TripProgressUpdateFormatter.Builder(ctx)
+            .estimatedTimeToArrivalFormatter(
+                mockk {
+                    every { format(1L) } returns SpannableString("11:59")
+                }
+            )
+            .distanceRemainingFormatter(
+                mockk {
+                    every { format(2.0) } returns SpannableString("44 mi")
+                }
+            )
+            .timeRemainingFormatter(
+                mockk {
+                    every { format(3.0) } returns SpannableString("5 min")
+                }
+            )
+            .build()
+        val result = ExpectedFactory.createValue<TripOverviewError, TripOverviewValue>(
+            TripOverviewValue(
+                listOf(
+                    RouteLegTripOverview(
+                        legIndex = 0,
+                        legTime = 3.0,
+                        legDistance = 2.0,
+                        estimatedTimeToArrival = 1L
+                    )
+                ),
+                3.0,
+                2.0,
+                1L,
+                formatter
+            )
+        )
+
+        val view = MapboxTripProgressView(ctx).also {
+            it.renderLegOverview(0, result)
         }
 
         assertEquals(
