@@ -96,6 +96,10 @@ dependencies {
     // Mapbox Navigation SDK
     implementation project(':libnavigation-android')
 
+    implementation("com.mapbox.maps:android-core:10.7.0-rc.1-969ffefe16-SNAPSHOT") {
+        force(true)
+    }
+
     // test
     androidTestImplementation project(':libtesting-ui')
     androidTestImplementation dependenciesList.testRunner
