@@ -320,7 +320,7 @@ internal object ViewportDataSourceProcessor {
     fun getMapAnchoredPaddingFromUserPadding(
         mapSize: Size,
         padding: EdgeInsets,
-        focalPoint: FocalPoint = FocalPoint(0.5, 1.0)
+        focalPoint: FollowingFrameOptions.FocalPoint
     ): EdgeInsets {
         val verticalRange = 0f..mapSize.height
         val horizontalRange = 0f..mapSize.width
