@@ -127,6 +127,9 @@ package com.mapbox.navigation.dropin {
     method public Integer? getCameraModeButtonStyle();
     method public Integer? getDestinationMarker();
     method public Integer? getEndNavigationButtonStyle();
+    method public Integer? getInfoPanelBackground();
+    method public Integer? getInfoPanelMarginEnd();
+    method public Integer? getInfoPanelMarginStart();
     method public Integer? getInfoPanelPeekHeight();
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? getManeuverViewOptions();
     method public Integer? getRecenterButtonStyle();
@@ -141,6 +144,9 @@ package com.mapbox.navigation.dropin {
     method public void setCameraModeButtonStyle(Integer?);
     method public void setDestinationMarker(Integer?);
     method public void setEndNavigationButtonStyle(Integer?);
+    method public void setInfoPanelBackground(Integer?);
+    method public void setInfoPanelMarginEnd(Integer?);
+    method public void setInfoPanelMarginStart(Integer?);
     method public void setInfoPanelPeekHeight(Integer?);
     method public void setManeuverViewOptions(com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions?);
     method public void setRecenterButtonStyle(Integer?);
@@ -155,6 +161,9 @@ package com.mapbox.navigation.dropin {
     property public final Integer? cameraModeButtonStyle;
     property public final Integer? destinationMarker;
     property public final Integer? endNavigationButtonStyle;
+    property public final Integer? infoPanelBackground;
+    property public final Integer? infoPanelMarginEnd;
+    property public final Integer? infoPanelMarginStart;
     property public final Integer? infoPanelPeekHeight;
     property public final com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? maneuverViewOptions;
     property public final Integer? recenterButtonStyle;
@@ -173,6 +182,9 @@ package com.mapbox.navigation.dropin {
     method @StyleRes public int defaultCameraModeButtonStyle();
     method @DrawableRes public int defaultDestinationMarker();
     method @StyleRes public int defaultEndNavigationButtonStyle();
+    method @DrawableRes public int defaultInfoPanelBackground();
+    method @Px public int defaultInfoPanelMarginEnd();
+    method @Px public int defaultInfoPanelMarginStart();
     method @Px public int defaultInfoPanelPeekHeight(android.content.Context context);
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions defaultManeuverViewOptions();
     method @StyleRes public int defaultRecenterButtonStyle();
@@ -199,8 +211,7 @@ package com.mapbox.navigation.dropin.binder.infopanel {
   }
 
   public static final class InfoPanelBinder.Companion {
-    method public com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder getDefaultBinder();
-    property public final com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder defaultBinder;
+    method public com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder defaultBinder();
   }
 
 }

@@ -8,7 +8,7 @@ import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import kotlinx.coroutines.flow.combine
 
 @ExperimentalPreviewMapboxNavigationAPI
-class InfoPanelComponent internal constructor(
+internal class InfoPanelComponent internal constructor(
     private val layout: ViewGroup,
     private val context: NavigationViewContext
 ) : UIComponent() {
