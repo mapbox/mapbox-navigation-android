@@ -13,6 +13,7 @@ import com.mapbox.navigation.core.trip.service.MapboxTripService
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.MapboxTripSession
 import com.mapbox.navigation.core.trip.session.NavigationSession
+import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManagerImpl
@@ -88,4 +89,8 @@ internal object NavigationComponentProvider {
     fun createArrivalProgressObserver(
         tripSession: TripSession
     ): ArrivalProgressObserver = ArrivalProgressObserver(tripSession)
+
+    fun createHistoryRecordingStateHandler(
+        initialState: NavigationSessionState
+    ): HistoryRecordingStateHandler = HistoryRecordingStateHandler(initialState)
 }

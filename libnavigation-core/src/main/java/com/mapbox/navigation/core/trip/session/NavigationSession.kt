@@ -1,15 +1,15 @@
 package com.mapbox.navigation.core.trip.session
 
-import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
-import com.mapbox.navigation.core.telemetry.navObtainUniversalSessionId
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.FreeDrive
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.Idle
 import java.util.concurrent.CopyOnWriteArraySet
 
-internal class NavigationSession : TripSessionStateObserver {
+internal class NavigationSession : RoutesObserver, TripSessionStateObserver {
 
     private val stateObservers = CopyOnWriteArraySet<NavigationSessionStateObserver>()
 
@@ -40,17 +40,7 @@ internal class NavigationSession : TripSessionStateObserver {
         }
 
     private fun updateState() {
-        state = when {
-            hasRoutes && isDriving -> {
-                ActiveGuidance(navObtainUniversalSessionId())
-            }
-            isDriving -> {
-                FreeDrive(navObtainUniversalSessionId())
-            }
-            else -> {
-                Idle
-            }
-        }
+        state = NavigationSessionUtils.getNewState(isDriving = isDriving, hasRoutes = hasRoutes)
     }
 
     internal fun registerNavigationSessionStateObserver(
@@ -70,15 +60,12 @@ internal class NavigationSession : TripSessionStateObserver {
         stateObservers.clear()
     }
 
-    fun setRoutes(routes: List<NavigationRoute>) {
-        hasRoutes = routes.isNotEmpty()
+    override fun onRoutesChanged(result: RoutesUpdatedResult) {
+        hasRoutes = result.navigationRoutes.isNotEmpty()
     }
 
     override fun onSessionStateChanged(tripSessionState: TripSessionState) {
-        isDriving = when (tripSessionState) {
-            TripSessionState.STARTED -> true
-            TripSessionState.STOPPED -> false
-        }
+        isDriving = NavigationSessionUtils.isDriving(tripSessionState)
     }
 }
 
