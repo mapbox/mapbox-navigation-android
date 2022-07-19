@@ -17,6 +17,9 @@ import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
+import com.mapbox.navigation.core.internal.extensions.registerHistoryRecordingStateChangeObserver
+import com.mapbox.navigation.core.internal.extensions.unregisterHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.telemetry.NavigationCustomEventType
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.reroute.NavigationRerouteController
@@ -30,6 +33,7 @@ import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
+import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.createSetRouteResult
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
@@ -132,7 +136,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @Test
     fun init_routesObs_internalRouteObs_navigationSession_and_TelemetryLocAndProgressDispatcher() {
         createMapboxNavigation()
-        verify(exactly = 1) { directionsSession.registerRoutesObserver(any()) }
+        verify(exactly = 2) { directionsSession.registerRoutesObserver(any()) }
     }
 
     @Test
@@ -195,7 +199,9 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @Test
     fun init_registerStateObserver_navigationSession() {
         createMapboxNavigation()
-        verify(exactly = 1) { tripSession.registerStateObserver(any()) }
+        val arguments = mutableListOf<TripSessionStateObserver>()
+        verify(exactly = 2) { tripSession.registerStateObserver(capture(arguments)) }
+        assertEquals(listOf(navigationSession, historyRecordingStateHandler), arguments)
     }
 
     @Test
@@ -244,6 +250,14 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.onDestroy()
 
         verify(exactly = 1) { tripSession.unregisterAllRoadObjectsOnRouteObservers() }
+    }
+
+    @Test
+    fun onDestroy_unregisters_HistoryRecordingStateHandler_observers() {
+        createMapboxNavigation()
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { historyRecordingStateHandler.unregisterAllStateChangeObservers() }
     }
 
     @Test
@@ -1276,7 +1290,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             mapboxNavigation.setNavigationRoutes(routes)
 
             coVerifyOrder {
-                navigationSession.setRoutes(routes)
                 routeAlternativesController.pauseUpdates()
                 tripSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
                 routeAlternativesController.processAlternativesMetadata(routes, nativeAlternatives)
@@ -1345,7 +1358,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             }
 
             coVerifyOrder {
-                navigationSession.setRoutes(routes)
                 tripSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
                 directionsSession.setRoutes(routes, any(), any())
                 tripSession.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
@@ -1530,5 +1542,25 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         createMapboxNavigation()
         mapboxNavigation.requestRoadGraphDataUpdate(callback)
         verify { CacheHandleWrapper.requestRoadGraphDataUpdate(cache, callback) }
+    }
+
+    @Test
+    fun registerHistoryRecordingStateChangeObserver() {
+        val observer = mockk<HistoryRecordingStateChangeObserver>(relaxed = true)
+        createMapboxNavigation()
+        mapboxNavigation.registerHistoryRecordingStateChangeObserver(observer)
+        verify {
+            historyRecordingStateHandler.registerStateChangeObserver(observer)
+        }
+    }
+
+    @Test
+    fun unregisterHistoryRecordingStateChangeObserver() {
+        val observer = mockk<HistoryRecordingStateChangeObserver>(relaxed = true)
+        createMapboxNavigation()
+        mapboxNavigation.unregisterHistoryRecordingStateChangeObserver(observer)
+        verify {
+            historyRecordingStateHandler.unregisterStateChangeObserver(observer)
+        }
     }
 }

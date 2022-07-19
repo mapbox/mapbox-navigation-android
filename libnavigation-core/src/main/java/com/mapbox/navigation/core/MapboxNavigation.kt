@@ -243,6 +243,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val tripService: TripService
     private val tripSession: TripSession
     private val navigationSession: NavigationSession
+    internal val historyRecordingStateHandler: HistoryRecordingStateHandler
     private val tripSessionLocationEngine: TripSessionLocationEngine
     private val billingController: BillingController
     private val connectivityHandler: ConnectivityHandler = ConnectivityHandler(
@@ -437,6 +438,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         )
         historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
         navigationSession = NavigationComponentProvider.createNavigationSession()
+        historyRecordingStateHandler = NavigationComponentProvider
+            .createHistoryRecordingStateHandler(navigationSession.state)
 
         val notification: TripNotification = MapboxModuleProvider
             .createModule(
@@ -472,8 +475,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         )
 
         tripSession.registerStateObserver(navigationSession)
+        tripSession.registerStateObserver(historyRecordingStateHandler)
 
         directionsSession = NavigationComponentProvider.createDirectionsSession(moduleRouter)
+        directionsSession.registerRoutesObserver(navigationSession)
         if (reachabilityObserverId == null) {
             reachabilityObserverId = ReachabilityService.addReachabilityObserver(
                 connectivityHandler
@@ -859,7 +864,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         restartRouteScope()
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
-                navigationSession.setRoutes(routes)
+                historyRecordingStateHandler.setRoutes(routes)
                 val routesSetResult: Expected<RoutesSetError, RoutesSetSuccess>
                 when (val processedRoutes = setRoutesToTripSession(routes, legIndex, reason)) {
                     is NativeSetRouteValue -> {
@@ -884,6 +889,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                         routesSetResult = ExpectedFactory.createError(
                             RoutesSetError(processedRoutes.error)
                         )
+                        historyRecordingStateHandler.lastSetRoutesFailed()
                     }
                 }
                 callback?.onRoutesSet(routesSetResult)
@@ -1025,6 +1031,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         arrivalProgressObserver.unregisterAllObservers()
 
         navigationSession.unregisterAllNavigationSessionStateObservers()
+        historyRecordingStateHandler.unregisterAllStateChangeObservers()
         runInTelemetryContext { telemetry ->
             telemetry.destroy(this@MapboxNavigation)
         }
