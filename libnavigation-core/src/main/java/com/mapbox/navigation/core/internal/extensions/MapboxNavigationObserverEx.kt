@@ -2,7 +2,6 @@
 
 package com.mapbox.navigation.core.internal.extensions
 
-import androidx.annotation.VisibleForTesting
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
