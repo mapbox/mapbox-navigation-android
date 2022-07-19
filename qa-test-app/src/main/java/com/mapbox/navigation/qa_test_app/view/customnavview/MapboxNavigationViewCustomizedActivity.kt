@@ -289,8 +289,8 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         binding.navigationView.customizeViewStyles {
             if (enabled) {
                 infoPanelBackground = R.drawable.bg_custom_info_panel2
-                infoPanelMarginStart = 5.dp
-                infoPanelMarginEnd = 5.dp
+                infoPanelMarginStart = 10.dp
+                infoPanelMarginEnd = 10.dp
             } else {
                 infoPanelBackground = defaultInfoPanelBackground()
                 infoPanelMarginStart = defaultInfoPanelMarginStart()
