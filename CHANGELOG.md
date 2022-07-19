@@ -4,6 +4,10 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added `ViewBinderCustomization.infoPanelBinder` that allows installation of a custom info panel layout in `NavigationView`. [#6049](https://github.com/mapbox/mapbox-navigation-android/pull/6049) 
+- Added `ViewStyleCustomization.infoPanelPeekHeight` that allows customization of `NavigationView` info panel bottom sheet peek height. [#6049](https://github.com/mapbox/mapbox-navigation-android/pull/6049) 
+- Added `ViewStyleCustomization.infoPanelMarginStart`, `ViewStyleCustomization.infoPanelMarginEnd`, `ViewStyleCustomization.infoPanelBackground` that allows customization of a `NavigatioView` default info panel margins and background. [#6049](https://github.com/mapbox/mapbox-navigation-android/pull/6049)
+
 #### Bug fixes and improvements
 - Remove the `MapView` from the `RouteArrowComponent` so that it can be used by Android Auto. [#6053](https://github.com/mapbox/mapbox-navigation-android/pull/6053)
 - Enabled tunnel dead reckoning drift compensation by default for Auto profile. [#6061](https://github.com/mapbox/mapbox-navigation-android/pull/6061)

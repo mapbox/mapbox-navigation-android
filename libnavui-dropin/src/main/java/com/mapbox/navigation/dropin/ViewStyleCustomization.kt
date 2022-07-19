@@ -1,6 +1,8 @@
 package com.mapbox.navigation.dropin
 
+import android.content.Context
 import androidx.annotation.DrawableRes
+import androidx.annotation.Px
 import androidx.annotation.StyleRes
 import com.google.android.material.resources.TextAppearance
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -24,67 +26,118 @@ import com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class ViewStyleCustomization {
+    /**
+     * Specify info panel peek height.
+     * Use [defaultInfoPanelPeekHeight] to reset to default.
+     */
+    @Px
+    var infoPanelPeekHeight: Int? = null
+
+    /**
+     * Specify info panel start margin.
+     * Use [defaultInfoPanelMarginStart] to reset to default.
+     */
+    @Px
+    var infoPanelMarginStart: Int? = null
+
+    /**
+     * Specify info panel end margin.
+     * Use [defaultInfoPanelMarginEnd] to reset to default.
+     */
+    @Px
+    var infoPanelMarginEnd: Int? = null
+
+    /**
+     * Specify info panel background drawable.
+     * Use [defaultInfoPanelBackground] to reset to default.
+     */
+    @DrawableRes
+    var infoPanelBackground: Int? = null
 
     /**
      * Provide custom destination marker icon.
      * Use [defaultDestinationMarker] to reset to default.
      */
-    @DrawableRes var destinationMarker: Int? = null
+    @DrawableRes
+    var destinationMarker: Int? = null
+
     /**
      * Provide custom [MapboxRoadNameView] background.
      * Use [defaultRoadNameBackground] to reset to default.
      */
-    @DrawableRes var roadNameBackground: Int? = null
+    @DrawableRes
+    var roadNameBackground: Int? = null
+
     /**
      * Provide custom [MapboxTripProgressView] style.
      * Use [defaultTripProgressStyle] to reset to default.
      */
-    @StyleRes var tripProgressStyle: Int? = null
+    @StyleRes
+    var tripProgressStyle: Int? = null
+
     /**
      * Provide custom [MapboxSpeedLimitView] style.
      * Use [defaultSpeedLimitStyle] to reset to default.
      */
-    @StyleRes var speedLimitStyle: Int? = null
+    @StyleRes
+    var speedLimitStyle: Int? = null
+
     /**
      * Provide custom [MapboxSpeedLimitView] [TextAppearance].
      * Use [defaultSpeedLimitTextAppearance] to reset to default.
      */
-    @StyleRes var speedLimitTextAppearance: Int? = null
+    @StyleRes
+    var speedLimitTextAppearance: Int? = null
+
     /**
      * Provide custom [MapboxRoadNameView] [TextAppearance].
      * Use [defaultRoadNameTextAppearance] to reset to default.
      */
-    @StyleRes var roadNameTextAppearance: Int? = null
+    @StyleRes
+    var roadNameTextAppearance: Int? = null
+
     /**
      * Provide custom [MapboxExtendableButton] style for re-center button.
      * Use [defaultRecenterButtonStyle] to reset to default.
      */
-    @StyleRes var recenterButtonStyle: Int? = null
+    @StyleRes
+    var recenterButtonStyle: Int? = null
+
     /**
      * Provide custom [MapboxCameraModeButton] style.
      * Use [defaultCameraModeButtonStyle] to reset to default.
      */
-    @StyleRes var cameraModeButtonStyle: Int? = null
+    @StyleRes
+    var cameraModeButtonStyle: Int? = null
+
     /**
      * Provide custom [MapboxExtendableButton] style for route preview button.
      * Use [defaultRoutePreviewButtonStyle] to reset to default.
      */
-    @StyleRes var routePreviewButtonStyle: Int? = null
+    @StyleRes
+    var routePreviewButtonStyle: Int? = null
+
     /**
      * Provide custom [MapboxAudioGuidanceButton] style.
      * Use [defaultAudioGuidanceButtonStyle] to reset to default.
      */
-    @StyleRes var audioGuidanceButtonStyle: Int? = null
+    @StyleRes
+    var audioGuidanceButtonStyle: Int? = null
+
     /**
      * Provide custom [MapboxExtendableButton] style for end navigation button.
      * Use [defaultEndNavigationButtonStyle] to reset to default.
      */
-    @StyleRes var endNavigationButtonStyle: Int? = null
+    @StyleRes
+    var endNavigationButtonStyle: Int? = null
+
     /**
      * Provide custom [MapboxExtendableButton] style for start navigation button.
      * Use [defaultStartNavigationButtonStyle] to reset to default.
      */
-    @StyleRes var startNavigationButtonStyle: Int? = null
+    @StyleRes
+    var startNavigationButtonStyle: Int? = null
+
     /**
      * Provide custom [ManeuverViewOptions] to style [MapboxManeuverView].
      * Use [defaultManeuverViewOptions] to reset to default.
@@ -92,6 +145,31 @@ class ViewStyleCustomization {
     var maneuverViewOptions: ManeuverViewOptions? = null
 
     companion object {
+        /**
+         * Default info panel peek height in pixels.
+         */
+        @Px
+        fun defaultInfoPanelPeekHeight(context: Context): Int =
+            context.resources.getDimensionPixelSize(R.dimen.mapbox_infoPanel_peekHeight)
+
+        /**
+         * Default info panel start margin value.
+         */
+        @Px
+        fun defaultInfoPanelMarginStart(): Int = 0
+
+        /**
+         * Default info panel end margin value.
+         */
+        @Px
+        fun defaultInfoPanelMarginEnd(): Int = 0
+
+        /**
+         * Default info panel background drawable.
+         */
+        @DrawableRes
+        fun defaultInfoPanelBackground(): Int = R.drawable.mapbox_bg_info_panel
+
         /**
          * Default destination marker icon.
          */

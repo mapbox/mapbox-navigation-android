@@ -55,4 +55,6 @@ class MapboxNavigationObserverChain : MapboxNavigationObserver {
     fun clear() {
         queue.clear()
     }
+
+    fun toList(): List<MapboxNavigationObserver> = queue.toList()
 }

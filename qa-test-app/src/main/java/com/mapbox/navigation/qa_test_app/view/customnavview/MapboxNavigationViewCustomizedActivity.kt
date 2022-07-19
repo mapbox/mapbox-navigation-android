@@ -23,6 +23,10 @@ import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultAudi
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultCameraModeButtonStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultDestinationMarker
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultEndNavigationButtonStyle
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelBackground
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelMarginEnd
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelMarginStart
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelPeekHeight
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultManeuverViewOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRecenterButtonStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoadNameBackground
@@ -32,6 +36,7 @@ import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultSpee
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultSpeedLimitTextAppearance
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultStartNavigationButtonStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultTripProgressStyle
+import com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.LayoutActivityNavigationViewBinding
 import com.mapbox.navigation.qa_test_app.databinding.LayoutDrawerMenuNavViewCustomBinding
@@ -100,6 +105,22 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             menuBinding.toggleCustomMap,
             viewModel.showCustomMapView,
             ::customizeMap
+        )
+
+        bindSwitch(
+            menuBinding.toggleCustomInfoPanelContent,
+            viewModel.showCustomInfoPanelContent,
+            ::toggleCustomInfoPanelContent
+        )
+        bindSwitch(
+            menuBinding.toggleCustomInfoPanel,
+            viewModel.useCustomInfoPanelLayout,
+            ::toggleCustomInfoPanelLayout
+        )
+        bindSwitch(
+            menuBinding.toggleCustomInfoPanelStyles,
+            viewModel.useCustomInfoPanelStyles,
+            ::toggleCustomInfoPanelStyles
         )
 
         bindSwitch(
@@ -236,6 +257,48 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         }
     }
 
+    private fun toggleCustomInfoPanelContent(enabled: Boolean) {
+        binding.navigationView.customizeViewBinders {
+            if (enabled) {
+                infoPanelContentBinder = UIBinder { viewGroup ->
+                    supportFragmentManager.beginTransaction()
+                        .replace(viewGroup.id, CustomInfoPanelDetailsFragment())
+                        .commitAllowingStateLoss()
+                    UIComponent()
+                }
+            } else {
+                infoPanelContentBinder = UIBinder.USE_DEFAULT
+            }
+        }
+    }
+
+    private fun toggleCustomInfoPanelLayout(enabled: Boolean) {
+        binding.navigationView.customizeViewBinders {
+            infoPanelBinder =
+                if (enabled) CustomInfoPanelBinder()
+                else InfoPanelBinder.defaultBinder()
+        }
+        binding.navigationView.customizeViewStyles {
+            infoPanelPeekHeight =
+                if (enabled) defaultInfoPanelPeekHeight(applicationContext) + 20.dp
+                else defaultInfoPanelPeekHeight(applicationContext)
+        }
+    }
+
+    private fun toggleCustomInfoPanelStyles(enabled: Boolean) {
+        binding.navigationView.customizeViewStyles {
+            if (enabled) {
+                infoPanelBackground = R.drawable.bg_custom_info_panel2
+                infoPanelMarginStart = 10.dp
+                infoPanelMarginEnd = 10.dp
+            } else {
+                infoPanelBackground = defaultInfoPanelBackground()
+                infoPanelMarginStart = defaultInfoPanelMarginStart()
+                infoPanelMarginEnd = defaultInfoPanelMarginEnd()
+            }
+        }
+    }
+
     private fun toggleShowInfoPanelInFreeDrive(showInFreeDrive: Boolean) {
         // Show Bottom Sheet in Free Drive
         binding.navigationView.customizeViewOptions {
@@ -337,17 +400,9 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             binding.navigationView.customizeViewBinders {
                 infoPanelHeaderBinder = UIBinder { viewGroup ->
                     viewGroup.removeAllViews()
-                    viewGroup.addView(LayoutInfoPanelHeaderBinding.inflate(layoutInflater).root)
-                    UIComponent()
-                }
-                infoPanelContentBinder = UIBinder { viewGroup ->
-                    val existingFragment =
-                        supportFragmentManager.findFragmentById(viewGroup.id)
-                    if (existingFragment !is CustomInfoPanelDetailsFragment) {
-                        supportFragmentManager.beginTransaction()
-                            .replace(viewGroup.id, CustomInfoPanelDetailsFragment())
-                            .commitAllowingStateLoss()
-                    }
+                    val header = LayoutInfoPanelHeaderBinding
+                        .inflate(layoutInflater, viewGroup, false).root
+                    viewGroup.addView(header)
                     UIComponent()
                 }
             }

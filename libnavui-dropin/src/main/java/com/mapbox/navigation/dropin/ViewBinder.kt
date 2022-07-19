@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +17,7 @@ internal class ViewBinder {
     private val _speedLimit: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
     private val _maneuver: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
     private val _roadName: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
+    private val _infoPanelBinder: MutableStateFlow<InfoPanelBinder?> = MutableStateFlow(null)
     private val _infoPanelTripProgressBinder: MutableStateFlow<UIBinder?> =
         MutableStateFlow(null)
     private val _infoPanelHeaderBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
@@ -30,6 +32,7 @@ internal class ViewBinder {
     val speedLimit: StateFlow<UIBinder?> get() = _speedLimit.asStateFlow()
     val maneuver: StateFlow<UIBinder?> get() = _maneuver.asStateFlow()
     val roadName: StateFlow<UIBinder?> get() = _roadName.asStateFlow()
+    val infoPanelBinder: StateFlow<InfoPanelBinder?> get() = _infoPanelBinder.asStateFlow()
     val infoPanelTripProgressBinder: StateFlow<UIBinder?>
         get() = _infoPanelTripProgressBinder.asStateFlow()
     val infoPanelHeaderBinder: StateFlow<UIBinder?> get() = _infoPanelHeaderBinder.asStateFlow()
@@ -45,6 +48,7 @@ internal class ViewBinder {
         customization.speedLimitBinder?.also { _speedLimit.emitOrNull(it) }
         customization.maneuverBinder?.also { _maneuver.emitOrNull(it) }
         customization.roadNameBinder?.also { _roadName.emitOrNull(it) }
+        customization.infoPanelBinder?.also { _infoPanelBinder.emitOrNull(it) }
         customization.infoPanelTripProgressBinder?.also {
             _infoPanelTripProgressBinder.emitOrNull(it)
         }
@@ -57,7 +61,7 @@ internal class ViewBinder {
         customization.customActionButtons?.also { _customActionButtons.value = it }
     }
 
-    private fun MutableStateFlow<UIBinder?>.emitOrNull(v: UIBinder) {
+    private fun <T : UIBinder> MutableStateFlow<T?>.emitOrNull(v: T) {
         tryEmit(if (v != UIBinder.USE_DEFAULT) v else null)
     }
 }
