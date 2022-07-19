@@ -14,6 +14,10 @@ Mapbox welcomes participation and contributions from everyone.
 - Enabled tunnel dead reckoning drift compensation by default for Auto profile. [#6061](https://github.com/mapbox/mapbox-navigation-android/pull/6061)
 - Increased route line stickiness for Auto profile. [#6061](https://github.com/mapbox/mapbox-navigation-android/pull/6061)
 - Improved off-road detection for Auto profile by relying more on the heading change relative to the road. [#6061](https://github.com/mapbox/mapbox-navigation-android/pull/6061)
+- Added `PredictiveCacheController` constructor with `PredictiveCacheOptions`, `PredictiveCacheController(PredictiveCacheOptions)`. [#6071](https://github.com/mapbox/mapbox-navigation-android/pull/6071)
+- Deprecated constructors `PredictiveCacheController(PredictiveCacheLocationOptions, PredictiveCacheControllerErrorHandler)` and `PredictiveCacheController(PredictiveCacheLocationOptions, PredictiveCacheLocationOptions, PredictiveCacheControllerErrorHandler)`. [#6071](https://github.com/mapbox/mapbox-navigation-android/pull/6071)
+- Added `PredictiveCacheController#predictiveCacheControllerErrorHandler` to set and get `PredictiveCacheControllerErrorHandler`. [#6071](https://github.com/mapbox/mapbox-navigation-android/pull/6071)
+- Added `PredictiveCacheMapsOptions`(map specific, that also allow to specify zoom levels for which the map tiles should be cached) and `PredictiveCacheNavigationOptions`(navigation specific) available through the `PredictiveCacheOptions`. [#6071](https://github.com/mapbox/mapbox-navigation-android/pull/6071)
 
 ## Mapbox Navigation SDK 2.7.0-beta.1 - 14 July, 2022
 ### Changelog

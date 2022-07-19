@@ -3,12 +3,17 @@ package com.mapbox.navigation.ui.maps
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.Value
 import com.mapbox.common.TileStore
+import com.mapbox.common.TilesetDescriptor
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
+import com.mapbox.maps.TilesetDescriptorOptions
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
+import com.mapbox.navigation.base.options.PredictiveCacheOptions
 import com.mapbox.navigation.core.internal.PredictiveCache
+import com.mapbox.navigation.ui.maps.internal.offline.OfflineManagerProvider
+import io.mockk.Ordering
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -21,6 +26,7 @@ import io.mockk.unmockkStatic
 import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,6 +53,47 @@ class PredictiveCacheControllerTest {
         unmockkStatic(TileStore::class)
     }
 
+    fun `sanity primary constructor`() {
+        val predictiveCacheOptions = mockk<PredictiveCacheOptions> {
+            every { predictiveCacheNavigationOptions } returns mockk {
+                every { predictiveCacheLocationOptions } returns mockk()
+            }
+        }
+        every {
+            PredictiveCache.createNavigationController(
+                predictiveCacheOptions.predictiveCacheNavigationOptions
+                    .predictiveCacheLocationOptions
+            )
+        } just Runs
+
+        val predictiveCacheController = PredictiveCacheController(predictiveCacheOptions)
+
+        assertNull(predictiveCacheController.predictiveCacheControllerErrorHandler)
+        verify(Ordering.SEQUENCE) {
+            PredictiveCache.init()
+            PredictiveCache.createNavigationController(
+                predictiveCacheOptions.predictiveCacheNavigationOptions
+                    .predictiveCacheLocationOptions
+            )
+        }
+    }
+
+    fun `sanity secondary constructor`() {
+        val mockedLocationOptions: PredictiveCacheLocationOptions = mockk()
+        every {
+            PredictiveCache.createNavigationController(mockedLocationOptions)
+        } just Runs
+
+        val predictiveCacheController =
+            PredictiveCacheController(mockedLocationOptions, errorHandler)
+
+        assertEquals(errorHandler, predictiveCacheController.predictiveCacheControllerErrorHandler)
+        verify(Ordering.SEQUENCE) {
+            PredictiveCache.init()
+            PredictiveCache.createNavigationController(mockedLocationOptions)
+        }
+    }
+
     @Test
     fun `initialize creates Navigation Predictive Cache Controller`() {
         val mockedLocationOptions: PredictiveCacheLocationOptions = mockk()
@@ -59,7 +106,6 @@ class PredictiveCacheControllerTest {
         verify {
             PredictiveCache.createNavigationController(mockedLocationOptions)
         }
-
         verify(exactly = 0) { errorHandler.onError(any()) }
     }
 
@@ -499,6 +545,66 @@ class PredictiveCacheControllerTest {
         verify(exactly = 1) { errorHandler.onError(error) }
         verify(exactly = 0) {
             PredictiveCache.createMapsController(any(), any(), any<String>(), any())
+        }
+    }
+
+    @Test
+    fun `check createMapsController`() {
+        mockkObject(OfflineManagerProvider) {
+            val predictiveCacheOptions = mockk<PredictiveCacheOptions> {
+                every {
+                    predictiveCacheMapsOptions
+                } returns mockk {
+                    every { minZoom } returns 40.toByte()
+                    every { maxZoom } returns 50.toByte()
+                    every { predictiveCacheLocationOptions } returns mockk()
+                }
+                every { predictiveCacheNavigationOptions } returns mockk {
+                    every { predictiveCacheLocationOptions } returns mockk()
+                }
+            }
+            every { PredictiveCache.createNavigationController(any()) } just Runs
+            val mockedTileStore = mockk<TileStore>()
+            every { TileStore.create(any()) } returns mockedTileStore
+            val mockedMapboxMap = mockk<MapboxMap>(relaxed = true) {
+                every { getResourceOptions().tileStore } returns mockedTileStore
+            }
+            val slotListTilesetDescriptorOptions = mutableListOf<TilesetDescriptorOptions>()
+            val mockTilesetDescriptor: TilesetDescriptor = mockk()
+            every {
+                OfflineManagerProvider.provideOfflineManager(any())
+            } returns mockk {
+                every {
+                    createTilesetDescriptor(capture(slotListTilesetDescriptorOptions))
+                } returns mockTilesetDescriptor
+            }
+            val slotMapsPredictiveCacheLocationOptions = slot<PredictiveCacheLocationOptions>()
+            every {
+                PredictiveCache.createMapsController(
+                    mockedMapboxMap,
+                    mockedTileStore,
+                    mockTilesetDescriptor,
+                    capture(slotMapsPredictiveCacheLocationOptions)
+                )
+            } just Runs
+
+            val predictiveCacheController = PredictiveCacheController(predictiveCacheOptions)
+            predictiveCacheController.predictiveCacheControllerErrorHandler = errorHandler
+            predictiveCacheController.createStyleMapControllers(
+                mockedMapboxMap, styles = listOf("mapbox://test_test", "non_valid://test_test")
+            )
+
+            assertEquals(1, slotListTilesetDescriptorOptions.size)
+            val slotTilesetDescriptorOptions = slotListTilesetDescriptorOptions.first()
+            assertEquals(40.toByte(), slotTilesetDescriptorOptions.minZoom)
+            assertEquals(50.toByte(), slotTilesetDescriptorOptions.maxZoom)
+            assertEquals("mapbox://test_test", slotTilesetDescriptorOptions.styleURI)
+            assertEquals(
+                predictiveCacheOptions.predictiveCacheMapsOptions.predictiveCacheLocationOptions,
+                slotMapsPredictiveCacheLocationOptions.captured
+            )
+            // "non_valid://test_test
+            verify(exactly = 1) { errorHandler.onError(any()) }
         }
     }
 }

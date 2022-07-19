@@ -5,23 +5,23 @@ import com.mapbox.bindgen.Value
 import com.mapbox.common.TileStore
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.OfflineManager
 import com.mapbox.maps.ResourceOptions
 import com.mapbox.maps.TilesetDescriptorOptions
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
+import com.mapbox.navigation.base.options.PredictiveCacheMapsOptions
+import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
+import com.mapbox.navigation.base.options.PredictiveCacheOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.PredictiveCache
+import com.mapbox.navigation.ui.maps.internal.offline.OfflineManagerProvider
 import com.mapbox.navigation.utils.internal.logE
-import java.util.HashMap
 
 private const val LOG_CATEGORY = "PredictiveCacheController"
 private const val MAPBOX_URL_PREFIX = "mapbox://"
 private const val VECTOR_SOURCE_TYPE = "vector"
 private const val RASTER_SOURCE_TYPE = "raster"
-private const val MIN_ZOOM = 0.toByte()
-private const val MAX_ZOOM = 16.toByte()
 
 /**
  * Predictive caching is a system that downloads necessary visual map and guidance data resources
@@ -55,55 +55,31 @@ private const val MAX_ZOOM = 16.toByte()
  * - `OnboardRouterOptions` enabled you to specify a path where nav-tiles will be saved and if a
  * custom directory was used, it should be cleared as well.
  *
- * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions] location configuration for visual map predictive caching (optional)
- * @param predictiveCacheGuidanceLocationOptions [PredictiveCacheLocationOptions] location configuration for guidance predictive caching (optional)
- * @param predictiveCacheControllerErrorHandler [PredictiveCacheControllerErrorHandler] listener (optional)
+ * @param predictiveCacheOptions [PredictiveCacheOptions] options to instantiate instance of [PredictiveCacheController]
  */
-class PredictiveCacheController @JvmOverloads constructor(
-    private val predictiveCacheLocationOptions: PredictiveCacheLocationOptions =
-        PredictiveCacheLocationOptions.Builder().build(),
-    private val predictiveCacheGuidanceLocationOptions: PredictiveCacheLocationOptions =
-        PredictiveCacheLocationOptions.Builder().build(),
-    private val predictiveCacheControllerErrorHandler: PredictiveCacheControllerErrorHandler? =
-        null,
+class PredictiveCacheController constructor(
+    private val predictiveCacheOptions: PredictiveCacheOptions,
 ) {
 
     /**
-     * Predictive caching is a system that downloads necessary visual map and guidance data resources
-     * along the route upfront, before they are needed, in an attempt to provide a smooth experience
-     * even when connectivity is lost while using the app.
-     *
-     * Once instantiated, the controller will immediately start caching guidance data.
-     *
-     * In order to start caching map data, provide an instance via [createMapControllers].
-     * To specify sources to cache, pass a list of id's via [createMapControllers].
-     * Source id's should look like "mapbox://mapbox.satellite", "mapbox://mapbox.mapbox-terrain-v2".
-     * The system only supports source hosted on Mapbox Services which URL starts with "mapbox://".
-     * If no ids are passed all available style sources will be cached.
-     *
-     * The controller as well as [MapboxNavigation] instance it's holding can have
-     * a different lifecycle than the [MapboxMap] instance, so make sure to call [removeMapControllers]
-     * whenever the [MapView] is destroyed to avoid leaking references or downloading unnecessary
-     * resources. When the map instance is recreated, set it back with [createMapControllers].
-     *
-     * The map instance has to be configured with the same [TileStore] instance that was provided to [RoutingTilesOptions.tileStore].
-     * You need to call [TileStore.create] with a path and pass it to [ResourceOptions.tileStore] or use the Maps SDK's tile store path XML attribute.
-     *
-     * Call [onDestroy] to cleanup all map and navigation state related references.
-     * This can be called when navigation session finishes and predictive caching is not needed anymore.
-     *
-     * - When migrating please ensure you have cleaned up old navigation tiles cache folder to reclaim disk space.
-     * Navigation SDK 2.0 caches navigation tiles in a default folder under `APP_FOLDER/mbx_nav/tiles/api.mapbox.com`.
-     * Previous versions of Nav SDK used to cache tiles under a default folder `APP_FOLDER/Offline/api.mapbox.com/$tilesVersion/tiles`.
-     * Old cache is not compatible with a new version of SDK 2.0.
-     * It makes sense to delete any folders used previously for caching including a default one.
-     * - `OnboardRouterOptions` enabled you to specify a path where nav-tiles will be saved and if a
-     * custom directory was used, it should be cleared as well.
+     * Predictive Cache Controller errors listener
+     */
+    @Volatile
+    var predictiveCacheControllerErrorHandler: PredictiveCacheControllerErrorHandler? = null
+
+    private var mapListeners = mutableMapOf<MapboxMap, OnStyleLoadedListener>()
+
+    /**
+     * Constructor of [PredictiveCacheController]
      *
      * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions] location configuration for visual map predictive caching (optional)
      * @param predictiveCacheControllerErrorHandler [PredictiveCacheControllerErrorHandler] listener (optional)
      * Noting that `predictiveCacheLocationOptions` is used as `predictiveCacheGuidanceLocationOptions` when constructing `PredictiveCacheController` to retain backwards compatibility
      */
+    @Deprecated(
+        "Use PredictiveCacheController(PredictiveCacheOptions) and " +
+            "PredictiveCacheController#predictiveCacheControllerErrorHandler instead"
+    )
     constructor(
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions =
             PredictiveCacheLocationOptions.Builder().build(),
@@ -115,11 +91,47 @@ class PredictiveCacheController @JvmOverloads constructor(
         predictiveCacheControllerErrorHandler
     )
 
-    private var mapListeners = mutableMapOf<MapboxMap, OnStyleLoadedListener>()
+    /**
+     * Constructor of [PredictiveCacheController]
+     *
+     * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions] location configuration for visual map predictive caching (optional)
+     * @param predictiveCacheGuidanceLocationOptions [PredictiveCacheLocationOptions] location configuration for guidance predictive caching (optional)
+     * @param predictiveCacheControllerErrorHandler [PredictiveCacheControllerErrorHandler] listener (optional)
+     */
+    @JvmOverloads
+    @Deprecated(
+        "Use PredictiveCacheController(PredictiveCacheOptions) and " +
+            "PredictiveCacheController#predictiveCacheControllerErrorHandler instead"
+    )
+    constructor(
+        predictiveCacheLocationOptions: PredictiveCacheLocationOptions =
+            PredictiveCacheLocationOptions.Builder().build(),
+        predictiveCacheGuidanceLocationOptions: PredictiveCacheLocationOptions =
+            PredictiveCacheLocationOptions.Builder().build(),
+        predictiveCacheControllerErrorHandler: PredictiveCacheControllerErrorHandler? =
+            null,
+    ) : this(
+        PredictiveCacheOptions.Builder().apply {
+            predictiveCacheNavigationOptions(
+                PredictiveCacheNavigationOptions.Builder().apply {
+                    predictiveCacheLocationOptions(predictiveCacheGuidanceLocationOptions)
+                }.build()
+            )
+            predictiveCacheMapsOptions(
+                PredictiveCacheMapsOptions.Builder().apply {
+                    predictiveCacheLocationOptions(predictiveCacheLocationOptions)
+                }.build()
+            )
+        }.build(),
+    ) {
+        this.predictiveCacheControllerErrorHandler = predictiveCacheControllerErrorHandler
+    }
 
     init {
         PredictiveCache.init()
-        PredictiveCache.createNavigationController(predictiveCacheGuidanceLocationOptions)
+        PredictiveCache.createNavigationController(
+            predictiveCacheOptions.predictiveCacheNavigationOptions.predictiveCacheLocationOptions
+        )
     }
 
     /**
@@ -158,7 +170,7 @@ class PredictiveCacheController @JvmOverloads constructor(
                 map,
                 tileStore,
                 tileVariant,
-                predictiveCacheLocationOptions
+                predictiveCacheOptions.predictiveCacheMapsOptions.predictiveCacheLocationOptions,
             )
         }
 
@@ -310,7 +322,8 @@ class PredictiveCacheController @JvmOverloads constructor(
                     map,
                     tileStore,
                     it,
-                    predictiveCacheLocationOptions
+                    predictiveCacheOptions.predictiveCacheMapsOptions
+                        .predictiveCacheLocationOptions,
                 )
             }
     }
@@ -320,7 +333,7 @@ class PredictiveCacheController @JvmOverloads constructor(
         map: MapboxMap,
         tileStore: TileStore
     ) {
-        val offlineManager = OfflineManager(map.getResourceOptions())
+        val offlineManager = OfflineManagerProvider.provideOfflineManager(map.getResourceOptions())
 
         if (!styleURI.startsWith(MAPBOX_URL_PREFIX)) {
             val message =
@@ -332,8 +345,12 @@ class PredictiveCacheController @JvmOverloads constructor(
         } else {
             val descriptorOptions = TilesetDescriptorOptions.Builder()
                 .styleURI(styleURI)
-                .minZoom(MIN_ZOOM)
-                .maxZoom(MAX_ZOOM)
+                .minZoom(
+                    predictiveCacheOptions.predictiveCacheMapsOptions.minZoom
+                )
+                .maxZoom(
+                    predictiveCacheOptions.predictiveCacheMapsOptions.maxZoom
+                )
                 .build()
 
             val tilesetDescriptor = offlineManager.createTilesetDescriptor(descriptorOptions)
@@ -342,7 +359,7 @@ class PredictiveCacheController @JvmOverloads constructor(
                 map,
                 tileStore,
                 tilesetDescriptor,
-                predictiveCacheLocationOptions
+                predictiveCacheOptions.predictiveCacheMapsOptions.predictiveCacheLocationOptions,
             )
         }
     }

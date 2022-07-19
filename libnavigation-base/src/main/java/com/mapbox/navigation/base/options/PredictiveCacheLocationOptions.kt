@@ -10,7 +10,7 @@ package com.mapbox.navigation.base.options
 class PredictiveCacheLocationOptions private constructor(
     val currentLocationRadiusInMeters: Int,
     val routeBufferRadiusInMeters: Int,
-    val destinationLocationRadiusInMeters: Int
+    val destinationLocationRadiusInMeters: Int,
 ) {
 
     /**
@@ -94,7 +94,7 @@ class PredictiveCacheLocationOptions private constructor(
             return PredictiveCacheLocationOptions(
                 currentLocationRadiusInMeters = currentLocationRadiusInMeters,
                 routeBufferRadiusInMeters = routeBufferRadiusInMeters,
-                destinationLocationRadiusInMeters = destinationLocationRadiusInMeters
+                destinationLocationRadiusInMeters = destinationLocationRadiusInMeters,
             )
         }
     }

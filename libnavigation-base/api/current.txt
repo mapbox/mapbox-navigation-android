@@ -495,6 +495,51 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder routeBufferRadiusInMeters(int radiusInMeters);
   }
 
+  public final class PredictiveCacheMapsOptions {
+    method public byte getMaxZoom();
+    method public byte getMinZoom();
+    method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions getPredictiveCacheLocationOptions();
+    method public com.mapbox.navigation.base.options.PredictiveCacheMapsOptions.Builder toBuilder();
+    property public final byte maxZoom;
+    property public final byte minZoom;
+    property public final com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions;
+  }
+
+  public static final class PredictiveCacheMapsOptions.Builder {
+    ctor public PredictiveCacheMapsOptions.Builder();
+    method public com.mapbox.navigation.base.options.PredictiveCacheMapsOptions build();
+    method public com.mapbox.navigation.base.options.PredictiveCacheMapsOptions.Builder maxZoom(byte maxZoom);
+    method public com.mapbox.navigation.base.options.PredictiveCacheMapsOptions.Builder minZoom(byte minZoom);
+    method public com.mapbox.navigation.base.options.PredictiveCacheMapsOptions.Builder predictiveCacheLocationOptions(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions);
+  }
+
+  public final class PredictiveCacheNavigationOptions {
+    method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions getPredictiveCacheLocationOptions();
+    method public com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions;
+  }
+
+  public static final class PredictiveCacheNavigationOptions.Builder {
+    ctor public PredictiveCacheNavigationOptions.Builder();
+    method public com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions build();
+    method public com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions.Builder predictiveCacheLocationOptions(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions);
+  }
+
+  public final class PredictiveCacheOptions {
+    method public com.mapbox.navigation.base.options.PredictiveCacheMapsOptions getPredictiveCacheMapsOptions();
+    method public com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions getPredictiveCacheNavigationOptions();
+    method public com.mapbox.navigation.base.options.PredictiveCacheOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.base.options.PredictiveCacheMapsOptions predictiveCacheMapsOptions;
+    property public final com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions predictiveCacheNavigationOptions;
+  }
+
+  public static final class PredictiveCacheOptions.Builder {
+    ctor public PredictiveCacheOptions.Builder();
+    method public com.mapbox.navigation.base.options.PredictiveCacheOptions build();
+    method public com.mapbox.navigation.base.options.PredictiveCacheOptions.Builder predictiveCacheMapsOptions(com.mapbox.navigation.base.options.PredictiveCacheMapsOptions predictiveCacheMapsOptions);
+    method public com.mapbox.navigation.base.options.PredictiveCacheOptions.Builder predictiveCacheNavigationOptions(com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions predictiveCacheNavigationOptions);
+  }
+
   public final class RerouteOptions {
     method public int getAvoidManeuverSeconds();
     method public com.mapbox.navigation.base.options.RerouteOptions.Builder toBuilder();
