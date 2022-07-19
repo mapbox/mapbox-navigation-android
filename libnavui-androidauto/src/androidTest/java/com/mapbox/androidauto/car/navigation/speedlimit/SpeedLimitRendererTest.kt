@@ -29,13 +29,11 @@ class SpeedLimitRendererTest {
         "test_speed_limit_images"
     )
 
-    private val speedLimitWidget = SpeedLimitWidget()
-
     @Test
     fun speed_limit_120_speed_150() {
         bitmapUtils.assertBitmapsSimilar(
             testName,
-            speedLimitWidget.drawSpeedLimitSign(speedLimit = 120, speed = 150)
+            SpeedLimitWidget.drawSpeedLimitSign(speedLimit = 120, speed = 150),
         )
     }
 
@@ -43,7 +41,7 @@ class SpeedLimitRendererTest {
     fun speed_limit_120_speed_90() {
         bitmapUtils.assertBitmapsSimilar(
             testName,
-            speedLimitWidget.drawSpeedLimitSign(speedLimit = 120, speed = 90)
+            SpeedLimitWidget.drawSpeedLimitSign(speedLimit = 120, speed = 90),
         )
     }
 
@@ -51,7 +49,7 @@ class SpeedLimitRendererTest {
     fun speed_limit_65_speed_90() {
         bitmapUtils.assertBitmapsSimilar(
             testName,
-            speedLimitWidget.drawSpeedLimitSign(speedLimit = 65, speed = 90)
+            SpeedLimitWidget.drawSpeedLimitSign(speedLimit = 65, speed = 90),
         )
     }
 
@@ -59,7 +57,7 @@ class SpeedLimitRendererTest {
     fun speed_limit_65_speed_30() {
         bitmapUtils.assertBitmapsSimilar(
             testName,
-            speedLimitWidget.drawSpeedLimitSign(speedLimit = 65, speed = 30)
+            SpeedLimitWidget.drawSpeedLimitSign(speedLimit = 65, speed = 30),
         )
     }
 
@@ -67,7 +65,7 @@ class SpeedLimitRendererTest {
     fun speed_limit_5_speed_30() {
         bitmapUtils.assertBitmapsSimilar(
             testName,
-            speedLimitWidget.drawSpeedLimitSign(speedLimit = 5, speed = 30)
+            SpeedLimitWidget.drawSpeedLimitSign(speedLimit = 5, speed = 30),
         )
     }
 
@@ -75,7 +73,7 @@ class SpeedLimitRendererTest {
     fun speed_limit_5_speed_0() {
         bitmapUtils.assertBitmapsSimilar(
             testName,
-            speedLimitWidget.drawSpeedLimitSign(speedLimit = 5, speed = 0)
+            SpeedLimitWidget.drawSpeedLimitSign(speedLimit = 5, speed = 0),
         )
     }
 
@@ -83,7 +81,7 @@ class SpeedLimitRendererTest {
     fun speed_limit_unknown_speed_5() {
         bitmapUtils.assertBitmapsSimilar(
             testName,
-            speedLimitWidget.drawSpeedLimitSign(speedLimit = null, speed = 5)
+            SpeedLimitWidget.drawSpeedLimitSign(speedLimit = null, speed = 5),
         )
     }
 }

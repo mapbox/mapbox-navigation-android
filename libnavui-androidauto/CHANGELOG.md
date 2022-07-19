@@ -6,6 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 - Fixed an issue with speed limit widget that caused it to turn into a back rectangle. [#6064](https://github.com/mapbox/mapbox-navigation-android/pull/6064)
+- Fixed an issue with compass and logo widgets that caused them to draw behind location puck. [#6076](https://github.com/mapbox/mapbox-navigation-android/pull/6076)
 
 ## androidauto-v0.4.0 - Jul 12, 2022
 ### Changelog
