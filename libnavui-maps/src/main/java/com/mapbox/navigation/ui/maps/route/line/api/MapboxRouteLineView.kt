@@ -147,6 +147,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param routeDrawData a [Expected<RouteLineError, RouteSetValue>]
      */
     fun renderRouteDrawData(style: Style, routeDrawData: Expected<RouteLineError, RouteSetValue>) {
+        println("[Mapbox] perfTest renderRouteDrawData start(count: ${routeDrawData.fold({0}, { it.alternativeRouteLinesData.count() + 1 }) }) : ${System.nanoTime()}")
         MapboxRouteLineUtils.initializeLayers(style, options)
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
@@ -264,6 +265,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                         updateLayerVisibility(style, it.first, visibility)
                     }
                 }
+                println("[Mapbox] perfTest renderRouteDrawData end : ${System.nanoTime()}")
             }
         }
     }

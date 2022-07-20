@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.internal.route.line
 
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.os.Looper
 import android.util.LruCache
 import android.util.SparseArray
 import androidx.annotation.ColorInt
@@ -825,6 +826,8 @@ internal object MapboxRouteLineUtils {
         route: NavigationRoute,
         identifier: String?
     ) -> RouteFeatureData = { route: NavigationRoute, identifier: String? ->
+        val mainThread = Looper.myLooper() == Looper.getMainLooper()
+        println("[Mapbox] perfTest generateRouteFeatureData start (main thread: $mainThread) : ${System.nanoTime()}")
         val routeGeometry = route.directionsRoute.completeGeometryToLineString()
         val routeFeature = when (identifier) {
             null -> Feature.fromGeometry(routeGeometry, null, route.id)
@@ -834,6 +837,7 @@ internal object MapboxRouteLineUtils {
                 }
             }
         }
+        println("[Mapbox] perfTest generateRouteFeatureData end : ${System.nanoTime()}")
 
         RouteFeatureData(
             route,

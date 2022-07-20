@@ -121,6 +121,7 @@ class RouterWrapper(
                             { routes ->
                                 val metadata = routes.firstOrNull()?.directionsResponse?.metadata()
                                 logI("Response metadata: $metadata", LOG_CATEGORY)
+                                println("[Mapbox] perfTest onRoutesReady(IDs: ${routes.map { it.id }}) : ${System.nanoTime()}")
                                 callback.onRoutesReady(
                                     routes,
                                     origin.mapToSdkRouteOrigin()

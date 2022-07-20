@@ -50,6 +50,7 @@ internal class MapboxDirectionsSession(
         RouteCompatibilityCache.setDirectionsSessionResult(routes)
         this.routes = routes
         this.routesUpdateReason = routesUpdateReason
+        println("[Mapbox] perfTest onRoutesChanged(IDs: ${routes.map { it.id }}) : ${System.nanoTime()}")
         routesObservers.forEach {
             it.onRoutesChanged(
                 RoutesUpdatedResult(
@@ -109,6 +110,7 @@ internal class MapboxDirectionsSession(
         routeOptions: RouteOptions,
         routerCallback: NavigationRouterCallback
     ): Long {
+        println("[Mapbox] perfTest requestRoutes(${routeOptions.coordinatesList().map { it.coordinates() }}) : ${System.nanoTime()}")
         return router.getRoute(routeOptions, routerCallback)
     }
 

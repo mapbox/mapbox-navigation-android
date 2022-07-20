@@ -862,6 +862,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     ) {
         rerouteController?.interrupt()
         restartRouteScope()
+        println("[Mapbox] perfTest internalSetNavigationRoutes(IDs: ${routes.map { it.id }}) : ${System.nanoTime()}")
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
                 historyRecordingStateHandler.setRoutes(routes)

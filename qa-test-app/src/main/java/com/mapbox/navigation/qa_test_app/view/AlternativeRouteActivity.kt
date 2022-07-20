@@ -263,7 +263,44 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             }
         }
     }
-
+    private fun overloadDispatcher() {
+        CoroutineScope(Dispatchers.Default).launch {
+            Thread.sleep(2000)
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            Thread.sleep(2000)
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            Thread.sleep(2000)
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            Thread.sleep(2000)
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            Thread.sleep(2000)
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            Thread.sleep(2000)
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            Thread.sleep(2000)
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            Thread.sleep(2000)
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            Thread.sleep(2000)
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            Thread.sleep(2000)
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            Thread.sleep(2000)
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            Thread.sleep(2000)
+        }
+    }
     private fun findRoute(origin: Point?, destination: Point?) {
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
@@ -279,6 +316,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                     routes: List<NavigationRoute>,
                     routerOrigin: RouterOrigin
                 ) {
+                    overloadDispatcher()
                     mapboxNavigation.setNavigationRoutes(routes)
                 }
 

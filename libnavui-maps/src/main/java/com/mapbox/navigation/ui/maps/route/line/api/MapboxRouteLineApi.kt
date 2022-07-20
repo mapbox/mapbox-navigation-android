@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
+import android.os.Looper
 import android.util.LruCache
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -66,6 +67,7 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -385,16 +387,24 @@ class MapboxRouteLineApi(
         alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
+        val routesIds = newRoutes.map { it.route.id }
+        val invocationID = UUID.randomUUID().toString()
+        println("[Mapbox] perfTest setNavigationRouteLines entry (invID: $invocationID, routesIDs: $routesIds) : ${System.nanoTime()}")
         cancel()
+        println("[Mapbox] perfTest setNavigationRouteLines canceled old (invID: $invocationID) : ${System.nanoTime()}")
         jobControl.scope.launch(Dispatchers.Main) {
+            println("[Mapbox] perfTest setNavigationRouteLines waiting for lock (invID: $invocationID) : ${System.nanoTime()}")
             mutex.withLock {
+                println("[Mapbox] perfTest setNavigationRouteLines lock granted (invID: $invocationID) : ${System.nanoTime()}")
                 val featureDataProvider: () -> List<RouteFeatureData> =
                     MapboxRouteLineUtils.getRouteLineFeatureDataProvider(newRoutes)
                 val routeData = setNewRouteData(
                     newRoutes.map(NavigationRouteLine::route),
                     featureDataProvider,
-                    alternativeRoutesMetadata
+                    alternativeRoutesMetadata,
+                    invocationID
                 )
+                println("[Mapbox] perfTest setNavigationRouteLines end (invID: $invocationID) : ${System.nanoTime()}")
                 consumer.accept(routeData)
             }
         }
@@ -413,7 +423,7 @@ class MapboxRouteLineApi(
             mutex.withLock {
                 val featureDataProvider: () -> List<RouteFeatureData> =
                     MapboxRouteLineUtils.getRouteFeatureDataProvider(routes)
-                val result = buildDrawRoutesState(featureDataProvider)
+                val result = buildDrawRoutesState(featureDataProvider, "getRouteDrawData")
                 consumer.accept(result)
             }
         }
@@ -1140,7 +1150,8 @@ class MapboxRouteLineApi(
     private suspend fun setNewRouteData(
         newRoutes: List<NavigationRoute>,
         featureDataProvider: () -> List<RouteFeatureData>,
-        alternativeRoutesMetadata: List<AlternativeRouteMetadata>
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
+        invocationID: String
     ): Expected<RouteLineError, RouteSetValue> {
         ifNonNull(newRoutes.firstOrNull()) { primaryRouteCandidate ->
             if (!primaryRouteCandidate.directionsRoute.isSameRoute(primaryRoute?.directionsRoute)) {
@@ -1156,14 +1167,19 @@ class MapboxRouteLineApi(
         alternativesDeviationOffset =
             MapboxRouteLineUtils.getAlternativeRoutesDeviationOffsets(alternativeRoutesMetadata)
 
-        return buildDrawRoutesState(featureDataProvider)
+        return buildDrawRoutesState(featureDataProvider, invocationID)
     }
 
     private suspend fun buildDrawRoutesState(
-        featureDataProvider: () -> List<RouteFeatureData>
+        featureDataProvider: () -> List<RouteFeatureData>, invocationID: String
     ): Expected<RouteLineError, RouteSetValue> {
+        println("[Mapbox] perfTest main thread tid : ${Looper.getMainLooper().thread.id} : ${System.nanoTime()}")
+        println("[Mapbox] perfTest setNavigationRouteLines routeFeatureDataDef start (invID: $invocationID) : ${System.nanoTime()}")
         val routeFeatureDataDef = jobControl.scope.async {
-            featureDataProvider()
+            println("[Mapbox] perfTest setNavigationRouteLines routeFeatureDataDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
+            featureDataProvider().also {
+                println("[Mapbox] perfTest setNavigationRouteLines routeFeatureDataDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
         val routeFeatureDataResult = routeFeatureDataDef.await()
         if (routeFeatureDataResult.count { it.lineString.coordinates().size < 2 } > 0) {
@@ -1181,7 +1197,9 @@ class MapboxRouteLineApi(
             it.route == routes.first()
         }
         val vanishingPointOffset = routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0
+        println("[Mapbox] perfTest setNavigationRouteLines primaryRouteTrafficLineExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val primaryRouteTrafficLineExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines primaryRouteTrafficLineExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             partitionedRoutes.first.firstOrNull()?.route?.run {
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
                     this.directionsRoute,
@@ -1195,18 +1213,26 @@ class MapboxRouteLineApi(
                     routeLineOptions.displaySoftGradientForTraffic,
                     routeLineOptions.softGradientTransition
                 )
-            }?.generateExpression()
+            }?.generateExpression().also {
+                println("[Mapbox] perfTest setNavigationRouteLines primaryRouteTrafficLineExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
+        println("[Mapbox] perfTest setNavigationRouteLines primaryRouteBaseExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val primaryRouteBaseExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines primaryRouteBaseExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             MapboxRouteLineUtils.getRouteLineExpression(
                 vanishingPointOffset,
                 routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor,
                 routeLineOptions.resourceProvider.routeLineColorResources.routeDefaultColor
-            )
+            ).also {
+                println("[Mapbox] perfTest setNavigationRouteLines primaryRouteBaseExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
+        println("[Mapbox] perfTest setNavigationRouteLines primaryRouteCasingExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val primaryRouteCasingExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines primaryRouteCasingExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             MapboxRouteLineUtils.getRouteLineExpression(
                 vanishingPointOffset,
                 routeLineOptions
@@ -1214,18 +1240,26 @@ class MapboxRouteLineApi(
                     .routeLineColorResources
                     .routeLineTraveledCasingColor,
                 routeLineOptions.resourceProvider.routeLineColorResources.routeCasingColor
-            )
+            ).also {
+                println("[Mapbox] perfTest setNavigationRouteLines primaryRouteCasingExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
+        println("[Mapbox] perfTest setNavigationRouteLines primaryRouteTrailExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val primaryRouteTrailExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines primaryRouteTrailExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             MapboxRouteLineUtils.getRouteLineExpression(
                 vanishingPointOffset,
                 routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor,
                 routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor
-            )
+            ).also {
+                println("[Mapbox] perfTest setNavigationRouteLines primaryRouteTrailExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
+        println("[Mapbox] perfTest setNavigationRouteLines primaryRouteTrailCasingExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val primaryRouteTrailCasingExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines primaryRouteTrailCasingExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             MapboxRouteLineUtils.getRouteLineExpression(
                 vanishingPointOffset,
                 routeLineOptions
@@ -1236,7 +1270,9 @@ class MapboxRouteLineApi(
                     .resourceProvider
                     .routeLineColorResources
                     .routeLineTraveledCasingColor
-            )
+            ).also {
+                println("[Mapbox] perfTest setNavigationRouteLines primaryRouteTrailCasingExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
         val alternative1PercentageTraveled = partitionedRoutes.second.firstOrNull()?.route?.run {
@@ -1250,44 +1286,64 @@ class MapboxRouteLineApi(
             routeLineOptions.resourceProvider.routeLineColorResources.alternativeRouteCasingColor
         )
 
+        println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1BaseExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val alternateRoute1BaseExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1BaseExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             MapboxRouteLineUtils.getRouteLineExpression(
                 alternative1PercentageTraveled,
                 Color.TRANSPARENT,
                 alternateRoute1LineColors.first
-            )
+            ).also {
+                println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1BaseExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
+        println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1CasingExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val alternateRoute1CasingExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1CasingExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             MapboxRouteLineUtils.getRouteLineExpression(
                 alternative1PercentageTraveled,
                 Color.TRANSPARENT,
                 alternateRoute1LineColors.second
-            )
+            ).also {
+                println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1CasingExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
+        println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1TrailExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val alternateRoute1TrailExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1TrailExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             MapboxRouteLineUtils.getRouteLineExpression(
                 alternative1PercentageTraveled,
                 Color.TRANSPARENT,
                 Color.TRANSPARENT
-            )
+            ).also {
+                println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1TrailExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
+        println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1TrailCasingExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val alternateRoute1TrailCasingExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1TrailCasingExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             MapboxRouteLineUtils.getRouteLineExpression(
                 alternative1PercentageTraveled,
                 Color.TRANSPARENT,
                 Color.TRANSPARENT
-            )
+            ).also {
+                println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1TrailCasingExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
+        println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1RestrictedSectionsExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val alternateRoute1RestrictedSectionsExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1RestrictedSectionsExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             MapboxRouteLineUtils.getRouteLineExpression(
                 alternative1PercentageTraveled,
                 Color.TRANSPARENT,
                 Color.TRANSPARENT
-            )
+            ).also {
+                println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1RestrictedSectionsExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
         val alternative2PercentageTraveled = partitionedRoutes.second.getOrNull(1)?.route?.run {
@@ -1301,47 +1357,69 @@ class MapboxRouteLineApi(
             routeLineOptions.resourceProvider.routeLineColorResources.alternativeRouteCasingColor
         )
 
+        println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2BaseExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val alternateRoute2BaseExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2BaseExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             MapboxRouteLineUtils.getRouteLineExpression(
                 alternative2PercentageTraveled,
                 Color.TRANSPARENT,
                 alternateRoute2LineColors.first
-            )
+            ).also {
+                println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2BaseExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
+        println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2CasingExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val alternateRoute2CasingExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2CasingExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             MapboxRouteLineUtils.getRouteLineExpression(
                 alternative2PercentageTraveled,
                 Color.TRANSPARENT,
                 alternateRoute2LineColors.second
-            )
+            ).also {
+                println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2CasingExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
+        println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2TrailExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val alternateRoute2TrailExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2TrailExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             MapboxRouteLineUtils.getRouteLineExpression(
                 alternative2PercentageTraveled,
                 Color.TRANSPARENT,
                 Color.TRANSPARENT
-            )
+            ).also {
+                println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2TrailExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
+        println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2TrailCasingExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val alternateRoute2TrailCasingExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2TrailCasingExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             MapboxRouteLineUtils.getRouteLineExpression(
                 alternative2PercentageTraveled,
                 Color.TRANSPARENT,
                 Color.TRANSPARENT
-            )
+            ).also {
+                println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2TrailCasingExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
+        println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2RestrictedSectionsExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val alternateRoute2RestrictedSectionsExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2RestrictedSectionsExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             MapboxRouteLineUtils.getRouteLineExpression(
                 alternative2PercentageTraveled,
                 Color.TRANSPARENT,
                 Color.TRANSPARENT
-            )
+            ).also {
+                println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2RestrictedSectionsExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
+        println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1TrafficExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val alternateRoute1TrafficExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1TrafficExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             partitionedRoutes.second.firstOrNull()?.route?.run {
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
                     this.directionsRoute,
@@ -1357,10 +1435,14 @@ class MapboxRouteLineApi(
                     routeLineOptions.displaySoftGradientForTraffic,
                     routeLineOptions.softGradientTransition
                 )
-            }?.generateExpression()
+            }?.generateExpression().also {
+                println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1TrafficExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
+        println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2TrafficExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val alternateRoute2TrafficExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2TrafficExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             if (partitionedRoutes.second.size > 1) {
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
                     partitionedRoutes.second[1].route.directionsRoute,
@@ -1378,13 +1460,17 @@ class MapboxRouteLineApi(
                 ).generateExpression()
             } else {
                 null
+            }.also {
+                println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2TrafficExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
             }
         }
 
         // If the displayRestrictedRoadSections is true then produce a gradient that is transparent
         // except for the restricted sections. If false produce a gradient for the restricted
         // line layer that is completely transparent.
+        println("[Mapbox] perfTest setNavigationRouteLines primaryRouteRestrictedSectionsExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val primaryRouteRestrictedSectionsExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines primaryRouteRestrictedSectionsExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             partitionedRoutes.first.firstOrNull()?.route?.run {
                 if (routeLineOptions.displayRestrictedRoadSections) {
                     MapboxRouteLineUtils.getRestrictedLineExpressionProducer(
@@ -1401,13 +1487,19 @@ class MapboxRouteLineApi(
                             .restrictedRoadColor
                     )
                 }
-            }?.generateExpression()
+            }?.generateExpression().also {
+                println("[Mapbox] perfTest setNavigationRouteLines primaryRouteRestrictedSectionsExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
+        println("[Mapbox] perfTest setNavigationRouteLines wayPointsFeatureCollectionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val wayPointsFeatureCollectionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines wayPointsFeatureCollectionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
             partitionedRoutes.first.firstOrNull()?.route?.run {
                 MapboxRouteLineUtils.buildWayPointFeatureCollection(this)
-            } ?: FeatureCollection.fromFeatures(listOf())
+            } ?: FeatureCollection.fromFeatures(listOf()).also {
+                println("[Mapbox] perfTest setNavigationRouteLines wayPointsFeatureCollectionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
         }
 
         val primaryRouteSource = partitionedRoutes.first.firstOrNull()?.featureCollection
@@ -1444,7 +1536,9 @@ class MapboxRouteLineApi(
             routeLineOptions.styleInactiveRouteLegsIndependently
         ) {
             jobControl.scope.launch(Dispatchers.Main) {
+                println("[Mapbox] perfTest setNavigationRouteLines segmentsDef start (invID: $invocationID) : ${System.nanoTime()}")
                 val segmentsDef = jobControl.scope.async {
+                    println("[Mapbox] perfTest setNavigationRouteLines segmentsDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
                     partitionedRoutes.first.firstOrNull()?.route?.run {
                         MapboxRouteLineUtils.calculateRouteLineSegments(
                             this.directionsRoute,
@@ -1454,7 +1548,9 @@ class MapboxRouteLineApi(
                         )
                     } ?: listOf()
                 }
-                routeLineExpressionData = segmentsDef.await()
+                routeLineExpressionData = segmentsDef.await().also {
+                    println("[Mapbox] perfTest setNavigationRouteLines segmentsDef end (invID: $invocationID) : ${System.nanoTime()}")
+                }
             }
         }
 
@@ -1550,7 +1646,7 @@ class MapboxRouteLineApi(
                 RouteLineExpressionProvider { exp }
             }
 
-        return ExpectedFactory.createValue(
+        return ExpectedFactory.createValue<RouteLineError?, RouteSetValue?>(
             RouteSetValue(
                 primaryRouteLineData = RouteLineData(
                     primaryRouteSource,
@@ -1592,7 +1688,9 @@ class MapboxRouteLineApi(
                 ),
                 wayPointsFeatureCollection,
             )
-        )
+        ).also {
+            println("[Mapbox] perfTest setNavigationRouteLines buildDrawRoutesState end (invID: $invocationID) : ${System.nanoTime()}")
+        }
     }
 
     private fun resetCaches() {
