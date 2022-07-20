@@ -16,6 +16,9 @@ ext {
 }
 
 def getVersionName() {
+    if (project.hasProperty('VERSION_NAME')) {
+      return project.property('VERSION_NAME')
+    }
     def prefix = project.ext.releaseTagPrefix
     def cmd = ["git", "describe", "--tag", "--match", "$prefix*", "--abbrev=0"]
     def version = cmd.execute().text
