@@ -204,12 +204,15 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  *   .build()
  * mapboxNavigation.requestRoutes(
  *     routeOptions,
- *     object : RouterCallback {
- *         override fun onRoutesReady(routes: List<DirectionsRoute>) {
- *             mapboxNavigation.setRoutes(routes)
+ *     object : NavigationRouterCallback {
+ *         override fun onRoutesReady(
+ *             routes: List<NavigationRoute>,
+ *             routerOrigin: RouterOrigin
+ *         ) {
+ *             mapboxNavigation.setNavigationRoutes(routes)
  *         }
  *         override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) { }
- *         override fun onCanceled(routeOptions: RouteOptions) { }
+ *         override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) { }
  *     }
  * )
  * ```
@@ -537,7 +540,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         internalFallbackVersionsObserver = createInternalFallbackVersionsObserver()
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerFallbackVersionsObserver(internalFallbackVersionsObserver)
-        directionsSession.registerRoutesObserver(internalRoutesObserver)
+        registerRoutesObserver(internalRoutesObserver)
 
         roadObjectsStore = RoadObjectsStore(navigator)
         graphAccessor = GraphAccessor(navigator)
@@ -748,6 +751,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the
      * routes list reference managed by the SDK changes, regardless of a source.
      *
+     * This call is asynchronous, only once processing finishes the effects are available through [MapboxNavigation.getNavigationRoutes] and [RoutesObserver].
+     * If this call fails, no changes are made to the routes managed by the [MapboxNavigation], they are not cleared. Observe the processing with [MapboxNavigation.setNavigationRoutes]'s callback.
+     *
      * **Deprecated**: use #setNavigationRoutes(List<NavigationRoute>) instead. To fetch [NavigationRoute]
      * list use #requestRoutes(RouteOptions, NavigationRouterCallback) or create an instance of
      * [NavigationRoute] via [NavigationRoute.create], which requires an original [DirectionsResponse]
@@ -778,6 +784,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * If the list is empty, the SDK will exit the `Active Guidance` state.
      *
      * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the routes list reference managed by the SDK changes, regardless of a source.
+     *
+     * This call is asynchronous, only once [callback] returns the effects are available through [MapboxNavigation.getNavigationRoutes] and [RoutesObserver].
+     * If this call fails, no changes are made to the routes managed by the [MapboxNavigation], they are not cleared.
      *
      * @param routes a list of [NavigationRoute]s
      * @param initialLegIndex starting leg to follow. By default the first leg is used.
@@ -1087,9 +1096,16 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     /**
      * Registers [RoutesObserver]. The updates are available when a new list of routes is set.
      * The route at index 0, if exist, will be treated as the primary route for 'Active Guidance'.
+     *
+     * If the observer is registered when new routes are being set with [MapboxNavigation.setNavigationRoutes],
+     * the observer waits for the processing to finish before delivering the latest result.
      */
     fun registerRoutesObserver(routesObserver: RoutesObserver) {
-        directionsSession.registerRoutesObserver(routesObserver)
+        threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
+            routeUpdateMutex.withLock {
+                directionsSession.registerRoutesObserver(routesObserver)
+            }
+        }
     }
 
     /**
