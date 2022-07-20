@@ -103,6 +103,8 @@ class ViewportDataSourceProcessorTest {
         doubleAdapter
     )
 
+    private val defaultFocalPoint = FollowingFrameOptions.FocalPoint(0.5, 1.0)
+
     @Test
     fun `test processRoutePoints`() {
         val expected = completeRoutePoints
@@ -652,7 +654,7 @@ class ViewportDataSourceProcessorTest {
         val padding = EdgeInsets(0.0, 0.0, 0.0, 0.0)
         val expected = EdgeInsets(1000.0, 500.0, 0.0, 500.0)
 
-        val actual = getMapAnchoredPaddingFromUserPadding(mapSize, padding)
+        val actual = getMapAnchoredPaddingFromUserPadding(mapSize, padding, defaultFocalPoint)
 
         assertEquals(expected, actual)
     }
@@ -663,7 +665,7 @@ class ViewportDataSourceProcessorTest {
         val padding = EdgeInsets(300.0, 150.0, 200.0, 100.0)
         val expected = EdgeInsets(800.0, 525.0, 200.0, 475.0)
 
-        val actual = getMapAnchoredPaddingFromUserPadding(mapSize, padding)
+        val actual = getMapAnchoredPaddingFromUserPadding(mapSize, padding, defaultFocalPoint)
 
         assertEquals(expected, actual)
     }
@@ -676,15 +678,15 @@ class ViewportDataSourceProcessorTest {
         val expected = EdgeInsets(0.0, 0.0, 0.0, 0.0)
 
         val padding1 = EdgeInsets(0.0, 1100.0, 0.0, 0.0)
-        val actual1 = getMapAnchoredPaddingFromUserPadding(mapSize, padding1)
+        val actual1 = getMapAnchoredPaddingFromUserPadding(mapSize, padding1, defaultFocalPoint)
         assertEquals(expected, actual1)
 
         val padding2 = EdgeInsets(0.0, 0.0, 0.0, 1100.0)
-        val actual2 = getMapAnchoredPaddingFromUserPadding(mapSize, padding2)
+        val actual2 = getMapAnchoredPaddingFromUserPadding(mapSize, padding2, defaultFocalPoint)
         assertEquals(expected, actual2)
 
         val padding3 = EdgeInsets(0.0, 600.0, 0.0, 600.0)
-        val actual3 = getMapAnchoredPaddingFromUserPadding(mapSize, padding3)
+        val actual3 = getMapAnchoredPaddingFromUserPadding(mapSize, padding3, defaultFocalPoint)
         assertEquals(expected, actual3)
         unmockkStatic(Logger::class)
     }
@@ -697,15 +699,15 @@ class ViewportDataSourceProcessorTest {
         val expected = EdgeInsets(0.0, 0.0, 0.0, 0.0)
 
         val padding1 = EdgeInsets(1100.0, 0.0, 0.0, 0.0)
-        val actual1 = getMapAnchoredPaddingFromUserPadding(mapSize, padding1)
+        val actual1 = getMapAnchoredPaddingFromUserPadding(mapSize, padding1, defaultFocalPoint)
         assertEquals(expected, actual1)
 
         val padding2 = EdgeInsets(0.0, 0.0, 1100.0, 0.0)
-        val actual2 = getMapAnchoredPaddingFromUserPadding(mapSize, padding2)
+        val actual2 = getMapAnchoredPaddingFromUserPadding(mapSize, padding2, defaultFocalPoint)
         assertEquals(expected, actual2)
 
         val padding3 = EdgeInsets(600.0, 0.0, 600.0, 0.0)
-        val actual3 = getMapAnchoredPaddingFromUserPadding(mapSize, padding3)
+        val actual3 = getMapAnchoredPaddingFromUserPadding(mapSize, padding3, defaultFocalPoint)
         assertEquals(expected, actual3)
         unmockkStatic(Logger::class)
     }
@@ -716,13 +718,25 @@ class ViewportDataSourceProcessorTest {
 
         val padding1 = EdgeInsets(250.0, 300.0, 750.0, 0.0)
         val expected1 = EdgeInsets(250.0, 650.0, 750.0, 350.0)
-        val actual1 = getMapAnchoredPaddingFromUserPadding(mapSize, padding1)
+        val actual1 = getMapAnchoredPaddingFromUserPadding(mapSize, padding1, defaultFocalPoint)
         assertEquals(expected1, actual1)
 
         val padding2 = EdgeInsets(200.0, 250.0, 0.0, 750.0)
         val expected2 = EdgeInsets(1000.0, 250.0, 0.0, 750.0)
-        val actual2 = getMapAnchoredPaddingFromUserPadding(mapSize, padding2)
+        val actual2 = getMapAnchoredPaddingFromUserPadding(mapSize, padding2, defaultFocalPoint)
         assertEquals(expected2, actual2)
+    }
+
+    @Test
+    fun `test getMapAnchoredPaddingFromUserPadding - focal point offset`() {
+        val mapSize = Size(1000f, 1000f)
+        val padding = EdgeInsets(0.0, 0.0, 0.0, 0.0)
+        val expected = EdgeInsets(500.0, 500.0, 500.0, 500.0)
+        val focalPoint = FollowingFrameOptions.FocalPoint(0.5, 0.5)
+
+        val actual = getMapAnchoredPaddingFromUserPadding(mapSize, padding, focalPoint)
+
+        assertEquals(expected, actual)
     }
 
     @Test
