@@ -33,6 +33,19 @@ fun interface Reducer {
 }
 
 /**
+ * Similar to the [Action], except these actions complete asynchronous tasks such as network
+ * requests within a coroutine scope.
+ */
+interface SuspendAction
+
+/**
+ * Similar to the [Reducer], except the state is processed and completed with a result.
+ */
+fun interface SuspendReducer {
+    suspend fun process(state: State, action: SuspendAction): State
+}
+
+/**
  * A store that holds observable, drop-in UI [State]. The [State] can only be modified by
  * registered [Reducer], as a result of [Action] processing.
  */
@@ -40,6 +53,7 @@ open class Store {
     protected val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state.asStateFlow()
 
+    private val suspendReducers = ConcurrentLinkedQueue<SuspendReducer>()
     private val reducers = ConcurrentLinkedQueue<Reducer>()
     private var isDispatching = false
 
@@ -68,12 +82,27 @@ open class Store {
         isDispatching = false
     }
 
+    suspend fun process(action: SuspendAction): State {
+        suspendReducers.forEach { reducer ->
+            _state.value = reducer.process(_state.value, action)
+        }
+        return _state.value
+    }
+
     fun register(vararg reducers: Reducer) {
         this.reducers.addAll(reducers)
     }
 
     fun unregister(vararg reducers: Reducer) {
-        this.reducers.removeAll(reducers)
+        this.reducers.removeAll(reducers.toSet())
+    }
+
+    fun registerSuspend(vararg reducers: SuspendReducer) {
+        this.suspendReducers.addAll(reducers)
+    }
+
+    fun unregisterSuspend(vararg reducers: SuspendReducer) {
+        this.suspendReducers.removeAll(reducers.toSet())
     }
 
     /**

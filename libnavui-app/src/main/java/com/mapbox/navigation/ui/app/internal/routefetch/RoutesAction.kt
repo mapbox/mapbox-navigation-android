@@ -6,6 +6,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.ui.app.internal.Action
+import com.mapbox.navigation.ui.app.internal.SuspendAction
 
 /**
  * Defines actions responsible to mutate the [RoutesState].
@@ -54,4 +55,14 @@ sealed class RoutesAction : Action {
         val routeOptions: RouteOptions,
         val routerOrigin: RouterOrigin
     ) : RoutesAction()
+}
+
+/**
+ * Defines suspending actions responsible to mutate the [RoutesState]
+ */
+sealed class RoutesSuspendAction : SuspendAction {
+    /**
+     * The action will complete the current route request and return with the result.
+     */
+    object RequestCurrent : RoutesSuspendAction()
 }

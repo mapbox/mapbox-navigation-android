@@ -14,17 +14,25 @@ import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
 import com.mapbox.navigation.ui.app.internal.Action
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.Store
+import com.mapbox.navigation.ui.app.internal.SuspendAction
+import com.mapbox.navigation.ui.app.internal.SuspendReducer
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesState
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutesSuspendAction
+import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.toPoint
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RoutesStateController(
     private val store: Store
-) : StateController() {
+) : StateController(), SuspendReducer {
+
     init {
         store.register(this)
+        store.registerSuspend(this)
     }
 
     private var mapboxNavigation: MapboxNavigation? = null
@@ -60,6 +68,13 @@ class RoutesStateController(
                     routes = processRoutesAction(it, state.routes, action)
                 )
             } ?: state
+        }
+        return state
+    }
+
+    override suspend fun process(state: State, action: SuspendAction): State {
+        if (action is RoutesSuspendAction) {
+            return processRoutesSuspendAction(action)
         }
         return state
     }
@@ -103,6 +118,16 @@ class RoutesStateController(
         }
     }
 
+    private suspend fun processRoutesSuspendAction(
+        action: RoutesSuspendAction
+    ): State {
+        return when (action) {
+            is RoutesSuspendAction.RequestCurrent -> {
+                requestCurrentRoute()
+            }
+        }
+    }
+
     private fun MapboxNavigation.fetchRoute(options: RouteOptions): Long {
         return requestRoutes(
             options,
@@ -139,5 +164,27 @@ class RoutesStateController(
             .coordinatesList(points)
             .alternatives(true)
             .build()
+    }
+
+    /**
+     * Dispatch FetchPoints action and wait for RoutesState.Ready.
+     * Method returns immediately if already in RoutesState.Ready or RoutesState.Fetching, or if
+     * required location or destination data is missing.
+     *
+     * @return the state once the route state has completed the fetching state
+     */
+    private suspend fun requestCurrentRoute(): State {
+        val storeState = store.state.value
+        if (storeState.routes is RoutesState.Ready) return storeState
+        if (storeState.routes is RoutesState.Fetching) return storeState
+
+        ifNonNull(
+            storeState.location?.enhancedLocation?.toPoint(),
+            storeState.destination
+        ) { lastPoint, destination ->
+            store.dispatch(RoutesAction.FetchPoints(listOf(lastPoint, destination.point)))
+            store.select { it.routes }.takeWhile { it is RoutesState.Fetching }.collect()
+        }
+        return store.state.value
     }
 }

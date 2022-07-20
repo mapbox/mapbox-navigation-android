@@ -8,6 +8,8 @@ import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutesState
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutesSuspendAction
 import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterAction
 
 /**
@@ -32,6 +34,20 @@ class NavigationViewApi internal constructor(
      */
     fun setRoutes(routes: List<NavigationRoute>) {
         store.dispatch(RoutesAction.SetRoutes(routes))
+    }
+
+    /**
+     * The action will suspend until a route request is successful, canceled, or failed. This can
+     * be used with the [setRoutes] functions.
+     *
+     * For example, within a coroutine scope you can wait for the request to complete.
+     *   navigationViewApi.setRoutes(routes)
+     *   navigationViewApi.completeRequest()
+     *
+     * @return true when the route is ready
+     */
+    suspend fun requestCurrent(): Boolean {
+        return store.process(RoutesSuspendAction.RequestCurrent).routes is RoutesState.Ready
     }
 
     /**

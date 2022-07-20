@@ -12,11 +12,8 @@ import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesState
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutesSuspendAction
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
-import com.mapbox.navigation.utils.internal.ifNonNull
-import com.mapbox.navigation.utils.internal.toPoint
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 
 @ExperimentalPreviewMapboxNavigationAPI
@@ -58,7 +55,7 @@ internal class InfoPanelHeaderComponent(
 
         binding.routePreview.setOnClickListener {
             coroutineScope.launch {
-                if (fetchRouteIfNeeded()) {
+                if (store.process(RoutesSuspendAction.RequestCurrent).routes is RoutesState.Ready) {
                     store.dispatch(NavigationStateAction.Update(NavigationState.RoutePreview))
                 }
             }
@@ -66,7 +63,7 @@ internal class InfoPanelHeaderComponent(
 
         binding.startNavigation.setOnClickListener {
             coroutineScope.launch {
-                if (fetchRouteIfNeeded()) {
+                if (store.process(RoutesSuspendAction.RequestCurrent).routes is RoutesState.Ready) {
                     store.dispatch(NavigationStateAction.Update(NavigationState.ActiveNavigation))
                 }
             }
@@ -77,31 +74,5 @@ internal class InfoPanelHeaderComponent(
             store.dispatch(DestinationAction.SetDestination(null))
             store.dispatch(NavigationStateAction.Update(NavigationState.FreeDrive))
         }
-    }
-
-    /**
-     * Dispatch FetchPoints action and wait for RoutesState.Ready.
-     * Method returns immediately if already in RoutesState.Ready or RoutesState.Fetching, or if
-     * required location or destination data is missing.
-     *
-     * @return `true` once in RoutesState.Ready state, otherwise `false`
-     */
-    private suspend fun fetchRouteIfNeeded(): Boolean {
-        val storeState = store.state.value
-        if (storeState.routes is RoutesState.Ready) return true
-        if (storeState.routes is RoutesState.Fetching) return false
-
-        return ifNonNull(
-            storeState.location?.enhancedLocation?.toPoint(),
-            storeState.destination
-        ) { lastPoint, destination ->
-            store.dispatch(RoutesAction.FetchPoints(listOf(lastPoint, destination.point)))
-            waitForReady()
-        } ?: false
-    }
-
-    private suspend fun waitForReady(): Boolean {
-        store.select { it.routes }.takeWhile { it is RoutesState.Fetching }.collect()
-        return store.state.value.routes is RoutesState.Ready
     }
 }
