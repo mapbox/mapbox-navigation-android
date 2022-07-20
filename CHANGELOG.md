@@ -9,6 +9,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Added `ViewStyleCustomization.infoPanelMarginStart`, `ViewStyleCustomization.infoPanelMarginEnd`, `ViewStyleCustomization.infoPanelBackground` that allows customization of a `NavigatioView` default info panel margins and background. [#6049](https://github.com/mapbox/mapbox-navigation-android/pull/6049)
 
 #### Bug fixes and improvements
+- :warning: Fixed an issue where `RoutesObserver` would be called with the previous routes set upon registration while a new routes set was already being processed. Now, the observer waits for the processing of `MapboxNavigation#setNavigationRoutes` to finish before delivering the result. [#6079](https://github.com/mapbox/mapbox-navigation-android/pull/6079)
 - Remove the `MapView` from the `RouteArrowComponent` so that it can be used by Android Auto. [#6053](https://github.com/mapbox/mapbox-navigation-android/pull/6053)
 - Enabled tunnel dead reckoning drift compensation by default for Auto profile. [#6061](https://github.com/mapbox/mapbox-navigation-android/pull/6061)
 - Increased route line stickiness for Auto profile. [#6061](https://github.com/mapbox/mapbox-navigation-android/pull/6061)
