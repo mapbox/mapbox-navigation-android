@@ -49,9 +49,9 @@ class MainCarSession : Session() {
     }
 
     init {
+        logAndroidAuto("MainCarSession constructor")
         val logoSurfaceRenderer = CarLogoSurfaceRenderer()
         val compassSurfaceRenderer = CarCompassSurfaceRenderer()
-        logAndroidAuto("MainCarSession constructor")
         lifecycle.addObserver(object : DefaultLifecycleObserver {
 
             override fun onCreate(owner: LifecycleOwner) {

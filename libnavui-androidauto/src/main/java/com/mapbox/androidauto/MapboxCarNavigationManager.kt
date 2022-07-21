@@ -5,6 +5,7 @@ import androidx.car.app.navigation.NavigationManager
 import androidx.car.app.navigation.NavigationManagerCallback
 import com.mapbox.androidauto.car.navigation.CarDistanceFormatter
 import com.mapbox.androidauto.car.navigation.maneuver.CarManeuverMapper
+import com.mapbox.androidauto.car.telemetry.MapboxCarTelemetry
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
@@ -22,7 +23,7 @@ import kotlinx.coroutines.flow.StateFlow
  * registered, the trip status of [MapboxNavigation] will be sent to the [NavigationManager].
  * This is needed to keep the vehicle cluster display updated.
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@ExperimentalPreviewMapboxNavigationAPI
 class MapboxCarNavigationManager(
     carContext: CarContext
 ) : MapboxNavigationObserver {
@@ -34,6 +35,7 @@ class MapboxCarNavigationManager(
     private var maneuverApi: MapboxManeuverApi? = null
     private var carDistanceFormatter: CarDistanceFormatter? = null
     private var mapboxNavigation: MapboxNavigation? = null
+    private val carTelemetry = MapboxCarTelemetry()
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         val distanceFormatter = carDistanceFormatter ?: return@RouteProgressObserver
@@ -73,6 +75,7 @@ class MapboxCarNavigationManager(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         logAndroidAuto("MapboxNavigationManager onAttached")
         this.mapboxNavigation = mapboxNavigation
+        carTelemetry.onAttached(mapboxNavigation)
         val distanceFormatter = MapboxDistanceFormatter(
             mapboxNavigation.navigationOptions.distanceFormatterOptions
         )
@@ -87,6 +90,7 @@ class MapboxCarNavigationManager(
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         logAndroidAuto("MapboxNavigationManager onDetached")
         this.mapboxNavigation = null
+        carTelemetry.onDetached(mapboxNavigation)
         mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
 
