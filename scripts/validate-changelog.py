@@ -41,10 +41,32 @@ def group_by_versions(lines):
         groups[group_name] = group
     return groups
 
+def extract_unreleased_group(versions):
+    for version in versions.keys():
+        if 'Unreleased' in version:
+            return versions[version]
+    raise Exception("No 'Unreleased' section in CHANGELOG")
+
+def extract_stable_versions(versions):
+    str_before_version = "Mapbox Navigation SDK "
+    str_after_version = " "
+    stable_versions = {}
+    pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")
+    for version in versions.keys():
+        beginIndex = version.find(str_before_version)
+        if beginIndex == -1:
+            continue
+        version_name = version[(beginIndex + len(str_before_version)):]
+        endIndex = version_name.find(str_after_version)
+        if endIndex == -1:
+            continue
+        version_name = version_name[:endIndex]
+        if pattern.fullmatch(version_name) != None:
+            stable_versions[version_name] = versions[version]
+    return stable_versions
+
 with requests.get(api_url, headers=headers) as pr_response:
     response_json = pr_response.json()
-    print("[ddlog] response:")
-    print(response_json)
     pr_labels = response_json["labels"]
 
     skip_changelog = False
@@ -58,8 +80,6 @@ with requests.get(api_url, headers=headers) as pr_response:
         pr_diff_url = response_json["diff_url"]
         with requests.get(pr_diff_url, headers) as diff_response:
             diff = diff_response.text
-            print("[ddlog] diff:")
-            print(diff)
             changelog_diff_matches = re.search(changelog_diff_regex, diff)
             if not changelog_diff_matches:
                 raise Exception("Add a non-empty changelog entry in a CHANGELOG.md or add a `skip changelog` label if not applicable.")
@@ -91,14 +111,8 @@ with requests.get(api_url, headers=headers) as pr_response:
                         content = base64.b64decode(contents_response_json["content"]).decode("utf-8")
                         lines = content.split("\n")
                         versions = group_by_versions(lines)
-                        unreleased_group = []
-                        for version in versions.keys():
-                            if 'Unreleased' in version:
-                                unreleased_group = versions[version]
-                                break
-                        if len(unreleased_group) == 0:
-                            raise Exception("No 'unreleased' section in CHANGELOG")
-                        print(unreleased_group)
+                        unreleased_group = extract_unreleased_group(versions)
+                        stable_versions = extract_stable_versions(versions)
 
                         for added_line in added_lines:
                             pr_link_matches = re.search(pr_link_regex, added_line)
@@ -108,7 +122,9 @@ with requests.get(api_url, headers=headers) as pr_response:
                             if added_line not in unreleased_group:
                                 raise Exception(added_line + " should be placed in 'Unreleased' section")
 
-                        # todo find added line(s) in diff_searchable scope, verify they are only in unreleased group
+                            for stable_version in stable_versions:
+                                if added_line in stable_versions[stable_version]:
+                                    raise Exception("The changelog entry \"" + added_line + "\" is already contained in " + stable_version + " changelog.")
                 print("Changelog entry validation successful.")
     else:
         print("`skip changelog` label present, exiting.")
