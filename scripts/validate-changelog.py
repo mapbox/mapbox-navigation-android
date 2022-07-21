@@ -3,6 +3,7 @@
 import re
 import requests
 import sys
+import base64
 
 print("Validating that changelog entry is provided in the CHANGELOG.md...")
 
@@ -13,9 +14,37 @@ pr_link_regex = "\[#\d+]\(https:\/\/github\.com\/mapbox\/mapbox-navigation-andro
 headers = {"accept": "application/vnd.github.v3+json", "authorization": "token " + github_token}
 changelog_diff_regex = "diff --git a(.*)\/CHANGELOG.md b(.*)\/CHANGELOG.md"
 any_diff_substring = "diff --git"
+diff_file_start_regex = "\\n\@\@(.*)\@\@"
+changelog_filename = "CHANGELOG.md"
+files_path = "/files"
+
+def is_line_added(line):
+    return line.startswith('+')
+
+def remove_plus(line):
+    return line[1:]
+
+def group_by_versions(lines):
+    groups = {}
+    group = []
+    group_name = ""
+    for line in lines:
+        if line.startswith("##") and len(line) > 2 and line[2] != '#':
+            if (len(group) > 0):
+                if len(group_name.strip()) > 0:
+                    groups[group_name] = group
+                group = []
+            group_name = line
+        elif len(line.strip()) > 0:
+            group.append(line)
+    if len(group) > 0 and len(group_name.strip()) > 0:
+        groups[group_name] = group
+    return groups
 
 with requests.get(api_url, headers=headers) as pr_response:
     response_json = pr_response.json()
+    print("[ddlog] response:")
+    print(response_json)
     pr_labels = response_json["labels"]
 
     skip_changelog = False
@@ -29,17 +58,57 @@ with requests.get(api_url, headers=headers) as pr_response:
         pr_diff_url = response_json["diff_url"]
         with requests.get(pr_diff_url, headers) as diff_response:
             diff = diff_response.text
+            print("[ddlog] diff:")
+            print(diff)
             changelog_diff_matches = re.search(changelog_diff_regex, diff)
             if not changelog_diff_matches:
                 raise Exception("Add a non-empty changelog entry in a CHANGELOG.md or add a `skip changelog` label if not applicable.")
             else:
-                last_reachable_index = diff.find(any_diff_substring, changelog_diff_matches.end())
+                diff_starting_at_changelog = diff[changelog_diff_matches.end():]
+                first_changelog_diff_index = re.search(diff_file_start_regex, diff_starting_at_changelog).end()
+                if first_changelog_diff_index == -1:
+                    first_changelog_diff_index = 0
+                last_reachable_index = diff_starting_at_changelog.find(any_diff_substring, first_changelog_diff_index)
                 if last_reachable_index == -1:
-                    last_reachable_index = len(diff)
-                diff_searchable = diff[changelog_diff_matches.end():last_reachable_index]
-                pr_link_matches = re.search(pr_link_regex, diff_searchable)
-                if not pr_link_matches:
-                    raise Exception("The changelog entry should contain a link to the original PR that matches `" + pr_link_regex + "`")
+                    last_reachable_index = len(diff_starting_at_changelog)
+                diff_searchable = diff_starting_at_changelog[first_changelog_diff_index:last_reachable_index]
+
+                diff_lines = diff_searchable.split('\n')
+                added_lines = list(map(remove_plus, list(filter(is_line_added, diff_lines))))
+
+                files_url = api_url + files_path
+                with requests.get(files_url, headers) as files_response:
+                    files_response_json = files_response.json()
+                    contents_url = ''
+                    for file_json in files_response_json:
+                        if file_json["filename"] == changelog_filename:
+                            contents_url = file_json["contents_url"]
+                            break
+                    if len(contents_url) == 0:
+                        raise Exception("No CHANGELOG.md file in PR files")
+                    with requests.get(contents_url, headers) as contents_response:
+                        contents_response_json = contents_response.json()
+                        content = base64.b64decode(contents_response_json["content"]).decode("utf-8")
+                        lines = content.split("\n")
+                        versions = group_by_versions(lines)
+                        unreleased_group = []
+                        for version in versions.keys():
+                            if 'Unreleased' in version:
+                                unreleased_group = versions[version]
+                                break
+                        if len(unreleased_group) == 0:
+                            raise Exception("No 'unreleased' section in CHANGELOG")
+                        print(unreleased_group)
+
+                        for added_line in added_lines:
+                            pr_link_matches = re.search(pr_link_regex, added_line)
+                            if not pr_link_matches:
+                                raise Exception("The changelog entry \"" + added_line + "\" should contain a link to the original PR that matches `" + pr_link_regex + "`")
+
+                            if added_line not in unreleased_group:
+                                raise Exception(added_line + " should be placed in 'Unreleased' section")
+
+                        # todo find added line(s) in diff_searchable scope, verify they are only in unreleased group
                 print("Changelog entry validation successful.")
     else:
         print("`skip changelog` label present, exiting.")
