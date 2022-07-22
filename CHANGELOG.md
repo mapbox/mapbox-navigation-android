@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Updated `MapboxRouteLineApiExtensions` so that when coroutine scope calling the suspend functions is canceled, `MapboxRouteLineApi::cancel` is called. [#6094](https://github.com/mapbox/mapbox-navigation-android/pull/6094)
 
 ## Mapbox Navigation SDK 2.7.0-beta.2 - 22 July, 2022
 ### Changelog

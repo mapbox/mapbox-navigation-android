@@ -24,8 +24,8 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.maps.route.line.model.toNavigationRouteLines
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 /**
  * Extension functions for [MapboxRouteLineApi] calls that are implemented as callbacks. This offers
@@ -50,10 +50,14 @@ object MapboxRouteLineApiExtensions {
     )
     suspend fun MapboxRouteLineApi.setRoutes(newRoutes: List<RouteLine>):
         Expected<RouteLineError, RouteSetValue> {
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             this.setNavigationRouteLines(
                 newRoutes.toNavigationRouteLines()
             ) { value -> continuation.resume(value) }
+
+            continuation.invokeOnCancellation {
+                this.cancel()
+            }
         }
     }
 
@@ -88,11 +92,15 @@ object MapboxRouteLineApiExtensions {
         newRoutes: List<NavigationRouteLine>,
         alternativeRoutesMetadata: List<AlternativeRouteMetadata>
     ): Expected<RouteLineError, RouteSetValue> {
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             this.setNavigationRouteLines(
                 newRoutes,
                 alternativeRoutesMetadata
             ) { value -> continuation.resume(value) }
+
+            continuation.invokeOnCancellation {
+                this.cancel()
+            }
         }
     }
 
@@ -124,11 +132,15 @@ object MapboxRouteLineApiExtensions {
         newRoutes: List<NavigationRoute>,
         alternativeRoutesMetadata: List<AlternativeRouteMetadata>
     ): Expected<RouteLineError, RouteSetValue> {
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             this.setNavigationRoutes(
                 newRoutes,
                 alternativeRoutesMetadata
             ) { value -> continuation.resume(value) }
+
+            continuation.invokeOnCancellation {
+                this.cancel()
+            }
         }
     }
 
@@ -137,8 +149,12 @@ object MapboxRouteLineApiExtensions {
      * can be used to draw the current route line(s) on the map.
      */
     suspend fun MapboxRouteLineApi.getRouteDrawData(): Expected<RouteLineError, RouteSetValue> {
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             this.getRouteDrawData { value -> continuation.resume(value) }
+
+            continuation.invokeOnCancellation {
+                this.cancel()
+            }
         }
     }
 
@@ -161,12 +177,16 @@ object MapboxRouteLineApiExtensions {
         mapboxMap: MapboxMap,
         padding: Float,
     ): Expected<RouteNotFound, ClosestRouteValue> {
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             this.findClosestRoute(
                 target,
                 mapboxMap,
                 padding
             ) { value -> continuation.resume(value) }
+
+            continuation.invokeOnCancellation {
+                this.cancel()
+            }
         }
     }
 
@@ -177,8 +197,12 @@ object MapboxRouteLineApiExtensions {
      * the map should appear without any route lines.
      */
     suspend fun MapboxRouteLineApi.clearRouteLine(): Expected<RouteLineError, RouteLineClearValue> {
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             this.clearRouteLine { value -> continuation.resume(value) }
+
+            continuation.invokeOnCancellation {
+                this.cancel()
+            }
         }
     }
 
@@ -198,9 +222,13 @@ object MapboxRouteLineApiExtensions {
      */
     suspend fun MapboxRouteLineApi.showRouteWithLegIndexHighlighted(legIndex: Int):
         Expected<RouteLineError, RouteLineUpdateValue> {
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             this.showRouteWithLegIndexHighlighted(legIndex) { value ->
                 continuation.resume(value)
+            }
+
+            continuation.invokeOnCancellation {
+                this.cancel()
             }
         }
     }
