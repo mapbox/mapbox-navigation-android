@@ -38,6 +38,7 @@ import com.mapbox.navigator.RoadObjectProvider
 import com.mapbox.navigator.RoadObjectType
 import com.mapbox.navigator.RoadSurface
 import com.mapbox.navigator.SubgraphEdge
+import com.mapbox.navigator.match.openlr.OpenLR
 import com.mapbox.navigator.match.openlr.Orientation
 import com.mapbox.navigator.match.openlr.SideOfRoad
 
@@ -373,9 +374,8 @@ internal fun EHorizonGraphPosition.mapToNativeGraphPosition(): GraphPosition {
 
 internal fun SDKMatchableOpenLr.mapToNativeMatchableOpenLr(): MatchableOpenLr {
     return MatchableOpenLr(
-        openLRLocation,
-        openLRStandard.mapToOpenLRStandard(),
-        roadObjectId
+        OpenLR(openLRLocation, openLRStandard.mapToOpenLRStandard()),
+        roadObjectId,
     )
 }
 

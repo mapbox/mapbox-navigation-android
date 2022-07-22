@@ -269,7 +269,7 @@ class RoadObjectMapperTest {
         type = com.mapbox.navigator.RoadObjectType.INCIDENT,
         incidentInfo = com.mapbox.navigator.IncidentInfo(
             INCIDENT_ID,
-            com.mapbox.navigator.match.openlr.OpenLR(Standard.TOM_TOM, INCIDENT_OPEN_LR),
+            com.mapbox.navigator.match.openlr.OpenLR(INCIDENT_OPEN_LR, Standard.TOM_TOM),
             com.mapbox.navigator.IncidentType.CONSTRUCTION,
             INCIDENT_CREATION_TIME,
             INCIDENT_START_TIME,
