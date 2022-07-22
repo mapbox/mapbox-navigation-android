@@ -23,8 +23,12 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
 import com.mapbox.navigation.ui.utils.internal.Provider
 import com.mapbox.navigation.utils.internal.ifNonNull
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -32,6 +36,8 @@ import kotlinx.coroutines.launch
 @ExperimentalPreviewMapboxNavigationAPI
 interface RouteLineComponentContract {
     fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>)
+
+    fun getRouteInPreview(): Flow<List<NavigationRoute>?>
 }
 
 @ExperimentalPreviewMapboxNavigationAPI
@@ -39,9 +45,14 @@ internal class MapboxRouteLineComponentContract : RouteLineComponentContract {
     override fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>) {
         mapboxNavigation.setNavigationRoutes(routes)
     }
+
+    override fun getRouteInPreview(): Flow<List<NavigationRoute>?> {
+        return flowOf(null)
+    }
 }
 
 @ExperimentalPreviewMapboxNavigationAPI
+@FlowPreview
 class RouteLineComponent(
     private val mapboxMap: MapboxMap,
     private val mapPlugins: MapPluginProviderDelegate,
@@ -58,8 +69,6 @@ class RouteLineComponent(
             MapboxRouteLineComponentContract()
         }
     }
-
-    private var contract: RouteLineComponentContract? = null
 
     private val routeClickPadding = Utils.dpToPx(30f)
 
@@ -80,7 +89,6 @@ class RouteLineComponent(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
         this.mapboxNavigation = mapboxNavigation
-        contract = contractProvider.get()
         mapPlugins.gestures.addOnMapClickListener(onMapClickListener)
         mapPlugins.location.addOnIndicatorPositionChangedListener(onPositionChangedListener)
 
@@ -106,11 +114,19 @@ class RouteLineComponent(
                     SharingStarted.WhileSubscribed(),
                     mapboxNavigation.getNavigationRoutes()
                 )
-
-            routesFlow.collect { navigationRoutes ->
+            val routePreviewFlow = contractProvider.get().getRouteInPreview()
+            combine(routesFlow, routePreviewFlow) { navigationRoutes, previewRoutes ->
+                if (navigationRoutes.isNotEmpty()) {
+                    navigationRoutes
+                } else if (!previewRoutes.isNullOrEmpty()) {
+                    previewRoutes
+                } else {
+                    emptyList()
+                }
+            }.collect { routes ->
                 mapboxMap.getStyle()?.also { style ->
-                    val routeLines = navigationRoutes.map {
-                        NavigationRouteLine(it, null)
+                    val routeLines = routes.map { navigationRoute ->
+                        NavigationRouteLine(navigationRoute, null)
                     }
                     val routeDrawData = routeLineApi.setNavigationRouteLines(routeLines)
                     routeLineView.renderRouteDrawData(style, routeDrawData)
@@ -124,7 +140,6 @@ class RouteLineComponent(
         mapPlugins.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
         routeLineApi.cancel()
         routeLineView.cancel()
-        contract = null
         this.mapboxNavigation = null
     }
 
@@ -144,7 +159,7 @@ class RouteLineComponent(
                         .also {
                             it.add(0, resultValue.navigationRoute)
                         }
-                    contract?.setRoutes(mapboxNavigation, reOrderedRoutes)
+                    contractProvider.get().setRoutes(mapboxNavigation, reOrderedRoutes)
                 }
             }
         }

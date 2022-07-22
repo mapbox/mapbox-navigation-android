@@ -17,8 +17,8 @@ import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesState
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -188,7 +188,7 @@ internal class InfoPanelHeaderComponentTest {
                 ),
                 destination = Destination(destPoint),
                 navigation = NavigationState.DestinationPreview,
-                routes = RoutesState.Empty
+                previewRoutes = RoutePreviewState.Empty
             )
         )
 
@@ -196,7 +196,7 @@ internal class InfoPanelHeaderComponentTest {
         binding.routePreview.performClick()
 
         verify(exactly = 1) {
-            val action = RoutesAction.FetchPoints(listOf(origPoint, destPoint))
+            val action = RoutePreviewAction.FetchPoints(listOf(origPoint, destPoint))
             store.dispatch(action)
         }
     }
@@ -215,7 +215,7 @@ internal class InfoPanelHeaderComponentTest {
                     ),
                     destination = Destination(destPoint),
                     navigation = NavigationState.DestinationPreview,
-                    routes = mockk<RoutesState.Ready> {
+                    previewRoutes = mockk<RoutePreviewState.Ready> {
                         every { routes } returns mockk()
                     }
                 )
@@ -225,7 +225,7 @@ internal class InfoPanelHeaderComponentTest {
             binding.routePreview.performClick()
 
             verify(exactly = 0) {
-                val action = RoutesAction.FetchPoints(listOf(origPoint, destPoint))
+                val action = RoutePreviewAction.FetchPoints(listOf(origPoint, destPoint))
                 store.dispatch(action)
             }
         }
@@ -243,7 +243,7 @@ internal class InfoPanelHeaderComponentTest {
                 ),
                 destination = Destination(destPoint),
                 navigation = NavigationState.DestinationPreview,
-                routes = mockk<RoutesState.Ready> {
+                previewRoutes = mockk<RoutePreviewState.Ready> {
                     every { routes } returns mockk()
                 }
             )
@@ -271,7 +271,7 @@ internal class InfoPanelHeaderComponentTest {
                     ),
                     destination = Destination(destPoint),
                     navigation = NavigationState.DestinationPreview,
-                    routes = mockk<RoutesState.Ready> {
+                    previewRoutes = mockk<RoutePreviewState.Ready> {
                         every { routes } returns mockk()
                     }
                 )
@@ -281,7 +281,7 @@ internal class InfoPanelHeaderComponentTest {
             binding.startNavigation.performClick()
 
             verify(exactly = 0) {
-                val action = RoutesAction.FetchPoints(listOf(origPoint, destPoint))
+                val action = RoutePreviewAction.FetchPoints(listOf(origPoint, destPoint))
                 store.dispatch(action)
             }
         }

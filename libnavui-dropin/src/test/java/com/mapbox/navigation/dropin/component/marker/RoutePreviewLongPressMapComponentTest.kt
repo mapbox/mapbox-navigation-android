@@ -14,7 +14,7 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
 import com.mapbox.navigation.utils.internal.toPoint
 import io.mockk.every
 import io.mockk.mockk
@@ -106,7 +106,7 @@ internal class RoutePreviewLongPressMapComponentTest {
         val points = listOf(locationMatcherResult.enhancedLocation.toPoint(), clickPoint)
         verifyOrder {
             testStore.dispatch(DestinationAction.SetDestination(Destination(clickPoint)))
-            testStore.dispatch(RoutesAction.FetchPoints(points))
+            testStore.dispatch(RoutePreviewAction.FetchPoints(points))
         }
     }
 }

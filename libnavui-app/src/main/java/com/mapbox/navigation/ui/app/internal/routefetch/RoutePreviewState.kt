@@ -8,23 +8,23 @@ import com.mapbox.navigation.base.route.RouterOrigin
 /**
  * Defines the state for route between origin and destination.
  */
-sealed class RoutesState {
+sealed class RoutePreviewState {
     /**
      * Represents no route available.
      */
-    object Empty : RoutesState()
+    object Empty : RoutePreviewState()
 
     /**
      * Represents the state when the route is being fetched.
      * @param requestId of the route requested
      */
-    data class Fetching constructor(val requestId: Long) : RoutesState()
+    data class Fetching constructor(val requestId: Long) : RoutePreviewState()
 
     /**
      * Represents the state when route fetching is complete and the route is ready.
      * @param routes fetched as a result of network request
      */
-    data class Ready constructor(val routes: List<NavigationRoute>) : RoutesState()
+    data class Ready constructor(val routes: List<NavigationRoute>) : RoutePreviewState()
 
     /**
      * Represents the state when route fetching is canceled.
@@ -34,7 +34,7 @@ sealed class RoutesState {
     data class Canceled constructor(
         val routeOptions: RouteOptions,
         val routerOrigin: RouterOrigin
-    ) : RoutesState()
+    ) : RoutePreviewState()
 
     /**
      * Represents the state when route request is failed.
@@ -44,5 +44,5 @@ sealed class RoutesState {
     data class Failed constructor(
         val reasons: List<RouterFailure>,
         val routeOptions: RouteOptions
-    ) : RoutesState()
+    ) : RoutePreviewState()
 }

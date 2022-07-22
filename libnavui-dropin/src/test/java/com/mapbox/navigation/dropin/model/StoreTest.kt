@@ -9,7 +9,7 @@ import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesState
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,14 +46,16 @@ internal class StoreTest {
         sut.register(
             Reducer { state, _ ->
                 state.copy(
-                    routes = mockk<RoutesState.Fetching> { every { requestId } returns 0 }
+                    previewRoutes = mockk<RoutePreviewState.Fetching> {
+                        every { requestId } returns 0
+                    }
                 )
             }
         )
 
         sut.dispatch(NavigationStateAction.Update(NavigationState.ActiveNavigation))
 
-        val routesState: RoutesState.Fetching = sut.state.value.routes as RoutesState.Fetching
+        val routesState = sut.state.value.previewRoutes as RoutePreviewState.Fetching
         assertEquals(0, routesState.requestId)
         assertEquals(NavigationState.ActiveNavigation, sut.state.value.navigation)
     }

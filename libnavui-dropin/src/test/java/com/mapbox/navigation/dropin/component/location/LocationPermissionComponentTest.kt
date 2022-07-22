@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.app.internal.tripsession
+package com.mapbox.navigation.dropin.component.location
 
 import android.Manifest
 import androidx.activity.ComponentActivity
@@ -11,10 +11,10 @@ import androidx.lifecycle.LifecycleRegistry
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.component.location.LocationPermissionComponent
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.State
+import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterAction
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic

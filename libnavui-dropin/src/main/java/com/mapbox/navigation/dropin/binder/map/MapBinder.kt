@@ -23,6 +23,8 @@ import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
 import com.mapbox.navigation.ui.app.internal.SharedApp
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.maps.internal.ui.RouteArrowComponent
@@ -30,8 +32,12 @@ import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponentContract
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 
 @ExperimentalPreviewMapboxNavigationAPI
+@FlowPreview
 internal class MapBinder(
     private val context: NavigationViewContext,
     private val binding: MapboxNavigationViewLayoutBinding,
@@ -122,6 +128,33 @@ internal class RouteLineComponentContractImpl(
     private val store: Store
 ) : RouteLineComponentContract {
     override fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>) {
-        store.dispatch(RoutesAction.SetRoutes(routes))
+        when (store.state.value.navigation) {
+            is NavigationState.RoutePreview -> {
+                store.dispatch(RoutePreviewAction.Ready(routes))
+            }
+            is NavigationState.ActiveNavigation -> {
+                store.dispatch(RoutesAction.SetRoutes(routes))
+            }
+            else -> {
+                // no op
+            }
+        }
+    }
+
+    override fun getRouteInPreview(): Flow<List<NavigationRoute>?> {
+        return combine(
+            store.select { it.navigation },
+            store.select { it.previewRoutes },
+        ) { navigationState, routePreviewState ->
+            if (routePreviewState is RoutePreviewState.Ready) {
+                if (navigationState == NavigationState.RoutePreview) {
+                    routePreviewState.routes
+                } else {
+                    null
+                }
+            } else {
+                emptyList()
+            }
+        }
     }
 }

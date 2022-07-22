@@ -13,6 +13,7 @@ import com.mapbox.navigation.ui.app.internal.camera.CameraAction.SetCameraMode
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
 import com.mapbox.navigation.ui.app.internal.camera.toTargetCameraMode
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
@@ -21,8 +22,11 @@ import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHan
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import com.mapbox.navigation.ui.maps.internal.extensions.flowNavigationCameraState
 import com.mapbox.navigation.utils.internal.logD
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @ExperimentalPreviewMapboxNavigationAPI
@@ -185,25 +189,46 @@ internal class CameraComponent constructor(
 
     private fun onRouteUpdates(mapboxNavigation: MapboxNavigation) {
         coroutineScope.launch {
+            val routesFlow = mapboxNavigation.flowRoutesUpdated()
+                .map { it.navigationRoutes }
+                .stateIn(
+                    coroutineScope,
+                    SharingStarted.WhileSubscribed(),
+                    mapboxNavigation.getNavigationRoutes()
+                )
+
+            val routePreview = store.select { it.previewRoutes }
+            val navigation = store.select { it.navigation }
             combine(
-                mapboxNavigation.flowRoutesUpdated(),
-                store.select { it.navigation }
-            ) { routeUpdate, navigationState ->
-                if (routeUpdate.navigationRoutes.isNotEmpty()) {
-                    viewportDataSource.onRouteChanged(routeUpdate.navigationRoutes.first())
-                    viewportDataSource.evaluate()
-                    when (navigationState) {
-                        NavigationState.ActiveNavigation,
-                        NavigationState.Arrival -> {
-                            store.dispatch(SetCameraMode(TargetCameraMode.Following))
-                        }
-                        else -> {
-                            store.dispatch(SetCameraMode(TargetCameraMode.Overview))
+                routePreview,
+                routesFlow,
+                navigation
+            ) { previewRoutes, navigationRoutes, navigationState ->
+                val routes = if (previewRoutes is RoutePreviewState.Ready) {
+                    previewRoutes.routes
+                } else if (navigationRoutes.isNotEmpty()) {
+                    navigationRoutes
+                } else {
+                    emptyList()
+                }
+                when (routes.isNotEmpty()) {
+                    true -> {
+                        viewportDataSource.onRouteChanged(routes.first())
+                        viewportDataSource.evaluate()
+                        when (navigationState) {
+                            NavigationState.ActiveNavigation,
+                            NavigationState.Arrival -> {
+                                store.dispatch(SetCameraMode(TargetCameraMode.Following))
+                            }
+                            else -> {
+                                store.dispatch(SetCameraMode(TargetCameraMode.Overview))
+                            }
                         }
                     }
-                } else {
-                    viewportDataSource.clearRouteData()
-                    viewportDataSource.evaluate()
+                    false -> {
+                        viewportDataSource.clearRouteData()
+                        viewportDataSource.evaluate()
+                    }
                 }
             }.collect()
         }
