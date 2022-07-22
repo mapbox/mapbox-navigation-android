@@ -103,7 +103,7 @@ class HistoryRecordingStateChangeObserverTest :
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(otherNonEmptyRoutes)
         checkHasNoNextElement(eventsChannel)
         // set invalid routes, but has other non-empty routes - do nothing
-        mapboxNavigation.setNavigationRoutesAndAwaitError(nonEmptyRoutes, 15)
+        mapboxNavigation.setNavigationRoutesAndAwaitError(nonEmptyRoutes, legIndex = 15)
         checkHasNoNextElement(eventsChannel)
         // alternatives - do nothing
         mapboxNavigation.setNavigationRoutesAndWaitForAlternativesUpdate(
@@ -170,7 +170,7 @@ class HistoryRecordingStateChangeObserverTest :
         // stop free drive + start active guidance +
         // + cancel active guidance + start free drive
         // because of the invalid route
-        mapboxNavigation.setNavigationRoutes(otherNonEmptyRoutes, 16)
+        mapboxNavigation.setNavigationRoutes(otherNonEmptyRoutes, initialLegIndex = 16)
         assertEquals(
             listOf(
                 HistoryRecordingStateChangeEvent(
