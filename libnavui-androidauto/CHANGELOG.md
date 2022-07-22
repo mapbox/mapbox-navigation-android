@@ -5,9 +5,21 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+
+## androidauto-v0.5.0 - Jul 22, 2022
+### Changelog
+[Changes between 0.4.0 and 0.5.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.4.0...androidauto-v0.5.0)
+
+#### Bug fixes and improvements
 - Fixed an issue with speed limit widget that caused it to turn into a back rectangle. [#6064](https://github.com/mapbox/mapbox-navigation-android/pull/6064)
 - Fixed an issue with compass and logo widgets that caused them to draw behind location puck. [#6076](https://github.com/mapbox/mapbox-navigation-android/pull/6076)
 - Added telemetry to determine when the car head unit has been started or stopped. [#6084](https://github.com/mapbox/mapbox-navigation-android/pull/6084)
+
+### Mapbox dependencies
+This release defines minimum versions for the Mapbox dependencies.
+- Mapbox Maps Android Auto Extension `v0.1.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/extension-androidauto-v0.1.0))
+- Mapbox Navigation `v2.7.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/2.7.0-beta.2))
+- Mapbox Search `v1.0.0-beta.33` ([release notes](https://github.com/mapbox/mapbox-search-android/releases/tag/v1.0.0-beta.33))
 
 ## androidauto-v0.4.0 - Jul 12, 2022
 ### Changelog
