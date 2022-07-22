@@ -25,7 +25,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequ
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
-import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
+import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
@@ -78,7 +78,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
     }
 
     override fun setupMockLocation(): Location {
-        val mockRoute = MockRoutesProvider.dc_very_short(activity)
+        val mockRoute = RoutesProvider.dc_very_short(activity)
         return mockLocationUpdatesRule.generateLocationUpdate {
             latitude = mockRoute.routeWaypoints.first().latitude()
             longitude = mockRoute.routeWaypoints.first().longitude()
@@ -88,7 +88,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
     @Test
     fun reroute_completes() {
         // prepare
-        val mockRoute = MockRoutesProvider.dc_very_short(activity)
+        val mockRoute = RoutesProvider.dc_very_short(activity)
         val originLocation = mockRoute.routeWaypoints.first()
         val offRouteLocationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
             latitude = originLocation.latitude() + 0.002

@@ -20,7 +20,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTe
 import com.mapbox.navigation.instrumentation_tests.utils.idling.ArrivalIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
-import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
+import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
@@ -43,7 +43,7 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
     private lateinit var routeCompleteIdlingResource: RouteProgressStateIdlingResource
 
     override fun setupMockLocation(): Location {
-        val mockRoute = MockRoutesProvider.dc_very_short(activity)
+        val mockRoute = RoutesProvider.dc_very_short(activity)
         return mockLocationUpdatesRule.generateLocationUpdate {
             latitude = mockRoute.routeWaypoints.first().latitude()
             longitude = mockRoute.routeWaypoints.first().longitude()
@@ -71,7 +71,7 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
     @Test
     fun route_completes() {
         // prepare
-        val mockRoute = MockRoutesProvider.dc_very_short(activity)
+        val mockRoute = RoutesProvider.dc_very_short(activity)
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         routeCompleteIdlingResource.register()
 
@@ -129,7 +129,7 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
     @Test
     fun route_with_two_legs_completes() {
         // prepare
-        val mockRoute = MockRoutesProvider.dc_very_short_two_legs(activity)
+        val mockRoute = RoutesProvider.dc_very_short_two_legs(activity)
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         val arrivalIdlingResource = ArrivalIdlingResource(mapboxNavigation)
         arrivalIdlingResource.register()

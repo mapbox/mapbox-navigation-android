@@ -33,8 +33,8 @@ import com.mapbox.navigation.instrumentation_tests.utils.http.MockRoutingTileEnd
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoute
-import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
-import com.mapbox.navigation.instrumentation_tests.utils.routes.NavigationRoutesProvider
+import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
+import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import kotlinx.coroutines.channels.Channel
@@ -71,8 +71,9 @@ class HistoryRecordingStateChangeObserverTest :
         createMapboxNavigation()
         val eventsChannel = Channel<HistoryRecordingStateChangeEvent>(Channel.UNLIMITED)
         observeHistoryRecordingEvents(eventsChannel)
-        val nonEmptyRoutes = NavigationRoutesProvider.dc_very_short(activity)
-        val otherNonEmptyRoutes = NavigationRoutesProvider.dc_very_short_two_legs(activity)
+        val nonEmptyRoutes = RoutesProvider.dc_very_short(activity).toNavigationRoutes()
+        val otherNonEmptyRoutes = RoutesProvider.dc_very_short_two_legs(activity)
+            .toNavigationRoutes()
 
         checkHasNoNextElement(eventsChannel)
         // start free drive
@@ -206,7 +207,7 @@ class HistoryRecordingStateChangeObserverTest :
 
     @Test
     fun history_recording_observer_route_refresh() = sdkTest {
-        val mockRoute = MockRoutesProvider.dc_very_short(activity)
+        val mockRoute = RoutesProvider.dc_very_short(activity)
         setUpMockRequestHandlersForRefresh(mockRoute)
         mapboxNavigation = MapboxNavigationProvider.create(
             NavigationOptions.Builder(activity)
@@ -220,7 +221,7 @@ class HistoryRecordingStateChangeObserverTest :
                 .navigatorPredictionMillis(0L)
                 .build()
         )
-        val routes = NavigationRoutesProvider.fromMockRoute(mockRoute) {
+        val routes = mockRoute.toNavigationRoutes {
             baseUrl(mockWebServerRule.baseUrl)
         }
 
@@ -264,8 +265,8 @@ class HistoryRecordingStateChangeObserverTest :
 
     @Test
     fun history_recording_observer_reroute() = sdkTest {
-        val mockRoute = MockRoutesProvider.dc_very_short(activity)
-        val routes = NavigationRoutesProvider.fromMockRoute(mockRoute) {
+        val mockRoute = RoutesProvider.dc_very_short(activity)
+        val routes = mockRoute.toNavigationRoutes {
             baseUrl(mockWebServerRule.baseUrl)
         }
         val offRouteLocationUpdate = getOffRouteLocation(mockRoute.routeWaypoints.first())
@@ -314,7 +315,7 @@ class HistoryRecordingStateChangeObserverTest :
 
     @Test
     fun history_recording_observer_ensures_first_set_route_event() = sdkTest {
-        val routes = NavigationRoutesProvider.dc_very_short(activity)
+        val routes = RoutesProvider.dc_very_short(activity).toNavigationRoutes()
         createMapboxNavigation()
         mapboxNavigation.startTripSession()
 

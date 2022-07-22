@@ -9,7 +9,7 @@ import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.BasicNavigationViewActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
-import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
+import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
@@ -40,7 +40,7 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
     private lateinit var routeLineView: MapboxRouteLineView
 
     override fun setupMockLocation(): Location {
-        val directionsResponse = MockRoutesProvider
+        val directionsResponse = RoutesProvider
             .loadDirectionsResponse(activity, R.raw.multiple_routes)
         val origin = directionsResponse.waypoints()!!.map { it.location()!! }
             .first()
@@ -116,7 +116,7 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
     }
 
     private fun setupRouteWithAlternatives() {
-        val directionsResponse = MockRoutesProvider
+        val directionsResponse = RoutesProvider
             .loadDirectionsResponse(activity, R.raw.multiple_routes)
         val route = directionsResponse.routes()[0]
         runOnMainSync {

@@ -26,7 +26,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoute
-import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
+import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
@@ -95,7 +95,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     @Test
     fun verify_history_files_are_recorded_and_readable() {
         // prepare
-        val mockRoute = MockRoutesProvider.dc_very_short(activity)
+        val mockRoute = RoutesProvider.dc_very_short(activity)
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         routeCompleteIdlingResource.register()
 
@@ -158,7 +158,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     @Test
     fun verify_history_files_are_recorded_and_readable_with_silent_waypoints() {
         // prepare
-        val mockRoute = MockRoutesProvider.dc_very_short_two_legs_with_silent_waypoint(activity)
+        val mockRoute = RoutesProvider.dc_very_short_two_legs_with_silent_waypoint(activity)
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         routeCompleteIdlingResource.register()
 

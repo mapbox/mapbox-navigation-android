@@ -14,7 +14,8 @@ import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.setNavigationRoutesAsync
-import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
+import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
+import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
@@ -54,15 +55,7 @@ class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
 
     @Test
     fun set_navigation_routes_successfully() = sdkTest {
-        val mockRoute = MockRoutesProvider.dc_very_short(activity)
-        val routes = NavigationRoute.create(
-            mockRoute.routeResponse,
-            RouteOptions.builder()
-                .coordinatesList(mockRoute.routeWaypoints)
-                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                .build(),
-            RouterOrigin.Custom()
-        )
+        val routes = RoutesProvider.dc_very_short(activity).toNavigationRoutes()
         val result = mapboxNavigation.setNavigationRoutesAsync(routes)
         result.run {
             assertTrue(this.isValue)
@@ -72,7 +65,7 @@ class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
 
     @Test
     fun set_navigation_routes_ignore_alternatives() = sdkTest {
-        val mockRoute = MockRoutesProvider.dc_very_short_with_invalid_alternatives(activity)
+        val mockRoute = RoutesProvider.dc_very_short_with_invalid_alternatives(activity)
         val routes = NavigationRoute.create(
             mockRoute.routeResponse,
             RouteOptions.builder()
@@ -92,15 +85,7 @@ class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
 
     @Test
     fun set_navigation_routes_failed() = sdkTest {
-        val mockRoute = MockRoutesProvider.dc_very_short(activity)
-        val routes = NavigationRoute.create(
-            mockRoute.routeResponse,
-            RouteOptions.builder()
-                .coordinatesList(mockRoute.routeWaypoints)
-                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                .build(),
-            RouterOrigin.Custom()
-        )
+        val routes = RoutesProvider.dc_very_short(activity).toNavigationRoutes()
         val result = mapboxNavigation.setNavigationRoutesAsync(routes, 6)
         result.run {
             assertTrue(this.isError)
@@ -119,24 +104,8 @@ class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
 
     @Test
     fun routes_observer_waits_for_routes_to_finish_processing_when_registered() = sdkTest {
-        val mockRoute1 = MockRoutesProvider.dc_very_short(activity)
-        val routes1 = NavigationRoute.create(
-            mockRoute1.routeResponse,
-            RouteOptions.builder()
-                .coordinatesList(mockRoute1.routeWaypoints)
-                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                .build(),
-            RouterOrigin.Custom()
-        )
-        val mockRoute2 = MockRoutesProvider.dc_very_short_two_legs(activity)
-        val routes2 = NavigationRoute.create(
-            mockRoute2.routeResponse,
-            RouteOptions.builder()
-                .coordinatesList(mockRoute2.routeWaypoints)
-                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                .build(),
-            RouterOrigin.Custom()
-        )
+        val routes1 = RoutesProvider.dc_very_short(activity).toNavigationRoutes()
+        val routes2 = RoutesProvider.dc_very_short_two_legs(activity).toNavigationRoutes()
 
         mapboxNavigation.setNavigationRoutesAsync(routes1)
         mapboxNavigation.setNavigationRoutes(routes2)
@@ -152,24 +121,8 @@ class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
 
     @Test
     fun routes_observer_waits_for_multiple_routes_to_finish_processing_when_registered() = sdkTest {
-        val mockRoute1 = MockRoutesProvider.dc_very_short(activity)
-        val routes1 = NavigationRoute.create(
-            mockRoute1.routeResponse,
-            RouteOptions.builder()
-                .coordinatesList(mockRoute1.routeWaypoints)
-                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                .build(),
-            RouterOrigin.Custom()
-        )
-        val mockRoute2 = MockRoutesProvider.dc_very_short_two_legs(activity)
-        val routes2 = NavigationRoute.create(
-            mockRoute2.routeResponse,
-            RouteOptions.builder()
-                .coordinatesList(mockRoute2.routeWaypoints)
-                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                .build(),
-            RouterOrigin.Custom()
-        )
+        val routes1 = RoutesProvider.dc_very_short(activity).toNavigationRoutes()
+        val routes2 = RoutesProvider.dc_very_short_two_legs(activity).toNavigationRoutes()
 
         mapboxNavigation.setNavigationRoutes(routes1)
         mapboxNavigation.setNavigationRoutes(routes2)
@@ -185,15 +138,7 @@ class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
 
     @Test
     fun routes_observer_isnt_notified_on_registration_when_routes_processing_fails() = sdkTest {
-        val mockRoute1 = MockRoutesProvider.dc_very_short(activity)
-        val routes1 = NavigationRoute.create(
-            mockRoute1.routeResponse,
-            RouteOptions.builder()
-                .coordinatesList(mockRoute1.routeWaypoints)
-                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                .build(),
-            RouterOrigin.Custom()
-        )
+        val routes1 = RoutesProvider.dc_very_short(activity).toNavigationRoutes()
         mapboxNavigation.setNavigationRoutes(routes1, initialLegIndex = 6)
 
         mapboxNavigation.registerRoutesObserver {
