@@ -11,7 +11,7 @@ import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -145,7 +145,7 @@ class OnKeyListenerComponentTest {
     }
 
     @Test
-    fun `back press during RoutePreview will SetRoutes to null`() {
+    fun `back press during RoutePreview will set route preview to null`() {
         testStore.setState(State(navigation = NavigationState.RoutePreview))
 
         onKeyListenerComponent.onAttached(mockk())
@@ -153,7 +153,7 @@ class OnKeyListenerComponentTest {
 
         verify {
             testStore.dispatch(
-                RoutesAction.SetRoutes(emptyList())
+                RoutePreviewAction.Ready(emptyList())
             )
         }
     }

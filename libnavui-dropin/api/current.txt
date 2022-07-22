@@ -33,9 +33,11 @@ package com.mapbox.navigation.dropin {
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NavigationViewApi {
     method public void enableReplaySession();
     method public void enableTripSession();
+    method public void fetchRoutes(com.mapbox.api.directions.v5.models.RouteOptions options);
+    method public void fetchRoutes(java.util.List<com.mapbox.geojson.Point> points);
     method public boolean isReplayEnabled();
     method public void setDestination(com.mapbox.geojson.Point point);
-    method public void setRoutes(com.mapbox.api.directions.v5.models.RouteOptions options);
+    method public void setPreviewRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
     method public void setRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
   }
 

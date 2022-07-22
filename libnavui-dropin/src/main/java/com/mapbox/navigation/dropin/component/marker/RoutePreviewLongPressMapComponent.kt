@@ -9,7 +9,7 @@ import com.mapbox.navigation.dropin.util.HapticFeedback
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.toPoint
@@ -39,7 +39,7 @@ internal class RoutePreviewLongPressMapComponent(
         val location = store.state.value.location?.enhancedLocation
         location?.toPoint()?.also { lastPoint ->
             store.dispatch(DestinationAction.SetDestination(Destination(point)))
-            store.dispatch(RoutesAction.FetchPoints(listOf(lastPoint, point)))
+            store.dispatch(RoutePreviewAction.FetchPoints(listOf(lastPoint, point)))
             hapticFeedback?.tick()
         } ?: logW(TAG, "Current location is unknown so map long press does nothing")
         false

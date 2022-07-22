@@ -30,6 +30,7 @@ internal class InfoPanelTripProgressBinder(
             navigationViewContext.styles.tripProgressStyle
         ) { styles ->
             TripProgressComponent(
+                store = navigationViewContext.store,
                 styles = styles,
                 tripProgressView = binding.tripProgressView
             )

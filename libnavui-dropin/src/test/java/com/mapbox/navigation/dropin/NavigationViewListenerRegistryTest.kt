@@ -14,7 +14,7 @@ import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
 import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesState
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -189,7 +189,7 @@ class NavigationViewListenerRegistryTest {
         sut.registerListener(testListener)
 
         val routes = emptyList<NavigationRoute>()
-        testStore.setState(State(routes = RoutesState.Ready(routes)))
+        testStore.setState(State(previewRoutes = RoutePreviewState.Ready(routes)))
 
         verify {
             testListener.onRouteFetchSuccessful(routes)
@@ -201,7 +201,7 @@ class NavigationViewListenerRegistryTest {
         sut.registerListener(testListener)
 
         val routes = listOf<NavigationRoute>(mockk())
-        testStore.setState(State(routes = RoutesState.Ready(routes)))
+        testStore.setState(State(previewRoutes = RoutePreviewState.Ready(routes)))
 
         verify {
             testListener.onRouteFetchSuccessful(routes)
@@ -214,7 +214,7 @@ class NavigationViewListenerRegistryTest {
 
         val reasons = listOf<RouterFailure>(mockk())
         val options = mockk<RouteOptions>()
-        testStore.setState(State(routes = RoutesState.Failed(reasons, options)))
+        testStore.setState(State(previewRoutes = RoutePreviewState.Failed(reasons, options)))
 
         verify {
             testListener.onRouteFetchFailed(reasons, options)
@@ -227,7 +227,7 @@ class NavigationViewListenerRegistryTest {
 
         val origin = mockk<RouterOrigin>()
         val options = mockk<RouteOptions>()
-        testStore.setState(State(routes = RoutesState.Canceled(options, origin)))
+        testStore.setState(State(previewRoutes = RoutePreviewState.Canceled(options, origin)))
 
         verify {
             testListener.onRouteFetchCanceled(options, origin)
@@ -239,7 +239,7 @@ class NavigationViewListenerRegistryTest {
         sut.registerListener(testListener)
 
         val id = 1L
-        testStore.setState(State(routes = RoutesState.Fetching(id)))
+        testStore.setState(State(previewRoutes = RoutePreviewState.Fetching(id)))
 
         verify {
             testListener.onRouteFetching(id)

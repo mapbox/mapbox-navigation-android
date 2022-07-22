@@ -4,7 +4,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesState
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -36,27 +36,27 @@ internal class NavigationViewListenerRegistry(
                 }
             }
             launch {
-                store.select { it.routes }.collect {
+                store.select { it.previewRoutes }.collect {
                     when (it) {
-                        is RoutesState.Empty -> {
+                        is RoutePreviewState.Empty -> {
                             listener.onRouteFetchSuccessful(routes = emptyList())
                         }
-                        is RoutesState.Ready -> {
+                        is RoutePreviewState.Ready -> {
                             listener.onRouteFetchSuccessful(routes = it.routes)
                         }
-                        is RoutesState.Failed -> {
+                        is RoutePreviewState.Failed -> {
                             listener.onRouteFetchFailed(
                                 reasons = it.reasons,
                                 routeOptions = it.routeOptions
                             )
                         }
-                        is RoutesState.Canceled -> {
+                        is RoutePreviewState.Canceled -> {
                             listener.onRouteFetchCanceled(
                                 routeOptions = it.routeOptions,
                                 routerOrigin = it.routerOrigin
                             )
                         }
-                        is RoutesState.Fetching -> {
+                        is RoutePreviewState.Fetching -> {
                             listener.onRouteFetching(requestId = it.requestId)
                         }
                     }

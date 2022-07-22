@@ -12,8 +12,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesState
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import com.mapbox.navigation.ui.app.testing.TestStore
 import io.mockk.every
 import io.mockk.mockk
@@ -34,42 +34,25 @@ import org.junit.Test
 import java.util.Locale
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
-internal class RoutesStateControllerTest {
+internal class RoutePreviewStateControllerTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
     private lateinit var store: TestStore
-    private lateinit var sut: RoutesStateController
+    private lateinit var sut: RoutePreviewStateController
 
     @Before
     fun setUp() {
         mockkStatic("com.mapbox.navigation.base.internal.extensions.ContextEx")
         mockkObject(MapboxNavigationApp)
         store = spyk(TestStore())
-        sut = RoutesStateController(store)
+        sut = RoutePreviewStateController(store)
     }
 
     @After
     fun cleanUp() {
         unmockkAll()
-    }
-
-    @Test
-    fun `onAttached should observe MapboxNavigation route updates and dispatch Ready action`() {
-        val mapboxNavigation = mockMapboxNavigation()
-        val routesList = listOf<NavigationRoute>(mockk())
-        every { mapboxNavigation.registerRoutesObserver(any()) } answers {
-            firstArg<RoutesObserver>().onRoutesChanged(
-                mockk {
-                    every { navigationRoutes } returns routesList
-                }
-            )
-        }
-
-        sut.onAttached(mapboxNavigation)
-
-        verify { store.dispatch(RoutesAction.Ready(routesList)) }
     }
 
     @Test
@@ -85,7 +68,7 @@ internal class RoutesStateControllerTest {
 
         sut.onAttached(mapboxNavigation)
 
-        assertTrue(store.state.value.routes is RoutesState.Empty)
+        assertTrue(store.state.value.previewRoutes is RoutePreviewState.Empty)
     }
 
     @Test
@@ -93,9 +76,9 @@ internal class RoutesStateControllerTest {
         val mapboxNavigation = mockMapboxNavigation()
 
         sut.onAttached(mapboxNavigation)
-        store.dispatch(RoutesAction.FetchPoints(mockRoutePoints()))
+        store.dispatch(RoutePreviewAction.FetchPoints(mockRoutePoints()))
 
-        assertTrue(store.state.value.routes is RoutesState.Fetching)
+        assertTrue(store.state.value.previewRoutes is RoutePreviewState.Fetching)
         verify { mapboxNavigation.requestRoutes(any(), any<NavigationRouterCallback>()) }
     }
 
@@ -107,7 +90,7 @@ internal class RoutesStateControllerTest {
         }
 
         sut.onAttached(mapboxNavigation)
-        store.dispatch(RoutesAction.FetchPoints(mockRoutePoints()))
+        store.dispatch(RoutePreviewAction.FetchPoints(mockRoutePoints()))
         sut.onDetached(mapboxNavigation)
 
         verify { mapboxNavigation.cancelRouteRequest(123L) }
@@ -118,9 +101,9 @@ internal class RoutesStateControllerTest {
         val mapboxNavigation = mockMapboxNavigation()
 
         sut.onAttached(mapboxNavigation)
-        store.dispatch(RoutesAction.FetchPoints(mockRoutePoints()))
+        store.dispatch(RoutePreviewAction.FetchPoints(mockRoutePoints()))
 
-        assertTrue(store.state.value.routes is RoutesState.Fetching)
+        assertTrue(store.state.value.previewRoutes is RoutePreviewState.Fetching)
         verify { mapboxNavigation.requestRoutes(any(), any<NavigationRouterCallback>()) }
     }
 
@@ -132,11 +115,11 @@ internal class RoutesStateControllerTest {
         every { mapboxNavigation.requestRoutes(any(), capture(callbackSlot)) } returns 123L
 
         sut.onAttached(mapboxNavigation)
-        store.dispatch(RoutesAction.FetchPoints(mockRoutePoints()))
+        store.dispatch(RoutePreviewAction.FetchPoints(mockRoutePoints()))
         callbackSlot.captured.onRoutesReady(routes, mockk())
         sut.onDetached(mapboxNavigation)
 
-        val readyState = store.state.value.routes as? RoutesState.Ready
+        val readyState = store.state.value.previewRoutes as? RoutePreviewState.Ready
         assertNotNull(readyState)
         assertEquals(readyState?.routes, routes)
         verify(exactly = 0) { mapboxNavigation.cancelRouteRequest(123L) }
@@ -151,11 +134,11 @@ internal class RoutesStateControllerTest {
         every { mapboxNavigation.requestRoutes(any(), capture(callbackSlot)) } returns 123L
 
         sut.onAttached(mapboxNavigation)
-        store.dispatch(RoutesAction.FetchPoints(mockRoutePoints()))
+        store.dispatch(RoutePreviewAction.FetchPoints(mockRoutePoints()))
         callbackSlot.captured.onFailure(reasons, routeOptions)
         sut.onDetached(mapboxNavigation)
 
-        val readyState = store.state.value.routes as? RoutesState.Failed
+        val readyState = store.state.value.previewRoutes as? RoutePreviewState.Failed
         assertNotNull(readyState)
         assertEquals(readyState?.reasons, reasons)
         assertEquals(readyState?.routeOptions, routeOptions)
@@ -171,11 +154,11 @@ internal class RoutesStateControllerTest {
         every { mapboxNavigation.requestRoutes(any(), capture(callbackSlot)) } returns 123L
 
         sut.onAttached(mapboxNavigation)
-        store.dispatch(RoutesAction.FetchPoints(mockRoutePoints()))
+        store.dispatch(RoutePreviewAction.FetchPoints(mockRoutePoints()))
         callbackSlot.captured.onCanceled(routeOptions, routerOrigin)
         sut.onDetached(mapboxNavigation)
 
-        val readyState = store.state.value.routes as? RoutesState.Canceled
+        val readyState = store.state.value.previewRoutes as? RoutePreviewState.Canceled
         assertNotNull(readyState)
         assertEquals(readyState?.routeOptions, routeOptions)
         assertEquals(readyState?.routerOrigin, routerOrigin)
@@ -188,9 +171,9 @@ internal class RoutesStateControllerTest {
         val routeOptions = mockk<RouteOptions>()
 
         sut.onAttached(mapboxNavigation)
-        store.dispatch(RoutesAction.FetchOptions(routeOptions))
+        store.dispatch(RoutePreviewAction.FetchOptions(routeOptions))
 
-        assertTrue(store.state.value.routes is RoutesState.Fetching)
+        assertTrue(store.state.value.previewRoutes is RoutePreviewState.Fetching)
         verify { mapboxNavigation.requestRoutes(routeOptions, any<NavigationRouterCallback>()) }
     }
 
@@ -202,7 +185,7 @@ internal class RoutesStateControllerTest {
         }
 
         sut.onAttached(mapboxNavigation)
-        store.dispatch(RoutesAction.FetchOptions(mockk()))
+        store.dispatch(RoutePreviewAction.FetchOptions(mockk()))
         sut.onDetached(mapboxNavigation)
 
         verify { mapboxNavigation.cancelRouteRequest(123L) }
@@ -217,10 +200,10 @@ internal class RoutesStateControllerTest {
         val routeOptions = mockk<RouteOptions>()
 
         sut.onAttached(mapboxNavigation)
-        store.dispatch(RoutesAction.FetchOptions(routeOptions))
+        store.dispatch(RoutePreviewAction.FetchOptions(routeOptions))
         callbackSlot.captured.onRoutesReady(routes, mockk())
 
-        val readyState = store.state.value.routes as? RoutesState.Ready
+        val readyState = store.state.value.previewRoutes as? RoutePreviewState.Ready
         assertNotNull(readyState)
         assertEquals(readyState?.routes, routes)
     }
@@ -234,10 +217,10 @@ internal class RoutesStateControllerTest {
         every { mapboxNavigation.requestRoutes(any(), capture(callbackSlot)) } returns 123L
 
         sut.onAttached(mapboxNavigation)
-        store.dispatch(RoutesAction.FetchOptions(routeOptions))
+        store.dispatch(RoutePreviewAction.FetchOptions(routeOptions))
         callbackSlot.captured.onFailure(reasons, routeOptions)
 
-        val readyState = store.state.value.routes as? RoutesState.Failed
+        val readyState = store.state.value.previewRoutes as? RoutePreviewState.Failed
         assertNotNull(readyState)
         assertEquals(readyState?.reasons, reasons)
         assertEquals(readyState?.routeOptions, routeOptions)
@@ -252,38 +235,13 @@ internal class RoutesStateControllerTest {
         every { mapboxNavigation.requestRoutes(any(), capture(callbackSlot)) } returns 123L
 
         sut.onAttached(mapboxNavigation)
-        store.dispatch(RoutesAction.FetchOptions(routeOptions))
+        store.dispatch(RoutePreviewAction.FetchOptions(routeOptions))
         callbackSlot.captured.onCanceled(routeOptions, routerOrigin)
 
-        val readyState = store.state.value.routes as? RoutesState.Canceled
+        val readyState = store.state.value.previewRoutes as? RoutePreviewState.Canceled
         assertNotNull(readyState)
         assertEquals(readyState?.routeOptions, routeOptions)
         assertEquals(readyState?.routerOrigin, routerOrigin)
-    }
-
-    @Test
-    fun `RoutesAction SetRoute with routes will setNavigationRoutes and go to Ready state`() {
-        val mapboxNavigation = mockMapboxNavigation()
-        val navigationRoutes = listOf<NavigationRoute>(mockk())
-
-        sut.onAttached(mapboxNavigation)
-        store.dispatch(RoutesAction.SetRoutes(navigationRoutes))
-
-        verify { mapboxNavigation.setNavigationRoutes(navigationRoutes) }
-        val readyState = store.state.value.routes as? RoutesState.Ready
-        assertNotNull(readyState)
-        assertEquals(readyState?.routes, navigationRoutes)
-    }
-
-    @Test
-    fun `RoutesAction SetRoute with no routes will setNavigationRoutes and go to Empty state`() {
-        val mapboxNavigation = mockMapboxNavigation()
-
-        sut.onAttached(mapboxNavigation)
-        store.dispatch(RoutesAction.SetRoutes(emptyList()))
-
-        verify { mapboxNavigation.setNavigationRoutes(emptyList()) }
-        assertTrue(store.state.value.routes is RoutesState.Empty)
     }
 
     private fun mockMapboxNavigation(): MapboxNavigation {

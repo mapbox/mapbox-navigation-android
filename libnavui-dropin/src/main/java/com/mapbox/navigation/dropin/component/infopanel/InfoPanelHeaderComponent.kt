@@ -10,8 +10,9 @@ import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesState
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.toPoint
@@ -66,7 +67,15 @@ internal class InfoPanelHeaderComponent(
 
         binding.startNavigation.setOnClickListener {
             coroutineScope.launch {
-                if (fetchRouteIfNeeded()) {
+                if (
+                    fetchRouteIfNeeded() &&
+                    store.state.value.previewRoutes is RoutePreviewState.Ready
+                ) {
+                    store.dispatch(
+                        RoutesAction.SetRoutes(
+                            (store.state.value.previewRoutes as RoutePreviewState.Ready).routes
+                        )
+                    )
                     store.dispatch(NavigationStateAction.Update(NavigationState.ActiveNavigation))
                 }
             }
@@ -74,34 +83,35 @@ internal class InfoPanelHeaderComponent(
 
         binding.endNavigation.setOnClickListener {
             store.dispatch(RoutesAction.SetRoutes(emptyList()))
+            store.dispatch(RoutePreviewAction.Ready(emptyList()))
             store.dispatch(DestinationAction.SetDestination(null))
             store.dispatch(NavigationStateAction.Update(NavigationState.FreeDrive))
         }
     }
 
     /**
-     * Dispatch FetchPoints action and wait for RoutesState.Ready.
-     * Method returns immediately if already in RoutesState.Ready or RoutesState.Fetching, or if
+     * Dispatch FetchPoints action and wait for RoutePreviewState.Ready.
+     * Method returns immediately if already in RoutePreviewState.Ready or RoutePreviewState.Fetching, or if
      * required location or destination data is missing.
      *
-     * @return `true` once in RoutesState.Ready state, otherwise `false`
+     * @return `true` once in RoutePreviewState.Ready state, otherwise `false`
      */
     private suspend fun fetchRouteIfNeeded(): Boolean {
         val storeState = store.state.value
-        if (storeState.routes is RoutesState.Ready) return true
-        if (storeState.routes is RoutesState.Fetching) return false
+        if (storeState.previewRoutes is RoutePreviewState.Ready) return true
+        if (storeState.previewRoutes is RoutePreviewState.Fetching) return false
 
         return ifNonNull(
             storeState.location?.enhancedLocation?.toPoint(),
             storeState.destination
         ) { lastPoint, destination ->
-            store.dispatch(RoutesAction.FetchPoints(listOf(lastPoint, destination.point)))
+            store.dispatch(RoutePreviewAction.FetchPoints(listOf(lastPoint, destination.point)))
             waitForReady()
         } ?: false
     }
 
     private suspend fun waitForReady(): Boolean {
-        store.select { it.routes }.takeWhile { it is RoutesState.Fetching }.collect()
-        return store.state.value.routes is RoutesState.Ready
+        store.select { it.previewRoutes }.takeWhile { it is RoutePreviewState.Fetching }.collect()
+        return store.state.value.previewRoutes is RoutePreviewState.Ready
     }
 }

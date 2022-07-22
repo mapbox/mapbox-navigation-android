@@ -10,6 +10,7 @@ import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
+import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
 import com.mapbox.navigation.ui.app.testing.TestStore
 import io.mockk.every
@@ -73,6 +74,7 @@ internal class StateResetControllerTest {
             coroutineRule.testDispatcher.advanceTimeBy(200)
             verify(exactly = 1) {
                 store.dispatch(RoutesAction.SetRoutes(emptyList()))
+                store.dispatch(RoutePreviewAction.Ready(emptyList()))
                 store.dispatch(DestinationAction.SetDestination(null))
                 store.dispatch(NavigationStateAction.Update(NavigationState.FreeDrive))
             }

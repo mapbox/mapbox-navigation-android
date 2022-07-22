@@ -14,7 +14,6 @@ import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -89,7 +88,6 @@ internal class FreeDriveLongPressMapComponentTest {
 
         verifyOrder {
             testStore.dispatch(DestinationAction.SetDestination(Destination(point)))
-            testStore.dispatch(RoutesAction.SetRoutes(emptyList()))
             testStore.dispatch(
                 NavigationStateAction.Update(NavigationState.DestinationPreview)
             )
