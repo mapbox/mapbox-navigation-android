@@ -15,6 +15,8 @@ import com.mapbox.navigation.base.options.PredictiveCacheOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.PredictiveCache
+import com.mapbox.navigation.core.trip.session.TripSessionState
+import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.ui.maps.internal.offline.OfflineManagerProvider
 import com.mapbox.navigation.utils.internal.logE
 
@@ -57,7 +59,8 @@ private const val RASTER_SOURCE_TYPE = "raster"
  *
  * @param predictiveCacheOptions [PredictiveCacheOptions] options to instantiate instance of [PredictiveCacheController]
  */
-class PredictiveCacheController constructor(
+class PredictiveCacheController private constructor(
+    private val mapboxNavigation: MapboxNavigation?,
     private val predictiveCacheOptions: PredictiveCacheOptions,
 ) {
 
@@ -68,6 +71,11 @@ class PredictiveCacheController constructor(
     var predictiveCacheControllerErrorHandler: PredictiveCacheControllerErrorHandler? = null
 
     private var mapListeners = mutableMapOf<MapboxMap, OnStyleLoadedListener>()
+
+    constructor(
+        predictiveCacheOptions: PredictiveCacheOptions,
+        mapboxNavigation: MapboxNavigation
+    ) : this(mapboxNavigation, predictiveCacheOptions)
 
     /**
      * Constructor of [PredictiveCacheController]
@@ -111,6 +119,7 @@ class PredictiveCacheController constructor(
         predictiveCacheControllerErrorHandler: PredictiveCacheControllerErrorHandler? =
             null,
     ) : this(
+        null,
         PredictiveCacheOptions.Builder().apply {
             predictiveCacheNavigationOptions(
                 PredictiveCacheNavigationOptions.Builder().apply {
@@ -128,10 +137,28 @@ class PredictiveCacheController constructor(
     }
 
     init {
-        PredictiveCache.init()
-        PredictiveCache.createNavigationController(
-            predictiveCacheOptions.predictiveCacheNavigationOptions.predictiveCacheLocationOptions
-        )
+        fun startPredictiveCache() {
+            PredictiveCache.init()
+            PredictiveCache.createNavigationController(
+                predictiveCacheOptions.predictiveCacheNavigationOptions.predictiveCacheLocationOptions
+            )
+        }
+        if (mapboxNavigation == null) {
+            startPredictiveCache()
+        } else {
+            val tripSessionStateObserver = object : TripSessionStateObserver {
+                override fun onSessionStateChanged(tripSessionState: TripSessionState) {
+                    when (tripSessionState) {
+                        TripSessionState.STARTED -> {
+                            startPredictiveCache()
+                            mapboxNavigation.unregisterTripSessionStateObserver(this)
+                        }
+                        TripSessionState.STOPPED -> Unit
+                    }
+                }
+            }
+            mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
+        }
     }
 
     /**
@@ -287,7 +314,8 @@ class PredictiveCacheController constructor(
                 if (properties.isError) {
                     handleError(properties.error)
                 } else {
-                    val contentsDictionary = properties.value!!.contents as HashMap<String, Value>
+                    val contentsDictionary =
+                        properties.value!!.contents as HashMap<String, Value>
                     val url = contentsDictionary["url"].toString()
                     if (!url.startsWith(MAPBOX_URL_PREFIX)) {
                         val message =
@@ -333,7 +361,8 @@ class PredictiveCacheController constructor(
         map: MapboxMap,
         tileStore: TileStore
     ) {
-        val offlineManager = OfflineManagerProvider.provideOfflineManager(map.getResourceOptions())
+        val offlineManager =
+            OfflineManagerProvider.provideOfflineManager(map.getResourceOptions())
 
         if (!styleURI.startsWith(MAPBOX_URL_PREFIX)) {
             val message =
