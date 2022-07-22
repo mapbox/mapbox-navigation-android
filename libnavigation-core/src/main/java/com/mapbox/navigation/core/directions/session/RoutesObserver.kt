@@ -11,7 +11,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 fun interface RoutesObserver {
 
     /**
-     * Invoked whenever a list of routes changes.
+     * Invoked whenever a list of routes changes and immediately when registered
+     * (see [MapboxNavigation.registerRoutesObserver]) if non-empty routes are present.
      *
      * The route at index 0, if exist, will be treated as the primary route for 'Active Guidance'.
      *
