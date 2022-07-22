@@ -4,6 +4,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.7.0-beta.2 - 22 July, 2022
+### Changelog
+[Changes between v2.7.0-beta.1 and v2.7.0-beta.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.7.0-beta.1...v2.7.0-beta.2)
+
+#### Features
 - Added `ViewBinderCustomization.infoPanelBinder` that allows installation of a custom info panel layout in `NavigationView`. [#6049](https://github.com/mapbox/mapbox-navigation-android/pull/6049) 
 - Added `ViewStyleCustomization.infoPanelPeekHeight` that allows customization of `NavigationView` info panel bottom sheet peek height. [#6049](https://github.com/mapbox/mapbox-navigation-android/pull/6049) 
 - Added `ViewStyleCustomization.infoPanelMarginStart`, `ViewStyleCustomization.infoPanelMarginEnd`, `ViewStyleCustomization.infoPanelBackground` that allows customization of a `NavigatioView` default info panel margins and background. [#6049](https://github.com/mapbox/mapbox-navigation-android/pull/6049)
@@ -19,6 +26,16 @@ Mapbox welcomes participation and contributions from everyone.
 - Deprecated constructors `PredictiveCacheController(PredictiveCacheLocationOptions, PredictiveCacheControllerErrorHandler)` and `PredictiveCacheController(PredictiveCacheLocationOptions, PredictiveCacheLocationOptions, PredictiveCacheControllerErrorHandler)`. [#6071](https://github.com/mapbox/mapbox-navigation-android/pull/6071)
 - Added `PredictiveCacheController#predictiveCacheControllerErrorHandler` to set and get `PredictiveCacheControllerErrorHandler`. [#6071](https://github.com/mapbox/mapbox-navigation-android/pull/6071)
 - Added `PredictiveCacheMapsOptions`(map specific, that also allow to specify zoom levels for which the map tiles should be cached) and `PredictiveCacheNavigationOptions`(navigation specific) available through the `PredictiveCacheOptions`. [#6071](https://github.com/mapbox/mapbox-navigation-android/pull/6071)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.7.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.7.0-rc.1))
+- Mapbox Navigation Native `v109.0.0`
+- Mapbox Core Common `v22.1.0-rc.1`
+- Mapbox Java `v6.7.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.7.0-beta.1))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+- Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
+
 
 ## Mapbox Navigation SDK 2.7.0-beta.1 - 14 July, 2022
 ### Changelog
