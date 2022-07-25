@@ -6,14 +6,18 @@ import androidx.annotation.IntegerRes
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.utils.bufferFromRawFile
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockVoiceRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 
-object MockRoutesProvider {
+object RoutesProvider {
 
     fun dc_very_short(context: Context): MockRoute {
         val jsonResponse = readRawFileText(context, R.raw.route_response_dc_very_short)
@@ -113,6 +117,20 @@ object MockRoutesProvider {
             ),
             coordinates,
             emptyList()
+        )
+    }
+
+    fun MockRoute.toNavigationRoutes(
+        routeOptionsBlock: RouteOptions.Builder.() -> RouteOptions.Builder = { this }
+    ) : List<NavigationRoute> {
+        return NavigationRoute.create(
+            this.routeResponse,
+            RouteOptions.builder().applyDefaultNavigationOptions()
+                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                .coordinatesList(this.routeWaypoints)
+                .routeOptionsBlock()
+                .build(),
+            RouterOrigin.Custom()
         )
     }
 

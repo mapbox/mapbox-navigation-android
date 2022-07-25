@@ -8,7 +8,8 @@ import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
 
 /**
  * Register [HistoryRecordingStateChangeObserver]. Use this method to receive notifications
- * regarding history recording: when to start, stop or cancel recording.
+ * regarding history recording: when to start, stop or cancel recording
+ * to have each trip session (Free Drive and Active Guidance) recorded independently.
  * NOTE: call this method before [MapboxNavigation.startTripSession] and
  * [MapboxNavigation.setNavigationRoutes] invocations.
  *

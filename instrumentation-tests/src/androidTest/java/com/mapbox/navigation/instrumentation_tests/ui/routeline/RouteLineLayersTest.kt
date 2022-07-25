@@ -16,7 +16,7 @@ import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.BasicNavigationViewActivity
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
-import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
+import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
@@ -44,7 +44,7 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
     }
 
     override fun setupMockLocation(): Location {
-        val directionsResponse = MockRoutesProvider
+        val directionsResponse = RoutesProvider
             .loadDirectionsResponse(activity, R.raw.multiple_routes)
         val origin = directionsResponse.waypoints()!!.map { it.location()!! }
             .first()

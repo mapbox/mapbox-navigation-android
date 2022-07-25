@@ -26,7 +26,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.idling.MapStyleInitIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoute
-import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
+import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
@@ -212,6 +212,6 @@ abstract class SimpleMapViewNavigationTest :
     }
 
     open fun getRoute(context: Context): MockRoute {
-        return MockRoutesProvider.dc_very_short(context)
+        return RoutesProvider.dc_very_short(context)
     }
 }

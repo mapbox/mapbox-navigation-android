@@ -255,6 +255,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @Test
     fun onDestroy_unregisters_HistoryRecordingStateHandler_observers() {
         createMapboxNavigation()
+
         mapboxNavigation.onDestroy()
 
         verify(exactly = 1) { historyRecordingStateHandler.unregisterAllStateChangeObservers() }
@@ -1548,7 +1549,9 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun registerHistoryRecordingStateChangeObserver() {
         val observer = mockk<HistoryRecordingStateChangeObserver>(relaxed = true)
         createMapboxNavigation()
+
         mapboxNavigation.registerHistoryRecordingStateChangeObserver(observer)
+
         verify {
             historyRecordingStateHandler.registerStateChangeObserver(observer)
         }
@@ -1558,7 +1561,9 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun unregisterHistoryRecordingStateChangeObserver() {
         val observer = mockk<HistoryRecordingStateChangeObserver>(relaxed = true)
         createMapboxNavigation()
+
         mapboxNavigation.unregisterHistoryRecordingStateChangeObserver(observer)
+
         verify {
             historyRecordingStateHandler.unregisterStateChangeObserver(observer)
         }

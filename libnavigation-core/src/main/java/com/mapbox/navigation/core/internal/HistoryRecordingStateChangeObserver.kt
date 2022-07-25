@@ -5,7 +5,8 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionState
 
 /**
  * Interface definition for an observer that gets notified whenever
- * some actions are required for history recording.
+ * some actions are required to record each trip session
+ * (Free Drive and Active Guidance) independently.
  */
 @UiThread
 interface HistoryRecordingStateChangeObserver {
