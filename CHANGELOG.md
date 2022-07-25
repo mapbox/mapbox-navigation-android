@@ -6,6 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 - Updated `MapboxRouteLineApiExtensions` so that when coroutine scope calling the suspend functions is canceled, `MapboxRouteLineApi::cancel` is called. [#6094](https://github.com/mapbox/mapbox-navigation-android/pull/6094)
+- :warning: Changed the behaviour of `RoutesObserver` to align it with other observables exposed by `MapboxNavigation`: now the `onRoutesChanged` will be invoked on registration if the routes were explicitly cleared before. [#6097](https://github.com/mapbox/mapbox-navigation-android/pull/6097)  
 
 ## Mapbox Navigation SDK 2.7.0-beta.2 - 22 July, 2022
 ### Changelog

@@ -30,7 +30,12 @@ internal class MapboxDirectionsSession(
      * @see [registerRoutesObserver]
      */
     override var routes: List<NavigationRoute> = emptyList()
-        private set
+        private set(value) {
+            field = value
+            routesInitialized = true
+        }
+
+    private var routesInitialized = false
 
     @RoutesExtra.RoutesUpdateReason
     private var routesUpdateReason: String = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
@@ -44,7 +49,7 @@ internal class MapboxDirectionsSession(
         @RoutesExtra.RoutesUpdateReason routesUpdateReason: String
     ) {
         this.initialLegIndex = initialLegIndex
-        if (this.routes.isEmpty() && routes.isEmpty()) {
+        if (routesInitialized && this.routes.isEmpty() && routes.isEmpty()) {
             return
         }
         RouteCompatibilityCache.setDirectionsSessionResult(routes)
@@ -121,7 +126,7 @@ internal class MapboxDirectionsSession(
      */
     override fun registerRoutesObserver(routesObserver: RoutesObserver) {
         routesObservers.add(routesObserver)
-        if (routes.isNotEmpty()) {
+        if (routesInitialized) {
             routesObserver.onRoutesChanged(RoutesUpdatedResult(routes, routesUpdateReason))
         }
     }
