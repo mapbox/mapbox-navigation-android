@@ -76,7 +76,6 @@ class HistoryRecordingStateChangeObserverTest :
             .toNavigationRoutes()
 
         checkHasNoNextElement(eventsChannel)
-        // start free drive
         mapboxNavigation.startTripSession()
         assertEquals(
             HistoryRecordingStateChangeEvent(
@@ -85,7 +84,6 @@ class HistoryRecordingStateChangeObserverTest :
             ),
             eventsChannel.receive()
         )
-        // stop free drive + start active guidance
         mapboxNavigation.setNavigationRoutes(nonEmptyRoutes)
         assertEquals(
             listOf(
@@ -100,7 +98,7 @@ class HistoryRecordingStateChangeObserverTest :
             ),
             eventsChannel.receive(2)
         )
-        // do nothing
+        // set other non-empty routes - no state transitions - do nothing
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(otherNonEmptyRoutes)
         checkHasNoNextElement(eventsChannel)
         // set invalid routes, but has other non-empty routes - do nothing
@@ -111,7 +109,6 @@ class HistoryRecordingStateChangeObserverTest :
             otherNonEmptyRoutes + nonEmptyRoutes
         )
         checkHasNoNextElement(eventsChannel)
-        // stop active guidance + start free drive
         mapboxNavigation.setNavigationRoutes(emptyList())
         assertEquals(
             listOf(
@@ -126,7 +123,6 @@ class HistoryRecordingStateChangeObserverTest :
             ),
             eventsChannel.receive(2)
         )
-        // stop free drive
         mapboxNavigation.stopTripSession()
         assertEquals(
             HistoryRecordingStateChangeEvent(
@@ -135,10 +131,9 @@ class HistoryRecordingStateChangeObserverTest :
             ),
             eventsChannel.receive()
         )
-        // do nothing
+        // trip session is stopped - still Idle - do nothing
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(nonEmptyRoutes)
         checkHasNoNextElement(eventsChannel)
-        // start active guidance
         mapboxNavigation.startTripSession()
         assertEquals(
             HistoryRecordingStateChangeEvent(
@@ -147,7 +142,6 @@ class HistoryRecordingStateChangeObserverTest :
             ),
             eventsChannel.receive()
         )
-        // stop active guidance
         mapboxNavigation.stopTripSession()
         assertEquals(
             HistoryRecordingStateChangeEvent(
@@ -156,10 +150,9 @@ class HistoryRecordingStateChangeObserverTest :
             ),
             eventsChannel.receive()
         )
-        // do nothing
+        // trip session stopped - still Idle - do nothing
         mapboxNavigation.clearNavigationRoutesAndWaitForUpdate()
         checkHasNoNextElement(eventsChannel)
-        // start free drive
         mapboxNavigation.startTripSession()
         assertEquals(
             HistoryRecordingStateChangeEvent(
@@ -168,9 +161,7 @@ class HistoryRecordingStateChangeObserverTest :
             ),
             eventsChannel.receive()
         )
-        // stop free drive + start active guidance +
-        // + cancel active guidance + start free drive
-        // because of the invalid route
+        // immediately cancel active guidance because of the invalid route
         mapboxNavigation.setNavigationRoutes(otherNonEmptyRoutes, initialLegIndex = 16)
         assertEquals(
             listOf(
@@ -193,7 +184,6 @@ class HistoryRecordingStateChangeObserverTest :
             ),
             eventsChannel.receive(4)
         )
-        // stop free drive
         mapboxNavigation.stopTripSession()
         assertEquals(
             HistoryRecordingStateChangeEvent(
@@ -247,7 +237,6 @@ class HistoryRecordingStateChangeObserverTest :
             ),
             eventsChannel.receive(3)
         )
-        // wait for refresh
         mapboxNavigation.routesUpdates()
             .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
             .first()
@@ -296,7 +285,6 @@ class HistoryRecordingStateChangeObserverTest :
             ),
             eventsChannel.receive(3)
         )
-        // wait for reroute
         mockLocationReplayerRule.loopUpdate(offRouteLocationUpdate, times = 5)
         mapboxNavigation.routesUpdates()
             .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
