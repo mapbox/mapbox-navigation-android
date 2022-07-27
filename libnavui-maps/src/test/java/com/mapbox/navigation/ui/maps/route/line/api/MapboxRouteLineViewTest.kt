@@ -283,6 +283,9 @@ class MapboxRouteLineViewTest {
         val topLevelLayer = mockk<LineLayer>(relaxed = true)
         val style = mockk<Style> {
             every {
+                styleLayerExists(any())
+            } returns true
+            every {
                 getLayer(LAYER_GROUP_1_TRAFFIC)
             } returns primaryRouteTrafficLayer
             every {
@@ -363,6 +366,7 @@ class MapboxRouteLineViewTest {
         val primaryTrailLayer = mockk<LineLayer>(relaxed = true)
         val primaryTrailCasingLayer = mockk<LineLayer>(relaxed = true)
         val style = mockk<Style> {
+            every { styleLayerExists(any()) } returns true
             every {
                 getLayer(LAYER_GROUP_1_TRAFFIC)
             } returns primaryRouteTrafficLayer
@@ -1033,6 +1037,7 @@ class MapboxRouteLineViewTest {
         val route1Traffic = mockk<LineLayer>(relaxed = true)
         val route1Restricted = mockk<LineLayer>(relaxed = true)
         val style = mockk<Style> {
+            every { styleLayerExists(any()) } returns true
             every {
                 getLayer(LAYER_GROUP_1_TRAFFIC)
             } returns route1Traffic
@@ -1086,6 +1091,7 @@ class MapboxRouteLineViewTest {
         val route1Traffic = mockk<LineLayer>(relaxed = true)
         val route1Restricted = mockk<LineLayer>(relaxed = true)
         val style = mockk<Style> {
+            every { styleLayerExists(any()) } returns true
             every {
                 getLayer(LAYER_GROUP_1_TRAFFIC)
             } returns route1Traffic
@@ -1151,6 +1157,7 @@ class MapboxRouteLineViewTest {
         val route3Traffic = mockk<LineLayer>(relaxed = true)
         val route3Restricted = mockk<LineLayer>(relaxed = true)
         val style = mockk<Style> {
+            every { styleLayerExists(any()) } returns true
             every {
                 getLayer(LAYER_GROUP_1_TRAIL_CASING)
             } returns route1TrailCasing
@@ -1268,6 +1275,7 @@ class MapboxRouteLineViewTest {
         val route3Traffic = mockk<LineLayer>(relaxed = true)
         val route3Restricted = mockk<LineLayer>(relaxed = true)
         val style = mockk<Style> {
+            every { styleLayerExists(any()) } returns true
             every {
                 getLayer(LAYER_GROUP_1_TRAIL_CASING)
             } returns route1TrailCasing
@@ -1599,6 +1607,7 @@ class MapboxRouteLineViewTest {
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val waypointLayer = mockk<LineLayer>(relaxed = true)
         val style = mockk<Style> {
+            every { styleLayerExists(any()) } returns true
             every { getLayer(WAYPOINT_LAYER_ID) } returns waypointLayer
         }.also {
             mockCheckForLayerInitialization(it)
@@ -1618,6 +1627,7 @@ class MapboxRouteLineViewTest {
         val waypointLayer = mockk<LineLayer>(relaxed = true)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val style = mockk<Style> {
+            every { styleLayerExists(any()) } returns true
             every { getLayer(WAYPOINT_LAYER_ID) } returns waypointLayer
         }.also {
             mockCheckForLayerInitialization(it)
