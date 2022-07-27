@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Added an option to hide or show alternative routes during route preview and active guidance. [#6100](https://github.com/mapbox/mapbox-navigation-android/pull/6100)
 
 ## androidauto-v0.5.0 - Jul 22, 2022
 ### Changelog

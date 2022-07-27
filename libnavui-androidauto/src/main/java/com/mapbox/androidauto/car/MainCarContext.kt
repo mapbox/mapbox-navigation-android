@@ -14,6 +14,7 @@ import com.mapbox.search.SearchEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @OptIn(MapboxExperimental::class)
 class MainCarContext(
@@ -36,6 +37,8 @@ class MainCarContext(
     val maneuverApi: MapboxManeuverApi by lazy {
         MapboxManeuverApi(distanceFormatter)
     }
+
+    val routeAlternativesEnabled = MutableStateFlow(value = true)
 
     fun getJobControl(): JobControl {
         val supervisorJob = SupervisorJob()
