@@ -65,6 +65,7 @@ class CarSpeedLimitRenderer(
         logAndroidAuto("CarSpeedLimitRenderer carMapSurface detached")
         mainCarContext.mapboxNavigation.unregisterLocationObserver(locationObserver)
         speedLimitWidget?.let { mapboxCarMapSurface.mapSurface.removeWidget(it) }
+        speedLimitWidget = null
     }
 
     override fun onVisibleAreaChanged(visibleArea: Rect, edgeInsets: EdgeInsets) {

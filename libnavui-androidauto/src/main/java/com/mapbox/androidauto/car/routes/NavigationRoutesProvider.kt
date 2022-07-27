@@ -18,7 +18,7 @@ internal class NavigationRoutesProvider(private val mapboxNavigation: MapboxNavi
     private data class RoutesObserverAdapter(val listener: RoutesListener) : RoutesObserver {
 
         override fun onRoutesChanged(result: RoutesUpdatedResult) {
-            listener.onRoutesChanged(result.navigationRoutes.take(1))
+            listener.onRoutesChanged(result.navigationRoutes)
         }
     }
 }
