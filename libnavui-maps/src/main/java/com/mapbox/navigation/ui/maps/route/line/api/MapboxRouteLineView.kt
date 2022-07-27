@@ -573,7 +573,9 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
     }
 
     private fun updateLayerVisibility(style: Style, layerId: String, visibility: Visibility) {
-        style.getLayer(layerId)?.visibility(visibility)
+        if (style.styleLayerExists(layerId)) {
+            style.getLayer(layerId)?.visibility(visibility)
+        }
     }
 
     private fun updateSource(style: Style, sourceId: String, featureCollection: FeatureCollection) {
@@ -587,8 +589,10 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         expressionProvider: RouteLineExpressionProvider?
     ): (Style) -> Unit = { style: Style ->
         ifNonNull(expressionProvider) { provider ->
-            style.getLayer(layerId)?.let {
-                (it as LineLayer).lineTrimOffset(provider.generateExpression())
+            if (style.styleLayerExists(layerId)) {
+                style.getLayer(layerId)?.let {
+                    (it as LineLayer).lineTrimOffset(provider.generateExpression())
+                }
             }
         }
     }
@@ -604,8 +608,10 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
 
     private fun updateLineGradient(style: Style, expression: Expression, vararg layerIds: String) {
         layerIds.forEach { layerId ->
-            style.getLayer(layerId)?.let {
-                (it as LineLayer).lineGradient(expression)
+            if (style.styleLayerExists(layerId)) {
+                style.getLayer(layerId)?.let {
+                    (it as LineLayer).lineGradient(expression)
+                }
             }
         }
     }

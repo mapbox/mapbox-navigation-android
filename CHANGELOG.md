@@ -27,6 +27,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Deprecated constructors `PredictiveCacheController(PredictiveCacheLocationOptions, PredictiveCacheControllerErrorHandler)` and `PredictiveCacheController(PredictiveCacheLocationOptions, PredictiveCacheLocationOptions, PredictiveCacheControllerErrorHandler)`. [#6071](https://github.com/mapbox/mapbox-navigation-android/pull/6071)
 - Added `PredictiveCacheController#predictiveCacheControllerErrorHandler` to set and get `PredictiveCacheControllerErrorHandler`. [#6071](https://github.com/mapbox/mapbox-navigation-android/pull/6071)
 - Added `PredictiveCacheMapsOptions`(map specific, that also allow to specify zoom levels for which the map tiles should be cached) and `PredictiveCacheNavigationOptions`(navigation specific) available through the `PredictiveCacheOptions`. [#6071](https://github.com/mapbox/mapbox-navigation-android/pull/6071)
+- Reduced log entries related to getting map layers. [#6101](https://github.com/mapbox/mapbox-navigation-android/pull/6101)
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
