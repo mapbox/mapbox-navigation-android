@@ -70,6 +70,15 @@ class RouterWrapperTests {
     private val routerRefreshCallback: RouteRefreshCallback = mockk(relaxed = true)
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
     private val routeUrl = routerOptions.toUrl(accessToken).toString()
+    private val currentGeometryIndexProvider = object : Function0<Int?> {
+
+        private var numberOfInvocations = 0
+
+        override fun invoke(): Int? {
+            numberOfInvocations++
+            return numberOfInvocations * 10 // 10, 20, 30, ...
+        }
+    }
 
     private val testRouteFixtures = TestRouteFixtures()
 
@@ -137,7 +146,8 @@ class RouterWrapperTests {
         routerWrapper = RouterWrapper(
             accessToken,
             mapboxNativeNavigator.router,
-            ThreadController()
+            ThreadController(),
+            currentGeometryIndexProvider
         )
     }
 
@@ -337,7 +347,7 @@ class RouterWrapperTests {
                 1,
                 0,
                 RoutingProfile(routerOptions.profile().mapToRoutingMode(), routerOptions.user()),
-                null
+//                10
             )
 
             verify(exactly = 1) {

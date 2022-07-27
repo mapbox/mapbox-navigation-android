@@ -98,7 +98,10 @@ interface MapboxNativeNavigator {
      *
      * @param route [DirectionsRoute]
      */
-    suspend fun refreshRoute(route: NavigationRoute): Expected<String, List<RouteAlternative>>
+    suspend fun refreshRoute(
+        route: NavigationRoute,
+        geometryIndex: Int?
+    ): Expected<String, List<RouteAlternative>>
 
     /**
      * Follows a new leg of the already loaded directions.

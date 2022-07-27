@@ -44,6 +44,7 @@ import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.TilesConfig
 import io.mockk.Ordering
 import io.mockk.Runs
+import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coVerifyOrder
@@ -392,13 +393,24 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
+    fun current_route_geometry_index_provider() {
+        createMapboxNavigation()
+        verify(exactly = 1) {
+            tripSession.registerRouteProgressObserver(currentGeometryIndexProvider)
+        }
+    }
+
+    @Test
     fun arrival_controller_register() {
         createMapboxNavigation()
+        clearMocks(tripSession, answers = false)
         val arrivalController: ArrivalController = mockk()
 
         mapboxNavigation.setArrivalController(arrivalController)
 
-        verify { tripSession.registerRouteProgressObserver(any<ArrivalProgressObserver>()) }
+        verify(exactly = 1) {
+            tripSession.registerRouteProgressObserver(ofType(ArrivalProgressObserver::class))
+        }
     }
 
     @Test

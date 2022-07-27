@@ -99,7 +99,10 @@ internal class MapboxTripSession(
             RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
                 if (routes.isNotEmpty()) {
                     val primaryRoute = routes.first()
-                    val alternatives = navigator.refreshRoute(primaryRoute)
+                    val alternatives = navigator.refreshRoute(
+                        primaryRoute,
+                        routeProgress?.currentRouteGeometryIndex
+                    )
                     roadObjects = getRouteInitInfo(primaryRoute.nativeRoute().routeInfo)
                         ?.roadObjects
                         ?: emptyList()

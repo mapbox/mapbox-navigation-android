@@ -4,6 +4,7 @@ import android.util.LruCache
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
+import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
@@ -89,6 +90,53 @@ object DecodeUtils {
         cacheRoute(route = this, precision)
         return legs()?.map { leg ->
             leg.steps()?.map { step ->
+                stepsGeometryDecodeCache.getOrDecode(step.geometry(), precision)
+            }.orEmpty()
+        }.orEmpty()
+    }
+
+    /**
+     * Decodes geometries of all [RouteLeg]s in a [DirectionsRoute] to [LineString]s
+     * and caches the results.
+     * No decoding is performed for [RouteLeg]s, that already have a cached result available.
+     *
+     * @return decoded [LineString]s. The resulting collection is a nested list of:
+     * ```
+     * [ legs
+     *   { flat steps' geometry decoded to a line string }
+     * ]
+     * ```
+     */
+    @JvmStatic
+    fun DirectionsRoute.legsGeometryToLineString(): List<LineString> {
+        val precision = precision()
+        cacheRoute(route = this, precision)
+        return legs()?.flatMap { leg ->
+            leg.steps()?.map { step ->
+                val points = stepsGeometryDecodeCache.getOrDecode(step.geometry(), precision)
+                LineString.fromLngLats(points)
+            }.orEmpty()
+        }.orEmpty()
+    }
+
+    /**
+     * Decodes geometries of all [RouteLeg]s in a [DirectionsRoute] to [List]s of [List] of [Point]s
+     * and caches the results.
+     * No decoding is performed for [RouteLeg]s, that already have a cached result available.
+     *
+     * @return decoded [List]s of [List] of [Point]s. The resulting collection is a nested list of:
+     * ```
+     * [ legs
+     *   { flat steps' geometry decoded to a list of points }
+     * ]
+     * ```
+     */
+    @JvmStatic
+    fun DirectionsRoute.legsGeometryToPoints(): List<List<Point>> {
+        val precision = precision()
+        cacheRoute(route = this, precision)
+        return legs()?.map { leg ->
+            leg.steps()?.flatMap { step ->
                 stepsGeometryDecodeCache.getOrDecode(step.geometry(), precision)
             }.orEmpty()
         }.orEmpty()

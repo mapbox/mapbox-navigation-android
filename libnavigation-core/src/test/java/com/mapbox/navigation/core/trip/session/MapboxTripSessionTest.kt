@@ -113,7 +113,10 @@ class MapboxTripSessionTest {
     private val tripStatus: TripStatus = mockk(relaxUnitFun = true)
     private val navigationStatusOrigin: NavigationStatusOrigin = mockk()
     private val navigationStatus: NavigationStatus = mockk(relaxed = true)
-    private val routeProgress: RouteProgress = mockk()
+    private val geometryIndex = 23
+    private val routeProgress: RouteProgress = mockk {
+        every { currentRouteGeometryIndex } returns geometryIndex
+    }
     private val threadController = spyk<ThreadController>()
 
     private val parentJob = SupervisorJob()
@@ -143,7 +146,7 @@ class MapboxTripSessionTest {
         coEvery { navigator.updateLocation(any()) } returns false
         coEvery { navigator.setRoutes(any(), any(), any()) } returns createSetRouteResult()
         coEvery { navigator.setAlternativeRoutes(any()) } returns listOf()
-        coEvery { navigator.refreshRoute(any()) } returns ExpectedFactory.createValue(listOf())
+        coEvery { navigator.refreshRoute(any(), any()) } returns ExpectedFactory.createValue(listOf())
         every { navigationStatus.getTripStatusFrom(any()) } returns tripStatus
 
         every { navigationStatus.location } returns fixLocation
@@ -576,12 +579,24 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun checkNavigatorRefreshRouteWhenReasonIsRefresh() = coroutineRule.runBlockingTest {
+    fun checkNavigatorRefreshRouteWhenReasonIsRefreshNoGeometryIndex() = coroutineRule.runBlockingTest {
         tripSession.start(true)
 
         tripSession.setRoutes(routes, legIndex, RoutesExtra.ROUTES_UPDATE_REASON_REFRESH)
 
-        coVerify(exactly = 1) { navigator.refreshRoute(routes[0]) }
+        coVerify(exactly = 1) { navigator.refreshRoute(routes[0], null) }
+        coVerify(exactly = 0) { navigator.setRoutes(any()) }
+        coVerify(exactly = 0) { navigator.setAlternativeRoutes(any()) }
+    }
+
+    @Test
+    fun checkNavigatorRefreshRouteWhenReasonIsRefreshHasGeometryIndex() = coroutineRule.runBlockingTest {
+        tripSession.start(true)
+        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+
+        tripSession.setRoutes(routes, legIndex, RoutesExtra.ROUTES_UPDATE_REASON_REFRESH)
+
+        coVerify(exactly = 1) { navigator.refreshRoute(routes[0], geometryIndex) }
         coVerify(exactly = 0) { navigator.setRoutes(any()) }
         coVerify(exactly = 0) { navigator.setAlternativeRoutes(any()) }
     }
@@ -601,7 +616,7 @@ class MapboxTripSessionTest {
             coVerify(exactly = 0) {
                 navigator.setRoutes(routes.first(), legIndex, any())
             }
-            coVerify(exactly = 0) { navigator.refreshRoute(any()) }
+            coVerify(exactly = 0) { navigator.refreshRoute(any(), any()) }
         }
 
     @Test
@@ -683,7 +698,7 @@ class MapboxTripSessionTest {
         coroutineRule.runBlockingTest {
             val mockAlternativesMetadata = listOf<RouteAlternative>(mockk())
             coEvery {
-                navigator.refreshRoute(any())
+                navigator.refreshRoute(any(), any())
             } returns ExpectedFactory.createValue(mockAlternativesMetadata)
 
             tripSession.start(true)
@@ -704,7 +719,7 @@ class MapboxTripSessionTest {
         coroutineRule.runBlockingTest {
             val error = "some error"
             coEvery {
-                navigator.refreshRoute(any())
+                navigator.refreshRoute(any(), any())
             } returns ExpectedFactory.createError(error)
 
             tripSession.start(true)

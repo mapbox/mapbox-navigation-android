@@ -57,6 +57,7 @@ class RouteProgress internal constructor(
     val upcomingRoadObjects: List<UpcomingRoadObject>,
     val stale: Boolean,
     val routeAlternativeId: String?,
+    val currentRouteGeometryIndex: Int?,
 ) {
 
     /**
@@ -90,6 +91,8 @@ class RouteProgress internal constructor(
         if (remainingWaypoints != other.remainingWaypoints) return false
         if (upcomingRoadObjects != other.upcomingRoadObjects) return false
         if (stale != other.stale) return false
+        if (routeAlternativeId != other.routeAlternativeId) return false
+        if (currentRouteGeometryIndex != other.currentRouteGeometryIndex) return false
 
         return true
     }
@@ -112,6 +115,8 @@ class RouteProgress internal constructor(
         result = 31 * result + remainingWaypoints
         result = 31 * result + upcomingRoadObjects.hashCode()
         result = 31 * result + stale.hashCode()
+        result = 31 * result + (routeAlternativeId?.hashCode() ?: 0)
+        result = 31 * result + (currentRouteGeometryIndex ?: 0)
         return result
     }
 
@@ -133,7 +138,9 @@ class RouteProgress internal constructor(
             "fractionTraveled=$fractionTraveled, " +
             "remainingWaypoints=$remainingWaypoints, " +
             "upcomingRoadObjects=$upcomingRoadObjects, " +
-            "stale=$stale" +
+            "stale=$stale, " +
+            "routeAlternativeId=$routeAlternativeId, " +
+            "currentRouteGeometryIndex=$currentRouteGeometryIndex" +
             ")"
     }
 }

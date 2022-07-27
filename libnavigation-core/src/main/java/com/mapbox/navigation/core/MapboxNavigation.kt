@@ -286,6 +286,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         )
     }
 
+    private val currentGeometryIndexProvider =
+        NavigationComponentProvider.createCurrentRouteGeometryIndexProvider()
+
     // Router provided via @Modules, might be outer
     private val moduleRouter: NavigationRouter by lazy {
         val result = MapboxModuleProvider.createModule<Router>(MapboxModuleType.NavigationRouter) {
@@ -294,7 +297,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                     accessToken
                         ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER),
                     nativeRouter,
-                    threadController
+                    threadController,
+                    currentGeometryIndexProvider
                 )
             )
         }
@@ -475,6 +479,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             threadController,
         )
 
+        tripSession.registerRouteProgressObserver(currentGeometryIndexProvider)
         tripSession.registerStateObserver(navigationSession)
         tripSession.registerStateObserver(historyRecordingStateHandler)
 

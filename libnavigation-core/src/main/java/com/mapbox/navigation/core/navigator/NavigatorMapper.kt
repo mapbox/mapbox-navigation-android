@@ -198,6 +198,8 @@ private fun NavigationStatus.getRouteProgress(
             upcomingRouteAlerts.toUpcomingRoadObjects(),
             stale,
             locatedAlternativeRouteId,
+            null,
+//            geometryIndex,
         )
     }
     return null

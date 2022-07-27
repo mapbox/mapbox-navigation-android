@@ -47,6 +47,7 @@ class RouterWrapper(
     private val accessToken: String,
     private val router: RouterInterface,
     private val threadController: ThreadController,
+    private val currentRouteGeometryIndexProvider: Function0<Int?>,
 ) : NavigationRouter, InternalRouter {
 
     private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
@@ -183,12 +184,14 @@ class RouterWrapper(
             return REQUEST_FAILURE
         }
 
+        val currentRouteGeometryIndex = currentRouteGeometryIndexProvider()
+
         val refreshOptions = RouteRefreshOptions(
             requestUuid,
             routeIndex,
             legIndex,
             RoutingProfile(routeOptions.profile().mapToRoutingMode(), routeOptions.user()),
-            null
+            //            currentRouteGeometryIndex,
         )
 
         return router.getRouteRefresh(
@@ -237,6 +240,7 @@ class RouterWrapper(
                                 .mapValue { routeRefresh ->
                                     route.refreshRoute(
                                         initialLegIndex = refreshOptions.legIndex,
+                                        currentRouteGeometryIndex = currentRouteGeometryIndex,
                                         legAnnotations = routeRefresh.legs()?.map {
                                             it.annotation()
                                         },
@@ -253,7 +257,9 @@ class RouterWrapper(
                                     )
                                 )
                             },
-                            { callback.onRefreshReady(it) },
+                            {
+                                callback.onRefreshReady(it)
+                            },
                         )
                     }
                 }
