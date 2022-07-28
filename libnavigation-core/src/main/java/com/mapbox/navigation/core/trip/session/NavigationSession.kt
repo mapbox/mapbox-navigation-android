@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.trip.session
 
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
@@ -12,6 +13,7 @@ import java.util.concurrent.CopyOnWriteArraySet
 internal class NavigationSession : RoutesObserver, TripSessionStateObserver {
 
     private val stateObservers = CopyOnWriteArraySet<NavigationSessionStateObserver>()
+    private val stateObserversV2 = CopyOnWriteArraySet<NavigationSessionStateObserverV2>()
 
     internal var state: NavigationSessionState = Idle
         set(value) {
@@ -23,13 +25,17 @@ internal class NavigationSession : RoutesObserver, TripSessionStateObserver {
             stateObservers.forEach { it.onNavigationSessionStateChanged(value) }
         }
 
-    private var hasRoutes = false
+    internal var stateV2: NavigationSessionStateV2 = NavigationSessionStateV2.Idle
         set(value) {
-            if (field != value) {
-                field = value
-                updateState()
+            if (field == value) {
+                return
             }
+            field = value
+
+            stateObserversV2.forEach { it.onNavigationSessionStateChanged(value) }
         }
+
+    private var hasRoutes = false
 
     private var isDriving = false
         set(value) {
@@ -39,11 +45,16 @@ internal class NavigationSession : RoutesObserver, TripSessionStateObserver {
             }
         }
 
+    private var isPreview = false
+
     private fun updateState() {
-        state = NavigationSessionUtils.getNewNavigationSessionState(
-            isDriving = isDriving,
-            hasRoutes = hasRoutes
-        )
+        stateV2 = NavigationSessionUtils.getNewStateV2(isDriving, hasRoutes, isPreview)
+        state = when (stateV2) {
+            is NavigationSessionStateV2.ActiveGuidance -> ActiveGuidance(stateV2.sessionId)
+            is NavigationSessionStateV2.FreeDrive -> FreeDrive(stateV2.sessionId)
+            NavigationSessionStateV2.Idle -> Idle
+            is NavigationSessionStateV2.RoutePreview -> FreeDrive(stateV2.sessionId)
+        }
     }
 
     internal fun registerNavigationSessionStateObserver(
@@ -59,12 +70,31 @@ internal class NavigationSession : RoutesObserver, TripSessionStateObserver {
         stateObservers.remove(navigationSessionStateObserver)
     }
 
+    internal fun registerNavigationSessionStateObserverV2(
+        navigationSessionStateObserver: NavigationSessionStateObserverV2
+    ) {
+        stateObserversV2.add(navigationSessionStateObserver)
+        navigationSessionStateObserver.onNavigationSessionStateChanged(stateV2)
+    }
+
+    internal fun unregisterNavigationSessionStateObserverV2(
+        navigationSessionStateObserver: NavigationSessionStateObserverV2
+    ) {
+        stateObserversV2.remove(navigationSessionStateObserver)
+    }
+
     internal fun unregisterAllNavigationSessionStateObservers() {
         stateObservers.clear()
     }
 
     override fun onRoutesChanged(result: RoutesUpdatedResult) {
-        hasRoutes = result.navigationRoutes.isNotEmpty()
+        val newIsPreview = result.reason == RoutesExtra.ROUTES_UPDATE_REASON_PREVIEW
+        val newNasRoutes = result.navigationRoutes.isNotEmpty()
+        if (newIsPreview != isPreview || newNasRoutes != hasRoutes) {
+            isPreview = newIsPreview
+            hasRoutes = newNasRoutes
+            updateState()
+        }
     }
 
     override fun onSessionStateChanged(tripSessionState: TripSessionState) {
@@ -122,4 +152,43 @@ sealed class NavigationSessionState {
     data class ActiveGuidance internal constructor(
         override val sessionId: String
     ) : NavigationSessionState()
+}
+
+sealed class NavigationSessionStateV2 {
+
+    /**
+     * Random session UUID.
+     * This is generated internally based on the current state within a trip session.
+     * I.e. will change when transitioning across states of a trip session. Empty when [Idle].
+     *
+     * Useful to use it in combination with the [MapboxHistoryRecorder].
+     *
+     * @see [TripSessionState]
+     */
+    abstract val sessionId: String
+
+    /**
+     * Idle state
+     */
+    object Idle : NavigationSessionStateV2() {
+        override val sessionId = ""
+    }
+
+    /**
+     * Free Drive state
+     */
+    data class FreeDrive internal constructor(
+        override val sessionId: String
+    ) : NavigationSessionStateV2()
+
+    /**
+     * Active Guidance state
+     */
+    data class ActiveGuidance internal constructor(
+        override val sessionId: String
+    ) : NavigationSessionStateV2()
+
+    data class RoutePreview internal constructor(
+        override val sessionId: String
+    ) : NavigationSessionStateV2()
 }

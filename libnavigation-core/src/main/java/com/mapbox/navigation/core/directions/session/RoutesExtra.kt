@@ -19,6 +19,9 @@ object RoutesExtra {
      */
     const val ROUTES_UPDATE_REASON_NEW = "ROUTES_UPDATE_REASON_NEW"
 
+
+    const val ROUTES_UPDATE_REASON_PREVIEW = "ROUTES_UPDATE_REASON_PREVIEW"
+
     /**
      * Routes update reason is **alternative routes**.
      * @see [RoutesObserver]
@@ -48,6 +51,7 @@ object RoutesExtra {
         ROUTES_UPDATE_REASON_ALTERNATIVE,
         ROUTES_UPDATE_REASON_REROUTE,
         ROUTES_UPDATE_REASON_REFRESH,
+        ROUTES_UPDATE_REASON_PREVIEW,
     )
     annotation class RoutesUpdateReason
 }

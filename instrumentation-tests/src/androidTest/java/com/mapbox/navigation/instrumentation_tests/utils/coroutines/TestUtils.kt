@@ -100,18 +100,24 @@ suspend fun MapboxNavigation.setNavigationRoutesAndWaitForAlternativesUpdate(
         waitForAlternativeRoute()
     }
 
-suspend fun MapboxNavigation.waitForNewRoute() {
+suspend fun MapboxNavigation.waitForNewRoute(): RoutesUpdatedResult =
     waitForRoutesUpdate(RoutesExtra.ROUTES_UPDATE_REASON_NEW)
-}
+
+suspend fun MapboxNavigation.waitForRoutesCleanUp(): RoutesUpdatedResult =
+    waitForRoutesUpdate(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
 
 suspend fun MapboxNavigation.waitForAlternativeRoute() {
     waitForRoutesUpdate(RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE)
 }
 
+suspend fun MapboxNavigation.waitForPreviewRoute(): RoutesUpdatedResult {
+    return waitForRoutesUpdate(RoutesExtra.ROUTES_UPDATE_REASON_PREVIEW)
+}
+
 private suspend fun MapboxNavigation.waitForRoutesUpdate(
     @RoutesExtra.RoutesUpdateReason reason: String
-) {
-    routesUpdates()
+): RoutesUpdatedResult {
+    return routesUpdates()
         .filter { it.reason == reason }
         .first()
 }

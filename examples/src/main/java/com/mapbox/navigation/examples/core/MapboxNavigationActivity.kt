@@ -10,6 +10,7 @@ import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
@@ -52,6 +53,7 @@ import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRoutes
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
@@ -88,6 +90,8 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     // location puck integration
     private val navigationLocationProvider = NavigationLocationProvider()
+
+    private val waypoints = mutableListOf<Point>()
 
     // camera
     private lateinit var navigationCamera: NavigationCamera
@@ -229,15 +233,19 @@ class MapboxNavigationActivity : AppCompatActivity() {
         }
 
     private val routesObserver = RoutesObserver { result ->
-        if (result.routes.isNotEmpty()) {
+        if (result.navigationRoutes.isNotEmpty()) {
             // generate route geometries asynchronously and render them
-            CoroutineScope(Dispatchers.Main).launch {
-                val result = routeLineAPI.setRoutes(
-                    listOf(RouteLine(result.routes.first(), null))
-                )
-                val style = mapboxMap.getStyle()
-                if (style != null) {
-                    routeLineView.renderRouteDrawData(style, result)
+            lifecycleScope.launch {
+                routeLineAPI.setNavigationRoutes(
+                    newRoutes = result.navigationRoutes,
+                    alternativeRoutesMetadata = mapboxNavigation.getAlternativeMetadataFor(
+                        result.navigationRoutes
+                    )
+                ).apply {
+                    routeLineView.renderRouteDrawData(
+                        binding.mapView.getMapboxMap().getStyle()!!,
+                        this
+                    )
                 }
             }
 
@@ -399,7 +407,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
             routeLineView.initializeLayers(style)
             // add long click listener that search for a route to the clicked destination
             binding.mapView.gestures.addOnMapLongClickListener { point ->
-                findRoute(point)
+                addWaypoint(point)
                 true
             }
         }
@@ -460,24 +468,26 @@ class MapboxNavigationActivity : AppCompatActivity() {
         voiceInstructionsPlayer.shutdown()
     }
 
-    private fun findRoute(destination: Point) {
+    private fun addWaypoint(destination: Point) {
         val origin = navigationLocationProvider.lastLocation?.let {
             Point.fromLngLat(it.longitude, it.latitude)
         } ?: return
+
+        waypoints.add(destination)
 
         mapboxNavigation.requestRoutes(
             RouteOptions.builder()
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
-                .coordinatesList(listOf(origin, destination))
-                .layersList(listOf(mapboxNavigation.getZLevel(), null))
+                .alternatives(true)
+                .coordinatesList(listOf(origin) + waypoints)
                 .build(),
             object : NavigationRouterCallback {
                 override fun onRoutesReady(
                     routes: List<NavigationRoute>,
                     routerOrigin: RouterOrigin
                 ) {
-                    setRouteAndStartNavigation(routes)
+                    setRoutePreview(routes)
                 }
 
                 override fun onFailure(
@@ -494,9 +504,25 @@ class MapboxNavigationActivity : AppCompatActivity() {
         )
     }
 
-    private fun setRouteAndStartNavigation(route: List<NavigationRoute>) {
+
+
+    private fun setRoutePreview(route: List<NavigationRoute>) {
         // set route
-        mapboxNavigation.setNavigationRoutes(route)
+        mapboxNavigation.previewNavigationRoutes(route)
+        binding.navigate.visibility = VISIBLE
+        binding.navigate.setOnClickListener {
+            setRoute()
+            binding.navigate.visibility = INVISIBLE
+        }
+
+        // move the camera to overview when new route is available
+        navigationCamera.requestNavigationCameraToOverview()
+    }
+
+    private fun setRoute() {
+        // set route
+        mapboxNavigation.setNavigationRoutes(mapboxNavigation.getPreviewedNavigationRoutes())
+        waypoints.clear()
 
         // show UI elements
         binding.soundButton.visibility = VISIBLE
@@ -506,12 +532,12 @@ class MapboxNavigationActivity : AppCompatActivity() {
         binding.soundButton.unmuteAndExtend(2000L)
 
         // move the camera to overview when new route is available
-        navigationCamera.requestNavigationCameraToOverview()
+        navigationCamera.requestNavigationCameraToFollowing()
     }
 
     private fun clearRouteAndStopNavigation() {
         // clear
-        mapboxNavigation.setRoutes(listOf())
+        mapboxNavigation.clearRoutes()
 
         // hide UI elements
         binding.soundButton.visibility = INVISIBLE

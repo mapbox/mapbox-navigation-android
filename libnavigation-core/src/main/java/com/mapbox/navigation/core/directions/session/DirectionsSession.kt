@@ -16,6 +16,8 @@ internal interface DirectionsSession : RouteRefresh {
      */
     val routes: List<NavigationRoute>
 
+    val previewedRoutes: List<NavigationRoute>
+
     val initialLegIndex: Int
 
     fun setRoutes(

@@ -22,6 +22,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.internal.NavigationRouterV2
+import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -101,6 +102,7 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuid
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.FreeDrive
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.Idle
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
+import com.mapbox.navigation.core.trip.session.NavigationSessionStateV2
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -130,6 +132,7 @@ import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.IncidentsOptions
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.PollingConfig
+import com.mapbox.navigator.RouteParser
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
@@ -654,6 +657,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @see [registerNavigationSessionStateObserver]
      */
     fun getNavigationSessionState(): NavigationSessionState = navigationSession.state
+    fun getNavigationSessionStateV2(): NavigationSessionStateV2 = navigationSession.stateV2
 
     /**
      * Provides the current Z-Level. Can be used to build a route from a proper level of a road.
@@ -828,6 +832,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
                 initialLegIndex
             )
+            directionsSession.routes == routes -> {
+                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+            }
             routes.first() == directionsSession.routes.firstOrNull() ->
                 SetAlternativeRoutesInfo(initialLegIndex)
             else -> BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
@@ -837,6 +844,31 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             setRoutesInfo,
             callback,
         )
+    }
+
+    fun previewNavigationRoutes(
+        routes: List<NavigationRoute>,
+        initialLegIndex: Int = 0,
+    ) {
+        threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
+            routeUpdateMutex.withLock {
+                val alternatives = routes.drop(1)
+                val routesData = RouteParser.createRoutesData(
+                    routes.first().nativeRoute(),
+                    alternatives.map { it.nativeRoute() }
+                )
+                routeAlternativesController.processAlternativesMetadata(
+                    routes,
+                    routesData.alternativeRoutes()
+                )
+                directionsSession.setRoutes(routes, BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_PREVIEW, initialLegIndex))
+            }
+        }
+    }
+
+
+    fun clearRoutes() {
+        setNavigationRoutes(emptyList())
     }
 
     /**
@@ -968,6 +1000,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @return a list of [NavigationRoute]s
      */
     fun getNavigationRoutes(): List<NavigationRoute> = directionsSession.routes
+
+    fun getPreviewedNavigationRoutes(): List<NavigationRoute> = directionsSession.previewedRoutes
 
     /**
      * Requests an alternative route using the original [RouteOptions] associated with

@@ -13,6 +13,8 @@ import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.BasicSetRoutesInfo
 import com.mapbox.navigation.core.NavigationComponentProvider
+import com.mapbox.navigation.testing.factories.createDirectionsResponse
+import com.mapbox.navigation.testing.factories.createNavigationRoutes
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
@@ -385,5 +387,69 @@ class MapboxDirectionsSessionTest {
         session.setRoutes(routes, mockSetRoutesInfo)
 
         verify(exactly = 0) { observer.onRoutesChanged(any()) }
+    }
+
+    @Test
+    fun `set previewed route`() {
+        session.registerRoutesObserver(observer)
+        val testRoutes = createNavigationRoutes()
+
+        session.setRoutes(
+            testRoutes,
+            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_PREVIEW, 0)
+        )
+
+        assertEquals(testRoutes, session.previewedRoutes)
+        verify {
+            observer.onRoutesChanged(
+                match {
+                    it.navigationRoutes == testRoutes
+                        && it.reason == RoutesExtra.ROUTES_UPDATE_REASON_PREVIEW
+                }
+            )
+        }
+        assertEquals(emptyList<NavigationRoute>(), session.routes)
+    }
+
+    @Test
+    fun `clean set previewed route`() {
+        session.setRoutes(
+            createNavigationRoutes(),
+            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_PREVIEW, 0)
+        )
+        session.registerRoutesObserver(observer)
+
+        session.setRoutes(
+            emptyList(),
+            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0)
+        )
+
+        assertEquals(emptyList<NavigationRoute>(), session.previewedRoutes)
+        assertEquals(emptyList<NavigationRoute>(), session.routes)
+        verify {
+            observer.onRoutesChanged(
+                match {
+                    it.navigationRoutes.isEmpty()
+                        && it.reason == RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `set route preview after active navigation`() {
+        session.setRoutes(
+            createNavigationRoutes(createDirectionsResponse(uuid = "test1")),
+            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, 0)
+        )
+
+        val testPreviewRoutes = createNavigationRoutes(createDirectionsResponse(uuid = "test2"))
+        session.setRoutes(
+            testPreviewRoutes,
+            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_PREVIEW, 0)
+        )
+
+        assertEquals(testPreviewRoutes, session.previewedRoutes)
+        assertEquals(emptyList<NavigationRoute>(), session.routes)
     }
 }

@@ -49,4 +49,23 @@ internal object NavigationSessionUtils {
             idleProvider()
         }
     }
+
+    fun getNewStateV2(
+        isDriving: Boolean,
+        hasRoutes: Boolean,
+        routePreview: Boolean
+    ): NavigationSessionStateV2 = when {
+        hasRoutes && routePreview -> {
+            NavigationSessionStateV2.RoutePreview(navObtainUniversalSessionId())
+        }
+        hasRoutes && isDriving -> {
+            NavigationSessionStateV2.ActiveGuidance(navObtainUniversalSessionId())
+        }
+        isDriving -> {
+            NavigationSessionStateV2.FreeDrive(navObtainUniversalSessionId())
+        }
+        else -> {
+            NavigationSessionStateV2.Idle
+        }
+    }
 }
