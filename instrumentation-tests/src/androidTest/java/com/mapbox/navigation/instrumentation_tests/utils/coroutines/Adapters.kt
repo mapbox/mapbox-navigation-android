@@ -1,6 +1,8 @@
 package com.mapbox.navigation.instrumentation_tests.utils.coroutines
 
+import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -14,8 +16,10 @@ import com.mapbox.navigation.core.RoutesSetError
 import com.mapbox.navigation.core.RoutesSetSuccess
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -116,5 +120,31 @@ fun RouteRequestResult.getSuccessfulResultOrThrowException(): RouteRequestResult
     return when (this) {
         is RouteRequestResult.Success -> this
         is RouteRequestResult.Failure -> error("result is failure: ${this.reasons}")
+    }
+}
+
+suspend fun MapboxNavigation.bannerInstructions(): Flow<BannerInstructions> {
+    val navigation = this
+    return callbackFlow {
+        val observer = BannerInstructionsObserver {
+            trySend(it)
+        }
+        navigation.registerBannerInstructionsObserver(observer)
+        awaitClose {
+            navigation.unregisterBannerInstructionsObserver(observer)
+        }
+    }
+}
+
+suspend fun MapboxNavigation.voiceInstructions(): Flow<VoiceInstructions> {
+    val navigation = this
+    return callbackFlow {
+        val observer = VoiceInstructionsObserver {
+            trySend(it)
+        }
+        navigation.registerVoiceInstructionsObserver(observer)
+        awaitClose {
+            navigation.unregisterVoiceInstructionsObserver(observer)
+        }
     }
 }

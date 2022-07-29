@@ -6,6 +6,7 @@ import com.mapbox.navigation.core.RoutesSetCallback
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
@@ -23,9 +24,9 @@ private const val DEFAULT_TIMEOUT_FOR_SDK_TEST = 30_000L
 
 fun sdkTest(
     timeout: Long = DEFAULT_TIMEOUT_FOR_SDK_TEST,
-    block: suspend () -> Unit
+    block: suspend CoroutineScope.() -> Unit
 ) {
-    runBlocking(Dispatchers.Main) {
+    runBlocking(Dispatchers.Main.immediate) {
         withTimeout(timeout) {
             block()
         }
