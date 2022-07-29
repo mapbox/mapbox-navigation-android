@@ -52,6 +52,9 @@ package com.mapbox.navigation.dropin {
     method public void onFollowingCameraMode();
     method public void onFreeDrive();
     method public void onIdleCameraMode();
+    method public void onInfoPanelCollapsed();
+    method public void onInfoPanelExpanded();
+    method public void onInfoPanelHidden();
     method public void onMapStyleChanged(com.mapbox.maps.Style style);
     method public void onOverviewCameraMode();
     method public void onRouteFetchCanceled(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
