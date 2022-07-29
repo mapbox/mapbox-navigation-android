@@ -1,5 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.utils.coroutines
 
+import android.util.Log
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.RoutesSetCallback
@@ -9,6 +10,7 @@ import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -112,4 +114,13 @@ private suspend fun MapboxNavigation.waitForRoutesUpdate(
     routesUpdates()
         .filter { it.reason == reason }
         .first()
+}
+
+inline fun <T> withLogOnTimeout(message: String, body: () -> T): T {
+    try {
+        return body()
+    } catch (ce: TimeoutCancellationException) {
+        Log.e("sdk-test", "timeout: $message")
+        throw ce
+    }
 }

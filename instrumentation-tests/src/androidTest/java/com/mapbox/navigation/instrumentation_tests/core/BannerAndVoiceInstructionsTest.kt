@@ -9,6 +9,7 @@ import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.bannerInstructions
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.voiceInstructions
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.withLogOnTimeout
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
@@ -52,8 +53,12 @@ class BannerAndVoiceInstructionsTest : BaseTest<EmptyTestActivity>(EmptyTestActi
         val voiceInstructionDeferred = async { mapboxNavigation.voiceInstructions().first() }
         mapboxNavigation.setNavigationRoutes(testRoutes)
         mapboxNavigation.startTripSession()
-        val bannerInstruction = bannerInstructionDeferred.await()
-        val voiceInstruction = voiceInstructionDeferred.await()
+        val bannerInstruction = withLogOnTimeout("waiting for an initial banner instruction") {
+            bannerInstructionDeferred.await()
+        }
+        val voiceInstruction = withLogOnTimeout("waiting for an initial voice instruction") {
+            voiceInstructionDeferred.await()
+        }
 
         assertEquals("Pennsylvania Avenue Northwest", bannerInstruction.primary().text())
         assertEquals(ManeuverModifier.RIGHT, bannerInstruction.primary().modifier())
