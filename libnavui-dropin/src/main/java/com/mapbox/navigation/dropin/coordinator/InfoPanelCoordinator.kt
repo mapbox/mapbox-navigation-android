@@ -31,6 +31,17 @@ internal class InfoPanelCoordinator(
     private val store = context.store
     private val behavior = BottomSheetBehavior.from(infoPanel)
 
+    private val updateGuideline = object : BottomSheetBehavior.BottomSheetCallback() {
+        override fun onStateChanged(bottomSheet: View, newState: Int) {
+            context.infoPanelBehavior.updateBehavior(newState)
+            setGuidelinePosition(bottomSheet)
+        }
+
+        override fun onSlide(bottomSheet: View, slideOffset: Float) {
+            setGuidelinePosition(bottomSheet)
+        }
+    }
+
     init {
         infoPanel.addOnLayoutChangeListener(FixBottomSheetLayoutWhenHidden(infoPanel, behavior))
         behavior.peekHeight = context.styles.infoPanelPeekHeight.value
@@ -103,16 +114,6 @@ internal class InfoPanelCoordinator(
     private fun setGuidelinePosition(bottomSheet: View) {
         val offsetBottom = (bottomSheet.parent as ViewGroup).height - bottomSheet.top
         guidelineBottom.setGuidelineEnd(offsetBottom)
-    }
-
-    private val updateGuideline = object : BottomSheetBehavior.BottomSheetCallback() {
-        override fun onStateChanged(bottomSheet: View, newState: Int) {
-            setGuidelinePosition(bottomSheet)
-        }
-
-        override fun onSlide(bottomSheet: View, slideOffset: Float) {
-            setGuidelinePosition(bottomSheet)
-        }
     }
 
     /**

@@ -83,6 +83,18 @@ class LoggingNavigationViewListener(
         log("listener onRouteFetchSuccessful routes = $routes")
     }
 
+    override fun onInfoPanelHidden() {
+        log("listener onInfoPanelHidden")
+    }
+
+    override fun onInfoPanelExpanded() {
+        log("listener onInfoPanelExpanded")
+    }
+
+    override fun onInfoPanelCollapsed() {
+        log("listener onInfoPanelCollapsed")
+    }
+
     private fun log(message: String) {
         logD(message, tag)
     }

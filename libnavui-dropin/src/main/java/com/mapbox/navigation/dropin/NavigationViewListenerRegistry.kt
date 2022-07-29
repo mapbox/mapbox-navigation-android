@@ -1,6 +1,8 @@
 package com.mapbox.navigation.dropin
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.dropin.component.infopanel.InfoPanelBehavior
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
@@ -15,6 +17,7 @@ import kotlinx.coroutines.launch
 internal class NavigationViewListenerRegistry(
     private val store: Store,
     private val mapStyleLoader: MapStyleLoader,
+    private val infoPanelSubscriber: InfoPanelBehavior,
     private val coroutineScope: CoroutineScope
 ) {
     private var listeners = mutableMapOf<NavigationViewListener, Job>()
@@ -86,6 +89,19 @@ internal class NavigationViewListenerRegistry(
                 store.select { it.audio.isMuted }.collect {
                     listener.onAudioGuidanceStateChanged(it)
                 }
+            }
+
+            launch {
+                infoPanelSubscriber
+                    .infoPanelBehavior
+                    .filterNotNull()
+                    .collect { behavior ->
+                        when (behavior) {
+                            BottomSheetBehavior.STATE_HIDDEN -> listener.onInfoPanelHidden()
+                            BottomSheetBehavior.STATE_EXPANDED -> listener.onInfoPanelExpanded()
+                            BottomSheetBehavior.STATE_COLLAPSED -> listener.onInfoPanelCollapsed()
+                        }
+                    }
             }
         }
     }

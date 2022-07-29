@@ -114,4 +114,19 @@ abstract class NavigationViewListener {
      * @param requestId Id of the route requested.
      */
     open fun onRouteFetching(requestId: Long) = Unit
+
+    /**
+     * Called when the info panel behavior updates to hidden.
+     */
+    open fun onInfoPanelHidden() = Unit
+
+    /**
+     * Called when the info panel behavior updates to expanded.
+     */
+    open fun onInfoPanelExpanded() = Unit
+
+    /**
+     * Called when the info panel behavior updates to collapsed.
+     */
+    open fun onInfoPanelCollapsed() = Unit
 }

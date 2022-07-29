@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
@@ -8,6 +9,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.dropin.component.infopanel.InfoPanelBehavior
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.State
@@ -37,12 +39,17 @@ class NavigationViewListenerRegistryTest {
     private lateinit var sut: NavigationViewListenerRegistry
     private lateinit var testStore: TestStore
     private lateinit var loadedMapStyleFlow: MutableStateFlow<Style?>
+    private lateinit var infoPanelBehaviorFlow: MutableStateFlow<Int?>
     private lateinit var testListener: NavigationViewListener
 
     @Before
     fun setUp() {
         testStore = TestStore()
         loadedMapStyleFlow = MutableStateFlow(null)
+        infoPanelBehaviorFlow = MutableStateFlow(null)
+        val mockInfoPanelBehavior = mockk<InfoPanelBehavior> {
+            every { infoPanelBehavior } returns infoPanelBehaviorFlow.asStateFlow()
+        }
         val mockStyleLoader = mockk<MapStyleLoader> {
             every { loadedMapStyle } returns loadedMapStyleFlow.asStateFlow()
         }
@@ -51,6 +58,7 @@ class NavigationViewListenerRegistryTest {
         sut = NavigationViewListenerRegistry(
             testStore,
             mockStyleLoader,
+            mockInfoPanelBehavior,
             coroutineRule.coroutineScope
         )
     }
@@ -243,6 +251,42 @@ class NavigationViewListenerRegistryTest {
 
         verify {
             testListener.onRouteFetching(id)
+        }
+    }
+
+    @Test
+    fun onInfoPanelHidden() {
+        sut.registerListener(testListener)
+        val newState = BottomSheetBehavior.STATE_HIDDEN
+
+        infoPanelBehaviorFlow.value = newState
+
+        verify {
+            testListener.onInfoPanelHidden()
+        }
+    }
+
+    @Test
+    fun onInfoPanelExpanded() {
+        sut.registerListener(testListener)
+        val newState = BottomSheetBehavior.STATE_EXPANDED
+
+        infoPanelBehaviorFlow.value = newState
+
+        verify {
+            testListener.onInfoPanelExpanded()
+        }
+    }
+
+    @Test
+    fun onInfoPanelCollapsed() {
+        sut.registerListener(testListener)
+        val newState = BottomSheetBehavior.STATE_COLLAPSED
+
+        infoPanelBehaviorFlow.value = newState
+
+        verify {
+            testListener.onInfoPanelCollapsed()
         }
     }
 }
