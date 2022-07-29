@@ -5,9 +5,9 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
-- Introduced `NavigationViewListener#onInfoPanelHidden` to inform user when `InfoPanel` hides. [#6112](https://github.com/mapbox/mapbox-navigation-android/pull/6113)
-- Introduced `NavigationViewListener#onInfoPanelExpanded` to inform user when `InfoPanel` expands. [#6112](https://github.com/mapbox/mapbox-navigation-android/pull/6113)
-- Introduced `NavigationViewListener#onInfoPanelCollapsed` to inform user when `InfoPanel` collapses. [#6112](https://github.com/mapbox/mapbox-navigation-android/pull/6113)
+- Introduced `NavigationViewListener#onInfoPanelHidden` to inform user when `InfoPanel` hides. [#6113](https://github.com/mapbox/mapbox-navigation-android/pull/6113)
+- Introduced `NavigationViewListener#onInfoPanelExpanded` to inform user when `InfoPanel` expands. [#6113](https://github.com/mapbox/mapbox-navigation-android/pull/6113)
+- Introduced `NavigationViewListener#onInfoPanelCollapsed` to inform user when `InfoPanel` collapses. [#6113](https://github.com/mapbox/mapbox-navigation-android/pull/6113)
 
 ## Mapbox Navigation SDK 2.7.0-beta.3 - 29 July, 2022
 ### Changelog
