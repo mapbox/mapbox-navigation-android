@@ -5,7 +5,19 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+
+## androidauto-v0.6.0 - Jul 29, 2022
+### Changelog
+[Changes between 0.5.0 and 0.6.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.5.0...androidauto-v0.6.0)
+
+#### Bug fixes and improvements
 - Added an option to hide or show alternative routes during route preview and active guidance. [#6100](https://github.com/mapbox/mapbox-navigation-android/pull/6100)
+
+### Mapbox dependencies
+This release defines minimum versions for the Mapbox dependencies.
+- Mapbox Maps Android Auto Extension `v0.1.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/extension-androidauto-v0.1.0))
+- Mapbox Navigation `v2.7.0-beta.3` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/v2.7.0-beta.3))
+- Mapbox Search `v1.0.0-beta.34` ([release notes](https://github.com/mapbox/mapbox-search-android/releases/tag/v1.0.0-beta.34))
 
 ## androidauto-v0.5.0 - Jul 22, 2022
 ### Changelog
@@ -19,7 +31,7 @@ Mapbox welcomes participation and contributions from everyone.
 ### Mapbox dependencies
 This release defines minimum versions for the Mapbox dependencies.
 - Mapbox Maps Android Auto Extension `v0.1.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/extension-androidauto-v0.1.0))
-- Mapbox Navigation `v2.7.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/2.7.0-beta.2))
+- Mapbox Navigation `v2.7.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/v2.7.0-beta.2))
 - Mapbox Search `v1.0.0-beta.33` ([release notes](https://github.com/mapbox/mapbox-search-android/releases/tag/v1.0.0-beta.33))
 
 ## androidauto-v0.4.0 - Jul 12, 2022
