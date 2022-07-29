@@ -84,5 +84,4 @@ internal object AnnotationsRefresher {
             for (index in 0 until min(n, size)) { it.add(get(index)) }
         }
     }
-
 }

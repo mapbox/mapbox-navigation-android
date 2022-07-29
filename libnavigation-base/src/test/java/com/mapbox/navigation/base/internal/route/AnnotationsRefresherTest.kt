@@ -163,7 +163,11 @@ class AnnotationsRefresherTest(
                         .distance(listOf(2.1, 4.3, 6.5, 8.7, 0.9))
                         .duration(listOf(22.1, 44.3, 66.5, 88.7, 110.9))
                         .speed(listOf(51.0, 52.5, 53.1, 54.6, 55.9))
-                        .maxspeed(List(5) { MaxSpeed.builder().speed(it * 10 + 1).unit("kmh").build() })
+                        .maxspeed(
+                            List(5) {
+                                MaxSpeed.builder().speed(it * 10 + 1).unit("kmh").build()
+                            }
+                        )
                         .build(),
                     0,
                     LegAnnotation.builder()
@@ -172,7 +176,11 @@ class AnnotationsRefresherTest(
                         .distance(listOf(2.1, 4.3, 6.5, 8.7, 0.9))
                         .duration(listOf(22.1, 44.3, 66.5, 88.7, 110.9))
                         .speed(listOf(51.0, 52.5, 53.1, 54.6, 55.9))
-                        .maxspeed(List(5) { MaxSpeed.builder().speed(it * 10 + 1).unit("kmh").build() })
+                        .maxspeed(
+                            List(5) {
+                                MaxSpeed.builder().speed(it * 10 + 1).unit("kmh").build()
+                            }
+                        )
                         .build(),
                     "Everything is filled, index = 0"
                 ),
@@ -183,7 +191,11 @@ class AnnotationsRefresherTest(
                         .distance(listOf(1.2, 3.4, 5.6, 7.8, 9.0))
                         .duration(listOf(11.2, 33.4, 55.6, 77.8, 99.0))
                         .speed(listOf(41.0, 42.5, 43.1, 44.6, 45.9))
-                        .maxspeed(List(5) { MaxSpeed.builder().speed(it * 10).unit("mph").build() })
+                        .maxspeed(
+                            List(5) {
+                                MaxSpeed.builder().speed(it * 10).unit("mph").build()
+                            }
+                        )
                         .build(),
                     LegAnnotation.builder()
                         .congestionNumeric(listOf(9, 10))
@@ -191,7 +203,11 @@ class AnnotationsRefresherTest(
                         .distance(listOf(8.7, 0.9))
                         .duration(listOf(88.7, 110.9))
                         .speed(listOf(54.6, 55.9))
-                        .maxspeed(List(2) { MaxSpeed.builder().speed(it * 10 + 1).unit("kmh").build() })
+                        .maxspeed(
+                            List(2) {
+                                MaxSpeed.builder().speed(it * 10 + 1).unit("kmh").build()
+                            }
+                        )
                         .build(),
                     3,
                     LegAnnotation.builder()
@@ -201,8 +217,12 @@ class AnnotationsRefresherTest(
                         .duration(listOf(11.2, 33.4, 55.6, 88.7, 110.9))
                         .speed(listOf(41.0, 42.5, 43.1, 54.6, 55.9))
                         .maxspeed(
-                            List(3) { MaxSpeed.builder().speed(it * 10).unit("mph").build() } +
-                            List(2) { MaxSpeed.builder().speed(it * 10 + 1).unit("kmh").build() }
+                            List(3) {
+                                MaxSpeed.builder().speed(it * 10).unit("mph").build()
+                            } +
+                                List(2) {
+                                    MaxSpeed.builder().speed(it * 10 + 1).unit("kmh").build()
+                                }
                         )
                         .build(),
                     "Everything is filled, index = 3"
@@ -214,7 +234,11 @@ class AnnotationsRefresherTest(
                         .distance(listOf(1.2, 3.4, 5.6, 7.8, 9.0))
                         .duration(listOf(11.2, 33.4, 55.6, 77.8, 99.0))
                         .speed(listOf(41.0, 42.5, 43.1, 44.6, 45.9))
-                        .maxspeed(List(5) { MaxSpeed.builder().speed(it * 10).unit("mph").build() })
+                        .maxspeed(
+                            List(5) {
+                                MaxSpeed.builder().speed(it * 10).unit("mph").build()
+                            }
+                        )
                         .build(),
                     LegAnnotation.builder()
                         .congestionNumeric(emptyList())
@@ -231,7 +255,11 @@ class AnnotationsRefresherTest(
                         .distance(listOf(1.2, 3.4, 5.6, 7.8, 9.0))
                         .duration(listOf(11.2, 33.4, 55.6, 77.8, 99.0))
                         .speed(listOf(41.0, 42.5, 43.1, 44.6, 45.9))
-                        .maxspeed(List(5) { MaxSpeed.builder().speed(it * 10).unit("mph").build() })
+                        .maxspeed(
+                            List(5) {
+                                MaxSpeed.builder().speed(it * 10).unit("mph").build()
+                            }
+                        )
                         .build(),
                     "Everything is filled, index = 5"
                 ),
@@ -242,7 +270,11 @@ class AnnotationsRefresherTest(
                         .distance(listOf(1.2, 3.4, 5.6, 7.8, 9.0))
                         .duration(listOf(11.2, 33.4, 55.6, 77.8, 99.0))
                         .speed(listOf(41.0, 42.5, 43.1, 44.6, 45.9))
-                        .maxspeed(List(5) { MaxSpeed.builder().speed(it * 10).unit("mph").build() })
+                        .maxspeed(
+                            List(5) {
+                                MaxSpeed.builder().speed(it * 10).unit("mph").build()
+                            }
+                        )
                         .build(),
                     defaultAnnotation,
                     5,

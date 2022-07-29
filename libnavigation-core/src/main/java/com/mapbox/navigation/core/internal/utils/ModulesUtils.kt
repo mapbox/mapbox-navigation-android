@@ -26,7 +26,7 @@ internal fun paramsProvider(moduleParams: ModuleParams): Array<ModuleProviderArg
             ),
             ModuleProviderArgument(
                 Function0::class.java,
-                moduleParams.currentRouteGeometryIndexProvider
+                moduleParams.currentGeometryIndicesProvider
             ),
         )
         is ModuleParams.NavigationTripNotification -> arrayOf(
@@ -50,7 +50,7 @@ internal sealed class ModuleParams {
         val accessToken: String,
         val nativeRouter: RouterInterface,
         val threadController: ThreadController,
-        val currentRouteGeometryIndexProvider: Function0<Int?>,
+        val currentGeometryIndicesProvider: Function0<Pair<Int?, Int?>>,
     ) : ModuleParams()
 
     class NavigationTripNotification(

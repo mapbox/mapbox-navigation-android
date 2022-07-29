@@ -94,6 +94,6 @@ internal object NavigationComponentProvider {
         initialState: NavigationSessionState
     ): HistoryRecordingStateHandler = HistoryRecordingStateHandler(initialState)
 
-    fun createCurrentRouteGeometryIndexProvider(): CurrentGeometryIndexProvider =
-        CurrentGeometryIndexProvider()
+    fun createCurrentRouteGeometryIndicesProvider(): CurrentGeometryIndicesProvider =
+        CurrentGeometryIndicesProvider()
 }

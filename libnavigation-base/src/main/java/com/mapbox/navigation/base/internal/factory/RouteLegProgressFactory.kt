@@ -28,6 +28,7 @@ object RouteLegProgressFactory {
      * is currently on
      * @param upcomingStep Next/upcoming step immediately after the current step. If the user is on the last step
      * on the last leg, this will return null since a next step doesn't exist
+     * @param geometryIndex Current index in a leg geometry
      */
     fun buildRouteLegProgressObject(
         legIndex: Int,
@@ -37,7 +38,8 @@ object RouteLegProgressFactory {
         durationRemaining: Double,
         fractionTraveled: Float,
         currentStepProgress: RouteStepProgress?,
-        upcomingStep: LegStep?
+        upcomingStep: LegStep?,
+        geometryIndex: Int,
     ): RouteLegProgress {
         return RouteLegProgress(
             legIndex = legIndex,
@@ -47,7 +49,8 @@ object RouteLegProgressFactory {
             durationRemaining = durationRemaining,
             fractionTraveled = fractionTraveled,
             currentStepProgress = currentStepProgress,
-            upcomingStep = upcomingStep
+            upcomingStep = upcomingStep,
+            geometryIndex = geometryIndex
         )
     }
 }

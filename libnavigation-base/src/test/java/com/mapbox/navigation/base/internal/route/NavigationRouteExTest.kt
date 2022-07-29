@@ -14,11 +14,8 @@ import com.mapbox.navigator.RouterOrigin
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.unmockkObject
 import io.mockk.verify
 import junit.framework.Assert.assertEquals
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 
 class NavigationRouteExTest {
@@ -118,48 +115,6 @@ class NavigationRouteExTest {
                 val newIncidents = mockk<List<Incident>>()
                 val newIncidents2 = mockk<List<Incident>>()
                 TestData(
-                    "update items multi-leg route, geometryIndex is 0",
-                    provideNavigationRoute(addLeg = true),
-                    RefreshLegItemsWrapper(
-                        0,
-                        listOf(newLegAnnotations, newLegAnnotations2),
-                        listOf(newIncidents, newIncidents2),
-                        0
-                    ),
-                    LegItemsResult(
-                        listOf(newLegAnnotations, newLegAnnotations2),
-                        listOf(newIncidents, newIncidents2),
-                        0
-                    )
-                )
-            },
-            run {
-                val newLegAnnotations = mockk<LegAnnotation>()
-                val newLegAnnotations2 = mockk<LegAnnotation>()
-                val newIncidents = mockk<List<Incident>>()
-                val newIncidents2 = mockk<List<Incident>>()
-                TestData(
-                    "update items multi-leg route, geometryIndex is 1",
-                    provideNavigationRoute(addLeg = true),
-                    RefreshLegItemsWrapper(
-                        0,
-                        listOf(newLegAnnotations, newLegAnnotations2),
-                        listOf(newIncidents, newIncidents2),
-                        1
-                    ),
-                    LegItemsResult(
-                        listOf(newLegAnnotations, newLegAnnotations2),
-                        listOf(newIncidents, newIncidents2),
-                        1
-                    )
-                )
-            },
-            run {
-                val newLegAnnotations = mockk<LegAnnotation>()
-                val newLegAnnotations2 = mockk<LegAnnotation>()
-                val newIncidents = mockk<List<Incident>>()
-                val newIncidents2 = mockk<List<Incident>>()
-                TestData(
                     "update items multi-leg route, geometryIndex is 2",
                     provideNavigationRoute(addLeg = true),
                     RefreshLegItemsWrapper(
@@ -172,27 +127,6 @@ class NavigationRouteExTest {
                         listOf(newLegAnnotations, newLegAnnotations2),
                         listOf(newIncidents, newIncidents2),
                         2
-                    )
-                )
-            },
-            run {
-                val newLegAnnotations = mockk<LegAnnotation>()
-                val newLegAnnotations2 = mockk<LegAnnotation>()
-                val newIncidents = mockk<List<Incident>>()
-                val newIncidents2 = mockk<List<Incident>>()
-                TestData(
-                    "update items multi-leg route, geometryIndex is 3",
-                    provideNavigationRoute(addLeg = true),
-                    RefreshLegItemsWrapper(
-                        0,
-                        listOf(newLegAnnotations, newLegAnnotations2),
-                        listOf(newIncidents, newIncidents2),
-                        3
-                    ),
-                    LegItemsResult(
-                        listOf(newLegAnnotations, newLegAnnotations2),
-                        listOf(newIncidents, newIncidents2),
-                        3
                     )
                 )
             },
@@ -236,73 +170,7 @@ class NavigationRouteExTest {
                     LegItemsResult(
                         listOf(provideDefaultLegAnnotation(), newLegAnnotations2),
                         listOf(provideDefaultIncidents(), newIncidents2),
-                        0
-                    )
-                )
-            },
-            run {
-                val newLegAnnotations = mockk<LegAnnotation>()
-                val newLegAnnotations2 = mockk<LegAnnotation>()
-                val newIncidents = mockk<List<Incident>>()
-                val newIncidents2 = mockk<List<Incident>>()
-                TestData(
-                    "update items multi-leg route starting with second leg, geometryIndex = 5",
-                    provideNavigationRoute(addLeg = true),
-                    RefreshLegItemsWrapper(
-                        1,
-                        listOf(newLegAnnotations, newLegAnnotations2),
-                        listOf(newIncidents, newIncidents2),
-                        5
-                    ),
-
-                    LegItemsResult(
-                        listOf(provideDefaultLegAnnotation(), newLegAnnotations2),
-                        listOf(provideDefaultIncidents(), newIncidents2),
-                        1
-                    )
-                )
-            },
-            run {
-                val newLegAnnotations = mockk<LegAnnotation>()
-                val newLegAnnotations2 = mockk<LegAnnotation>()
-                val newIncidents = mockk<List<Incident>>()
-                val newIncidents2 = mockk<List<Incident>>()
-                TestData(
-                    "update items multi-leg route starting with second leg, geometryIndex = 6",
-                    provideNavigationRoute(addLeg = true),
-                    RefreshLegItemsWrapper(
-                        1,
-                        listOf(newLegAnnotations, newLegAnnotations2),
-                        listOf(newIncidents, newIncidents2),
-                        6
-                    ),
-
-                    LegItemsResult(
-                        listOf(provideDefaultLegAnnotation(), newLegAnnotations2),
-                        listOf(provideDefaultIncidents(), newIncidents2),
-                        2
-                    )
-                )
-            },
-            run {
-                val newLegAnnotations = mockk<LegAnnotation>()
-                val newLegAnnotations2 = mockk<LegAnnotation>()
-                val newIncidents = mockk<List<Incident>>()
-                val newIncidents2 = mockk<List<Incident>>()
-                TestData(
-                    "update items multi-leg route starting with second leg, geometryIndex = 7",
-                    provideNavigationRoute(addLeg = true),
-                    RefreshLegItemsWrapper(
-                        1,
-                        listOf(newLegAnnotations, newLegAnnotations2),
-                        listOf(newIncidents, newIncidents2),
-                        7
-                    ),
-
-                    LegItemsResult(
-                        listOf(provideDefaultLegAnnotation(), newLegAnnotations2),
-                        listOf(provideDefaultIncidents(), newIncidents2),
-                        3
+                        4
                     )
                 )
             },
@@ -313,7 +181,7 @@ class NavigationRouteExTest {
                 } returns result.newLegAnnotation?.get(refreshItems.startWithIndex)
                 val updatedNavRoute = navRoute.refreshRoute(
                     refreshItems.startWithIndex,
-                    refreshItems.routeGeometryIndex,
+                    refreshItems.legGeometryIndex,
                     refreshItems.legAnnotation,
                     refreshItems.incidents
                 )
@@ -336,7 +204,8 @@ class NavigationRouteExTest {
                 if (result.expectedLegGeometryIndex != null) {
                     verify(exactly = 1) {
                         AnnotationsRefresher.getRefreshedAnnotations(
-                            navRoute.directionsRoute.legs()?.get(refreshItems.startWithIndex)?.annotation(),
+                            navRoute.directionsRoute.legs()
+                                ?.get(refreshItems.startWithIndex)?.annotation(),
                             refreshItems.legAnnotation?.get(refreshItems.startWithIndex),
                             result.expectedLegGeometryIndex
                         )
@@ -356,10 +225,13 @@ class NavigationRouteExTest {
         addLeg: Boolean,
         distance: Double = 10.0
     ): NavigationRoute {
-        val twoPointGeometry = PolylineUtils.encode(listOf(
-            Point.fromLngLat(1.2, 3.4),
-            Point.fromLngLat(3.3, 6.7)
-        ), 5)
+        val twoPointGeometry = PolylineUtils.encode(
+            listOf(
+                Point.fromLngLat(1.2, 3.4),
+                Point.fromLngLat(3.3, 6.7)
+            ),
+            5
+        )
         val validStep = mockk<LegStep>(relaxed = true) {
             every { geometry() } returns twoPointGeometry
         }
@@ -389,7 +261,15 @@ class NavigationRouteExTest {
                                     }
                                 }
                             )
-                            .geometry(PolylineUtils.encode(listOf(Point.fromLngLat(11.22, 33.44), Point.fromLngLat(23.34, 34.45)), 5))
+                            .geometry(
+                                PolylineUtils.encode(
+                                    listOf(
+                                        Point.fromLngLat(11.22, 33.44),
+                                        Point.fromLngLat(23.34, 34.45)
+                                    ),
+                                    5
+                                )
+                            )
                             .build()
                     )
                 )
@@ -445,7 +325,7 @@ class NavigationRouteExTest {
         val startWithIndex: Int,
         val legAnnotation: List<LegAnnotation?>?,
         val incidents: List<List<Incident>?>?,
-        val routeGeometryIndex: Int?,
+        val legGeometryIndex: Int?,
     )
 
     /**

@@ -81,7 +81,8 @@ class NavigatorMapperTest {
                     distanceTraveled = 30f,
                     fractionTraveled = 50f,
                     durationRemaining = 3.0
-                )
+                ),
+                geometryIndex = legGeometryIndex
             ),
             distanceRemaining = 80f,
             durationRemaining = 1.0,
@@ -96,7 +97,7 @@ class NavigatorMapperTest {
             remainingWaypoints = 1,
             upcomingRoadObjects = listOf(),
             alternativeRouteId = "alternative_id",
-            currentRouteGeometryIndex = geometryIndex
+            currentRouteGeometryIndex = routeGeometryIndex
         )
 
         val result = getRouteProgressFrom(
@@ -543,7 +544,8 @@ class NavigatorMapperTest {
         every { remainingStepDistance } returns 111f
         every { ssmlAnnouncement } returns "ssmlAnnouncement"
     }
-    private val geometryIndex = 12
+    private val routeGeometryIndex = 12
+    private val legGeometryIndex = 7
     private val navigationStatus: NavigationStatus = mockk {
         every { intersectionIndex } returns 1
         every { stepIndex } returns 1
@@ -569,6 +571,7 @@ class NavigatorMapperTest {
         every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
         every { locatedAlternativeRouteId } returns "alternative_id"
 //        every { this.geometryIndex } returns geometryIndex
+        every { shapeIndex } returns legGeometryIndex
     }
 
     val routeAlertLocation: RouteAlertLocation = mockk()

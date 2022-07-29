@@ -11,7 +11,6 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.toNavigationRoute
-import com.mapbox.navigation.base.utils.DecodeUtils.legsGeometryToPoints
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouterOrigin
@@ -30,7 +29,7 @@ fun NavigationRoute.nativeRoute(): RouteInterface = this.nativeRoute
  */
 fun NavigationRoute.refreshRoute(
     initialLegIndex: Int,
-    currentRouteGeometryIndex: Int?,
+    currentLegGeometryIndex: Int?,
     legAnnotations: List<LegAnnotation?>?,
     incidents: List<List<Incident>?>?,
 ): NavigationRoute {
@@ -39,17 +38,14 @@ fun NavigationRoute.refreshRoute(
             routeLeg
         } else {
             val newAnnotation = legAnnotations?.getOrNull(index)
-            val mergedAnnotation = if (index == initialLegIndex && currentRouteGeometryIndex != null) {
-                val legGeometryIndexOffset = directionsRoute.legsGeometryToPoints()
-                    .sumOfUntil(index) { it.size }
-                AnnotationsRefresher.getRefreshedAnnotations(
-                    routeLeg.annotation(),
-                    newAnnotation,
-                    currentRouteGeometryIndex - legGeometryIndexOffset
-                )
-            } else {
-                newAnnotation
-            }
+            val mergedAnnotation =
+                if (index == initialLegIndex && currentLegGeometryIndex != null) {
+                    AnnotationsRefresher.getRefreshedAnnotations(
+                        routeLeg.annotation(),
+                        newAnnotation,
+                        currentLegGeometryIndex
+                    )
+                } else { newAnnotation }
             routeLeg.toBuilder()
                 .incidents(incidents?.getOrNull(index))
                 .annotation(mergedAnnotation)
@@ -105,12 +101,4 @@ fun createNavigationRoutes(
  */
 fun RouteInterface.toNavigationRoute(): NavigationRoute {
     return this.toNavigationRoute()
-}
-
-private inline fun <T> List<T>.sumOfUntil(lastIndex: Int, selector: (T) -> Int): Int {
-    var sum = 0
-    for (index in 0 until lastIndex) {
-        sum += selector(get(index))
-    }
-    return sum
 }
