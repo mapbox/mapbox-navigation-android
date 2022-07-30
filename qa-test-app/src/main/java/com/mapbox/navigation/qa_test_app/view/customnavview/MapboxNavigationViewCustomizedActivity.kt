@@ -12,11 +12,16 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.MutableLiveData
+import com.mapbox.geojson.Point
+import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
+import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
+import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.ActionButtonDescription
 import com.mapbox.navigation.dropin.ActionButtonDescription.Position.END
 import com.mapbox.navigation.dropin.ActionButtonDescription.Position.START
+import com.mapbox.navigation.dropin.MapViewObserver
 import com.mapbox.navigation.dropin.NavigationViewListener
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultAudioGuidanceButtonStyle
@@ -63,6 +68,26 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
 
     private val navViewListener =
         LoggingNavigationViewListener("MapboxNavigationViewCustomizedActivity")
+
+    private val onMapLongClick = object : MapViewObserver(), OnMapLongClickListener {
+
+        override fun onAttached(mapView: MapView) {
+            mapView.gestures.addOnMapLongClickListener(this)
+        }
+
+        override fun onDetached(mapView: MapView) {
+            mapView.gestures.removeOnMapLongClickListener(this)
+        }
+
+        override fun onMapLongClick(point: Point): Boolean {
+            Toast.makeText(
+                this@MapboxNavigationViewCustomizedActivity,
+                "Long press handled by activity",
+                Toast.LENGTH_LONG
+            ).show()
+            return false
+        }
+    }
 
     private lateinit var binding: LayoutActivityNavigationViewBinding
     private lateinit var menuBinding: LayoutDrawerMenuNavViewCustomBinding
@@ -127,6 +152,12 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             menuBinding.toggleBottomSheetFD,
             viewModel.showBottomSheetInFreeDrive,
             ::toggleShowInfoPanelInFreeDrive
+        )
+
+        bindSwitch(
+            menuBinding.toggleOnMapLongClick,
+            viewModel.enableOnMapLongClick,
+            ::toggleOnMapLongClick
         )
     }
 
@@ -303,6 +334,18 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         // Show Bottom Sheet in Free Drive
         binding.navigationView.customizeViewOptions {
             showInfoPanelInFreeDrive = showInFreeDrive
+        }
+    }
+
+    private fun toggleOnMapLongClick(enable: Boolean) {
+        // If enabled [NavigationView] will intercept map long clicks
+        if (enable) {
+            binding.navigationView.unregisterMapObserver(onMapLongClick)
+        } else {
+            binding.navigationView.registerMapObserver(onMapLongClick)
+        }
+        binding.navigationView.customizeViewOptions {
+            enableMapLongClickIntercept = enable
         }
     }
 

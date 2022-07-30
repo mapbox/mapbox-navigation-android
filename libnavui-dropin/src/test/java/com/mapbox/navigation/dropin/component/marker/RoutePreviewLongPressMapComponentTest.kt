@@ -7,6 +7,7 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.util.HapticFeedback
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.dropin.util.TestingUtil.makeLocationMatcherResult
@@ -24,6 +25,8 @@ import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -35,6 +38,7 @@ internal class RoutePreviewLongPressMapComponentTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
+    private val enableOnMapLongClick = MutableStateFlow<Boolean>(true)
     private val mockGesturesPlugin: GesturesPlugin = mockk(relaxed = true)
     private val mockMapView: MapView = mockk {
         every { gestures } returns mockGesturesPlugin
@@ -42,6 +46,11 @@ internal class RoutePreviewLongPressMapComponentTest {
     private val mockMapboxNavigation: MapboxNavigation = mockk(relaxed = true) {
         every { navigationOptions } returns mockk {
             every { applicationContext } returns mockk(relaxed = true)
+        }
+    }
+    private val navigationViewContext: NavigationViewContext = mockk(relaxed = true) {
+        every { options } returns mockk(relaxed = true) {
+            every { enableMapLongClickIntercept } returns enableOnMapLongClick.asStateFlow()
         }
     }
 
@@ -54,7 +63,7 @@ internal class RoutePreviewLongPressMapComponentTest {
         every { HapticFeedback.create(any()) } returns mockk(relaxed = true)
         testStore = spyk(TestStore())
 
-        sut = RoutePreviewLongPressMapComponent(testStore, mockMapView)
+        sut = RoutePreviewLongPressMapComponent(testStore, mockMapView, navigationViewContext)
     }
 
     @After
@@ -93,7 +102,7 @@ internal class RoutePreviewLongPressMapComponentTest {
     }
 
     @Test
-    fun `onMapLongClick should update view model state`() {
+    fun `onMapLongClick should update view model state when long click intercept is enabled`() {
         val slot = slot<OnMapLongClickListener>()
         every { mockGesturesPlugin.addOnMapLongClickListener(capture(slot)) } returns Unit
         val locationMatcherResult = makeLocationMatcherResult(21.0, 22.0, 0f)
@@ -105,6 +114,25 @@ internal class RoutePreviewLongPressMapComponentTest {
 
         val points = listOf(locationMatcherResult.enhancedLocation.toPoint(), clickPoint)
         verifyOrder {
+            testStore.dispatch(DestinationAction.SetDestination(Destination(clickPoint)))
+            testStore.dispatch(RoutePreviewAction.FetchPoints(points))
+        }
+    }
+
+    @Test
+    fun `onMapLongClick should not update state when long click intercept is disabled`() {
+        enableOnMapLongClick.value = false
+        val slot = slot<OnMapLongClickListener>()
+        every { mockGesturesPlugin.addOnMapLongClickListener(capture(slot)) } returns Unit
+        val locationMatcherResult = makeLocationMatcherResult(21.0, 22.0, 0f)
+        testStore.setState(State(location = locationMatcherResult))
+        sut.onAttached(mockMapboxNavigation)
+
+        val clickPoint = Point.fromLngLat(11.0, 12.0)
+        slot.captured.onMapLongClick(clickPoint)
+
+        val points = listOf(locationMatcherResult.enhancedLocation.toPoint(), clickPoint)
+        verify(exactly = 0) {
             testStore.dispatch(DestinationAction.SetDestination(Destination(clickPoint)))
             testStore.dispatch(RoutePreviewAction.FetchPoints(points))
         }

@@ -3,7 +3,6 @@ package com.mapbox.navigation.qa_test_app.view.customnavview
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterFailure
@@ -50,10 +49,6 @@ class LoggingNavigationViewListener(
 
     override fun onFollowingCameraMode() {
         log("listener onFollowingCameraMode")
-    }
-
-    override fun onMapStyleChanged(style: Style) {
-        log("listener onMapStyleChange = ${style.styleURI}")
     }
 
     override fun onCameraPaddingChanged(padding: EdgeInsets) {

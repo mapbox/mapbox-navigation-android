@@ -39,6 +39,7 @@ internal class NavigationViewOptionsTest {
         assertEquals(c.routeLineOptions, sut.routeLineOptions.value)
         assertEquals(c.routeArrowOptions, sut.routeArrowOptions.value)
         assertEquals(c.showInfoPanelInFreeDrive, sut.showInfoPanelInFreeDrive.value)
+        assertEquals(c.enableMapLongClickIntercept, sut.enableMapLongClickIntercept.value)
     }
 
     private fun customization() =
@@ -56,5 +57,6 @@ internal class NavigationViewOptionsTest {
                 .withArrowColor(Color.YELLOW)
                 .build()
             showInfoPanelInFreeDrive = true
+            enableMapLongClickIntercept = false
         }
 }

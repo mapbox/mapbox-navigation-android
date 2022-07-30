@@ -199,6 +199,20 @@ class NavigationView @JvmOverloads constructor(
         navigationContext.listenerRegistry.unregisterListener(listener)
     }
 
+    /**
+     * Registers [MapViewObserver].
+     */
+    fun registerMapObserver(observer: MapViewObserver) {
+        navigationContext.mapViewOwner.registerObserver(observer)
+    }
+
+    /**
+     * Unregisters [MapViewObserver].
+     */
+    fun unregisterMapObserver(observer: MapViewObserver) {
+        navigationContext.mapViewOwner.unregisterObserver(observer)
+    }
+
     private inline fun <reified T : ViewModel> lazyViewModel(): Lazy<T> = lazy {
         viewModelProvider[T::class.java]
     }
