@@ -25,8 +25,14 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".view.ComponentsActivity" />
-        <activity android:name=".view.ComponentsAltActivity" />
+        <activity
+            android:name=".view.ComponentsActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            />
+        <activity
+            android:name=".view.ComponentsAltActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            />
         <activity android:name=".view.AppLifecycleActivity" />
         <activity android:name=".view.AlternativeRouteActivity" />
         <activity android:name=".view.MapboxRouteLineActivity" />

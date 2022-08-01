@@ -1,4 +1,4 @@
-package com.mapbox.navigation.dropin.component.speedlimit
+package com.mapbox.navigation.ui.speedlimit.internal
 
 import androidx.annotation.StyleRes
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -12,18 +12,20 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal class SpeedLimitComponent(
+class SpeedLimitComponent(
     @StyleRes val style: Int,
     @StyleRes val textAppearance: Int,
-    val speedLimitView: MapboxSpeedLimitView
+    val speedLimitView: MapboxSpeedLimitView,
+    val speedLimitApi: MapboxSpeedLimitApi = MapboxSpeedLimitApi(
+        SpeedLimitFormatter(speedLimitView.context)
+    )
 ) : UIComponent() {
+
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
         speedLimitView.updateStyle(style)
         // setTextAppearance is not deprecated in AppCompatTextView
         speedLimitView.setTextAppearance(speedLimitView.context, textAppearance)
-        val speedLimitFormatter = SpeedLimitFormatter(speedLimitView.context)
-        val speedLimitApi = MapboxSpeedLimitApi(speedLimitFormatter)
 
         coroutineScope.launch {
             mapboxNavigation.flowLocationMatcherResult().collect {

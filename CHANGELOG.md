@@ -38,6 +38,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Introduced `NavigationViewOptions.enableMapLongClickIntercept` that would allow users to disable `NavigationView` from handling `OnMapLongClick` events. [#6116](https://github.com/mapbox/mapbox-navigation-android/pull/6116)
 - Introduced `MapViewObserver#onAttached` and `MapViewObserver#onDetached` to get access to `MapView` instance used by `NavigationView`. [#6116](https://github.com/mapbox/mapbox-navigation-android/pull/6116)
 - Removed `NavigationViewListener.onMapStyleChanged`. [#6116](https://github.com/mapbox/mapbox-navigation-android/pull/6116)
+- Added `ComponentInstaller` to `Maneuver` and `SpeedLimit` that offer simplified integration of maneuvers and speed limits APIs. [#6117](https://github.com/mapbox/mapbox-navigation-android/pull/6117)
 - Fixed bearing calculation error during tunnel dead reckoning. [#6118](https://github.com/mapbox/mapbox-navigation-android/pull/6118)
 
 ### Mapbox dependencies

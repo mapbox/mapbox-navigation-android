@@ -1,4 +1,24 @@
 // Signature format: 3.0
+package com.mapbox.navigation.ui.maneuver {
+
+  public final class ComponentInstallerKt {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation maneuver(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView maneuverView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maneuver.ManeuverConfig,kotlin.Unit> config = {});
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ManeuverConfig {
+    method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions getOptions();
+    method public String? getStyleId();
+    method public String? getUserId();
+    method public void setOptions(com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions);
+    method public void setStyleId(String?);
+    method public void setUserId(String?);
+    property public final com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions options;
+    property public final String? styleId;
+    property public final String? userId;
+  }
+
+}
+
 package com.mapbox.navigation.ui.maneuver.api {
 
   public final class MapboxLaneIconsApi {

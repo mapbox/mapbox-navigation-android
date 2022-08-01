@@ -1,6 +1,5 @@
-package com.mapbox.navigation.dropin.component.maneuver
+package com.mapbox.navigation.ui.maneuver.internal
 
-import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.core.MapboxNavigation
@@ -13,16 +12,15 @@ import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
-import com.mapbox.navigation.ui.maps.internal.extensions.getStyleId
-import com.mapbox.navigation.ui.maps.internal.extensions.getUserId
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal class ManeuverComponent(
+class ManeuverComponent(
     val maneuverView: MapboxManeuverView,
-    val mapStyle: Style,
+    val userId: String?,
+    val styleId: String?,
     val options: ManeuverViewOptions,
     val maneuverApi: MapboxManeuverApi = MapboxManeuverApi(
         MapboxDistanceFormatter(
@@ -49,8 +47,8 @@ internal class ManeuverComponent(
 
                     value.onValue { maneuvers ->
                         maneuverApi.getRoadShields(
-                            mapStyle.getUserId(),
-                            mapStyle.getStyleId(),
+                            userId,
+                            styleId,
                             mapboxNavigation.navigationOptions.accessToken,
                             maneuvers
                         ) { result ->
