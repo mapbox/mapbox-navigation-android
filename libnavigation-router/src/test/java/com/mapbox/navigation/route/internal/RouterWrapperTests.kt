@@ -347,7 +347,7 @@ class RouterWrapperTests {
                 1,
                 0,
                 RoutingProfile(routerOptions.profile().mapToRoutingMode(), routerOptions.user()),
-//                100
+                100,
             )
 
             verify(exactly = 1) {

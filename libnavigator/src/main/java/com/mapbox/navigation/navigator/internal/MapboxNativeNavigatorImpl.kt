@@ -272,7 +272,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 navigator!!.refreshRoute(
                     refreshResponseJson,
                     route.nativeRoute().routeId,
-                    // geometryIndex
+                    geometryIndex,
                 ) { callback(continuation, it) }
             }
         }

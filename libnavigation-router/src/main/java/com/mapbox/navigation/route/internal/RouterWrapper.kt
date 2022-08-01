@@ -191,7 +191,7 @@ class RouterWrapper(
             routeIndex,
             legIndex,
             RoutingProfile(routeOptions.profile().mapToRoutingMode(), routeOptions.user()),
-            //            currentRouteGeometryIndex,
+            currentRouteGeometryIndex,
         )
 
         return router.getRouteRefresh(
@@ -306,6 +306,7 @@ class RouterWrapper(
     }
 
     private companion object {
+
         private const val LOG_CATEGORY = "RouterWrapper"
         private const val REQUEST_FAILURE = -1L
     }

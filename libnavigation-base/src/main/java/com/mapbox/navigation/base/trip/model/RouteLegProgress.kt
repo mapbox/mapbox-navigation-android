@@ -88,7 +88,7 @@ class RouteLegProgress internal constructor(
             "durationRemaining=$durationRemaining, " +
             "fractionTraveled=$fractionTraveled, " +
             "currentStepProgress=$currentStepProgress, " +
-            "upcomingStep=$upcomingStep" +
+            "upcomingStep=$upcomingStep, " +
             "geometryIndex=$geometryIndex" +
             ")"
     }

@@ -570,7 +570,7 @@ class NavigatorMapperTest {
         every { upcomingRouteAlerts } returns emptyList()
         every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
         every { locatedAlternativeRouteId } returns "alternative_id"
-//        every { this.geometryIndex } returns geometryIndex
+        every { geometryIndex } returns routeGeometryIndex
         every { shapeIndex } returns legGeometryIndex
     }
 

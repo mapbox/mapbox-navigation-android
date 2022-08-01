@@ -169,6 +169,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 #### Features
 - Added `FollowingFrameOptions.focalPoint` that can be used to define the position of the first framed geometry point (typically the user location indicator, if available) in the `MapboxNavigationViewportDataSource.followingPadding`. [#5875](https://github.com/mapbox/mapbox-navigation-android/pull/5875)
 
+- Added `RouteLegProgress#geometryIndex`, `RouteProgress#currentRouteGeometryIndex` and `DirectionsRoute.legsGeometryToLineString`, `DirectionsRoute.legsGeometryToPoints` `DecodeUtils`. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
 #### Bug fixes and improvements
 - Introduced `NavigationViewListener#onInfoPanelHidden` to inform user when `InfoPanel` hides. [#6113](https://github.com/mapbox/mapbox-navigation-android/pull/6113)
 - Introduced `NavigationViewListener#onInfoPanelExpanded` to inform user when `InfoPanel` expands. [#6113](https://github.com/mapbox/mapbox-navigation-android/pull/6113)
