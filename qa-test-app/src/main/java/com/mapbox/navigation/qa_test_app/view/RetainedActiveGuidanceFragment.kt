@@ -16,7 +16,10 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.qa_test_app.databinding.FragmentActiveGuidanceBinding
 import com.mapbox.navigation.qa_test_app.lifecycle.bottomsheet.DropInTripProgress
-import com.mapbox.navigation.qa_test_app.lifecycle.topbanner.DropInManeuver
+import com.mapbox.navigation.ui.base.installer.installComponents
+import com.mapbox.navigation.ui.maneuver.maneuver
+import com.mapbox.navigation.ui.maps.NavigationStyles
+import com.mapbox.navigation.ui.speedlimit.speedLimit
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.onStart
@@ -25,7 +28,6 @@ import kotlinx.coroutines.flow.onStart
 class RetainedActiveGuidanceFragment : Fragment() {
 
     private var dropInTripProgress: DropInTripProgress? = null
-    private var dropInManeuver: DropInManeuver? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +61,19 @@ class RetainedActiveGuidanceFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val binding = FragmentActiveGuidanceBinding.bind(view)
 
+        MapboxNavigationApp.installComponents(this) {
+            maneuver(
+                binding.maneuverView,
+                config = {
+                    userId = NavigationStyles.NAVIGATION_DAY_STYLE_USER_ID
+                    styleId = NavigationStyles.NAVIGATION_DAY_STYLE_ID
+                }
+            )
+            speedLimit(
+                binding.speedLimitView
+            )
+        }
+
         attachStarted(object : MapboxNavigationObserver {
             override fun onAttached(mapboxNavigation: MapboxNavigation) {
                 mapboxNavigation.flowActiveGuidanceStarted().asLiveData()
@@ -79,9 +94,6 @@ class RetainedActiveGuidanceFragment : Fragment() {
             stopView = binding.stop,
             tripProgressView = binding.tripProgressView
         ).also { MapboxNavigationApp.registerObserver(it) }
-        dropInManeuver = DropInManeuver(
-            maneuverView = binding.maneuverView,
-        ).also { MapboxNavigationApp.registerObserver(it) }
     }
 
     override fun onDestroyView() {
@@ -89,8 +101,6 @@ class RetainedActiveGuidanceFragment : Fragment() {
         // be created within the Fragment lifecycle.
         dropInTripProgress?.let { MapboxNavigationApp.unregisterObserver(it) }
         dropInTripProgress = null
-        dropInManeuver?.let { MapboxNavigationApp.unregisterObserver(it) }
-        dropInManeuver = null
 
         super.onDestroyView()
     }
