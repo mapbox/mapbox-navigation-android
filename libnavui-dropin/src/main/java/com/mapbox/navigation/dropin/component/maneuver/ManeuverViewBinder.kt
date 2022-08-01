@@ -10,7 +10,10 @@ import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxManeuverGuidanceLayoutBinding
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
+import com.mapbox.navigation.ui.maneuver.internal.ManeuverComponent
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
+import com.mapbox.navigation.ui.maps.internal.extensions.getStyleId
+import com.mapbox.navigation.ui.maps.internal.extensions.getUserId
 import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -34,7 +37,8 @@ internal class ManeuverViewBinder(
             if (mapStyle != null) {
                 ManeuverComponent(
                     maneuverView = binding.maneuverView,
-                    mapStyle = mapStyle,
+                    userId = mapStyle.getUserId(),
+                    styleId = mapStyle.getStyleId(),
                     options = options
                 )
             } else {
