@@ -11,6 +11,7 @@ import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxSpeedLimitLayoutBinding
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
+import com.mapbox.navigation.ui.speedlimit.internal.SpeedLimitComponent
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class SpeedLimitViewBinder(

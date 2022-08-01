@@ -1,9 +1,8 @@
-package com.mapbox.navigation.dropin.component.maneuver
+package com.mapbox.navigation.ui.maneuver.internal
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -19,7 +18,6 @@ import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
-import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.shield.model.RouteShieldCallback
 import com.mapbox.navigation.ui.shield.model.RouteShieldError
 import com.mapbox.navigation.ui.shield.model.RouteShieldResult
@@ -43,17 +41,12 @@ class ManeuverComponentTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
-    lateinit var style: Style
-
     private val maneuverViewOptions = ManeuverViewOptions.Builder().build()
 
     @Before
     fun setUp() {
         mockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationEx")
         every { mockNavigation.flowRouteProgress() } returns flowOf(routeProgress)
-        style = mockk {
-            every { styleURI } returns NavigationStyles.NAVIGATION_DAY_STYLE
-        }
     }
 
     @After
@@ -70,7 +63,7 @@ class ManeuverComponentTest {
         every {
             getRoadShields(
                 DirectionsCriteria.PROFILE_DEFAULT_USER,
-                NavigationStyles.NAVIGATION_DAY_STYLE_ID,
+                "navigation-day-v1",
                 "token",
                 maneuvers,
                 capture(callbackSlot)
@@ -78,7 +71,7 @@ class ManeuverComponentTest {
         } returns Unit
     }
     private val maneuverView: MapboxManeuverView = mockk(relaxed = true)
-    private val mockNavigation = mockk<MapboxNavigation>() {
+    private val mockNavigation = mockk<MapboxNavigation> {
         every { navigationOptions } returns mockk {
             every { accessToken } returns "token"
         }
@@ -108,7 +101,13 @@ class ManeuverComponentTest {
                 firstArg<TripSessionStateObserver>().onSessionStateChanged(TripSessionState.STARTED)
             }
             val maneuverComponent =
-                ManeuverComponent(maneuverView, style, maneuverViewOptions, mockManeuverApi)
+                ManeuverComponent(
+                    maneuverView = maneuverView,
+                    userId = DirectionsCriteria.PROFILE_DEFAULT_USER,
+                    styleId = "navigation-day-v1",
+                    options = maneuverViewOptions,
+                    maneuverApi = mockManeuverApi
+                )
 
             maneuverComponent.onAttached(mockNavigation)
 
@@ -139,7 +138,13 @@ class ManeuverComponentTest {
             }
             val expectedList: List<Expected<RouteShieldError, RouteShieldResult>> = listOf()
             val maneuverComponent =
-                ManeuverComponent(maneuverView, style, maneuverViewOptions, mockManeuverApi)
+                ManeuverComponent(
+                    maneuverView = maneuverView,
+                    userId = DirectionsCriteria.PROFILE_DEFAULT_USER,
+                    styleId = "navigation-day-v1",
+                    options = maneuverViewOptions,
+                    maneuverApi = mockManeuverApi
+                )
 
             maneuverComponent.onAttached(mockNavigation).also {
                 callbackSlot.captured.onRoadShields(expectedList)
@@ -172,7 +177,13 @@ class ManeuverComponentTest {
             }
 
             val maneuverComponent =
-                ManeuverComponent(maneuverView, style, maneuverViewOptions, mockManeuverApi)
+                ManeuverComponent(
+                    maneuverView = maneuverView,
+                    userId = DirectionsCriteria.PROFILE_DEFAULT_USER,
+                    styleId = "navigation-day-v1",
+                    options = maneuverViewOptions,
+                    maneuverApi = mockManeuverApi
+                )
 
             maneuverComponent.onAttached(mockNavigation)
 
@@ -201,7 +212,13 @@ class ManeuverComponentTest {
             }
 
             val maneuverComponent =
-                ManeuverComponent(maneuverView, style, maneuverViewOptions, mockManeuverApi)
+                ManeuverComponent(
+                    maneuverView = maneuverView,
+                    userId = DirectionsCriteria.PROFILE_DEFAULT_USER,
+                    styleId = "navigation-day-v1",
+                    options = maneuverViewOptions,
+                    maneuverApi = mockManeuverApi
+                )
 
             maneuverComponent.onAttached(mockNavigation)
 
