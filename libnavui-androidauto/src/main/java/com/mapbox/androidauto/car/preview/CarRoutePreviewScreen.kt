@@ -49,8 +49,8 @@ class CarRoutePreviewScreen(
 ) : Screen(routePreviewCarContext.carContext) {
 
     private val mainCarContext = routePreviewCarContext.mainCarContext
-    private val carRouteLineContract = CarRoutePreviewContract(navigationRoutes)
-    private val carRouteLine = CarRouteLine(carRouteLineContract)
+    private val carRoutePreviewContract = CarRoutePreviewContract(navigationRoutes)
+    private val carRouteLine = CarRouteLine(mainCarContext, carRoutePreviewContract)
     private val carLocationRenderer = CarLocationRenderer(mainCarContext)
     private val carSpeedLimitRenderer = CarSpeedLimitRenderer(mainCarContext)
     private val carNavigationCamera = CarNavigationCamera(
@@ -147,9 +147,9 @@ class CarRoutePreviewScreen(
             )
         }
         if (navigationRoutes.isNotEmpty()) {
-            listBuilder.setSelectedIndex(carRouteLineContract.selectedIndex)
+            listBuilder.setSelectedIndex(carRoutePreviewContract.selectedIndex)
             listBuilder.setOnSelectedListener { index ->
-                if (carRouteLineContract.selectIndex(index)) {
+                if (carRoutePreviewContract.selectIndex(index)) {
                     invalidate()
                 }
             }
@@ -174,7 +174,7 @@ class CarRoutePreviewScreen(
                 Action.Builder()
                     .setTitle(carContext.getString(R.string.car_action_preview_navigate_button))
                     .setOnClickListener {
-                        carRouteLineContract.startActiveNavigation()
+                        carRoutePreviewContract.startActiveNavigation()
                     }
                     .build(),
             )

@@ -1,5 +1,7 @@
 package com.mapbox.androidauto.car.preview
 
+import com.mapbox.androidauto.car.MainCarContext
+import com.mapbox.androidauto.car.internal.extensions.flowStyle
 import com.mapbox.androidauto.car.internal.extensions.getStyleAsync
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
@@ -16,10 +18,17 @@ import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 
 /**
  * This class is to simplify the interaction with [MapboxRouteLineApi], [MapboxRouteArrowView]
@@ -31,6 +40,7 @@ import kotlinx.coroutines.flow.flowOf
 @ExperimentalPreviewMapboxNavigationAPI
 @OptIn(FlowPreview::class)
 class CarRouteLine constructor(
+    private val mainCarContext: MainCarContext,
     private val contract: RouteLineComponentContract = MapboxRouteLineComponentContract(),
     private val routeLineOptions: MapboxRouteLineOptions? = null,
     private val routeArrowOptions: RouteArrowOptions? = null,
@@ -38,6 +48,7 @@ class CarRouteLine constructor(
 
     private var routeLineComponent: RouteLineComponent? = null
     private var routeArrowComponent: RouteArrowComponent? = null
+    private lateinit var scope: CoroutineScope
 
     override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
         attachRouteLine(mapboxCarMapSurface)
@@ -45,17 +56,34 @@ class CarRouteLine constructor(
     }
 
     private fun attachRouteLine(mapboxCarMapSurface: MapboxCarMapSurface) {
+        scope = MainScope()
+        val options = routeLineOptions
+            ?: MapboxRouteLineOptions.Builder(mapboxCarMapSurface.carContext)
+                .withRouteLineBelowLayerId("road-label-navigation")
+                .build()
+        val routeLineView = MapboxRouteLineView(options)
         routeLineComponent = RouteLineComponent(
             mapboxMap = mapboxCarMapSurface.mapSurface.getMapboxMap(),
             mapPlugins = mapboxCarMapSurface.mapSurface,
-            options = routeLineOptions
-                ?: MapboxRouteLineOptions.Builder(mapboxCarMapSurface.carContext)
-                    .withRouteLineBelowLayerId("road-label-navigation")
-                    .build(),
+            options = options,
+            routeLineView = routeLineView,
             contractProvider = { contract }
         ).also { routeLineComponent ->
             mapboxCarMapSurface.getStyleAsync {
                 MapboxNavigationApp.registerObserver(routeLineComponent)
+            }
+
+            scope.launch {
+                combine(
+                    mapboxCarMapSurface.flowStyle(),
+                    mainCarContext.routeAlternativesEnabled
+                ) { style, alternativesEnabled ->
+                    if (alternativesEnabled) {
+                        routeLineView.showAlternativeRoutes(style)
+                    } else {
+                        routeLineView.hideAlternativeRoutes(style)
+                    }
+                }.collect()
             }
         }
     }
@@ -74,6 +102,7 @@ class CarRouteLine constructor(
     }
 
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
+        scope.cancel()
         routeLineComponent?.let { MapboxNavigationApp.unregisterObserver(it) }
         routeLineComponent = null
         routeArrowComponent?.let { MapboxNavigationApp.unregisterObserver(it) }

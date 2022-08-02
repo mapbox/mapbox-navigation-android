@@ -24,7 +24,7 @@ class MainCarScreen(
     private val mainCarContext: MainCarContext
 ) : Screen(mainCarContext.carContext) {
 
-    val carRouteLine = CarRouteLine()
+    val carRouteLine = CarRouteLine(mainCarContext)
     val carLocationRenderer = CarLocationRenderer(mainCarContext)
     val carSpeedLimitRenderer = CarSpeedLimitRenderer(mainCarContext)
     val carNavigationCamera = CarNavigationCamera(

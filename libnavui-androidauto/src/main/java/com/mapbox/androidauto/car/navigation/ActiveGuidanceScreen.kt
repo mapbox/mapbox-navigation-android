@@ -45,7 +45,7 @@ class ActiveGuidanceScreen(
     private val placesLayerUtil: PlacesListOnMapLayerUtil = PlacesListOnMapLayerUtil(),
 ) : Screen(carActiveGuidanceContext.carContext) {
 
-    val carRouteLine = CarRouteLine()
+    val carRouteLine = CarRouteLine(carActiveGuidanceContext.mainCarContext)
     val carLocationRenderer = CarLocationRenderer(carActiveGuidanceContext.mainCarContext)
     val carSpeedLimitRenderer = CarSpeedLimitRenderer(carActiveGuidanceContext.mainCarContext)
     val carNavigationCamera = CarNavigationCamera(

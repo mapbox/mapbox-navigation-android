@@ -7,6 +7,10 @@ import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 
 internal fun MapboxCarMapSurface.handleStyleOnAttached(
     block: (Style) -> Unit
@@ -25,6 +29,16 @@ internal fun MapboxCarMapSurface.handleStyleOnDetached(
 ): Style? {
     listener?.let { mapSurface.getMapboxMap().removeOnStyleLoadedListener(it) }
     return getStyle()
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+internal fun MapboxCarMapSurface.flowStyle(): Flow<Style> = callbackFlow {
+    val listener = handleStyleOnAttached {
+        trySend(it)
+    }
+    awaitClose {
+        handleStyleOnDetached(listener)
+    }
 }
 
 internal fun MapboxCarMapSurface.getStyle(): Style? {
