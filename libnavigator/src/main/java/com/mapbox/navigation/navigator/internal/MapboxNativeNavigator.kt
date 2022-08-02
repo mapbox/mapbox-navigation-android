@@ -9,7 +9,6 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.Experimental
@@ -100,14 +99,6 @@ interface MapboxNativeNavigator {
      * @param route [DirectionsRoute]
      */
     suspend fun refreshRoute(route: NavigationRoute): Expected<String, List<RouteAlternative>>
-
-    /**
-     * Gets the current banner. If there is no
-     * banner, the method returns *null*.
-     *
-     * @return [BannerInstruction] for step index you passed
-     */
-    suspend fun getCurrentBannerInstruction(): BannerInstruction?
 
     /**
      * Follows a new leg of the already loaded directions.

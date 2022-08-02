@@ -16,7 +16,6 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
-import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
@@ -259,19 +258,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             }
         }
     }
-
-    /**
-     * Gets the current banner. If there is no
-     * banner, the method returns *null*.
-     *
-     * @return [BannerInstruction] for step index you passed
-     */
-    override suspend fun getCurrentBannerInstruction(): BannerInstruction? =
-        suspendCancellableCoroutine { continuation ->
-            navigator!!.getBannerInstruction {
-                continuation.resume(it)
-            }
-        }
 
     /**
      * Follows a new leg of the already loaded directions.

@@ -1,5 +1,6 @@
 package com.mapbox.navigation.testing.factories
 
+import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.ActiveGuidanceInfo
 import com.mapbox.navigator.BannerInstruction
@@ -81,26 +82,37 @@ fun createVoiceInstruction(
     return VoiceInstruction("test", announcement, 0f, 0)
 }
 
-fun createBannerInstruction(): BannerInstruction {
+fun createBannerInstruction(
+    primary: BannerSection = createBannerSection(),
+    view: BannerSection = createBannerSection(),
+    secondary: BannerSection = createBannerSection(),
+    sub: BannerSection = createBannerSection(),
+    remainingStepDistance: Float = 50f,
+    index: Int = 0
+): BannerInstruction {
     return BannerInstruction(
-        createBannerSection(),
-        null,
-        null,
-        null,
-        0f,
-        0
+        primary,
+        view,
+        secondary,
+        sub,
+        remainingStepDistance,
+        index
     )
 }
 
 fun createBannerSection(
     text: String = "testText",
+    @StepManeuver.StepManeuverType type: String = StepManeuver.TURN,
+    modifier: String = "right",
+    degrees: Int = 90,
+    drivingSide: String = "right"
 ): BannerSection {
     return BannerSection(
         text,
-        null,
-        null,
-        null,
-        null,
+        type,
+        modifier,
+        degrees,
+        drivingSide,
         null
     )
 }
