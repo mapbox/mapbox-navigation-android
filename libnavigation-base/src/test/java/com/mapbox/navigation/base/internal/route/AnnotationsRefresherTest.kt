@@ -83,7 +83,8 @@ class AnnotationsRefresherTest(
                     annotationWithCongestionNumericOnlyEmpty,
                     5,
                     LegAnnotation.builder().congestionNumeric(listOf(0, 0, 0, 0, 0)).build(),
-                    "Default + empty congestion_numeric, index = 5"
+                    "Default + empty congestion_numeric, index = 5. Annotations before current " +
+                        "geometry index should be updated to default value."
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyEmpty,

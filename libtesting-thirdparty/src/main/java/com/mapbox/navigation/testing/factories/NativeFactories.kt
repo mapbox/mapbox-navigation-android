@@ -47,7 +47,6 @@ fun createNavigationStatus(
     upcomingRouteAlerts: List<UpcomingRouteAlert> = emptyList(),
     nextWaypointIndex: Int = 0,
     layer: Int = 0,
-    geometryIndex: Int = 0,
 ): NavigationStatus {
     return NavigationStatus(
         routeState,
@@ -63,7 +62,6 @@ fun createNavigationStatus(
         geometryIndex,
         shapeIndex,
         intersectionIndex,
-        geometryIndex,
         roads,
         voiceInstruction,
         bannerInstruction,
@@ -74,7 +72,7 @@ fun createNavigationStatus(
         activeGuidanceInfo,
         upcomingRouteAlerts,
         nextWaypointIndex,
-        layer
+        layer,
     )
 }
 
@@ -98,7 +96,7 @@ fun createBannerInstruction(
         secondary,
         sub,
         remainingStepDistance,
-        index
+        index,
     )
 }
 
