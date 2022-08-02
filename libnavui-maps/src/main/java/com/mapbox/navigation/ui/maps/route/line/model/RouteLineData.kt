@@ -11,7 +11,7 @@ import com.mapbox.geojson.FeatureCollection
 class RouteLineData internal constructor(
     val featureCollection: FeatureCollection,
     val dynamicData: RouteLineDynamicData,
-    var copy: RouteLineDataCopy? = null
+    internal var copy: RouteLineDataCopy? = null
 ) {
 
     /**

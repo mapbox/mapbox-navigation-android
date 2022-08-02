@@ -38,6 +38,7 @@ workflows:
               only:
                 - main
                 - release-v.*
+                - lp-perf-logs
       - release:
           filters:
             tags:

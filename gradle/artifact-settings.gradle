@@ -42,6 +42,6 @@ def getSnapshotVersion(String version) {
         def matcher = version =~ /$prefix(\d+).(\d+)?.*/
         def major = (matcher[0][1] as Integer)
         def minor = (matcher[0][2] as Integer) + 1
-        return "${major}.${minor}.0-SNAPSHOT"
+        return "2.7.0-beta.3-route-set-perf-logs-2-SNAPSHOT"
     }
 }
