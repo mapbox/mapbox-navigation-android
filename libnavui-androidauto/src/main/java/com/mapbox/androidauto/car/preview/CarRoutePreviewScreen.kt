@@ -54,9 +54,10 @@ class CarRoutePreviewScreen(
     private val carLocationRenderer = CarLocationRenderer(mainCarContext)
     private val carSpeedLimitRenderer = CarSpeedLimitRenderer(mainCarContext)
     private val carNavigationCamera = CarNavigationCamera(
-        routePreviewCarContext.mapboxNavigation,
-        CarCameraMode.OVERVIEW,
-        CarCameraMode.FOLLOWING,
+        mapboxNavigation = routePreviewCarContext.mapboxNavigation,
+        initialCarCameraMode = CarCameraMode.OVERVIEW,
+        alternativeCarCameraMode = CarCameraMode.FOLLOWING,
+        contract = carRoutePreviewContract
     )
 
     private val backPressCallback = object : OnBackPressedCallback(true) {
