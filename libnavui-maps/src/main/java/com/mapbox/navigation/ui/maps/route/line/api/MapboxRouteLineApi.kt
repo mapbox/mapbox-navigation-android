@@ -232,7 +232,7 @@ class MapboxRouteLineApi(
      * from the [RouteLineResources] as part of the [MapboxRouteLineOptions]
      */
     fun setRoadClasses(roadClasses: List<String>) {
-        jobControl.scope.launch(Dispatchers.Main) {
+        jobControl.scope.launch(Dispatchers.Main.immediate) {
             mutex.withLock {
                 trafficBackfillRoadClasses.clear()
                 trafficBackfillRoadClasses.addAll(roadClasses)
@@ -392,7 +392,7 @@ class MapboxRouteLineApi(
         println("[Mapbox] perfTest setNavigationRouteLines entry (invID: $invocationID, routesIDs: $routesIds) : ${System.nanoTime()}")
         cancel()
         println("[Mapbox] perfTest setNavigationRouteLines canceled old (invID: $invocationID) : ${System.nanoTime()}")
-        jobControl.scope.launch(Dispatchers.Main) {
+        jobControl.scope.launch(Dispatchers.Main.immediate) {
             println("[Mapbox] perfTest setNavigationRouteLines waiting for lock (invID: $invocationID) : ${System.nanoTime()}")
             mutex.withLock {
                 println("[Mapbox] perfTest setNavigationRouteLines lock granted (invID: $invocationID) : ${System.nanoTime()}")
@@ -419,7 +419,7 @@ class MapboxRouteLineApi(
     fun getRouteDrawData(
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
-        jobControl.scope.launch(Dispatchers.Main) {
+        jobControl.scope.launch(Dispatchers.Main.immediate) {
             mutex.withLock {
                 val featureDataProvider: () -> List<RouteFeatureData> =
                     MapboxRouteLineUtils.getRouteFeatureDataProvider(routes)
@@ -555,7 +555,7 @@ class MapboxRouteLineApi(
     fun clearRouteLine(
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineClearValue>>
     ) {
-        jobControl.scope.launch(Dispatchers.Main) {
+        jobControl.scope.launch(Dispatchers.Main.immediate) {
             mutex.withLock {
                 routeLineOptions.vanishingRouteLine?.clear()
                 routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
@@ -731,7 +731,7 @@ class MapboxRouteLineApi(
                 else -> {
                     ifNonNull(routeProgress.currentLegProgress) { routeLegProgress ->
                         if (routeLegProgress.legIndex > activeLegIndex) {
-                            jobControl.scope.launch(Dispatchers.Main) {
+                            jobControl.scope.launch(Dispatchers.Main.immediate) {
                                 mutex.withLock {
                                     alternativelyStyleSegmentsNotInLeg(
                                         routeLegProgress.legIndex,
@@ -802,7 +802,7 @@ class MapboxRouteLineApi(
         legIndexToHighlight: Int,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>
     ) {
-        jobControl.scope.launch(Dispatchers.Main) {
+        jobControl.scope.launch(Dispatchers.Main.immediate) {
             mutex.withLock {
                 val expected = ifNonNull(primaryRoute?.directionsRoute?.legs()) { routeLegs ->
                     if (legIndexToHighlight in 0..routeLegs.lastIndex) {
@@ -953,7 +953,7 @@ class MapboxRouteLineApi(
         padding: Float,
         resultConsumer: MapboxNavigationConsumer<Expected<RouteNotFound, ClosestRouteValue>>
     ) {
-        jobControl.scope.launch(Dispatchers.Main) {
+        jobControl.scope.launch(Dispatchers.Main.immediate) {
             mutex.withLock {
                 val state = findClosestRoute(target, mapboxMap, padding)
                 resultConsumer.accept(state)
@@ -1218,6 +1218,54 @@ class MapboxRouteLineApi(
             }
         }
 
+        println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1TrafficExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
+        val alternateRoute1TrafficExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1TrafficExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
+            partitionedRoutes.second.firstOrNull()?.route?.run {
+                MapboxRouteLineUtils.getTrafficLineExpressionProducer(
+                    this.directionsRoute,
+                    routeLineOptions.resourceProvider.routeLineColorResources,
+                    trafficBackfillRoadClasses,
+                    false,
+                    alternativesDeviationOffset[this.id] ?: 0.0,
+                    Color.TRANSPARENT,
+                    routeLineOptions
+                        .resourceProvider
+                        .routeLineColorResources
+                        .alternativeRouteUnknownCongestionColor,
+                    routeLineOptions.displaySoftGradientForTraffic,
+                    routeLineOptions.softGradientTransition
+                )
+            }?.generateExpression().also {
+                println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1TrafficExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
+        }
+
+        println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2TrafficExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
+        val alternateRoute2TrafficExpressionDef = jobControl.scope.async {
+            println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2TrafficExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
+            if (partitionedRoutes.second.size > 1) {
+                MapboxRouteLineUtils.getTrafficLineExpressionProducer(
+                    partitionedRoutes.second[1].route.directionsRoute,
+                    routeLineOptions.resourceProvider.routeLineColorResources,
+                    trafficBackfillRoadClasses,
+                    false,
+                    alternativesDeviationOffset[partitionedRoutes.second[1].route.id] ?: 0.0,
+                    Color.TRANSPARENT,
+                    routeLineOptions
+                        .resourceProvider
+                        .routeLineColorResources
+                        .alternativeRouteUnknownCongestionColor,
+                    routeLineOptions.displaySoftGradientForTraffic,
+                    routeLineOptions.softGradientTransition
+                ).generateExpression()
+            } else {
+                null
+            }.also {
+                println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2TrafficExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
+            }
+        }
+
         println("[Mapbox] perfTest setNavigationRouteLines primaryRouteBaseExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
         val primaryRouteBaseExpressionDef = jobControl.scope.async {
             println("[Mapbox] perfTest setNavigationRouteLines primaryRouteBaseExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
@@ -1417,54 +1465,6 @@ class MapboxRouteLineApi(
             }
         }
 
-        println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1TrafficExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
-        val alternateRoute1TrafficExpressionDef = jobControl.scope.async {
-            println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1TrafficExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
-            partitionedRoutes.second.firstOrNull()?.route?.run {
-                MapboxRouteLineUtils.getTrafficLineExpressionProducer(
-                    this.directionsRoute,
-                    routeLineOptions.resourceProvider.routeLineColorResources,
-                    trafficBackfillRoadClasses,
-                    false,
-                    alternativesDeviationOffset[this.id] ?: 0.0,
-                    Color.TRANSPARENT,
-                    routeLineOptions
-                        .resourceProvider
-                        .routeLineColorResources
-                        .alternativeRouteUnknownCongestionColor,
-                    routeLineOptions.displaySoftGradientForTraffic,
-                    routeLineOptions.softGradientTransition
-                )
-            }?.generateExpression().also {
-                println("[Mapbox] perfTest setNavigationRouteLines alternateRoute1TrafficExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
-            }
-        }
-
-        println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2TrafficExpressionDef start (invID: $invocationID) : ${System.nanoTime()}")
-        val alternateRoute2TrafficExpressionDef = jobControl.scope.async {
-            println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2TrafficExpressionDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")
-            if (partitionedRoutes.second.size > 1) {
-                MapboxRouteLineUtils.getTrafficLineExpressionProducer(
-                    partitionedRoutes.second[1].route.directionsRoute,
-                    routeLineOptions.resourceProvider.routeLineColorResources,
-                    trafficBackfillRoadClasses,
-                    false,
-                    alternativesDeviationOffset[partitionedRoutes.second[1].route.id] ?: 0.0,
-                    Color.TRANSPARENT,
-                    routeLineOptions
-                        .resourceProvider
-                        .routeLineColorResources
-                        .alternativeRouteUnknownCongestionColor,
-                    routeLineOptions.displaySoftGradientForTraffic,
-                    routeLineOptions.softGradientTransition
-                ).generateExpression()
-            } else {
-                null
-            }.also {
-                println("[Mapbox] perfTest setNavigationRouteLines alternateRoute2TrafficExpressionDef end (invID: $invocationID) : ${System.nanoTime()}")
-            }
-        }
-
         // If the displayRestrictedRoadSections is true then produce a gradient that is transparent
         // except for the restricted sections. If false produce a gradient for the restricted
         // line layer that is completely transparent.
@@ -1518,7 +1518,7 @@ class MapboxRouteLineApi(
         val wayPointsFeatureCollection = wayPointsFeatureCollectionDef.await()
 
         if (routeLineOptions.displayRestrictedRoadSections) {
-            jobControl.scope.launch(Dispatchers.Main) {
+            jobControl.scope.launch(Dispatchers.Main.immediate) {
                 val routeHasRestrictionsDef =
                     jobControl.scope.async {
                         partitionedRoutes.first.firstOrNull()?.route?.run {
@@ -1535,7 +1535,7 @@ class MapboxRouteLineApi(
             routeLineOptions.vanishingRouteLine != null ||
             routeLineOptions.styleInactiveRouteLegsIndependently
         ) {
-            jobControl.scope.launch(Dispatchers.Main) {
+            jobControl.scope.launch(Dispatchers.Main.immediate) {
                 println("[Mapbox] perfTest setNavigationRouteLines segmentsDef start (invID: $invocationID) : ${System.nanoTime()}")
                 val segmentsDef = jobControl.scope.async {
                     println("[Mapbox] perfTest setNavigationRouteLines segmentsDef entry (invID: $invocationID, tid: ${Thread.currentThread().id}) : ${System.nanoTime()}")

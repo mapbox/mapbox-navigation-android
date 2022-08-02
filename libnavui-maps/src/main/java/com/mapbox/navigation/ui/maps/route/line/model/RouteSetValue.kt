@@ -3,6 +3,17 @@ package com.mapbox.navigation.ui.maps.route.line.model
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 
+class RouteLineDataCopy internal constructor(
+    val featureCollection: String,
+    val dynamicData: RouteLineDynamicData
+)
+
+class RouteSetValueCopy internal constructor(
+    val primaryRouteLineData: RouteLineDataCopy,
+    val alternativeRouteLinesData: List<RouteLineDataCopy>,
+    val waypointsSource: String
+)
+
 /**
  * Represents the side effects for drawing routes on a map.
  *
@@ -13,7 +24,8 @@ import com.mapbox.maps.extension.style.expressions.generated.Expression
 class RouteSetValue internal constructor(
     val primaryRouteLineData: RouteLineData,
     val alternativeRouteLinesData: List<RouteLineData>,
-    val waypointsSource: FeatureCollection
+    val waypointsSource: FeatureCollection,
+    var copy: RouteSetValueCopy? = null
 ) {
 
     /**

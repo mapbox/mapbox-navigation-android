@@ -18,6 +18,9 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
+import com.mapbox.maps.Event
+import com.mapbox.maps.Observer
+import com.mapbox.maps.extension.observable.model.SourceDataType
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
@@ -204,6 +207,22 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 }
             )
             binding.mapView.gestures.addOnMapLongClickListener(this)
+            binding.mapView.gestures.addOnMapClickListener {
+                mapboxNavigation.setNavigationRoutes(emptyList())
+                false
+            }
+            binding.mapView.getMapboxMap().addOnMapIdleListener {
+                println("[Mapbox] perfTest map idle")
+            }
+            binding.mapView.getMapboxMap().addOnSourceDataLoadedListener {
+                if (it.type == SourceDataType.METADATA) {
+                    when (it.id) {
+                        "mapbox-layerGroup:1:Source", "mapbox-layerGroup:2:Source", "mapbox-layerGroup:3:Source" -> {
+                            println("[Mapbox] perfTest source loaded ${it.id}")
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -216,8 +235,8 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 currentLocation.longitude,
                 currentLocation.latitude
             )
-            findRoute(originPoint, point)
         }
+        findRoute()
         return false
     }
 
@@ -301,11 +320,14 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             Thread.sleep(2000)
         }
     }
-    private fun findRoute(origin: Point?, destination: Point?) {
+    private fun findRoute() {
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
-            .coordinatesList(listOf(origin, destination))
+            .coordinatesList(listOf(
+                Point.fromLngLat(11.56660231912236, 48.19144798856047),
+                Point.fromLngLat(-3.672915742237681, 40.417415521394496)
+            ))
             .layersList(listOf(mapboxNavigation.getZLevel(), null))
             .alternatives(true)
             .build()
@@ -316,7 +338,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                     routes: List<NavigationRoute>,
                     routerOrigin: RouterOrigin
                 ) {
-                    overloadDispatcher()
+                    // overloadDispatcher()
                     mapboxNavigation.setNavigationRoutes(routes)
                 }
 
