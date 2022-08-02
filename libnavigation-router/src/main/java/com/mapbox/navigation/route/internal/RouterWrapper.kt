@@ -187,7 +187,8 @@ class RouterWrapper(
             requestUuid,
             routeIndex,
             legIndex,
-            RoutingProfile(routeOptions.profile().mapToRoutingMode(), routeOptions.user())
+            RoutingProfile(routeOptions.profile().mapToRoutingMode(), routeOptions.user()),
+            null
         )
 
         return router.getRouteRefresh(

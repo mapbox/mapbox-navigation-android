@@ -336,7 +336,8 @@ class RouterWrapperTests {
                 UUID,
                 1,
                 0,
-                RoutingProfile(routerOptions.profile().mapToRoutingMode(), routerOptions.user())
+                RoutingProfile(routerOptions.profile().mapToRoutingMode(), routerOptions.user()),
+                null
             )
 
             verify(exactly = 1) {
