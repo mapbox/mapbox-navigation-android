@@ -80,6 +80,10 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         binding.mapView.camera
     }
 
+    private val mapCamera2: CameraAnimationsPlugin by lazy {
+        binding.mapView2.camera
+    }
+
     private val mapboxNavigation: MapboxNavigation by lazy {
         MapboxNavigationProvider.create(
             NavigationOptions.Builder(this)
@@ -107,6 +111,10 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private val routeLineView by lazy {
+        MapboxRouteLineView(routeLineOptions)
+    }
+
+    private val routeLineView2 by lazy {
         MapboxRouteLineView(routeLineOptions)
     }
 
@@ -145,12 +153,18 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         super.onDestroy()
         routeLineApi.cancel()
         routeLineView.cancel()
+        routeLineView2.cancel()
         mapboxReplayer.finish()
         mapboxNavigation.onDestroy()
     }
 
     private fun initNavigation() {
         binding.mapView.location.apply {
+            setLocationProvider(navigationLocationProvider)
+            addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
+            enabled = true
+        }
+        binding.mapView2.location.apply {
             setLocationProvider(navigationLocationProvider)
             addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
             enabled = true
@@ -182,6 +196,15 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 .build(),
             mapAnimationOptionsBuilder.build()
         )
+        mapCamera2.easeTo(
+            CameraOptions.Builder()
+                .center(Point.fromLngLat(location.longitude, location.latitude))
+                .bearing(location.bearing.toDouble())
+                .zoom(13.0)
+                .padding(EdgeInsets(1000.0, 0.0, 0.0, 0.0))
+                .build(),
+            mapAnimationOptionsBuilder.build()
+        )
     }
 
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
@@ -205,6 +228,23 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             )
             binding.mapView.gestures.addOnMapLongClickListener(this)
         }
+        binding.mapView2.getMapboxMap().loadStyleUri(
+            NavigationStyles.NAVIGATION_DAY_STYLE
+        ) {
+            mapboxNavigation.navigationOptions.locationEngine.getLastLocation(
+                object : LocationEngineCallback<LocationEngineResult> {
+                    override fun onSuccess(result: LocationEngineResult) {
+                        result.lastLocation?.let {
+                            navigationLocationProvider.changePosition(it)
+                            updateCamera(it)
+                        }
+                    }
+
+                    override fun onFailure(exception: Exception) {}
+                }
+            )
+            binding.mapView2.gestures.addOnMapLongClickListener(this)
+        }
     }
 
     override fun onMapLongClick(point: Point): Boolean {
@@ -225,6 +265,10 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         routeLineApi.updateTraveledRouteLine(point).let {
             routeLineView.renderRouteLineUpdate(
                 binding.mapView.getMapboxMap().getStyle()!!,
+                it
+            )
+            routeLineView2.renderRouteLineUpdate(
+                binding.mapView2.getMapboxMap().getStyle()!!,
                 it
             )
         }
@@ -260,6 +304,9 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         routeLineApi.updateWithRouteProgress(routeProgress) { result ->
             binding.mapView.getMapboxMap().getStyle()?.apply {
                 routeLineView.renderRouteLineUpdate(this, result)
+            }
+            binding.mapView2.getMapboxMap().getStyle()?.apply {
+                routeLineView2.renderRouteLineUpdate(this, result)
             }
         }
     }
@@ -333,11 +380,17 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 alternativeRoutesMetadata = mapboxNavigation.getAlternativeMetadataFor(
                     result.navigationRoutes
                 )
-            ).apply {
+            ).let {
                 routeLineView.renderRouteDrawData(
                     binding.mapView.getMapboxMap().getStyle()!!,
-                    this
+                    it
                 )
+                launch {
+                    routeLineView2.renderRouteDrawData(
+                        binding.mapView2.getMapboxMap().getStyle()!!,
+                        it
+                    )
+                }
             }
         }
     }
