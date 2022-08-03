@@ -279,6 +279,8 @@ class FollowingFrameOptions internal constructor() {
 
     /**
      * Focal point that defines the position of the first framed geometry point.
+     * @param x position from the left edge of the padding in the `<0.0, 1.0>` range
+     * @param y position from the top edge of the padding in the `<0.0, 1.0>` range
      */
     data class FocalPoint(
         @FloatRange(from = 0.0, to = 1.0) val x: Double,
