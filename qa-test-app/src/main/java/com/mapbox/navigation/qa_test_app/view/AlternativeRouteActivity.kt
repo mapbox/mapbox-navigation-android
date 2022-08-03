@@ -20,7 +20,10 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.Event
 import com.mapbox.maps.Observer
+import com.mapbox.maps.Projection
 import com.mapbox.maps.extension.observable.model.SourceDataType
+import com.mapbox.maps.extension.style.layers.properties.generated.ProjectionName
+import com.mapbox.maps.extension.style.projection.generated.setProjection
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
@@ -106,6 +109,9 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             .withRouteLineResources(routeLineResources)
             .withRouteLineBelowLayerId("road-label-navigation")
             .withVanishingRouteLineEnabled(true)
+            .displaySoftGradientForTraffic(true)
+            .softGradientTransition(35)
+            .displayRestrictedRoadSections(true)
             .build()
     }
 
@@ -192,8 +198,9 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     @SuppressLint("MissingPermission")
     private fun initStyle() {
         binding.mapView.getMapboxMap().loadStyleUri(
-            NavigationStyles.NAVIGATION_DAY_STYLE
+           "mapbox://styles/khuebner/cl313wg9q001k15np3kymgzc2"
         ) {
+            it.setProjection(com.mapbox.maps.extension.style.projection.generated.Projection(ProjectionName.GLOBE))
             mapboxNavigation.navigationOptions.locationEngine.getLastLocation(
                 object : LocationEngineCallback<LocationEngineResult> {
                     override fun onSuccess(result: LocationEngineResult) {
@@ -207,10 +214,10 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 }
             )
             binding.mapView.gestures.addOnMapLongClickListener(this)
-            binding.mapView.gestures.addOnMapClickListener {
+            /*binding.mapView.gestures.addOnMapClickListener {
                 mapboxNavigation.setNavigationRoutes(emptyList())
                 false
-            }
+            }*/
             binding.mapView.getMapboxMap().addOnMapIdleListener {
                 println("[Mapbox] perfTest map idle")
             }

@@ -83,6 +83,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
     private companion object {
         private const val TAG = "MbxRouteLineView"
     }
+
     private val sourceToFeatureMap = mutableMapOf<RouteLineSourceKey, RouteLineFeatureId>(
         Pair(MapboxRouteLineUtils.layerGroup1SourceKey, RouteLineFeatureId(null)),
         Pair(MapboxRouteLineUtils.layerGroup2SourceKey, RouteLineFeatureId(null)),
@@ -159,7 +160,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                 val alternativeRouteVisibility = getAlternativeRoutesVisibility(style)
                 if (routeDrawData.isValue) {
                     var routeSetValue = routeDrawData.value!!
-                    val routeSetValueDef = jobControl.scope.async {
+                    /*val routeSetValueDef = jobControl.scope.async {
                         routeDrawData.value!!.run {
                             RouteSetValueCopy(
                                 RouteLineDataCopy(
@@ -175,8 +176,34 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                                 waypointsSource.toJson()
                             )
                         }
+                    }*/
+
+                    val routeSetValueDef = routeDrawData.value!!.run {
+                        val primaryDef = jobControl.scope.async {
+                            primaryRouteLineData.featureCollection.toJson()
+                        }
+
+                        val alternativeDefs = alternativeRouteLinesData.map {
+                            jobControl.scope.async {
+                                it.featureCollection.toJson()
+                            }
+                        }
+
+                        RouteSetValueCopy(
+                            RouteLineDataCopy(
+                                primaryDef.await(),
+                                primaryRouteLineData.dynamicData
+                            ),
+                            alternativeRouteLinesData.mapIndexed { index, routeLineData ->
+                                RouteLineDataCopy(
+                                    alternativeDefs[index].await(),
+                                    routeLineData.dynamicData
+                                )
+                            },
+                            waypointsSource.toJson()
+                        )
                     }
-                    val routeSetValueCopy = routeSetValueDef.await()
+                    val routeSetValueCopy = routeSetValueDef
                     routeSetValue.copy = routeSetValueCopy
                     routeSetValue.primaryRouteLineData.copy = routeSetValueCopy.primaryRouteLineData
                     routeSetValue.alternativeRouteLinesData.forEachIndexed { index, routeLineData ->
