@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.camera.data
 
 import android.location.Location
+import androidx.annotation.FloatRange
 import com.mapbox.api.directions.v5.models.StepManeuver
 
 /**
@@ -43,6 +44,22 @@ class FollowingFrameOptions internal constructor() {
      * Defaults to `16.35`.
      */
     var maxZoom = 16.35
+
+    /**
+     * Focal point that defines the position of the first framed geometry point (typically the user location indicator, if available)
+     * in the [MapboxNavigationViewportDataSource.followingPadding].
+     *
+     * The value is a horizontal and vertical ratio starting from the top left corner of the padding, in the `<0.0, 1.0>` range.
+     * Example:
+     * - `FocalPoint(0.0, 0.0)` positions the first geometry point in the top left
+     * - `FocalPoint(0.5, 0.5)` positions the first geometry point in the center
+     * - `FocalPoint(1.0, 1.0)` positions the first geometry point in the bottom right
+     *
+     * Defaults to `FocalPoint(0.5, 1.0)` that centers horizontally on the bottom edge of the padding.
+     *
+     * **NOTE:** The focal point change has no effect when the camera's pitch is `0` and [maximizeViewableGeometryWhenPitchZero] is enabled.
+     */
+    var focalPoint: FocalPoint = FocalPoint(0.5, 1.0)
 
     /**
      * When a produced **following frame** has pitch `0` and there are at least 2 points available for framing,
@@ -258,6 +275,21 @@ class FollowingFrameOptions internal constructor() {
          * Defaults to `45.0` degrees.
          */
         var maxBearingAngleDiff = 45.0
+    }
+
+    /**
+     * Focal point that defines the position of the first framed geometry point.
+     * @param x position from the left edge of the padding in the `<0.0, 1.0>` range
+     * @param y position from the top edge of the padding in the `<0.0, 1.0>` range
+     */
+    data class FocalPoint(
+        @FloatRange(from = 0.0, to = 1.0) val x: Double,
+        @FloatRange(from = 0.0, to = 1.0) val y: Double
+    ) {
+        init {
+            require(x in 0.0..1.0) { "x value must be within [0.0..1.0] range" }
+            require(y in 0.0..1.0) { "y value must be within [0.0..1.0] range" }
+        }
     }
 }
 

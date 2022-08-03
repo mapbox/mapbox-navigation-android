@@ -136,7 +136,9 @@ class MapboxNavigationViewportDataSourceTest {
         viewportDataSource = MapboxNavigationViewportDataSource(mapboxMap)
 
         mockkObject(ViewportDataSourceProcessor)
-        every { getMapAnchoredPaddingFromUserPadding(mapSize, any()) } returns singlePixelEdgeInsets
+        every {
+            getMapAnchoredPaddingFromUserPadding(mapSize, any(), any())
+        } returns singlePixelEdgeInsets
         every { getScreenBoxForFraming(mapSize, any()) } returns followingScreenBox
         every {
             getSmootherBearingForMap(

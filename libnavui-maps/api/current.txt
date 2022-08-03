@@ -134,6 +134,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
     method public boolean getBearingUpdatesAllowed();
     method public boolean getCenterUpdatesAllowed();
     method public double getDefaultPitch();
+    method public com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FocalPoint getFocalPoint();
     method public com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FrameGeometryAfterManeuver getFrameGeometryAfterManeuver();
     method public com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.IntersectionDensityCalculation getIntersectionDensityCalculation();
     method public double getMaxZoom();
@@ -146,6 +147,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
     method public void setBearingUpdatesAllowed(boolean);
     method public void setCenterUpdatesAllowed(boolean);
     method public void setDefaultPitch(double);
+    method public void setFocalPoint(com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FocalPoint);
     method public void setMaxZoom(double);
     method public void setMaximizeViewableGeometryWhenPitchZero(boolean);
     method public void setMinZoom(double);
@@ -156,6 +158,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
     property public final boolean bearingUpdatesAllowed;
     property public final boolean centerUpdatesAllowed;
     property public final double defaultPitch;
+    property public final com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FocalPoint focalPoint;
     property public final com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FrameGeometryAfterManeuver frameGeometryAfterManeuver;
     property public final com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.IntersectionDensityCalculation intersectionDensityCalculation;
     property public final double maxZoom;
@@ -174,6 +177,17 @@ package com.mapbox.navigation.ui.maps.camera.data {
     method public void setMaxBearingAngleDiff(double);
     property public final boolean enabled;
     property public final double maxBearingAngleDiff;
+  }
+
+  public static final class FollowingFrameOptions.FocalPoint {
+    ctor public FollowingFrameOptions.FocalPoint(@FloatRange(from=0.0, to=1.0) double x, @FloatRange(from=0.0, to=1.0) double y);
+    method public double component1();
+    method public double component2();
+    method public com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FocalPoint copy(@FloatRange(from=0.0, to=1.0) double x, @FloatRange(from=0.0, to=1.0) double y);
+    method public double getX();
+    method public double getY();
+    property public final double x;
+    property public final double y;
   }
 
   public static final class FollowingFrameOptions.FrameGeometryAfterManeuver {

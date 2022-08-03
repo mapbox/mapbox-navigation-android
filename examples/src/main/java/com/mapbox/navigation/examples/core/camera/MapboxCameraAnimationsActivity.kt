@@ -54,6 +54,7 @@ import com.mapbox.navigation.examples.core.camera.AnimationAdapter.OnAnimationBu
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityCameraBinding
 import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
+import com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FocalPoint
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandler
@@ -72,6 +73,8 @@ import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.math.cos
+import kotlin.math.sin
 
 class MapboxCameraAnimationsActivity :
     AppCompatActivity(),
@@ -136,6 +139,7 @@ class MapboxCameraAnimationsActivity :
                 poiSource.featureCollection(FeatureCollection.fromFeatures(emptyList()))
             }
         }
+    private var complexFollowingNorth = false
     private val poiLayer = CircleLayer("circle_layer", "circle_source")
         .circleColor(Color.RED)
         .circleRadius(10.0)
@@ -171,6 +175,12 @@ class MapboxCameraAnimationsActivity :
                 )
                 val bearing = TurfMeasurement.bearing(point, this)
                 viewportDataSource.followingBearingPropertyOverride(bearing)
+            }
+
+            if (complexFollowingNorth) {
+                viewportDataSource.options.followingFrameOptions.focalPoint = focalPointForBearing(
+                    locationMatcherResult.enhancedLocation.bearing.toDouble()
+                )
             }
 
             viewportDataSource.evaluate()
@@ -268,9 +278,9 @@ class MapboxCameraAnimationsActivity :
         viewportDataSource = MapboxNavigationViewportDataSource(
             binding.mapView.getMapboxMap()
         )
-        viewportDataSource.options.followingFrameOptions.pitchNearManeuvers.apply {
+        viewportDataSource.options.followingFrameOptions.apply {
             // An example of maneuver exclusion from "pitch to 0 near maneuvers" updates.
-            excludedManeuvers = listOf(
+            pitchNearManeuvers.excludedManeuvers = listOf(
                 StepManeuver.FORK,
                 StepManeuver.OFF_RAMP,
                 StepManeuver.ARRIVE
@@ -488,10 +498,33 @@ class MapboxCameraAnimationsActivity :
     @SuppressLint("MissingPermission")
     override fun onButtonClicked(animationType: AnimationType) {
         when (animationType) {
-            AnimationType.Following, AnimationType.FastFollowing -> {
+            AnimationType.Following, AnimationType.FastFollowing, AnimationType.FollowingNorth -> {
                 followingEdgeInsets = paddedFollowingEdgeInsets
                 viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed = true
                 viewportDataSource.followingPadding = followingEdgeInsets
+                if (animationType == AnimationType.FollowingNorth) {
+                    viewportDataSource.apply {
+                        followingBearingPropertyOverride(0.0)
+                        followingPitchPropertyOverride(0.0)
+                        // An example moving the user location puck to the screen center
+                        viewportDataSource.options.followingFrameOptions.focalPoint =
+                            navigationLocationProvider.lastLocation?.let {
+                                focalPointForBearing(it.bearing.toDouble())
+                            } ?: FocalPoint(0.5, 0.5)
+                        // disable the maximizeViewableGeometryWhenPitchZero keep the puck centered
+                        options.followingFrameOptions.maximizeViewableGeometryWhenPitchZero = false
+                    }
+                    complexFollowingNorth = true
+                } else {
+                    viewportDataSource.apply {
+                        followingBearingPropertyOverride(null)
+                        followingPitchPropertyOverride(null)
+                        // An example moving the user location puck to the bottom edge (default)
+                        options.followingFrameOptions.focalPoint = FocalPoint(0.5, 1.0)
+                        options.followingFrameOptions.maximizeViewableGeometryWhenPitchZero = true
+                    }
+                    complexFollowingNorth = false
+                }
                 viewportDataSource.evaluate()
                 if (animationType == AnimationType.Following) {
                     navigationCamera.requestNavigationCameraToFollowing()
@@ -617,4 +650,17 @@ class MapboxCameraAnimationsActivity :
     }
 
     private fun Number?.formatNumber() = "%.8f".format(this)
+
+    /**
+     * Produces a [FocalPoint] that shifts the focal point of the camera to maximize the viewable area depending on bearing of the vehicle.
+     */
+    private fun focalPointForBearing(bearing: Double): FocalPoint {
+        val bearingRad = Math.toRadians(bearing)
+        val focalPointX = sin(-bearingRad) / 3.0 + 0.5
+        val focalPointY = cos(bearingRad) / 3.0 + 0.5
+        return FocalPoint(
+            focalPointX,
+            focalPointY
+        )
+    }
 }
