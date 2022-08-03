@@ -178,7 +178,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                         }
                     }*/
 
-                    val routeSetValueDef = routeDrawData.value!!.run {
+                    /*val routeSetValueDef = routeDrawData.value!!.run {
                         val primaryDef = jobControl.scope.async {
                             primaryRouteLineData.featureCollection.toJson()
                         }
@@ -202,8 +202,22 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                             },
                             waypointsSource.toJson()
                         )
+                    }*/
+                    val routeSetValueCopy = routeDrawData.value!!.run {
+                        RouteSetValueCopy(
+                            RouteLineDataCopy(
+                                primaryRouteLineData.featureCollection.toJson(),
+                                primaryRouteLineData.dynamicData
+                            ),
+                            alternativeRouteLinesData.map {
+                                RouteLineDataCopy(
+                                    it.featureCollection.toJson(),
+                                    it.dynamicData
+                                )
+                            },
+                            waypointsSource.toJson()
+                        )
                     }
-                    val routeSetValueCopy = routeSetValueDef
                     routeSetValue.copy = routeSetValueCopy
                     routeSetValue.primaryRouteLineData.copy = routeSetValueCopy.primaryRouteLineData
                     routeSetValue.alternativeRouteLinesData.forEachIndexed { index, routeLineData ->
