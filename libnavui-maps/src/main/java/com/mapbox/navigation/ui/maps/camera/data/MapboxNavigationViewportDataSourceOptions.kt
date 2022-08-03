@@ -51,9 +51,9 @@ class FollowingFrameOptions internal constructor() {
      *
      * The value is a horizontal and vertical ratio starting from the top left corner of the padding, in the `<0.0, 1.0>` range.
      * Example:
-     * - FocalPoint(0.0, 0.0)` positions the first geometry point in the top left
-     * - FocalPoint(0.5, 0.5)` positions the first geometry point in the center
-     * - FocalPoint(1.0, 1.0)` positions the first geometry point in the bottom right
+     * - `FocalPoint(0.0, 0.0)` positions the first geometry point in the top left
+     * - `FocalPoint(0.5, 0.5)` positions the first geometry point in the center
+     * - `FocalPoint(1.0, 1.0)` positions the first geometry point in the bottom right
      *
      * Defaults to `FocalPoint(0.5, 1.0)` that centers horizontally on the bottom edge of the padding.
      *
