@@ -11,6 +11,9 @@ import com.mapbox.navigation.dropin.component.marker.MapMarkerFactory
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache.Companion.MB_IN_BYTES
 import com.mapbox.navigation.ui.app.internal.SharedApp
+import com.mapbox.navigation.ui.app.internal.Store
+import com.mapbox.navigation.ui.utils.internal.Provider
+import com.mapbox.navigation.ui.utils.internal.getValue
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
@@ -26,8 +29,9 @@ internal class NavigationViewContext(
     val context: Context,
     val lifecycleOwner: LifecycleOwner,
     val viewModel: NavigationViewModel,
+    storeProvider: Provider<Store> = Provider { SharedApp.store }
 ) {
-    val store by lazy { SharedApp.store }
+    val store by storeProvider
 
     val mapView = MutableStateFlow<MapView?>(null)
 

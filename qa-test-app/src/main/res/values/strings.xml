@@ -45,4 +45,12 @@
     <string name="basic_route_line_features_description" translatable="false">Tests basic route line related functionality. \n\nYou should see three route lines on the screen. The blue line is the primary route line. Selecting alternate routes should change the colors such that the line touched turns blue indicating it is the primary route. \n\nOne important use case to observe is: \n\n1. Hide the primary route. \n\n2. Select an alternative route. \n\n3. Notice the route selected becomes the primary route and then disappears, maintaining its state as hidden, while the original primary route line appears colored as an alternative.</string>
 
     <string name="drop_in_buttons_activity_description" translatable="false">Screen for viewing SDK buttons.</string>
+
+    <string-array name="drop_in_info_panel_overrides" translatable="false">
+        <item>--</item>
+        <item>HIDDEN</item>
+        <item>COLLAPSED</item>
+        <item>HALF_EXPANDED</item>
+        <item>EXPANDED</item>
+    </string-array>
 </resources>

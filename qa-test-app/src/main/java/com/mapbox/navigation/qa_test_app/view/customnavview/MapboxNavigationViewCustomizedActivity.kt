@@ -6,12 +6,16 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.SpinnerAdapter
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.AppCompatSpinner
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.MutableLiveData
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
@@ -159,6 +163,18 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             viewModel.enableOnMapLongClick,
             ::toggleOnMapLongClick
         )
+
+        bindSwitch(
+            menuBinding.toggleIsInfoPanelHideable,
+            viewModel.isInfoPanelHideable,
+            ::toggleInfoPanelHiding
+        )
+
+        bindSpinner(
+            menuBinding.spinnerInfoPanelVisibilityOverride,
+            viewModel.infoPanelStateOverride,
+            ::overrideInfoPanelState
+        )
     }
 
     override fun onResume() {
@@ -208,6 +224,46 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         }
         switch.setOnCheckedChangeListener { _, isChecked ->
             liveData.value = isChecked
+        }
+    }
+
+    private fun bindSpinner(
+        spinner: AppCompatSpinner,
+        liveData: MutableLiveData<String>,
+        onChange: (value: String) -> Unit
+    ) {
+        liveData.observe(this) {
+            if (spinner.selectedItem != it) {
+                spinner.setSelection(spinner.adapter.findItemPosition(it) ?: 0)
+            }
+            onChange(it)
+        }
+
+        spinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    liveData.value = parent.getItemAtPosition(position) as? String
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+            }
+    }
+
+    private fun overrideInfoPanelState(value: String) {
+        val newState = when (value) {
+            "HIDDEN" -> BottomSheetBehavior.STATE_HIDDEN
+            "COLLAPSED" -> BottomSheetBehavior.STATE_COLLAPSED
+            "HALF_EXPANDED" -> BottomSheetBehavior.STATE_HALF_EXPANDED
+            "EXPANDED" -> BottomSheetBehavior.STATE_EXPANDED
+            else -> 0
+        }
+        binding.navigationView.customizeViewOptions {
+            infoPanelForcedState = newState
         }
     }
 
@@ -349,6 +405,12 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         }
     }
 
+    private fun toggleInfoPanelHiding(isHideable: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            isInfoPanelHideable = isHideable
+        }
+    }
+
     private fun customActionButton(text: String): View {
         return AppCompatTextView(this).apply {
             val w = resources.getDimensionPixelSize(R.dimen.mapbox_actionList_width)
@@ -456,5 +518,12 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 infoPanelHeaderBinder = UIBinder.USE_DEFAULT
             }
         }
+    }
+
+    private fun SpinnerAdapter.findItemPosition(item: Any): Int? {
+        for (pos in 0..count) {
+            if (item == getItem(pos)) return pos
+        }
+        return null
     }
 }
