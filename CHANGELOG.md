@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Fixed a crash when the service process is killed by the Android system. [#6125](https://github.com/mapbox/mapbox-navigation-android/pull/6125)
 
 ## Mapbox Navigation SDK 2.7.0-rc.1 - 04 August, 2022
 ### Changelog
