@@ -8,13 +8,11 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
-import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -36,7 +34,7 @@ class ComponentInstallerTest {
     }
 
     @Test
-    fun `MapboxNavigationApp installComponent - should register ComponentInstaller`() {
+    fun `installComponent should register ComponentInstaller lifecycle is CREATED`() {
         val testComponent = TestComponent()
         val lifecycleOwner = TestLifecycleOwner()
         MapboxNavigationApp.installComponents(lifecycleOwner) {
@@ -51,36 +49,14 @@ class ComponentInstallerTest {
     }
 
     @Test
-    fun `MapboxNavigation installComponent - should attach and detach components`() {
-        val mapboxNavigation = mockk<MapboxNavigation>()
+    fun `installComponent should not register ComponentInstaller before creation`() {
         val testComponent = TestComponent()
         val lifecycleOwner = TestLifecycleOwner()
-
-        mapboxNavigation.installComponents(lifecycleOwner) {
+        MapboxNavigationApp.installComponents(lifecycleOwner) {
             component(testComponent)
         }
 
-        lifecycleOwner.moveToState(Lifecycle.State.CREATED)
-        assertEquals(mapboxNavigation, testComponent.attachedTo)
-
-        lifecycleOwner.moveToState(Lifecycle.State.DESTROYED)
-        assertEquals(null, testComponent.attachedTo)
-    }
-
-    @Test
-    fun `ComponentInstaller should detach components via returned Installation`() {
-        val mapboxNavigation = mockk<MapboxNavigation>()
-        val testComponent = TestComponent()
-        val lifecycleOwner = TestLifecycleOwner()
-        var installation: Installation? = null
-        mapboxNavigation.installComponents(lifecycleOwner) {
-            installation = component(testComponent)
-        }
-        lifecycleOwner.moveToState(Lifecycle.State.CREATED)
-
-        installation!!.uninstall()
-
-        assertEquals(null, testComponent.attachedTo)
+        verify(exactly = 0) { MapboxNavigationApp.registerObserver(any()) }
     }
 
     private class TestComponent : UIComponent() {
