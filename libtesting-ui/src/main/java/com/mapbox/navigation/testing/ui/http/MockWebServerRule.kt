@@ -43,15 +43,14 @@ class MockWebServerRule : TestWatcher() {
                 requestHandlers.forEach {
                     formattedHandlersBuilder.append("$it\n|")
                 }
-                throw Error(
-                    """Request url:
+                return MockResponse().setResponseCode(500)
+                    .setBody("""Request url:
                       |${request.path}
                       |is not handled.
                       |
                       |Available handlers:
                       |$formattedHandlersBuilder
-                    """.trimMargin()
-                )
+                    """.trimMargin())
             }
         }
     }
