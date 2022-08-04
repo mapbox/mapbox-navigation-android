@@ -3,10 +3,10 @@ package com.mapbox.androidauto.car.navigation.roadlabel
 import android.graphics.Color
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
-import com.mapbox.androidauto.car.internal.extensions.getStyleAsync
-import com.mapbox.androidauto.car.internal.extensions.handleStyleOnAttached
-import com.mapbox.androidauto.car.internal.extensions.handleStyleOnDetached
 import com.mapbox.androidauto.car.navigation.MapUserStyleObserver
+import com.mapbox.androidauto.internal.extensions.getStyleAsync
+import com.mapbox.androidauto.internal.extensions.handleStyleOnAttached
+import com.mapbox.androidauto.internal.extensions.handleStyleOnDetached
 import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.androidauto.logAndroidAutoFailure
 import com.mapbox.androidauto.surfacelayer.CarSurfaceLayer

@@ -14,9 +14,6 @@ import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.MainCarContext
 import com.mapbox.androidauto.car.action.MapboxActionProvider
-import com.mapbox.androidauto.car.internal.extensions.getStyle
-import com.mapbox.androidauto.car.internal.extensions.handleStyleOnAttached
-import com.mapbox.androidauto.car.internal.extensions.handleStyleOnDetached
 import com.mapbox.androidauto.car.location.CarLocationRenderer
 import com.mapbox.androidauto.car.navigation.CarLocationsOverviewCamera
 import com.mapbox.androidauto.car.preview.CarRoutePreviewScreen
@@ -24,6 +21,9 @@ import com.mapbox.androidauto.car.preview.CarRouteRequestCallback
 import com.mapbox.androidauto.car.preview.RoutePreviewCarContext
 import com.mapbox.androidauto.car.search.PlaceRecord
 import com.mapbox.androidauto.car.search.SearchCarContext
+import com.mapbox.androidauto.internal.extensions.getStyle
+import com.mapbox.androidauto.internal.extensions.handleStyleOnAttached
+import com.mapbox.androidauto.internal.extensions.handleStyleOnDetached
 import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection

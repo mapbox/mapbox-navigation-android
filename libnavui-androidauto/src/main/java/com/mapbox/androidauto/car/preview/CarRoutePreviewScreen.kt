@@ -18,14 +18,14 @@ import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.car.feedback.ui.routePreviewCarFeedbackProvider
-import com.mapbox.androidauto.car.internal.extensions.handleStyleOnAttached
-import com.mapbox.androidauto.car.internal.extensions.handleStyleOnDetached
 import com.mapbox.androidauto.car.location.CarLocationRenderer
 import com.mapbox.androidauto.car.navigation.CarCameraMode
 import com.mapbox.androidauto.car.navigation.CarNavigationCamera
 import com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil
 import com.mapbox.androidauto.car.search.PlaceRecord
+import com.mapbox.androidauto.internal.extensions.handleStyleOnAttached
+import com.mapbox.androidauto.internal.extensions.handleStyleOnDetached
 import com.mapbox.androidauto.logAndroidAuto
 import com.mapbox.androidauto.navigation.audioguidance.muteAudioGuidance
 import com.mapbox.geojson.Feature

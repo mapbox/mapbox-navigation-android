@@ -1,7 +1,7 @@
 @file:JvmName("MapboxCarMapSurfaceEx")
 @file:OptIn(MapboxExperimental::class)
 
-package com.mapbox.androidauto.car.internal.extensions
+package com.mapbox.androidauto.internal.extensions
 
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
