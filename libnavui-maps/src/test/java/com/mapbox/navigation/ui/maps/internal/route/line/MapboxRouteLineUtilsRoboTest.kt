@@ -916,7 +916,7 @@ class MapboxRouteLineUtilsRoboTest {
         MapboxRouteLineUtils.extractRouteData(route1, trafficCongestionProvider)
         verify(exactly = 1) { route1.legs() }
 
-        MapboxRouteLineUtils.resetCache()
+        MapboxRouteLineUtils.evictRouteDataCache()
         MapboxRouteLineUtils.extractRouteData(route1, trafficCongestionProvider)
 
         verify(exactly = 2) { route1.legs() }

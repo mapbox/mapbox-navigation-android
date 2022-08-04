@@ -103,6 +103,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             .withRouteLineResources(routeLineResources)
             .withRouteLineBelowLayerId("road-label-navigation")
             .withVanishingRouteLineEnabled(true)
+            .displayRestrictedRoadSections(true)
             .build()
     }
 
@@ -323,17 +324,20 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         val replayData = replayRouteMapper.mapDirectionsRouteGeometry(route)
         mapboxReplayer.pushEvents(replayData)
         mapboxReplayer.seekTo(replayData[0])
+        mapboxReplayer.playbackSpeed(4.0)
         mapboxReplayer.play()
     }
 
     private val routesObserver = RoutesObserver { result ->
         CoroutineScope(Dispatchers.Main).launch {
+            val time = System.currentTimeMillis()
             routeLineApi.setNavigationRoutes(
                 newRoutes = result.navigationRoutes,
                 alternativeRoutesMetadata = mapboxNavigation.getAlternativeMetadataFor(
                     result.navigationRoutes
                 )
             ).apply {
+                Log.e("lp_test", "t: ${System.currentTimeMillis() - time}")
                 routeLineView.renderRouteDrawData(
                     binding.mapView.getMapboxMap().getStyle()!!,
                     this

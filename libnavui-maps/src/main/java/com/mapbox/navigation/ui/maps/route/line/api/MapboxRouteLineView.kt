@@ -328,9 +328,9 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                         { routeSourceKey ->
                             routeSourceKey
                         }, { error ->
-                        logE(TAG, error.message)
-                        null
-                    }
+                            logE(TAG, error.message)
+                            null
+                        }
                     )?.also {
                         updateSource(
                             style,

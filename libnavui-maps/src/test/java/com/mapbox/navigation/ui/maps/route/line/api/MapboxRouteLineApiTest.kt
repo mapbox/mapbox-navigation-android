@@ -297,7 +297,7 @@ class MapboxRouteLineApiTest {
 
         api.setRoutes(routes)
 
-        verify { MapboxRouteLineUtils.resetCache() }
+        verify { MapboxRouteLineUtils.evictRouteDataCache() }
         unmockkObject(MapboxRouteLineUtils)
     }
 
@@ -991,7 +991,7 @@ class MapboxRouteLineApiTest {
         assertTrue(result.value!!.alternativeRouteSourceSources[1].features()!!.isEmpty())
         assertTrue(result.value!!.primaryRouteSource.features()!!.isEmpty())
         assertTrue(result.value!!.waypointsSource.features()!!.isEmpty())
-        verify { MapboxRouteLineUtils.resetCache() }
+        verify { MapboxRouteLineUtils.evictRouteDataCache() }
         unmockkObject(MapboxRouteLineUtils)
     }
 
