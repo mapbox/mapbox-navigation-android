@@ -49,6 +49,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
+import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheRouteResult
 import com.mapbox.navigation.ui.utils.internal.extensions.getBitmap
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
@@ -65,8 +66,8 @@ internal object MapboxRouteLineUtils {
     internal const val VANISH_POINT_STOP_GAP = .00000000001
 
     private val extractRouteDataCache: LruCache<
-        CacheResultUtils.CacheResultKey2<
-            DirectionsRoute, (RouteLeg) -> List<String>?,
+        CacheResultUtils.CacheResultKeyRoute<
+            (RouteLeg) -> List<String>?,
             List<ExtractedRouteData>
             >,
         List<ExtractedRouteData>> by lazy { LruCache(3) }
@@ -544,7 +545,7 @@ internal object MapboxRouteLineUtils {
                     else -> true
                 }
             }
-        }.cacheResult(extractRouteDataCache)
+        }.cacheRouteResult(extractRouteDataCache)
 
     /**
      * Extracts data from the [DirectionsRoute] in a format more useful to the route line
@@ -603,7 +604,7 @@ internal object MapboxRouteLineUtils {
             }
 
             itemsToReturn
-        }.cacheResult(extractRouteDataCache)
+        }.cacheRouteResult(extractRouteDataCache)
 
     internal val getRouteLegTrafficNumericCongestionProvider: (
         routeLineColorResources: RouteLineColorResources

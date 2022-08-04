@@ -388,6 +388,13 @@ class MapboxRouteLineApi(
         cancel()
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
+                routes.forEach { route ->
+                    val newRoute = newRoutes.find { route.id == it.route.id }
+                    if (route.hashCode() != newRoute.hashCode()) {
+                        MapboxRouteLineUtils.resetCache()
+                        return@forEach
+                    }
+                }
                 val featureDataProvider: () -> List<RouteFeatureData> =
                     MapboxRouteLineUtils.getRouteLineFeatureDataProvider(newRoutes)
                 val routeData = setNewRouteData(
