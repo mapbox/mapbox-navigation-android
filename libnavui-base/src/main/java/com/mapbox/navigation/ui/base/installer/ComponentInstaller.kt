@@ -73,44 +73,6 @@ fun MapboxNavigationApp.installComponents(
     lifecycleOwner.attachCreated(installer)
 }
 
-/**
- * Install UI components in receiving [MapboxNavigation] instance.
- *
- * Each component will be attached to receiving [MapboxNavigation] instance on [lifecycleOwner]
- * [Lifecycle.Event.ON_CREATE] event and detached on [Lifecycle.Event.ON_DESTROY].
- *
- * Example usage:
- * ```
- * class MyNavigationActivity : AppCompatActivity() {
- *     override fun onCreate(savedInstanceState: Bundle?) {
- *         super.onCreate(savedInstanceState)
- *         setContentView(R.layout.my_nav_activity)
- *
- *         // ...
- *
- *         val soundButton = findViewById<MapboxAudioGuidanceButton>(R.id.soundButton)
- *         val mapView = findViewById<MapView>(R.id.mapView)
- *
- *         val mapboxNavigation = MapboxNavigationProvider.retrieve()
- *         mapboxNavigation.installComponents(this) {
- *             audioGuidanceButton(soundButton)
- *             routeLine(mapView)
- *             routeArrow(mapView)
- *
- *             component(MyCustomUIComponent())
- *         }
- *     }
- * }
- * ```
- */
-@ExperimentalPreviewMapboxNavigationAPI
-fun LifecycleOwner.installComponents(
-    config: ComponentInstaller.() -> Unit
-) {
-    val components = NavigationComponents().apply(config)
-    attachCreated(components)
-}
-
 @ExperimentalPreviewMapboxNavigationAPI
 internal class NavigationComponents(
     private val components: MapboxNavigationObserverChain = MapboxNavigationObserverChain()

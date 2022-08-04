@@ -15,7 +15,6 @@ package com.mapbox.navigation.ui.base.installer {
 
   public final class ComponentInstallerKt {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static void installComponents(com.mapbox.navigation.core.lifecycle.MapboxNavigationApp, androidx.lifecycle.LifecycleOwner lifecycleOwner, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.base.installer.ComponentInstaller,kotlin.Unit> config);
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static void installComponents(com.mapbox.navigation.core.MapboxNavigation, androidx.lifecycle.LifecycleOwner lifecycleOwner, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.base.installer.ComponentInstaller,kotlin.Unit> config);
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface Installation {
