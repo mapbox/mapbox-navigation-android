@@ -11,6 +11,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Introduced `NavigationViewListener#onInfoPanelExpanded` to inform user when `InfoPanel` expands. [#6113](https://github.com/mapbox/mapbox-navigation-android/pull/6113)
 - Introduced `NavigationViewListener#onInfoPanelCollapsed` to inform user when `InfoPanel` collapses. [#6113](https://github.com/mapbox/mapbox-navigation-android/pull/6113)
 - Fixed bearing calculation error during tunnel dead reckoning. [#6118](https://github.com/mapbox/mapbox-navigation-android/pull/6118)
+- Remove `MapboxNavigation#installComponents` in favor of `MapboxNavigationApp#installComponents`. [#6120](https://github.com/mapbox/mapbox-navigation-android/pull/6120)
 
 ## Mapbox Navigation SDK 2.7.0-beta.3 - 29 July, 2022
 ### Changelog
