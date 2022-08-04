@@ -75,8 +75,7 @@ class ComponentsAltActivity : AppCompatActivity() {
         //
         // Components installation via existing MapboxNavigation instance
         //
-        val mapboxNavigation = MapboxNavigationApp.current()!!
-        mapboxNavigation.installComponents(this) {
+        installComponents {
             audioGuidanceButton(binding.soundButton)
             routeLine(binding.mapView) {
                 options = customRouteLineOptions()

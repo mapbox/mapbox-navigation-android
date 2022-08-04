@@ -104,12 +104,11 @@ fun MapboxNavigationApp.installComponents(
  * ```
  */
 @ExperimentalPreviewMapboxNavigationAPI
-fun MapboxNavigation.installComponents(
-    lifecycleOwner: LifecycleOwner,
+fun LifecycleOwner.installComponents(
     config: ComponentInstaller.() -> Unit
 ) {
     val components = NavigationComponents().apply(config)
-    lifecycleOwner.attachCreated(this, components)
+    attachCreated(components)
 }
 
 @ExperimentalPreviewMapboxNavigationAPI
