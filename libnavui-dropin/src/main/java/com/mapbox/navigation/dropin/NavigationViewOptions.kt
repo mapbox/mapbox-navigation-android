@@ -27,12 +27,16 @@ internal class NavigationViewOptions(context: Context) {
         MutableStateFlow(defaultRouteArrowOptions(context))
     private var _showInfoPanelInFreeDrive: MutableStateFlow<Boolean> =
         MutableStateFlow(false)
+    private var _enableMapLongClickIntercept: MutableStateFlow<Boolean> =
+        MutableStateFlow(true)
 
     var mapStyleUriDay: StateFlow<String> = _mapStyleUriDay.asStateFlow()
     var mapStyleUriNight: StateFlow<String> = _mapStyleUriNight.asStateFlow()
     val routeLineOptions: StateFlow<MapboxRouteLineOptions> = _routeLineOptions.asStateFlow()
     val routeArrowOptions: StateFlow<RouteArrowOptions> = _routeArrowOptions.asStateFlow()
     val showInfoPanelInFreeDrive: StateFlow<Boolean> = _showInfoPanelInFreeDrive.asStateFlow()
+    val enableMapLongClickIntercept: StateFlow<Boolean> =
+        _enableMapLongClickIntercept.asStateFlow()
 
     fun applyCustomization(customization: ViewOptionsCustomization) {
         customization.mapStyleUriDay?.also { _mapStyleUriDay.tryEmit(it) }
@@ -40,5 +44,8 @@ internal class NavigationViewOptions(context: Context) {
         customization.routeLineOptions?.also { _routeLineOptions.tryEmit(it) }
         customization.routeArrowOptions?.also { _routeArrowOptions.tryEmit(it) }
         customization.showInfoPanelInFreeDrive?.also { _showInfoPanelInFreeDrive.tryEmit(it) }
+        customization.enableMapLongClickIntercept?.also {
+            _enableMapLongClickIntercept.tryEmit(it)
+        }
     }
 }

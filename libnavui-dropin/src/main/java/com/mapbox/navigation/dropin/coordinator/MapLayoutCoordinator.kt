@@ -13,6 +13,7 @@ import com.mapbox.navigation.dropin.databinding.MapboxMapviewLayoutBinding
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.ui.base.lifecycle.Binder
 import com.mapbox.navigation.ui.base.lifecycle.UICoordinator
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -21,6 +22,7 @@ import kotlinx.coroutines.launch
 /**
  * Coordinator for inflating [MapView].
  */
+@OptIn(FlowPreview::class)
 @ExperimentalPreviewMapboxNavigationAPI
 internal class MapLayoutCoordinator(
     private val navigationViewContext: NavigationViewContext,
@@ -28,6 +30,7 @@ internal class MapLayoutCoordinator(
 ) : UICoordinator<ViewGroup>(binding.mapViewLayout) {
 
     private val viewGroup = binding.mapViewLayout
+    private val mapViewOwner = navigationViewContext.mapViewOwner
     private val mapStyleLoader = navigationViewContext.mapStyleLoader
     private var reloadStyleJob: Job? = null
 
@@ -48,11 +51,13 @@ internal class MapLayoutCoordinator(
 
                     val binding = MapboxMapviewLayoutBinding.bind(viewGroup)
                     initDefaultMap(binding.mapView.getMapboxMap())
+                    mapViewOwner.updateMapView(binding.mapView)
                     binding.mapView
                 } else {
                     initCustomMap(mapViewOverride.getMapboxMap())
                     viewGroup.removeAllViews()
                     viewGroup.addView(mapViewOverride)
+                    mapViewOwner.updateMapView(mapViewOverride)
                     mapViewOverride
                 }
             }

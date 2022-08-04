@@ -16,7 +16,6 @@ import kotlinx.coroutines.launch
 @ExperimentalPreviewMapboxNavigationAPI
 internal class NavigationViewListenerRegistry(
     private val store: Store,
-    private val mapStyleLoader: MapStyleLoader,
     private val infoPanelSubscriber: InfoPanelBehavior,
     private val coroutineScope: CoroutineScope
 ) {
@@ -71,11 +70,6 @@ internal class NavigationViewListenerRegistry(
                 }
             }
             launch {
-                mapStyleLoader.loadedMapStyle.filterNotNull().collect {
-                    listener.onMapStyleChanged(it)
-                }
-            }
-            launch {
                 store.select { it.camera.cameraMode }.collect {
                     listener.onCameraModeChanged(it)
                 }
@@ -90,7 +84,6 @@ internal class NavigationViewListenerRegistry(
                     listener.onAudioGuidanceStateChanged(it)
                 }
             }
-
             launch {
                 infoPanelSubscriber
                     .infoPanelBehavior

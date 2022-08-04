@@ -3,7 +3,6 @@ package com.mapbox.navigation.dropin
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.Router
@@ -46,14 +45,6 @@ abstract class NavigationViewListener {
      * Called when NavigationView enters Arrival state.
      */
     open fun onArrival() = Unit
-
-    /**
-     * Called when Map [Style] has changed. Invoked once the new style has been fully loaded,
-     * including the style specified sprite and sources.
-     *
-     * @param style Fully loaded style.
-     */
-    open fun onMapStyleChanged(style: Style) = Unit
 
     /**
      * Called when camera mode has changed to Idle.

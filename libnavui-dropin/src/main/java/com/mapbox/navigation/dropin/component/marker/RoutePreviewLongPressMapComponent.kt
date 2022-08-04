@@ -5,6 +5,7 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.util.HapticFeedback
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.destination.Destination
@@ -18,6 +19,7 @@ import com.mapbox.navigation.utils.internal.toPoint
 internal class RoutePreviewLongPressMapComponent(
     private val store: Store,
     private val mapView: MapView,
+    private val context: NavigationViewContext
 ) : UIComponent() {
 
     private var hapticFeedback: HapticFeedback? = null
@@ -36,12 +38,14 @@ internal class RoutePreviewLongPressMapComponent(
     }
 
     private val longClickListener = OnMapLongClickListener { point ->
-        val location = store.state.value.location?.enhancedLocation
-        location?.toPoint()?.also { lastPoint ->
-            store.dispatch(DestinationAction.SetDestination(Destination(point)))
-            store.dispatch(RoutePreviewAction.FetchPoints(listOf(lastPoint, point)))
-            hapticFeedback?.tick()
-        } ?: logW(TAG, "Current location is unknown so map long press does nothing")
+        if (context.options.enableMapLongClickIntercept.value) {
+            val location = store.state.value.location?.enhancedLocation
+            location?.toPoint()?.also { lastPoint ->
+                store.dispatch(DestinationAction.SetDestination(Destination(point)))
+                store.dispatch(RoutePreviewAction.FetchPoints(listOf(lastPoint, point)))
+                hapticFeedback?.tick()
+            } ?: logW(TAG, "Current location is unknown so map long press does nothing")
+        }
         false
     }
 

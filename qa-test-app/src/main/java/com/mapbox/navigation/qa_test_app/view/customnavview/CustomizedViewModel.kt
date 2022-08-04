@@ -11,4 +11,5 @@ class CustomizedViewModel : ViewModel() {
     val useCustomInfoPanelStyles = MutableLiveData(false)
     val showCustomInfoPanelContent = MutableLiveData(false)
     val showBottomSheetInFreeDrive = MutableLiveData(false)
+    val enableOnMapLongClick = MutableLiveData(true)
 }

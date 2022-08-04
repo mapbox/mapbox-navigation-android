@@ -14,6 +14,12 @@ package com.mapbox.navigation.dropin {
     enum_constant public static final com.mapbox.navigation.dropin.ActionButtonDescription.Position START;
   }
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class MapViewObserver {
+    ctor public MapViewObserver();
+    method public void onAttached(com.mapbox.maps.MapView mapView);
+    method public void onDetached(com.mapbox.maps.MapView mapView);
+  }
+
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NavigationView extends android.widget.FrameLayout implements androidx.lifecycle.LifecycleOwner {
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null, String accessToken = attrs.navigationViewAccessToken(context), androidx.lifecycle.ViewModelStoreOwner viewModelStoreOwner = context.toViewModelStoreOwner());
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null, String accessToken = attrs.navigationViewAccessToken(context));
@@ -26,7 +32,9 @@ package com.mapbox.navigation.dropin {
     method public void customizeViewStyles(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewStyleCustomization,kotlin.Unit> action);
     method public com.mapbox.navigation.dropin.NavigationViewApi getApi();
     method public androidx.lifecycle.Lifecycle getLifecycle();
+    method public void registerMapObserver(com.mapbox.navigation.dropin.MapViewObserver observer);
     method public void removeListener(com.mapbox.navigation.dropin.NavigationViewListener listener);
+    method public void unregisterMapObserver(com.mapbox.navigation.dropin.MapViewObserver observer);
     property public final com.mapbox.navigation.dropin.NavigationViewApi api;
   }
 
@@ -55,7 +63,6 @@ package com.mapbox.navigation.dropin {
     method public void onInfoPanelCollapsed();
     method public void onInfoPanelExpanded();
     method public void onInfoPanelHidden();
-    method public void onMapStyleChanged(com.mapbox.maps.Style style);
     method public void onOverviewCameraMode();
     method public void onRouteFetchCanceled(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
     method public void onRouteFetchFailed(java.util.List<com.mapbox.navigation.base.route.RouterFailure> reasons, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
@@ -103,16 +110,19 @@ package com.mapbox.navigation.dropin {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ViewOptionsCustomization {
     ctor public ViewOptionsCustomization();
+    method public Boolean? getEnableMapLongClickIntercept();
     method public String? getMapStyleUriDay();
     method public String? getMapStyleUriNight();
     method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions? getRouteArrowOptions();
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions? getRouteLineOptions();
     method public Boolean? getShowInfoPanelInFreeDrive();
+    method public void setEnableMapLongClickIntercept(Boolean?);
     method public void setMapStyleUriDay(String?);
     method public void setMapStyleUriNight(String?);
     method public void setRouteArrowOptions(com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions?);
     method public void setRouteLineOptions(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions?);
     method public void setShowInfoPanelInFreeDrive(Boolean?);
+    property public final Boolean? enableMapLongClickIntercept;
     property public final String? mapStyleUriDay;
     property public final String? mapStyleUriNight;
     property public final com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions? routeArrowOptions;

@@ -4,7 +4,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterFailure
@@ -38,26 +37,20 @@ class NavigationViewListenerRegistryTest {
 
     private lateinit var sut: NavigationViewListenerRegistry
     private lateinit var testStore: TestStore
-    private lateinit var loadedMapStyleFlow: MutableStateFlow<Style?>
     private lateinit var infoPanelBehaviorFlow: MutableStateFlow<Int?>
     private lateinit var testListener: NavigationViewListener
 
     @Before
     fun setUp() {
         testStore = TestStore()
-        loadedMapStyleFlow = MutableStateFlow(null)
         infoPanelBehaviorFlow = MutableStateFlow(null)
         val mockInfoPanelBehavior = mockk<InfoPanelBehavior> {
             every { infoPanelBehavior } returns infoPanelBehaviorFlow.asStateFlow()
-        }
-        val mockStyleLoader = mockk<MapStyleLoader> {
-            every { loadedMapStyle } returns loadedMapStyleFlow.asStateFlow()
         }
         testListener = spyk(object : NavigationViewListener() {})
 
         sut = NavigationViewListenerRegistry(
             testStore,
-            mockStyleLoader,
             mockInfoPanelBehavior,
             coroutineRule.coroutineScope
         )
@@ -125,16 +118,6 @@ class NavigationViewListenerRegistryTest {
         testStore.setState(State(navigation = navigationState))
 
         verify { testListener.onArrival() }
-    }
-
-    @Test
-    fun onMapStyleChanged() {
-        sut.registerListener(testListener)
-
-        val style = mockk<Style>()
-        loadedMapStyleFlow.value = style
-
-        verify { testListener.onMapStyleChanged(style) }
     }
 
     @Test

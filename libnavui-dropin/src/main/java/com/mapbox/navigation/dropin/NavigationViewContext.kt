@@ -37,11 +37,11 @@ internal class NavigationViewContext(
     val styles = NavigationViewStyles(context)
     val options = NavigationViewOptions(context)
     val infoPanelBehavior = InfoPanelBehavior()
+    val mapViewOwner = MapViewOwner()
     val mapStyleLoader = MapStyleLoader(context, options)
     val listenerRegistry by lazy {
         NavigationViewListenerRegistry(
             store,
-            mapStyleLoader,
             infoPanelBehavior,
             lifecycleOwner.lifecycleScope
         )

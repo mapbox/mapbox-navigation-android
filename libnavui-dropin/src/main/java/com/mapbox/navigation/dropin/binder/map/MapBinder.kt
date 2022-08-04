@@ -94,9 +94,9 @@ internal class MapBinder(
         when (navigationState) {
             NavigationState.FreeDrive,
             NavigationState.DestinationPreview ->
-                FreeDriveLongPressMapComponent(store, mapView)
+                FreeDriveLongPressMapComponent(store, mapView, context)
             NavigationState.RoutePreview ->
-                RoutePreviewLongPressMapComponent(store, mapView)
+                RoutePreviewLongPressMapComponent(store, mapView, context)
             NavigationState.ActiveNavigation,
             NavigationState.Arrival ->
                 null

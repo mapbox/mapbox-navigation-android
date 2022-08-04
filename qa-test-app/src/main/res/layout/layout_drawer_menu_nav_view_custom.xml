@@ -105,6 +105,16 @@
                 android:text="Show Info Panel IN \nFree Drive"
                 android:textAllCaps="true" />
         </TableRow>
+        <TableRow android:padding="5dp">
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/toggleOnMapLongClick"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="Enable Map Long Click"
+                android:textAllCaps="true" />
+        </TableRow>
     </TableLayout>
 
 </androidx.appcompat.widget.LinearLayoutCompat>

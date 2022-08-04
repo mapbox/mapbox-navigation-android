@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin
 
 import android.content.Context
+import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
@@ -47,6 +48,12 @@ class ViewOptionsCustomization {
      * Set to `false` for the default behavior.
      */
     var showInfoPanelInFreeDrive: Boolean? = null
+
+    /**
+     * Set to false if you don't want [NavigationView] to intercept [OnMapLongClickListener] events.
+     * Set to `true` as the default behavior.
+     */
+    var enableMapLongClickIntercept: Boolean? = null
 
     companion object {
         /**
