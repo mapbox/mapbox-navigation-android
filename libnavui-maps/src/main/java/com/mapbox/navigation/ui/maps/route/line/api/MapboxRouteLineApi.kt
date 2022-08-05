@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
+import android.util.Log
 import android.util.LruCache
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -28,10 +29,12 @@ import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.calculateRouteGranularDistances
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getMatchingColors
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup1SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup2SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup3SourceLayerIds
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.parseRoutePoints
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
@@ -1161,8 +1164,23 @@ class MapboxRouteLineApi(
         routes.addAll(distinctNewRoutes)
         primaryRoute = distinctNewRoutes.firstOrNull()
         MapboxRouteLineUtils.trimRouteDataCacheToSize(size = distinctNewRoutes.size)
-        alternativesDeviationOffset =
-            MapboxRouteLineUtils.getAlternativeRoutesDeviationOffsets(alternativeRoutesMetadata)
+        val time = System.currentTimeMillis()
+        alternativesDeviationOffset = run {
+            val map = mutableMapOf<String, Double>()
+            alternativeRoutesMetadata.forEach { alternativeMetadata ->
+                parseRoutePoints(alternativeMetadata.navigationRoute.directionsRoute)?.run {
+                    calculateRouteGranularDistances(flatList)?.run {
+                        map[alternativeMetadata.navigationRoute.id] =
+                            MapboxRouteLineUtils.getAlternativeRouteDeviationOffsets(
+                                granularDistances = this,
+                                metadata = alternativeMetadata
+                            )
+                    }
+                }
+            }
+            map
+        }
+        Log.e("lp_test", "2: ${System.currentTimeMillis() - time}")
 
         return buildDrawRoutesState(featureDataProvider)
     }

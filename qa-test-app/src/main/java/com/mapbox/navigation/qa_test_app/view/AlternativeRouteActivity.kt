@@ -329,12 +329,14 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val routesObserver = RoutesObserver { result ->
         CoroutineScope(Dispatchers.Main).launch {
+            val time = System.currentTimeMillis()
             routeLineApi.setNavigationRoutes(
                 newRoutes = result.navigationRoutes,
                 alternativeRoutesMetadata = mapboxNavigation.getAlternativeMetadataFor(
                     result.navigationRoutes
                 )
             ).apply {
+                Log.e("lp_test", "1: ${System.currentTimeMillis() - time}")
                 routeLineView.renderRouteDrawData(
                     binding.mapView.getMapboxMap().getStyle()!!,
                     this

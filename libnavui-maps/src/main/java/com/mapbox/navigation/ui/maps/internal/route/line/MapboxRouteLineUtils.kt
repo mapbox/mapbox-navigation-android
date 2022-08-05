@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.maps.internal.route.line
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.LruCache
-import android.util.SparseArray
 import androidx.annotation.ColorInt
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -807,18 +806,17 @@ internal object MapboxRouteLineUtils {
 
     private fun calculateGranularDistances(points: List<Point>): RouteLineGranularDistances {
         var distance = 0.0
-        val indexArray = SparseArray<RouteLineDistancesIndex>(points.size)
+
+        val indexArray = arrayOfNulls<RouteLineDistancesIndex>(points.size)
         for (i in (points.size - 1) downTo 1) {
             val curr = points[i]
             val prev = points[i - 1]
             distance += calculateDistance(curr, prev)
-            indexArray.append(i - 1, RouteLineDistancesIndex(prev, distance))
+            indexArray[i - 1] = RouteLineDistancesIndex(prev, distance)
         }
-        indexArray.append(
-            points.size - 1,
+        indexArray[points.size - 1] =
             RouteLineDistancesIndex(points[points.size - 1], 0.0)
-        )
-        return RouteLineGranularDistances(distance, indexArray)
+        return RouteLineGranularDistances(distance, indexArray as Array<RouteLineDistancesIndex>)
     }
 
     private val generateRouteFeatureData: (
@@ -926,7 +924,7 @@ internal object MapboxRouteLineUtils {
             granularDistances.distancesArray.run {
                 val points = mutableListOf<Point>()
                 for (i in max(upcomingIndex - 10, 0)..upcomingIndex) {
-                    points.add(this.get(i).point)
+                    points.add(this[i].point)
                 }
                 points
             },
@@ -1304,9 +1302,14 @@ internal object MapboxRouteLineUtils {
         route: DirectionsRoute,
     ): RoutePoints? {
         val nestedList = route.legs()?.map { routeLeg ->
-            routeLeg.steps()?.map { legStep ->
+            routeLeg.steps()?.mapIndexed { stepIndex, legStep ->
                 legStep.geometry() ?: return null
-                route.stepGeometryToPoints(legStep)
+                route.stepGeometryToPoints(legStep).let {
+                    if (stepIndex > 0) {
+                        it.drop(1)
+                    }
+                    it
+                }
             } ?: return null
         } ?: return null
 
@@ -1510,30 +1513,13 @@ internal object MapboxRouteLineUtils {
         }
     }
 
-    internal fun getAlternativeRoutesDeviationOffsets(
-        alternativeRoutesMetadata: List<AlternativeRouteMetadata>
-    ): Map<String, Double> {
-        val alternativesDeviationOffset = mutableMapOf<String, Double>()
-        alternativeRoutesMetadata.forEach { routeMetadata ->
-            var runningDistance = 0.0
-            val route = routeMetadata.navigationRoute.directionsRoute
-            route.legs()?.forEachIndexed LegLoop@{ legIndex, leg ->
-                leg.annotation()?.distance()
-                    ?.forEachIndexed AnnotationLoop@{ annotationIndex, distance ->
-                        val forkLegIndex = routeMetadata.forkIntersectionOfAlternativeRoute.legIndex
-                        val forkGeometryIndexInLeg =
-                            routeMetadata.forkIntersectionOfAlternativeRoute.geometryIndexInLeg
-                        if (legIndex == forkLegIndex && annotationIndex == forkGeometryIndexInLeg) {
-                            val percentageTraveled = runningDistance / route.distance()
-                            alternativesDeviationOffset[routeMetadata.navigationRoute.id] =
-                                percentageTraveled
-                            return@LegLoop
-                        }
-                        runningDistance += distance
-                    }
-            }
-        }
-        return alternativesDeviationOffset
+    internal fun getAlternativeRouteDeviationOffsets(
+        granularDistances: RouteLineGranularDistances,
+        metadata: AlternativeRouteMetadata
+    ): Double {
+        val index = metadata.forkIntersectionOfAlternativeRoute.geometryIndexInRoute
+        val distanceRemaining = granularDistances.distancesArray[index].distanceRemaining
+        return 1.0 - distanceRemaining / granularDistances.distance
     }
 
     private fun projectX(x: Double): Double {

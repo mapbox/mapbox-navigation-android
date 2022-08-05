@@ -116,7 +116,7 @@ internal class VanishingRouteLine {
         granularDistances: RouteLineGranularDistances,
         index: Int
     ): Double? {
-        val upcomingIndex = granularDistances.distancesArray[index]
+        val upcomingIndex = granularDistances.distancesArray.getOrNull(index)
         if (upcomingIndex == null) {
             logD(
                 "Upcoming route line index is null.",
