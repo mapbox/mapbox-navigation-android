@@ -3,7 +3,7 @@ package com.mapbox.navigation.core.trip.session
 /**
  * Describes the [TripSession]'s state.
  */
-enum class TripSessionState {
+enum class  TripSessionState {
     /**
      * State when the session is active, running a foreground service and requesting and returning location updates.
      */
