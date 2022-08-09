@@ -15,7 +15,7 @@ import com.mapbox.androidauto.car.feedback.ui.activeGuidanceCarFeedbackProvider
 import com.mapbox.androidauto.car.feedback.ui.buildArrivalFeedbackProvider
 import com.mapbox.androidauto.car.navigation.ActiveGuidanceScreen
 import com.mapbox.androidauto.car.navigation.CarActiveGuidanceCarContext
-import com.mapbox.androidauto.logAndroidAuto
+import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.navigation.audioguidance.CarAudioGuidanceUi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -69,11 +69,11 @@ class MainScreenManager(val mainCarContext: MainCarContext) {
                 }
             }
     }
-}
 
-fun ScreenManager.replace(screen: Screen) {
-    popToRoot()
-    val root = top
-    push(screen)
-    root.finish()
+    private fun ScreenManager.replace(screen: Screen) {
+        popToRoot()
+        val root = top
+        push(screen)
+        root.finish()
+    }
 }

@@ -6,6 +6,7 @@ import androidx.car.app.navigation.NavigationManagerCallback
 import com.mapbox.androidauto.car.navigation.CarDistanceFormatter
 import com.mapbox.androidauto.car.navigation.maneuver.CarManeuverMapper
 import com.mapbox.androidauto.car.telemetry.MapboxCarTelemetry
+import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter

@@ -3,8 +3,9 @@
 Use `$> make core-check-api` / `$> make core-update-api` (Core) `$> make ui-check-api` / `$> make ui-update-api` (UI) from the [`Makefile`](https://github.com/mapbox/mapbox-navigation-android/blob/main/Makefile) to interact.
 
 ```
-$> make core-check-api / make core-update-api
-$> make ui-check-api / make ui-update-api
+$> make core-update-api / make core-check-api 
+$> make ui-update-api / make ui-check-api
+$> make androidauto-update-api / make androidauto-check-api
 ```
 
 :warning: Noting that we might need to update / push `api/current.txt` files after running `$> make core-update-api` (Core) / `$> make ui-update-api` (UI) if there are changes / errors we're 🆗 with (e.g. `AddedMethod` changes are marked as errors but don't break SemVer) 🚀

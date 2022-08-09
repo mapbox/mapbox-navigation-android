@@ -1,7 +1,7 @@
 package com.mapbox.androidauto.car.search
 
-import com.mapbox.androidauto.logAndroidAuto
-import com.mapbox.androidauto.logAndroidAutoFailure
+import com.mapbox.androidauto.internal.logAndroidAuto
+import com.mapbox.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.search.ResponseInfo

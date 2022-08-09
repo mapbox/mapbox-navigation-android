@@ -2,11 +2,11 @@ package com.mapbox.androidauto.car.navigation
 
 import android.graphics.Rect
 import android.location.Location
-import com.mapbox.androidauto.car.RendererUtils.dpToPx
 import com.mapbox.androidauto.car.routes.NavigationRoutesProvider
 import com.mapbox.androidauto.car.routes.RoutesListener
 import com.mapbox.androidauto.car.routes.RoutesProvider
-import com.mapbox.androidauto.logAndroidAuto
+import com.mapbox.androidauto.internal.car.RendererUtils.dpToPx
+import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxExperimental

@@ -3,7 +3,7 @@ package com.mapbox.androidauto.car.navigation.speedlimit
 import android.graphics.Rect
 import android.location.Location
 import com.mapbox.androidauto.car.MainCarContext
-import com.mapbox.androidauto.logAndroidAuto
+import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver

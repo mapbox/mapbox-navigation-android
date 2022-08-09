@@ -73,7 +73,7 @@ dokkaHtmlPartial {
         configureEach {
             reportUndocumented.set(true)
             perPackageOption {
-                matchingRegex.set("com.mapbox.navigation.ui.car.internal.*")
+                matchingRegex.set("com.mapbox.androidauto.internal.*")
                 suppress.set(true)
             }
         }

@@ -26,7 +26,7 @@ libnavui-app \
 
 UI_MODULES = $(RELEASED_UI_MODULES)
 
-EXTENSION_MODULES = \
+ANDROIDAUTO_MODULES = \
 libnavui-androidauto
 
 APPLICATION_MODULES = \
@@ -47,14 +47,14 @@ endef
 check-kotlin-lint:
 	$(call run-gradle-tasks,$(CORE_MODULES),ktlint) \
 	&& $(call run-gradle-tasks,$(UI_MODULES),ktlint) \
-	&& $(call run-gradle-tasks,$(EXTENSION_MODULES),ktlint) \
+	&& $(call run-gradle-tasks,$(ANDROIDAUTO_MODULES),ktlint) \
 	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),ktlint)
 
 .PHONY: check-android-lint
 check-android-lint:
 	$(call run-gradle-tasks,$(CORE_MODULES),lint) \
 	&& $(call run-gradle-tasks,$(UI_MODULES),lint) \
-	&& $(call run-gradle-tasks,$(EXTENSION_MODULES),lint) \
+	&& $(call run-gradle-tasks,$(ANDROIDAUTO_MODULES),lint) \
 	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),lint)
 
 .PHONY: license-verification
@@ -142,6 +142,10 @@ assemble-ui-debug:
 assemble-ui-release:
 	$(call run-gradle-tasks,$(UI_MODULES),assembleRelease)
 
+.PHONY: assemble-androidauto-release
+assemble-androidauto-release:
+	$(call run-gradle-tasks,$(ANDROIDAUTO_MODULES),assembleRelease)
+
 .PHONY: ui-unit-tests
 ui-unit-tests:
 	$(call run-gradle-tasks,$(UI_MODULES),test)
@@ -212,6 +216,14 @@ ui-update-api: assemble-ui-release
 	./gradlew :libnavui-status:updateApi -PhidePackage=com.mapbox.navigation.ui.status.internal
 	./gradlew :libnavui-dropin:updateApi -PhidePackage=com.mapbox.navigation.dropin.internal
 	./gradlew :libnavui-app:updateApi -PhidePackage=com.mapbox.navigation.ui.app.internal
+
+.PHONY: androidauto-check-api
+androidauto-check-api: assemble-androidauto-release
+	./gradlew :libnavui-androidauto:checkApi -PhidePackage=com.mapbox.androidauto.internal
+
+.PHONY: androidauto-update-api
+androidauto-update-api: assemble-androidauto-release
+	./gradlew :libnavui-androidauto:updateApi -PhidePackage=com.mapbox.androidauto.internal
 
 .PHONY: update-metalava
 update-metalava:

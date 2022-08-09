@@ -9,7 +9,7 @@ import androidx.car.app.model.CarIcon
 import androidx.car.app.navigation.model.Step
 import androidx.core.graphics.drawable.IconCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
-import com.mapbox.androidauto.car.RendererUtils.dpToPx
+import com.mapbox.androidauto.internal.car.RendererUtils.dpToPx
 
 /**
  * This class will take multiple [CarLaneIcon] objects which were created from

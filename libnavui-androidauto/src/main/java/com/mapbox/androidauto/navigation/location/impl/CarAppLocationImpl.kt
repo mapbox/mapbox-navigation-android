@@ -1,7 +1,7 @@
 package com.mapbox.androidauto.navigation.location.impl
 
 import android.location.Location
-import com.mapbox.androidauto.logAndroidAuto
+import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.navigation.location.CarAppLocation
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation

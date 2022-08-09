@@ -2,7 +2,7 @@ package com.mapbox.androidauto.car.navigation
 
 import android.graphics.Rect
 import android.location.Location
-import com.mapbox.androidauto.logAndroidAuto
+import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets

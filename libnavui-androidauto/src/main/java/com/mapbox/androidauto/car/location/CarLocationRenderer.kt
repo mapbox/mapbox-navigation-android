@@ -2,7 +2,7 @@ package com.mapbox.androidauto.car.location
 
 import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.car.MainCarContext
-import com.mapbox.androidauto.logAndroidAuto
+import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
