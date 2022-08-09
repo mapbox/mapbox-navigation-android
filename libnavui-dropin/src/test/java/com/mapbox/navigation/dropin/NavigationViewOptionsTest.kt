@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin
 import android.content.Context
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
@@ -40,6 +41,8 @@ internal class NavigationViewOptionsTest {
         assertEquals(c.routeArrowOptions, sut.routeArrowOptions.value)
         assertEquals(c.showInfoPanelInFreeDrive, sut.showInfoPanelInFreeDrive.value)
         assertEquals(c.enableMapLongClickIntercept, sut.enableMapLongClickIntercept.value)
+        assertEquals(c.isInfoPanelHideable, sut.isInfoPanelHideable.value)
+        assertEquals(c.infoPanelForcedState, sut.infoPanelForcedState.value)
     }
 
     private fun customization() =
@@ -58,5 +61,7 @@ internal class NavigationViewOptionsTest {
                 .build()
             showInfoPanelInFreeDrive = true
             enableMapLongClickIntercept = false
+            isInfoPanelHideable = true
+            infoPanelForcedState = BottomSheetBehavior.STATE_EXPANDED
         }
 }

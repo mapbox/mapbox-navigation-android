@@ -53,12 +53,28 @@ internal class InfoPanelCoordinator(
 
         behavior.addBottomSheetCallback(updateGuideline)
         coroutineScope.launch {
-            bottomSheetVisibility().collect { isVisible ->
-                updateBottomSheetVisibility(isVisible)
+            bottomSheetState().collect { state ->
+                when (state) {
+                    BottomSheetBehavior.STATE_HIDDEN -> behavior.hide()
+                    BottomSheetBehavior.STATE_COLLAPSED,
+                    BottomSheetBehavior.STATE_HALF_EXPANDED,
+                    BottomSheetBehavior.STATE_EXPANDED -> behavior.show(state)
+                }
 
                 // When BottomSheet is already in requested state, BottomSheetCallback won't be
                 // called leaving guideline in a wrong position.
                 setGuidelinePosition(infoPanel)
+            }
+        }
+        coroutineScope.launch {
+            context.options.isInfoPanelHideable.collect { hideable ->
+                if (behavior.state != BottomSheetBehavior.STATE_HIDDEN) {
+                    // To avoid incorrect layout positioning, we only allow `behavior.isHideable`
+                    // changes when BottomSheet is NOT in STATE_HIDDEN.
+                    // NOTE: Setting `behavior.isHideable = false` when BottomSheet is in STATE_HIDDEN
+                    // will force BottomSheet into STATE_COLLAPSED.
+                    behavior.isHideable = hideable
+                }
             }
         }
         coroutineScope.launch {
@@ -89,21 +105,24 @@ internal class InfoPanelCoordinator(
         }
     }
 
-    private fun bottomSheetVisibility() = combine(
+    private fun bottomSheetState() = combine(
+        store.select { it.destination?.point },
         store.select { it.navigation },
-        context.options.showInfoPanelInFreeDrive
-    ) { navigationState, showInfoPanelInFreeDrive ->
-        showInfoPanelInFreeDrive || navigationState != NavigationState.FreeDrive
+        context.options.showInfoPanelInFreeDrive,
+        context.options.infoPanelForcedState
+    ) { _, navigationState, showInfoPanelInFreeDrive, infoPanelForcedState ->
+        if (infoPanelForcedState != 0) {
+            infoPanelForcedState
+        } else if (showInfoPanelInFreeDrive || navigationState != NavigationState.FreeDrive) {
+            BottomSheetBehavior.STATE_COLLAPSED
+        } else {
+            BottomSheetBehavior.STATE_HIDDEN
+        }
     }
 
-    private fun updateBottomSheetVisibility(isVisible: Boolean) {
-        if (isVisible) behavior.collapse()
-        else behavior.hide()
-    }
-
-    private fun <V : View> BottomSheetBehavior<V>.collapse() {
-        state = BottomSheetBehavior.STATE_COLLAPSED
-        isHideable = false
+    private fun <V : View> BottomSheetBehavior<V>.show(@BottomSheetBehavior.State state: Int) {
+        this.state = state
+        isHideable = context.options.isInfoPanelHideable.value
     }
 
     private fun <V : View> BottomSheetBehavior<V>.hide() {

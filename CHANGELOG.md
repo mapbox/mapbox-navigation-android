@@ -4,6 +4,9 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Introduced `ViewOptionsCustomization.isInfoPanelHideable` that allows control over whether the `NavigationView` Info Panel can hide when it is swiped down. [#6132](https://github.com/mapbox/mapbox-navigation-android/pull/6132)
+- Introduced `ViewOptionsCustomization.infoPanelForcedState` that allows overriding of the `NavigationView` Info Panel (BottomSheetBehaviour) state. [#6132](https://github.com/mapbox/mapbox-navigation-android/pull/6132)
+
 #### Bug fixes and improvements
 
 ## Mapbox Navigation SDK 2.7.0-rc.2 - 11 August, 2022
