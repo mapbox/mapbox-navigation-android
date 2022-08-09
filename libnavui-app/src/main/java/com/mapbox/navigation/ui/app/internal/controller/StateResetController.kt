@@ -5,11 +5,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowTripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.ui.app.internal.Store
-import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
-import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
-import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
+import com.mapbox.navigation.ui.app.internal.endNavigation
+import com.mapbox.navigation.ui.app.internal.extension.dispatch
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
@@ -27,10 +24,7 @@ internal class StateResetController(private val store: Store) : UIComponent() {
         mapboxNavigation.flowTripSessionState().debounce(100).observe { newState ->
             if (prevState == TripSessionState.STARTED && newState == TripSessionState.STOPPED) {
                 // we only reset Store state when TripSessionState switches from STARTED to STOPPED.
-                store.dispatch(RoutesAction.SetRoutes(emptyList()))
-                store.dispatch(RoutePreviewAction.Ready(emptyList()))
-                store.dispatch(DestinationAction.SetDestination(null))
-                store.dispatch(NavigationStateAction.Update(NavigationState.FreeDrive))
+                store.dispatch(endNavigation())
             }
             prevState = newState
         }

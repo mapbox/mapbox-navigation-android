@@ -45,4 +45,10 @@ sealed class RoutePreviewAction : Action {
         val routeOptions: RouteOptions,
         val routerOrigin: RouterOrigin
     ) : RoutePreviewAction()
+
+    /**
+     * The actions informs that fetch route request has started.
+     * @param requestId of the route requested
+     */
+    data class StartedFetchRequest(val requestId: Long) : RoutePreviewAction()
 }

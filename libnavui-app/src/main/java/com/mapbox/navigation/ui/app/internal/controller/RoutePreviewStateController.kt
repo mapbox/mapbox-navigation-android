@@ -13,8 +13,18 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.app.internal.Action
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.Store
+import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
+import com.mapbox.navigation.ui.app.internal.extension.actionsFlowable
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
+import com.mapbox.navigation.utils.internal.logE
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RoutePreviewStateController(private val store: Store) : StateController() {
@@ -27,43 +37,34 @@ class RoutePreviewStateController(private val store: Store) : StateController() 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
         this.mapboxNavigation = mapboxNavigation
+
+        coroutineScope.launch {
+            mapboxNavigation.fetchRouteSaga()
+        }
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         super.onDetached(mapboxNavigation)
-        when (val currentState = store.state.value.previewRoutes) {
-            is RoutePreviewState.Fetching -> {
-                mapboxNavigation.cancelRouteRequest(currentState.requestId)
-            }
-            else -> Unit
-        }
         this.mapboxNavigation = null
     }
 
     override fun process(state: State, action: Action): State {
-        if (action is RoutePreviewAction) {
-            return this.mapboxNavigation?.let {
-                return state.copy(
-                    previewRoutes = processRoutesAction(it, action)
-                )
-            } ?: state
+        if (action is RoutePreviewAction && mapboxNavigation != null) {
+            return state.copy(
+                previewRoutes = processRoutesAction(action)
+            )
         }
         return state
     }
 
-    private fun processRoutesAction(
-        mapboxNavigation: MapboxNavigation,
-        action: RoutePreviewAction
-    ): RoutePreviewState {
+    private fun processRoutesAction(action: RoutePreviewAction): RoutePreviewState {
         return when (action) {
-            is RoutePreviewAction.FetchPoints -> {
-                val routeOptions = getDefaultOptions(mapboxNavigation, action.points)
-                val requestId = mapboxNavigation.fetchRoute(routeOptions)
-                RoutePreviewState.Fetching(requestId)
-            }
+            is RoutePreviewAction.FetchPoints,
             is RoutePreviewAction.FetchOptions -> {
-                val requestId = mapboxNavigation.fetchRoute(action.options)
-                RoutePreviewState.Fetching(requestId)
+                RoutePreviewState.Fetching(0)
+            }
+            is RoutePreviewAction.StartedFetchRequest -> {
+                RoutePreviewState.Fetching(action.requestId)
             }
             is RoutePreviewAction.Ready -> {
                 if (action.routes.isEmpty()) {
@@ -81,41 +82,91 @@ class RoutePreviewStateController(private val store: Store) : StateController() 
         }
     }
 
-    private fun MapboxNavigation.fetchRoute(options: RouteOptions): Long {
-        return requestRoutes(
-            options,
-            object : NavigationRouterCallback {
-                override fun onRoutesReady(
-                    routes: List<NavigationRoute>,
-                    routerOrigin: RouterOrigin
-                ) {
-                    store.dispatch(RoutePreviewAction.Ready(routes))
-                }
-
-                override fun onFailure(
-                    reasons: List<RouterFailure>,
-                    routeOptions: RouteOptions
-                ) {
-                    store.dispatch(RoutePreviewAction.Failed(reasons, routeOptions))
-                }
-
-                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
-                    store.dispatch(RoutePreviewAction.Canceled(routeOptions, routerOrigin))
+    private suspend fun MapboxNavigation.fetchRouteSaga() {
+        store.actionsFlowable()
+            .filter {
+                it is RoutePreviewAction.FetchPoints ||
+                    it is RoutePreviewAction.FetchOptions ||
+                    it is DestinationAction.SetDestination
+            }
+            .map {
+                when (it) {
+                    is RoutePreviewAction.FetchPoints -> routeOptions(it.points)
+                    is RoutePreviewAction.FetchOptions -> it.options
+                    else -> null
                 }
             }
-        )
+            .collectLatest { routeOptions ->
+                if (routeOptions != null) {
+                    try {
+                        val routes = fetchRoute(routeOptions) { requestId ->
+                            store.dispatch(RoutePreviewAction.StartedFetchRequest(requestId))
+                        }
+                        store.dispatch(RoutePreviewAction.Ready(routes))
+                    } catch (e: FetchRouteError) {
+                        store.dispatch(RoutePreviewAction.Failed(e.reasons, e.routeOptions))
+                    } catch (e: FetchRouteCancelled) {
+                        store.dispatch(RoutePreviewAction.Canceled(e.routeOptions, e.routerOrigin))
+                    } catch (e: Throwable) {
+                        logE("Error fetching route. ${e.message}", "RoutesStateController")
+                        store.dispatch(RoutePreviewAction.Ready(emptyList()))
+                    }
+                }
+            }
     }
 
-    private fun getDefaultOptions(
-        mapboxNavigation: MapboxNavigation,
-        points: List<Point>
-    ): RouteOptions {
+    private fun MapboxNavigation.routeOptions(points: List<Point>): RouteOptions {
         return RouteOptions.builder()
             .applyDefaultNavigationOptions()
-            .applyLanguageAndVoiceUnitOptions(mapboxNavigation.navigationOptions.applicationContext)
-            .layersList(listOf(mapboxNavigation.getZLevel(), null))
+            .applyLanguageAndVoiceUnitOptions(navigationOptions.applicationContext)
+            .layersList(listOf(getZLevel(), null))
             .coordinatesList(points)
             .alternatives(true)
             .build()
     }
+
+    private suspend fun MapboxNavigation.fetchRoute(
+        routeOptions: RouteOptions,
+        fetchStarted: (requestId: Long) -> Unit
+    ): List<NavigationRoute> {
+        return suspendCancellableCoroutine { cont ->
+            val requestId = requestRoutes(
+                routeOptions,
+                object : NavigationRouterCallback {
+                    override fun onRoutesReady(
+                        routes: List<NavigationRoute>,
+                        routerOrigin: RouterOrigin
+                    ) {
+                        cont.resume(routes)
+                    }
+
+                    override fun onFailure(
+                        reasons: List<RouterFailure>,
+                        routeOptions: RouteOptions
+                    ) {
+                        cont.resumeWithException(FetchRouteError(reasons, routeOptions))
+                    }
+
+                    override fun onCanceled(
+                        routeOptions: RouteOptions,
+                        routerOrigin: RouterOrigin
+                    ) {
+                        cont.cancel(FetchRouteCancelled(routeOptions, routerOrigin))
+                    }
+                }
+            )
+            fetchStarted(requestId)
+            cont.invokeOnCancellation { cancelRouteRequest(requestId) }
+        }
+    }
+
+    private class FetchRouteError(
+        val reasons: List<RouterFailure>,
+        val routeOptions: RouteOptions
+    ) : Error()
+
+    private class FetchRouteCancelled(
+        val routeOptions: RouteOptions,
+        val routerOrigin: RouterOrigin
+    ) : Error()
 }

@@ -272,4 +272,13 @@ class NavigationViewListenerRegistryTest {
             testListener.onInfoPanelCollapsed()
         }
     }
+
+    fun `onRouteFetching should NOT notify listener if requestId is 0`() {
+        sut.registerListener(testListener)
+
+        val id = 0L
+        testStore.setState(State(previewRoutes = RoutePreviewState.Fetching(id)))
+
+        verify(exactly = 0) { testListener.onRouteFetching(id) }
+    }
 }

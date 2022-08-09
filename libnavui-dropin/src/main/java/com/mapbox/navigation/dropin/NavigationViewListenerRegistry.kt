@@ -59,7 +59,9 @@ internal class NavigationViewListenerRegistry(
                             )
                         }
                         is RoutePreviewState.Fetching -> {
-                            listener.onRouteFetching(requestId = it.requestId)
+                            if (0 < it.requestId) {
+                                listener.onRouteFetching(requestId = it.requestId)
+                            }
                         }
                     }
                 }
