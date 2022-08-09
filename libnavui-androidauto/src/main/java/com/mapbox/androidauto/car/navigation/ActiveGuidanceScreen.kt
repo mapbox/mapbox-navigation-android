@@ -18,10 +18,10 @@ import com.mapbox.androidauto.car.navigation.roadlabel.RoadLabelSurfaceLayer
 import com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil
 import com.mapbox.androidauto.car.preview.CarRouteLine
-import com.mapbox.androidauto.internal.extensions.getStyle
-import com.mapbox.androidauto.internal.extensions.handleStyleOnAttached
-import com.mapbox.androidauto.internal.extensions.handleStyleOnDetached
-import com.mapbox.androidauto.logAndroidAuto
+import com.mapbox.androidauto.internal.car.extensions.getStyle
+import com.mapbox.androidauto.internal.car.extensions.handleStyleOnAttached
+import com.mapbox.androidauto.internal.car.extensions.handleStyleOnDetached
+import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.MapboxExperimental

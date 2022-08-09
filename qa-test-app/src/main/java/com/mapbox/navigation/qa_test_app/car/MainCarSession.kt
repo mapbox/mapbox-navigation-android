@@ -20,7 +20,7 @@ import com.mapbox.androidauto.car.map.widgets.compass.CarCompassSurfaceRenderer
 import com.mapbox.androidauto.car.map.widgets.logo.CarLogoSurfaceRenderer
 import com.mapbox.androidauto.car.permissions.NeedsLocationPermissionsScreen
 import com.mapbox.androidauto.deeplink.GeoDeeplinkNavigateAction
-import com.mapbox.androidauto.logAndroidAuto
+import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.notification.CarNotificationInterceptor
 import com.mapbox.maps.MapInitOptions
 import com.mapbox.maps.MapboxExperimental

@@ -4,10 +4,10 @@ import com.mapbox.androidauto.car.MainCarContext
 import com.mapbox.androidauto.car.routes.NavigationRoutesProvider
 import com.mapbox.androidauto.car.routes.RoutesListener
 import com.mapbox.androidauto.car.routes.RoutesProvider
-import com.mapbox.androidauto.internal.extensions.getStyle
-import com.mapbox.androidauto.internal.extensions.handleStyleOnAttached
-import com.mapbox.androidauto.internal.extensions.handleStyleOnDetached
-import com.mapbox.androidauto.logAndroidAuto
+import com.mapbox.androidauto.internal.car.extensions.getStyle
+import com.mapbox.androidauto.internal.car.extensions.handleStyleOnAttached
+import com.mapbox.androidauto.internal.car.extensions.handleStyleOnDetached
+import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver

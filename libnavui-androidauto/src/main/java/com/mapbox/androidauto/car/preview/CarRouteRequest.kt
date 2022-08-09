@@ -1,8 +1,8 @@
 package com.mapbox.androidauto.car.preview
 
 import com.mapbox.androidauto.car.search.PlaceRecord
-import com.mapbox.androidauto.logAndroidAuto
-import com.mapbox.androidauto.logAndroidAutoFailure
+import com.mapbox.androidauto.internal.logAndroidAuto
+import com.mapbox.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point

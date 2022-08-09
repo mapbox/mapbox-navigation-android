@@ -24,9 +24,9 @@ import com.mapbox.androidauto.car.navigation.CarNavigationCamera
 import com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil
 import com.mapbox.androidauto.car.search.PlaceRecord
-import com.mapbox.androidauto.internal.extensions.handleStyleOnAttached
-import com.mapbox.androidauto.internal.extensions.handleStyleOnDetached
-import com.mapbox.androidauto.logAndroidAuto
+import com.mapbox.androidauto.internal.car.extensions.handleStyleOnAttached
+import com.mapbox.androidauto.internal.car.extensions.handleStyleOnDetached
+import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.navigation.audioguidance.muteAudioGuidance
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection

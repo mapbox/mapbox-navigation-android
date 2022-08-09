@@ -9,7 +9,7 @@ import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.car.placeslistonmap.PlaceMarkerRenderer
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListItemMapper
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapScreen
-import com.mapbox.androidauto.logAndroidAuto
+import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplink
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplinkParser
 

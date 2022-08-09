@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.opengl.GLES20
 import android.opengl.GLUtils
-import com.mapbox.androidauto.logAndroidAutoFailure
+import com.mapbox.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.maps.CustomLayerHost
 import com.mapbox.maps.CustomLayerRenderParameters
 import java.util.concurrent.ConcurrentLinkedQueue

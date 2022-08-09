@@ -1,9 +1,9 @@
-package com.mapbox.androidauto
+package com.mapbox.androidauto.internal
 
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 
-object AndroidAutoLog {
+internal object AndroidAutoLog {
 
     private const val LOG_CATEGORY = "MapboxAndroidAuto"
 

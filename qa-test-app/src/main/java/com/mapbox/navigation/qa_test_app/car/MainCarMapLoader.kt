@@ -1,7 +1,7 @@
 package com.mapbox.navigation.qa_test_app.car
 
-import com.mapbox.androidauto.AndroidAutoLog
-import com.mapbox.androidauto.logAndroidAuto
+import com.mapbox.androidauto.internal.logAndroidAuto
+import com.mapbox.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
@@ -18,7 +18,7 @@ class MainCarMapLoader : MapboxCarMapObserver {
     private val logMapError = object : OnMapLoadErrorListener {
         override fun onMapLoadError(eventData: MapLoadingErrorEventData) {
             val errorData = "${eventData.type} ${eventData.message}"
-            AndroidAutoLog.logAndroidAutoFailure("onMapLoadError $errorData")
+            logAndroidAutoFailure("onMapLoadError $errorData")
         }
     }
 

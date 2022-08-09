@@ -7,8 +7,8 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.car.app.model.CarIcon
 import androidx.core.graphics.drawable.IconCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
-import com.mapbox.androidauto.car.RendererUtils.dpToPx
-import com.mapbox.androidauto.logAndroidAutoFailure
+import com.mapbox.androidauto.internal.car.RendererUtils.dpToPx
+import com.mapbox.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.ui.maneuver.api.MapboxTurnIconsApi
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.SubManeuver

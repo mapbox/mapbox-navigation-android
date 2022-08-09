@@ -1,6 +1,6 @@
 package com.mapbox.androidauto.testing
 
-import com.mapbox.androidauto.AndroidAutoLog
+import com.mapbox.androidauto.internal.AndroidAutoLog
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockkObject

@@ -4,11 +4,11 @@ import android.graphics.Color
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import com.mapbox.androidauto.car.navigation.MapUserStyleObserver
-import com.mapbox.androidauto.internal.extensions.getStyleAsync
-import com.mapbox.androidauto.internal.extensions.handleStyleOnAttached
-import com.mapbox.androidauto.internal.extensions.handleStyleOnDetached
-import com.mapbox.androidauto.logAndroidAuto
-import com.mapbox.androidauto.logAndroidAutoFailure
+import com.mapbox.androidauto.internal.car.extensions.getStyleAsync
+import com.mapbox.androidauto.internal.car.extensions.handleStyleOnAttached
+import com.mapbox.androidauto.internal.car.extensions.handleStyleOnDetached
+import com.mapbox.androidauto.internal.logAndroidAuto
+import com.mapbox.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.androidauto.surfacelayer.CarSurfaceLayer
 import com.mapbox.androidauto.surfacelayer.textview.CarTextLayerHost
 import com.mapbox.maps.LayerPosition

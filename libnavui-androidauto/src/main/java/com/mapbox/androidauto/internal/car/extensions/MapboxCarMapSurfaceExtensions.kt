@@ -1,14 +1,14 @@
 @file:JvmName("MapboxCarMapSurfaceEx")
 @file:OptIn(MapboxExperimental::class)
 
-package com.mapbox.androidauto.internal.extensions
+package com.mapbox.androidauto.internal.car.extensions
 
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 
-internal fun MapboxCarMapSurface.handleStyleOnAttached(
+fun MapboxCarMapSurface.handleStyleOnAttached(
     block: (Style) -> Unit
 ): OnStyleLoadedListener {
     getStyle()?.let { block(it) }
@@ -20,17 +20,17 @@ internal fun MapboxCarMapSurface.handleStyleOnAttached(
     }
 }
 
-internal fun MapboxCarMapSurface.handleStyleOnDetached(
+fun MapboxCarMapSurface.handleStyleOnDetached(
     listener: OnStyleLoadedListener?,
 ): Style? {
     listener?.let { mapSurface.getMapboxMap().removeOnStyleLoadedListener(it) }
     return getStyle()
 }
 
-internal fun MapboxCarMapSurface.getStyle(): Style? {
+fun MapboxCarMapSurface.getStyle(): Style? {
     return mapSurface.getMapboxMap().getStyle()
 }
 
-internal fun MapboxCarMapSurface.getStyleAsync(block: (Style) -> Unit) {
+fun MapboxCarMapSurface.getStyleAsync(block: (Style) -> Unit) {
     mapSurface.getMapboxMap().getStyle { block(it) }
 }
