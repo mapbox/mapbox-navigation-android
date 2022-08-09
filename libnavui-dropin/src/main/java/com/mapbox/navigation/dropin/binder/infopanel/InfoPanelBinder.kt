@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin.binder.infopanel
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.graphics.Insets
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.extensions.navigationListOf
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -53,6 +54,17 @@ abstract class InfoPanelBinder : UIBinder {
      */
     abstract fun getContentLayout(layout: ViewGroup): ViewGroup?
 
+    /**
+     * Called when the Info Panel layout should apply system bar insets.
+     *
+     * This method should be overridden by a subclass to apply a policy different from the default behavior.
+     * The default behavior applies insets with a value of [Insets.NONE].
+     *
+     * @param layout ViewGroup returned by [onCreateLayout]
+     * @param insets system bars insets
+     */
+    open fun applySystemBarsInsets(layout: ViewGroup, insets: Insets) = Unit
+
     internal fun setBinders(headerBinder: UIBinder?, contentBinder: UIBinder?) {
         this.headerBinder = headerBinder
         this.contentBinder = contentBinder
@@ -81,6 +93,11 @@ abstract class InfoPanelBinder : UIBinder {
         ifNonNull(contentBinder, getContentLayout(layout)) { binder, contentLayout ->
             binders.add(binder.bind(contentLayout))
         }
+
+        context?.apply {
+            applySystemBarsInsets(layout, systemBarsInsets.value)
+        }
+
         return navigationListOf(*binders.toTypedArray())
     }
 
@@ -105,6 +122,15 @@ internal class MapboxInfoPanelBinder : InfoPanelBinder() {
 
     override fun getContentLayout(layout: ViewGroup): ViewGroup? =
         layout.findViewById(R.id.infoPanelContent)
+
+    override fun applySystemBarsInsets(layout: ViewGroup, insets: Insets) {
+        layout.setPadding(
+            layout.paddingLeft,
+            layout.paddingTop,
+            layout.paddingRight,
+            insets.bottom
+        )
+    }
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val observer = super.bind(viewGroup)

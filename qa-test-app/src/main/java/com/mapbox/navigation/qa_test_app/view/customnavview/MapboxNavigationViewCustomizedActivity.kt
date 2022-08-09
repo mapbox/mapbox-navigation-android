@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.SwitchCompat
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.MutableLiveData
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.geojson.Point
@@ -106,8 +107,19 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         return menuBinding.root
     }
 
+    private fun updateTheme() {
+        if (viewModel.fullScreen.value == true) {
+            setTheme(R.style.Theme_Fullscreen)
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+        } else {
+            setTheme(R.style.Theme_AppCompat_NoActionBar)
+            WindowCompat.setDecorFitsSystemWindows(window, true)
+        }
+    }
+
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        updateTheme()
         super.onCreate(savedInstanceState)
 
         binding.navigationView.addListener(freeDriveInfoPanelInstaller)
@@ -134,6 +146,15 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             menuBinding.toggleCustomMap,
             viewModel.showCustomMapView,
             ::customizeMap
+        )
+
+        bindSwitch(
+            menuBinding.toggleFullscreen,
+            getValue = { viewModel.fullScreen.value == true },
+            setValue = {
+                viewModel.fullScreen.value = it
+                recreate()
+            }
         )
 
         bindSwitch(

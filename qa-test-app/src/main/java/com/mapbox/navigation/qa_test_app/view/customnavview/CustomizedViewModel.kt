@@ -14,4 +14,5 @@ class CustomizedViewModel : ViewModel() {
     val enableOnMapLongClick = MutableLiveData(true)
     val isInfoPanelHideable = MutableLiveData(false)
     val infoPanelStateOverride = MutableLiveData("--")
+    val fullScreen = MutableLiveData(false)
 }

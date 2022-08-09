@@ -2,13 +2,16 @@ package com.mapbox.navigation.dropin.binder.infopanel
 
 import android.content.Context
 import android.widget.FrameLayout
+import androidx.core.graphics.Insets
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.extensions.MapboxNavigationObserverChain
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.component.infopanel.InfoPanelComponent
 import io.mockk.MockKAnnotations
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -31,6 +34,8 @@ internal class MapboxInfoPanelBinderTest {
     fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true)
         ctx = ApplicationProvider.getApplicationContext()
+
+        every { mockNavContext.systemBarsInsets } returns MutableStateFlow(Insets.NONE)
 
         sut = MapboxInfoPanelBinder()
     }
