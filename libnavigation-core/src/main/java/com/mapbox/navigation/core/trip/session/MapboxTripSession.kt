@@ -64,7 +64,6 @@ internal class MapboxTripSession(
 
     private var isUpdatingRoute = false
     private var updateLegIndexJob: Job? = null
-    private var updateRouteProgressJob: Job? = null
 
     @VisibleForTesting
     internal var primaryRoute: NavigationRoute? = null
@@ -90,7 +89,6 @@ internal class MapboxTripSession(
                 roadObjects = emptyList()
                 routeProgress = null
                 updateLegIndexJob?.cancel()
-                updateRouteProgressJob?.cancel()
                 setRouteToNativeNavigator(routes, legIndex)
             }
             RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE -> {
@@ -371,7 +369,6 @@ internal class MapboxTripSession(
     }
 
     private fun reset() {
-        updateRouteProgressJob?.cancel()
         updateLegIndexJob?.cancel()
         locationMatcherResult = null
         rawLocation = null
