@@ -9,10 +9,8 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.utils.internal.logI
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class CarAppLifecycleOwner : LifecycleOwner {
 
     // Keeps track of the activities created and foregrounded

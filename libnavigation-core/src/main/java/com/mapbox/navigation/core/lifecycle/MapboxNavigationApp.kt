@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Application
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import kotlin.reflect.KClass
@@ -53,7 +52,6 @@ import kotlin.reflect.KClass
  * }
  * ```
  */
-@ExperimentalPreviewMapboxNavigationAPI
 object MapboxNavigationApp {
 
     // The singleton MapboxNavigationApp is not good for unit testing.
