@@ -31,7 +31,6 @@ internal class ReplayRouteTripSession {
             .also { mapboxNavigation.registerRouteProgressObserver(it) }
 
         mapboxReplayer.pushRealLocation(context, 0.0)
-        mapboxReplayer.playbackSpeed(1.5)
         mapboxReplayer.play()
     }
 
