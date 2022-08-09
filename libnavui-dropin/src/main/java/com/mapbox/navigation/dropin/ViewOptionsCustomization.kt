@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin
 
 import android.content.Context
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.NavigationStyles
@@ -54,6 +55,21 @@ class ViewOptionsCustomization {
      * Set to `true` as the default behavior.
      */
     var enableMapLongClickIntercept: Boolean? = null
+
+    /**
+     * Sets whether the Info Panel can hide when it is swiped down.
+     * Set to `false` for the default behavior.
+     */
+    var isInfoPanelHideable: Boolean? = null
+
+    /**
+     * Set to override Info Panel BottomSheet state.
+     * Setting this value to one of [BottomSheetBehavior.STATE_COLLAPSED], [BottomSheetBehavior.STATE_EXPANDED],
+     * [BottomSheetBehavior.STATE_HIDDEN] or [BottomSheetBehavior.STATE_HALF_EXPANDED] will disable
+     * default (auto-hiding) behaviour.
+     * Set to `0` to restore the default behavior.
+     */
+    var infoPanelForcedState: Int? = null
 
     companion object {
         /**
