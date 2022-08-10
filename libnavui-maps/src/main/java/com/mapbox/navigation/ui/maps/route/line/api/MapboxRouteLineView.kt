@@ -41,6 +41,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRA
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineData
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDataCopy
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider
@@ -49,6 +50,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineSourceKey
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimExpressionProvider
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
+import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValueCopy
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
@@ -148,19 +150,38 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      */
     fun renderRouteDrawData(style: Style, routeDrawData: Expected<RouteLineError, RouteSetValue>) {
         MapboxRouteLineUtils.initializeLayers(style, options)
-        jobControl.scope.launch(Dispatchers.Main) {
+        jobControl.scope.launch(Dispatchers.Main.immediate) {
             mutex.withLock {
                 val primaryRouteTrafficVisibility = getTrafficVisibility(style)
                 val primaryRouteVisibility = getPrimaryRouteVisibility(style)
                 val alternativeRouteVisibility = getAlternativeRoutesVisibility(style)
-                routeDrawData.fold({ error ->
-                    logE(TAG, error.errorMessage)
-                    listOf()
-                }, { routeSetValue ->
+                if (routeDrawData.isValue) {
+                    var routeSetValue = routeDrawData.value!!
+
+                val routeSetValueCopy = routeDrawData.value!!.run {
+                    RouteSetValueCopy(
+                        RouteLineDataCopy(
+                            primaryRouteLineData.featureCollection.toJson(),
+                            primaryRouteLineData.dynamicData
+                        ),
+                        alternativeRouteLinesData.map {
+                            RouteLineDataCopy(
+                                it.featureCollection.toJson(),
+                                it.dynamicData
+                            )
+                        },
+                        waypointsSource.toJson()
+                    )
+                }
+                routeSetValue.copy = routeSetValueCopy
+                routeSetValue.primaryRouteLineData.copy = routeSetValueCopy.primaryRouteLineData
+                routeSetValue.alternativeRouteLinesData.forEachIndexed { index, routeLineData ->
+                    routeLineData.copy = routeSetValueCopy.alternativeRouteLinesData[index]
+                }
                     updateSource(
                         style,
                         RouteLayerConstants.WAYPOINT_SOURCE_ID,
-                        routeSetValue.waypointsSource
+                        routeSetValueCopy.waypointsSource
                     )
                     val routeLineDatas = listOf(routeSetValue.primaryRouteLineData)
                         .plus(routeSetValue.alternativeRouteLinesData)
@@ -180,9 +201,9 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                         val nextRouteLineData = routeLineDatas.find {
                             it.featureCollection.features()?.firstOrNull()?.id() == nextFeatureId
                         }
-                        val fc: FeatureCollection =
-                            nextRouteLineData?.featureCollection
-                                ?: FeatureCollection.fromFeatures(listOf())
+                        val fc: String =
+                            nextRouteLineData?.copy?.featureCollection
+                                ?: "{}"
                         updateSource(style, sourceToUpdate.key.sourceId, fc)
                         sourceToFeatureMap[sourceToUpdate.key] = RouteLineFeatureId(nextFeatureId)
                     }
@@ -225,9 +246,9 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                             } else { {} }
                             listOf(layerMoveCommand).plus(trimOffsetCommands).plus(gradientCommands)
                         } ?: listOf()
+                    }.flatten().forEach { mutationCommand ->
+                        mutationCommand()
                     }
-                }).flatten().forEach { mutationCommand ->
-                    mutationCommand()
                 }
 
                 primaryRouteLineLayerGroup = getLayerIdsForPrimaryRoute(style, sourceLayerMap)
@@ -265,6 +286,11 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                     }
                 }
             }
+                /*routeDrawData.fold({ error ->
+                    logE(TAG, error.errorMessage)
+                    listOf()
+                }, { routeSetValue ->*/
+
         }
     }
 
@@ -335,7 +361,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                         updateSource(
                             style,
                             it.sourceId,
-                            value.primaryRouteSource
+                            value.primaryRouteSource.toJson()
                         )
                         sourceToFeatureMap[it] =
                             RouteLineFeatureId(
@@ -348,7 +374,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                                 updateSource(
                                     style,
                                     routeLineSourceKey.sourceId,
-                                    value.alternativeRouteSourceSources[index]
+                                    value.alternativeRouteSourceSources[index].toJson()
                                 )
                                 sourceToFeatureMap[routeLineSourceKey] =
                                     RouteLineFeatureId(
@@ -362,7 +388,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                     updateSource(
                         style,
                         RouteLayerConstants.WAYPOINT_SOURCE_ID,
-                        value.waypointsSource
+                        value.waypointsSource.toJson()
                     )
 
                     primaryRouteLineLayerGroup = setOf()
@@ -578,9 +604,9 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         }
     }
 
-    private fun updateSource(style: Style, sourceId: String, featureCollection: FeatureCollection) {
+    private fun updateSource(style: Style, sourceId: String, featureCollection: String) {
         style.getSource(sourceId)?.let {
-            (it as GeoJsonSource).featureCollection(featureCollection)
+            (it as GeoJsonSource).data(featureCollection)
         }
     }
 
