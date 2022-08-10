@@ -2,9 +2,12 @@ package com.mapbox.navigation.base.internal.route
 
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.MaxSpeed
+import com.mapbox.navigation.utils.internal.logW
 import kotlin.math.min
 
 internal object AnnotationsRefresher {
+
+    private const val TAG = "AnnotationsRefresher"
 
     fun getRefreshedAnnotations(
         oldAnnotation: LegAnnotation?,
@@ -18,37 +21,31 @@ internal object AnnotationsRefresher {
             oldAnnotation,
             newAnnotation,
             legGeometryIndex,
-            0,
         ) { congestionNumeric() }
         val congestion = mergeAnnotationProperty(
             oldAnnotation,
             newAnnotation,
             legGeometryIndex,
-            "unknown"
         ) { congestion() }
         val distance = mergeAnnotationProperty(
             oldAnnotation,
             newAnnotation,
             legGeometryIndex,
-            0.0
         ) { distance() }
         val duration = mergeAnnotationProperty(
             oldAnnotation,
             newAnnotation,
             legGeometryIndex,
-            0.0
         ) { duration() }
         val speed = mergeAnnotationProperty(
             oldAnnotation,
             newAnnotation,
             legGeometryIndex,
-            0.0
         ) { speed() }
         val maxSpeed = mergeAnnotationProperty(
             oldAnnotation,
             newAnnotation,
             legGeometryIndex,
-            MaxSpeed.builder().build()
         ) { maxspeed() }
         // unrecognized properties migrate from new annotation
         return newAnnotation.toBuilder()
@@ -65,23 +62,21 @@ internal object AnnotationsRefresher {
         oldAnnotation: LegAnnotation?,
         newAnnotation: LegAnnotation,
         endIndex: Int,
-        defaultValue: T,
         propertyExtractor: LegAnnotation.() -> List<T>?,
     ): List<T>? {
-        val newProperty = newAnnotation.propertyExtractor()
-        if (newProperty == null) {
+        val newProperty = newAnnotation.propertyExtractor() ?: return null
+        val oldProperty = oldAnnotation?.propertyExtractor() ?: return null
+        val expectedSize = oldProperty.size
+        if (expectedSize < endIndex) {
+            logW("Annotations sizes mismatch: index=$endIndex, expected_size=$expectedSize", TAG)
             return null
         }
-        val oldProperty = oldAnnotation?.propertyExtractor()
-        return (oldProperty?.mutableTake(endIndex) ?: mutableListOf()).apply {
-            repeat(endIndex - size) { add(defaultValue) }
-            addAll(newProperty)
-        }
-    }
+        val result = mutableListOf<T>()
+        repeat(endIndex) { result.add(oldProperty[it]) }
+        repeat(min(expectedSize - endIndex, newProperty.size)) { result.add(newProperty[it]) }
+        val filledSize = result.size
+        repeat(expectedSize - filledSize) { result.add(oldProperty[it + filledSize]) }
 
-    private fun <T> List<T>.mutableTake(n: Int): MutableList<T> {
-        return mutableListOf<T>().also {
-            for (index in 0 until min(n, size)) { it.add(get(index)) }
-        }
+        return result
     }
 }

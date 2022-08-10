@@ -34,120 +34,165 @@ class AnnotationsRefresherTest(
                     null,
                     0,
                     null,
-                    "Everything is null"
+                    "Everything is null. Null new annotation turns everything to null."
                 ),
                 arrayOf(
                     defaultAnnotation,
                     null,
                     0,
                     null,
-                    "New annotation is null"
+                    "New annotation is null. Null new annotation turns everything to null."
                 ),
                 arrayOf(
                     defaultAnnotation,
                     defaultAnnotation,
                     0,
                     defaultAnnotation,
-                    "2 default annotations, index = 0"
+                    "2 default annotations, index = 0. " +
+                        "Null new annotation property turns property to null."
                 ),
                 arrayOf(
                     defaultAnnotation,
                     defaultAnnotation,
                     5,
                     defaultAnnotation,
-                    "2 default annotations, index = 5"
+                    "2 default annotations, index = 5. " +
+                        "Null new annotation property turns property to null."
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyEmpty,
                     defaultAnnotation,
                     0,
                     defaultAnnotation,
-                    "Empty congestion_numeric + default, index = 0"
+                    "Empty congestion_numeric + default, index = 0. " +
+                        "Null new annotation property turns property to null."
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyEmpty,
                     defaultAnnotation,
-                    0,
+                    5,
                     defaultAnnotation,
-                    "Empty congestion_numeric + default, index = 5"
+                    "Empty congestion_numeric + default, index = 5. " +
+                        "Null new annotation property turns property to null."
                 ),
                 arrayOf(
                     defaultAnnotation,
                     annotationWithCongestionNumericOnlyEmpty,
                     0,
-                    annotationWithCongestionNumericOnlyEmpty,
-                    "Default + empty congestion_numeric, index = 0"
+                    defaultAnnotation,
+                    "Default + empty congestion_numeric, index = 0. " +
+                        "Null old annotation property turns property to null."
                 ),
                 arrayOf(
                     defaultAnnotation,
                     annotationWithCongestionNumericOnlyEmpty,
                     5,
-                    LegAnnotation.builder().congestionNumeric(listOf(0, 0, 0, 0, 0)).build(),
-                    "Default + empty congestion_numeric, index = 5. Annotations before current " +
-                        "geometry index should be updated to default value."
+                    defaultAnnotation,
+                    "Default + empty congestion_numeric, index = 5. Mistmached sizes result in null annotation"
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyEmpty,
                     annotationWithCongestionNumericOnlyEmpty,
                     0,
                     annotationWithCongestionNumericOnlyEmpty,
-                    "Empty congestion_numeric x2, index = 0",
+                    "Empty congestion_numeric x2, index = 0. New annotation property is used.",
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyFilled,
                     defaultAnnotation,
                     0,
                     defaultAnnotation,
-                    "Filled congestion_numeric + default, index = 0"
+                    "Filled congestion_numeric + default, index = 0. " +
+                        "Mismatched sizes result in null annotation."
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyFilled,
                     defaultAnnotation,
                     5,
                     defaultAnnotation,
-                    "Filled congestion_numeric + default, index = 5"
+                    "Filled congestion_numeric + default, index = 5. " +
+                        "Mismatched sizes result in null annotation."
                 ),
                 arrayOf(
                     defaultAnnotation,
                     LegAnnotation.builder().congestionNumeric(listOf(3, 4, 5)).build(),
                     2,
-                    LegAnnotation.builder().congestionNumeric(listOf(0, 0, 3, 4, 5)).build(),
-                    "Default + filled congestion_numeric, index = 2"
+                    defaultAnnotation,
+                    "Default + filled congestion_numeric, index = 2." +
+                        "Mismatched sizes result in null annotation."
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyEmpty,
                     LegAnnotation.builder().congestionNumeric(listOf(3, 4, 5)).build(),
                     2,
-                    LegAnnotation.builder().congestionNumeric(listOf(0, 0, 3, 4, 5)).build(),
-                    "Empty congestion_numeric + filled congestion_numeric, index = 2"
+                    defaultAnnotation,
+                    "Empty congestion_numeric + filled congestion_numeric, index = 2. " +
+                        "Mismatched sizes result in null annotation."
                 ),
                 arrayOf(
                     LegAnnotation.builder().congestionNumeric(listOf(1)).build(),
                     LegAnnotation.builder().congestionNumeric(listOf(3, 4, 5)).build(),
                     2,
-                    LegAnnotation.builder().congestionNumeric(listOf(1, 0, 3, 4, 5)).build(),
-                    "Partially filled congestion_numeric + filled congestion_numeric, index = 2"
+                    defaultAnnotation,
+                    "Partially filled congestion_numeric + filled congestion_numeric, index = 2. " +
+                        "Mismatched sizes result in null annotation."
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyFilled,
                     LegAnnotation.builder().congestionNumeric(listOf(6, 7, 8, 9, 10)).build(),
                     0,
                     LegAnnotation.builder().congestionNumeric(listOf(6, 7, 8, 9, 10)).build(),
-                    "Filled congestion_numeric x2, index = 0"
+                    "Filled congestion_numeric x2, index = 0. New annotation property is used."
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyFilled,
                     LegAnnotation.builder().congestionNumeric(listOf(8, 9, 10)).build(),
                     2,
                     LegAnnotation.builder().congestionNumeric(listOf(1, 2, 8, 9, 10)).build(),
-                    "Filled congestion_numeric x2, index = 2"
+                    "Filled congestion_numeric x2, index = 2. Annotations before current " +
+                        "geometry index should be updated to old value."
+                ),
+                arrayOf(
+                    annotationWithCongestionNumericOnlyFilled,
+                    LegAnnotation.builder().congestionNumeric(listOf(8, 9, 10, 11)).build(),
+                    2,
+                    LegAnnotation.builder().congestionNumeric(listOf(1, 2, 8, 9, 10)).build(),
+                    "Filled congestion_numeric + too long new annotation, index = 2. " +
+                        "Excessive new annotations should be ignored."
+                ),
+                arrayOf(
+                    annotationWithCongestionNumericOnlyFilled,
+                    LegAnnotation.builder().congestionNumeric(listOf(8, 9)).build(),
+                    2,
+                    LegAnnotation.builder().congestionNumeric(listOf(1, 2, 8, 9, 5)).build(),
+                    "Filled congestion_numeric + too short new annotation, index = 2. " +
+                        "Last items are filled with old values."
+                ),
+                arrayOf(
+                    LegAnnotation.builder().congestion(List(5) { "unknown" }).build(),
+                    LegAnnotation.builder().congestion(listOf("low", "severe")).build(),
+                    2,
+                    LegAnnotation
+                        .builder()
+                        .congestion(listOf("unknown", "unknown", "low", "severe", "unknown"))
+                        .build(),
+                    "Congestion filled with default values + update in the middle updates only middle."
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyFilled,
                     annotationWithCongestionNumericOnlyEmpty,
                     5,
                     annotationWithCongestionNumericOnlyFilled,
-                    "Filled congestion_numeric + empty congestion numeric, index = 5"
+                    "Filled congestion_numeric + empty congestion numeric, index = 5. " +
+                        "Old annotation property is used before current index."
+                ),
+                arrayOf(
+                    annotationWithCongestionNumericOnlyFilled,
+                    annotationWithCongestionNumericOnlyEmpty,
+                    6,
+                    defaultAnnotation,
+                    "Filled congestion_numeric + empty congestion numeric, index = 6. " +
+                        "Index out of bounds results in null annotation."
                 ),
                 arrayOf(
                     LegAnnotation.builder()
@@ -183,7 +228,7 @@ class AnnotationsRefresherTest(
                             }
                         )
                         .build(),
-                    "Everything is filled, index = 0"
+                    "Everything is filled, index = 0. New annotation properties are used."
                 ),
                 arrayOf(
                     LegAnnotation.builder()
@@ -226,7 +271,8 @@ class AnnotationsRefresherTest(
                                 }
                         )
                         .build(),
-                    "Everything is filled, index = 3"
+                    "Everything is filled, index = 3. " +
+                        "Old annotations properties are used before current index."
                 ),
                 arrayOf(
                     LegAnnotation.builder()
@@ -262,7 +308,8 @@ class AnnotationsRefresherTest(
                             }
                         )
                         .build(),
-                    "Everything is filled, index = 5"
+                    "Everything is filled, index = 5. " +
+                        "Old annotation properties are used before current index."
                 ),
                 arrayOf(
                     LegAnnotation.builder()
@@ -280,14 +327,15 @@ class AnnotationsRefresherTest(
                     defaultAnnotation,
                     5,
                     defaultAnnotation,
-                    "Everything is filled + default, index = 5"
+                    "Everything is filled + default, index = 5. " +
+                        "Old annotation properties are used before current index."
                 ),
                 arrayOf(
                     LegAnnotation.fromJson("{ \"my_key1\": \"my_value1\" }"),
                     LegAnnotation.fromJson("{ \"my_key2\": \"my_value2\" }"),
                     3,
                     LegAnnotation.fromJson("{ \"my_key2\": \"my_value2\" }"),
-                    "Unrecognized properties migrate from new annotation"
+                    "Unrecognized properties migrate from new annotation."
                 )
             )
         }
