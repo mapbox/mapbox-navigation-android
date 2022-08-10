@@ -60,7 +60,7 @@ class RouteRefreshControllerTest {
         )
         val routeRefreshController = createRouteRefreshController()
 
-        val refreshJob = async { routeRefreshController.refresh(listOf(testRoute)) }
+        val refreshJob = async { routeRefreshController.refresh(listOf(testRoute), 0) }
         advanceTimeBy(TimeUnit.HOURS.toMillis(3))
 
         assertTrue(refreshJob.isActive)
@@ -80,7 +80,7 @@ class RouteRefreshControllerTest {
                 .build(),
         )
 
-        val refreshJob = async { routeRefreshController.refresh(listOf(initialRoute)) }
+        val refreshJob = async { routeRefreshController.refresh(listOf(initialRoute), 0) }
         advanceTimeBy(TimeUnit.SECONDS.toMillis(30))
 
         assertEquals(listOf(refreshedRoute), refreshJob.getCompletedTest())
@@ -103,7 +103,7 @@ class RouteRefreshControllerTest {
         )
 
         val refreshedRouteDeferred =
-            async { routeRefreshController.refresh(listOf(routeWithoutAnnotations)) }
+            async { routeRefreshController.refresh(listOf(routeWithoutAnnotations), 0) }
         advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
 
         assertEquals(listOf(refreshedRoute), refreshedRouteDeferred.getCompletedTest())
@@ -114,7 +114,7 @@ class RouteRefreshControllerTest {
         val primaryRoute = createNavigationRoute(createTestTwoLegRoute(requestUuid = null))
         val routeRefreshController = createRouteRefreshController()
 
-        val refreshedDeferred = async { routeRefreshController.refresh(listOf(primaryRoute)) }
+        val refreshedDeferred = async { routeRefreshController.refresh(listOf(primaryRoute), 0) }
         advanceTimeBy(TimeUnit.HOURS.toMillis(6))
 
         assertTrue(refreshedDeferred.isActive)
@@ -136,7 +136,7 @@ class RouteRefreshControllerTest {
     fun `refreshing of empty routes`() = runBlockingTest {
         val routeRefreshController = createRouteRefreshController()
 
-        val refreshedDeferred = async { routeRefreshController.refresh(listOf()) }
+        val refreshedDeferred = async { routeRefreshController.refresh(listOf(), 0) }
         advanceTimeBy(TimeUnit.HOURS.toMillis(6))
 
         assertTrue(refreshedDeferred.isActive)
@@ -160,7 +160,8 @@ class RouteRefreshControllerTest {
                         createNavigationRoute(
                             createTestTwoLegRoute()
                         )
-                    )
+                    ),
+                    0
                 )
             }
         advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
@@ -178,7 +179,7 @@ class RouteRefreshControllerTest {
         )
         val route = createNavigationRoute(createTestTwoLegRoute(requestUuid = ""))
 
-        val refreshDeferred = launch { routeRefreshController.refresh(listOf(route)) }
+        val refreshDeferred = launch { routeRefreshController.refresh(listOf(route), 0) }
         advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
 
         assertTrue(refreshDeferred.isActive)
@@ -201,7 +202,7 @@ class RouteRefreshControllerTest {
             routeRefresh = routeRefresh
         )
 
-        val result = async { routeRefreshController.refresh(listOf(initialRoute)) }
+        val result = async { routeRefreshController.refresh(listOf(initialRoute), 0) }
         advanceTimeBy(TimeUnit.HOURS.toMillis(6))
 
         assertTrue("route refresh has finished $result", result.isActive)
@@ -235,7 +236,7 @@ class RouteRefreshControllerTest {
             routeRefresh = routeRefresh
         )
 
-        val result = routeRefreshController.refresh(initialRoutes)
+        val result = routeRefreshController.refresh(initialRoutes, 0)
 
         assertEquals(refreshedRoutes, result)
     }
@@ -292,7 +293,7 @@ class RouteRefreshControllerTest {
                 routeRefresh = routeRefresh,
             )
 
-            routeRefreshController.refresh(initialRoutes)
+            routeRefreshController.refresh(initialRoutes, 0)
 
             verify {
                 logger.logI(
@@ -324,7 +325,7 @@ class RouteRefreshControllerTest {
                 routeRefresh = routeRefreshStub,
             )
 
-            val refreshJob = launch { routeRefreshController.refresh(initialRoutes) }
+            val refreshJob = launch { routeRefreshController.refresh(initialRoutes, 0) }
             advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
             refreshJob.cancel()
 
@@ -394,13 +395,12 @@ class RouteRefreshControllerTest {
                 .build()
             val routeRefreshController = createRouteRefreshController(
                 routeRefreshOptions = routeRefreshOptions,
-                currentLegIndexProvider = { 0 },
                 localDateProvider = { currentTime },
                 routeRefresh = routeRefreshStub,
             )
             // act
             val refreshedRoutesDeffer = async {
-                routeRefreshController.refresh(listOf(primaryRoute))
+                routeRefreshController.refresh(listOf(primaryRoute), 0)
             }
             advanceTimeBy(
                 expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis)
@@ -432,7 +432,7 @@ class RouteRefreshControllerTest {
                 routeRefresh = routeRefreshStub
             )
             val invalidatedRouteDeffer = async {
-                routeRefreshController.refresh(listOf(initialRoute))
+                routeRefreshController.refresh(listOf(initialRoute), 0)
             }
             advanceTimeBy(
                 expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis)
@@ -440,7 +440,7 @@ class RouteRefreshControllerTest {
             val invalidatedRoute = invalidatedRouteDeffer.getCompletedTest().first()
             // act
             val refreshedRoute = async {
-                routeRefreshController.refresh(listOf(invalidatedRoute))
+                routeRefreshController.refresh(listOf(invalidatedRoute), 0)
             }
             advanceTimeBy(
                 expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis) * 100
@@ -483,7 +483,7 @@ class RouteRefreshControllerTest {
                 localDateProvider = { currentTime }
             )
             val invalidatedRouteDeffer = async {
-                routeRefreshController.refresh(listOf(initialRoute))
+                routeRefreshController.refresh(listOf(initialRoute), 0)
             }
             advanceTimeBy(
                 expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis)
@@ -491,7 +491,7 @@ class RouteRefreshControllerTest {
             val invalidatedRoute = invalidatedRouteDeffer.getCompletedTest().first()
             // act
             val refreshedRoute = async {
-                routeRefreshController.refresh(listOf(invalidatedRoute))
+                routeRefreshController.refresh(listOf(invalidatedRoute), 0)
             }
             val twoHours = TimeUnit.HOURS.toMillis(2)
             currentTime = currentTime.add(milliseconds = twoHours)
@@ -539,7 +539,6 @@ class RouteRefreshControllerTest {
                     )
                 )
             )
-            val currentLegIndexProvider = { 1 }
             val routeRefreshStub = RouteRefreshStub().apply {
                 doNotRespondForRouteRefresh(currentRoute.id)
             }
@@ -549,13 +548,12 @@ class RouteRefreshControllerTest {
             val routeRefreshController = createRouteRefreshController(
                 routeRefreshOptions = routeRefreshOptions,
                 routeDiffProvider = DirectionsRouteDiffProvider(),
-                currentLegIndexProvider = currentLegIndexProvider,
                 localDateProvider = { currentTime },
                 routeRefresh = routeRefreshStub
             )
             // act
             val refreshedRoutesDeferred = async {
-                routeRefreshController.refresh(listOf(currentRoute))
+                routeRefreshController.refresh(listOf(currentRoute), 1)
             }
             advanceTimeBy(
                 expectedTimeToInvalidateCongestionsInCaseOfTimeout(
@@ -615,7 +613,7 @@ class RouteRefreshControllerTest {
                     .build()
             )
 
-            val refreshedDeferred = async { refreshController.refresh(listOf(initialRoute)) }
+            val refreshedDeferred = async { refreshController.refresh(listOf(initialRoute), 0) }
             advanceTimeBy(refreshInterval)
             assertFalse(refreshedDeferred.isCompleted)
             currentRoute = refreshed
@@ -661,7 +659,7 @@ class RouteRefreshControllerTest {
                     .build()
             )
 
-            val refreshedDeferred = async { refreshController.refresh(listOf(initialRoute)) }
+            val refreshedDeferred = async { refreshController.refresh(listOf(initialRoute), 0) }
             advanceTimeBy(refreshInterval)
             assertFalse(refreshedDeferred.isCompleted)
             currentRoute = refreshed
@@ -719,7 +717,7 @@ class RouteRefreshControllerTest {
         )
 
         val refreshedRoutesDeferred = async {
-            routeRefreshController.refresh(initialRoutes)
+            routeRefreshController.refresh(initialRoutes, 0)
         }
         advanceTimeBy(refreshOptions.intervalMillis)
 
@@ -776,7 +774,7 @@ class RouteRefreshControllerTest {
             )
 
             val refreshedRoutesDeferred = async {
-                routeRefreshController.refresh(initialRoutes)
+                routeRefreshController.refresh(initialRoutes, 0)
             }
             advanceTimeBy(refreshOptions.intervalMillis)
             val result = refreshedRoutesDeferred.getCompletedTest()
@@ -828,7 +826,7 @@ class RouteRefreshControllerTest {
         )
 
         val refreshedRoutesDeferred = async {
-            routeRefreshController.refresh(initialRoutes)
+            routeRefreshController.refresh(initialRoutes, 0)
         }
         routeRefreshStub.setRefreshedRoute(initialRoutes[0])
         routeRefreshStub.setRefreshedRoute(initialRoutes[1])
@@ -869,7 +867,7 @@ class RouteRefreshControllerTest {
             )
 
             val refreshedDeferred = async {
-                routeRefreshController.refresh(listOf(primaryRoute, alternativeRoute))
+                routeRefreshController.refresh(listOf(primaryRoute, alternativeRoute), 0)
             }
             advanceTimeBy(refreshOptions.intervalMillis)
             val result = refreshedDeferred.getCompletedTest()
@@ -914,7 +912,7 @@ class RouteRefreshControllerTest {
             routeRefresh = routeRefresh
         )
 
-        val refreshedDeferred = async { routeRefreshController.refresh(routes) }
+        val refreshedDeferred = async { routeRefreshController.refresh(routes, 0) }
         advanceTimeBy(TimeUnit.HOURS.toMillis(8))
         assertFalse(refreshedDeferred.isCompleted)
         refreshedDeferred.cancel()
@@ -963,17 +961,15 @@ class RouteRefreshControllerTest {
                 failRouteRefresh(initialRoutes[0].id)
                 failRouteRefresh(initialRoutes[1].id)
             }
-            val currentLegIndexProvider = { 1 }
             val routeRefreshOptions = RouteRefreshOptions.Builder().build()
             val routeRefreshController = createRouteRefreshController(
                 routeRefreshOptions = routeRefreshOptions,
                 routeDiffProvider = DirectionsRouteDiffProvider(),
-                currentLegIndexProvider = currentLegIndexProvider,
                 routeRefresh = routeRefresh
             )
             // act
             val refreshedRoutesDeferred = async {
-                routeRefreshController.refresh(initialRoutes)
+                routeRefreshController.refresh(initialRoutes, 1)
             }
             advanceTimeBy(
                 expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis)
@@ -1035,11 +1031,10 @@ class RouteRefreshControllerTest {
                 routeRefresh = routeRefreshStub,
                 routeRefreshOptions = refreshOptions,
                 localDateProvider = { currentTime },
-                currentLegIndexProvider = { 1 }
             )
 
             val refreshedRoutesDeferred = async {
-                routeRefreshController.refresh(initialRoutes)
+                routeRefreshController.refresh(initialRoutes, 1)
             }
             advanceTimeBy(
                 expectedTimeToInvalidateCongestionsInCaseOfTimeout(refreshOptions.intervalMillis)
@@ -1060,13 +1055,11 @@ class RouteRefreshControllerTest {
     private fun createRouteRefreshController(
         routeRefreshOptions: RouteRefreshOptions = RouteRefreshOptions.Builder().build(),
         routeRefresh: RouteRefresh = RouteRefreshStub(),
-        currentLegIndexProvider: () -> Int = { 0 },
         routeDiffProvider: DirectionsRouteDiffProvider = DirectionsRouteDiffProvider(),
         localDateProvider: () -> Date = { Date(1653493148247) }
     ) = RouteRefreshController(
         routeRefreshOptions,
         routeRefresh,
-        currentLegIndexProvider,
         routeDiffProvider,
         localDateProvider
     )

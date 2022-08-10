@@ -143,6 +143,8 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
 - Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
 
+- Fixed an issue where `NavigationView` switches from Active Guidance to Free Drive state after rotating device when replay is enabled. [#6140](https://github.com/mapbox/mapbox-navigation-android/pull/6140) 
+- Added `RouteLegProgress#geometryIndex` and `RouteProgress#currentRouteGeometryIndex`. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
 
 ## Mapbox Navigation SDK 2.8.0-alpha.1 - 04 August, 2022
 ### Changelog
@@ -169,7 +171,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 #### Features
 - Added `FollowingFrameOptions.focalPoint` that can be used to define the position of the first framed geometry point (typically the user location indicator, if available) in the `MapboxNavigationViewportDataSource.followingPadding`. [#5875](https://github.com/mapbox/mapbox-navigation-android/pull/5875)
 
-- Added `RouteLegProgress#geometryIndex`, `RouteProgress#currentRouteGeometryIndex` and `DirectionsRoute.legsGeometryToLineString`, `DirectionsRoute.legsGeometryToPoints` `DecodeUtils`. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
 #### Bug fixes and improvements
 - Introduced `NavigationViewListener#onInfoPanelHidden` to inform user when `InfoPanel` hides. [#6113](https://github.com/mapbox/mapbox-navigation-android/pull/6113)
 - Introduced `NavigationViewListener#onInfoPanelExpanded` to inform user when `InfoPanel` expands. [#6113](https://github.com/mapbox/mapbox-navigation-android/pull/6113)

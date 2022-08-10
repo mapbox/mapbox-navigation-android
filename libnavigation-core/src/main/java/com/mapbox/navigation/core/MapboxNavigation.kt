@@ -286,8 +286,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         )
     }
 
-    private val currentGeometryIndicesProvider =
-        NavigationComponentProvider.createCurrentRouteGeometryIndicesProvider()
+    private val currentIndicesSnapshotProvider =
+        NavigationComponentProvider.createCurrentIndicesSnapshotProvider()
 
     // Router provided via @Modules, might be outer
     private val moduleRouter: NavigationRouter by lazy {
@@ -298,7 +298,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                         ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER),
                     nativeRouter,
                     threadController,
-                    currentGeometryIndicesProvider
+                    currentIndicesSnapshotProvider
                 )
             )
         }
@@ -479,7 +479,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             threadController,
         )
 
-        tripSession.registerRouteProgressObserver(currentGeometryIndicesProvider)
+        tripSession.registerRouteProgressObserver(currentIndicesSnapshotProvider)
         tripSession.registerStateObserver(navigationSession)
         tripSession.registerStateObserver(historyRecordingStateHandler)
 
@@ -534,7 +534,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
             navigationOptions.routeRefreshOptions,
             directionsSession,
-            tripSession
         )
 
         defaultRerouteController = MapboxRerouteController(
@@ -815,21 +814,18 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         }
 
         // Telemetry uses this field to determine what type of event should be triggered.
-        @RoutesExtra.RoutesUpdateReason val reason = when {
-            routes.isEmpty() -> {
-                RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
-            }
-            routes.first() == directionsSession.routes.firstOrNull() -> {
-                RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
-            }
-            else -> {
-                RoutesExtra.ROUTES_UPDATE_REASON_NEW
-            }
+        val setRoutesInfo = when {
+            routes.isEmpty() -> BasicSetRoutesInfo(
+                RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
+                initialLegIndex
+            )
+            routes.first() == directionsSession.routes.firstOrNull() ->
+                SetAlternativeRoutesInfo(initialLegIndex)
+            else -> BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
         }
         internalSetNavigationRoutes(
             routes,
-            initialLegIndex,
-            reason,
+            setRoutesInfo,
             callback,
         )
     }
@@ -863,8 +859,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun internalSetNavigationRoutes(
         routes: List<NavigationRoute>,
-        legIndex: Int = 0,
-        @RoutesExtra.RoutesUpdateReason reason: String,
+        setRoutesInfo: SetRoutesInfo,
         callback: RoutesSetCallback? = null,
     ) {
         rerouteController?.interrupt()
@@ -873,7 +868,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             routeUpdateMutex.withLock {
                 historyRecordingStateHandler.setRoutes(routes)
                 val routesSetResult: Expected<RoutesSetError, RoutesSetSuccess>
-                when (val processedRoutes = setRoutesToTripSession(routes, legIndex, reason)) {
+                when (val processedRoutes = setRoutesToTripSession(routes, setRoutesInfo)) {
                     is NativeSetRouteValue -> {
                         val (acceptedAlternatives, ignoredAlternatives) = routes
                             .drop(1)
@@ -882,7 +877,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                                     processedRoute.route.routeId == passedRoute.id
                                 }
                             }
-                        directionsSession.setRoutes(routes, legIndex, reason)
+                        directionsSession.setRoutes(routes, setRoutesInfo)
                         routesSetResult = ExpectedFactory.createValue(
                             RoutesSetSuccess(
                                 ignoredAlternatives.associate {
@@ -909,7 +904,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             routeUpdateMutex.withLock {
                 val routes = directionsSession.routes
                 val legIndex = latestLegIndex ?: directionsSession.initialLegIndex
-                setRoutesToTripSession(routes, legIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+                setRoutesToTripSession(
+                    routes,
+                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, legIndex)
+                )
             }
         }
     }
@@ -920,11 +918,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     private suspend fun setRoutesToTripSession(
         routes: List<NavigationRoute>,
-        legIndex: Int = 0,
-        @RoutesExtra.RoutesUpdateReason reason: String,
+        setRoutesInfo: SetRoutesInfo,
     ): NativeSetRouteResult {
         routeAlternativesController.pauseUpdates()
-        return tripSession.setRoutes(routes, legIndex, reason).apply {
+        return tripSession.setRoutes(routes, setRoutesInfo).apply {
             if (this is NativeSetRouteValue) {
                 routeAlternativesController.processAlternativesMetadata(
                     routes,
@@ -1030,7 +1027,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeAlternativesController.unregisterAll()
         internalSetNavigationRoutes(
             emptyList(),
-            reason = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
         )
         resetTripSession()
         navigator.unregisterAllObservers()
@@ -1617,10 +1614,15 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         latestLegIndex = null
         if (result.navigationRoutes.isNotEmpty()) {
             routeScope.launch {
-                val refreshed = routeRefreshController.refresh(result.navigationRoutes)
+                val indicesSnapshot = currentIndicesSnapshotProvider.freezeAndGet()
+                val refreshed = routeRefreshController.refresh(
+                    result.navigationRoutes,
+                    indicesSnapshot.legIndex
+                )
+                currentIndicesSnapshotProvider.unfreeze()
                 internalSetNavigationRoutes(
                     refreshed,
-                    reason = RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
+                    SetRefreshedRoutesInfo(indicesSnapshot),
                 )
             }
         }
@@ -1700,7 +1702,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         rerouteController?.reroute { routes, _ ->
             internalSetNavigationRoutes(
                 routes,
-                reason = RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
             )
         }
     }

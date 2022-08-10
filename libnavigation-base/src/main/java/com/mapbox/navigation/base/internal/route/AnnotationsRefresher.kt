@@ -1,13 +1,12 @@
 package com.mapbox.navigation.base.internal.route
 
 import com.mapbox.api.directions.v5.models.LegAnnotation
-import com.mapbox.api.directions.v5.models.MaxSpeed
 import com.mapbox.navigation.utils.internal.logW
 import kotlin.math.min
 
 internal object AnnotationsRefresher {
 
-    private const val TAG = "AnnotationsRefresher"
+    private const val LOG_CATEGORY = "AnnotationsRefresher"
 
     fun getRefreshedAnnotations(
         oldAnnotation: LegAnnotation?,
@@ -68,7 +67,7 @@ internal object AnnotationsRefresher {
         val oldProperty = oldAnnotation?.propertyExtractor() ?: return null
         val expectedSize = oldProperty.size
         if (expectedSize < endIndex) {
-            logW("Annotations sizes mismatch: index=$endIndex, expected_size=$expectedSize", TAG)
+            logW("Annotations sizes mismatch: index=$endIndex, expected_size=$expectedSize", LOG_CATEGORY)
             return null
         }
         val result = mutableListOf<T>()

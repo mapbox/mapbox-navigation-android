@@ -48,7 +48,10 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             createMapboxNavigation()
             val routes = listOf(passedPrimaryRoute, alternativeRoute1, alternativeRoute2)
             coEvery {
-                tripSession.setRoutes(routes, initialLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+                tripSession.setRoutes(
+                    routes,
+                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+                )
             } returns NativeSetRouteValue(
                 listOf(
                     routeAlternativeWithId(alternativeId1),
@@ -71,7 +74,10 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             createMapboxNavigation()
             val routes = listOf(passedPrimaryRoute)
             coEvery {
-                tripSession.setRoutes(routes, initialLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+                tripSession.setRoutes(
+                    routes,
+                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+                )
             } returns NativeSetRouteValue(emptyList())
 
             mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)
@@ -89,7 +95,10 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             createMapboxNavigation()
             val routes = listOf(passedPrimaryRoute, alternativeRoute1, alternativeRoute2)
             coEvery {
-                tripSession.setRoutes(routes, initialLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+                tripSession.setRoutes(
+                    routes,
+                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+                )
             } returns NativeSetRouteError(errorMessage)
 
             mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)
@@ -109,8 +118,8 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             coEvery {
                 tripSession.setRoutes(
                     routes,
-                    initialLegIndex,
-                    RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, initialLegIndex),
+
                 )
             } returns NativeSetRouteValue(emptyList())
 
@@ -129,7 +138,10 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             createMapboxNavigation()
             val routes = listOf(passedPrimaryRoute, alternativeRoute1, alternativeRoute2)
             coEvery {
-                tripSession.setRoutes(routes, initialLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+                tripSession.setRoutes(
+                    routes,
+                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+                )
             } returns NativeSetRouteValue(emptyList())
 
             mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)
@@ -153,7 +165,10 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             createMapboxNavigation()
             val routes = listOf(passedPrimaryRoute, alternativeRoute1, alternativeRoute2)
             coEvery {
-                tripSession.setRoutes(routes, initialLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+                tripSession.setRoutes(
+                    routes,
+                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+                )
             } returns NativeSetRouteValue(
                 listOf(routeAlternativeWithId("bad id 1"), routeAlternativeWithId("bad id 2"))
             )
@@ -179,7 +194,10 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             createMapboxNavigation()
             val routes = listOf(passedPrimaryRoute, alternativeRoute1, alternativeRoute2)
             coEvery {
-                tripSession.setRoutes(routes, initialLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+                tripSession.setRoutes(
+                    routes,
+                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+                )
             } returns NativeSetRouteValue(listOf(routeAlternativeWithId(alternativeId2)))
 
             mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)

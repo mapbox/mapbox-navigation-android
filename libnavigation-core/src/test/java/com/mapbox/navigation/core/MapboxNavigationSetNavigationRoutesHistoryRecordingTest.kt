@@ -31,7 +31,10 @@ internal class MapboxNavigationSetNavigationRoutesHistoryRecordingTest :
         createMapboxNavigation()
         val routes = listOf(passedPrimaryRoute)
         coEvery {
-            tripSession.setRoutes(routes, initialLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            tripSession.setRoutes(
+                routes,
+                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+            )
         } returns NativeSetRouteValue(emptyList())
 
         mapboxNavigation.setNavigationRoutes(routes, initialLegIndex)
@@ -45,7 +48,10 @@ internal class MapboxNavigationSetNavigationRoutesHistoryRecordingTest :
         createMapboxNavigation()
         val routes = listOf(passedPrimaryRoute)
         coEvery {
-            tripSession.setRoutes(routes, initialLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            tripSession.setRoutes(
+                routes,
+                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+            )
         } returns NativeSetRouteError("error")
 
         mapboxNavigation.setNavigationRoutes(routes, initialLegIndex)
@@ -59,7 +65,10 @@ internal class MapboxNavigationSetNavigationRoutesHistoryRecordingTest :
         createMapboxNavigation()
         val routes = emptyList<NavigationRoute>()
         coEvery {
-            tripSession.setRoutes(routes, initialLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            tripSession.setRoutes(
+                routes,
+                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+            )
         } returns NativeSetRouteValue(emptyList())
 
         mapboxNavigation.setNavigationRoutes(routes, initialLegIndex)

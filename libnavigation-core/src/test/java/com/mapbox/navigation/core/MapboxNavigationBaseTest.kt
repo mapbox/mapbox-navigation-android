@@ -91,7 +91,7 @@ internal open class MapboxNavigationBaseTest {
     val arrivalProgressObserver: ArrivalProgressObserver = mockk(relaxUnitFun = true)
     val historyRecordingStateHandler: HistoryRecordingStateHandler = mockk(relaxUnitFun = true)
     val threadController = ThreadController()
-    val currentGeometryIndexProvider = mockk<CurrentGeometryIndicesProvider>(relaxed = true)
+    val currentIndicesSnapshotProvider = mockk<CurrentIndicesSnapshotProvider>(relaxed = true)
 
     val applicationContext: Context = mockk(relaxed = true) {
         every { inferDeviceLocale() } returns Locale.US
@@ -159,7 +159,7 @@ internal open class MapboxNavigationBaseTest {
         mockkObject(RouteRefreshControllerProvider)
         every {
             RouteRefreshControllerProvider.createRouteRefreshController(
-                any(), any(), any(),
+                any(), any(),
             )
         } returns routeRefreshController
         mockkObject(RouteAlternativesControllerProvider)
@@ -188,8 +188,8 @@ internal open class MapboxNavigationBaseTest {
                 .createHistoryRecordingStateHandler(NavigationSessionState.Idle)
         } returns historyRecordingStateHandler
         every {
-            NavigationComponentProvider.createCurrentRouteGeometryIndicesProvider()
-        } returns currentGeometryIndexProvider
+            NavigationComponentProvider.createCurrentIndicesSnapshotProvider()
+        } returns currentIndicesSnapshotProvider
 
         every { navigator.create(any(), any(), any(), any(), any(), any()) } returns navigator
         mockkStatic(TelemetryEnabler::class)
@@ -286,7 +286,7 @@ internal open class MapboxNavigationBaseTest {
             )
         } returns tripSession
         every { tripSession.getRouteProgress() } returns routeProgress
-        coEvery { tripSession.setRoutes(any(), any(), any()) } returns NativeSetRouteValue(
+        coEvery { tripSession.setRoutes(any(), any()) } returns NativeSetRouteValue(
             nativeAlternatives = emptyList()
         )
     }

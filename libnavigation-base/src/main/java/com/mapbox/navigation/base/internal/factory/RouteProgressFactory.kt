@@ -43,8 +43,8 @@ object RouteProgressFactory {
      * a lack of confidence in the progress updates being sent.
      * @param alternativeRouteId id of an alternative route user started to follow deviating from
      * a primary route. **null** if a route does not exist
-     * @param currentRouteGeometryIndex index of a current geometry for the whole route
-     *   (see [DirectionsRoute.geometry]), null if unavailable.
+     * @param currentRouteGeometryIndex route-wise index representing the geometry point
+     * right in front of the user (see [DirectionsRoute.geometry]), null if unavailable.
      */
     fun buildRouteProgressObject(
         route: NavigationRoute,

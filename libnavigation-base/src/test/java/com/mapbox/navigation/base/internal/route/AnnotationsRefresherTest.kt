@@ -88,7 +88,8 @@ class AnnotationsRefresherTest(
                     annotationWithCongestionNumericOnlyEmpty,
                     5,
                     defaultAnnotation,
-                    "Default + empty congestion_numeric, index = 5. Mistmached sizes result in null annotation"
+                    "Default + empty congestion_numeric, index = 5. " +
+                        "Mismatched sizes result in null annotation"
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyEmpty,
@@ -176,7 +177,8 @@ class AnnotationsRefresherTest(
                         .builder()
                         .congestion(listOf("unknown", "unknown", "low", "severe", "unknown"))
                         .build(),
-                    "Congestion filled with default values + update in the middle updates only middle."
+                    "Congestion filled with default values + " +
+                        "update in the middle updates only middle."
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyFilled,

@@ -7,7 +7,7 @@ import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.BasicSetRoutesInfo
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_NEW
 import com.mapbox.navigation.core.infra.TestLocationEngine
 import com.mapbox.navigation.core.infra.recorders.RouteProgressObserverRecorder
@@ -75,8 +75,7 @@ class MapboxTripSessionNoSetupTest {
         tripSession.registerRouteProgressObserver(routeProgressObserver)
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            0,
-            RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
         )
         // act
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
@@ -108,8 +107,7 @@ class MapboxTripSessionNoSetupTest {
         tripSession.start(true)
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            0,
-            RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
         )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         val routeProgressObserver = RouteProgressObserverRecorder()
@@ -143,15 +141,13 @@ class MapboxTripSessionNoSetupTest {
         tripSession.start(true)
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            0,
-            ROUTES_UPDATE_REASON_NEW
+            BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
         )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         // act
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            0,
-            ROUTES_UPDATE_REASON_NEW
+            BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
         )
         locationEngine.updateLocation(
             createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL)
@@ -180,8 +176,7 @@ class MapboxTripSessionNoSetupTest {
         tripSession.start(true)
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            0,
-            ROUTES_UPDATE_REASON_NEW
+            BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
         )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         // act
@@ -213,8 +208,7 @@ class MapboxTripSessionNoSetupTest {
         tripSession.start(true)
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            0,
-            ROUTES_UPDATE_REASON_NEW
+            BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
         )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         // act
@@ -248,8 +242,7 @@ class MapboxTripSessionNoSetupTest {
             tripSession.start(true)
             tripSession.setRoutes(
                 listOf(createNavigationRoute()),
-                0,
-                ROUTES_UPDATE_REASON_NEW
+                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
             )
             locationEngine.updateLocation(
                 createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1)
@@ -281,8 +274,7 @@ class MapboxTripSessionNoSetupTest {
             tripSession.start(true)
             tripSession.setRoutes(
                 listOf(createNavigationRoute()),
-                0,
-                ROUTES_UPDATE_REASON_NEW
+                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
             )
             // act
             locationEngine.updateLocation(createLocation())
@@ -330,7 +322,10 @@ class MapboxTripSessionNoSetupTest {
                 nativeNavigator = nativeNavigator,
             )
             tripSession.start(false)
-            tripSession.setRoutes(listOf(createNavigationRoute()), 0, ROUTES_UPDATE_REASON_NEW)
+            tripSession.setRoutes(
+                listOf(createNavigationRoute()),
+                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+            )
             // act
             navigatorObservers.onStatus(
                 NavigationStatusOrigin.UNCONDITIONAL,

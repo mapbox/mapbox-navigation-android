@@ -27,7 +27,6 @@ import kotlin.coroutines.resume
 internal class RouteRefreshController(
     private val routeRefreshOptions: RouteRefreshOptions,
     private val routeRefresh: RouteRefresh,
-    private val currentLegIndexProvider: () -> Int,
     private val routeDiffProvider: DirectionsRouteDiffProvider = DirectionsRouteDiffProvider(),
     private val localDateProvider: () -> Date
 ) {
@@ -37,11 +36,11 @@ internal class RouteRefreshController(
         private const val FAILED_ATTEMPTS_TO_INVALIDATE_EXPIRING_DATA = 3
     }
 
-    suspend fun refresh(routes: List<NavigationRoute>): List<NavigationRoute> {
+    suspend fun refresh(routes: List<NavigationRoute>, legIndex: Int): List<NavigationRoute> {
         return if (routes.isNotEmpty()) {
             val routesValidationResults = routes.map { validateRoute(it) }
             if (routesValidationResults.any { it is RouteValidationResult.Valid }) {
-                tryRefreshingRoutesUntilRouteChanges(routes)
+                tryRefreshingRoutesUntilRouteChanges(routes, legIndex)
             } else {
                 val message = joinValidationErrorMessages(routesValidationResults, routes)
                 waitForever("No routes which could be refreshed. $message")
@@ -57,10 +56,11 @@ internal class RouteRefreshController(
         .joinToString(separator = ". ")
 
     private suspend fun tryRefreshingRoutesUntilRouteChanges(
-        initialRoutes: List<NavigationRoute>
+        initialRoutes: List<NavigationRoute>,
+        legIndex: Int,
     ): List<NavigationRoute> {
         while (true) {
-            val refreshed = refreshRoutesWithRetry(initialRoutes)
+            val refreshed = refreshRoutesWithRetry(initialRoutes, legIndex)
             if (refreshed != initialRoutes) {
                 return refreshed
             }
@@ -68,14 +68,15 @@ internal class RouteRefreshController(
     }
 
     private suspend fun refreshRoutesWithRetry(
-        routes: List<NavigationRoute>
+        routes: List<NavigationRoute>,
+        legIndex: Int,
     ): List<NavigationRoute> = coroutineScope {
         var timeUntilNextAttempt = async { delay(routeRefreshOptions.intervalMillis) }
         try {
             repeat(FAILED_ATTEMPTS_TO_INVALIDATE_EXPIRING_DATA) {
                 timeUntilNextAttempt.await()
                 timeUntilNextAttempt = async { delay(routeRefreshOptions.intervalMillis) }
-                val refreshedRoutes = refreshRoutesOrNull(routes)
+                val refreshedRoutes = refreshRoutesOrNull(routes, legIndex)
                 if (refreshedRoutes.any { it != null }) {
                     return@coroutineScope refreshedRoutes.mapIndexed { index, navigationRoute ->
                         navigationRoute ?: routes[index]
@@ -85,14 +86,14 @@ internal class RouteRefreshController(
         } finally {
             timeUntilNextAttempt.cancel() // otherwise current coroutine will wait for its child
         }
-        routes.map { removeExpiringDataFromRoute(it) }
+        routes.map { removeExpiringDataFromRoute(it, legIndex) }
     }
 
     private fun removeExpiringDataFromRoute(
-        route: NavigationRoute
+        route: NavigationRoute,
+        currentLegIndex: Int,
     ): NavigationRoute {
         val routeLegs = route.directionsRoute.legs()
-        val currentLegIndex = currentLegIndexProvider()
         return route.updateDirectionsRouteOnly {
             toBuilder().legs(
                 routeLegs?.mapIndexed { legIndex, leg ->
@@ -126,14 +127,14 @@ internal class RouteRefreshController(
             .build()
 
     private suspend fun refreshRouteOrNull(
-        route: NavigationRoute
+        route: NavigationRoute,
+        legIndex: Int
     ): NavigationRoute? {
         val validationResult = validateRoute(route)
         if (validationResult is RouteValidationResult.Invalid) {
             logI("route ${route.id} can't be refreshed because ${validationResult.reason}")
             return null
         }
-        val legIndex = currentLegIndexProvider()
         return when (val result = requestRouteRefresh(route, legIndex)) {
             is RouteRefreshResult.Fail -> {
                 logE(
@@ -156,13 +157,14 @@ internal class RouteRefreshController(
     }
 
     private suspend fun refreshRoutesOrNull(
-        routes: List<NavigationRoute>
+        routes: List<NavigationRoute>,
+        legIndex: Int,
     ): List<NavigationRoute?> {
         return coroutineScope {
             routes.map { route ->
                 async {
                     withTimeoutOrNull(routeRefreshOptions.intervalMillis) {
-                        refreshRouteOrNull(route)
+                        refreshRouteOrNull(route, legIndex)
                     }
                 }
             }.awaitAll()
