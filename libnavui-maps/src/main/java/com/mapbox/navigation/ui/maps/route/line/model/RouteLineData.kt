@@ -10,8 +10,8 @@ import com.mapbox.geojson.FeatureCollection
  */
 class RouteLineData internal constructor(
     val featureCollection: FeatureCollection,
-    val dynamicData: RouteLineDynamicData,
-    var copy: RouteLineDataCopy? = null
+    val featureCollectionJson: String,
+    val dynamicData: RouteLineDynamicData
 ) {
 
     /**
@@ -19,6 +19,7 @@ class RouteLineData internal constructor(
      */
     fun toMutableValue() = MutableRouteLineData(
         featureCollection,
+        featureCollectionJson,
         dynamicData
     )
 
@@ -30,6 +31,7 @@ class RouteLineData internal constructor(
      */
     class MutableRouteLineData internal constructor(
         var featureCollection: FeatureCollection,
+        var featureCollectionJson: String,
         var dynamicData: RouteLineDynamicData
     ) {
 
@@ -38,6 +40,7 @@ class RouteLineData internal constructor(
          */
         fun toImmutableValue() = RouteLineData(
             featureCollection,
+            featureCollectionJson,
             dynamicData
         )
     }

@@ -1180,6 +1180,41 @@ class MapboxRouteLineApi(
         val partitionedRoutes = routeFeatureData.partition {
             it.route == routes.first()
         }
+
+        val wayPointsFeatureCollectionDef = jobControl.scope.async {
+            partitionedRoutes.first.firstOrNull()?.route?.run {
+                MapboxRouteLineUtils.buildWayPointFeatureCollection(this)
+            } ?: FeatureCollection.fromFeatures(listOf())
+        }
+
+        val primaryRouteSource = partitionedRoutes.first.firstOrNull()?.featureCollection
+            ?: FeatureCollection.fromFeatures(
+                listOf()
+            )
+        val primaryRouteSourceJsonDef = jobControl.scope.async {
+            primaryRouteSource.toJson()
+        }
+        val alternativeRoute1FeatureCollection =
+            partitionedRoutes.second.firstOrNull()?.featureCollection
+                ?: FeatureCollection.fromFeatures(listOf())
+        val alternativeRoute1FeatureCollectionJsonDef = jobControl.scope.async {
+            alternativeRoute1FeatureCollection.toJson()
+        }
+        val alternativeRoute2FeatureCollection = if (partitionedRoutes.second.size > 1) {
+            partitionedRoutes.second[1].featureCollection
+        } else {
+            FeatureCollection.fromFeatures(listOf())
+        }
+
+        val alternativeRoute2FeatureCollectionJsonDef = jobControl.scope.async {
+            alternativeRoute2FeatureCollection.toJson()
+        }
+
+        val wayPointsFeatureCollection = wayPointsFeatureCollectionDef.await()
+        val wayPointsFeatureCollectionJsonDef = jobControl.scope.async {
+            wayPointsFeatureCollection.toJson()
+        }
+
         val vanishingPointOffset = routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0
         val primaryRouteTrafficLineExpressionDef = jobControl.scope.async {
             partitionedRoutes.first.firstOrNull()?.route?.run {
@@ -1404,27 +1439,6 @@ class MapboxRouteLineApi(
             }?.generateExpression()
         }
 
-        val wayPointsFeatureCollectionDef = jobControl.scope.async {
-            partitionedRoutes.first.firstOrNull()?.route?.run {
-                MapboxRouteLineUtils.buildWayPointFeatureCollection(this)
-            } ?: FeatureCollection.fromFeatures(listOf())
-        }
-
-        val primaryRouteSource = partitionedRoutes.first.firstOrNull()?.featureCollection
-            ?: FeatureCollection.fromFeatures(
-                listOf()
-            )
-        val alternativeRoute1FeatureCollection =
-            partitionedRoutes.second.firstOrNull()?.featureCollection
-                ?: FeatureCollection.fromFeatures(listOf())
-        val alternativeRoute2FeatureCollection = if (partitionedRoutes.second.size > 1) {
-            partitionedRoutes.second[1].featureCollection
-        } else {
-            FeatureCollection.fromFeatures(listOf())
-        }
-
-        val wayPointsFeatureCollection = wayPointsFeatureCollectionDef.await()
-
         if (routeLineOptions.displayRestrictedRoadSections) {
             jobControl.scope.launch(Dispatchers.Main) {
                 val routeHasRestrictionsDef =
@@ -1554,6 +1568,7 @@ class MapboxRouteLineApi(
             RouteSetValue(
                 primaryRouteLineData = RouteLineData(
                     primaryRouteSource,
+                    primaryRouteSourceJsonDef.await(),
                     RouteLineDynamicData(
                         primaryRouteBaseExpressionProducer,
                         primaryRouteCasingExpressionProducer,
@@ -1567,6 +1582,7 @@ class MapboxRouteLineApi(
                 alternativeRouteLinesData = listOf(
                     RouteLineData(
                         alternativeRoute1FeatureCollection,
+                        alternativeRoute1FeatureCollectionJsonDef.await(),
                         RouteLineDynamicData(
                             alternateRoute1BaseExpressionProducer,
                             alternateRoute1CasingExpressionProducer,
@@ -1579,6 +1595,7 @@ class MapboxRouteLineApi(
                     ),
                     RouteLineData(
                         alternativeRoute2FeatureCollection,
+                        alternativeRoute2FeatureCollectionJsonDef.await(),
                         RouteLineDynamicData(
                             alternateRoute2BaseExpressionProducer,
                             alternateRoute2CasingExpressionProducer,
@@ -1591,6 +1608,7 @@ class MapboxRouteLineApi(
                     )
                 ),
                 wayPointsFeatureCollection,
+                wayPointsFeatureCollectionJsonDef.await(),
             )
         )
     }
