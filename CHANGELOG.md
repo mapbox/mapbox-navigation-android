@@ -9,6 +9,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 #### Bug fixes and improvements
 - Updated `NavigationView` to allow drawing of the info panel behind the translucent navigation bar. [#6145](https://github.com/mapbox/mapbox-navigation-android/pull/6145)
+- Fixed an issue where `NavigationView` switches from Active Guidance to Free Drive state after rotating device when replay is enabled. [#6140](https://github.com/mapbox/mapbox-navigation-android/pull/6140) 
 
 ## Mapbox Navigation SDK 2.7.0-rc.2 - 11 August, 2022
 ### Changelog
