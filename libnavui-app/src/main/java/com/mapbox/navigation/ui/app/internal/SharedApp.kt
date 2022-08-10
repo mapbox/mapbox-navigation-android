@@ -17,6 +17,7 @@ import com.mapbox.navigation.ui.app.internal.controller.TripSessionStarterStateC
 import com.mapbox.navigation.ui.utils.internal.datastore.NavigationDataStoreOwner
 import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidance
 import com.mapbox.navigation.ui.voice.internal.impl.MapboxAudioGuidanceImpl
+import java.util.concurrent.atomic.AtomicBoolean
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 object SharedApp {
@@ -24,6 +25,8 @@ object SharedApp {
 
     val store = Store()
     val state get() = store.state.value
+
+    private val ignoreTripSessionUpdates = AtomicBoolean(false)
 
     /**
      * These classes are accessible through MapboxNavigationApp.getObserver(..)
@@ -54,9 +57,18 @@ object SharedApp {
         if (isSetup) return
         isSetup = true
 
-        MapboxNavigationApp.registerObserver(StateResetController(store))
+        MapboxNavigationApp.registerObserver(StateResetController(store, ignoreTripSessionUpdates))
         MapboxNavigationApp.lifecycleOwner.attachCreated(*navigationObservers)
         MapboxNavigationApp.registerObserver(audioGuidance ?: defaultAudioGuidance(context))
+    }
+
+    fun tripSessionTransaction(updateSession: () -> Unit) {
+        // Any changes to MapboxNavigation TripSession should be done within `tripSessionTransaction { }` block.
+        // This ensures that non of the registered TripSessionStateObserver accidentally execute cleanup logic
+        // when TripSession state changes.
+        ignoreTripSessionUpdates.set(true)
+        updateSession()
+        ignoreTripSessionUpdates.set(false)
     }
 
     private fun defaultAudioGuidance(context: Context): MapboxAudioGuidance {

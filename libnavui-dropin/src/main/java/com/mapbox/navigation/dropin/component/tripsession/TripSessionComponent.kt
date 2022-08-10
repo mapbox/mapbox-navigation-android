@@ -6,6 +6,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.TripSessionState
+import com.mapbox.navigation.ui.app.internal.SharedApp.tripSessionTransaction
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterState
@@ -42,19 +43,16 @@ internal class TripSessionComponent(
         coroutineScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 flowStartReplaySession().collect { starterState ->
-                    when (starterState.isLocationPermissionGranted) {
-                        true ->
+                    tripSessionTransaction {
+                        if (starterState.isLocationPermissionGranted) {
                             if (starterState.isReplayEnabled) {
-                                replayRouteTripSession?.stop(mapboxNavigation)
-                                replayRouteTripSession = ReplayRouteTripSession()
-                                replayRouteTripSession?.start(mapboxNavigation)
+                                startReplayTripSession(mapboxNavigation)
                             } else {
-                                replayRouteTripSession?.stop(mapboxNavigation)
-                                replayRouteTripSession = null
-                                mapboxNavigation.ensureTripSessionStarted()
+                                startTripSession(mapboxNavigation)
                             }
-                        false ->
+                        } else {
                             mapboxNavigation.ensureTripSessionStopped()
+                        }
                     }
                 }
             }
@@ -67,8 +65,10 @@ internal class TripSessionComponent(
      */
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         super.onDetached(mapboxNavigation)
-        replayRouteTripSession?.stop(mapboxNavigation)
-        replayRouteTripSession = null
+        tripSessionTransaction {
+            replayRouteTripSession?.stop(mapboxNavigation)
+            replayRouteTripSession = null
+        }
     }
 
     private fun flowStartReplaySession(): Flow<TripSessionStarterState> = combine(
@@ -81,6 +81,18 @@ internal class TripSessionComponent(
             tripSessionStarterState
         }
     }.distinctUntilChanged()
+
+    private fun startTripSession(mapboxNavigation: MapboxNavigation) {
+        replayRouteTripSession?.stop(mapboxNavigation)
+        replayRouteTripSession = null
+        mapboxNavigation.ensureTripSessionStarted()
+    }
+
+    private fun startReplayTripSession(mapboxNavigation: MapboxNavigation) {
+        replayRouteTripSession?.stop(mapboxNavigation)
+        replayRouteTripSession = ReplayRouteTripSession()
+        replayRouteTripSession?.start(mapboxNavigation)
+    }
 
     private fun MapboxNavigation.ensureTripSessionStarted() {
         if (getTripSessionState() != TripSessionState.STARTED) {
