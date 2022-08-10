@@ -27,7 +27,7 @@
     <string name="car_feedback_title">Report feedback</string>
     <string name="car_feedback_submit">Submit</string>
     <string name="car_feedback_submit_toast_select_item">Please select a feedback item</string>
-    <string name="car_feedback_submit_toast_success">Thanks for the feedback!</string>
+    <string name="car_feedback_submit_toast_success">Thank you for your feedback!</string>
     <string name="car_feedback_negative_routing_error">Route quality</string>
     <string name="car_feedback_negative_incorrect_visual">Incorrect visual</string>
     <string name="car_feedback_negative_incorrect_audio">Incorrect audio</string>

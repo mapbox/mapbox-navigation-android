@@ -1,9 +1,7 @@
 package com.mapbox.androidauto.car.search
 
-import androidx.car.app.CarContext
-import com.mapbox.androidauto.car.feedback.core.CarFeedbackItemProvider
-import com.mapbox.androidauto.car.feedback.ui.CarFeedbackItem
-import com.mapbox.androidauto.car.feedback.ui.buildSearchPlacesCarFeedbackItems
+import com.mapbox.androidauto.car.feedback.core.CarFeedbackSearchOptions
+import com.mapbox.androidauto.car.feedback.core.CarFeedbackSearchOptionsProvider
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapProvider
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
@@ -15,9 +13,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class FavoritesApi(
-    private val carContext: CarContext,
     private val favoritesProvider: FavoritesDataProvider
-) : PlacesListOnMapProvider, CarFeedbackItemProvider {
+) : PlacesListOnMapProvider, CarFeedbackSearchOptionsProvider {
 
     private var getAllTask: AsyncOperationTask? = null
     private var addFavoriteTask: AsyncOperationTask? = null
@@ -38,9 +35,8 @@ class FavoritesApi(
         cancelRequests()
     }
 
-    override fun feedbackItems(): List<CarFeedbackItem> = buildSearchPlacesCarFeedbackItems(
-        carContext = carContext,
-        favoriteRecords = favoriteRecords
+    override fun searchOptions(): CarFeedbackSearchOptions = CarFeedbackSearchOptions(
+        favoriteRecords = favoriteRecords,
     )
 
     suspend fun getFavorites(): Expected<GetPlacesError, List<FavoriteRecord>> {

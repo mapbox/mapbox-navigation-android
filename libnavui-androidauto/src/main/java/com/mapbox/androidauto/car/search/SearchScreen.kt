@@ -10,9 +10,9 @@ import androidx.car.app.model.Row
 import androidx.car.app.model.SearchTemplate
 import androidx.car.app.model.Template
 import com.mapbox.androidauto.R
+import com.mapbox.androidauto.car.feedback.core.CarFeedbackSearchOptions
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
-import com.mapbox.androidauto.car.feedback.ui.buildSearchPlacesCarFeedbackProvider
 import com.mapbox.androidauto.car.preview.CarRoutePreviewScreen
 import com.mapbox.androidauto.car.preview.CarRouteRequestCallback
 import com.mapbox.androidauto.car.preview.RoutePreviewCarContext
@@ -73,11 +73,11 @@ class SearchScreen(
                         CarFeedbackAction(
                             searchCarContext.mainCarContext.mapboxCarMap,
                             CarFeedbackSender(),
-                            buildSearchPlacesCarFeedbackProvider(
-                                carContext = carContext,
-                                searchSuggestions = searchSuggestions
-                            )
-                        ).getAction(this@SearchScreen)
+                            searchCarContext.feedbackPollProvider
+                                .getSearchFeedbackPoll(searchCarContext.carContext),
+                        ) {
+                            CarFeedbackSearchOptions(searchSuggestions = searchSuggestions)
+                        }.getAction(this@SearchScreen)
                     )
                     .build()
             )

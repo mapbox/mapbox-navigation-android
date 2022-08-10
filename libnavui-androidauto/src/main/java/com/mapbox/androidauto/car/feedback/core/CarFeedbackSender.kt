@@ -7,32 +7,28 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
-import com.mapbox.navigation.utils.internal.ifNonNull
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class CarFeedbackSender {
 
-    private val gson: Gson = Gson()
+    private val gson = Gson()
 
     fun send(
         selectedItem: CarFeedbackItem,
         encodedSnapshot: String?,
         sourceScreenSimpleName: String
     ) {
-        val feedbackMetadata = MapboxNavigationApp.current()
-            ?.provideFeedbackMetadataWrapper()?.get()
+        val mapboxNavigation = MapboxNavigationApp.current()
+        val feedbackMetadata = mapboxNavigation?.provideFeedbackMetadataWrapper()?.get()
 
-        ifNonNull(
-            selectedItem.navigationFeedbackType,
-            MapboxNavigationApp.current(), feedbackMetadata
-        ) { feedbackType, mapboxNavigation, metadata ->
+        if (selectedItem.navigationFeedbackType != null && feedbackMetadata != null) {
             mapboxNavigation.postUserFeedback(
-                feedbackType = feedbackType,
+                feedbackType = selectedItem.navigationFeedbackType,
                 description = "Android Auto selection: ${selectedItem.carFeedbackTitle}",
                 feedbackSource = FeedbackEvent.UI,
-                screenshot = encodedSnapshot ?: "",
-                feedbackSubType = emptyArray(),
-                feedbackMetadata = metadata
+                screenshot = encodedSnapshot.orEmpty(),
+                feedbackSubType = selectedItem.navigationFeedbackSubType?.toTypedArray(),
+                feedbackMetadata = feedbackMetadata,
             )
         }
 

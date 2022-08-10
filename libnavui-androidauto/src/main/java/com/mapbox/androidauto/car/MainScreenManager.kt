@@ -11,8 +11,6 @@ import com.mapbox.androidauto.RoutePreviewState
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.car.feedback.ui.CarGridFeedbackScreen
-import com.mapbox.androidauto.car.feedback.ui.activeGuidanceCarFeedbackProvider
-import com.mapbox.androidauto.car.feedback.ui.buildArrivalFeedbackProvider
 import com.mapbox.androidauto.car.navigation.ActiveGuidanceScreen
 import com.mapbox.androidauto.car.navigation.CarActiveGuidanceCarContext
 import com.mapbox.androidauto.internal.logAndroidAuto
@@ -35,7 +33,8 @@ class MainScreenManager(val mainCarContext: MainCarContext) {
                         CarFeedbackAction(
                             mainCarContext.mapboxCarMap,
                             CarFeedbackSender(),
-                            activeGuidanceCarFeedbackProvider(mainCarContext.carContext)
+                            mainCarContext.feedbackPollProvider
+                                .getActiveGuidanceFeedbackPoll(mainCarContext.carContext),
                         ),
                         CarAudioGuidanceUi()
                     )
@@ -47,7 +46,8 @@ class MainScreenManager(val mainCarContext: MainCarContext) {
                 mainCarContext.carContext,
                 javaClass.simpleName,
                 CarFeedbackSender(),
-                feedbackItems = buildArrivalFeedbackProvider(mainCarContext.carContext),
+                mainCarContext.feedbackPollProvider
+                    .getArrivalFeedbackPoll(mainCarContext.carContext),
                 encodedSnapshot = null,
             ) {
                 mainCarContext.mapboxNavigation.setNavigationRoutes(emptyList())

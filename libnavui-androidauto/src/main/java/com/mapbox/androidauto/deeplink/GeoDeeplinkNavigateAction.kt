@@ -30,10 +30,11 @@ class GeoDeeplinkNavigateAction(
             "GeoDeeplinkGeocoding requires an access token"
         }
         val placesProvider = GeoDeeplinkPlacesListOnMapProvider(
-            mainCarContext.carContext,
             GeoDeeplinkGeocoding(accessToken),
             geoDeeplink
         )
+        val feedbackPoll = mainCarContext.feedbackPollProvider
+            .getSearchFeedbackPoll(mainCarContext.carContext)
 
         return PlacesListOnMapScreen(
             mainCarContext,
@@ -47,7 +48,9 @@ class GeoDeeplinkNavigateAction(
                     .unitType
             ),
             listOf(
-                CarFeedbackAction(mainCarContext.mapboxCarMap, CarFeedbackSender(), placesProvider)
+                CarFeedbackAction(
+                    mainCarContext.mapboxCarMap, CarFeedbackSender(), feedbackPoll, placesProvider,
+                )
             )
         )
     }

@@ -1,6 +1,7 @@
 package com.mapbox.androidauto.car
 
 import androidx.car.app.CarContext
+import com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider
 import com.mapbox.androidauto.car.settings.CarSettingsStorage
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
@@ -21,6 +22,7 @@ class MainCarContext(
     val carContext: CarContext,
     val mapboxCarMap: MapboxCarMap,
     val searchEngine: SearchEngine,
+    val feedbackPollProvider: CarFeedbackPollProvider = CarFeedbackPollProvider(),
 ) {
     val carSettingsStorage = CarSettingsStorage(carContext)
 

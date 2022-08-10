@@ -1,10 +1,8 @@
 package com.mapbox.androidauto.deeplink
 
-import androidx.car.app.CarContext
 import com.mapbox.androidauto.MapboxCarApp
-import com.mapbox.androidauto.car.feedback.core.CarFeedbackItemProvider
-import com.mapbox.androidauto.car.feedback.ui.CarFeedbackItem
-import com.mapbox.androidauto.car.feedback.ui.buildSearchPlacesCarFeedbackItems
+import com.mapbox.androidauto.car.feedback.core.CarFeedbackSearchOptions
+import com.mapbox.androidauto.car.feedback.core.CarFeedbackSearchOptionsProvider
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapProvider
 import com.mapbox.androidauto.car.search.GetPlacesError
 import com.mapbox.androidauto.car.search.PlaceRecord
@@ -16,10 +14,9 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplink
 
 class GeoDeeplinkPlacesListOnMapProvider(
-    private val carContext: CarContext,
     private val geoDeeplinkGeocoding: GeoDeeplinkGeocoding,
     private val geoDeeplink: GeoDeeplink
-) : PlacesListOnMapProvider, CarFeedbackItemProvider {
+) : PlacesListOnMapProvider, CarFeedbackSearchOptionsProvider {
 
     private var geocodingResponse: GeocodingResponse? = null
 
@@ -46,8 +43,7 @@ class GeoDeeplinkPlacesListOnMapProvider(
         geoDeeplinkGeocoding.cancel()
     }
 
-    override fun feedbackItems(): List<CarFeedbackItem> = buildSearchPlacesCarFeedbackItems(
-        carContext = carContext,
+    override fun searchOptions(): CarFeedbackSearchOptions = CarFeedbackSearchOptions(
         geoDeeplink = geoDeeplink,
         geocodingResponse = geocodingResponse,
     )

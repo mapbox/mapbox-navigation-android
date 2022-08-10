@@ -7,6 +7,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Added metalava api tracking. Removed `AndroidAutoLog` and `RendererUtils` from public api. [#6130](https://github.com/mapbox/mapbox-navigation-android/pull/6130)
 - Bumped maps extension version to fix AAOS issue when changing screens. [#6139](https://github.com/mapbox/mapbox-navigation-android/pull/6139)
+- Added an option to override items displayed in the feedback screen. [#6144](https://github.com/mapbox/mapbox-navigation-android/pull/6144)
 
 ## androidauto-v0.6.0 - Jul 29, 2022
 ### Changelog
