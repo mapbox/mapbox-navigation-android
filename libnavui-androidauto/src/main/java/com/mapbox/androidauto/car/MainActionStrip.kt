@@ -9,7 +9,6 @@ import androidx.core.graphics.drawable.IconCompat
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
-import com.mapbox.androidauto.car.feedback.ui.buildFreeDriveFeedbackItemsProvider
 import com.mapbox.androidauto.car.placeslistonmap.PlaceMarkerRenderer
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListItemMapper
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapScreen
@@ -46,7 +45,8 @@ class MainActionStrip(
         CarFeedbackAction(
             mainCarContext.mapboxCarMap,
             CarFeedbackSender(),
-            buildFreeDriveFeedbackItemsProvider(screen.carContext)
+            mainCarContext.feedbackPollProvider
+                .getFreeDriveFeedbackPoll(mainCarContext.carContext),
         ).getAction(screen)
 
     private fun buildSettingsAction() = Action.Builder()
@@ -87,10 +87,9 @@ class MainActionStrip(
         .build()
 
     private fun favoritesScreen(): PlacesListOnMapScreen {
-        val placesProvider = FavoritesApi(
-            mainCarContext.carContext,
-            MapboxSearchSdk.serviceProvider.favoritesDataProvider()
-        )
+        val placesProvider = FavoritesApi(MapboxSearchSdk.serviceProvider.favoritesDataProvider())
+        val feedbackPoll = mainCarContext.feedbackPollProvider
+            .getSearchFeedbackPoll(mainCarContext.carContext)
         return PlacesListOnMapScreen(
             mainCarContext,
             placesProvider,
@@ -103,7 +102,9 @@ class MainActionStrip(
                     .unitType
             ),
             listOf(
-                CarFeedbackAction(mainCarContext.mapboxCarMap, CarFeedbackSender(), placesProvider)
+                CarFeedbackAction(
+                    mainCarContext.mapboxCarMap, CarFeedbackSender(), feedbackPoll, placesProvider,
+                ),
             )
         )
     }

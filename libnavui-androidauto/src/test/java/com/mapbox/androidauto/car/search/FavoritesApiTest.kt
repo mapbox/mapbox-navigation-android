@@ -1,6 +1,5 @@
 package com.mapbox.androidauto.car.search
 
-import androidx.car.app.CarContext
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.search.AsyncOperationTask
@@ -48,7 +47,7 @@ class FavoritesApiTest {
             }
         }
 
-        val result = FavoritesApi(mockContext(), mockFavoritesProvider).getPlaces().value
+        val result = FavoritesApi(mockFavoritesProvider).getPlaces().value
 
         assertEquals("id", result!!.first().id)
         assertEquals("name", result.first().name)
@@ -67,7 +66,7 @@ class FavoritesApiTest {
             }
         }
 
-        val result = FavoritesApi(mockContext(), mockFavoritesProvider).getFavorites().value!!
+        val result = FavoritesApi(mockFavoritesProvider).getFavorites().value!!
 
         assertEquals(expectedItemList, result)
     }
@@ -83,7 +82,7 @@ class FavoritesApiTest {
                 expectedAsyncOperationTask
             }
         }
-        val api = FavoritesApi(mockContext(), mockFavoritesProvider)
+        val api = FavoritesApi(mockFavoritesProvider)
 
         api.getFavorites()
         api.getFavorites()
@@ -101,7 +100,7 @@ class FavoritesApiTest {
             }
         }
 
-        val result = FavoritesApi(mockContext(), mockFavoritesProvider).getFavorites().error
+        val result = FavoritesApi(mockFavoritesProvider).getFavorites().error
 
         assertEquals("Exception Message", result!!.errorMessage)
     }
@@ -117,7 +116,7 @@ class FavoritesApiTest {
             }
         }
 
-        val result = FavoritesApi(mockContext(), mockFavoritesProvider).addFavorite(expected)
+        val result = FavoritesApi(mockFavoritesProvider).addFavorite(expected)
 
         assertEquals(expected, result.value)
     }
@@ -134,7 +133,7 @@ class FavoritesApiTest {
                 expectedAsyncOperationTask
             }
         }
-        val api = FavoritesApi(mockContext(), mockFavoritesProvider)
+        val api = FavoritesApi(mockFavoritesProvider)
 
         api.addFavorite(favoriteRecord)
         api.addFavorite(favoriteRecord)
@@ -152,7 +151,7 @@ class FavoritesApiTest {
             }
         }
 
-        val result = FavoritesApi(mockContext(), mockFavoritesProvider).removeFavorite("foobar")
+        val result = FavoritesApi(mockFavoritesProvider).removeFavorite("foobar")
 
         assertTrue(result.value!!)
     }
@@ -167,7 +166,7 @@ class FavoritesApiTest {
                 expectedAsyncOperationTask
             }
         }
-        val api = FavoritesApi(mockContext(), mockFavoritesProvider)
+        val api = FavoritesApi(mockFavoritesProvider)
 
         api.removeFavorite("foobar")
         api.removeFavorite("foobar")
@@ -198,7 +197,7 @@ class FavoritesApiTest {
                 addFavoriteTask
             }
         }
-        val api = FavoritesApi(mockContext(), mockFavoritesProvider)
+        val api = FavoritesApi(mockFavoritesProvider)
         api.removeFavorite("foobar")
         api.removeFavorite("foobar")
         api.addFavorite(favoriteRecord)
@@ -212,6 +211,4 @@ class FavoritesApiTest {
         verify { addFavoriteTask.cancel() }
         verify { getAllTask.cancel() }
     }
-
-    private fun mockContext(): CarContext = mockk()
 }

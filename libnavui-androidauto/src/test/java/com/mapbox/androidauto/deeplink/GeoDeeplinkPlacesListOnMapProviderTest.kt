@@ -1,7 +1,6 @@
 package com.mapbox.androidauto.deeplink
 
 import android.location.Location
-import androidx.car.app.CarContext
 import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.navigation.location.CarAppLocation
 import com.mapbox.api.geocoding.v5.models.CarmenFeature
@@ -29,12 +28,9 @@ class GeoDeeplinkPlacesListOnMapProviderTest {
 
     @Test
     fun cancel() {
-        val carContext = mockk<CarContext> {
-            every { getString(any()) } returns "test_string"
-        }
         val geoDeeplinkGeocoding = mockk<GeoDeeplinkGeocoding>(relaxed = true)
         val geoDeeplink = mockk<GeoDeeplink>()
-        GeoDeeplinkPlacesListOnMapProvider(carContext, geoDeeplinkGeocoding, geoDeeplink).cancel()
+        GeoDeeplinkPlacesListOnMapProvider(geoDeeplinkGeocoding, geoDeeplink).cancel()
 
         verify { geoDeeplinkGeocoding.cancel() }
     }
@@ -74,11 +70,8 @@ class GeoDeeplinkPlacesListOnMapProviderTest {
             coEvery { requestPlaces(geoDeeplink, capture(originSlot)) } returns response
         }
 
-        val carContext = mockk<CarContext> {
-            every { getString(any()) } returns "test_string"
-        }
         val result =
-            GeoDeeplinkPlacesListOnMapProvider(carContext, geoDeeplinkGeocoding, geoDeeplink)
+            GeoDeeplinkPlacesListOnMapProvider(geoDeeplinkGeocoding, geoDeeplink)
                 .getPlaces()
                 .value!!
 

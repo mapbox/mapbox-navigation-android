@@ -17,7 +17,6 @@ import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
-import com.mapbox.androidauto.car.feedback.ui.routePreviewCarFeedbackProvider
 import com.mapbox.androidauto.car.location.CarLocationRenderer
 import com.mapbox.androidauto.car.navigation.CarCameraMode
 import com.mapbox.androidauto.car.navigation.CarNavigationCamera
@@ -172,7 +171,8 @@ class CarRoutePreviewScreen(
                         CarFeedbackAction(
                             routePreviewCarContext.mapboxCarMap,
                             CarFeedbackSender(),
-                            routePreviewCarFeedbackProvider(carContext)
+                            routePreviewCarContext.feedbackPollProvider
+                                .getRoutePreviewFeedbackPoll(routePreviewCarContext.carContext),
                         ).getAction(this@CarRoutePreviewScreen)
                     )
                     .build()

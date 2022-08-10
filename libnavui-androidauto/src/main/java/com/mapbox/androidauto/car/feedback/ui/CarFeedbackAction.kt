@@ -7,7 +7,8 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.lifecycleScope
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.action.MapboxActionProvider
-import com.mapbox.androidauto.car.feedback.core.CarFeedbackItemProvider
+import com.mapbox.androidauto.car.feedback.core.CarFeedbackSearchOptions
+import com.mapbox.androidauto.car.feedback.core.CarFeedbackSearchOptionsProvider
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
@@ -19,21 +20,18 @@ import kotlinx.coroutines.launch
 class CarFeedbackAction(
     private val mapboxCarMap: MapboxCarMap,
     private val carFeedBackSender: CarFeedbackSender,
-    private val carFeedbackItemProvider: CarFeedbackItemProvider
+    private val carFeedbackPoll: CarFeedbackPoll,
+    private val carFeedbackSearchOptionsProvider: CarFeedbackSearchOptionsProvider =
+        CarFeedbackSearchOptionsProvider { CarFeedbackSearchOptions() },
 ) : MapboxActionProvider.ScreenActionProvider {
 
     override fun getAction(screen: Screen): Action {
-        return buildSnapshotAction(
-            screen,
-            carFeedBackSender,
-            carFeedbackItemProvider.feedbackItems()
-        )
+        return buildSnapshotAction(screen, carFeedbackSearchOptionsProvider.searchOptions())
     }
 
     private fun buildSnapshotAction(
         screen: Screen,
-        feedbackSender: CarFeedbackSender,
-        feedbackItems: List<CarFeedbackItem>
+        searchOptions: CarFeedbackSearchOptions,
     ) = Action.Builder()
         .setIcon(
             CarIcon.Builder(
@@ -50,9 +48,10 @@ class CarFeedbackAction(
                     CarGridFeedbackScreen(
                         screen.carContext,
                         screen.javaClass.simpleName,
-                        feedbackSender,
-                        feedbackItems,
-                        encodedSnapshot
+                        carFeedBackSender,
+                        carFeedbackPoll,
+                        encodedSnapshot,
+                        searchOptions,
                     ) { screen.screenManager.pop() }
                 )
             }
