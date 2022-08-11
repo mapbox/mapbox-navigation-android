@@ -513,6 +513,15 @@ class RouteOptionsUpdaterTest {
                     1,
                     2,
                     "true;false"
+                ),
+                arrayOf(
+                    provideRouteOptionsWithCoordinates().toBuilder()
+                        .snappingIncludeClosures(null)
+                        .profile(DirectionsCriteria.PROFILE_CYCLING)
+                        .build(),
+                    1,
+                    2,
+                    null
                 )
             )
         }
