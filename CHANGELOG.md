@@ -8,8 +8,25 @@ Mapbox welcomes participation and contributions from everyone.
 - Introduced `ViewOptionsCustomization.infoPanelForcedState` that allows overriding of the `NavigationView` Info Panel (BottomSheetBehaviour) state. [#6132](https://github.com/mapbox/mapbox-navigation-android/pull/6132)
 
 #### Bug fixes and improvements
-- Fixed an issue where `NavigationView` switches from Active Guidance to Free Drive state after rotating device when replay is enabled. [#6140](https://github.com/mapbox/mapbox-navigation-android/pull/6140) 
+- Fixed an issue where `NavigationView` switches from Active Guidance to Free Drive state after rotating device when replay is enabled. [#6140](https://github.com/mapbox/mapbox-navigation-android/pull/6140)
+
+## Mapbox Navigation SDK 2.7.0-rc.2 - 11 August, 2022
+### Changelog
+[Changes between v2.7.0-rc.1 and v2.7.0-rc.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.7.0-rc.1...v2.7.0-rc.2)
+
+#### Features
+#### Bug fixes and improvements
 - Fixed reroute for profiles other than driving/traffic. [#6146](https://github.com/mapbox/mapbox-navigation-android/pull/6146)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.7.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.7.0))
+- Mapbox Navigation Native `v111.0.0`
+- Mapbox Core Common `v22.1.0`
+- Mapbox Java `v6.7.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.7.0-beta.1))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+- Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
+
 
 ## Mapbox Navigation SDK 2.8.0-alpha.1 - 04 August, 2022
 ### Changelog
