@@ -60,6 +60,7 @@ import com.mapbox.navigation.core.internal.utils.InternalUtils
 import com.mapbox.navigation.core.internal.utils.ModuleParams
 import com.mapbox.navigation.core.internal.utils.isInternalImplementation
 import com.mapbox.navigation.core.internal.utils.paramsProvider
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -154,7 +155,7 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  * An entry point for interacting with the Mapbox Navigation SDK.
  *
  * **Only one instance of this class should be used per application process.**
- * Use [MapboxNavigationProvider] to easily manage the instance across lifecycle.
+ * Use [MapboxNavigationApp] to easily manage the instance across lifecycle.
  *
  * Feel free to visit our [docs pages and examples](https://docs.mapbox.com/android/beta/navigation/overview/) before diving in!
  *
@@ -401,7 +402,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * Describes whether this instance of `MapboxNavigation` has been destroyed by calling
      * [onDestroy]. Once an instance is destroyed, it cannot be used anymore.
      *
-     * @see [MapboxNavigationProvider]
+     * @see [MapboxNavigationApp]
      */
     @Volatile
     var isDestroyed = false
@@ -415,7 +416,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 """
                     A different MapboxNavigation instance already exists.
                     Make sure to destroy it with #onDestroy before creating a new one.
-                    Also see MapboxNavigationProvider for instance management assistance.
+                    Also see MapboxNavigationApp for instance management assistance.
                 """.trimIndent()
             )
         }
@@ -840,8 +841,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *           versionInfo: RoadGraphVersionInfo?
      *       ) {
      *           if (isUpdateAvailable) {
-     *               mapboxNavigation.onDestroy()
-     *               mapboxNavigation = MapboxNavigationProvider.create(...)
+     *               val currentOptions = mapboxNavigation.navigationOptions
+     *               MapboxNavigationApp.disable()
+     *               MapboxNavigationApp.setup(currentOptions)
      *           }
      *       }
      *   })

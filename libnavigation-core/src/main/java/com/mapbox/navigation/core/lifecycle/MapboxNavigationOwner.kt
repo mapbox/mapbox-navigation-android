@@ -2,14 +2,12 @@ package com.mapbox.navigation.core.lifecycle
 
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.utils.internal.logI
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.reflect.KClass
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class MapboxNavigationOwner {
 
     private lateinit var navigationOptionsProvider: NavigationOptionsProvider

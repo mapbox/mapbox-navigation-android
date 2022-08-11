@@ -7,6 +7,9 @@ import com.mapbox.navigation.base.options.NavigationOptions
  * Singleton responsible for ensuring there is only one MapboxNavigation instance.
  */
 @UiThread
+@Deprecated(
+    message = "Use MapboxNavigationApp to attach MapboxNavigation to lifecycles."
+)
 object MapboxNavigationProvider {
     @Volatile
     private var mapboxNavigation: MapboxNavigation? = null
@@ -18,6 +21,9 @@ object MapboxNavigationProvider {
      * @param navigationOptions
      */
     @JvmStatic
+    @Deprecated(
+        message = "Set the navigation options with MapboxNavigationApp.setup"
+    )
     fun create(navigationOptions: NavigationOptions): MapboxNavigation {
         mapboxNavigation?.onDestroy()
         mapboxNavigation = MapboxNavigation(
@@ -33,6 +39,10 @@ object MapboxNavigationProvider {
      * @see [isCreated]
      */
     @JvmStatic
+    @Deprecated(
+        message = "Get the MapboxNavigation instance through MapboxNavigationObserver or" +
+            " MapboxNavigationApp.current"
+    )
     fun retrieve(): MapboxNavigation {
         if (!isCreated()) {
             throw RuntimeException("Need to create MapboxNavigation before using it.")
@@ -45,6 +55,9 @@ object MapboxNavigationProvider {
      * Destroy MapboxNavigation when your process/activity exits.
      */
     @JvmStatic
+    @Deprecated(
+        message = "MapboxNavigationApp will determine when to destroy MapboxNavigation instances"
+    )
     fun destroy() {
         mapboxNavigation?.onDestroy()
         mapboxNavigation = null

@@ -2,8 +2,8 @@ package com.mapbox.navigation.core.lifecycle
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+
 /**
  * Defines an object that needs to interact with or observe [MapboxNavigation]. Use the
  * [MapboxNavigationApp] singleton to register and unregister observers with
@@ -49,7 +49,6 @@ import com.mapbox.navigation.core.MapboxNavigation
  * }
  * ```
  */
-@ExperimentalPreviewMapboxNavigationAPI
 interface MapboxNavigationObserver {
     /**
      * Signals that the [mapboxNavigation] instance is ready for use. Use this function to

@@ -2,7 +2,6 @@ package com.mapbox.navigation.core.lifecycle
 
 import android.app.Application
 import androidx.lifecycle.LifecycleOwner
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.utils.internal.logI
 import kotlin.reflect.KClass
@@ -11,7 +10,6 @@ import kotlin.reflect.KClass
  * This is a testable version of [MapboxNavigationApp]. Please refer to the singleton
  * for documented functions and expected behaviors.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 internal class MapboxNavigationAppDelegate {
     private val mapboxNavigationOwner by lazy { MapboxNavigationOwner() }
     private val carAppLifecycleOwner by lazy { CarAppLifecycleOwner() }
