@@ -23,7 +23,6 @@ import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import kotlinx.coroutines.CoroutineScope
@@ -73,8 +72,9 @@ class CarRouteLine internal constructor(
         logAndroidAuto("CarRouteLine onRoutesChanged ${routes.size}")
         mainCarContext.mapboxCarMap.carMapSurface?.getStyle()?.let { style ->
             if (routes.isNotEmpty()) {
-                val routeLines = routes.map { NavigationRouteLine(it, identifier = null) }
-                routeLineApi.setNavigationRouteLines(routeLines) { value ->
+                val routesMetadata =
+                    mainCarContext.mapboxNavigation.getAlternativeMetadataFor(routes)
+                routeLineApi.setNavigationRoutes(routes, routesMetadata) { value ->
                     routeLineView.renderRouteDrawData(style, value)
                 }
             } else {
