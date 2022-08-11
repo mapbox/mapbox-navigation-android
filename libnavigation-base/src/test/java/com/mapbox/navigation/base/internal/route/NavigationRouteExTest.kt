@@ -40,7 +40,7 @@ class NavigationRouteExTest {
                 LegItemsResult(
                     listOf(null),
                     listOf(null),
-                    null
+                    0
                 )
             ),
             TestData(
@@ -50,7 +50,7 @@ class NavigationRouteExTest {
                 LegItemsResult(
                     listOf(null, null),
                     listOf(null, null),
-                    null
+                    0
                 )
             ),
             TestData(
@@ -65,7 +65,7 @@ class NavigationRouteExTest {
                 LegItemsResult(
                     listOf(provideDefaultLegAnnotation(), null),
                     listOf(provideDefaultIncidents(), null),
-                    null
+                    0
                 ),
             ),
 
@@ -84,7 +84,7 @@ class NavigationRouteExTest {
                     LegItemsResult(
                         listOf(newLegAnnotations),
                         listOf(newIncidents),
-                        null
+                        0
                     )
                 )
             },
@@ -105,7 +105,7 @@ class NavigationRouteExTest {
                     LegItemsResult(
                         listOf(newLegAnnotations, newLegAnnotations2),
                         listOf(newIncidents, newIncidents2),
-                        null
+                        0
                     )
                 )
             },
@@ -148,7 +148,7 @@ class NavigationRouteExTest {
                     LegItemsResult(
                         listOf(provideDefaultLegAnnotation(), newLegAnnotations2),
                         listOf(provideDefaultIncidents(), newIncidents2),
-                        null
+                        0
                     )
                 )
             },
@@ -178,7 +178,8 @@ class NavigationRouteExTest {
             mockkObject(AnnotationsRefresher) {
                 every {
                     AnnotationsRefresher.getRefreshedAnnotations(any(), any(), any())
-                } returns result.newLegAnnotation?.get(refreshItems.startWithIndex)
+                } returnsMany
+                    (result.newLegAnnotation?.drop(refreshItems.startWithIndex) ?: emptyList())
                 val updatedNavRoute = navRoute.refreshRoute(
                     refreshItems.startWithIndex,
                     refreshItems.legGeometryIndex,
@@ -191,30 +192,41 @@ class NavigationRouteExTest {
                     result.newLegAnnotation,
                     updatedNavRoute.directionsRoute
                         .legs()
-                        ?.map { it.annotation() }
+                        ?.map { it.annotation() },
                 )
                 assertEquals(
                     description,
                     result.newIncidents,
                     updatedNavRoute.directionsRoute
                         .legs()
-                        ?.map { it.incidents() }
+                        ?.map { it.incidents() },
                 )
 
-                if (result.expectedLegGeometryIndex != null) {
-                    verify(exactly = 1) {
-                        AnnotationsRefresher.getRefreshedAnnotations(
-                            navRoute.directionsRoute.legs()
-                                ?.get(refreshItems.startWithIndex)?.annotation(),
-                            refreshItems.legAnnotation?.get(refreshItems.startWithIndex),
-                            result.expectedLegGeometryIndex
-                        )
-                    }
-                } else {
-                    verify(exactly = 0) {
-                        AnnotationsRefresher.getRefreshedAnnotations(any(), any(), any())
-                    }
+                val capturedOldAnnotations = mutableListOf<LegAnnotation?>()
+                val capturedNewAnnotations = mutableListOf<LegAnnotation?>()
+                val capturedLegGeometryIndices = mutableListOf<Int>()
+                verify {
+                    AnnotationsRefresher.getRefreshedAnnotations(
+                        captureNullable(capturedOldAnnotations),
+                        captureNullable(capturedNewAnnotations),
+                        capture(capturedLegGeometryIndices)
+                    )
                 }
+                assertEquals(
+                    description,
+                    navRoute.directionsRoute.legs()?.drop(refreshItems.startWithIndex)?.map { it.annotation() },
+                    capturedOldAnnotations
+                )
+                assertEquals(
+                    description,
+                    refreshItems.legAnnotation?.drop(refreshItems.startWithIndex),
+                    capturedNewAnnotations
+                )
+                assertEquals(
+                    description,
+                    listOf(result.expectedLegGeometryIndex) + List(capturedLegGeometryIndices.size - 1) { 0 },
+                    capturedLegGeometryIndices
+                )
             }
         }
     }
@@ -334,6 +346,6 @@ class NavigationRouteExTest {
     private data class LegItemsResult(
         val newLegAnnotation: List<LegAnnotation?>?,
         val newIncidents: List<List<Incident>?>?,
-        val expectedLegGeometryIndex: Int?,
+        val expectedLegGeometryIndex: Int,
     )
 }

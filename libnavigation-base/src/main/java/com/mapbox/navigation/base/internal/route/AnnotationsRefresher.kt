@@ -1,7 +1,7 @@
 package com.mapbox.navigation.base.internal.route
 
 import com.mapbox.api.directions.v5.models.LegAnnotation
-import com.mapbox.navigation.utils.internal.logW
+import com.mapbox.navigation.utils.internal.logE
 import kotlin.math.min
 
 internal object AnnotationsRefresher {
@@ -11,43 +11,43 @@ internal object AnnotationsRefresher {
     fun getRefreshedAnnotations(
         oldAnnotation: LegAnnotation?,
         newAnnotation: LegAnnotation?,
-        legGeometryIndex: Int
+        startingLegGeometryIndex: Int
     ): LegAnnotation? {
-        if (newAnnotation == null) {
+        if (oldAnnotation == null) {
             return null
         }
         val congestionNumeric = mergeAnnotationProperty(
             oldAnnotation,
             newAnnotation,
-            legGeometryIndex,
+            startingLegGeometryIndex,
         ) { congestionNumeric() }
         val congestion = mergeAnnotationProperty(
             oldAnnotation,
             newAnnotation,
-            legGeometryIndex,
+            startingLegGeometryIndex,
         ) { congestion() }
         val distance = mergeAnnotationProperty(
             oldAnnotation,
             newAnnotation,
-            legGeometryIndex,
+            startingLegGeometryIndex,
         ) { distance() }
         val duration = mergeAnnotationProperty(
             oldAnnotation,
             newAnnotation,
-            legGeometryIndex,
+            startingLegGeometryIndex,
         ) { duration() }
         val speed = mergeAnnotationProperty(
             oldAnnotation,
             newAnnotation,
-            legGeometryIndex,
+            startingLegGeometryIndex,
         ) { speed() }
         val maxSpeed = mergeAnnotationProperty(
             oldAnnotation,
             newAnnotation,
-            legGeometryIndex,
+            startingLegGeometryIndex,
         ) { maxspeed() }
         // unrecognized properties migrate from new annotation
-        return newAnnotation.toBuilder()
+        return (newAnnotation?.toBuilder() ?: LegAnnotation.builder())
             .congestion(congestion)
             .congestionNumeric(congestionNumeric)
             .maxspeed(maxSpeed)
@@ -58,21 +58,24 @@ internal object AnnotationsRefresher {
     }
 
     private fun <T> mergeAnnotationProperty(
-        oldAnnotation: LegAnnotation?,
-        newAnnotation: LegAnnotation,
-        endIndex: Int,
+        oldAnnotation: LegAnnotation,
+        newAnnotation: LegAnnotation?,
+        startingLegGeometryIndex: Int,
         propertyExtractor: LegAnnotation.() -> List<T>?,
     ): List<T>? {
-        val newProperty = newAnnotation.propertyExtractor() ?: return null
-        val oldProperty = oldAnnotation?.propertyExtractor() ?: return null
+        val oldProperty = oldAnnotation.propertyExtractor() ?: return null
+        val newProperty = newAnnotation?.propertyExtractor() ?: emptyList()
         val expectedSize = oldProperty.size
-        if (expectedSize < endIndex) {
-            logW("Annotations sizes mismatch: index=$endIndex, expected_size=$expectedSize", LOG_CATEGORY)
+        if (expectedSize < startingLegGeometryIndex) {
+            logE(
+                "Annotations sizes mismatch: index=$startingLegGeometryIndex, expected_size=$expectedSize",
+                LOG_CATEGORY
+            )
             return null
         }
         val result = mutableListOf<T>()
-        repeat(endIndex) { result.add(oldProperty[it]) }
-        repeat(min(expectedSize - endIndex, newProperty.size)) { result.add(newProperty[it]) }
+        repeat(startingLegGeometryIndex) { result.add(oldProperty[it]) }
+        repeat(min(expectedSize - startingLegGeometryIndex, newProperty.size)) { result.add(newProperty[it]) }
         val filledSize = result.size
         repeat(expectedSize - filledSize) { result.add(oldProperty[it + filledSize]) }
 

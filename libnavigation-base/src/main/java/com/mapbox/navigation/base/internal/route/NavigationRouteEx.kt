@@ -45,7 +45,13 @@ fun NavigationRoute.refreshRoute(
                         newAnnotation,
                         currentLegGeometryIndex
                     )
-                } else { newAnnotation }
+                } else {
+                    AnnotationsRefresher.getRefreshedAnnotations(
+                        routeLeg.annotation(),
+                        newAnnotation,
+                    startingLegGeometryIndex = 0
+                    )
+                }
             routeLeg.toBuilder()
                 .incidents(incidents?.getOrNull(index))
                 .annotation(mergedAnnotation)

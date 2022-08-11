@@ -34,14 +34,14 @@ class AnnotationsRefresherTest(
                     null,
                     0,
                     null,
-                    "Everything is null. Null new annotation turns everything to null."
+                    "Everything is null. Null old annotation turns merged one to null."
                 ),
                 arrayOf(
                     defaultAnnotation,
                     null,
                     0,
-                    null,
-                    "New annotation is null. Null new annotation turns everything to null."
+                    defaultAnnotation,
+                    "Default + null. Null old annotation property turns merged property to null."
                 ),
                 arrayOf(
                     defaultAnnotation,
@@ -49,7 +49,7 @@ class AnnotationsRefresherTest(
                     0,
                     defaultAnnotation,
                     "2 default annotations, index = 0. " +
-                        "Null new annotation property turns property to null."
+                        "Null old annotation property turns merged property to null."
                 ),
                 arrayOf(
                     defaultAnnotation,
@@ -57,15 +57,15 @@ class AnnotationsRefresherTest(
                     5,
                     defaultAnnotation,
                     "2 default annotations, index = 5. " +
-                        "Null new annotation property turns property to null."
+                        "Null old annotation property turns merged property to null."
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyEmpty,
                     defaultAnnotation,
                     0,
-                    defaultAnnotation,
+                    annotationWithCongestionNumericOnlyEmpty,
                     "Empty congestion_numeric + default, index = 0. " +
-                        "Null new annotation property turns property to null."
+                        "congestion_numeric is backfilled."
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyEmpty,
@@ -73,7 +73,7 @@ class AnnotationsRefresherTest(
                     5,
                     defaultAnnotation,
                     "Empty congestion_numeric + default, index = 5. " +
-                        "Null new annotation property turns property to null."
+                        "Index out of bounds results in null annotation property"
                 ),
                 arrayOf(
                     defaultAnnotation,
@@ -81,7 +81,7 @@ class AnnotationsRefresherTest(
                     0,
                     defaultAnnotation,
                     "Default + empty congestion_numeric, index = 0. " +
-                        "Null old annotation property turns property to null."
+                        "Null old annotation property turns merged property to null."
                 ),
                 arrayOf(
                     defaultAnnotation,
@@ -89,7 +89,7 @@ class AnnotationsRefresherTest(
                     5,
                     defaultAnnotation,
                     "Default + empty congestion_numeric, index = 5. " +
-                        "Mismatched sizes result in null annotation"
+                        "Mismatched sizes result in null merged annotation property."
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyEmpty,
@@ -102,17 +102,17 @@ class AnnotationsRefresherTest(
                     annotationWithCongestionNumericOnlyFilled,
                     defaultAnnotation,
                     0,
-                    defaultAnnotation,
+                    annotationWithCongestionNumericOnlyFilled,
                     "Filled congestion_numeric + default, index = 0. " +
-                        "Mismatched sizes result in null annotation."
+                        "congestion_numeric is backfilled."
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyFilled,
                     defaultAnnotation,
                     5,
-                    defaultAnnotation,
+                    annotationWithCongestionNumericOnlyFilled,
                     "Filled congestion_numeric + default, index = 5. " +
-                        "Mismatched sizes result in null annotation."
+                        "Nothing changes since index is the last."
                 ),
                 arrayOf(
                     defaultAnnotation,
@@ -120,7 +120,7 @@ class AnnotationsRefresherTest(
                     2,
                     defaultAnnotation,
                     "Default + filled congestion_numeric, index = 2." +
-                        "Mismatched sizes result in null annotation."
+                        "Index is too big: return null annotation."
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyEmpty,
@@ -128,7 +128,7 @@ class AnnotationsRefresherTest(
                     2,
                     defaultAnnotation,
                     "Empty congestion_numeric + filled congestion_numeric, index = 2. " +
-                        "Mismatched sizes result in null annotation."
+                        "Index is too big: return null annotation."
                 ),
                 arrayOf(
                     LegAnnotation.builder().congestionNumeric(listOf(1)).build(),
@@ -136,7 +136,7 @@ class AnnotationsRefresherTest(
                     2,
                     defaultAnnotation,
                     "Partially filled congestion_numeric + filled congestion_numeric, index = 2. " +
-                        "Mismatched sizes result in null annotation."
+                        "Index is too big: return null annotation."
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyFilled,
@@ -328,7 +328,18 @@ class AnnotationsRefresherTest(
                         .build(),
                     defaultAnnotation,
                     5,
-                    defaultAnnotation,
+                    LegAnnotation.builder()
+                        .congestionNumeric(listOf(1, 2, 3, 4, 5))
+                        .congestion(listOf("c1", "c2", "c3", "c4", "c5"))
+                        .distance(listOf(1.2, 3.4, 5.6, 7.8, 9.0))
+                        .duration(listOf(11.2, 33.4, 55.6, 77.8, 99.0))
+                        .speed(listOf(41.0, 42.5, 43.1, 44.6, 45.9))
+                        .maxspeed(
+                            List(5) {
+                                MaxSpeed.builder().speed(it * 10).unit("mph").build()
+                            }
+                        )
+                        .build(),
                     "Everything is filled + default, index = 5. " +
                         "Old annotation properties are used before current index."
                 ),
@@ -338,7 +349,31 @@ class AnnotationsRefresherTest(
                     3,
                     LegAnnotation.fromJson("{ \"my_key2\": \"my_value2\" }"),
                     "Unrecognized properties migrate from new annotation."
-                )
+                ),
+                arrayOf(
+                    LegAnnotation.fromJson("{ \"my_key1\": \"my_value1\" }"),
+                    LegAnnotation.fromJson("{ \"my_key2\": \"my_value2\", \"my_key3\": \"my_value3\" }"),
+                    3,
+                    LegAnnotation.fromJson("{ \"my_key2\": \"my_value2\", \"my_key3\": \"my_value3\" }"),
+                    "Old annotation has less unrecognized properties. " +
+                        "Unrecognized properties migrate from new annotation."
+                ),
+                arrayOf(
+                    LegAnnotation.builder().build(),
+                    LegAnnotation.fromJson("{ \"my_key2\": \"my_value2\", \"my_key3\": \"my_value3\" }"),
+                    3,
+                    LegAnnotation.fromJson("{ \"my_key2\": \"my_value2\", \"my_key3\": \"my_value3\" }"),
+                    "Old annotation has no unrecognized properties. " +
+                        "Unrecognized properties migrate from new annotation."
+                ),
+                arrayOf(
+                    LegAnnotation.fromJson("{ \"my_key2\": \"my_value2\", \"my_key3\": \"my_value3\" }"),
+                    LegAnnotation.fromJson("{ \"my_key1\": \"my_value1\" }"),
+                    3,
+                    LegAnnotation.fromJson("{ \"my_key1\": \"my_value1\" }"),
+                    "Old annotation has more unrecognized properties. " +
+                        "Unrecognized properties migrate from new annotation."
+                ),
             )
         }
     }
