@@ -8,8 +8,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Introduced `ViewOptionsCustomization.infoPanelForcedState` that allows overriding of the `NavigationView` Info Panel (BottomSheetBehaviour) state. [#6132](https://github.com/mapbox/mapbox-navigation-android/pull/6132)
 
 #### Bug fixes and improvements
-- Fixed an issue where `NavigationView` switches from Active Guidance to Free Drive state after rotating device when replay is enabled. [#6140](https://github.com/mapbox/mapbox-navigation-android/pull/6140) 
-- Fixed reroute for profiles other than driving/traffic. [#6146](https://github.com/mapbox/mapbox-navigation-android/pull/6146)
+- Fixed an issue where `NavigationView` switches from Active Guidance to Free Drive state after rotating device when replay is enabled. [#6140](https://github.com/mapbox/mapbox-navigation-android/pull/6140)
 
 ## Mapbox Navigation SDK 2.7.0-rc.2 - 11 August, 2022
 ### Changelog
