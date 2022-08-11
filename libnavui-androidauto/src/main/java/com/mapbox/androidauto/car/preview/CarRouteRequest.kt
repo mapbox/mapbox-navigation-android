@@ -34,6 +34,7 @@ interface CarRouteRequestCallback {
  */
 class CarRouteRequest(
     val mapboxNavigation: MapboxNavigation,
+    private val routeOptionsInterceptor: CarRouteOptionsInterceptor,
     private val navigationLocationProvider: NavigationLocationProvider,
 ) {
     internal var currentRequestId: Long? = null
@@ -119,6 +120,7 @@ class CarRouteRequest(
         .coordinatesList(listOf(origin, destination))
         .layersList(listOf(mapboxNavigation.getZLevel(), null))
         .metadata(true)
+        .let { routeOptionsInterceptor.intercept(it) }
         .build()
 
     /**

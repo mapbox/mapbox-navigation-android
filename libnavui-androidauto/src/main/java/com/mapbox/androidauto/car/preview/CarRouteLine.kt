@@ -25,12 +25,6 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
 /**
  * This class is to simplify the interaction with [MapboxRouteLineApi], [MapboxRouteArrowView]
@@ -58,8 +52,6 @@ class CarRouteLine internal constructor(
     private lateinit var routeLineApi: MapboxRouteLineApi
     private lateinit var routeArrowApi: MapboxRouteArrowApi
     private lateinit var routeArrowView: MapboxRouteArrowView
-
-    private var styleScope: CoroutineScope? = null
 
     private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
         val result = routeLineApi.updateTraveledRouteLine(point)
@@ -107,7 +99,6 @@ class CarRouteLine internal constructor(
     override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
         logAndroidAuto("CarRouteLine carMapSurface loaded $mapboxCarMapSurface")
         val locationPlugin = mapboxCarMapSurface.mapSurface.location
-        val scope = MainScope().also { styleScope = it }
         styleLoadedListener = mapboxCarMapSurface.handleStyleOnAttached { style ->
             val routeLineOptions = getMapboxRouteLineOptions(style)
             routeLineView = MapboxRouteLineView(routeLineOptions)
@@ -124,17 +115,6 @@ class CarRouteLine internal constructor(
             locationPlugin.addOnIndicatorPositionChangedListener(onPositionChangedListener)
             mainCarContext.mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
             routesProvider.registerRoutesListener(routesListener)
-
-            scope.coroutineContext.cancelChildren()
-            scope.launch {
-                mainCarContext.routeAlternativesEnabled.collect { enabled ->
-                    if (enabled) {
-                        routeLineView.showAlternativeRoutes(style)
-                    } else {
-                        routeLineView.hideAlternativeRoutes(style)
-                    }
-                }
-            }
         }
     }
 
@@ -145,8 +125,6 @@ class CarRouteLine internal constructor(
         mapSurface.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
         mainCarContext.mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         routesProvider.unregisterRoutesListener(routesListener)
-        styleScope?.cancel()
-        styleScope = null
     }
 
     private fun getMapboxRouteLineOptions(style: Style): MapboxRouteLineOptions {

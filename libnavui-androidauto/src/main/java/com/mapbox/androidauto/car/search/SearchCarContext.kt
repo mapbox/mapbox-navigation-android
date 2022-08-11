@@ -22,6 +22,7 @@ class SearchCarContext(
     )
     val carRouteRequest = CarRouteRequest(
         mainCarContext.mapboxNavigation,
+        mainCarContext.routeOptionsInterceptor,
         MapboxCarApp.carAppLocationService().navigationLocationProvider
     )
 }
