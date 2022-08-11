@@ -1,16 +1,22 @@
 package com.mapbox.androidauto.testing
 
+import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
+import android.os.Build
 import android.os.Environment
+import android.provider.MediaStore
+import androidx.annotation.RequiresApi
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.fail
 import org.junit.rules.TestName
 import java.io.File
+import java.io.IOException
+import java.io.OutputStream
 import java.nio.IntBuffer
 import kotlin.math.abs
 import kotlin.math.max
@@ -39,16 +45,16 @@ import kotlin.math.max
  */
 class BitmapTestUtil(
     private val expectedAssetsDirectoryName: String,
-    samplesDirectoryName: String
+    private val samplesDirectoryName: String
 ) {
     private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val mapboxTestDirectoryName = "mapbox_test"
     private val directory: File =
         File(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-            "mapbox_test"
+            mapboxTestDirectoryName
         )
     private val deviceTestDirectory = File(directory, samplesDirectoryName)
-        .also { it.mkdirs() }
 
     /**
      * When testing bitmaps for the car. Use a specific car display so all systems
@@ -71,26 +77,29 @@ class BitmapTestUtil(
     fun assertBitmapsSimilar(testName: TestName, actual: Bitmap) {
         val filename = testName.methodName + ".png"
         val expectedBitmapFile = expectedAssetsDirectoryName + File.separator + filename
-        try {
+        val expected = try {
             context.assets.open(expectedBitmapFile).use {
-                val expected = BitmapFactory.decodeStream(it)
-                val difference = calculateDifference(expected, actual)
-                // If the images are different, write them to a file so they can be uploaded for
-                // debugging.
-                if (difference.similarity > 0.01) {
-                    writeBitmapFile(testName, actual)
-                    writeBitmapFile(
-                        "${testName.methodName}-diff", difference.difference
-                    )
-                    fail(
-                        "The ${testName.methodName} image failed with similarity: " +
-                            "${difference.similarity}"
-                    )
-                }
+                BitmapFactory.decodeStream(it)
             }
-        } catch (t: Throwable) {
+        } catch (ignored: IOException) {
+            null
+        }
+        if (expected != null) {
+            val difference = calculateDifference(expected, actual)
+            // If the images are different, write them to a file so they can be uploaded for
+            // debugging.
+            if (difference.similarity > 0.01) {
+                writeBitmapFile(testName, actual)
+                writeBitmapFile(
+                    "${testName.methodName}-diff", difference.difference
+                )
+                fail(
+                    "The ${testName.methodName} image failed with similarity: " +
+                        "${difference.similarity}"
+                )
+            }
+        } else {
             writeBitmapFile(testName, actual)
-            throw t
         }
     }
 
@@ -212,10 +221,31 @@ class BitmapTestUtil(
     }
 
     private fun writeBitmapFile(methodName: String, lanesImageBitmap: Bitmap) {
-        val testFile = File(deviceTestDirectory, "$methodName.png")
-        testFile.outputStream().use { out ->
+        val outputStream = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            mediaStoreOutputStream(samplesDirectoryName, "$methodName.png")
+        } else {
+            deviceTestDirectory.mkdirs()
+            val testFile = File(deviceTestDirectory, "$methodName.png")
+            testFile.outputStream()
+        }
+        outputStream.use { out ->
             lanesImageBitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun mediaStoreOutputStream(filePath: String, fileName: String): OutputStream {
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+            put(
+                MediaStore.MediaColumns.RELATIVE_PATH,
+                Environment.DIRECTORY_DOWNLOADS + "/$mapboxTestDirectoryName/$filePath"
+            )
+        }
+        val resolver = context.contentResolver
+        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+        return resolver.openOutputStream(uri!!)!!
     }
 
     private fun getSingleImagePixels(bitmap: Bitmap) =

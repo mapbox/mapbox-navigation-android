@@ -1,6 +1,12 @@
 package com.mapbox.navigation.instrumentation_tests.utils.history
 
+import android.content.ContentValues
+import android.content.Context
+import android.os.Build
 import android.os.Environment
+import android.provider.MediaStore
+import androidx.annotation.RequiresApi
+import androidx.test.platform.app.InstrumentationRegistry
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.utils.internal.logE
@@ -32,23 +38,31 @@ import java.util.concurrent.CountDownLatch
  */
 class MapboxHistoryTestRule : TestWatcher() {
 
+    private val mapboxTestDirectoryName = "mapbox_test"
     private val directory: File =
         File(
             Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOWNLOADS
             ),
-            "mapbox_test"
+            mapboxTestDirectoryName
         )
 
     lateinit var historyRecorder: MapboxHistoryRecorder
+    private val context: Context by lazy {
+        InstrumentationRegistry.getInstrumentation().targetContext
+    }
 
     override fun finished(description: Description) {
         val filePath = historyRecorder.fileDirectory()!!
         val file = File(filePath)
         file.walk().filterNot { it.isDirectory }.forEach {
-            val path = description.methodName + File.separator + it.name
-            val target = File(directory, path)
-            it.copyTo(target)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                saveFileUsingMediaStore(it, context, description.methodName, it.name)
+            } else {
+                val path = description.methodName + File.separator + it.name
+                val target = File(directory, path)
+                it.copyTo(target)
+            }
         }
     }
 
@@ -65,6 +79,32 @@ class MapboxHistoryTestRule : TestWatcher() {
             }
             countDownLatch.await()
             throw t
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun saveFileUsingMediaStore(
+        inputFile: File?,
+        context: Context,
+        filePath: String,
+        fileName: String
+    ) {
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "text/plain")
+            put(
+                MediaStore.MediaColumns.RELATIVE_PATH,
+                Environment.DIRECTORY_DOWNLOADS + "/$mapboxTestDirectoryName/" + filePath
+            )
+        }
+        val resolver = context.contentResolver
+        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+        if (uri != null) {
+            inputFile?.inputStream().use { input ->
+                resolver.openOutputStream(uri).use { output ->
+                    input?.copyTo(output!!, DEFAULT_BUFFER_SIZE)
+                }
+            }
         }
     }
 }
