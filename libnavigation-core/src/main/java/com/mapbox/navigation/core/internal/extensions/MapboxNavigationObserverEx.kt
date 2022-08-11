@@ -38,9 +38,11 @@ class MapboxNavigationObserverChain : MapboxNavigationObserver {
         queue.remove(observer)
     }
 
-    fun removeAndDetach(observer: MapboxNavigationObserver) {
-        if (queue.remove(observer)) {
-            attached?.also { observer.onDetached(it) }
+    fun removeAndDetach(vararg observers: MapboxNavigationObserver) {
+        observers.forEach { observer ->
+            if (queue.remove(observer)) {
+                attached?.also { observer.onDetached(it) }
+            }
         }
     }
 

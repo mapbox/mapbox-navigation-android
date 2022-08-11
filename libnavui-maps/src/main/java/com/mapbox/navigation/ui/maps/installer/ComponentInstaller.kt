@@ -1,12 +1,18 @@
 package com.mapbox.navigation.ui.maps.installer
 
 import android.content.Context
+import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
+import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.base.installer.ComponentInstaller
 import com.mapbox.navigation.ui.base.installer.Installation
+import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
+import com.mapbox.navigation.ui.maps.internal.ui.MapboxRecenterButtonComponentContract
+import com.mapbox.navigation.ui.maps.internal.ui.RecenterButtonComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteArrowComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponent
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
@@ -46,6 +52,47 @@ fun ComponentInstaller.routeArrow(
 ): Installation {
     val componentConfig = RouteArrowComponentConfig(mapView.context).apply(config)
     return component(RouteArrowComponent(mapView.getMapboxMap(), componentConfig.options))
+}
+
+/**
+ * Install component that re-centers the [mapView] to device location on [button] click.
+ *
+ * The installed components registers itself as a [LocationObserver] and updates camera position
+ * only if location data is available.
+ */
+@ExperimentalPreviewMapboxNavigationAPI
+fun ComponentInstaller.recenterButton(
+    mapView: MapView,
+    button: MapboxExtendableButton,
+    config: RecenterButtonComponentConfig.() -> Unit = {}
+): Installation {
+    val componentConfig = RecenterButtonComponentConfig().apply(config)
+    val contract = MapboxRecenterButtonComponentContract(mapView, componentConfig)
+    return components(
+        contract,
+        RecenterButtonComponent(
+            recenterButton = button,
+            contractProvider = { contract }
+        )
+    )
+}
+
+/**
+ * Recenter button component configuration class.
+ */
+@ExperimentalPreviewMapboxNavigationAPI
+class RecenterButtonComponentConfig internal constructor() {
+    /**
+     * Options for camera re-center request.
+     */
+    var cameraOptions: CameraOptions = CameraOptions.Builder()
+        .zoom(15.0)
+        .build()
+
+    /**
+     * Options for re-center camera animation.
+     */
+    var animationOptions: MapAnimationOptions? = null
 }
 
 /**

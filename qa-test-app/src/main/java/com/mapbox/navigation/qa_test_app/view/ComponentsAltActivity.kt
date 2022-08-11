@@ -8,6 +8,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
+import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -22,6 +24,7 @@ import com.mapbox.navigation.qa_test_app.utils.Utils.getMapboxAccessToken
 import com.mapbox.navigation.ui.base.installer.Installation
 import com.mapbox.navigation.ui.base.installer.installComponents
 import com.mapbox.navigation.ui.maps.NavigationStyles
+import com.mapbox.navigation.ui.maps.installer.recenterButton
 import com.mapbox.navigation.ui.maps.installer.routeArrow
 import com.mapbox.navigation.ui.maps.installer.routeLine
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
@@ -83,6 +86,15 @@ class ComponentsAltActivity : AppCompatActivity() {
             }
             routeArrowInstallation = routeArrow(binding.mapView) {
                 options = customRouteArrowOptions()
+            }
+            recenterButton(binding.mapView, binding.recenterButton) {
+                cameraOptions = CameraOptions.Builder()
+                    .zoom(10.0)
+                    .bearing(0.0)
+                    .build()
+                animationOptions = MapAnimationOptions.Builder()
+                    .duration(1000L)
+                    .build()
             }
 
             // custom components

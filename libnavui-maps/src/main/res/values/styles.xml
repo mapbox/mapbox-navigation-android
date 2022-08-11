@@ -43,4 +43,9 @@
         <item name="cameraModeButtonBackground">@drawable/mapbox_bg_circle_outline</item>
     </style>
 
+    <!-- Camera recenter button -->
+    <style name="MapboxStyleRecenterButton" parent="MapboxStyleExtendableButton">
+        <item name="extendableButtonIcon">@drawable/mapbox_ic_camera_recenter</item>
+    </style>
+
 </resources>

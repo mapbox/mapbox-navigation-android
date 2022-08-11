@@ -27,7 +27,7 @@ class DropInNavigationViewModel : ViewModel() {
     }
 
     companion object {
-        val defaultCameraMode: DropInCameraMode = DropInCameraMode.FOLLOWING
+        val defaultCameraMode: DropInCameraMode = DropInCameraMode.IDLE
 
         private const val DEFAULT_INITIAL_ZOOM = 15.0
         private val defaultCameraOptions = CameraOptions.Builder()
