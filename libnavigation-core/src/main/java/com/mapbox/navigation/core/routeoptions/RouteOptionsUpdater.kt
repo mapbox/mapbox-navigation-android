@@ -100,28 +100,32 @@ class RouteOptionsUpdater {
                                 it.addAll(approachesList.subList(index, coordinatesList.size))
                             }
                         }
-                    )
-                    .snappingIncludeClosuresList(
-                        let snappingClosures@{
-                            val snappingClosures = routeOptions.snappingIncludeClosuresList()
-                            mutableListOf<Boolean?>().apply {
-                                // append true for the origin of the re-route request
-                                add(true)
-                                if (snappingClosures.isNullOrEmpty()) {
-                                    // create `null` value for each upcoming waypoint
-                                    addAll(arrayOfNulls<Boolean>(remainingWaypoints))
-                                } else {
-                                    // get existing values for each upcoming waypoint
-                                    addAll(
-                                        snappingClosures.subList(
-                                            index + 1,
-                                            coordinatesList.size
-                                        )
-                                    )
+                    ).apply {
+                        if (routeOptions.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC) {
+                            snappingIncludeClosuresList(
+                                let snappingClosures@{
+                                    val snappingClosures =
+                                        routeOptions.snappingIncludeClosuresList()
+                                    mutableListOf<Boolean?>().apply {
+                                        // append true for the origin of the re-route request
+                                        add(true)
+                                        if (snappingClosures.isNullOrEmpty()) {
+                                            // create `null` value for each upcoming waypoint
+                                            addAll(arrayOfNulls<Boolean>(remainingWaypoints))
+                                        } else {
+                                            // get existing values for each upcoming waypoint
+                                            addAll(
+                                                snappingClosures.subList(
+                                                    index + 1,
+                                                    coordinatesList.size
+                                                )
+                                            )
+                                        }
+                                    }
                                 }
-                            }
+                            )
                         }
-                    )
+                    }
                     .waypointNamesList(
                         getUpdatedWaypointsList(
                             routeOptions.waypointNamesList(),
