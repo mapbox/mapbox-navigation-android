@@ -1,9 +1,6 @@
 package com.mapbox.androidauto.car.preview
 
-import androidx.test.core.app.ApplicationProvider
-import com.mapbox.androidauto.testing.MapboxRobolectricTestRunner
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.common.Logger
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -15,19 +12,18 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
 import io.mockk.verify
-import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Test
 import java.util.Locale
 
-class CarRouteRequestTest : MapboxRobolectricTestRunner() {
+class CarRouteRequestTest {
 
     private val routeOptionsSlot = CapturingSlot<RouteOptions>()
     private val routerCallbackSlot = CapturingSlot<NavigationRouterCallback>()
+    private val routeOptionsInterceptor = mockk<CarRouteOptionsInterceptor> {
+        every { intercept(any()) } answers { firstArg() }
+    }
     private val navigationLocationProvider = mockk<NavigationLocationProvider>()
     private var requestCount = 0L
     private val mapboxNavigation = mockk<MapboxNavigation> {
@@ -36,7 +32,7 @@ class CarRouteRequestTest : MapboxRobolectricTestRunner() {
         } returns requestCount++
         every { cancelRouteRequest(any()) } just Runs
         every { navigationOptions } returns mockk {
-            every { applicationContext } returns ApplicationProvider.getApplicationContext()
+            every { applicationContext } returns mockk()
             every { distanceFormatterOptions } returns mockk {
                 every { locale } returns Locale.US
                 every { unitType } returns UnitType.METRIC
@@ -45,19 +41,8 @@ class CarRouteRequestTest : MapboxRobolectricTestRunner() {
         every { getZLevel() } returns Z_LEVEL
     }
 
-    private val carRouteRequest = CarRouteRequest(mapboxNavigation, navigationLocationProvider)
-
-    @Before
-    fun setup() {
-        mockkStatic(Logger::class)
-        every { Logger.e(any(), any()) } just Runs
-        every { Logger.i(any(), any()) } just Runs
-    }
-
-    @After
-    fun teardown() {
-        unmockkStatic(Logger::class)
-    }
+    private val carRouteRequest =
+        CarRouteRequest(mapboxNavigation, routeOptionsInterceptor, navigationLocationProvider)
 
     @Test
     fun `onRoutesReady is called after successful request`() {
@@ -183,6 +168,24 @@ class CarRouteRequestTest : MapboxRobolectricTestRunner() {
         carRouteRequest.request(mockk { every { coordinate } returns searchCoordinate }, callback)
 
         assertEquals(listOf(Z_LEVEL, null), routeOptionsSlot.captured.layersList())
+    }
+
+    @Test
+    fun `custom route options provided by interceptor are used for route request`() {
+        val customRouteOptions = mockk<RouteOptions>()
+        val customRouteOptionsBuilder = mockk<RouteOptions.Builder> {
+            every { build() } returns customRouteOptions
+        }
+        every { routeOptionsInterceptor.intercept(any()) } returns customRouteOptionsBuilder
+        every { navigationLocationProvider.lastLocation } returns mockk {
+            every { longitude } returns -121.4670161
+            every { latitude } returns 38.5630514
+        }
+        val callback = mockk<CarRouteRequestCallback>(relaxUnitFun = true)
+        val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
+        carRouteRequest.request(mockk { every { coordinate } returns searchCoordinate }, callback)
+
+        assertEquals(customRouteOptions, routeOptionsSlot.captured)
     }
 
     private companion object {

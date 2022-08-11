@@ -49,7 +49,10 @@ package com.mapbox.androidauto.car {
   }
 
   public final class MainCarContext {
-    ctor public MainCarContext(androidx.car.app.CarContext carContext, com.mapbox.maps.extension.androidauto.MapboxCarMap mapboxCarMap, com.mapbox.search.SearchEngine searchEngine, com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider feedbackPollProvider = com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider());
+    ctor public MainCarContext(androidx.car.app.CarContext carContext, com.mapbox.maps.extension.androidauto.MapboxCarMap mapboxCarMap, com.mapbox.search.SearchEngine searchEngine, com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider feedbackPollProvider = com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider(), com.mapbox.androidauto.car.preview.CarRouteOptionsInterceptor routeOptionsInterceptor = CarRouteOptionsInterceptor({ var it: com.mapbox.api.directions.v5.models.RouteOptions.Builder ->
+
+    return it
+}));
     method public androidx.car.app.CarContext getCarContext();
     method public com.mapbox.androidauto.car.settings.CarSettingsStorage getCarSettingsStorage();
     method public com.mapbox.navigation.base.formatter.DistanceFormatter getDistanceFormatter();
@@ -58,7 +61,7 @@ package com.mapbox.androidauto.car {
     method public com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi getManeuverApi();
     method public com.mapbox.maps.extension.androidauto.MapboxCarMap getMapboxCarMap();
     method public com.mapbox.navigation.core.MapboxNavigation getMapboxNavigation();
-    method public kotlinx.coroutines.flow.MutableStateFlow<java.lang.Boolean> getRouteAlternativesEnabled();
+    method public com.mapbox.androidauto.car.preview.CarRouteOptionsInterceptor getRouteOptionsInterceptor();
     method public com.mapbox.search.SearchEngine getSearchEngine();
     property public final androidx.car.app.CarContext carContext;
     property public final com.mapbox.androidauto.car.settings.CarSettingsStorage carSettingsStorage;
@@ -67,7 +70,7 @@ package com.mapbox.androidauto.car {
     property public final com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi maneuverApi;
     property public final com.mapbox.maps.extension.androidauto.MapboxCarMap mapboxCarMap;
     property public final com.mapbox.navigation.core.MapboxNavigation mapboxNavigation;
-    property public final kotlinx.coroutines.flow.MutableStateFlow<java.lang.Boolean> routeAlternativesEnabled;
+    property public final com.mapbox.androidauto.car.preview.CarRouteOptionsInterceptor routeOptionsInterceptor;
     property public final com.mapbox.search.SearchEngine searchEngine;
   }
 
@@ -620,6 +623,10 @@ package com.mapbox.androidauto.car.preview {
     property public final com.mapbox.androidauto.car.MainCarContext mainCarContext;
   }
 
+  public fun interface CarRouteOptionsInterceptor {
+    method public com.mapbox.api.directions.v5.models.RouteOptions.Builder intercept(com.mapbox.api.directions.v5.models.RouteOptions.Builder builder);
+  }
+
   @com.mapbox.maps.MapboxExperimental public final class CarRoutePreviewScreen extends androidx.car.app.Screen {
     ctor public CarRoutePreviewScreen(com.mapbox.androidauto.car.preview.RoutePreviewCarContext routePreviewCarContext, com.mapbox.androidauto.car.search.PlaceRecord placeRecord, java.util.List<com.mapbox.navigation.base.route.NavigationRoute> navigationRoutes, com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil placesLayerUtil = com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil());
     method public com.mapbox.androidauto.car.location.CarLocationRenderer getCarLocationRenderer();
@@ -637,7 +644,7 @@ package com.mapbox.androidauto.car.preview {
   }
 
   public final class CarRouteRequest {
-    ctor public CarRouteRequest(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation, com.mapbox.navigation.ui.maps.location.NavigationLocationProvider navigationLocationProvider);
+    ctor public CarRouteRequest(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation, com.mapbox.androidauto.car.preview.CarRouteOptionsInterceptor routeOptionsInterceptor, com.mapbox.navigation.ui.maps.location.NavigationLocationProvider navigationLocationProvider);
     method public void cancelRequest();
     method public com.mapbox.navigation.core.MapboxNavigation getMapboxNavigation();
     method public void request(com.mapbox.androidauto.car.search.PlaceRecord placeRecord, com.mapbox.androidauto.car.preview.CarRouteRequestCallback callback);

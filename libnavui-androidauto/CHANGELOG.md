@@ -9,6 +9,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Bumped maps extension version to fix AAOS issue when changing screens. [#6139](https://github.com/mapbox/mapbox-navigation-android/pull/6139)
 - Added an option to override items displayed in the feedback screen. [#6144](https://github.com/mapbox/mapbox-navigation-android/pull/6144)
 - Fixed an issue with alternative route line not vanishing. [#6153](https://github.com/mapbox/mapbox-navigation-android/pull/6153)
+- Added an option to override route options used for route requests. [#6153](https://github.com/mapbox/mapbox-navigation-android/pull/6153)
 
 ## androidauto-v0.6.0 - Jul 29, 2022
 ### Changelog
