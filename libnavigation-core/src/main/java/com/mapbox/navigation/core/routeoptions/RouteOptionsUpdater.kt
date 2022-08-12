@@ -28,7 +28,7 @@ class RouteOptionsUpdater {
      * This carries over or adapts all of the request parameters to best fit the existing situation and remaining portion of the route.
      *
      * Notable adjustments:
-     * - `snapping_include_closures=true` is set for the origin of the request to aid with potential need to navigate out of a closed section of the road
+     * - `snapping_include_closures=true` and `snapping_include_static_closures=true` are set for the origin of the request to aid with potential need to navigate out of a closed section of the road
      * - `depart_at`/`arrive_by` parameters are cleared as they are not applicable in update/re-route scenario
      *
      * @return `RouteOptionsResult.Error` if a new [RouteOptions] instance cannot be combined based on the input given.
@@ -100,29 +100,16 @@ class RouteOptionsUpdater {
                                 it.addAll(approachesList.subList(index, coordinatesList.size))
                             }
                         }
-                    ).apply {
+                    )
+                    .apply {
                         if (routeOptions.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC) {
                             snappingIncludeClosuresList(
-                                let snappingClosures@{
-                                    val snappingClosures =
-                                        routeOptions.snappingIncludeClosuresList()
-                                    mutableListOf<Boolean?>().apply {
-                                        // append true for the origin of the re-route request
-                                        add(true)
-                                        if (snappingClosures.isNullOrEmpty()) {
-                                            // create `null` value for each upcoming waypoint
-                                            addAll(arrayOfNulls<Boolean>(remainingWaypoints))
-                                        } else {
-                                            // get existing values for each upcoming waypoint
-                                            addAll(
-                                                snappingClosures.subList(
-                                                    index + 1,
-                                                    coordinatesList.size
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
+                                routeOptions.snappingIncludeClosuresList()
+                                    .withFirstTrue(remainingWaypoints, index, coordinatesList.size)
+                            )
+                            snappingIncludeStaticClosuresList(
+                                routeOptions.snappingIncludeStaticClosuresList()
+                                    .withFirstTrue(remainingWaypoints, index, coordinatesList.size)
                             )
                         }
                     }
@@ -259,6 +246,24 @@ class RouteOptionsUpdater {
             }
         }
         return updatedStartWaypointIndicesIndex
+    }
+
+    private fun List<Boolean>?.withFirstTrue(
+        remainingWaypoints: Int,
+        index: Int,
+        coordinatesListSize: Int,
+    ): List<Boolean?> {
+        return mutableListOf<Boolean?>().also { newList ->
+            // append true for the origin of the re-route request
+            newList.add(true)
+            if (isNullOrEmpty()) {
+                // create `null` value for each upcoming waypoint
+                newList.addAll(arrayOfNulls<Boolean>(remainingWaypoints))
+            } else {
+                // get existing values for each upcoming waypoint
+                newList.addAll(subList(index + 1, coordinatesListSize))
+            }
+        }
     }
 
     /**
