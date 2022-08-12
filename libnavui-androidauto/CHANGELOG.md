@@ -5,11 +5,23 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+
+## androidauto-v0.7.0 - Aug 12, 2022
+### Changelog
+[Changes between 0.6.0 and 0.7.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.6.0...androidauto-v0.7.0)
+
+#### Bug fixes and improvements
 - Added metalava api tracking. Removed `AndroidAutoLog` and `RendererUtils` from public api. [#6130](https://github.com/mapbox/mapbox-navigation-android/pull/6130)
 - Bumped maps extension version to fix AAOS issue when changing screens. [#6139](https://github.com/mapbox/mapbox-navigation-android/pull/6139)
 - Added an option to override items displayed in the feedback screen. [#6144](https://github.com/mapbox/mapbox-navigation-android/pull/6144)
 - Fixed an issue with alternative route line not vanishing. [#6153](https://github.com/mapbox/mapbox-navigation-android/pull/6153)
 - Added an option to override route options used for route requests. [#6153](https://github.com/mapbox/mapbox-navigation-android/pull/6153)
+
+### Mapbox dependencies
+This release defines minimum versions for the Mapbox dependencies.
+- Mapbox Maps Android Auto Extension `v0.2.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/extension-androidauto-v0.2.0))
+- Mapbox Navigation `v2.7.0-rc.2` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/v2.7.0-rc.2))
+- Mapbox Search `v1.0.0-beta.34` ([release notes](https://github.com/mapbox/mapbox-search-android/releases/tag/v1.0.0-beta.34))
 
 ## androidauto-v0.6.0 - Jul 29, 2022
 ### Changelog
