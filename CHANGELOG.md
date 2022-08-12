@@ -18,6 +18,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed calculation of `AlternativeRouteMetadata` (duration and distance). [#6168](https://github.com/mapbox/mapbox-navigation-android/pull/6168)
 - Updated `NavigationView` to render upcoming maneuvers. [#6175](https://github.com/mapbox/mapbox-navigation-android/pull/6175)
 - Made the SDK use `snapping_include_static_closures=true` for an origin of each re-route request. Similar to `snapping_include_closures=true`, but it includes statically closed roads, that is long-term. [#6164](https://github.com/mapbox/mapbox-navigation-android/pull/6164)
+- Added `RouteLegProgress#geometryIndex` and `RouteProgress#currentRouteGeometryIndex`. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
 
 ## Mapbox Navigation SDK 2.7.0 - 17 August, 2022
 ### Changelog
@@ -144,7 +145,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
 
 - Fixed an issue where `NavigationView` switches from Active Guidance to Free Drive state after rotating device when replay is enabled. [#6140](https://github.com/mapbox/mapbox-navigation-android/pull/6140) 
-- Added `RouteLegProgress#geometryIndex` and `RouteProgress#currentRouteGeometryIndex`. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
 
 ## Mapbox Navigation SDK 2.8.0-alpha.1 - 04 August, 2022
 ### Changelog
