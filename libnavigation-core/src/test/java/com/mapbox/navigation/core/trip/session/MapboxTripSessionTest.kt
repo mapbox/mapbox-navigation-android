@@ -150,7 +150,7 @@ class MapboxTripSessionTest {
         coEvery { navigator.setRoutes(any(), any(), any()) } returns createSetRouteResult()
         coEvery { navigator.setAlternativeRoutes(any()) } returns listOf()
         coEvery {
-            navigator.refreshRoute(any(), any())
+            navigator.refreshRoute(any())
         } returns ExpectedFactory.createValue(listOf())
         every { navigationStatus.getTripStatusFrom(any()) } returns tripStatus
 
@@ -601,26 +601,13 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun checkNavigatorRefreshRouteWhenReasonIsRefreshNoGeometryIndex() =
+    fun checkNavigatorRefreshRouteWhenReasonIsRefresh() =
         coroutineRule.runBlockingTest {
             tripSession.start(true)
 
             tripSession.setRoutes(routes, SetRefreshedRoutesInfo(CurrentIndicesSnapshot()))
 
-            coVerify(exactly = 1) { navigator.refreshRoute(routes[0], null) }
-            coVerify(exactly = 0) { navigator.setRoutes(any()) }
-            coVerify(exactly = 0) { navigator.setAlternativeRoutes(any()) }
-        }
-
-    @Test
-    fun checkNavigatorRefreshRouteWhenReasonIsRefreshHasGeometryIndex() =
-        coroutineRule.runBlockingTest {
-            tripSession.start(true)
-            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
-
-            tripSession.setRoutes(routes, SetRefreshedRoutesInfo(indicesSnapshot))
-
-            coVerify(exactly = 1) { navigator.refreshRoute(routes[0], geometryIndex) }
+            coVerify(exactly = 1) { navigator.refreshRoute(routes[0]) }
             coVerify(exactly = 0) { navigator.setRoutes(any()) }
             coVerify(exactly = 0) { navigator.setAlternativeRoutes(any()) }
         }
@@ -639,7 +626,7 @@ class MapboxTripSessionTest {
             coVerify(exactly = 0) {
                 navigator.setRoutes(routes.first(), 2, any())
             }
-            coVerify(exactly = 0) { navigator.refreshRoute(any(), any()) }
+            coVerify(exactly = 0) { navigator.refreshRoute(any()) }
         }
 
     @Test
@@ -717,7 +704,7 @@ class MapboxTripSessionTest {
         coroutineRule.runBlockingTest {
             val mockAlternativesMetadata = listOf<RouteAlternative>(mockk())
             coEvery {
-                navigator.refreshRoute(any(), any())
+                navigator.refreshRoute(any())
             } returns ExpectedFactory.createValue(mockAlternativesMetadata)
 
             tripSession.start(true)
@@ -737,7 +724,7 @@ class MapboxTripSessionTest {
         coroutineRule.runBlockingTest {
             val error = "some error"
             coEvery {
-                navigator.refreshRoute(any(), any())
+                navigator.refreshRoute(any())
             } returns ExpectedFactory.createError(error)
 
             tripSession.start(true)

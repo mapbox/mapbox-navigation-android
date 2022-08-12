@@ -12,14 +12,19 @@ import okhttp3.mockwebserver.RecordedRequest
  */
 data class MockDirectionsRefreshHandler(
     val testUuid: String,
-    val jsonResponse: String
+    val jsonResponse: String,
+    val acceptedGeometryIndex: Int? = null,
 ) : MockRequestHandler {
     override fun handle(request: RecordedRequest): MockResponse? {
         val prefix = """/directions-refresh/v1/mapbox/driving-traffic/$testUuid"""
-        return if (request.path!!.startsWith(prefix)) {
-            MockResponse().setBody(jsonResponse)
-        } else {
-            null
+        if (request.path!!.startsWith(prefix)) {
+            val currentGeometryIndex = request.requestUrl
+                ?.queryParameter("current_route_geometry_index")
+                ?.toInt()
+            if (acceptedGeometryIndex == null || acceptedGeometryIndex == currentGeometryIndex) {
+                return MockResponse().setBody(jsonResponse)
+            }
         }
+        return null
     }
 }

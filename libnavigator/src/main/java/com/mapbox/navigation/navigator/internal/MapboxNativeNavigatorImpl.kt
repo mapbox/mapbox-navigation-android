@@ -208,8 +208,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * to [Navigator.refreshRoute], not only the annotations/incidents collections.
      */
     override suspend fun refreshRoute(
-        route: NavigationRoute,
-        geometryIndex: Int?,
+        route: NavigationRoute
     ): Expected<String, List<RouteAlternative>> {
         val refreshedLegs = route.directionsRoute.legs()?.map { routeLeg ->
             RouteLegRefresh.builder()
@@ -263,18 +262,10 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             )
         }
         return suspendCancellableCoroutine { continuation ->
-            if (geometryIndex == null) {
-                navigator!!.refreshRoute(
-                    refreshResponseJson,
-                    route.nativeRoute().routeId
-                ) { callback(continuation, it) }
-            } else {
-                navigator!!.refreshRoute(
-                    refreshResponseJson,
-                    route.nativeRoute().routeId,
-                    geometryIndex,
-                ) { callback(continuation, it) }
-            }
+            navigator!!.refreshRoute(
+                refreshResponseJson,
+                route.nativeRoute().routeId
+            ) { callback(continuation, it) }
         }
     }
 

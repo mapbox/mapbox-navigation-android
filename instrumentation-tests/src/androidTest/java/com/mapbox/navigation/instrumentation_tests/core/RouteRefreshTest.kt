@@ -1,6 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
+import androidx.annotation.IntegerRes
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -62,22 +63,32 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     val idlingPolicyRule = IdlingPolicyTimeoutRule(35, TimeUnit.SECONDS)
 
     private lateinit var mapboxNavigation: MapboxNavigation
-    private val coordinates = listOf(
+    private val twoCoordinates = listOf(
         Point.fromLngLat(-121.496066, 38.577764),
         Point.fromLngLat(-121.480279, 38.57674)
+    )
+    private val threeCoordinates = listOf(
+        Point.fromLngLat(-121.496066, 38.577764),
+        Point.fromLngLat(-121.480279, 38.57674),
+        Point.fromLngLat(-121.468434, 38.58225)
     )
 
     private lateinit var failByRequestRouteRefreshResponse: FailByRequestMockRequestHandler
 
     override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
-        latitude = coordinates[0].latitude()
-        longitude = coordinates[0].longitude()
+        latitude = twoCoordinates[0].latitude()
+        longitude = twoCoordinates[0].longitude()
         bearing = 190f
     }
 
     @Before
     fun setup() {
-        setupMockRequestHandlers(coordinates)
+        setupMockRequestHandlers(
+            twoCoordinates,
+            R.raw.route_response_route_refresh,
+            R.raw.route_response_route_refresh_annotations,
+            "route_response_route_refresh"
+        )
 
         runOnMainSync {
             val routeRefreshOptions = RouteRefreshOptions.Builder()
@@ -105,7 +116,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     @Test
     fun expect_route_refresh_to_update_traffic_annotations_and_incidents_for_all_routes() =
         sdkTest {
-            val routeOptions = generateRouteOptions(coordinates)
+            val routeOptions = generateRouteOptions(twoCoordinates)
             val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
                 .getSuccessfulResultOrThrowException()
                 .routes
@@ -160,7 +171,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 initialRoutes[0].getDurationAnnotationsFromLeg(0)
             )
             assertEquals(227.918, initialRoutes[0].getDurationOfLeg(0), 0.0001)
-            assertEquals(1189.651, refreshedRoutes[0].getDurationOfLeg(0), 0.0001)
+            assertEquals(287.063, refreshedRoutes[0].getDurationOfLeg(0), 0.0001)
 
             assertEquals(
                 requestedRoutes[1].getDurationOfLeg(0),
@@ -168,12 +179,12 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 0.0
             )
             assertEquals(224.2239, initialRoutes[1].getDurationOfLeg(0), 0.0001)
-            assertEquals(1189.651, refreshedRoutes[1].getDurationOfLeg(0), 0.0001)
+            assertEquals(258.767, refreshedRoutes[1].getDurationOfLeg(0), 0.0001)
         }
 
     @Test
     fun routeRefreshesWorksAfterSettingsNewRoutes() = sdkTest {
-        val routeOptions = generateRouteOptions(coordinates)
+        val routeOptions = generateRouteOptions(twoCoordinates)
         val routes = mapboxNavigation.requestRoutes(routeOptions)
             .getSuccessfulResultOrThrowException()
             .routes
@@ -189,7 +200,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
 
     @Test
     fun routeSuccessfullyRefreshesAfterInvalidationOfExpiringData() = sdkTest {
-        val routeOptions = generateRouteOptions(coordinates)
+        val routeOptions = generateRouteOptions(twoCoordinates)
         val routes = mapboxNavigation.requestRoutes(routeOptions)
             .getSuccessfulResultOrThrowException()
             .routes
@@ -219,7 +230,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
 
     @Test
     fun routeAlternativeMetadataUpdatedAlongWithRouteRefresh() = sdkTest {
-        val routeOptions = generateRouteOptions(coordinates)
+        val routeOptions = generateRouteOptions(twoCoordinates)
         val routes = mapboxNavigation.requestRoutes(routeOptions)
             .getSuccessfulResultOrThrowException()
             .routes
@@ -245,11 +256,95 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         assertEquals(277.0, alternativesMetadata.infoFromStartOfPrimary.duration, 1.0)
     }
 
+    @Test
+    fun expect_route_refresh_to_update_annotations_for_truncated_current_leg() =
+        sdkTest {
+            setupMockRequestHandlers(
+                twoCoordinates,
+                R.raw.route_response_route_refresh,
+                R.raw.route_response_route_refresh_truncated_first_leg,
+                "route_response_route_refresh",
+                acceptedGeometryIndex = 5
+            )
+            val routeOptions = generateRouteOptions(twoCoordinates)
+            val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+
+            mapboxNavigation.setNavigationRoutes(requestedRoutes)
+            mapboxNavigation.startTripSession()
+            // corresponds to currentRouteGeometryIndex = 5
+            stayOnPosition(38.57622, -121.496731)
+            mapboxNavigation.routeProgressUpdates()
+                .filter { it.currentRouteGeometryIndex == 5 }
+                .first()
+            val refreshedRoutes = mapboxNavigation.routesUpdates()
+                .filter {
+                    it.reason == ROUTES_UPDATE_REASON_REFRESH &&
+                        it.navigationRoutes[0].getDurationAnnotationsFromLeg(0) !=
+                        requestedRoutes[0].getDurationAnnotationsFromLeg(0)
+                }
+                .first()
+                .navigationRoutes
+
+            assertEquals(224.224, requestedRoutes[0].getDurationOfLeg(0), 0.0001)
+            assertEquals(169.582, refreshedRoutes[0].getDurationOfLeg(0), 0.0001)
+
+            assertEquals(227.918, requestedRoutes[1].getDurationOfLeg(0), 0.0001)
+            assertEquals(234.024, refreshedRoutes[1].getDurationOfLeg(0), 0.0001)
+        }
+
+    @Test
+    fun expect_route_refresh_to_update_annotations_for_truncated_next_leg() =
+        sdkTest {
+            setupMockRequestHandlers(
+                threeCoordinates,
+                R.raw.route_response_route_refresh_multileg,
+                R.raw.route_response_route_refresh_truncated_next_leg,
+                "route_response_route_refresh_multileg",
+                acceptedGeometryIndex = 5
+            )
+            val routeOptions = generateRouteOptions(threeCoordinates)
+            val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+
+            mapboxNavigation.setNavigationRoutes(requestedRoutes)
+            mapboxNavigation.startTripSession()
+            // corresponds to currentRouteGeometryIndex = 5
+            stayOnPosition(38.57622, -121.496731)
+            mapboxNavigation.routeProgressUpdates()
+                .filter { it.currentRouteGeometryIndex == 5 }
+                .first()
+            val refreshedRoutes = mapboxNavigation.routesUpdates()
+                .filter {
+                    it.reason == ROUTES_UPDATE_REASON_REFRESH &&
+                        it.navigationRoutes[0].getDurationAnnotationsFromLeg(1) !=
+                        requestedRoutes[0].getDurationAnnotationsFromLeg(1)
+                }
+                .first()
+                .navigationRoutes
+
+            assertEquals(201.673, requestedRoutes[0].getDurationOfLeg(1), 0.0001)
+            assertEquals(189.086, refreshedRoutes[0].getDurationOfLeg(1), 0.0001)
+        }
+
     private fun stayOnInitialPosition() {
         mockLocationReplayerRule.loopUpdate(
             mockLocationUpdatesRule.generateLocationUpdate {
-                latitude = coordinates[0].latitude()
-                longitude = coordinates[0].longitude()
+                latitude = twoCoordinates[0].latitude()
+                longitude = twoCoordinates[0].longitude()
+                bearing = 190f
+            },
+            times = 120
+        )
+    }
+
+    private fun stayOnPosition(latitude: Double, longitude: Double) {
+        mockLocationReplayerRule.loopUpdate(
+            mockLocationUpdatesRule.generateLocationUpdate {
+                this.latitude = latitude
+                this.longitude = longitude
                 bearing = 190f
             },
             times = 120
@@ -262,25 +357,33 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             .first()
 
     private fun isRefreshedRouteDistance(it: RouteProgress): Boolean {
-        val expectedDurationRemaining = 1180.651
+        val expectedDurationRemaining = 287.063
         // 30 seconds margin of error
         return (it.durationRemaining - expectedDurationRemaining).absoluteValue < 30
     }
 
     // Will be ignored when .baseUrl(mockWebServerRule.baseUrl) is commented out
     // in the requestDirectionsRouteSync function.
-    private fun setupMockRequestHandlers(coordinates: List<Point>) {
+    private fun setupMockRequestHandlers(
+        coordinates: List<Point>,
+        @IntegerRes routesResponse: Int,
+        @IntegerRes refreshResponse: Int,
+        responseTestUuid: String,
+        acceptedGeometryIndex: Int? = null,
+    ) {
+        mockWebServerRule.requestHandlers.clear()
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRequestHandler(
                 "driving-traffic",
-                readRawFileText(activity, R.raw.route_response_route_refresh),
+                readRawFileText(activity, routesResponse),
                 coordinates
             )
         )
         failByRequestRouteRefreshResponse = FailByRequestMockRequestHandler(
             MockDirectionsRefreshHandler(
-                "route_response_route_refresh",
-                readRawFileText(activity, R.raw.route_response_route_refresh_annotations)
+                responseTestUuid,
+                readRawFileText(activity, refreshResponse),
+                acceptedGeometryIndex
             )
         )
         mockWebServerRule.requestHandlers.add(failByRequestRouteRefreshResponse)

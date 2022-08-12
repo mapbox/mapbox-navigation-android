@@ -49,7 +49,7 @@ fun NavigationRoute.refreshRoute(
                     AnnotationsRefresher.getRefreshedAnnotations(
                         routeLeg.annotation(),
                         newAnnotation,
-                    startingLegGeometryIndex = 0
+                        startingLegGeometryIndex = 0
                     )
                 }
             routeLeg.toBuilder()

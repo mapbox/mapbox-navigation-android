@@ -103,10 +103,7 @@ internal class MapboxTripSession(
             is SetRefreshedRoutesInfo -> {
                 if (routes.isNotEmpty()) {
                     val primaryRoute = routes.first()
-                    val alternatives = navigator.refreshRoute(
-                        primaryRoute,
-                        setRoutesInfo.currentIndicesSnapshot.routeGeometryIndex
-                    )
+                    val alternatives = navigator.refreshRoute(primaryRoute)
                     roadObjects = getRouteInitInfo(primaryRoute.nativeRoute().routeInfo)
                         ?.roadObjects
                         ?: emptyList()
