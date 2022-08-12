@@ -43,6 +43,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
+        <com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton
+            android:id="@+id/cameraModeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp" />
+
         <com.mapbox.navigation.ui.base.view.MapboxExtendableButton
             android:id="@+id/recenterButton"
             android:layout_width="wrap_content"

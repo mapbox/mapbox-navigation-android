@@ -13,7 +13,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.ActionButtonDescription
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.component.cameramode.CameraModeButtonComponent
+import com.mapbox.navigation.dropin.component.cameramode.CameraModeButtonComponentContractImpl
 import com.mapbox.navigation.dropin.component.recenter.RecenterButtonComponentContractImpl
 import com.mapbox.navigation.dropin.databinding.MapboxActionButtonsLayoutBinding
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
@@ -21,6 +21,7 @@ import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.audioguidance.AudioAction
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
+import com.mapbox.navigation.ui.maps.internal.ui.CameraModeButtonComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RecenterButtonComponent
 import com.mapbox.navigation.ui.voice.internal.ui.AudioComponentContract
 import com.mapbox.navigation.ui.voice.internal.ui.AudioGuidanceButtonComponent
@@ -43,11 +44,7 @@ internal class ActionButtonBinder(
                 audioGuidanceButtonComponent(binding, style, store)
             },
             reloadOnChange(context.styles.cameraModeButtonStyle) { style ->
-                CameraModeButtonComponent(
-                    store = store,
-                    cameraModeButton = binding.cameraModeButton,
-                    cameraModeStyle = style
-                )
+                cameraModeButtonComponent(binding, style, store)
             },
             reloadOnChange(context.styles.recenterButtonStyle) { style ->
                 recenterButtonComponent(binding, style, store)
@@ -89,6 +86,16 @@ internal class ActionButtonBinder(
         return AudioGuidanceButtonComponent(binding.soundButton, style, contractProvider = {
             AudioComponentContractImpl(context.viewModel.viewModelScope, store)
         })
+    }
+
+    private fun cameraModeButtonComponent(
+        binding: MapboxActionButtonsLayoutBinding,
+        style: Int,
+        store: Store
+    ): CameraModeButtonComponent {
+        return CameraModeButtonComponent(binding.cameraModeButton, contractProvider = {
+            CameraModeButtonComponentContractImpl(context.viewModel.viewModelScope, store)
+        }, style)
     }
 
     private fun recenterButtonComponent(

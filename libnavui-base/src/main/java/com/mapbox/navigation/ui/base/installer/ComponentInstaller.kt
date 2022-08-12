@@ -24,6 +24,11 @@ sealed interface ComponentInstaller {
      * Install multiple UIComponents and manage their lifecycle alongside MapboxNavigation lifecycle.
      */
     fun components(vararg components: UIComponent): Installation
+
+    /**
+     * Find installed component that matches given [predicate].
+     */
+    fun findComponent(predicate: (Any) -> Boolean): UIComponent?
 }
 
 /**
@@ -126,4 +131,18 @@ internal class NavigationComponents(
         componentsChain.addAll(*components)
         return Installation { componentsChain.removeAndDetach(*components) }
     }
+
+    override fun findComponent(predicate: (Any) -> Boolean): UIComponent? {
+        return componentsChain.toList().firstOrNull(predicate) as? UIComponent
+    }
+}
+
+/**
+ * Find installed component of type T.
+ *
+ * Shorthand for `findComponent { it is T } as? T`
+ */
+@ExperimentalPreviewMapboxNavigationAPI
+inline fun <reified T : UIComponent> ComponentInstaller.findComponent(): T? {
+    return findComponent { it is T } as? T
 }

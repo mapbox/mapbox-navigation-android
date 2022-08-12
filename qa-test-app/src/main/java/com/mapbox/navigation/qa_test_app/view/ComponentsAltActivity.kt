@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -16,14 +17,17 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.ComponentsActivityLayoutBinding
 import com.mapbox.navigation.qa_test_app.lifecycle.DropInLocationPuck
-import com.mapbox.navigation.qa_test_app.lifecycle.DropInNavigationCamera
 import com.mapbox.navigation.qa_test_app.lifecycle.DropInStartReplayButton
 import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInLocationViewModel
 import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInNavigationViewModel
 import com.mapbox.navigation.qa_test_app.utils.Utils.getMapboxAccessToken
+import com.mapbox.navigation.qa_test_app.view.customnavview.dp
 import com.mapbox.navigation.ui.base.installer.Installation
 import com.mapbox.navigation.ui.base.installer.installComponents
 import com.mapbox.navigation.ui.maps.NavigationStyles
+import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
+import com.mapbox.navigation.ui.maps.installer.cameraModeButton
+import com.mapbox.navigation.ui.maps.installer.navigationCamera
 import com.mapbox.navigation.ui.maps.installer.recenterButton
 import com.mapbox.navigation.ui.maps.installer.routeArrow
 import com.mapbox.navigation.ui.maps.installer.routeLine
@@ -75,6 +79,14 @@ class ComponentsAltActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
+        val dataSource = MapboxNavigationViewportDataSource(
+            mapboxMap = binding.mapView.getMapboxMap()
+        ).apply {
+            val insets = EdgeInsets(0.0, 0.0, 100.dp.toDouble(), 0.0)
+            overviewPadding = insets
+            followingPadding = insets
+        }
+
         //
         // Components installation via existing MapboxNavigation instance
         //
@@ -96,6 +108,11 @@ class ComponentsAltActivity : AppCompatActivity() {
                     .duration(1000L)
                     .build()
             }
+            cameraModeButton(binding.cameraModeButton)
+            navigationCamera(binding.mapView) {
+                switchToIdleOnMapGesture = true
+                viewportDataSource = dataSource
+            }
 
             // custom components
             component(FindRouteOnLongPress(binding.mapView))
@@ -106,14 +123,14 @@ class ComponentsAltActivity : AppCompatActivity() {
                     locationViewModel.navigationLocationProvider
                 )
             )
-            component(
-                DropInNavigationCamera(
-                    viewModel,
-                    locationViewModel,
-                    this@ComponentsAltActivity,
-                    binding.mapView
-                )
-            )
+            // component(
+            //     DropInNavigationCamera(
+            //         viewModel,
+            //         locationViewModel,
+            //         this@ComponentsAltActivity,
+            //         binding.mapView
+            //     )
+            // )
         }
     }
 
