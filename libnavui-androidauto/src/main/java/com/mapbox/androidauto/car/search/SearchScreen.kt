@@ -9,6 +9,7 @@ import androidx.car.app.model.ItemList
 import androidx.car.app.model.Row
 import androidx.car.app.model.SearchTemplate
 import androidx.car.app.model.Template
+import androidx.lifecycle.lifecycleScope
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSearchOptions
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
@@ -18,12 +19,17 @@ import com.mapbox.androidauto.car.preview.CarRouteRequestCallback
 import com.mapbox.androidauto.car.preview.RoutePreviewCarContext
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.internal.logAndroidAutoFailure
+import com.mapbox.maps.MapboxExperimental
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.internal.extensions.attachCreated
 import com.mapbox.search.result.SearchSuggestion
+import kotlinx.coroutines.launch
 
 /**
  * This screen allows the user to search for a destination.
  */
+@OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)
 class SearchScreen(
     private val searchCarContext: SearchCarContext,
 ) : Screen(searchCarContext.carContext) {
@@ -53,6 +59,10 @@ class SearchScreen(
         override fun onNoRoutesFound() {
             onErrorItemList(R.string.car_search_no_results)
         }
+    }
+
+    init {
+        attachCreated(searchCarContext.carPlaceSearch)
     }
 
     override fun onGetTemplate(): Template {
@@ -87,7 +97,10 @@ class SearchScreen(
     }
 
     fun doSearch(searchText: String) {
-        searchCarContext.carSearchEngine.search(searchText) { suggestions ->
+        lifecycleScope.launch {
+            val suggestions = searchCarContext.carPlaceSearch.search(searchText)
+                .onFailure { logAndroidAutoFailure("Search query failed", it) }
+                .getOrDefault(emptyList())
             searchSuggestions = suggestions
             if (suggestions.isEmpty()) {
                 onErrorItemList(R.string.car_search_no_results)
@@ -115,7 +128,10 @@ class SearchScreen(
 
     private fun onClickSearch(searchSuggestion: SearchSuggestion) {
         logAndroidAuto("onClickSearch $searchSuggestion")
-        searchCarContext.carSearchEngine.select(searchSuggestion) { searchResults ->
+        lifecycleScope.launch {
+            val searchResults = searchCarContext.carPlaceSearch.select(searchSuggestion)
+                .onFailure { logAndroidAutoFailure("Search select failed", it) }
+                .getOrDefault(emptyList())
             logAndroidAuto("onClickSearch select ${searchResults.joinToString()}")
             if (searchResults.isNotEmpty()) {
                 searchCarContext.carRouteRequest.request(
@@ -134,11 +150,4 @@ class SearchScreen(
     private fun buildErrorItemList(@StringRes stringRes: Int) = ItemList.Builder()
         .setNoItemsMessage(carContext.getString(stringRes))
         .build()
-
-    companion object {
-        // TODO turn this into something typesafe
-        fun parseResult(results: Any?): Any? {
-            return results
-        }
-    }
 }

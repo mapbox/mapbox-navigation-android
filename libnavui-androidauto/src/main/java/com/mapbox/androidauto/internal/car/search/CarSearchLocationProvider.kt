@@ -1,4 +1,4 @@
-package com.mapbox.navigation.qa_test_app.car.search
+package com.mapbox.androidauto.internal.car.search
 
 import android.app.PendingIntent
 import android.location.Location
@@ -8,6 +8,7 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -15,11 +16,15 @@ import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import java.util.concurrent.ConcurrentHashMap
 
-// TODO probably can be removed once https://github.com/mapbox/mapbox-search-sdk/issues/671 fixed
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class CarSearchLocationProvider : LocationEngine, MapboxNavigationObserver {
 
-    private var location: Location? = null
+    var location: Location? = null
+        private set
+    var point: Point? = null
+        get() = location?.let { Point.fromLngLat(it.longitude, it.latitude) }
+        private set
+
     private val callbacks =
         ConcurrentHashMap<LocationEngineCallback<LocationEngineResult>, Looper?>()
 

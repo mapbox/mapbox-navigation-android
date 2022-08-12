@@ -49,10 +49,10 @@ package com.mapbox.androidauto.car {
   }
 
   public final class MainCarContext {
-    ctor public MainCarContext(androidx.car.app.CarContext carContext, com.mapbox.maps.extension.androidauto.MapboxCarMap mapboxCarMap, com.mapbox.search.SearchEngine searchEngine, com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider feedbackPollProvider = com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider(), com.mapbox.androidauto.car.preview.CarRouteOptionsInterceptor routeOptionsInterceptor = CarRouteOptionsInterceptor({ var it: com.mapbox.api.directions.v5.models.RouteOptions.Builder ->
+    ctor public MainCarContext(androidx.car.app.CarContext carContext, com.mapbox.maps.extension.androidauto.MapboxCarMap mapboxCarMap, com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider feedbackPollProvider = com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider(), com.mapbox.androidauto.car.preview.CarRouteOptionsInterceptor routeOptionsInterceptor = CarRouteOptionsInterceptor({ var it: com.mapbox.api.directions.v5.models.RouteOptions.Builder ->
 
     return it
-}));
+}), com.mapbox.search.SearchEngineSettings? searchEngineSettings = null);
     method public androidx.car.app.CarContext getCarContext();
     method public com.mapbox.androidauto.car.settings.CarSettingsStorage getCarSettingsStorage();
     method public com.mapbox.navigation.base.formatter.DistanceFormatter getDistanceFormatter();
@@ -62,7 +62,7 @@ package com.mapbox.androidauto.car {
     method public com.mapbox.maps.extension.androidauto.MapboxCarMap getMapboxCarMap();
     method public com.mapbox.navigation.core.MapboxNavigation getMapboxNavigation();
     method public com.mapbox.androidauto.car.preview.CarRouteOptionsInterceptor getRouteOptionsInterceptor();
-    method public com.mapbox.search.SearchEngine getSearchEngine();
+    method public com.mapbox.search.SearchEngineSettings? getSearchEngineSettings();
     property public final androidx.car.app.CarContext carContext;
     property public final com.mapbox.androidauto.car.settings.CarSettingsStorage carSettingsStorage;
     property public final com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter;
@@ -71,7 +71,7 @@ package com.mapbox.androidauto.car {
     property public final com.mapbox.maps.extension.androidauto.MapboxCarMap mapboxCarMap;
     property public final com.mapbox.navigation.core.MapboxNavigation mapboxNavigation;
     property public final com.mapbox.androidauto.car.preview.CarRouteOptionsInterceptor routeOptionsInterceptor;
-    property public final com.mapbox.search.SearchEngine searchEngine;
+    property public final com.mapbox.search.SearchEngineSettings? searchEngineSettings;
   }
 
   public final class MainCarScreen extends androidx.car.app.Screen {
@@ -680,10 +680,9 @@ package com.mapbox.androidauto.car.preview {
 
 package com.mapbox.androidauto.car.search {
 
-  public final class CarSearchEngine {
-    ctor public CarSearchEngine(com.mapbox.search.SearchEngine searchEngine, com.mapbox.navigation.ui.maps.location.NavigationLocationProvider navigationLocationProvider);
-    method public void search(String query, kotlin.jvm.functions.Function1<? super java.util.List<? extends com.mapbox.search.result.SearchSuggestion>,kotlin.Unit> callback);
-    method public void select(com.mapbox.search.result.SearchSuggestion selection, kotlin.jvm.functions.Function1<? super java.util.List<? extends com.mapbox.search.result.SearchResult>,kotlin.Unit> callback);
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface CarPlaceSearch extends com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    method public suspend Object? search(String query, kotlin.coroutines.Continuation<? super kotlin.Result<? extends java.util.List<? extends com.mapbox.search.result.SearchSuggestion>>>);
+    method public suspend Object? select(com.mapbox.search.result.SearchSuggestion selection, kotlin.coroutines.Continuation<? super kotlin.Result<? extends java.util.List<? extends com.mapbox.search.result.SearchResult>>>);
   }
 
   public final class FavoritesApi implements com.mapbox.androidauto.car.feedback.core.CarFeedbackSearchOptionsProvider com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapProvider {
@@ -727,14 +726,14 @@ package com.mapbox.androidauto.car.search {
   public final class SearchCarContext {
     ctor public SearchCarContext(com.mapbox.androidauto.car.MainCarContext mainCarContext);
     method public androidx.car.app.CarContext getCarContext();
+    method public com.mapbox.androidauto.car.search.CarPlaceSearch getCarPlaceSearch();
     method public com.mapbox.androidauto.car.preview.CarRouteRequest getCarRouteRequest();
-    method public com.mapbox.androidauto.car.search.CarSearchEngine getCarSearchEngine();
     method public com.mapbox.navigation.base.formatter.DistanceFormatter getDistanceFormatter();
     method public com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider getFeedbackPollProvider();
     method public com.mapbox.androidauto.car.MainCarContext getMainCarContext();
     property public final androidx.car.app.CarContext carContext;
+    property public final com.mapbox.androidauto.car.search.CarPlaceSearch carPlaceSearch;
     property public final com.mapbox.androidauto.car.preview.CarRouteRequest carRouteRequest;
-    property public final com.mapbox.androidauto.car.search.CarSearchEngine carSearchEngine;
     property public final com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter;
     property public final com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider feedbackPollProvider;
     property public final com.mapbox.androidauto.car.MainCarContext mainCarContext;
@@ -747,11 +746,6 @@ package com.mapbox.androidauto.car.search {
     method public androidx.car.app.model.Template onGetTemplate();
     method public void setItemList(androidx.car.app.model.ItemList);
     property public final androidx.car.app.model.ItemList itemList;
-    field public static final com.mapbox.androidauto.car.search.SearchScreen.Companion Companion;
-  }
-
-  public static final class SearchScreen.Companion {
-    method public Object? parseResult(Object? results);
   }
 
 }

@@ -4,42 +4,55 @@ import android.text.SpannableString
 import androidx.car.app.model.Row
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.testing.MapboxRobolectricTestRunner
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.search.result.SearchSuggestion
 import io.mockk.CapturingSlot
 import io.mockk.Runs
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
 class SearchScreenTest : MapboxRobolectricTestRunner() {
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     private val searchCarContext: SearchCarContext = mockk {
         every { carContext } returns mockk {
             every { getString(R.string.car_search_no_results) } returns "No results"
         }
-        every { carSearchEngine } returns mockk()
+        every { carPlaceSearch } returns mockk(relaxed = true)
         every { distanceFormatter } returns mockk()
     }
 
     private val searchScreen = SearchScreen(searchCarContext)
 
     @Test
-    fun `search suggestion create list row`() {
-        val callbackSlot = mockSearch("starbucks")
-        mockDistanceFormat(559.39, "0.3 mi")
-
-        searchScreen.doSearch("starbucks")
-        callbackSlot.captured(
+    fun `search suggestion create list row`() = coroutineRule.runBlockingTest {
+        coEvery {
+            searchCarContext.carPlaceSearch.search("starbucks")
+        } returns Result.success(
             listOf(
-                mockSearchSuggestion(
-                    mockName = "Starbucks",
-                    mockDistanceMeters = 559.39
-                )
+                mockk {
+                    every { name } returns "Starbucks"
+                    every { distanceMeters } returns 559.39
+                }
             )
         )
+
+        every {
+            searchCarContext.distanceFormatter.formatDistance(559.39)
+        } returns SpannableString.valueOf("0.3 mi")
+
+        searchScreen.doSearch("starbucks")
 
         val firstResult = searchScreen.itemList.items[0] as Row
         assertEquals("Starbucks", firstResult.title.toString())
@@ -48,37 +61,13 @@ class SearchScreenTest : MapboxRobolectricTestRunner() {
 
     @Test
     fun `empty search creates no results item`() {
-        val callbackSlot = mockSearch("starbucks")
+        coEvery {
+            searchCarContext.carPlaceSearch.search("starbucks")
+        } returns Result.success(listOf())
 
         searchScreen.doSearch("starbucks")
-        callbackSlot.captured(emptyList())
 
         assertTrue(searchScreen.itemList.items.isEmpty())
         assertEquals("No results", searchScreen.itemList.noItemsMessage.toString())
-    }
-
-    private fun mockSearch(query: String): CapturingSlot<(List<SearchSuggestion>) -> Unit> {
-        val callbackSlot = CapturingSlot<(List<SearchSuggestion>) -> Unit>()
-        every {
-            searchCarContext.carSearchEngine.search(query, capture(callbackSlot))
-        } just Runs
-        return callbackSlot
-    }
-
-    private fun mockSearchSuggestion(
-        mockName: String = "Starbucks",
-        mockDistanceMeters: Double? = 559.3991196008689
-    ): SearchSuggestion = mockk {
-        every { name } returns mockName
-        every { distanceMeters } returns mockDistanceMeters
-    }
-
-    private fun mockDistanceFormat(
-        value: Double = 559.3991196008689,
-        formatted: String = "0.3 mi"
-    ) {
-        every {
-            searchCarContext.distanceFormatter.formatDistance(value)
-        } returns SpannableString.valueOf(formatted)
     }
 }

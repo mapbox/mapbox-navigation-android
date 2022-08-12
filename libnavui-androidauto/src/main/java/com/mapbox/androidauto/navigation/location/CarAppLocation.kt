@@ -9,7 +9,7 @@ import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 
 /**
  * Provides a way to access the car or app navigation location.
- * Access through [MapboxCarApp.carAppServices].
+ * Access through [MapboxCarApp.carAppLocationService].
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 interface CarAppLocation : MapboxNavigationObserver {
