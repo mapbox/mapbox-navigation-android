@@ -6,6 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 - Added the `isUrban` flag to `EHorizonEdgeMetadata` which define if an edge is in urban area. [#6178](https://github.com/mapbox/mapbox-navigation-android/pull/6178)
 - Added the `isUrban` flag to `RoadObject` which define if an object is in urban area. Might be `null` if it's not possible to define. [#6178](https://github.com/mapbox/mapbox-navigation-android/pull/6178)
+- Added `ComponentInstaller` for the `RecenterButtonComponent` that offers simplified integration of map recenter button. [#6158](https://github.com/mapbox/mapbox-navigation-android/pull/6158)
 
 #### Bug fixes and improvements
 - Updated `NavigationView` to allow drawing of the info panel behind the translucent navigation bar. [#6145](https://github.com/mapbox/mapbox-navigation-android/pull/6145)
