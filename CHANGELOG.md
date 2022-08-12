@@ -13,6 +13,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue where some callbacks for completed operations would be invoked again if the `TileStore` service process was terminated. [#6168](https://github.com/mapbox/mapbox-navigation-android/pull/6168)
 - Fixed calculation of `AlternativeRouteMetadata` (duration and distance). [#6168](https://github.com/mapbox/mapbox-navigation-android/pull/6168)
 - Updated `NavigationView` to render upcoming maneuvers. [#6175](https://github.com/mapbox/mapbox-navigation-android/pull/6175)
+- Made the SDK use `snapping_include_static_closures=true` for an origin of each re-route request. Similar to `snapping_include_closures=true`, but it includes statically closed roads, that is long-term. [#6164](https://github.com/mapbox/mapbox-navigation-android/pull/6164)
 
 ## Mapbox Navigation SDK 2.8.0-alpha.2 - 12 August, 2022
 ### Changelog
