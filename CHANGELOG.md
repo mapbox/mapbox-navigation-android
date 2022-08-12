@@ -4,12 +4,29 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.8.0-alpha.2 - 12 August, 2022
+### Changelog
+[Changes between v2.8.0-alpha.1 and v2.8.0-alpha.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.8.0-alpha.1...v2.8.0-alpha.2)
+
+#### Features
 - Introduced `ViewOptionsCustomization.isInfoPanelHideable` that allows control over whether the `NavigationView` Info Panel can hide when it is swiped down. [#6132](https://github.com/mapbox/mapbox-navigation-android/pull/6132)
 - Introduced `ViewOptionsCustomization.infoPanelForcedState` that allows overriding of the `NavigationView` Info Panel (BottomSheetBehaviour) state. [#6132](https://github.com/mapbox/mapbox-navigation-android/pull/6132)
 
 #### Bug fixes and improvements
+- :warning: Changed the behaviour of `RoutesObserver` to align it with other observables exposed by `MapboxNavigation`: now the `onRoutesChanged` will be invoked on registration if the routes were explicitly cleared before. [#6097](https://github.com/mapbox/mapbox-navigation-android/pull/6097)
 - Fixed an issue where `NavigationView` switches from Active Guidance to Free Drive state after rotating device when replay is enabled. [#6140](https://github.com/mapbox/mapbox-navigation-android/pull/6140)
-- Commit to a stable api for `MapboxNavigationApp` and `MapboxNavigationObserver`. This deprecates the `MapboxNavigationProvider`. [#6143](https://github.com/mapbox/mapbox-navigation-android/pull/6143)
+- Commit to a stable API for `MapboxNavigationApp` and `MapboxNavigationObserver`. This deprecates the `MapboxNavigationProvider`. [#6143](https://github.com/mapbox/mapbox-navigation-android/pull/6143)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.7.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.7.0))
+- Mapbox Navigation Native `v111.0.0`
+- Mapbox Core Common `v22.1.1`
+- Mapbox Java `v6.8.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0-beta.1))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+- Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
 
 
 ## Mapbox Navigation SDK 2.7.0-rc.2 - 11 August, 2022
