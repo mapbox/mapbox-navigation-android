@@ -20,13 +20,13 @@
     -->
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+        android:layout_height="match_parent">
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:id="@+id/coordinatorLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/container"
@@ -122,17 +122,18 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <FrameLayout
-                android:id="@+id/infoPanelLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-                app:behavior_hideable="true"
-                app:behavior_fitToContents="true"
-                tools:behavior_peekHeight="@dimen/mapbox_infoPanel_peekHeight"
-                tools:background="@drawable/mapbox_bg_info_panel"
-                tools:minHeight="@dimen/mapbox_infoPanel_peekHeight" />
-
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+        <FrameLayout
+            android:id="@+id/infoPanelLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+            app:behavior_hideable="true"
+            app:behavior_fitToContents="true"
+            tools:behavior_peekHeight="@dimen/mapbox_infoPanel_peekHeight"
+            tools:background="@drawable/mapbox_bg_info_panel"
+            tools:minHeight="@dimen/mapbox_infoPanel_peekHeight" />
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </merge>

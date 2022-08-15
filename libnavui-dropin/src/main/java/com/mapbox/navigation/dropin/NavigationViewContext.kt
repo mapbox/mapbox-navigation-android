@@ -35,7 +35,7 @@ internal class NavigationViewContext(
 
     val mapView = MutableStateFlow<MapView?>(null)
 
-    val systemBarsInsets = MutableStateFlow<Insets?>(null)
+    val systemBarsInsets = MutableStateFlow(Insets.NONE)
 
     val uiBinders = ViewBinder()
     val styles = NavigationViewStyles(context)

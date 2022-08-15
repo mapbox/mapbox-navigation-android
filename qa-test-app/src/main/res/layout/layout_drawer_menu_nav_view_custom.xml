@@ -48,6 +48,15 @@
                 android:textAllCaps="true" />
 
             <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/toggleFullscreen"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingVertical="10dp"
+                android:text="Fullscreen"
+                android:textAllCaps="true" />
+
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/toggleViewStyling"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

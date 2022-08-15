@@ -2,6 +2,7 @@ package com.mapbox.navigation.qa_test_app.view.customnavview
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.graphics.Insets
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder
 import com.mapbox.navigation.qa_test_app.R
@@ -20,4 +21,10 @@ class CustomInfoPanelBinder : InfoPanelBinder() {
 
     override fun getContentLayout(layout: ViewGroup): ViewGroup? =
         layout.findViewById(R.id.infoPanelContent)
+
+    override fun applySystemBarsInsets(layout: ViewGroup, insets: Insets) {
+        layout.layoutParams = (layout.layoutParams as ViewGroup.MarginLayoutParams).apply {
+            setMargins(leftMargin, topMargin, rightMargin, 10.dp + insets.bottom)
+        }
+    }
 }
