@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.mapbox.navigation.dropin
 
 import com.mapbox.api.directions.v5.models.BannerInstructions
@@ -9,20 +11,12 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.TripSessionState
-import com.mapbox.navigation.ui.app.internal.Store
-import com.mapbox.navigation.ui.app.internal.destination.Destination
-import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
-import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterAction
 
 /**
  * Api that gives you the ability to change the state for navigation apps.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class NavigationViewApi internal constructor(
-    private val store: Store
-) {
+abstract class NavigationViewApi {
 
     /**
      * Request routes based on [RouteOptions]. Routes obtained from this route request can be
@@ -34,9 +28,7 @@ class NavigationViewApi internal constructor(
      *
      * @param options [RouteOptions]
      */
-    fun fetchRoutes(options: RouteOptions) {
-        store.dispatch(RoutePreviewAction.FetchOptions(options))
-    }
+    abstract fun fetchRoutes(options: RouteOptions)
 
     /**
      * Request routes based on list of [Point]. Routes obtained from this route request can be
@@ -51,9 +43,7 @@ class NavigationViewApi internal constructor(
      *
      * @param points list of [Point]
      */
-    fun fetchRoutes(points: List<Point>) {
-        store.dispatch(RoutePreviewAction.FetchPoints(points))
-    }
+    abstract fun fetchRoutes(points: List<Point>)
 
     /**
      * Sets the [routes] passed to [NavigationView] and not to [MapboxNavigation]. The action
@@ -62,9 +52,7 @@ class NavigationViewApi internal constructor(
      *
      * @param routes list of [NavigationRoute]
      */
-    fun setPreviewRoutes(routes: List<NavigationRoute>) {
-        store.dispatch(RoutePreviewAction.Ready(routes))
-    }
+    abstract fun setPreviewRoutes(routes: List<NavigationRoute>)
 
     /**
      * Sets the [routes] passed to [MapboxNavigation]. The action triggers [RouteProgress],
@@ -73,36 +61,115 @@ class NavigationViewApi internal constructor(
      *
      * @param routes list of [NavigationRoute]
      */
-    fun setRoutes(routes: List<NavigationRoute>) {
-        store.dispatch(RoutesAction.SetRoutes(routes))
-    }
+    abstract fun setRoutes(routes: List<NavigationRoute>)
 
     /**
      * Sets a destination to [NavigationView].
      * @property point the destination location
      */
-    fun setDestination(point: Point) {
-        store.dispatch(DestinationAction.SetDestination(Destination(point)))
-    }
+    abstract fun setDestination(point: Point)
 
     /**
      * Enables trip session based on real gps updates.
      */
-    fun enableTripSession() {
-        store.dispatch(TripSessionStarterAction.EnableTripSession)
-    }
+    abstract fun enableTripSession()
 
     /**
      * Enables replay trip session based on simulated locations.
      */
-    fun enableReplaySession() {
-        store.dispatch(TripSessionStarterAction.EnableReplayTripSession)
-    }
+    abstract fun enableReplaySession()
 
     /**
      * Checks if the current trip is being simulated.
      */
-    fun isReplayEnabled(): Boolean {
-        return store.state.value.tripSession.isReplayEnabled
-    }
+    abstract fun isReplayEnabled(): Boolean
+
+    /**
+     * Clear Route data and request [NavigationView] to enter Free Drive state.
+     *
+     * [NavigationViewListener.onFreeDrive] or [NavigationViewListener.onDestinationPreview]
+     * (depending if destination has been set) will be called once [NavigationView] enters
+     * Free Drive state.
+     */
+    abstract fun startFreeDrive()
+
+    /**
+     * Request [NavigationView] to enter Route Preview state.
+     *
+     * [NavigationViewListener.onRoutePreview] will be called once [NavigationView] enters
+     * Route Preview state.
+     *
+     * @throws IllegalStateException if either Destination or Preview Routes are not set.
+     */
+    @Throws(IllegalStateException::class)
+    abstract fun startRoutePreview()
+
+    /**
+     * Request [NavigationView] to enter Active Navigation state.
+     *
+     * [NavigationViewListener.onActiveNavigation] will be called once [NavigationView] enters
+     * Active Navigation state.
+     *
+     * @throws IllegalStateException if either Destination or Preview Routes are not set.
+     */
+    @Throws(IllegalStateException::class)
+    abstract fun startNavigation()
+
+    /**
+     * Request [NavigationView] to enter Arrival state.
+     *
+     * [NavigationViewListener.onArrival] will be called once [NavigationView] enters
+     * Arrival state.
+     */
+    abstract fun startArrival()
+
+    /**
+     * Clear Destination and Route data, and update [NavigationView] to Free Drive state.
+     */
+    abstract fun endNavigation()
+}
+
+/**
+ * Sets a [destination], preview [routes] and request [NavigationView] to enter Route Preview state.
+ *
+ * It is a shorthand for calling the following with non-empty [routes].
+ * ```
+ *     setDestination(point)
+ *     setPreviewRoutes(routes)
+ *     startRoutePreview()
+ * ```
+ *
+ * @throws IllegalArgumentException if the [routes] argument is an empty list.
+ */
+@ExperimentalPreviewMapboxNavigationAPI
+@Throws(IllegalArgumentException::class)
+fun NavigationViewApi.startRoutePreview(destination: Point, routes: List<NavigationRoute>) {
+    require(routes.isNotEmpty()) { "routes cannot be empty" }
+
+    setDestination(destination)
+    setPreviewRoutes(routes)
+    startRoutePreview()
+}
+
+/**
+ * Sets a [destination], preview [routes] and request [NavigationView] to enter Active Navigation
+ * state.
+ *
+ * It is a shorthand for calling the following with non-empty [routes].
+ * ```
+ *     setDestination(point)
+ *     setPreviewRoutes(routes)
+ *     startNavigation()
+ * ```
+ *
+ * @throws IllegalArgumentException if the [routes] argument is an empty list.
+ */
+@ExperimentalPreviewMapboxNavigationAPI
+@Throws(IllegalArgumentException::class)
+fun NavigationViewApi.startNavigation(destination: Point, routes: List<NavigationRoute>) {
+    require(routes.isNotEmpty()) { "routes cannot be empty" }
+
+    setDestination(destination)
+    setPreviewRoutes(routes)
+    startNavigation()
 }
