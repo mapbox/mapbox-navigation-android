@@ -907,18 +907,37 @@ class MapboxRouteLineUtilsRoboTest {
     }
 
     @Test
-    fun resetExtractRouteDataCache() {
+    fun `trim route data cache`() {
         val route1 = mockk<DirectionsRoute> {
+            every { legs() } returns null
+        }
+        val route2 = mockk<DirectionsRoute> {
             every { legs() } returns null
         }
         val trafficCongestionProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
         MapboxRouteLineUtils.extractRouteData(route1, trafficCongestionProvider)
         MapboxRouteLineUtils.extractRouteData(route1, trafficCongestionProvider)
+        MapboxRouteLineUtils.extractRouteData(route2, trafficCongestionProvider)
+        MapboxRouteLineUtils.extractRouteData(route2, trafficCongestionProvider)
         verify(exactly = 1) { route1.legs() }
+        verify(exactly = 1) { route2.legs() }
 
-        MapboxRouteLineUtils.resetCache()
+        MapboxRouteLineUtils.trimRouteDataCacheToSize(1) // removes route1
         MapboxRouteLineUtils.extractRouteData(route1, trafficCongestionProvider)
-
+        MapboxRouteLineUtils.extractRouteData(route2, trafficCongestionProvider)
         verify(exactly = 2) { route1.legs() }
+        verify(exactly = 1) { route2.legs() }
+
+        MapboxRouteLineUtils.trimRouteDataCacheToSize(0) // removes both routes
+        MapboxRouteLineUtils.extractRouteData(route1, trafficCongestionProvider)
+        MapboxRouteLineUtils.extractRouteData(route2, trafficCongestionProvider)
+        verify(exactly = 3) { route1.legs() }
+        verify(exactly = 2) { route2.legs() }
+
+        MapboxRouteLineUtils.trimRouteDataCacheToSize(2) // doesn't remove anything
+        MapboxRouteLineUtils.extractRouteData(route1, trafficCongestionProvider)
+        MapboxRouteLineUtils.extractRouteData(route2, trafficCongestionProvider)
+        verify(exactly = 3) { route1.legs() }
+        verify(exactly = 2) { route2.legs() }
     }
 }

@@ -1429,10 +1429,8 @@ internal object MapboxRouteLineUtils {
         } ?: false
     }
 
-    internal fun resetCache() {
-        synchronized(extractRouteDataCache) {
-            extractRouteDataCache.evictAll()
-        }
+    internal fun trimRouteDataCacheToSize(size: Int) {
+        extractRouteDataCache.trimToSize(size)
     }
 
     internal fun getLayerIdsForPrimaryRoute(

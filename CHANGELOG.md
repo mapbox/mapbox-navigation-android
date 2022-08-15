@@ -7,6 +7,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Updated `NavigationView` to allow drawing of the info panel behind the translucent navigation bar. [#6145](https://github.com/mapbox/mapbox-navigation-android/pull/6145)
 - Optimized vanishing line updates (`MapboxRouteLineApi#updateTraveledRouteLine`) when going through restrictions and legs aren't styled independently. [#6169](https://github.com/mapbox/mapbox-navigation-android/pull/6169)
+- Optimized cache management when switching between primary and alternative routes to improve the execution time of `MapboxRouteLineApi#setNavigationRoutes`. [#6171](https://github.com/mapbox/mapbox-navigation-android/pull/6171)
 - Added support for _Onboard_ `snapping_include_static_closures` route request parameter (`RouteOptions#snappingIncludeStaticClosures). [#6168](https://github.com/mapbox/mapbox-navigation-android/pull/6168)
 - Fixed a race condition that could cause a hang during `TileStore` clean up. [#6168](https://github.com/mapbox/mapbox-navigation-android/pull/6168)
 - Fixed a crash when the `TileStore` service process is killed by the Android system. [#6168](https://github.com/mapbox/mapbox-navigation-android/pull/6168)
