@@ -56,6 +56,7 @@ import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.parallelMap
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
@@ -215,6 +216,7 @@ class MapboxRouteLineApi(
 
     companion object {
         private const val INVALID_ACTIVE_LEG_INDEX = -1
+        private const val LOG_CATEGORY = "MapboxRouteLineApi"
     }
 
     init {
@@ -1139,7 +1141,16 @@ class MapboxRouteLineApi(
         featureDataProvider: () -> List<RouteFeatureData>,
         alternativeRoutesMetadata: List<AlternativeRouteMetadata>
     ): Expected<RouteLineError, RouteSetValue> {
-        ifNonNull(newRoutes.firstOrNull()) { primaryRouteCandidate ->
+        val distinctNewRoutes = newRoutes.distinctBy { it.id }
+        if (distinctNewRoutes.size < newRoutes.size) {
+            logW(
+                "Routes provided to MapboxRouteLineApi contain duplicates " +
+                    "(based on NavigationRoute#id) - using only distinct instances",
+                LOG_CATEGORY
+            )
+        }
+
+        ifNonNull(distinctNewRoutes.firstOrNull()) { primaryRouteCandidate ->
             if (!primaryRouteCandidate.directionsRoute.isSameRoute(primaryRoute?.directionsRoute)) {
                 routeLineOptions.vanishingRouteLine?.clear()
                 routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
@@ -1147,9 +1158,9 @@ class MapboxRouteLineApi(
         }
 
         routes.clear()
-        routes.addAll(newRoutes)
-        primaryRoute = newRoutes.firstOrNull()
-        resetCaches()
+        routes.addAll(distinctNewRoutes)
+        primaryRoute = distinctNewRoutes.firstOrNull()
+        MapboxRouteLineUtils.trimRouteDataCacheToSize(size = distinctNewRoutes.size)
         alternativesDeviationOffset =
             MapboxRouteLineUtils.getAlternativeRoutesDeviationOffsets(alternativeRoutesMetadata)
 
@@ -1184,7 +1195,7 @@ class MapboxRouteLineApi(
                     this.directionsRoute,
                     routeLineOptions.resourceProvider.routeLineColorResources,
                     trafficBackfillRoadClasses,
-                    true,
+                    isPrimaryRoute = true,
                     vanishingPointOffset,
                     Color.TRANSPARENT,
                     routeLineOptions.resourceProvider.routeLineColorResources
@@ -1344,8 +1355,8 @@ class MapboxRouteLineApi(
                     this.directionsRoute,
                     routeLineOptions.resourceProvider.routeLineColorResources,
                     trafficBackfillRoadClasses,
-                    false,
-                    alternativesDeviationOffset[this.id] ?: 0.0,
+                    isPrimaryRoute = false,
+                    vanishingPointOffset = alternativesDeviationOffset[this.id] ?: 0.0,
                     Color.TRANSPARENT,
                     routeLineOptions
                         .resourceProvider
@@ -1386,8 +1397,8 @@ class MapboxRouteLineApi(
                 if (routeLineOptions.displayRestrictedRoadSections) {
                     MapboxRouteLineUtils.getRestrictedLineExpressionProducer(
                         this.directionsRoute,
-                        0.0,
-                        0,
+                        vanishingPointOffset = 0.0,
+                        activeLegIndex = 0,
                         routeLineOptions.resourceProvider.routeLineColorResources
                     )
                 } else {
@@ -1446,7 +1457,7 @@ class MapboxRouteLineApi(
                         MapboxRouteLineUtils.calculateRouteLineSegments(
                             this.directionsRoute,
                             trafficBackfillRoadClasses,
-                            true,
+                            isPrimaryRoute = true,
                             routeLineOptions.resourceProvider.routeLineColorResources
                         )
                     } ?: listOf()
@@ -1593,7 +1604,7 @@ class MapboxRouteLineApi(
     }
 
     private fun resetCaches() {
-        MapboxRouteLineUtils.resetCache()
+        MapboxRouteLineUtils.trimRouteDataCacheToSize(size = 0)
         alternativelyStyleSegmentsNotInLegCache.evictAll()
     }
 

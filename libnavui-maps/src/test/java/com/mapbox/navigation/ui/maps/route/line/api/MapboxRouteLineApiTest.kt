@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.core.constants.Constants
+import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
@@ -18,6 +19,7 @@ import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -28,6 +30,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.clearRouteLine
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setAlternativeTrafficColor
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRoutes
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setPrimaryTrafficColor
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -43,6 +46,8 @@ import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
+import com.mapbox.navigation.utils.internal.LoggerFrontend
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigator.RouteInterface
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -53,6 +58,7 @@ import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
+import io.mockk.verifyOrder
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -285,20 +291,6 @@ class MapboxRouteLineApiTest {
             result, 0.0
         )
         assertEquals(0.0, options.vanishingRouteLine!!.vanishPointOffset, 0.0)
-    }
-
-    @Test
-    fun setRoutes_resetsCache() = coroutineRule.runBlockingTest {
-        mockkObject(MapboxRouteLineUtils)
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val api = MapboxRouteLineApi(options)
-        val route = loadRoute("short_route.json")
-        val routes = listOf(RouteLine(route, null))
-
-        api.setRoutes(routes)
-
-        verify { MapboxRouteLineUtils.resetCache() }
-        unmockkObject(MapboxRouteLineUtils)
     }
 
     @Test
@@ -991,7 +983,7 @@ class MapboxRouteLineApiTest {
         assertTrue(result.value!!.alternativeRouteSourceSources[1].features()!!.isEmpty())
         assertTrue(result.value!!.primaryRouteSource.features()!!.isEmpty())
         assertTrue(result.value!!.waypointsSource.features()!!.isEmpty())
-        verify { MapboxRouteLineUtils.resetCache() }
+        verify { MapboxRouteLineUtils.trimRouteDataCacheToSize(size = 0) }
         unmockkObject(MapboxRouteLineUtils)
     }
 
@@ -1299,5 +1291,52 @@ class MapboxRouteLineApiTest {
                 .trafficExpressionProvider!!
                 .generateExpression().toString()
         )
+    }
+
+    @Test
+    fun `setNavigationRouteLines uses distinct routes`() = coroutineRule.runBlockingTest {
+        val logger = mockk<LoggerFrontend>(relaxed = true)
+        LoggerProvider.setLoggerFrontend(logger)
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val api = MapboxRouteLineApi(options)
+        val route1 = loadRoute("short_route.json").toNavigationRoute(
+            routerOrigin = RouterOrigin.Offboard
+        )
+        val route2 = loadRoute("short_route.json").toNavigationRoute(
+            routerOrigin = RouterOrigin.Offboard
+        )
+
+        val result = api.setNavigationRoutes(listOf(route1, route2))
+
+        result.value!!.alternativeRouteLinesData.forEach {
+            assertEquals(FeatureCollection.fromFeatures(listOf()), it.featureCollection)
+        }
+        verify {
+            logger.logW(
+                "Routes provided to MapboxRouteLineApi contain duplicates " +
+                    "(based on NavigationRoute#id) - using only distinct instances",
+                "MapboxRouteLineApi"
+            )
+        }
+    }
+
+    @Test
+    fun `setNavigationRouteLines trims data cache`() = coroutineRule.runBlockingTest {
+        mockkObject(MapboxRouteLineUtils)
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val api = MapboxRouteLineApi(options)
+        val route = loadRoute("short_route.json").toNavigationRoute(
+            routerOrigin = RouterOrigin.Offboard
+        )
+
+        api.setNavigationRoutes(listOf(route))
+        api.setNavigationRoutes(emptyList())
+
+        verifyOrder {
+            MapboxRouteLineUtils.trimRouteDataCacheToSize(1)
+            MapboxRouteLineUtils.trimRouteDataCacheToSize(0)
+        }
+
+        unmockkObject(MapboxRouteLineUtils)
     }
 }
