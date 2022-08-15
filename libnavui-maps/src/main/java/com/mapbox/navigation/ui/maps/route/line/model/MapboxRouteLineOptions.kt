@@ -26,6 +26,7 @@ import kotlin.math.abs
  * @param styleInactiveRouteLegsIndependently enabling this feature will change the color of the route
  * legs that aren't currently being navigated. See [RouteLineColorResources] to specify the color
  * used.
+ * **Enabling this feature when [vanishingRouteLine] is enabled can have negative performance implications, especially for long routes.**
  * @param displaySoftGradientForTraffic determines if the color transition between traffic congestion
  * changes should use a soft gradient appearance or abrupt color change. This is false by default.
  * @param softGradientTransition influences the length of the color transition when the displaySoftGradientForTraffic

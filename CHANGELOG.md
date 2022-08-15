@@ -6,6 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 - Updated `NavigationView` to allow drawing of the info panel behind the translucent navigation bar. [#6145](https://github.com/mapbox/mapbox-navigation-android/pull/6145)
+- Optimized vanishing line updates (`MapboxRouteLineApi#updateTraveledRouteLine`) when going through restrictions and legs aren't styled independently. [#6169](https://github.com/mapbox/mapbox-navigation-android/pull/6169)
 
 ## Mapbox Navigation SDK 2.8.0-alpha.2 - 12 August, 2022
 ### Changelog
