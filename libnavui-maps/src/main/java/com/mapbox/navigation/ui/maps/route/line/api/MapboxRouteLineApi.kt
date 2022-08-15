@@ -447,34 +447,31 @@ class MapboxRouteLineApi(
             )
         }
 
-        val workingRouteLineExpressionData =
-            if (routeLineOptions.styleInactiveRouteLegsIndependently) {
-                alternativelyStyleSegmentsNotInLeg(activeLegIndex, routeLineExpressionData)
-            } else {
-                routeLineExpressionData
-            }
-
         val stopGap: Double = ifNonNull(primaryRoute?.directionsRoute) { route ->
             RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS / route.distance()
         } ?: .00000000001 // an arbitrarily small value so Expression values are in ascending order
 
-        val restrictedExpressionData: List<ExtractedRouteData>? =
-            ifNonNull(primaryRoute?.directionsRoute) { route ->
-                if (routeLineOptions.displayRestrictedRoadSections && routeHasRestrictions) {
-                    MapboxRouteLineUtils.extractRouteData(
-                        route,
-                        MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
-                            route,
-                            routeLineOptions.resourceProvider.routeLineColorResources
-                        )
-                    )
-                } else {
-                    null
-                }
-            }
-
         val routeLineExpressionProviders =
             if (routeLineOptions.styleInactiveRouteLegsIndependently) {
+                val workingRouteLineExpressionData =
+                    alternativelyStyleSegmentsNotInLeg(activeLegIndex, routeLineExpressionData)
+
+                val restrictedExpressionData: List<ExtractedRouteData>? =
+                    ifNonNull(primaryRoute?.directionsRoute) { route ->
+                        if (routeLineOptions.displayRestrictedRoadSections &&
+                            routeHasRestrictions
+                        ) {
+                            MapboxRouteLineUtils.extractRouteData(
+                                route,
+                                MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                                    route,
+                                    routeLineOptions.resourceProvider.routeLineColorResources
+                                )
+                            )
+                        } else {
+                            null
+                        }
+                    }
                 routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(
                     point,
                     workingRouteLineExpressionData,

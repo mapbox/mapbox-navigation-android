@@ -32,6 +32,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import io.mockk.verify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -382,45 +383,54 @@ class MapboxRouteLineApiRoboTest {
         }
 
     @Test
-    fun updateTraveledRouteLine_whenRouteHasRestrictions() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx)
-            .withVanishingRouteLineEnabled(true)
-            .displayRestrictedRoadSections(true)
-            .vanishingRouteLineUpdateInterval(0)
-            .build()
-        val api = MapboxRouteLineApi(options)
-        val expectedRestrictedExpression = "[literal, [0.0, 0.05416168943228483]]"
-        val route = loadRoute("route-with-restrictions.json")
-        val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
-        val routeProgress = mockk<RouteProgress> {
-            every { currentLegProgress } returns mockk {
-                every { legIndex } returns 0
-                every { currentStepProgress } returns mockk {
-                    every { stepPoints } returns PolylineUtils.decode(
-                        route.legs()!![0].steps()!![2].geometry()!!,
-                        6
-                    )
-                    every { distanceTraveled } returns 0f
-                    every { step } returns mockk {
-                        every { distance() } returns route.legs()!![0].steps()!![2].distance()
+    fun `updateTraveledRouteLine when route has restrictions and legs not styled independently`() =
+        coroutineRule.runBlockingTest {
+            val options = MapboxRouteLineOptions.Builder(ctx)
+                .withVanishingRouteLineEnabled(true)
+                .displayRestrictedRoadSections(true)
+                .vanishingRouteLineUpdateInterval(0)
+                .build()
+            val api = MapboxRouteLineApi(options)
+            val expectedRestrictedExpression = "[literal, [0.0, 0.05416168943228483]]"
+            val route = loadRoute("route-with-restrictions.json")
+            val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
+            val routeProgress = mockk<RouteProgress> {
+                every { currentLegProgress } returns mockk {
+                    every { legIndex } returns 0
+                    every { currentStepProgress } returns mockk {
+                        every { stepPoints } returns PolylineUtils.decode(
+                            route.legs()!![0].steps()!![2].geometry()!!,
+                            6
+                        )
+                        every { distanceTraveled } returns 0f
+                        every { step } returns mockk {
+                            every { distance() } returns route.legs()!![0].steps()!![2].distance()
+                        }
+                        every { stepIndex } returns 2
                     }
-                    every { stepIndex } returns 2
                 }
             }
+
+            api.updateVanishingPointState(RouteProgressState.TRACKING)
+            api.setRoutes(listOf(RouteLine(route, null)))
+            api.updateUpcomingRoutePointIndex(routeProgress)
+
+            mockkObject(MapboxRouteLineUtils)
+            val result = api.updateTraveledRouteLine(lineString.coordinates()[1])
+
+            assertEquals(
+                expectedRestrictedExpression,
+                result.value!!.primaryRouteLineDynamicData.restrictedSectionExpressionProvider!!
+                    .generateExpression().toString()
+            )
+
+            verify(exactly = 0) {
+                // the cache key is based on the full hash of the Directions Route
+                // and is not suited to be used as frequently as the vanishing route line needs it
+                MapboxRouteLineUtils.extractRouteData(any(), any())
+            }
+            unmockkObject(MapboxRouteLineUtils)
         }
-
-        api.updateVanishingPointState(RouteProgressState.TRACKING)
-        api.setRoutes(listOf(RouteLine(route, null)))
-        api.updateUpcomingRoutePointIndex(routeProgress)
-
-        val result = api.updateTraveledRouteLine(lineString.coordinates()[1])
-
-        assertEquals(
-            expectedRestrictedExpression,
-            result.value!!.primaryRouteLineDynamicData.restrictedSectionExpressionProvider!!
-                .generateExpression().toString()
-        )
-    }
 
     @Test
     fun updateTraveledRouteLine_whenRouteRestrictionsEnabledButHasNone() =

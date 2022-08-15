@@ -103,6 +103,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             .withRouteLineResources(routeLineResources)
             .withRouteLineBelowLayerId("road-label-navigation")
             .withVanishingRouteLineEnabled(true)
+            .displayRestrictedRoadSections(true)
             .build()
     }
 
