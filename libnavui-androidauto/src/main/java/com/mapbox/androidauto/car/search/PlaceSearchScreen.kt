@@ -35,7 +35,11 @@ class PlaceSearchScreen(
 ) : Screen(searchCarContext.carContext) {
 
     @VisibleForTesting
-    internal var itemList = buildErrorItemList(R.string.car_search_no_results)
+    internal var itemList = buildNoItemsList(R.string.car_search_no_results)
+        private set(value) {
+            field = value
+            invalidate()
+        }
 
     // Cached to send to feedback.
     private var searchSuggestions: List<SearchSuggestion> = emptyList()
@@ -49,15 +53,15 @@ class PlaceSearchScreen(
         }
 
         override fun onUnknownCurrentLocation() {
-            onErrorItemList(R.string.car_search_unknown_current_location)
+            itemList = buildNoItemsList(R.string.car_search_unknown_current_location)
         }
 
         override fun onDestinationLocationUnknown() {
-            onErrorItemList(R.string.car_search_unknown_search_location)
+            itemList = buildNoItemsList(R.string.car_search_unknown_search_location)
         }
 
         override fun onNoRoutesFound() {
-            onErrorItemList(R.string.car_search_no_results)
+            itemList = buildNoItemsList(R.string.car_search_no_results)
         }
     }
 
@@ -100,18 +104,16 @@ class PlaceSearchScreen(
     internal fun doSearch(searchText: String) {
         lifecycleScope.launch {
             val suggestions = searchCarContext.carPlaceSearch.search(searchText)
-                .onFailure { logAndroidAutoFailure("Search query failed", it) }
                 .getOrDefault(emptyList())
             searchSuggestions = suggestions
-            if (suggestions.isEmpty()) {
-                onErrorItemList(R.string.car_search_no_results)
+            itemList = if (suggestions.isEmpty()) {
+                buildNoItemsList(R.string.car_search_no_results)
             } else {
                 val builder = ItemList.Builder()
                 suggestions.forEach { suggestion ->
                     builder.addItem(searchItemRow(suggestion))
                 }
-                itemList = builder.build()
-                invalidate()
+                builder.build()
             }
         }
     }
@@ -131,7 +133,6 @@ class PlaceSearchScreen(
         logAndroidAuto("onClickSearch $searchSuggestion")
         lifecycleScope.launch {
             val searchResults = searchCarContext.carPlaceSearch.select(searchSuggestion)
-                .onFailure { logAndroidAutoFailure("Search select failed", it) }
                 .getOrDefault(emptyList())
             logAndroidAuto("onClickSearch select ${searchResults.joinToString()}")
             if (searchResults.isNotEmpty()) {
@@ -143,12 +144,7 @@ class PlaceSearchScreen(
         }
     }
 
-    private fun onErrorItemList(@StringRes stringRes: Int) {
-        itemList = buildErrorItemList(stringRes)
-        invalidate()
-    }
-
-    private fun buildErrorItemList(@StringRes stringRes: Int) = ItemList.Builder()
+    private fun buildNoItemsList(@StringRes stringRes: Int) = ItemList.Builder()
         .setNoItemsMessage(carContext.getString(stringRes))
         .build()
 }

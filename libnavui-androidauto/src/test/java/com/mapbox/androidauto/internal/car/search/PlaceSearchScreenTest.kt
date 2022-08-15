@@ -13,6 +13,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -24,6 +25,7 @@ class PlaceSearchScreenTest : MapboxRobolectricTestRunner() {
     val coroutineRule = MainCoroutineRule()
 
     private val searchCarContext: SearchCarContext = mockk {
+        every { mainCarContext } returns mockk()
         every { carContext } returns mockk {
             every { getString(R.string.car_search_no_results) } returns "No results"
         }
@@ -32,6 +34,11 @@ class PlaceSearchScreenTest : MapboxRobolectricTestRunner() {
     }
 
     private val placeSearchScreen = PlaceSearchScreen(searchCarContext)
+
+    @Test
+    fun `initial results are empty`() {
+        assertNotNull(placeSearchScreen.itemList.noItemsMessage)
+    }
 
     @Test
     fun `search suggestion create list row`() = coroutineRule.runBlockingTest {

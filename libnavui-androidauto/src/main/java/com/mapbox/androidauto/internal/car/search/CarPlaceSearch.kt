@@ -8,11 +8,12 @@ import com.mapbox.search.result.SearchSuggestion
 /**
  * Service that allows you to search for points of interest.
  *
- * This is an internal interface for as long as [SearchSuggestion] and [SearchResult] come from
- * an sdk that has not reached stability.
+ * This is an internal interface because [SearchSuggestion] and [SearchResult] are subject to
+ * change.
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 interface CarPlaceSearch : MapboxNavigationObserver {
+
     /**
      * Search for suggestions with a query string.
      *

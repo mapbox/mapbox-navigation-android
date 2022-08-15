@@ -24,10 +24,10 @@ import kotlin.coroutines.resume
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class CarPlaceSearchImpl(
     private val options: CarPlaceSearchOptions,
+    private val locationProvider: CarSearchLocationProvider,
 ) : CarPlaceSearch {
 
     private var searchEngine: SearchEngine? = null
-    private val locationProvider = CarSearchLocationProvider()
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         locationProvider.onAttached(mapboxNavigation)
@@ -48,9 +48,7 @@ class CarPlaceSearchImpl(
 
     override suspend fun search(query: String): Result<List<SearchSuggestion>> {
         val searchEngine = searchEngine
-            ?: return Result.failure(
-                IllegalStateException("SearchEngine is not available for place search")
-            )
+            ?: return searchEngineNotAvailable("search")
 
         val optionsBuilder = SearchOptions.Builder()
             .requestDebounce(SEARCH_DEBOUNCE_MILLIS)
@@ -65,7 +63,6 @@ class CarPlaceSearchImpl(
         logAndroidAuto("carLocationProvider request $query")
         return suspendCancellableCoroutine { continuation ->
             val searchCallback = object : SearchSuggestionsCallback {
-
                 override fun onSuggestions(
                     suggestions: List<SearchSuggestion>,
                     responseInfo: ResponseInfo
@@ -80,15 +77,15 @@ class CarPlaceSearchImpl(
                 }
             }
             val task = searchEngine.search(query, options, searchCallback)
-            continuation.invokeOnCancellation { task.cancel() }
+            continuation.invokeOnCancellation {
+                task.cancel()
+            }
         }
     }
 
     override suspend fun select(selection: SearchSuggestion): Result<List<SearchResult>> {
         val searchEngine = searchEngine
-            ?: return Result.failure(
-                IllegalStateException("SearchEngine is not available for place selection")
-            )
+            ?: return searchEngineNotAvailable("select")
 
         return suspendCancellableCoroutine { continuation ->
             val selectionCallback = object : SearchSelectionCallback {
@@ -129,6 +126,14 @@ class CarPlaceSearchImpl(
             val task = searchEngine.select(selection, selectionCallback)
             continuation.invokeOnCancellation { task.cancel() }
         }
+    }
+
+    private fun <T> searchEngineNotAvailable(source: String): Result<T> {
+        val message = "SearchEngine is not available for place $source"
+        logAndroidAutoFailure(message)
+        return Result.failure(
+            IllegalStateException("SearchEngine is not available for place $source")
+        )
     }
 
     private companion object {
