@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin.coordinator
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.Guideline
+import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -34,11 +35,11 @@ internal class InfoPanelCoordinator(
     private val updateGuideline = object : BottomSheetBehavior.BottomSheetCallback() {
         override fun onStateChanged(bottomSheet: View, newState: Int) {
             context.infoPanelBehavior.updateBehavior(newState)
-            setGuidelinePosition(bottomSheet)
+            setGuidelinePosition(bottomSheet, context.systemBarsInsets.value)
         }
 
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
-            setGuidelinePosition(bottomSheet)
+            setGuidelinePosition(bottomSheet, context.systemBarsInsets.value)
         }
     }
 
@@ -60,10 +61,11 @@ internal class InfoPanelCoordinator(
                     BottomSheetBehavior.STATE_HALF_EXPANDED,
                     BottomSheetBehavior.STATE_EXPANDED -> behavior.show(state)
                 }
-
-                // When BottomSheet is already in requested state, BottomSheetCallback won't be
-                // called leaving guideline in a wrong position.
-                setGuidelinePosition(infoPanel)
+            }
+        }
+        coroutineScope.launch {
+            context.systemBarsInsets.collect {
+                setGuidelinePosition(infoPanel, it)
             }
         }
         coroutineScope.launch {
@@ -78,9 +80,7 @@ internal class InfoPanelCoordinator(
             }
         }
         coroutineScope.launch {
-            context.styles.infoPanelPeekHeight.collect { peekHeight ->
-                behavior.peekHeight = peekHeight
-            }
+            bottomSheetPeekHeight().collect(behavior::setPeekHeight)
         }
     }
 
@@ -93,8 +93,9 @@ internal class InfoPanelCoordinator(
         return combine(
             context.uiBinders.infoPanelBinder,
             context.uiBinders.infoPanelHeaderBinder,
-            context.uiBinders.infoPanelContentBinder
-        ) { infoPanelBinder, headerBinder, contentBinder ->
+            context.uiBinders.infoPanelContentBinder,
+            context.systemBarsInsets
+        ) { infoPanelBinder, headerBinder, contentBinder, _ ->
             (infoPanelBinder ?: InfoPanelBinder.defaultBinder()).also {
                 it.setNavigationViewContext(context)
                 it.setBinders(
@@ -120,6 +121,13 @@ internal class InfoPanelCoordinator(
         }
     }
 
+    private fun bottomSheetPeekHeight() = combine(
+        context.styles.infoPanelPeekHeight,
+        context.systemBarsInsets
+    ) { peekHeight, insets ->
+        peekHeight + insets.bottom
+    }
+
     private fun <V : View> BottomSheetBehavior<V>.show(@BottomSheetBehavior.State state: Int) {
         this.state = state
         isHideable = context.options.isInfoPanelHideable.value
@@ -130,9 +138,9 @@ internal class InfoPanelCoordinator(
         state = BottomSheetBehavior.STATE_HIDDEN
     }
 
-    private fun setGuidelinePosition(bottomSheet: View) {
-        val offsetBottom = (bottomSheet.parent as ViewGroup).height - bottomSheet.top
-        guidelineBottom.setGuidelineEnd(offsetBottom)
+    private fun setGuidelinePosition(bottomSheet: View, systemBarsInsets: Insets) {
+        val parentHeight = (bottomSheet.parent as ViewGroup).height
+        guidelineBottom.setGuidelineEnd(parentHeight - bottomSheet.top - systemBarsInsets.bottom)
     }
 
     /**

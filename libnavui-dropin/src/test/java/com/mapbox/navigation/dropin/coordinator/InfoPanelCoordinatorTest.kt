@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin.coordinator
 import android.content.Context
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.core.graphics.Insets
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -15,8 +16,12 @@ import com.mapbox.navigation.dropin.NavigationViewModel
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
+import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -163,6 +168,21 @@ class InfoPanelCoordinatorTest {
 
             assertTrue(bottomSheetBehavior().isHideable)
         }
+
+    @Test
+    fun `should reload binders when systemInsets change`() = runBlockingTest {
+        val binders = mutableListOf<UIBinder>()
+        val job = launch {
+            sut.apply {
+                mapboxNavigation.flowViewBinders().take(2).toList(binders)
+            }
+        }
+
+        viewContext.systemBarsInsets.value = Insets.of(0, 0, 0, 10)
+        job.join()
+
+        assertEquals(2, binders.size)
+    }
 
     private fun bottomSheetBehavior() = BottomSheetBehavior.from(binding.infoPanelLayout)
 
