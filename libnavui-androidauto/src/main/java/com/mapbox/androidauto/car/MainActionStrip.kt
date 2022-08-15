@@ -13,8 +13,8 @@ import com.mapbox.androidauto.car.placeslistonmap.PlaceMarkerRenderer
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListItemMapper
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapScreen
 import com.mapbox.androidauto.car.search.FavoritesApi
+import com.mapbox.androidauto.car.search.PlaceSearchScreen
 import com.mapbox.androidauto.car.search.SearchCarContext
-import com.mapbox.androidauto.car.search.SearchScreen
 import com.mapbox.androidauto.car.settings.CarSettingsScreen
 import com.mapbox.androidauto.car.settings.SettingsCarContext
 import com.mapbox.search.MapboxSearchSdk
@@ -76,7 +76,7 @@ class MainActionStrip(
         )
         .setOnClickListener {
             screenManager.push(
-                SearchScreen(SearchCarContext(mainCarContext))
+                PlaceSearchScreen(SearchCarContext(mainCarContext))
             )
         }
         .build()

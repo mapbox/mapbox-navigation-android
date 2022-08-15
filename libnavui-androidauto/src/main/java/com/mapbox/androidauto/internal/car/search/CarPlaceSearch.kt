@@ -1,4 +1,4 @@
-package com.mapbox.androidauto.car.search
+package com.mapbox.androidauto.internal.car.search
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -7,8 +7,11 @@ import com.mapbox.search.result.SearchSuggestion
 
 /**
  * Service that allows you to search for points of interest.
+ *
+ * This is an internal interface for as long as [SearchSuggestion] and [SearchResult] come from
+ * an sdk that has not reached stability.
  */
-@ExperimentalPreviewMapboxNavigationAPI
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 interface CarPlaceSearch : MapboxNavigationObserver {
     /**
      * Search for suggestions with a query string.

@@ -30,12 +30,12 @@ import kotlinx.coroutines.launch
  * This screen allows the user to search for a destination.
  */
 @OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)
-class SearchScreen(
+class PlaceSearchScreen(
     private val searchCarContext: SearchCarContext,
 ) : Screen(searchCarContext.carContext) {
 
     @VisibleForTesting
-    var itemList = buildErrorItemList(R.string.car_search_no_results)
+    internal var itemList = buildErrorItemList(R.string.car_search_no_results)
 
     // Cached to send to feedback.
     private var searchSuggestions: List<SearchSuggestion> = emptyList()
@@ -87,7 +87,7 @@ class SearchScreen(
                                 .getSearchFeedbackPoll(searchCarContext.carContext),
                         ) {
                             CarFeedbackSearchOptions(searchSuggestions = searchSuggestions)
-                        }.getAction(this@SearchScreen)
+                        }.getAction(this@PlaceSearchScreen)
                     )
                     .build()
             )
@@ -96,7 +96,8 @@ class SearchScreen(
             .build()
     }
 
-    fun doSearch(searchText: String) {
+    @VisibleForTesting
+    internal fun doSearch(searchText: String) {
         lifecycleScope.launch {
             val suggestions = searchCarContext.carPlaceSearch.search(searchText)
                 .onFailure { logAndroidAutoFailure("Search query failed", it) }

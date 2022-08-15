@@ -1,10 +1,11 @@
 package com.mapbox.androidauto.internal.car.search
 
-import com.mapbox.androidauto.car.search.CarPlaceSearch
+import com.mapbox.androidauto.car.search.CarPlaceSearchOptions
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.search.ApiType
 import com.mapbox.search.MapboxSearchSdk
 import com.mapbox.search.ResponseInfo
 import com.mapbox.search.SearchEngine
@@ -22,7 +23,7 @@ import kotlin.coroutines.resume
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class CarPlaceSearchImpl(
-    private val searchEngineSettings: SearchEngineSettings? = null,
+    private val options: CarPlaceSearchOptions,
 ) : CarPlaceSearch {
 
     private var searchEngine: SearchEngine? = null
@@ -30,16 +31,19 @@ class CarPlaceSearchImpl(
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         locationProvider.onAttached(mapboxNavigation)
-        val settings = searchEngineSettings
-            ?: SearchEngineSettings(
-                accessToken = mapboxNavigation.navigationOptions.accessToken!!,
+        searchEngine = MapboxSearchSdk.createSearchEngineWithBuiltInDataProviders(
+            apiType = ApiType.SBS,
+            settings = SearchEngineSettings(
+                options.accessToken
+                    ?: mapboxNavigation.navigationOptions.accessToken!!,
                 locationProvider,
             )
-        searchEngine = MapboxSearchSdk.createSearchEngineWithBuiltInDataProviders(settings)
+        )
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         locationProvider.onDetached(mapboxNavigation)
+        searchEngine = null
     }
 
     override suspend fun search(query: String): Result<List<SearchSuggestion>> {

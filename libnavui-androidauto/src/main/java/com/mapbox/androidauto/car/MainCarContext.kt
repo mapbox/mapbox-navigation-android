@@ -3,6 +3,7 @@ package com.mapbox.androidauto.car
 import androidx.car.app.CarContext
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider
 import com.mapbox.androidauto.car.preview.CarRouteOptionsInterceptor
+import com.mapbox.androidauto.car.search.CarPlaceSearchOptions
 import com.mapbox.androidauto.car.settings.CarSettingsStorage
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
@@ -12,7 +13,6 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.utils.internal.JobControl
-import com.mapbox.search.SearchEngineSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,7 +23,7 @@ class MainCarContext(
     val mapboxCarMap: MapboxCarMap,
     val feedbackPollProvider: CarFeedbackPollProvider = CarFeedbackPollProvider(),
     val routeOptionsInterceptor: CarRouteOptionsInterceptor = CarRouteOptionsInterceptor { it },
-    val searchEngineSettings: SearchEngineSettings? = null
+    val carPlaceSearchOptions: CarPlaceSearchOptions = CarPlaceSearchOptions.Builder().build(),
 ) {
     val carSettingsStorage = CarSettingsStorage(carContext)
 

@@ -1,17 +1,15 @@
-package com.mapbox.androidauto.car.search
+package com.mapbox.androidauto.internal.car.search
 
 import android.text.SpannableString
 import androidx.car.app.model.Row
 import com.mapbox.androidauto.R
+import com.mapbox.androidauto.car.search.PlaceSearchScreen
+import com.mapbox.androidauto.car.search.SearchCarContext
 import com.mapbox.androidauto.testing.MapboxRobolectricTestRunner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.search.result.SearchSuggestion
-import io.mockk.CapturingSlot
-import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertEquals
@@ -20,7 +18,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
-class SearchScreenTest : MapboxRobolectricTestRunner() {
+class PlaceSearchScreenTest : MapboxRobolectricTestRunner() {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
@@ -33,7 +31,7 @@ class SearchScreenTest : MapboxRobolectricTestRunner() {
         every { distanceFormatter } returns mockk()
     }
 
-    private val searchScreen = SearchScreen(searchCarContext)
+    private val placeSearchScreen = PlaceSearchScreen(searchCarContext)
 
     @Test
     fun `search suggestion create list row`() = coroutineRule.runBlockingTest {
@@ -52,9 +50,9 @@ class SearchScreenTest : MapboxRobolectricTestRunner() {
             searchCarContext.distanceFormatter.formatDistance(559.39)
         } returns SpannableString.valueOf("0.3 mi")
 
-        searchScreen.doSearch("starbucks")
+        placeSearchScreen.doSearch("starbucks")
 
-        val firstResult = searchScreen.itemList.items[0] as Row
+        val firstResult = placeSearchScreen.itemList.items[0] as Row
         assertEquals("Starbucks", firstResult.title.toString())
         assertEquals("0.3 mi", firstResult.texts[0].toString())
     }
@@ -65,9 +63,9 @@ class SearchScreenTest : MapboxRobolectricTestRunner() {
             searchCarContext.carPlaceSearch.search("starbucks")
         } returns Result.success(listOf())
 
-        searchScreen.doSearch("starbucks")
+        placeSearchScreen.doSearch("starbucks")
 
-        assertTrue(searchScreen.itemList.items.isEmpty())
-        assertEquals("No results", searchScreen.itemList.noItemsMessage.toString())
+        assertTrue(placeSearchScreen.itemList.items.isEmpty())
+        assertEquals("No results", placeSearchScreen.itemList.noItemsMessage.toString())
     }
 }
