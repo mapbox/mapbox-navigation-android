@@ -576,7 +576,8 @@ class NavigatorMapperTest {
         MatchedRoadObjectLocation.valueOf(routeAlertLocation),
         com.mapbox.navigator.RoadObjectType.TUNNEL,
         RoadObjectProvider.MAPBOX,
-        RoadObjectMetadata.valueOf(com.mapbox.navigator.TunnelInfo("Ted Williams Tunnel"))
+        RoadObjectMetadata.valueOf(com.mapbox.navigator.TunnelInfo("Ted Williams Tunnel")),
+        false,
     )
 
     private fun RoadObject.toUpcomingRouteAlert(
