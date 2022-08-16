@@ -51,7 +51,7 @@ internal sealed class ModuleParams {
         val accessToken: String,
         val nativeRouter: RouterInterface,
         val threadController: ThreadController,
-        val currentIndicesSnapshotProvider: Function0<CurrentIndicesSnapshot>,
+        val currentIndicesSnapshotProvider: Function0<CurrentIndicesSnapshot?>,
     ) : ModuleParams()
 
     class NavigationTripNotification(

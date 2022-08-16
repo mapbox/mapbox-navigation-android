@@ -280,9 +280,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 .first()
             val refreshedRoutes = mapboxNavigation.routesUpdates()
                 .filter {
-                    it.reason == ROUTES_UPDATE_REASON_REFRESH &&
-                        it.navigationRoutes[0].getDurationAnnotationsFromLeg(0) !=
-                        requestedRoutes[0].getDurationAnnotationsFromLeg(0)
+                    it.reason == ROUTES_UPDATE_REASON_REFRESH
                 }
                 .first()
                 .navigationRoutes
@@ -318,9 +316,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 .first()
             val refreshedRoutes = mapboxNavigation.routesUpdates()
                 .filter {
-                    it.reason == ROUTES_UPDATE_REASON_REFRESH &&
-                        it.navigationRoutes[0].getDurationAnnotationsFromLeg(1) !=
-                        requestedRoutes[0].getDurationAnnotationsFromLeg(1)
+                    it.reason == ROUTES_UPDATE_REASON_REFRESH
                 }
                 .first()
                 .navigationRoutes

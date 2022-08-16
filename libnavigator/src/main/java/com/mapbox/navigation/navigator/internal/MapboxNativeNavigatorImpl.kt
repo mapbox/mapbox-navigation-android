@@ -231,11 +231,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         val callback = {
                 continuation: Continuation<Expected<String, List<RouteAlternative>>>,
                 expected: Expected<String, RefreshRouteResult> ->
-            logD(
-                "Refreshing native route ${route.nativeRoute().routeId} " +
-                    "with generated refresh response: $refreshResponseJson",
-                LOG_CATEGORY
-            )
             expected.fold(
                 { error ->
                     logE(
@@ -262,6 +257,11 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             )
         }
         return suspendCancellableCoroutine { continuation ->
+            logD(
+                "Refreshing native route ${route.nativeRoute().routeId} " +
+                    "with generated refresh response: $refreshResponseJson",
+                LOG_CATEGORY
+            )
             navigator!!.refreshRoute(
                 refreshResponseJson,
                 route.nativeRoute().routeId

@@ -2,6 +2,9 @@ package com.mapbox.navigation.core
 
 import com.mapbox.navigation.base.internal.CurrentIndicesSnapshot
 import com.mapbox.navigation.core.directions.session.RoutesExtra
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

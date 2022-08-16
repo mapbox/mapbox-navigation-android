@@ -534,6 +534,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
             navigationOptions.routeRefreshOptions,
             directionsSession,
+            currentIndicesSnapshotProvider,
         )
 
         defaultRerouteController = MapboxRerouteController(
@@ -1612,17 +1613,15 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
+        currentIndicesSnapshotProvider.clear()
         if (result.navigationRoutes.isNotEmpty()) {
             routeScope.launch {
-                val indicesSnapshot = currentIndicesSnapshotProvider.freezeAndGet()
                 val refreshed = routeRefreshController.refresh(
-                    result.navigationRoutes,
-                    indicesSnapshot.legIndex
+                    result.navigationRoutes
                 )
-                currentIndicesSnapshotProvider.unfreeze()
                 internalSetNavigationRoutes(
-                    refreshed,
-                    SetRefreshedRoutesInfo(indicesSnapshot),
+                    refreshed.routes,
+                    SetRefreshedRoutesInfo(refreshed.usedIndicesSnapshot),
                 )
             }
         }

@@ -3,10 +3,12 @@ package com.mapbox.navigation.core.routerefresh
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.CurrentIndicesSnapshot
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterFactory
+import com.mapbox.navigation.core.CurrentIndicesSnapshotProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RouteRefresh
 import com.mapbox.navigation.testing.add
@@ -22,6 +24,8 @@ import com.mapbox.navigation.testing.factories.createRouteOptions
 import com.mapbox.navigation.testing.utcToLocalTime
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import com.mapbox.navigation.utils.internal.LoggerProvider
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -43,6 +47,10 @@ import java.util.concurrent.TimeUnit
 class RouteRefreshControllerTest {
 
     private val logger = mockk<LoggerFrontend>(relaxed = true)
+    private val currentIndicesSnapshot = CurrentIndicesSnapshot(0, 1, 2)
+    private val currentIndicesSnapshotProvider = mockk<CurrentIndicesSnapshotProvider>(relaxed = true) {
+        coEvery { getFilledIndicesAndFreeze() } returns currentIndicesSnapshot
+    }
 
     @Before
     fun setup() {
@@ -60,7 +68,7 @@ class RouteRefreshControllerTest {
         )
         val routeRefreshController = createRouteRefreshController()
 
-        val refreshJob = async { routeRefreshController.refresh(listOf(testRoute), 0) }
+        val refreshJob = async { routeRefreshController.refresh(listOf(testRoute)) }
         advanceTimeBy(TimeUnit.HOURS.toMillis(3))
 
         assertTrue(refreshJob.isActive)
@@ -80,10 +88,20 @@ class RouteRefreshControllerTest {
                 .build(),
         )
 
-        val refreshJob = async { routeRefreshController.refresh(listOf(initialRoute), 0) }
+        val refreshJob = async { routeRefreshController.refresh(listOf(initialRoute)) }
         advanceTimeBy(TimeUnit.SECONDS.toMillis(30))
 
-        assertEquals(listOf(refreshedRoute), refreshJob.getCompletedTest())
+        assertEquals(
+            RefreshedRouteInfo(listOf(refreshedRoute), currentIndicesSnapshot),
+            refreshJob.getCompletedTest()
+        )
+        verify(exactly = 0) { currentIndicesSnapshotProvider.invoke() }
+        coVerify(exactly = 1) {
+            currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
+        }
+        verify(exactly = 2) {
+            currentIndicesSnapshotProvider.unfreeze()
+        }
     }
 
     @Test
@@ -103,10 +121,20 @@ class RouteRefreshControllerTest {
         )
 
         val refreshedRouteDeferred =
-            async { routeRefreshController.refresh(listOf(routeWithoutAnnotations), 0) }
+            async { routeRefreshController.refresh(listOf(routeWithoutAnnotations)) }
         advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
 
-        assertEquals(listOf(refreshedRoute), refreshedRouteDeferred.getCompletedTest())
+        assertEquals(
+            RefreshedRouteInfo(listOf(refreshedRoute), currentIndicesSnapshot),
+            refreshedRouteDeferred.getCompletedTest()
+        )
+        verify(exactly = 0) { currentIndicesSnapshotProvider.invoke() }
+        coVerify(exactly = 1) {
+            currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
+        }
+        verify(exactly = 2) {
+            currentIndicesSnapshotProvider.unfreeze()
+        }
     }
 
     @Test
@@ -114,7 +142,7 @@ class RouteRefreshControllerTest {
         val primaryRoute = createNavigationRoute(createTestTwoLegRoute(requestUuid = null))
         val routeRefreshController = createRouteRefreshController()
 
-        val refreshedDeferred = async { routeRefreshController.refresh(listOf(primaryRoute), 0) }
+        val refreshedDeferred = async { routeRefreshController.refresh(listOf(primaryRoute)) }
         advanceTimeBy(TimeUnit.HOURS.toMillis(6))
 
         assertTrue(refreshedDeferred.isActive)
@@ -136,7 +164,7 @@ class RouteRefreshControllerTest {
     fun `refreshing of empty routes`() = runBlockingTest {
         val routeRefreshController = createRouteRefreshController()
 
-        val refreshedDeferred = async { routeRefreshController.refresh(listOf(), 0) }
+        val refreshedDeferred = async { routeRefreshController.refresh(listOf()) }
         advanceTimeBy(TimeUnit.HOURS.toMillis(6))
 
         assertTrue(refreshedDeferred.isActive)
@@ -160,8 +188,7 @@ class RouteRefreshControllerTest {
                         createNavigationRoute(
                             createTestTwoLegRoute()
                         )
-                    ),
-                    0
+                    )
                 )
             }
         advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
@@ -179,7 +206,7 @@ class RouteRefreshControllerTest {
         )
         val route = createNavigationRoute(createTestTwoLegRoute(requestUuid = ""))
 
-        val refreshDeferred = launch { routeRefreshController.refresh(listOf(route), 0) }
+        val refreshDeferred = launch { routeRefreshController.refresh(listOf(route)) }
         advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
 
         assertTrue(refreshDeferred.isActive)
@@ -202,7 +229,7 @@ class RouteRefreshControllerTest {
             routeRefresh = routeRefresh
         )
 
-        val result = async { routeRefreshController.refresh(listOf(initialRoute), 0) }
+        val result = async { routeRefreshController.refresh(listOf(initialRoute)) }
         advanceTimeBy(TimeUnit.HOURS.toMillis(6))
 
         assertTrue("route refresh has finished $result", result.isActive)
@@ -236,9 +263,9 @@ class RouteRefreshControllerTest {
             routeRefresh = routeRefresh
         )
 
-        val result = routeRefreshController.refresh(initialRoutes, 0)
+        val result = routeRefreshController.refresh(initialRoutes)
 
-        assertEquals(refreshedRoutes, result)
+        assertEquals(RefreshedRouteInfo(refreshedRoutes, currentIndicesSnapshot), result)
     }
 
     @Test
@@ -293,7 +320,7 @@ class RouteRefreshControllerTest {
                 routeRefresh = routeRefresh,
             )
 
-            routeRefreshController.refresh(initialRoutes, 0)
+            routeRefreshController.refresh(initialRoutes)
 
             verify {
                 logger.logI(
@@ -325,7 +352,7 @@ class RouteRefreshControllerTest {
                 routeRefresh = routeRefreshStub,
             )
 
-            val refreshJob = launch { routeRefreshController.refresh(initialRoutes, 0) }
+            val refreshJob = launch { routeRefreshController.refresh(initialRoutes) }
             advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
             refreshJob.cancel()
 
@@ -400,13 +427,13 @@ class RouteRefreshControllerTest {
             )
             // act
             val refreshedRoutesDeffer = async {
-                routeRefreshController.refresh(listOf(primaryRoute), 0)
+                routeRefreshController.refresh(listOf(primaryRoute))
             }
             advanceTimeBy(
                 expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis)
             )
             // assert
-            val refreshedRoute = refreshedRoutesDeffer.getCompletedTest().first()
+            val refreshedRoute = refreshedRoutesDeffer.getCompletedTest().routes.first()
             refreshedRoute.assertCongestionExpiredForLeg(0)
             refreshedRoute.assertCongestionExpiredForLeg(1)
             assertEquals(
@@ -432,15 +459,15 @@ class RouteRefreshControllerTest {
                 routeRefresh = routeRefreshStub
             )
             val invalidatedRouteDeffer = async {
-                routeRefreshController.refresh(listOf(initialRoute), 0)
+                routeRefreshController.refresh(listOf(initialRoute))
             }
             advanceTimeBy(
                 expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis)
             )
-            val invalidatedRoute = invalidatedRouteDeffer.getCompletedTest().first()
+            val invalidatedRoute = invalidatedRouteDeffer.getCompletedTest().routes.first()
             // act
             val refreshedRoute = async {
-                routeRefreshController.refresh(listOf(invalidatedRoute), 0)
+                routeRefreshController.refresh(listOf(invalidatedRoute))
             }
             advanceTimeBy(
                 expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis) * 100
@@ -449,7 +476,20 @@ class RouteRefreshControllerTest {
             routeRefreshStub.setRefreshedRoute(initialRoute)
             advanceTimeBy(routeRefreshOptions.intervalMillis)
             // assert
-            assertEquals(listOf(initialRoute), refreshedRoute.getCompletedTest())
+            assertEquals(
+                RefreshedRouteInfo(listOf(initialRoute), currentIndicesSnapshot),
+                refreshedRoute.getCompletedTest()
+            )
+            // 304 = 3(attempts) * (100 + 1) + 1
+            coVerify(exactly = 304) {
+                currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
+            }
+            // 101 = 100 + 1
+            verify(exactly = 101) { currentIndicesSnapshotProvider.invoke() }
+            // 406 = 4(attempts + finally) * (100 + 1) + 1 * 2 (for success)
+            verify(exactly = 406) {
+                currentIndicesSnapshotProvider.unfreeze()
+            }
         }
 
     @Test
@@ -483,15 +523,15 @@ class RouteRefreshControllerTest {
                 localDateProvider = { currentTime }
             )
             val invalidatedRouteDeffer = async {
-                routeRefreshController.refresh(listOf(initialRoute), 0)
+                routeRefreshController.refresh(listOf(initialRoute))
             }
             advanceTimeBy(
                 expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis)
             )
-            val invalidatedRoute = invalidatedRouteDeffer.getCompletedTest().first()
+            val invalidatedRoute = invalidatedRouteDeffer.getCompletedTest().routes.first()
             // act
             val refreshedRoute = async {
-                routeRefreshController.refresh(listOf(invalidatedRoute), 0)
+                routeRefreshController.refresh(listOf(invalidatedRoute))
             }
             val twoHours = TimeUnit.HOURS.toMillis(2)
             currentTime = currentTime.add(milliseconds = twoHours)
@@ -503,7 +543,7 @@ class RouteRefreshControllerTest {
             // assert
             assertEquals(
                 emptyList<Incident>(),
-                refreshedRoute.getCompletedTest().first()
+                refreshedRoute.getCompletedTest().routes.first()
                     .directionsResponse.routes().first().legs()?.first()?.incidents()
             )
         }
@@ -545,6 +585,9 @@ class RouteRefreshControllerTest {
             val routeRefreshOptions = RouteRefreshOptions.Builder()
                 .intervalMillis(30_000L)
                 .build()
+            coEvery {
+                currentIndicesSnapshotProvider.invoke()
+            } returns CurrentIndicesSnapshot(1)
             val routeRefreshController = createRouteRefreshController(
                 routeRefreshOptions = routeRefreshOptions,
                 routeDiffProvider = DirectionsRouteDiffProvider(),
@@ -553,7 +596,7 @@ class RouteRefreshControllerTest {
             )
             // act
             val refreshedRoutesDeferred = async {
-                routeRefreshController.refresh(listOf(currentRoute), 1)
+                routeRefreshController.refresh(listOf(currentRoute))
             }
             advanceTimeBy(
                 expectedTimeToInvalidateCongestionsInCaseOfTimeout(
@@ -561,7 +604,7 @@ class RouteRefreshControllerTest {
                 )
             )
             // assert
-            val refreshedRoute = refreshedRoutesDeferred.getCompletedTest().first()
+            val refreshedRoute = refreshedRoutesDeferred.getCompletedTest().routes.first()
             refreshedRoute.assertCongestionExpiredForLeg(1)
             assertEquals(
                 listOf("3"),
@@ -613,13 +656,23 @@ class RouteRefreshControllerTest {
                     .build()
             )
 
-            val refreshedDeferred = async { refreshController.refresh(listOf(initialRoute), 0) }
+            val refreshedDeferred = async { refreshController.refresh(listOf(initialRoute)) }
             advanceTimeBy(refreshInterval)
             assertFalse(refreshedDeferred.isCompleted)
             currentRoute = refreshed
             advanceTimeBy(refreshInterval)
 
-            assertEquals(listOf(refreshed), refreshedDeferred.getCompletedTest())
+            assertEquals(
+                RefreshedRouteInfo(listOf(refreshed), currentIndicesSnapshot),
+                refreshedDeferred.getCompletedTest()
+            )
+            verify(exactly = 0) { currentIndicesSnapshotProvider.invoke() }
+            coVerify(exactly = 2) {
+                currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
+            }
+            verify(exactly = 3) {
+                currentIndicesSnapshotProvider.unfreeze()
+            }
         }
 
     @Test
@@ -659,13 +712,23 @@ class RouteRefreshControllerTest {
                     .build()
             )
 
-            val refreshedDeferred = async { refreshController.refresh(listOf(initialRoute), 0) }
+            val refreshedDeferred = async { refreshController.refresh(listOf(initialRoute)) }
             advanceTimeBy(refreshInterval)
             assertFalse(refreshedDeferred.isCompleted)
             currentRoute = refreshed
             advanceTimeBy(refreshInterval)
 
-            assertEquals(listOf(refreshed), refreshedDeferred.getCompletedTest())
+            assertEquals(
+                RefreshedRouteInfo(listOf(refreshed), currentIndicesSnapshot),
+                refreshedDeferred.getCompletedTest()
+            )
+            verify(exactly = 0) { currentIndicesSnapshotProvider.invoke() }
+            coVerify(exactly = 2) {
+                currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
+            }
+            verify(exactly = 3) {
+                currentIndicesSnapshotProvider.unfreeze()
+            }
         }
 
     @Test
@@ -717,16 +780,23 @@ class RouteRefreshControllerTest {
         )
 
         val refreshedRoutesDeferred = async {
-            routeRefreshController.refresh(initialRoutes, 0)
+            routeRefreshController.refresh(initialRoutes)
         }
         advanceTimeBy(refreshOptions.intervalMillis)
 
         val result = refreshedRoutesDeferred.getCompletedTest()
 
         assertEquals(
-            refreshedRoutes,
+            RefreshedRouteInfo(refreshedRoutes, currentIndicesSnapshot),
             result
         )
+        verify(exactly = 0) { currentIndicesSnapshotProvider.invoke() }
+        coVerify(exactly = 1) {
+            currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
+        }
+        verify(exactly = 2) {
+            currentIndicesSnapshotProvider.unfreeze()
+        }
     }
 
     @Test
@@ -774,15 +844,22 @@ class RouteRefreshControllerTest {
             )
 
             val refreshedRoutesDeferred = async {
-                routeRefreshController.refresh(initialRoutes, 0)
+                routeRefreshController.refresh(initialRoutes)
             }
             advanceTimeBy(refreshOptions.intervalMillis)
             val result = refreshedRoutesDeferred.getCompletedTest()
 
             assertEquals(
-                expectedRefreshedRoutes,
+                RefreshedRouteInfo(expectedRefreshedRoutes, currentIndicesSnapshot),
                 result
             )
+            verify(exactly = 0) { currentIndicesSnapshotProvider.invoke() }
+            coVerify(exactly = 1) {
+                currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
+            }
+            verify(exactly = 2) {
+                currentIndicesSnapshotProvider.unfreeze()
+            }
         }
 
     @Test
@@ -826,7 +903,7 @@ class RouteRefreshControllerTest {
         )
 
         val refreshedRoutesDeferred = async {
-            routeRefreshController.refresh(initialRoutes, 0)
+            routeRefreshController.refresh(initialRoutes)
         }
         routeRefreshStub.setRefreshedRoute(initialRoutes[0])
         routeRefreshStub.setRefreshedRoute(initialRoutes[1])
@@ -838,9 +915,18 @@ class RouteRefreshControllerTest {
         val result = refreshedRoutesDeferred.getCompletedTest()
 
         assertEquals(
-            refreshedRoutes,
+            RefreshedRouteInfo(refreshedRoutes, currentIndicesSnapshot),
             result
         )
+        verify(exactly = 0) { currentIndicesSnapshotProvider.invoke() }
+        // 5 hours has 84 intervals + one after advanceTimeBy(refreshOptions.intervalMillis)
+        coVerify(exactly = 85) {
+            currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
+        }
+        // 170 = 85 * 2
+        verify(exactly = 170) {
+            currentIndicesSnapshotProvider.unfreeze()
+        }
     }
 
     @Test
@@ -867,15 +953,22 @@ class RouteRefreshControllerTest {
             )
 
             val refreshedDeferred = async {
-                routeRefreshController.refresh(listOf(primaryRoute, alternativeRoute), 0)
+                routeRefreshController.refresh(listOf(primaryRoute, alternativeRoute))
             }
             advanceTimeBy(refreshOptions.intervalMillis)
             val result = refreshedDeferred.getCompletedTest()
 
             assertEquals(
-                listOf(updatedPrimary, alternativeRoute),
+                RefreshedRouteInfo(listOf(updatedPrimary, alternativeRoute), currentIndicesSnapshot),
                 result
             )
+            verify(exactly = 0) { currentIndicesSnapshotProvider.invoke() }
+            coVerify(exactly = 1) {
+                currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
+            }
+            verify(exactly = 2) {
+                currentIndicesSnapshotProvider.unfreeze()
+            }
             verify(exactly = 1) {
                 logger.logI(
                     withArg {
@@ -912,7 +1005,7 @@ class RouteRefreshControllerTest {
             routeRefresh = routeRefresh
         )
 
-        val refreshedDeferred = async { routeRefreshController.refresh(routes, 0) }
+        val refreshedDeferred = async { routeRefreshController.refresh(routes) }
         advanceTimeBy(TimeUnit.HOURS.toMillis(8))
         assertFalse(refreshedDeferred.isCompleted)
         refreshedDeferred.cancel()
@@ -962,6 +1055,9 @@ class RouteRefreshControllerTest {
                 failRouteRefresh(initialRoutes[1].id)
             }
             val routeRefreshOptions = RouteRefreshOptions.Builder().build()
+            coEvery {
+                currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
+            } returns CurrentIndicesSnapshot(1)
             val routeRefreshController = createRouteRefreshController(
                 routeRefreshOptions = routeRefreshOptions,
                 routeDiffProvider = DirectionsRouteDiffProvider(),
@@ -969,13 +1065,13 @@ class RouteRefreshControllerTest {
             )
             // act
             val refreshedRoutesDeferred = async {
-                routeRefreshController.refresh(initialRoutes, 1)
+                routeRefreshController.refresh(initialRoutes)
             }
             advanceTimeBy(
                 expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis)
             )
             // assert
-            val refreshedRoutes = refreshedRoutesDeferred.getCompletedTest()
+            val refreshedRoutes = refreshedRoutesDeferred.getCompletedTest().routes
             refreshedRoutes[0].assertCongestionExpiredForLeg(1)
             refreshedRoutes[1].assertCongestionExpiredForLeg(1)
         }
@@ -1027,6 +1123,9 @@ class RouteRefreshControllerTest {
             routeRefreshStub.setRefreshedRoute(refreshedRoutes[0])
             routeRefreshStub.doNotRespondForRouteRefresh(refreshedRoutes[1].id)
             val refreshOptions = RouteRefreshOptions.Builder().build()
+            coEvery {
+                currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
+            } returns CurrentIndicesSnapshot(1)
             val routeRefreshController = createRouteRefreshController(
                 routeRefresh = routeRefreshStub,
                 routeRefreshOptions = refreshOptions,
@@ -1034,13 +1133,13 @@ class RouteRefreshControllerTest {
             )
 
             val refreshedRoutesDeferred = async {
-                routeRefreshController.refresh(initialRoutes, 1)
+                routeRefreshController.refresh(initialRoutes)
             }
             advanceTimeBy(
                 expectedTimeToInvalidateCongestionsInCaseOfTimeout(refreshOptions.intervalMillis)
             )
 
-            val result = refreshedRoutesDeferred.getCompletedTest()
+            val result = refreshedRoutesDeferred.getCompletedTest().routes
 
             assertEquals(
                 refreshedRoutes[0],
@@ -1060,6 +1159,7 @@ class RouteRefreshControllerTest {
     ) = RouteRefreshController(
         routeRefreshOptions,
         routeRefresh,
+        currentIndicesSnapshotProvider,
         routeDiffProvider,
         localDateProvider
     )

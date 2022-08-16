@@ -48,7 +48,7 @@ class RouterWrapper(
     private val accessToken: String,
     private val router: RouterInterface,
     private val threadController: ThreadController,
-    private val currentIndicesSnapshotProvider: Function0<CurrentIndicesSnapshot>,
+    private val currentIndicesSnapshotProvider: Function0<CurrentIndicesSnapshot?>,
 ) : NavigationRouter, InternalRouter {
 
     private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
@@ -185,7 +185,7 @@ class RouterWrapper(
             return REQUEST_FAILURE
         }
 
-        val indicesSnapshot = currentIndicesSnapshotProvider()
+        val indicesSnapshot = currentIndicesSnapshotProvider()!!
 
         val refreshOptions = RouteRefreshOptions(
             requestUuid,
