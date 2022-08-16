@@ -16,6 +16,7 @@ class RestrictedArea internal constructor(
     length: Double?,
     location: RoadObjectLocation,
     @RoadObjectProvider.Type provider: String,
+    isUrban: Boolean?,
     nativeRoadObject: com.mapbox.navigator.RoadObject,
 ) : RoadObject(
     id,
@@ -23,7 +24,8 @@ class RestrictedArea internal constructor(
     length,
     location,
     provider,
-    nativeRoadObject
+    isUrban,
+    nativeRoadObject,
 ) {
 
     /**

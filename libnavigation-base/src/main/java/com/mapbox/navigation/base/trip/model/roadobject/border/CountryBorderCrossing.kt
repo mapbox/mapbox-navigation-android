@@ -18,6 +18,7 @@ class CountryBorderCrossing internal constructor(
     length: Double?,
     location: RoadObjectLocation,
     @RoadObjectProvider.Type provider: String,
+    isUrban: Boolean?,
     nativeRoadObject: com.mapbox.navigator.RoadObject,
 ) : RoadObject(
     id,
@@ -25,6 +26,7 @@ class CountryBorderCrossing internal constructor(
     length,
     location,
     provider,
+    isUrban,
     nativeRoadObject
 ) {
 

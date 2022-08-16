@@ -57,6 +57,7 @@ class RoadObjectMapperTest {
             LENGTH,
             location,
             SDKRoadObjectProvider.MAPBOX,
+            false,
             nativeObject
         )
 
@@ -81,6 +82,7 @@ class RoadObjectMapperTest {
             LENGTH,
             location,
             SDKRoadObjectProvider.MAPBOX,
+            false,
             nativeObject
         )
 
@@ -103,6 +105,7 @@ class RoadObjectMapperTest {
             LENGTH,
             location,
             SDKRoadObjectProvider.MAPBOX,
+            false,
             nativeObject
         )
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject) as TollCollection
@@ -125,6 +128,7 @@ class RoadObjectMapperTest {
             LENGTH,
             location,
             SDKRoadObjectProvider.MAPBOX,
+            false,
             nativeObject
         )
 
@@ -149,6 +153,7 @@ class RoadObjectMapperTest {
             LENGTH,
             location,
             SDKRoadObjectProvider.MAPBOX,
+            false,
             nativeObject
         )
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject) as RestStop
@@ -172,6 +177,7 @@ class RoadObjectMapperTest {
             LENGTH,
             location,
             SDKRoadObjectProvider.MAPBOX,
+            false,
             nativeObject
         )
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject) as RestStop
@@ -192,6 +198,7 @@ class RoadObjectMapperTest {
             LENGTH,
             location,
             SDKRoadObjectProvider.MAPBOX,
+            false,
             nativeObject
         )
 
@@ -233,6 +240,7 @@ class RoadObjectMapperTest {
             LENGTH,
             location,
             SDKRoadObjectProvider.MAPBOX,
+            false,
             nativeObject
         )
 
@@ -254,6 +262,7 @@ class RoadObjectMapperTest {
             LENGTH,
             location,
             SDKRoadObjectProvider.MAPBOX,
+            false,
             nativeObject
         )
 

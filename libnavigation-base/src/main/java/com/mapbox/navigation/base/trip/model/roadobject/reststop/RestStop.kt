@@ -22,8 +22,11 @@ class RestStop internal constructor(
     length: Double?,
     location: RoadObjectLocation,
     @RoadObjectProvider.Type provider: String,
+    isUrban: Boolean?,
     nativeRoadObject: com.mapbox.navigator.RoadObject,
-) : RoadObject(id, RoadObjectType.REST_STOP, length, location, provider, nativeRoadObject) {
+) : RoadObject(
+    id, RoadObjectType.REST_STOP, length, location, provider, isUrban, nativeRoadObject
+) {
 
     /**
      * Indicates whether some other object is "equal to" this one.

@@ -16,8 +16,9 @@ class Bridge internal constructor(
     length: Double?,
     location: RoadObjectLocation,
     @RoadObjectProvider.Type provider: String,
+    isUrban: Boolean?,
     nativeRoadObject: com.mapbox.navigator.RoadObject,
-) : RoadObject(id, RoadObjectType.BRIDGE, length, location, provider, nativeRoadObject) {
+) : RoadObject(id, RoadObjectType.BRIDGE, length, location, provider, isUrban, nativeRoadObject) {
 
     /**
      * Returns a string representation of the object.
