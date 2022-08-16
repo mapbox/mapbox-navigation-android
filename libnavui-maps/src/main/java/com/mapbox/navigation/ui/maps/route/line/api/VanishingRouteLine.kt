@@ -3,29 +3,18 @@ package com.mapbox.navigation.ui.maps.route.line.api
 import android.graphics.Color
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
-import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.parseRoutePoints
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimExpressionProvider
-import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineExpressions
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
-import com.mapbox.navigation.utils.internal.InternalJobControlFactory
-import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.logD
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import org.jetbrains.annotations.TestOnly
 
 /**
  * This class implements a feature that can change the appearance of the route line behind the puck.
@@ -38,20 +27,6 @@ import org.jetbrains.annotations.TestOnly
  * information.
  */
 internal class VanishingRouteLine {
-
-    private var jobControl: JobControl = InternalJobControlFactory.createDefaultScopeJobControl()
-
-    @TestOnly
-    internal fun setJobControl(jobControl: JobControl) {
-        this.jobControl = jobControl
-    }
-
-    /**
-     * the route points for the indicated primary route
-     */
-    var primaryRoutePoints: RoutePoints? = null
-        private set
-    internal var primaryRouteLineGranularDistances: RouteLineGranularDistances? = null
 
     /**
      * the distance index used for calculating the point at which the primary route line
@@ -70,33 +45,6 @@ internal class VanishingRouteLine {
      */
     var vanishingPointState = VanishingPointState.DISABLED
         private set
-
-    /**
-     * Initializes this class with the active primary route.
-     */
-    fun initWithRoute(route: NavigationRoute) {
-        clear()
-        jobControl.job.cancelChildren()
-        jobControl.scope.launch(Dispatchers.Main) {
-            val parsedRoutePointsDef = jobControl.scope.async {
-                parseRoutePoints(route.directionsRoute)
-            }
-            val parsedRoutePoints = parsedRoutePointsDef.await()
-
-            val granularDistancesDef = jobControl.scope.async {
-                MapboxRouteLineUtils.calculateRouteGranularDistances(
-                    parsedRoutePoints?.flatList
-                        ?: emptyList()
-                )
-            }
-            val granularDistances = granularDistancesDef.await()
-
-            if (coroutineContext.isActive) {
-                primaryRoutePoints = parsedRoutePoints
-                primaryRouteLineGranularDistances = granularDistances
-            }
-        }
-    }
 
     /**
      * Updates this instance with a route progress state from a route progress.
@@ -169,11 +117,11 @@ internal class VanishingRouteLine {
         return offset
     }
 
-    internal fun getTraveledRouteLineExpressions(point: Point): VanishingRouteLineExpressions? {
-        return ifNonNull(
-            primaryRouteLineGranularDistances,
-            primaryRouteRemainingDistancesIndex
-        ) { granularDistances, index ->
+    internal fun getTraveledRouteLineExpressions(
+        point: Point,
+        granularDistances: RouteLineGranularDistances
+    ): VanishingRouteLineExpressions? {
+        return ifNonNull(primaryRouteRemainingDistancesIndex) { index ->
             ifNonNull(getOffset(point, granularDistances, index)) { offset ->
                 vanishPointOffset = offset
                 val trimmedOffsetExpression = literal(listOf(0.0, offset))
@@ -201,6 +149,7 @@ internal class VanishingRouteLine {
 
     internal fun getTraveledRouteLineExpressions(
         point: Point,
+        granularDistances: RouteLineGranularDistances,
         routeLineExpressionData: List<RouteLineExpressionData>,
         restrictedLineExpressionData: List<ExtractedRouteData>?,
         routeResourceProvider: RouteLineResources,
@@ -209,9 +158,8 @@ internal class VanishingRouteLine {
         useSoftGradient: Boolean,
     ): VanishingRouteLineExpressions? {
         return ifNonNull(
-            primaryRouteLineGranularDistances,
             primaryRouteRemainingDistancesIndex
-        ) { granularDistances, index ->
+        ) { index ->
             ifNonNull(getOffset(point, granularDistances, index)) { offset ->
                 vanishPointOffset = offset
                 val trafficLineExpressionProvider = if (useSoftGradient) {
@@ -278,20 +226,5 @@ internal class VanishingRouteLine {
                 )
             }
         }
-    }
-
-    /**
-     * Clears the state stored in this instance.
-     */
-    fun clear() {
-        primaryRoutePoints = null
-        primaryRouteLineGranularDistances = null
-    }
-
-    /**
-     * Cancels any/all background tasks that may be running.
-     */
-    fun cancel() {
-        jobControl.job.cancelChildren()
     }
 }

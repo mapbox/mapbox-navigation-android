@@ -29,12 +29,12 @@ import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.calculateRouteGranularDistances
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getMatchingColors
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.granularDistancesProvider
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup1SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup2SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup3SourceLayerIds
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.parseRoutePoints
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.routePointsProvider
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
@@ -456,39 +456,45 @@ class MapboxRouteLineApi(
             RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS / route.distance()
         } ?: .00000000001 // an arbitrarily small value so Expression values are in ascending order
 
-        val routeLineExpressionProviders =
-            if (routeLineOptions.styleInactiveRouteLegsIndependently) {
-                val workingRouteLineExpressionData =
-                    alternativelyStyleSegmentsNotInLeg(activeLegIndex, routeLineExpressionData)
+        val routeLineExpressionProviders = ifNonNull(primaryRoute) { route ->
+            ifNonNull(granularDistancesProvider(route)) { granularDistances ->
+                if (routeLineOptions.styleInactiveRouteLegsIndependently) {
+                    val workingRouteLineExpressionData =
+                        alternativelyStyleSegmentsNotInLeg(activeLegIndex, routeLineExpressionData)
 
-                val restrictedExpressionData: List<ExtractedRouteData>? =
-                    ifNonNull(primaryRoute?.directionsRoute) { route ->
+                    val restrictedExpressionData: List<ExtractedRouteData>? =
+
                         if (routeLineOptions.displayRestrictedRoadSections &&
                             routeHasRestrictions
                         ) {
                             MapboxRouteLineUtils.extractRouteData(
-                                route,
+                                route.directionsRoute,
                                 MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
-                                    route,
+                                    route.directionsRoute,
                                     routeLineOptions.resourceProvider.routeLineColorResources
                                 )
                             )
                         } else {
                             null
                         }
-                    }
-                routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(
-                    point,
-                    workingRouteLineExpressionData,
-                    restrictedExpressionData,
-                    routeLineOptions.resourceProvider,
-                    activeLegIndex,
-                    stopGap,
-                    routeLineOptions.displaySoftGradientForTraffic,
-                )
-            } else {
-                routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(point)
+                    routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(
+                        point,
+                        granularDistances,
+                        workingRouteLineExpressionData,
+                        restrictedExpressionData,
+                        routeLineOptions.resourceProvider,
+                        activeLegIndex,
+                        stopGap,
+                        routeLineOptions.displaySoftGradientForTraffic,
+                    )
+                } else {
+                    routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(
+                        point,
+                        granularDistances
+                    )
+                }
             }
+        }
 
         lastPointUpdateTimeNano = System.nanoTime()
         return when (routeLineExpressionProviders) {
@@ -549,7 +555,6 @@ class MapboxRouteLineApi(
     ) {
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
-                routeLineOptions.vanishingRouteLine?.clear()
                 routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
                 activeLegIndex = INVALID_ACTIVE_LEG_INDEX
                 routes.clear()
@@ -957,7 +962,6 @@ class MapboxRouteLineApi(
      * Cancels any/all background tasks that may be running.
      */
     fun cancel() {
-        routeLineOptions.vanishingRouteLine?.cancel()
         jobControl.job.cancelChildren()
     }
 
@@ -1079,7 +1083,7 @@ class MapboxRouteLineApi(
         ifNonNull(
             routeProgress.currentLegProgress,
             routeProgress.currentLegProgress?.currentStepProgress,
-            routeLineOptions.vanishingRouteLine?.primaryRoutePoints
+            routePointsProvider(routeProgress.navigationRoute)
         ) { currentLegProgress, currentStepProgress, completeRoutePoints ->
             var allRemainingPoints = 0
 
@@ -1128,6 +1132,8 @@ class MapboxRouteLineApi(
              * calculate the index of the upcoming point.
              */
             val allPoints = completeRoutePoints.flatList.size
+            Log.e("lp_test", "point old: ${allPoints - allRemainingPoints - 1}")
+            Log.e("lp_test", "point new: ${routeProgress.currentRouteGeometryIndex}")
             routeLineOptions.vanishingRouteLine?.primaryRouteRemainingDistancesIndex =
                 allPoints - allRemainingPoints - 1
         } ?: run { routeLineOptions.vanishingRouteLine?.primaryRouteRemainingDistancesIndex = null }
@@ -1155,7 +1161,6 @@ class MapboxRouteLineApi(
 
         ifNonNull(distinctNewRoutes.firstOrNull()) { primaryRouteCandidate ->
             if (!primaryRouteCandidate.directionsRoute.isSameRoute(primaryRoute?.directionsRoute)) {
-                routeLineOptions.vanishingRouteLine?.clear()
                 routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
             }
         }
@@ -1168,14 +1173,12 @@ class MapboxRouteLineApi(
         alternativesDeviationOffset = run {
             val map = mutableMapOf<String, Double>()
             alternativeRoutesMetadata.forEach { alternativeMetadata ->
-                parseRoutePoints(alternativeMetadata.navigationRoute.directionsRoute)?.run {
-                    calculateRouteGranularDistances(flatList)?.run {
-                        map[alternativeMetadata.navigationRoute.id] =
-                            MapboxRouteLineUtils.getAlternativeRouteDeviationOffsets(
-                                granularDistances = this,
-                                metadata = alternativeMetadata
-                            )
-                    }
+                granularDistancesProvider(alternativeMetadata.navigationRoute)?.run {
+                    map[alternativeMetadata.navigationRoute.id] =
+                        MapboxRouteLineUtils.getAlternativeRouteDeviationOffsets(
+                            granularDistances = this,
+                            metadata = alternativeMetadata
+                        )
                 }
             }
             map
@@ -1481,20 +1484,6 @@ class MapboxRouteLineApi(
                     } ?: listOf()
                 }
                 routeLineExpressionData = segmentsDef.await()
-            }
-        }
-
-        // This call is resource intensive so it needs to come last so that
-        // it doesn't consume resources used by the calculations above. The results
-        // of this call aren't necessary to return to the caller but the calculations above are.
-        // Putting this call above will delay the caller receiving the result. There is a check
-        // for primaryRouteLineGranularDistances being null because this value is cleared only
-        // if the primary route has changed via setRoutes. If there's no change in the primary
-        // route there's no need to re-init the vanishing route line which is an expensive
-        // operation.
-        if (routeLineOptions.vanishingRouteLine?.primaryRouteLineGranularDistances == null) {
-            partitionedRoutes.first.firstOrNull()?.let {
-                routeLineOptions.vanishingRouteLine?.initWithRoute(it.route)
             }
         }
 

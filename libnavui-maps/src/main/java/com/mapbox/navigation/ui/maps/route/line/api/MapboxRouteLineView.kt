@@ -49,14 +49,8 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineSourceKey
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimExpressionProvider
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
-import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import org.jetbrains.annotations.TestOnly
 
 /**
@@ -78,15 +72,14 @@ import org.jetbrains.annotations.TestOnly
 class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
 
     private companion object {
-        private const val TAG = "MbxRouteLineView"
+        private const val TAG = "MapboxRouteLineView"
     }
+
     private val sourceToFeatureMap = mutableMapOf<RouteLineSourceKey, RouteLineFeatureId>(
         Pair(MapboxRouteLineUtils.layerGroup1SourceKey, RouteLineFeatureId(null)),
         Pair(MapboxRouteLineUtils.layerGroup2SourceKey, RouteLineFeatureId(null)),
         Pair(MapboxRouteLineUtils.layerGroup3SourceKey, RouteLineFeatureId(null))
     )
-    private val jobControl = InternalJobControlFactory.createDefaultScopeJobControl()
-    private val mutex = Mutex()
 
     private var primaryRouteLineLayerGroup = setOf<String>()
     private val trailCasingLayerIds = setOf(
@@ -148,122 +141,120 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      */
     fun renderRouteDrawData(style: Style, routeDrawData: Expected<RouteLineError, RouteSetValue>) {
         MapboxRouteLineUtils.initializeLayers(style, options)
-        jobControl.scope.launch(Dispatchers.Main) {
-            mutex.withLock {
-                val primaryRouteTrafficVisibility = getTrafficVisibility(style)
-                val primaryRouteVisibility = getPrimaryRouteVisibility(style)
-                val alternativeRouteVisibility = getAlternativeRoutesVisibility(style)
-                routeDrawData.fold({ error ->
-                    logE(TAG, error.errorMessage)
-                    listOf()
-                }, { routeSetValue ->
-                    updateSource(
+        val primaryRouteTrafficVisibility = getTrafficVisibility(style)
+        val primaryRouteVisibility = getPrimaryRouteVisibility(style)
+        val alternativeRouteVisibility = getAlternativeRoutesVisibility(style)
+        routeDrawData.fold({ error ->
+            logE(TAG, error.errorMessage)
+            listOf()
+        }, { routeSetValue ->
+            updateSource(
+                style,
+                RouteLayerConstants.WAYPOINT_SOURCE_ID,
+                routeSetValue.waypointsSource
+            )
+            val routeLineDatas = listOf(routeSetValue.primaryRouteLineData)
+                .plus(routeSetValue.alternativeRouteLinesData)
+            val incomingFeatureIds = routeLineDatas.mapNotNull {
+                it.featureCollection.features()?.firstOrNull()?.id()
+            }
+            val featuresNotOnMap = routeLineDatas.map {
+                RouteLineFeatureId(it.featureCollection.features()?.firstOrNull()?.id())
+            }.filter { it !in sourceToFeatureMap.values }
+            val sourcesToUpdate = sourceToFeatureMap.filter {
+                it.value.id() !in incomingFeatureIds
+            }
+            val featureQueue = ArrayDeque(featuresNotOnMap)
+
+            sourcesToUpdate.forEach { sourceToUpdate ->
+                val nextFeatureId = featureQueue.removeFirstOrNull()?.id()
+                val nextRouteLineData = routeLineDatas.find {
+                    it.featureCollection.features()?.firstOrNull()?.id() == nextFeatureId
+                }
+                val fc: FeatureCollection =
+                    nextRouteLineData?.featureCollection
+                        ?: FeatureCollection.fromFeatures(listOf())
+                updateSource(style, sourceToUpdate.key.sourceId, fc)
+                sourceToFeatureMap[sourceToUpdate.key] = RouteLineFeatureId(nextFeatureId)
+            }
+
+            val sourceFeaturePairings = sourceToFeatureMap.toMutableList()
+            routeLineDatas.mapIndexed { index, routeLineData ->
+                val relatedSourceKey = getRelatedSourceKey(
+                    routeLineData.featureCollection.features()?.firstOrNull()?.id(),
+                    sourceFeaturePairings
+                ).also { sourceFeaturePairings.remove(it) }
+                ifNonNull(relatedSourceKey) { sourceKeyFeaturePair ->
+                    val gradientCommands = getGradientUpdateCommands(
                         style,
-                        RouteLayerConstants.WAYPOINT_SOURCE_ID,
-                        routeSetValue.waypointsSource
-                    )
-                    val routeLineDatas = listOf(routeSetValue.primaryRouteLineData)
-                        .plus(routeSetValue.alternativeRouteLinesData)
-                    val incomingFeatureIds = routeLineDatas.mapNotNull {
-                        it.featureCollection.features()?.firstOrNull()?.id()
+                        sourceKeyFeaturePair.first,
+                        routeLineData,
+                        sourceLayerMap
+                    ).reversed()
+                    // Ignoring the trim offsets if the source was updated with an
+                    // empty feature collection. Even though the call to update the
+                    // source was made first the trim offset commands seem to get
+                    // rendered before the source update completes resulting in an
+                    // undesirable flash on the screen.
+                    val trimOffsetCommands = when (sourceKeyFeaturePair.second.id()) {
+                        null -> listOf()
+                        else -> getTrimOffsetCommands(
+                            style,
+                            sourceKeyFeaturePair.first,
+                            routeLineData,
+                            sourceLayerMap
+                        )
                     }
-                    val featuresNotOnMap = routeLineDatas.map {
-                        RouteLineFeatureId(it.featureCollection.features()?.firstOrNull()?.id())
-                    }.filter { it !in sourceToFeatureMap.values }
-                    val sourcesToUpdate = sourceToFeatureMap.filter {
-                        it.value.id() !in incomingFeatureIds
-                    }
-                    val featureQueue = ArrayDeque(featuresNotOnMap)
-
-                    sourcesToUpdate.forEach { sourceToUpdate ->
-                        val nextFeatureId = featureQueue.removeFirstOrNull()?.id()
-                        val nextRouteLineData = routeLineDatas.find {
-                            it.featureCollection.features()?.firstOrNull()?.id() == nextFeatureId
-                        }
-                        val fc: FeatureCollection =
-                            nextRouteLineData?.featureCollection
-                                ?: FeatureCollection.fromFeatures(listOf())
-                        updateSource(style, sourceToUpdate.key.sourceId, fc)
-                        sourceToFeatureMap[sourceToUpdate.key] = RouteLineFeatureId(nextFeatureId)
-                    }
-
-                    val sourceFeaturePairings = sourceToFeatureMap.toMutableList()
-                    routeLineDatas.mapIndexed { index, routeLineData ->
-                        val relatedSourceKey = getRelatedSourceKey(
-                            routeLineData.featureCollection.features()?.firstOrNull()?.id(),
-                            sourceFeaturePairings
-                        ).also { sourceFeaturePairings.remove(it) }
-                        ifNonNull(relatedSourceKey) { sourceKeyFeaturePair ->
-                            val gradientCommands = getGradientUpdateCommands(
+                    val layerMoveCommand = if (index == 0) {
+                        {
+                            moveLayersUp(
                                 style,
                                 sourceKeyFeaturePair.first,
-                                routeLineData,
                                 sourceLayerMap
-                            ).reversed()
-                            // Ignoring the trim offsets if the source was updated with an
-                            // empty feature collection. Even though the call to update the
-                            // source was made first the trim offset commands seem to get
-                            // rendered before the source update completes resulting in an
-                            // undesirable flash on the screen.
-                            val trimOffsetCommands = when (sourceKeyFeaturePair.second.id()) {
-                                null -> listOf()
-                                else -> getTrimOffsetCommands(
-                                    style,
-                                    sourceKeyFeaturePair.first,
-                                    routeLineData,
-                                    sourceLayerMap
-                                )
-                            }
-                            val layerMoveCommand = if (index == 0) {
-                                {
-                                    moveLayersUp(
-                                        style,
-                                        sourceKeyFeaturePair.first,
-                                        sourceLayerMap
-                                    )
-                                }
-                            } else { {} }
-                            listOf(layerMoveCommand).plus(trimOffsetCommands).plus(gradientCommands)
-                        } ?: listOf()
-                    }
-                }).flatten().forEach { mutationCommand ->
-                    mutationCommand()
-                }
-
-                primaryRouteLineLayerGroup = getLayerIdsForPrimaryRoute(style, sourceLayerMap)
-
-                // Any layer group can host the primary route.  If a call was made to
-                // hide the primary our alternative routes, that state needs to be maintained
-                // until a call is made to show the line(s).  For example if there are 3
-                // route lines showing on the map and a call is made to hide the primary route
-                // it's expected only the alternative routes are displayed. If a user then
-                // selects an alternative route in order to make it the primary route, that
-                // route line should then disappear and the previously hidden primary route line
-                // should appear since the state is: primary route line = hidden / alternative
-                // routes = showing. Only when an API call to show the primary route is made
-                // should the primary route line become visible. The snippet below adjusts
-                // the layer visibility to maintain that state.
-                val trafficLayerIds = setOf(
-                    LAYER_GROUP_1_TRAFFIC,
-                    LAYER_GROUP_2_TRAFFIC,
-                    LAYER_GROUP_3_TRAFFIC
-                )
-                sourceLayerMap.values.flatten().map { layerID ->
-                    when (layerID in trafficLayerIds) {
-                        true -> when (primaryRouteLineLayerGroup.contains(layerID)) {
-                            true -> Pair(layerID, primaryRouteTrafficVisibility)
-                            false -> Pair(layerID, alternativeRouteVisibility)
+                            )
                         }
-                        false -> when (primaryRouteLineLayerGroup.contains(layerID)) {
-                            true -> Pair(layerID, primaryRouteVisibility)
-                            false -> Pair(layerID, alternativeRouteVisibility)
-                        }
+                    } else {
+                        {}
                     }
-                }.forEach {
-                    ifNonNull(it.second) { visibility ->
-                        updateLayerVisibility(style, it.first, visibility)
-                    }
+                    listOf(layerMoveCommand).plus(trimOffsetCommands).plus(gradientCommands)
+                } ?: listOf()
+            }
+        }).flatten().forEach { mutationCommand ->
+            mutationCommand()
+        }
+
+        primaryRouteLineLayerGroup = getLayerIdsForPrimaryRoute(style, sourceLayerMap)
+
+        // Any layer group can host the primary route.  If a call was made to
+        // hide the primary our alternative routes, that state needs to be maintained
+        // until a call is made to show the line(s).  For example if there are 3
+        // route lines showing on the map and a call is made to hide the primary route
+        // it's expected only the alternative routes are displayed. If a user then
+        // selects an alternative route in order to make it the primary route, that
+        // route line should then disappear and the previously hidden primary route line
+        // should appear since the state is: primary route line = hidden / alternative
+        // routes = showing. Only when an API call to show the primary route is made
+        // should the primary route line become visible. The snippet below adjusts
+        // the layer visibility to maintain that state.
+        val trafficLayerIds = setOf(
+            LAYER_GROUP_1_TRAFFIC,
+            LAYER_GROUP_2_TRAFFIC,
+            LAYER_GROUP_3_TRAFFIC
+        )
+        sourceLayerMap.values.flatten().map { layerID ->
+            when (layerID in trafficLayerIds) {
+                true -> when (primaryRouteLineLayerGroup.contains(layerID)) {
+                    true -> Pair(layerID, primaryRouteTrafficVisibility)
+                    false -> Pair(layerID, alternativeRouteVisibility)
                 }
+                false -> when (primaryRouteLineLayerGroup.contains(layerID)) {
+                    true -> Pair(layerID, primaryRouteVisibility)
+                    false -> Pair(layerID, alternativeRouteVisibility)
+                }
+            }
+        }.forEach {
+            ifNonNull(it.second) { visibility ->
+                updateLayerVisibility(style, it.first, visibility)
             }
         }
     }
@@ -286,16 +277,11 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         style: Style,
         update: Expected<RouteLineError, RouteLineUpdateValue>
     ) {
-        MapboxRouteLineUtils.initializeLayers(style, options)
-        jobControl.scope.launch(Dispatchers.Main) {
-            mutex.withLock {
-                update.onValue {
-                    primaryRouteLineLayerGroup.map { layerId ->
-                        toExpressionUpdateFun(layerId, it.primaryRouteLineDynamicData)
-                    }.forEach { updateFun ->
-                        updateFun(style)
-                    }
-                }
+        update.onValue {
+            primaryRouteLineLayerGroup.map { layerId ->
+                toExpressionUpdateFun(layerId, it.primaryRouteLineDynamicData)
+            }.forEach { updateFun ->
+                updateFun(style)
             }
         }
     }
@@ -321,53 +307,49 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         clearRouteLineValue: Expected<RouteLineError, RouteLineClearValue>
     ) {
         MapboxRouteLineUtils.initializeLayers(style, options)
-        jobControl.scope.launch(Dispatchers.Main) {
-            mutex.withLock {
-                clearRouteLineValue.onValue { value ->
-                    val primarySourceKey = getSourceKeyForPrimaryRoute(style).fold(
-                        { routeSourceKey ->
-                            routeSourceKey
-                        }, { error ->
-                        logE(TAG, error.message)
-                        null
-                    }
-                    )?.also {
+        clearRouteLineValue.onValue { value ->
+            val primarySourceKey = getSourceKeyForPrimaryRoute(style).fold(
+                { routeSourceKey ->
+                    routeSourceKey
+                }, { error ->
+                    logE(TAG, error.message)
+                    null
+                }
+            )?.also {
+                updateSource(
+                    style,
+                    it.sourceId,
+                    value.primaryRouteSource
+                )
+                sourceToFeatureMap[it] =
+                    RouteLineFeatureId(
+                        value.primaryRouteSource.features()?.firstOrNull()?.id()
+                    )
+            }
+            sourceLayerMap.keys.filter { it != primarySourceKey }
+                .forEachIndexed { index, routeLineSourceKey ->
+                    if (index < value.alternativeRouteSourceSources.size) {
                         updateSource(
                             style,
-                            it.sourceId,
-                            value.primaryRouteSource
+                            routeLineSourceKey.sourceId,
+                            value.alternativeRouteSourceSources[index]
                         )
-                        sourceToFeatureMap[it] =
+                        sourceToFeatureMap[routeLineSourceKey] =
                             RouteLineFeatureId(
-                                value.primaryRouteSource.features()?.firstOrNull()?.id()
+                                value.alternativeRouteSourceSources[index]
+                                    .features()
+                                    ?.firstOrNull()
+                                    ?.id()
                             )
                     }
-                    sourceLayerMap.keys.filter { it != primarySourceKey }
-                        .forEachIndexed { index, routeLineSourceKey ->
-                            if (index < value.alternativeRouteSourceSources.size) {
-                                updateSource(
-                                    style,
-                                    routeLineSourceKey.sourceId,
-                                    value.alternativeRouteSourceSources[index]
-                                )
-                                sourceToFeatureMap[routeLineSourceKey] =
-                                    RouteLineFeatureId(
-                                        value.alternativeRouteSourceSources[index]
-                                            .features()
-                                            ?.firstOrNull()
-                                            ?.id()
-                                    )
-                            }
-                        }
-                    updateSource(
-                        style,
-                        RouteLayerConstants.WAYPOINT_SOURCE_ID,
-                        value.waypointsSource
-                    )
-
-                    primaryRouteLineLayerGroup = setOf()
                 }
-            }
+            updateSource(
+                style,
+                RouteLayerConstants.WAYPOINT_SOURCE_ID,
+                value.waypointsSource
+            )
+
+            primaryRouteLineLayerGroup = setOf()
         }
     }
 
@@ -377,12 +359,8 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the [Style]
      */
     fun showPrimaryRoute(style: Style) {
-        jobControl.scope.launch(Dispatchers.Main) {
-            mutex.withLock {
-                getLayerIdsForPrimaryRoute(primaryRouteLineLayerGroup, sourceLayerMap, style)
-                    .forEach { updateLayerVisibility(style, it, Visibility.VISIBLE) }
-            }
-        }
+        getLayerIdsForPrimaryRoute(primaryRouteLineLayerGroup, sourceLayerMap, style)
+            .forEach { updateLayerVisibility(style, it, Visibility.VISIBLE) }
     }
 
     /**
@@ -391,12 +369,8 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the [Style]
      */
     fun hidePrimaryRoute(style: Style) {
-        jobControl.scope.launch(Dispatchers.Main) {
-            mutex.withLock {
-                getLayerIdsForPrimaryRoute(primaryRouteLineLayerGroup, sourceLayerMap, style)
-                    .forEach { updateLayerVisibility(style, it, Visibility.NONE) }
-            }
-        }
+        getLayerIdsForPrimaryRoute(primaryRouteLineLayerGroup, sourceLayerMap, style)
+            .forEach { updateLayerVisibility(style, it, Visibility.NONE) }
     }
 
     /**
@@ -405,18 +379,14 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the [Style]
      */
     fun showAlternativeRoutes(style: Style) {
-        jobControl.scope.launch(Dispatchers.Main) {
-            mutex.withLock {
-                val primaryRouteLineLayers =
-                    getLayerIdsForPrimaryRoute(primaryRouteLineLayerGroup, sourceLayerMap, style)
-                layerGroup1SourceLayerIds
-                    .union(layerGroup2SourceLayerIds)
-                    .union(layerGroup3SourceLayerIds)
-                    .subtract(primaryRouteLineLayers).forEach {
-                        updateLayerVisibility(style, it, Visibility.VISIBLE)
-                    }
+        val primaryRouteLineLayers =
+            getLayerIdsForPrimaryRoute(primaryRouteLineLayerGroup, sourceLayerMap, style)
+        layerGroup1SourceLayerIds
+            .union(layerGroup2SourceLayerIds)
+            .union(layerGroup3SourceLayerIds)
+            .subtract(primaryRouteLineLayers).forEach {
+                updateLayerVisibility(style, it, Visibility.VISIBLE)
             }
-        }
     }
 
     /**
@@ -425,18 +395,14 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the [Style]
      */
     fun hideAlternativeRoutes(style: Style) {
-        jobControl.scope.launch(Dispatchers.Main) {
-            mutex.withLock {
-                val primaryRouteLineLayers =
-                    getLayerIdsForPrimaryRoute(primaryRouteLineLayerGroup, sourceLayerMap, style)
-                layerGroup1SourceLayerIds
-                    .union(layerGroup2SourceLayerIds)
-                    .union(layerGroup3SourceLayerIds)
-                    .subtract(primaryRouteLineLayers).forEach {
-                        updateLayerVisibility(style, it, Visibility.NONE)
-                    }
+        val primaryRouteLineLayers =
+            getLayerIdsForPrimaryRoute(primaryRouteLineLayerGroup, sourceLayerMap, style)
+        layerGroup1SourceLayerIds
+            .union(layerGroup2SourceLayerIds)
+            .union(layerGroup3SourceLayerIds)
+            .subtract(primaryRouteLineLayers).forEach {
+                updateLayerVisibility(style, it, Visibility.NONE)
             }
-        }
     }
 
     /**
@@ -445,17 +411,13 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the [Style]
      */
     fun hideTraffic(style: Style) {
-        jobControl.scope.launch(Dispatchers.Main) {
-            mutex.withLock {
-                layerGroup1SourceLayerIds
-                    .union(layerGroup2SourceLayerIds)
-                    .union(layerGroup3SourceLayerIds)
-                    .filter { it in trafficLayerIds }
-                    .forEach { layerId ->
-                        updateLayerVisibility(style, layerId, Visibility.NONE)
-                    }
+        layerGroup1SourceLayerIds
+            .union(layerGroup2SourceLayerIds)
+            .union(layerGroup3SourceLayerIds)
+            .filter { it in trafficLayerIds }
+            .forEach { layerId ->
+                updateLayerVisibility(style, layerId, Visibility.NONE)
             }
-        }
     }
 
     /**
@@ -464,17 +426,13 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the [Style]
      */
     fun showTraffic(style: Style) {
-        jobControl.scope.launch(Dispatchers.Main) {
-            mutex.withLock {
-                layerGroup1SourceLayerIds
-                    .union(layerGroup2SourceLayerIds)
-                    .union(layerGroup3SourceLayerIds)
-                    .filter { it in trafficLayerIds }
-                    .forEach { layerId ->
-                        updateLayerVisibility(style, layerId, Visibility.VISIBLE)
-                    }
+        layerGroup1SourceLayerIds
+            .union(layerGroup2SourceLayerIds)
+            .union(layerGroup3SourceLayerIds)
+            .filter { it in trafficLayerIds }
+            .forEach { layerId ->
+                updateLayerVisibility(style, layerId, Visibility.VISIBLE)
             }
-        }
     }
 
     /**
@@ -541,15 +499,11 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the Style
      */
     fun showOriginAndDestinationPoints(style: Style) {
-        jobControl.scope.launch(Dispatchers.Main) {
-            mutex.withLock {
-                updateLayerVisibility(
-                    style,
-                    RouteLayerConstants.WAYPOINT_LAYER_ID,
-                    Visibility.VISIBLE
-                )
-            }
-        }
+        updateLayerVisibility(
+            style,
+            RouteLayerConstants.WAYPOINT_LAYER_ID,
+            Visibility.VISIBLE
+        )
     }
 
     /**
@@ -558,18 +512,14 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the Style
      */
     fun hideOriginAndDestinationPoints(style: Style) {
-        jobControl.scope.launch(Dispatchers.Main) {
-            mutex.withLock {
-                updateLayerVisibility(style, RouteLayerConstants.WAYPOINT_LAYER_ID, Visibility.NONE)
-            }
-        }
+        updateLayerVisibility(style, RouteLayerConstants.WAYPOINT_LAYER_ID, Visibility.NONE)
     }
 
     /**
      * Cancels any/all background tasks that may be running.
      */
     fun cancel() {
-        jobControl.job.cancelChildren()
+        // no-op
     }
 
     private fun updateLayerVisibility(style: Style, layerId: String, visibility: Visibility) {

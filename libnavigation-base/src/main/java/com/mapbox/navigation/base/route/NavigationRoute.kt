@@ -258,8 +258,17 @@ class NavigationRoute internal constructor(
 
     /**
      * Unique local identifier of the route instance.
+     *
      * For routes which contain server-side UUID it's equal to: `UUID + "#" + routeIndex`, for example: `d77PcddF8rhGUc3ORYGfcwcDfS_8QW6r1iXugXD0HOgmr9CWL8wn0g==#0`.
      * For routes which were generated onboard and do not have a UUID it's equal to: `"local@" + generateUuid() + "#" + routeIndex`, for example: `local@84438c3e-f608-47e9-88cc-cddf341d2fb1#0`.
+     *
+     * There can be two or more [NavigationRoute]s that have an equal ID but fail the [equals] check.
+     * This can occur if a route has been refreshed and contains updated:
+     * - [RouteLeg.annotation]
+     * - [RouteLeg.incidents]
+     * - duration fields
+     *
+     * If two [NavigationRoute]s do have the same ID, they are guaranteed to be originating from the same route response, and follow the exact same path.
      */
     val id: String = nativeRoute.routeId
 
