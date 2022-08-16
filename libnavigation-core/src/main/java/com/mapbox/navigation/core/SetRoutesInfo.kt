@@ -26,7 +26,7 @@ internal sealed class SetRoutesInfo(
     }
 
     override fun toString(): String {
-        return "SetRoutesInfo(reason='$reason', legIndex=$legIndex)"
+        return "SetRoutesInfo(reason=$reason, legIndex=$legIndex)"
     }
 }
 
@@ -37,6 +37,14 @@ internal class BasicSetRoutesInfo(
     override fun toString(): String {
         return "BasicSetRoutesInfo() ${super.toString()}"
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        if (!super.equals(other)) return false
+        return true
+    }
+
 }
 
 internal class SetAlternativeRoutesInfo(legIndex: Int) : SetRoutesInfo(
@@ -46,6 +54,14 @@ internal class SetAlternativeRoutesInfo(legIndex: Int) : SetRoutesInfo(
     override fun toString(): String {
         return "SetAlternativeRoutesInfo() ${super.toString()}"
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        if (!super.equals(other)) return false
+        return true
+    }
+
 }
 
 internal class SetRefreshedRoutesInfo(
