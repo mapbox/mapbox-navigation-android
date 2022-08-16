@@ -36,6 +36,8 @@ import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocat
  * - [RoadObjectLocationType.ROUTE_ALERT]
  *
  * @param provider provider of the road object
+ * @param isUrban **true** whenever [RoadObject] is in urban area, **false** otherwise. **null** if
+ * road object cannot be defined if one is in urban or not (most probably is in both at the same time)
  */
 abstract class RoadObject internal constructor(
     val id: String,
@@ -43,7 +45,8 @@ abstract class RoadObject internal constructor(
     val length: Double?,
     val location: RoadObjectLocation,
     val provider: String,
-    internal val nativeRoadObject: com.mapbox.navigator.RoadObject
+    val isUrban: Boolean?,
+    internal val nativeRoadObject: com.mapbox.navigator.RoadObject,
 ) {
 
     /**
@@ -61,6 +64,7 @@ abstract class RoadObject internal constructor(
         if (location != other.location) return false
         if (provider != other.provider) return false
         if (nativeRoadObject != other.nativeRoadObject) return false
+        if (isUrban != other.isUrban) return false
 
         return true
     }
@@ -75,6 +79,7 @@ abstract class RoadObject internal constructor(
         result = 31 * result + location.hashCode()
         result = 31 * result + provider.hashCode()
         result = 31 * result + nativeRoadObject.hashCode()
+        result = 31 * result + isUrban.hashCode()
         return result
     }
 
@@ -87,7 +92,8 @@ abstract class RoadObject internal constructor(
             "objectType=$objectType, " +
             "length=$length, " +
             "location=$location, " +
-            "provider='$provider'" +
+            "provider=$provider, " +
+            "isUrban=$isUrban" +
             ")"
     }
 }

@@ -338,7 +338,8 @@ internal fun EdgeMetadata.mapToEHorizonEdgeMetadata(): EHorizonEdgeMetadata {
         stateCode,
         isRightHandTraffic,
         isOneway,
-        surface.mapToRoadSurface()
+        surface.mapToRoadSurface(),
+        isUrban,
     )
 }
 

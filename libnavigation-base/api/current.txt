@@ -1002,6 +1002,7 @@ package com.mapbox.navigation.base.trip.model.eh {
     method public boolean getTunnel();
     method public boolean isOneWay();
     method public boolean isRightHandTraffic();
+    method public boolean isUrban();
     property public final boolean bridge;
     property public final String? countryCodeIso2;
     property public final String? countryCodeIso3;
@@ -1010,6 +1011,7 @@ package com.mapbox.navigation.base.trip.model.eh {
     property public final double heading;
     property public final boolean isOneWay;
     property public final boolean isRightHandTraffic;
+    property public final boolean isUrban;
     property public final Byte? laneCount;
     property public final double length;
     property public final Double? meanElevation;
@@ -1158,7 +1160,9 @@ package com.mapbox.navigation.base.trip.model.roadobject {
     method public final com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation getLocation();
     method public final int getObjectType();
     method public final String getProvider();
+    method public final Boolean? isUrban();
     property public final String id;
+    property public final Boolean? isUrban;
     property public final Double? length;
     property public final com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation location;
     property public final int objectType;

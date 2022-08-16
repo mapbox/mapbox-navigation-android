@@ -67,7 +67,8 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
                 length,
                 location,
                 provider,
-                this
+                isUrban,
+                this,
             )
         RoadObjectType.TOLL_COLLECTION_POINT ->
             TollCollection(
@@ -77,7 +78,8 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
                 length,
                 location,
                 provider,
-                this
+                isUrban,
+                this,
             )
         RoadObjectType.BORDER_CROSSING ->
             CountryBorderCrossing(
@@ -89,16 +91,20 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
                 length,
                 location,
                 provider,
-                this
+                isUrban,
+                this,
             )
         RoadObjectType.TUNNEL ->
-            Tunnel(id, metadata.tunnelInfo.toTunnelInfo(), length, location, provider, this)
+            Tunnel(
+                id, metadata.tunnelInfo.toTunnelInfo(), length, location, provider, isUrban, this
+            )
         RoadObjectType.RESTRICTED_AREA -> RestrictedArea(
             id,
             length,
             location,
             provider,
-            this
+            isUrban,
+            this,
         )
         RoadObjectType.SERVICE_AREA ->
             RestStop(
@@ -109,19 +115,20 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
                 length,
                 location,
                 provider,
-                this
+                isUrban,
+                this,
             )
-        RoadObjectType.BRIDGE -> Bridge(id, length, location, provider, this)
-        RoadObjectType.CUSTOM -> Custom(id, length, location, provider, this)
+        RoadObjectType.BRIDGE -> Bridge(id, length, location, provider, isUrban, this)
+        RoadObjectType.CUSTOM -> Custom(id, length, location, provider, isUrban, this)
         RoadObjectType.RAILWAY_CROSSING -> RailwayCrossing(
             id,
             metadata.railwayCrossingInfo.toRailwayCrossingInfo(),
             length,
             location,
             provider,
-            this
+            isUrban,
+            this,
         )
-        else -> throw IllegalArgumentException("unsupported type: $type")
     }
 }
 
