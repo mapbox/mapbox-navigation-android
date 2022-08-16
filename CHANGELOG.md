@@ -12,6 +12,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed a crash when the `TileStore` service process is killed by the Android system. [#6168](https://github.com/mapbox/mapbox-navigation-android/pull/6168)
 - Fixed an issue where some callbacks for completed operations would be invoked again if the `TileStore` service process was terminated. [#6168](https://github.com/mapbox/mapbox-navigation-android/pull/6168)
 - Fixed calculation of `AlternativeRouteMetadata` (duration and distance). [#6168](https://github.com/mapbox/mapbox-navigation-android/pull/6168)
+- Updated `NavigationView` to render upcoming maneuvers. [#6175](https://github.com/mapbox/mapbox-navigation-android/pull/6175)
 
 ## Mapbox Navigation SDK 2.8.0-alpha.2 - 12 August, 2022
 ### Changelog
