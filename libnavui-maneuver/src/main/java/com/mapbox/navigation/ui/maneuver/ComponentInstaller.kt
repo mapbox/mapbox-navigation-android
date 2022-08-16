@@ -59,6 +59,7 @@ class ManeuverConfig internal constructor() {
         .turnIconManeuver(R.style.MapboxStyleTurnIconManeuver)
         .laneGuidanceTurnIconManeuver(R.style.MapboxStyleTurnIconManeuver)
         .stepDistanceTextAppearance(R.style.MapboxStyleStepDistance)
+        .upcomingManeuverBackgroundColor(R.color.colorPrimary)
         .primaryManeuverOptions(
             ManeuverPrimaryOptions
                 .Builder()
