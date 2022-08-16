@@ -249,6 +249,7 @@ class ViewStyleCustomization {
             .Builder()
             .maneuverBackgroundColor(R.color.colorPrimary)
             .subManeuverBackgroundColor(R.color.colorPrimaryVariant)
+            .upcomingManeuverBackgroundColor(R.color.colorPrimaryVariant)
             .turnIconManeuver(R.style.DropInStyleTurnIconManeuver)
             .laneGuidanceTurnIconManeuver(R.style.DropInStyleTurnIconManeuver)
             .stepDistanceTextAppearance(R.style.DropInStyleStepDistance)

@@ -478,6 +478,7 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         .Builder()
         .maneuverBackgroundColor(R.color.maneuver_main_background)
         .subManeuverBackgroundColor(R.color.maneuver_sub_background)
+        .upcomingManeuverBackgroundColor(R.color.maneuver_sub_background)
         .turnIconManeuver(R.style.MyCustomTurnIconManeuver)
         .laneGuidanceTurnIconManeuver(R.style.MyCustomTurnIconManeuver)
         .stepDistanceTextAppearance(R.style.MyCustomStepDistance)
