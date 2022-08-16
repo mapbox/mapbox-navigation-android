@@ -241,8 +241,8 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             alternativesMetadata.navigationRoute.id
         )
         assertNotEquals(alternativesMetadataLegacy, alternativesMetadata)
-        assertEquals(266.0, alternativesMetadataLegacy.infoFromStartOfPrimary.duration, 1.0)
-        assertEquals(275.0, alternativesMetadata.infoFromStartOfPrimary.duration, 1.0)
+        assertEquals(267.9, alternativesMetadataLegacy.infoFromStartOfPrimary.duration, 1.0)
+        assertEquals(277.0, alternativesMetadata.infoFromStartOfPrimary.duration, 1.0)
     }
 
     private fun stayOnInitialPosition() {

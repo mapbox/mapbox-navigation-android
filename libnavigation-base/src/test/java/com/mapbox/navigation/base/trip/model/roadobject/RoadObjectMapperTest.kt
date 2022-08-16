@@ -381,7 +381,8 @@ class RoadObjectMapperTest {
             location,
             type,
             RoadObjectProvider.MAPBOX,
-            metadata
+            metadata,
+            false,
         )
     }
 
