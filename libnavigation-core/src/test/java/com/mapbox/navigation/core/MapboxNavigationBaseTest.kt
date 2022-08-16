@@ -11,6 +11,7 @@ import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.MapboxSDKCommon
 import com.mapbox.common.module.provider.MapboxModuleProvider
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
@@ -64,6 +65,7 @@ import org.junit.Rule
 import java.io.File
 import java.util.Locale
 
+@ExperimentalPreviewMapboxNavigationAPI
 internal open class MapboxNavigationBaseTest {
 
     @get:Rule

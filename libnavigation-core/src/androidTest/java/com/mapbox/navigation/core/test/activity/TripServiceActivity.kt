@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.tests.activity
+package com.mapbox.navigation.core.test.activity
 
 import android.os.Bundle
 import android.widget.Button

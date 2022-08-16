@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.trip.service
+package com.mapbox.navigation.core.test.service
 
 import android.os.Build
 import androidx.test.espresso.Espresso.onIdle
@@ -6,7 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.By
 import com.adevinta.android.barista.interaction.BaristaClickInteractions.clickOn
 import com.mapbox.navigation.core.test.R
-import com.mapbox.navigation.core.tests.activity.TripServiceActivity
+import com.mapbox.navigation.core.test.activity.TripServiceActivity
 import com.mapbox.navigation.testing.ui.NotificationTest
 import com.mapbox.navigation.testing.ui.utils.loopFor
 import org.junit.Assert.assertFalse
