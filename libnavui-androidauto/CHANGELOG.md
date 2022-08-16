@@ -5,6 +5,9 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Added `CarPlaceSearchOptions` to `MainCarContext` so that place search can have a stable api. [#6165](https://github.com/mapbox/mapbox-navigation-android/pull/6165)
+- Deleted `MapboxCarSearchApp` because it is no longer needed. [#6165](https://github.com/mapbox/mapbox-navigation-android/pull/6165)
+- Replaced `CarSearchEngine` with `CarPlaceSearch` and move the implementation to public internal package. [#6165](https://github.com/mapbox/mapbox-navigation-android/pull/6165)
 
 ## androidauto-v0.7.0 - Aug 12, 2022
 ### Changelog
