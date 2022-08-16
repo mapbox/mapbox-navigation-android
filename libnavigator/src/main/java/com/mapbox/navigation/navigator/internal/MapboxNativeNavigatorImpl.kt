@@ -227,6 +227,11 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         }
 
         return suspendCancellableCoroutine { continuation ->
+            logD(
+                "Refreshing native route ${route.nativeRoute().routeId} " +
+                    "with generated refresh response: $refreshResponseJson",
+                LOG_CATEGORY
+            )
             navigator!!.refreshRoute(
                 refreshResponseJson,
                 route.nativeRoute().routeId
