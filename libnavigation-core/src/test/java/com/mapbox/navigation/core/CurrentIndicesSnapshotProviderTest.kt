@@ -2,17 +2,23 @@ package com.mapbox.navigation.core
 
 import com.mapbox.navigation.base.internal.CurrentIndicesSnapshot
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CurrentIndicesSnapshotProviderTest {
 
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
     private val provider = CurrentIndicesSnapshotProvider()
     private val currentLegIndex = 9
     private val routeGeometryIndex = 44
@@ -61,6 +67,26 @@ class CurrentIndicesSnapshotProviderTest {
 
         assertEquals(expected, provider.getFilledIndicesAndFreeze())
         assertEquals(expected, provider())
+    }
+
+    @Test
+    fun updateDuringRetrieval_async() = coroutineRule.runBlockingTest {
+        pauseDispatcher {
+            launch {
+                delay(100)
+                provider.onRouteProgressChanged(routeProgress)
+            }
+            var value: CurrentIndicesSnapshot? = null
+            val update = launch {
+                value = provider.getFilledIndicesAndFreeze()
+                throw AssertionError()
+            }
+            advanceTimeBy(50)
+            update.cancel()
+            advanceTimeBy(50)
+            assertNull(value)
+            assertEquals(expected, provider())
+        }
     }
 
     @Test
@@ -183,13 +209,15 @@ class CurrentIndicesSnapshotProviderTest {
         provider.onRouteProgressChanged(routeProgress)
         val expected = provider.getFilledIndicesAndFreeze()
 
-        provider.onRouteProgressChanged(mockk {
-            every { currentRouteGeometryIndex } returns routeGeometryIndex
-            every { currentLegProgress } returns mockk {
-                every { legIndex } returns 89
-                every { geometryIndex } returns 12
+        provider.onRouteProgressChanged(
+            mockk {
+                every { currentRouteGeometryIndex } returns routeGeometryIndex
+                every { currentLegProgress } returns mockk {
+                    every { legIndex } returns 89
+                    every { geometryIndex } returns 12
+                }
             }
-        })
+        )
 
         assertEquals(expected, provider())
         assertEquals(expected, provider.getFilledIndicesAndFreeze())
@@ -206,13 +234,15 @@ class CurrentIndicesSnapshotProviderTest {
 
     @Test
     fun unfreezeAllowsUpdates() = runBlocking {
-        provider.onRouteProgressChanged(mockk {
-            every { currentRouteGeometryIndex } returns routeGeometryIndex
-            every { currentLegProgress } returns mockk {
-                every { legIndex } returns 89
-                every { geometryIndex } returns 12
+        provider.onRouteProgressChanged(
+            mockk {
+                every { currentRouteGeometryIndex } returns routeGeometryIndex
+                every { currentLegProgress } returns mockk {
+                    every { legIndex } returns 89
+                    every { geometryIndex } returns 12
+                }
             }
-        })
+        )
         provider.getFilledIndicesAndFreeze()
 
         provider.unfreeze()
@@ -220,5 +250,21 @@ class CurrentIndicesSnapshotProviderTest {
 
         assertEquals(expected, provider())
         assertEquals(expected, provider.getFilledIndicesAndFreeze())
+    }
+
+    @Test
+    fun cancelDuringWaitAllowsUpdates_async() = coroutineRule.runBlockingTest {
+        pauseDispatcher {
+            val freeze = launch {
+                provider.getFilledIndicesAndFreeze()
+            }
+            delay(50)
+
+            freeze.cancel()
+            provider.onRouteProgressChanged(routeProgress)
+
+            assertEquals(expected, provider())
+            assertEquals(expected, provider.getFilledIndicesAndFreeze())
+        }
     }
 }

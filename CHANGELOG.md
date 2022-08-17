@@ -19,7 +19,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Updated `NavigationView` to render upcoming maneuvers. [#6175](https://github.com/mapbox/mapbox-navigation-android/pull/6175)
 - Made the SDK use `snapping_include_static_closures=true` for an origin of each re-route request. Similar to `snapping_include_closures=true`, but it includes statically closed roads, that is long-term. [#6164](https://github.com/mapbox/mapbox-navigation-android/pull/6164)
 - Added `RouteLegProgress#geometryIndex` and `RouteProgress#currentRouteGeometryIndex`. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
-- Improved default router to refresh a route partially. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
+- Improved default router to refresh a route partially instead of failing for routes over 1000 km long. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
+- :warning: Disabled route refresh for routes that are set to `MapboxNavigation` while trip session is not running. A session has to be started (`MapboxNavigation#startTripSession`) for refresh feature to start as well. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
 
 ## Mapbox Navigation SDK 2.7.0 - 17 August, 2022
 ### Changelog

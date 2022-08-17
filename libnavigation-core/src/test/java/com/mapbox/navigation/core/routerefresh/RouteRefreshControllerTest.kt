@@ -48,9 +48,10 @@ class RouteRefreshControllerTest {
 
     private val logger = mockk<LoggerFrontend>(relaxed = true)
     private val currentIndicesSnapshot = CurrentIndicesSnapshot(0, 1, 2)
-    private val currentIndicesSnapshotProvider = mockk<CurrentIndicesSnapshotProvider>(relaxed = true) {
-        coEvery { getFilledIndicesAndFreeze() } returns currentIndicesSnapshot
-    }
+    private val currentIndicesSnapshotProvider =
+        mockk<CurrentIndicesSnapshotProvider>(relaxed = true) {
+            coEvery { getFilledIndicesAndFreeze() } returns currentIndicesSnapshot
+        }
 
     @Before
     fun setup() {
@@ -959,7 +960,10 @@ class RouteRefreshControllerTest {
             val result = refreshedDeferred.getCompletedTest()
 
             assertEquals(
-                RefreshedRouteInfo(listOf(updatedPrimary, alternativeRoute), currentIndicesSnapshot),
+                RefreshedRouteInfo(
+                    listOf(updatedPrimary, alternativeRoute),
+                    currentIndicesSnapshot
+                ),
                 result
             )
             verify(exactly = 0) { currentIndicesSnapshotProvider.invoke() }

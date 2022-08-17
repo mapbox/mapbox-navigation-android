@@ -250,7 +250,10 @@ class MapboxDirectionsSessionTest {
 
     @Test
     fun `observer notified on subscribe with explicit empty route data`() {
-        session.setRoutes(emptyList(), BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0))
+        session.setRoutes(
+            emptyList(),
+            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0)
+        )
         val slot = slot<RoutesUpdatedResult>()
         every { observer.onRoutesChanged(capture(slot)) } just runs
 
@@ -312,7 +315,10 @@ class MapboxDirectionsSessionTest {
         every { observer.onRoutesChanged(capture(slot)) } just runs
 
         session.registerRoutesObserver(observer)
-        session.setRoutes(emptyList(), BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0))
+        session.setRoutes(
+            emptyList(),
+            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0)
+        )
 
         assertTrue("Number of onRoutesChanged invocations", slot.size == 1)
         assertEquals(
@@ -325,11 +331,17 @@ class MapboxDirectionsSessionTest {
 
     @Test
     fun `when route cleared for the second first time, observer not notified`() {
-        session.setRoutes(emptyList(), BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0))
+        session.setRoutes(
+            emptyList(),
+            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0)
+        )
 
         session.registerRoutesObserver(observer)
         clearMocks(observer)
-        session.setRoutes(emptyList(), BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0))
+        session.setRoutes(
+            emptyList(),
+            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0)
+        )
 
         verify(exactly = 0) {
             observer.onRoutesChanged(any())

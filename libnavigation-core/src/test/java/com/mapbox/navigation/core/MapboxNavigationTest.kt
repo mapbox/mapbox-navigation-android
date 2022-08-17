@@ -1361,7 +1361,9 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             val currentIndicesSnapshot = CurrentIndicesSnapshot(5, 12, 43)
             val routeObserversSlot = mutableListOf<RoutesObserver>()
             every { tripSession.getState() } returns TripSessionState.STARTED
-            coEvery { currentIndicesSnapshotProvider.getFilledIndicesAndFreeze() } returns currentIndicesSnapshot
+            coEvery {
+                currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
+            } returns currentIndicesSnapshot
 
             val refreshedRoutes = listOf(mockk<NavigationRoute>())
             coEvery {

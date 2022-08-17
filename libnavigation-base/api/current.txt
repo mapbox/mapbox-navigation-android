@@ -876,7 +876,7 @@ package com.mapbox.navigation.base.trip.model {
   public final class RouteProgress {
     method public com.mapbox.api.directions.v5.models.BannerInstructions? getBannerInstructions();
     method public com.mapbox.navigation.base.trip.model.RouteLegProgress? getCurrentLegProgress();
-    method public Integer? getCurrentRouteGeometryIndex();
+    method public int getCurrentRouteGeometryIndex();
     method public com.mapbox.navigation.base.trip.model.RouteProgressState getCurrentState();
     method public float getDistanceRemaining();
     method public float getDistanceTraveled();
@@ -893,7 +893,7 @@ package com.mapbox.navigation.base.trip.model {
     method public com.mapbox.api.directions.v5.models.VoiceInstructions? getVoiceInstructions();
     property public final com.mapbox.api.directions.v5.models.BannerInstructions? bannerInstructions;
     property public final com.mapbox.navigation.base.trip.model.RouteLegProgress? currentLegProgress;
-    property public final Integer? currentRouteGeometryIndex;
+    property public final int currentRouteGeometryIndex;
     property public final com.mapbox.navigation.base.trip.model.RouteProgressState currentState;
     property public final float distanceRemaining;
     property public final float distanceTraveled;

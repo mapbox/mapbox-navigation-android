@@ -226,8 +226,8 @@ class NavigationRouteExTest {
                 )
                 assertEquals(
                     description,
-                    listOf(result.expectedLegGeometryIndex)
-                        + List(capturedLegGeometryIndices.size - 1) { 0 },
+                    listOf(result.expectedLegGeometryIndex) +
+                        List(capturedLegGeometryIndices.size - 1) { 0 },
                     capturedLegGeometryIndices
                 )
             }

@@ -29,11 +29,8 @@ internal class CurrentIndicesSnapshotProvider :
      * [getFilledIndicesAndFreeze] and [invoke] results.
      */
     suspend fun getFilledIndicesAndFreeze(): CurrentIndicesSnapshot {
-        return (indicesSnapshot ?: suspendCancellableCoroutine<CurrentIndicesSnapshot> {
-            continuation = it
-        }).also {
-            frozen = true
-        }
+        return (indicesSnapshot ?: suspendCancellableCoroutine { continuation = it })
+            .also { frozen = true }
     }
 
     /**

@@ -44,7 +44,6 @@ internal class BasicSetRoutesInfo(
         if (!super.equals(other)) return false
         return true
     }
-
 }
 
 internal class SetAlternativeRoutesInfo(legIndex: Int) : SetRoutesInfo(
@@ -61,7 +60,6 @@ internal class SetAlternativeRoutesInfo(legIndex: Int) : SetRoutesInfo(
         if (!super.equals(other)) return false
         return true
     }
-
 }
 
 internal class SetRefreshedRoutesInfo(
