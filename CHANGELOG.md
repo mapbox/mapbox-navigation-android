@@ -4,13 +4,8 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
-- Introduced `ViewOptionsCustomization.isInfoPanelHideable` that allows control over whether the `NavigationView` Info Panel can hide when it is swiped down. [#6132](https://github.com/mapbox/mapbox-navigation-android/pull/6132)
-- Introduced `ViewOptionsCustomization.infoPanelForcedState` that allows overriding of the `NavigationView` Info Panel (BottomSheetBehaviour) state. [#6132](https://github.com/mapbox/mapbox-navigation-android/pull/6132)
 
 #### Bug fixes and improvements
-- Updated `NavigationView` to render upcoming maneuvers. [#6175](https://github.com/mapbox/mapbox-navigation-android/pull/6175)
-- Updated `NavigationView` to allow drawing of the info panel behind the translucent navigation bar. [#6145](https://github.com/mapbox/mapbox-navigation-android/pull/6145)
-- Fixed an issue where `NavigationView` switches from Active Guidance to Free Drive state after rotating device when replay is enabled. [#6140](https://github.com/mapbox/mapbox-navigation-android/pull/6140) 
 
 ## Mapbox Navigation SDK 2.7.0 - 17 August, 2022
 ### Changelog
@@ -109,24 +104,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Maps SDK `v10.7.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.7.0))
 - Mapbox Navigation Native `v111.0.0`
 - Mapbox Core Common `v22.1.0`
-- Mapbox Java `v6.7.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.7.0-beta.1))
-- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
-- Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
-
-
-## Mapbox Navigation SDK 2.8.0-alpha.1 - 04 August, 2022
-### Changelog
-[Changes between v2.7.0-rc.1 and v2.8.0-alpha.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.7.0-rc.1...v2.8.0-alpha.1)
-
-#### Features
-#### Bug fixes and improvements
-- Fixed a crash when the service process is killed by the Android system. [#6125](https://github.com/mapbox/mapbox-navigation-android/pull/6125)
-
-### Mapbox dependencies
-This release depends on, and has been tested with, the following Mapbox dependencies:
-- Mapbox Maps SDK `v10.7.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.7.0))
-- Mapbox Navigation Native `v111.0.0`
-- Mapbox Core Common `v22.1.1`
 - Mapbox Java `v6.7.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.7.0-beta.1))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
 - Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
