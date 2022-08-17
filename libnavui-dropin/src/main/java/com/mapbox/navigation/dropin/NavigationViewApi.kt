@@ -39,7 +39,7 @@ abstract class NavigationViewApi {
      *
      * Fails with an error when either Destination or Preview Routes has not been set.
      */
-    abstract fun startRoutePreview(): Expected<Throwable, Unit>
+    abstract fun startRoutePreview(): Expected<NavigationViewApiError, Unit>
 
     /**
      * Sets a preview [routes] and request Request [NavigationView] to enter Route Preview state.
@@ -51,7 +51,9 @@ abstract class NavigationViewApi {
      *
      * Fails with an error when [routes] is an empty list.
      */
-    abstract fun startRoutePreview(routes: List<NavigationRoute>): Expected<Throwable, Unit>
+    abstract fun startRoutePreview(
+        routes: List<NavigationRoute>
+    ): Expected<NavigationViewApiError, Unit>
 
     /**
      * Request [NavigationView] to enter Active Navigation state.
@@ -61,7 +63,7 @@ abstract class NavigationViewApi {
      *
      * Fails with an error when either Destination or Preview Routes has not been set.
      */
-    abstract fun startNavigation(): Expected<Throwable, Unit>
+    abstract fun startActiveGuidance(): Expected<NavigationViewApiError, Unit>
 
     /**
      * Sets [routes] and request [NavigationView] to enter Active Navigation state.
@@ -73,7 +75,9 @@ abstract class NavigationViewApi {
      *
      * Fails with an error when [routes] is an empty list.
      */
-    abstract fun startNavigation(routes: List<NavigationRoute>): Expected<Throwable, Unit>
+    abstract fun startActiveGuidance(
+        routes: List<NavigationRoute>
+    ): Expected<NavigationViewApiError, Unit>
 
     /**
      * Request [NavigationView] to enter Arrival state.
@@ -83,7 +87,7 @@ abstract class NavigationViewApi {
      *
      * Fails with an error when either Destination or Routes has not been set.
      */
-    abstract fun startArrival(): Expected<Throwable, Unit>
+    abstract fun startArrival(): Expected<NavigationViewApiError, Unit>
 
     /**
      * Sets [routes] and request [NavigationView] to enter Arrival state.
@@ -95,7 +99,7 @@ abstract class NavigationViewApi {
      *
      * Fails with an error when [routes] is an empty list.
      */
-    abstract fun startArrival(routes: List<NavigationRoute>): Expected<Throwable, Unit>
+    abstract fun startArrival(routes: List<NavigationRoute>): Expected<NavigationViewApiError, Unit>
 
     /**
      * Checks if the current trip is being simulated.
@@ -106,4 +110,36 @@ abstract class NavigationViewApi {
      * Enable/Disable replay trip session based on simulated locations.
      */
     abstract fun routeReplayEnabled(enabled: Boolean)
+}
+
+/**
+ * Errors returned by the NavigationApi.
+ */
+sealed class NavigationViewApiError(message: String) : Throwable(message) {
+    /**
+     * Error returned when the Destination hasn't been set yet.
+     */
+    object MissingDestinationInfo : NavigationViewApiError("Destination cannot be empty.")
+
+    /**
+     * Error returned when the Preview Routes list hasn't been set yet.
+     */
+    object MissingPreviewRoutesInfo : NavigationViewApiError("Preview Routes cannot be empty.")
+
+    /**
+     * Error returned when the Routes list hasn't been set yet.
+     */
+    object MissingRoutesInfo : NavigationViewApiError("Routes cannot be empty.")
+
+    /**
+     * Error returned when given PreviewRoute or Route list is empty.
+     */
+    object InvalidRoutesInfo : NavigationViewApiError("Routes cannot be empty.")
+
+    /**
+     * Error returned when given PreviewRoute or Route list is missing [DirectionsWaypoint]
+     * information that is needed to determine Destination coordinates.
+     */
+    object IncompleteRoutesInfo :
+        NavigationViewApiError("Missing destination info in a given route.")
 }

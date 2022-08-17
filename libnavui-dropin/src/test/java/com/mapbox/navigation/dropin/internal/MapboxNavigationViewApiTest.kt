@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.dropin.NavigationViewApiError
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.ui.app.internal.Reducer
 import com.mapbox.navigation.ui.app.internal.destination.Destination
@@ -90,7 +91,8 @@ class MapboxNavigationViewApiTest {
     }
 
     @Test
-    fun `startRoutePreview should return an Error if destination has not been set`() {
+    @Suppress("MaxLineLength")
+    fun `startRoutePreview should return an MissingDestinationInfo error if destination has not been set`() {
         testStore.updateState {
             it.copy(
                 destination = null,
@@ -100,11 +102,12 @@ class MapboxNavigationViewApiTest {
 
         val error = sut.startRoutePreview().error
 
-        assertTrue(error is IllegalStateException)
+        assertTrue(error is NavigationViewApiError.MissingDestinationInfo)
     }
 
     @Test
-    fun `startRoutePreview should fail with IllegalStateException if preview routes are empty`() {
+    @Suppress("MaxLineLength")
+    fun `startRoutePreview should fail with MissingPreviewRoutesInfo error if preview routes are empty`() {
         testStore.updateState {
             it.copy(
                 destination = Destination(Point.fromLngLat(1.0, 2.0)),
@@ -114,7 +117,7 @@ class MapboxNavigationViewApiTest {
 
         val result = sut.startRoutePreview()
 
-        assertTrue(result.error is IllegalStateException)
+        assertTrue(result.error is NavigationViewApiError.MissingPreviewRoutesInfo)
     }
 
     @Test
@@ -139,15 +142,23 @@ class MapboxNavigationViewApiTest {
 
     @Test
     @Suppress("MaxLineLength")
-    fun `startRoutePreview should fail with IllegalArgumentException if preview routes are empty`() {
+    fun `startRoutePreview should fail with InvalidRoutesInfo error if preview routes are empty`() {
         val result = sut.startRoutePreview(emptyList())
 
-        assertTrue(result.error is IllegalArgumentException)
+        assertTrue(result.error is NavigationViewApiError.InvalidRoutesInfo)
     }
 
     @Test
     @Suppress("MaxLineLength")
-    fun `startNavigation should set preview routes as routes and set ActiveNavigation NavigationState`() {
+    fun `startRoutePreview should fail with IncompleteRoutesInfo error if preview routes is missing waypoints data`() {
+        val result = sut.startRoutePreview(listOf(navigationRoute()))
+
+        assertTrue(result.error is NavigationViewApiError.IncompleteRoutesInfo)
+    }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `startActiveGuidance should set preview routes as routes and set ActiveNavigation NavigationState`() {
         val routes = listOf<NavigationRoute>(mockk())
         testStore.updateState {
             it.copy(
@@ -156,7 +167,7 @@ class MapboxNavigationViewApiTest {
             )
         }
 
-        val result = sut.startNavigation()
+        val result = sut.startActiveGuidance()
 
         verify { testStore.dispatch(RoutesAction.SetRoutes(routes)) }
         verify {
@@ -167,7 +178,7 @@ class MapboxNavigationViewApiTest {
 
     @Test
     @Suppress("MaxLineLength")
-    fun `startNavigation should fail with IllegalStateException if destination has not been set`() {
+    fun `startActiveGuidance should fail with MissingDestinationInfo error if destination has not been set`() {
         testStore.updateState {
             it.copy(
                 destination = null,
@@ -175,13 +186,13 @@ class MapboxNavigationViewApiTest {
             )
         }
 
-        val result = sut.startNavigation()
+        val result = sut.startActiveGuidance()
 
-        assertTrue(result.error is IllegalStateException)
+        assertTrue(result.error is NavigationViewApiError.MissingDestinationInfo)
     }
 
     @Test
-    fun `startNavigation should fail with IllegalStateException if preview routes are empty`() {
+    fun `startActiveGuidance should fail with MissingPreviewRoutesInfo error if preview routes are empty`() {
         testStore.updateState {
             it.copy(
                 destination = Destination(Point.fromLngLat(1.0, 2.0)),
@@ -189,14 +200,14 @@ class MapboxNavigationViewApiTest {
             )
         }
 
-        val result = sut.startNavigation()
+        val result = sut.startActiveGuidance()
 
-        assertTrue(result.error is IllegalStateException)
+        assertTrue(result.error is NavigationViewApiError.MissingPreviewRoutesInfo)
     }
 
     @Test
     @Suppress("MaxLineLength")
-    fun `startNavigation should set destination, preview routes and set RoutePreview NavigationState `() {
+    fun `startActiveGuidance should set destination, preview routes and set RoutePreview NavigationState `() {
         val point = Point.fromLngLat(11.0, 22.0)
         val routes = listOf(
             navigationRoute(
@@ -206,7 +217,7 @@ class MapboxNavigationViewApiTest {
             )
         )
 
-        val result = sut.startNavigation(routes)
+        val result = sut.startActiveGuidance(routes)
 
         verify { testStore.dispatch(DestinationAction.SetDestination(Destination(point))) }
         verify { testStore.dispatch(RoutePreviewAction.Ready(routes)) }
@@ -217,10 +228,11 @@ class MapboxNavigationViewApiTest {
     }
 
     @Test
-    fun `startNavigation should fail with IllegalArgumentException if preview routes are empty`() {
-        val result = sut.startNavigation(emptyList())
+    @Suppress("MaxLineLength")
+    fun `startActiveGuidance should fail with InvalidRoutesInfo error if preview routes are empty`() {
+        val result = sut.startActiveGuidance(emptyList())
 
-        assertTrue(result.error is IllegalArgumentException)
+        assertTrue(result.error is NavigationViewApiError.InvalidRoutesInfo)
     }
 
     @Test
@@ -239,7 +251,8 @@ class MapboxNavigationViewApiTest {
     }
 
     @Test
-    fun `startArrival should fail with IllegalStateException if destination has not been set`() {
+    @Suppress("MaxLineLength")
+    fun `startArrival should fail with MissingDestinationInfo error if destination has not been set`() {
         testStore.updateState {
             it.copy(
                 destination = null,
@@ -249,21 +262,22 @@ class MapboxNavigationViewApiTest {
 
         val result = sut.startArrival()
 
-        assertTrue(result.error is IllegalStateException)
+        assertTrue(result.error is NavigationViewApiError.MissingDestinationInfo)
     }
 
     @Test
-    fun `startArrival should fail with IllegalStateException if preview routes are empty`() {
+    @Suppress("MaxLineLength")
+    fun `startArrival should fail with MissingRoutesInfo error if routes are empty`() {
         testStore.updateState {
             it.copy(
-                destination = null,
+                destination = Destination(Point.fromLngLat(1.0, 2.0)),
                 routes = emptyList()
             )
         }
 
         val result = sut.startArrival()
 
-        assertTrue(result.error is IllegalStateException)
+        assertTrue(result.error is NavigationViewApiError.MissingRoutesInfo)
     }
 
     @Test
@@ -290,10 +304,11 @@ class MapboxNavigationViewApiTest {
     }
 
     @Test
-    fun `startArrival should fail with IllegalArgumentException if preview routes are empty`() {
+    @Suppress("MaxLineLength")
+    fun `startArrival should fail with InvalidRoutesInfo error if preview routes are empty`() {
         val result = sut.startArrival(emptyList())
 
-        assertTrue(result.error is IllegalArgumentException)
+        assertTrue(result.error is NavigationViewApiError.InvalidRoutesInfo)
     }
 
     @Test

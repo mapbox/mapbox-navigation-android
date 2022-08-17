@@ -6,6 +6,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.dropin.NavigationViewApi
+import com.mapbox.navigation.dropin.NavigationViewApiError
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
@@ -32,28 +33,27 @@ internal class MapboxNavigationViewApi(
         store.dispatch(NavigationStateAction.Update(NavigationState.DestinationPreview))
     }
 
-    override fun startRoutePreview(): Expected<Throwable, Unit> =
-        runCatchingExpected {
+    override fun startRoutePreview(): Expected<NavigationViewApiError, Unit> =
+        runCatchingError {
             checkDestination()
             checkPreviewRoutes()
 
             store.dispatch(NavigationStateAction.Update(NavigationState.RoutePreview))
         }
 
-    override fun startRoutePreview(routes: List<NavigationRoute>): Expected<Throwable, Unit> =
-        runCatchingExpected {
-            require(routes.isNotEmpty()) { "routes cannot be empty" }
-            val point = checkNotNull(routes.first().getDestination()) {
-                "destination not found in a given route"
-            }
+    override fun startRoutePreview(
+        routes: List<NavigationRoute>
+    ): Expected<NavigationViewApiError, Unit> =
+        runCatchingError {
+            val point = findDestinationPoint(routes)
 
             setDestination(point)
             setPreviewRoutes(routes)
             startRoutePreview()
         }
 
-    override fun startNavigation(): Expected<Throwable, Unit> =
-        runCatchingExpected {
+    override fun startActiveGuidance(): Expected<NavigationViewApiError, Unit> =
+        runCatchingError {
             checkDestination()
             checkPreviewRoutes()
 
@@ -62,32 +62,30 @@ internal class MapboxNavigationViewApi(
             store.dispatch(NavigationStateAction.Update(NavigationState.ActiveNavigation))
         }
 
-    override fun startNavigation(routes: List<NavigationRoute>): Expected<Throwable, Unit> =
-        runCatchingExpected {
-            require(routes.isNotEmpty()) { "routes cannot be empty" }
-            val point = checkNotNull(routes.first().getDestination()) {
-                "destination not found in a given route"
-            }
+    override fun startActiveGuidance(
+        routes: List<NavigationRoute>
+    ): Expected<NavigationViewApiError, Unit> =
+        runCatchingError {
+            val point = findDestinationPoint(routes)
 
             setDestination(point)
             setPreviewRoutes(routes)
-            startNavigation()
+            startActiveGuidance()
         }
 
-    override fun startArrival(): Expected<Throwable, Unit> =
-        runCatchingExpected {
+    override fun startArrival(): Expected<NavigationViewApiError, Unit> =
+        runCatchingError {
             checkDestination()
             checkRoutes()
 
             store.dispatch(NavigationStateAction.Update(NavigationState.Arrival))
         }
 
-    override fun startArrival(routes: List<NavigationRoute>): Expected<Throwable, Unit> =
-        runCatchingExpected {
-            require(routes.isNotEmpty()) { "routes cannot be empty" }
-            val point = checkNotNull(routes.first().getDestination()) {
-                "destination not found in a given route"
-            }
+    override fun startArrival(
+        routes: List<NavigationRoute>
+    ): Expected<NavigationViewApiError, Unit> =
+        runCatchingError {
+            val point = findDestinationPoint(routes)
 
             setDestination(point)
             setPreviewRoutes(routes)
@@ -107,24 +105,34 @@ internal class MapboxNavigationViewApi(
         }
     }
 
-    @Throws(IllegalStateException::class)
+    @Throws(NavigationViewApiError.MissingDestinationInfo::class)
     private fun checkDestination() {
-        checkNotNull(store.state.value.destination) { "Destination not set." }
-    }
-
-    @Throws(IllegalStateException::class)
-    private fun checkPreviewRoutes() {
-        val previewState = store.state.value.previewRoutes
-        check(
-            previewState is RoutePreviewState.Ready && previewState.routes.isNotEmpty()
-        ) {
-            "Preview Routes not set."
+        if (store.state.value.destination == null) {
+            throw NavigationViewApiError.MissingDestinationInfo
         }
     }
 
-    @Throws(IllegalStateException::class)
+    @Throws(NavigationViewApiError.MissingPreviewRoutesInfo::class)
+    private fun checkPreviewRoutes() {
+        val previewState = store.state.value.previewRoutes
+        if (previewState !is RoutePreviewState.Ready || previewState.routes.isEmpty()) {
+            throw NavigationViewApiError.MissingPreviewRoutesInfo
+        }
+    }
+
+    @Throws(NavigationViewApiError.MissingRoutesInfo::class)
     private fun checkRoutes() {
-        check(store.state.value.routes.isNotEmpty()) { "Routes not set." }
+        if (store.state.value.routes.isEmpty()) throw NavigationViewApiError.MissingRoutesInfo
+    }
+
+    @Throws(
+        NavigationViewApiError.InvalidRoutesInfo::class,
+        NavigationViewApiError.IncompleteRoutesInfo::class
+    )
+    private fun findDestinationPoint(routes: List<NavigationRoute>): Point {
+        if (routes.isEmpty()) throw NavigationViewApiError.InvalidRoutesInfo
+
+        return routes.first().getDestination() ?: throw NavigationViewApiError.IncompleteRoutesInfo
     }
 
     private fun setDestination(point: Point) {
@@ -146,12 +154,15 @@ internal class MapboxNavigationViewApi(
 
 /**
  * Calls the specified function [block] and returns its encapsulated result if invocation was successful,
- * catching any [Throwable] exception that was thrown from the [block] function execution and encapsulating it as a failure.
+ * catching any [NavigationViewApiError] that was thrown from the [block] function execution and encapsulating it as a failure.
  */
-private inline fun <R : Any> runCatchingExpected(block: () -> R): Expected<Throwable, R> {
+@ExperimentalPreviewMapboxNavigationAPI
+private inline fun <R : Any> runCatchingError(
+    block: () -> R
+): Expected<NavigationViewApiError, R> {
     return try {
         ExpectedFactory.createValue(block())
-    } catch (e: Throwable) {
+    } catch (e: NavigationViewApiError) {
         ExpectedFactory.createError(e)
     }
 }

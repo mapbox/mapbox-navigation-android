@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Updated `NavigationViewApi`. Introduced `startFreeDrive`, `startDestinationPreview`, `startRoutePreview`, `startActiveGuidance`, `startArrival`. Removed `fetchRoutes`, `setPreviewRoutes`, `setRoutes`, `setDestination`. Replaced `enableTripSession` and `enableReplaySession` with `routeReplayEnabled(enabled: Boolean)`. [#6174](https://github.com/mapbox/mapbox-navigation-android/pull/6174)
 
 ## Mapbox Navigation SDK 2.8.0-alpha.3 - 17 August, 2022
 ### Changelog
