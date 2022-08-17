@@ -29,6 +29,7 @@ fun NavigationRoute.nativeRoute(): RouteInterface = this.nativeRoute
  */
 fun NavigationRoute.refreshRoute(
     initialLegIndex: Int,
+    currentLegGeometryIndex: Int?,
     legAnnotations: List<LegAnnotation?>?,
     incidents: List<List<Incident>?>?,
 ): NavigationRoute {
@@ -36,11 +37,25 @@ fun NavigationRoute.refreshRoute(
         if (index < initialLegIndex) {
             routeLeg
         } else {
-            routeLeg.toBuilder().annotation(
-                legAnnotations?.getOrNull(index)
-            ).incidents(
-                incidents?.getOrNull(index)
-            ).build()
+            val newAnnotation = legAnnotations?.getOrNull(index)
+            val mergedAnnotation =
+                if (index == initialLegIndex && currentLegGeometryIndex != null) {
+                    AnnotationsRefresher.getRefreshedAnnotations(
+                        routeLeg.annotation(),
+                        newAnnotation,
+                        currentLegGeometryIndex
+                    )
+                } else {
+                    AnnotationsRefresher.getRefreshedAnnotations(
+                        routeLeg.annotation(),
+                        newAnnotation,
+                        startingLegGeometryIndex = 0
+                    )
+                }
+            routeLeg.toBuilder()
+                .incidents(incidents?.getOrNull(index))
+                .annotation(mergedAnnotation)
+                .build()
         }
     }
     return updateDirectionsRouteOnly {

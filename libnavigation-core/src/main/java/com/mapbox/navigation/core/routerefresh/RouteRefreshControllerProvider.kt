@@ -1,8 +1,8 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.route.RouteRefreshOptions
+import com.mapbox.navigation.core.CurrentIndicesSnapshotProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
-import com.mapbox.navigation.core.trip.session.TripSession
 import java.util.Date
 
 internal object RouteRefreshControllerProvider {
@@ -10,11 +10,11 @@ internal object RouteRefreshControllerProvider {
     fun createRouteRefreshController(
         routeRefreshOptions: RouteRefreshOptions,
         directionsSession: DirectionsSession,
-        tripSession: TripSession,
+        currentIndicesSnapshotProvider: CurrentIndicesSnapshotProvider,
     ) = RouteRefreshController(
         routeRefreshOptions,
         directionsSession,
-        { tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0 },
+        currentIndicesSnapshotProvider,
         DirectionsRouteDiffProvider(),
         { Date() }
     )

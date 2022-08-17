@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.route.NavigationRouter
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.core.SetRoutesInfo
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -45,16 +46,15 @@ internal class MapboxDirectionsSession(
 
     override fun setRoutes(
         routes: List<NavigationRoute>,
-        initialLegIndex: Int,
-        @RoutesExtra.RoutesUpdateReason routesUpdateReason: String
+        setRoutesInfo: SetRoutesInfo,
     ) {
-        this.initialLegIndex = initialLegIndex
+        this.initialLegIndex = setRoutesInfo.legIndex
         if (routesInitialized && this.routes.isEmpty() && routes.isEmpty()) {
             return
         }
         RouteCompatibilityCache.setDirectionsSessionResult(routes)
         this.routes = routes
-        this.routesUpdateReason = routesUpdateReason
+        this.routesUpdateReason = setRoutesInfo.reason
         routesObservers.forEach {
             it.onRoutesChanged(
                 RoutesUpdatedResult(

@@ -9,6 +9,7 @@ import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.CurrentIndicesSnapshot
 import com.mapbox.navigation.base.internal.route.InternalRouter
 import com.mapbox.navigation.base.internal.route.refreshRoute
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
@@ -47,6 +48,7 @@ class RouterWrapper(
     private val accessToken: String,
     private val router: RouterInterface,
     private val threadController: ThreadController,
+    private val currentIndicesSnapshotProvider: Function0<CurrentIndicesSnapshot?>,
 ) : NavigationRouter, InternalRouter {
 
     private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
@@ -183,12 +185,14 @@ class RouterWrapper(
             return REQUEST_FAILURE
         }
 
+        val indicesSnapshot = currentIndicesSnapshotProvider()!!
+
         val refreshOptions = RouteRefreshOptions(
             requestUuid,
             routeIndex,
             legIndex,
             RoutingProfile(routeOptions.profile().mapToRoutingMode(), routeOptions.user()),
-            null
+            indicesSnapshot.routeGeometryIndex,
         )
 
         return router.getRouteRefresh(
@@ -237,6 +241,7 @@ class RouterWrapper(
                                 .mapValue { routeRefresh ->
                                     route.refreshRoute(
                                         initialLegIndex = refreshOptions.legIndex,
+                                        currentLegGeometryIndex = indicesSnapshot.legGeometryIndex,
                                         legAnnotations = routeRefresh.legs()?.map {
                                             it.annotation()
                                         },
@@ -253,7 +258,9 @@ class RouterWrapper(
                                     )
                                 )
                             },
-                            { callback.onRefreshReady(it) },
+                            {
+                                callback.onRefreshReady(it)
+                            },
                         )
                     }
                 }
@@ -300,6 +307,7 @@ class RouterWrapper(
     }
 
     private companion object {
+
         private const val LOG_CATEGORY = "RouterWrapper"
         private const val REQUEST_FAILURE = -1L
     }

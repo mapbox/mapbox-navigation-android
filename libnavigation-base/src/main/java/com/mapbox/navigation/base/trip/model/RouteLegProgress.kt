@@ -24,6 +24,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg
  * is currently on
  * @param upcomingStep Next/upcoming step immediately after the current step. If the user is on the last step
  * on the last leg, this will return null since a next step doesn't exist
+ * @param geometryIndex Leg-wise index representing the geometry point right in front of the user
  */
 class RouteLegProgress internal constructor(
     val legIndex: Int,
@@ -33,7 +34,8 @@ class RouteLegProgress internal constructor(
     val durationRemaining: Double,
     val fractionTraveled: Float,
     val currentStepProgress: RouteStepProgress?,
-    val upcomingStep: LegStep?
+    val upcomingStep: LegStep?,
+    val geometryIndex: Int,
 ) {
 
     /**
@@ -53,6 +55,7 @@ class RouteLegProgress internal constructor(
         if (fractionTraveled != other.fractionTraveled) return false
         if (currentStepProgress != other.currentStepProgress) return false
         if (upcomingStep != other.upcomingStep) return false
+        if (geometryIndex != other.geometryIndex) return false
 
         return true
     }
@@ -69,6 +72,7 @@ class RouteLegProgress internal constructor(
         result = 31 * result + fractionTraveled.hashCode()
         result = 31 * result + currentStepProgress.hashCode()
         result = 31 * result + upcomingStep.hashCode()
+        result = 31 * result + geometryIndex.hashCode()
         return result
     }
 
@@ -84,7 +88,8 @@ class RouteLegProgress internal constructor(
             "durationRemaining=$durationRemaining, " +
             "fractionTraveled=$fractionTraveled, " +
             "currentStepProgress=$currentStepProgress, " +
-            "upcomingStep=$upcomingStep" +
+            "upcomingStep=$upcomingStep, " +
+            "geometryIndex=$geometryIndex" +
             ")"
     }
 }

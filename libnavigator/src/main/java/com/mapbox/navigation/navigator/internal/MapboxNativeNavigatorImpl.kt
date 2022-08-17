@@ -31,6 +31,7 @@ import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.PredictiveCacheController
 import com.mapbox.navigator.PredictiveCacheControllerOptions
 import com.mapbox.navigator.PredictiveLocationTrackerOptions
+import com.mapbox.navigator.RefreshRouteResult
 import com.mapbox.navigator.RoadObjectMatcher
 import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
@@ -44,6 +45,7 @@ import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArraySet
+import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 
 /**
@@ -226,6 +228,34 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             refreshResponse.toJson()
         }
 
+        val callback = {
+                continuation: Continuation<Expected<String, List<RouteAlternative>>>,
+                expected: Expected<String, RefreshRouteResult> ->
+            expected.fold(
+                { error ->
+                    logE(
+                        "Annotations update failed for route with ID '${route.id}'. " +
+                            "Reason: $error",
+                        LOG_CATEGORY
+                    )
+                    continuation.resume(ExpectedFactory.createError(error))
+                },
+                { refreshRouteResult ->
+                    logD(
+                        "Annotations updated successfully " +
+                            "for route with ID: '${refreshRouteResult.route.routeId}'. " +
+                            "Alternatives IDs: " +
+                            refreshRouteResult.alternatives
+                                .joinToString { it.id.toString() }
+                                .ifBlank { "[no alternatives]" },
+                        LOG_CATEGORY
+                    )
+                    continuation.resume(
+                        ExpectedFactory.createValue(refreshRouteResult.alternatives)
+                    )
+                }
+            )
+        }
         return suspendCancellableCoroutine { continuation ->
             logD(
                 "Refreshing native route ${route.nativeRoute().routeId} " +
@@ -235,32 +265,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             navigator!!.refreshRoute(
                 refreshResponseJson,
                 route.nativeRoute().routeId
-            ) { expected ->
-                expected.fold(
-                    { error ->
-                        logE(
-                            "Annotations update failed for route with ID '${route.id}'. " +
-                                "Reason: $error",
-                            LOG_CATEGORY
-                        )
-                        continuation.resume(ExpectedFactory.createError(error))
-                    },
-                    { refreshRouteResult ->
-                        logD(
-                            "Annotations updated successfully " +
-                                "for route with ID: '${refreshRouteResult.route.routeId}'. " +
-                                "Alternatives IDs: " +
-                                refreshRouteResult.alternatives
-                                    .joinToString { it.id.toString() }
-                                    .ifBlank { "[no alternatives]" },
-                            LOG_CATEGORY
-                        )
-                        continuation.resume(
-                            ExpectedFactory.createValue(refreshRouteResult.alternatives)
-                        )
-                    }
-                )
-            }
+            ) { callback(continuation, it) }
         }
     }
 

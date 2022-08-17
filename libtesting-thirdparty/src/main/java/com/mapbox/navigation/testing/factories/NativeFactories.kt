@@ -32,6 +32,7 @@ fun createNavigationStatus(
     isFallback: Boolean = false,
     isTunnel: Boolean = false,
     predicted: Long = 0,
+    geometryIndex: Int = 0,
     shapeIndex: Int = 0,
     intersectionIndex: Int = 0,
     roads: List<Road> = emptyList(),
@@ -46,7 +47,6 @@ fun createNavigationStatus(
     upcomingRouteAlerts: List<UpcomingRouteAlert> = emptyList(),
     nextWaypointIndex: Int = 0,
     layer: Int = 0,
-    geometryIndex: Int = 0,
 ): NavigationStatus {
     return NavigationStatus(
         routeState,
@@ -59,9 +59,9 @@ fun createNavigationStatus(
         isFallback,
         isTunnel,
         predicted,
+        geometryIndex,
         shapeIndex,
         intersectionIndex,
-        geometryIndex,
         roads,
         voiceInstruction,
         bannerInstruction,
@@ -72,7 +72,7 @@ fun createNavigationStatus(
         activeGuidanceInfo,
         upcomingRouteAlerts,
         nextWaypointIndex,
-        layer
+        layer,
     )
 }
 
@@ -96,7 +96,7 @@ fun createBannerInstruction(
         secondary,
         sub,
         remainingStepDistance,
-        index
+        index,
     )
 }
 

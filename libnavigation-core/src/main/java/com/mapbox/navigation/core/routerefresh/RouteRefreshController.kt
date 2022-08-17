@@ -7,6 +7,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshError
 import com.mapbox.navigation.base.route.RouteRefreshOptions
+import com.mapbox.navigation.core.CurrentIndicesSnapshotProvider
 import com.mapbox.navigation.core.directions.session.RouteRefresh
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
@@ -27,7 +28,7 @@ import kotlin.coroutines.resume
 internal class RouteRefreshController(
     private val routeRefreshOptions: RouteRefreshOptions,
     private val routeRefresh: RouteRefresh,
-    private val currentLegIndexProvider: () -> Int,
+    private val currentIndicesSnapshotProvider: CurrentIndicesSnapshotProvider,
     private val routeDiffProvider: DirectionsRouteDiffProvider = DirectionsRouteDiffProvider(),
     private val localDateProvider: () -> Date
 ) {
@@ -37,7 +38,7 @@ internal class RouteRefreshController(
         private const val FAILED_ATTEMPTS_TO_INVALIDATE_EXPIRING_DATA = 3
     }
 
-    suspend fun refresh(routes: List<NavigationRoute>): List<NavigationRoute> {
+    suspend fun refresh(routes: List<NavigationRoute>): RefreshedRouteInfo {
         return if (routes.isNotEmpty()) {
             val routesValidationResults = routes.map { validateRoute(it) }
             if (routesValidationResults.any { it is RouteValidationResult.Valid }) {
@@ -58,10 +59,10 @@ internal class RouteRefreshController(
 
     private suspend fun tryRefreshingRoutesUntilRouteChanges(
         initialRoutes: List<NavigationRoute>
-    ): List<NavigationRoute> {
+    ): RefreshedRouteInfo {
         while (true) {
             val refreshed = refreshRoutesWithRetry(initialRoutes)
-            if (refreshed != initialRoutes) {
+            if (refreshed.routes != initialRoutes) {
                 return refreshed
             }
         }
@@ -69,30 +70,40 @@ internal class RouteRefreshController(
 
     private suspend fun refreshRoutesWithRetry(
         routes: List<NavigationRoute>
-    ): List<NavigationRoute> = coroutineScope {
+    ): RefreshedRouteInfo = coroutineScope {
         var timeUntilNextAttempt = async { delay(routeRefreshOptions.intervalMillis) }
         try {
             repeat(FAILED_ATTEMPTS_TO_INVALIDATE_EXPIRING_DATA) {
                 timeUntilNextAttempt.await()
                 timeUntilNextAttempt = async { delay(routeRefreshOptions.intervalMillis) }
-                val refreshedRoutes = refreshRoutesOrNull(routes)
+                val indicesSnapshot = currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
+                val refreshedRoutes = refreshRoutesOrNull(routes, indicesSnapshot.legIndex)
+                currentIndicesSnapshotProvider.unfreeze()
                 if (refreshedRoutes.any { it != null }) {
-                    return@coroutineScope refreshedRoutes.mapIndexed { index, navigationRoute ->
-                        navigationRoute ?: routes[index]
-                    }
+                    return@coroutineScope RefreshedRouteInfo(
+                        refreshedRoutes.mapIndexed { index, navigationRoute ->
+                            navigationRoute ?: routes[index]
+                        },
+                        indicesSnapshot
+                    )
                 }
             }
         } finally {
+            currentIndicesSnapshotProvider.unfreeze()
             timeUntilNextAttempt.cancel() // otherwise current coroutine will wait for its child
         }
-        routes.map { removeExpiringDataFromRoute(it) }
+        val indicesSnapshot = currentIndicesSnapshotProvider()!!
+        RefreshedRouteInfo(
+            routes.map { removeExpiringDataFromRoute(it, indicesSnapshot.legIndex) },
+            indicesSnapshot
+        )
     }
 
     private fun removeExpiringDataFromRoute(
-        route: NavigationRoute
+        route: NavigationRoute,
+        currentLegIndex: Int,
     ): NavigationRoute {
         val routeLegs = route.directionsRoute.legs()
-        val currentLegIndex = currentLegIndexProvider()
         return route.updateDirectionsRouteOnly {
             toBuilder().legs(
                 routeLegs?.mapIndexed { legIndex, leg ->
@@ -126,14 +137,14 @@ internal class RouteRefreshController(
             .build()
 
     private suspend fun refreshRouteOrNull(
-        route: NavigationRoute
+        route: NavigationRoute,
+        legIndex: Int
     ): NavigationRoute? {
         val validationResult = validateRoute(route)
         if (validationResult is RouteValidationResult.Invalid) {
             logI("route ${route.id} can't be refreshed because ${validationResult.reason}")
             return null
         }
-        val legIndex = currentLegIndexProvider()
         return when (val result = requestRouteRefresh(route, legIndex)) {
             is RouteRefreshResult.Fail -> {
                 logE(
@@ -156,13 +167,14 @@ internal class RouteRefreshController(
     }
 
     private suspend fun refreshRoutesOrNull(
-        routes: List<NavigationRoute>
+        routes: List<NavigationRoute>,
+        legIndex: Int,
     ): List<NavigationRoute?> {
         return coroutineScope {
             routes.map { route ->
                 async {
                     withTimeoutOrNull(routeRefreshOptions.intervalMillis) {
-                        refreshRouteOrNull(route)
+                        refreshRouteOrNull(route, legIndex)
                     }
                 }
             }.awaitAll()

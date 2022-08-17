@@ -8,6 +8,7 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.coordinates
+import com.mapbox.navigation.base.internal.CurrentIndicesSnapshot
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
@@ -70,6 +71,19 @@ class RouterWrapperTests {
     private val routerRefreshCallback: RouteRefreshCallback = mockk(relaxed = true)
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
     private val routeUrl = routerOptions.toUrl(accessToken).toString()
+    private val currentIndicesSnapshotProvider = object : Function0<CurrentIndicesSnapshot> {
+
+        private var numberOfInvocations = 0
+
+        override fun invoke(): CurrentIndicesSnapshot {
+            numberOfInvocations++
+            return CurrentIndicesSnapshot(
+                legIndex = numberOfInvocations,
+                routeGeometryIndex = numberOfInvocations * 100,
+                legGeometryIndex = numberOfInvocations * 10
+            )
+        }
+    }
 
     private val testRouteFixtures = TestRouteFixtures()
 
@@ -137,7 +151,8 @@ class RouterWrapperTests {
         routerWrapper = RouterWrapper(
             accessToken,
             mapboxNativeNavigator.router,
-            ThreadController()
+            ThreadController(),
+            currentIndicesSnapshotProvider
         )
     }
 
@@ -337,7 +352,7 @@ class RouterWrapperTests {
                 1,
                 0,
                 RoutingProfile(routerOptions.profile().mapToRoutingMode(), routerOptions.user()),
-                null
+                100,
             )
 
             verify(exactly = 1) {

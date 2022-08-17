@@ -13,7 +13,10 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
-import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.BasicSetRoutesInfo
+import com.mapbox.navigation.core.SetAlternativeRoutesInfo
+import com.mapbox.navigation.core.SetRefreshedRoutesInfo
+import com.mapbox.navigation.core.SetRoutesInfo
 import com.mapbox.navigation.core.navigator.getLocationMatcherResult
 import com.mapbox.navigation.core.navigator.getRouteInitInfo
 import com.mapbox.navigation.core.navigator.getRouteProgressFrom
@@ -75,28 +78,29 @@ internal class MapboxTripSession(
 
     override suspend fun setRoutes(
         routes: List<NavigationRoute>,
-        legIndex: Int,
-        @RoutesExtra.RoutesUpdateReason reason: String
+        setRoutesInfo: SetRoutesInfo,
     ): NativeSetRouteResult {
-        logD("routes update (reason: $reason, count: ${routes.size}) - starting", LOG_CATEGORY)
+        logD(
+            "routes update (reason: ${setRoutesInfo.reason}, " +
+                "count: ${routes.size}) - starting",
+            LOG_CATEGORY
+        )
         isUpdatingRoute = true
-        val result = when (reason) {
-            RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
-            RoutesExtra.ROUTES_UPDATE_REASON_NEW,
-            RoutesExtra.ROUTES_UPDATE_REASON_REROUTE -> {
+        val result = when (setRoutesInfo) {
+            is BasicSetRoutesInfo -> {
                 isOffRoute = false
                 invalidateLatestInstructions()
                 roadObjects = emptyList()
                 routeProgress = null
                 updateLegIndexJob?.cancel()
-                setRouteToNativeNavigator(routes, legIndex)
+                setRouteToNativeNavigator(routes, setRoutesInfo.legIndex)
             }
-            RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE -> {
+            is SetAlternativeRoutesInfo -> {
                 NativeSetRouteValue(
                     nativeAlternatives = navigator.setAlternativeRoutes(routes.drop(1))
                 )
             }
-            RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
+            is SetRefreshedRoutesInfo -> {
                 if (routes.isNotEmpty()) {
                     val primaryRoute = routes.first()
                     val alternatives = navigator.refreshRoute(primaryRoute)
@@ -112,10 +116,9 @@ internal class MapboxTripSession(
                     }
                 }
             }
-            else -> throw IllegalArgumentException("Unsupported route update reason: $reason")
         }
         isUpdatingRoute = false
-        logD("routes update (reason: $reason) - finished", LOG_CATEGORY)
+        logD("routes update (reason: ${setRoutesInfo.reason}) - finished", LOG_CATEGORY)
         return result
     }
 

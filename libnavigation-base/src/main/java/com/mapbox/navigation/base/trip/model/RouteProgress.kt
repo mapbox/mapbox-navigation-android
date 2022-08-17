@@ -40,6 +40,8 @@ import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
  * @param routeAlternativeId in case of [currentState] equal to [RouteProgressState.OFF_ROUTE],
  * this field can provide the route ID of an alternative route that user turned into causing off-route event (if there is one).
  * This field can be used to find a route with [NavigationRoute.id] that can be immediately used as the new primary route.
+ * @param currentRouteGeometryIndex route-wise index representing the geometry point
+ * right in front of the user (see [DirectionsRoute.geometry]).
  */
 class RouteProgress internal constructor(
     val navigationRoute: NavigationRoute,
@@ -57,6 +59,7 @@ class RouteProgress internal constructor(
     val upcomingRoadObjects: List<UpcomingRoadObject>,
     val stale: Boolean,
     val routeAlternativeId: String?,
+    val currentRouteGeometryIndex: Int,
 ) {
 
     /**
@@ -90,6 +93,8 @@ class RouteProgress internal constructor(
         if (remainingWaypoints != other.remainingWaypoints) return false
         if (upcomingRoadObjects != other.upcomingRoadObjects) return false
         if (stale != other.stale) return false
+        if (routeAlternativeId != other.routeAlternativeId) return false
+        if (currentRouteGeometryIndex != other.currentRouteGeometryIndex) return false
 
         return true
     }
@@ -112,6 +117,8 @@ class RouteProgress internal constructor(
         result = 31 * result + remainingWaypoints
         result = 31 * result + upcomingRoadObjects.hashCode()
         result = 31 * result + stale.hashCode()
+        result = 31 * result + routeAlternativeId.hashCode()
+        result = 31 * result + currentRouteGeometryIndex.hashCode()
         return result
     }
 
@@ -133,7 +140,9 @@ class RouteProgress internal constructor(
             "fractionTraveled=$fractionTraveled, " +
             "remainingWaypoints=$remainingWaypoints, " +
             "upcomingRoadObjects=$upcomingRoadObjects, " +
-            "stale=$stale" +
+            "stale=$stale, " +
+            "routeAlternativeId=$routeAlternativeId, " +
+            "currentRouteGeometryIndex=$currentRouteGeometryIndex" +
             ")"
     }
 }

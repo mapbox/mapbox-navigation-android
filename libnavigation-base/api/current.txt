@@ -858,6 +858,7 @@ package com.mapbox.navigation.base.trip.model {
     method public float getDistanceTraveled();
     method public double getDurationRemaining();
     method public float getFractionTraveled();
+    method public int getGeometryIndex();
     method public int getLegIndex();
     method public com.mapbox.api.directions.v5.models.RouteLeg? getRouteLeg();
     method public com.mapbox.api.directions.v5.models.LegStep? getUpcomingStep();
@@ -866,6 +867,7 @@ package com.mapbox.navigation.base.trip.model {
     property public final float distanceTraveled;
     property public final double durationRemaining;
     property public final float fractionTraveled;
+    property public final int geometryIndex;
     property public final int legIndex;
     property public final com.mapbox.api.directions.v5.models.RouteLeg? routeLeg;
     property public final com.mapbox.api.directions.v5.models.LegStep? upcomingStep;
@@ -874,6 +876,7 @@ package com.mapbox.navigation.base.trip.model {
   public final class RouteProgress {
     method public com.mapbox.api.directions.v5.models.BannerInstructions? getBannerInstructions();
     method public com.mapbox.navigation.base.trip.model.RouteLegProgress? getCurrentLegProgress();
+    method public int getCurrentRouteGeometryIndex();
     method public com.mapbox.navigation.base.trip.model.RouteProgressState getCurrentState();
     method public float getDistanceRemaining();
     method public float getDistanceTraveled();
@@ -890,6 +893,7 @@ package com.mapbox.navigation.base.trip.model {
     method public com.mapbox.api.directions.v5.models.VoiceInstructions? getVoiceInstructions();
     property public final com.mapbox.api.directions.v5.models.BannerInstructions? bannerInstructions;
     property public final com.mapbox.navigation.base.trip.model.RouteLegProgress? currentLegProgress;
+    property public final int currentRouteGeometryIndex;
     property public final com.mapbox.navigation.base.trip.model.RouteProgressState currentState;
     property public final float distanceRemaining;
     property public final float distanceTraveled;

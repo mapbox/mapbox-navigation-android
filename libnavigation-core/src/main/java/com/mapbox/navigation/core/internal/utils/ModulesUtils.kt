@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.internal.utils
 import com.mapbox.common.module.provider.ModuleProviderArgument
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.internal.CurrentIndicesSnapshot
 import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
@@ -23,6 +24,10 @@ internal fun paramsProvider(moduleParams: ModuleParams): Array<ModuleProviderArg
             ModuleProviderArgument(
                 ThreadController::class.java,
                 moduleParams.threadController
+            ),
+            ModuleProviderArgument(
+                Function0::class.java,
+                moduleParams.currentIndicesSnapshotProvider
             ),
         )
         is ModuleParams.NavigationTripNotification -> arrayOf(
@@ -46,6 +51,7 @@ internal sealed class ModuleParams {
         val accessToken: String,
         val nativeRouter: RouterInterface,
         val threadController: ThreadController,
+        val currentIndicesSnapshotProvider: Function0<CurrentIndicesSnapshot?>,
     ) : ModuleParams()
 
     class NavigationTripNotification(

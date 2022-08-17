@@ -179,7 +179,8 @@ private fun NavigationStatus.getRouteProgress(
             routeLegProgressDurationRemaining,
             routeLegProgressFractionTraveled,
             routeStepProgress,
-            routeLegProgressUpcomingStep
+            routeLegProgressUpcomingStep,
+            shapeIndex
         )
 
         return buildRouteProgressObject(
@@ -198,6 +199,7 @@ private fun NavigationStatus.getRouteProgress(
             upcomingRouteAlerts.toUpcomingRoadObjects(),
             stale,
             locatedAlternativeRouteId,
+            geometryIndex,
         )
     }
     return null
