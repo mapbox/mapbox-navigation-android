@@ -12,6 +12,90 @@ Mapbox welcomes participation and contributions from everyone.
 - Updated `NavigationView` to allow drawing of the info panel behind the translucent navigation bar. [#6145](https://github.com/mapbox/mapbox-navigation-android/pull/6145)
 - Fixed an issue where `NavigationView` switches from Active Guidance to Free Drive state after rotating device when replay is enabled. [#6140](https://github.com/mapbox/mapbox-navigation-android/pull/6140) 
 
+## Mapbox Navigation SDK 2.7.0 - 17 August, 2022
+### Changelog
+[Changes between v2.6.0 and v2.7.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.6.0...v2.7.0)
+
+#### Features
+- Introduced `ViewOptionsCustomization.isInfoPanelHideable` that allows control over whether the `NavigationView` Info Panel can hide when it is swiped down. [#6132](https://github.com/mapbox/mapbox-navigation-android/pull/6132)
+- Introduced `ViewOptionsCustomization.infoPanelForcedState` that allows overriding of the `NavigationView` Info Panel (BottomSheetBehaviour) state. [#6132](https://github.com/mapbox/mapbox-navigation-android/pull/6132)
+- Added `FollowingFrameOptions.focalPoint` that can be used to define the position of the first framed geometry point (typically the user location indicator, if available) in the `MapboxNavigationViewportDataSource.followingPadding`. [#5875](https://github.com/mapbox/mapbox-navigation-android/pull/5875)
+- Added `ViewBinderCustomization.infoPanelBinder` that allows installation of a custom info panel layout in `NavigationView`. [#6049](https://github.com/mapbox/mapbox-navigation-android/pull/6049) 
+- Added `ViewStyleCustomization.infoPanelPeekHeight` that allows customization of `NavigationView` info panel bottom sheet peek height. [#6049](https://github.com/mapbox/mapbox-navigation-android/pull/6049) 
+- Added `ViewStyleCustomization.infoPanelMarginStart`, `ViewStyleCustomization.infoPanelMarginEnd`, `ViewStyleCustomization.infoPanelBackground` that allows customization of a `NavigatioView` default info panel margins and background. [#6049](https://github.com/mapbox/mapbox-navigation-android/pull/6049)
+- Introduced new API(s) `MapboxTripProgressApi#getTripDetails()`, `MapboxTripProgressView#renderTripOverview()` and `MapboxTripProgressView#renderLegOverview()` to allow users to visualize trip related details for the entire route or a given leg of a route, before starting active navigation. [#6068](https://github.com/mapbox/mapbox-navigation-android/pull/6068)
+- Added `MapboxNavigation.requestRoadGraphDataUpdate` method and `RoadGraphDataUpdateCallback` class to request road graph data update and recreate `MapboxNavigation` instance in the callback to be able to use latest data even if the application lifecycle is very long. [#6044](https://github.com/mapbox/mapbox-navigation-android/pull/6044)
+- :warning: Deprecated `RoadObjectsOnRouteObserver` in favor of a new getter `NavigationRoute.upcomingRoadObjects` to get access to list of `UpcomingRoadObject`. [#6032](https://github.com/mapbox/mapbox-navigation-android/pull/6032)
+- Added `amenities` to `RestStop`. [#6007](https://github.com/mapbox/mapbox-navigation-android/pull/6007)
+- Introduced `NavigationViewOptions.showInfoPanelInFreeDrive` option that allows showing of the BottomSheet Info Panel when `NavigationView` is in the Free Drive state. [#6011](https://github.com/mapbox/mapbox-navigation-android/pull/6011)
+- Added `VoiceInstructionsPlayerOptions.abandonFocusDelay` option that allows specifying a delay in milliseconds until the player abandons audio focus after playing all queued voice instructions. [#5969](https://github.com/mapbox/mapbox-navigation-android/pull/5969)
+- Added refresh of alternatives routes. [#5923](https://github.com/mapbox/mapbox-navigation-android/pull/5923)
+- Moved `MapboxCameraModeButton` to `libnavui-maps` module. Moved `MapboxExtendableButton` to `libnavui-base` module. Added new styles for `MapboxAudioGuidanceButton`, `MapboxCameraModeButton` and `MapboxExtendableButton` views. Those styles can be used to change the default button shape to "Oval," "Square" or "Circle" [#5962](https://github.com/mapbox/mapbox-navigation-android/pull/5962)
+- Added `IncidentInfo#affectedRoadNames`. [#6008](https://github.com/mapbox/mapbox-navigation-android/pull/6008)
+
+#### Bug fixes and improvements
+- Updated `NavigationView` to render upcoming maneuvers. [#6175](https://github.com/mapbox/mapbox-navigation-android/pull/6175)
+- Updated `NavigationView` to allow drawing of the info panel behind the translucent navigation bar. [#6145](https://github.com/mapbox/mapbox-navigation-android/pull/6145)
+- Fixed an issue where `NavigationView` switches from Active Guidance to Free Drive state after rotating device when replay is enabled. [#6140](https://github.com/mapbox/mapbox-navigation-android/pull/6140) 
+- Fixed reroute for profiles other than driving/traffic. [#6146](https://github.com/mapbox/mapbox-navigation-android/pull/6146)
+- Introduced `NavigationViewListener#onInfoPanelHidden` to inform user when `InfoPanel` hides. [#6113](https://github.com/mapbox/mapbox-navigation-android/pull/6113)
+- Introduced `NavigationViewListener#onInfoPanelExpanded` to inform user when `InfoPanel` expands. [#6113](https://github.com/mapbox/mapbox-navigation-android/pull/6113)
+- Introduced `NavigationViewListener#onInfoPanelCollapsed` to inform user when `InfoPanel` collapses. [#6113](https://github.com/mapbox/mapbox-navigation-android/pull/6113)
+- Introduced `NavigationViewOptions.enableMapLongClickIntercept` that would allow users to disable `NavigationView` from handling `OnMapLongClick` events. [#6116](https://github.com/mapbox/mapbox-navigation-android/pull/6116)
+- Introduced `MapViewObserver#onAttached` and `MapViewObserver#onDetached` to get access to `MapView` instance used by `NavigationView`. [#6116](https://github.com/mapbox/mapbox-navigation-android/pull/6116)
+- Removed `NavigationViewListener.onMapStyleChanged`. [#6116](https://github.com/mapbox/mapbox-navigation-android/pull/6116)
+- Added `ComponentInstaller` to `Maneuver` and `SpeedLimit` that offer simplified integration of maneuvers and speed limits APIs. [#6117](https://github.com/mapbox/mapbox-navigation-android/pull/6117)
+- Fixed bearing calculation error during tunnel dead reckoning. [#6118](https://github.com/mapbox/mapbox-navigation-android/pull/6118)
+- Updated `MapboxRouteLineApiExtensions` so that when coroutine scope calling the suspend functions is canceled, `MapboxRouteLineApi::cancel` is called. [#6094](https://github.com/mapbox/mapbox-navigation-android/pull/6094)
+- :warning: Fixed an issue where `RoutesObserver` would be called with the previous routes set upon registration while a new routes set was already being processed. Now, the observer waits for the processing of `MapboxNavigation#setNavigationRoutes` to finish before delivering the result. [#6079](https://github.com/mapbox/mapbox-navigation-android/pull/6079)
+- Remove the `MapView` from the `RouteArrowComponent` so that it can be used by Android Auto. [#6053](https://github.com/mapbox/mapbox-navigation-android/pull/6053)
+- Enabled tunnel dead reckoning drift compensation by default for Auto profile. [#6061](https://github.com/mapbox/mapbox-navigation-android/pull/6061)
+- Increased route line stickiness for Auto profile. [#6061](https://github.com/mapbox/mapbox-navigation-android/pull/6061)
+- Improved off-road detection for Auto profile by relying more on the heading change relative to the road. [#6061](https://github.com/mapbox/mapbox-navigation-android/pull/6061)
+- Added `PredictiveCacheController` constructor with `PredictiveCacheOptions`, `PredictiveCacheController(PredictiveCacheOptions)`. [#6071](https://github.com/mapbox/mapbox-navigation-android/pull/6071)
+- Deprecated constructors `PredictiveCacheController(PredictiveCacheLocationOptions, PredictiveCacheControllerErrorHandler)` and `PredictiveCacheController(PredictiveCacheLocationOptions, PredictiveCacheLocationOptions, PredictiveCacheControllerErrorHandler)`. [#6071](https://github.com/mapbox/mapbox-navigation-android/pull/6071)
+- Added `PredictiveCacheController#predictiveCacheControllerErrorHandler` to set and get `PredictiveCacheControllerErrorHandler`. [#6071](https://github.com/mapbox/mapbox-navigation-android/pull/6071)
+- Added `PredictiveCacheMapsOptions`(map specific, that also allow to specify zoom levels for which the map tiles should be cached) and `PredictiveCacheNavigationOptions`(navigation specific) available through the `PredictiveCacheOptions`. [#6071](https://github.com/mapbox/mapbox-navigation-android/pull/6071)
+- Reduced log entries related to getting map layers. [#6101](https://github.com/mapbox/mapbox-navigation-android/pull/6101)
+- Changed `RouteOptionsUpdater` to use `snapping_include_closures=true` for origin of each re-route request. This resolves a situation when Nav SDK returned a route in an opposite direction or on a parallel road when a driver caused a re-route by entering a closed section of a road. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)
+- :warning: Added checks to `DirectionsRoute#toNavigationRoute` and `NavigationRoute#toDirectionsRoute` mappers which restrict mapping `NavigationRoute` to `DirectionsRoute` and vice versa for some Directions API features and properties (currently including only preview EV routing features), because the `DirectionsRoute` cannot carry information necessary to support turn-by-turn navigation when these features are enabled. If you are using EV routing preview feature, make sure to only interact with `MapboxNavigation#requestRoutes(RouteOptions, NavigationRouterCallback)`, `MapboxNavigation#setNavigationRoutes(List<NavigationRoute>)`, and equivalent `NavigationRoute` APIs. [#6004](https://github.com/mapbox/mapbox-navigation-android/pull/6004)
+- Adjusted the `RoutesSetCallback` API. [#6040](https://github.com/mapbox/mapbox-navigation-android/pull/6040)
+- Updated `NavigationView` to reset `SharedApp` state when `MapboxNavigation`is destroyed. [#6039](https://github.com/mapbox/mapbox-navigation-android/pull/6039)
+- Updated `NavigationView` to enable vanishing route line by default. Previous behaviour can be restored by setting `MapboxRouteLineOptions` with `vanishingRouteLineEnabled` flag set to `false` [#6055](https://github.com/mapbox/mapbox-navigation-android/pull/6055)
+  ```kotlin
+  navigationView.customizeViewOptions {
+      routeLineOptions = ViewOptionsCustomization.defaultRouteLineOptions(context)
+          .toBuilder(context)
+          .withVanishingRouteLineEnabled(false)
+          .build()
+  }
+  ```
+- Made `rerouteController` argument in `MapboxNavigation#setRerouteController` nullable. Null can be passed to disable automatic rerouting. [#5977](https://github.com/mapbox/mapbox-navigation-android/pull/5977)
+- Introduced `RoutesSetCallback` parameter to `MapboxNavigation#setNavigationRoutes`, which is called after the routes passed to `MapboxNavigation#setNavigationRoutes` are processed or are failed to be processed. [#5946](https://github.com/mapbox/mapbox-navigation-android/pull/5946)
+- Changed the behaviour of `RoutesObserver`: `onRoutesChanged` method will not be triggered if the navigator fails to process routes passed via `MapboxNavigation#setNavigationRoutes`. [#5946](https://github.com/mapbox/mapbox-navigation-android/pull/5946)
+- Fixed Attribution Icon position in `NavigationView`. [#6012](https://github.com/mapbox/mapbox-navigation-android/pull/6012)
+- Fixed Toggle Camera Mode Button behavior in `NavigationView`. [#6014](https://github.com/mapbox/mapbox-navigation-android/pull/6014)
+- Increased `AudioFocusDelegateProvider` visibility to public to allow instantiation of the default `AsyncAudioFocusDelegate`. [#5969](https://github.com/mapbox/mapbox-navigation-android/pull/5969)
+- Fixed serialization of models with unrecognized properties. [#6021](https://github.com/mapbox/mapbox-navigation-android/pull/6021)
+- Fixed the intermittent native crash caused during _Free Drive_ transition from _Active Guidance with alternatives. [#6034](https://github.com/mapbox/mapbox-navigation-android/pull/6034)
+- :warning: Changed the default log level from `Debug` to `Info`. To change the level for logs produced by Mapbox SDKs use `LogConfiguration.setLoggingLevel(LoggingLevel)`. [#5987](https://github.com/mapbox/mapbox-navigation-android/pull/5987)
+- Fixed reroute request interruption when setting the `NavigationRerouteController` [#5950](https://github.com/mapbox/mapbox-navigation-android/pull/5950).
+- Fixed setting trim offsets to route line trail layers. [#5982](https://github.com/mapbox/mapbox-navigation-android/pull/5982)
+- Fixed a Drop-In UI issue where legacy shields were displayed instead of Mapbox designed ones with some of the map styles. [#5984](https://github.com/mapbox/mapbox-navigation-android/pull/5984)
+- Updated `NavigationView` to support edge-to-edge display. [#5976](https://github.com/mapbox/mapbox-navigation-android/pull/5976)
+- Updated `MapboxSpeechApi` to use persistent cache to decrease the bandwidth consumption. [#5790](https://github.com/mapbox/mapbox-navigation-android/pull/5790)
+- Updated `DefaultResourceLoader` offline behaviour to return resources from the disk cache when available. [#5970](https://github.com/mapbox/mapbox-navigation-android/pull/5970)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.7.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.7.0))
+- Mapbox Navigation Native `v111.0.0`
+- Mapbox Core Common `v22.1.0`
+- Mapbox Java `v6.7.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.7.0))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+- Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
+
+
 ## Mapbox Navigation SDK 2.7.0-rc.2 - 11 August, 2022
 ### Changelog
 [Changes between v2.7.0-rc.1 and v2.7.0-rc.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.7.0-rc.1...v2.7.0-rc.2)
