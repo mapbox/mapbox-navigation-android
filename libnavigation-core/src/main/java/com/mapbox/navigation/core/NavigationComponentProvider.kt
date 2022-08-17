@@ -3,7 +3,7 @@ package com.mapbox.navigation.core
 import android.content.Context
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.route.NavigationRouter
+import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
@@ -26,7 +26,7 @@ import com.mapbox.navigator.TilesConfig
 
 internal object NavigationComponentProvider {
     fun createDirectionsSession(
-        router: NavigationRouter,
+        router: NavigationRouterV2,
     ): DirectionsSession = MapboxDirectionsSession(router)
 
     fun createNativeNavigator(
@@ -94,6 +94,6 @@ internal object NavigationComponentProvider {
         initialState: NavigationSessionState
     ): HistoryRecordingStateHandler = HistoryRecordingStateHandler(initialState)
 
-    fun createCurrentIndicesSnapshotProvider(): CurrentIndicesSnapshotProvider =
-        CurrentIndicesSnapshotProvider()
+    fun createCurrentIndicesProvider(): CurrentIndicesProvider =
+        CurrentIndicesProvider()
 }

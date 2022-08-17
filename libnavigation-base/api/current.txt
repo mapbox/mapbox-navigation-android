@@ -1,6 +1,15 @@
 // Signature format: 3.0
 package com.mapbox.navigation.base {
 
+  public final class CurrentIndices {
+    method public Integer? getLegGeometryIndex();
+    method public int getLegIndex();
+    method public int getRouteGeometryIndex();
+    property public final Integer? legGeometryIndex;
+    property public final int legIndex;
+    property public final int routeGeometryIndex;
+  }
+
   @kotlin.RequiresOptIn(level=kotlin.RequiresOptIn.Level.ERROR) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) @kotlin.annotation.Target(allowedTargets={kotlin.annotation.AnnotationTarget.CLASS, kotlin.annotation.AnnotationTarget.FUNCTION, kotlin.annotation.AnnotationTarget.PROPERTY}) public @interface ExperimentalMapboxNavigationAPI {
   }
 
