@@ -1,10 +1,9 @@
 package com.mapbox.navigation.dropin.internal
 
+import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.dropin.startNavigation
-import com.mapbox.navigation.dropin.startRoutePreview
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.ui.app.internal.Reducer
 import com.mapbox.navigation.ui.app.internal.destination.Destination
@@ -14,10 +13,13 @@ import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
+import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterAction
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
-import junit.framework.Assert.fail
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -31,7 +33,7 @@ class MapboxNavigationViewApiTest {
     @Before
     fun setUp() {
         testStore = spyk(TestStore())
-        // registering simple reducer that copies Destination and RoutePreviewState values
+        // registering simple reducer that copies destination and routes values
         testStore.register(
             Reducer { state, action ->
                 when (action) {
@@ -39,6 +41,8 @@ class MapboxNavigationViewApiTest {
                         state.copy(destination = action.destination)
                     is RoutePreviewAction.Ready ->
                         state.copy(previewRoutes = RoutePreviewState.Ready(action.routes))
+                    is RoutesAction.SetRoutes ->
+                        state.copy(routes = action.routes)
                     else -> state
                 }
             }
@@ -47,12 +51,27 @@ class MapboxNavigationViewApiTest {
     }
 
     @Test
+    @Suppress("MaxLineLength")
     fun `startFreeDrive should clear routes and preview routes and set FreeDrive NavigationState`() {
         sut.startFreeDrive()
 
+        verify { testStore.dispatch(DestinationAction.SetDestination(null)) }
         verify { testStore.dispatch(RoutesAction.SetRoutes(emptyList())) }
         verify { testStore.dispatch(RoutePreviewAction.Ready(emptyList())) }
         verify { testStore.dispatch(NavigationStateAction.Update(NavigationState.FreeDrive)) }
+    }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `startDestinationPreview should set new destination and set DestinationPreview NavigationState`() {
+        val point = Point.fromLngLat(22.0, 33.0)
+
+        sut.startDestinationPreview(point)
+
+        verify { testStore.dispatch(DestinationAction.SetDestination(Destination(point))) }
+        verify {
+            testStore.dispatch(NavigationStateAction.Update(NavigationState.DestinationPreview))
+        }
     }
 
     @Test
@@ -64,13 +83,14 @@ class MapboxNavigationViewApiTest {
             )
         }
 
-        sut.startRoutePreview()
+        val result = sut.startRoutePreview()
 
         verify { testStore.dispatch(NavigationStateAction.Update(NavigationState.RoutePreview)) }
+        assertTrue(result.isValue)
     }
 
     @Test
-    fun `startRoutePreview should throw IllegalStateException if destination has not been set`() {
+    fun `startRoutePreview should return an Error if destination has not been set`() {
         testStore.updateState {
             it.copy(
                 destination = null,
@@ -78,52 +98,51 @@ class MapboxNavigationViewApiTest {
             )
         }
 
-        try {
-            sut.startRoutePreview()
-            fail("expected IllegalStateException to be thrown")
-        } catch (e: IllegalStateException) {
-            // pass
-        }
+        val error = sut.startRoutePreview().error
+
+        assertTrue(error is IllegalStateException)
     }
 
     @Test
-    fun `startRoutePreview should throw IllegalStateException if preview routes are empty`() {
+    fun `startRoutePreview should fail with IllegalStateException if preview routes are empty`() {
         testStore.updateState {
             it.copy(
                 destination = Destination(Point.fromLngLat(1.0, 2.0)),
                 previewRoutes = RoutePreviewState.Ready(emptyList())
             )
         }
-        try {
-            sut.startRoutePreview()
-            fail("expected IllegalStateException to be thrown")
-        } catch (e: IllegalStateException) {
-            // pass
-        }
+
+        val result = sut.startRoutePreview()
+
+        assertTrue(result.error is IllegalStateException)
     }
 
     @Test
     @Suppress("MaxLineLength")
     fun `startRoutePreview should set destination, preview routes and set RoutePreview NavigationState `() {
         val point = Point.fromLngLat(11.0, 22.0)
-        val previewRoutes = listOf<NavigationRoute>(mockk())
+        val routes = listOf(
+            navigationRoute(
+                waypoint(Point.fromLngLat(1.0, 2.0)),
+                waypoint(Point.fromLngLat(2.0, 3.0)),
+                waypoint(point),
+            )
+        )
 
-        sut.startRoutePreview(point, previewRoutes)
+        val result = sut.startRoutePreview(routes)
 
         verify { testStore.dispatch(DestinationAction.SetDestination(Destination(point))) }
-        verify { testStore.dispatch(RoutePreviewAction.Ready(previewRoutes)) }
+        verify { testStore.dispatch(RoutePreviewAction.Ready(routes)) }
         verify { testStore.dispatch(NavigationStateAction.Update(NavigationState.RoutePreview)) }
+        assertTrue(result.isValue)
     }
 
     @Test
-    fun `startRoutePreview should throw IllegalArgumentException if preview routes are empty`() {
-        val point = Point.fromLngLat(11.0, 22.0)
-        try {
-            sut.startRoutePreview(point, emptyList())
-            fail("expected IllegalArgumentException to be thrown")
-        } catch (e: IllegalArgumentException) {
-            // pass
-        }
+    @Suppress("MaxLineLength")
+    fun `startRoutePreview should fail with IllegalArgumentException if preview routes are empty`() {
+        val result = sut.startRoutePreview(emptyList())
+
+        assertTrue(result.error is IllegalArgumentException)
     }
 
     @Test
@@ -137,16 +156,18 @@ class MapboxNavigationViewApiTest {
             )
         }
 
-        sut.startNavigation()
+        val result = sut.startNavigation()
 
         verify { testStore.dispatch(RoutesAction.SetRoutes(routes)) }
         verify {
             testStore.dispatch(NavigationStateAction.Update(NavigationState.ActiveNavigation))
         }
+        assertTrue(result.isValue)
     }
 
     @Test
-    fun `startNavigation should throw IllegalStateException if destination has not been set`() {
+    @Suppress("MaxLineLength")
+    fun `startNavigation should fail with IllegalStateException if destination has not been set`() {
         testStore.updateState {
             it.copy(
                 destination = null,
@@ -154,71 +175,161 @@ class MapboxNavigationViewApiTest {
             )
         }
 
-        try {
-            sut.startNavigation()
-            fail("expected IllegalStateException to be thrown")
-        } catch (e: IllegalStateException) {
-            // pass
-        }
+        val result = sut.startNavigation()
+
+        assertTrue(result.error is IllegalStateException)
     }
 
     @Test
-    fun `startNavigation should throw IllegalStateException if preview routes are empty`() {
+    fun `startNavigation should fail with IllegalStateException if preview routes are empty`() {
         testStore.updateState {
             it.copy(
                 destination = Destination(Point.fromLngLat(1.0, 2.0)),
                 previewRoutes = RoutePreviewState.Ready(emptyList())
             )
         }
-        try {
-            sut.startNavigation()
-            fail("expected IllegalStateException to be thrown")
-        } catch (e: IllegalStateException) {
-            // pass
-        }
+
+        val result = sut.startNavigation()
+
+        assertTrue(result.error is IllegalStateException)
     }
 
     @Test
     @Suppress("MaxLineLength")
     fun `startNavigation should set destination, preview routes and set RoutePreview NavigationState `() {
         val point = Point.fromLngLat(11.0, 22.0)
-        val previewRoutes = listOf<NavigationRoute>(mockk())
+        val routes = listOf(
+            navigationRoute(
+                waypoint(Point.fromLngLat(1.0, 2.0)),
+                waypoint(Point.fromLngLat(2.0, 3.0)),
+                waypoint(point),
+            )
+        )
 
-        sut.startNavigation(point, previewRoutes)
+        val result = sut.startNavigation(routes)
 
         verify { testStore.dispatch(DestinationAction.SetDestination(Destination(point))) }
-        verify { testStore.dispatch(RoutePreviewAction.Ready(previewRoutes)) }
+        verify { testStore.dispatch(RoutePreviewAction.Ready(routes)) }
         verify {
             testStore.dispatch(NavigationStateAction.Update(NavigationState.ActiveNavigation))
         }
+        assertTrue(result.isValue)
     }
 
     @Test
-    fun `startNavigation should throw IllegalArgumentException if preview routes are empty`() {
-        val point = Point.fromLngLat(11.0, 22.0)
-        try {
-            sut.startNavigation(point, emptyList())
-            fail("expected IllegalArgumentException to be thrown")
-        } catch (e: IllegalArgumentException) {
-            // pass
-        }
+    fun `startNavigation should fail with IllegalArgumentException if preview routes are empty`() {
+        val result = sut.startNavigation(emptyList())
+
+        assertTrue(result.error is IllegalArgumentException)
     }
 
     @Test
     fun `startArrival should set Arrival NavigationState`() {
-        sut.startArrival()
+        testStore.updateState {
+            it.copy(
+                destination = Destination(Point.fromLngLat(1.0, 2.0)),
+                routes = listOf(mockk())
+            )
+        }
+
+        val result = sut.startArrival()
 
         verify { testStore.dispatch(NavigationStateAction.Update(NavigationState.Arrival)) }
+        assertTrue(result.isValue)
+    }
+
+    @Test
+    fun `startArrival should fail with IllegalStateException if destination has not been set`() {
+        testStore.updateState {
+            it.copy(
+                destination = null,
+                routes = listOf(mockk())
+            )
+        }
+
+        val result = sut.startArrival()
+
+        assertTrue(result.error is IllegalStateException)
+    }
+
+    @Test
+    fun `startArrival should fail with IllegalStateException if preview routes are empty`() {
+        testStore.updateState {
+            it.copy(
+                destination = null,
+                routes = emptyList()
+            )
+        }
+
+        val result = sut.startArrival()
+
+        assertTrue(result.error is IllegalStateException)
     }
 
     @Test
     @Suppress("MaxLineLength")
-    fun `endNavigation should clear Destination and Route data and set FreeDrive NavigationState`() {
-        sut.endNavigation()
+    fun `startArrival should set destination, routes and set RoutePreview NavigationState `() {
+        val point = Point.fromLngLat(11.0, 22.0)
+        val routes = listOf(
+            navigationRoute(
+                waypoint(Point.fromLngLat(1.0, 2.0)),
+                waypoint(Point.fromLngLat(2.0, 3.0)),
+                waypoint(point),
+            )
+        )
 
-        verify { testStore.dispatch(DestinationAction.SetDestination(null)) }
-        verify { testStore.dispatch(RoutesAction.SetRoutes(emptyList())) }
-        verify { testStore.dispatch(RoutePreviewAction.Ready(emptyList())) }
-        verify { testStore.dispatch(NavigationStateAction.Update(NavigationState.FreeDrive)) }
+        val result = sut.startArrival(routes)
+
+        verify { testStore.dispatch(DestinationAction.SetDestination(Destination(point))) }
+        verify { testStore.dispatch(RoutePreviewAction.Ready(routes)) }
+        verify { testStore.dispatch(RoutesAction.SetRoutes(routes)) }
+        verify {
+            testStore.dispatch(NavigationStateAction.Update(NavigationState.Arrival))
+        }
+        assertTrue(result.isValue)
+    }
+
+    @Test
+    fun `startArrival should fail with IllegalArgumentException if preview routes are empty`() {
+        val result = sut.startArrival(emptyList())
+
+        assertTrue(result.error is IllegalArgumentException)
+    }
+
+    @Test
+    fun `isReplayEnabled should return true when replay trip session is enabled `() {
+        assertFalse(sut.isReplayEnabled())
+        testStore.updateState {
+            it.copy(
+                tripSession = it.tripSession.copy(isReplayEnabled = true)
+            )
+        }
+        assertTrue(sut.isReplayEnabled())
+    }
+
+    @Test
+    fun `routeReplayEnabled should dispatch EnableReplayTripSession`() {
+        sut.routeReplayEnabled(true)
+        verify { testStore.dispatch(TripSessionStarterAction.EnableReplayTripSession) }
+    }
+
+    @Test
+    fun `routeReplayEnabled should dispatch EnableTripSession`() {
+        sut.routeReplayEnabled(false)
+        verify { testStore.dispatch(TripSessionStarterAction.EnableTripSession) }
+    }
+
+    private fun navigationRoute(vararg waypoints: DirectionsWaypoint): NavigationRoute {
+        return mockk {
+            every { directionsResponse } returns mockk {
+                every { waypoints() } returns waypoints.toList()
+            }
+        }
+    }
+
+    private fun waypoint(point: Point): DirectionsWaypoint {
+        return mockk {
+            every { location() } returns point
+        }
     }
 }

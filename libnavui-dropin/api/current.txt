@@ -40,24 +40,16 @@ package com.mapbox.navigation.dropin {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class NavigationViewApi {
     ctor public NavigationViewApi();
-    method public abstract void enableReplaySession();
-    method public abstract void enableTripSession();
-    method public abstract void endNavigation();
-    method public abstract void fetchRoutes(com.mapbox.api.directions.v5.models.RouteOptions options);
-    method public abstract void fetchRoutes(java.util.List<com.mapbox.geojson.Point> points);
     method public abstract boolean isReplayEnabled();
-    method public abstract void setDestination(com.mapbox.geojson.Point point);
-    method public abstract void setPreviewRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
-    method public abstract void setRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
-    method public abstract void startArrival();
+    method public abstract void routeReplayEnabled(boolean enabled);
+    method public abstract com.mapbox.bindgen.Expected<java.lang.Throwable,kotlin.Unit> startArrival();
+    method public abstract com.mapbox.bindgen.Expected<java.lang.Throwable,kotlin.Unit> startArrival(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    method public abstract void startDestinationPreview(com.mapbox.geojson.Point point);
     method public abstract void startFreeDrive();
-    method @kotlin.jvm.Throws(exceptionClasses=IllegalStateException::class) public abstract void startNavigation() throws java.lang.IllegalStateException;
-    method @kotlin.jvm.Throws(exceptionClasses=IllegalStateException::class) public abstract void startRoutePreview() throws java.lang.IllegalStateException;
-  }
-
-  public final class NavigationViewApiKt {
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI @kotlin.jvm.Throws(exceptionClasses=IllegalArgumentException::class) public static void startNavigation(com.mapbox.navigation.dropin.NavigationViewApi, com.mapbox.geojson.Point destination, java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes) throws java.lang.IllegalArgumentException;
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI @kotlin.jvm.Throws(exceptionClasses=IllegalArgumentException::class) public static void startRoutePreview(com.mapbox.navigation.dropin.NavigationViewApi, com.mapbox.geojson.Point destination, java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes) throws java.lang.IllegalArgumentException;
+    method public abstract com.mapbox.bindgen.Expected<java.lang.Throwable,kotlin.Unit> startNavigation();
+    method public abstract com.mapbox.bindgen.Expected<java.lang.Throwable,kotlin.Unit> startNavigation(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    method public abstract com.mapbox.bindgen.Expected<java.lang.Throwable,kotlin.Unit> startRoutePreview();
+    method public abstract com.mapbox.bindgen.Expected<java.lang.Throwable,kotlin.Unit> startRoutePreview(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class NavigationViewListener {

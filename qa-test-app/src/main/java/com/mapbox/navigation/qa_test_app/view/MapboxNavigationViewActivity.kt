@@ -28,11 +28,7 @@ class MapboxNavigationViewActivity : DrawerActivity() {
 
         menuBinding.toggleReplay.isChecked = binding.navigationView.api.isReplayEnabled()
         menuBinding.toggleReplay.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                binding.navigationView.api.enableReplaySession()
-            } else {
-                binding.navigationView.api.enableTripSession()
-            }
+            binding.navigationView.api.routeReplayEnabled(isChecked)
         }
     }
 }
