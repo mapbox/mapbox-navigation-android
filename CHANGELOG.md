@@ -4,6 +4,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.8.0-alpha.3 - 17 August, 2022
+### Changelog
+[Changes between v2.8.0-alpha.2 and v2.8.0-alpha.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.8.0-alpha.2...v2.8.0-alpha.3)
+
+#### Features
 - Added the `isUrban` flag to `EHorizonEdgeMetadata` which define if an edge is in urban area. [#6178](https://github.com/mapbox/mapbox-navigation-android/pull/6178)
 - Added the `isUrban` flag to `RoadObject` which define if an object is in urban area. Might be `null` if it's not possible to define. [#6178](https://github.com/mapbox/mapbox-navigation-android/pull/6178)
 - Added `ComponentInstaller` for the `RecenterButtonComponent` that offers simplified integration of map recenter button. [#6158](https://github.com/mapbox/mapbox-navigation-android/pull/6158)
@@ -12,7 +19,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Updated `NavigationView` to allow drawing of the info panel behind the translucent navigation bar. [#6145](https://github.com/mapbox/mapbox-navigation-android/pull/6145)
 - Optimized vanishing line updates (`MapboxRouteLineApi#updateTraveledRouteLine`) when going through restrictions and legs aren't styled independently. [#6169](https://github.com/mapbox/mapbox-navigation-android/pull/6169)
 - Optimized cache management when switching between primary and alternative routes to improve the execution time of `MapboxRouteLineApi#setNavigationRoutes`. [#6171](https://github.com/mapbox/mapbox-navigation-android/pull/6171)
-- Added support for _Onboard_ `snapping_include_static_closures` route request parameter (`RouteOptions#snappingIncludeStaticClosures). [#6168](https://github.com/mapbox/mapbox-navigation-android/pull/6168)
+- Added support for _Onboard_ `snapping_include_static_closures` route request parameter (`RouteOptions#snappingIncludeStaticClosures`). [#6168](https://github.com/mapbox/mapbox-navigation-android/pull/6168)
 - Fixed a race condition that could cause a hang during `TileStore` clean up. [#6168](https://github.com/mapbox/mapbox-navigation-android/pull/6168)
 - Fixed a crash when the `TileStore` service process is killed by the Android system. [#6168](https://github.com/mapbox/mapbox-navigation-android/pull/6168)
 - Fixed an issue where some callbacks for completed operations would be invoked again if the `TileStore` service process was terminated. [#6168](https://github.com/mapbox/mapbox-navigation-android/pull/6168)
@@ -22,6 +29,16 @@ Mapbox welcomes participation and contributions from everyone.
 - Added `RouteLegProgress#geometryIndex` and `RouteProgress#currentRouteGeometryIndex`. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
 - Improved default router to refresh a route partially instead of failing for routes over 1000 km long. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
 - :warning: Disabled route refresh for routes that are set to `MapboxNavigation` while trip session is not running. A session has to be started (`MapboxNavigation#startTripSession`) for refresh feature to start as well. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.8.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.8.0-beta.1))
+- Mapbox Navigation Native `v112.0.0`
+- Mapbox Core Common `v23.0.0-beta.1`
+- Mapbox Java `v6.8.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0-beta.2))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+- Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
+
 
 ## Mapbox Navigation SDK 2.7.0 - 17 August, 2022
 ### Changelog
