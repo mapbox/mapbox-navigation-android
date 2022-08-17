@@ -44,7 +44,7 @@ object RouteProgressFactory {
      * @param alternativeRouteId id of an alternative route user started to follow deviating from
      * a primary route. **null** if a route does not exist
      * @param currentRouteGeometryIndex route-wise index representing the geometry point
-     * right in front of the user (see [DirectionsRoute.geometry]), null if unavailable.
+     * right in front of the user (see [DirectionsRoute.geometry]).
      */
     fun buildRouteProgressObject(
         route: NavigationRoute,
@@ -62,7 +62,7 @@ object RouteProgressFactory {
         upcomingRoadObjects: List<UpcomingRoadObject>,
         stale: Boolean,
         alternativeRouteId: String?,
-        currentRouteGeometryIndex: Int?,
+        currentRouteGeometryIndex: Int,
     ): RouteProgress {
         return RouteProgress(
             navigationRoute = route,

@@ -214,7 +214,9 @@ class NavigationRouteExTest {
                 }
                 assertEquals(
                     description,
-                    navRoute.directionsRoute.legs()?.drop(refreshItems.startWithIndex)?.map { it.annotation() },
+                    navRoute.directionsRoute.legs()
+                        ?.drop(refreshItems.startWithIndex)
+                        ?.map { it.annotation() },
                     capturedOldAnnotations
                 )
                 assertEquals(
@@ -224,7 +226,8 @@ class NavigationRouteExTest {
                 )
                 assertEquals(
                     description,
-                    listOf(result.expectedLegGeometryIndex) + List(capturedLegGeometryIndices.size - 1) { 0 },
+                    listOf(result.expectedLegGeometryIndex)
+                        + List(capturedLegGeometryIndices.size - 1) { 0 },
                     capturedLegGeometryIndices
                 )
             }

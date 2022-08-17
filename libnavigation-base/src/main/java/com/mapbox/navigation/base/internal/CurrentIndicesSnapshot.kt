@@ -14,6 +14,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
  */
 data class CurrentIndicesSnapshot(
     val legIndex: Int = 0,
-    val routeGeometryIndex: Int? = null,
+    val routeGeometryIndex: Int = 0,
     val legGeometryIndex: Int? = null,
 )

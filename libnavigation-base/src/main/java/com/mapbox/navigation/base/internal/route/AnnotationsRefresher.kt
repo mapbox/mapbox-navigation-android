@@ -68,14 +68,17 @@ internal object AnnotationsRefresher {
         val expectedSize = oldProperty.size
         if (expectedSize < startingLegGeometryIndex) {
             logE(
-                "Annotations sizes mismatch: index=$startingLegGeometryIndex, expected_size=$expectedSize",
+                "Annotations sizes mismatch: " +
+                    "index=$startingLegGeometryIndex, expected_size=$expectedSize",
                 LOG_CATEGORY
             )
             return null
         }
         val result = mutableListOf<T>()
         repeat(startingLegGeometryIndex) { result.add(oldProperty[it]) }
-        repeat(min(expectedSize - startingLegGeometryIndex, newProperty.size)) { result.add(newProperty[it]) }
+        repeat(min(expectedSize - startingLegGeometryIndex, newProperty.size)) {
+            result.add(newProperty[it])
+        }
         val filledSize = result.size
         repeat(expectedSize - filledSize) { result.add(oldProperty[it + filledSize]) }
 

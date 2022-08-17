@@ -352,22 +352,37 @@ class AnnotationsRefresherTest(
                 ),
                 arrayOf(
                     LegAnnotation.fromJson("{ \"my_key1\": \"my_value1\" }"),
-                    LegAnnotation.fromJson("{ \"my_key2\": \"my_value2\", \"my_key3\": \"my_value3\" }"),
+                    LegAnnotation.fromJson(
+                        "{ \"my_key2\": \"my_value2\", " +
+                            "\"my_key3\": \"my_value3\" }"
+                    ),
                     3,
-                    LegAnnotation.fromJson("{ \"my_key2\": \"my_value2\", \"my_key3\": \"my_value3\" }"),
+                    LegAnnotation.fromJson(
+                        "{ \"my_key2\": \"my_value2\", " +
+                            "\"my_key3\": \"my_value3\" }"
+                    ),
                     "Old annotation has less unrecognized properties. " +
                         "Unrecognized properties migrate from new annotation."
                 ),
                 arrayOf(
                     LegAnnotation.builder().build(),
-                    LegAnnotation.fromJson("{ \"my_key2\": \"my_value2\", \"my_key3\": \"my_value3\" }"),
+                    LegAnnotation.fromJson(
+                        "{ \"my_key2\": \"my_value2\", " +
+                            "\"my_key3\": \"my_value3\" }"
+                    ),
                     3,
-                    LegAnnotation.fromJson("{ \"my_key2\": \"my_value2\", \"my_key3\": \"my_value3\" }"),
+                    LegAnnotation.fromJson(
+                        "{ \"my_key2\": \"my_value2\", " +
+                            "\"my_key3\": \"my_value3\" }"
+                    ),
                     "Old annotation has no unrecognized properties. " +
                         "Unrecognized properties migrate from new annotation."
                 ),
                 arrayOf(
-                    LegAnnotation.fromJson("{ \"my_key2\": \"my_value2\", \"my_key3\": \"my_value3\" }"),
+                    LegAnnotation.fromJson(
+                        "{ \"my_key2\": \"my_value2\", " +
+                            "\"my_key3\": \"my_value3\" }"
+                    ),
                     LegAnnotation.fromJson("{ \"my_key1\": \"my_value1\" }"),
                     3,
                     LegAnnotation.fromJson("{ \"my_key1\": \"my_value1\" }"),

@@ -11,7 +11,7 @@ class CurrentIndicesSnapshotTest {
     fun defaultConstructor() {
         with(CurrentIndicesSnapshot()) {
             assertEquals(0, legIndex)
-            assertNull(routeGeometryIndex)
+            assertEquals(0, routeGeometryIndex)
             assertNull(legGeometryIndex)
         }
     }
