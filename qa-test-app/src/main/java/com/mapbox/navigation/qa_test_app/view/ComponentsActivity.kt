@@ -36,6 +36,7 @@ import com.mapbox.navigation.qa_test_app.utils.Utils.getMapboxAccessToken
 import com.mapbox.navigation.ui.base.installer.installComponents
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.NavigationStyles
+import com.mapbox.navigation.ui.maps.installer.recenterButton
 import com.mapbox.navigation.ui.maps.installer.routeArrow
 import com.mapbox.navigation.ui.maps.installer.routeLine
 import com.mapbox.navigation.ui.voice.installer.audioGuidanceButton
@@ -89,6 +90,7 @@ class ComponentsActivity : AppCompatActivity() {
             audioGuidanceButton(binding.soundButton)
             routeLine(binding.mapView)
             routeArrow(binding.mapView)
+            recenterButton(binding.mapView, binding.recenterButton)
 
             // custom components
             component(FindRouteOnLongPress(binding.mapView))

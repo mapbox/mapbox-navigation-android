@@ -29,14 +29,27 @@
         android:text="Start Navigation"
         android:background="@color/primary" />
 
-    <com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
-        android:id="@+id/soundButton"
+    <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="vertical"
         android:layout_marginEnd="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/mapView"
-        app:layout_constraintBottom_toTopOf="@+id/mapView" />
+        app:layout_constraintBottom_toTopOf="@+id/mapView">
+
+        <com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
+            android:id="@+id/soundButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <com.mapbox.navigation.ui.base.view.MapboxExtendableButton
+            android:id="@+id/recenterButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:extendableButtonIcon="@drawable/mapbox_ic_camera_recenter" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
     <ProgressBar
         android:id="@+id/routeLoadingProgressBar"

@@ -18,7 +18,12 @@ sealed interface ComponentInstaller {
     /**
      * Install given UIComponent and manage its lifecycle alongside MapboxNavigation lifecycle.
      */
-    fun component(component: UIComponent): Installation
+    fun component(component: UIComponent): Installation = components(component)
+
+    /**
+     * Install multiple UIComponents and manage their lifecycle alongside MapboxNavigation lifecycle.
+     */
+    fun components(vararg components: UIComponent): Installation
 }
 
 /**
@@ -114,11 +119,11 @@ fun MapboxNavigation.installComponents(
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class NavigationComponents(
-    private val components: MapboxNavigationObserverChain = MapboxNavigationObserverChain()
-) : ComponentInstaller, MapboxNavigationObserver by components {
+    private val componentsChain: MapboxNavigationObserverChain = MapboxNavigationObserverChain()
+) : ComponentInstaller, MapboxNavigationObserver by componentsChain {
 
-    override fun component(component: UIComponent): Installation {
-        components.add(component)
-        return Installation { components.removeAndDetach(component) }
+    override fun components(vararg components: UIComponent): Installation {
+        componentsChain.addAll(*components)
+        return Installation { componentsChain.removeAndDetach(*components) }
     }
 }

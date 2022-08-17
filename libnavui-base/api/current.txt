@@ -10,7 +10,8 @@ package com.mapbox.navigation.ui.base.formatter {
 package com.mapbox.navigation.ui.base.installer {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public sealed interface ComponentInstaller {
-    method public com.mapbox.navigation.ui.base.installer.Installation component(com.mapbox.navigation.ui.base.lifecycle.UIComponent component);
+    method public default com.mapbox.navigation.ui.base.installer.Installation component(com.mapbox.navigation.ui.base.lifecycle.UIComponent component);
+    method public com.mapbox.navigation.ui.base.installer.Installation components(com.mapbox.navigation.ui.base.lifecycle.UIComponent... components);
   }
 
   public final class ComponentInstallerKt {
