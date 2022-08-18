@@ -436,12 +436,12 @@ class NavigationCamera(
 
         private var isCanceled = false
 
-        override fun onAnimationStart(animation: Animator?) {
+        override fun onAnimationStart(animation: Animator) {
             this@NavigationCamera.frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT
             state = progressState
         }
 
-        override fun onAnimationEnd(animation: Animator?) {
+        override fun onAnimationEnd(animation: Animator) {
             if (!isCanceled) {
                 this@NavigationCamera.frameTransitionOptions = frameTransitionOptions
                 state = finalState
@@ -453,29 +453,29 @@ class NavigationCamera(
             updateFrame(viewportDataSource.getViewportData(), instant = false)
         }
 
-        override fun onAnimationCancel(animation: Animator?) {
+        override fun onAnimationCancel(animation: Animator) {
             isCanceled = true
         }
 
-        override fun onAnimationRepeat(animation: Animator?) {
+        override fun onAnimationRepeat(animation: Animator) {
         }
     }
 
     private fun createFrameListener() = object : Animator.AnimatorListener {
 
-        override fun onAnimationStart(animation: Animator?) {
+        override fun onAnimationStart(animation: Animator) {
             // no impl
         }
 
-        override fun onAnimationEnd(animation: Animator?) {
+        override fun onAnimationEnd(animation: Animator) {
             finishAnimation(animation as AnimatorSet)
         }
 
-        override fun onAnimationCancel(animation: Animator?) {
+        override fun onAnimationCancel(animation: Animator) {
             // no impl
         }
 
-        override fun onAnimationRepeat(animation: Animator?) {
+        override fun onAnimationRepeat(animation: Animator) {
             // no impl
         }
     }

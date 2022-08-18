@@ -141,7 +141,7 @@ class LocationExTest {
             assertEquals(ZERO_VALUE, bearingAccuracyDegrees, .0f)
             assertEquals(ZERO_VALUE, speedAccuracyMetersPerSecond, .0f)
             assertEquals(ZERO_VALUE, verticalAccuracyMeters, .0f)
-            assertEquals(EMPTY_EXTRAS.toString(), extras.toMap().toString())
+            assertEquals(EMPTY_EXTRAS.toString(), extras!!.toMap().toString())
             assertEquals(IS_MOCK, isFromMockProvider)
         }
     }
