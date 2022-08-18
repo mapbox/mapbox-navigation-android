@@ -3,6 +3,7 @@
 package com.mapbox.navigation.core.navigator
 
 import android.location.Location
+import android.util.Log
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
@@ -200,7 +201,10 @@ private fun NavigationStatus.getRouteProgress(
             stale,
             locatedAlternativeRouteId,
             geometryIndex,
-        )
+        ).also {
+            Log.e("lp_test", "location: ${this.location.coordinate}" )
+            Log.e("lp_test", "index: ${this.geometryIndex}" )
+        }
     }
     return null
 }

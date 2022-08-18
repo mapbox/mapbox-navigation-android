@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
+import android.util.Log
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -83,6 +84,9 @@ internal class VanishingRouteLine {
                 distanceToLine >
                 RouteLayerConstants.ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS
             ) {
+                Log.e("lp_test", "upcomingIndex: ${upcomingIndex}")
+                Log.e("lp_test", "previousIndex: ${granularDistances.distancesArray.getOrNull(index - 1)}")
+                Log.e("lp_test", "point: ${point}")
                 return null
             }
         }
@@ -92,7 +96,7 @@ internal class VanishingRouteLine {
          * by the exact position of the puck.
          */
         val remainingDistance =
-            upcomingIndex.distanceRemaining + MapboxRouteLineUtils.calculateDistance(
+            upcomingIndex.projectedDistanceRemaining + MapboxRouteLineUtils.calculateDistance(
                 upcomingPoint,
                 point
             )

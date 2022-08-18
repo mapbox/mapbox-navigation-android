@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.internal.route.line
 
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.util.LruCache
 import androidx.annotation.ColorInt
 import com.mapbox.api.directions.v5.DirectionsCriteria
@@ -10,6 +11,7 @@ import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
+import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
@@ -30,6 +32,7 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToLineString
+import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
@@ -53,6 +56,7 @@ import com.mapbox.navigation.ui.utils.internal.extensions.getBitmap
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.turf.TurfConstants
+import com.mapbox.turf.TurfMeasurement
 import com.mapbox.turf.TurfMisc
 import kotlin.math.ln
 import kotlin.math.max
@@ -635,18 +639,36 @@ internal object MapboxRouteLineUtils {
     ) -> RoutePoints? =
         { route: NavigationRoute ->
             route.directionsRoute.legs()?.mapNotNull { routeLeg ->
-                routeLeg.steps()?.mapIndexed { stepIndex, legStep ->
-                    route.directionsRoute.stepGeometryToPoints(legStep).let {
-                        if (stepIndex > 0) {
-                            it.drop(1)
-                        }
-                        it
-                    }
+                routeLeg.steps()?.map { legStep ->
+                    route.directionsRoute.stepGeometryToPoints(legStep)
                 }
-            }?.let {
+            }?.let { nestedList ->
+                val flatList = nestedList.flatten().flatten()
+                val distinctFlatList = flatList.filterIndexed { index, point ->
+                    index == 0 || point != flatList[index - 1]
+                }
+                Log.e("lp_test", "p1: ${route.directionsRoute.completeGeometryToPoints().size}")
+                Log.e(
+                    "lp_test",
+                    "p1.1: ${
+                        LineString.fromLngLats(route.directionsRoute.completeGeometryToPoints())
+                            .toJson()
+                    }"
+                )
+                Log.e("lp_test", "p2: ${nestedList.flatten().flatten().size}")
+                Log.e(
+                    "lp_test",
+                    "p2.1: ${LineString.fromLngLats(nestedList.flatten().flatten()).toJson()}}"
+                )
+                Log.e("lp_test", "p3: ${distinctFlatList.size}")
+                Log.e(
+                    "lp_test",
+                    "p3.1: ${LineString.fromLngLats(distinctFlatList).toJson()}}"
+                )
                 RoutePoints(
-                    nestedList = it,
-                    flatList = it.flatten().flatten()
+                    nestedList = nestedList,
+                    flatList = flatList,
+                    distinctFlatList = distinctFlatList,
                 )
                 /*RoutePoints(
                     nestedList = it,
@@ -664,7 +686,7 @@ internal object MapboxRouteLineUtils {
         route: NavigationRoute,
     ) -> RouteLineGranularDistances? =
         { route: NavigationRoute ->
-            val points = routePointsProvider(route)?.flatList
+            val points = routePointsProvider(route)?.distinctFlatList
             if (points?.isNotEmpty() == true) {
                 calculateGranularDistances(points)
             } else {
@@ -848,18 +870,20 @@ internal object MapboxRouteLineUtils {
         generateRouteFeatureData(route.route, route.identifier)
 
     private fun calculateGranularDistances(points: List<Point>): RouteLineGranularDistances {
+        var projectedDistance = 0.0
         var distance = 0.0
 
         val indexArray = arrayOfNulls<RouteLineDistancesIndex>(points.size)
         for (i in (points.size - 1) downTo 1) {
             val curr = points[i]
             val prev = points[i - 1]
-            distance += calculateDistance(curr, prev)
-            indexArray[i - 1] = RouteLineDistancesIndex(prev, distance)
+            distance += TurfMeasurement.distance(prev, curr, TurfConstants.UNIT_METERS)
+            projectedDistance += calculateDistance(curr, prev)
+            indexArray[i - 1] = RouteLineDistancesIndex(prev, distance, projectedDistance)
         }
         indexArray[points.size - 1] =
-            RouteLineDistancesIndex(points[points.size - 1], 0.0)
-        return RouteLineGranularDistances(distance, indexArray as Array<RouteLineDistancesIndex>)
+            RouteLineDistancesIndex(points[points.size - 1], 0.0, 0.0)
+        return RouteLineGranularDistances(projectedDistance, indexArray as Array<RouteLineDistancesIndex>)
     }
 
     private val generateRouteFeatureData: (
@@ -1536,7 +1560,7 @@ internal object MapboxRouteLineUtils {
         metadata: AlternativeRouteMetadata
     ): Double {
         val index = metadata.forkIntersectionOfAlternativeRoute.geometryIndexInRoute
-        val distanceRemaining = granularDistances.distancesArray[index].distanceRemaining
+        val distanceRemaining = granularDistances.distancesArray[index].projectedDistanceRemaining
         return 1.0 - distanceRemaining / granularDistances.distance
     }
 

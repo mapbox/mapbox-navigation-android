@@ -4,6 +4,6 @@ import com.mapbox.geojson.Point
 
 /**
  * @param point the upcoming, not yet visited point on the route
- * @param distanceRemaining distance remaining from the upcoming point
+ * @param projectedDistanceRemaining distance remaining from the upcoming point
  */
-data class RouteLineDistancesIndex(val point: Point, val distanceRemaining: Double)
+data class RouteLineDistancesIndex(val point: Point, val distanceRemaining: Double, val projectedDistanceRemaining: Double)
