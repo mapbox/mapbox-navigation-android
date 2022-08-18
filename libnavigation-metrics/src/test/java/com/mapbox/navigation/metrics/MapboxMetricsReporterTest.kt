@@ -110,7 +110,7 @@ class MapboxMetricsReporterTest {
         override val metricName: String
     ) : Event(), MetricEvent {
 
-        override fun writeToParcel(dest: Parcel?, flags: Int) {}
+        override fun writeToParcel(dest: Parcel, flags: Int) {}
 
         override fun describeContents(): Int = 0
 

@@ -40,19 +40,19 @@ fun ValueAnimator.play(
     set.play(this)
     set.interpolator = AccelerateDecelerateInterpolator()
     set.addListener(object : Animator.AnimatorListener {
-        override fun onAnimationStart(animation: Animator?) {
+        override fun onAnimationStart(animation: Animator) {
             doOnStart?.invoke()
         }
 
-        override fun onAnimationEnd(animation: Animator?) {
+        override fun onAnimationEnd(animation: Animator) {
             doOnEnd?.invoke()
         }
 
-        override fun onAnimationCancel(animation: Animator?) {
+        override fun onAnimationCancel(animation: Animator) {
             // No implementation
         }
 
-        override fun onAnimationRepeat(animation: Animator?) {
+        override fun onAnimationRepeat(animation: Animator) {
             // No implementation
         }
     })

@@ -12,6 +12,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed `MapboxNavigationApp#detach` will not fully detach. This causes `MapboxNavigation` to continue to be accessible, and causes `MapboxNavigationObserver.onDetached` to be called multiple times. [#6245](https://github.com/mapbox/mapbox-navigation-android/pull/6245)
 - Introduced `NavigationViewListener#onInfoPanelDragging` to inform user when `InfoPanel` is dragging. [#6249](https://github.com/mapbox/mapbox-navigation-android/pull/6249)
 - Introduced `NavigationViewListener#onInfoPanelSettling` to inform user when `InfoPanel` is settling. [#6249](https://github.com/mapbox/mapbox-navigation-android/pull/6249)
+- Added Android 13 support. [#6196](https://github.com/mapbox/mapbox-navigation-android/pull/6196)
+- Declared [POST_NOTIFICATIONS](https://developer.android.com/reference/android/Manifest.permission#POST_NOTIFICATIONS) permission in SDK's AndroidManifest.xml. It is highly recommended for apps to request the permission in runtime. Without it, the SDK will not be able to show the notification with trip progress in the notification drawer for apps that target Android 13 or higher. [#6196](https://github.com/mapbox/mapbox-navigation-android/pull/6196)
 
 ## Mapbox Navigation SDK 2.8.0-beta.1 - 25 August, 2022
 ### Changelog
