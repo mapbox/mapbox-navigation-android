@@ -1,10 +1,15 @@
 package com.mapbox.navigation.ui.maps.installer
 
 import android.content.Context
+import androidx.core.content.ContextCompat
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
+import com.mapbox.maps.plugin.LocationPuck
+import com.mapbox.maps.plugin.LocationPuck2D
+import com.mapbox.maps.plugin.LocationPuck3D
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -13,10 +18,13 @@ import com.mapbox.navigation.ui.base.installer.ComponentInstaller
 import com.mapbox.navigation.ui.base.installer.Installation
 import com.mapbox.navigation.ui.base.installer.findComponent
 import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
+import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.internal.ui.CameraModeButtonComponent
+import com.mapbox.navigation.ui.maps.internal.ui.LocationComponent
+import com.mapbox.navigation.ui.maps.internal.ui.LocationPuckComponent
 import com.mapbox.navigation.ui.maps.internal.ui.MapboxCameraModeButtonComponentContract
 import com.mapbox.navigation.ui.maps.internal.ui.MapboxRecenterButtonComponentContract
 import com.mapbox.navigation.ui.maps.internal.ui.NavigationCameraComponent
@@ -24,6 +32,7 @@ import com.mapbox.navigation.ui.maps.internal.ui.NavigationCameraGestureComponen
 import com.mapbox.navigation.ui.maps.internal.ui.RecenterButtonComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteArrowComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponent
+import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
@@ -31,6 +40,39 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton
+
+/**
+ * Install component that renders [LocationPuck].
+ */
+@ExperimentalPreviewMapboxNavigationAPI
+fun ComponentInstaller.locationPuck(
+    mapView: MapView,
+    config: LocationPuckComponentConfig.() -> Unit = {}
+): Installation {
+    val componentConfig = LocationPuckComponentConfig().apply(config)
+    val locationPuck = componentConfig.locationPuck ?: LocationPuck2D(
+        bearingImage = ContextCompat.getDrawable(
+            mapView.context,
+            R.drawable.mapbox_navigation_puck_icon
+        )
+    )
+    val locationProvider = componentConfig.locationProvider ?: NavigationLocationProvider()
+    val locationPuckComponent = LocationPuckComponent(
+        mapView.getMapboxMap(),
+        mapView.location,
+        locationPuck,
+        locationProvider
+    )
+
+    return if (componentConfig.enableLocationUpdates) {
+        components(
+            LocationComponent(locationProvider),
+            locationPuckComponent
+        )
+    } else {
+        component(locationPuckComponent)
+    }
+}
 
 /**
  * Install component that renders route line on the map.
@@ -217,4 +259,25 @@ class RouteArrowComponentConfig internal constructor(context: Context) {
      * Options used to create [MapboxRouteArrowView] instance.
      */
     var options = RouteArrowOptions.Builder(context).build()
+}
+
+/**
+ * Location puck component configuration class.
+ */
+@ExperimentalPreviewMapboxNavigationAPI
+class LocationPuckComponentConfig internal constructor() {
+    /**
+     * An instance of either [LocationPuck2D] or [LocationPuck3D] to use with this component.
+     */
+    var locationPuck: LocationPuck? = null
+
+    /**
+     * An instance of [NavigationLocationProvider] to use with this component.
+     */
+    var locationProvider: NavigationLocationProvider? = null
+
+    /**
+     * Set whether the [locationProvider] should register as a MapboxNavigation [LocationObserver].
+     */
+    var enableLocationUpdates: Boolean = true
 }

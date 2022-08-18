@@ -10,13 +10,14 @@ import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
+import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
+import com.mapbox.maps.plugin.LocationPuck3D
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.ComponentsActivityLayoutBinding
-import com.mapbox.navigation.qa_test_app.lifecycle.DropInLocationPuck
 import com.mapbox.navigation.qa_test_app.lifecycle.DropInStartReplayButton
 import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInLocationViewModel
 import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInNavigationViewModel
@@ -27,6 +28,7 @@ import com.mapbox.navigation.ui.base.installer.installComponents
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.installer.cameraModeButton
+import com.mapbox.navigation.ui.maps.installer.locationPuck
 import com.mapbox.navigation.ui.maps.installer.navigationCamera
 import com.mapbox.navigation.ui.maps.installer.recenterButton
 import com.mapbox.navigation.ui.maps.installer.routeArrow
@@ -93,6 +95,9 @@ class ComponentsAltActivity : AppCompatActivity() {
         val mapboxNavigation = MapboxNavigationApp.current()!!
         mapboxNavigation.installComponents(this) {
             audioGuidanceButton(binding.soundButton)
+            locationPuck(binding.mapView) {
+                locationPuck = customLocationPuck()
+            }
             routeLine(binding.mapView) {
                 options = customRouteLineOptions()
             }
@@ -101,7 +106,7 @@ class ComponentsAltActivity : AppCompatActivity() {
             }
             recenterButton(binding.mapView, binding.recenterButton) {
                 cameraOptions = CameraOptions.Builder()
-                    .zoom(10.0)
+                    .zoom(17.0)
                     .bearing(0.0)
                     .build()
                 animationOptions = MapAnimationOptions.Builder()
@@ -117,20 +122,6 @@ class ComponentsAltActivity : AppCompatActivity() {
             // custom components
             component(FindRouteOnLongPress(binding.mapView))
             component(DropInStartReplayButton(binding.startNavigation))
-            component(
-                DropInLocationPuck(
-                    binding.mapView,
-                    locationViewModel.navigationLocationProvider
-                )
-            )
-            // component(
-            //     DropInNavigationCamera(
-            //         viewModel,
-            //         locationViewModel,
-            //         this@ComponentsAltActivity,
-            //         binding.mapView
-            //     )
-            // )
         }
     }
 
@@ -172,4 +163,11 @@ class ComponentsAltActivity : AppCompatActivity() {
         .withAboveLayerId(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
         .withArrowColor(Color.RED)
         .build()
+
+    private fun customLocationPuck() = LocationPuck3D(
+        // "Little ducky, you're the one!"
+        modelUri = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Embedded/Duck.gltf", // ktlint-disable
+        modelScaleExpression = literal(listOf(30, 30, 30)).toJson(),
+        modelRotation = listOf(0f, 0f, -90f)
+    )
 }
