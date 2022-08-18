@@ -28,7 +28,6 @@ import com.mapbox.navigation.core.internal.extensions.flowNewRawLocation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.ComponentsActivityLayoutBinding
-import com.mapbox.navigation.qa_test_app.lifecycle.DropInLocationPuck
 import com.mapbox.navigation.qa_test_app.lifecycle.DropInStartReplayButton
 import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInLocationViewModel
 import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInNavigationViewModel
@@ -39,6 +38,7 @@ import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.installer.cameraModeButton
+import com.mapbox.navigation.ui.maps.installer.locationPuck
 import com.mapbox.navigation.ui.maps.installer.navigationCamera
 import com.mapbox.navigation.ui.maps.installer.recenterButton
 import com.mapbox.navigation.ui.maps.installer.routeArrow
@@ -100,6 +100,7 @@ class ComponentsActivity : AppCompatActivity() {
         //
         MapboxNavigationApp.installComponents(this) {
             audioGuidanceButton(binding.soundButton)
+            locationPuck(binding.mapView)
             routeLine(binding.mapView)
             routeArrow(binding.mapView)
             recenterButton(binding.mapView, binding.recenterButton)
@@ -112,20 +113,6 @@ class ComponentsActivity : AppCompatActivity() {
             // custom components
             component(FindRouteOnLongPress(binding.mapView))
             component(DropInStartReplayButton(binding.startNavigation))
-            component(
-                DropInLocationPuck(
-                    binding.mapView,
-                    locationViewModel.navigationLocationProvider
-                )
-            )
-            // component(
-            //     DropInNavigationCamera(
-            //         viewModel,
-            //         locationViewModel,
-            //         this@ComponentsActivity,
-            //         binding.mapView
-            //     )
-            // )
         }
     }
 }

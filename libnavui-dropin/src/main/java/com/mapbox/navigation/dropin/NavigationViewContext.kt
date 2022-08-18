@@ -13,6 +13,7 @@ import com.mapbox.navigation.dropin.util.BitmapMemoryCache
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache.Companion.MB_IN_BYTES
 import com.mapbox.navigation.ui.app.internal.SharedApp
 import com.mapbox.navigation.ui.app.internal.Store
+import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.utils.internal.Provider
 import com.mapbox.navigation.ui.utils.internal.getValue
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,6 +54,7 @@ internal class NavigationViewContext(
             lifecycleOwner.lifecycleScope
         )
     }
+    val locationProvider = NavigationLocationProvider()
 
     fun mapAnnotationFactory() = MapMarkerFactory(
         context,

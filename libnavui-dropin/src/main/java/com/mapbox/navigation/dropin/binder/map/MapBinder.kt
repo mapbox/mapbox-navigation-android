@@ -1,8 +1,11 @@
 package com.mapbox.navigation.dropin.binder.map
 
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import com.mapbox.maps.MapView
+import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.compass.compass
+import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.scalebar.scalebar
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -12,7 +15,6 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.component.camera.CameraComponent
 import com.mapbox.navigation.dropin.component.camera.CameraLayoutObserver
-import com.mapbox.navigation.dropin.component.location.LocationComponent
 import com.mapbox.navigation.dropin.component.logo.LogoAttributionComponent
 import com.mapbox.navigation.dropin.component.marker.FreeDriveLongPressMapComponent
 import com.mapbox.navigation.dropin.component.marker.GeocodingComponent
@@ -20,16 +22,19 @@ import com.mapbox.navigation.dropin.component.marker.MapMarkersComponent
 import com.mapbox.navigation.dropin.component.marker.RoutePreviewLongPressMapComponent
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
-import com.mapbox.navigation.ui.app.internal.SharedApp
+import com.mapbox.navigation.ui.app.R
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
+import com.mapbox.navigation.ui.maps.internal.ui.LocationComponent
+import com.mapbox.navigation.ui.maps.internal.ui.LocationPuckComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteArrowComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponentContract
+import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import kotlinx.coroutines.FlowPreview
@@ -55,7 +60,8 @@ internal class MapBinder(
         val navigationState = store.select { it.navigation }
         return navigationListOf(
             CameraLayoutObserver(store, mapView, binding),
-            LocationComponent(mapView, SharedApp.locationStateController),
+            LocationComponent(context.locationProvider),
+            locationPuckComponent(context.locationProvider),
             LogoAttributionComponent(mapView, context.systemBarsInsets),
             reloadOnChange(
                 context.mapStyleLoader.loadedMapStyle,
@@ -82,6 +88,23 @@ internal class MapBinder(
             ) { _, arrowOptions, navState ->
                 routeArrowComponent(navState, arrowOptions)
             }
+        )
+    }
+
+    private fun locationPuckComponent(
+        locationProvider: NavigationLocationProvider
+    ): LocationPuckComponent {
+        val locationPuck = LocationPuck2D(
+            bearingImage = ContextCompat.getDrawable(
+                mapView.context,
+                R.drawable.mapbox_navigation_puck_icon
+            )
+        )
+        return LocationPuckComponent(
+            mapView.getMapboxMap(),
+            mapView.location,
+            locationPuck,
+            locationProvider
         )
     }
 
