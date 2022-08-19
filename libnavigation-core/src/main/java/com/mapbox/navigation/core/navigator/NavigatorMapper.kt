@@ -3,16 +3,12 @@
 package com.mapbox.navigation.core.navigator
 
 import android.location.Location
-import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
-import com.mapbox.api.directions.v5.models.BannerText
-import com.mapbox.api.directions.v5.models.BannerView
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.extensions.toMapboxShield
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
 import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory.buildRouteLegProgressObject
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory.buildRouteProgressObject
@@ -26,9 +22,7 @@ import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.utils.internal.ifNonNull
-import com.mapbox.navigator.BannerComponent
-import com.mapbox.navigator.BannerInstruction
-import com.mapbox.navigator.BannerSection
+import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouteState
@@ -38,6 +32,7 @@ import com.mapbox.navigator.VoiceInstruction
 
 private const val ONE_INDEX = 1
 private const val ONE_SECOND_IN_MILLISECONDS = 1000.0
+private const val LOG_CATEGORY = "NavigatorMapper"
 
 /**
  * Builds [RouteProgress] object based on [NavigationStatus] returned by [Navigator]
@@ -202,55 +197,35 @@ private fun NavigationStatus.getRouteProgress(
     return null
 }
 
-internal fun BannerInstruction.mapToDirectionsApi(): BannerInstructions {
-    return BannerInstructions.builder()
-        .distanceAlongGeometry(this.remainingStepDistance.toDouble())
-        .primary(this.primary.mapToDirectionsApi())
-        .secondary(this.secondary?.mapToDirectionsApi())
-        .sub(this.sub?.mapToDirectionsApi())
-        .view(this.view?.mapViewToDirectionsApi())
-        .build()
-}
-
-private fun BannerSection.mapToDirectionsApi(): BannerText {
-    return BannerText.builder()
-        .components(this.components?.mapToDirectionsApi())
-        .degrees(this.degrees?.toDouble())
-        .drivingSide(this.drivingSide)
-        .modifier(this.modifier)
-        .text(this.text)
-        .type(this.type)
-        .build()
-}
-
-private fun BannerSection.mapViewToDirectionsApi(): BannerView {
-    return BannerView.builder()
-        .components(components?.mapToDirectionsApi())
-        .text(text)
-        .type(type)
-        .modifier(modifier)
-        .build()
-}
-
-private fun MutableList<BannerComponent>.mapToDirectionsApi(): MutableList<BannerComponents> {
-    val components = mutableListOf<BannerComponents>()
-    this.forEach {
-        components.add(
-            BannerComponents.builder()
-                .abbreviation(it.abbr)
-                .abbreviationPriority(it.abbrPriority)
-                .active(it.active)
-                .directions(it.directions)
-                .imageBaseUrl(it.imageBaseUrl)
-                .imageUrl(it.imageURL)
-                .text(it.text)
-                .type(it.type)
-                .subType(it.subType?.name?.lowercase())
-                .mapboxShield(it.shield?.toMapboxShield())
-                .build()
-        )
+internal fun NavigationStatus.getCurrentBannerInstructions(
+    currentRoute: NavigationRoute?
+): BannerInstructions? {
+    return ifNonNull(currentRoute, bannerInstruction) { route, nativeBanner ->
+        route.directionsRoute.legs()?.let { legs ->
+            if (legs.size > 0) {
+                val currentLeg = legs[legIndex]
+                currentLeg.steps()?.let { steps ->
+                    if (steps.size > 0) {
+                        val currentStep = steps[stepIndex]
+                        currentStep.bannerInstructions()?.let { banners ->
+                            banners[nativeBanner.index]
+                                .toBuilder()
+                                .distanceAlongGeometry(
+                                    nativeBanner.remainingStepDistance.toDouble()
+                                )
+                                .build()
+                        }
+                    } else {
+                        logW("Steps cannot be null or empty", LOG_CATEGORY)
+                        null
+                    }
+                }
+            } else {
+                logW("Legs cannot be null or empty", LOG_CATEGORY)
+                null
+            }
+        }
     }
-    return components
 }
 
 internal fun VoiceInstruction.mapToDirectionsApi(): VoiceInstructions? {

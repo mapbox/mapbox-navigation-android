@@ -52,7 +52,7 @@ class NavigatorMapperTest {
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     @Test
     fun `route progress result sanity`() {
-        val bannerInstructions = nativeBannerInstructions.mapToDirectionsApi()
+        val bannerInstructions = navigationStatus.getCurrentBannerInstructions(route)
         val expected = RouteProgressFactory.buildRouteProgressObject(
             route = route,
             bannerInstructions = bannerInstructions,
@@ -482,12 +482,12 @@ class NavigatorMapperTest {
     }
 
     @Test
-    fun `banner components mapper correctly sets legacy shield url`() {
-        val result = nativeBannerInstructions.mapToDirectionsApi()
+    fun `banner components mapper correctly sets remaining distance`() {
+        val result = navigationStatus.getCurrentBannerInstructions(route)
 
         assertEquals(
-            "legacyShieldUrl",
-            result.primary().components()!!.first().imageBaseUrl()
+            111f.toDouble(),
+            result?.distanceAlongGeometry()
         )
     }
 

@@ -522,6 +522,61 @@ package com.mapbox.navigation.ui.maps.guidance.junction.view {
 
 }
 
+package com.mapbox.navigation.ui.maps.guidance.restarea.api {
+
+  public final class MapboxRestAreaApi {
+    ctor public MapboxRestAreaApi(String accessToken, com.mapbox.navigation.ui.maps.guidance.restarea.model.MapboxRestAreaOptions options = MapboxRestAreaOptions.<init>().build());
+    ctor public MapboxRestAreaApi(String accessToken);
+    method public void cancelAll();
+    method public void generateRestAreaGuideMap(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.restarea.model.RestAreaGuideMapError,com.mapbox.navigation.ui.maps.guidance.restarea.model.RestAreaGuideMapValue>> consumer);
+    method public void generateUpcomingRestAreaGuideMap(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.restarea.model.RestAreaGuideMapError,com.mapbox.navigation.ui.maps.guidance.restarea.model.RestAreaGuideMapValue>> consumer);
+    method public String getAccessToken();
+    method public com.mapbox.navigation.ui.maps.guidance.restarea.model.MapboxRestAreaOptions getOptions();
+    property public final String accessToken;
+    property public final com.mapbox.navigation.ui.maps.guidance.restarea.model.MapboxRestAreaOptions options;
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.guidance.restarea.model {
+
+  public final class MapboxRestAreaOptions {
+    method public int getDesiredGuideMapWidth();
+    method public com.mapbox.navigation.ui.maps.guidance.restarea.model.MapboxRestAreaOptions.Builder toBuilder();
+    property public final int desiredGuideMapWidth;
+  }
+
+  public static final class MapboxRestAreaOptions.Builder {
+    ctor public MapboxRestAreaOptions.Builder();
+    method public com.mapbox.navigation.ui.maps.guidance.restarea.model.MapboxRestAreaOptions build();
+    method public com.mapbox.navigation.ui.maps.guidance.restarea.model.MapboxRestAreaOptions.Builder desiredGuideMapWidth(int desiredGuideMapWidth);
+  }
+
+  public final class RestAreaGuideMapError {
+    method public String? getMessage();
+    method public Throwable? getThrowable();
+    property public final String? message;
+    property public final Throwable? throwable;
+  }
+
+  public final class RestAreaGuideMapValue {
+    method public android.graphics.Bitmap getBitmap();
+    property public final android.graphics.Bitmap bitmap;
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.guidance.restarea.view {
+
+  public final class MapboxRestAreaGuideMapView extends androidx.appcompat.widget.AppCompatImageView {
+    ctor public MapboxRestAreaGuideMapView(android.content.Context context);
+    ctor public MapboxRestAreaGuideMapView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxRestAreaGuideMapView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void render(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.restarea.model.RestAreaGuideMapError,com.mapbox.navigation.ui.maps.guidance.restarea.model.RestAreaGuideMapValue> result);
+  }
+
+}
+
 package com.mapbox.navigation.ui.maps.guidance.signboard.api {
 
   public class MapboxExternalFileResolver extends com.caverock.androidsvg.SVGExternalFileResolver {

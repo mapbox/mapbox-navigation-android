@@ -69,9 +69,11 @@ object SvgUtil {
         stream: ByteArrayInputStream,
         desiredWidth: Int,
         cssStyles: String? = null,
-        resolver: SVGExternalFileResolver
+        resolver: SVGExternalFileResolver? = null
     ): Bitmap {
-        SVG.registerExternalFileResolver(resolver)
+        ifNonNull(resolver) { svgResolver ->
+            SVG.registerExternalFileResolver(svgResolver)
+        }
         val svg = SVG.getFromInputStream(stream)
         svg.setDocumentWidth("100%")
         svg.setDocumentHeight("100%")

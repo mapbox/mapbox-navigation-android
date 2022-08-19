@@ -4,8 +4,6 @@ import android.content.Context
 import android.location.Location
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.BannerInstructions
-import com.mapbox.api.directions.v5.models.LegStep
-import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.internal.CurrentIndicesFactory
@@ -21,6 +19,7 @@ import com.mapbox.navigation.core.BasicSetRoutesInfo
 import com.mapbox.navigation.core.SetAlternativeRoutesInfo
 import com.mapbox.navigation.core.SetRefreshedRoutesInfo
 import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.navigator.getCurrentBannerInstructions
 import com.mapbox.navigation.core.navigator.getLocationMatcherResult
 import com.mapbox.navigation.core.navigator.getRouteProgressFrom
 import com.mapbox.navigation.core.navigator.getTripStatusFrom
@@ -885,13 +884,8 @@ class MapboxTripSessionTest {
 
     @Test
     fun unregisterAllBannerInstructionsObservers() = coroutineRule.runBlockingTest {
-        val step = mockk<LegStep>(relaxed = true)
-        every { step.bannerInstructions() } returns listOf(mockk(relaxed = true))
-        val leg = mockk<RouteLeg>(relaxed = true)
-        every { leg.steps() } returns listOf(step)
-        every { routes.first().directionsRoute.legs() } returns listOf(leg)
         val bannerInstructionsObserver: BannerInstructionsObserver = mockk(relaxUnitFun = true)
-        every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
+        every { navigationStatus.getCurrentBannerInstructions(routes.first()) } returns mockk()
 
         tripSession = buildTripSession()
         tripSession.start(true)
@@ -1306,12 +1300,8 @@ class MapboxTripSessionTest {
             every { offRouteObserver.onOffRouteStateChanged(any()) } just Runs
             every { bannerInstructionsObserver.onNewBannerInstructions(any()) } just Runs
 
-            val leg: RouteLeg = mockk(relaxed = true)
-            val legs = listOf(leg)
-            val steps: List<LegStep> = mockk(relaxed = true)
-            every { navigationStatus.legIndex } returns 0
-            every { routes.first().directionsRoute.legs() } returns legs
-            every { leg.steps() } returns steps
+            val banner: BannerInstructions = mockk(relaxed = true)
+            every { navigationStatus.getCurrentBannerInstructions(primary) } returns banner
 
             tripSession = buildTripSession()
             tripSession.registerRouteProgressObserver(routeProgressObserver)
@@ -1367,7 +1357,7 @@ class MapboxTripSessionTest {
 
                 // routeProgressObserver and bannerInstructionsObserver are notified when setRoute is finished
                 verify(exactly = 1) { routeProgressObserver.onRouteProgressChanged(any()) }
-                verify(exactly = 1) { bannerInstructionsObserver.onNewBannerInstructions(any()) }
+                verify(exactly = 1) { bannerInstructionsObserver.onNewBannerInstructions(banner) }
                 // offRouteObserver is notified twice:
                 // when setRoute starts, and on a new status when setRoute is finished
                 verify(exactly = 2) { offRouteObserver.onOffRouteStateChanged(any()) }
