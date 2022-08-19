@@ -31,6 +31,7 @@ import com.mapbox.navigation.ui.maps.installer.cameraModeButton
 import com.mapbox.navigation.ui.maps.installer.locationPuck
 import com.mapbox.navigation.ui.maps.installer.navigationCamera
 import com.mapbox.navigation.ui.maps.installer.recenterButton
+import com.mapbox.navigation.ui.maps.installer.roadName
 import com.mapbox.navigation.ui.maps.installer.routeArrow
 import com.mapbox.navigation.ui.maps.installer.routeLine
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
@@ -104,6 +105,7 @@ class ComponentsAltActivity : AppCompatActivity() {
             routeArrowInstallation = routeArrow(binding.mapView) {
                 options = customRouteArrowOptions()
             }
+            roadName(binding.mapView, binding.roadNameView)
             recenterButton(binding.mapView, binding.recenterButton) {
                 cameraOptions = CameraOptions.Builder()
                     .zoom(17.0)

@@ -27,12 +27,15 @@ import com.mapbox.navigation.ui.maps.internal.ui.LocationComponent
 import com.mapbox.navigation.ui.maps.internal.ui.LocationPuckComponent
 import com.mapbox.navigation.ui.maps.internal.ui.MapboxCameraModeButtonComponentContract
 import com.mapbox.navigation.ui.maps.internal.ui.MapboxRecenterButtonComponentContract
+import com.mapbox.navigation.ui.maps.internal.ui.MapboxRoadNameComponentContract
 import com.mapbox.navigation.ui.maps.internal.ui.NavigationCameraComponent
 import com.mapbox.navigation.ui.maps.internal.ui.NavigationCameraGestureComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RecenterButtonComponent
+import com.mapbox.navigation.ui.maps.internal.ui.RoadNameComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteArrowComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponent
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
+import com.mapbox.navigation.ui.maps.roadname.view.MapboxRoadNameView
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
@@ -40,6 +43,7 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton
+import com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi
 
 /**
  * Install component that renders [LocationPuck].
@@ -103,6 +107,30 @@ fun ComponentInstaller.routeArrow(
 ): Installation {
     val componentConfig = RouteArrowComponentConfig(mapView.context).apply(config)
     return component(RouteArrowComponent(mapView.getMapboxMap(), componentConfig.options))
+}
+
+/**
+ * Install component that updates [MapboxRoadNameView] with a road name that matches current device location.
+ *
+ * The installed component registers itself as a [LocationObserver] and updates the label only
+ * if road name information is available.
+ */
+@ExperimentalPreviewMapboxNavigationAPI
+fun ComponentInstaller.roadName(
+    mapView: MapView,
+    roadNameView: MapboxRoadNameView,
+    config: RoadNameComponentConfig.() -> Unit = {}
+): Installation {
+    val componentConfig = RoadNameComponentConfig().apply(config)
+    val contract = MapboxRoadNameComponentContract(mapView.getMapboxMap())
+    return components(
+        contract,
+        RoadNameComponent(
+            roadNameView,
+            { contract },
+            componentConfig.routeShieldApi ?: MapboxRouteShieldApi()
+        )
+    )
 }
 
 /**
@@ -234,6 +262,17 @@ class RecenterButtonComponentConfig internal constructor() {
      * Options for re-center camera animation.
      */
     var animationOptions: MapAnimationOptions? = null
+}
+
+/**
+ * Road name component configuration class.
+ */
+@ExperimentalPreviewMapboxNavigationAPI
+class RoadNameComponentConfig internal constructor() {
+    /**
+     * A [MapboxRouteShieldApi] instance to use with this component.
+     */
+    var routeShieldApi: MapboxRouteShieldApi? = null
 }
 
 /**

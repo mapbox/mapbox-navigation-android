@@ -29,6 +29,22 @@
         android:text="Start Navigation"
         android:background="@color/primary" />
 
+    <com.mapbox.navigation.ui.maps.roadname.view.MapboxRoadNameView
+        style="@style/MapboxStyleRoadNameView"
+        android:id="@+id/roadNameView"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:maxLines="1"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="2dp"
+        android:layout_marginBottom="80dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/startNavigation" />
+
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

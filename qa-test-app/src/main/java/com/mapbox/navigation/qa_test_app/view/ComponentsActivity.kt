@@ -41,6 +41,7 @@ import com.mapbox.navigation.ui.maps.installer.cameraModeButton
 import com.mapbox.navigation.ui.maps.installer.locationPuck
 import com.mapbox.navigation.ui.maps.installer.navigationCamera
 import com.mapbox.navigation.ui.maps.installer.recenterButton
+import com.mapbox.navigation.ui.maps.installer.roadName
 import com.mapbox.navigation.ui.maps.installer.routeArrow
 import com.mapbox.navigation.ui.maps.installer.routeLine
 import com.mapbox.navigation.ui.voice.installer.audioGuidanceButton
@@ -103,6 +104,7 @@ class ComponentsActivity : AppCompatActivity() {
             locationPuck(binding.mapView)
             routeLine(binding.mapView)
             routeArrow(binding.mapView)
+            roadName(binding.mapView, binding.roadNameView)
             recenterButton(binding.mapView, binding.recenterButton)
 
             cameraModeButton(binding.cameraModeButton)
