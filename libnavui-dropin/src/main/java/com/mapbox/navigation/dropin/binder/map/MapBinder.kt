@@ -141,6 +141,24 @@ internal class RouteLineComponentContractImpl(
         }
     }
 
+    override fun setRoutesWithIndex(
+        mapboxNavigation: MapboxNavigation,
+        routes: List<NavigationRoute>,
+        legIndex: Int
+    ) {
+        when (store.state.value.navigation) {
+            is NavigationState.RoutePreview -> {
+                store.dispatch(RoutePreviewAction.Ready(routes))
+            }
+            is NavigationState.ActiveNavigation -> {
+                store.dispatch(RoutesAction.SetRoutesWithIndex(routes, legIndex))
+            }
+            else -> {
+                // no op
+            }
+        }
+    }
+
     override fun getRouteInPreview(): Flow<List<NavigationRoute>?> {
         return combine(
             store.select { it.navigation },

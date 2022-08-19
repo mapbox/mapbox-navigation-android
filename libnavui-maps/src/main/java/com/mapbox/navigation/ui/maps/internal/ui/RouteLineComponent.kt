@@ -11,7 +11,9 @@ import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListen
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.extensions.flowRouteAlternativeObserver
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
@@ -37,6 +39,12 @@ import kotlinx.coroutines.launch
 interface RouteLineComponentContract {
     fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>)
 
+    fun setRoutesWithIndex(
+        mapboxNavigation: MapboxNavigation,
+        routes: List<NavigationRoute>,
+        legIndex: Int
+    )
+
     fun getRouteInPreview(): Flow<List<NavigationRoute>?>
 }
 
@@ -44,6 +52,14 @@ interface RouteLineComponentContract {
 internal class MapboxRouteLineComponentContract : RouteLineComponentContract {
     override fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>) {
         mapboxNavigation.setNavigationRoutes(routes)
+    }
+
+    override fun setRoutesWithIndex(
+        mapboxNavigation: MapboxNavigation,
+        routes: List<NavigationRoute>,
+        legIndex: Int
+    ) {
+        mapboxNavigation.setNavigationRoutes(routes, legIndex)
     }
 
     override fun getRouteInPreview(): Flow<List<NavigationRoute>?> {
@@ -117,19 +133,59 @@ class RouteLineComponent(
             val routePreviewFlow = contractProvider.get().getRouteInPreview()
             combine(routesFlow, routePreviewFlow) { navigationRoutes, previewRoutes ->
                 if (navigationRoutes.isNotEmpty()) {
-                    navigationRoutes
+                    Pair(navigationRoutes, false)
                 } else if (!previewRoutes.isNullOrEmpty()) {
-                    previewRoutes
+                    Pair(previewRoutes, true)
                 } else {
-                    emptyList()
+                    Pair(emptyList(), false)
                 }
-            }.collect { routes ->
-                mapboxMap.getStyle()?.also { style ->
-                    val routeLines = routes.map { navigationRoute ->
-                        NavigationRouteLine(navigationRoute, null)
+            }.collect { pair ->
+                val routes = pair.first
+                val fromPreview = pair.second
+                if (fromPreview) {
+                    routeLineApi.setNavigationRoutes(routes) { value ->
+                        mapboxMap.getStyle()?.apply {
+                            routeLineView.renderRouteDrawData(this, value)
+                        }
                     }
-                    val routeDrawData = routeLineApi.setNavigationRouteLines(routeLines)
-                    routeLineView.renderRouteDrawData(style, routeDrawData)
+                } else {
+                    routeLineApi.setNavigationRoutes(
+                        routes,
+                        mapboxNavigation.getAlternativeMetadataFor(routes)
+                    ) { value ->
+                        mapboxMap.getStyle()?.apply {
+                            routeLineView.renderRouteDrawData(this, value)
+                        }
+                    }
+                }
+            }
+        }
+
+        coroutineScope.launch {
+            mapboxNavigation.flowRouteAlternativeObserver().collect { alternatives ->
+                val currentRoutes = mapboxNavigation.getNavigationRoutes()
+                val primaryRoute = currentRoutes.firstOrNull()
+                ifNonNull(primaryRoute) { routePrimary ->
+                    val offBoardAlternatives = alternatives.filter {
+                        it.origin == RouterOrigin.Offboard
+                    }
+                    val updatedRoutes = arrayListOf(routePrimary)
+                    when {
+                        routePrimary.origin == RouterOrigin.Offboard -> {
+                            updatedRoutes.addAll(offBoardAlternatives)
+                        }
+                        offBoardAlternatives.isEmpty() -> {
+                            updatedRoutes.addAll(alternatives)
+                        }
+                        else -> {
+                            updatedRoutes.addAll(offBoardAlternatives)
+                        }
+                    }
+                    /**
+                     * TODO: We should pass in currentLegIndex and invoke contractProvider.get().setRoutesWithIndex(mapboxNavigation, updatedRoutes, currentLegIndex)
+                     * val currentLegIndex = routeProgress.value?.currentLegProgress?.legIndex ?: 0
+                     */
+                    contractProvider.get().setRoutes(mapboxNavigation, updatedRoutes)
                 }
             }
         }
