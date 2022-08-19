@@ -2,13 +2,19 @@ package com.mapbox.navigation.testing.factories
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Closure
+import com.mapbox.api.directions.v5.models.BannerComponents
+import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.api.directions.v5.models.BannerText
+import com.mapbox.api.directions.v5.models.BannerView
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
+import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.MaxSpeed
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.geojson.Point
 
 fun createDirectionsResponse(
@@ -45,12 +51,75 @@ fun createRouteLeg(
     annotation: LegAnnotation? = createRouteLegAnnotation(),
     incidents: List<Incident>? = null,
     closures: List<Closure>? = null,
+    legStep: List<LegStep> = listOf(createRouteStep()),
 ): RouteLeg {
     return RouteLeg.builder()
         .annotation(annotation)
         .incidents(incidents)
         .closures(closures)
+        .steps(legStep)
         .build()
+}
+
+fun createRouteStep(): LegStep {
+    return LegStep
+        .builder()
+        .distance(123.0)
+        .duration(334.0)
+        .mode("mode")
+        .maneuver(StepManeuver.builder().rawLocation(doubleArrayOf(123.3434, 37.2233)).build())
+        .weight(111.0)
+        .bannerInstructions(listOf(createBannerInstructions()))
+        .build()
+}
+
+fun createBannerInstructions(
+    primary: BannerText = createBannerText(),
+    view: BannerView = createBannerView(),
+    secondary: BannerText = createBannerText(),
+    sub: BannerText = createBannerText(),
+    distanceAlongGeometry: Double = 555.0
+): BannerInstructions {
+    return BannerInstructions
+        .builder()
+        .primary(primary)
+        .view(view)
+        .secondary(secondary)
+        .sub(sub)
+        .distanceAlongGeometry(distanceAlongGeometry)
+        .build()
+}
+
+fun createBannerText(
+    text: String = "testText",
+    @StepManeuver.StepManeuverType type: String = StepManeuver.TURN,
+    modifier: String = "right",
+    degrees: Double = 90.0,
+    drivingSide: String = "right"
+): BannerText {
+    return BannerText.builder()
+        .text(text)
+        .type(type)
+        .modifier(modifier)
+        .degrees(degrees)
+        .drivingSide(drivingSide)
+        .build()
+}
+
+fun createBannerView(
+    text: String = "testText",
+    @StepManeuver.StepManeuverType type: String = StepManeuver.TURN,
+    modifier: String = "right",
+    components: List<BannerComponents> = emptyList(),
+): BannerView {
+    return BannerView
+        .builder()
+        .components(components)
+        .text(text)
+        .type(type)
+        .modifier(modifier)
+        .build()
+
 }
 
 fun createRouteLegAnnotation(

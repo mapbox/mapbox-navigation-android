@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.guidance.junction.api
 
+import android.net.Uri
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.bindgen.Expected
@@ -27,7 +28,7 @@ class MapboxJunctionApi(
 ) {
 
     private companion object {
-        private const val ACCESS_TOKEN = "&access_token="
+        private const val ACCESS_TOKEN = "access_token"
     }
 
     private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
@@ -76,9 +77,10 @@ class MapboxJunctionApi(
         result: JunctionResult.JunctionAvailable,
         consumer: MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>
     ) {
-        val requestAction = JunctionAction.PrepareJunctionRequest(
-            result.junctionUrl.plus(ACCESS_TOKEN.plus(accessToken))
-        )
+        val url = Uri.parse(result.junctionUrl).buildUpon().apply {
+            appendQueryParameter(ACCESS_TOKEN, accessToken)
+        }.build().toString()
+        val requestAction = JunctionAction.PrepareJunctionRequest(url)
         val junctionRequest = JunctionProcessor.process(requestAction)
         val loadRequest = (junctionRequest as JunctionResult.JunctionRequest).request
         mainJobController.scope.launch {

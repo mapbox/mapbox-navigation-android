@@ -18,10 +18,10 @@ import com.mapbox.navigation.core.BasicSetRoutesInfo
 import com.mapbox.navigation.core.SetAlternativeRoutesInfo
 import com.mapbox.navigation.core.SetRefreshedRoutesInfo
 import com.mapbox.navigation.core.SetRoutesInfo
+import com.mapbox.navigation.core.navigator.getCurrentBannerInstructions
 import com.mapbox.navigation.core.navigator.getLocationMatcherResult
 import com.mapbox.navigation.core.navigator.getRouteProgressFrom
 import com.mapbox.navigation.core.navigator.getTripStatusFrom
-import com.mapbox.navigation.core.navigator.mapToDirectionsApi
 import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
@@ -325,7 +325,8 @@ internal class MapboxTripSession(
             var triggerObserver = false
             if (tripStatus.navigationStatus.routeState != RouteState.INVALID) {
                 val nativeBannerInstruction = tripStatus.navigationStatus.bannerInstruction
-                val bannerInstructions = nativeBannerInstruction?.mapToDirectionsApi()
+                val bannerInstructions =
+                    tripStatus.navigationStatus.getCurrentBannerInstructions(primaryRoute)
                 triggerObserver = bannerInstructionEvent.isOccurring(
                     bannerInstructions,
                     nativeBannerInstruction?.index

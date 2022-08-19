@@ -276,7 +276,7 @@ class MapboxTripSessionNoSetupTest {
         }
 
     @Test
-    fun `banner instruction is transferred from NN to SDK status update`() =
+    fun `banner instruction remaining distance is transferred from NN to SDK status update`() =
         coroutineRule.runBlockingTest {
             // arrange
             val nativeNavigator = createNativeNavigatorMock()
@@ -300,31 +300,17 @@ class MapboxTripSessionNoSetupTest {
                 createNavigationStatus(
                     bannerInstruction = createBannerInstruction(
                         index = 0,
-                        primary = createBannerSection(
-                            text = "turn1"
-                        )
+                        primary = createBannerSection()
                     )
                 )
             )
 
-            locationEngine.updateLocation(createLocation())
-            statusUpdateListeners.onStatus(
-                NavigationStatusOrigin.LOCATION_UPDATE,
-                createNavigationStatus(
-                    bannerInstruction = createBannerInstruction(
-                        index = 2,
-                        primary = createBannerSection(
-                            text = "turn2"
-                        )
-                    )
-                )
-            )
             // assert
             val bannerInstructions = routeProgressRecorder.records
-                .takeLast(2) // take only events triggered by location updates
-                .map { it.bannerInstructions?.primary()?.text() }
+                .takeLast(1) // take only events triggered by location updates
+                .map { it.bannerInstructions?.distanceAlongGeometry() }
             assertEquals(
-                listOf("turn1", "turn2"),
+                listOf(50.0),
                 bannerInstructions
             )
         }

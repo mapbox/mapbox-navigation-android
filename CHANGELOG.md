@@ -7,6 +7,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Improved the route refresh feature to also refresh _closures_ (`RouteLeg#closures`). [#6274](https://github.com/mapbox/mapbox-navigation-android/pull/6274)
 - Added `requireMapboxNavigation` to offer a simple way to use `MapboxNavigationApp`. [#6233](https://github.com/mapbox/mapbox-navigation-android/pull/6233)
 - Implemented continuous alternatives in Drop-In UI. [#6213](https://github.com/mapbox/mapbox-navigation-android/pull/6213)
+- Introduced `MapboxRestAreaApi#generateRestAreaGuideMap` to be used to fetch service/parking area guide maps using `BannerInstruction`. [#6239](https://github.com/mapbox/mapbox-navigation-android/pull/6239)
+- Introduced `MapboxRestAreaApi#generateUpcomingRestAreaGuideMap` to be used to fetch service/parking area guide maps using `RestStop`. [#6239](https://github.com/mapbox/mapbox-navigation-android/pull/6239)
 #### Bug fixes and improvements
 - Fixed an issue with `NavigationView` that caused overview camera to have wrong pitch. [#6278](https://github.com/mapbox/mapbox-navigation-android/pull/6278)
 

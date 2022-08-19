@@ -33,10 +33,13 @@ import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @ExperimentalCoroutinesApi
+@RunWith(RobolectricTestRunner::class)
 class MapboxSignboardApiTest {
 
     @get:Rule

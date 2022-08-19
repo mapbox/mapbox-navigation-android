@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.guidance.signboard.api
 
 import android.content.Context
+import android.net.Uri
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.bindgen.Expected
@@ -32,6 +33,10 @@ class MapboxSignboardApi @JvmOverloads constructor(
     private val options: MapboxSignboardOptions = MapboxSignboardOptions.Builder().build()
 ) {
 
+    private companion object {
+        private const val KEY: String = "access_token"
+    }
+
     constructor(
         accessToken: String,
         applicationContext: Context,
@@ -41,10 +46,6 @@ class MapboxSignboardApi @JvmOverloads constructor(
         MapboxSvgToBitmapParser(MapboxExternalFileResolver(applicationContext.assets)),
         options
     )
-
-    private companion object {
-        private const val ACCESS_TOKEN = "?access_token="
-    }
 
     private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
     private val resourceLoader by lazy { ResourceLoaderFactory.getInstance() }
@@ -92,9 +93,10 @@ class MapboxSignboardApi @JvmOverloads constructor(
         result: SignboardResult.SignboardAvailable,
         consumer: MapboxNavigationConsumer<Expected<SignboardError, SignboardValue>>
     ) {
-        val requestAction = SignboardAction.PrepareSignboardRequest(
-            result.signboardUrl.plus(ACCESS_TOKEN.plus(accessToken))
-        )
+        val url = Uri.parse(result.signboardUrl).buildUpon().apply {
+            appendQueryParameter(KEY, accessToken)
+        }.build().toString()
+        val requestAction = SignboardAction.PrepareSignboardRequest(url)
         val signboardRequest = SignboardProcessor.process(requestAction)
         val loadRequest = (signboardRequest as SignboardResult.SignboardRequest).request
         mainJobController.scope.launch {
