@@ -43,6 +43,7 @@ import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
+import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.flowOf
@@ -213,7 +214,7 @@ class RouteLineComponentTest {
 
         routesObserverSlot.captured.onRoutesChanged(routesUpdateResult)
 
-        verify { mockApi.setNavigationRouteLines(any(), any(), capture(callbackSlot)) }
+        verifyOrder { mockApi.setNavigationRoutes(any(), any(), capture(callbackSlot)) }
         callbackSlot.captured.accept(expectedMockError)
         verify { mockView.renderRouteDrawData(mockStyle, expectedMockError) }
     }
@@ -245,7 +246,7 @@ class RouteLineComponentTest {
 
         routesObserverSlot.captured.onRoutesChanged(routesUpdateResult)
 
-        verify { mockApi.setNavigationRouteLines(any(), any(), capture(callbackSlot)) }
+        verify { mockApi.setNavigationRoutes(any(), any(), capture(callbackSlot)) }
         callbackSlot.captured.accept(expectedMockError)
         verify { mockView.renderRouteDrawData(mockStyle, expectedMockError) }
     }
@@ -277,15 +278,16 @@ class RouteLineComponentTest {
 
         routesObserverSlot.captured.onRoutesChanged(routesUpdateResult)
 
-        verify { mockApi.setNavigationRouteLines(any(), any(), capture(callbackSlot)) }
+        verifyOrder { mockApi.setNavigationRoutes(any(), any(), capture(callbackSlot)) }
         callbackSlot.captured.accept(expectedMockError)
         verify { mockView.renderRouteDrawData(mockStyle, expectedMockError) }
     }
 
     @Test
     fun `routes observer when routes from mapbox navigation is empty and preview is not null`() {
+        val previewRoutes = listOf<NavigationRoute>(mockk())
         val mockContract = mockk<RouteLineComponentContract>(relaxed = true) {
-            coEvery { getRouteInPreview() } returns flowOf(listOf(mockk()))
+            coEvery { getRouteInPreview() } returns flowOf(previewRoutes)
         }
         val mockRoutes = listOf<NavigationRoute>()
         val mockApi = mockk<MapboxRouteLineApi>(relaxed = true)
@@ -309,7 +311,7 @@ class RouteLineComponentTest {
 
         routesObserverSlot.captured.onRoutesChanged(routesUpdateResult)
 
-        verify { mockApi.setNavigationRouteLines(any(), any(), capture(callbackSlot)) }
+        verify { mockApi.setNavigationRoutes(any(), any(), capture(callbackSlot)) }
         callbackSlot.captured.accept(expectedMockError)
         verify { mockView.renderRouteDrawData(mockStyle, expectedMockError) }
     }

@@ -4,12 +4,16 @@ package com.mapbox.navigation.core.internal.extensions
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
@@ -106,3 +110,25 @@ fun MapboxNavigation.flowNavigationSessionState(): Flow<NavigationSessionState> 
     registerNavigationSessionStateObserver(observer)
     awaitClose { unregisterNavigationSessionStateObserver(observer) }
 }
+
+@OptIn(ExperimentalCoroutinesApi::class)
+fun MapboxNavigation.flowRouteAlternativeObserver():
+    Flow<Pair<RouteProgress, List<NavigationRoute>>> =
+    callbackFlow {
+        val alternativesObserver = object : NavigationRouteAlternativesObserver {
+            override fun onRouteAlternatives(
+                routeProgress: RouteProgress,
+                alternatives: List<NavigationRoute>,
+                routerOrigin: RouterOrigin
+            ) {
+                trySend(
+                    element = Pair(routeProgress, alternatives)
+                )
+            }
+
+            override fun onRouteAlternativesError(error: RouteAlternativesError) {
+            }
+        }
+        registerRouteAlternativesObserver(alternativesObserver)
+        awaitClose { unregisterRouteAlternativesObserver(alternativesObserver) }
+    }
