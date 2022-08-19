@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.navigation.base.CurrentIndices
+import com.mapbox.navigation.base.internal.CurrentIndices
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CurrentIndicesFactory
 import com.mapbox.navigation.base.route.NavigationRoute

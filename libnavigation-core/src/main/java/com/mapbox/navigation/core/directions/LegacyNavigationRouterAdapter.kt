@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.directions
 
-import com.mapbox.navigation.base.CurrentIndices
+import com.mapbox.navigation.base.internal.CurrentIndices
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouter
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback

@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core
 
-import com.mapbox.navigation.base.CurrentIndices
+import com.mapbox.navigation.base.internal.CurrentIndices
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 
 internal sealed class SetRoutesInfo(

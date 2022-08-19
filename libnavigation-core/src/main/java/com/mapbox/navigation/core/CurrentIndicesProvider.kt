@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core
 
 import androidx.annotation.MainThread
-import com.mapbox.navigation.base.CurrentIndices
+import com.mapbox.navigation.base.internal.CurrentIndices
 import com.mapbox.navigation.base.internal.CurrentIndicesFactory
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver

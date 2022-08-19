@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.RouteLeg
-import com.mapbox.navigation.base.CurrentIndices
+import com.mapbox.navigation.base.internal.CurrentIndices
 import com.mapbox.navigation.base.internal.route.updateDirectionsRouteOnly
 import com.mapbox.navigation.base.internal.time.parseISO8601DateToLocalTimeOrNull
 import com.mapbox.navigation.base.route.NavigationRoute
