@@ -10,6 +10,7 @@ import com.mapbox.navigation.ui.app.internal.controller.CameraStateController
 import com.mapbox.navigation.ui.app.internal.controller.DestinationStateController
 import com.mapbox.navigation.ui.app.internal.controller.LocationStateController
 import com.mapbox.navigation.ui.app.internal.controller.NavigationStateController
+import com.mapbox.navigation.ui.app.internal.controller.RouteAlternativeStateController
 import com.mapbox.navigation.ui.app.internal.controller.RoutePreviewStateController
 import com.mapbox.navigation.ui.app.internal.controller.RouteStateController
 import com.mapbox.navigation.ui.app.internal.controller.StateResetController
@@ -39,15 +40,17 @@ object SharedApp {
     val destinationStateController = DestinationStateController(store)
     val routeStateController = RouteStateController(store)
     val routePreviewStateController = RoutePreviewStateController(store)
+    val routeAlternativeStateController = RouteAlternativeStateController(store)
     private val navigationObservers: Array<MapboxNavigationObserver> = arrayOf(
-        destinationStateController,
-        tripSessionStarterStateController,
-        audioGuidanceStateController,
-        locationStateController,
         routeStateController,
-        routePreviewStateController,
         cameraStateController,
+        locationStateController,
         navigationStateController,
+        destinationStateController,
+        routePreviewStateController,
+        audioGuidanceStateController,
+        routeAlternativeStateController,
+        tripSessionStarterStateController,
     )
 
     fun setup(

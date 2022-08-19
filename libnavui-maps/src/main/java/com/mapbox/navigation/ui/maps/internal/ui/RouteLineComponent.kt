@@ -16,11 +16,9 @@ import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
-import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRouteLines
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
 import com.mapbox.navigation.ui.utils.internal.Provider
 import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.coroutines.FlowPreview
@@ -124,12 +122,13 @@ class RouteLineComponent(
                     emptyList()
                 }
             }.collect { routes ->
-                mapboxMap.getStyle()?.also { style ->
-                    val routeLines = routes.map { navigationRoute ->
-                        NavigationRouteLine(navigationRoute, null)
+                routeLineApi.setNavigationRoutes(
+                    routes,
+                    mapboxNavigation.getAlternativeMetadataFor(routes)
+                ) { value ->
+                    mapboxMap.getStyle()?.apply {
+                        routeLineView.renderRouteDrawData(this, value)
                     }
-                    val routeDrawData = routeLineApi.setNavigationRouteLines(routeLines)
-                    routeLineView.renderRouteDrawData(style, routeDrawData)
                 }
             }
         }

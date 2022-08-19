@@ -13,4 +13,14 @@ sealed class RoutesAction : Action {
      * @param routes list of [NavigationRoute]
      */
     data class SetRoutes(val routes: List<NavigationRoute>) : RoutesAction()
+
+    /**
+     * The action is used to directly set the [NavigationRoute] supplied to NavigationView.
+     * @param routes list of [NavigationRoute]
+     * @param legIndex index of route leg
+     */
+    data class SetRoutesWithIndex(
+        val routes: List<NavigationRoute>,
+        val legIndex: Int
+    ) : RoutesAction()
 }

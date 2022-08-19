@@ -46,6 +46,10 @@ class RouteStateController(store: Store) : StateController() {
                 mapboxNavigation.setNavigationRoutes(action.routes)
                 action.routes
             }
+            is RoutesAction.SetRoutesWithIndex -> {
+                mapboxNavigation.setNavigationRoutes(action.routes, action.legIndex)
+                action.routes
+            }
         }
     }
 }

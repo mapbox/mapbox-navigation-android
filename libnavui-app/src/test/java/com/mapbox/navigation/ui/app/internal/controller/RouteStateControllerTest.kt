@@ -36,4 +36,25 @@ internal class RouteStateControllerTest {
 
         assertEquals(store.state.value.routes.size, routes.size)
     }
+
+    @Test
+    fun `when RoutesAction SetRouteIndex it sets route to mapboxNavigation`() {
+        val store = spyk(TestStore())
+        val sut = RouteStateController(store)
+        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        val routes = listOf(mockk<NavigationRoute>())
+        every { mapboxNavigation.registerRoutesObserver(any()) } answers {
+            firstArg<RoutesObserver>().onRoutesChanged(
+                mockk {
+                    every { navigationRoutes } returns routes
+                }
+            )
+        }
+
+        sut.onAttached(mapboxNavigation)
+
+        store.dispatch(RoutesAction.SetRoutesWithIndex(routes, 1))
+
+        assertEquals(store.state.value.routes.size, routes.size)
+    }
 }

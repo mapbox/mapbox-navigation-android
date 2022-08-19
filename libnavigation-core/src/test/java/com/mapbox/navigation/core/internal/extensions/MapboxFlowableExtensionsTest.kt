@@ -9,6 +9,7 @@ import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -217,5 +218,34 @@ class MapboxFlowableExtensionsTest {
         advanceUntilIdle()
 
         verify { navigation.unregisterArrivalObserver(callbackSlot.captured) }
+    }
+
+    @Test
+    fun navigationAlternativesFlowable() = coroutineRule.runBlockingTest {
+        val navigation = mockk<MapboxNavigation>()
+        val callbackSlot = slot<NavigationRouteAlternativesObserver>()
+        every {
+            navigation.registerRouteAlternativesObserver(capture(callbackSlot))
+        } just Runs
+        every { navigation.unregisterRouteAlternativesObserver(capture(callbackSlot)) } just Runs
+        val mockProgress = mockk<RouteProgress>()
+        val mockNavigationRoute = listOf(mockk<NavigationRoute>())
+        var actual = Pair(mockProgress, mockNavigationRoute)
+
+        val flow = navigation.flowRouteAlternativeObserver().onEach {
+            actual = it
+        }
+        val job = coroutineRule.coroutineScope.launch { flow.collect() }
+        advanceUntilIdle()
+        val expected = Pair(mockk<RouteProgress>(), listOf(mockk<NavigationRoute>()))
+        callbackSlot.captured.onRouteAlternatives(expected.first, expected.second, mockk())
+        advanceUntilIdle()
+
+        assertEquals(expected, actual)
+
+        job.cancel()
+        advanceUntilIdle()
+
+        verify { navigation.unregisterRouteAlternativesObserver(callbackSlot.captured) }
     }
 }
