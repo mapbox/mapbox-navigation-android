@@ -7,13 +7,12 @@ import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
-import com.mapbox.navigator.Navigator
+import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteIntersection
@@ -52,17 +51,6 @@ internal class RouteAlternativesController constructor(
         hashMapOf<RouteAlternativesObserver, NavigationRouteAlternativesObserver>()
 
     private val metadataMap = mutableMapOf<String, AlternativeRouteMetadata>()
-
-    /**
-     * This flag is used to conditionally ignore the calls to native `RouteAlternativesObserver`.
-     *
-     * It's needed because the native observer will fire every time new alternative routes are provided via [MapboxNavigation.setNavigationRoutes],
-     * which would return back to developer the same alternatives they already set, unnecessary duplicating the work.
-     *
-     * This additional call to the native observer will be made synchronously when [Navigator.setAlternativeRoutes] is called.
-     * To prevent this from happening, we're "pausing" the observer for the duration of the route updates.
-     */
-    private var paused = false
 
     fun register(routeAlternativesObserver: RouteAlternativesObserver) {
         val observer = object : NavigationRouteAlternativesObserver {
@@ -163,11 +151,7 @@ internal class RouteAlternativesController constructor(
             routeAlternatives: List<RouteAlternative>,
             removed: List<RouteAlternative>
         ) {
-            logD("${routeAlternatives.size} native alternatives available", LOG_CATEGORY)
-            if (paused) {
-                logD("paused, returning", LOG_CATEGORY)
-                return
-            }
+            logI("${routeAlternatives.size} native alternatives available", LOG_CATEGORY)
 
             observerProcessingJob?.cancel()
             observerProcessingJob =
@@ -235,20 +219,6 @@ internal class RouteAlternativesController constructor(
         }?.route?.routerOrigin?.mapToSdkRouteOrigin() ?: lastUpdateOrigin
         block(alternatives, origin)
         lastUpdateOrigin = origin
-    }
-
-    /**
-     * @see paused
-     */
-    fun pauseUpdates() {
-        paused = true
-    }
-
-    /**
-     * @see paused
-     */
-    fun resumeUpdates() {
-        paused = false
     }
 
     fun processAlternativesMetadata(

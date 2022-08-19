@@ -1386,7 +1386,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             mapboxNavigation.setNavigationRoutes(routes)
 
             coVerifyOrder {
-                routeAlternativesController.pauseUpdates()
                 tripSession.setRoutes(
                     routes,
                     BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, 0)
@@ -1395,7 +1394,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                     processedRoutes,
                     nativeAlternatives
                 )
-                routeAlternativesController.resumeUpdates()
                 directionsSession.setRoutes(
                     processedRoutes,
                     BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, 0)
