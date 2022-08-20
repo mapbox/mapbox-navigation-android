@@ -1,6 +1,7 @@
 package com.mapbox.navigation.qa_test_app.view
 
 import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -110,9 +111,12 @@ class MainActivity : AppCompatActivity() {
         }
 
     companion object {
-        private val DEFAULT_PERMISSIONS = listOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        )
+        private val DEFAULT_PERMISSIONS = listOf(Manifest.permission.ACCESS_FINE_LOCATION) +
+            // starting from Android R leak canary writes to Download storage without the permission
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                listOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            } else {
+                emptyList()
+            }
     }
 }

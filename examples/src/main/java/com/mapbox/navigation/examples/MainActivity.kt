@@ -1,8 +1,10 @@
 package com.mapbox.navigation.examples
 
+import android.Manifest
 import android.Manifest.permission
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -56,7 +58,7 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
         adapter.addSampleItems(sampleItemList)
 
         if (areLocationPermissionsGranted(this)) {
-            requestPermissionIfNotGranted(permission.WRITE_EXTERNAL_STORAGE)
+            maybeRequestStoragePermission()
         } else {
             permissionsHelper.requestLocationPermissions(this)
         }
@@ -152,7 +154,7 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
 
     override fun onPermissionResult(granted: Boolean) {
         if (granted) {
-            requestPermissionIfNotGranted(permission.WRITE_EXTERNAL_STORAGE)
+            maybeRequestStoragePermission()
         } else {
             Toast.makeText(
                 this,
@@ -162,16 +164,18 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
         }
     }
 
-    private fun requestPermissionIfNotGranted(permission: String) {
-        val permissionsNeeded: MutableList<String> = ArrayList()
+    private fun maybeRequestStoragePermission() {
+        // starting from Android R leak canary writes to Download storage without the permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            return
+        }
         if (
-            ContextCompat.checkSelfPermission(this, permission) !=
+            ContextCompat.checkSelfPermission(this, permission.WRITE_EXTERNAL_STORAGE) !=
             PackageManager.PERMISSION_GRANTED
         ) {
-            permissionsNeeded.add(permission)
             ActivityCompat.requestPermissions(
                 this,
-                permissionsNeeded.toTypedArray(),
+                arrayOf(permission.WRITE_EXTERNAL_STORAGE),
                 10
             )
         } else {
