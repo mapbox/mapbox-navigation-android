@@ -2,6 +2,7 @@ package com.mapbox.navigation.testing.ui
 
 import android.Manifest
 import android.location.Location
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
@@ -23,11 +24,21 @@ abstract class BaseTest<A : AppCompatActivity>(activityClass: Class<A>) {
         val mockLocationUpdatesRule = MockLocationUpdatesRule()
     }
 
+    private val permissionsToGrant by lazy {
+        listOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        ) + if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            listOf(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            emptyList()
+        }
+    }
+
     @get:Rule
     val permissionsRule: GrantPermissionRule = GrantPermissionRule.grant(
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE
+        *permissionsToGrant.toTypedArray()
     )
 
     @get:Rule
