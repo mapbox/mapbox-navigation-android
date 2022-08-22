@@ -18,6 +18,8 @@ import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
+import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON_CASING
@@ -51,19 +53,25 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_ID
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
+import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
+import com.mapbox.navigator.RouteInterface
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
+import org.json.JSONObject
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.ArrayList
+import java.util.UUID
 
 @RunWith(RobolectricTestRunner::class)
 class MapboxRouteLineUtilsRoboTest {
@@ -73,6 +81,36 @@ class MapboxRouteLineUtilsRoboTest {
     @Before
     fun setUp() {
         ctx = ApplicationProvider.getApplicationContext()
+        mockkObject(NativeRouteParserWrapper)
+        every {
+            NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
+        } answers {
+            val response = JSONObject(this.firstArg<String>())
+            val routesCount = response.getJSONArray("routes").length()
+            val idBase = if (response.has("uuid")) {
+                response.getString("uuid")
+            } else {
+                "local@${UUID.randomUUID()}"
+            }
+            val nativeRoutes = mutableListOf<RouteInterface>().apply {
+                repeat(routesCount) {
+                    add(
+                        mockk {
+                            every { routeInfo } returns mockk(relaxed = true)
+                            every { routeId } returns "$idBase#$it"
+                            every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
+                        }
+                    )
+                }
+            }
+            ExpectedFactory.createValue(nativeRoutes)
+        }
+    }
+
+    @After
+    fun tearDown() {
+        unmockkObject(NativeRouteParserWrapper)
+        MapboxRouteLineUtils.trimRouteDataCacheToSize(0)
     }
 
     @Test
@@ -504,31 +542,47 @@ class MapboxRouteLineUtilsRoboTest {
     }
 
     @Test
-    fun calculateRouteGranularDistances() {
-        val routeAsJsonJson = loadJsonFixture("short_route.json")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson)
-        val lineString = LineString.fromPolyline(
-            route.geometry() ?: "",
-            Constants.PRECISION_6
-        )
+    fun `calculateRouteGranularDistances with duplicates`() {
+        val route = loadNavigationRoute("short_route.json")
 
-        val result = MapboxRouteLineUtils.calculateRouteGranularDistances(lineString.coordinates())
+        val result = MapboxRouteLineUtils.granularDistancesProvider(route)!!
 
-        assertEquals(0.0000025451727518618744, result!!.distance, 0.0)
-        assertEquals(5, result.distancesArray.size())
+        assertEquals(8, result.distancesArray.size)
+        assertEquals(result.distancesArray[1], result.distancesArray[2])
+        assertEquals(result.distancesArray[4], result.distancesArray[5])
+        assertEquals(result.distancesArray[6], result.distancesArray[7])
         assertEquals(Point.fromLngLat(-122.523671, 37.975379), result.distancesArray[0].point)
         assertEquals(0.0000025451727518618744, result.distancesArray[0].distanceRemaining, 0.0)
+        assertEquals(Point.fromLngLat(-122.523117, 37.975107), result.distancesArray[4].point)
+        assertEquals(0.0, result.distancesArray[4].distanceRemaining, 0.00000014622044645899132)
+        assertEquals(Point.fromLngLat(-122.523131, 37.975067), result.distancesArray[7].point)
+        assertEquals(0.0, result.distancesArray[7].distanceRemaining, 0.0)
+    }
+
+    @Test
+    fun `calculateRouteGranularDistances distinct`() {
+        val route = loadNavigationRoute("short_route.json")
+
+        val result = MapboxRouteLineUtils.distinctGranularDistancesProvider(route)!!
+
+        assertEquals(5, result.distancesArray.size)
+        assertEquals(5, result.distancesArray.distinct().size)
+        assertEquals(Point.fromLngLat(-122.523671, 37.975379), result.distancesArray[0].point)
+        assertEquals(0.0000025451727518618744, result.distancesArray[0].distanceRemaining, 0.0)
+        assertEquals(Point.fromLngLat(-122.523117, 37.975107), result.distancesArray[3].point)
+        assertEquals(0.0, result.distancesArray[3].distanceRemaining, 0.00000014622044645899132)
         assertEquals(Point.fromLngLat(-122.523131, 37.975067), result.distancesArray[4].point)
         assertEquals(0.0, result.distancesArray[4].distanceRemaining, 0.0)
     }
 
     @Test
     fun findDistanceToNearestPointOnCurrentLine() {
-        val route = loadRoute("multileg_route.json")
-        val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
-        val distances = MapboxRouteLineUtils.calculateRouteGranularDistances(
-            lineString.coordinates()
+        val route = loadNavigationRoute("multileg_route.json")
+        val lineString = LineString.fromPolyline(
+            route.directionsRoute.geometry()!!,
+            Constants.PRECISION_6
         )
+        val distances = MapboxRouteLineUtils.distinctGranularDistancesProvider(route)
 
         val result = MapboxRouteLineUtils.findDistanceToNearestPointOnCurrentLine(
             lineString.coordinates()[15],
@@ -939,5 +993,39 @@ class MapboxRouteLineUtilsRoboTest {
         MapboxRouteLineUtils.extractRouteData(route2, trafficCongestionProvider)
         verify(exactly = 3) { route1.legs() }
         verify(exactly = 2) { route2.legs() }
+    }
+
+    @Test
+    fun `trim route points cache`() {
+        val route1 = mockk<NavigationRoute>(relaxed = true) {
+            every { id } returns "1"
+        }
+        val route2 = mockk<NavigationRoute>(relaxed = true) {
+            every { id } returns "2"
+        }
+        MapboxRouteLineUtils.routePointsProvider(route1)
+        MapboxRouteLineUtils.routePointsProvider(route1)
+        MapboxRouteLineUtils.routePointsProvider(route2)
+        MapboxRouteLineUtils.routePointsProvider(route2)
+        verify(exactly = 1) { route1.directionsRoute }
+        verify(exactly = 1) { route2.directionsRoute }
+
+        MapboxRouteLineUtils.trimRouteDataCacheToSize(1) // removes route1
+        MapboxRouteLineUtils.routePointsProvider(route1)
+        MapboxRouteLineUtils.routePointsProvider(route2)
+        verify(exactly = 2) { route1.directionsRoute }
+        verify(exactly = 1) { route2.directionsRoute }
+
+        MapboxRouteLineUtils.trimRouteDataCacheToSize(0) // removes both routes
+        MapboxRouteLineUtils.routePointsProvider(route1)
+        MapboxRouteLineUtils.routePointsProvider(route2)
+        verify(exactly = 3) { route1.directionsRoute }
+        verify(exactly = 2) { route2.directionsRoute }
+
+        MapboxRouteLineUtils.trimRouteDataCacheToSize(2) // doesn't remove anything
+        MapboxRouteLineUtils.routePointsProvider(route1)
+        MapboxRouteLineUtils.routePointsProvider(route2)
+        verify(exactly = 3) { route1.directionsRoute }
+        verify(exactly = 2) { route2.directionsRoute }
     }
 }

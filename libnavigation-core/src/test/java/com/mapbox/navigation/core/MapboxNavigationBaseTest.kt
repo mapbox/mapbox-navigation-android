@@ -45,7 +45,6 @@ import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.RouteInterface
-import com.mapbox.navigator.RouterOrigin
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.every
@@ -63,6 +62,7 @@ import org.junit.BeforeClass
 import org.junit.Rule
 import java.io.File
 import java.util.Locale
+import java.util.UUID
 
 internal open class MapboxNavigationBaseTest {
 
@@ -199,16 +199,20 @@ internal open class MapboxNavigationBaseTest {
         every {
             NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
         } answers {
-            val routesCount =
-                JSONObject(this.firstArg<String>())
-                    .getJSONArray("routes")
-                    .length()
+            val response = JSONObject(this.firstArg<String>())
+            val routesCount = response.getJSONArray("routes").length()
+            val idBase = if (response.has("uuid")) {
+                response.getString("uuid")
+            } else {
+                "local@${UUID.randomUUID()}"
+            }
             val nativeRoutes = mutableListOf<RouteInterface>().apply {
                 repeat(routesCount) {
                     add(
                         mockk {
-                            every { routeId } returns "$it"
-                            every { routerOrigin } returns RouterOrigin.ONBOARD
+                            every { routeInfo } returns mockk(relaxed = true)
+                            every { routeId } returns "$idBase#$it"
+                            every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
                         }
                     )
                 }

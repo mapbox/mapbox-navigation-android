@@ -8,6 +8,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Added `ComponentInstaller` for the `CameraModeButtonComponent` that offers simplified integration of the `NavigationCamera` mode button. [#6202](https://github.com/mapbox/mapbox-navigation-android/pull/6202)
 - Added `NavigationViewOptions#distanceFormatterOptions` to allow for specifying `DistanceFormatterOptions` at runtime. [#6222](https://github.com/mapbox/mapbox-navigation-android/pull/6222)
 #### Bug fixes and improvements
+- Fixed an issue where the portion of the alternative route that overlaps with the primary route wasn't hidden correctly, suffering from precision issue. [#6228](https://github.com/mapbox/mapbox-navigation-android/pull/6228)
 
 ## Mapbox Navigation SDK 2.8.0-alpha.3 - 17 August, 2022
 ### Changelog
