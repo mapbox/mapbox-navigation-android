@@ -74,11 +74,32 @@ object RoutesProvider {
         )
     }
 
+    fun dc_short_with_alternative(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(context, R.raw.route_response_dc_short_with_alternative)
+        val coordinates = listOf(
+            Point.fromLngLat(-77.033991, 38.891121),
+            Point.fromLngLat(-77.030023, 38.895433)
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates
+                )
+            ),
+            coordinates,
+            emptyList()
+        )
+    }
+
     fun dc_very_short_two_legs(context: Context): MockRoute {
         val jsonResponse = readRawFileText(context, R.raw.route_response_dc_very_short_two_legs)
         val coordinates = listOf(
             Point.fromLngLat(-77.031991, 38.894721),
-            Point.fromLngLat(-77.031991,38.895433),
+            Point.fromLngLat(-77.031991, 38.895433),
             Point.fromLngLat(-77.030923, 38.895433)
         )
         // TODO: add more data if you need it for your scenarios
@@ -101,7 +122,7 @@ object RoutesProvider {
         val jsonResponse = readRawFileText(context, R.raw.route_response_dc_very_short_silent_waypoints)
         val coordinates = listOf(
             Point.fromLngLat(-77.031991, 38.894721),
-            Point.fromLngLat(-77.031991,38.895433),
+            Point.fromLngLat(-77.031991, 38.895433),
             Point.fromLngLat(-77.030923, 38.895433)
         )
         // TODO: add more data if you need it for your scenarios
