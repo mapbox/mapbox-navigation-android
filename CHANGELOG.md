@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Fixed an issue where portions of alternative routes that overlap with the primary route weren't hidden correctly, suffering from precision problems. [#6228](https://github.com/mapbox/mapbox-navigation-android/pull/6228)
 
 ## Mapbox Navigation SDK 2.8.0-beta.1 - 25 August, 2022
 ### Changelog
@@ -25,7 +26,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v6.8.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0-beta.2))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
 - Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
-
 
 ## Mapbox Navigation SDK 2.8.0-alpha.3 - 17 August, 2022
 ### Changelog
