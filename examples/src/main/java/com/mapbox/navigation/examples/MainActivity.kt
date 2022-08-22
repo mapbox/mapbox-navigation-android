@@ -1,6 +1,5 @@
 package com.mapbox.navigation.examples
 
-import android.Manifest
 import android.Manifest.permission
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -34,7 +33,7 @@ import com.mapbox.navigation.examples.util.RouteDrawingActivity
 
 class MainActivity : AppCompatActivity(), PermissionsListener {
 
-    private val permissionsHelper = LocationPermissionsHelper(this)
+    private val locationPermissionsHelper = LocationPermissionsHelper(this)
     private lateinit var binding: LayoutActivityMainBinding
     private lateinit var adapter: ExamplesAdapter
 
@@ -58,9 +57,9 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
         adapter.addSampleItems(sampleItemList)
 
         if (areLocationPermissionsGranted(this)) {
-            maybeRequestStoragePermission()
+            requestOptionalPermissions()
         } else {
-            permissionsHelper.requestLocationPermissions(this)
+            locationPermissionsHelper.requestLocationPermissions(this)
         }
     }
 
@@ -144,17 +143,26 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
         )
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        locationPermissionsHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
     override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {
         Toast.makeText(
             this,
-            "This app needs location and storage permissions in order to show its functionality.",
+            "This app needs location permission in order to show its functionality.",
             Toast.LENGTH_LONG
         ).show()
     }
 
     override fun onPermissionResult(granted: Boolean) {
         if (granted) {
-            maybeRequestStoragePermission()
+            requestOptionalPermissions()
         } else {
             Toast.makeText(
                 this,
@@ -164,22 +172,29 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
         }
     }
 
-    private fun maybeRequestStoragePermission() {
+    private fun requestOptionalPermissions() {
         // starting from Android R leak canary writes to Download storage without the permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            return
-        }
+        val permissionsToRequest = mutableListOf<String>()
         if (
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.R &&
             ContextCompat.checkSelfPermission(this, permission.WRITE_EXTERNAL_STORAGE) !=
             PackageManager.PERMISSION_GRANTED
         ) {
+            permissionsToRequest.add(permission.WRITE_EXTERNAL_STORAGE)
+        }
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            permissionsToRequest.add(permission.POST_NOTIFICATIONS)
+        }
+        if (permissionsToRequest.isNotEmpty()) {
             ActivityCompat.requestPermissions(
                 this,
-                arrayOf(permission.WRITE_EXTERNAL_STORAGE),
+                permissionsToRequest.toTypedArray(),
                 10
             )
-        } else {
-            //
         }
     }
 }

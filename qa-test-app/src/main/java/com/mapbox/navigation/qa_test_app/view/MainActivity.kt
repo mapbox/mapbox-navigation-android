@@ -111,12 +111,14 @@ class MainActivity : AppCompatActivity() {
         }
 
     companion object {
-        private val DEFAULT_PERMISSIONS = listOf(Manifest.permission.ACCESS_FINE_LOCATION) +
-            // starting from Android R leak canary writes to Download storage without the permission
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                listOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            } else {
-                emptyList()
+        private val DEFAULT_PERMISSIONS = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
+            .apply {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                    add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    add(Manifest.permission.POST_NOTIFICATIONS)
+                }
             }
     }
 }
