@@ -14,6 +14,7 @@ import com.mapbox.navigator.RouteInterface
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
 import org.json.JSONObject
@@ -24,6 +25,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.net.URL
+import java.util.UUID
 
 class NavigationRouteTest {
 
@@ -33,15 +35,19 @@ class NavigationRouteTest {
         every {
             NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
         } answers {
-            val routesCount = JSONObject(this.firstArg<String>())
-                .getJSONArray("routes")
-                .length()
+            val response = JSONObject(this.firstArg<String>())
+            val routesCount = response.getJSONArray("routes").length()
+            val idBase = if (response.has("uuid")) {
+                response.getString("uuid")
+            } else {
+                "local@${UUID.randomUUID()}"
+            }
             val nativeRoutes = mutableListOf<RouteInterface>().apply {
                 repeat(routesCount) {
                     add(
                         mockk {
                             every { routeInfo } returns mockk(relaxed = true)
-                            every { routeId } returns "$it"
+                            every { routeId } returns "$idBase#$it"
                             every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
                         }
                     )
@@ -123,6 +129,38 @@ class NavigationRouteTest {
                 .build(),
             navigationRoute.directionsResponse.waypoints()!![1]
         )
+    }
+
+    @Test
+    fun `toNavigationRoute - uuid from route used`() {
+        val directionsRoute = mockk<DirectionsRoute> {
+            every { requestUuid() } returns "asdf"
+            every { routeIndex() } returns "0"
+            every { routeOptions() } returns RouteOptions.builder()
+                .profile("driving")
+                .coordinatesList(
+                    listOf(
+                        Point.fromLngLat(1.1, 1.1),
+                        Point.fromLngLat(2.2, 2.2),
+                    )
+                )
+                .build()
+            every { legs() } returns null
+            every { toBuilder() } returns mockk(relaxed = true)
+        }
+
+        val navigationRoute = directionsRoute.toNavigationRoute(RouterOrigin.Offboard)
+
+        val responseJsonSlot = slot<String>()
+        verify {
+            NativeRouteParserWrapper.parseDirectionsResponse(
+                capture(responseJsonSlot),
+                any(),
+                any()
+            )
+        }
+        assertEquals("asdf", DirectionsResponse.fromJson(responseJsonSlot.captured).uuid())
+        assertEquals("asdf#0", navigationRoute.id)
     }
 
     @Test
