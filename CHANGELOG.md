@@ -22,7 +22,6 @@ Mapbox welcomes participation and contributions from everyone.
 - Added `RouteLegProgress#geometryIndex` and `RouteProgress#currentRouteGeometryIndex`. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
 - Improved default router to refresh a route partially instead of failing for routes over 1000 km long. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
 - :warning: Disabled route refresh for routes that are set to `MapboxNavigation` while trip session is not running. A session has to be started (`MapboxNavigation#startTripSession`) for refresh feature to start as well. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
-- Introduced `NavigationRouterV2` interface that supports partial route refresh. [#6190](https://github.com/mapbox/mapbox-navigation-android/pull/6190)
 
 ## Mapbox Navigation SDK 2.7.0 - 17 August, 2022
 ### Changelog
