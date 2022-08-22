@@ -1,9 +1,9 @@
 package com.mapbox.navigation.core
 
 import android.content.Context
+import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver

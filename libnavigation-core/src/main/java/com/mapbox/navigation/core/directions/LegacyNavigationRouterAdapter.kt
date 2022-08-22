@@ -1,10 +1,10 @@
 package com.mapbox.navigation.core.directions
 
 import com.mapbox.navigation.base.internal.CurrentIndices
+import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouter
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
-import com.mapbox.navigation.base.internal.NavigationRouterV2
 
 internal class LegacyNavigationRouterAdapter(
     private val legacyRouter: NavigationRouter
