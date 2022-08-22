@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.maps.internal.route.line
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.LruCache
-import android.util.SparseArray
 import androidx.annotation.ColorInt
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -49,6 +48,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
+import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheRouteResult
 import com.mapbox.navigation.ui.utils.internal.extensions.getBitmap
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
@@ -63,13 +63,28 @@ internal object MapboxRouteLineUtils {
 
     private const val LOG_CATEGORY = "MapboxRouteLineUtils"
     internal const val VANISH_POINT_STOP_GAP = .00000000001
+    private const val NUMBER_OF_SUPPORTED_ROUTES = 3
 
     private val extractRouteDataCache: LruCache<
         CacheResultUtils.CacheResultKey2<
             DirectionsRoute, (RouteLeg) -> List<String>?,
             List<ExtractedRouteData>
             >,
-        List<ExtractedRouteData>> by lazy { LruCache(3) }
+        List<ExtractedRouteData>> by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
+
+    private val routePointsCache: LruCache<
+        CacheResultUtils.CacheResultKeyRoute<RoutePoints?>, RoutePoints?>
+        by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
+
+    private val granularDistancesCache: LruCache<
+        CacheResultUtils.CacheResultKeyRoute<
+            RouteLineGranularDistances?>, RouteLineGranularDistances?>
+        by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
+
+    private val distinctGranularDistancesCache: LruCache<
+        CacheResultUtils.CacheResultKeyRoute<
+            RouteLineGranularDistances?>, RouteLineGranularDistances?>
+        by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
 
     private val extractRouteDataCacheDeDuped: LruCache<
         CacheResultUtils.CacheResultKey2<
@@ -627,6 +642,65 @@ internal object MapboxRouteLineUtils {
             routeLeg.annotation()?.congestion() ?: listOf()
         }.cacheResult(1)
 
+    /**
+     * Decodes the route geometry into nested arrays of legs -> steps -> points.
+     *
+     * The first and last point of adjacent steps overlap and are duplicated.
+     */
+    internal val routePointsProvider: (
+        route: NavigationRoute,
+    ) -> RoutePoints? =
+        { route: NavigationRoute ->
+            route.directionsRoute.legs()?.mapNotNull { routeLeg ->
+                routeLeg.steps()?.map { legStep ->
+                    route.directionsRoute.stepGeometryToPoints(legStep)
+                }
+            }?.let { nestedList ->
+                val flatList = nestedList.flatten().flatten()
+                RoutePoints(
+                    nestedList = nestedList,
+                    flatList = flatList,
+                )
+            }
+        }.cacheRouteResult(routePointsCache)
+
+    /**
+     * Decodes the route and produces an array of sorted points along route geometry,
+     * where each of them defines the distance remaining from the point to the end of the route.
+     *
+     * The distances are generated using [EPSG:3857 projection](https://epsg.io/3857) projection. More in [calculateDistance].
+     *
+     * This is a flat list of step geometry points and contains duplicates of points for adjacent steps.
+     */
+    internal val granularDistancesProvider: (
+        route: NavigationRoute,
+    ) -> RouteLineGranularDistances? =
+        { route: NavigationRoute ->
+            val points = routePointsProvider(route)?.flatList
+            if (points?.isNotEmpty() == true) {
+                calculateGranularDistances(points)
+            } else {
+                null
+            }
+        }.cacheRouteResult(granularDistancesCache)
+
+    /**
+     * Same as [granularDistancesProvider], however, the duplicates for adjacent step geometries are filtered out.
+     */
+    internal val distinctGranularDistancesProvider: (
+        route: NavigationRoute,
+    ) -> RouteLineGranularDistances? =
+        { route: NavigationRoute ->
+            granularDistancesProvider(route)?.let { granularDistances ->
+                val array = granularDistances.distancesArray
+                granularDistances.copy(
+                    distancesArray = array.filterIndexed { index, routeLineDistancesIndex ->
+                        index == 0 || routeLineDistancesIndex.point != array[index - 1].point
+                    }.toTypedArray()
+                )
+            }
+        }.cacheRouteResult(distinctGranularDistancesCache)
+
     internal fun getTrafficCongestionAnnotationProvider(
         route: DirectionsRoute,
         routeLineColorResources: RouteLineColorResources
@@ -802,30 +876,19 @@ internal object MapboxRouteLineUtils {
     private fun generateFeatureCollection(route: NavigationRouteLine): RouteFeatureData =
         generateRouteFeatureData(route.route, route.identifier)
 
-    internal fun calculateRouteGranularDistances(
-        coordinates: List<Point>
-    ): RouteLineGranularDistances? {
-        return if (coordinates.isNotEmpty()) {
-            calculateGranularDistances(coordinates)
-        } else {
-            null
-        }
-    }
-
     private fun calculateGranularDistances(points: List<Point>): RouteLineGranularDistances {
         var distance = 0.0
-        val indexArray = SparseArray<RouteLineDistancesIndex>(points.size)
+
+        val indexArray = arrayOfNulls<RouteLineDistancesIndex>(points.size)
         for (i in (points.size - 1) downTo 1) {
             val curr = points[i]
             val prev = points[i - 1]
             distance += calculateDistance(curr, prev)
-            indexArray.append(i - 1, RouteLineDistancesIndex(prev, distance))
+            indexArray[i - 1] = RouteLineDistancesIndex(prev, distance)
         }
-        indexArray.append(
-            points.size - 1,
+        indexArray[points.size - 1] =
             RouteLineDistancesIndex(points[points.size - 1], 0.0)
-        )
-        return RouteLineGranularDistances(distance, indexArray)
+        return RouteLineGranularDistances(distance, indexArray as Array<RouteLineDistancesIndex>)
     }
 
     private val generateRouteFeatureData: (
@@ -933,7 +996,7 @@ internal object MapboxRouteLineUtils {
             granularDistances.distancesArray.run {
                 val points = mutableListOf<Point>()
                 for (i in max(upcomingIndex - 10, 0)..upcomingIndex) {
-                    points.add(this.get(i).point)
+                    points.add(this[i].point)
                 }
                 points
             },
@@ -1302,26 +1365,6 @@ internal object MapboxRouteLineUtils {
             }
     }
 
-    /**
-     * Decodes the route geometry into nested arrays of legs -> steps -> points.
-     *
-     * The first and last point of adjacent steps overlap and are duplicated.
-     */
-    internal fun parseRoutePoints(
-        route: DirectionsRoute,
-    ): RoutePoints? {
-        val nestedList = route.legs()?.map { routeLeg ->
-            routeLeg.steps()?.map { legStep ->
-                legStep.geometry() ?: return null
-                route.stepGeometryToPoints(legStep)
-            } ?: return null
-        } ?: return null
-
-        val flatList = nestedList.flatten().flatten()
-
-        return RoutePoints(nestedList, flatList)
-    }
-
     internal fun getTrafficLineExpressionProducer(
         route: DirectionsRoute,
         colorResources: RouteLineColorResources,
@@ -1438,6 +1481,9 @@ internal object MapboxRouteLineUtils {
 
     internal fun trimRouteDataCacheToSize(size: Int) {
         extractRouteDataCache.trimToSize(size)
+        routePointsCache.trimToSize(size)
+        granularDistancesCache.trimToSize(size)
+        distinctGranularDistancesCache.trimToSize(size)
     }
 
     internal fun getLayerIdsForPrimaryRoute(
@@ -1517,30 +1563,17 @@ internal object MapboxRouteLineUtils {
         }
     }
 
-    internal fun getAlternativeRoutesDeviationOffsets(
-        alternativeRoutesMetadata: List<AlternativeRouteMetadata>
-    ): Map<String, Double> {
-        val alternativesDeviationOffset = mutableMapOf<String, Double>()
-        alternativeRoutesMetadata.forEach { routeMetadata ->
-            var runningDistance = 0.0
-            val route = routeMetadata.navigationRoute.directionsRoute
-            route.legs()?.forEachIndexed LegLoop@{ legIndex, leg ->
-                leg.annotation()?.distance()
-                    ?.forEachIndexed AnnotationLoop@{ annotationIndex, distance ->
-                        val forkLegIndex = routeMetadata.forkIntersectionOfAlternativeRoute.legIndex
-                        val forkGeometryIndexInLeg =
-                            routeMetadata.forkIntersectionOfAlternativeRoute.geometryIndexInLeg
-                        if (legIndex == forkLegIndex && annotationIndex == forkGeometryIndexInLeg) {
-                            val percentageTraveled = runningDistance / route.distance()
-                            alternativesDeviationOffset[routeMetadata.navigationRoute.id] =
-                                percentageTraveled
-                            return@LegLoop
-                        }
-                        runningDistance += distance
-                    }
-            }
-        }
-        return alternativesDeviationOffset
+    /**
+     * Returns a percentage offset of the fork intersection along the alternative route's geometry.
+     */
+    internal fun getAlternativeRouteDeviationOffsets(
+        metadata: AlternativeRouteMetadata
+    ): Double {
+        return distinctGranularDistancesProvider(metadata.navigationRoute)?.let {
+            val index = metadata.forkIntersectionOfAlternativeRoute.geometryIndexInRoute
+            val distanceRemaining = it.distancesArray[index].distanceRemaining
+            1.0 - distanceRemaining / it.distance
+        } ?: 0.0
     }
 
     private fun projectX(x: Double): Double {

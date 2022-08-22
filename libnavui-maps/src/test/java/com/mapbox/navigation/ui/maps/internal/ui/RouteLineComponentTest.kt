@@ -51,6 +51,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.UUID
 
 @OptIn(
     FlowPreview::class,
@@ -91,15 +92,19 @@ class RouteLineComponentTest {
         every {
             NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
         } answers {
-            val routesCount =
-                JSONObject(this.firstArg<String>())
-                    .getJSONArray("routes")
-                    .length()
+            val response = JSONObject(this.firstArg<String>())
+            val routesCount = response.getJSONArray("routes").length()
+            val idBase = if (response.has("uuid")) {
+                response.getString("uuid")
+            } else {
+                "local@${UUID.randomUUID()}"
+            }
             val nativeRoutes = mutableListOf<RouteInterface>().apply {
                 repeat(routesCount) {
                     add(
                         mockk {
-                            every { routeId } returns "$it"
+                            every { routeInfo } returns mockk(relaxed = true)
+                            every { routeId } returns "$idBase#$it"
                             every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
                         }
                     )

@@ -75,16 +75,19 @@ class RouteAlternativesControllerTest {
         every {
             NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
         } answers {
-            val routesCount =
-                JSONObject(this.firstArg<String>())
-                    .getJSONArray("routes")
-                    .length()
+            val response = JSONObject(this.firstArg<String>())
+            val routesCount = response.getJSONArray("routes").length()
+            val idBase = if (response.has("uuid")) {
+                response.getString("uuid")
+            } else {
+                "local@${UUID.randomUUID()}"
+            }
             val nativeRoutes = mutableListOf<RouteInterface>().apply {
                 repeat(routesCount) {
                     add(
                         mockk {
                             every { routeInfo } returns mockk(relaxed = true)
-                            every { routeId } returns "$it"
+                            every { routeId } returns "$idBase#$it"
                             every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
                         }
                     )

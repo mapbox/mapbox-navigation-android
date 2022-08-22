@@ -58,6 +58,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
+import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
 import com.mapbox.navigator.RouteInterface
 import io.mockk.Runs
@@ -66,6 +67,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import org.json.JSONObject
@@ -77,6 +79,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.util.UUID
 
 class MapboxRouteLineUtilsTest {
 
@@ -89,11 +92,36 @@ class MapboxRouteLineUtilsTest {
             every { intrinsicWidth } returns 24
             every { intrinsicHeight } returns 24
         }
+        mockkObject(NativeRouteParserWrapper)
+        every {
+            NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
+        } answers {
+            val response = JSONObject(this.firstArg<String>())
+            val routesCount = response.getJSONArray("routes").length()
+            val idBase = if (response.has("uuid")) {
+                response.getString("uuid")
+            } else {
+                "local@${UUID.randomUUID()}"
+            }
+            val nativeRoutes = mutableListOf<RouteInterface>().apply {
+                repeat(routesCount) {
+                    add(
+                        mockk {
+                            every { routeInfo } returns mockk(relaxed = true)
+                            every { routeId } returns "$idBase#$it"
+                            every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
+                        }
+                    )
+                }
+            }
+            ExpectedFactory.createValue(nativeRoutes)
+        }
     }
 
     @After
     fun cleanUp() {
         unmockkStatic(AppCompatResources::class)
+        unmockkObject(NativeRouteParserWrapper)
     }
 
     @Test
@@ -438,13 +466,6 @@ class MapboxRouteLineUtilsTest {
 
         verify(exactly = 0) { style.styleLayers }
         verify(exactly = 0) { style.addStyleSource(any(), any()) }
-    }
-
-    @Test
-    fun calculateRouteGranularDistances_whenInputNull() {
-        val result = MapboxRouteLineUtils.calculateRouteGranularDistances(listOf())
-
-        assertNull(result)
     }
 
     @Test
@@ -1449,9 +1470,9 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun parseRoutePoints() {
-        val route = loadRoute("multileg_route.json")
+        val route = loadNavigationRoute("multileg_route.json")
 
-        val result = MapboxRouteLineUtils.parseRoutePoints(route)!!
+        val result = MapboxRouteLineUtils.routePointsProvider(route)!!
 
         assertEquals(128, result.flatList.size)
         assertEquals(15, result.nestedList.flatten().size)

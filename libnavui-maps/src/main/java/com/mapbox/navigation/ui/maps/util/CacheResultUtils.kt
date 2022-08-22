@@ -1,6 +1,8 @@
 package com.mapbox.navigation.ui.maps.util
 
 import android.util.LruCache
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.route.NavigationRoute
 
 internal object CacheResultUtils {
     private interface CacheResultCall<in F, out R> {
@@ -15,6 +17,38 @@ internal object CacheResultUtils {
     data class CacheResultKey2<out P1, P2, R>(val p1: P1, val p2: P2) :
         CacheResultCall<(P1, P2) -> R, R> {
         override fun invoke(f: (P1, P2) -> R) = f(p1, p2)
+    }
+
+    /**
+     * Specialized cache key that can be used for managing results of processing related to a route.
+     *
+     * This key uses [NavigationRoute.id] instead of [NavigationRoute.hashCode] because the latter produces a hash of the full [DirectionsRoute]
+     * which for longer routes and use cases that require very frequent access (multiple times per second) proves to be inefficient (refs https://github.com/mapbox/navigation-sdks/issues/1918).
+     *
+     * What has to be kept in mind, is that [NavigationRoute.id] does not guarantee uniqueness of the [NavigationRoute].
+     * There can be small but impactful (depending on processing task) differences between two [NavigationRoute] instances that have the same ID.
+     * For example, they can have different congestion annotations.
+     *
+     * That's why this cache key can be used for access during operations that are not impacted by changes in these untracked areas of the route.
+     */
+    data class CacheResultKeyRoute<R>(val route: NavigationRoute) :
+        CacheResultCall<(NavigationRoute) -> R, R> {
+
+        override fun invoke(f: (NavigationRoute) -> R) = f(route)
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as CacheResultKeyRoute<*>
+
+            if (route.id != other.route.id) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            return route.id.hashCode()
+        }
     }
 
     fun <P1, R> ((P1) -> R).cacheResult(maxSize: Int): (P1) -> R {
@@ -62,6 +96,19 @@ internal object CacheResultUtils {
                     cache
                 )
             override fun invoke(p1: P1, p2: P2) = handler(CacheResultKey2(p1, p2))
+        }
+    }
+
+    fun <R> ((NavigationRoute) -> R).cacheRouteResult(
+        cache: LruCache<CacheResultKeyRoute<R>, R>
+    ): (NavigationRoute) -> R {
+        return object : (NavigationRoute) -> R {
+            private val handler =
+                CacheResultHandler(
+                    this@cacheRouteResult,
+                    cache
+                )
+            override fun invoke(route: NavigationRoute) = handler(CacheResultKeyRoute(route))
         }
     }
 
