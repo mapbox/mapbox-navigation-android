@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Integrate `MapboxCarMapSessionInstaller` and `MapboxCarMapScreenInstaller`. [#6211](https://github.com/mapbox/mapbox-navigation-android/pull/6211)
 
 ## androidauto-v0.8.0 - Aug 18, 2022
 ### Changelog
