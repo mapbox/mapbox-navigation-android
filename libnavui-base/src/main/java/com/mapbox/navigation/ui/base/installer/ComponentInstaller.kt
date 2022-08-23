@@ -28,7 +28,7 @@ sealed interface ComponentInstaller {
     /**
      * Find installed component that matches given [predicate].
      */
-    fun findComponent(predicate: (Any) -> Boolean): UIComponent?
+    fun <T> findComponent(predicate: (Any) -> Boolean): T?
 }
 
 /**
@@ -132,8 +132,8 @@ internal class NavigationComponents(
         return Installation { componentsChain.removeAndDetach(*components) }
     }
 
-    override fun findComponent(predicate: (Any) -> Boolean): UIComponent? {
-        return componentsChain.toList().firstOrNull(predicate) as? UIComponent
+    override fun <T> findComponent(predicate: (Any) -> Boolean): T? {
+        return componentsChain.toList().firstOrNull(predicate) as? T
     }
 }
 
@@ -143,6 +143,6 @@ internal class NavigationComponents(
  * Shorthand for `findComponent { it is T } as? T`
  */
 @ExperimentalPreviewMapboxNavigationAPI
-inline fun <reified T : UIComponent> ComponentInstaller.findComponent(): T? {
+inline fun <reified T> ComponentInstaller.findComponent(): T? {
     return findComponent { it is T } as? T
 }
