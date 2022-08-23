@@ -3,12 +3,13 @@ package com.mapbox.navigation.core.routerefresh
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.CurrentIndicesSnapshot
+import com.mapbox.navigation.base.internal.CurrentIndices
+import com.mapbox.navigation.base.internal.CurrentIndicesFactory
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterFactory
-import com.mapbox.navigation.core.CurrentIndicesSnapshotProvider
+import com.mapbox.navigation.core.CurrentIndicesProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RouteRefresh
 import com.mapbox.navigation.testing.add
@@ -25,7 +26,6 @@ import com.mapbox.navigation.testing.utcToLocalTime
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -47,10 +47,10 @@ import java.util.concurrent.TimeUnit
 class RouteRefreshControllerTest {
 
     private val logger = mockk<LoggerFrontend>(relaxed = true)
-    private val currentIndicesSnapshot = CurrentIndicesSnapshot(0, 1, 2)
-    private val currentIndicesSnapshotProvider =
-        mockk<CurrentIndicesSnapshotProvider>(relaxed = true) {
-            coEvery { getFilledIndicesAndFreeze() } returns currentIndicesSnapshot
+    private val currentIndices = CurrentIndicesFactory.createIndices(0, 1, 2)
+    private val currentIndicesProvider =
+        mockk<CurrentIndicesProvider>(relaxed = true) {
+            coEvery { getFilledIndicesOrWait() } returns currentIndices
         }
 
     @Before
@@ -93,16 +93,9 @@ class RouteRefreshControllerTest {
         advanceTimeBy(TimeUnit.SECONDS.toMillis(30))
 
         assertEquals(
-            RefreshedRouteInfo(listOf(refreshedRoute), currentIndicesSnapshot),
+            RefreshedRouteInfo(listOf(refreshedRoute), currentIndices),
             refreshJob.getCompletedTest()
         )
-        verify(exactly = 0) { currentIndicesSnapshotProvider.invoke() }
-        coVerify(exactly = 1) {
-            currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
-        }
-        verify(exactly = 2) {
-            currentIndicesSnapshotProvider.unfreeze()
-        }
     }
 
     @Test
@@ -126,16 +119,9 @@ class RouteRefreshControllerTest {
         advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
 
         assertEquals(
-            RefreshedRouteInfo(listOf(refreshedRoute), currentIndicesSnapshot),
+            RefreshedRouteInfo(listOf(refreshedRoute), currentIndices),
             refreshedRouteDeferred.getCompletedTest()
         )
-        verify(exactly = 0) { currentIndicesSnapshotProvider.invoke() }
-        coVerify(exactly = 1) {
-            currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
-        }
-        verify(exactly = 2) {
-            currentIndicesSnapshotProvider.unfreeze()
-        }
     }
 
     @Test
@@ -266,7 +252,7 @@ class RouteRefreshControllerTest {
 
         val result = routeRefreshController.refresh(initialRoutes)
 
-        assertEquals(RefreshedRouteInfo(refreshedRoutes, currentIndicesSnapshot), result)
+        assertEquals(RefreshedRouteInfo(refreshedRoutes, currentIndices), result)
     }
 
     @Test
@@ -478,19 +464,9 @@ class RouteRefreshControllerTest {
             advanceTimeBy(routeRefreshOptions.intervalMillis)
             // assert
             assertEquals(
-                RefreshedRouteInfo(listOf(initialRoute), currentIndicesSnapshot),
+                RefreshedRouteInfo(listOf(initialRoute), currentIndices),
                 refreshedRoute.getCompletedTest()
             )
-            // 304 = 3(attempts) * (100 + 1) + 1
-            coVerify(exactly = 304) {
-                currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
-            }
-            // 101 = 100 + 1
-            verify(exactly = 101) { currentIndicesSnapshotProvider.invoke() }
-            // 406 = 4(attempts + finally) * (100 + 1) + 1 * 2 (for success)
-            verify(exactly = 406) {
-                currentIndicesSnapshotProvider.unfreeze()
-            }
         }
 
     @Test
@@ -587,8 +563,8 @@ class RouteRefreshControllerTest {
                 .intervalMillis(30_000L)
                 .build()
             coEvery {
-                currentIndicesSnapshotProvider.invoke()
-            } returns CurrentIndicesSnapshot(1)
+                currentIndicesProvider.getFilledIndicesOrWait()
+            } returns CurrentIndicesFactory.createIndices(1, 0, null)
             val routeRefreshController = createRouteRefreshController(
                 routeRefreshOptions = routeRefreshOptions,
                 routeDiffProvider = DirectionsRouteDiffProvider(),
@@ -664,16 +640,9 @@ class RouteRefreshControllerTest {
             advanceTimeBy(refreshInterval)
 
             assertEquals(
-                RefreshedRouteInfo(listOf(refreshed), currentIndicesSnapshot),
+                RefreshedRouteInfo(listOf(refreshed), currentIndices),
                 refreshedDeferred.getCompletedTest()
             )
-            verify(exactly = 0) { currentIndicesSnapshotProvider.invoke() }
-            coVerify(exactly = 2) {
-                currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
-            }
-            verify(exactly = 3) {
-                currentIndicesSnapshotProvider.unfreeze()
-            }
         }
 
     @Test
@@ -720,16 +689,9 @@ class RouteRefreshControllerTest {
             advanceTimeBy(refreshInterval)
 
             assertEquals(
-                RefreshedRouteInfo(listOf(refreshed), currentIndicesSnapshot),
+                RefreshedRouteInfo(listOf(refreshed), currentIndices),
                 refreshedDeferred.getCompletedTest()
             )
-            verify(exactly = 0) { currentIndicesSnapshotProvider.invoke() }
-            coVerify(exactly = 2) {
-                currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
-            }
-            verify(exactly = 3) {
-                currentIndicesSnapshotProvider.unfreeze()
-            }
         }
 
     @Test
@@ -788,16 +750,9 @@ class RouteRefreshControllerTest {
         val result = refreshedRoutesDeferred.getCompletedTest()
 
         assertEquals(
-            RefreshedRouteInfo(refreshedRoutes, currentIndicesSnapshot),
+            RefreshedRouteInfo(refreshedRoutes, currentIndices),
             result
         )
-        verify(exactly = 0) { currentIndicesSnapshotProvider.invoke() }
-        coVerify(exactly = 1) {
-            currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
-        }
-        verify(exactly = 2) {
-            currentIndicesSnapshotProvider.unfreeze()
-        }
     }
 
     @Test
@@ -851,16 +806,9 @@ class RouteRefreshControllerTest {
             val result = refreshedRoutesDeferred.getCompletedTest()
 
             assertEquals(
-                RefreshedRouteInfo(expectedRefreshedRoutes, currentIndicesSnapshot),
+                RefreshedRouteInfo(expectedRefreshedRoutes, currentIndices),
                 result
             )
-            verify(exactly = 0) { currentIndicesSnapshotProvider.invoke() }
-            coVerify(exactly = 1) {
-                currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
-            }
-            verify(exactly = 2) {
-                currentIndicesSnapshotProvider.unfreeze()
-            }
         }
 
     @Test
@@ -916,18 +864,9 @@ class RouteRefreshControllerTest {
         val result = refreshedRoutesDeferred.getCompletedTest()
 
         assertEquals(
-            RefreshedRouteInfo(refreshedRoutes, currentIndicesSnapshot),
+            RefreshedRouteInfo(refreshedRoutes, currentIndices),
             result
         )
-        verify(exactly = 0) { currentIndicesSnapshotProvider.invoke() }
-        // 5 hours has 84 intervals + one after advanceTimeBy(refreshOptions.intervalMillis)
-        coVerify(exactly = 85) {
-            currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
-        }
-        // 170 = 85 * 2
-        verify(exactly = 170) {
-            currentIndicesSnapshotProvider.unfreeze()
-        }
     }
 
     @Test
@@ -962,17 +901,10 @@ class RouteRefreshControllerTest {
             assertEquals(
                 RefreshedRouteInfo(
                     listOf(updatedPrimary, alternativeRoute),
-                    currentIndicesSnapshot
+                    currentIndices
                 ),
                 result
             )
-            verify(exactly = 0) { currentIndicesSnapshotProvider.invoke() }
-            coVerify(exactly = 1) {
-                currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
-            }
-            verify(exactly = 2) {
-                currentIndicesSnapshotProvider.unfreeze()
-            }
             verify(exactly = 1) {
                 logger.logI(
                     withArg {
@@ -1060,8 +992,8 @@ class RouteRefreshControllerTest {
             }
             val routeRefreshOptions = RouteRefreshOptions.Builder().build()
             coEvery {
-                currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
-            } returns CurrentIndicesSnapshot(1)
+                currentIndicesProvider.getFilledIndicesOrWait()
+            } returns CurrentIndicesFactory.createIndices(1, 0, null)
             val routeRefreshController = createRouteRefreshController(
                 routeRefreshOptions = routeRefreshOptions,
                 routeDiffProvider = DirectionsRouteDiffProvider(),
@@ -1128,8 +1060,8 @@ class RouteRefreshControllerTest {
             routeRefreshStub.doNotRespondForRouteRefresh(refreshedRoutes[1].id)
             val refreshOptions = RouteRefreshOptions.Builder().build()
             coEvery {
-                currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
-            } returns CurrentIndicesSnapshot(1)
+                currentIndicesProvider.getFilledIndicesOrWait()
+            } returns CurrentIndicesFactory.createIndices(1, 0, null)
             val routeRefreshController = createRouteRefreshController(
                 routeRefresh = routeRefreshStub,
                 routeRefreshOptions = refreshOptions,
@@ -1163,7 +1095,7 @@ class RouteRefreshControllerTest {
     ) = RouteRefreshController(
         routeRefreshOptions,
         routeRefresh,
-        currentIndicesSnapshotProvider,
+        currentIndicesProvider,
         routeDiffProvider,
         localDateProvider
     )
@@ -1220,7 +1152,7 @@ private fun DirectionsSession.onRefresh(
     body: (
         refreshAttempt: Int,
         route: NavigationRoute,
-        legIndex: Int,
+        currentIndices: CurrentIndices,
         callback: NavigationRouterRefreshCallback
     ) -> Unit
 ): DirectionsSession {

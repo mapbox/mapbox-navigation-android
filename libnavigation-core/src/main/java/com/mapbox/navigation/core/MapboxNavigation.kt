@@ -22,6 +22,7 @@ import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
+import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -47,6 +48,7 @@ import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.arrival.AutoArrivalController
+import com.mapbox.navigation.core.directions.LegacyNavigationRouterAdapter
 import com.mapbox.navigation.core.directions.LegacyRouterAdapter
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesExtra
@@ -286,26 +288,25 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         )
     }
 
-    private val currentIndicesSnapshotProvider =
-        NavigationComponentProvider.createCurrentIndicesSnapshotProvider()
+    private val currentIndicesProvider =
+        NavigationComponentProvider.createCurrentIndicesProvider()
 
     // Router provided via @Modules, might be outer
-    private val moduleRouter: NavigationRouter by lazy {
+    private val moduleRouter: NavigationRouterV2 by lazy {
         val result = MapboxModuleProvider.createModule<Router>(MapboxModuleType.NavigationRouter) {
             paramsProvider(
                 ModuleParams.NavigationRouter(
                     accessToken
                         ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER),
                     nativeRouter,
-                    threadController,
-                    currentIndicesSnapshotProvider
+                    threadController
                 )
             )
         }
-        if (result is NavigationRouter) {
-            result
-        } else {
-            LegacyRouterAdapter(result)
+        when (result) {
+            is NavigationRouterV2 -> result
+            is NavigationRouter -> LegacyNavigationRouterAdapter(result)
+            else -> LegacyNavigationRouterAdapter(LegacyRouterAdapter(result))
         }
     }
 
@@ -479,7 +480,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             threadController,
         )
 
-        tripSession.registerRouteProgressObserver(currentIndicesSnapshotProvider)
+        tripSession.registerRouteProgressObserver(currentIndicesProvider)
         tripSession.registerStateObserver(navigationSession)
         tripSession.registerStateObserver(historyRecordingStateHandler)
 
@@ -534,7 +535,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
             navigationOptions.routeRefreshOptions,
             directionsSession,
-            currentIndicesSnapshotProvider,
+            currentIndicesProvider,
         )
 
         defaultRerouteController = MapboxRerouteController(
@@ -1613,7 +1614,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
-        currentIndicesSnapshotProvider.clear()
+        currentIndicesProvider.clear()
         if (result.navigationRoutes.isNotEmpty()) {
             routeScope.launch {
                 val refreshed = routeRefreshController.refresh(

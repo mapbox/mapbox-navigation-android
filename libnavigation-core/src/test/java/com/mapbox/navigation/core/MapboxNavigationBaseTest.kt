@@ -91,7 +91,7 @@ internal open class MapboxNavigationBaseTest {
     val arrivalProgressObserver: ArrivalProgressObserver = mockk(relaxUnitFun = true)
     val historyRecordingStateHandler: HistoryRecordingStateHandler = mockk(relaxUnitFun = true)
     val threadController = ThreadController()
-    val currentIndicesSnapshotProvider = mockk<CurrentIndicesSnapshotProvider>(relaxed = true)
+    val currentIndicesProvider = mockk<CurrentIndicesProvider>(relaxed = true)
 
     val applicationContext: Context = mockk(relaxed = true) {
         every { inferDeviceLocale() } returns Locale.US
@@ -188,8 +188,8 @@ internal open class MapboxNavigationBaseTest {
                 .createHistoryRecordingStateHandler(NavigationSessionState.Idle)
         } returns historyRecordingStateHandler
         every {
-            NavigationComponentProvider.createCurrentIndicesSnapshotProvider()
-        } returns currentIndicesSnapshotProvider
+            NavigationComponentProvider.createCurrentIndicesProvider()
+        } returns currentIndicesProvider
 
         every { navigator.create(any(), any(), any(), any(), any(), any()) } returns navigator
         mockkStatic(TelemetryEnabler::class)

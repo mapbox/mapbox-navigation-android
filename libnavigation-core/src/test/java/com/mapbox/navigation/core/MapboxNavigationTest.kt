@@ -4,7 +4,7 @@ import com.mapbox.android.telemetry.TelemetryEnabler
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.CurrentIndicesSnapshot
+import com.mapbox.navigation.base.internal.CurrentIndicesFactory
 import com.mapbox.navigation.base.options.IncidentsOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -398,7 +398,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun current_route_geometry_index_provider() {
         createMapboxNavigation()
         verify(exactly = 1) {
-            tripSession.registerRouteProgressObserver(currentIndicesSnapshotProvider)
+            tripSession.registerRouteProgressObserver(currentIndicesProvider)
         }
     }
 
@@ -630,7 +630,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
 
         coVerifyOrder {
-            currentIndicesSnapshotProvider.clear()
+            currentIndicesProvider.clear()
             routeRefreshController.refresh(routes)
         }
     }
@@ -649,7 +649,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
 
         coVerify(exactly = 1) {
-            currentIndicesSnapshotProvider.clear()
+            currentIndicesProvider.clear()
         }
         coVerify(exactly = 0) { routeRefreshController.refresh(any()) }
     }
@@ -1278,7 +1278,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 refreshOrFirstRoute.await()
                 RefreshedRouteInfo(
                     listOf(createNavigationRoute(createDirectionsRoute(requestUuid = "test1.1"))),
-                    CurrentIndicesSnapshot()
+                    CurrentIndicesFactory.createIndices(1, 2, 3)
                 )
             }
             coEvery { tripSession.setRoutes(second, any()) } coAnswers {
@@ -1358,23 +1358,23 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 every { directionsRoute } returns mockk()
             }
             val routes = listOf(primary)
-            val currentIndicesSnapshot = CurrentIndicesSnapshot(5, 12, 43)
+            val currentIndices = CurrentIndicesFactory.createIndices(5, 12, 43)
             val routeObserversSlot = mutableListOf<RoutesObserver>()
             every { tripSession.getState() } returns TripSessionState.STARTED
             coEvery {
-                currentIndicesSnapshotProvider.getFilledIndicesAndFreeze()
-            } returns currentIndicesSnapshot
+                currentIndicesProvider.getFilledIndicesOrWait()
+            } returns currentIndices
 
             val refreshedRoutes = listOf(mockk<NavigationRoute>())
             coEvery {
                 tripSession.setRoutes(
                     refreshedRoutes,
-                    SetRefreshedRoutesInfo(currentIndicesSnapshot)
+                    SetRefreshedRoutesInfo(currentIndices)
                 )
             } returns NativeSetRouteError("some error")
             coEvery {
                 routeRefreshController.refresh(routes)
-            } returns RefreshedRouteInfo(refreshedRoutes, currentIndicesSnapshot)
+            } returns RefreshedRouteInfo(refreshedRoutes, currentIndices)
 
             verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
             routeObserversSlot.forEach {
@@ -1457,7 +1457,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             }
             val routes = listOf(primary)
             val reason = RoutesExtra.ROUTES_UPDATE_REASON_NEW
-            val currentIndicesSnapshot = CurrentIndicesSnapshot(5, 12, 43)
+            val currentIndices = CurrentIndicesFactory.createIndices(5, 12, 43)
             val routeObserversSlot = mutableListOf<RoutesObserver>()
             every { tripSession.getState() } returns TripSessionState.STARTED
             verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
@@ -1465,7 +1465,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             val refreshedRoutes = listOf(mockk<NavigationRoute>())
             coEvery {
                 routeRefreshController.refresh(routes)
-            } returns RefreshedRouteInfo(refreshedRoutes, currentIndicesSnapshot)
+            } returns RefreshedRouteInfo(refreshedRoutes, currentIndices)
             routeObserversSlot.forEach {
                 it.onRoutesChanged(RoutesUpdatedResult(routes, reason))
             }
@@ -1473,13 +1473,13 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             coVerify(exactly = 1) {
                 tripSession.setRoutes(
                     refreshedRoutes,
-                    SetRefreshedRoutesInfo(currentIndicesSnapshot)
+                    SetRefreshedRoutesInfo(currentIndices)
                 )
             }
             verify(exactly = 1) {
                 directionsSession.setRoutes(
                     refreshedRoutes,
-                    SetRefreshedRoutesInfo(currentIndicesSnapshot)
+                    SetRefreshedRoutesInfo(currentIndices)
                 )
             }
         }
@@ -1493,7 +1493,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             }
             val routes = listOf(primary)
             val reason = RoutesExtra.ROUTES_UPDATE_REASON_NEW
-            val usedIndicesSnapshot = CurrentIndicesSnapshot(4, 13, 42)
+            val usedIndicesSnapshot = CurrentIndicesFactory.createIndices(4, 13, 42)
             val routeObserversSlot = mutableListOf<RoutesObserver>()
             every { tripSession.getState() } returns TripSessionState.STARTED
             verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }

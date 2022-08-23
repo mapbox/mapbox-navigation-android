@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core
 
-import com.mapbox.navigation.base.internal.CurrentIndicesSnapshot
+import com.mapbox.navigation.base.internal.CurrentIndices
+import com.mapbox.navigation.base.internal.CurrentIndicesFactory
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
@@ -15,11 +16,11 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class CurrentIndicesSnapshotProviderTest {
+class CurrentIndicesProviderTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
-    private val provider = CurrentIndicesSnapshotProvider()
+    private val provider = CurrentIndicesProvider()
     private val currentLegIndex = 9
     private val routeGeometryIndex = 44
     private val legGeometryIndex = 33
@@ -30,32 +31,17 @@ class CurrentIndicesSnapshotProviderTest {
             every { geometryIndex } returns legGeometryIndex
         }
     }
-    private val expected = CurrentIndicesSnapshot(
+    private val expected = CurrentIndicesFactory.createIndices(
         currentLegIndex,
         routeGeometryIndex,
         legGeometryIndex
     )
 
     @Test
-    fun initialStateIsNull() {
-        assertNull(provider())
-    }
-
-    @Test
-    fun stateIsNullAfterClear() {
-        provider.onRouteProgressChanged(routeProgress)
-
-        provider.clear()
-
-        assertNull(provider())
-    }
-
-    @Test
     fun stateAfterUpdate() = runBlocking {
         provider.onRouteProgressChanged(routeProgress)
 
-        assertEquals(expected, provider())
-        assertEquals(expected, provider.getFilledIndicesAndFreeze())
+        assertEquals(expected, provider.getFilledIndicesOrWait())
     }
 
     @Test
@@ -65,8 +51,7 @@ class CurrentIndicesSnapshotProviderTest {
             provider.onRouteProgressChanged(routeProgress)
         }
 
-        assertEquals(expected, provider.getFilledIndicesAndFreeze())
-        assertEquals(expected, provider())
+        assertEquals(expected, provider.getFilledIndicesOrWait())
     }
 
     @Test
@@ -76,16 +61,16 @@ class CurrentIndicesSnapshotProviderTest {
                 delay(100)
                 provider.onRouteProgressChanged(routeProgress)
             }
-            var value: CurrentIndicesSnapshot? = null
+            var value: CurrentIndices? = null
             val update = launch {
-                value = provider.getFilledIndicesAndFreeze()
+                value = provider.getFilledIndicesOrWait()
                 throw AssertionError()
             }
             advanceTimeBy(50)
             update.cancel()
             advanceTimeBy(50)
             assertNull(value)
-            assertEquals(expected, provider())
+            assertEquals(expected, provider.getFilledIndicesOrWait())
         }
     }
 
@@ -96,12 +81,11 @@ class CurrentIndicesSnapshotProviderTest {
             every { currentRouteGeometryIndex } returns routeIndex
             every { currentLegProgress } returns null
         }
-        val expected = CurrentIndicesSnapshot(0, routeIndex, null)
+        val expected = CurrentIndicesFactory.createIndices(0, routeIndex, null)
 
         provider.onRouteProgressChanged(routeProgress)
 
-        assertEquals(expected, provider())
-        assertEquals(expected, provider.getFilledIndicesAndFreeze())
+        assertEquals(expected, provider.getFilledIndicesOrWait())
     }
 
     @Test
@@ -126,13 +110,16 @@ class CurrentIndicesSnapshotProviderTest {
                 every { geometryIndex } returns legGeometryIndex2
             }
         }
-        val expected = CurrentIndicesSnapshot(legIndex2, routeGeometryIndex2, legGeometryIndex2)
+        val expected = CurrentIndicesFactory.createIndices(
+            legIndex2,
+            routeGeometryIndex2,
+            legGeometryIndex2
+        )
 
         provider.onRouteProgressChanged(routeProgress1)
         provider.onRouteProgressChanged(routeProgress2)
 
-        assertEquals(expected, provider())
-        assertEquals(expected, provider.getFilledIndicesAndFreeze())
+        assertEquals(expected, provider.getFilledIndicesOrWait())
     }
 
     @Test
@@ -157,7 +144,11 @@ class CurrentIndicesSnapshotProviderTest {
                 every { geometryIndex } returns legGeometryIndex2
             }
         }
-        val expected = CurrentIndicesSnapshot(legIndex1, routeGeometryIndex1, legGeometryIndex1)
+        val expected = CurrentIndicesFactory.createIndices(
+            legIndex1,
+            routeGeometryIndex1,
+            legGeometryIndex1
+        )
         provider.onRouteProgressChanged(routeProgress1)
 
         launch {
@@ -165,8 +156,7 @@ class CurrentIndicesSnapshotProviderTest {
             provider.onRouteProgressChanged(routeProgress2)
         }
 
-        assertEquals(expected, provider.getFilledIndicesAndFreeze())
-        assertEquals(expected, provider())
+        assertEquals(expected, provider.getFilledIndicesOrWait())
     }
 
     @Test
@@ -191,7 +181,11 @@ class CurrentIndicesSnapshotProviderTest {
                 every { geometryIndex } returns legGeometryIndex2
             }
         }
-        val expected = CurrentIndicesSnapshot(legIndex2, routeGeometryIndex2, legGeometryIndex2)
+        val expected = CurrentIndicesFactory.createIndices(
+            legIndex2,
+            routeGeometryIndex2,
+            legGeometryIndex2
+        )
         provider.onRouteProgressChanged(routeProgress1)
 
         provider.clear()
@@ -200,71 +194,6 @@ class CurrentIndicesSnapshotProviderTest {
             provider.onRouteProgressChanged(routeProgress2)
         }
 
-        assertEquals(expected, provider.getFilledIndicesAndFreeze())
-        assertEquals(expected, provider())
-    }
-
-    @Test
-    fun getFilledIndicesAndFreezeForbidsUpdates() = runBlocking {
-        provider.onRouteProgressChanged(routeProgress)
-        val expected = provider.getFilledIndicesAndFreeze()
-
-        provider.onRouteProgressChanged(
-            mockk {
-                every { currentRouteGeometryIndex } returns routeGeometryIndex
-                every { currentLegProgress } returns mockk {
-                    every { legIndex } returns 89
-                    every { geometryIndex } returns 12
-                }
-            }
-        )
-
-        assertEquals(expected, provider())
-        assertEquals(expected, provider.getFilledIndicesAndFreeze())
-    }
-
-    @Test
-    fun invokeDoesNotForbidUpdates() = runBlocking {
-        provider()
-        provider.onRouteProgressChanged(routeProgress)
-
-        assertEquals(expected, provider())
-        assertEquals(expected, provider.getFilledIndicesAndFreeze())
-    }
-
-    @Test
-    fun unfreezeAllowsUpdates() = runBlocking {
-        provider.onRouteProgressChanged(
-            mockk {
-                every { currentRouteGeometryIndex } returns routeGeometryIndex
-                every { currentLegProgress } returns mockk {
-                    every { legIndex } returns 89
-                    every { geometryIndex } returns 12
-                }
-            }
-        )
-        provider.getFilledIndicesAndFreeze()
-
-        provider.unfreeze()
-        provider.onRouteProgressChanged(routeProgress)
-
-        assertEquals(expected, provider())
-        assertEquals(expected, provider.getFilledIndicesAndFreeze())
-    }
-
-    @Test
-    fun cancelDuringWaitAllowsUpdates_async() = coroutineRule.runBlockingTest {
-        pauseDispatcher {
-            val freeze = launch {
-                provider.getFilledIndicesAndFreeze()
-            }
-            delay(50)
-
-            freeze.cancel()
-            provider.onRouteProgressChanged(routeProgress)
-
-            assertEquals(expected, provider())
-            assertEquals(expected, provider.getFilledIndicesAndFreeze())
-        }
+        assertEquals(expected, provider.getFilledIndicesOrWait())
     }
 }

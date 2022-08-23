@@ -9,13 +9,14 @@ import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.CurrentIndicesSnapshot
+import com.mapbox.navigation.base.internal.CurrentIndices
+import com.mapbox.navigation.base.internal.CurrentIndicesFactory
+import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.route.InternalRouter
 import com.mapbox.navigation.base.internal.route.refreshRoute
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.NavigationRouter
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshError
@@ -48,8 +49,7 @@ class RouterWrapper(
     private val accessToken: String,
     private val router: RouterInterface,
     private val threadController: ThreadController,
-    private val currentIndicesSnapshotProvider: Function0<CurrentIndicesSnapshot?>,
-) : NavigationRouter, InternalRouter {
+) : NavigationRouterV2, InternalRouter {
 
     private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
 
@@ -157,10 +157,20 @@ class RouterWrapper(
         )
     }
 
-    @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun getRouteRefresh(
         route: NavigationRoute,
         legIndex: Int,
+        callback: NavigationRouterRefreshCallback
+    ): Long = getRouteRefresh(
+        route,
+        CurrentIndicesFactory.createIndices(legIndex, 0, null),
+        callback
+    )
+
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    override fun getRouteRefresh(
+        route: NavigationRoute,
+        indicesSnapshot: CurrentIndices,
         callback: NavigationRouterRefreshCallback
     ): Long {
         val routeOptions = route.routeOptions
@@ -185,12 +195,10 @@ class RouterWrapper(
             return REQUEST_FAILURE
         }
 
-        val indicesSnapshot = currentIndicesSnapshotProvider()!!
-
         val refreshOptions = RouteRefreshOptions(
             requestUuid,
             routeIndex,
-            legIndex,
+            indicesSnapshot.legIndex,
             RoutingProfile(routeOptions.profile().mapToRoutingMode(), routeOptions.user()),
             indicesSnapshot.routeGeometryIndex,
         )
@@ -209,7 +217,7 @@ class RouterWrapper(
                                code = ${it.code}
                                type = ${it.type}
                                requestId = ${it.requestId}
-                               legIndex = $legIndex
+                               indicesSnapshot = $indicesSnapshot
                             """.trimIndent()
 
                         logW(errorMessage, LOG_CATEGORY)

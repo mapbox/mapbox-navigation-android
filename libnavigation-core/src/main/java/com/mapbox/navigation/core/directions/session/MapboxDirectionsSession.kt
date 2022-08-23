@@ -3,9 +3,10 @@ package com.mapbox.navigation.core.directions.session
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.CurrentIndices
+import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.NavigationRouter
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.Router
@@ -19,7 +20,7 @@ import java.util.concurrent.CopyOnWriteArraySet
  * @property routes a list of [DirectionsRoute]. Fetched from [Router] or might be set manually
  */
 internal class MapboxDirectionsSession(
-    private val router: NavigationRouter,
+    private val router: NavigationRouterV2,
 ) : DirectionsSession {
 
     private val routesObservers = CopyOnWriteArraySet<RoutesObserver>()
@@ -82,16 +83,16 @@ internal class MapboxDirectionsSession(
      * Refresh the traffic annotations for a given [DirectionsRoute]
      *
      * @param route DirectionsRoute the direction route to refresh
-     * @param legIndex Int the index of the current leg in the route
+     * @param legIndex Object containing information about consistent current indices
      * @param callback Callback that gets notified with the results of the request
      */
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun requestRouteRefresh(
         route: NavigationRoute,
-        legIndex: Int,
+        currentIndices: CurrentIndices,
         callback: NavigationRouterRefreshCallback
     ): Long {
-        return router.getRouteRefresh(route, legIndex, callback)
+        return router.getRouteRefresh(route, currentIndices, callback)
     }
 
     /**

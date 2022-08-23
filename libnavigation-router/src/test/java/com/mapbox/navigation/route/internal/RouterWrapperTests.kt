@@ -8,10 +8,10 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.coordinates
-import com.mapbox.navigation.base.internal.CurrentIndicesSnapshot
+import com.mapbox.navigation.base.internal.CurrentIndicesFactory
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
-import com.mapbox.navigation.base.route.RouteRefreshCallback
-import com.mapbox.navigation.base.route.RouteRefreshError
+import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
+import com.mapbox.navigation.base.route.NavigationRouterRefreshError
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin.Offboard
@@ -23,6 +23,7 @@ import com.mapbox.navigation.route.internal.util.TestRouteFixtures
 import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
+import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteInterfacesFromDirectionRequestResponse
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouteRefreshOptions
@@ -68,22 +69,11 @@ class RouterWrapperTests {
     private val accessToken = "pk.123"
     private val route: DirectionsRoute = mockk(relaxed = true)
     private val routerCallback: RouterCallback = mockk(relaxed = true)
-    private val routerRefreshCallback: RouteRefreshCallback = mockk(relaxed = true)
+    private val routerRefreshCallback: NavigationRouterRefreshCallback = mockk(relaxed = true)
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
     private val routeUrl = routerOptions.toUrl(accessToken).toString()
-    private val currentIndicesSnapshotProvider = object : Function0<CurrentIndicesSnapshot> {
-
-        private var numberOfInvocations = 0
-
-        override fun invoke(): CurrentIndicesSnapshot {
-            numberOfInvocations++
-            return CurrentIndicesSnapshot(
-                legIndex = numberOfInvocations,
-                routeGeometryIndex = numberOfInvocations * 100,
-                legGeometryIndex = numberOfInvocations * 10
-            )
-        }
-    }
+    // these indices are used in expected files
+    private val currentIndices = CurrentIndicesFactory.createIndices(0, 100, 10)
 
     private val testRouteFixtures = TestRouteFixtures()
 
@@ -152,7 +142,6 @@ class RouterWrapperTests {
             accessToken,
             mapboxNativeNavigator.router,
             ThreadController(),
-            currentIndicesSnapshotProvider
         )
     }
 
@@ -313,15 +302,17 @@ class RouterWrapperTests {
 
     @Test
     fun `route refresh fails with null requestUuid`() {
-        val route: DirectionsRoute = DirectionsRoute.builder()
-            .requestUuid(null)
-            .distance(100.0)
-            .duration(100.0)
-            .routeIndex("1")
-            .routeOptions(routerOptions)
-            .build()
+        val route = createNavigationRoute(
+            DirectionsRoute.builder()
+                .requestUuid(null)
+                .distance(100.0)
+                .duration(100.0)
+                .routeIndex("0")
+                .routeOptions(routerOptions)
+                .build()
+        )
 
-        routerWrapper.getRouteRefresh(route, 0, routerRefreshCallback)
+        routerWrapper.getRouteRefresh(route, currentIndices, routerRefreshCallback)
 
         val expectedErrorMessage =
             """
@@ -329,8 +320,8 @@ class RouterWrapperTests {
                requestUuid = null
             """.trimIndent()
 
-        val errorSlot = slot<RouteRefreshError>()
-        verify(exactly = 1) { routerRefreshCallback.onError(capture(errorSlot)) }
+        val errorSlot = slot<NavigationRouterRefreshError>()
+        verify(exactly = 1) { routerRefreshCallback.onFailure(capture(errorSlot)) }
         verify(exactly = 0) { router.getRouteRefresh(any(), any()) }
         assertEquals("Route refresh failed", errorSlot.captured.message)
         assertEquals(expectedErrorMessage, errorSlot.captured.throwable?.message)
@@ -339,20 +330,30 @@ class RouterWrapperTests {
     @Test
     fun `route refresh set right params`() {
         mockkStatic("com.mapbox.navigation.base.route.NavigationRouteEx") {
-            val route: DirectionsRoute = createDirectionsRoute(
-                routeOptions = routerOptions,
-                requestUuid = UUID,
-                routeIndex = "1"
+            val route = createNavigationRoute(
+                createDirectionsRoute(
+                    routeOptions = routerOptions,
+                    requestUuid = UUID,
+                    routeIndex = "0"
+                )
             )
 
-            routerWrapper.getRouteRefresh(route, 0, routerRefreshCallback)
+            val legIndex = 12
+            val routeGeometryIndex = 23
+            val legGeometryIndex = 19
+            val indicesSnapshot = CurrentIndicesFactory.createIndices(
+                legIndex,
+                routeGeometryIndex,
+                legGeometryIndex
+            )
+            routerWrapper.getRouteRefresh(route, indicesSnapshot, routerRefreshCallback)
 
             val expectedRefreshOptions = RouteRefreshOptions(
                 UUID,
-                1,
                 0,
+                legIndex,
                 RoutingProfile(routerOptions.profile().mapToRoutingMode(), routerOptions.user()),
-                100,
+                routeGeometryIndex,
             )
 
             verify(exactly = 1) {
@@ -377,20 +378,24 @@ class RouterWrapperTests {
                 )
             )
             .build()
-        val route: DirectionsRoute = DirectionsResponse.fromJson(
-            testRouteFixtures.loadMultiLegRouteForRefresh(),
-            options
-        ).routes().first()
+        val route = createNavigationRoute(
+            DirectionsResponse.fromJson(
+                testRouteFixtures.loadMultiLegRouteForRefresh(),
+                options
+            ).routes().first()
+        )
 
-        routerWrapper.getRouteRefresh(route, 0, routerRefreshCallback)
+        routerWrapper.getRouteRefresh(route, currentIndices, routerRefreshCallback)
         refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard)
 
-        val expected = DirectionsResponse.fromJson(
-            testRouteFixtures.loadRefreshedMultiLegRoute(),
-            options
-        ).routes().first()
+        val expected = createNavigationRoute(
+            DirectionsResponse.fromJson(
+                testRouteFixtures.loadRefreshedMultiLegRoute(),
+                options
+            ).routes().first()
+        )
 
-        verify(exactly = 1) { routerRefreshCallback.onRefresh(expected) }
+        verify(exactly = 1) { routerRefreshCallback.onRefreshReady(expected) }
     }
 
     @Test
@@ -406,34 +411,47 @@ class RouterWrapperTests {
                 )
             )
             .build()
-        val route: DirectionsRoute = DirectionsResponse.fromJson(
-            testRouteFixtures.loadMultiLegRouteForRefresh(),
-            options
-        ).routes().first()
+        val route = createNavigationRoute(
+            DirectionsResponse.fromJson(
+                testRouteFixtures.loadMultiLegRouteForRefresh(),
+                options
+            ).routes().first()
+        )
 
-        routerWrapper.getRouteRefresh(route, 1, routerRefreshCallback)
+        routerWrapper.getRouteRefresh(
+            route,
+            CurrentIndicesFactory.createIndices(
+                1,
+                currentIndices.routeGeometryIndex,
+                currentIndices.legGeometryIndex
+            ),
+            routerRefreshCallback
+        )
         refreshRouteSlot.captured.run(routerRefreshSuccessSecondLeg, nativeOriginOnboard)
 
-        val expected = DirectionsResponse.fromJson(
-            testRouteFixtures.loadRefreshedMultiLegRouteSecondLeg(),
-            options
-        ).routes().first()
+        val expected = createNavigationRoute(
+            DirectionsResponse.fromJson(
+                testRouteFixtures.loadRefreshedMultiLegRouteSecondLeg(),
+                options
+            ).routes().first()
+        )
 
-        verify(exactly = 1) { routerRefreshCallback.onRefresh(expected) }
+        verify(exactly = 1) { routerRefreshCallback.onRefreshReady(expected) }
     }
 
     @Test
     fun `route refresh failure`() {
-        val route: DirectionsRoute = DirectionsRoute.builder()
-            .requestUuid(UUID)
-            .distance(100.0)
-            .duration(100.0)
-            .routeIndex("1")
-            .routeOptions(routerOptions)
-            .build()
+        val route = createNavigationRoute(
+            DirectionsRoute.builder()
+                .requestUuid(UUID)
+                .distance(100.0)
+                .duration(100.0)
+                .routeIndex("0")
+                .routeOptions(routerOptions)
+                .build()
+        )
 
-        val legIndex = 0
-        routerWrapper.getRouteRefresh(route, legIndex, routerRefreshCallback)
+        routerWrapper.getRouteRefresh(route, currentIndices, routerRefreshCallback)
         refreshRouteSlot.captured.run(routerResultFailure, nativeOriginOnboard)
 
         val errorMessage =
@@ -443,12 +461,12 @@ class RouterWrapperTests {
                code = $FAILURE_CODE
                type = $FAILURE_TYPE
                requestId = $REQUEST_ID
-               legIndex = $legIndex
+               indicesSnapshot = $currentIndices
             """.trimIndent()
 
-        val errorSlot = slot<RouteRefreshError>()
+        val errorSlot = slot<NavigationRouterRefreshError>()
 
-        verify(exactly = 1) { routerRefreshCallback.onError(capture(errorSlot)) }
+        verify(exactly = 1) { routerRefreshCallback.onFailure(capture(errorSlot)) }
         assertEquals("Route refresh failed", errorSlot.captured.message)
         assertEquals(errorMessage, errorSlot.captured.throwable?.message)
     }

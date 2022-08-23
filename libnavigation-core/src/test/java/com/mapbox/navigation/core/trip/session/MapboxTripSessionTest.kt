@@ -8,7 +8,7 @@ import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.navigation.base.internal.CurrentIndicesSnapshot
+import com.mapbox.navigation.base.internal.CurrentIndicesFactory
 import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -105,7 +105,11 @@ class MapboxTripSessionTest {
     private val routes: List<NavigationRoute> = listOf(mockk(relaxed = true))
     private val legIndex = 2
     private val geometryIndex = 23
-    private val indicesSnapshot = CurrentIndicesSnapshot(legIndex, geometryIndex, 66)
+    private val indicesSnapshot = CurrentIndicesFactory.createIndices(
+        legIndex,
+        geometryIndex,
+        66
+    )
     private val setRoutesInfo = BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, legIndex)
 
     private val context: Context = ApplicationProvider.getApplicationContext()
@@ -605,7 +609,10 @@ class MapboxTripSessionTest {
         coroutineRule.runBlockingTest {
             tripSession.start(true)
 
-            tripSession.setRoutes(routes, SetRefreshedRoutesInfo(CurrentIndicesSnapshot()))
+            tripSession.setRoutes(
+                routes,
+                SetRefreshedRoutesInfo(CurrentIndicesFactory.createIndices(0, 0, null))
+            )
 
             coVerify(exactly = 1) { navigator.refreshRoute(routes[0]) }
             coVerify(exactly = 0) { navigator.setRoutes(any()) }
@@ -943,7 +950,7 @@ class MapboxTripSessionTest {
             )
             tripSession.setRoutes(
                 listOf(mockNavigationRoute(routeInfo = mockedRouteInfo)),
-                SetRefreshedRoutesInfo(CurrentIndicesSnapshot()),
+                SetRefreshedRoutesInfo(CurrentIndicesFactory.createIndices(0, 0, null)),
             )
 
             verify(exactly = 2) { roadObjectsObserver.onNewRoadObjectsOnTheRoute(any()) }
