@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Mapbox Example</string>
-
     <string name="car_action_search_favorites" translatable="false">Favorites</string>
     <string name="car_search_no_results">No results</string>
     <string name="car_search_unknown_current_location">Unknown current location</string>
