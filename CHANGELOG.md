@@ -4,6 +4,9 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added `ComponentInstaller` for the `NavigationCameraComponent` that offers simplified integration of the `NavigationCamera`. [#6202](https://github.com/mapbox/mapbox-navigation-android/pull/6202)
+- Added `ComponentInstaller` for the `CameraModeButtonComponent` that offers simplified integration of the `NavigationCamera` mode button. [#6202](https://github.com/mapbox/mapbox-navigation-android/pull/6202)
+
 #### Bug fixes and improvements
 
 ## Mapbox Navigation SDK 2.8.0-alpha.3 - 17 August, 2022
