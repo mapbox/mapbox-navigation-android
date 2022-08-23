@@ -27,8 +27,7 @@ class MainCarScreen(
     val carLocationRenderer = CarLocationRenderer(mainCarContext)
     val carSpeedLimitRenderer = CarSpeedLimitRenderer(mainCarContext)
     val carNavigationCamera = CarNavigationCamera(
-        mainCarContext.mapboxNavigation,
-        CarCameraMode.FOLLOWING,
+        initialCarCameraMode = CarCameraMode.FOLLOWING,
         alternativeCarCameraMode = null,
     )
     private val roadLabelSurfaceLayer = RoadLabelSurfaceLayer(carContext)

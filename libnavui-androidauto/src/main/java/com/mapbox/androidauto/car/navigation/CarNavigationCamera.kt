@@ -2,9 +2,8 @@ package com.mapbox.androidauto.car.navigation
 
 import android.graphics.Rect
 import android.location.Location
-import com.mapbox.androidauto.car.routes.NavigationRoutesProvider
-import com.mapbox.androidauto.car.routes.RoutesListener
-import com.mapbox.androidauto.car.routes.RoutesProvider
+import com.mapbox.androidauto.car.routes.CarRoutesProvider
+import com.mapbox.androidauto.car.routes.NavigationCarRoutesProvider
 import com.mapbox.androidauto.internal.car.RendererUtils.dpToPx
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.maps.CameraOptions
@@ -13,30 +12,43 @@ import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.dsl.cameraOptions
 import com.mapbox.maps.extension.androidauto.DefaultMapboxCarMapGestureHandler
+import com.mapbox.maps.extension.androidauto.MapboxCarMap
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import kotlin.properties.Delegates
 
 private const val DEFAULT_INITIAL_ZOOM = 15.0
 
 /**
  * Integrates the Android Auto [MapboxCarMapSurface] with the [NavigationCamera].
+ *
+ * @param initialCarCameraMode defines the initial [CarCameraMode]
+ * @param alternativeCarCameraMode is an optional toggle [CarCameraMode]
+ * @param carRoutesProvider provides routes that can adjust the camera view port
+ * @param initialCameraOptions set camera options when the camera is attached
  */
 @OptIn(MapboxExperimental::class)
-class CarNavigationCamera internal constructor(
-    private val mapboxNavigation: MapboxNavigation,
+class CarNavigationCamera(
     private val initialCarCameraMode: CarCameraMode,
     private val alternativeCarCameraMode: CarCameraMode?,
-    private val routesProvider: RoutesProvider,
+    private val carRoutesProvider: CarRoutesProvider = NavigationCarRoutesProvider(),
     private val initialCameraOptions: CameraOptions? = CameraOptions.Builder()
         .zoom(DEFAULT_INITIAL_ZOOM)
         .build()
@@ -45,20 +57,21 @@ class CarNavigationCamera internal constructor(
     private var mapboxCarMapSurface: MapboxCarMapSurface? = null
     private lateinit var navigationCamera: NavigationCamera
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
+    private var overviewPaddingPx by Delegates.notNull<Int>()
+    private var followingPaddingPx by Delegates.notNull<Int>()
+    private lateinit var coroutineScope: CoroutineScope
 
     private val _nextCameraMode = MutableStateFlow(alternativeCarCameraMode)
-    val nextCameraMode: StateFlow<CarCameraMode?> = _nextCameraMode
 
-    private val overviewPaddingPx by lazy {
-        mapboxNavigation.navigationOptions.applicationContext.dpToPx(
-            OVERVIEW_PADDING_DP
-        )
-    }
-    private val followingPaddingPx by lazy {
-        mapboxNavigation.navigationOptions.applicationContext.dpToPx(
-            FOLLOWING_OVERVIEW_PADDING_DP
-        )
-    }
+    /**
+     * Allow you to observe what the next camera mode will be. The navigation camera lets you
+     * toggle between the [initialCarCameraMode] and [alternativeCarCameraMode].
+     *
+     * For example, if your initial camera mode is [CarCameraMode.FOLLOWING] and the alternative
+     * camera mode is [CarCameraMode.OVERVIEW]; if the current mode is overview, the
+     * [nextCameraMode] is following.
+     */
+    val nextCameraMode: StateFlow<CarCameraMode?> = _nextCameraMode
 
     private var isLocationInitialized = false
 
@@ -91,20 +104,26 @@ class CarNavigationCamera internal constructor(
         }
     }
 
-    private val routesListener = RoutesListener { routes ->
-        if (routes.isEmpty()) {
-            viewportDataSource.clearRouteData()
-        } else {
-            viewportDataSource.onRouteChanged(routes.first())
-        }
-        viewportDataSource.evaluate()
-    }
-
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.evaluate()
     }
 
+    private val navigationObserver = object : MapboxNavigationObserver {
+        override fun onAttached(mapboxNavigation: MapboxNavigation) {
+            mapboxNavigation.registerLocationObserver(locationObserver)
+            mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+        }
+
+        override fun onDetached(mapboxNavigation: MapboxNavigation) {
+            mapboxNavigation.unregisterLocationObserver(locationObserver)
+            mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        }
+    }
+
+    /**
+     * Connect the gesture handler to the map with [MapboxCarMap.setGestureHandler].
+     */
     val gestureHandler = object : DefaultMapboxCarMapGestureHandler() {
         override fun onScroll(
             mapboxCarMapSurface: MapboxCarMapSurface,
@@ -132,24 +151,14 @@ class CarNavigationCamera internal constructor(
         }
     }
 
-    constructor(
-        mapboxNavigation: MapboxNavigation,
-        initialCarCameraMode: CarCameraMode,
-        alternativeCarCameraMode: CarCameraMode?,
-        initialCameraOptions: CameraOptions? = CameraOptions.Builder()
-            .zoom(DEFAULT_INITIAL_ZOOM)
-            .build(),
-    ) : this(
-        mapboxNavigation,
-        initialCarCameraMode,
-        alternativeCarCameraMode,
-        NavigationRoutesProvider(mapboxNavigation),
-        initialCameraOptions,
-    )
-
     override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
         super.onAttached(mapboxCarMapSurface)
+        coroutineScope = MainScope()
         this.mapboxCarMapSurface = mapboxCarMapSurface
+        this.followingPaddingPx = mapboxCarMapSurface.carContext.dpToPx(
+            FOLLOWING_OVERVIEW_PADDING_DP
+        )
+        this.overviewPaddingPx = mapboxCarMapSurface.carContext.dpToPx(OVERVIEW_PADDING_DP)
         logAndroidAuto("CarNavigationCamera loaded $mapboxCarMapSurface")
 
         val mapboxMap = mapboxCarMapSurface.mapSurface.getMapboxMap()
@@ -163,9 +172,18 @@ class CarNavigationCamera internal constructor(
             viewportDataSource
         )
 
-        mapboxNavigation.registerLocationObserver(locationObserver)
-        routesProvider.registerRoutesListener(routesListener)
-        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+        MapboxNavigationApp.registerObserver(navigationObserver)
+
+        coroutineScope.launch {
+            carRoutesProvider.navigationRoutes.collect { routes ->
+                if (routes.isEmpty()) {
+                    viewportDataSource.clearRouteData()
+                } else {
+                    viewportDataSource.onRouteChanged(routes.first())
+                }
+                viewportDataSource.evaluate()
+            }
+        }
     }
 
     override fun onVisibleAreaChanged(visibleArea: Rect, edgeInsets: EdgeInsets) {
@@ -241,14 +259,10 @@ class CarNavigationCamera internal constructor(
     }
 
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
-        super.onDetached(mapboxCarMapSurface)
         logAndroidAuto("CarNavigationCamera detached $mapboxCarMapSurface")
-
-        routesProvider.unregisterRoutesListener(routesListener)
-        mapboxNavigation.unregisterLocationObserver(locationObserver)
-        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         this.mapboxCarMapSurface = null
         isLocationInitialized = false
+        coroutineScope.cancel()
     }
 
     private companion object {
