@@ -20,7 +20,6 @@ interface NavigationRouteAlternativesRequestCallback {
      *
      * The alternatives are not automatically added to [MapboxNavigation],
      * you need to add them manually to trigger [RoutesObserver], for example:
-     * todo update docs (no fun int)
      * ```kotlin
      * mapboxNavigation.requestAlternativeRoutes(
      *     NavigationRouteAlternativesRequestListener { routeProgress, alternatives, routerOrigin ->
