@@ -48,9 +48,8 @@ class ActiveGuidanceScreen(
     val carLocationRenderer = CarLocationRenderer(carActiveGuidanceContext.mainCarContext)
     val carSpeedLimitRenderer = CarSpeedLimitRenderer(carActiveGuidanceContext.mainCarContext)
     val carNavigationCamera = CarNavigationCamera(
-        carActiveGuidanceContext.mapboxNavigation,
-        CarCameraMode.FOLLOWING,
-        CarCameraMode.OVERVIEW,
+        initialCarCameraMode = CarCameraMode.FOLLOWING,
+        alternativeCarCameraMode = CarCameraMode.OVERVIEW,
     )
     private val roadLabelSurfaceLayer = RoadLabelSurfaceLayer(carContext)
     private val carRouteProgressObserver = CarNavigationInfoObserver(carActiveGuidanceContext)

@@ -47,16 +47,15 @@ class CarRoutePreviewScreen(
     private val placesLayerUtil: PlacesListOnMapLayerUtil = PlacesListOnMapLayerUtil(),
 ) : Screen(routePreviewCarContext.carContext) {
 
-    private val routesProvider = PreviewRoutesProvider(navigationRoutes)
+    private val carRoutesProvider = PreviewCarRoutesProvider(navigationRoutes)
     var selectedIndex = 0
-    val carRouteLine = CarRouteLine(routePreviewCarContext.mainCarContext, routesProvider)
+    val carRouteLine = CarRouteLine(routePreviewCarContext.mainCarContext, carRoutesProvider)
     val carLocationRenderer = CarLocationRenderer(routePreviewCarContext.mainCarContext)
     val carSpeedLimitRenderer = CarSpeedLimitRenderer(routePreviewCarContext.mainCarContext)
     val carNavigationCamera = CarNavigationCamera(
-        routePreviewCarContext.mapboxNavigation,
-        CarCameraMode.OVERVIEW,
-        CarCameraMode.FOLLOWING,
-        routesProvider,
+        initialCarCameraMode = CarCameraMode.OVERVIEW,
+        alternativeCarCameraMode = CarCameraMode.FOLLOWING,
+        carRoutesProvider = carRoutesProvider,
     )
 
     private val backPressCallback = object : OnBackPressedCallback(true) {
@@ -155,9 +154,9 @@ class CarRoutePreviewScreen(
                     val swap = newRouteOrder[0]
                     newRouteOrder[0] = newRouteOrder[index]
                     newRouteOrder[index] = swap
-                    routesProvider.routes = newRouteOrder
+                    carRoutesProvider.updateRoutes(newRouteOrder)
                 } else {
-                    routesProvider.routes = navigationRoutes
+                    carRoutesProvider.updateRoutes(navigationRoutes)
                 }
             }
         }
@@ -183,7 +182,7 @@ class CarRoutePreviewScreen(
                     .setTitle(carContext.getString(R.string.car_action_preview_navigate_button))
                     .setOnClickListener {
                         routePreviewCarContext.mapboxNavigation.setNavigationRoutes(
-                            routesProvider.routes
+                            carRoutesProvider.navigationRoutes.value
                         )
                         MapboxCarApp.updateCarAppState(ActiveGuidanceState)
                     }

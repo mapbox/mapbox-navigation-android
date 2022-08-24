@@ -339,7 +339,7 @@ package com.mapbox.androidauto.car.navigation {
   }
 
   public final class CarNavigationCamera implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
-    ctor public CarNavigationCamera(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation, com.mapbox.androidauto.car.navigation.CarCameraMode initialCarCameraMode, com.mapbox.androidauto.car.navigation.CarCameraMode? alternativeCarCameraMode, com.mapbox.maps.CameraOptions? initialCameraOptions = CameraOptions.<init>().zoom(DEFAULT_INITIAL_ZOOM).build());
+    ctor public CarNavigationCamera(com.mapbox.androidauto.car.navigation.CarCameraMode initialCarCameraMode, com.mapbox.androidauto.car.navigation.CarCameraMode? alternativeCarCameraMode, com.mapbox.androidauto.car.routes.CarRoutesProvider carRoutesProvider = com.mapbox.androidauto.car.routes.NavigationCarRoutesProvider(), com.mapbox.maps.CameraOptions? initialCameraOptions = CameraOptions.<init>().zoom(DEFAULT_INITIAL_ZOOM).build());
     method public boolean followingZoomUpdatesAllowed();
     method public com.mapbox.maps.extension.androidauto.DefaultMapboxCarMapGestureHandler getGestureHandler();
     method public kotlinx.coroutines.flow.StateFlow<com.mapbox.androidauto.car.navigation.CarCameraMode> getNextCameraMode();
@@ -610,7 +610,7 @@ package com.mapbox.androidauto.car.placeslistonmap {
 package com.mapbox.androidauto.car.preview {
 
   public final class CarRouteLine implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
-    ctor public CarRouteLine(com.mapbox.androidauto.car.MainCarContext mainCarContext);
+    ctor public CarRouteLine(com.mapbox.androidauto.car.MainCarContext mainCarContext, com.mapbox.androidauto.car.routes.CarRoutesProvider carRoutesProvider = com.mapbox.androidauto.car.routes.NavigationCarRoutesProvider());
     method public com.mapbox.androidauto.car.MainCarContext getMainCarContext();
     method public void onAttached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
     method public void onDetached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
@@ -653,6 +653,13 @@ package com.mapbox.androidauto.car.preview {
     method public void onUnknownCurrentLocation();
   }
 
+  public final class PreviewCarRoutesProvider implements com.mapbox.androidauto.car.routes.CarRoutesProvider {
+    ctor public PreviewCarRoutesProvider(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    method public kotlinx.coroutines.flow.StateFlow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> getNavigationRoutes();
+    method public void updateRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    property public kotlinx.coroutines.flow.StateFlow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> navigationRoutes;
+  }
+
   public final class RoutePreviewCarContext {
     method public com.mapbox.androidauto.car.MainCarContext component1();
     method public com.mapbox.androidauto.car.preview.RoutePreviewCarContext copy(com.mapbox.androidauto.car.MainCarContext mainCarContext);
@@ -668,6 +675,21 @@ package com.mapbox.androidauto.car.preview {
     property public final com.mapbox.androidauto.car.MainCarContext mainCarContext;
     property public final com.mapbox.maps.extension.androidauto.MapboxCarMap mapboxCarMap;
     property public final com.mapbox.navigation.core.MapboxNavigation mapboxNavigation;
+  }
+
+}
+
+package com.mapbox.androidauto.car.routes {
+
+  public interface CarRoutesProvider {
+    method public kotlinx.coroutines.flow.Flow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> getNavigationRoutes();
+    property public abstract kotlinx.coroutines.flow.Flow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> navigationRoutes;
+  }
+
+  public final class NavigationCarRoutesProvider implements com.mapbox.androidauto.car.routes.CarRoutesProvider {
+    ctor public NavigationCarRoutesProvider();
+    method public kotlinx.coroutines.flow.Flow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> getNavigationRoutes();
+    property public kotlinx.coroutines.flow.Flow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> navigationRoutes;
   }
 
 }
