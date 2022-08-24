@@ -31,11 +31,7 @@ class MainCarScreen(
         CarCameraMode.FOLLOWING,
         alternativeCarCameraMode = null,
     )
-    private val roadLabelSurfaceLayer = RoadLabelSurfaceLayer(
-        mainCarContext.carContext,
-        mainCarContext.mapboxNavigation,
-    )
-
+    private val roadLabelSurfaceLayer = RoadLabelSurfaceLayer(carContext)
     private val mainActionStrip = MainActionStrip(this, mainCarContext)
     private val mapActionStripBuilder = MainMapActionStrip(this, carNavigationCamera)
 
