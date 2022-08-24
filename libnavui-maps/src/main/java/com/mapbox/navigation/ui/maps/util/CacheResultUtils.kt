@@ -72,11 +72,9 @@ internal object CacheResultUtils {
         operator fun invoke(k: K): R {
             synchronized(cache) {
                 return cache[k] ?: run {
-                    val r = k(f)
-                    if (cache.get(k) == null) {
-                        cache.put(k, r)
+                    k(f).also {
+                        cache.put(k, it)
                     }
-                    r
                 }
             }
         }
