@@ -21,14 +21,13 @@ import kotlinx.coroutines.launch
 internal class TripProgressComponent(
     val store: Store,
     @StyleRes val styles: Int,
-    val tripProgressView: MapboxTripProgressView
+    val distanceFormatterOptions: DistanceFormatterOptions,
+    private val tripProgressView: MapboxTripProgressView
 ) : UIComponent() {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
         tripProgressView.updateStyle(styles)
-        val distanceFormatterOptions =
-            DistanceFormatterOptions.Builder(tripProgressView.context).build()
         val tripProgressFormatter = TripProgressUpdateFormatter
             .Builder(tripProgressView.context)
             .distanceRemainingFormatter(

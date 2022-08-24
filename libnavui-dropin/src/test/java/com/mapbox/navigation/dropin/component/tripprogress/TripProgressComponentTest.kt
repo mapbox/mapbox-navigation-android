@@ -4,6 +4,7 @@ import android.os.Build
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -78,6 +79,7 @@ class TripProgressComponentTest {
         TripProgressComponent(
             store,
             R.style.DropInStyleTripProgressView,
+            DistanceFormatterOptions.Builder(mockk(relaxed = true)).build(),
             tripProgressView
         ).onAttached(mapboxNavigation)
 
@@ -108,6 +110,7 @@ class TripProgressComponentTest {
         TripProgressComponent(
             store,
             R.style.DropInStyleTripProgressView,
+            DistanceFormatterOptions.Builder(mockk(relaxed = true)).build(),
             tripProgressView
         ).onAttached(mapboxNavigation)
 

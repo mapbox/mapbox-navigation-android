@@ -1,9 +1,11 @@
 package com.mapbox.navigation.ui.maneuver.internal
 
+import android.os.Build
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -33,7 +35,12 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.N])
 @ExperimentalCoroutinesApi
 @ExperimentalPreviewMapboxNavigationAPI
 class ManeuverComponentTest {
@@ -106,7 +113,9 @@ class ManeuverComponentTest {
                     userId = DirectionsCriteria.PROFILE_DEFAULT_USER,
                     styleId = "navigation-day-v1",
                     options = maneuverViewOptions,
-                    maneuverApi = mockManeuverApi
+                    maneuverApi = mockManeuverApi,
+                    formatterOptions =
+                    DistanceFormatterOptions.Builder(mockk(relaxed = true)).build()
                 )
 
             maneuverComponent.onAttached(mockNavigation)
@@ -143,7 +152,9 @@ class ManeuverComponentTest {
                     userId = DirectionsCriteria.PROFILE_DEFAULT_USER,
                     styleId = "navigation-day-v1",
                     options = maneuverViewOptions,
-                    maneuverApi = mockManeuverApi
+                    maneuverApi = mockManeuverApi,
+                    formatterOptions =
+                    DistanceFormatterOptions.Builder(mockk(relaxed = true)).build()
                 )
 
             maneuverComponent.onAttached(mockNavigation).also {
@@ -182,7 +193,9 @@ class ManeuverComponentTest {
                     userId = DirectionsCriteria.PROFILE_DEFAULT_USER,
                     styleId = "navigation-day-v1",
                     options = maneuverViewOptions,
-                    maneuverApi = mockManeuverApi
+                    maneuverApi = mockManeuverApi,
+                    formatterOptions =
+                    DistanceFormatterOptions.Builder(mockk(relaxed = true)).build()
                 )
 
             maneuverComponent.onAttached(mockNavigation)
@@ -217,7 +230,9 @@ class ManeuverComponentTest {
                     userId = DirectionsCriteria.PROFILE_DEFAULT_USER,
                     styleId = "navigation-day-v1",
                     options = maneuverViewOptions,
-                    maneuverApi = mockManeuverApi
+                    maneuverApi = mockManeuverApi,
+                    formatterOptions =
+                    DistanceFormatterOptions.Builder(mockk(relaxed = true)).build()
                 )
 
             maneuverComponent.onAttached(mockNavigation)

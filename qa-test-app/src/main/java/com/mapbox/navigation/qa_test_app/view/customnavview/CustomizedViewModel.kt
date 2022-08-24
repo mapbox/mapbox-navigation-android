@@ -15,4 +15,5 @@ class CustomizedViewModel : ViewModel() {
     val isInfoPanelHideable = MutableLiveData(false)
     val infoPanelStateOverride = MutableLiveData("--")
     val fullScreen = MutableLiveData(false)
+    val distanceFormatterMetric = MutableLiveData(false)
 }

@@ -74,6 +74,15 @@
                 android:text="Use custom views"
                 android:textAllCaps="true" />
 
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/useMetric"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingVertical="10dp"
+                android:text="use metric"
+                android:textAllCaps="true" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

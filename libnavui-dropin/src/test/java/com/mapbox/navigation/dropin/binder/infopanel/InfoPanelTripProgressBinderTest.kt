@@ -4,6 +4,7 @@ import android.content.Context
 import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.internal.extensions.ReloadingComponent
 import io.mockk.MockKAnnotations
@@ -39,6 +40,9 @@ internal class InfoPanelTripProgressBinderTest {
     @Test
     fun `bind should return TripProgressComponent`() {
         every { mockNavContext.styles.tripProgressStyle } returns MutableStateFlow(1)
+        every { mockNavContext.options.distanceFormatterOptions } returns MutableStateFlow(
+            DistanceFormatterOptions.Builder(ctx).build()
+        )
         val result = sut.bind(FrameLayout(ctx))
 
         assertTrue(
