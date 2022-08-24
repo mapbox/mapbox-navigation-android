@@ -518,27 +518,23 @@ package com.mapbox.androidauto.car.navigation.roadlabel {
   }
 
   public final class RoadLabelSurfaceLayer extends com.mapbox.androidauto.surfacelayer.CarSurfaceLayer {
-    ctor public RoadLabelSurfaceLayer(androidx.car.app.CarContext carContext, com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    ctor public RoadLabelSurfaceLayer(androidx.car.app.CarContext carContext);
     method public java.util.List<com.mapbox.androidauto.surfacelayer.textview.CarScene2d> children();
     method public androidx.car.app.CarContext getCarContext();
-    method public com.mapbox.navigation.core.MapboxNavigation getMapboxNavigation();
     property public final androidx.car.app.CarContext carContext;
-    property public final com.mapbox.navigation.core.MapboxNavigation mapboxNavigation;
   }
 
-  public abstract class RoadNameObserver implements com.mapbox.navigation.core.trip.session.LocationObserver {
-    ctor public RoadNameObserver(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation, com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi routeShieldApi, com.mapbox.androidauto.car.navigation.MapUserStyleObserver mapUserStyleObserver);
+  public abstract class RoadNameObserver implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    ctor public RoadNameObserver(com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi routeShieldApi, com.mapbox.androidauto.car.navigation.MapUserStyleObserver mapUserStyleObserver);
     method public final java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> getCurrentRoad();
     method public final java.util.List<com.mapbox.navigation.ui.shield.model.RouteShield> getCurrentShields();
-    method public final com.mapbox.navigation.core.MapboxNavigation getMapboxNavigation();
-    method public void onNewLocationMatcherResult(com.mapbox.navigation.core.trip.session.LocationMatcherResult locationMatcherResult);
-    method public void onNewRawLocation(android.location.Location rawLocation);
+    method public final void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public final void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     method public abstract void onRoadUpdate(java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> road, java.util.List<? extends com.mapbox.navigation.ui.shield.model.RouteShield> shields);
     method public final void setCurrentRoad(java.util.List<com.mapbox.navigation.base.road.model.RoadComponent>);
     method public final void setCurrentShields(java.util.List<? extends com.mapbox.navigation.ui.shield.model.RouteShield>);
     property public final java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> currentRoad;
     property public final java.util.List<com.mapbox.navigation.ui.shield.model.RouteShield> currentShields;
-    property public final com.mapbox.navigation.core.MapboxNavigation mapboxNavigation;
   }
 
 }

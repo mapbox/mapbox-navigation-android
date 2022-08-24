@@ -18,7 +18,7 @@ import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.base.road.model.RoadComponent
-import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi
 import com.mapbox.navigation.ui.shield.model.RouteShield
 
@@ -32,7 +32,6 @@ import com.mapbox.navigation.ui.shield.model.RouteShield
 @OptIn(MapboxExperimental::class)
 class RoadLabelSurfaceLayer(
     val carContext: CarContext,
-    val mapboxNavigation: MapboxNavigation,
 ) : CarSurfaceLayer() {
 
     private val roadLabelRenderer = RoadLabelRenderer(carContext.resources)
@@ -42,7 +41,6 @@ class RoadLabelSurfaceLayer(
     private var styleLoadedListener: OnStyleLoadedListener? = null
 
     private val roadNameObserver = object : RoadNameObserver(
-        mapboxNavigation,
         routeShieldApi,
         mapUserStyleObserver
     ) {
@@ -79,15 +77,14 @@ class RoadLabelSurfaceLayer(
         }
 
         mapUserStyleObserver.onAttached(mapboxCarMapSurface)
-        mapboxNavigation.registerLocationObserver(roadNameObserver)
+        MapboxNavigationApp.registerObserver(roadNameObserver)
     }
 
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
         logAndroidAuto("RoadLabelSurfaceLayer carMapSurface detached")
-        mapboxCarMapSurface.handleStyleOnDetached(styleLoadedListener)?.let {
-            it.removeStyleLayer(CAR_NAVIGATION_VIEW_LAYER_ID)
-        }
-        mapboxNavigation.unregisterLocationObserver(roadNameObserver)
+        mapboxCarMapSurface.handleStyleOnDetached(styleLoadedListener)
+            ?.removeStyleLayer(CAR_NAVIGATION_VIEW_LAYER_ID)
+        MapboxNavigationApp.unregisterObserver(roadNameObserver)
         routeShieldApi.cancel()
         mapUserStyleObserver.onDetached(mapboxCarMapSurface)
         super.onDetached(mapboxCarMapSurface)

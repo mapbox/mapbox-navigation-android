@@ -52,11 +52,7 @@ class ActiveGuidanceScreen(
         CarCameraMode.FOLLOWING,
         CarCameraMode.OVERVIEW,
     )
-    private val roadLabelSurfaceLayer = RoadLabelSurfaceLayer(
-        carActiveGuidanceContext.carContext,
-        carActiveGuidanceContext.mapboxNavigation,
-    )
-
+    private val roadLabelSurfaceLayer = RoadLabelSurfaceLayer(carContext)
     private val carRouteProgressObserver = CarNavigationInfoObserver(carActiveGuidanceContext)
     private val mapActionStripBuilder = MainMapActionStrip(this, carNavigationCamera)
 
