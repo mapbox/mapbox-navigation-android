@@ -11,6 +11,8 @@ import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
@@ -19,7 +21,6 @@ import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitio
 
 @OptIn(MapboxExperimental::class)
 class CarLocationsOverviewCamera(
-    val mapboxNavigation: MapboxNavigation,
     private val initialCameraOptions: CameraOptions = CameraOptions.Builder()
         .zoom(DEFAULT_INITIAL_ZOOM)
         .build()
@@ -60,6 +61,16 @@ class CarLocationsOverviewCamera(
         }
     }
 
+    private val navigationObserver = object : MapboxNavigationObserver {
+        override fun onAttached(mapboxNavigation: MapboxNavigation) {
+            mapboxNavigation.registerLocationObserver(locationObserver)
+        }
+
+        override fun onDetached(mapboxNavigation: MapboxNavigation) {
+            mapboxNavigation.unregisterLocationObserver(locationObserver)
+        }
+    }
+
     override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
         super.onAttached(mapboxCarMapSurface)
         this.mapboxCarMapSurface = mapboxCarMapSurface
@@ -77,7 +88,7 @@ class CarLocationsOverviewCamera(
             viewportDataSource
         )
 
-        mapboxNavigation.registerLocationObserver(locationObserver)
+        MapboxNavigationApp.registerObserver(navigationObserver)
     }
 
     override fun onVisibleAreaChanged(visibleArea: Rect, edgeInsets: EdgeInsets) {
@@ -98,7 +109,7 @@ class CarLocationsOverviewCamera(
         super.onDetached(mapboxCarMapSurface)
         logAndroidAuto("LocationsOverviewCamera detached $mapboxCarMapSurface")
 
-        mapboxNavigation.unregisterLocationObserver(locationObserver)
+        MapboxNavigationApp.unregisterObserver(navigationObserver)
         this.mapboxCarMapSurface = null
         isLocationInitialized = false
     }

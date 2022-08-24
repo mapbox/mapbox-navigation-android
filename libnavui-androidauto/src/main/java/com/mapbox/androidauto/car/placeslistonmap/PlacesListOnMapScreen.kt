@@ -54,7 +54,7 @@ class PlacesListOnMapScreen(
 
     private val placeRecords by lazy { CopyOnWriteArrayList<PlaceRecord>() }
     private val jobControl by lazy { mainCarContext.getJobControl() }
-    private val carNavigationCamera = CarLocationsOverviewCamera(mainCarContext.mapboxNavigation)
+    private val carNavigationCamera = CarLocationsOverviewCamera()
     private val locationRenderer = CarLocationRenderer(mainCarContext)
     private var styleLoadedListener: OnStyleLoadedListener? = null
 
