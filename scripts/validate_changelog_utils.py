@@ -1,6 +1,7 @@
 import re
 
 changelog_diff_regex = "^([\s]*)diff --git a(.*)\/CHANGELOG.md b(.*)\/CHANGELOG.md"
+changelog_diff_filename_regex = re.compile("([\s]*)diff --git a\/(.*) b\/(.*)")
 changelog_filename = "CHANGELOG.md"
 any_diff_substring = "diff --git"
 diff_file_start_regex = "^([\s]*)\@\@(.*)\@\@"
@@ -67,31 +68,47 @@ def check_has_changelog_diff(diff):
         raise Exception("Add a non-empty changelog entry in a CHANGELOG.md or add a `skip changelog` label if not applicable.")
 
 def parse_contents_url(files_response_json):
+    content_urls = {}
     for file_json in files_response_json:
-        if file_json["filename"] == changelog_filename:
-            return file_json["contents_url"]
-    raise Exception("No CHANGELOG.md file in PR files")
+        filename = file_json["filename"]
+        if filename == changelog_filename or filename.endswith("/" + changelog_filename):
+            content_urls[filename] = file_json["contents_url"]
+    if len(content_urls) == 0:
+        raise Exception("No CHANGELOG.md file in PR files")
+    return content_urls
 
-def extract_added_lines(diff):
-    changelog_diff_matches = re.search(changelog_diff_regex, diff, re.MULTILINE)
-    diff_starting_at_changelog = diff[changelog_diff_matches.end():]
-    first_changelog_diff = re.search(diff_file_start_regex, diff_starting_at_changelog, re.MULTILINE)
-    first_changelog_diff_index = 0
-    if first_changelog_diff:
-        first_changelog_diff_index = first_changelog_diff.end()
-    last_reachable_index = diff_starting_at_changelog.find(any_diff_substring, first_changelog_diff_index)
-    if last_reachable_index == -1:
-        last_reachable_index = len(diff_starting_at_changelog)
-    diff_searchable = diff_starting_at_changelog[first_changelog_diff_index:last_reachable_index]
+def extract_added_lines(whole_diff):
+    added_lines = {}
+    diff = whole_diff
+    while len(diff) > 0:
+        changelog_diff_matches = re.search(changelog_diff_regex, diff, re.MULTILINE)
+        if not changelog_diff_matches:
+            break
+        matched_changelog_diff = diff[changelog_diff_matches.start():changelog_diff_matches.end()]
+        filename = re.match(changelog_diff_filename_regex, matched_changelog_diff).group(2)
 
-    diff_lines = diff_searchable.split('\n')
-    return list(map(remove_plus, list(filter(is_line_added, diff_lines))))
+        diff_starting_at_changelog = diff[changelog_diff_matches.end():]
+        first_changelog_diff = re.search(diff_file_start_regex, diff_starting_at_changelog, re.MULTILINE)
+        first_changelog_diff_index = 0
+        if first_changelog_diff:
+            first_changelog_diff_index = first_changelog_diff.end()
+        last_reachable_index = diff_starting_at_changelog.find(any_diff_substring, first_changelog_diff_index)
+        if last_reachable_index == -1:
+            last_reachable_index = len(diff_starting_at_changelog)
+        diff_searchable = diff_starting_at_changelog[first_changelog_diff_index:last_reachable_index]
 
-def check_contains_pr_link(added_lines):
-    for added_line in added_lines:
-        pr_link_matches = re.search(pr_link_regex, added_line)
-        if not pr_link_matches:
-            raise Exception("The changelog entry \"" + added_line + "\" should contain a link to the original PR that matches `" + pr_link_regex + "`")
+        diff_lines = diff_searchable.split('\n')
+        added_lines[filename] = list(map(remove_plus, list(filter(is_line_added, diff_lines))))
+        diff = diff[last_reachable_index:]
+    return added_lines
+
+def check_contains_pr_link(added_lines_by_file):
+    for filename in added_lines_by_file:
+        for added_line in added_lines_by_file[filename]:
+            if len(added_line.strip()) > 0:
+                pr_link_matches = re.search(pr_link_regex, added_line)
+                if not pr_link_matches:
+                    raise Exception("The changelog entry \"" + added_line + "\"  in \"" + filename + "\" should contain a link to the original PR that matches `" + pr_link_regex + "`")
 
 def check_version_section(content, added_lines):
     lines = content.split("\n")
