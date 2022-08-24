@@ -76,15 +76,7 @@ package com.mapbox.androidauto.car {
 
   public final class MainCarScreen extends androidx.car.app.Screen {
     ctor public MainCarScreen(com.mapbox.androidauto.car.MainCarContext mainCarContext);
-    method public com.mapbox.androidauto.car.location.CarLocationRenderer getCarLocationRenderer();
-    method public com.mapbox.androidauto.car.navigation.CarNavigationCamera getCarNavigationCamera();
-    method public com.mapbox.androidauto.car.preview.CarRouteLine getCarRouteLine();
-    method public com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer getCarSpeedLimitRenderer();
     method public androidx.car.app.model.Template onGetTemplate();
-    property public final com.mapbox.androidauto.car.location.CarLocationRenderer carLocationRenderer;
-    property public final com.mapbox.androidauto.car.navigation.CarNavigationCamera carNavigationCamera;
-    property public final com.mapbox.androidauto.car.preview.CarRouteLine carRouteLine;
-    property public final com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer carSpeedLimitRenderer;
   }
 
   public final class MainMapActionStrip {
@@ -287,15 +279,7 @@ package com.mapbox.androidauto.car.navigation {
 
   public final class ActiveGuidanceScreen extends androidx.car.app.Screen {
     ctor public ActiveGuidanceScreen(com.mapbox.androidauto.car.navigation.CarActiveGuidanceCarContext carActiveGuidanceContext, java.util.List<? extends com.mapbox.androidauto.car.action.MapboxActionProvider> actionProviders, com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil placesLayerUtil = com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil());
-    method public com.mapbox.androidauto.car.location.CarLocationRenderer getCarLocationRenderer();
-    method public com.mapbox.androidauto.car.navigation.CarNavigationCamera getCarNavigationCamera();
-    method public com.mapbox.androidauto.car.preview.CarRouteLine getCarRouteLine();
-    method public com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer getCarSpeedLimitRenderer();
     method public androidx.car.app.model.Template onGetTemplate();
-    property public final com.mapbox.androidauto.car.location.CarLocationRenderer carLocationRenderer;
-    property public final com.mapbox.androidauto.car.navigation.CarNavigationCamera carNavigationCamera;
-    property public final com.mapbox.androidauto.car.preview.CarRouteLine carRouteLine;
-    property public final com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer carSpeedLimitRenderer;
   }
 
   public final class CarActiveGuidanceCarContext {
@@ -629,17 +613,9 @@ package com.mapbox.androidauto.car.preview {
 
   @com.mapbox.maps.MapboxExperimental public final class CarRoutePreviewScreen extends androidx.car.app.Screen {
     ctor public CarRoutePreviewScreen(com.mapbox.androidauto.car.preview.RoutePreviewCarContext routePreviewCarContext, com.mapbox.androidauto.car.search.PlaceRecord placeRecord, java.util.List<com.mapbox.navigation.base.route.NavigationRoute> navigationRoutes, com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil placesLayerUtil = com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil());
-    method public com.mapbox.androidauto.car.location.CarLocationRenderer getCarLocationRenderer();
-    method public com.mapbox.androidauto.car.navigation.CarNavigationCamera getCarNavigationCamera();
-    method public com.mapbox.androidauto.car.preview.CarRouteLine getCarRouteLine();
-    method public com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer getCarSpeedLimitRenderer();
     method public int getSelectedIndex();
     method public androidx.car.app.model.Template onGetTemplate();
     method public void setSelectedIndex(int);
-    property public final com.mapbox.androidauto.car.location.CarLocationRenderer carLocationRenderer;
-    property public final com.mapbox.androidauto.car.navigation.CarNavigationCamera carNavigationCamera;
-    property public final com.mapbox.androidauto.car.preview.CarRouteLine carRouteLine;
-    property public final com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer carSpeedLimitRenderer;
     property public final int selectedIndex;
   }
 

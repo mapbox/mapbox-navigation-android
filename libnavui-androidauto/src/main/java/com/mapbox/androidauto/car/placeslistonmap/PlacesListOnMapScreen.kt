@@ -31,6 +31,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
+import com.mapbox.maps.extension.androidauto.mapboxMapInstaller
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.base.route.NavigationRoute
 import kotlinx.coroutines.Dispatchers
@@ -55,7 +56,6 @@ class PlacesListOnMapScreen(
     private val placeRecords by lazy { CopyOnWriteArrayList<PlaceRecord>() }
     private val jobControl by lazy { mainCarContext.getJobControl() }
     private val carNavigationCamera = CarLocationsOverviewCamera(mainCarContext.mapboxNavigation)
-    private val locationRenderer = CarLocationRenderer(mainCarContext)
     private var styleLoadedListener: OnStyleLoadedListener? = null
 
     private val surfaceListener = object : MapboxCarMapObserver {
@@ -111,37 +111,19 @@ class PlacesListOnMapScreen(
     }
 
     init {
+        mapboxMapInstaller(mainCarContext.mapboxCarMap)
+            .onResumed(
+                surfaceListener,
+                carNavigationCamera,
+                CarLocationRenderer(mainCarContext)
+            )
+            .install()
+
         lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onCreate(owner: LifecycleOwner) {
-                logAndroidAuto("PlacesListOnMapScreen onCreate")
-            }
-
-            override fun onStart(owner: LifecycleOwner) {
-                logAndroidAuto("PlacesListOnMapScreen onStart")
-            }
-
-            override fun onResume(owner: LifecycleOwner) {
-                logAndroidAuto("PlacesListOnMapScreen onResume")
-                mainCarContext.mapboxCarMap.registerObserver(surfaceListener)
-                mainCarContext.mapboxCarMap.registerObserver(carNavigationCamera)
-                mainCarContext.mapboxCarMap.registerObserver(locationRenderer)
-            }
-
             override fun onPause(owner: LifecycleOwner) {
                 logAndroidAuto("PlacesListOnMapScreen onPause")
                 placesProvider.cancel()
                 jobControl.job.cancelChildren()
-                mainCarContext.mapboxCarMap.unregisterObserver(locationRenderer)
-                mainCarContext.mapboxCarMap.unregisterObserver(carNavigationCamera)
-                mainCarContext.mapboxCarMap.unregisterObserver(surfaceListener)
-            }
-
-            override fun onStop(owner: LifecycleOwner) {
-                logAndroidAuto("PlacesListOnMapScreen onStop")
-            }
-
-            override fun onDestroy(owner: LifecycleOwner) {
-                logAndroidAuto("PlacesListOnMapScreen onDestroy")
             }
         })
     }

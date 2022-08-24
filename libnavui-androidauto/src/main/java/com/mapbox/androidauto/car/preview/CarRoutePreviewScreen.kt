@@ -32,6 +32,7 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
+import com.mapbox.maps.extension.androidauto.mapboxMapInstaller
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.base.route.NavigationRoute
 
@@ -49,15 +50,6 @@ class CarRoutePreviewScreen(
 
     private val routesProvider = PreviewRoutesProvider(navigationRoutes)
     var selectedIndex = 0
-    val carRouteLine = CarRouteLine(routePreviewCarContext.mainCarContext, routesProvider)
-    val carLocationRenderer = CarLocationRenderer(routePreviewCarContext.mainCarContext)
-    val carSpeedLimitRenderer = CarSpeedLimitRenderer(routePreviewCarContext.mainCarContext)
-    val carNavigationCamera = CarNavigationCamera(
-        routePreviewCarContext.mapboxNavigation,
-        CarCameraMode.OVERVIEW,
-        CarCameraMode.FOLLOWING,
-        routesProvider,
-    )
 
     private val backPressCallback = object : OnBackPressedCallback(true) {
 
@@ -101,28 +93,31 @@ class CarRoutePreviewScreen(
 
     init {
         logAndroidAuto("CarRoutePreviewScreen constructor")
+        mapboxMapInstaller(routePreviewCarContext.mapboxCarMap)
+            .onResumed(
+                CarLocationRenderer(routePreviewCarContext.mainCarContext),
+                CarSpeedLimitRenderer(routePreviewCarContext.mainCarContext),
+                CarNavigationCamera(
+                    routePreviewCarContext.mapboxNavigation,
+                    CarCameraMode.OVERVIEW,
+                    CarCameraMode.FOLLOWING,
+                    routesProvider,
+                ),
+                CarRouteLine(routePreviewCarContext.mainCarContext, routesProvider),
+                surfaceListener,
+            )
+            .install()
+
         lifecycle.muteAudioGuidance()
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onResume(owner: LifecycleOwner) {
                 logAndroidAuto("CarRoutePreviewScreen onResume")
-                routePreviewCarContext.carContext.onBackPressedDispatcher.addCallback(
-                    backPressCallback
-                )
-                routePreviewCarContext.mapboxCarMap.registerObserver(carLocationRenderer)
-                routePreviewCarContext.mapboxCarMap.registerObserver(carSpeedLimitRenderer)
-                routePreviewCarContext.mapboxCarMap.registerObserver(carNavigationCamera)
-                routePreviewCarContext.mapboxCarMap.registerObserver(carRouteLine)
-                routePreviewCarContext.mapboxCarMap.registerObserver(surfaceListener)
+                carContext.onBackPressedDispatcher.addCallback(backPressCallback)
             }
 
             override fun onPause(owner: LifecycleOwner) {
                 logAndroidAuto("CarRoutePreviewScreen onPause")
                 backPressCallback.remove()
-                routePreviewCarContext.mapboxCarMap.unregisterObserver(carLocationRenderer)
-                routePreviewCarContext.mapboxCarMap.unregisterObserver(carSpeedLimitRenderer)
-                routePreviewCarContext.mapboxCarMap.unregisterObserver(carNavigationCamera)
-                routePreviewCarContext.mapboxCarMap.unregisterObserver(carRouteLine)
-                routePreviewCarContext.mapboxCarMap.unregisterObserver(surfaceListener)
             }
         })
     }
