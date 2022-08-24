@@ -27,11 +27,13 @@ internal class InfoPanelTripProgressBinder(
 
         val binding = MapboxInfoPanelTripProgressLayoutBinding.bind(viewGroup)
         return reloadOnChange(
-            navigationViewContext.styles.tripProgressStyle
-        ) { styles ->
+            navigationViewContext.styles.tripProgressStyle,
+            navigationViewContext.options.distanceFormatterOptions
+        ) { styles, formatterOptions ->
             TripProgressComponent(
                 store = navigationViewContext.store,
                 styles = styles,
+                distanceFormatterOptions = formatterOptions,
                 tripProgressView = binding.tripProgressView
             )
         }

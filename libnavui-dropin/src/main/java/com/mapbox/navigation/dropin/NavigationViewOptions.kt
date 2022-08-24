@@ -2,6 +2,7 @@ package com.mapbox.navigation.dropin
 
 import android.content.Context
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteArrowOptions
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
 import com.mapbox.navigation.ui.maps.NavigationStyles
@@ -33,6 +34,8 @@ internal class NavigationViewOptions(context: Context) {
         MutableStateFlow(false)
     private var _infoPanelForcedState: MutableStateFlow<Int> =
         MutableStateFlow(0)
+    private var _distanceFormatterOptions: MutableStateFlow<DistanceFormatterOptions> =
+        MutableStateFlow(DistanceFormatterOptions.Builder(context).build())
 
     var mapStyleUriDay: StateFlow<String> = _mapStyleUriDay.asStateFlow()
     var mapStyleUriNight: StateFlow<String> = _mapStyleUriNight.asStateFlow()
@@ -42,6 +45,8 @@ internal class NavigationViewOptions(context: Context) {
     val enableMapLongClickIntercept: StateFlow<Boolean> = _enableMapLongClickIntercept.asStateFlow()
     val isInfoPanelHideable: StateFlow<Boolean> = _isInfoPanelHideable.asStateFlow()
     val infoPanelForcedState: StateFlow<Int> = _infoPanelForcedState.asStateFlow()
+    val distanceFormatterOptions: StateFlow<DistanceFormatterOptions> =
+        _distanceFormatterOptions.asStateFlow()
 
     fun applyCustomization(customization: ViewOptionsCustomization) {
         customization.mapStyleUriDay?.also { _mapStyleUriDay.tryEmit(it) }
@@ -52,5 +57,6 @@ internal class NavigationViewOptions(context: Context) {
         customization.enableMapLongClickIntercept?.also { _enableMapLongClickIntercept.tryEmit(it) }
         customization.isInfoPanelHideable?.also { _isInfoPanelHideable.tryEmit(it) }
         customization.infoPanelForcedState?.also { _infoPanelForcedState.tryEmit(it) }
+        customization.distanceFormatterOptions?.also { _distanceFormatterOptions.tryEmit(it) }
     }
 }

@@ -33,6 +33,7 @@ internal class ManeuverCoordinator(
                     if (navigationState == NavigationState.ActiveNavigation) {
                         it ?: ManeuverViewBinder(
                             context.mapStyleLoader.loadedMapStyle,
+                            context.options.distanceFormatterOptions,
                             context.styles.maneuverViewOptions,
                         )
                     } else {

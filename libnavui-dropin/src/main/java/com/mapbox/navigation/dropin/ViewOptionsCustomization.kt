@@ -4,6 +4,7 @@ import android.content.Context
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
@@ -70,6 +71,11 @@ class ViewOptionsCustomization {
      * Set to `0` to restore the default behavior.
      */
     var infoPanelForcedState: Int? = null
+
+    /**
+     * Set to override [DistanceFormatterOptions]
+     */
+    var distanceFormatterOptions: DistanceFormatterOptions? = null
 
     companion object {
         /**

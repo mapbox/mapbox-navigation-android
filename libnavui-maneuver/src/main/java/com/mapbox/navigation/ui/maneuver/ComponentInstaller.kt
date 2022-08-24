@@ -1,6 +1,8 @@
 package com.mapbox.navigation.ui.maneuver
 
+import android.content.Context
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.ui.base.installer.ComponentInstaller
 import com.mapbox.navigation.ui.base.installer.Installation
 import com.mapbox.navigation.ui.maneuver.internal.ManeuverComponent
@@ -24,13 +26,14 @@ fun ComponentInstaller.maneuver(
     maneuverView: MapboxManeuverView,
     config: ManeuverConfig.() -> Unit = {}
 ): Installation {
-    val componentConfig = ManeuverConfig().apply(config)
+    val componentConfig = ManeuverConfig(maneuverView.context).apply(config)
     return component(
         ManeuverComponent(
             maneuverView = maneuverView,
             userId = componentConfig.userId,
             styleId = componentConfig.styleId,
-            componentConfig.options
+            componentConfig.options,
+            componentConfig.distanceFormatterOptions
         )
     )
 }
@@ -39,7 +42,7 @@ fun ComponentInstaller.maneuver(
  * Maneuver view component configuration class.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class ManeuverConfig internal constructor() {
+class ManeuverConfig internal constructor(context: Context) {
     /**
      * [userId]
      */
@@ -49,6 +52,12 @@ class ManeuverConfig internal constructor() {
      * [styleId] used by maps style.
      */
     var styleId: String? = null
+
+    /**
+     * [DistanceFormatterOptions] to be used by [MapboxManeuverView].
+     */
+    var distanceFormatterOptions: DistanceFormatterOptions =
+        DistanceFormatterOptions.Builder(context).build()
 
     /**
      * Options used to create [MapboxManeuverView] instance.

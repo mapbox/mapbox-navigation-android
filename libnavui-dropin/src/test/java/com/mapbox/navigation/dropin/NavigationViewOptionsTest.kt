@@ -6,6 +6,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -43,6 +45,7 @@ internal class NavigationViewOptionsTest {
         assertEquals(c.enableMapLongClickIntercept, sut.enableMapLongClickIntercept.value)
         assertEquals(c.isInfoPanelHideable, sut.isInfoPanelHideable.value)
         assertEquals(c.infoPanelForcedState, sut.infoPanelForcedState.value)
+        assertEquals(c.distanceFormatterOptions, sut.distanceFormatterOptions.value)
     }
 
     private fun customization() =
@@ -63,5 +66,9 @@ internal class NavigationViewOptionsTest {
             enableMapLongClickIntercept = false
             isInfoPanelHideable = true
             infoPanelForcedState = BottomSheetBehavior.STATE_EXPANDED
+            distanceFormatterOptions = DistanceFormatterOptions
+                .Builder(ctx)
+                .unitType(UnitType.METRIC)
+                .build()
         }
 }

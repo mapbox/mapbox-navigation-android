@@ -23,6 +23,8 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.dropin.ActionButtonDescription
 import com.mapbox.navigation.dropin.ActionButtonDescription.Position.END
 import com.mapbox.navigation.dropin.ActionButtonDescription.Position.START
@@ -189,6 +191,12 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             menuBinding.toggleIsInfoPanelHideable,
             viewModel.isInfoPanelHideable,
             ::toggleInfoPanelHiding
+        )
+
+        bindSwitch(
+            menuBinding.useMetric,
+            viewModel.distanceFormatterMetric,
+            ::toggleUseMetric
         )
 
         bindSpinner(
@@ -429,6 +437,21 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
     private fun toggleInfoPanelHiding(isHideable: Boolean) {
         binding.navigationView.customizeViewOptions {
             isInfoPanelHideable = isHideable
+        }
+    }
+
+    private fun toggleUseMetric(showMetric: Boolean) {
+        val options = DistanceFormatterOptions
+            .Builder(this@MapboxNavigationViewCustomizedActivity)
+            .build()
+        if (showMetric) {
+            binding.navigationView.customizeViewOptions {
+                distanceFormatterOptions = options.toBuilder().unitType(UnitType.METRIC).build()
+            }
+        } else {
+            binding.navigationView.customizeViewOptions {
+                distanceFormatterOptions = options.toBuilder().unitType(UnitType.IMPERIAL).build()
+            }
         }
     }
 

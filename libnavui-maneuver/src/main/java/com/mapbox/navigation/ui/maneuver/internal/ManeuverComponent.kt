@@ -22,10 +22,9 @@ class ManeuverComponent(
     val userId: String?,
     val styleId: String?,
     val options: ManeuverViewOptions,
+    private val formatterOptions: DistanceFormatterOptions,
     val maneuverApi: MapboxManeuverApi = MapboxManeuverApi(
-        MapboxDistanceFormatter(
-            DistanceFormatterOptions.Builder(maneuverView.context).build()
-        )
+        MapboxDistanceFormatter(formatterOptions)
     )
 ) : UIComponent() {
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
