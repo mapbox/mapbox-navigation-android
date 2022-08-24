@@ -330,13 +330,11 @@ package com.mapbox.androidauto.car.navigation {
   }
 
   public final class CarLocationsOverviewCamera implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
-    ctor public CarLocationsOverviewCamera(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation, com.mapbox.maps.CameraOptions initialCameraOptions = CameraOptions.<init>().zoom(DEFAULT_INITIAL_ZOOM).build());
-    method public com.mapbox.navigation.core.MapboxNavigation getMapboxNavigation();
+    ctor public CarLocationsOverviewCamera(com.mapbox.maps.CameraOptions initialCameraOptions = CameraOptions.<init>().zoom(DEFAULT_INITIAL_ZOOM).build());
     method public void onAttached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
     method public void onDetached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
     method public void onVisibleAreaChanged(android.graphics.Rect visibleArea, com.mapbox.maps.EdgeInsets edgeInsets);
     method public void updateWithLocations(java.util.List<com.mapbox.geojson.Point> points);
-    property public final com.mapbox.navigation.core.MapboxNavigation mapboxNavigation;
     field public static final double DEFAULT_INITIAL_ZOOM = 15.0;
   }
 

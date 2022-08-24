@@ -6,6 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 - Removed `MapboxNavigation` from `RoadNameObserver` and `RoadLabelSurfaceLayer` constructor. [#6224](https://github.com/mapbox/mapbox-navigation-android/pull/6224)
+- Removed `MapboxNavigation` form `CarLocationsOverviewCamera` constructor. [#6225](https://github.com/mapbox/mapbox-navigation-android/pull/6225)
 
 ## androidauto-v0.8.0 - Aug 18, 2022
 ### Changelog
