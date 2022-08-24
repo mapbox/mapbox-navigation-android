@@ -71,6 +71,13 @@ internal object MapboxRouteLineUtils {
             >,
         List<ExtractedRouteData>> by lazy { LruCache(3) }
 
+    private val extractRouteDataCacheDeDuped: LruCache<
+        CacheResultUtils.CacheResultKey2<
+            DirectionsRoute, (RouteLeg) -> List<String>?,
+            List<ExtractedRouteData>
+            >,
+        List<ExtractedRouteData>> by lazy { LruCache(3) }
+
     val layerGroup1SourceKey = RouteLineSourceKey(RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID)
     val layerGroup2SourceKey = RouteLineSourceKey(RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID)
     val layerGroup3SourceKey = RouteLineSourceKey(RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID)
@@ -544,7 +551,7 @@ internal object MapboxRouteLineUtils {
                     else -> true
                 }
             }
-        }.cacheResult(extractRouteDataCache)
+        }.cacheResult(extractRouteDataCacheDeDuped)
 
     /**
      * Extracts data from the [DirectionsRoute] in a format more useful to the route line
