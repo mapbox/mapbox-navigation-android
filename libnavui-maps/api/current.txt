@@ -591,10 +591,30 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.view {
 
 package com.mapbox.navigation.ui.maps.installer {
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CameraModeComponentConfig {
+    method public com.mapbox.navigation.ui.maps.camera.NavigationCamera? getNavigationCamera();
+    method public void setNavigationCamera(com.mapbox.navigation.ui.maps.camera.NavigationCamera?);
+    property public final com.mapbox.navigation.ui.maps.camera.NavigationCamera? navigationCamera;
+  }
+
   public final class ComponentInstallerKt {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation cameraModeButton(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton button, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.installer.CameraModeComponentConfig,kotlin.Unit> config = {});
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation navigationCamera(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.maps.MapView mapView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.installer.NavigationCameraComponentConfig,kotlin.Unit> config = {});
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation recenterButton(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.maps.MapView mapView, com.mapbox.navigation.ui.base.view.MapboxExtendableButton button, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.installer.RecenterButtonComponentConfig,kotlin.Unit> config = {});
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation routeArrow(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.maps.MapView mapView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.installer.RouteArrowComponentConfig,kotlin.Unit> config = {});
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation routeLine(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.maps.MapView mapView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.installer.RouteLineComponentConfig,kotlin.Unit> config = {});
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NavigationCameraComponentConfig {
+    method public com.mapbox.navigation.ui.maps.camera.NavigationCamera? getNavigationCamera();
+    method public boolean getSwitchToIdleOnMapGesture();
+    method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource? getViewportDataSource();
+    method public void setNavigationCamera(com.mapbox.navigation.ui.maps.camera.NavigationCamera?);
+    method public void setSwitchToIdleOnMapGesture(boolean);
+    method public void setViewportDataSource(com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource?);
+    property public final com.mapbox.navigation.ui.maps.camera.NavigationCamera? navigationCamera;
+    property public final boolean switchToIdleOnMapGesture;
+    property public final com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource? viewportDataSource;
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RecenterButtonComponentConfig {

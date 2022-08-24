@@ -12,9 +12,11 @@ package com.mapbox.navigation.ui.base.installer {
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public sealed interface ComponentInstaller {
     method public default com.mapbox.navigation.ui.base.installer.Installation component(com.mapbox.navigation.ui.base.lifecycle.UIComponent component);
     method public com.mapbox.navigation.ui.base.installer.Installation components(com.mapbox.navigation.ui.base.lifecycle.UIComponent... components);
+    method public <T> T? findComponent(kotlin.jvm.functions.Function1<java.lang.Object,java.lang.Boolean> predicate);
   }
 
   public final class ComponentInstallerKt {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static inline <reified T> T! findComponent(com.mapbox.navigation.ui.base.installer.ComponentInstaller);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static void installComponents(com.mapbox.navigation.core.lifecycle.MapboxNavigationApp, androidx.lifecycle.LifecycleOwner lifecycleOwner, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.base.installer.ComponentInstaller,kotlin.Unit> config);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static void installComponents(com.mapbox.navigation.core.MapboxNavigation, androidx.lifecycle.LifecycleOwner lifecycleOwner, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.base.installer.ComponentInstaller,kotlin.Unit> config);
   }
