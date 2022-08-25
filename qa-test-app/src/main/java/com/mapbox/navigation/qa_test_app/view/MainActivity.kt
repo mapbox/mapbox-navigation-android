@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.ActivityMainBinding
 import com.mapbox.navigation.qa_test_app.domain.TestActivityDescription
@@ -53,6 +54,9 @@ class MainActivity : AppCompatActivity() {
         (binding.activitiesList.adapter as GenericListAdapter<TestActivityDescription, *>).swap(
             TestActivitySuite.testActivities
         )
+
+        // Each example is responsible for setting up their NavigationOptions.
+        MapboxNavigationApp.disable()
     }
 
     override fun onRequestPermissionsResult(

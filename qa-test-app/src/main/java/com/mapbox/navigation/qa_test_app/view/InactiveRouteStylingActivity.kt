@@ -15,9 +15,12 @@ import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
@@ -56,15 +59,6 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
         binding.mapView.camera
     }
 
-    private val mapboxNavigation: MapboxNavigation by lazy {
-        MapboxNavigationProvider.create(
-            NavigationOptions.Builder(this)
-                .accessToken(Utils.getMapboxAccessToken(this))
-                .locationEngine(ReplayLocationEngine(mapboxReplayer))
-                .build()
-        )
-    }
-
     private val routeLineColorResources by lazy {
         RouteLineColorResources.Builder()
             .inActiveRouteLegsColor(Color.YELLOW)
@@ -95,21 +89,56 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
         MapboxRouteLineApi(options)
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private val mapboxNavigation by requireMapboxNavigation(
+        onCreatedObserver = object : MapboxNavigationObserver {
+            override fun onAttached(mapboxNavigation: MapboxNavigation) {
+
+                mapboxNavigation.registerLocationObserver(locationObserver)
+                mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+                mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
+            }
+
+            override fun onDetached(mapboxNavigation: MapboxNavigation) {
+                mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
+                mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+                mapboxNavigation.unregisterLocationObserver(locationObserver)
+                mapboxNavigation.stopTripSession()
+            }
+        }
+    ) {
+        MapboxNavigationApp.setup(
+            NavigationOptions.Builder(this)
+                .accessToken(Utils.getMapboxAccessToken(this))
+                .locationEngine(ReplayLocationEngine(mapboxReplayer))
+                .build()
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        initNavigation()
         initStyle()
         initListeners()
     }
 
-    override fun onStop() {
-        super.onStop()
-        mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
-        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.unregisterLocationObserver(locationObserver)
-        mapboxNavigation.stopTripSession()
+    @SuppressLint("MissingPermission")
+    private fun initListeners() {
+        binding.mapView.location.apply {
+            setLocationProvider(navigationLocationProvider)
+            enabled = true
+        }
+        mapboxReplayer.pushRealLocation(this, 0.0)
+        mapboxReplayer.playbackSpeed(1.5)
+        mapboxReplayer.play()
+        binding.startNavigation.setOnClickListener {
+            val route = getRoute()
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.setRoutes(listOf(route))
+            binding.startNavigation.visibility = View.GONE
+            startSimulation(route)
+        }
     }
 
     override fun onDestroy() {
@@ -117,20 +146,6 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
         routeLineApi.cancel()
         routeLineView.cancel()
         mapboxReplayer.finish()
-        mapboxNavigation.onDestroy()
-    }
-
-    private fun initNavigation() {
-        binding.mapView.location.apply {
-            setLocationProvider(navigationLocationProvider)
-            enabled = true
-        }
-        mapboxNavigation.setRoutes(listOf(getRoute()))
-        mapboxNavigation.registerLocationObserver(locationObserver)
-        mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
-        mapboxReplayer.pushRealLocation(this, 0.0)
-        mapboxReplayer.playbackSpeed(1.5)
-        mapboxReplayer.play()
     }
 
     private fun initStyle() {
@@ -175,16 +190,6 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
                 .build(),
             mapAnimationOptionsBuilder.build()
         )
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun initListeners() {
-        binding.startNavigation.setOnClickListener {
-            mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-            mapboxNavigation.startTripSession()
-            binding.startNavigation.visibility = View.GONE
-            startSimulation(mapboxNavigation.getRoutes()[0])
-        }
     }
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
