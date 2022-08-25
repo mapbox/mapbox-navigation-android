@@ -1367,21 +1367,13 @@ internal object MapboxRouteLineUtils {
 
     internal fun getTrafficLineExpressionProducer(
         route: DirectionsRoute,
-        colorResources: RouteLineColorResources,
-        trafficBackfillRoadClasses: List<String>,
-        isPrimaryRoute: Boolean,
+        segments: List<RouteLineExpressionData>,
         vanishingPointOffset: Double,
         lineStartColor: Int,
         lineColor: Int,
         useSoftGradient: Boolean,
         softGradientTransitionDistance: Double
     ) = RouteLineExpressionProvider {
-        val segments: List<RouteLineExpressionData> = calculateRouteLineSegments(
-            route,
-            trafficBackfillRoadClasses,
-            isPrimaryRoute,
-            colorResources
-        )
         if (useSoftGradient) {
             val stopGap = softGradientTransitionDistance / route.distance()
             getTrafficLineExpressionSoftGradient(
@@ -1399,6 +1391,34 @@ internal object MapboxRouteLineUtils {
                 segments
             )
         }
+    }
+
+    internal fun getTrafficLineExpressionProducer(
+        route: DirectionsRoute,
+        colorResources: RouteLineColorResources,
+        trafficBackfillRoadClasses: List<String>,
+        isPrimaryRoute: Boolean,
+        vanishingPointOffset: Double,
+        lineStartColor: Int,
+        lineColor: Int,
+        useSoftGradient: Boolean,
+        softGradientTransitionDistance: Double
+    ): RouteLineExpressionProvider {
+        val segments: List<RouteLineExpressionData> = calculateRouteLineSegments(
+            route,
+            trafficBackfillRoadClasses,
+            isPrimaryRoute,
+            colorResources
+        )
+        return getTrafficLineExpressionProducer(
+            route,
+            segments,
+            vanishingPointOffset,
+            lineStartColor,
+            lineColor,
+            useSoftGradient,
+            softGradientTransitionDistance
+        )
     }
 
     internal fun getRestrictedLineExpressionProducer(

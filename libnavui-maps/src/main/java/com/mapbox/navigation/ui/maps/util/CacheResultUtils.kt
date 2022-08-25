@@ -117,11 +117,10 @@ internal object CacheResultUtils {
         val cache: LruCache<K, R>
     ) {
         operator fun invoke(k: K): R {
-            synchronized(cache) {
-                return cache[k] ?: run {
-                    k(f).also {
-                        cache.put(k, it)
-                    }
+            // this is synchronized per cache unit (so per task), and we can't have multiple operations being parallelized, they tend to wait for one another on this lock.
+            return cache[k] ?: run {
+                k(f).also {
+                    cache.put(k, it)
                 }
             }
         }
