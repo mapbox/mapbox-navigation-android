@@ -34,6 +34,7 @@ import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 
 /**
  * After a destination has been selected. This view previews the route and lets
@@ -62,7 +63,7 @@ class CarRoutePreviewScreen(
 
         override fun handleOnBackPressed() {
             logAndroidAuto("CarRoutePreviewScreen OnBackPressedCallback")
-            routePreviewCarContext.mapboxNavigation.setNavigationRoutes(emptyList())
+            MapboxNavigationApp.current()!!.setNavigationRoutes(emptyList())
             screenManager.pop()
         }
     }
@@ -181,7 +182,8 @@ class CarRoutePreviewScreen(
                 Action.Builder()
                     .setTitle(carContext.getString(R.string.car_action_preview_navigate_button))
                     .setOnClickListener {
-                        routePreviewCarContext.mapboxNavigation.setNavigationRoutes(
+                        val mapboxNavigation = MapboxNavigationApp.current()!!
+                        mapboxNavigation.setNavigationRoutes(
                             carRoutesProvider.navigationRoutes.value
                         )
                         MapboxCarApp.updateCarAppState(ActiveGuidanceState)
