@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.internal.route.line
 
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.util.LruCache
 import androidx.annotation.ColorInt
 import com.mapbox.api.directions.v5.DirectionsCriteria
@@ -507,12 +508,15 @@ internal object MapboxRouteLineUtils {
         isPrimaryRoute: Boolean,
         routeLineColorResources: RouteLineColorResources,
     ): List<RouteLineExpressionData> {
+        val time = System.currentTimeMillis()
         val congestionProvider =
             getTrafficCongestionAnnotationProvider(route, routeLineColorResources)
+        Log.e("lp_test", "3: ${System.currentTimeMillis() - time}")
         val annotationExpressionData = extractRouteDataWithTrafficAndRoadClassDeDuped(
             route,
             congestionProvider
         )
+        Log.e("lp_test", "4: ${System.currentTimeMillis() - time}")
 
         return when (annotationExpressionData.isEmpty()) {
             false -> {
@@ -522,7 +526,9 @@ internal object MapboxRouteLineUtils {
                     routeLineColorResources,
                     isPrimaryRoute,
                     trafficBackfillRoadClasses
-                )
+                ).also {
+                    Log.e("lp_test", "5: ${System.currentTimeMillis() - time}")
+                }
             }
             true -> listOf(
                 RouteLineExpressionData(
@@ -548,10 +554,12 @@ internal object MapboxRouteLineUtils {
         trafficCongestionProvider: (RouteLeg) -> List<String>?
     ) -> List<ExtractedRouteData> =
         { route: DirectionsRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
+            val time = System.currentTimeMillis()
             val extractedRouteDataItems = extractRouteData(
                 route,
                 trafficCongestionProvider
             )
+            Log.e("lp_test", "7: ${System.currentTimeMillis() - time}")
             extractedRouteDataItems.filterIndexed { index, extractedRouteData ->
                 when {
                     index == 0 -> true
@@ -565,8 +573,10 @@ internal object MapboxRouteLineUtils {
                         extractedRouteData.roadClass == null -> false
                     else -> true
                 }
+            }.also {
+                Log.e("lp_test", "8: ${System.currentTimeMillis() - time}")
             }
-        }.cacheResult(extractRouteDataCacheDeDuped)
+        }
 
     /**
      * Extracts data from the [DirectionsRoute] in a format more useful to the route line
@@ -578,6 +588,7 @@ internal object MapboxRouteLineUtils {
         trafficCongestionProvider: (RouteLeg) -> List<String>?
     ) -> List<ExtractedRouteData> =
         { route: DirectionsRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
+            val time = System.currentTimeMillis()
             var runningDistance = 0.0
             var runningIndex = 0
             val size = route.legs()?.map {
@@ -627,8 +638,10 @@ internal object MapboxRouteLineUtils {
                 }
             }
 
-            itemsToReturn.filterNotNull()
-        }.cacheResult(extractRouteDataCache)
+            val items = itemsToReturn.filterNotNull()
+            Log.e("lp_test", "2: ${System.currentTimeMillis() - time}")
+            items
+        }
 
     internal val getRouteLegTrafficNumericCongestionProvider: (
         routeLineColorResources: RouteLineColorResources

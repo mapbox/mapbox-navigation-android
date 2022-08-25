@@ -60,6 +60,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 import java.util.concurrent.TimeUnit
 
 class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
@@ -211,14 +212,23 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     override fun onMapLongClick(point: Point): Boolean {
         vibrate()
 
-        val currentLocation = navigationLocationProvider.lastLocation
+        /*val currentLocation = navigationLocationProvider.lastLocation
         if (currentLocation != null) {
             val originPoint = Point.fromLngLat(
                 currentLocation.longitude,
                 currentLocation.latitude
             )
             findRoute(originPoint, point)
-        }
+        }*/
+        mapboxNavigation.setNavigationRoutes(
+            NavigationRoute.create(
+                // directionsResponseJson = File(this.filesDir, "route.json").readText(),
+                // routeRequestUrl = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/11.5688053,48.1910753;-3.674812,40.4181365?access_token=pk.test&geometries=polyline6&alternatives=true&overview=full&steps=true&layers=%3B&continue_straight=true&annotations=congestion_numeric%2Cmaxspeed%2Cclosure%2Cspeed%2Cduration%2Cdistance&language=en&roundabout_exits=true&voice_instructions=true&banner_instructions=true&voice_units=imperial&enable_refresh=true",
+                directionsResponseJson = File(this.filesDir, "route.json").readText(),
+                routeRequestUrl = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/11.5688053,48.1910752;13.3902443,52.5156532?access_token=pk.test&geometries=polyline6&alternatives=true&overview=full&steps=true&layers=%3B&continue_straight=true&annotations=congestion_numeric%2Cmaxspeed%2Cclosure%2Cspeed%2Cduration%2Cdistance&language=en&roundabout_exits=true&voice_instructions=true&banner_instructions=true&voice_units=imperial&enable_refresh=true",
+                routerOrigin = RouterOrigin.Offboard
+            )
+        )
         return false
     }
 
@@ -329,12 +339,14 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val routesObserver = RoutesObserver { result ->
         CoroutineScope(Dispatchers.Main).launch {
+            val time = System.currentTimeMillis()
             routeLineApi.setNavigationRoutes(
                 newRoutes = result.navigationRoutes,
                 alternativeRoutesMetadata = mapboxNavigation.getAlternativeMetadataFor(
                     result.navigationRoutes
                 )
             ).apply {
+                Log.e("lp_test", "1: ${System.currentTimeMillis() - time}")
                 routeLineView.renderRouteDrawData(
                     binding.mapView.getMapboxMap().getStyle()!!,
                     this

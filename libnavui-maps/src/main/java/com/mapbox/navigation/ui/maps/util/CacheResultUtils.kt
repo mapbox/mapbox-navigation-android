@@ -118,7 +118,8 @@ internal object CacheResultUtils {
     ) {
         operator fun invoke(k: K): R {
             synchronized(cache) {
-                return cache[k] ?: run {
+                val value = if (cache.size() > 0) cache[k] else null
+                return value ?: run {
                     k(f).also {
                         cache.put(k, it)
                     }
