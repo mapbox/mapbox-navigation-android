@@ -63,7 +63,7 @@ class CarRoutePreviewScreen(
 
         override fun handleOnBackPressed() {
             logAndroidAuto("CarRoutePreviewScreen OnBackPressedCallback")
-            MapboxNavigationApp.current()?.setNavigationRoutes(emptyList())
+            MapboxNavigationApp.current()!!.setNavigationRoutes(emptyList())
             screenManager.pop()
         }
     }
@@ -182,12 +182,11 @@ class CarRoutePreviewScreen(
                 Action.Builder()
                     .setTitle(carContext.getString(R.string.car_action_preview_navigate_button))
                     .setOnClickListener {
-                        MapboxNavigationApp.current()?.let { mapboxNavigation ->
-                            mapboxNavigation.setNavigationRoutes(
-                                carRoutesProvider.navigationRoutes.value
-                            )
-                            MapboxCarApp.updateCarAppState(ActiveGuidanceState)
-                        }
+                        val mapboxNavigation = MapboxNavigationApp.current()!!
+                        mapboxNavigation.setNavigationRoutes(
+                            carRoutesProvider.navigationRoutes.value
+                        )
+                        MapboxCarApp.updateCarAppState(ActiveGuidanceState)
                     }
                     .build(),
             )
