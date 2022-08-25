@@ -4,9 +4,6 @@
 import os
 import json
 import codecs
-import sys
-reload(sys)
-sys.setdefaultencoding('utf-8')
 
 path = os.getcwd()
 licensePath = path + "/LICENSE.md"

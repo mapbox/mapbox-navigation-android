@@ -37,6 +37,8 @@ class CarGridFeedbackScreen constructor(
         }
     }
 
+    private val iconDownloader = CarFeedbackIconDownloader(screen = this)
+
     init {
         logAndroidAuto("FeedbackScreen constructor")
         lifecycle.addObserver(
@@ -65,12 +67,15 @@ class CarGridFeedbackScreen constructor(
     private fun buildItemList(options: List<CarFeedbackOption>): ItemList {
         val itemListBuilder = ItemList.Builder()
         for (option in options) {
-            val gridItem = GridItem.Builder()
-                .setTitle(option.title)
-                .setImage(option.icon, GridItem.IMAGE_TYPE_ICON)
-                .setOnClickListener { selectOption(option) }
-                .build()
-            itemListBuilder.addItem(gridItem)
+            val itemBuilder = GridItem.Builder().setTitle(option.title)
+            val image = iconDownloader.getOrDownload(option.icon)
+            if (image != null) {
+                itemBuilder.setImage(image, GridItem.IMAGE_TYPE_ICON)
+                itemBuilder.setOnClickListener { selectOption(option) }
+            } else {
+                itemBuilder.setLoading(true)
+            }
+            itemListBuilder.addItem(itemBuilder.build())
         }
         return itemListBuilder.build()
     }

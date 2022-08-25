@@ -4189,6 +4189,12 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Android Support ExifInterface.
+URL: [https://developer.android.com/jetpack/androidx](https://developer.android.com/jetpack/androidx)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Android Support Library Annotations (The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs.).
 URL: [https://developer.android.com/jetpack/androidx/releases/annotation#1.3.0](https://developer.android.com/jetpack/androidx/releases/annotation#1.3.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -4369,6 +4375,30 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 Mapbox Navigation uses portions of the Fragment Kotlin Extensions (Kotlin extensions for 'fragment' artifact).
 URL: [https://developer.android.com/jetpack/androidx/releases/fragment#1.4.0](https://developer.android.com/jetpack/androidx/releases/fragment#1.4.0)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Glide (A fast and efficient image loading library for Android focused on smooth scrolling.).
+URL: [https://github.com/bumptech/glide](https://github.com/bumptech/glide)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Glide Annotations (A set of annotations for configuring Glide.).
+URL: [https://github.com/bumptech/glide](https://github.com/bumptech/glide)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Glide Disk LRU Cache Library (A cache that uses a bounded amount of space on a filesystem. Based on Jake Wharton's tailored for Glide.).
+URL: [https://github.com/bumptech/glide](https://github.com/bumptech/glide)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Glide GIF Decoder Library (Implementation of GifDecoder that is more memory efficient to animate for Android devices.).
+URL: [https://github.com/bumptech/glide](https://github.com/bumptech/glide)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================

@@ -64,7 +64,7 @@ license-verification:
 .PHONY: license
 license:
 	./gradlew licenseReleaseReport
-	python ./scripts/generate-license.py
+	python3 ./scripts/generate-license.py
 
 .PHONY: javadoc-dokka
 javadoc-dokka:
