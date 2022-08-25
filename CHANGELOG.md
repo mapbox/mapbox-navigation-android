@@ -8,6 +8,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Added `ComponentInstaller` for the `CameraModeButtonComponent` that offers simplified integration of the `NavigationCamera` mode button. [#6202](https://github.com/mapbox/mapbox-navigation-android/pull/6202)
 - Added `NavigationViewOptions#distanceFormatterOptions` to allow for specifying `DistanceFormatterOptions` at runtime. [#6222](https://github.com/mapbox/mapbox-navigation-android/pull/6222)
 #### Bug fixes and improvements
+- Updated `NavigationViewApi`. Introduced `startFreeDrive`, `startDestinationPreview`, `startRoutePreview`, `startActiveGuidance`, `startArrival`. Removed `fetchRoutes`, `setPreviewRoutes`, `setRoutes`, `setDestination`. Replaced `enableTripSession` and `enableReplaySession` with `routeReplayEnabled(enabled: Boolean)`. [#6174](https://github.com/mapbox/mapbox-navigation-android/pull/6174)
 
 ## Mapbox Navigation SDK 2.8.0-alpha.3 - 17 August, 2022
 ### Changelog

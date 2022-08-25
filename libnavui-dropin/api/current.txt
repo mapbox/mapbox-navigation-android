@@ -38,15 +38,41 @@ package com.mapbox.navigation.dropin {
     property public final com.mapbox.navigation.dropin.NavigationViewApi api;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NavigationViewApi {
-    method public void enableReplaySession();
-    method public void enableTripSession();
-    method public void fetchRoutes(com.mapbox.api.directions.v5.models.RouteOptions options);
-    method public void fetchRoutes(java.util.List<com.mapbox.geojson.Point> points);
-    method public boolean isReplayEnabled();
-    method public void setDestination(com.mapbox.geojson.Point point);
-    method public void setPreviewRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
-    method public void setRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class NavigationViewApi {
+    ctor public NavigationViewApi();
+    method public abstract boolean isReplayEnabled();
+    method public abstract void routeReplayEnabled(boolean enabled);
+    method public abstract com.mapbox.bindgen.Expected<com.mapbox.navigation.dropin.NavigationViewApiError,kotlin.Unit> startActiveGuidance();
+    method public abstract com.mapbox.bindgen.Expected<com.mapbox.navigation.dropin.NavigationViewApiError,kotlin.Unit> startActiveGuidance(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    method public abstract com.mapbox.bindgen.Expected<com.mapbox.navigation.dropin.NavigationViewApiError,kotlin.Unit> startArrival();
+    method public abstract com.mapbox.bindgen.Expected<com.mapbox.navigation.dropin.NavigationViewApiError,kotlin.Unit> startArrival(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    method public abstract void startDestinationPreview(com.mapbox.geojson.Point point);
+    method public abstract void startFreeDrive();
+    method public abstract com.mapbox.bindgen.Expected<com.mapbox.navigation.dropin.NavigationViewApiError,kotlin.Unit> startRoutePreview();
+    method public abstract com.mapbox.bindgen.Expected<com.mapbox.navigation.dropin.NavigationViewApiError,kotlin.Unit> startRoutePreview(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+  }
+
+  public abstract sealed class NavigationViewApiError extends java.lang.Throwable {
+  }
+
+  public static final class NavigationViewApiError.IncompleteRoutesInfo extends com.mapbox.navigation.dropin.NavigationViewApiError {
+    field public static final com.mapbox.navigation.dropin.NavigationViewApiError.IncompleteRoutesInfo INSTANCE;
+  }
+
+  public static final class NavigationViewApiError.InvalidRoutesInfo extends com.mapbox.navigation.dropin.NavigationViewApiError {
+    field public static final com.mapbox.navigation.dropin.NavigationViewApiError.InvalidRoutesInfo INSTANCE;
+  }
+
+  public static final class NavigationViewApiError.MissingDestinationInfo extends com.mapbox.navigation.dropin.NavigationViewApiError {
+    field public static final com.mapbox.navigation.dropin.NavigationViewApiError.MissingDestinationInfo INSTANCE;
+  }
+
+  public static final class NavigationViewApiError.MissingPreviewRoutesInfo extends com.mapbox.navigation.dropin.NavigationViewApiError {
+    field public static final com.mapbox.navigation.dropin.NavigationViewApiError.MissingPreviewRoutesInfo INSTANCE;
+  }
+
+  public static final class NavigationViewApiError.MissingRoutesInfo extends com.mapbox.navigation.dropin.NavigationViewApiError {
+    field public static final com.mapbox.navigation.dropin.NavigationViewApiError.MissingRoutesInfo INSTANCE;
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class NavigationViewListener {

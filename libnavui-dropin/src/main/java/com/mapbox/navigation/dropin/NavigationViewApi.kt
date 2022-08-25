@@ -1,108 +1,145 @@
+@file:Suppress("unused")
+
 package com.mapbox.navigation.dropin
 
-import com.mapbox.api.directions.v5.models.BannerInstructions
-import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.api.directions.v5.models.DirectionsWaypoint
+import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.trip.session.TripSessionState
-import com.mapbox.navigation.ui.app.internal.Store
-import com.mapbox.navigation.ui.app.internal.destination.Destination
-import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
-import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterAction
 
 /**
  * Api that gives you the ability to change the state for navigation apps.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class NavigationViewApi internal constructor(
-    private val store: Store
-) {
+abstract class NavigationViewApi {
 
     /**
-     * Request routes based on [RouteOptions]. Routes obtained from this route request can be
-     * obtained via
-     * [NavigationViewListener.onRouteFetching] when the route is being fetched
-     * [NavigationViewListener.onRouteFetchFailed] if the route request failed
-     * [NavigationViewListener.onRouteFetchCanceled] if the route request was canceled
-     * [NavigationViewListener.onRouteFetchSuccessful] if the route request was a success
+     * Clear Route data and request [NavigationView] to enter Free Drive state.
      *
-     * @param options [RouteOptions]
+     * [NavigationViewListener.onFreeDrive] will be called once [NavigationView] enters
+     * Free Drive state.
      */
-    fun fetchRoutes(options: RouteOptions) {
-        store.dispatch(RoutePreviewAction.FetchOptions(options))
-    }
+    abstract fun startFreeDrive()
 
     /**
-     * Request routes based on list of [Point]. Routes obtained from this route request can be
-     * obtained via
-     * [NavigationViewListener.onRouteFetching] when the route is being fetched
-     * [NavigationViewListener.onRouteFetchFailed] if the route request failed
-     * [NavigationViewListener.onRouteFetchCanceled] if the route request was canceled
-     * [NavigationViewListener.onRouteFetchSuccessful] if the route request was a success
-     * The first point in the list should be the origin and last point should be the destination.
-     * If you have multi waypoints, you can insert additional waypoints in the list
-     * between the first and the last point.
+     * Sets a [point] as destination and request [NavigationView] to enter Destination Preview state.
      *
-     * @param points list of [Point]
+     * [NavigationViewListener.onDestinationChanged] will be called once new destination is set
+     * and [NavigationViewListener.onDestinationPreview] once [NavigationView] enters
+     * Destination Preview state.
      */
-    fun fetchRoutes(points: List<Point>) {
-        store.dispatch(RoutePreviewAction.FetchPoints(points))
-    }
+    abstract fun startDestinationPreview(point: Point)
 
     /**
-     * Sets the [routes] passed to [NavigationView] and not to [MapboxNavigation]. The action
-     * does not triggers [RouteProgress], [BannerInstructions] or [VoiceInstructions] updates even
-     * if the [TripSessionState] is [TripSessionState.STARTED].
+     * Request [NavigationView] to enter Route Preview state.
      *
-     * @param routes list of [NavigationRoute]
-     */
-    fun setPreviewRoutes(routes: List<NavigationRoute>) {
-        store.dispatch(RoutePreviewAction.Ready(routes))
-    }
-
-    /**
-     * Sets the [routes] passed to [MapboxNavigation]. The action triggers [RouteProgress],
-     * [BannerInstructions] and [VoiceInstructions] updates if the [TripSessionState] is
-     * [TripSessionState.STARTED].
+     * [NavigationViewListener.onRoutePreview] will be called once [NavigationView] enters
+     * Route Preview state.
      *
-     * @param routes list of [NavigationRoute]
+     * Fails with an error when either Destination or Preview Routes has not been set.
      */
-    fun setRoutes(routes: List<NavigationRoute>) {
-        store.dispatch(RoutesAction.SetRoutes(routes))
-    }
+    abstract fun startRoutePreview(): Expected<NavigationViewApiError, Unit>
 
     /**
-     * Sets a destination to [NavigationView].
-     * @property point the destination location
+     * Sets a preview [routes] and request Request [NavigationView] to enter Route Preview state.
+     * Last [DirectionsWaypoint] location will be used as the destination.
+     *
+     * [NavigationViewListener.onDestinationChanged] will be called once new destination is set
+     * and [NavigationViewListener.onRoutePreview] will be called once [NavigationView] enters
+     * Route Preview state.
+     *
+     * Fails with an error when [routes] is an empty list.
      */
-    fun setDestination(point: Point) {
-        store.dispatch(DestinationAction.SetDestination(Destination(point)))
-    }
+    abstract fun startRoutePreview(
+        routes: List<NavigationRoute>
+    ): Expected<NavigationViewApiError, Unit>
 
     /**
-     * Enables trip session based on real gps updates.
+     * Request [NavigationView] to enter Active Navigation state.
+     *
+     * [NavigationViewListener.onActiveNavigation] will be called once [NavigationView] enters
+     * Route Preview state.
+     *
+     * Fails with an error when either Destination or Preview Routes has not been set.
      */
-    fun enableTripSession() {
-        store.dispatch(TripSessionStarterAction.EnableTripSession)
-    }
+    abstract fun startActiveGuidance(): Expected<NavigationViewApiError, Unit>
 
     /**
-     * Enables replay trip session based on simulated locations.
+     * Sets [routes] and request [NavigationView] to enter Active Navigation state.
+     * Last [DirectionsWaypoint] location will be used as the destination.
+     *
+     * [NavigationViewListener.onDestinationChanged] will be called once new destination is set
+     * and [NavigationViewListener.onActiveNavigation] will be called once [NavigationView] enters
+     * Active Navigation state.
+     *
+     * Fails with an error when [routes] is an empty list.
      */
-    fun enableReplaySession() {
-        store.dispatch(TripSessionStarterAction.EnableReplayTripSession)
-    }
+    abstract fun startActiveGuidance(
+        routes: List<NavigationRoute>
+    ): Expected<NavigationViewApiError, Unit>
+
+    /**
+     * Request [NavigationView] to enter Arrival state.
+     *
+     * [NavigationViewListener.onArrival] will be called once [NavigationView] enters
+     * Arrival state.
+     *
+     * Fails with an error when either Destination or Routes has not been set.
+     */
+    abstract fun startArrival(): Expected<NavigationViewApiError, Unit>
+
+    /**
+     * Sets [routes] and request [NavigationView] to enter Arrival state.
+     * Last [DirectionsWaypoint] location will be used as the destination.
+     *
+     * [NavigationViewListener.onDestinationChanged] will be called once new destination is set
+     * and [NavigationViewListener.onArrival] will be called once [NavigationView] enters
+     * Arrival state.
+     *
+     * Fails with an error when [routes] is an empty list.
+     */
+    abstract fun startArrival(routes: List<NavigationRoute>): Expected<NavigationViewApiError, Unit>
 
     /**
      * Checks if the current trip is being simulated.
      */
-    fun isReplayEnabled(): Boolean {
-        return store.state.value.tripSession.isReplayEnabled
-    }
+    abstract fun isReplayEnabled(): Boolean
+
+    /**
+     * Enable/Disable replay trip session based on simulated locations.
+     */
+    abstract fun routeReplayEnabled(enabled: Boolean)
+}
+
+/**
+ * Errors returned by the NavigationApi.
+ */
+sealed class NavigationViewApiError(message: String) : Throwable(message) {
+    /**
+     * Error returned when the Destination hasn't been set yet.
+     */
+    object MissingDestinationInfo : NavigationViewApiError("Destination cannot be empty.")
+
+    /**
+     * Error returned when the Preview Routes list hasn't been set yet.
+     */
+    object MissingPreviewRoutesInfo : NavigationViewApiError("Preview Routes cannot be empty.")
+
+    /**
+     * Error returned when the Routes list hasn't been set yet.
+     */
+    object MissingRoutesInfo : NavigationViewApiError("Routes cannot be empty.")
+
+    /**
+     * Error returned when given PreviewRoute or Route list is empty.
+     */
+    object InvalidRoutesInfo : NavigationViewApiError("Routes cannot be empty.")
+
+    /**
+     * Error returned when given PreviewRoute or Route list is missing [DirectionsWaypoint]
+     * information that is needed to determine Destination coordinates.
+     */
+    object IncompleteRoutesInfo :
+        NavigationViewApiError("Missing destination info in a given route.")
 }

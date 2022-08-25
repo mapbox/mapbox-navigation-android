@@ -35,6 +35,7 @@ import com.mapbox.navigation.dropin.coordinator.RightFrameCoordinator
 import com.mapbox.navigation.dropin.coordinator.RoadNameLabelCoordinator
 import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
+import com.mapbox.navigation.dropin.internal.MapboxNavigationViewApi
 import com.mapbox.navigation.dropin.internal.extensions.navigationViewAccessToken
 import com.mapbox.navigation.dropin.internal.extensions.toComponentActivityRef
 import com.mapbox.navigation.dropin.internal.extensions.toViewModelStoreOwner
@@ -155,7 +156,7 @@ class NavigationView @JvmOverloads constructor(
     /**
      * Api for changing navigation state.
      */
-    val api: NavigationViewApi = NavigationViewApi(navigationContext.store)
+    val api: NavigationViewApi = MapboxNavigationViewApi(navigationContext.store)
 
     /**
      * Customize the views by implementing your own [UIBinder] components.
