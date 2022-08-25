@@ -9,6 +9,9 @@ import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.navigation.base.formatter.UnitType
+import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import kotlin.math.roundToInt
@@ -30,6 +33,16 @@ class CarSpeedLimitRenderer(
 
         override fun onNewRawLocation(rawLocation: Location) {
             // no op
+        }
+    }
+
+    private val navigationObserver = object : MapboxNavigationObserver {
+        override fun onAttached(mapboxNavigation: MapboxNavigation) {
+            mapboxNavigation.registerLocationObserver(locationObserver)
+        }
+
+        override fun onDetached(mapboxNavigation: MapboxNavigation) {
+            mapboxNavigation.unregisterLocationObserver(locationObserver)
         }
     }
 
@@ -58,12 +71,12 @@ class CarSpeedLimitRenderer(
         logAndroidAuto("CarSpeedLimitRenderer carMapSurface loaded")
         val speedLimitWidget = SpeedLimitWidget().also { speedLimitWidget = it }
         mapboxCarMapSurface.mapSurface.addWidget(speedLimitWidget)
-        mainCarContext.mapboxNavigation.registerLocationObserver(locationObserver)
+        MapboxNavigationApp.registerObserver(navigationObserver)
     }
 
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
         logAndroidAuto("CarSpeedLimitRenderer carMapSurface detached")
-        mainCarContext.mapboxNavigation.unregisterLocationObserver(locationObserver)
+        MapboxNavigationApp.unregisterObserver(navigationObserver)
         speedLimitWidget?.let { mapboxCarMapSurface.mapSurface.removeWidget(it) }
         speedLimitWidget = null
     }
