@@ -579,7 +579,11 @@ internal object MapboxRouteLineUtils {
     ) -> List<ExtractedRouteData> =
         { route: DirectionsRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
             var runningDistance = 0.0
-            val itemsToReturn = mutableListOf<ExtractedRouteData>()
+            var runningIndex = 0
+            val size = route.legs()?.map {
+                it.annotation()?.distance()?.size
+            }?.foldRight(initial = 0) { v, acc -> acc + (v ?: 0) } ?: 0
+            val itemsToReturn =  arrayOfNulls<ExtractedRouteData?>(size).toMutableList()
             route.legs()?.forEachIndexed { legIndex, leg ->
                 val restrictedRanges = getRestrictedRouteLegRanges(leg).asSequence()
                 val closureRanges = getClosureRanges(leg).asSequence()
@@ -607,24 +611,23 @@ internal object MapboxRouteLineUtils {
                         }
                         val roadClass = getRoadClassForIndex(roadClassArray, index)
 
-                        itemsToReturn.add(
-                            ExtractedRouteData(
-                                runningDistance,
-                                percentDistanceTraveled,
-                                isInRestrictedRange,
-                                congestionValue,
-                                roadClass,
-                                legIndex,
-                                isLegOrigin
-                            )
+                        itemsToReturn[runningIndex] = ExtractedRouteData(
+                            runningDistance,
+                            percentDistanceTraveled,
+                            isInRestrictedRange,
+                            congestionValue,
+                            roadClass,
+                            legIndex,
+                            isLegOrigin
                         )
+                        runningIndex++
                         isLegOrigin = false
                         runningDistance += distance
                     }
                 }
             }
 
-            itemsToReturn
+            itemsToReturn.filterNotNull()
         }.cacheResult(extractRouteDataCache)
 
     internal val getRouteLegTrafficNumericCongestionProvider: (
