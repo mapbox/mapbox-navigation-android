@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
+import androidx.annotation.UiThread
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.LayerPosition
@@ -75,6 +76,7 @@ import org.jetbrains.annotations.TestOnly
  *
  * @param options resource options used rendering the route line on the map
  */
+@UiThread
 class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
 
     private companion object {

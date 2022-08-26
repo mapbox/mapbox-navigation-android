@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.UiThread
 import com.mapbox.maps.MapView
 
 /**
@@ -20,6 +21,7 @@ object ViewUtils {
      * @param callback invoked when a screenshot of the view tree is ready
      */
     @JvmStatic
+    @UiThread
     fun View.capture(callback: OnViewScreenshotReady) {
         val root = rootView
         val maps = collectMaps(root)

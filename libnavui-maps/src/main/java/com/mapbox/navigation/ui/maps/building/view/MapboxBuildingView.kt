@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.building.view
 
+import androidx.annotation.UiThread
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.QueriedFeature
@@ -21,6 +22,7 @@ import com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptio
  * This means that if the data has not changed, it does not have to be manually redrawn after a style change.
  * See [Style.addPersistentStyleLayer].
  */
+@UiThread
 class MapboxBuildingView {
 
     /**

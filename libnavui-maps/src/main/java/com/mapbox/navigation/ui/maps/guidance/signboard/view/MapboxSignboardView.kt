@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.view
 
 import android.content.Context
 import android.util.AttributeSet
+import androidx.annotation.UiThread
 import androidx.appcompat.widget.AppCompatImageView
 import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError
@@ -10,6 +11,7 @@ import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue
 /**
  * Default Signboard View that renders a signboard view.
  */
+@UiThread
 class MapboxSignboardView : AppCompatImageView {
 
     /**

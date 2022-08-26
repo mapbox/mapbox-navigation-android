@@ -1,11 +1,13 @@
 package com.mapbox.navigation.ui.maps.camera.transition
 
 import android.animation.AnimatorSet
+import androidx.annotation.UiThread
 import com.mapbox.maps.CameraOptions
 
 /**
  * Helper interface to provide camera transition animations.
  */
+@UiThread
 interface NavigationCameraTransition {
     /**
      * This transition moves the camera from a zoomed out level to a zoomed in level.

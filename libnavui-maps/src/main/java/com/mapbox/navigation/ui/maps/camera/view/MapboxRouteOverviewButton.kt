@@ -5,6 +5,7 @@ import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.annotation.StyleRes
+import androidx.annotation.UiThread
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.resources.databinding.ExtendableButtonLayoutBinding
@@ -13,6 +14,7 @@ import com.mapbox.navigation.ui.utils.internal.ExtendableButtonHelper
 /**
  * Default view to allow user to switch to route overview mode.
  */
+@UiThread
 class MapboxRouteOverviewButton : ConstraintLayout {
 
     private val binding = ExtendableButtonLayoutBinding.inflate(LayoutInflater.from(context), this)

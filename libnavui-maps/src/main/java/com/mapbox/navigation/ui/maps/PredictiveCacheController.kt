@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps
 
+import androidx.annotation.UiThread
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.Value
 import com.mapbox.common.TileStore
@@ -57,6 +58,7 @@ private const val RASTER_SOURCE_TYPE = "raster"
  *
  * @param predictiveCacheOptions [PredictiveCacheOptions] options to instantiate instance of [PredictiveCacheController]
  */
+@UiThread
 class PredictiveCacheController constructor(
     private val predictiveCacheOptions: PredictiveCacheOptions,
 ) {

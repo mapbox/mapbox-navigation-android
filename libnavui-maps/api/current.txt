@@ -11,7 +11,7 @@ package com.mapbox.navigation.ui.maps {
     field public static final String NAVIGATION_NIGHT_STYLE_USER_ID = "mapbox";
   }
 
-  public final class PredictiveCacheController {
+  @UiThread public final class PredictiveCacheController {
     ctor public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheOptions predictiveCacheOptions);
     ctor @Deprecated public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions = PredictiveCacheLocationOptions.<init>().build(), com.mapbox.navigation.ui.maps.PredictiveCacheControllerErrorHandler? predictiveCacheControllerErrorHandler = null);
     ctor @Deprecated public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions = PredictiveCacheLocationOptions.<init>().build(), com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheGuidanceLocationOptions = PredictiveCacheLocationOptions.<init>().build(), com.mapbox.navigation.ui.maps.PredictiveCacheControllerErrorHandler? predictiveCacheControllerErrorHandler = null);
@@ -82,7 +82,7 @@ package com.mapbox.navigation.ui.maps.building.model {
 
 package com.mapbox.navigation.ui.maps.building.view {
 
-  public final class MapboxBuildingView {
+  @UiThread public final class MapboxBuildingView {
     ctor public MapboxBuildingView();
     method public void clear(com.mapbox.maps.Style style);
     method public void highlightBuilding(com.mapbox.maps.Style style, java.util.List<com.mapbox.maps.QueriedFeature> buildings, com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions options = MapboxBuildingHighlightOptions.<init>().build());
@@ -322,7 +322,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
   }
 
   public fun interface ViewportDataSourceUpdateObserver {
-    method public void viewportDataSourceUpdated(com.mapbox.navigation.ui.maps.camera.data.ViewportData viewportData);
+    method @UiThread public void viewportDataSourceUpdated(com.mapbox.navigation.ui.maps.camera.data.ViewportData viewportData);
   }
 
 }
@@ -355,10 +355,10 @@ package com.mapbox.navigation.ui.maps.camera.lifecycle {
 
   public final class NavigationScaleGestureHandler implements com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener {
     ctor public NavigationScaleGestureHandler(android.content.Context context, com.mapbox.navigation.ui.maps.camera.NavigationCamera navigationCamera, com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.gestures.GesturesPlugin gesturesPlugin, com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin locationPlugin, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener? scaleActionListener = null, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions options = NavigationScaleGestureHandlerOptions.<init>(context).build());
-    method public void cleanup();
+    method @UiThread public void cleanup();
     method public com.mapbox.android.gestures.AndroidGesturesManager getCustomGesturesManager();
     method public com.mapbox.android.gestures.AndroidGesturesManager getInitialGesturesManager();
-    method public void initialize();
+    method @UiThread public void initialize();
     method public boolean isInitialized();
     method public void onAnimatorCancelling(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator animator, String? owner);
     method public void onAnimatorEnding(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator animator, String? owner);
@@ -400,7 +400,7 @@ package com.mapbox.navigation.ui.maps.camera.state {
   }
 
   public fun interface NavigationCameraStateChangedObserver {
-    method public void onNavigationCameraStateChanged(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState navigationCameraState);
+    method @UiThread public void onNavigationCameraStateChanged(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState navigationCameraState);
   }
 
 }
@@ -425,14 +425,14 @@ package com.mapbox.navigation.ui.maps.camera.transition {
   public final class MapboxNavigationCameraTransitionKt {
   }
 
-  public interface NavigationCameraStateTransition {
+  @UiThread public interface NavigationCameraStateTransition {
     method public android.animation.AnimatorSet transitionToFollowing(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
     method public android.animation.AnimatorSet transitionToOverview(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
     method public android.animation.AnimatorSet updateFrameForFollowing(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
     method public android.animation.AnimatorSet updateFrameForOverview(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
   }
 
-  public interface NavigationCameraTransition {
+  @UiThread public interface NavigationCameraTransition {
     method public android.animation.AnimatorSet transitionFromHighZoomToLowZoom(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
     method public android.animation.AnimatorSet transitionFromLowZoomToHighZoom(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
     method public android.animation.AnimatorSet transitionLinear(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
@@ -451,7 +451,7 @@ package com.mapbox.navigation.ui.maps.camera.transition {
   }
 
   public fun interface TransitionEndListener {
-    method public void onTransitionEnd(boolean isCanceled);
+    method @UiThread public void onTransitionEnd(boolean isCanceled);
   }
 
 }
@@ -465,7 +465,7 @@ package com.mapbox.navigation.ui.maps.camera.utils {
 
 package com.mapbox.navigation.ui.maps.camera.view {
 
-  public final class MapboxRecenterButton extends androidx.constraintlayout.widget.ConstraintLayout {
+  @UiThread public final class MapboxRecenterButton extends androidx.constraintlayout.widget.ConstraintLayout {
     ctor public MapboxRecenterButton(android.content.Context context);
     ctor public MapboxRecenterButton(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxRecenterButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
@@ -474,7 +474,7 @@ package com.mapbox.navigation.ui.maps.camera.view {
     method public void updateStyle(@StyleRes int style);
   }
 
-  public final class MapboxRouteOverviewButton extends androidx.constraintlayout.widget.ConstraintLayout {
+  @UiThread public final class MapboxRouteOverviewButton extends androidx.constraintlayout.widget.ConstraintLayout {
     ctor public MapboxRouteOverviewButton(android.content.Context context);
     ctor public MapboxRouteOverviewButton(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxRouteOverviewButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
@@ -513,7 +513,7 @@ package com.mapbox.navigation.ui.maps.guidance.junction.model {
 
 package com.mapbox.navigation.ui.maps.guidance.junction.view {
 
-  public final class MapboxJunctionView extends androidx.appcompat.widget.AppCompatImageView {
+  @UiThread public final class MapboxJunctionView extends androidx.appcompat.widget.AppCompatImageView {
     ctor public MapboxJunctionView(android.content.Context context);
     ctor public MapboxJunctionView(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxJunctionView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
@@ -580,7 +580,7 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.model {
 
 package com.mapbox.navigation.ui.maps.guidance.signboard.view {
 
-  public final class MapboxSignboardView extends androidx.appcompat.widget.AppCompatImageView {
+  @UiThread public final class MapboxSignboardView extends androidx.appcompat.widget.AppCompatImageView {
     ctor public MapboxSignboardView(android.content.Context context);
     ctor public MapboxSignboardView(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxSignboardView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
@@ -679,7 +679,7 @@ package com.mapbox.navigation.ui.maps.roadname.model {
 
 package com.mapbox.navigation.ui.maps.roadname.view {
 
-  @Deprecated public final class MapboxRoadNameLabelView extends android.widget.LinearLayout {
+  @Deprecated @UiThread public final class MapboxRoadNameLabelView extends android.widget.LinearLayout {
     ctor @Deprecated public MapboxRoadNameLabelView(android.content.Context context);
     ctor @Deprecated public MapboxRoadNameLabelView(android.content.Context context, android.util.AttributeSet? attrs);
     ctor @Deprecated public MapboxRoadNameLabelView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
@@ -689,7 +689,7 @@ package com.mapbox.navigation.ui.maps.roadname.view {
     method @Deprecated public void updateRoadNameTextAppearance(@StyleRes int style);
   }
 
-  public final class MapboxRoadNameView extends androidx.appcompat.widget.AppCompatTextView {
+  @UiThread public final class MapboxRoadNameView extends androidx.appcompat.widget.AppCompatTextView {
     ctor public MapboxRoadNameView(android.content.Context context);
     ctor public MapboxRoadNameView(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxRoadNameView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
@@ -723,7 +723,7 @@ package com.mapbox.navigation.ui.maps.route.arrow.api {
     method public com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue showManeuverArrow();
   }
 
-  public final class MapboxRouteArrowView {
+  @UiThread public final class MapboxRouteArrowView {
     ctor public MapboxRouteArrowView(com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions options);
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getVisibility(com.mapbox.maps.Style style);
     method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue visibilityChange);
@@ -878,7 +878,7 @@ package com.mapbox.navigation.ui.maps.route.line.api {
   public static final class MapboxRouteLineApi.Companion {
   }
 
-  public final class MapboxRouteLineView {
+  @UiThread public final class MapboxRouteLineView {
     ctor public MapboxRouteLineView(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions options);
     method public void cancel();
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getAlternativeRoutesVisibility(com.mapbox.maps.Style style);
@@ -1377,7 +1377,7 @@ package com.mapbox.navigation.ui.maps.util {
   }
 
   public final class ViewUtils {
-    method public static void capture(android.view.View, com.mapbox.navigation.ui.maps.util.OnViewScreenshotReady callback);
+    method @UiThread public static void capture(android.view.View, com.mapbox.navigation.ui.maps.util.OnViewScreenshotReady callback);
     field public static final com.mapbox.navigation.ui.maps.util.ViewUtils INSTANCE;
   }
 
@@ -1385,7 +1385,7 @@ package com.mapbox.navigation.ui.maps.util {
 
 package com.mapbox.navigation.ui.maps.view {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxCameraModeButton extends android.widget.FrameLayout {
+  @UiThread @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxCameraModeButton extends android.widget.FrameLayout {
     ctor public MapboxCameraModeButton(android.content.Context context);
     ctor public MapboxCameraModeButton(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxCameraModeButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
@@ -1401,9 +1401,9 @@ package com.mapbox.navigation.ui.maps.view {
     method public void setFollowingText(String?);
     method public void setOverviewIconResId(int);
     method public void setOverviewText(String?);
-    method @UiThread public void setState(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state);
-    method @UiThread public void setStateAndExtend(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state, long duration = 2000L);
-    method @UiThread public void setStateAndExtend(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state);
+    method public void setState(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state);
+    method public void setStateAndExtend(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state, long duration = 2000L);
+    method public void setStateAndExtend(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state);
     method public void updateStyle(@StyleRes int style);
     property public final androidx.constraintlayout.widget.ConstraintLayout containerView;
     property public final int followingIconResId;

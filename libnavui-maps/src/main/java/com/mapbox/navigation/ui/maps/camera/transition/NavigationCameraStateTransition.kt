@@ -1,11 +1,13 @@
 package com.mapbox.navigation.ui.maps.camera.transition
 
 import android.animation.AnimatorSet
+import androidx.annotation.UiThread
 import com.mapbox.maps.CameraOptions
 
 /**
  * Helper interface to provide navigation camera state transitions.
  */
+@UiThread
 interface NavigationCameraStateTransition {
     /**
      * Transition the camera to following state.

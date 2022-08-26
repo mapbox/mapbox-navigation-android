@@ -23,6 +23,7 @@ import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
  * Default button that allows user to toggle between Camera Following and Overview mode.
  */
 @ExperimentalPreviewMapboxNavigationAPI
+@UiThread
 class MapboxCameraModeButton : FrameLayout {
 
     private val binding =
@@ -116,7 +117,6 @@ class MapboxCameraModeButton : FrameLayout {
      *
      * @param state new camera state
      */
-    @UiThread
     fun setState(state: NavigationCameraState) {
         updateIconDrawable(state)
     }
@@ -129,7 +129,6 @@ class MapboxCameraModeButton : FrameLayout {
      * @param state new camera state.
      * @param duration duration in milliseconds. Defaults to [EXTEND_DURATION].
      */
-    @UiThread
     @JvmOverloads
     fun setStateAndExtend(state: NavigationCameraState, duration: Long = EXTEND_DURATION) {
         updateIconDrawable(state)
