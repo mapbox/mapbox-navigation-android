@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.camera.lifecycle
 
 import android.animation.ValueAnimator
 import android.content.Context
+import androidx.annotation.UiThread
 import com.mapbox.android.gestures.AndroidGesturesManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
@@ -281,6 +282,7 @@ class NavigationScaleGestureHandler(
      *
      * @see cleanup
      */
+    @UiThread
     fun initialize() {
         gesturesPlugin.setGesturesManager(
             customGesturesManager,
@@ -306,6 +308,7 @@ class NavigationScaleGestureHandler(
      *
      * @see initialize
      */
+    @UiThread
     fun cleanup() {
         gesturesPlugin.setGesturesManager(
             initialGesturesManager,

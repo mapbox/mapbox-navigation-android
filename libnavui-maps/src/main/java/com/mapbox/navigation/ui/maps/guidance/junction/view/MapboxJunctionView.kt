@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.guidance.junction.view
 
 import android.content.Context
 import android.util.AttributeSet
+import androidx.annotation.UiThread
 import androidx.appcompat.widget.AppCompatImageView
 import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError
@@ -10,6 +11,7 @@ import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue
 /**
  * Default Junction View that renders junction.
  */
+@UiThread
 class MapboxJunctionView : AppCompatImageView {
 
     /**

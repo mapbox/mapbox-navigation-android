@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import androidx.annotation.StyleRes
+import androidx.annotation.UiThread
 import androidx.core.widget.TextViewCompat
 import com.mapbox.navigation.ui.maps.databinding.MapboxRoadNameLabelLayoutBinding
 import com.mapbox.navigation.ui.maps.roadname.model.RoadLabel
@@ -18,6 +19,7 @@ import com.mapbox.navigation.ui.maps.roadname.model.RoadLabel
     message = "This view is incapable of rendering multiple shields for a given road name",
     replaceWith = ReplaceWith("MapboxRoadNameView")
 )
+@UiThread
 class MapboxRoadNameLabelView : LinearLayout {
 
     private val binding = MapboxRoadNameLabelLayoutBinding.inflate(

@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.arrow.api
 
+import androidx.annotation.UiThread
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
@@ -31,6 +32,7 @@ import com.mapbox.navigation.utils.internal.logE
  *
  * @param options the options used for determining the rendering appearance and/or behavior.
  */
+@UiThread
 class MapboxRouteArrowView(private val options: RouteArrowOptions) {
 
     private companion object {

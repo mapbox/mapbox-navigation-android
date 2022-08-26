@@ -5,6 +5,7 @@ import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ImageSpan
 import android.util.AttributeSet
+import androidx.annotation.UiThread
 import androidx.appcompat.widget.AppCompatTextView
 import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.road.model.Road
@@ -19,6 +20,7 @@ import com.mapbox.navigation.ui.utils.internal.ifNonNull
  * Default Mapbox implementation that allows you to render road name labels and route shields
  * associated with the name.
  */
+@UiThread
 class MapboxRoadNameView : AppCompatTextView {
 
     private val shields = mutableSetOf<RouteShield>()

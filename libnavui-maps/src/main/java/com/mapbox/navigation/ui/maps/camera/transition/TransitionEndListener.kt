@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.camera.transition
 
+import androidx.annotation.UiThread
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 
 /**
@@ -12,5 +13,6 @@ fun interface TransitionEndListener {
      *
      * @param isCanceled whether the transition was canceled.
      */
+    @UiThread
     fun onTransitionEnd(isCanceled: Boolean)
 }
