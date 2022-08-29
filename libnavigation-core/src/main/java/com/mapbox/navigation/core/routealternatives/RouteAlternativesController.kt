@@ -15,6 +15,7 @@ import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouteAlternative
+import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteIntersection
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -161,11 +162,11 @@ internal class RouteAlternativesController constructor(
         override fun onRouteAlternativesChanged(
             routeAlternatives: List<RouteAlternative>,
             removed: List<RouteAlternative>
-        ): List<Int> {
+        ) {
             logD("${routeAlternatives.size} native alternatives available", LOG_CATEGORY)
             if (paused) {
                 logD("paused, returning", LOG_CATEGORY)
-                return emptyList()
+                return
             }
 
             observerProcessingJob?.cancel()
@@ -183,11 +184,9 @@ internal class RouteAlternativesController constructor(
                         it.onRouteAlternatives(routeProgress, alternatives, origin)
                     }
                 }
-
-            // This is supposed to be able to filter alternatives
-            // but at this point we're not filtering anything.
-            return emptyList()
         }
+
+        override fun onOnlinePrimaryRouteAvailable(onlinePrimaryRoute: RouteInterface) = Unit
 
         override fun onError(message: String) {
             observers.forEach {

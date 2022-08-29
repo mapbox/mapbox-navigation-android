@@ -11,6 +11,8 @@ import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocat
  * @param restStopType information about a rest stop. See [RestStopType].
  * @param name name of the rest stop.
  * @param amenities facilities associated with the rest stop. See [AmenityType]
+ * @param guideMapUri URI to guide map image. To be able to access the resource, you need to
+ * append an `access_token=` query parameter. Data availability may vary.
  * @see RoadObject
  * @see RoadObjectType.REST_STOP
  */
@@ -19,6 +21,7 @@ class RestStop internal constructor(
     @RestStopType.Type val restStopType: Int,
     val name: String?,
     val amenities: List<Amenity>?,
+    val guideMapUri: String?,
     length: Double?,
     location: RoadObjectLocation,
     @RoadObjectProvider.Type provider: String,
@@ -41,6 +44,7 @@ class RestStop internal constructor(
         if (restStopType != other.restStopType) return false
         if (name != other.name) return false
         if (amenities != other.amenities) return false
+        if (guideMapUri != other.guideMapUri) return false
 
         return true
     }
@@ -53,6 +57,7 @@ class RestStop internal constructor(
         result = 31 * result + restStopType
         result = 31 * result + name.hashCode()
         result = 31 * result + amenities.hashCode()
+        result = 31 * result + guideMapUri.hashCode()
         return result
     }
 
@@ -63,6 +68,8 @@ class RestStop internal constructor(
         return "RestStop(" +
             "restStopType=$restStopType, " +
             "amenities=$amenities, " +
-            "name=$name), ${super.toString()}"
+            "name=$name, " +
+            "guideMapUri=$guideMapUri" +
+            "), ${super.toString()}"
     }
 }

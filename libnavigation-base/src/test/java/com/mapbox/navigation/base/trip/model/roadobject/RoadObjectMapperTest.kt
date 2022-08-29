@@ -150,6 +150,7 @@ class RoadObjectMapperTest {
             RestStopType.REST_AREA,
             "rest_stop_name",
             emptyList(),
+            "some_uri",
             LENGTH,
             location,
             SDKRoadObjectProvider.MAPBOX,
@@ -163,6 +164,7 @@ class RoadObjectMapperTest {
         assertEquals(expected.toString(), roadObject.toString())
         assertEquals(RoadObjectType.REST_STOP, roadObject.objectType)
         assertEquals("rest_stop_name", roadObject.name)
+        assertEquals("some_uri", roadObject.guideMapUri)
     }
 
     @Test
@@ -174,6 +176,7 @@ class RoadObjectMapperTest {
             RestStopType.SERVICE_AREA,
             "rest_area_name",
             emptyList(),
+            "some_uri",
             LENGTH,
             location,
             SDKRoadObjectProvider.MAPBOX,
@@ -187,6 +190,7 @@ class RoadObjectMapperTest {
         assertEquals(expected.toString(), roadObject.toString())
         assertEquals(RoadObjectType.REST_STOP, roadObject.objectType)
         assertEquals("rest_area_name", roadObject.name)
+        assertEquals("some_uri", roadObject.guideMapUri)
     }
 
     @Test
@@ -339,7 +343,8 @@ class RoadObjectMapperTest {
         serviceAreaInfo = com.mapbox.navigator.ServiceAreaInfo(
             com.mapbox.navigator.ServiceAreaType.REST_AREA,
             "rest_stop_name",
-            listOf(Amenity(com.mapbox.navigator.AmenityType.ATM, "amenity_1", "brand_1"))
+            listOf(Amenity(com.mapbox.navigator.AmenityType.ATM, "amenity_1", "brand_1")),
+            "some_uri",
         )
     )
 
@@ -349,6 +354,7 @@ class RoadObjectMapperTest {
             com.mapbox.navigator.ServiceAreaType.SERVICE_AREA,
             "rest_area_name",
             listOf(Amenity(com.mapbox.navigator.AmenityType.ATM, "amenity_1", "brand_1")),
+            "some_uri",
         )
     )
 

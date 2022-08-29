@@ -6,6 +6,9 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 - Fixed an issue where portions of alternative routes that overlap with the primary route weren't hidden correctly, suffering from precision problems. [#6228](https://github.com/mapbox/mapbox-navigation-android/pull/6228)
+- Fixed routes’ incorrect duration: now it relays on annotations if provided, otherwise on steps’s duration. [#6237](https://github.com/mapbox/mapbox-navigation-android/pull/6237)
+- Added `guideMapUri` to the `RestStop`. [#6237](https://github.com/mapbox/mapbox-navigation-android/pull/6237)
+- [TileStore Android Service] Fixed a crash when the service process is killed by the Android system. [#6237](https://github.com/mapbox/mapbox-navigation-android/pull/6237)
 
 ## Mapbox Navigation SDK 2.8.0-beta.1 - 25 August, 2022
 ### Changelog
