@@ -17,6 +17,10 @@
     </activity>
 
     <activity
+        android:name=".MapboxReplayExtendedActivity">
+    </activity>
+
+    <activity
         android:name=".MapboxRouteLineAndArrowActivity"
         android:label="@string/title_route_line"
         android:screenOrientation="portrait">

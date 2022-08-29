@@ -17,6 +17,7 @@ import com.mapbox.navigation.examples.core.MapboxJunctionActivity
 import com.mapbox.navigation.examples.core.MapboxManeuverActivity
 import com.mapbox.navigation.examples.core.MapboxMultipleArrowActivity
 import com.mapbox.navigation.examples.core.MapboxNavigationActivity
+import com.mapbox.navigation.examples.core.MapboxReplayExtendedActivity
 import com.mapbox.navigation.examples.core.MapboxRouteLineAndArrowActivity
 import com.mapbox.navigation.examples.core.MapboxSignboardActivity
 import com.mapbox.navigation.examples.core.MapboxTripProgressActivity
@@ -64,6 +65,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
 
     private fun buildSampleList(): List<SampleItem> {
         return listOf(
+            SampleItem(
+                "Mapbox Replay extended activity",
+                "null",
+                MapboxReplayExtendedActivity::class.java
+            ),
             SampleItem(
                 getString(R.string.title_navigation),
                 getString(R.string.description_navigation),
