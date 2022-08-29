@@ -80,6 +80,7 @@ package com.mapbox.navigation.dropin {
     method public void onActiveNavigation();
     method public void onArrival();
     method public void onAudioGuidanceStateChanged(boolean muted);
+    method public boolean onBackPressed();
     method public void onCameraPaddingChanged(com.mapbox.maps.EdgeInsets padding);
     method public void onDestinationChanged(com.mapbox.geojson.Point? destination);
     method public void onDestinationPreview();
@@ -87,8 +88,10 @@ package com.mapbox.navigation.dropin {
     method public void onFreeDrive();
     method public void onIdleCameraMode();
     method public void onInfoPanelCollapsed();
+    method public void onInfoPanelDragging();
     method public void onInfoPanelExpanded();
     method public void onInfoPanelHidden();
+    method public void onInfoPanelSettling();
     method public void onOverviewCameraMode();
     method public void onRouteFetchCanceled(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
     method public void onRouteFetchFailed(java.util.List<com.mapbox.navigation.base.route.RouterFailure> reasons, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);

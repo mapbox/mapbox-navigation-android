@@ -125,7 +125,11 @@ class NavigationView @JvmOverloads constructor(
             LocationPermissionComponent(context.toComponentActivityRef(), navigationContext.store),
             TripSessionComponent(lifecycle, navigationContext.store),
             MapLayoutCoordinator(navigationContext, binding),
-            OnKeyListenerComponent(navigationContext.store, this),
+            OnKeyListenerComponent(
+                navigationContext.store,
+                this,
+                navigationContext.listenerRegistry
+            ),
             ManeuverCoordinator(navigationContext, binding.guidanceLayout),
             InfoPanelCoordinator(
                 navigationContext,

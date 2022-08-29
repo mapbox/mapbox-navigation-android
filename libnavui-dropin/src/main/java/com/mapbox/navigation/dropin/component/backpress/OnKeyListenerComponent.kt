@@ -25,6 +25,7 @@ import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 internal class OnKeyListenerComponent(
     private val store: Store,
     private val view: View,
+    private val delegateOnKeyListener: View.OnKeyListener? = null
 ) : UIComponent() {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
@@ -32,7 +33,10 @@ internal class OnKeyListenerComponent(
 
         view.isFocusableInTouchMode = true
         view.requestFocus()
-        view.setOnKeyListener { _, keyCode, event ->
+        view.setOnKeyListener { v, keyCode, event ->
+            if (delegateOnKeyListener?.onKey(v, keyCode, event) == true) {
+                return@setOnKeyListener true
+            }
             if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_UP) {
                 handleBackPress()
             } else {

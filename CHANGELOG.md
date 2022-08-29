@@ -4,6 +4,8 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added `NavigationViewListener.onBackPressed()`. This method allows client code to intercept any `NavigationView` BACK press events. [#6244](https://github.com/mapbox/mapbox-navigation-android/pull/6244)
+
 #### Bug fixes and improvements
 - Fixed an issue where portions of alternative routes that overlap with the primary route weren't hidden correctly, suffering from precision problems. [#6228](https://github.com/mapbox/mapbox-navigation-android/pull/6228)
 - Fixed incorrect values in `AlternativeRouteInfo#duration` and `RouteProgress#durationRemaining`: now they rely on `route.leg.annotations.duration` if available, otherwise, `LegStep#duration` is used for calculations. [#6237](https://github.com/mapbox/mapbox-navigation-android/pull/6237)

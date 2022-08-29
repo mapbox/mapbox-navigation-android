@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin
 
+import android.view.KeyEvent
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -24,6 +25,7 @@ import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -305,5 +307,44 @@ class NavigationViewListenerRegistryTest {
         testStore.setState(State(previewRoutes = RoutePreviewState.Fetching(id)))
 
         verify(exactly = 0) { testListener.onRouteFetching(id) }
+    }
+
+    @Test
+    fun `onKey should notify listeners only when BACK button is pressed`() {
+        sut.registerListener(testListener)
+
+        val keyEvent = mockk<KeyEvent> { every { action } returns KeyEvent.ACTION_UP }
+        sut.onKey(mockk(), KeyEvent.KEYCODE_BACK, keyEvent)
+
+        verify { testListener.onBackPressed() }
+    }
+
+    @Test
+    fun `onKey should NOT notify remaining listeners once BACK button pressed event is consumed`() {
+        val listener1 = mockk<NavigationViewListener>(relaxed = true) {
+            every { onBackPressed() } returns true
+        }
+        val listener2 = mockk<NavigationViewListener>(relaxed = true)
+        sut.registerListener(listener1)
+        sut.registerListener(listener2)
+
+        val keyEvent = mockk<KeyEvent> { every { action } returns KeyEvent.ACTION_UP }
+        val result = sut.onKey(mockk(), KeyEvent.KEYCODE_BACK, keyEvent)
+
+        assertTrue(result)
+        verify(exactly = 1) { listener1.onBackPressed() }
+        verify(exactly = 0) { listener2.onBackPressed() }
+    }
+
+    @Test
+    fun `onKey should NOT notify listeners when other buttons are pressed`() {
+        sut.registerListener(testListener)
+
+        val keyEvent = mockk<KeyEvent> { every { action } returns KeyEvent.ACTION_UP }
+        sut.onKey(mockk(), KeyEvent.KEYCODE_1, keyEvent)
+        sut.onKey(mockk(), KeyEvent.KEYCODE_2, keyEvent)
+        sut.onKey(mockk(), KeyEvent.KEYCODE_3, keyEvent)
+
+        verify(exactly = 0) { testListener.onBackPressed() }
     }
 }

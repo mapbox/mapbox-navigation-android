@@ -126,6 +126,7 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
 
         binding.navigationView.addListener(freeDriveInfoPanelInstaller)
         binding.navigationView.addListener(navViewListener)
+        binding.navigationView.addListener(backPressOverride)
         binding.navigationView.customizeViewOptions {
             routeArrowOptions = customRouteArrowOptions()
         }
@@ -558,6 +559,38 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             binding.navigationView.customizeViewBinders {
                 infoPanelHeaderBinder = UIBinder.USE_DEFAULT
             }
+        }
+    }
+
+    private val backPressOverride = object : NavigationViewListener() {
+        private var inRoutePreview = false
+
+        override fun onFreeDrive() {
+            inRoutePreview = false
+        }
+
+        override fun onDestinationPreview() {
+            inRoutePreview = false
+        }
+
+        override fun onRoutePreview() {
+            inRoutePreview = true
+        }
+
+        override fun onActiveNavigation() {
+            inRoutePreview = false
+        }
+
+        override fun onArrival() {
+            inRoutePreview = false
+        }
+
+        override fun onBackPressed(): Boolean {
+            if (inRoutePreview) {
+                binding.navigationView.api.startFreeDrive()
+                return true
+            }
+            return super.onBackPressed()
         }
     }
 

@@ -1,5 +1,7 @@
 package com.mapbox.navigation.dropin
 
+import android.view.KeyEvent
+import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.component.infopanel.InfoPanelBehavior
@@ -18,7 +20,7 @@ internal class NavigationViewListenerRegistry(
     private val store: Store,
     private val infoPanelSubscriber: InfoPanelBehavior,
     private val coroutineScope: CoroutineScope
-) {
+) : View.OnKeyListener {
     private var listeners = mutableMapOf<NavigationViewListener, Job>()
 
     fun registerListener(listener: NavigationViewListener) {
@@ -29,6 +31,19 @@ internal class NavigationViewListenerRegistry(
     fun unregisterListener(listener: NavigationViewListener) {
         listeners.remove(listener)?.cancel()
     }
+
+    //region View.OnKeyListener
+
+    override fun onKey(v: View, keyCode: Int, event: KeyEvent): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_UP) {
+            listeners.forEach { (listener, _) ->
+                if (listener.onBackPressed()) return true
+            }
+        }
+        return false
+    }
+
+    //endregion
 
     private fun connectListener(listener: NavigationViewListener): Job {
         return coroutineScope.launch {
