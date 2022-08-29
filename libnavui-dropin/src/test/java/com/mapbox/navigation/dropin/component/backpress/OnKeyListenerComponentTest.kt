@@ -43,12 +43,14 @@ class OnKeyListenerComponentTest {
 
     private lateinit var onKeyListenerComponent: OnKeyListenerComponent
 
+    private lateinit var onKeyListener: View.OnKeyListener
+
     @Before
     fun setUp() {
         mockkStatic(Utils::class)
         testStore = spyk(TestStore())
-
-        onKeyListenerComponent = OnKeyListenerComponent(testStore, view)
+        onKeyListener = mockk(relaxed = true)
+        onKeyListenerComponent = OnKeyListenerComponent(testStore, view, onKeyListener)
     }
 
     @Test
@@ -206,6 +208,27 @@ class OnKeyListenerComponentTest {
             )
         }
         assertTrue(result)
+    }
+
+    @Test
+    fun `should call delegate onClickListener with onKey event`() {
+        onKeyListenerComponent.onAttached(mockk())
+
+        slotOnKeyListener.captured.triggerBackPressed()
+
+        verify { onKeyListener.onKey(view, KeyEvent.KEYCODE_BACK, any()) }
+    }
+
+    @Test
+    fun `should use delegate onClickListener to intercept onKey events`() {
+        every { onKeyListener.onKey(any(), any(), any()) } returns true
+        testStore.setState(State(navigation = NavigationState.DestinationPreview))
+        onKeyListenerComponent.onAttached(mockk())
+
+        val result = slotOnKeyListener.captured.triggerBackPressed()
+
+        assertTrue(result)
+        verify(exactly = 0) { testStore.dispatch(any()) }
     }
 
     private fun View.OnKeyListener.triggerBackPressed(): Boolean {

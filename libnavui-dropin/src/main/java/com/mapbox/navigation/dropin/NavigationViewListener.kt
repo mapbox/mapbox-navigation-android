@@ -130,4 +130,11 @@ abstract class NavigationViewListener {
      * Called when the info panel behavior updates to settling.
      */
     open fun onInfoPanelSettling() = Unit
+
+    /**
+     * Called when hardware back button has been pressed.
+     *
+     * @return True if the listener has consumed the event, false otherwise.
+     */
+    open fun onBackPressed(): Boolean = false
 }
