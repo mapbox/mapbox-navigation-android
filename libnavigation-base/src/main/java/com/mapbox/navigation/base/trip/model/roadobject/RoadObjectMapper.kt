@@ -112,6 +112,7 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
                 metadata.serviceAreaInfo.toRestStopType(),
                 metadata.serviceAreaInfo.name,
                 metadata.serviceAreaInfo.amenities.toAmenities(),
+                metadata.serviceAreaInfo.guideMapUri,
                 length,
                 location,
                 provider,
