@@ -6,7 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 - Fixed an issue where portions of alternative routes that overlap with the primary route weren't hidden correctly, suffering from precision problems. [#6228](https://github.com/mapbox/mapbox-navigation-android/pull/6228)
-- Fixed routes’ incorrect duration: now it relays on annotations if provided, otherwise on steps’s duration. [#6237](https://github.com/mapbox/mapbox-navigation-android/pull/6237)
+- Fixed incorrect values in `AlternativeRouteInfo#duration` and `RouteProgress#durationRemaining`: now they rely on `route.leg.annotations.duration` if available, otherwise, `LegStep#duration` is used for calculations. [#6237](https://github.com/mapbox/mapbox-navigation-android/pull/6237)
 - Added `guideMapUri` to the `RestStop`. [#6237](https://github.com/mapbox/mapbox-navigation-android/pull/6237)
 - [TileStore Android Service] Fixed a crash when the service process is killed by the Android system. [#6237](https://github.com/mapbox/mapbox-navigation-android/pull/6237)
 
