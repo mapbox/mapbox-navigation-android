@@ -54,6 +54,7 @@ dependencies {
     implementation(dependenciesList.androidXConstraintLayout)
     implementation(dependenciesList.kotlinStdLib)
     implementation(dependenciesList.coroutinesAndroid)
+    implementation(dependenciesList.glide)
 
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
     testImplementation(project(':libtesting-utils'))

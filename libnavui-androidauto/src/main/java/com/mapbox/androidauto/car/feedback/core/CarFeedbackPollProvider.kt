@@ -5,6 +5,7 @@ import androidx.car.app.CarContext
 import androidx.car.app.model.CarIcon
 import androidx.core.graphics.drawable.IconCompat
 import com.mapbox.androidauto.R
+import com.mapbox.androidauto.car.feedback.ui.CarFeedbackIcon
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackOption
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackPoll
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
@@ -176,7 +177,8 @@ open class CarFeedbackPollProvider {
         return CarFeedbackPoll(carContext.getString(R.string.car_feedback_title), options)
     }
 
-    private fun CarContext.getCarIcon(@DrawableRes iconId: Int): CarIcon {
-        return CarIcon.Builder(IconCompat.createWithResource(this, iconId)).build()
+    private fun CarContext.getCarIcon(@DrawableRes iconId: Int): CarFeedbackIcon {
+        val icon = IconCompat.createWithResource(this, iconId)
+        return CarFeedbackIcon.Local(CarIcon.Builder(icon).build())
     }
 }

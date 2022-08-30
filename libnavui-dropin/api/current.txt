@@ -136,6 +136,7 @@ package com.mapbox.navigation.dropin {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ViewOptionsCustomization {
     ctor public ViewOptionsCustomization();
+    method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions? getDistanceFormatterOptions();
     method public Boolean? getEnableMapLongClickIntercept();
     method public Integer? getInfoPanelForcedState();
     method public String? getMapStyleUriDay();
@@ -144,6 +145,7 @@ package com.mapbox.navigation.dropin {
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions? getRouteLineOptions();
     method public Boolean? getShowInfoPanelInFreeDrive();
     method public Boolean? isInfoPanelHideable();
+    method public void setDistanceFormatterOptions(com.mapbox.navigation.base.formatter.DistanceFormatterOptions?);
     method public void setEnableMapLongClickIntercept(Boolean?);
     method public void setInfoPanelForcedState(Integer?);
     method public void setInfoPanelHideable(Boolean?);
@@ -152,6 +154,7 @@ package com.mapbox.navigation.dropin {
     method public void setRouteArrowOptions(com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions?);
     method public void setRouteLineOptions(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions?);
     method public void setShowInfoPanelInFreeDrive(Boolean?);
+    property public final com.mapbox.navigation.base.formatter.DistanceFormatterOptions? distanceFormatterOptions;
     property public final Boolean? enableMapLongClickIntercept;
     property public final Integer? infoPanelForcedState;
     property public final Boolean? isInfoPanelHideable;

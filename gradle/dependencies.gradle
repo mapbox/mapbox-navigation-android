@@ -66,6 +66,7 @@ ext {
       svgParser                 : '1.4',
       androidStartup            : '1.0.0',
       viewBinding               : '7.2.1',
+      glide                     : '4.13.2',
   ]
   dependenciesList = [
       // mapbox
@@ -167,6 +168,8 @@ ext {
       multidex                  : "androidx.multidex:multidex:${version.multidex}",
 
       svgParser                 : "com.caverock:androidsvg-aar:${version.svgParser}",
+
+      glide                     : "com.github.bumptech.glide:glide:${version.glide}",
 
       viewBinding               : "androidx.databinding:viewbinding:${version.viewBinding}",
 
