@@ -9,6 +9,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed incorrect values in `AlternativeRouteInfo#duration` and `RouteProgress#durationRemaining`: now they rely on `route.leg.annotations.duration` if available, otherwise, `LegStep#duration` is used for calculations. [#6237](https://github.com/mapbox/mapbox-navigation-android/pull/6237)
 - Added `guideMapUri` to the `RestStop`. [#6237](https://github.com/mapbox/mapbox-navigation-android/pull/6237)
 - [TileStore Android Service] Fixed a crash when the service process is killed by the Android system. [#6237](https://github.com/mapbox/mapbox-navigation-android/pull/6237)
+- Fixed `MapboxNavigationApp#detach` will not fully detach. This causes `MapboxNavigation` to continue to be accessible, and causes `MapboxNavigationObserver.onDetached` to be called multiple times.
 
 ## Mapbox Navigation SDK 2.8.0-beta.1 - 25 August, 2022
 ### Changelog

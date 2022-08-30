@@ -60,6 +60,8 @@ internal class MapboxNavigationOwner {
             attached = false
             services.forEach { it.onDetached(mapboxNavigation!!) }
             MapboxNavigationProvider.destroy()
+            mapboxNavigation = null
+            logI("disabled ${services.size} observers", LOG_CATEGORY)
         }
     }
 
