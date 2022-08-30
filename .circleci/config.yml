@@ -738,6 +738,7 @@ jobs:
                 test-command: ./gradlew libnavui-androidauto:connectedDebugAndroidTest
                 system-image: system-images;android-30;google_apis_playstore;x86
                 wait-for-emulator: false
+                save-gradle-cache: false
             - run:
                 name: Save test results
                 command: |
