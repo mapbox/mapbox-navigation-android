@@ -275,6 +275,23 @@ class MapboxNavigationAppDelegateTest {
     }
 
     @Test
+    fun `verify disable will detach and current becomes null`() {
+        mapboxNavigationApp.setup { navigationOptions }
+
+        val testLifecycleOwner = CarAppLifecycleOwnerTest.TestLifecycleOwner()
+        mapboxNavigationApp.attach(testLifecycleOwner)
+        testLifecycleOwner.lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+
+        val observer = mockk<MapboxNavigationObserver>(relaxUnitFun = true)
+        mapboxNavigationApp.registerObserver(observer)
+        mapboxNavigationApp.disable()
+        mapboxNavigationApp.unregisterObserver(observer)
+
+        assertNull(MapboxNavigationApp.current())
+        verify(exactly = 1) { observer.onDetached(any()) }
+    }
+
+    @Test
     fun `verify current is null when all lifecycle owners are destroyed`() {
         mapboxNavigationApp.setup { navigationOptions }
 
