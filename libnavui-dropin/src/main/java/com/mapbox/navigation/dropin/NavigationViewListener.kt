@@ -120,4 +120,14 @@ abstract class NavigationViewListener {
      * Called when the info panel behavior updates to collapsed.
      */
     open fun onInfoPanelCollapsed() = Unit
+
+    /**
+     * Called when the info panel behavior updates to dragging.
+     */
+    open fun onInfoPanelDragging() = Unit
+
+    /**
+     * Called when the info panel behavior updates to settling.
+     */
+    open fun onInfoPanelSettling() = Unit
 }

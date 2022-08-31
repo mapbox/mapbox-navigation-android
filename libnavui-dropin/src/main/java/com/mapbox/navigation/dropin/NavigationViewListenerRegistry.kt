@@ -95,6 +95,8 @@ internal class NavigationViewListenerRegistry(
                             BottomSheetBehavior.STATE_HIDDEN -> listener.onInfoPanelHidden()
                             BottomSheetBehavior.STATE_EXPANDED -> listener.onInfoPanelExpanded()
                             BottomSheetBehavior.STATE_COLLAPSED -> listener.onInfoPanelCollapsed()
+                            BottomSheetBehavior.STATE_DRAGGING -> listener.onInfoPanelDragging()
+                            BottomSheetBehavior.STATE_SETTLING -> listener.onInfoPanelSettling()
                         }
                     }
             }
