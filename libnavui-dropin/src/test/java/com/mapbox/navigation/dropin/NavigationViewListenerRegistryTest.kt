@@ -273,6 +273,31 @@ class NavigationViewListenerRegistryTest {
         }
     }
 
+    @Test
+    fun onInfoPanelDragging() {
+        sut.registerListener(testListener)
+        val newState = BottomSheetBehavior.STATE_DRAGGING
+
+        infoPanelBehaviorFlow.value = newState
+
+        verify {
+            testListener.onInfoPanelDragging()
+        }
+    }
+
+    @Test
+    fun onInfoPanelSettling() {
+        sut.registerListener(testListener)
+        val newState = BottomSheetBehavior.STATE_SETTLING
+
+        infoPanelBehaviorFlow.value = newState
+
+        verify {
+            testListener.onInfoPanelSettling()
+        }
+    }
+
+    @Test
     fun `onRouteFetching should NOT notify listener if requestId is 0`() {
         sut.registerListener(testListener)
 
