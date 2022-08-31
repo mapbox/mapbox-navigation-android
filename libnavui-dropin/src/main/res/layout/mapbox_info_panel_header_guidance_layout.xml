@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:background="@drawable/mapbox_bg_info_panel"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    tools:layout_height="@dimen/mapbox_infoPanel_peekHeight">
+
+    <FrameLayout
+        android:id="@+id/tripProgressLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/endNavigation"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.mapbox.navigation.ui.base.view.MapboxExtendableButton
+        tools:style="@style/DropInStyleExitButton"
+        android:id="@+id/endNavigation"
+        android:layout_width="72dp"
+        android:layout_height="52dp"
+        android:layout_marginTop="26dp"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</merge>

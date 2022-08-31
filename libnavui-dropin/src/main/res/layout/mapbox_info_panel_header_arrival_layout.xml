@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:background="@drawable/mapbox_bg_info_panel"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    tools:layout_height="@dimen/mapbox_infoPanel_peekHeight">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        style="@style/DropInInfoPanelHeadlineTextAppearance"
+        android:id="@+id/arrivedText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingEnd="8dp"
+        android:text="@string/mapbox_drop_in_arrived"
+        android:maxLines="2"
+        android:ellipsize="end"
+        app:layout_constraintTop_toTopOf="@+id/endNavigation"
+        app:layout_constraintBottom_toBottomOf="@+id/endNavigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5" />
+
+    <com.mapbox.navigation.ui.base.view.MapboxExtendableButton
+        tools:style="@style/DropInStyleExitButton"
+        android:id="@+id/endNavigation"
+        android:layout_width="72dp"
+        android:layout_height="52dp"
+        android:layout_marginTop="26dp"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</merge>
