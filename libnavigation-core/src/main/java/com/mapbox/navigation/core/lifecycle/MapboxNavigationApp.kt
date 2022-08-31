@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.lifecycle
 
 import android.app.Activity
 import android.app.Application
+import androidx.annotation.UiThread
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -70,6 +71,7 @@ object MapboxNavigationApp {
      *
      * Returns true after [setup] has been called and false after [disable] is called.
      */
+    @UiThread
     fun isSetup(): Boolean = mapboxNavigationAppDelegate.isSetup
 
     /**
@@ -78,6 +80,7 @@ object MapboxNavigationApp {
      * This call is a no-op if an attached activity is changing configurations
      * [Activity.isChangingConfigurations].
      */
+    @UiThread
     fun setup(navigationOptions: NavigationOptions) = apply {
         mapboxNavigationAppDelegate.setup { navigationOptions }
     }
@@ -89,6 +92,7 @@ object MapboxNavigationApp {
      * This call is a no-op if an attached activity is changing configurations
      * [Activity.isChangingConfigurations].
      */
+    @UiThread
     fun setup(navigationOptionsProvider: NavigationOptionsProvider) = apply {
         mapboxNavigationAppDelegate.setup(navigationOptionsProvider)
     }
@@ -105,6 +109,7 @@ object MapboxNavigationApp {
      * Optional function to detach all observers and disable [MapboxNavigation] from being created.
      * You can re-enable [MapboxNavigation] by calling [MapboxNavigationApp.setup].
      */
+    @UiThread
     fun disable() = apply {
         mapboxNavigationAppDelegate.disable()
     }
@@ -118,6 +123,7 @@ object MapboxNavigationApp {
      * the [Lifecycle] reaches the terminal [Lifecycle.State.DESTROYED] state
      * it will be removed from the observers automatically.
      */
+    @UiThread
     fun attach(lifecycleOwner: LifecycleOwner) = apply {
         mapboxNavigationAppDelegate.attach(lifecycleOwner)
     }
@@ -131,6 +137,7 @@ object MapboxNavigationApp {
      * Detaching an owner that was never attached will create incorrect counters
      * and will potentially cause [MapboxNavigation] to never be created.
      */
+    @UiThread
     fun detach(lifecycleOwner: LifecycleOwner) = apply {
         mapboxNavigationAppDelegate.detach(lifecycleOwner)
     }
@@ -138,6 +145,7 @@ object MapboxNavigationApp {
     /**
      * Register an observer to receive the [MapboxNavigation] instance.
      */
+    @UiThread
     fun registerObserver(mapboxNavigationObserver: MapboxNavigationObserver) = apply {
         mapboxNavigationAppDelegate.registerObserver(mapboxNavigationObserver)
     }
@@ -145,6 +153,7 @@ object MapboxNavigationApp {
     /**
      * Unregister the observer that was registered through [registerObserver].
      */
+    @UiThread
     fun unregisterObserver(mapboxNavigationObserver: MapboxNavigationObserver) = apply {
         mapboxNavigationAppDelegate.unregisterObserver(mapboxNavigationObserver)
     }
