@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.lifecycle
 
+import androidx.annotation.UiThread
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.core.MapboxNavigation
@@ -60,6 +61,7 @@ interface MapboxNavigationObserver {
      *
      * @param mapboxNavigation instance that is being attached.
      */
+    @UiThread
     fun onAttached(mapboxNavigation: MapboxNavigation)
 
     /**
@@ -75,5 +77,6 @@ interface MapboxNavigationObserver {
      *
      * @param mapboxNavigation instance that is being detached.
      */
+    @UiThread
     fun onDetached(mapboxNavigation: MapboxNavigation)
 }
