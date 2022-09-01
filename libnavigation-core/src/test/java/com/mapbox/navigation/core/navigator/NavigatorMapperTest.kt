@@ -11,7 +11,6 @@ import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buil
 import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.speed.model.SpeedLimit
-import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.testing.FileUtils
@@ -22,7 +21,6 @@ import com.mapbox.navigator.RoadObject
 import com.mapbox.navigator.RoadObjectMetadata
 import com.mapbox.navigator.RoadObjectProvider
 import com.mapbox.navigator.RouteAlertLocation
-import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.SpeedLimitSign
 import com.mapbox.navigator.SpeedLimitUnit
@@ -449,22 +447,6 @@ class NavigatorMapperTest {
         )
 
         assertFalse(routeProgress!!.stale)
-    }
-
-    @Test
-    fun `route init info is null when route info is null`() {
-        assertNull(getRouteInitInfo(null))
-    }
-
-    @Test
-    @Ignore("https://github.com/mapbox/mapbox-navigation-native/issues/3456")
-    fun `alerts are present in the route init info is they are delivered from native`() {
-        val routeInfo = RouteInfo(listOf(tunnel.toUpcomingRouteAlert()))
-
-        val result = getRouteInitInfo(routeInfo)!!
-
-        assertEquals(1, result.roadObjects.size)
-        assertEquals(RoadObjectType.TUNNEL, result.roadObjects[0].roadObject.objectType)
     }
 
     @Test

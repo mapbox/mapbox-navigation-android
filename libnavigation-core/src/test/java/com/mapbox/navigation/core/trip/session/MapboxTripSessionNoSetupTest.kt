@@ -6,10 +6,16 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
+import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
+import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.BasicSetRoutesInfo
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_NEW
 import com.mapbox.navigation.core.infra.TestLocationEngine
+import com.mapbox.navigation.core.infra.recorders.BannerInstructionsObserverRecorder
+import com.mapbox.navigation.core.infra.recorders.OffRouteObserverRecorder
+import com.mapbox.navigation.core.infra.recorders.RoadObjectsOnRouteObserverRecorder
 import com.mapbox.navigation.core.infra.recorders.RouteProgressObserverRecorder
 import com.mapbox.navigation.core.infra.recorders.VoiceInstructionsObserverRecorder
 import com.mapbox.navigation.core.trip.service.TripService
@@ -20,6 +26,7 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.factories.createBannerInstruction
 import com.mapbox.navigation.testing.factories.createBannerSection
+import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createLocation
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createNavigationStatus
@@ -29,20 +36,25 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
+import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteState
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.spyk
 import io.mockk.unmockkAll
 import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertNotNull
 import junit.framework.Assert.assertNull
+import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.util.Locale
@@ -52,6 +64,11 @@ class MapboxTripSessionNoSetupTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
+
+    @Before
+    fun setUp() {
+        mockkObject(RoadObjectFactory)
+    }
 
     @After
     fun cleanup() {
@@ -366,6 +383,217 @@ class MapboxTripSessionNoSetupTest {
 
         assertEquals(testLocation, tripSession.getRawLocation())
     }
+
+    @Test
+    fun `session doesn't override route reference if native routes update fails`() =
+        coroutineRule.runBlockingTest {
+            // arrange
+            val initialRoute = createNavigationRoute()
+            val failingRoute = createNavigationRoute(createDirectionsRoute(requestUuid = "fail"))
+            val routeProgressObserver = RouteProgressObserverRecorder()
+            val nativeNavigator = createNativeNavigatorMock()
+            StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(
+                nativeNavigator
+            )
+            val locationEngine = TestLocationEngine.create()
+            val tripSession = buildTripSession(
+                nativeNavigator = nativeNavigator,
+                locationEngine = locationEngine
+            )
+            tripSession.start(true)
+            tripSession.registerRouteProgressObserver(routeProgressObserver)
+            // act
+            tripSession.setRoutes(
+                listOf(initialRoute),
+                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+            )
+            coEvery {
+                nativeNavigator.setRoutes(failingRoute, any(), any())
+            } returns createSetRouteError()
+            tripSession.setRoutes(
+                listOf(failingRoute),
+                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+            )
+            locationEngine.updateLocation(
+                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1)
+            )
+            locationEngine.updateLocation(
+                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL)
+            )
+            locationEngine.updateLocation(
+                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2)
+            )
+            // assert
+            assertTrue(
+                routeProgressObserver.records
+                    .takeLast(3)
+                    .all { it.navigationRoute == initialRoute }
+            )
+            assertEquals(initialRoute, tripSession.primaryRoute)
+        }
+
+    @Test
+    fun `session doesn't clear road objects on route if native routes update fails`() =
+        coroutineRule.runBlockingTest {
+            // arrange
+            val initialRoadObject = listOf(createMockUpcomingRoadObject())
+            val initialRoute = createNavigationRoute(
+                routeInfo = createMockRouteInfo(initialRoadObject)
+            )
+            val failingRoadObject = listOf(createMockUpcomingRoadObject())
+            val failingRoute = createNavigationRoute(
+                createDirectionsRoute(requestUuid = "fail"),
+                routeInfo = createMockRouteInfo(failingRoadObject)
+            )
+            val roadObjectsObserver = RoadObjectsOnRouteObserverRecorder()
+            val nativeNavigator = createNativeNavigatorMock()
+            StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(
+                nativeNavigator
+            )
+            val locationEngine = TestLocationEngine.create()
+            val tripSession = buildTripSession(
+                nativeNavigator = nativeNavigator,
+                locationEngine = locationEngine
+            )
+            tripSession.start(true)
+            tripSession.registerRoadObjectsOnRouteObserver(roadObjectsObserver)
+            // act
+            tripSession.setRoutes(
+                listOf(initialRoute),
+                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+            )
+            coEvery {
+                nativeNavigator.setRoutes(failingRoute, any(), any())
+            } returns createSetRouteError()
+            tripSession.setRoutes(
+                listOf(failingRoute),
+                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+            )
+            // assert
+            assertEquals(initialRoadObject, roadObjectsObserver.records.last())
+        }
+
+    @Test
+    fun `session doesn't clear off route state if native routes update fails`() =
+        coroutineRule.runBlockingTest {
+            // arrange
+            val initialRoute = createNavigationRoute()
+            val failingRoute = createNavigationRoute(
+                createDirectionsRoute(requestUuid = "fail")
+            )
+            val observer = OffRouteObserverRecorder()
+            val nativeNavigator = createNativeNavigatorMock()
+            StatusWithOffRouteUpdateUtil.triggerStatusUpdatesOnLocationUpdate(
+                nativeNavigator
+            )
+            val locationEngine = TestLocationEngine.create()
+            val tripSession = buildTripSession(
+                nativeNavigator = nativeNavigator,
+                locationEngine = locationEngine
+            )
+            tripSession.start(true)
+            tripSession.registerOffRouteObserver(observer)
+            // act
+            tripSession.setRoutes(
+                listOf(initialRoute),
+                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+            )
+            locationEngine.updateLocation(createLocation())
+            coEvery {
+                nativeNavigator.setRoutes(failingRoute, any(), any())
+            } returns createSetRouteError()
+            tripSession.setRoutes(
+                listOf(failingRoute),
+                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+            )
+            // assert
+            assertEquals(true, observer.records.last())
+        }
+
+    @Test
+    fun `session doesn't clear route progress state if native routes update fails`() =
+        coroutineRule.runBlockingTest {
+            // arrange
+            val initialRoute = createNavigationRoute()
+            val failingRoute = createNavigationRoute(
+                createDirectionsRoute(requestUuid = "fail")
+            )
+            val nativeNavigator = createNativeNavigatorMock()
+            StatusWithOffRouteUpdateUtil.triggerStatusUpdatesOnLocationUpdate(
+                nativeNavigator
+            )
+            val locationEngine = TestLocationEngine.create()
+            val tripSession = buildTripSession(
+                nativeNavigator = nativeNavigator,
+                locationEngine = locationEngine
+            )
+            tripSession.start(true)
+            // act
+            tripSession.setRoutes(
+                listOf(initialRoute),
+                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+            )
+            locationEngine.updateLocation(createLocation())
+            coEvery {
+                nativeNavigator.setRoutes(failingRoute, any(), any())
+            } returns createSetRouteError()
+            tripSession.setRoutes(
+                listOf(failingRoute),
+                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+            )
+            // assert
+            assertNotNull(tripSession.getRouteProgress())
+        }
+
+    @Test
+    fun `session doesn't clear voice and banner state if native routes update fails`() =
+        coroutineRule.runBlockingTest {
+            // arrange
+            val initialRoute = createNavigationRoute()
+            val failingRoute = createNavigationRoute(createDirectionsRoute(requestUuid = "fail"))
+            val voiceInstructionObserver = VoiceInstructionsObserverRecorder()
+            val bannerInstructionObserver = BannerInstructionsObserverRecorder()
+            val nativeNavigator = createNativeNavigatorMock()
+            StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(
+                nativeNavigator
+            )
+            val locationEngine = TestLocationEngine.create()
+            val tripSession = buildTripSession(
+                nativeNavigator = nativeNavigator,
+                locationEngine = locationEngine
+            )
+            tripSession.start(true)
+            tripSession.registerVoiceInstructionsObserver(voiceInstructionObserver)
+            tripSession.registerBannerInstructionsObserver(bannerInstructionObserver)
+            // act
+            tripSession.setRoutes(
+                listOf(initialRoute),
+                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+            )
+            locationEngine.updateLocation(
+                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1)
+            )
+            coEvery {
+                nativeNavigator.setRoutes(failingRoute, any(), any())
+            } returns createSetRouteError()
+            tripSession.setRoutes(
+                listOf(failingRoute),
+                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+            )
+            locationEngine.updateLocation(
+                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1)
+            )
+            // assert
+            assertEquals(
+                tripSession.getRouteProgress()!!.voiceInstructions,
+                voiceInstructionObserver.records.last()
+            )
+            assertEquals(1, bannerInstructionObserver.records.size)
+            assertEquals(
+                tripSession.getRouteProgress()!!.bannerInstructions,
+                bannerInstructionObserver.records.last()
+            )
+        }
 }
 
 private fun buildTripSession(
@@ -457,6 +685,28 @@ object StatusWithVoiceInstructionUpdateUtil {
     }
 }
 
+object StatusWithOffRouteUpdateUtil {
+
+    fun triggerStatusUpdatesOnLocationUpdate(nativeNavigator: MapboxNativeNavigator) {
+        val navigatorObservers = recordNavigatorObservers(nativeNavigator)
+        coEvery {
+            nativeNavigator.updateLocation(
+                any()
+            )
+        } answers {
+            navigatorObservers.onStatus(
+                NavigationStatusOrigin.LOCATION_UPDATE,
+                createNavigationStatus(
+                    location = firstArg(),
+                    voiceInstruction = createVoiceInstruction("1"),
+                    routeState = RouteState.OFF_ROUTE
+                )
+            )
+            true
+        }
+    }
+}
+
 private fun createNativeNavigatorMock(): MapboxNativeNavigator {
     val nativeNavigator = mockk<MapboxNativeNavigator>(relaxed = true)
     coEvery {
@@ -514,3 +764,11 @@ private fun triggerLocationEngineUpdateOnSubscribe(
         )
     }
 }
+
+private fun createMockRouteInfo(
+    roadObjects: List<UpcomingRoadObject> = listOf(mockk())
+): RouteInfo = mockk {
+    every { alerts.toUpcomingRoadObjects() } returns roadObjects
+}
+
+private fun createMockUpcomingRoadObject(): UpcomingRoadObject = mockk {}

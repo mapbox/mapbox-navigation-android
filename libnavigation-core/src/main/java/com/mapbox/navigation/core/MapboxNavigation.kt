@@ -889,7 +889,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                         )
                     }
                     is NativeSetRouteError -> {
-                        logE("Routes $routes will be ignored as they are not valid")
+                        logE(
+                            "Routes with IDs ${routes.map { it.id }} " +
+                                "will be ignored as they are not valid"
+                        )
                         routesSetResult = ExpectedFactory.createError(
                             RoutesSetError(processedRoutes.error)
                         )

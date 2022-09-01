@@ -7,6 +7,7 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadFactory
+import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
 import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -18,7 +19,6 @@ import com.mapbox.navigation.core.SetAlternativeRoutesInfo
 import com.mapbox.navigation.core.SetRefreshedRoutesInfo
 import com.mapbox.navigation.core.SetRoutesInfo
 import com.mapbox.navigation.core.navigator.getLocationMatcherResult
-import com.mapbox.navigation.core.navigator.getRouteInitInfo
 import com.mapbox.navigation.core.navigator.getRouteProgressFrom
 import com.mapbox.navigation.core.navigator.getTripStatusFrom
 import com.mapbox.navigation.core.navigator.mapToDirectionsApi
@@ -82,17 +82,12 @@ internal class MapboxTripSession(
     ): NativeSetRouteResult {
         logD(
             "routes update (reason: ${setRoutesInfo.reason}, " +
-                "count: ${routes.size}) - starting",
+                "route IDs: ${routes.map { it.id }}) - starting",
             LOG_CATEGORY
         )
         isUpdatingRoute = true
         val result = when (setRoutesInfo) {
             is BasicSetRoutesInfo -> {
-                isOffRoute = false
-                invalidateLatestInstructions()
-                roadObjects = emptyList()
-                routeProgress = null
-                updateLegIndexJob?.cancel()
                 setRouteToNativeNavigator(routes, setRoutesInfo.legIndex)
             }
             is SetAlternativeRoutesInfo -> {
@@ -103,12 +98,16 @@ internal class MapboxTripSession(
             is SetRefreshedRoutesInfo -> {
                 if (routes.isNotEmpty()) {
                     val primaryRoute = routes.first()
-                    val alternatives = navigator.refreshRoute(primaryRoute)
-                    roadObjects = getRouteInitInfo(primaryRoute.nativeRoute().routeInfo)
-                        ?.roadObjects
-                        ?: emptyList()
-                    this@MapboxTripSession.primaryRoute = routes.first()
-                    alternatives.fold({ NativeSetRouteError(it) }, { NativeSetRouteValue(it) })
+                    navigator.refreshRoute(primaryRoute).onValue {
+                        this@MapboxTripSession.primaryRoute = routes.first()
+                        roadObjects = primaryRoute.nativeRoute().routeInfo.alerts
+                            .toUpcomingRoadObjects()
+                    }.fold({ NativeSetRouteError(it) }, { NativeSetRouteValue(it) }).also {
+                        logD(
+                            "routes update (route IDs: ${routes.map { it.id }}) - refresh finished",
+                            LOG_CATEGORY
+                        )
+                    }
                 } else {
                     with("Cannot refresh route. Route can't be null") {
                         logW(this, LOG_CATEGORY)
@@ -118,7 +117,11 @@ internal class MapboxTripSession(
             }
         }
         isUpdatingRoute = false
-        logD("routes update (reason: ${setRoutesInfo.reason}) - finished", LOG_CATEGORY)
+        logD(
+            "routes update (reason: ${setRoutesInfo.reason}, " +
+                "route IDs: ${routes.map { it.id }}) - finished",
+            LOG_CATEGORY
+        )
         return result
     }
 
@@ -126,19 +129,31 @@ internal class MapboxTripSession(
         routes: List<NavigationRoute>,
         legIndex: Int
     ): NativeSetRouteResult {
-        logD("primary route update - starting", LOG_CATEGORY)
+        logD(
+            "native routes update (route IDs: ${routes.map { it.id }}) - starting",
+            LOG_CATEGORY
+        )
         val newPrimaryRoute = routes.firstOrNull()
-        val processedAlternatives = navigator.setRoutes(
+        return navigator.setRoutes(
             newPrimaryRoute,
             legIndex,
             routes.drop(1)
-        ).mapValue { it.alternatives }
-        this@MapboxTripSession.primaryRoute = newPrimaryRoute
-        roadObjects = newPrimaryRoute?.let {
-            getRouteInitInfo(it.nativeRoute().routeInfo)?.roadObjects
-        } ?: emptyList()
-        logD("primary route update - finished", LOG_CATEGORY)
-        return processedAlternatives.fold({ NativeSetRouteError(it) }, { NativeSetRouteValue(it) })
+        ).onValue {
+            updateLegIndexJob?.cancel()
+            this@MapboxTripSession.primaryRoute = newPrimaryRoute
+            roadObjects = newPrimaryRoute?.nativeRoute()?.routeInfo?.alerts
+                ?.toUpcomingRoadObjects() ?: emptyList()
+            isOffRoute = false
+            invalidateLatestInstructions()
+            routeProgress = null
+        }.mapValue {
+            it.alternatives
+        }.fold({ NativeSetRouteError(it) }, { NativeSetRouteValue(it) }).also {
+            logD(
+                "native routes update (route IDs: ${routes.map { it.id }}) - finished",
+                LOG_CATEGORY
+            )
+        }
     }
 
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
@@ -303,7 +318,7 @@ internal class MapboxTripSession(
             // we should skip RouteProgress, BannerInstructions, isOffRoute state updates while
             // setting a new route
             if (isUpdatingRoute) {
-                logD("route progress update dropped - updating routes")
+                logD("route progress update dropped - updating routes", LOG_CATEGORY)
                 return
             }
 
@@ -324,7 +339,16 @@ internal class MapboxTripSession(
                 bannerInstructionEvent.latestBannerInstructions,
                 bannerInstructionEvent.latestInstructionIndex,
                 lastVoiceInstruction
-            )
+            ).also {
+                if (it == null) {
+                    logD(
+                        "route progress update dropped - " +
+                            "currentPrimaryRoute ID: ${primaryRoute?.id}; " +
+                            "currentState: ${status.routeState}",
+                        LOG_CATEGORY
+                    )
+                }
+            }
             updateRouteProgress(routeProgress, triggerObserver)
             triggerVoiceInstructionEvent(routeProgress, status)
             isOffRoute = tripStatus.navigationStatus.routeState == RouteState.OFF_ROUTE
