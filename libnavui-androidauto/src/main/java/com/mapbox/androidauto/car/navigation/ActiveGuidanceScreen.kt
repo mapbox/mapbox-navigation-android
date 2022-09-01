@@ -52,7 +52,8 @@ class ActiveGuidanceScreen(
         alternativeCarCameraMode = CarCameraMode.OVERVIEW,
     )
     private val roadLabelSurfaceLayer = RoadLabelSurfaceLayer(carContext)
-    private val carRouteProgressObserver = CarNavigationInfoObserver(carActiveGuidanceContext)
+    private val navigationInfoProvider = CarNavigationInfoProvider()
+        .invalidateOnChange(this)
     private val mapActionStripBuilder = MainMapActionStrip(this, carNavigationCamera)
 
     private val arrivalObserver = object : ArrivalObserver {
@@ -108,6 +109,7 @@ class ActiveGuidanceScreen(
 
     init {
         logAndroidAuto("ActiveGuidanceScreen constructor")
+
         lifecycle.addObserver(object : DefaultLifecycleObserver {
 
             override fun onCreate(owner: LifecycleOwner) {
@@ -126,9 +128,7 @@ class ActiveGuidanceScreen(
                 )
                 carActiveGuidanceContext.mapboxCarMap.registerObserver(carRouteLine)
                 carActiveGuidanceContext.mapboxCarMap.registerObserver(surfaceListener)
-                carRouteProgressObserver.start {
-                    invalidate()
-                }
+                carActiveGuidanceContext.mapboxCarMap.registerObserver(navigationInfoProvider)
             }
 
             override fun onPause(owner: LifecycleOwner) {
@@ -140,7 +140,7 @@ class ActiveGuidanceScreen(
                 carActiveGuidanceContext.mapboxCarMap.setGestureHandler(null)
                 carActiveGuidanceContext.mapboxCarMap.unregisterObserver(carRouteLine)
                 carActiveGuidanceContext.mapboxCarMap.unregisterObserver(surfaceListener)
-                carRouteProgressObserver.stop()
+                carActiveGuidanceContext.mapboxCarMap.unregisterObserver(navigationInfoProvider)
             }
 
             override fun onDestroy(owner: LifecycleOwner) {
@@ -171,20 +171,13 @@ class ActiveGuidanceScreen(
                     }.build()
             )
         }.build()
-        val builder = NavigationTemplate.Builder()
+
+        return NavigationTemplate.Builder()
             .setBackgroundColor(CarColor.PRIMARY)
             .setActionStrip(actionStrip)
             .setMapActionStrip(mapActionStripBuilder.build())
-
-        carRouteProgressObserver.navigationInfo?.let {
-            builder.setNavigationInfo(it)
-        }
-
-        carRouteProgressObserver.travelEstimateInfo?.let {
-            builder.setDestinationTravelEstimate(it)
-        }
-
-        return builder.build()
+            .apply(navigationInfoProvider.setNavigationInfo())
+            .build()
     }
 
     private fun stopNavigation() {

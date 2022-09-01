@@ -62,6 +62,7 @@ dependencies {
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
     testImplementation(project(':libtesting-utils'))
     testImplementation(dependenciesList.androidXArchCoreTesting)
+    testImplementation(dependenciesList.androidXLifecycleTesting)
 
     // Needed for the instrumentation tests in the androidTest module
     androidTestImplementation(dependenciesList.testRunner)

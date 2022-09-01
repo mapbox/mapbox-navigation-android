@@ -14,7 +14,7 @@ class CarNavigationEtaMapper(
     private val tripProgressApi: MapboxTripProgressApi,
 ) {
 
-    fun from(routeProgress: RouteProgress): TravelEstimate {
+    fun getDestinationTravelEstimate(routeProgress: RouteProgress): TravelEstimate {
         val result = tripProgressApi.getTripProgress(routeProgress)
         val distance = carDistanceFormatter.carDistance(result.distanceRemaining)
         val zonedDateTime =

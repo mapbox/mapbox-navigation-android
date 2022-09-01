@@ -33,7 +33,7 @@ class CarNavigationEtaMapperTest {
         }
         val mapper = CarNavigationEtaMapper(formatter, tripProgressApi)
 
-        val result = mapper.from(routeProgress)
+        val result = mapper.getDestinationTravelEstimate(routeProgress)
 
         assertEquals(1234567, result.arrivalTimeAtDestination!!.timeSinceEpochMillis)
         assertEquals(50.0, result.remainingDistance!!.displayDistance, 0.0)
