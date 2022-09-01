@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.mapbox.navigation.core">
+    package="com.mapbox.navigation.core.test">
 
     <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION"
         tools:ignore="MockLocation,ProtectedPermissions" />
@@ -10,7 +10,7 @@
 
     <application>
         <activity
-            android:name=".tests.activity.TripServiceActivity"
+            android:name="com.mapbox.navigation.core.tests.activity.TripServiceActivity"
             android:theme="@style/AppTheme" />
     </application>
 </manifest>
