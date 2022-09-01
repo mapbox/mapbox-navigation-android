@@ -59,6 +59,7 @@ import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.parallelMap
 import com.mapbox.turf.TurfConstants
@@ -711,6 +712,25 @@ class MapboxRouteLineApi(
         routeProgress: RouteProgress,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>
     ) {
+        val currentPrimaryRoute = primaryRoute
+        if (currentPrimaryRoute == null) {
+            val msg = "You're calling #updateWithRouteProgress without any routes being set."
+            consumer.accept(
+                ExpectedFactory.createError(RouteLineError(msg, throwable = null))
+            )
+            logW(msg, LOG_CATEGORY)
+            return
+        } else if (currentPrimaryRoute.id != routeProgress.navigationRoute.id) {
+            val msg = "Provided primary route (#setNavigationRoutes, ID: " +
+                "${currentPrimaryRoute.id}) and navigated route (#updateWithRouteProgress, ID: " +
+                "${routeProgress.navigationRoute.id}) are not the same. Aborting the update."
+            consumer.accept(
+                ExpectedFactory.createError(RouteLineError(msg, throwable = null))
+            )
+            logE(msg, LOG_CATEGORY)
+            return
+        }
+
         updateUpcomingRoutePointIndex(routeProgress)
         updateVanishingPointState(routeProgress.currentState)
 

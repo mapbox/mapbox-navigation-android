@@ -38,6 +38,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
@@ -543,6 +544,57 @@ class MapboxRouteLineApiTest {
             mockVanishingRouteLine.updateVanishingPointState(RouteProgressState.TRACKING)
         }
     }
+
+    @Test
+    fun `updateWithRouteProgress - abort if no primary route`() = coroutineRule.runBlockingTest {
+        val route = loadNavigationRoute("short_route.json")
+        val options = mockRouteOptions()
+        val api = MapboxRouteLineApi(options)
+        val routeProgress = mockRouteProgress(route, stepIndexValue = 2)
+        val consumer =
+            mockk<MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>>(
+                relaxUnitFun = true
+            )
+
+        api.updateWithRouteProgress(routeProgress, consumer)
+
+        val resultSlot = slot<Expected<RouteLineError, RouteLineUpdateValue>>()
+        verify { consumer.accept(capture(resultSlot)) }
+        assertEquals(
+            "You're calling #updateWithRouteProgress without any routes being set.",
+            resultSlot.captured.error!!.errorMessage
+        )
+    }
+
+    @Test
+    fun `updateWithRouteProgress - abort if primary route different`() =
+        coroutineRule.runBlockingTest {
+            val route1 = loadNavigationRoute("multileg-route-two-legs.json", uuid = "abc")
+            val route2 = loadNavigationRoute("short_route.json", uuid = "def")
+            val mockVanishingRouteLine = mockk<VanishingRouteLine>(relaxUnitFun = true) {
+                every { vanishPointOffset } returns 0.0
+            }
+            val options = mockRouteOptions()
+            every { options.vanishingRouteLine } returns mockVanishingRouteLine
+            val api = MapboxRouteLineApi(options)
+            api.setNavigationRoutes(listOf(route1))
+            val routeProgress = mockRouteProgress(route2, stepIndexValue = 2)
+            val consumer =
+                mockk<MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>>(
+                    relaxUnitFun = true
+                )
+
+            api.updateWithRouteProgress(routeProgress, consumer)
+
+            val resultSlot = slot<Expected<RouteLineError, RouteLineUpdateValue>>()
+            verify { consumer.accept(capture(resultSlot)) }
+            assertEquals(
+                "Provided primary route (#setNavigationRoutes, ID: abc#0) and navigated " +
+                    "route (#updateWithRouteProgress, ID: def#0) are not the same. " +
+                    "Aborting the update.",
+                resultSlot.captured.error!!.errorMessage
+            )
+        }
 
     @Test
     fun updateWithRouteProgress_whenDeEmphasizeInactiveLegSegments_vanishingRouteLineDisabled() =
