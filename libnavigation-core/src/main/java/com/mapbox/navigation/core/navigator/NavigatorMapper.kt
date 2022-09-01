@@ -31,7 +31,6 @@ import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
-import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.SpeedLimitSign
 import com.mapbox.navigator.SpeedLimitUnit
@@ -39,8 +38,6 @@ import com.mapbox.navigator.VoiceInstruction
 
 private const val ONE_INDEX = 1
 private const val ONE_SECOND_IN_MILLISECONDS = 1000.0
-
-internal fun getRouteInitInfo(routeInfo: RouteInfo?) = routeInfo.toRouteInitInfo()
 
 /**
  * Builds [RouteProgress] object based on [NavigationStatus] returned by [Navigator]
@@ -273,12 +270,6 @@ internal fun RouteState.convertState(): RouteProgressState {
         RouteState.COMPLETE -> RouteProgressState.COMPLETE
         RouteState.OFF_ROUTE -> RouteProgressState.OFF_ROUTE
         RouteState.UNCERTAIN -> RouteProgressState.UNCERTAIN
-    }
-}
-
-private fun RouteInfo?.toRouteInitInfo(): RouteInitInfo? {
-    return this?.let {
-        RouteInitInfo(alerts.toUpcomingRoadObjects())
     }
 }
 

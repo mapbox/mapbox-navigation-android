@@ -17,6 +17,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Added Android 13 support. [#6196](https://github.com/mapbox/mapbox-navigation-android/pull/6196)
 - Declared [POST_NOTIFICATIONS](https://developer.android.com/reference/android/Manifest.permission#POST_NOTIFICATIONS) permission in SDK's AndroidManifest.xml. It is highly recommended for apps to request the permission in runtime. Without it, the SDK will not be able to show the notification with trip progress in the notification drawer for apps that target Android 13 or higher. [#6196](https://github.com/mapbox/mapbox-navigation-android/pull/6196)
 - Marked `MapboxNavigationApp` and `MapboxMavigationObserver` methods with `@UiThread` annotations. [#6254](https://github.com/mapbox/mapbox-navigation-android/pull/6254)
+- Fixed an issue where `RouteProgress#navigationRoute` could have been delivered with an incorrect route reference, if setting routes failed as reported by `RoutesSetCallback`. [#6255](https://github.com/mapbox/mapbox-navigation-android/pull/6255)
+- Expanded debug and warning logs around `RouteProgress` generation and route setting processes, including when incorrect progress is delivered to `MapboxRouteLineApi#updateWithRouteProgress`. [#6255](https://github.com/mapbox/mapbox-navigation-android/pull/6255)
 
 ## Mapbox Navigation SDK 2.8.0-beta.1 - 25 August, 2022
 ### Changelog

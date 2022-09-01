@@ -9,10 +9,12 @@ import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.internal.utils.mapToNativeRouteOrigin
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteInterface
 
 fun createNavigationRoute(
-    directionsRoute: DirectionsRoute = createDirectionsRoute()
+    directionsRoute: DirectionsRoute = createDirectionsRoute(),
+    routeInfo: RouteInfo = RouteInfo(emptyList())
 ): NavigationRoute {
     return com.mapbox.navigation.base.internal.route.createNavigationRoute(
         directionsRoute,
@@ -30,7 +32,8 @@ fun createNavigationRoute(
                             responseJson = response,
                             routerOrigin = routerOrigin.mapToNativeRouteOrigin(),
                             requestURI = directionsRoute.routeOptions()!!.toUrl("pk.*test_token*")
-                                .toString()
+                                .toString(),
+                            routeInfo = routeInfo
                         ),
                     )
                 )
