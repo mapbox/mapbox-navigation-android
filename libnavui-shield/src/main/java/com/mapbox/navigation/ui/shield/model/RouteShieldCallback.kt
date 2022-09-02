@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.shield.model
 
 import android.graphics.Bitmap
+import androidx.annotation.UiThread
 import com.mapbox.bindgen.Expected
 
 /**
@@ -18,6 +19,7 @@ fun interface RouteShieldCallback {
      *
      * @param shields list of [Expected] wither containing [RouteShieldError] or [RouteShieldResult]
      */
+    @UiThread
     fun onRoadShields(
         shields: List<Expected<RouteShieldError, RouteShieldResult>>
     )

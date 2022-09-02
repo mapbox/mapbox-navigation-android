@@ -11,6 +11,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Marked `MapboxSpeedLimitView`, `MapboxStatusView`, `MapboxTripProgressView`, `MapboxSoundButton` methods with `@UiThread` annotation. [#6272](https://github.com/mapbox/mapbox-navigation-android/pull/6272)
 - Marked `InfoPanelBinder`, `NavigationView`, `NavigationViewApi` methods with `@UiThread` annotation. [#6269](https://github.com/mapbox/mapbox-navigation-android/pull/6269)
 - Marked `MapboxExitText`, `MapboxLaneGuidance`, `MapboxLaneGuidanceAdapter`, `MapboxManeuverView`, `MapboxPrimaryManeuver`, `MapboxSecondaryManeuver`, `MapboxStepDistance`, `MapboxSubManeuver`, `MapboxTurnIconManeuver`, `MapboxUpcomingManeuverAdapter` methods with `@UiThread` annotation. [#6270](https://github.com/mapbox/mapbox-navigation-android/pull/6270)
+- Marked `RouteShieldCallback` methods with `@UiThread` annotation. [#6271](https://github.com/mapbox/mapbox-navigation-android/pull/6271)
 
 ## Mapbox Navigation SDK 2.9.0-beta.1 - 06 October, 2022
 ### Changelog
