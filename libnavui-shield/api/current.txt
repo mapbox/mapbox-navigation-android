@@ -39,7 +39,7 @@ package com.mapbox.navigation.ui.shield.model {
   }
 
   public fun interface RouteShieldCallback {
-    method public void onRoadShields(java.util.List<? extends com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.shield.model.RouteShieldError,com.mapbox.navigation.ui.shield.model.RouteShieldResult>> shields);
+    method @UiThread public void onRoadShields(java.util.List<? extends com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.shield.model.RouteShieldError,com.mapbox.navigation.ui.shield.model.RouteShieldResult>> shields);
   }
 
   public final class RouteShieldError {
