@@ -2,6 +2,7 @@
 
 package com.mapbox.navigation.dropin
 
+import androidx.annotation.UiThread
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
@@ -12,6 +13,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
  * Api that gives you the ability to change the state for navigation apps.
  */
 @ExperimentalPreviewMapboxNavigationAPI
+@UiThread
 abstract class NavigationViewApi {
 
     /**

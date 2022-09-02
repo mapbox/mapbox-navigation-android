@@ -2,6 +2,7 @@ package com.mapbox.navigation.dropin.infopanel
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.annotation.UiThread
 import androidx.core.graphics.Insets
 import androidx.core.view.updatePadding
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -31,6 +32,7 @@ abstract class InfoPanelBinder : UIBinder {
      *
      * @return ViewGroup that can host both header and content layouts. Returned view must not be attached to [root] view.
      */
+    @UiThread
     abstract fun onCreateLayout(layoutInflater: LayoutInflater, root: ViewGroup): ViewGroup
 
     /**
@@ -41,6 +43,7 @@ abstract class InfoPanelBinder : UIBinder {
      * @return ViewGroup that will be passed to the header UIBinder to install header view or
      *  `null` if header view is not supported by parent [layout].
      */
+    @UiThread
     abstract fun getHeaderLayout(layout: ViewGroup): ViewGroup?
 
     /**
@@ -51,6 +54,7 @@ abstract class InfoPanelBinder : UIBinder {
      * @return ViewGroup that will be passed to the content UIBinder to install content view or
      *  `null` if content view is not supported by parent [layout].
      */
+    @UiThread
     abstract fun getContentLayout(layout: ViewGroup): ViewGroup?
 
     /**
@@ -62,6 +66,7 @@ abstract class InfoPanelBinder : UIBinder {
      * @param layout ViewGroup returned by [onCreateLayout]
      * @param insets system bars insets
      */
+    @UiThread
     open fun applySystemBarsInsets(layout: ViewGroup, insets: Insets) = Unit
 
     internal fun setBinders(headerBinder: UIBinder?, contentBinder: UIBinder?) {
