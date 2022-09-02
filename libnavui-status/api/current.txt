@@ -27,12 +27,12 @@ package com.mapbox.navigation.ui.status.model {
 
 package com.mapbox.navigation.ui.status.view {
 
-  public final class MapboxStatusView extends android.widget.FrameLayout {
+  @UiThread public final class MapboxStatusView extends android.widget.FrameLayout {
     ctor public MapboxStatusView(android.content.Context context);
     ctor public MapboxStatusView(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxStatusView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
     ctor public MapboxStatusView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr, int defStyleRes);
-    method @UiThread public void cancel(Boolean? animated = null);
+    method public void cancel(Boolean? animated = null);
     method public androidx.constraintlayout.widget.ConstraintLayout getContainerView();
     method public com.mapbox.navigation.ui.status.model.Status? getCurrentStatus();
     method public int getHideAnimRes();
@@ -41,7 +41,7 @@ package com.mapbox.navigation.ui.status.view {
     method public int getShowAnimRes();
     method public android.widget.ProgressBar getSpinnerProgressBar();
     method public boolean isRendered();
-    method @UiThread public void render(com.mapbox.navigation.ui.status.model.Status? status);
+    method public void render(com.mapbox.navigation.ui.status.model.Status? status);
     method public void setHideAnimRes(int);
     method public void setShowAnimRes(int);
     property public final androidx.constraintlayout.widget.ConstraintLayout containerView;

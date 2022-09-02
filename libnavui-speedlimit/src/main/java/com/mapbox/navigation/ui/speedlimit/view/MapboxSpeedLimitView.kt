@@ -12,6 +12,7 @@ import android.text.style.StyleSpan
 import android.util.AttributeSet
 import android.view.Gravity
 import androidx.annotation.StyleRes
+import androidx.annotation.UiThread
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import com.mapbox.bindgen.Expected
@@ -26,6 +27,7 @@ import com.mapbox.navigation.ui.utils.internal.extensions.spToPixel
 /**
  * A view component intended to consume data produced by the [MapboxSpeedLimitApi].
  */
+@UiThread
 class MapboxSpeedLimitView : AppCompatTextView {
 
     private var speedLimitBackgroundColor: Int = 0

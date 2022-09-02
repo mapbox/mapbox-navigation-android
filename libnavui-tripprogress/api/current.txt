@@ -139,7 +139,7 @@ package com.mapbox.navigation.ui.tripprogress.model {
 
 package com.mapbox.navigation.ui.tripprogress.view {
 
-  public final class MapboxTripProgressView extends android.widget.FrameLayout {
+  @UiThread public final class MapboxTripProgressView extends android.widget.FrameLayout {
     ctor public MapboxTripProgressView(android.content.Context context, com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions options = TripProgressViewOptions.<init>().build());
     ctor public MapboxTripProgressView(android.content.Context context);
     ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs);
