@@ -3,6 +3,7 @@
     <!-- Time formatting -->
     <plurals name="mapbox_number_of_days" tools:ignore="MissingTranslation">
         <item quantity="one">día</item>
+        <item quantity="many">días</item>
         <item quantity="other">días</item>
     </plurals>
     <!-- Hour -->
