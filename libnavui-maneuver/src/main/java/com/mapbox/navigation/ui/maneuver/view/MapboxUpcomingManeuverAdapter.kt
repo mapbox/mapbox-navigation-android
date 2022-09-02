@@ -6,6 +6,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.annotation.StyleRes
+import androidx.annotation.UiThread
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.TextViewCompat
@@ -34,6 +35,7 @@ import com.mapbox.navigation.utils.internal.ifNonNull
  * @property upcomingManeuverList MutableList<Maneuver>
  * @constructor
  */
+@UiThread
 class MapboxUpcomingManeuverAdapter(
     private val context: Context
 ) : RecyclerView.Adapter<MapboxUpcomingManeuverViewHolder>() {
@@ -191,6 +193,7 @@ class MapboxUpcomingManeuverAdapter(
      * @property viewBinding
      * @constructor
      */
+    @UiThread
     inner class MapboxUpcomingManeuverViewHolder(
         val viewBinding: MapboxMainManeuverLayoutBinding
     ) : RecyclerView.ViewHolder(viewBinding.root) {

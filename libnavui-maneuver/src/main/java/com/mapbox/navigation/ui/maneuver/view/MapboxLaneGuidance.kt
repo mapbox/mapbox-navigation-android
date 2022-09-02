@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
 import android.util.AttributeSet
+import androidx.annotation.UiThread
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
@@ -12,6 +13,7 @@ import com.mapbox.navigation.ui.maneuver.model.LaneIcon
  * It can be directly used in any other layout.
  * @constructor
  */
+@UiThread
 class MapboxLaneGuidance @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,

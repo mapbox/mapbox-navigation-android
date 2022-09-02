@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
 import android.util.AttributeSet
+import androidx.annotation.UiThread
 import androidx.appcompat.widget.AppCompatTextView
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.model.ManeuverInstructionGenerator
@@ -18,6 +19,7 @@ import com.mapbox.navigation.utils.internal.ifNonNull
  * @property attrs AttributeSet
  * @property defStyleAttr Int
  */
+@UiThread
 class MapboxSubManeuver : AppCompatTextView {
 
     private var options = ManeuverSubOptions.Builder().build()

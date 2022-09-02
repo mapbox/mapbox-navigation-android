@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import androidx.annotation.StyleRes
+import androidx.annotation.UiThread
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -27,6 +28,7 @@ import com.mapbox.navigation.ui.utils.internal.ifNonNull
  * @property rightDrawable Drawable? denotes the style for exit sign that is on the right.
  * @property exitBackground Drawable? denotes the exit board style.
  */
+@UiThread
 class MapboxExitText : AppCompatTextView {
 
     /**

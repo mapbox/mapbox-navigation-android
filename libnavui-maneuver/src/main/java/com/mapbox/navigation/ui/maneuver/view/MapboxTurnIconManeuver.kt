@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maneuver.view
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
+import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.AppCompatImageView
@@ -22,6 +23,7 @@ import com.mapbox.navigation.ui.utils.internal.ifNonNull
  * @property turnIconsApi MapboxTurnIconsApi
  * @constructor
  */
+@UiThread
 class MapboxTurnIconManeuver @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
