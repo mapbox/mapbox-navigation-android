@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.trip.session
 
+import androidx.annotation.UiThread
 import com.mapbox.navigation.base.trip.model.RouteProgress
 
 /**
@@ -7,6 +8,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
  *
  * @see [RouteProgress]
  */
+@UiThread
 fun interface RouteProgressObserver {
     /**
      * Invoked every time the [RouteProgress] is updated

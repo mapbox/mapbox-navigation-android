@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.location.Location
 import android.os.Looper
 import android.os.SystemClock
+import androidx.annotation.UiThread
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
@@ -19,6 +20,7 @@ private typealias EngineCallback = LocationEngineCallback<LocationEngineResult>
 /**
  * Location Engine for replaying route history.
  */
+@UiThread
 class ReplayLocationEngine(
     private val mapboxReplayer: MapboxReplayer
 ) : LocationEngine, ReplayEventsObserver {

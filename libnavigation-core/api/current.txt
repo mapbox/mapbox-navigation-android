@@ -374,7 +374,7 @@ package com.mapbox.navigation.core.navigator {
 
 package com.mapbox.navigation.core.replay {
 
-  public final class MapboxReplayer {
+  @UiThread public final class MapboxReplayer {
     ctor public MapboxReplayer();
     method public void clearEvents();
     method public double durationSeconds();
@@ -394,7 +394,7 @@ package com.mapbox.navigation.core.replay {
     method public void unregisterObservers();
   }
 
-  public final class ReplayLocationEngine implements com.mapbox.android.core.location.LocationEngine com.mapbox.navigation.core.replay.history.ReplayEventsObserver {
+  @UiThread public final class ReplayLocationEngine implements com.mapbox.android.core.location.LocationEngine com.mapbox.navigation.core.replay.history.ReplayEventsObserver {
     ctor public ReplayLocationEngine(com.mapbox.navigation.core.replay.MapboxReplayer mapboxReplayer);
     method public void getLastLocation(com.mapbox.android.core.location.LocationEngineCallback<com.mapbox.android.core.location.LocationEngineResult> callback);
     method public void removeLocationUpdates(com.mapbox.android.core.location.LocationEngineCallback<com.mapbox.android.core.location.LocationEngineResult> callback);
@@ -527,7 +527,7 @@ package com.mapbox.navigation.core.replay.route {
     ctor public ReplayProgressObserver(com.mapbox.navigation.core.replay.MapboxReplayer mapboxReplayer, com.mapbox.navigation.core.replay.route.ReplayRouteMapper replayRouteMapper = com.mapbox.navigation.core.replay.route.ReplayRouteMapper());
     ctor public ReplayProgressObserver(com.mapbox.navigation.core.replay.MapboxReplayer mapboxReplayer);
     method public void onRouteProgressChanged(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
-    method public com.mapbox.navigation.core.replay.route.ReplayProgressObserver updateOptions(com.mapbox.navigation.core.replay.route.ReplayRouteOptions options);
+    method @UiThread public com.mapbox.navigation.core.replay.route.ReplayProgressObserver updateOptions(com.mapbox.navigation.core.replay.route.ReplayRouteOptions options);
   }
 
   public final class ReplayRouteMapper {
@@ -583,15 +583,15 @@ package com.mapbox.navigation.core.replay.route {
 
 package com.mapbox.navigation.core.reroute {
 
-  public interface NavigationRerouteController extends com.mapbox.navigation.core.reroute.RerouteController {
+  @UiThread public interface NavigationRerouteController extends com.mapbox.navigation.core.reroute.RerouteController {
     method public void reroute(com.mapbox.navigation.core.reroute.NavigationRerouteController.RoutesCallback callback);
   }
 
-  public static fun interface NavigationRerouteController.RoutesCallback {
+  @UiThread public static fun interface NavigationRerouteController.RoutesCallback {
     method public void onNewRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
   }
 
-  public interface RerouteController {
+  @UiThread public interface RerouteController {
     method public com.mapbox.navigation.core.reroute.RerouteState getState();
     method public void interrupt();
     method public boolean registerRerouteStateObserver(com.mapbox.navigation.core.reroute.RerouteController.RerouteStateObserver rerouteStateObserver);
@@ -604,7 +604,7 @@ package com.mapbox.navigation.core.reroute {
     method public void onRerouteStateChanged(com.mapbox.navigation.core.reroute.RerouteState rerouteState);
   }
 
-  public static fun interface RerouteController.RoutesCallback {
+  @UiThread public static fun interface RerouteController.RoutesCallback {
     method public void onNewRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
   }
 
@@ -930,7 +930,7 @@ package com.mapbox.navigation.core.trip.session {
     property public final Integer? zLevel;
   }
 
-  public interface LocationObserver {
+  @UiThread public interface LocationObserver {
     method public void onNewLocationMatcherResult(com.mapbox.navigation.core.trip.session.LocationMatcherResult locationMatcherResult);
     method public void onNewRawLocation(android.location.Location rawLocation);
   }
@@ -960,11 +960,11 @@ package com.mapbox.navigation.core.trip.session {
     field public static final com.mapbox.navigation.core.trip.session.NavigationSessionState.Idle INSTANCE;
   }
 
-  public fun interface NavigationSessionStateObserver {
+  @UiThread public fun interface NavigationSessionStateObserver {
     method public void onNavigationSessionStateChanged(com.mapbox.navigation.core.trip.session.NavigationSessionState navigationSession);
   }
 
-  public fun interface OffRouteObserver {
+  @UiThread public fun interface OffRouteObserver {
     method public void onOffRouteStateChanged(boolean offRoute);
   }
 
@@ -972,7 +972,7 @@ package com.mapbox.navigation.core.trip.session {
     method @Deprecated public void onNewRoadObjectsOnTheRoute(java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> roadObjects);
   }
 
-  public fun interface RouteProgressObserver {
+  @UiThread public fun interface RouteProgressObserver {
     method public void onRouteProgressChanged(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
   }
 
@@ -981,11 +981,11 @@ package com.mapbox.navigation.core.trip.session {
     enum_constant public static final com.mapbox.navigation.core.trip.session.TripSessionState STOPPED;
   }
 
-  public fun interface TripSessionStateObserver {
+  @UiThread public fun interface TripSessionStateObserver {
     method public void onSessionStateChanged(com.mapbox.navigation.core.trip.session.TripSessionState tripSessionState);
   }
 
-  public fun interface VoiceInstructionsObserver {
+  @UiThread public fun interface VoiceInstructionsObserver {
     method public void onNewVoiceInstructions(com.mapbox.api.directions.v5.models.VoiceInstructions voiceInstructions);
   }
 

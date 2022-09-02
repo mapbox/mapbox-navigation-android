@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.replay.route
 
+import androidx.annotation.UiThread
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -31,6 +32,7 @@ class ReplayProgressObserver @JvmOverloads constructor(
      * @param options allow you to control the driver and car behavior.
      * @return [ReplayProgressObserver]
      */
+    @UiThread
     fun updateOptions(options: ReplayRouteOptions): ReplayProgressObserver {
         replayRouteMapper.options = options
         return this
