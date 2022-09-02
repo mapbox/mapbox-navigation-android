@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.base.installer
 
+import androidx.annotation.UiThread
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -75,6 +76,7 @@ fun interface Installation {
  */
 @ExperimentalPreviewMapboxNavigationAPI
 @Suppress("unused")
+@UiThread
 fun MapboxNavigationApp.installComponents(
     lifecycleOwner: LifecycleOwner,
     config: ComponentInstaller.() -> Unit
@@ -114,6 +116,7 @@ fun MapboxNavigationApp.installComponents(
  * ```
  */
 @ExperimentalPreviewMapboxNavigationAPI
+@UiThread
 fun MapboxNavigation.installComponents(
     lifecycleOwner: LifecycleOwner,
     config: ComponentInstaller.() -> Unit
