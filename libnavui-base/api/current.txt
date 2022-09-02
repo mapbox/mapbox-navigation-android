@@ -17,8 +17,8 @@ package com.mapbox.navigation.ui.base.installer {
 
   public final class ComponentInstallerKt {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static inline <reified T> T! findComponent(com.mapbox.navigation.ui.base.installer.ComponentInstaller);
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static void installComponents(com.mapbox.navigation.core.lifecycle.MapboxNavigationApp, androidx.lifecycle.LifecycleOwner lifecycleOwner, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.base.installer.ComponentInstaller,kotlin.Unit> config);
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static void installComponents(com.mapbox.navigation.core.MapboxNavigation, androidx.lifecycle.LifecycleOwner lifecycleOwner, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.base.installer.ComponentInstaller,kotlin.Unit> config);
+    method @UiThread @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static void installComponents(com.mapbox.navigation.core.lifecycle.MapboxNavigationApp, androidx.lifecycle.LifecycleOwner lifecycleOwner, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.base.installer.ComponentInstaller,kotlin.Unit> config);
+    method @UiThread @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static void installComponents(com.mapbox.navigation.core.MapboxNavigation, androidx.lifecycle.LifecycleOwner lifecycleOwner, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.base.installer.ComponentInstaller,kotlin.Unit> config);
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface Installation {
@@ -30,7 +30,7 @@ package com.mapbox.navigation.ui.base.installer {
 package com.mapbox.navigation.ui.base.lifecycle {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface Binder<T> {
-    method public com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver bind(T? viewGroup);
+    method @UiThread public com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver bind(T? viewGroup);
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface UIBinder extends com.mapbox.navigation.ui.base.lifecycle.Binder<android.view.ViewGroup> {
@@ -76,7 +76,7 @@ package com.mapbox.navigation.ui.base.util {
 
 package com.mapbox.navigation.ui.base.view {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxExtendableButton extends android.widget.FrameLayout {
+  @UiThread @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxExtendableButton extends android.widget.FrameLayout {
     ctor public MapboxExtendableButton(android.content.Context context);
     ctor public MapboxExtendableButton(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxExtendableButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);

@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.annotation.DrawableRes
 import androidx.annotation.StyleRes
+import androidx.annotation.UiThread
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -21,6 +22,7 @@ import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
  * Button with an icon and expand behaviour.
  */
 @ExperimentalPreviewMapboxNavigationAPI
+@UiThread
 class MapboxExtendableButton : FrameLayout {
 
     private val binding =

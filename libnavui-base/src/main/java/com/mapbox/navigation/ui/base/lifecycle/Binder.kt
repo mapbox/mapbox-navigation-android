@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.base.lifecycle
 
 import android.view.ViewGroup
+import androidx.annotation.UiThread
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -17,6 +18,7 @@ interface Binder<T> {
      * Triggered when this view binder instance is attached. The [viewGroup] returns a
      * [MapboxNavigationObserver] which gives this view a simple lifecycle.
      */
+    @UiThread
     fun bind(viewGroup: T): MapboxNavigationObserver
 }
 
