@@ -2,6 +2,7 @@ package com.mapbox.androidauto.car.placeslistonmap
 
 import android.content.res.Resources
 import android.graphics.BitmapFactory
+import androidx.annotation.UiThread
 import com.mapbox.androidauto.R
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Style
@@ -12,6 +13,7 @@ import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
 
+@UiThread
 class PlacesListOnMapLayerUtil {
 
     fun initializePlacesListOnMapLayer(style: Style, resources: Resources) {

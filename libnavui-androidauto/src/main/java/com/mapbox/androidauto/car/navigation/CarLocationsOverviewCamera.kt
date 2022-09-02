@@ -2,6 +2,7 @@ package com.mapbox.androidauto.car.navigation
 
 import android.graphics.Rect
 import android.location.Location
+import androidx.annotation.UiThread
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -114,6 +115,7 @@ class CarLocationsOverviewCamera(
         isLocationInitialized = false
     }
 
+    @UiThread
     fun updateWithLocations(points: List<Point>) {
         if (points.isNotEmpty()) {
             logAndroidAuto("LocationsOverviewCamera updateWithLocations")

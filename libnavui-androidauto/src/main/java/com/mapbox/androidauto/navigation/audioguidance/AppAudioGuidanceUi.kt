@@ -1,6 +1,7 @@
 package com.mapbox.androidauto.navigation.audioguidance
 
 import android.view.View
+import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
@@ -13,6 +14,7 @@ import com.mapbox.navigation.ui.voice.view.MapboxSoundButton
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
+@UiThread
 fun Fragment.attachAudioGuidance(
     mapboxSoundButton: MapboxSoundButton
 ) {
@@ -38,6 +40,7 @@ fun Fragment.attachAudioGuidance(
 /**
  * Use this function to mute the audio guidance for a lifecycle.
  */
+@UiThread
 fun Lifecycle.muteAudioGuidance() {
     addObserver(object : DefaultLifecycleObserver {
         lateinit var initialState: MapboxAudioGuidanceState

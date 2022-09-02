@@ -2,6 +2,7 @@ package com.mapbox.androidauto.car.preview
 
 import android.text.SpannableString
 import androidx.activity.OnBackPressedCallback
+import androidx.annotation.UiThread
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
 import androidx.car.app.model.ActionStrip
@@ -41,7 +42,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
  * you select alternatives. From here, you can start turn-by-turn navigation.
  */
 @MapboxExperimental
-class CarRoutePreviewScreen(
+class CarRoutePreviewScreen @UiThread constructor(
     private val routePreviewCarContext: RoutePreviewCarContext,
     private val placeRecord: PlaceRecord,
     private val navigationRoutes: List<NavigationRoute>,

@@ -1,5 +1,6 @@
 package com.mapbox.androidauto.car
 
+import androidx.annotation.UiThread
 import androidx.car.app.Screen
 import androidx.car.app.model.CarColor
 import androidx.car.app.model.Template
@@ -19,7 +20,7 @@ import com.mapbox.maps.MapboxExperimental
  * When the app is launched from Android Auto
  */
 @OptIn(MapboxExperimental::class)
-class MainCarScreen(
+class MainCarScreen @UiThread constructor(
     private val mainCarContext: MainCarContext
 ) : Screen(mainCarContext.carContext) {
 

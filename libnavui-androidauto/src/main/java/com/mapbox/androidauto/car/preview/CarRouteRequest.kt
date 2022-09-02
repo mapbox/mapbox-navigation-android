@@ -1,5 +1,6 @@
 package com.mapbox.androidauto.car.preview
 
+import androidx.annotation.UiThread
 import com.mapbox.androidauto.car.search.PlaceRecord
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.internal.logAndroidAutoFailure
@@ -39,6 +40,7 @@ class CarRouteRequest(
 ) {
     internal var currentRequestId: Long? = null
 
+    @UiThread
     suspend fun requestSync(placeRecord: PlaceRecord): List<NavigationRoute>? {
         return suspendCancellableCoroutine { continuation ->
             continuation.invokeOnCancellation { cancelRequest() }
@@ -74,6 +76,7 @@ class CarRouteRequest(
      *
      * @param searchResults potential destinations for directions
      */
+    @UiThread
     fun request(placeRecord: PlaceRecord, callback: CarRouteRequestCallback) {
         currentRequestId?.let { mapboxNavigation.cancelRouteRequest(it) }
 
@@ -99,6 +102,7 @@ class CarRouteRequest(
         }
     }
 
+    @UiThread
     fun cancelRequest() {
         currentRequestId?.let { mapboxNavigation.cancelRouteRequest(it) }
     }
