@@ -2,4 +2,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="mapbox_recenter" tools:ignore="MissingTranslation">Tập trung lại</string>
     <string name="mapbox_route_overview" tools:ignore="MissingTranslation">Tóm tắt</string>
-    </resources>
+    <string name="mapbox_route_follow" tools:ignore="MissingTranslation">Theo dõi</string>
+</resources>
