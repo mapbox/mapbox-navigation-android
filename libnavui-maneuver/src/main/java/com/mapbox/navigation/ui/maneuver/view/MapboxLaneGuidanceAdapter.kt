@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.StyleRes
+import androidx.annotation.UiThread
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.recyclerview.widget.RecyclerView
 import com.mapbox.navigation.ui.maneuver.R
@@ -19,6 +20,7 @@ import com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLa
  * @property laneIndicatorList MutableList<LaneIndicator>
  * @constructor
  */
+@UiThread
 class MapboxLaneGuidanceAdapter(
     private val context: Context,
 ) : RecyclerView.Adapter<MapboxLaneGuidanceViewHolder>() {
@@ -104,6 +106,7 @@ class MapboxLaneGuidanceAdapter(
          * Invoke the method to bind the lane to the view.
          * @param laneIndicator LaneIndicator
          */
+        @UiThread
         fun bindLaneIndicator(laneIndicator: LaneIndicator) {
             val laneIcon = laneApi.getTurnLane(laneIndicator)
             viewBinding.itemLaneGuidance.renderLane(

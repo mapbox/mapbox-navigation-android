@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
 import android.util.AttributeSet
+import androidx.annotation.UiThread
 import androidx.appcompat.widget.AppCompatTextView
 import com.mapbox.navigation.ui.maneuver.model.StepDistance
 
@@ -10,6 +11,7 @@ import com.mapbox.navigation.ui.maneuver.model.StepDistance
  * item in [MapboxUpcomingManeuverAdapter].
  * It can be directly used in any other layout.
  */
+@UiThread
 class MapboxStepDistance : AppCompatTextView {
 
     /**

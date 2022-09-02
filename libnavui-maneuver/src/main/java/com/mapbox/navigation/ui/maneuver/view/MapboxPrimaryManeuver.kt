@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
 import android.util.AttributeSet
+import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.widget.AppCompatTextView
 import com.mapbox.navigation.ui.maneuver.R
@@ -19,6 +20,7 @@ import com.mapbox.navigation.utils.internal.ifNonNull
  * @property attrs AttributeSet
  * @property defStyleAttr Int
  */
+@UiThread
 class MapboxPrimaryManeuver : AppCompatTextView {
 
     private var options = ManeuverPrimaryOptions.Builder().build()

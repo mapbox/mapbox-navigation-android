@@ -5,6 +5,7 @@ import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.annotation.StyleRes
+import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -43,6 +44,7 @@ import kotlinx.coroutines.flow.asStateFlow
  *
  * @see MapboxManeuverApi
  */
+@UiThread
 class MapboxManeuverView : ConstraintLayout {
 
     private val _maneuverViewState = MutableStateFlow<MapboxManeuverViewState>(
