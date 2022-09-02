@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.StyleRes
+import androidx.annotation.UiThread
 import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import com.mapbox.api.directions.v5.models.RouteLeg
@@ -21,6 +22,7 @@ import com.mapbox.navigation.utils.internal.ifNonNull
 /**
  * A view that can be added to activity layouts which displays trip progress.
  */
+@UiThread
 class MapboxTripProgressView : FrameLayout {
 
     /**

@@ -221,7 +221,7 @@ package com.mapbox.navigation.ui.voice.view {
     property public final String? unmuteText;
   }
 
-  public final class MapboxSoundButton extends androidx.constraintlayout.widget.ConstraintLayout {
+  @UiThread public final class MapboxSoundButton extends androidx.constraintlayout.widget.ConstraintLayout {
     ctor public MapboxSoundButton(android.content.Context context);
     ctor public MapboxSoundButton(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxSoundButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);

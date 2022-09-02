@@ -25,6 +25,7 @@ import com.mapbox.navigation.ui.status.model.Status
  * View for rendering [Status] information.
  */
 @Suppress("MemberVisibilityCanBePrivate")
+@UiThread
 class MapboxStatusView : FrameLayout {
 
     private val binding = MapboxStatusViewLayoutBinding.inflate(LayoutInflater.from(context), this)
@@ -152,7 +153,6 @@ class MapboxStatusView : FrameLayout {
      *
      * @param status [Status]
      */
-    @UiThread
     fun render(status: Status?) {
         if (status == null) return
 
@@ -169,13 +169,11 @@ class MapboxStatusView : FrameLayout {
      * @param animated Boolean animate hiding of the view.
      * Passing `null` will use [currentStatus].animated flag value.
      */
-    @UiThread
     fun cancel(animated: Boolean? = null) {
         if (!isRendered) return
         hide(animated ?: currentStatus?.animated ?: true)
     }
 
-    @UiThread
     private fun show(animated: Boolean) = currentStatus?.also { status ->
         cancelPendingAnimations()
 
@@ -196,7 +194,6 @@ class MapboxStatusView : FrameLayout {
         }
     }
 
-    @UiThread
     private fun hide(animated: Boolean) {
         cancelPendingAnimations()
         hideAnimator().apply {
@@ -205,7 +202,6 @@ class MapboxStatusView : FrameLayout {
         }
     }
 
-    @UiThread
     private fun updateView(status: Status) {
         messageTextView.text = status.message
         spinnerProgressBar.isVisible = status.spinner
@@ -231,7 +227,6 @@ class MapboxStatusView : FrameLayout {
             }
         }
 
-    @UiThread
     private fun cancelPendingAnimations() {
         pendingHideAnimation?.cancel()
     }

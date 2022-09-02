@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.annotation.StyleRes
+import androidx.annotation.UiThread
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.mapbox.navigation.ui.resources.databinding.ExtendableButtonLayoutBinding
@@ -15,6 +16,7 @@ import com.mapbox.navigation.ui.voice.R
 /**
  * Default view to allow user to mute or unmute voice instructions.
  */
+@UiThread
 class MapboxSoundButton : ConstraintLayout {
 
     private var muteDrawable: Drawable? = null
