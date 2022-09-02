@@ -1,12 +1,14 @@
 package com.mapbox.navigation.core.trip.session
 
 import android.location.Location
+import androidx.annotation.UiThread
 
 /**
  * An interface which enables listening to location updates
  *
  * @see [LocationMatcherResult]
  */
+@UiThread
 interface LocationObserver {
 
     /**

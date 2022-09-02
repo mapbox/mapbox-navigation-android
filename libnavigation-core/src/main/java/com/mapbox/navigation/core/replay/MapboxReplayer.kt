@@ -4,6 +4,7 @@ import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
 import androidx.annotation.RequiresPermission
+import androidx.annotation.UiThread
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
@@ -20,6 +21,7 @@ import java.util.Collections.singletonList
 /**
  * This class is similar to a music player. It will include controls like play, pause, seek.
  */
+@UiThread
 class MapboxReplayer {
 
     private val replayEvents = ReplayEvents(mutableListOf())

@@ -1,11 +1,13 @@
 package com.mapbox.navigation.core.trip.session
 
+import androidx.annotation.UiThread
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.core.MapboxNavigation
 
 /**
  * Voice instruction interface, which can be registered via [MapboxNavigation.registerVoiceInstructionsObserver]
  */
+@UiThread
 fun interface VoiceInstructionsObserver {
     /**
      * Called every time on a new [VoiceInstructions] is applicable. Only new voice instructions

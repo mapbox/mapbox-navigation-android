@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Marked `ReplayProgressObserver`, `MapboxReplayer`, `ReplayLocationEngine`, `RerouteController#RoutesCallback`, `NavigationRerouteController#RoutesCallback`, `LocationObserver`, `NavigationSessionStateObserver`, `OffRouteObserver`, `RouteProgressObserver`, `TripSessionStateObserver`, `VoiceInstructionsObserver` methods with `@UiThread` annotation. [#6266](https://github.com/mapbox/mapbox-navigation-android/pull/6266)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.3 - 23 September, 2022
 ### Changelog
@@ -64,7 +65,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v6.8.0-beta.4` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0-beta.4))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
 - Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
-
 
 ## Mapbox Navigation SDK 2.9.0-alpha.2 - 16 September, 2022
 ### Changelog
