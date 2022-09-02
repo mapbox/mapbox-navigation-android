@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
+import androidx.annotation.UiThread
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -78,6 +79,7 @@ import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
  * used by the [NavigationView] shouldn't outlive its hosting [Fragment] (in anticipation of potential [Fragment] recreation).
  */
 @ExperimentalPreviewMapboxNavigationAPI
+@UiThread
 class NavigationView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,

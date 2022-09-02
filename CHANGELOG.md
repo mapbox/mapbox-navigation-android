@@ -9,6 +9,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed a crash in `MapboxJunctionApi` that happens when a junction contains an invalid bitmap. [#6459](https://github.com/mapbox/mapbox-navigation-android/pull/6459)
 - Updated `MapboxJunctionApi` to ignore banner components with subtype `signboard`. `MapboxSignboardApi` should be used to handle such components. [#6459](https://github.com/mapbox/mapbox-navigation-android/pull/6459)
 - Marked `MapboxSpeedLimitView`, `MapboxStatusView`, `MapboxTripProgressView`, `MapboxSoundButton` methods with `@UiThread` annotation. [#6272](https://github.com/mapbox/mapbox-navigation-android/pull/6272)
+- Marked `InfoPanelBinder`, `NavigationView`, `NavigationViewApi` methods with `@UiThread` annotation. [#6269](https://github.com/mapbox/mapbox-navigation-android/pull/6269)
 
 ## Mapbox Navigation SDK 2.9.0-beta.1 - 06 October, 2022
 ### Changelog

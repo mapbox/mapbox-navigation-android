@@ -17,7 +17,7 @@ package com.mapbox.navigation.dropin {
     property public final int style;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NavigationView extends android.widget.FrameLayout implements androidx.lifecycle.LifecycleOwner {
+  @UiThread @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NavigationView extends android.widget.FrameLayout implements androidx.lifecycle.LifecycleOwner {
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null, String accessToken = attrs.navigationViewAccessToken(context), androidx.lifecycle.ViewModelStoreOwner viewModelStoreOwner = context.toViewModelStoreOwner());
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null, String accessToken = attrs.navigationViewAccessToken(context));
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null);
@@ -36,7 +36,7 @@ package com.mapbox.navigation.dropin {
     property public final com.mapbox.navigation.dropin.NavigationViewApi api;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class NavigationViewApi {
+  @UiThread @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class NavigationViewApi {
     ctor public NavigationViewApi();
     method public abstract boolean isReplayEnabled();
     method public abstract void routeReplayEnabled(boolean enabled);
@@ -285,11 +285,11 @@ package com.mapbox.navigation.dropin.infopanel {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class InfoPanelBinder implements com.mapbox.navigation.ui.base.lifecycle.UIBinder {
     ctor public InfoPanelBinder();
-    method public void applySystemBarsInsets(android.view.ViewGroup layout, androidx.core.graphics.Insets insets);
+    method @UiThread public void applySystemBarsInsets(android.view.ViewGroup layout, androidx.core.graphics.Insets insets);
     method public com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver bind(android.view.ViewGroup viewGroup);
-    method public abstract android.view.ViewGroup? getContentLayout(android.view.ViewGroup layout);
-    method public abstract android.view.ViewGroup? getHeaderLayout(android.view.ViewGroup layout);
-    method public abstract android.view.ViewGroup onCreateLayout(android.view.LayoutInflater layoutInflater, android.view.ViewGroup root);
+    method @UiThread public abstract android.view.ViewGroup? getContentLayout(android.view.ViewGroup layout);
+    method @UiThread public abstract android.view.ViewGroup? getHeaderLayout(android.view.ViewGroup layout);
+    method @UiThread public abstract android.view.ViewGroup onCreateLayout(android.view.LayoutInflater layoutInflater, android.view.ViewGroup root);
     field public static final com.mapbox.navigation.dropin.infopanel.InfoPanelBinder.Companion Companion;
   }
 
