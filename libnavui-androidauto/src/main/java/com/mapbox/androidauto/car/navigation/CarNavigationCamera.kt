@@ -2,6 +2,7 @@ package com.mapbox.androidauto.car.navigation
 
 import android.graphics.Rect
 import android.location.Location
+import androidx.annotation.UiThread
 import com.mapbox.androidauto.car.routes.CarRoutesProvider
 import com.mapbox.androidauto.car.routes.NavigationCarRoutesProvider
 import com.mapbox.androidauto.internal.car.RendererUtils.dpToPx
@@ -45,6 +46,7 @@ private const val DEFAULT_INITIAL_ZOOM = 15.0
  * @param initialCameraOptions set camera options when the camera is attached
  */
 @OptIn(MapboxExperimental::class)
+@UiThread
 class CarNavigationCamera(
     private val initialCarCameraMode: CarCameraMode,
     private val alternativeCarCameraMode: CarCameraMode?,

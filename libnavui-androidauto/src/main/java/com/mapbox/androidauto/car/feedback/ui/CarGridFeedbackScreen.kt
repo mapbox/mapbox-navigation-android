@@ -1,6 +1,7 @@
 package com.mapbox.androidauto.car.feedback.ui
 
 import androidx.activity.OnBackPressedCallback
+import androidx.annotation.UiThread
 import androidx.car.app.CarContext
 import androidx.car.app.CarToast
 import androidx.car.app.Screen
@@ -19,7 +20,7 @@ import com.mapbox.androidauto.internal.logAndroidAuto
 /**
  * This screen allows the user to search for a destination.
  */
-class CarGridFeedbackScreen constructor(
+class CarGridFeedbackScreen @UiThread constructor(
     carContext: CarContext,
     private val sourceScreenSimpleName: String,
     private val carFeedbackSender: CarFeedbackSender,

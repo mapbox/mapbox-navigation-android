@@ -1,6 +1,7 @@
 package com.mapbox.androidauto.car.search
 
 import androidx.annotation.StringRes
+import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
@@ -30,7 +31,7 @@ import kotlinx.coroutines.launch
  * This screen allows the user to search for a destination.
  */
 @OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)
-class PlaceSearchScreen(
+class PlaceSearchScreen @UiThread constructor(
     private val searchCarContext: SearchCarContext,
 ) : Screen(searchCarContext.carContext) {
 

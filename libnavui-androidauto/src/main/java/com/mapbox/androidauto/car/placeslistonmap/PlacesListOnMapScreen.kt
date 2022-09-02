@@ -1,6 +1,7 @@
 package com.mapbox.androidauto.car.placeslistonmap
 
 import androidx.annotation.StringRes
+import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
@@ -40,7 +41,7 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArrayList
 
 @MapboxExperimental
-class PlacesListOnMapScreen(
+class PlacesListOnMapScreen @UiThread constructor(
     private val mainCarContext: MainCarContext,
     private val placesProvider: PlacesListOnMapProvider,
     private val placesListItemMapper: PlacesListItemMapper,

@@ -1,6 +1,7 @@
 package com.mapbox.androidauto.car.feedback.core
 
 import androidx.annotation.Keep
+import androidx.annotation.UiThread
 import com.google.gson.Gson
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackItem
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -13,6 +14,7 @@ class CarFeedbackSender {
 
     private val gson = Gson()
 
+    @UiThread
     fun send(
         selectedItem: CarFeedbackItem,
         encodedSnapshot: String?,
