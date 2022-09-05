@@ -57,6 +57,7 @@ android {
         debug {
             testCoverageEnabled = false
             manifestPlaceholders = [enableCrashReporting: "false"]
+            debuggable true
         }
         release {
             minifyEnabled true

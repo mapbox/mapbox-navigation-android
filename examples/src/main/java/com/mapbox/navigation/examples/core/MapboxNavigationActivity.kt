@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
@@ -21,6 +23,7 @@ import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
@@ -31,10 +34,15 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.trip.model.RouteLegProgress
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
+import com.mapbox.navigation.core.replay.history.ReplayEventBase
+import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
@@ -73,6 +81,7 @@ import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Date
 import java.util.Locale
 
 class MapboxNavigationActivity : AppCompatActivity() {
@@ -88,6 +97,8 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     // location puck integration
     private val navigationLocationProvider = NavigationLocationProvider()
+
+    private var previousOrigin: Point? = null
 
     // camera
     private lateinit var navigationCamera: NavigationCamera
@@ -428,7 +439,25 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
         // start the trip session to being receiving location updates in free drive
         // and later when a route is set, also receiving route progress updates
-        mapboxNavigation.startTripSession()
+        mapboxNavigation.startReplayTripSession(true)
+        mapboxNavigation.registerArrivalObserver(object : ArrivalObserver{
+            override fun onWaypointArrival(routeProgress: RouteProgress) {
+
+            }
+
+            override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
+
+            }
+
+            override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
+                findRoute(previousOrigin!!)
+            }
+        })
+        previousOrigin = Point.fromLngLat(-74.146115,40.850898)
+        requestRoute(listOf(
+            Point.fromLngLat(-74.146115,40.850898),
+            Point.fromLngLat(-76.613724,39.301790)
+        ))
     }
 
     override fun onStart() {
@@ -463,12 +492,17 @@ class MapboxNavigationActivity : AppCompatActivity() {
         val origin = navigationLocationProvider.lastLocation?.let {
             Point.fromLngLat(it.longitude, it.latitude)
         } ?: return
+        previousOrigin = origin
 
+        requestRoute(listOf(origin, destination))
+    }
+
+    private fun requestRoute(points: List<Point>) {
         mapboxNavigation.requestRoutes(
             RouteOptions.builder()
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
-                .coordinatesList(listOf(origin, destination))
+                .coordinatesList(points)
                 .layersList(listOf(mapboxNavigation.getZLevel(), null))
                 .build(),
             object : NavigationRouterCallback {
@@ -506,6 +540,15 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
         // move the camera to overview when new route is available
         navigationCamera.requestNavigationCameraToOverview()
+        mapboxNavigation.apply {
+            mapboxReplayer.stop()
+            mapboxReplayer.clearEvents()
+            val replayData: List<ReplayEventBase> =
+                ReplayRouteMapper().mapDirectionsRouteGeometry(route.first().directionsRoute)
+            mapboxReplayer.pushEvents(replayData)
+            mapboxReplayer.seekTo(replayData[0])
+            mapboxReplayer.play()
+        }
     }
 
     private fun clearRouteAndStopNavigation() {
