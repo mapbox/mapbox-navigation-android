@@ -40,6 +40,9 @@ internal class DirectionsRouteDiffProvider {
         if (oldRouteLeg.incidents() != newRouteLeg.incidents()) {
             result.add("incidents")
         }
+        if (oldRouteLeg.closures() != newRouteLeg.closures()) {
+            result.add("closures")
+        }
         return result
     }
 

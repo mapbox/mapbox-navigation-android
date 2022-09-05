@@ -3,6 +3,7 @@
 package com.mapbox.navigation.base.internal.route
 
 import androidx.annotation.VisibleForTesting
+import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.Incident
@@ -24,7 +25,7 @@ val NavigationRoute.routerOrigin: RouterOrigin get() = nativeRoute.routerOrigin
 fun NavigationRoute.nativeRoute(): RouteInterface = this.nativeRoute
 
 /**
- * Updates route's annotations and incidents in place while keeping the Native peer as is.
+ * Updates route's annotations, incidents, and closures in place while keeping the Native peer as is.
  * The peer should later be updated through [Navigator.refreshRoute].
  */
 fun NavigationRoute.refreshRoute(
@@ -32,6 +33,7 @@ fun NavigationRoute.refreshRoute(
     currentLegGeometryIndex: Int?,
     legAnnotations: List<LegAnnotation?>?,
     incidents: List<List<Incident>?>?,
+    closures: List<List<Closure>?>?,
 ): NavigationRoute {
     val updateLegs = directionsRoute.legs()?.mapIndexed { index, routeLeg ->
         if (index < initialLegIndex) {
@@ -53,8 +55,9 @@ fun NavigationRoute.refreshRoute(
                     )
                 }
             routeLeg.toBuilder()
-                .incidents(incidents?.getOrNull(index))
                 .annotation(mergedAnnotation)
+                .incidents(incidents?.getOrNull(index))
+                .closures(closures?.getOrNull(index))
                 .build()
         }
     }

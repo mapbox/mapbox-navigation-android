@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.routerefresh
 
+import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
@@ -13,6 +14,7 @@ import com.mapbox.navigation.core.CurrentIndicesProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RouteRefresh
 import com.mapbox.navigation.testing.add
+import com.mapbox.navigation.testing.factories.createClosure
 import com.mapbox.navigation.testing.factories.createCoordinatesList
 import com.mapbox.navigation.testing.factories.createDirectionsResponse
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
@@ -288,7 +290,10 @@ class RouteRefreshControllerTest {
                             ),
                             firstLegIncidents = listOf(
                                 createIncident(id = "1")
-                            )
+                            ),
+                            firstLegClosures = listOf(
+                                createClosure()
+                            ),
                         ),
                         createTestTwoLegRoute(
                             firstLegAnnotations = createRouteLegAnnotation(
@@ -311,7 +316,8 @@ class RouteRefreshControllerTest {
 
             verify {
                 logger.logI(
-                    "Updated congestion, congestionNumeric, incidents at route test#0 leg 0",
+                    "Updated congestion, congestionNumeric, incidents, closures at route " +
+                        "test#0 leg 0",
                     RouteRefreshController.LOG_CATEGORY
                 )
             }
@@ -526,7 +532,7 @@ class RouteRefreshControllerTest {
         }
 
     @Test
-    fun `traffic annotations and expired annotations on current leg(second) disappear if refresh doesn't respond`() =
+    fun `traffic annotations and expired incidents disappear, but closures are kept on if refresh doesn't respond`() =
         runBlockingTest {
             val currentTime = utcToLocalTime(
                 year = 2022,
@@ -552,6 +558,18 @@ class RouteRefreshControllerTest {
                         createIncident(
                             id = "3",
                             endTime = "2022-05-22T10:00:01Z"
+                        ),
+                    ),
+                    firstLegClosures = listOf(
+                        createClosure(
+                            geometryIndexStart = 5,
+                            geometryIndexEnd = 14,
+                        ),
+                    ),
+                    secondLegClosures = listOf(
+                        createClosure(
+                            geometryIndexStart = 1,
+                            geometryIndexEnd = 6,
                         ),
                     )
                 )
@@ -596,6 +614,11 @@ class RouteRefreshControllerTest {
                 "incidents on passed legs should not be refreshed",
                 currentRoute.directionsRoute.legs()!![0].incidents(),
                 refreshedRoute.directionsRoute.legs()!![0].incidents()!!
+            )
+            assertEquals(
+                "closures on the route should not be refreshed",
+                currentRoute.directionsRoute.legs()!!.map { it.closures() },
+                refreshedRoute.directionsRoute.legs()!!.map { it.closures() }
             )
         }
 
@@ -1038,7 +1061,17 @@ class RouteRefreshControllerTest {
                                     id = "2",
                                     endTime = "2022-05-22T14:00:00Z",
                                 ),
-                            )
+                            ),
+                            secondLegClosures = listOf(
+                                createClosure(
+                                    geometryIndexStart = 0,
+                                    geometryIndexEnd = 10,
+                                ),
+                                createClosure(
+                                    geometryIndexStart = 40,
+                                    geometryIndexEnd = 46,
+                                ),
+                            ),
                         )
                     )
                 )
@@ -1114,17 +1147,21 @@ private fun createTestTwoLegRoute(
         congestionNumeric = listOf(95, 96),
         distance = listOf(28.0, 29.0)
     ),
+    firstLegClosures: List<Closure>? = null,
+    secondLegClosures: List<Closure>? = null,
     requestUuid: String? = "testUUID"
 ) =
     createDirectionsRoute(
         legs = listOf(
             createRouteLeg(
                 annotation = firstLegAnnotations,
-                incidents = firstLegIncidents
+                incidents = firstLegIncidents,
+                closures = firstLegClosures,
             ),
             createRouteLeg(
                 annotation = secondLegAnnotations,
-                incidents = secondLegIncidents
+                incidents = secondLegIncidents,
+                closures = secondLegClosures,
             )
         ),
         routeOptions = createRouteOptions(

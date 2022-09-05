@@ -266,6 +266,7 @@ class NavigationRoute internal constructor(
      * This can occur if a route has been refreshed and contains updated:
      * - [RouteLeg.annotation]
      * - [RouteLeg.incidents]
+     * - [RouteLeg.closures]
      * - duration fields
      *
      * If two [NavigationRoute]s do have the same ID, they are guaranteed to be originating from the same route response, and follow the exact same path.

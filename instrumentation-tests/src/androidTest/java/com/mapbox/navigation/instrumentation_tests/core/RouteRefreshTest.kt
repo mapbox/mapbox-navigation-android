@@ -3,6 +3,7 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import androidx.annotation.IntegerRes
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
@@ -114,7 +115,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     }
 
     @Test
-    fun expect_route_refresh_to_update_traffic_annotations_and_incidents_for_all_routes() =
+    fun expect_route_refresh_to_update_traffic_annotations_incidents_and_closures_for_all_routes() =
         sdkTest {
             val routeOptions = generateRouteOptions(twoCoordinates)
             val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
@@ -148,6 +149,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 2,
                 requestedRoutes.size
             )
+            // incidents
             assertEquals(
                 listOf("11589180127444257"),
                 initialRoutes[0].getIncidentsIdFromTheRoute(0)
@@ -163,6 +165,38 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             assertEquals(
                 listOf("11589180127444257", "14158569638505033").sorted(),
                 refreshedRoutes[1].getIncidentsIdFromTheRoute(0)?.sorted()
+            )
+            // closures
+            assertEquals(
+                listOf(
+                    Closure.builder()
+                        .geometryIndexStart(5)
+                        .geometryIndexEnd(6)
+                        .build()
+                ),
+                initialRoutes[0].directionsRoute.legs()!![0].closures()
+            )
+            assertEquals(
+                null,
+                initialRoutes[1].directionsRoute.legs()!![0].closures()
+            )
+            assertEquals(
+                listOf(
+                    Closure.builder()
+                        .geometryIndexStart(1)
+                        .geometryIndexEnd(3)
+                        .build()
+                ),
+                refreshedRoutes[0].directionsRoute.legs()!![0].closures()
+            )
+            assertEquals(
+                listOf(
+                    Closure.builder()
+                        .geometryIndexStart(1)
+                        .geometryIndexEnd(3)
+                        .build()
+                ),
+                refreshedRoutes[1].directionsRoute.legs()!![0].closures()
             )
 
             assertEquals(

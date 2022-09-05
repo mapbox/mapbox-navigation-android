@@ -4,6 +4,8 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Improved the route refresh feature to also refresh _closures_ (`RouteLeg#closures`). [#6274](https://github.com/mapbox/mapbox-navigation-android/pull/6274)
+
 #### Bug fixes and improvements
 
 ## Mapbox Navigation SDK 2.8.0-beta.2 - 01 September, 2022
