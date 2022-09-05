@@ -49,6 +49,7 @@ class CarSpeedLimitRenderer(
     private fun updateSpeed(locationMatcherResult: LocationMatcherResult) {
         val speedKmph =
             locationMatcherResult.enhancedLocation.speed / METERS_IN_KILOMETER * SECONDS_IN_HOUR
+        val signFormat = locationMatcherResult.speedLimit?.speedLimitSign
         when (mainCarContext.mapboxNavigation.navigationOptions.distanceFormatterOptions.unitType) {
             UnitType.IMPERIAL -> {
                 val speedLimit =
@@ -56,13 +57,11 @@ class CarSpeedLimitRenderer(
                         5 * (speedLimitKmph / KILOMETERS_IN_MILE / 5).roundToInt()
                     }
                 val speed = speedKmph / KILOMETERS_IN_MILE
-                speedLimitWidget?.update(speedLimit, speed.roundToInt())
+                speedLimitWidget?.update(speedLimit, speed.roundToInt(), signFormat, threshold = 0)
             }
             UnitType.METRIC -> {
-                speedLimitWidget?.update(
-                    locationMatcherResult.speedLimit?.speedKmph,
-                    speedKmph.roundToInt()
-                )
+                val speedLimit = locationMatcherResult.speedLimit?.speedKmph
+                speedLimitWidget?.update(speedLimit, speedKmph.roundToInt(), signFormat, threshold = 0)
             }
         }
     }

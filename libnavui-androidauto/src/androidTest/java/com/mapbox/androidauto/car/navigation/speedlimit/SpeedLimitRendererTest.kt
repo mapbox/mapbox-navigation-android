@@ -30,58 +30,86 @@ class SpeedLimitRendererTest {
     )
 
     @Test
-    fun speed_limit_120_speed_150() {
-        bitmapUtils.assertBitmapsSimilar(
-            testName,
-            SpeedLimitWidget.drawSpeedLimitSign(speedLimit = 120, speed = 150),
-        )
+    fun speed_limit_120_speed_150_mutcd() {
+        val bitmap =
+            SpeedLimitWidget.drawMutcdSpeedLimitSign(speedLimit = 120, speed = 150, warn = true)
+        bitmapUtils.assertBitmapsSimilar(testName, bitmap)
     }
 
     @Test
-    fun speed_limit_120_speed_90() {
-        bitmapUtils.assertBitmapsSimilar(
-            testName,
-            SpeedLimitWidget.drawSpeedLimitSign(speedLimit = 120, speed = 90),
-        )
+    fun speed_limit_120_speed_90_mutcd() {
+        val bitmap =
+            SpeedLimitWidget.drawMutcdSpeedLimitSign(speedLimit = 120, speed = 90, warn = false)
+        bitmapUtils.assertBitmapsSimilar(testName, bitmap)
     }
 
     @Test
-    fun speed_limit_65_speed_90() {
-        bitmapUtils.assertBitmapsSimilar(
-            testName,
-            SpeedLimitWidget.drawSpeedLimitSign(speedLimit = 65, speed = 90),
-        )
+    fun speed_limit_65_speed_30_mutcd() {
+        val bitmap =
+            SpeedLimitWidget.drawMutcdSpeedLimitSign(speedLimit = 65, speed = 30, warn = false)
+        bitmapUtils.assertBitmapsSimilar(testName, bitmap)
     }
 
     @Test
-    fun speed_limit_65_speed_30() {
-        bitmapUtils.assertBitmapsSimilar(
-            testName,
-            SpeedLimitWidget.drawSpeedLimitSign(speedLimit = 65, speed = 30),
-        )
+    fun speed_limit_5_speed_30_mutcd() {
+        val bitmap =
+            SpeedLimitWidget.drawMutcdSpeedLimitSign(speedLimit = 5, speed = 30, warn = true)
+        bitmapUtils.assertBitmapsSimilar(testName, bitmap)
     }
 
     @Test
-    fun speed_limit_5_speed_30() {
-        bitmapUtils.assertBitmapsSimilar(
-            testName,
-            SpeedLimitWidget.drawSpeedLimitSign(speedLimit = 5, speed = 30),
-        )
+    fun speed_limit_5_speed_0_mutcd() {
+        val bitmap =
+            SpeedLimitWidget.drawMutcdSpeedLimitSign(speedLimit = 5, speed = 0, warn = false)
+        bitmapUtils.assertBitmapsSimilar(testName, bitmap)
     }
 
     @Test
-    fun speed_limit_5_speed_0() {
-        bitmapUtils.assertBitmapsSimilar(
-            testName,
-            SpeedLimitWidget.drawSpeedLimitSign(speedLimit = 5, speed = 0),
-        )
+    fun speed_limit_unknown_speed_5_mutcd() {
+        val bitmap =
+            SpeedLimitWidget.drawMutcdSpeedLimitSign(speedLimit = null, speed = 5, warn = false)
+        bitmapUtils.assertBitmapsSimilar(testName, bitmap)
     }
 
     @Test
-    fun speed_limit_unknown_speed_5() {
-        bitmapUtils.assertBitmapsSimilar(
-            testName,
-            SpeedLimitWidget.drawSpeedLimitSign(speedLimit = null, speed = 5),
-        )
+    fun speed_limit_120_speed_150_vienna() {
+        val bitmap =
+            SpeedLimitWidget.drawViennaSpeedLimitSign(speedLimit = 120, speed = 150, warn = true)
+        bitmapUtils.assertBitmapsSimilar(testName, bitmap)
+    }
+
+    @Test
+    fun speed_limit_120_speed_90_vienna() {
+        val bitmap =
+            SpeedLimitWidget.drawViennaSpeedLimitSign(speedLimit = 120, speed = 90, warn = false)
+        bitmapUtils.assertBitmapsSimilar(testName, bitmap)
+    }
+
+    @Test
+    fun speed_limit_65_speed_30_vienna() {
+        val bitmap =
+            SpeedLimitWidget.drawViennaSpeedLimitSign(speedLimit = 65, speed = 30, warn = false)
+        bitmapUtils.assertBitmapsSimilar(testName, bitmap)
+    }
+
+    @Test
+    fun speed_limit_5_speed_30_vienna() {
+        val bitmap =
+            SpeedLimitWidget.drawViennaSpeedLimitSign(speedLimit = 5, speed = 30, warn = true)
+        bitmapUtils.assertBitmapsSimilar(testName, bitmap)
+    }
+
+    @Test
+    fun speed_limit_5_speed_0_vienna() {
+        val bitmap =
+            SpeedLimitWidget.drawViennaSpeedLimitSign(speedLimit = 5, speed = 0, warn = false)
+        bitmapUtils.assertBitmapsSimilar(testName, bitmap)
+    }
+
+    @Test
+    fun speed_limit_unknown_speed_5_vienna() {
+        val bitmap =
+            SpeedLimitWidget.drawViennaSpeedLimitSign(speedLimit = null, speed = 5, warn = false)
+        bitmapUtils.assertBitmapsSimilar(testName, bitmap)
     }
 }
