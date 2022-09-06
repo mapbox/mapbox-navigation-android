@@ -298,7 +298,7 @@ class CameraComponentTest {
         }
 
     @Test
-    fun `when in mode other than free drive zoom property override is cleared`() =
+    fun `when in mode other than free drive only zoom property override is cleared`() =
         coroutineRule.runBlockingTest {
             testStore.setState(
                 testStore.state.value.copy(navigation = NavigationState.RoutePreview)
@@ -307,8 +307,9 @@ class CameraComponentTest {
             cameraComponent.onAttached(mockMapboxNavigation)
 
             verify {
-                mockViewPortDataSource.clearOverviewOverrides()
-                mockViewPortDataSource.clearFollowingOverrides()
+                mockViewPortDataSource.overviewZoomPropertyOverride(value = null)
+                mockViewPortDataSource.overviewPitchPropertyOverride(value = 0.0)
+                mockViewPortDataSource.followingZoomPropertyOverride(value = null)
                 mockViewPortDataSource.evaluate()
             }
         }
