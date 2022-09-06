@@ -102,17 +102,17 @@ internal class CameraComponent constructor(
     }
 
     private fun controlCameraFrameOverrides() {
+        viewportDataSource.overviewPitchPropertyOverride(OVERVIEW_PITCH_OVERRIDE)
         coroutineScope.launch {
             store.select { it.navigation }.collect {
                 when (it) {
                     is NavigationState.FreeDrive -> {
                         viewportDataSource.followingZoomPropertyOverride(FOLLOWING_ZOOM_OVERRIDE)
                         viewportDataSource.overviewZoomPropertyOverride(OVERVIEW_ZOOM_OVERRIDE)
-                        viewportDataSource.overviewPitchPropertyOverride(OVERVIEW_PITCH_OVERRIDE)
                     }
                     else -> {
-                        viewportDataSource.clearFollowingOverrides()
-                        viewportDataSource.clearOverviewOverrides()
+                        viewportDataSource.followingZoomPropertyOverride(value = null)
+                        viewportDataSource.overviewZoomPropertyOverride(value = null)
                     }
                 }
                 viewportDataSource.evaluate()
