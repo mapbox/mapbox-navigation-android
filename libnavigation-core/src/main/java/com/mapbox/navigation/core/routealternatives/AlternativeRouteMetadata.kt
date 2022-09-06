@@ -8,6 +8,10 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
  *
  * Valid only until [RoutesObserver] or [NavigationRouteAlternativesObserver] fires again.
  *
+ * @param alternativeId stable alternative's identificator. Always greater than zero.
+ * Alternative routes are generated as user travels and multiple new alternative can ultimately represent the
+ * same route because only their origins are placed further along the route.
+ * If new alternative route's geometry is fully included in the old one, it's ID will not change.
  * @param navigationRoute the alternative route
  * @param forkIntersectionOfAlternativeRoute intersection point of this alternative route with the primary route,
  * from the perspective of the alternative route
@@ -18,6 +22,7 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
  * the primary route's data until the deviation point with the alternative route's data from the deviation point
  */
 class AlternativeRouteMetadata internal constructor(
+    val alternativeId: Int,
     val navigationRoute: NavigationRoute,
     val forkIntersectionOfAlternativeRoute: AlternativeRouteIntersection,
     val forkIntersectionOfPrimaryRoute: AlternativeRouteIntersection,
@@ -33,6 +38,7 @@ class AlternativeRouteMetadata internal constructor(
 
         other as AlternativeRouteMetadata
 
+        if (alternativeId != other.alternativeId) return false
         if (navigationRoute.id != other.navigationRoute.id) return false
         if (forkIntersectionOfAlternativeRoute != other.forkIntersectionOfAlternativeRoute)
             return false
@@ -47,7 +53,8 @@ class AlternativeRouteMetadata internal constructor(
      * Returns a hash code value for the object.
      */
     override fun hashCode(): Int {
-        var result = navigationRoute.id.hashCode()
+        var result = alternativeId.hashCode()
+        result = 31 * result + navigationRoute.id.hashCode()
         result = 31 * result + forkIntersectionOfAlternativeRoute.hashCode()
         result = 31 * result + forkIntersectionOfPrimaryRoute.hashCode()
         result = 31 * result + infoFromFork.hashCode()
@@ -60,6 +67,7 @@ class AlternativeRouteMetadata internal constructor(
      */
     override fun toString(): String {
         return "AlternativeRouteMetadata(" +
+            "alternativeId=${alternativeId}, " +
             "navigationRouteId=${navigationRoute.id}, " +
             "forkIntersectionOfAlternativeRoute=$forkIntersectionOfAlternativeRoute, " +
             "forkIntersectionOfPrimaryRoute=$forkIntersectionOfPrimaryRoute, " +

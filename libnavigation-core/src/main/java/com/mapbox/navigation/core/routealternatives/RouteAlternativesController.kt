@@ -274,6 +274,7 @@ private fun RouteAlternative.mapToMetadata(
     navigationRoute: NavigationRoute
 ): AlternativeRouteMetadata {
     return AlternativeRouteMetadata(
+        alternativeId = id,
         navigationRoute = navigationRoute,
         forkIntersectionOfAlternativeRoute = alternativeRouteFork.mapToPlatform(),
         forkIntersectionOfPrimaryRoute = mainRouteFork.mapToPlatform(),
