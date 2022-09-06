@@ -1,15 +1,20 @@
 package com.mapbox.navigation.base.route
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.LegAnnotation
+import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import java.util.concurrent.TimeUnit
 
 /**
- * The options available for refreshing the active [DirectionsRoute]. Each refresh will update
- * the current route's [LegAnnotation]. This includes traffic congestion and estimated travel time.
+ * The options available for refreshing the current primary [NavigationRoute], as well as the alternatives. Each refresh will update:
+ * - [RouteLeg.annotation]
+ * - [RouteLeg.incidents]
+ * - [RouteLeg.closures]
+ * - duration fields
  *
- * Make sure that [RouteOptions.enableRefresh] is true to take advantage of this feature.
+ * This includes traffic congestion and estimated travel time. Make sure that [RouteOptions.enableRefresh] is true to take advantage of this feature.
+ *
+ * In case of a route refresh failing for `3 * `[intervalMillis] (default is 15 min), expired incidents and congestion annotations
+ * will be removed from the route in order to avoid presenting non-critical, outdated information. Closures are not cleared automatically, only upon information from a successful refresh.
  *
  * @param intervalMillis The refresh interval in milliseconds, default is 5 min.
  */

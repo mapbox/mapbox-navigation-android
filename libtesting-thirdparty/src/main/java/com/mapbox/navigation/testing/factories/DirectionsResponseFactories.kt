@@ -1,6 +1,7 @@
 package com.mapbox.navigation.testing.factories
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.Incident
@@ -42,9 +43,14 @@ fun createDirectionsRoute(
 
 fun createRouteLeg(
     annotation: LegAnnotation? = createRouteLegAnnotation(),
-    incidents: List<Incident>? = null
+    incidents: List<Incident>? = null,
+    closures: List<Closure>? = null,
 ): RouteLeg {
-    return RouteLeg.builder().annotation(annotation).incidents(incidents).build()
+    return RouteLeg.builder()
+        .annotation(annotation)
+        .incidents(incidents)
+        .closures(closures)
+        .build()
 }
 
 fun createRouteLegAnnotation(
@@ -53,7 +59,7 @@ fun createRouteLegAnnotation(
     distance: List<Double> = listOf(10.0, 10.0),
     duration: List<Double> = listOf(2.0, 2.0),
     maxSpeed: List<MaxSpeed> = listOf(createMaxSpeed(40), createMaxSpeed(60)),
-    speed: List<Double> = listOf(40.4, 60.7)
+    speed: List<Double> = listOf(40.4, 60.7),
 ): LegAnnotation {
     return LegAnnotation.builder()
         .distance(distance)
@@ -78,6 +84,14 @@ fun createIncident(
     .id(id)
     .type(type)
     .endTime(endTime)
+    .build()
+
+fun createClosure(
+    geometryIndexStart: Int = 2,
+    geometryIndexEnd: Int = 11,
+): Closure = Closure.builder()
+    .geometryIndexStart(geometryIndexStart)
+    .geometryIndexEnd(geometryIndexEnd)
     .build()
 
 fun createRouteOptions(

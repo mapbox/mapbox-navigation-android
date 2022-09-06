@@ -1890,6 +1890,12 @@
               "iso_3166_1": "US"
             }
           ],
+          "closures": [
+            {
+              "geometry_index_start": 5,
+              "geometry_index_end": 6
+            }
+          ],
           "incidents": [
             {
               "length": 50,

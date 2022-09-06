@@ -1,6 +1,7 @@
 package com.mapbox.navigation.base.internal.route
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.Incident
@@ -36,18 +37,22 @@ class NavigationRouteExTest {
             TestData(
                 "update to null items",
                 provideNavigationRoute(addLeg = false),
-                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null),
+                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null),
                 LegItemsResult(
                     listOf(null),
                     listOf(null),
-                    0
+                    listOf(null),
+                    0,
                 )
             ),
             TestData(
                 "update to null items multi-leg route",
                 provideNavigationRoute(addLeg = true),
-                RefreshLegItemsWrapper(0, listOf(null, null), listOf(null, null), null),
+                RefreshLegItemsWrapper(
+                    0, listOf(null, null), listOf(null, null), null, null
+                ),
                 LegItemsResult(
+                    listOf(null, null),
                     listOf(null, null),
                     listOf(null, null),
                     0
@@ -60,11 +65,13 @@ class NavigationRouteExTest {
                     1,
                     listOf(null, null),
                     listOf(null, null),
-                    null
+                    null,
+                    null,
                 ),
                 LegItemsResult(
                     listOf(provideDefaultLegAnnotation(), null),
                     listOf(provideDefaultIncidents(), null),
+                    listOf(provideDefaultClosures(), null),
                     0
                 ),
             ),
@@ -72,6 +79,7 @@ class NavigationRouteExTest {
             run {
                 val newLegAnnotations = mockk<LegAnnotation>()
                 val newIncidents = mockk<List<Incident>>()
+                val newClosures = mockk<List<Closure>>()
                 return@run TestData(
                     "update items route",
                     provideNavigationRoute(addLeg = false),
@@ -79,12 +87,14 @@ class NavigationRouteExTest {
                         0,
                         listOf(newLegAnnotations),
                         listOf(newIncidents),
-                        null
+                        listOf(newClosures),
+                        null,
                     ),
                     LegItemsResult(
                         listOf(newLegAnnotations),
                         listOf(newIncidents),
-                        0
+                        listOf(newClosures),
+                        0,
                     )
                 )
             },
@@ -93,6 +103,8 @@ class NavigationRouteExTest {
                 val newLegAnnotations2 = mockk<LegAnnotation>()
                 val newIncidents = mockk<List<Incident>>()
                 val newIncidents2 = mockk<List<Incident>>()
+                val newClosures = mockk<List<Closure>>()
+                val newClosures2 = mockk<List<Closure>>()
                 TestData(
                     "update items multi-leg route",
                     provideNavigationRoute(addLeg = true),
@@ -100,12 +112,14 @@ class NavigationRouteExTest {
                         0,
                         listOf(newLegAnnotations, newLegAnnotations2),
                         listOf(newIncidents, newIncidents2),
-                        null
+                        listOf(newClosures, newClosures2),
+                        null,
                     ),
                     LegItemsResult(
                         listOf(newLegAnnotations, newLegAnnotations2),
                         listOf(newIncidents, newIncidents2),
-                        0
+                        listOf(newClosures, newClosures2),
+                        0,
                     )
                 )
             },
@@ -114,6 +128,8 @@ class NavigationRouteExTest {
                 val newLegAnnotations2 = mockk<LegAnnotation>()
                 val newIncidents = mockk<List<Incident>>()
                 val newIncidents2 = mockk<List<Incident>>()
+                val newClosures = mockk<List<Closure>>()
+                val newClosures2 = mockk<List<Closure>>()
                 TestData(
                     "update items multi-leg route, geometryIndex is 2",
                     provideNavigationRoute(addLeg = true),
@@ -121,12 +137,14 @@ class NavigationRouteExTest {
                         0,
                         listOf(newLegAnnotations, newLegAnnotations2),
                         listOf(newIncidents, newIncidents2),
-                        2
+                        listOf(newClosures, newClosures2),
+                        2,
                     ),
                     LegItemsResult(
                         listOf(newLegAnnotations, newLegAnnotations2),
                         listOf(newIncidents, newIncidents2),
-                        2
+                        listOf(newClosures, newClosures2),
+                        2,
                     )
                 )
             },
@@ -135,6 +153,8 @@ class NavigationRouteExTest {
                 val newLegAnnotations2 = mockk<LegAnnotation>()
                 val newIncidents = mockk<List<Incident>>()
                 val newIncidents2 = mockk<List<Incident>>()
+                val newClosures = mockk<List<Closure>>()
+                val newClosures2 = mockk<List<Closure>>()
                 TestData(
                     "update items multi-leg route starting with second leg",
                     provideNavigationRoute(addLeg = true),
@@ -142,12 +162,13 @@ class NavigationRouteExTest {
                         1,
                         listOf(newLegAnnotations, newLegAnnotations2),
                         listOf(newIncidents, newIncidents2),
-                        null
+                        listOf(newClosures, newClosures2),
+                        null,
                     ),
-
                     LegItemsResult(
                         listOf(provideDefaultLegAnnotation(), newLegAnnotations2),
                         listOf(provideDefaultIncidents(), newIncidents2),
+                        listOf(provideDefaultClosures(), newClosures2),
                         0
                     )
                 )
@@ -157,6 +178,8 @@ class NavigationRouteExTest {
                 val newLegAnnotations2 = mockk<LegAnnotation>()
                 val newIncidents = mockk<List<Incident>>()
                 val newIncidents2 = mockk<List<Incident>>()
+                val newClosures = mockk<List<Closure>>()
+                val newClosures2 = mockk<List<Closure>>()
                 TestData(
                     "update items multi-leg route starting with second leg, geometryIndex = 4",
                     provideNavigationRoute(addLeg = true),
@@ -164,13 +187,14 @@ class NavigationRouteExTest {
                         1,
                         listOf(newLegAnnotations, newLegAnnotations2),
                         listOf(newIncidents, newIncidents2),
-                        4
+                        listOf(newClosures, newClosures2),
+                        4,
                     ),
-
                     LegItemsResult(
                         listOf(provideDefaultLegAnnotation(), newLegAnnotations2),
                         listOf(provideDefaultIncidents(), newIncidents2),
-                        4
+                        listOf(provideDefaultClosures(), newClosures2),
+                        4,
                     )
                 )
             },
@@ -180,11 +204,13 @@ class NavigationRouteExTest {
                     AnnotationsRefresher.getRefreshedAnnotations(any(), any(), any())
                 } returnsMany
                     (result.newLegAnnotation?.drop(refreshItems.startWithIndex) ?: emptyList())
+
                 val updatedNavRoute = navRoute.refreshRoute(
                     refreshItems.startWithIndex,
                     refreshItems.legGeometryIndex,
                     refreshItems.legAnnotation,
-                    refreshItems.incidents
+                    refreshItems.incidents,
+                    refreshItems.closures,
                 )
 
                 assertEquals(
@@ -200,6 +226,13 @@ class NavigationRouteExTest {
                     updatedNavRoute.directionsRoute
                         .legs()
                         ?.map { it.incidents() },
+                )
+                assertEquals(
+                    description,
+                    result.newClosures,
+                    updatedNavRoute.directionsRoute
+                        .legs()
+                        ?.map { it.closures() },
                 )
 
                 val capturedOldAnnotations = mutableListOf<LegAnnotation?>()
@@ -237,8 +270,9 @@ class NavigationRouteExTest {
     private fun provideNavigationRoute(
         annotations: LegAnnotation? = provideDefaultLegAnnotation(),
         incidents: List<Incident>? = provideDefaultIncidents(),
+        closures: List<Closure>? = provideDefaultClosures(),
         addLeg: Boolean,
-        distance: Double = 10.0
+        distance: Double = 10.0,
     ): NavigationRoute {
         val twoPointGeometry = PolylineUtils.encode(
             listOf(
@@ -262,6 +296,7 @@ class NavigationRouteExTest {
                                     RouteLeg.builder()
                                         .annotation(annotations)
                                         .incidents(incidents)
+                                        .closures(closures)
                                         .steps(List(2) { validStep })
                                         .build()
                                 ).apply {
@@ -270,6 +305,7 @@ class NavigationRouteExTest {
                                             RouteLeg.builder()
                                                 .annotation(annotations)
                                                 .incidents(incidents)
+                                                .closures(closures)
                                                 .steps(List(2) { validStep })
                                                 .build()
                                         )
@@ -318,6 +354,17 @@ class NavigationRouteExTest {
             .build(),
     )
 
+    private fun provideDefaultClosures(): List<Closure> = listOf(
+        Closure.builder()
+            .geometryIndexStart(0)
+            .geometryIndexEnd(5)
+            .build(),
+        Closure.builder()
+            .geometryIndexStart(10)
+            .geometryIndexEnd(12)
+            .build(),
+    )
+
     /**
      * Wrapper of test case
      *
@@ -340,6 +387,7 @@ class NavigationRouteExTest {
         val startWithIndex: Int,
         val legAnnotation: List<LegAnnotation?>?,
         val incidents: List<List<Incident>?>?,
+        val closures: List<List<Closure>?>?,
         val legGeometryIndex: Int?,
     )
 
@@ -349,6 +397,7 @@ class NavigationRouteExTest {
     private data class LegItemsResult(
         val newLegAnnotation: List<LegAnnotation?>?,
         val newIncidents: List<List<Incident>?>?,
+        val newClosures: List<List<Closure>?>?,
         val expectedLegGeometryIndex: Int,
     )
 }

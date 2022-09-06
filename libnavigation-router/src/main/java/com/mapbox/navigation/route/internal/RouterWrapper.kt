@@ -255,7 +255,8 @@ class RouterWrapper(
                                         },
                                         incidents = routeRefresh.legs()?.map {
                                             it.incidents()
-                                        }
+                                        },
+                                        closures = routeRefresh.legs()?.map { it.closures() },
                                     )
                                 }
                         }.fold(

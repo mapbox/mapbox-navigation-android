@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.testing.factories.createClosure
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createIncident
 import com.mapbox.navigation.testing.factories.createMaxSpeed
@@ -31,17 +32,19 @@ class DirectionsRouteDiffProviderTest {
             createTestLeg(85.71, 42.85, 57.14, 90, "unknown", 14),
             createTestLeg(71.42, 28.57, 42.85, 120, "unknown", 57),
             createTestLeg(142.8, 57.14, 28.57, 90, "low", 71),
-            createRouteLeg(incidents = listOf(createIncident())),
+            createRouteLeg(
+                incidents = listOf(createIncident()), closures = listOf(createClosure())
+            ),
         )
 
         assertEquals(
-            routeDiffProvider.buildRouteDiffs(oldRoute, newRoute, currentLegIndex = 1),
             listOf(
                 "Updated distance, duration, speed, congestion at route testDiff#0 leg 1",
                 "Updated duration, speed, maxSpeed, congestion at route testDiff#0 leg 3",
                 "Updated distance, maxSpeed, congestionNumeric at route testDiff#0 leg 4",
-                "Updated incidents at route testDiff#0 leg 5",
+                "Updated incidents, closures at route testDiff#0 leg 5",
             ),
+            routeDiffProvider.buildRouteDiffs(oldRoute, newRoute, currentLegIndex = 1),
         )
     }
 

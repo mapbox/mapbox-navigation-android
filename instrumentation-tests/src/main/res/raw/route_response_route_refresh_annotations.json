@@ -3,6 +3,12 @@
   "route": {
     "legs": [
       {
+        "closures": [
+          {
+            "geometry_index_start": 1,
+            "geometry_index_end": 3
+          }
+        ],
         "incidents": [
           {
             "length": 20,
