@@ -12,6 +12,7 @@ import com.mapbox.navigation.base.trip.model.eh.OpenLRStandard
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigator.MatchingOptions
+import com.mapbox.navigator.PartialPolylineDistanceCalculationStrategy
 import com.mapbox.navigator.RoadObject
 import com.mapbox.navigator.RoadObjectMatcherError
 import com.mapbox.navigator.RoadObjectMatcherListener
@@ -115,7 +116,11 @@ class RoadObjectMatcher internal constructor(
                     MatchableOpenLr(roadObjectId, openLRLocation, openLRStandard)
                 )
             ),
-            MatchingOptions(false, false),
+            MatchingOptions(
+                false,
+                false,
+                PartialPolylineDistanceCalculationStrategy.ONLY_MATCHED
+            ),
         )
     }
 
@@ -136,7 +141,11 @@ class RoadObjectMatcher internal constructor(
             matchableOpenLrs.map {
                 EHorizonFactory.buildNativeMatchableOpenLr(it)
             },
-            MatchingOptions(useOnlyPreloadedTiles, false),
+            MatchingOptions(
+                useOnlyPreloadedTiles,
+                false,
+                PartialPolylineDistanceCalculationStrategy.ONLY_MATCHED
+            ),
         )
     }
 
@@ -164,7 +173,11 @@ class RoadObjectMatcher internal constructor(
                     MatchableGeometry(roadObjectId, polyline)
                 )
             ),
-            MatchingOptions(false, false),
+            MatchingOptions(
+                false,
+                false,
+                PartialPolylineDistanceCalculationStrategy.ONLY_MATCHED
+            ),
         )
     }
 
@@ -190,7 +203,11 @@ class RoadObjectMatcher internal constructor(
             matchableGeometries.map {
                 EHorizonFactory.buildNativeMatchableGeometry(it)
             },
-            MatchingOptions(useOnlyPreloadedTiles, false),
+            MatchingOptions(
+                useOnlyPreloadedTiles,
+                false,
+                PartialPolylineDistanceCalculationStrategy.ONLY_MATCHED
+            ),
         )
     }
 
@@ -218,7 +235,11 @@ class RoadObjectMatcher internal constructor(
                     MatchableGeometry(roadObjectId, polygon)
                 )
             ),
-            MatchingOptions(false, false),
+            MatchingOptions(
+                false,
+                false,
+                PartialPolylineDistanceCalculationStrategy.ONLY_MATCHED
+            ),
         )
     }
 
@@ -244,7 +265,11 @@ class RoadObjectMatcher internal constructor(
             matchableGeometries.map {
                 EHorizonFactory.buildNativeMatchableGeometry(it)
             },
-            MatchingOptions(useOnlyPreloadedTiles, false),
+            MatchingOptions(
+                useOnlyPreloadedTiles,
+                false,
+                PartialPolylineDistanceCalculationStrategy.ONLY_MATCHED
+            ),
         )
     }
 
@@ -272,7 +297,11 @@ class RoadObjectMatcher internal constructor(
                     MatchableGeometry(roadObjectId, gantry)
                 )
             ),
-            MatchingOptions(false, false),
+            MatchingOptions(
+                false,
+                false,
+                PartialPolylineDistanceCalculationStrategy.ONLY_MATCHED
+            ),
         )
     }
 
@@ -298,7 +327,11 @@ class RoadObjectMatcher internal constructor(
             matchableGeometries.map {
                 EHorizonFactory.buildNativeMatchableGeometry(it)
             },
-            MatchingOptions(useOnlyPreloadedTiles, false),
+            MatchingOptions(
+                useOnlyPreloadedTiles,
+                false,
+                PartialPolylineDistanceCalculationStrategy.ONLY_MATCHED
+            ),
         )
     }
 
@@ -324,7 +357,11 @@ class RoadObjectMatcher internal constructor(
                     MatchablePoint(roadObjectId, point)
                 )
             ),
-            MatchingOptions(false, false),
+            MatchingOptions(
+                false,
+                false,
+                PartialPolylineDistanceCalculationStrategy.ONLY_MATCHED
+            ),
         )
     }
 
@@ -348,7 +385,11 @@ class RoadObjectMatcher internal constructor(
             matchablePoints.map {
                 EHorizonFactory.buildNativeMatchablePoint(it)
             },
-            MatchingOptions(useOnlyPreloadedTiles, false),
+            MatchingOptions(
+                useOnlyPreloadedTiles,
+                false,
+                PartialPolylineDistanceCalculationStrategy.ONLY_MATCHED
+            ),
         )
     }
 
