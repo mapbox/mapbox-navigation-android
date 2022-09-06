@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.app.internal.controller
+package com.mapbox.navigation.ui.maps.internal.ui
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -8,16 +8,13 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
-import com.mapbox.navigation.ui.app.testing.TestStore
+import com.mapbox.navigation.ui.utils.internal.Provider
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
-import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,14 +25,19 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
-class RouteAlternativeStateControllerTest {
+class RouteAlternativeComponentTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
     private val alternativeObserverSlot = slot<NavigationRouteAlternativesObserver>()
-    private val store = spyk(TestStore())
-    private val sut = RouteAlternativeStateController(store)
+    private val mockRouteAlternative = mockk<RouteAlternativeContract> {
+        every { onAlternativeRoutesUpdated(any(), any(), any()) } just Runs
+    }
+    private val provider = mockk<Provider<RouteAlternativeContract>> {
+        every { get() } returns mockRouteAlternative
+    }
+    private val sut = RouteAlternativeComponent(provider = provider)
 
     @Before
     fun setup() {
@@ -78,7 +80,11 @@ class RouteAlternativeStateControllerTest {
             )
 
             verify {
-                store.dispatch(RoutesAction.SetRoutesWithIndex(listOf(route1, route2), 0))
+                mockRouteAlternative.onAlternativeRoutesUpdated(
+                    legIndex = 0,
+                    mapboxNavigation = mapboxNavigation,
+                    updatedRoutes = listOf(route1, route2)
+                )
             }
         }
 
@@ -113,7 +119,11 @@ class RouteAlternativeStateControllerTest {
             )
 
             verify {
-                store.dispatch(RoutesAction.SetRoutesWithIndex(listOf(route2), 0))
+                mockRouteAlternative.onAlternativeRoutesUpdated(
+                    legIndex = 0,
+                    mapboxNavigation = mapboxNavigation,
+                    updatedRoutes = listOf(route1, route2)
+                )
             }
         }
 
@@ -134,7 +144,6 @@ class RouteAlternativeStateControllerTest {
                 } just Runs
                 every { getNavigationRoutes() } returns listOf(route1)
             }
-            every { store.state.value.navigation } returns NavigationState.RoutePreview
 
             sut.onAttached(mapboxNavigation)
 
@@ -145,7 +154,11 @@ class RouteAlternativeStateControllerTest {
             )
 
             verify {
-                store.dispatch(RoutesAction.SetRoutesWithIndex(listOf(route1, route2), 0))
+                mockRouteAlternative.onAlternativeRoutesUpdated(
+                    legIndex = 0,
+                    mapboxNavigation = mapboxNavigation,
+                    updatedRoutes = listOf(route1, route2)
+                )
             }
         }
 
@@ -176,7 +189,11 @@ class RouteAlternativeStateControllerTest {
             )
 
             verify(exactly = 0) {
-                store.dispatch(RoutesAction.SetRoutesWithIndex(listOf(route1, route2), 0))
+                mockRouteAlternative.onAlternativeRoutesUpdated(
+                    legIndex = 0,
+                    mapboxNavigation = mapboxNavigation,
+                    updatedRoutes = listOf(route1, route2)
+                )
             }
         }
 }

@@ -43,10 +43,6 @@ class RouteStateController(store: Store) : StateController() {
     ): List<NavigationRoute> {
         return when (action) {
             is RoutesAction.SetRoutes -> {
-                mapboxNavigation.setNavigationRoutes(action.routes)
-                action.routes
-            }
-            is RoutesAction.SetRoutesWithIndex -> {
                 mapboxNavigation.setNavigationRoutes(action.routes, action.legIndex)
                 action.routes
             }

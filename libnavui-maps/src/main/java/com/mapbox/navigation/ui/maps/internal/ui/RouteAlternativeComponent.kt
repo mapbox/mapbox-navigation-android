@@ -1,23 +1,46 @@
-package com.mapbox.navigation.ui.app.internal.controller
+package com.mapbox.navigation.ui.maps.internal.ui
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowRouteAlternativeObserver
-import com.mapbox.navigation.ui.app.internal.Action
-import com.mapbox.navigation.ui.app.internal.State
-import com.mapbox.navigation.ui.app.internal.Store
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
+import com.mapbox.navigation.ui.base.lifecycle.UIComponent
+import com.mapbox.navigation.ui.utils.internal.Provider
 import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class RouteAlternativeStateController(private val store: Store) : StateController() {
-    init {
-        store.register(this)
+interface RouteAlternativeContract {
+    fun onAlternativeRoutesUpdated(
+        legIndex: Int,
+        mapboxNavigation: MapboxNavigation,
+        updatedRoutes: List<NavigationRoute>
+    )
+}
+
+internal class MapboxRouteAlternativeComponentContract : RouteAlternativeContract {
+    override fun onAlternativeRoutesUpdated(
+        legIndex: Int,
+        mapboxNavigation: MapboxNavigation,
+        updatedRoutes: List<NavigationRoute>
+    ) {
+        mapboxNavigation.setNavigationRoutes(
+            routes = updatedRoutes,
+            initialLegIndex = legIndex
+        )
     }
+}
+
+@ExperimentalPreviewMapboxNavigationAPI
+class RouteAlternativeComponent(
+    private val provider: Provider<RouteAlternativeContract>? = null
+) : UIComponent() {
+
+    private val contractProvider: Provider<RouteAlternativeContract> =
+        this.provider ?: Provider {
+            MapboxRouteAlternativeComponentContract()
+        }
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
@@ -35,11 +58,8 @@ class RouteAlternativeStateController(private val store: Store) : StateControlle
                     }
                     val updatedRoutes = mutableListOf<NavigationRoute>()
                     when {
-                        isPrimaryRouteOffboard -> {
+                        isPrimaryRouteOffboard || offBoardAlternatives.isNotEmpty() -> {
                             updatedRoutes.add(routePrimary)
-                            updatedRoutes.addAll(offBoardAlternatives)
-                        }
-                        isPrimaryRouteOffboard.not() && offBoardAlternatives.isNotEmpty() -> {
                             updatedRoutes.addAll(offBoardAlternatives)
                         }
                         else -> {
@@ -48,17 +68,13 @@ class RouteAlternativeStateController(private val store: Store) : StateControlle
                         }
                     }
                     val currentLegIndex = routeProgress.currentLegProgress?.legIndex ?: 0
-                    store.dispatch(
-                        RoutesAction.SetRoutesWithIndex(updatedRoutes, currentLegIndex)
+                    contractProvider.get().onAlternativeRoutesUpdated(
+                        legIndex = currentLegIndex,
+                        mapboxNavigation = mapboxNavigation,
+                        updatedRoutes = updatedRoutes
                     )
                 }
             }
         }
     }
-
-    override fun onDetached(mapboxNavigation: MapboxNavigation) {
-        super.onDetached(mapboxNavigation)
-    }
-
-    override fun process(state: State, action: Action): State = state
 }

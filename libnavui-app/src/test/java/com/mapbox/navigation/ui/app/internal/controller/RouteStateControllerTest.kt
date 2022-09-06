@@ -53,7 +53,7 @@ internal class RouteStateControllerTest {
 
         sut.onAttached(mapboxNavigation)
 
-        store.dispatch(RoutesAction.SetRoutesWithIndex(routes, 1))
+        store.dispatch(RoutesAction.SetRoutes(routes, 1))
 
         assertEquals(store.state.value.routes.size, routes.size)
     }
