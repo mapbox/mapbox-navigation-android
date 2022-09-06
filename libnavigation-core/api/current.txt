@@ -338,7 +338,7 @@ package com.mapbox.navigation.core.lifecycle {
   }
 
   public final class RequireMapboxNavigation {
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static kotlin.properties.ReadOnlyProperty<androidx.lifecycle.LifecycleOwner,com.mapbox.navigation.core.MapboxNavigation> requireMapboxNavigation(com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver? onCreatedObserver = null, com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver? onStartedObserver = null, com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver? onResumedObserver = null, kotlin.jvm.functions.Function0<kotlin.Unit>? onInitialize = null);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static kotlin.properties.ReadOnlyProperty<java.lang.Object,com.mapbox.navigation.core.MapboxNavigation> requireMapboxNavigation(androidx.lifecycle.LifecycleOwner, com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver? onCreatedObserver = null, com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver? onStartedObserver = null, com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver? onResumedObserver = null, kotlin.jvm.functions.Function0<kotlin.Unit>? onInitialize = null);
   }
 
 }

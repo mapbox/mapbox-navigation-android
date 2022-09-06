@@ -82,6 +82,18 @@ class RequireMapboxNavigationTest {
     }
 
     @Test
+    fun `onInitialize is called before first reference to the delegate`() {
+        mockMapboxNavigationAppBehavior()
+        val mockOnInitialize: (() -> Unit) = mockk(relaxed = true)
+        val sut = SystemUnderTest(onInitialize = mockOnInitialize)
+
+        MapboxNavigationApp.setup(mockk<NavigationOptions>())
+        sut.moveToState(Lifecycle.State.CREATED)
+
+        verify { mockOnInitialize.invoke() }
+    }
+
+    @Test
     fun `multiple delegate references are the same instance`() {
         mockMapboxNavigationAppBehavior()
         val sut = SystemUnderTest()

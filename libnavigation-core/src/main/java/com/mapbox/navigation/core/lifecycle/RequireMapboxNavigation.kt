@@ -7,12 +7,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp.lifecycleOwner
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 /**
- * Extension function to make it simple to create the [RequireMapboxNavigationDelegate]. Below are
- * a couple examples of how you may use the delegate.
+ * Extension function to make it simple to create the [RequireMapboxNavigationDelegate].
+ * Below are a couple examples of how you may use the delegate.
  *
  * Default can be used when [MapboxNavigationApp] is setup elsewhere.
  * ```
@@ -51,12 +52,13 @@ import kotlin.reflect.KProperty
  * @see [RequireMapboxNavigationDelegate] for more details.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-fun requireMapboxNavigation(
+fun LifecycleOwner.requireMapboxNavigation(
     onCreatedObserver: MapboxNavigationObserver? = null,
     onStartedObserver: MapboxNavigationObserver? = null,
     onResumedObserver: MapboxNavigationObserver? = null,
     onInitialize: (() -> Unit)? = null,
-): ReadOnlyProperty<LifecycleOwner, MapboxNavigation> = RequireMapboxNavigationDelegate(
+): ReadOnlyProperty<Any, MapboxNavigation> = RequireMapboxNavigationDelegate(
+    lifecycleOwner = this,
     onCreatedObserver = onCreatedObserver,
     onStartedObserver = onStartedObserver,
     onResumedObserver = onResumedObserver,
@@ -74,22 +76,23 @@ fun requireMapboxNavigation(
  * [MapboxNavigation] instance can be re-created with [MapboxNavigationApp.disable], or if all
  * [MapboxNavigationApp.attach] lifecycles are destroyed.
  *
+ * @param lifecycleOwner: LifecycleOwner
  * @param onCreatedObserver registered to the [Lifecycle.State.CREATED] lifecycle
  * @param onStartedObserver registered to the [Lifecycle.State.STARTED] lifecycle
  * @param onResumedObserver registered to the [Lifecycle.State.RESUMED] lifecycle
- * @param onInitialize called when the property is read for the first time
+ * @param onInitialize called when the [lifecycleOwner] is [Lifecycle.State.CREATED]
  */
 internal class RequireMapboxNavigationDelegate(
+    lifecycleOwner: LifecycleOwner,
     private val onCreatedObserver: MapboxNavigationObserver? = null,
     private val onStartedObserver: MapboxNavigationObserver? = null,
     private val onResumedObserver: MapboxNavigationObserver? = null,
     private val onInitialize: (() -> Unit)? = null
-) : ReadOnlyProperty<LifecycleOwner, MapboxNavigation> {
-
-    private lateinit var lifecycleOwner: LifecycleOwner
+) : ReadOnlyProperty<Any, MapboxNavigation> {
 
     private val lifecycleObserver = object : DefaultLifecycleObserver {
         override fun onCreate(owner: LifecycleOwner) {
+            onInitialize?.invoke()
             onCreatedObserver?.let { MapboxNavigationApp.registerObserver(it) }
         }
 
@@ -114,21 +117,19 @@ internal class RequireMapboxNavigationDelegate(
         }
     }
 
+    init {
+        MapboxNavigationApp.attach(lifecycleOwner)
+        lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
+    }
+
     /**
-     * Returns an instance of [MapboxNavigation], the first retrieval will attach the [thisRef]
-     * to [MapboxNavigationApp.attach]. If [MapboxNavigationApp.isSetup] is false after all
-     * observers and initializers, this property getter will crash.
+     * Returns an instance of [MapboxNavigation]. If [MapboxNavigationApp.isSetup] is false after
+     * all observers and initializers, this property getter will crash.
      *
      * @param thisRef - the [LifecycleOwner] that needs access to [MapboxNavigation].
      * @param property - ignored
      */
-    override fun getValue(thisRef: LifecycleOwner, property: KProperty<*>): MapboxNavigation {
-        if (!this::lifecycleOwner.isInitialized) {
-            onInitialize?.invoke()
-            this.lifecycleOwner = thisRef
-            MapboxNavigationApp.attach(lifecycleOwner)
-            lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
-        }
+    override fun getValue(thisRef: Any, property: KProperty<*>): MapboxNavigation {
         val mapboxNavigation = MapboxNavigationApp.current()
         checkNotNull(mapboxNavigation) {
             "MapboxNavigation cannot be null. Ensure that MapboxNavigationApp is setup and an" +

@@ -93,7 +93,6 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
     private val mapboxNavigation by requireMapboxNavigation(
         onCreatedObserver = object : MapboxNavigationObserver {
             override fun onAttached(mapboxNavigation: MapboxNavigation) {
-
                 mapboxNavigation.registerLocationObserver(locationObserver)
                 mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
                 mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
