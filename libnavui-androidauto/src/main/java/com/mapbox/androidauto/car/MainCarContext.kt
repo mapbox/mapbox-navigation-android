@@ -2,6 +2,7 @@ package com.mapbox.androidauto.car
 
 import androidx.car.app.CarContext
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider
+import com.mapbox.androidauto.car.navigation.speedlimit.SpeedLimitOptions
 import com.mapbox.androidauto.car.preview.CarRouteOptionsInterceptor
 import com.mapbox.androidauto.car.search.CarPlaceSearchOptions
 import com.mapbox.androidauto.car.settings.CarSettingsStorage
@@ -16,6 +17,7 @@ import com.mapbox.navigation.utils.internal.JobControl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @OptIn(MapboxExperimental::class)
 class MainCarContext(
@@ -40,6 +42,8 @@ class MainCarContext(
     val maneuverApi: MapboxManeuverApi by lazy {
         MapboxManeuverApi(distanceFormatter)
     }
+
+    val speedLimitOptions = MutableStateFlow(SpeedLimitOptions.Builder().build())
 
     fun getJobControl(): JobControl {
         val supervisorJob = SupervisorJob()
