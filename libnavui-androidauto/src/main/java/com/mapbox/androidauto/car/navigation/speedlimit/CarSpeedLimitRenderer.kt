@@ -9,11 +9,17 @@ import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.navigation.base.formatter.UnitType
+import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlin.math.roundToInt
 
 /**
@@ -46,10 +52,15 @@ class CarSpeedLimitRenderer(
         }
     }
 
+    private lateinit var scope: CoroutineScope
+
     private fun updateSpeed(locationMatcherResult: LocationMatcherResult) {
         val speedKmph =
             locationMatcherResult.enhancedLocation.speed / METERS_IN_KILOMETER * SECONDS_IN_HOUR
-        val signFormat = locationMatcherResult.speedLimit?.speedLimitSign
+        val speedLimitOptions = mainCarContext.speedLimitOptions.value
+        val signFormat = speedLimitOptions.forcedSignFormat
+            ?: locationMatcherResult.speedLimit?.speedLimitSign
+        val threshold = speedLimitOptions.warningThreshold
         when (mainCarContext.mapboxNavigation.navigationOptions.distanceFormatterOptions.unitType) {
             UnitType.IMPERIAL -> {
                 val speedLimit =
@@ -57,20 +68,26 @@ class CarSpeedLimitRenderer(
                         5 * (speedLimitKmph / KILOMETERS_IN_MILE / 5).roundToInt()
                     }
                 val speed = speedKmph / KILOMETERS_IN_MILE
-                speedLimitWidget?.update(speedLimit, speed.roundToInt(), signFormat, threshold = 0)
+                speedLimitWidget?.update(speedLimit, speed.roundToInt(), signFormat, threshold)
             }
             UnitType.METRIC -> {
                 val speedLimit = locationMatcherResult.speedLimit?.speedKmph
-                speedLimitWidget?.update(speedLimit, speedKmph.roundToInt(), signFormat, threshold = 0)
+                speedLimitWidget?.update(speedLimit, speedKmph.roundToInt(), signFormat, threshold)
             }
         }
     }
 
     override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
         logAndroidAuto("CarSpeedLimitRenderer carMapSurface loaded")
-        val speedLimitWidget = SpeedLimitWidget().also { speedLimitWidget = it }
+        val signFormat =
+            mainCarContext.speedLimitOptions.value.forcedSignFormat ?: SpeedLimitSign.MUTCD
+        val speedLimitWidget = SpeedLimitWidget(signFormat).also { speedLimitWidget = it }
         mapboxCarMapSurface.mapSurface.addWidget(speedLimitWidget)
         MapboxNavigationApp.registerObserver(navigationObserver)
+        scope = MainScope()
+        mainCarContext.speedLimitOptions
+            .onEach { speedLimitWidget.update(it.forcedSignFormat, it.warningThreshold) }
+            .launchIn(scope)
     }
 
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
@@ -78,6 +95,7 @@ class CarSpeedLimitRenderer(
         MapboxNavigationApp.unregisterObserver(navigationObserver)
         speedLimitWidget?.let { mapboxCarMapSurface.mapSurface.removeWidget(it) }
         speedLimitWidget = null
+        scope.cancel()
     }
 
     override fun onVisibleAreaChanged(visibleArea: Rect, edgeInsets: EdgeInsets) {

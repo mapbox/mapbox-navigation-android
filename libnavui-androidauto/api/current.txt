@@ -63,6 +63,7 @@ package com.mapbox.androidauto.car {
     method public com.mapbox.maps.extension.androidauto.MapboxCarMap getMapboxCarMap();
     method public com.mapbox.navigation.core.MapboxNavigation getMapboxNavigation();
     method public com.mapbox.androidauto.car.preview.CarRouteOptionsInterceptor getRouteOptionsInterceptor();
+    method public kotlinx.coroutines.flow.MutableStateFlow<com.mapbox.androidauto.car.navigation.speedlimit.SpeedLimitOptions> getSpeedLimitOptions();
     property public final androidx.car.app.CarContext carContext;
     property public final com.mapbox.androidauto.car.search.CarPlaceSearchOptions carPlaceSearchOptions;
     property public final com.mapbox.androidauto.car.settings.CarSettingsStorage carSettingsStorage;
@@ -72,6 +73,7 @@ package com.mapbox.androidauto.car {
     property public final com.mapbox.maps.extension.androidauto.MapboxCarMap mapboxCarMap;
     property public final com.mapbox.navigation.core.MapboxNavigation mapboxNavigation;
     property public final com.mapbox.androidauto.car.preview.CarRouteOptionsInterceptor routeOptionsInterceptor;
+    property public final kotlinx.coroutines.flow.MutableStateFlow<com.mapbox.androidauto.car.navigation.speedlimit.SpeedLimitOptions> speedLimitOptions;
   }
 
   public final class MainCarScreen extends androidx.car.app.Screen {
@@ -565,9 +567,25 @@ package com.mapbox.androidauto.car.navigation.speedlimit {
     method public void onVisibleAreaChanged(android.graphics.Rect visibleArea, com.mapbox.maps.EdgeInsets edgeInsets);
   }
 
+  public final class SpeedLimitOptions {
+    method public com.mapbox.navigation.base.speed.model.SpeedLimitSign? getForcedSignFormat();
+    method public int getWarningThreshold();
+    method public com.mapbox.androidauto.car.navigation.speedlimit.SpeedLimitOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.base.speed.model.SpeedLimitSign? forcedSignFormat;
+    property public final int warningThreshold;
+  }
+
+  public static final class SpeedLimitOptions.Builder {
+    ctor public SpeedLimitOptions.Builder();
+    method public com.mapbox.androidauto.car.navigation.speedlimit.SpeedLimitOptions build();
+    method public com.mapbox.androidauto.car.navigation.speedlimit.SpeedLimitOptions.Builder forcedSignFormat(com.mapbox.navigation.base.speed.model.SpeedLimitSign? forcedSignFormat);
+    method public com.mapbox.androidauto.car.navigation.speedlimit.SpeedLimitOptions.Builder warningThreshold(int warningThreshold);
+  }
+
   public final class SpeedLimitWidget extends com.mapbox.maps.renderer.widget.BitmapWidget {
-    ctor public SpeedLimitWidget(com.mapbox.maps.renderer.widget.WidgetPosition position = com.mapbox.maps.renderer.widget.WidgetPosition(com.mapbox.maps.renderer.widget.WidgetPosition.Vertical.BOTTOM, com.mapbox.maps.renderer.widget.WidgetPosition.Horizontal.RIGHT), float marginX = 26f, float marginY = 50f);
-    method public void update(Integer? speedLimit, int speed);
+    ctor public SpeedLimitWidget(com.mapbox.navigation.base.speed.model.SpeedLimitSign initialSignFormat = com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD);
+    method public void update(Integer? speedLimit, int speed, com.mapbox.navigation.base.speed.model.SpeedLimitSign? signFormat, int threshold);
+    method public void update(com.mapbox.navigation.base.speed.model.SpeedLimitSign? signFormat, int threshold);
   }
 
 }

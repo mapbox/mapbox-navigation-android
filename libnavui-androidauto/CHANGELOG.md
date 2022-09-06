@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 - Added support for MUTCD and Vienna designs in the Speed limit widget. [#6275](https://github.com/mapbox/mapbox-navigation-android/pull/6275)
+- Added options to customize behavior of the Speed limit widget. [#6275](https://github.com/mapbox/mapbox-navigation-android/pull/6275)
 
 #### Bug fixes and improvements
 

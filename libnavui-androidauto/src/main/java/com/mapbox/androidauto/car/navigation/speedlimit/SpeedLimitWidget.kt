@@ -17,29 +17,10 @@ import com.mapbox.navigation.base.speed.model.SpeedLimitSign
  * Widget to display a speed limit sign on the map.
  */
 @OptIn(MapboxExperimental::class)
-class SpeedLimitWidget(
-    /**
-     * The position of the widget.
-     */
-    position: WidgetPosition = WidgetPosition(
-        vertical = WidgetPosition.Vertical.BOTTOM,
-        horizontal = WidgetPosition.Horizontal.RIGHT,
-    ),
-    /**
-     * The horizontal margin of the widget relative to the map.
-     */
-    marginX: Float = 14f,
-    /**
-     * The vertical margin of the widget relative to the map.
-     */
-    marginY: Float = 30f,
-    /**
-     * The initial sign format to use before speed limit info is available.
-     */
-    initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD,
-) : BitmapWidget(
+class SpeedLimitWidget(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD) : BitmapWidget(
     drawSpeedLimitSign(speedLimit = null, speed = 0, initialSignFormat, warn = false),
-    position, marginX, marginY,
+    WidgetPosition(WidgetPosition.Horizontal.RIGHT, WidgetPosition.Vertical.BOTTOM),
+    marginX = 14f, marginY = 30f,
 ) {
 
     private var lastSpeedLimit: Int? = null
@@ -57,6 +38,18 @@ class SpeedLimitWidget(
         ) return
         lastSpeedLimit = speedLimit
         lastSpeed = speed
+        lastSignFormat = newSignFormat
+        lastWarn = warn
+
+        updateBitmap(drawSpeedLimitSign(speedLimit, speed, newSignFormat, warn))
+    }
+
+    fun update(signFormat: SpeedLimitSign?, threshold: Int) {
+        val speedLimit = lastSpeedLimit
+        val speed = lastSpeed
+        val newSignFormat = signFormat ?: lastSignFormat
+        val warn = speedLimit != null && speed - threshold >= speedLimit
+        if (lastSignFormat == newSignFormat && lastWarn == warn) return
         lastSignFormat = newSignFormat
         lastWarn = warn
 
