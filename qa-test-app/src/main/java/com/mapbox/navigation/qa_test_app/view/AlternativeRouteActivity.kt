@@ -26,6 +26,7 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -36,8 +37,10 @@ import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
@@ -62,10 +65,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
+@SuppressLint("MissingPermission")
 class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private companion object {
-        private const val TAG = "AlternativeRouteActvt"
+        private const val TAG = "AlternativeRouteActivity"
     }
 
     private val routeClickPadding = Utils.dpToPx(30f)
@@ -78,20 +82,6 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val mapCamera: CameraAnimationsPlugin by lazy {
         binding.mapView.camera
-    }
-
-    private val mapboxNavigation: MapboxNavigation by lazy {
-        MapboxNavigationProvider.create(
-            NavigationOptions.Builder(this)
-                .accessToken(getMapboxAccessToken(this))
-                .locationEngine(ReplayLocationEngine(mapboxReplayer))
-                .routeAlternativesOptions(
-                    RouteAlternativesOptions.Builder()
-                        .intervalMillis(TimeUnit.SECONDS.toMillis(30))
-                        .build()
-                )
-                .build()
-        )
     }
 
     private val routeLineResources: RouteLineResources by lazy {
@@ -115,42 +105,49 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         MapboxRouteLineApi(routeLineOptions)
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private val mapboxNavigation: MapboxNavigation by requireMapboxNavigation(
+        onResumedObserver = object : MapboxNavigationObserver {
+            override fun onAttached(mapboxNavigation: MapboxNavigation) {
+                mapboxNavigation.registerLocationObserver(locationObserver)
+                mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
+                mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+                mapboxNavigation.registerRoutesObserver(routesObserver)
+                mapboxNavigation.registerRouteAlternativesObserver(alternativesObserver)
+            }
+
+            override fun onDetached(mapboxNavigation: MapboxNavigation) {
+                mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
+                mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+                mapboxNavigation.unregisterLocationObserver(locationObserver)
+                mapboxNavigation.unregisterRoutesObserver(routesObserver)
+                mapboxNavigation.unregisterRouteAlternativesObserver(alternativesObserver)
+            }
+        },
+        onInitialize = this::initNavigation
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        initNavigation()
         initStyle()
         initListeners()
     }
 
-    override fun onStart() {
-        super.onStart()
-        mapboxNavigation.registerLocationObserver(locationObserver)
-        mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
-        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.registerRoutesObserver(routesObserver)
-        mapboxNavigation.registerRouteAlternativesObserver(alternativesObserver)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
-        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.unregisterLocationObserver(locationObserver)
-        mapboxNavigation.unregisterRoutesObserver(routesObserver)
-        mapboxNavigation.unregisterRouteAlternativesObserver(alternativesObserver)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        routeLineApi.cancel()
-        routeLineView.cancel()
-        mapboxReplayer.finish()
-        mapboxNavigation.onDestroy()
-    }
-
     private fun initNavigation() {
+        MapboxNavigationApp.setup(
+            NavigationOptions.Builder(this)
+                .accessToken(getMapboxAccessToken(this))
+                .locationEngine(ReplayLocationEngine(mapboxReplayer))
+                .routeAlternativesOptions(
+                    RouteAlternativesOptions.Builder()
+                        .intervalMillis(TimeUnit.SECONDS.toMillis(30))
+                        .build()
+                )
+                .build()
+        )
+
         binding.mapView.location.apply {
             setLocationProvider(navigationLocationProvider)
             addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
@@ -159,6 +156,13 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.playbackSpeed(1.5)
         mapboxReplayer.play()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        routeLineApi.cancel()
+        routeLineView.cancel()
+        mapboxReplayer.finish()
     }
 
     private val locationObserver: LocationObserver = object : LocationObserver {
@@ -307,7 +311,6 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
-    @SuppressLint("MissingPermission")
     private fun initListeners() {
         binding.startNavigation.setOnClickListener {
             mapboxNavigation.startTripSession()

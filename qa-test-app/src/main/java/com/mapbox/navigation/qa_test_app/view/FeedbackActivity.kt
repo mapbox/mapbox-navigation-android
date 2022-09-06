@@ -28,8 +28,10 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
@@ -53,7 +55,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@ExperimentalPreviewMapboxNavigationAPI
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class FeedbackActivity : AppCompatActivity() {
 
     private val binding: FeedbackActivityBinding by lazy {
@@ -64,14 +66,6 @@ class FeedbackActivity : AppCompatActivity() {
 
     private val mapCamera: CameraAnimationsPlugin by lazy {
         binding.mapView.camera
-    }
-
-    private val mapboxNavigation: MapboxNavigation by lazy {
-        MapboxNavigationProvider.create(
-            NavigationOptions.Builder(this)
-                .accessToken(Utils.getMapboxAccessToken(this))
-                .build()
-        )
     }
 
     private val locationObserver = object : LocationObserver {
@@ -135,6 +129,30 @@ class FeedbackActivity : AppCompatActivity() {
             enableButtonStoreFeedbackMetadata(feedbackMetadataWrapper != null && value != null)
         }
 
+    private val mapboxNavigation by requireMapboxNavigation(
+        onCreatedObserver = object : MapboxNavigationObserver {
+            override fun onAttached(mapboxNavigation: MapboxNavigation) {
+                binding.mapView.location.apply {
+                    setLocationProvider(navigationLocationProvider)
+                    enabled = true
+                }
+                mapboxNavigation.registerLocationObserver(locationObserver)
+                mapboxNavigation.registerRoutesObserver(routesObserver)
+            }
+
+            override fun onDetached(mapboxNavigation: MapboxNavigation) {
+                mapboxNavigation.unregisterLocationObserver(locationObserver)
+                mapboxNavigation.unregisterRoutesObserver(routesObserver)
+            }
+        }
+    ) {
+        MapboxNavigationApp.setup(
+            NavigationOptions.Builder(this)
+                .accessToken(Utils.getMapboxAccessToken(this))
+                .build(),
+        )
+    }
+
     private companion object {
         private const val KEY_SP_FEEDBACK_METADATA = "KEY_SP_FEEDBACK_METADATA"
         private const val KEY_SP_FEEDBACK_SCREENSHOT = "KEY_SP_FEEDBACK_SCREENSHOT"
@@ -144,18 +162,8 @@ class FeedbackActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        initNavigation()
         initStyle()
         initListeners()
-    }
-
-    private fun initNavigation() {
-        binding.mapView.location.apply {
-            setLocationProvider(navigationLocationProvider)
-            enabled = true
-        }
-        mapboxNavigation.registerLocationObserver(locationObserver)
-        mapboxNavigation.registerRoutesObserver(routesObserver)
     }
 
     @SuppressLint("MissingPermission")
@@ -255,13 +263,6 @@ class FeedbackActivity : AppCompatActivity() {
             cleanUpFeedbackMetadata()
         }
         sharedPrefs.registerOnSharedPreferenceChangeListener(spListener)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mapboxNavigation.unregisterLocationObserver(locationObserver)
-        mapboxNavigation.unregisterRoutesObserver(routesObserver)
-        mapboxNavigation.onDestroy()
     }
 
     private fun updateCamera(location: Location, keyPoints: List<Location>) {
