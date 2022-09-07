@@ -40,12 +40,12 @@ import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.createSetRouteResult
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.RouteInterface
-import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
@@ -65,6 +65,9 @@ import java.util.Locale
 import java.util.UUID
 
 internal open class MapboxNavigationBaseTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
@@ -127,7 +130,6 @@ internal open class MapboxNavigationBaseTest {
     @Before
     open fun setUp() {
         mockkObject(LoggerProvider)
-        every { LoggerProvider.initialize() } just Runs
         mockkObject(NavigatorLoader)
         every {
             NavigatorLoader.createNativeRouterInterface(any(), any(), any(), any())

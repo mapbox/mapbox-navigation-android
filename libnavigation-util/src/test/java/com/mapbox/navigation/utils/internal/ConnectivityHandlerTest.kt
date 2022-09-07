@@ -4,9 +4,24 @@ import com.mapbox.common.NetworkStatus
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.channels.Channel
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 class ConnectivityHandlerTest {
+
+    private val originalLogger = LoggerProvider.getLoggerFrontend()
+    private val mockLogger = mockk<LoggerFrontend>(relaxed = true)
+
+    @Before
+    fun setup() {
+        LoggerProvider.setLoggerFrontend(mockLogger)
+    }
+
+    @After
+    fun tearDown() {
+        LoggerProvider.setLoggerFrontend(originalLogger)
+    }
 
     @Test
     fun `not reachable network status channel sends false`() {
@@ -50,7 +65,7 @@ class ConnectivityHandlerTest {
 
     @Test
     fun `not reachable logger prints out not reachable`() {
-        val logger = mockLogger()
+        val logger = mockLogger
         val mockedNetworkStatusChannel: Channel<Boolean> = mockk(relaxed = true)
         val connectivityHandler = ConnectivityHandler(mockedNetworkStatusChannel)
 
@@ -66,7 +81,7 @@ class ConnectivityHandlerTest {
 
     @Test
     fun `reachable via wifi logger prints out reachable via wifi`() {
-        val logger = mockLogger()
+        val logger = mockLogger
         val mockedNetworkStatusChannel: Channel<Boolean> = mockk(relaxed = true)
         val connectivityHandler = ConnectivityHandler(mockedNetworkStatusChannel)
 
@@ -82,7 +97,7 @@ class ConnectivityHandlerTest {
 
     @Test
     fun `reachable via ethernet logger prints out reachable via ethernet`() {
-        val logger = mockLogger()
+        val logger = mockLogger
         val mockedNetworkStatusChannel: Channel<Boolean> = mockk(relaxed = true)
         val connectivityHandler = ConnectivityHandler(mockedNetworkStatusChannel)
 
@@ -98,7 +113,7 @@ class ConnectivityHandlerTest {
 
     @Test
     fun `reachable via wwan logger prints out reachable via wwan`() {
-        val logger = mockLogger()
+        val logger = mockLogger
         val mockedNetworkStatusChannel: Channel<Boolean> = mockk(relaxed = true)
         val connectivityHandler = ConnectivityHandler(mockedNetworkStatusChannel)
 
@@ -111,10 +126,4 @@ class ConnectivityHandlerTest {
             )
         }
     }
-}
-
-private fun mockLogger(): LoggerFrontend {
-    val mock = mockk<LoggerFrontend>(relaxed = true)
-    LoggerProvider.setLoggerFrontend(mock)
-    return mock
 }

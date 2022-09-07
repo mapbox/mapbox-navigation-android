@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.app.internal
 
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.camera.CameraAction
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
@@ -29,6 +30,9 @@ import org.junit.Test
 @ExperimentalCoroutinesApi
 @ExperimentalPreviewMapboxNavigationAPI
 internal class StoreTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()

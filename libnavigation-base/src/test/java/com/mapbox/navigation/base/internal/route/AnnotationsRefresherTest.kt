@@ -2,7 +2,9 @@ package com.mapbox.navigation.base.internal.route
 
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.MaxSpeed
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import org.junit.Assert.assertEquals
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -15,6 +17,9 @@ class AnnotationsRefresherTest(
     private val expectedMergedAnnotation: LegAnnotation?,
     private val description: String,
 ) {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     companion object {
 

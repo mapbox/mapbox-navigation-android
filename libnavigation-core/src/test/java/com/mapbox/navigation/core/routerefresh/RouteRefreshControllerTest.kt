@@ -14,6 +14,7 @@ import com.mapbox.navigation.base.route.RouterFactory
 import com.mapbox.navigation.core.CurrentIndicesProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RouteRefresh
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.add
 import com.mapbox.navigation.testing.factories.createClosure
 import com.mapbox.navigation.testing.factories.createCoordinatesList
@@ -27,7 +28,6 @@ import com.mapbox.navigation.testing.factories.createRouteLegAnnotation
 import com.mapbox.navigation.testing.factories.createRouteOptions
 import com.mapbox.navigation.testing.utcToLocalTime
 import com.mapbox.navigation.utils.internal.LoggerFrontend
-import com.mapbox.navigation.utils.internal.LoggerProvider
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -41,7 +41,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import java.time.Month
 import java.util.Date
@@ -55,17 +55,16 @@ import java.util.concurrent.TimeUnit
 class RouteRefreshControllerTest {
 
     private val logger = mockk<LoggerFrontend>(relaxed = true)
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule(logger)
+
     private val currentIndices = CurrentIndicesFactory.createIndices(0, 1, 2)
     private val currentIndicesProvider =
         mockk<CurrentIndicesProvider>(relaxed = true) {
             coEvery { getFilledIndicesOrWait() } returns currentIndices
         }
     private val mockStatesObserver = mockk<RouteRefreshStatesObserver>(relaxUnitFun = true)
-
-    @Before
-    fun setup() {
-        LoggerProvider.setLoggerFrontend(logger)
-    }
 
     @Test
     fun `route with disabled refresh never refreshes and observer is failed`() =

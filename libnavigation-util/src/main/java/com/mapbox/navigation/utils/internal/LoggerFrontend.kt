@@ -1,5 +1,7 @@
 package com.mapbox.navigation.utils.internal
 
+import com.mapbox.common.NativeLoggerWrapper
+
 private const val NAV_SDK_CATEGORY = "nav-sdk"
 
 interface LoggerFrontend {
@@ -10,48 +12,31 @@ interface LoggerFrontend {
     fun logW(msg: String, category: String? = null)
 }
 
-internal class NoLoggingFrontend : LoggerFrontend {
-    override fun logV(msg: String, category: String?) {
-    }
-
-    override fun logD(msg: String, category: String?) {
-    }
-
-    override fun logI(msg: String, category: String?) {
-    }
-
-    override fun logE(msg: String, category: String?) {
-    }
-
-    override fun logW(msg: String, category: String?) {
-    }
-}
-
 internal class MapboxCommonLoggerFrontend : LoggerFrontend {
     override fun logV(msg: String, category: String?) {
         val message = createMessage(msg, category)
-        // There's no com.mapbox.common.Logger.v available - using Logger.d instead
-        com.mapbox.common.Logger.d(NAV_SDK_CATEGORY, message)
+        // There's no com.mapbox.common.Log.verbose available - using Log.debug instead
+        NativeLoggerWrapper.debug(message, NAV_SDK_CATEGORY)
     }
 
     override fun logD(msg: String, category: String?) {
         val message = createMessage(msg, category)
-        com.mapbox.common.Logger.d(NAV_SDK_CATEGORY, message)
+        NativeLoggerWrapper.debug(message, NAV_SDK_CATEGORY)
     }
 
     override fun logI(msg: String, category: String?) {
         val message = createMessage(msg, category)
-        com.mapbox.common.Logger.i(NAV_SDK_CATEGORY, message)
+        NativeLoggerWrapper.info(message, NAV_SDK_CATEGORY)
     }
 
     override fun logE(msg: String, category: String?) {
         val message = createMessage(msg, category)
-        com.mapbox.common.Logger.e(NAV_SDK_CATEGORY, message)
+        NativeLoggerWrapper.error(message, NAV_SDK_CATEGORY)
     }
 
     override fun logW(msg: String, category: String?) {
         val message = createMessage(msg, category)
-        com.mapbox.common.Logger.w(NAV_SDK_CATEGORY, message)
+        NativeLoggerWrapper.warning(message, NAV_SDK_CATEGORY)
     }
 }
 

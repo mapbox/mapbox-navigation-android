@@ -1,11 +1,11 @@
 package com.mapbox.navigation.utils.internal
 
-import com.mapbox.common.Logger
+import com.mapbox.common.NativeLoggerWrapper
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import io.mockk.verify
 import org.junit.After
 import org.junit.Before
@@ -15,17 +15,16 @@ class LoggerProviderTest {
 
     @Before
     fun setup() {
-        mockkStatic(Logger::class)
-        every { Logger.i(any(), any()) } just Runs
-        every { Logger.w(any(), any()) } just Runs
-        every { Logger.d(any(), any()) } just Runs
-        every { Logger.e(any(), any()) } just Runs
-        LoggerProvider.setLoggerFrontend(MapboxCommonLoggerFrontend())
+        mockkObject(NativeLoggerWrapper)
+        every { NativeLoggerWrapper.info(any(), any()) } just Runs
+        every { NativeLoggerWrapper.warning(any(), any()) } just Runs
+        every { NativeLoggerWrapper.debug(any(), any()) } just Runs
+        every { NativeLoggerWrapper.error(any(), any()) } just Runs
     }
 
     @After
     fun tearDown() {
-        unmockkStatic(Logger::class)
+        unmockkObject(NativeLoggerWrapper)
     }
 
     @Test
@@ -33,7 +32,7 @@ class LoggerProviderTest {
         logV("any_message", "any_clz_name")
 
         verify(exactly = 1) {
-            Logger.d(any(), any())
+            NativeLoggerWrapper.debug(any(), any())
         }
     }
 
@@ -42,7 +41,7 @@ class LoggerProviderTest {
         logD("any_message", "any_clz_name")
 
         verify(exactly = 1) {
-            Logger.d(any(), any())
+            NativeLoggerWrapper.debug(any(), any())
         }
     }
 
@@ -51,7 +50,7 @@ class LoggerProviderTest {
         logI("any_message", "any_clz_name")
 
         verify(exactly = 1) {
-            Logger.i(any(), any())
+            NativeLoggerWrapper.info(any(), any())
         }
     }
 
@@ -60,7 +59,7 @@ class LoggerProviderTest {
         logW("any_message", "any_clz_name")
 
         verify(exactly = 1) {
-            Logger.w(any(), any())
+            NativeLoggerWrapper.warning(any(), any())
         }
     }
 
@@ -69,7 +68,7 @@ class LoggerProviderTest {
         logE("any_message", "any_clz_name")
 
         verify(exactly = 1) {
-            Logger.e(any(), any())
+            NativeLoggerWrapper.error(any(), any())
         }
     }
 }

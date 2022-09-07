@@ -14,6 +14,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.util.TestStore
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import io.mockk.mockk
@@ -25,6 +26,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -33,6 +35,9 @@ import org.robolectric.shadows.ShadowLooper
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class InfoPanelCoordinatorTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private lateinit var ctx: Context
     private lateinit var sut: InfoPanelCoordinator

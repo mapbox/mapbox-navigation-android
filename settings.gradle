@@ -26,4 +26,5 @@ include ':examples',
         ':libnavui-app',
         ':qa-test-app',
         ':libtesting-thirdparty',
-        ':libtesting-navigation-base'
+        ':libtesting-navigation-base',
+        ':libtesting-navigation-util'

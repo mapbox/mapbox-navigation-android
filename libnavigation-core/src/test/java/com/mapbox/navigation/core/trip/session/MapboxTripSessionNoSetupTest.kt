@@ -23,6 +23,7 @@ import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateU
 import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.LONGITUDE_FOR_VOICE_INSTRUCTION_2
 import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.LONGITUDE_FOR_VOICE_INSTRUCTION_NULL
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.factories.createBannerInstruction
 import com.mapbox.navigation.testing.factories.createBannerSection
@@ -61,6 +62,9 @@ import java.util.Locale
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MapboxTripSessionNoSetupTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()

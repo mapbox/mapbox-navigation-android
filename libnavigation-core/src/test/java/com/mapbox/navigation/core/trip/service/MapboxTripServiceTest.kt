@@ -5,9 +5,9 @@ import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.TripNotificationState
 import com.mapbox.navigation.base.trip.notification.TripNotification
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.LoggerFrontend
-import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
@@ -27,9 +27,10 @@ class MapboxTripServiceTest {
     private val notification: Notification = mockk()
     private val initializeLambda: () -> Unit = mockk(relaxed = true)
     private val terminateLambda: () -> Unit = mockk(relaxed = true)
-    private val logger = mockk<LoggerFrontend>(relaxed = true).apply {
-        LoggerProvider.setLoggerFrontend(this)
-    }
+    private val logger = mockk<LoggerFrontend>(relaxed = true)
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule(logger)
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()

@@ -4,6 +4,7 @@ import com.mapbox.androidauto.ArrivalState
 import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -14,9 +15,13 @@ import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 class CarArrivalTriggerTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private val sut = CarArrivalTrigger()
 

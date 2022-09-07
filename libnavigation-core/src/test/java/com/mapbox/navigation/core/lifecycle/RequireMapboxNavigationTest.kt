@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleRegistry
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -17,12 +18,16 @@ import io.mockk.verifyOrder
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class RequireMapboxNavigationTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private class SystemUnderTest(
         onCreatedObserver: MapboxNavigationObserver? = null,

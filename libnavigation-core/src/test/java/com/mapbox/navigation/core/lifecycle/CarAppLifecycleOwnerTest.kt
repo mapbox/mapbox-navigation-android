@@ -11,11 +11,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -25,6 +27,9 @@ import org.robolectric.RobolectricTestRunner
 class CarAppLifecycleOwnerTest {
     private val testLifecycleObserver: DefaultLifecycleObserver = mockk(relaxUnitFun = true)
     private val carAppLifecycleOwner = CarAppLifecycleOwner()
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     @Before
     fun setup() {

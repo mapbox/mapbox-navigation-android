@@ -6,6 +6,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -15,10 +16,14 @@ import io.mockk.verifyOrder
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @ExperimentalPreviewMapboxNavigationAPI
 class MapboxNavigationOwnerTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private val navigationOptionsProvider = mockk<NavigationOptionsProvider> {
         every { createNavigationOptions() } returns mockk {

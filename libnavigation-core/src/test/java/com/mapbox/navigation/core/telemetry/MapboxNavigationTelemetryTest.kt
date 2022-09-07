@@ -63,6 +63,7 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEvent
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.Runs
 import io.mockk.every
@@ -90,6 +91,9 @@ import org.junit.Test
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 class MapboxNavigationTelemetryTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private companion object {
         private const val LAST_LOCATION_LAT = 55.5
