@@ -19,8 +19,11 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
+import com.mapbox.maps.dsl.cameraOptions
 import com.mapbox.maps.plugin.LocationPuck2D
+import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.plugin.animation.flyTo
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -78,6 +81,7 @@ import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.utils.internal.logD
+import com.mapbox.navigation.utils.internal.toPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -97,45 +101,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     // location puck integration
     private val navigationLocationProvider = NavigationLocationProvider()
-
-    private var previousOrigin: Point? = null
-
-    // camera
-    private lateinit var navigationCamera: NavigationCamera
-    private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
-    private val pixelDensity = Resources.getSystem().displayMetrics.density
-    private val overviewPadding: EdgeInsets by lazy {
-        EdgeInsets(
-            140.0 * pixelDensity,
-            40.0 * pixelDensity,
-            120.0 * pixelDensity,
-            40.0 * pixelDensity
-        )
-    }
-    private val landscapeOverviewPadding: EdgeInsets by lazy {
-        EdgeInsets(
-            30.0 * pixelDensity,
-            380.0 * pixelDensity,
-            20.0 * pixelDensity,
-            20.0 * pixelDensity
-        )
-    }
-    private val followingPadding: EdgeInsets by lazy {
-        EdgeInsets(
-            180.0 * pixelDensity,
-            40.0 * pixelDensity,
-            150.0 * pixelDensity,
-            40.0 * pixelDensity
-        )
-    }
-    private val landscapeFollowingPadding: EdgeInsets by lazy {
-        EdgeInsets(
-            30.0 * pixelDensity,
-            380.0 * pixelDensity,
-            110.0 * pixelDensity,
-            40.0 * pixelDensity
-        )
-    }
 
     // trip progress bottom view
     private lateinit var tripProgressApi: MapboxTripProgressApi
@@ -199,18 +164,20 @@ class MapboxNavigationActivity : AppCompatActivity() {
                 location = locationMatcherResult.enhancedLocation,
                 keyPoints = locationMatcherResult.keyPoints,
             )
-
-            // update camera position to account for new location
-            viewportDataSource.onLocationChanged(locationMatcherResult.enhancedLocation)
-            viewportDataSource.evaluate()
+            mapboxMap.flyTo(
+                cameraOptions {
+                    center(locationMatcherResult.enhancedLocation.toPoint())
+                    zoom(18.0)
+                },
+                MapAnimationOptions.mapAnimationOptions {
+                    duration(1000)
+                }
+            )
         }
     }
 
     private val routeProgressObserver =
         RouteProgressObserver { routeProgress ->
-            // update the camera position to account for the progressed fragment of the route
-            viewportDataSource.onRouteProgressChanged(routeProgress)
-            viewportDataSource.evaluate()
 
             // show arrow on the route line with the next maneuver
             val maneuverArrowResult = routeArrowAPI.addUpcomingManeuverArrow(routeProgress)
@@ -251,10 +218,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
                     routeLineView.renderRouteDrawData(style, result)
                 }
             }
-
-            // update the camera position to account for the new route
-            viewportDataSource.onRouteChanged(result.routes.first())
-            viewportDataSource.evaluate()
         } else {
             // remove the route line and route arrow from the map
             val style = mapboxMap.getStyle()
@@ -267,10 +230,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
                 }
                 routeArrowView.render(style, routeArrowAPI.clearArrows())
             }
-
-            // remove the route reference to change camera position
-            viewportDataSource.clearRouteData()
-            viewportDataSource.evaluate()
         }
     }
 
@@ -309,58 +268,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
                 )
                 .build()
         )
-        // move the camera to current location on the first update
-        mapboxNavigation.registerLocationObserver(object : LocationObserver {
-            override fun onNewRawLocation(rawLocation: Location) {
-                val point = Point.fromLngLat(rawLocation.longitude, rawLocation.latitude)
-                val cameraOptions = CameraOptions.Builder()
-                    .center(point)
-                    .zoom(13.0)
-                    .build()
-                mapboxMap.setCamera(cameraOptions)
-                mapboxNavigation.unregisterLocationObserver(this)
-            }
-
-            override fun onNewLocationMatcherResult(
-                locationMatcherResult: LocationMatcherResult,
-            ) {
-                // not handled
-            }
-        })
-
-        // initialize Navigation Camera
-        viewportDataSource = MapboxNavigationViewportDataSource(
-            binding.mapView.getMapboxMap()
-        )
-        navigationCamera = NavigationCamera(
-            binding.mapView.getMapboxMap(),
-            binding.mapView.camera,
-            viewportDataSource
-        )
-        binding.mapView.camera.addCameraAnimationsLifecycleListener(
-            NavigationBasicGesturesHandler(navigationCamera)
-        )
-        navigationCamera.registerNavigationCameraStateChangeObserver { navigationCameraState ->
-            // shows/hide the recenter button depending on the camera state
-            when (navigationCameraState) {
-                NavigationCameraState.TRANSITION_TO_FOLLOWING,
-                NavigationCameraState.FOLLOWING -> binding.recenter.visibility = INVISIBLE
-
-                NavigationCameraState.TRANSITION_TO_OVERVIEW,
-                NavigationCameraState.OVERVIEW,
-                NavigationCameraState.IDLE -> binding.recenter.visibility = VISIBLE
-            }
-        }
-        if (this.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            viewportDataSource.overviewPadding = landscapeOverviewPadding
-        } else {
-            viewportDataSource.overviewPadding = overviewPadding
-        }
-        if (this.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            viewportDataSource.followingPadding = landscapeFollowingPadding
-        } else {
-            viewportDataSource.followingPadding = followingPadding
-        }
 
         // initialize top maneuver view
         maneuverApi = MapboxManeuverApi(
@@ -418,13 +325,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
         binding.stop.setOnClickListener {
             clearRouteAndStopNavigation()
         }
-        binding.recenter.setOnClickListener {
-            navigationCamera.requestNavigationCameraToFollowing()
-        }
-        binding.routeOverview.setOnClickListener {
-            navigationCamera.requestNavigationCameraToOverview()
-            binding.recenter.showTextAndExtend(2000L)
-        }
         binding.soundButton.setOnClickListener {
             // mute/unmute voice instructions
             isVoiceInstructionsMuted = !isVoiceInstructionsMuted
@@ -440,24 +340,16 @@ class MapboxNavigationActivity : AppCompatActivity() {
         // start the trip session to being receiving location updates in free drive
         // and later when a route is set, also receiving route progress updates
         mapboxNavigation.startReplayTripSession(true)
-        mapboxNavigation.registerArrivalObserver(object : ArrivalObserver{
-            override fun onWaypointArrival(routeProgress: RouteProgress) {
-
-            }
-
-            override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
-
-            }
-
-            override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
-                findRoute(previousOrigin!!)
-            }
-        })
-        previousOrigin = Point.fromLngLat(-74.146115,40.850898)
-        requestRoute(listOf(
-            Point.fromLngLat(-74.146115,40.850898),
-            Point.fromLngLat(-76.613724,39.301790)
-        ))
+        val coordinates = listOf(
+            Point.fromLngLat(-9.157167,38.746620),
+            Point.fromLngLat(101.699952,36.645114)
+        )
+        requestRoute(coordinates)
+        val cameraOptions = CameraOptions.Builder()
+            .center(coordinates.first())
+            .zoom(18.0)
+            .build()
+        mapboxMap.setCamera(cameraOptions)
     }
 
     override fun onStart() {
@@ -492,8 +384,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
         val origin = navigationLocationProvider.lastLocation?.let {
             Point.fromLngLat(it.longitude, it.latitude)
         } ?: return
-        previousOrigin = origin
-
         requestRoute(listOf(origin, destination))
     }
 
@@ -538,8 +428,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
         binding.routeOverview.showTextAndExtend(2000L)
         binding.soundButton.unmuteAndExtend(2000L)
 
-        // move the camera to overview when new route is available
-        navigationCamera.requestNavigationCameraToOverview()
         mapboxNavigation.apply {
             mapboxReplayer.stop()
             mapboxReplayer.clearEvents()
