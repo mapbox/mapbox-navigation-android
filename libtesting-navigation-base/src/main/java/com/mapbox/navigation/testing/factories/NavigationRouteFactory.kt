@@ -47,26 +47,28 @@ fun createNavigationRoutes(
     options: RouteOptions = response.routes().first().routeOptions()!!,
     routerOrigin: RouterOrigin = RouterOrigin.Offboard,
 ): List<NavigationRoute> {
-    val parser = object : SDKRouteParser {
-        override fun parseDirectionsResponse(
-            response: String,
-            request: String,
-            routerOrigin: RouterOrigin
-        ): Expected<String, List<RouteInterface>> {
-            val result = createRouteInterfacesFromDirectionRequestResponse(
-                requestUri = request,
-                response = response,
-                routerOrigin = routerOrigin
-            )
-            return ExpectedFactory.createValue(result)
-        }
-    }
+    val parser = TestSDKRouteParser()
     return com.mapbox.navigation.base.internal.route.createNavigationRoutes(
         response,
         options,
         parser,
         routerOrigin
     )
+}
+
+class TestSDKRouteParser : SDKRouteParser {
+    override fun parseDirectionsResponse(
+        response: String,
+        request: String,
+        routerOrigin: RouterOrigin
+    ): Expected<String, List<RouteInterface>> {
+        val result = createRouteInterfacesFromDirectionRequestResponse(
+            requestUri = request,
+            response = response,
+            routerOrigin = routerOrigin
+        )
+        return ExpectedFactory.createValue(result)
+    }
 }
 
 fun createRouteInterfacesFromDirectionRequestResponse(
