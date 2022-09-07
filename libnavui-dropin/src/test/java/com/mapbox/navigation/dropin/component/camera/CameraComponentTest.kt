@@ -41,6 +41,7 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
+import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Before
@@ -51,7 +52,7 @@ import org.junit.Test
 class CameraComponentTest {
 
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
     private val mockCamera: CameraAnimationsPlugin = mockk(relaxUnitFun = true) {
         every { addCameraAnimationsLifecycleListener(any()) } just Runs
@@ -108,7 +109,7 @@ class CameraComponentTest {
         )
         testStore.setState(
             testStore.state.value.copy(
-                camera = mockk() {
+                camera = mockk(relaxed = true) {
                     every { mapCameraState } returns cameraState
                 }
             )
@@ -273,7 +274,7 @@ class CameraComponentTest {
 
             testStore.setState(
                 testStore.state.value.copy(
-                    camera = mockk {
+                    camera = mockk(relaxed = true) {
                         every { cameraMode } returns TargetCameraMode.Following
                     },
                 )
@@ -537,7 +538,7 @@ class CameraComponentTest {
             cameraComponent.onAttached(mockMapboxNavigation)
             testStore.setState(
                 testStore.state.value.copy(
-                    navigation = NavigationState.Arrival
+                    navigation = NavigationState.ActiveNavigation
                 )
             )
             slot.captured.onRoutesChanged(
@@ -575,6 +576,31 @@ class CameraComponentTest {
             }
             verify {
                 testStore.dispatch(SetCameraMode(TargetCameraMode.Following))
+            }
+        }
+
+    @Test
+    fun `when both preview and active routes are set, active route is preferred`() =
+        coroutineRule.runBlockingTest {
+            val previewNavigationRoute = mockk<NavigationRoute>(relaxed = true)
+            val activeNavigationRoute = mockk<NavigationRoute>(relaxed = true)
+            val slot = slot<RoutesObserver>()
+            every { mockMapboxNavigation.registerRoutesObserver(capture(slot)) } returns Unit
+            cameraComponent.onAttached(mockMapboxNavigation)
+            testStore.setState(
+                testStore.state.value.copy(
+                    navigation = NavigationState.ActiveNavigation,
+                    previewRoutes = RoutePreviewState.Ready(listOf(previewNavigationRoute)),
+                ),
+            )
+            slot.captured.onRoutesChanged(
+                mockk {
+                    every { navigationRoutes } returns listOf(activeNavigationRoute)
+                }
+            )
+            verifyOrder {
+                mockViewPortDataSource.onRouteChanged(previewNavigationRoute)
+                mockViewPortDataSource.onRouteChanged(activeNavigationRoute)
             }
         }
 

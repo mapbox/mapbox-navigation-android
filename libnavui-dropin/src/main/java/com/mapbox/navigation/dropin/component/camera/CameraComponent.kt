@@ -204,12 +204,10 @@ internal class CameraComponent constructor(
                 routesFlow,
                 navigation
             ) { previewRoutes, navigationRoutes, navigationState ->
-                val routes = if (previewRoutes is RoutePreviewState.Ready) {
-                    previewRoutes.routes
-                } else if (navigationRoutes.isNotEmpty()) {
-                    navigationRoutes
-                } else {
-                    emptyList()
+                val routes = when {
+                    navigationRoutes.isNotEmpty() -> navigationRoutes
+                    previewRoutes is RoutePreviewState.Ready -> previewRoutes.routes
+                    else -> emptyList()
                 }
                 when (routes.isNotEmpty()) {
                     true -> {
