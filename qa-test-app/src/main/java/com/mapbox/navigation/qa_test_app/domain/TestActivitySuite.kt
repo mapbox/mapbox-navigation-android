@@ -54,6 +54,13 @@ object TestActivitySuite {
             activity.startActivity<AppLifecycleActivity>()
         },
         TestActivityDescription(
+            "Display Road Objects",
+            R.string.road_object_activity_description,
+            launchAfterPermissionResult = false,
+        ) { activity ->
+            activity.startActivity<RoadObjectsActivity>()
+        },
+        TestActivityDescription(
             "Alternative Route Selection",
             R.string.alternative_route_selection_description,
         ) { activity ->
@@ -71,13 +78,6 @@ object TestActivitySuite {
             launchAfterPermissionResult = false,
         ) { activity ->
             activity.startActivity<RouteRestrictionsActivity>()
-        },
-        TestActivityDescription(
-            "Display Road Objects",
-            R.string.road_object_activity_description,
-            launchAfterPermissionResult = false,
-        ) { activity ->
-            activity.startActivity<RoadObjectsActivity>()
         },
         TestActivityDescription(
             "Dynamic Traffic Update",
