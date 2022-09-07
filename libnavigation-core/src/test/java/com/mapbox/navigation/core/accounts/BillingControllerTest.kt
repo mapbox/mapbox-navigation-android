@@ -17,6 +17,7 @@ import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -31,10 +32,14 @@ import io.mockk.verifyOrder
 import org.junit.After
 import org.junit.Assert.assertNotNull
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.TimeUnit
 
 class BillingControllerTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private val accessToken = "pk.123"
     private lateinit var navigationSession: NavigationSession

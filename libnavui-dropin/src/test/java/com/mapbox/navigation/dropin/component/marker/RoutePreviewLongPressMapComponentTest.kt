@@ -11,6 +11,7 @@ import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.util.HapticFeedback
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.dropin.util.TestingUtil.makeLocationMatcherResult
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.destination.Destination
@@ -34,6 +35,9 @@ import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class RoutePreviewLongPressMapComponentTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()

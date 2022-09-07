@@ -5,15 +5,20 @@ import com.mapbox.navigation.core.history.model.HistoryEventPushHistoryRecord
 import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
 import com.mapbox.navigation.core.history.model.HistoryEventUpdateLocation
 import com.mapbox.navigation.testing.BuilderTest
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
 import kotlin.reflect.KClass
 
 class ReplayHistoryMapperTest : BuilderTest<ReplayHistoryMapper, ReplayHistoryMapper.Builder>() {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     override fun getImplementationClass(): KClass<ReplayHistoryMapper> =
         ReplayHistoryMapper::class

@@ -2,6 +2,7 @@ package com.mapbox.androidauto.internal.car.search
 
 import com.mapbox.androidauto.car.search.CarPlaceSearchOptions
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.search.MapboxSearchSdk
 import com.mapbox.search.SearchEngine
@@ -25,6 +26,9 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CarPlaceSearchImplTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()

@@ -16,6 +16,7 @@ import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.BEARING_NORTH
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.EMPTY_EDGE_INSETS
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.NULL_ISLAND_POINT
@@ -44,9 +45,14 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 class MapboxNavigationViewportDataSourceTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
+
     private val mapboxMap: MapboxMap = mockk(relaxUnitFun = true)
     private val emptyCameraState = CameraState(
         NULL_ISLAND_POINT,

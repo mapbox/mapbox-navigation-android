@@ -5,10 +5,12 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.testing.FileUtils
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.every
 import io.mockk.mockk
 import junit.framework.Assert
 import kotlinx.coroutines.runBlocking
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -26,6 +28,9 @@ class NavigationRouteExTest {
         private val snappingIncludeStaticClosures: BooleansProvider?,
         private val expectedHasUnexpectedClosures: Boolean,
     ) {
+
+        @get:Rule
+        val loggerRule = LoggingFrontendTestRule()
 
         companion object {
             @JvmStatic

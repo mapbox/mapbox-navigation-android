@@ -21,6 +21,7 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.testing.FileUtils
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.CLOSURE_CONGESTION_VALUE
@@ -78,10 +79,14 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import java.util.UUID
 
 class MapboxRouteLineUtilsTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private val ctx: Context = mockk()
 

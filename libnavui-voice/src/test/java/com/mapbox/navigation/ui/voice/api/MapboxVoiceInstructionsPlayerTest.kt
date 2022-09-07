@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
 import android.media.AudioManager
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.api.VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer
 import com.mapbox.navigation.ui.voice.api.VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer
@@ -21,6 +22,7 @@ import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import java.io.File
 import java.util.Locale
@@ -28,6 +30,9 @@ import java.util.Timer
 import java.util.TimerTask
 
 class MapboxVoiceInstructionsPlayerTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private val aMockedContext: Context = mockk(relaxed = true)
     private val audioManager = mockk<AudioManager>(relaxed = true)

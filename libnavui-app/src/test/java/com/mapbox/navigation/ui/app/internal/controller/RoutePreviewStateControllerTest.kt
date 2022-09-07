@@ -11,6 +11,7 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
@@ -36,6 +37,9 @@ import java.util.Locale
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
 internal class RoutePreviewStateControllerTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()

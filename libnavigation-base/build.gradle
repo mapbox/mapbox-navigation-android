@@ -40,6 +40,7 @@ dependencies {
 
     testImplementation project(':libtesting-utils')
     testImplementation project(':libtesting-navigation-base')
+    testImplementation project(':libtesting-navigation-util')
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
 }
 

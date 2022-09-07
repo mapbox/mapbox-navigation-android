@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.AssetManager
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.common.Logger
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -12,12 +13,16 @@ import io.mockk.unmockkStatic
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class MapboxExternalFileResolverTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private lateinit var ctx: Context
     private lateinit var assetManager: AssetManager

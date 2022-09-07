@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
 import android.media.MediaPlayer
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import io.mockk.every
@@ -12,12 +13,16 @@ import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import java.io.File
 import java.io.FileDescriptor
 import java.io.FileInputStream
 
 class VoiceInstructionsFilePlayerTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private val mockedMediaPlayer: MediaPlayer = mockk(relaxUnitFun = true)
     private val mockedFileInputStream: FileInputStream = mockk(relaxUnitFun = true)

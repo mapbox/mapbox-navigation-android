@@ -23,6 +23,7 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
@@ -48,7 +49,6 @@ import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.LoggerFrontend
-import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigator.RouteInterface
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -80,6 +80,11 @@ import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MapboxRouteLineApiTest {
+
+    val logger = mockk<LoggerFrontend>(relaxed = true)
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule(logger)
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
@@ -998,8 +1003,6 @@ class MapboxRouteLineApiTest {
 
     @Test
     fun `setNavigationRouteLines uses distinct routes`() = coroutineRule.runBlockingTest {
-        val logger = mockk<LoggerFrontend>(relaxed = true)
-        LoggerProvider.setLoggerFrontend(logger)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val api = MapboxRouteLineApi(options)
         val route1 = loadRoute("short_route.json", uuid = "abc").toNavigationRoute(

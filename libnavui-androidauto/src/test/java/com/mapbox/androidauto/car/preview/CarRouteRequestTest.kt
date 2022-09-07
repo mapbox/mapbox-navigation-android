@@ -6,6 +6,7 @@ import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import io.mockk.CapturingSlot
 import io.mockk.Runs
@@ -14,10 +15,14 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Assert.assertEquals
+import org.junit.Rule
 import org.junit.Test
 import java.util.Locale
 
 class CarRouteRequestTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private val routeOptionsSlot = CapturingSlot<RouteOptions>()
     private val routerCallbackSlot = CapturingSlot<NavigationRouterCallback>()

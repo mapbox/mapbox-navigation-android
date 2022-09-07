@@ -20,6 +20,7 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.dropin.util.TestingUtil.makeLocationMatcherResult
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.camera.CameraAction
@@ -57,6 +58,9 @@ import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
 class CameraComponentTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()

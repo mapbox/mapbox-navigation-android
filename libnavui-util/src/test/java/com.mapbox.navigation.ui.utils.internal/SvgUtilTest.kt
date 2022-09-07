@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import com.caverock.androidsvg.SVGExternalFileResolver
 import com.caverock.androidsvg.SVGParseException
 import com.mapbox.common.Logger
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.Runs
 import io.mockk.every
@@ -21,11 +22,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayInputStream
-import java.lang.Exception
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class SvgUtilTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     @get:Rule
     private var coroutineRule = MainCoroutineRule()

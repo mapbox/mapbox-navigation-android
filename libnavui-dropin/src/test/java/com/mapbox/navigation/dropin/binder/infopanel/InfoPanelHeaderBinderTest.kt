@@ -11,6 +11,7 @@ import com.mapbox.navigation.dropin.NavigationViewModel
 import com.mapbox.navigation.dropin.internal.extensions.headerContentBinder
 import com.mapbox.navigation.dropin.testutil.TestLifecycleOwner
 import com.mapbox.navigation.dropin.util.TestStore
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
@@ -36,6 +37,10 @@ import org.robolectric.RobolectricTestRunner
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 internal class InfoPanelHeaderBinderTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
+
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 

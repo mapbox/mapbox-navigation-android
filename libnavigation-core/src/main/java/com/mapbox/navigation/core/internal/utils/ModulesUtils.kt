@@ -39,7 +39,6 @@ internal fun paramsProvider(moduleParams: ModuleParams): Array<ModuleProviderArg
                 MapboxDistanceFormatter(moduleParams.distanceFormatterOptions),
             ),
         )
-        is ModuleParams.CommonLogger -> arrayOf()
     }
 
 internal sealed class ModuleParams {
@@ -54,6 +53,4 @@ internal sealed class ModuleParams {
         val tripNotificationInterceptorOwner: TripNotificationInterceptorOwner,
         val distanceFormatterOptions: DistanceFormatterOptions,
     ) : ModuleParams()
-
-    object CommonLogger : ModuleParams()
 }

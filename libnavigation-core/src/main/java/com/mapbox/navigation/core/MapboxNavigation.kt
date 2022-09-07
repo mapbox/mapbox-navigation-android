@@ -119,7 +119,6 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.navigator.internal.router.RouterInterfaceAdapter
 import com.mapbox.navigation.utils.internal.ConnectivityHandler
-import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
@@ -415,8 +414,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         private set
 
     init {
-        // Instantiate LoggerProvider explicitly so that NavigationLogBackend is set
-        LoggerProvider.initialize()
         if (hasInstance) {
             throw IllegalStateException(
                 """

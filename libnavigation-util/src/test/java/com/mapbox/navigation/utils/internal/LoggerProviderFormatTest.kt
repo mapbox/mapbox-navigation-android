@@ -1,12 +1,12 @@
 package com.mapbox.navigation.utils.internal
 
-import com.mapbox.common.Logger
+import com.mapbox.common.NativeLoggerWrapper
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
-import io.mockk.mockkStatic
+import io.mockk.mockkObject
 import io.mockk.slot
-import io.mockk.unmockkStatic
+import io.mockk.unmockkObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -16,156 +16,135 @@ class LoggerProviderFormatTest {
 
     @Before
     fun setup() {
-        mockkStatic(Logger::class)
-        every { Logger.i(any(), any()) } just Runs
-        every { Logger.w(any(), any()) } just Runs
-        every { Logger.d(any(), any()) } just Runs
-        every { Logger.e(any(), any()) } just Runs
-        LoggerProvider.setLoggerFrontend(MapboxCommonLoggerFrontend())
+        mockkObject(NativeLoggerWrapper)
+        every { NativeLoggerWrapper.info(any(), any()) } just Runs
+        every { NativeLoggerWrapper.warning(any(), any()) } just Runs
+        every { NativeLoggerWrapper.debug(any(), any()) } just Runs
+        every { NativeLoggerWrapper.error(any(), any()) } just Runs
     }
 
     @After
     fun tearDown() {
-        unmockkStatic(Logger::class)
+        unmockkObject(NativeLoggerWrapper)
     }
 
     @Test
     fun `format log V - without category`() {
-        mockkStatic(Logger::class)
         val slotTag = slot<String>()
         val slotMessage = slot<String>()
-        every { Logger.d(capture(slotTag), capture(slotMessage)) } just Runs
+        every { NativeLoggerWrapper.debug(capture(slotMessage), capture(slotTag)) } just Runs
 
         logV("any_message")
 
         assertEquals("nav-sdk", slotTag.captured)
         assertEquals("any_message", slotMessage.captured)
-        unmockkStatic(Logger::class)
     }
 
     @Test
     fun `format log V - with category`() {
-        mockkStatic(Logger::class)
         val slotCategory = slot<String>()
         val slotMessage = slot<String>()
-        every { Logger.d(capture(slotCategory), capture(slotMessage)) } just Runs
+        every { NativeLoggerWrapper.debug(capture(slotMessage), capture(slotCategory)) } just Runs
 
         logV("any_message", "any_clz_name")
 
         assertEquals("nav-sdk", slotCategory.captured)
         assertEquals("[any_clz_name] any_message", slotMessage.captured)
-        unmockkStatic(Logger::class)
     }
 
     @Test
     fun `format log D - without category`() {
-        mockkStatic(Logger::class)
         val slotTag = slot<String>()
         val slotMessage = slot<String>()
-        every { Logger.d(capture(slotTag), capture(slotMessage)) } just Runs
+        every { NativeLoggerWrapper.debug(capture(slotMessage), capture(slotTag)) } just Runs
 
         logV("any_message")
 
         assertEquals("nav-sdk", slotTag.captured)
         assertEquals("any_message", slotMessage.captured)
-        unmockkStatic(Logger::class)
     }
 
     @Test
     fun `format log D - with category`() {
-        mockkStatic(Logger::class)
         val slotCategory = slot<String>()
         val slotMessage = slot<String>()
-        every { Logger.d(capture(slotCategory), capture(slotMessage)) } just Runs
+        every { NativeLoggerWrapper.debug(capture(slotMessage), capture(slotCategory)) } just Runs
 
         logD("any_message", "any_clz_name")
 
         assertEquals("nav-sdk", slotCategory.captured)
         assertEquals("[any_clz_name] any_message", slotMessage.captured)
-        unmockkStatic(Logger::class)
     }
 
     @Test
     fun `format log I - without category`() {
-        mockkStatic(Logger::class)
         val slotTag = slot<String>()
         val slotMessage = slot<String>()
-        every { Logger.i(capture(slotTag), capture(slotMessage)) } just Runs
+        every { NativeLoggerWrapper.info(capture(slotMessage), capture(slotTag)) } just Runs
 
         logI("any_message")
 
         assertEquals("nav-sdk", slotTag.captured)
         assertEquals("any_message", slotMessage.captured)
-        unmockkStatic(Logger::class)
     }
 
     @Test
     fun `format log I - with category`() {
-        mockkStatic(Logger::class)
         val slotCategory = slot<String>()
         val slotMessage = slot<String>()
-        every { Logger.i(capture(slotCategory), capture(slotMessage)) } just Runs
+        every { NativeLoggerWrapper.info(capture(slotMessage), capture(slotCategory)) } just Runs
 
         logI("any_message", "any_clz_name")
 
         assertEquals("nav-sdk", slotCategory.captured)
         assertEquals("[any_clz_name] any_message", slotMessage.captured)
-        unmockkStatic(Logger::class)
     }
 
     @Test
     fun `format log W - without category`() {
-        mockkStatic(Logger::class)
         val slotTag = slot<String>()
         val slotMessage = slot<String>()
-        every { Logger.w(capture(slotTag), capture(slotMessage)) } just Runs
+        every { NativeLoggerWrapper.warning(capture(slotMessage), capture(slotTag)) } just Runs
 
         logW("any_message")
 
         assertEquals("nav-sdk", slotTag.captured)
         assertEquals("any_message", slotMessage.captured)
-        unmockkStatic(Logger::class)
     }
 
     @Test
     fun `format log W - with category`() {
-        mockkStatic(Logger::class)
         val slotCategory = slot<String>()
         val slotMessage = slot<String>()
-        every { Logger.w(capture(slotCategory), capture(slotMessage)) } just Runs
+        every { NativeLoggerWrapper.warning(capture(slotMessage), capture(slotCategory)) } just Runs
 
         logW("any_message", "any_clz_name")
 
         assertEquals("nav-sdk", slotCategory.captured)
         assertEquals("[any_clz_name] any_message", slotMessage.captured)
-        unmockkStatic(Logger::class)
     }
 
     @Test
     fun `format log E - without category`() {
-        mockkStatic(Logger::class)
         val slotTag = slot<String>()
         val slotMessage = slot<String>()
-        every { Logger.e(capture(slotTag), capture(slotMessage)) } just Runs
+        every { NativeLoggerWrapper.error(capture(slotMessage), capture(slotTag)) } just Runs
 
         logE("any_message")
 
         assertEquals("nav-sdk", slotTag.captured)
         assertEquals("any_message", slotMessage.captured)
-        unmockkStatic(Logger::class)
     }
 
     @Test
     fun `format log E - with category`() {
-        mockkStatic(Logger::class)
         val slotCategory = slot<String>()
         val slotMessage = slot<String>()
-        every { Logger.e(capture(slotCategory), capture(slotMessage)) } just Runs
+        every { NativeLoggerWrapper.error(capture(slotMessage), capture(slotCategory)) } just Runs
 
         logE("any_message", "any_clz_name")
 
         assertEquals("nav-sdk", slotCategory.captured)
         assertEquals("[any_clz_name] any_message", slotMessage.captured)
-        unmockkStatic(Logger::class)
     }
 }

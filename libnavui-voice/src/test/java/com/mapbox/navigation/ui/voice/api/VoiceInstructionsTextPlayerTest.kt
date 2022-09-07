@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.voice.api
 import android.content.Context
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
@@ -14,10 +15,14 @@ import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import java.util.Locale
 
 class VoiceInstructionsTextPlayerTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private val mockedBundle: Bundle = mockk(relaxUnitFun = true)
 
