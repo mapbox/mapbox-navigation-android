@@ -11,6 +11,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Introduced `MapboxRestAreaApi#generateUpcomingRestAreaGuideMap` to be used to fetch service/parking area guide maps using `RestStop`. [#6239](https://github.com/mapbox/mapbox-navigation-android/pull/6239)
 #### Bug fixes and improvements
 - Fixed an issue with `NavigationView` that caused overview camera to have wrong pitch. [#6278](https://github.com/mapbox/mapbox-navigation-android/pull/6278)
+- Fixed an issue with `NavigationView` that caused camera issues after reroute or switching to an alternative route. [#6283](https://github.com/mapbox/mapbox-navigation-android/pull/6283)
 
 ## Mapbox Navigation SDK 2.8.0-beta.2 - 01 September, 2022
 ### Changelog
