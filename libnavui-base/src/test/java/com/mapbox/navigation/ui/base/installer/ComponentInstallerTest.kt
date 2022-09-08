@@ -10,6 +10,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
@@ -28,6 +29,7 @@ class ComponentInstallerTest {
     @Before
     fun setUp() {
         mockkObject(MapboxNavigationApp)
+        mockkStatic(MapboxNavigationApp::class)
     }
 
     @After

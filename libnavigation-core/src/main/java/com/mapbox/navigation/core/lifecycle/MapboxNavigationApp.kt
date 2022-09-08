@@ -72,6 +72,7 @@ object MapboxNavigationApp {
      * Returns true after [setup] has been called and false after [disable] is called.
      */
     @UiThread
+    @JvmStatic
     fun isSetup(): Boolean = mapboxNavigationAppDelegate.isSetup
 
     /**
@@ -81,6 +82,7 @@ object MapboxNavigationApp {
      * [Activity.isChangingConfigurations].
      */
     @UiThread
+    @JvmStatic
     fun setup(navigationOptions: NavigationOptions) = apply {
         mapboxNavigationAppDelegate.setup { navigationOptions }
     }
@@ -93,6 +95,7 @@ object MapboxNavigationApp {
      * [Activity.isChangingConfigurations].
      */
     @UiThread
+    @JvmStatic
     fun setup(navigationOptionsProvider: NavigationOptionsProvider) = apply {
         mapboxNavigationAppDelegate.setup(navigationOptionsProvider)
     }
@@ -110,6 +113,7 @@ object MapboxNavigationApp {
      * You can re-enable [MapboxNavigation] by calling [MapboxNavigationApp.setup].
      */
     @UiThread
+    @JvmStatic
     fun disable() = apply {
         mapboxNavigationAppDelegate.disable()
     }
@@ -124,6 +128,7 @@ object MapboxNavigationApp {
      * it will be removed from the observers automatically.
      */
     @UiThread
+    @JvmStatic
     fun attach(lifecycleOwner: LifecycleOwner) = apply {
         mapboxNavigationAppDelegate.attach(lifecycleOwner)
     }
@@ -138,6 +143,7 @@ object MapboxNavigationApp {
      * and will potentially cause [MapboxNavigation] to never be created.
      */
     @UiThread
+    @JvmStatic
     fun detach(lifecycleOwner: LifecycleOwner) = apply {
         mapboxNavigationAppDelegate.detach(lifecycleOwner)
     }
@@ -146,6 +152,7 @@ object MapboxNavigationApp {
      * Register an observer to receive the [MapboxNavigation] instance.
      */
     @UiThread
+    @JvmStatic
     fun registerObserver(mapboxNavigationObserver: MapboxNavigationObserver) = apply {
         mapboxNavigationAppDelegate.registerObserver(mapboxNavigationObserver)
     }
@@ -154,6 +161,7 @@ object MapboxNavigationApp {
      * Unregister the observer that was registered through [registerObserver].
      */
     @UiThread
+    @JvmStatic
     fun unregisterObserver(mapboxNavigationObserver: MapboxNavigationObserver) = apply {
         mapboxNavigationAppDelegate.unregisterObserver(mapboxNavigationObserver)
     }
@@ -164,6 +172,7 @@ object MapboxNavigationApp {
      *
      * @throws IllegalStateException when the class has not been registered.
      */
+    @JvmStatic
     fun <T : MapboxNavigationObserver> getObserver(kClass: KClass<T>): T {
         return mapboxNavigationAppDelegate.getObserver(kClass)
     }
@@ -172,8 +181,29 @@ object MapboxNavigationApp {
      * Provides access to any registered observer instance. If no observers have been registered
      * with this class type, an empty list is returned.
      */
+    @JvmStatic
     fun <T : MapboxNavigationObserver> getObservers(kClass: KClass<T>): List<T> {
         return mapboxNavigationAppDelegate.getObservers(kClass)
+    }
+
+    /**
+     * Java interoperability. Provides access to any registered observer instance. If multiple
+     * instances of the same class have been registered, the first observer will be returned.
+     *
+     * @throws IllegalStateException when the class has not been registered.
+     */
+    @JvmStatic
+    fun <T : MapboxNavigationObserver> getObserver(clazz: Class<T>): T {
+        return mapboxNavigationAppDelegate.getObserver(clazz)
+    }
+
+    /**
+     * Java interoperability. Provides access to any registered observer instance. If no observers
+     * have been registered with this class type, an empty list is returned.
+     */
+    @JvmStatic
+    fun <T : MapboxNavigationObserver> getObservers(clazz: Class<T>): List<T> {
+        return mapboxNavigationAppDelegate.getObservers(clazz)
     }
 
     /**
@@ -183,5 +213,6 @@ object MapboxNavigationApp {
      * For example, you do not need to [registerObserver] in order to call
      * [MapboxNavigation.postUserFeedback] or [MapboxNavigation.setRoutes].
      */
+    @JvmStatic
     fun current(): MapboxNavigation? = mapboxNavigationAppDelegate.current()
 }

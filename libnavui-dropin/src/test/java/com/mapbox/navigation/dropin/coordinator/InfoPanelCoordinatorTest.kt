@@ -12,7 +12,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.NavigationViewContext
-import com.mapbox.navigation.dropin.NavigationViewModel
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
@@ -54,7 +53,7 @@ class InfoPanelCoordinatorTest {
         viewContext = NavigationViewContext(
             context = ctx,
             lifecycleOwner = TestLifecycleOwner(),
-            viewModel = NavigationViewModel(),
+            viewModel = mockk(),
             storeProvider = { testStore }
         )
         mapboxNavigation = mockk(relaxed = true)
