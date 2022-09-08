@@ -25,11 +25,11 @@ import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverViewState
 import com.mapbox.navigation.ui.shield.model.RouteShieldCallback
 import com.mapbox.navigation.ui.shield.model.RouteShieldError
 import com.mapbox.navigation.ui.shield.model.RouteShieldResult
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.mockk.just
-import io.mockk.Runs
 import io.mockk.slot
 import io.mockk.unmockkStatic
 import io.mockk.verify
