@@ -51,6 +51,31 @@ internal object CacheResultUtils {
         }
     }
 
+    data class CacheResultKeyRoute2<P1, R>(val route: NavigationRoute, val p1: P1) :
+        CacheResultCall<(NavigationRoute, P1) -> R, R> {
+
+        override fun invoke(f: (NavigationRoute, P1) -> R) = f(route, p1)
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is CacheResultKeyRoute2<*, *>) return false
+
+            if (route.id != other.route.id) return false
+            if (p1 != other.p1) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = route.id.hashCode()
+            // result = 31 * result + route.directionsRoute.legs()?.map { it.annotation() }.hashCode()
+            // result = 31 * result + route.directionsRoute.legs()?.map { it.closures() }.hashCode()
+            // result = 31 * result + route.directionsRoute.legs()?.map { it.incidents() }.hashCode()
+            result = 31 * result + (p1?.hashCode() ?: 0)
+            return result
+        }
+    }
+
     fun <P1, R> ((P1) -> R).cacheResult(maxSize: Int): (P1) -> R {
         return object : (P1) -> R {
             val cache: LruCache<CacheResultKey1<P1, R>, R> = LruCache(maxSize)
@@ -109,6 +134,19 @@ internal object CacheResultUtils {
                     cache
                 )
             override fun invoke(route: NavigationRoute) = handler(CacheResultKeyRoute(route))
+        }
+    }
+
+    fun <R, P1> ((NavigationRoute, P1) -> R).cacheRouteResult(
+        cache: LruCache<CacheResultKeyRoute2<P1, R>, R>
+    ): (NavigationRoute, P1) -> R {
+        return object : (NavigationRoute, P1) -> R {
+            private val handler =
+                CacheResultHandler(
+                    this@cacheRouteResult,
+                    cache
+                )
+            override fun invoke(route: NavigationRoute, p1: P1) = handler(CacheResultKeyRoute2(route, p1))
         }
     }
 

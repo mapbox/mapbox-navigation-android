@@ -473,9 +473,9 @@ class MapboxRouteLineApi(
                             routeHasRestrictions
                         ) {
                             MapboxRouteLineUtils.extractRouteData(
-                                route.directionsRoute,
+                                route,
                                 MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
-                                    route.directionsRoute,
+                                    route,
                                     routeLineOptions.resourceProvider.routeLineColorResources
                                 )
                             )
@@ -636,7 +636,7 @@ class MapboxRouteLineApi(
             }
 
             val restrictedLineExpressionProvider =
-                ifNonNull(primaryRoute?.directionsRoute) { route ->
+                ifNonNull(primaryRoute) { route ->
                     if (routeLineOptions.displayRestrictedRoadSections && routeHasRestrictions) {
                         {
                             val routeData = MapboxRouteLineUtils.extractRouteData(
@@ -879,7 +879,7 @@ class MapboxRouteLineApi(
                         val restrictedLineExpressionProvider = if (
                             routeLineOptions.displayRestrictedRoadSections && routeHasRestrictions
                         ) {
-                            ifNonNull(primaryRoute?.directionsRoute) { route ->
+                            ifNonNull(primaryRoute) { route ->
                                 {
                                     val expressionData =
                                         MapboxRouteLineUtils.extractRouteData(
@@ -1259,7 +1259,7 @@ class MapboxRouteLineApi(
             val vanishingPointOffset = routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0
             val segments = partitionedRoutes.first.firstOrNull()?.route?.run {
                 MapboxRouteLineUtils.calculateRouteLineSegments(
-                    this.directionsRoute,
+                    this,
                     trafficBackfillRoadClasses,
                     isPrimaryRoute = true,
                     routeLineOptions.resourceProvider.routeLineColorResources
@@ -1300,7 +1300,7 @@ class MapboxRouteLineApi(
             val primaryRouteTrafficLineExpressionProducer =
                 partitionedRoutes.first.firstOrNull()?.route?.run {
                     MapboxRouteLineUtils.getTrafficLineExpressionProducer(
-                        this.directionsRoute,
+                        this,
                         segments,
                         vanishingPointOffset,
                         Color.TRANSPARENT,
@@ -1320,7 +1320,7 @@ class MapboxRouteLineApi(
                 partitionedRoutes.first.firstOrNull()?.route?.run {
                     if (routeLineOptions.displayRestrictedRoadSections) {
                         MapboxRouteLineUtils.getRestrictedLineExpressionProducer(
-                            this.directionsRoute,
+                            this,
                             vanishingPointOffset = 0.0,
                             activeLegIndex = 0,
                             routeLineOptions.resourceProvider.routeLineColorResources
@@ -1408,7 +1408,7 @@ class MapboxRouteLineApi(
             val alternateRoute1TrafficExpressionProducer =
                 partitionedRoutes.second.firstOrNull()?.route?.run {
                     MapboxRouteLineUtils.getTrafficLineExpressionProducer(
-                        this.directionsRoute,
+                        this,
                         routeLineOptions.resourceProvider.routeLineColorResources,
                         trafficBackfillRoadClasses,
                         isPrimaryRoute = false,
@@ -1499,7 +1499,7 @@ class MapboxRouteLineApi(
 
             val trafficExpressionProducer = if (partitionedRoutes.second.size > 1) {
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
-                    partitionedRoutes.second[1].route.directionsRoute,
+                    partitionedRoutes.second[1].route,
                     routeLineOptions.resourceProvider.routeLineColorResources,
                     trafficBackfillRoadClasses,
                     false,

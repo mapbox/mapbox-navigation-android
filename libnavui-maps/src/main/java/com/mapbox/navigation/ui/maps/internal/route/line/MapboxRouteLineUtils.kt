@@ -66,8 +66,15 @@ internal object MapboxRouteLineUtils {
     private const val NUMBER_OF_SUPPORTED_ROUTES = 3
 
     private val extractRouteDataCache: LruCache<
-        CacheResultUtils.CacheResultKey2<
-            DirectionsRoute, (RouteLeg) -> List<String>?,
+        CacheResultUtils.CacheResultKeyRoute2<
+                (RouteLeg) -> List<String>?,
+            List<ExtractedRouteData>
+            >,
+        List<ExtractedRouteData>> by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
+
+    private val extractRouteDataCacheDeDuped: LruCache<
+        CacheResultUtils.CacheResultKeyRoute2<
+                (RouteLeg) -> List<String>?,
             List<ExtractedRouteData>
             >,
         List<ExtractedRouteData>> by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
@@ -85,13 +92,6 @@ internal object MapboxRouteLineUtils {
         CacheResultUtils.CacheResultKeyRoute<
             RouteLineGranularDistances?>, RouteLineGranularDistances?>
         by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
-
-    private val extractRouteDataCacheDeDuped: LruCache<
-        CacheResultUtils.CacheResultKey2<
-            DirectionsRoute, (RouteLeg) -> List<String>?,
-            List<ExtractedRouteData>
-            >,
-        List<ExtractedRouteData>> by lazy { LruCache(3) }
 
     val layerGroup1SourceKey = RouteLineSourceKey(RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID)
     val layerGroup2SourceKey = RouteLineSourceKey(RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID)
@@ -502,15 +502,15 @@ internal object MapboxRouteLineUtils {
      * used to represent the traffic congestion.
      */
     fun calculateRouteLineSegments(
-        route: DirectionsRoute,
+        navigationRoute: NavigationRoute,
         trafficBackfillRoadClasses: List<String>,
         isPrimaryRoute: Boolean,
         routeLineColorResources: RouteLineColorResources,
     ): List<RouteLineExpressionData> {
         val congestionProvider =
-            getTrafficCongestionAnnotationProvider(route, routeLineColorResources)
+            getTrafficCongestionAnnotationProvider(navigationRoute, routeLineColorResources)
         val annotationExpressionData = extractRouteDataWithTrafficAndRoadClassDeDuped(
-            route,
+            navigationRoute,
             congestionProvider
         )
 
@@ -518,7 +518,7 @@ internal object MapboxRouteLineUtils {
             false -> {
                 getRouteLineExpressionDataWithStreetClassOverride(
                     annotationExpressionData,
-                    route.distance(),
+                    navigationRoute.directionsRoute.distance(),
                     routeLineColorResources,
                     isPrimaryRoute,
                     trafficBackfillRoadClasses
@@ -544,10 +544,10 @@ internal object MapboxRouteLineUtils {
      * performance reasons.
      */
     internal val extractRouteDataWithTrafficAndRoadClassDeDuped: (
-        route: DirectionsRoute,
+        route: NavigationRoute,
         trafficCongestionProvider: (RouteLeg) -> List<String>?
     ) -> List<ExtractedRouteData> =
-        { route: DirectionsRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
+        { route: NavigationRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
             val extractedRouteDataItems = extractRouteData(
                 route,
                 trafficCongestionProvider
@@ -566,7 +566,7 @@ internal object MapboxRouteLineUtils {
                     else -> true
                 }
             }
-        }.cacheResult(extractRouteDataCacheDeDuped)
+        }.cacheRouteResult(extractRouteDataCacheDeDuped)
 
     /**
      * Extracts data from the [DirectionsRoute] in a format more useful to the route line
@@ -574,10 +574,11 @@ internal object MapboxRouteLineUtils {
      * are cached for performance reasons.
      */
     internal val extractRouteData: (
-        route: DirectionsRoute,
+        route: NavigationRoute,
         trafficCongestionProvider: (RouteLeg) -> List<String>?
     ) -> List<ExtractedRouteData> =
-        { route: DirectionsRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
+        { navRoute: NavigationRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
+            val route = navRoute.directionsRoute
             var runningDistance = 0.0
             val itemsToReturn = mutableListOf<ExtractedRouteData>()
             route.legs()?.forEachIndexed { legIndex, leg ->
@@ -625,7 +626,7 @@ internal object MapboxRouteLineUtils {
             }
 
             itemsToReturn
-        }.cacheResult(extractRouteDataCache)
+        }.cacheRouteResult(extractRouteDataCache)
 
     internal val getRouteLegTrafficNumericCongestionProvider: (
         routeLineColorResources: RouteLineColorResources
@@ -702,11 +703,11 @@ internal object MapboxRouteLineUtils {
         }.cacheRouteResult(distinctGranularDistancesCache)
 
     internal fun getTrafficCongestionAnnotationProvider(
-        route: DirectionsRoute,
+        route: NavigationRoute,
         routeLineColorResources: RouteLineColorResources
     ): (RouteLeg) -> List<String>? {
         return if (
-            route.routeOptions()
+            route.directionsRoute.routeOptions()
                 ?.annotationsList()
                 ?.contains(DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC) == true
         ) {
@@ -1366,7 +1367,7 @@ internal object MapboxRouteLineUtils {
     }
 
     internal fun getTrafficLineExpressionProducer(
-        route: DirectionsRoute,
+        route: NavigationRoute,
         segments: List<RouteLineExpressionData>,
         vanishingPointOffset: Double,
         lineStartColor: Int,
@@ -1375,7 +1376,7 @@ internal object MapboxRouteLineUtils {
         softGradientTransitionDistance: Double
     ) = RouteLineExpressionProvider {
         if (useSoftGradient) {
-            val stopGap = softGradientTransitionDistance / route.distance()
+            val stopGap = softGradientTransitionDistance / route.directionsRoute.distance()
             getTrafficLineExpressionSoftGradient(
                 vanishingPointOffset,
                 lineStartColor,
@@ -1394,7 +1395,7 @@ internal object MapboxRouteLineUtils {
     }
 
     internal fun getTrafficLineExpressionProducer(
-        route: DirectionsRoute,
+        route: NavigationRoute,
         colorResources: RouteLineColorResources,
         trafficBackfillRoadClasses: List<String>,
         isPrimaryRoute: Boolean,
@@ -1422,7 +1423,7 @@ internal object MapboxRouteLineUtils {
     }
 
     internal fun getRestrictedLineExpressionProducer(
-        route: DirectionsRoute,
+        route: NavigationRoute,
         vanishingPointOffset: Double,
         activeLegIndex: Int,
         routeLineColorResources: RouteLineColorResources
