@@ -43,24 +43,21 @@ internal object JunctionProcessor {
 
     private fun getJunctionUrl(
         bannerInstructions: BannerInstructions
-    ): String? {
-        val bannerComponents = bannerInstructions.getBannerComponents()
-        return when {
-            bannerComponents != null -> {
-                findSignboardComponent(bannerComponents)
-            }
-            else -> {
-                null
-            }
-        }
-    }
+    ): String? = bannerInstructions.getBannerComponents()?.findJunctionUrl()
 
-    private fun findSignboardComponent(
-        componentList: MutableList<BannerComponents>
-    ): String? {
-        val component = componentList.find {
+    private fun List<BannerComponents>.findJunctionUrl(): String? {
+        val component = find {
             it.type() == BannerComponents.GUIDANCE_VIEW &&
-                it.subType() == BannerComponents.JCT
+                (
+                    it.subType() == BannerComponents.JCT ||
+                        it.subType() == BannerComponents.SAPA ||
+                        it.subType() == BannerComponents.CITYREAL ||
+                        it.subType() == BannerComponents.SIGNBOARD ||
+                        it.subType() == BannerComponents.AFTERTOLL ||
+                        it.subType() == BannerComponents.TOLLBRANCH ||
+                        it.subType() == BannerComponents.EXPRESSWAY_EXIT ||
+                        it.subType() == BannerComponents.EXPRESSWAY_ENTRANCE
+                    )
         }
         return component?.imageUrl()
     }

@@ -36,7 +36,16 @@ class MapboxJunctionApi(
 
     /**
      * The method takes in [BannerInstructions] and generates a junction based on the presence of
-     * [BannerComponents] of type [BannerComponents.GUIDANCE_VIEW] and subType [BannerComponents.JCT]
+     * [BannerComponents] of type [BannerComponents.GUIDANCE_VIEW] and subType
+     * [BannerComponents.JCT],
+     * [BannerComponents.SAPA],
+     * [BannerComponents.CITYREAL],
+     * [BannerComponents.AFTERTOLL],
+     * [BannerComponents.SIGNBOARD],
+     * [BannerComponents.TOLLBRANCH],
+     * [BannerComponents.EXPRESSWAY_EXIT],
+     * [BannerComponents.EXPRESSWAY_ENTRANCE]
+     *
      * @param instructions object representing [BannerInstructions]
      * @param consumer informs about the state of junction.
      */

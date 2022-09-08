@@ -61,7 +61,7 @@ class JunctionProcessorTest {
     }
 
     @Test
-    fun `process action signboard availability result unavailable no subType component`() {
+    fun `process action junction availability result unavailable no subType component`() {
         val bannerInstructions: BannerInstructions = mockk()
         val bannerView: BannerView = mockk()
         val bannerComponentsList: MutableList<BannerComponents> = mutableListOf()
@@ -77,7 +77,7 @@ class JunctionProcessorTest {
     }
 
     @Test
-    fun `process action signboard availability result unavailable no image url`() {
+    fun `process action junction availability result unavailable no image url`() {
         val bannerInstructions: BannerInstructions = mockk()
         val bannerView: BannerView = mockk()
         val bannerComponentsList: MutableList<BannerComponents> = mutableListOf()
@@ -93,11 +93,123 @@ class JunctionProcessorTest {
     }
 
     @Test
-    fun `process action signboard availability result available`() {
+    fun `process action junction jct availability result available`() {
         val bannerInstructions: BannerInstructions = mockk()
         val bannerView: BannerView = mockk()
         val bannerComponentsList: MutableList<BannerComponents> = mutableListOf()
-        bannerComponentsList.add(getComponentGuidanceViewTypeSignboardSubTypeImageUrl())
+        bannerComponentsList.add(getGuidanceViewSubType(BannerComponents.JCT))
+        every { bannerInstructions.view() } returns bannerView
+        every { bannerView.components() } returns bannerComponentsList
+        val expected = JunctionResult.JunctionAvailable("https://abc.mapbox.com")
+        val action = JunctionAction.CheckJunctionAvailability(bannerInstructions)
+
+        val result = JunctionProcessor.process(action) as JunctionResult.JunctionAvailable
+
+        assertEquals(expected.junctionUrl, result.junctionUrl)
+    }
+
+    @Test
+    fun `process action junction signboard availability result available`() {
+        val bannerInstructions: BannerInstructions = mockk()
+        val bannerView: BannerView = mockk()
+        val bannerComponentsList: MutableList<BannerComponents> = mutableListOf()
+        bannerComponentsList.add(getGuidanceViewSubType(BannerComponents.SIGNBOARD))
+        every { bannerInstructions.view() } returns bannerView
+        every { bannerView.components() } returns bannerComponentsList
+        val expected = JunctionResult.JunctionAvailable("https://abc.mapbox.com")
+        val action = JunctionAction.CheckJunctionAvailability(bannerInstructions)
+
+        val result = JunctionProcessor.process(action) as JunctionResult.JunctionAvailable
+
+        assertEquals(expected.junctionUrl, result.junctionUrl)
+    }
+
+    @Test
+    fun `process action junction afterToll availability result available`() {
+        val bannerInstructions: BannerInstructions = mockk()
+        val bannerView: BannerView = mockk()
+        val bannerComponentsList: MutableList<BannerComponents> = mutableListOf()
+        bannerComponentsList.add(getGuidanceViewSubType(BannerComponents.AFTERTOLL))
+        every { bannerInstructions.view() } returns bannerView
+        every { bannerView.components() } returns bannerComponentsList
+        val expected = JunctionResult.JunctionAvailable("https://abc.mapbox.com")
+        val action = JunctionAction.CheckJunctionAvailability(bannerInstructions)
+
+        val result = JunctionProcessor.process(action) as JunctionResult.JunctionAvailable
+
+        assertEquals(expected.junctionUrl, result.junctionUrl)
+    }
+
+    @Test
+    fun `process action junction cityReal availability result available`() {
+        val bannerInstructions: BannerInstructions = mockk()
+        val bannerView: BannerView = mockk()
+        val bannerComponentsList: MutableList<BannerComponents> = mutableListOf()
+        bannerComponentsList.add(getGuidanceViewSubType(BannerComponents.CITYREAL))
+        every { bannerInstructions.view() } returns bannerView
+        every { bannerView.components() } returns bannerComponentsList
+        val expected = JunctionResult.JunctionAvailable("https://abc.mapbox.com")
+        val action = JunctionAction.CheckJunctionAvailability(bannerInstructions)
+
+        val result = JunctionProcessor.process(action) as JunctionResult.JunctionAvailable
+
+        assertEquals(expected.junctionUrl, result.junctionUrl)
+    }
+
+    @Test
+    fun `process action junction sapa availability result available`() {
+        val bannerInstructions: BannerInstructions = mockk()
+        val bannerView: BannerView = mockk()
+        val bannerComponentsList: MutableList<BannerComponents> = mutableListOf()
+        bannerComponentsList.add(getGuidanceViewSubType(BannerComponents.SAPA))
+        every { bannerInstructions.view() } returns bannerView
+        every { bannerView.components() } returns bannerComponentsList
+        val expected = JunctionResult.JunctionAvailable("https://abc.mapbox.com")
+        val action = JunctionAction.CheckJunctionAvailability(bannerInstructions)
+
+        val result = JunctionProcessor.process(action) as JunctionResult.JunctionAvailable
+
+        assertEquals(expected.junctionUrl, result.junctionUrl)
+    }
+
+    @Test
+    fun `process action junction toll branch availability result available`() {
+        val bannerInstructions: BannerInstructions = mockk()
+        val bannerView: BannerView = mockk()
+        val bannerComponentsList: MutableList<BannerComponents> = mutableListOf()
+        bannerComponentsList.add(getGuidanceViewSubType(BannerComponents.TOLLBRANCH))
+        every { bannerInstructions.view() } returns bannerView
+        every { bannerView.components() } returns bannerComponentsList
+        val expected = JunctionResult.JunctionAvailable("https://abc.mapbox.com")
+        val action = JunctionAction.CheckJunctionAvailability(bannerInstructions)
+
+        val result = JunctionProcessor.process(action) as JunctionResult.JunctionAvailable
+
+        assertEquals(expected.junctionUrl, result.junctionUrl)
+    }
+
+    @Test
+    fun `process action junction expressway entrance availability result available`() {
+        val bannerInstructions: BannerInstructions = mockk()
+        val bannerView: BannerView = mockk()
+        val bannerComponentsList: MutableList<BannerComponents> = mutableListOf()
+        bannerComponentsList.add(getGuidanceViewSubType(BannerComponents.EXPRESSWAY_ENTRANCE))
+        every { bannerInstructions.view() } returns bannerView
+        every { bannerView.components() } returns bannerComponentsList
+        val expected = JunctionResult.JunctionAvailable("https://abc.mapbox.com")
+        val action = JunctionAction.CheckJunctionAvailability(bannerInstructions)
+
+        val result = JunctionProcessor.process(action) as JunctionResult.JunctionAvailable
+
+        assertEquals(expected.junctionUrl, result.junctionUrl)
+    }
+
+    @Test
+    fun `process action junction expressway exit availability result available`() {
+        val bannerInstructions: BannerInstructions = mockk()
+        val bannerView: BannerView = mockk()
+        val bannerComponentsList: MutableList<BannerComponents> = mutableListOf()
+        bannerComponentsList.add(getGuidanceViewSubType(BannerComponents.EXPRESSWAY_EXIT))
         every { bannerInstructions.view() } returns bannerView
         every { bannerView.components() } returns bannerComponentsList
         val expected = JunctionResult.JunctionAvailable("https://abc.mapbox.com")
@@ -217,10 +329,10 @@ class JunctionProcessorTest {
             .build()
     }
 
-    private fun getComponentGuidanceViewTypeSignboardSubTypeImageUrl(): BannerComponents {
+    private fun getGuidanceViewSubType(subType: String): BannerComponents {
         return BannerComponents.builder()
             .type(BannerComponents.GUIDANCE_VIEW)
-            .subType(BannerComponents.JCT)
+            .subType(subType)
             .text("some text")
             .imageUrl("https://abc.mapbox.com")
             .build()
