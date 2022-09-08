@@ -24,7 +24,9 @@ import com.mapbox.navigation.ui.maps.internal.extensions.flowNavigationCameraSta
 import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -188,47 +190,49 @@ internal class CameraComponent constructor(
     }
 
     private fun onRouteUpdates(mapboxNavigation: MapboxNavigation) {
-        coroutineScope.launch {
-            val routesFlow = mapboxNavigation.flowRoutesUpdated()
+        val routesFlow = combine(
+            store.select { it.previewRoutes },
+            mapboxNavigation.flowRoutesUpdated()
                 .map { it.navigationRoutes }
                 .stateIn(
                     coroutineScope,
                     SharingStarted.WhileSubscribed(),
-                    mapboxNavigation.getNavigationRoutes()
-                )
-
-            val routePreview = store.select { it.previewRoutes }
-            val navigation = store.select { it.navigation }
-            combine(
-                routePreview,
-                routesFlow,
-                navigation
-            ) { previewRoutes, navigationRoutes, navigationState ->
-                val routes = when {
-                    navigationRoutes.isNotEmpty() -> navigationRoutes
-                    previewRoutes is RoutePreviewState.Ready -> previewRoutes.routes
-                    else -> emptyList()
-                }
-                when (routes.isNotEmpty()) {
-                    true -> {
-                        viewportDataSource.onRouteChanged(routes.first())
-                        viewportDataSource.evaluate()
-                        when (navigationState) {
-                            NavigationState.ActiveNavigation,
-                            NavigationState.Arrival -> {
-                                store.dispatch(SetCameraMode(TargetCameraMode.Following))
-                            }
-                            else -> {
-                                store.dispatch(SetCameraMode(TargetCameraMode.Overview))
-                            }
-                        }
+                    mapboxNavigation.getNavigationRoutes(),
+                ),
+        ) { previewRoutes, navigationRoutes ->
+            when {
+                navigationRoutes.isNotEmpty() -> navigationRoutes
+                previewRoutes is RoutePreviewState.Ready -> previewRoutes.routes
+                else -> emptyList()
+            }
+        }
+        routesFlow.observe { routes ->
+            if (routes.isEmpty()) {
+                viewportDataSource.clearRouteData()
+                viewportDataSource.evaluate()
+            } else {
+                viewportDataSource.onRouteChanged(routes.first())
+                viewportDataSource.evaluate()
+            }
+        }
+        coroutineScope.launch {
+            store.select { it.navigation }.collectLatest { navigationState ->
+                when (navigationState) {
+                    NavigationState.FreeDrive -> {
+                        routesFlow.firstOrNull { it.isEmpty() } ?: return@collectLatest
+                        store.dispatch(SetCameraMode(TargetCameraMode.Overview))
                     }
-                    false -> {
-                        viewportDataSource.clearRouteData()
-                        viewportDataSource.evaluate()
+                    NavigationState.DestinationPreview -> {
+                        store.dispatch(SetCameraMode(TargetCameraMode.Idle))
+                    }
+                    NavigationState.RoutePreview -> {
+                        store.dispatch(SetCameraMode(TargetCameraMode.Overview))
+                    }
+                    NavigationState.ActiveNavigation, NavigationState.Arrival -> {
+                        store.dispatch(SetCameraMode(TargetCameraMode.Following))
                     }
                 }
-            }.collect()
+            }
         }
     }
 
