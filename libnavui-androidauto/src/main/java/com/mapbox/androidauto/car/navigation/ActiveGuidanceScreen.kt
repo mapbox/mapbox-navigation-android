@@ -176,7 +176,7 @@ class ActiveGuidanceScreen(
             .setBackgroundColor(CarColor.PRIMARY)
             .setActionStrip(actionStrip)
             .setMapActionStrip(mapActionStripBuilder.build())
-            .apply(navigationInfoProvider.setNavigationInfo())
+            .apply { navigationInfoProvider.setNavigationInfo(this) }
             .build()
     }
 

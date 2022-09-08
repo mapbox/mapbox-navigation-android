@@ -393,7 +393,7 @@ package com.mapbox.androidauto.car.navigation {
     method public com.mapbox.androidauto.car.navigation.CarNavigationInfoProvider invalidateOnChange(androidx.car.app.Screen screen);
     method public void onAttached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
     method public void onDetached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
-    method public kotlin.jvm.functions.Function1<androidx.car.app.navigation.model.NavigationTemplate.Builder,kotlin.Unit> setNavigationInfo();
+    method public androidx.car.app.navigation.model.NavigationTemplate.Builder setNavigationInfo(androidx.car.app.navigation.model.NavigationTemplate.Builder builder);
     property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.androidauto.car.navigation.CarNavigationInfo> carNavigationInfo;
   }
 

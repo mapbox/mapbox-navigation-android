@@ -68,18 +68,19 @@ internal constructor(
     val carNavigationInfo: StateFlow<CarNavigationInfo> = _carNavigationInfo.asStateFlow()
 
     /**
-     * When you have a [NavigationTemplate.Builder], you can simply [apply] this lambda and it
-     * will set the navigation info and travel estimate.
+     * When you have a [NavigationTemplate.Builder], you can set the navigation info and travel
+     * estimate
      */
-    fun setNavigationInfo(): (NavigationTemplate.Builder).() -> Unit = {
+    fun setNavigationInfo(builder: NavigationTemplate.Builder): NavigationTemplate.Builder {
         with(carNavigationInfo.value) {
             navigationInfo?.let {
-                setNavigationInfo(it)
+                builder.setNavigationInfo(it)
             }
             destinationTravelEstimate?.let {
-                setDestinationTravelEstimate(it)
+                builder.setDestinationTravelEstimate(it)
             }
         }
+        return builder
     }
 
     /**

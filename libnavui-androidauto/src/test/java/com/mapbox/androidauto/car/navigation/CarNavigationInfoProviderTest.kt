@@ -173,7 +173,7 @@ class CarNavigationInfoProviderTest {
         carAppTestRule.onAttached(mapboxNavigation)
         sut.onAttached(mapboxCarMapSurface)
         observerSlot.captured.onRouteProgressChanged(mockk(relaxed = true))
-        navigationTemplateBuilder.apply(sut.setNavigationInfo())
+        sut.setNavigationInfo(navigationTemplateBuilder)
 
         verify { navigationTemplateBuilder.setNavigationInfo(any()) }
         verify { navigationTemplateBuilder.setDestinationTravelEstimate(any()) }
