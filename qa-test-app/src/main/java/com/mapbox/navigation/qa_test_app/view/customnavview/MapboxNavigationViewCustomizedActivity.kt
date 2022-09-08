@@ -25,6 +25,10 @@ import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.formatter.UnitType
+import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.dump.MapboxDumpRegistry
+import com.mapbox.navigation.core.internal.extensions.attachResumed
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.ActionButtonDescription
 import com.mapbox.navigation.dropin.ActionButtonDescription.Position.END
 import com.mapbox.navigation.dropin.ActionButtonDescription.Position.START
@@ -53,6 +57,8 @@ import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.LayoutActivityNavigationViewBinding
 import com.mapbox.navigation.qa_test_app.databinding.LayoutDrawerMenuNavViewCustomBinding
 import com.mapbox.navigation.qa_test_app.databinding.LayoutInfoPanelHeaderBinding
+import com.mapbox.navigation.qa_test_app.dump.DistanceFormatterDumpInterceptor
+import com.mapbox.navigation.qa_test_app.dump.NavigationViewApiDumpInterceptor
 import com.mapbox.navigation.qa_test_app.view.base.DrawerActivity
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
@@ -117,6 +123,35 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             setTheme(R.style.Theme_AppCompat_NoActionBar)
             WindowCompat.setDecorFitsSystemWindows(window, true)
         }
+    }
+
+    /**
+     * This is a feature for Mapbox Navigation development. When the notification service is
+     * available you are able to send commands and handle state changes with dumpsys.
+     *
+     * $ adb shell dumpsys activity service com.mapbox.navigation.core.trip.service.NavigationNotificationService help
+     */
+    private val dumpCommands = object : MapboxNavigationObserver {
+
+        private val interceptors by lazy {
+            arrayOf(
+                DistanceFormatterDumpInterceptor(),
+                NavigationViewApiDumpInterceptor(binding.navigationView.api)
+                // Add your interceptors here
+            )
+        }
+
+        override fun onAttached(mapboxNavigation: MapboxNavigation) {
+            MapboxDumpRegistry.addInterceptors(*interceptors)
+        }
+
+        override fun onDetached(mapboxNavigation: MapboxNavigation) {
+            MapboxDumpRegistry.removeInterceptors(*interceptors)
+        }
+    }
+
+    init {
+        attachResumed(dumpCommands)
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)

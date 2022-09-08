@@ -13,6 +13,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Introduced `NavigationViewApi#onManeuverCollapsed` and `NavigationViewApi#onManeuverExpanded` callback which is triggered upon changes to `MapboxManeuverViewState`. [#6286](https://github.com/mapbox/mapbox-navigation-android/pull/6286)
 - Implemented logic that would display `BannerComponents` of `type` `GuidanceView` and `subType` `BannerComponents#SAPA`, `BannerComponents#CITYREAL`, `BannerComponents#AFTERTOLL`, `BannerComponents#SIGNBOARD`, `BannerComponents#TOLLBRANCH`, `BannerComponents#EXPRESSWAY_ENTRANCE`, `BannerComponents#EXPRESSWAY_EXIT` using `JunctionViewApi`. [#6285](https://github.com/mapbox/mapbox-navigation-android/pull/6285)
 - Calling `MapboxNavigationApp.setup` will create a new `MapboxNavigation` instance with new `NavigationOptions` even if the app has been setup. [#6285](https://github.com/mapbox/mapbox-navigation-android/pull/6285)
+- Added `MapboxDumpRegistry` which allows you to define adb commands for the sdk. [#6234](https://github.com/mapbox/mapbox-navigation-android/pull/6234)
 #### Bug fixes and improvements
 - Fixed an issue with `NavigationView` that caused overview camera to have wrong pitch. [#6278](https://github.com/mapbox/mapbox-navigation-android/pull/6278)
 - Fixed an issue with `NavigationView` that caused camera issues after reroute or switching to an alternative route. [#6283](https://github.com/mapbox/mapbox-navigation-android/pull/6283)
