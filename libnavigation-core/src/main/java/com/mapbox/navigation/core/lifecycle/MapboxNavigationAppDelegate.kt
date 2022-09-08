@@ -3,7 +3,6 @@ package com.mapbox.navigation.core.lifecycle
 import android.app.Application
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.utils.internal.logI
 import kotlin.reflect.KClass
 
 /**
@@ -24,16 +23,7 @@ internal class MapboxNavigationAppDelegate {
         }
 
         if (isSetup) {
-            logI(
-                """
-                    MapboxNavigationApp.setup was ignored because it has already been setup.
-                    If you want to use new NavigationOptions, you must first call
-                    MapboxNavigationApp.disable() and then call MapboxNavigationApp.setup(..).
-                    Calling setup multiple times, is harmless otherwise.
-                """.trimIndent(),
-                LOG_CATEGORY
-            )
-            return this
+            disable()
         }
 
         mapboxNavigationOwner.setup(navigationOptionsProvider)
@@ -80,8 +70,4 @@ internal class MapboxNavigationAppDelegate {
 
     fun <T : MapboxNavigationObserver> getObservers(kClass: KClass<T>): List<T> =
         mapboxNavigationOwner.getObservers(kClass)
-
-    private companion object {
-        private const val LOG_CATEGORY = "MapboxNavigationAppDelegate"
-    }
 }
