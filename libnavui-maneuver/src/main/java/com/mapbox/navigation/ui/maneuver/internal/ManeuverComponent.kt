@@ -12,9 +12,15 @@ import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
+import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverViewState
+import com.mapbox.navigation.ui.utils.internal.Provider
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+
+interface ManeuverComponentContract {
+    fun onManeuverViewStateChanged(state: MapboxManeuverViewState)
+}
 
 @ExperimentalPreviewMapboxNavigationAPI
 class ManeuverComponent(
@@ -23,6 +29,7 @@ class ManeuverComponent(
     val styleId: String?,
     val options: ManeuverViewOptions,
     private val formatterOptions: DistanceFormatterOptions,
+    val contract: Provider<ManeuverComponentContract>? = null,
     val maneuverApi: MapboxManeuverApi = MapboxManeuverApi(
         MapboxDistanceFormatter(formatterOptions)
     )
@@ -30,6 +37,11 @@ class ManeuverComponent(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
         maneuverView.updateManeuverViewOptions(options)
+        coroutineScope.launch {
+            maneuverView.maneuverViewState.collect {
+                contract?.get()?.onManeuverViewStateChanged(it)
+            }
+        }
         coroutineScope.launch {
             combine(
                 mapboxNavigation.flowRoutesUpdated(),

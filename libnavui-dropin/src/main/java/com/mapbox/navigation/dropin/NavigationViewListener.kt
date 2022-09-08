@@ -137,4 +137,14 @@ abstract class NavigationViewListener {
      * @return True if the listener has consumed the event, false otherwise.
      */
     open fun onBackPressed(): Boolean = false
+
+    /**
+     * Called when maneuver view has been expanded.
+     */
+    open fun onManeuverExpanded() = Unit
+
+    /**
+     * Called when maneuver view has been collapsed.
+     */
+    open fun onManeuverCollapsed() = Unit
 }

@@ -123,6 +123,18 @@ class MapboxManeuverViewTest {
     }
 
     @Test
+    fun `change maneuver state to expanded on click`() {
+        val view = MapboxManeuverView(ctx)
+        val expected = MapboxManeuverViewState.EXPANDED
+        view.findViewById<RecyclerView>(R.id.upcomingManeuverRecycler).visibility = GONE
+
+        view.performClick()
+        val actual = view.maneuverViewState.value
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun `hide maneuver list on click`() {
         val view = MapboxManeuverView(ctx)
         val expected = GONE
@@ -130,6 +142,18 @@ class MapboxManeuverViewTest {
 
         view.performClick()
         val actual = view.findViewById<RecyclerView>(R.id.upcomingManeuverRecycler).visibility
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `change maneuver state to collapsed on click`() {
+        val view = MapboxManeuverView(ctx)
+        val expected = MapboxManeuverViewState.COLLAPSED
+        view.findViewById<RecyclerView>(R.id.upcomingManeuverRecycler).visibility = VISIBLE
+
+        view.performClick()
+        val actual = view.maneuverViewState.value
 
         assertEquals(expected, actual)
     }

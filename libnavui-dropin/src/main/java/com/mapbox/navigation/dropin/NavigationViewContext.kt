@@ -7,6 +7,7 @@ import androidx.lifecycle.lifecycleScope
 import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.component.infopanel.InfoPanelBehavior
+import com.mapbox.navigation.dropin.component.maneuver.ManeuverBehavior
 import com.mapbox.navigation.dropin.component.marker.MapMarkerFactory
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache.Companion.MB_IN_BYTES
@@ -40,12 +41,14 @@ internal class NavigationViewContext(
     val uiBinders = ViewBinder()
     val styles = NavigationViewStyles(context)
     val options = NavigationViewOptions(context)
+    val maneuverBehavior = ManeuverBehavior()
     val infoPanelBehavior = InfoPanelBehavior()
     val mapViewOwner = MapViewOwner()
     val mapStyleLoader = MapStyleLoader(context, options)
     val listenerRegistry by lazy {
         NavigationViewListenerRegistry(
             store,
+            maneuverBehavior,
             infoPanelBehavior,
             lifecycleOwner.lifecycleScope
         )

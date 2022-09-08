@@ -999,6 +999,7 @@ package com.mapbox.navigation.ui.maneuver.view {
     ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr, com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions options = ManeuverViewOptions.<init>().build());
     ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.maneuver.view.MapboxManeuverViewState> getManeuverViewState();
     method public boolean getUpcomingManeuverRenderingEnabled();
     method public void renderAddLanes(com.mapbox.navigation.ui.maneuver.model.Lane lane);
     method public void renderDistanceRemaining(com.mapbox.navigation.ui.maneuver.model.StepDistance stepDistance);
@@ -1032,7 +1033,19 @@ package com.mapbox.navigation.ui.maneuver.view {
     method public void updateUpcomingManeuversVisibility(int visibility);
     method @Deprecated public void updateUpcomingPrimaryManeuverTextAppearance(@StyleRes int style);
     method @Deprecated public void updateUpcomingSecondaryManeuverTextAppearance(@StyleRes int style);
+    property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.maneuver.view.MapboxManeuverViewState> maneuverViewState;
     property public final boolean upcomingManeuverRenderingEnabled;
+  }
+
+  public abstract sealed class MapboxManeuverViewState {
+  }
+
+  public static final class MapboxManeuverViewState.COLLAPSED extends com.mapbox.navigation.ui.maneuver.view.MapboxManeuverViewState {
+    field public static final com.mapbox.navigation.ui.maneuver.view.MapboxManeuverViewState.COLLAPSED INSTANCE;
+  }
+
+  public static final class MapboxManeuverViewState.EXPANDED extends com.mapbox.navigation.ui.maneuver.view.MapboxManeuverViewState {
+    field public static final com.mapbox.navigation.ui.maneuver.view.MapboxManeuverViewState.EXPANDED INSTANCE;
   }
 
   public final class MapboxPrimaryManeuver extends androidx.appcompat.widget.AppCompatTextView {

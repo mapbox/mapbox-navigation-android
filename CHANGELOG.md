@@ -9,6 +9,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Implemented continuous alternatives in Drop-In UI. [#6213](https://github.com/mapbox/mapbox-navigation-android/pull/6213)
 - Introduced `MapboxRestAreaApi#generateRestAreaGuideMap` to be used to fetch service/parking area guide maps using `BannerInstruction`. [#6239](https://github.com/mapbox/mapbox-navigation-android/pull/6239)
 - Introduced `MapboxRestAreaApi#generateUpcomingRestAreaGuideMap` to be used to fetch service/parking area guide maps using `RestStop`. [#6239](https://github.com/mapbox/mapbox-navigation-android/pull/6239)
+- Introduced `MapboxManeuverView#maneuverViewState` to allow users to observe changes to `MapboxManeuverViewState` when the view expands and collapses. [#6286](https://github.com/mapbox/mapbox-navigation-android/pull/6286)
+- Introduced `NavigationViewApi#onManeuverCollapsed` and `NavigationViewApi#onManeuverExpanded` callback which is triggered upon changes to `MapboxManeuverViewState`. [#6286](https://github.com/mapbox/mapbox-navigation-android/pull/6286)
 #### Bug fixes and improvements
 - Fixed an issue with `NavigationView` that caused overview camera to have wrong pitch. [#6278](https://github.com/mapbox/mapbox-navigation-android/pull/6278)
 - Fixed an issue with `NavigationView` that caused camera issues after reroute or switching to an alternative route. [#6283](https://github.com/mapbox/mapbox-navigation-android/pull/6283)
