@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.util
 
+import android.util.Log
 import android.util.LruCache
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -142,7 +143,7 @@ internal object CacheResultUtils {
     ): (NavigationRoute, P1) -> R {
         return object : (NavigationRoute, P1) -> R {
             private val handler =
-                CacheResultHandler(
+                CacheRouteResultHandler<P1, (NavigationRoute, P1) -> R, CacheResultKeyRoute2<P1, R>, R>(
                     this@cacheRouteResult,
                     cache
                 )
@@ -161,6 +162,32 @@ internal object CacheResultUtils {
                     cache.put(k, it)
                 }
             }
+        }
+    }
+
+    private class CacheRouteResultHandler<P1, F: Function2<NavigationRoute, P1, R>, K : CacheResultKeyRoute2<P1, R>, R>(
+        val f: F,
+        val cache: LruCache<K, R>
+    ) {
+        operator fun invoke(k: K): R {
+            // this is synchronized per cache unit (so per task), and we can't have multiple operations being parallelized, they tend to wait for one another on this lock.
+            val fillCache = run {
+                k(f).also {
+                    cache.put(k, it)
+                }
+            }
+            return cache[k]?.let {
+                val route = cache.snapshot().keys.find { key -> key.route.id == k.route.id }?.route
+                if (route != k.route) {
+                    fillCache.also {
+                        Log.e("lp_test", "c: ${cache.hashCode()}, k: ${k.hashCode()}, f: ${f.hashCode()} rebuilding: ${k.route.id}, v: ${it.hashCode()}")
+                    }
+                } else {
+                    it.also {
+                        Log.e("lp_test", "c: ${cache.hashCode()}, k: ${k.hashCode()}, f: ${f.hashCode()} returning for: ${k.route.id}, v: ${it.hashCode()}")
+                    }
+                }
+            } ?: fillCache
         }
     }
 }
