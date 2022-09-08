@@ -11,8 +11,10 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.runs
 import io.mockk.unmockkAll
 import io.mockk.verify
 import io.mockk.verifyOrder
@@ -110,12 +112,14 @@ class MapboxNavigationAppDelegateTest {
     }
 
     @Test
-    fun `verify multiple setup calls are ignored`() {
-        mapboxNavigationApp.setup { navigationOptions }
-        val firstObserver = mockk<MapboxNavigationObserver>(relaxUnitFun = true)
-        val secondObserver = mockk<MapboxNavigationObserver>(relaxUnitFun = true)
-        mapboxNavigationApp.registerObserver(firstObserver)
-        mapboxNavigationApp.registerObserver(secondObserver)
+    fun `verify setup will detach old and attach a new`() {
+        val attachedSlot = mutableListOf<MapboxNavigation>()
+        val detachedSlot = mutableListOf<MapboxNavigation>()
+        val observer = mockk<MapboxNavigationObserver> {
+            every { onAttached(capture(attachedSlot)) } just runs
+            every { onDetached(capture(detachedSlot)) } just runs
+        }
+        mapboxNavigationApp.registerObserver(observer)
 
         val testLifecycleOwner = CarAppLifecycleOwnerTest.TestLifecycleOwner()
         mapboxNavigationApp.attach(testLifecycleOwner)
@@ -123,10 +127,14 @@ class MapboxNavigationAppDelegateTest {
         testLifecycleOwner.lifecycleRegistry.currentState = Lifecycle.State.RESUMED
         mapboxNavigationApp.setup { navigationOptions }
 
-        verify(exactly = 1) { firstObserver.onAttached(any()) }
-        verify(exactly = 1) { secondObserver.onAttached(any()) }
-        verify(exactly = 0) { firstObserver.onDetached(any()) }
-        verify(exactly = 0) { secondObserver.onDetached(any()) }
+        assertEquals(2, attachedSlot.size)
+        assertEquals(1, detachedSlot.size)
+        assertEquals(attachedSlot[0], detachedSlot[0])
+        verifyOrder {
+            observer.onAttached(attachedSlot[0])
+            observer.onDetached(attachedSlot[0])
+            observer.onAttached(attachedSlot[1])
+        }
     }
 
     @Test
