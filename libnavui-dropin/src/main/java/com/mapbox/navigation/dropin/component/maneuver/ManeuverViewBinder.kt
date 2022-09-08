@@ -7,6 +7,7 @@ import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxManeuverGuidanceLayoutBinding
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class ManeuverViewBinder(
+    private val context: NavigationViewContext,
     private val loadedMapStyle: StateFlow<Style?>,
     private val formatterOptions: StateFlow<DistanceFormatterOptions>,
     private val maneuverViewOptions: StateFlow<ManeuverViewOptions>,
@@ -43,7 +45,8 @@ internal class ManeuverViewBinder(
                     userId = mapStyle.getUserId(),
                     styleId = mapStyle.getStyleId(),
                     options = options,
-                    formatterOptions = distanceFormatterOptions
+                    formatterOptions = distanceFormatterOptions,
+                    contract = { ManeuverComponentContractImpl(context) }
                 )
             } else {
                 null

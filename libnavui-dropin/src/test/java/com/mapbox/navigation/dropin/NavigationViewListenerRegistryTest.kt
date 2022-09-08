@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.dropin.component.infopanel.InfoPanelBehavior
+import com.mapbox.navigation.dropin.component.maneuver.ManeuverBehavior
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.State
@@ -17,6 +18,7 @@ import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
 import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
+import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverViewState
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -39,13 +41,18 @@ class NavigationViewListenerRegistryTest {
 
     private lateinit var sut: NavigationViewListenerRegistry
     private lateinit var testStore: TestStore
+    private lateinit var maneuverBehaviorFlow: MutableStateFlow<MapboxManeuverViewState>
     private lateinit var infoPanelBehaviorFlow: MutableStateFlow<Int?>
     private lateinit var testListener: NavigationViewListener
 
     @Before
     fun setUp() {
         testStore = TestStore()
+        maneuverBehaviorFlow = MutableStateFlow(MapboxManeuverViewState.COLLAPSED)
         infoPanelBehaviorFlow = MutableStateFlow(null)
+        val mockManeuverBehavior = mockk<ManeuverBehavior> {
+            every { maneuverBehavior } returns maneuverBehaviorFlow.asStateFlow()
+        }
         val mockInfoPanelBehavior = mockk<InfoPanelBehavior> {
             every { infoPanelBehavior } returns infoPanelBehaviorFlow.asStateFlow()
         }
@@ -53,6 +60,7 @@ class NavigationViewListenerRegistryTest {
 
         sut = NavigationViewListenerRegistry(
             testStore,
+            mockManeuverBehavior,
             mockInfoPanelBehavior,
             coroutineRule.coroutineScope
         )
@@ -346,5 +354,30 @@ class NavigationViewListenerRegistryTest {
         sut.onKey(mockk(), KeyEvent.KEYCODE_3, keyEvent)
 
         verify(exactly = 0) { testListener.onBackPressed() }
+    }
+
+    @Test
+    fun onManeuverExpanded() {
+        sut.registerListener(testListener)
+        val newState = MapboxManeuverViewState.EXPANDED
+
+        maneuverBehaviorFlow.value = newState
+
+        verify {
+            testListener.onManeuverExpanded()
+        }
+    }
+
+    @Test
+    fun onManeuverCollapsed() {
+        sut.registerListener(testListener)
+        val expanded = MapboxManeuverViewState.EXPANDED
+        maneuverBehaviorFlow.value = expanded
+        val collapsed = MapboxManeuverViewState.COLLAPSED
+        maneuverBehaviorFlow.value = collapsed
+
+        verify {
+            testListener.onManeuverCollapsed()
+        }
     }
 }

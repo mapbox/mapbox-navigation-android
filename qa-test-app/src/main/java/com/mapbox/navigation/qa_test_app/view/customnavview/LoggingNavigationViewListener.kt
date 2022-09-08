@@ -98,6 +98,14 @@ class LoggingNavigationViewListener(
         log("listener onInfoPanelSettling")
     }
 
+    override fun onManeuverCollapsed() {
+        log("listener onManeuverCollapsed")
+    }
+
+    override fun onManeuverExpanded() {
+        log("listener onManeuverExpanded")
+    }
+
     private fun log(message: String) {
         logD(message, tag)
     }

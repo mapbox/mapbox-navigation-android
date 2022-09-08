@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maneuver.internal
 
 import android.os.Build
+import android.view.View
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
@@ -20,16 +21,20 @@ import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
+import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverViewState
 import com.mapbox.navigation.ui.shield.model.RouteShieldCallback
 import com.mapbox.navigation.ui.shield.model.RouteShieldError
 import com.mapbox.navigation.ui.shield.model.RouteShieldResult
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.just
+import io.mockk.Runs
 import io.mockk.slot
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import org.junit.After
 import org.junit.Before
@@ -240,6 +245,64 @@ class ManeuverComponentTest {
             verify(exactly = 0) {
                 maneuverView.renderManeuvers(any())
                 maneuverView.renderManeuverWith(any())
+            }
+        }
+
+    @Test
+    fun `expand maneuver view state is collected`() =
+        coroutineRule.runBlockingTest {
+            val contract = mockk<ManeuverComponentContract>(relaxed = true) {
+                every { onManeuverViewStateChanged(any()) } just Runs
+            }
+            every {
+                maneuverView.maneuverViewState
+            } returns MutableStateFlow(MapboxManeuverViewState.EXPANDED)
+            val maneuverComponent =
+                ManeuverComponent(
+                    maneuverView = maneuverView,
+                    userId = DirectionsCriteria.PROFILE_DEFAULT_USER,
+                    styleId = "navigation-day-v1",
+                    options = maneuverViewOptions,
+                    maneuverApi = mockManeuverApi,
+                    formatterOptions =
+                    DistanceFormatterOptions.Builder(mockk(relaxed = true)).build(),
+                    contract = { contract }
+                )
+            maneuverComponent.onAttached(mockNavigation)
+
+            maneuverView.updateUpcomingManeuversVisibility(View.VISIBLE)
+
+            verify {
+                contract.onManeuverViewStateChanged(MapboxManeuverViewState.EXPANDED)
+            }
+        }
+
+    @Test
+    fun `collapse maneuver view state is collected`() =
+        coroutineRule.runBlockingTest {
+            val contract = mockk<ManeuverComponentContract>(relaxed = true) {
+                every { onManeuverViewStateChanged(any()) } just Runs
+            }
+            every {
+                maneuverView.maneuverViewState
+            } returns MutableStateFlow(MapboxManeuverViewState.COLLAPSED)
+            val maneuverComponent =
+                ManeuverComponent(
+                    maneuverView = maneuverView,
+                    userId = DirectionsCriteria.PROFILE_DEFAULT_USER,
+                    styleId = "navigation-day-v1",
+                    options = maneuverViewOptions,
+                    maneuverApi = mockManeuverApi,
+                    formatterOptions =
+                    DistanceFormatterOptions.Builder(mockk(relaxed = true)).build(),
+                    contract = { contract }
+                )
+            maneuverComponent.onAttached(mockNavigation)
+
+            maneuverView.updateUpcomingManeuversVisibility(View.GONE)
+
+            verify {
+                contract.onManeuverViewStateChanged(MapboxManeuverViewState.COLLAPSED)
             }
         }
 }

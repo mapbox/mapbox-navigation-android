@@ -5,10 +5,12 @@ import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.component.infopanel.InfoPanelBehavior
+import com.mapbox.navigation.dropin.component.maneuver.ManeuverBehavior
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
+import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverViewState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -18,6 +20,7 @@ import kotlinx.coroutines.launch
 @ExperimentalPreviewMapboxNavigationAPI
 internal class NavigationViewListenerRegistry(
     private val store: Store,
+    private val maneuverSubscriber: ManeuverBehavior,
     private val infoPanelSubscriber: InfoPanelBehavior,
     private val coroutineScope: CoroutineScope
 ) : View.OnKeyListener {
@@ -112,6 +115,21 @@ internal class NavigationViewListenerRegistry(
                             BottomSheetBehavior.STATE_COLLAPSED -> listener.onInfoPanelCollapsed()
                             BottomSheetBehavior.STATE_DRAGGING -> listener.onInfoPanelDragging()
                             BottomSheetBehavior.STATE_SETTLING -> listener.onInfoPanelSettling()
+                        }
+                    }
+            }
+
+            launch {
+                maneuverSubscriber
+                    .maneuverBehavior
+                    .collect { behavior ->
+                        when (behavior) {
+                            MapboxManeuverViewState.EXPANDED -> {
+                                listener.onManeuverExpanded()
+                            }
+                            MapboxManeuverViewState.COLLAPSED -> {
+                                listener.onManeuverCollapsed()
+                            }
                         }
                     }
             }

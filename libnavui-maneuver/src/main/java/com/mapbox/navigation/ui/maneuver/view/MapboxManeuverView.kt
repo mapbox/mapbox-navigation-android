@@ -34,6 +34,8 @@ import com.mapbox.navigation.ui.shield.model.RouteShieldError
 import com.mapbox.navigation.ui.shield.model.RouteShieldResult
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Default view to render a maneuver.
@@ -41,6 +43,15 @@ import com.mapbox.navigation.utils.internal.logE
  * @see MapboxManeuverApi
  */
 class MapboxManeuverView : ConstraintLayout {
+
+    private val _maneuverViewState = MutableStateFlow<MapboxManeuverViewState>(
+        MapboxManeuverViewState.COLLAPSED
+    )
+
+    /**
+     * Observe on [maneuverViewState] to get notified about changes to [MapboxManeuverViewState].
+     */
+    val maneuverViewState = _maneuverViewState.asStateFlow()
 
     private var maneuverViewOptions = ManeuverViewOptions.Builder().build()
 
@@ -311,6 +322,10 @@ class MapboxManeuverView : ConstraintLayout {
      * @param visibility Int
      */
     fun updateUpcomingManeuversVisibility(visibility: Int) {
+        when (visibility) {
+            VISIBLE -> { _maneuverViewState.value = MapboxManeuverViewState.EXPANDED }
+            else -> { _maneuverViewState.value = MapboxManeuverViewState.COLLAPSED }
+        }
         binding.upcomingManeuverRecycler.visibility = visibility
     }
 
