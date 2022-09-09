@@ -8,9 +8,13 @@ import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.testing.FileUtils
+import com.mapbox.navigation.testing.factories.TestSDKRouteParser
+import com.mapbox.navigation.testing.factories.createRouteLegAnnotation
 import com.mapbox.navigator.RouterOrigin
 import io.mockk.every
 import io.mockk.mockk
@@ -18,6 +22,7 @@ import io.mockk.mockkObject
 import io.mockk.verify
 import junit.framework.Assert.assertEquals
 import org.junit.Test
+import java.net.URL
 
 class NavigationRouteExTest {
 
@@ -29,6 +34,183 @@ class NavigationRouteExTest {
             toBuilder().distance(73483.0).build()
         }
         assertEquals(73483.0, updated.directionsRoute.distance())
+    }
+
+    @Test
+    fun `route refresh updates route durations`() {
+        val sourceRoute = createNavigationRouteFromResource(
+            "3-steps-route-directions-response.json",
+            "3-steps-route-directions-request-url.txt"
+        )
+
+        val refreshedRoute = sourceRoute.refreshRoute(
+            initialLegIndex = 0,
+            currentLegGeometryIndex = 0,
+            legAnnotations = listOf(
+                createRouteLegAnnotation(
+                    duration = listOf(
+                        4.548,
+                        4.555,
+                        4.512,
+                        3.841,
+                        15.415,
+                        1.507,
+                        6.359
+                    )
+                )
+            ),
+            incidents = null,
+            closures = null
+        )
+
+        assertEquals(
+            40.736999999999995,
+            refreshedRoute.directionsRoute.duration(),
+            0.00001
+        )
+        val firstLeg = refreshedRoute.directionsRoute.legs()!!.first()!!
+        assertEquals(
+            40.736999999999995,
+            firstLeg.duration() ?: -1.0,
+            0.00001
+        )
+        val steps = firstLeg.steps()!!
+        assertEquals(
+            34.37799999999999,
+            steps[0].duration(),
+            0.00001
+        )
+        assertEquals(
+            6.359,
+            steps[1].duration(),
+            0.00001
+        )
+        assertEquals(
+            0.0,
+            steps[2].duration(),
+            0.00001
+        )
+    }
+
+    @Test
+    fun `route refresh without duration annotation doesn't affect durations`() {
+        val sourceRoute = createNavigationRouteFromResource(
+            "3-steps-route-directions-response.json",
+            "3-steps-route-directions-request-url.txt"
+        )
+            .updateDirectionsRouteOnly {
+                toBuilder()
+                    .legs(
+                        legs()?.map {
+                            it.toBuilder()
+                                .annotation(
+                                    it.annotation()
+                                        ?.toBuilder()
+                                        ?.duration(null)
+                                        ?.congestionNumeric(MutableList(7) { 1 })
+                                        ?.build()
+                                )
+                                .build()
+                        }
+                    )
+                    .routeOptions(
+                        routeOptions()?.toBuilder()
+                            ?.annotations(DirectionsCriteria.ANNOTATION_CONGESTION)
+                            ?.build()
+                    )
+                    .build()
+            }
+
+        val refreshedRoute = sourceRoute.refreshRoute(
+            initialLegIndex = 0,
+            currentLegGeometryIndex = 0,
+            legAnnotations = listOf(
+                createRouteLegAnnotation(
+                    congestionNumeric = MutableList(7) { 2 }
+                )
+            ),
+            incidents = null,
+            closures = null
+        )
+
+        // compare durations with original values from json file
+        assertEquals(
+            41.882,
+            refreshedRoute.directionsRoute.duration(),
+            0.00001
+        )
+        val firstLeg = refreshedRoute.directionsRoute.legs()!!.first()!!
+        assertEquals(
+            41.882,
+            firstLeg.duration()!!,
+            0.00001
+        )
+        val steps = firstLeg.steps()!!
+        assertEquals(
+            34.341,
+            steps[0].duration(),
+            0.00001
+        )
+        assertEquals(
+            7.541,
+            steps[1].duration(),
+            0.00001
+        )
+        assertEquals(
+            0.0,
+            steps[2].duration(),
+            0.00001
+        )
+    }
+
+    @Test
+    fun `route refresh refreshed durations on second leg`() {
+        // uses polyline instead of polyline6
+        val sourceRoute = createNavigationRouteFromResource(
+            "6-steps-3-waypoints-directions-response.json",
+            "6-steps-3-waypoints-directions-request-url.txt"
+        )
+
+        val refreshedRoute = sourceRoute.refreshRoute(
+            initialLegIndex = 1,
+            currentLegGeometryIndex = 0,
+            legAnnotations = listOf(
+                LegAnnotation.builder().build(),
+                createRouteLegAnnotation(
+                    duration = MutableList(4) { 1.0 }
+                )
+            ),
+            incidents = null,
+            closures = null
+        )
+
+        assertEquals(
+            45.882,
+            refreshedRoute.directionsRoute.duration(),
+            0.00001
+        )
+        val secondLeg = refreshedRoute.directionsRoute.legs()!![1]
+        assertEquals(
+            4.0,
+            secondLeg.duration()!!,
+            0.00001
+        )
+        val steps = secondLeg.steps()!!
+        assertEquals(
+            1.0,
+            steps[0].duration(),
+            0.00001
+        )
+        assertEquals(
+            3.0,
+            steps[1].duration(),
+            0.00001
+        )
+        assertEquals(
+            0.0,
+            steps[2].duration(),
+            0.00001
+        )
     }
 
     @Test
@@ -77,7 +259,7 @@ class NavigationRouteExTest {
             ),
 
             run {
-                val newLegAnnotations = mockk<LegAnnotation>()
+                val newLegAnnotations = createRouteLegAnnotation()
                 val newIncidents = mockk<List<Incident>>()
                 val newClosures = mockk<List<Closure>>()
                 return@run TestData(
@@ -99,8 +281,8 @@ class NavigationRouteExTest {
                 )
             },
             run {
-                val newLegAnnotations = mockk<LegAnnotation>()
-                val newLegAnnotations2 = mockk<LegAnnotation>()
+                val newLegAnnotations = createRouteLegAnnotation()
+                val newLegAnnotations2 = createRouteLegAnnotation()
                 val newIncidents = mockk<List<Incident>>()
                 val newIncidents2 = mockk<List<Incident>>()
                 val newClosures = mockk<List<Closure>>()
@@ -124,8 +306,8 @@ class NavigationRouteExTest {
                 )
             },
             run {
-                val newLegAnnotations = mockk<LegAnnotation>()
-                val newLegAnnotations2 = mockk<LegAnnotation>()
+                val newLegAnnotations = createRouteLegAnnotation()
+                val newLegAnnotations2 = createRouteLegAnnotation()
                 val newIncidents = mockk<List<Incident>>()
                 val newIncidents2 = mockk<List<Incident>>()
                 val newClosures = mockk<List<Closure>>()
@@ -149,8 +331,8 @@ class NavigationRouteExTest {
                 )
             },
             run {
-                val newLegAnnotations = mockk<LegAnnotation>()
-                val newLegAnnotations2 = mockk<LegAnnotation>()
+                val newLegAnnotations = createRouteLegAnnotation()
+                val newLegAnnotations2 = createRouteLegAnnotation()
                 val newIncidents = mockk<List<Incident>>()
                 val newIncidents2 = mockk<List<Incident>>()
                 val newClosures = mockk<List<Closure>>()
@@ -174,8 +356,8 @@ class NavigationRouteExTest {
                 )
             },
             run {
-                val newLegAnnotations = mockk<LegAnnotation>()
-                val newLegAnnotations2 = mockk<LegAnnotation>()
+                val newLegAnnotations = createRouteLegAnnotation()
+                val newLegAnnotations2 = createRouteLegAnnotation()
                 val newIncidents = mockk<List<Incident>>()
                 val newIncidents2 = mockk<List<Incident>>()
                 val newClosures = mockk<List<Closure>>()
@@ -204,14 +386,17 @@ class NavigationRouteExTest {
                     AnnotationsRefresher.getRefreshedAnnotations(any(), any(), any())
                 } returnsMany
                     (result.newLegAnnotation?.drop(refreshItems.startWithIndex) ?: emptyList())
-
-                val updatedNavRoute = navRoute.refreshRoute(
-                    refreshItems.startWithIndex,
-                    refreshItems.legGeometryIndex,
-                    refreshItems.legAnnotation,
-                    refreshItems.incidents,
-                    refreshItems.closures,
-                )
+                val updatedNavRoute = try {
+                    navRoute.refreshRoute(
+                        refreshItems.startWithIndex,
+                        refreshItems.legGeometryIndex,
+                        refreshItems.legAnnotation,
+                        refreshItems.incidents,
+                        refreshItems.closures,
+                    )
+                } catch (t: Throwable) {
+                    throw Throwable("unhandled exception in $description", t)
+                }
 
                 assertEquals(
                     description,
@@ -401,3 +586,19 @@ class NavigationRouteExTest {
         val expectedLegGeometryIndex: Int,
     )
 }
+
+private fun createNavigationRouteFromResource(
+    responseFileName: String,
+    requestFileName: String
+) = createNavigationRoutes(
+    DirectionsResponse.fromJson(
+        FileUtils.loadJsonFixture(responseFileName)
+    ),
+    RouteOptions.fromUrl(
+        URL(
+            FileUtils.loadJsonFixture(requestFileName)
+        )
+    ),
+    TestSDKRouteParser(),
+    com.mapbox.navigation.base.route.RouterOrigin.Offboard
+).first()

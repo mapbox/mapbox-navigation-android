@@ -204,16 +204,48 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 requestedRoutes[0].getDurationAnnotationsFromLeg(0),
                 initialRoutes[0].getDurationAnnotationsFromLeg(0)
             )
-            assertEquals(227.918, initialRoutes[0].getDurationOfLeg(0), 0.0001)
-            assertEquals(287.063, refreshedRoutes[0].getDurationOfLeg(0), 0.0001)
+            assertEquals(
+                227.918,
+                initialRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+                0.0001
+            )
+            assertEquals(
+                287.063,
+                refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+                0.0001
+            )
+            assertEquals(
+                287.063,
+                refreshedRoutes[0].directionsRoute.duration(),
+                0.0001
+            )
+            assertEquals(
+                287.063,
+                refreshedRoutes[0].directionsRoute.legs()!!.first().duration()!!,
+                0.0001
+            )
 
             assertEquals(
-                requestedRoutes[1].getDurationOfLeg(0),
-                initialRoutes[1].getDurationOfLeg(0),
+                requestedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+                initialRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
                 0.0
             )
-            assertEquals(224.2239, initialRoutes[1].getDurationOfLeg(0), 0.0001)
-            assertEquals(258.767, refreshedRoutes[1].getDurationOfLeg(0), 0.0001)
+            assertEquals(
+                224.2239,
+                initialRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+                0.0001
+            )
+            assertEquals(
+                258.767,
+                refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+                0.0001
+            )
+            assertEquals(258.767, refreshedRoutes[1].directionsRoute.duration(), 0.0001)
+            assertEquals(
+                258.767,
+                refreshedRoutes[1].directionsRoute.legs()!!.first().duration()!!,
+                0.0001
+            )
         }
 
     @Test
@@ -319,11 +351,11 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 .first()
                 .navigationRoutes
 
-            assertEquals(224.224, requestedRoutes[0].getDurationOfLeg(0), 0.0001)
-            assertEquals(169.582, refreshedRoutes[0].getDurationOfLeg(0), 0.0001)
+            assertEquals(224.224, requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
+            assertEquals(169.582, refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
 
-            assertEquals(227.918, requestedRoutes[1].getDurationOfLeg(0), 0.0001)
-            assertEquals(234.024, refreshedRoutes[1].getDurationOfLeg(0), 0.0001)
+            assertEquals(227.918, requestedRoutes[1].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
+            assertEquals(234.024, refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
         }
 
     @Test
@@ -355,8 +387,8 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 .first()
                 .navigationRoutes
 
-            assertEquals(201.673, requestedRoutes[0].getDurationOfLeg(1), 0.0001)
-            assertEquals(189.086, refreshedRoutes[0].getDurationOfLeg(1), 0.0001)
+            assertEquals(201.673, requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
+            assertEquals(189.086, refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
         }
 
     private fun stayOnInitialPosition() {
@@ -432,7 +464,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     }
 }
 
-private fun NavigationRoute.getDurationOfLeg(legIndex: Int): Double =
+private fun NavigationRoute.getSumOfDurationAnnotationsFromLeg(legIndex: Int): Double =
     getDurationAnnotationsFromLeg(legIndex)
         ?.sum()!!
 

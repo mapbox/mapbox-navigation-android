@@ -51,27 +51,40 @@ fun createRouteLeg(
     annotation: LegAnnotation? = createRouteLegAnnotation(),
     incidents: List<Incident>? = null,
     closures: List<Closure>? = null,
-    legStep: List<LegStep> = listOf(createRouteStep()),
+    steps: List<LegStep> = listOf(createRouteStep()),
+    duration: Double? = null
 ): RouteLeg {
     return RouteLeg.builder()
         .annotation(annotation)
         .incidents(incidents)
         .closures(closures)
-        .steps(legStep)
+        .duration(duration)
+        .steps(steps)
         .build()
 }
 
-fun createRouteStep(): LegStep {
+fun createRouteStep(
+    distance: Double = 123.0,
+    duration: Double = 333.4,
+    mode: String = "driving",
+    maneuver: StepManeuver = createManeuver(),
+    weight: Double = 111.0,
+    bannerInstructions: List<BannerInstructions> = listOf(createBannerInstructions())
+): LegStep {
     return LegStep
         .builder()
-        .distance(123.0)
-        .duration(334.0)
-        .mode("mode")
-        .maneuver(StepManeuver.builder().rawLocation(doubleArrayOf(123.3434, 37.2233)).build())
-        .weight(111.0)
-        .bannerInstructions(listOf(createBannerInstructions()))
+        .distance(distance)
+        .duration(duration)
+        .mode(mode)
+        .maneuver(maneuver)
+        .weight(weight)
+        .bannerInstructions(bannerInstructions)
         .build()
 }
+
+fun createManeuver(
+    rawLocation: DoubleArray = doubleArrayOf(123.3434, 37.2233)
+): StepManeuver = StepManeuver.builder().rawLocation(rawLocation).build()
 
 fun createBannerInstructions(
     primary: BannerText = createBannerText(),
