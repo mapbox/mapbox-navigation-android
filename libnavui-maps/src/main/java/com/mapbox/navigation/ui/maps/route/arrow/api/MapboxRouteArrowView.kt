@@ -176,7 +176,11 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
     }
 
     private fun updateLayerVisibility(style: Style, layerId: String, visibility: Visibility) {
-        style.getLayer(layerId)?.visibility(visibility)
+        style.getLayer(layerId)?.apply {
+            if (this.visibility != visibility) {
+                this.visibility(visibility)
+            }
+        }
     }
 
     private fun updateSource(style: Style, sourceId: String, feature: Feature) {
