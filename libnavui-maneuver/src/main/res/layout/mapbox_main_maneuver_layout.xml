@@ -55,12 +55,13 @@
 
     <com.mapbox.navigation.ui.maneuver.view.MapboxStepDistance
         android:id="@+id/stepDistance"
-        android:layout_width="96dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
         android:gravity="center"
         android:paddingTop="4dp"
         android:paddingBottom="4dp"
+        android:paddingEnd="2dp"
         android:textAppearance="@style/MapboxStyleStepDistance"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/mainManeuverGuideline"

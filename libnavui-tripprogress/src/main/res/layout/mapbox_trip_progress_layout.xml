@@ -17,7 +17,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             app:layout_constraintStart_toStartOf="@id/timeRemainingText"
-            app:layout_constraintTop_toBottomOf="@id/timeRemainingText" >
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/timeRemainingText">
+
             <ImageView
                 android:id="@+id/distanceRemainingIcon"
                 android:layout_width="18dp"
@@ -31,7 +33,7 @@
             <com.mapbox.navigation.ui.tripprogress.view.DistanceRemainingView
                 android:id="@+id/distanceRemainingText"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:includeFontPadding="false"
                 tools:text="5 mi"/>
         </androidx.appcompat.widget.LinearLayoutCompat>
@@ -57,7 +59,7 @@
             <com.mapbox.navigation.ui.tripprogress.view.EstimatedArrivalTimeView
                 android:id="@+id/estimatedTimeToArriveText"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:includeFontPadding="false"
                 tools:text="4:28 pm"/>
         </androidx.appcompat.widget.LinearLayoutCompat>
@@ -69,6 +71,7 @@
             android:includeFontPadding="false"
             tools:text="2h 15m"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/distanceRemainingLayout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="@id/estimatedArrivalTimeLayout"
             />

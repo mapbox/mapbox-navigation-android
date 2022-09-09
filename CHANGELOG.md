@@ -18,6 +18,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue with `NavigationView` that caused overview camera to have wrong pitch. [#6278](https://github.com/mapbox/mapbox-navigation-android/pull/6278)
 - Fixed an issue with `NavigationView` that caused camera issues after reroute or switching to an alternative route. [#6283](https://github.com/mapbox/mapbox-navigation-android/pull/6283)
 - Fixed an issue with `NavigationView` that caused camera to unexpectedly change state in some situations. [#6291](https://github.com/mapbox/mapbox-navigation-android/pull/6291)
+- Fixed an issue where step distance in `MapboxManeuverView` could have been cut off. [#6296](https://github.com/mapbox/mapbox-navigation-android/pull/6296)
+- Fixed an issue where trip progress in `MapboxTripProgressView` could have been cut off if large font size is used. [#6296](https://github.com/mapbox/mapbox-navigation-android/pull/6296)
 
 ## Mapbox Navigation SDK 2.8.0-beta.2 - 01 September, 2022
 ### Changelog
