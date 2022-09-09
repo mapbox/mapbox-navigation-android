@@ -17,6 +17,9 @@ import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -36,7 +39,6 @@ import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 
@@ -89,6 +91,11 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
         MapboxRouteLineApi(options)
     }
 
+    private val navigationRoute: NavigationRoute by lazy {
+        val routeAsString = Utils.readRawFileText(this, R.raw.multileg_route_two_legs)
+        DirectionsRoute.fromJson(routeAsString).toNavigationRoute(RouterOrigin.Offboard)
+    }
+
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private val mapboxNavigation by requireMapboxNavigation(
         onCreatedObserver = object : MapboxNavigationObserver {
@@ -124,6 +131,12 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     private fun initListeners() {
+        val startingLocation = Location("ReplayRoute").also {
+            val routeOrigin = Utils.getRouteOriginPoint(navigationRoute.directionsRoute)
+            it.latitude = routeOrigin.latitude()
+            it.longitude = routeOrigin.longitude()
+        }
+        navigationLocationProvider.changePosition(startingLocation)
         binding.mapView.location.apply {
             setLocationProvider(navigationLocationProvider)
             enabled = true
@@ -132,11 +145,11 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
         mapboxReplayer.playbackSpeed(1.5)
         mapboxReplayer.play()
         binding.startNavigation.setOnClickListener {
-            val route = getRoute()
+            mapboxNavigation.setRerouteController(null)
             mapboxNavigation.startTripSession()
-            mapboxNavigation.setRoutes(listOf(route))
+            mapboxNavigation.setNavigationRoutes(listOf(navigationRoute))
             binding.startNavigation.visibility = View.GONE
-            startSimulation(route)
+            startSimulation(navigationRoute.directionsRoute)
         }
     }
 
@@ -151,13 +164,11 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
         binding.mapView.getMapboxMap().loadStyleUri(
             NavigationStyles.NAVIGATION_DAY_STYLE
         ) { style ->
-
-            val route = getRoute()
-            routeLineApi.setRoutes(listOf(RouteLine(route, null))) {
+            routeLineApi.setNavigationRoutes(listOf(navigationRoute)) {
                 routeLineView.renderRouteDrawData(style, it)
             }
 
-            val routeOrigin = Utils.getRouteOriginPoint(route)
+            val routeOrigin = Utils.getRouteOriginPoint(navigationRoute.directionsRoute)
             val cameraOptions = CameraOptions.Builder().center(routeOrigin).zoom(14.0).build()
             binding.mapView.getMapboxMap().setCamera(cameraOptions)
         }
@@ -169,11 +180,13 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
         }
 
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
-            navigationLocationProvider.changePosition(
-                locationMatcherResult.enhancedLocation,
-                locationMatcherResult.keyPoints,
-            )
-            updateCamera(locationMatcherResult.enhancedLocation)
+            if (locationMatcherResult.enhancedLocation.provider == "ReplayRoute") {
+                navigationLocationProvider.changePosition(
+                    locationMatcherResult.enhancedLocation,
+                    locationMatcherResult.keyPoints,
+                )
+                updateCamera(locationMatcherResult.enhancedLocation)
+            }
         }
     }
 
@@ -209,10 +222,5 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
         mapboxReplayer.pushEvents(replayData)
         mapboxReplayer.seekTo(replayData[0])
         mapboxReplayer.play()
-    }
-
-    private fun getRoute(): DirectionsRoute {
-        val routeAsString = Utils.readRawFileText(this, R.raw.multileg_route_two_legs)
-        return DirectionsRoute.fromJson(routeAsString)
     }
 }
