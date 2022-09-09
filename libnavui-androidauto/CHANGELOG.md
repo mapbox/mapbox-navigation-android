@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Removed `MapboxCarApp.setup`, replace with `MapboxNavigationApp.registerObserver(MapboxCarApp)` so it can be disabled. [#6275](https://github.com/mapbox/mapbox-navigation-android/pull/6275)
 
 ## androidauto-v0.10.0 - Sep 9, 2022
 ### Changelog

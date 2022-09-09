@@ -13,6 +13,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.android.core.permissions.PermissionsManager
+import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.MapboxCarNavigationManager
 import com.mapbox.androidauto.car.MainCarContext
 import com.mapbox.androidauto.car.MainScreenManager
@@ -27,9 +28,11 @@ import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.core.internal.extensions.attachCreated
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.qa_test_app.utils.Utils
+import com.mapbox.navigation.ui.app.internal.SharedApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -47,6 +50,11 @@ class MainCarSession : Session() {
 
     init {
         logAndroidAuto("MainCarSession constructor")
+
+        // TODO remove after 2.8.0-rc.1
+        MapboxNavigationApp.registerObserver(SharedApp)
+        attachCreated(MapboxCarApp)
+
         val logoSurfaceRenderer = CarLogoSurfaceRenderer()
         val compassSurfaceRenderer = CarCompassSurfaceRenderer()
         MapboxNavigationApp.attach(lifecycleOwner = this)

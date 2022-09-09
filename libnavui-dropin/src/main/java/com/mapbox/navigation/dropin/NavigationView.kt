@@ -2,7 +2,6 @@ package com.mapbox.navigation.dropin
 
 import android.Manifest
 import android.app.Activity
-import android.app.Application
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -20,6 +19,7 @@ import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.internal.extensions.attachCreated
+import com.mapbox.navigation.core.internal.extensions.attachStarted
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.dropin.component.analytics.AnalyticsComponent
@@ -109,7 +109,7 @@ class NavigationView @JvmOverloads constructor(
         keepScreenOn = true
         captureSystemBarsInsets()
 
-        SharedApp.setup(context.applicationContext as Application)
+        MapboxNavigationApp.registerObserver(SharedApp)
         if (!MapboxNavigationApp.isSetup()) {
             MapboxNavigationApp.setup(
                 NavigationOptions.Builder(context)

@@ -98,6 +98,9 @@ dependencies {
     implementation project(':libnavui-androidauto')
     implementation dependenciesList.mapboxSearchSdk
 
+    // TODO Remove after 2.8.0-rc.1
+    implementation project(':libnavui-app')
+
     // test
     androidTestImplementation project(':libtesting-ui')
     androidTestImplementation dependenciesList.testRunner
