@@ -8,6 +8,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Added options to customize behavior of the Speed limit widget. [#6275](https://github.com/mapbox/mapbox-navigation-android/pull/6275)
 
 #### Bug fixes and improvements
+- Allow Android Auto release to be paired with old version of nav-sdk. [#6304](https://github.com/mapbox/mapbox-navigation-android/pull/6304)
 
 ## androidauto-v0.9.0 - Sep 1, 2022
 ### Changelog
