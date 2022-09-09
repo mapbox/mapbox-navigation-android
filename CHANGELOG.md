@@ -20,6 +20,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue with `NavigationView` that caused camera to unexpectedly change state in some situations. [#6291](https://github.com/mapbox/mapbox-navigation-android/pull/6291)
 - Fixed an issue where step distance in `MapboxManeuverView` could have been cut off. [#6296](https://github.com/mapbox/mapbox-navigation-android/pull/6296)
 - Fixed an issue where trip progress in `MapboxTripProgressView` could have been cut off if large font size is used. [#6296](https://github.com/mapbox/mapbox-navigation-android/pull/6296)
+- Added Experimental API `NavigationRoute#hasUnexpectedClosures` to check if a route has unexpected closures that might require a re-route. [#6295](https://github.com/mapbox/mapbox-navigation-android/pull/6295)
 
 ## Mapbox Navigation SDK 2.8.0-beta.2 - 01 September, 2022
 ### Changelog

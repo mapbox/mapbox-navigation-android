@@ -1,0 +1,461 @@
+{
+  "routeIndex": "0",
+  "country_crossed": false,
+  "weight_typical": 49.449,
+  "duration_typical": 34.555,
+  "weight_name": "auto",
+  "weight": 302.348,
+  "duration": 34.555,
+  "distance": 189.174,
+  "legs": [
+    {
+      "summary": "Uhlandstraße, Kantstraße",
+      "distance": 167.442,
+      "steps": [
+        {
+          "voiceInstructions": [
+            {
+              "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Drive north on <say-as interpret-as=\"address\">Uhlandstraße</say-as>. Then, in 500 feet, Turn right onto <say-as interpret-as=\"address\">Kantstraße</say-as>.</prosody></amazon:effect></speak>",
+              "announcement": "Drive north on Uhlandstraße. Then, in 500 feet, Turn right onto Kantstraße.",
+              "distanceAlongGeometry": 156.11
+            }
+          ],
+          "intersections": [
+            {
+              "entry": [
+                true
+              ],
+              "bearings": [
+                5
+              ],
+              "duration": 5.42,
+              "mapbox_streets_v8": {
+                "class": "street"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 54.876,
+              "geometry_index": 0,
+              "location": [
+                13.325517,
+                52.504169
+              ]
+            },
+            {
+              "entry": [
+                true,
+                true,
+                false
+              ],
+              "in": 2,
+              "bearings": [
+                5,
+                94,
+                185
+              ],
+              "duration": 3.608,
+              "turn_weight": 1,
+              "turn_duration": 0.008,
+              "mapbox_streets_v8": {
+                "class": "street"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 37.45,
+              "geometry_index": 1,
+              "location": [
+                13.325557,
+                52.504438
+              ]
+            },
+            {
+              "entry": [
+                true,
+                false,
+                false
+              ],
+              "in": 1,
+              "bearings": [
+                5,
+                185,
+                276
+              ],
+              "duration": 8.468,
+              "turn_weight": 1,
+              "turn_duration": 0.008,
+              "mapbox_streets_v8": {
+                "class": "street"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 86.657,
+              "geometry_index": 2,
+              "location": [
+                13.325582,
+                52.504616
+              ]
+            },
+            {
+              "bearings": [
+                5,
+                185,
+                275
+              ],
+              "entry": [
+                true,
+                false,
+                true
+              ],
+              "in": 1,
+              "turn_weight": 1,
+              "turn_duration": 0.008,
+              "mapbox_streets_v8": {
+                "class": "street"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 0,
+              "geometry_index": 5,
+              "location": [
+                13.325642,
+                52.505039
+              ]
+            }
+          ],
+          "maneuver": {
+            "type": "depart",
+            "instruction": "Drive north on Uhlandstraße.",
+            "bearing_after": 5,
+            "bearing_before": 0,
+            "location": [
+              13.325517,
+              52.504169
+            ]
+          },
+          "name": "Uhlandstraße",
+          "weight_typical": 34.612,
+          "duration_typical": 28.124,
+          "duration": 28.124,
+          "distance": 156.11,
+          "driving_side": "right",
+          "weight": 287.511,
+          "mode": "driving",
+          "geometry": "qerccBykilXyOoAcJq@aACuGk@uNgAeXmBgAIwDW"
+        },
+        {
+          "voiceInstructions": [
+            {
+              "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Your destination is on the left.</prosody></amazon:effect></speak>",
+              "announcement": "Your destination is on the left.",
+              "distanceAlongGeometry": 11.332
+            }
+          ],
+          "intersections": [
+            {
+              "bearings": [
+                6,
+                95,
+                185,
+                277
+              ],
+              "entry": [
+                true,
+                true,
+                false,
+                false
+              ],
+              "in": 2,
+              "turn_weight": 9,
+              "turn_duration": 2.105,
+              "mapbox_streets_v8": {
+                "class": "secondary"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 1,
+              "geometry_index": 8,
+              "location": [
+                13.325714,
+                52.50557
+              ]
+            }
+          ],
+          "maneuver": {
+            "type": "turn",
+            "instruction": "Turn right onto Kantstraße.",
+            "modifier": "right",
+            "bearing_after": 95,
+            "bearing_before": 5,
+            "location": [
+              13.325714,
+              52.50557
+            ]
+          },
+          "name": "Kantstraße",
+          "weight_typical": 10.53,
+          "duration_typical": 3.465,
+          "duration": 3.465,
+          "distance": 11.332,
+          "driving_side": "right",
+          "weight": 10.53,
+          "mode": "driving",
+          "geometry": "c}tccBcxilX@cALiG"
+        },
+        {
+          "voiceInstructions": [],
+          "intersections": [
+            {
+              "bearings": [
+                275
+              ],
+              "entry": [
+                true
+              ],
+              "in": 0,
+              "admin_index": 0,
+              "geometry_index": 10,
+              "location": [
+                13.325881,
+                52.505562
+              ]
+            }
+          ],
+          "maneuver": {
+            "type": "arrive",
+            "instruction": "Your destination is on the left.",
+            "modifier": "left",
+            "bearing_after": 0,
+            "bearing_before": 95,
+            "location": [
+              13.325881,
+              52.505562
+            ]
+          },
+          "name": "Kantstraße",
+          "weight_typical": 0,
+          "duration_typical": 0,
+          "duration": 0,
+          "distance": 0,
+          "driving_side": "right",
+          "weight": 0,
+          "mode": "driving",
+          "geometry": "s|tccBqbjlX??"
+        }
+      ],
+      "closures": [
+        {
+          "geometry_index_end": 8,
+          "geometry_index_start": 0
+        }
+      ],
+      "weight": 298.041,
+      "duration": 31.589,
+      "duration_typical": 31.589,
+      "weight_typical": 45.142,
+      "annotation": {},
+      "incidents": [
+        {
+          "id": "15610865421490173",
+          "type": "road_closure",
+          "creation_time": "2022-09-07T21:40:35Z",
+          "start_time": "2022-09-01T05:00:00Z",
+          "end_time": "2023-03-31T21:59:00Z",
+          "iso_3166_1_alpha2": "DE",
+          "iso_3166_1_alpha3": "DEU",
+          "description": "Uhlandstrasse: Straße gesperrt zwischen Kantstrasse und Grolmanstrasse",
+          "long_description": "Straße gesperrt wegen Bauarbeiten auf der Uhlandstrasse in beiden Richtungen zwischen Kantstrasse und Grolmanstrasse.",
+          "impact": "minor",
+          "alertc_codes": [
+            735
+          ],
+          "lanes_blocked": [],
+          "length": 303,
+          "closed": true,
+          "congestion": {
+            "value": 101
+          },
+          "geometry_index_start": 0,
+          "geometry_index_end": 8,
+          "affected_road_names": [
+            "Uhlandstraße"
+          ]
+        }
+      ],
+      "admins": [
+        {
+          "iso_3166_1_alpha3": "DEU",
+          "iso_3166_1": "DE"
+        }
+      ],
+      "via_waypoints": []
+    },
+    {
+      "via_waypoints": [],
+      "admins": [
+        {
+          "iso_3166_1_alpha3": "DEU",
+          "iso_3166_1": "DE"
+        }
+      ],
+      "annotation": {},
+      "weight_typical": 4.307,
+      "duration_typical": 2.966,
+      "weight": 4.307,
+      "duration": 2.966,
+      "steps": [
+        {
+          "voiceInstructions": [
+            {
+              "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Drive east on <say-as interpret-as=\"address\">Kantstraße</say-as>. Then, in 70 feet, Your destination will be on the left.</prosody></amazon:effect></speak>",
+              "announcement": "Drive east on Kantstraße. Then, in 70 feet, Your destination will be on the left.",
+              "distanceAlongGeometry": 21.732
+            }
+          ],
+          "intersections": [
+            {
+              "entry": [
+                true
+              ],
+              "bearings": [
+                95
+              ],
+              "duration": 0.08,
+              "mapbox_streets_v8": {
+                "class": "secondary"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 0.09,
+              "geometry_index": 0,
+              "location": [
+                13.325881,
+                52.505562
+              ]
+            },
+            {
+              "entry": [
+                false,
+                true,
+                false
+              ],
+              "in": 2,
+              "bearings": [
+                6,
+                95,
+                275
+              ],
+              "duration": 1.219,
+              "turn_weight": 0.5,
+              "turn_duration": 0.019,
+              "mapbox_streets_v8": {
+                "class": "secondary"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 1,
+              "weight": 1.85,
+              "geometry_index": 1,
+              "location": [
+                13.325897,
+                52.505561
+              ]
+            },
+            {
+              "bearings": [
+                6,
+                96,
+                275
+              ],
+              "entry": [
+                true,
+                true,
+                false
+              ],
+              "in": 2,
+              "turn_weight": 0.5,
+              "turn_duration": 0.007,
+              "mapbox_streets_v8": {
+                "class": "secondary"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 1,
+              "geometry_index": 2,
+              "location": [
+                13.32605,
+                52.505553
+              ]
+            }
+          ],
+          "maneuver": {
+            "type": "depart",
+            "instruction": "Drive east on Kantstraße.",
+            "bearing_after": 95,
+            "bearing_before": 0,
+            "location": [
+              13.325881,
+              52.505562
+            ]
+          },
+          "name": "Kantstraße",
+          "weight_typical": 4.307,
+          "duration_typical": 2.966,
+          "duration": 2.966,
+          "distance": 21.732,
+          "driving_side": "right",
+          "weight": 4.307,
+          "mode": "driving",
+          "geometry": "s|tccBqbjlX@_@NqHReI"
+        },
+        {
+          "voiceInstructions": [],
+          "intersections": [
+            {
+              "bearings": [
+                276
+              ],
+              "entry": [
+                true
+              ],
+              "in": 0,
+              "admin_index": 0,
+              "geometry_index": 3,
+              "location": [
+                13.326213,
+                52.505543
+              ]
+            }
+          ],
+          "maneuver": {
+            "type": "arrive",
+            "instruction": "Your destination is on the left.",
+            "modifier": "left",
+            "bearing_after": 0,
+            "bearing_before": 96,
+            "location": [
+              13.326213,
+              52.505543
+            ]
+          },
+          "name": "Kantstraße",
+          "weight_typical": 0,
+          "duration_typical": 0,
+          "duration": 0,
+          "distance": 0,
+          "driving_side": "right",
+          "weight": 0,
+          "mode": "driving",
+          "geometry": "m{tccBiwjlX??"
+        }
+      ],
+      "distance": 21.732,
+      "summary": "Kantstraße"
+    }
+  ],
+  "geometry": "qerccBykilXyOoAcJq@aACuGk@uNgAeXmBgAIwDW@cALiG@_@NqHReI",
+  "voiceLocale": "en-US"
+}

@@ -1,0 +1,505 @@
+{
+  "country_crossed": false,
+  "weight_typical": 147.885,
+  "duration_typical": 111.341,
+  "weight_name": "auto",
+  "weight": 594.32,
+  "duration": 79.293,
+  "distance": 395.317,
+  "legs": [
+    {
+      "summary": "Uhlandstraße, Kantstraße",
+      "distance": 395.317,
+      "steps": [
+        {
+          "voiceInstructions": [
+            {
+              "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Drive west on <say-as interpret-as=\"address\">Kurfürstendamm</say-as>. Then Turn right onto <say-as interpret-as=\"address\">Uhlandstraße</say-as>.</prosody></amazon:effect></speak>",
+              "announcement": "Drive west on Kurfürstendamm. Then Turn right onto Uhlandstraße.",
+              "distanceAlongGeometry": 30.254
+            }
+          ],
+          "intersections": [
+            {
+              "entry": [
+                true
+              ],
+              "bearings": [
+                251
+              ],
+              "duration": 1.451,
+              "mapbox_streets_v8": {
+                "class": "secondary"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 1.668,
+              "geometry_index": 0,
+              "location": [
+                13.32568,
+                52.502672
+              ]
+            },
+            {
+              "bearings": [
+                71,
+                158,
+                253
+              ],
+              "entry": [
+                false,
+                false,
+                true
+              ],
+              "in": 0,
+              "turn_weight": 0.5,
+              "turn_duration": 0.008,
+              "mapbox_streets_v8": {
+                "class": "secondary"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 2,
+              "geometry_index": 1,
+              "location": [
+                13.325583,
+                52.502651
+              ]
+            }
+          ],
+          "maneuver": {
+            "type": "depart",
+            "instruction": "Drive west on Kurfürstendamm.",
+            "bearing_after": 251,
+            "bearing_before": 0,
+            "location": [
+              13.32568,
+              52.502672
+            ]
+          },
+          "name": "Kurfürstendamm",
+          "weight_typical": 7.343,
+          "duration_typical": 6.059,
+          "duration": 6.059,
+          "distance": 30.254,
+          "driving_side": "right",
+          "weight": 7.343,
+          "mode": "driving",
+          "geometry": "_hoccB_vilXh@`EtBdS"
+        },
+        {
+          "voiceInstructions": [
+            {
+              "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In a quarter mile, Turn right onto <say-as interpret-as=\"address\">Kantstraße</say-as>.</prosody></amazon:effect></speak>",
+              "announcement": "In a quarter mile, Turn right onto Kantstraße.",
+              "distanceAlongGeometry": 315.333
+            },
+            {
+              "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Turn right onto <say-as interpret-as=\"address\">Kantstraße</say-as>. Then, in 100 feet, Your destination will be on the left.</prosody></amazon:effect></speak>",
+              "announcement": "Turn right onto Kantstraße. Then, in 100 feet, Your destination will be on the left.",
+              "distanceAlongGeometry": 118.056
+            }
+          ],
+          "intersections": [
+            {
+              "entry": [
+                true,
+                false,
+                true,
+                true
+              ],
+              "in": 1,
+              "bearings": [
+                5,
+                73,
+                183,
+                253
+              ],
+              "duration": 12.05,
+              "turn_weight": 6,
+              "turn_duration": 4.85,
+              "mapbox_streets_v8": {
+                "class": "street"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 14.1,
+              "geometry_index": 2,
+              "location": [
+                13.32526,
+                52.502592
+              ]
+            },
+            {
+              "entry": [
+                true,
+                false,
+                true
+              ],
+              "in": 1,
+              "bearings": [
+                9,
+                185,
+                284
+              ],
+              "duration": 25.586,
+              "turn_weight": 1,
+              "turn_duration": 0.009,
+              "mapbox_streets_v8": {
+                "class": "street"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 259.967,
+              "geometry_index": 5,
+              "location": [
+                13.325296,
+                52.502845
+              ]
+            },
+            {
+              "entry": [
+                true,
+                true,
+                false
+              ],
+              "in": 2,
+              "bearings": [
+                5,
+                94,
+                185
+              ],
+              "duration": 6.463,
+              "mapbox_streets_v8": {
+                "class": "street"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 65.438,
+              "geometry_index": 8,
+              "location": [
+                13.32551,
+                52.504117
+              ]
+            },
+            {
+              "entry": [
+                true,
+                true,
+                false
+              ],
+              "in": 2,
+              "bearings": [
+                5,
+                94,
+                185
+              ],
+              "duration": 3.608,
+              "turn_weight": 1,
+              "turn_duration": 0.008,
+              "mapbox_streets_v8": {
+                "class": "street"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 37.45,
+              "geometry_index": 9,
+              "location": [
+                13.325557,
+                52.504438
+              ]
+            },
+            {
+              "entry": [
+                true,
+                false,
+                false
+              ],
+              "in": 1,
+              "bearings": [
+                5,
+                185,
+                276
+              ],
+              "duration": 8.468,
+              "turn_weight": 1,
+              "turn_duration": 0.008,
+              "mapbox_streets_v8": {
+                "class": "street"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 86.658,
+              "geometry_index": 10,
+              "location": [
+                13.325582,
+                52.504616
+              ]
+            },
+            {
+              "bearings": [
+                5,
+                185,
+                275
+              ],
+              "entry": [
+                true,
+                false,
+                true
+              ],
+              "in": 1,
+              "turn_weight": 1,
+              "turn_duration": 0.008,
+              "mapbox_streets_v8": {
+                "class": "street"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 0,
+              "geometry_index": 13,
+              "location": [
+                13.325642,
+                52.505039
+              ]
+            }
+          ],
+          "maneuver": {
+            "type": "turn",
+            "instruction": "Turn right onto Uhlandstraße.",
+            "modifier": "right",
+            "bearing_after": 5,
+            "bearing_before": 253,
+            "location": [
+              13.32526,
+              52.502592
+            ]
+          },
+          "name": "Uhlandstraße",
+          "weight_typical": 125.705,
+          "duration_typical": 98.85,
+          "duration": 66.802,
+          "distance": 332,
+          "driving_side": "right",
+          "weight": 572.14,
+          "mode": "driving",
+          "geometry": "_coccBw{hlXcE[{@GyFc@{N_Cm~@iHEAaS}AcJq@aACuGk@uNgAeXmBgAIwDW"
+        },
+        {
+          "voiceInstructions": [
+            {
+              "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Your destination is on the left.</prosody></amazon:effect></speak>",
+              "announcement": "Your destination is on the left.",
+              "distanceAlongGeometry": 33.064
+            }
+          ],
+          "intersections": [
+            {
+              "entry": [
+                true,
+                true,
+                false,
+                false
+              ],
+              "in": 2,
+              "bearings": [
+                6,
+                95,
+                185,
+                277
+              ],
+              "duration": 3.545,
+              "turn_weight": 9,
+              "turn_duration": 2.105,
+              "mapbox_streets_v8": {
+                "class": "secondary"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 1,
+              "weight": 10.62,
+              "geometry_index": 16,
+              "location": [
+                13.325714,
+                52.50557
+              ]
+            },
+            {
+              "entry": [
+                false,
+                true,
+                false
+              ],
+              "in": 2,
+              "bearings": [
+                6,
+                95,
+                275
+              ],
+              "duration": 1.219,
+              "turn_weight": 0.5,
+              "turn_duration": 0.019,
+              "mapbox_streets_v8": {
+                "class": "secondary"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 1,
+              "weight": 1.85,
+              "geometry_index": 18,
+              "location": [
+                13.325897,
+                52.505561
+              ]
+            },
+            {
+              "bearings": [
+                6,
+                96,
+                275
+              ],
+              "entry": [
+                true,
+                true,
+                false
+              ],
+              "in": 2,
+              "turn_weight": 0.5,
+              "turn_duration": 0.007,
+              "mapbox_streets_v8": {
+                "class": "secondary"
+              },
+              "is_urban": true,
+              "admin_index": 0,
+              "out": 1,
+              "geometry_index": 19,
+              "location": [
+                13.32605,
+                52.505553
+              ]
+            }
+          ],
+          "maneuver": {
+            "type": "turn",
+            "instruction": "Turn right onto Kantstraße.",
+            "modifier": "right",
+            "bearing_after": 95,
+            "bearing_before": 5,
+            "location": [
+              13.325714,
+              52.50557
+            ]
+          },
+          "name": "Kantstraße",
+          "weight_typical": 14.837,
+          "duration_typical": 6.431,
+          "duration": 6.431,
+          "distance": 33.064,
+          "driving_side": "right",
+          "weight": 14.837,
+          "mode": "driving",
+          "geometry": "c}tccBcxilX@cANiHNqHReI"
+        },
+        {
+          "voiceInstructions": [],
+          "intersections": [
+            {
+              "bearings": [
+                276
+              ],
+              "entry": [
+                true
+              ],
+              "in": 0,
+              "admin_index": 0,
+              "geometry_index": 20,
+              "location": [
+                13.326213,
+                52.505543
+              ]
+            }
+          ],
+          "maneuver": {
+            "type": "arrive",
+            "instruction": "Your destination is on the left.",
+            "modifier": "left",
+            "bearing_after": 0,
+            "bearing_before": 96,
+            "location": [
+              13.326213,
+              52.505543
+            ]
+          },
+          "name": "Kantstraße",
+          "weight_typical": 0,
+          "duration_typical": 0,
+          "duration": 0,
+          "distance": 0,
+          "driving_side": "right",
+          "weight": 0,
+          "mode": "driving",
+          "geometry": "m{tccBiwjlX??"
+        }
+      ],
+      "closures": [
+        {
+          "geometry_index_end": 16,
+          "geometry_index_start": 5
+        }
+      ],
+      "weight": 594.32,
+      "duration": 79.293,
+      "duration_typical": 111.341,
+      "weight_typical": 147.885,
+      "annotation": {},
+      "incidents": [
+        {
+          "id": "15610865421490173",
+          "type": "road_closure",
+          "creation_time": "2022-09-07T21:40:35Z",
+          "start_time": "2022-09-01T05:00:00Z",
+          "end_time": "2023-03-31T21:59:00Z",
+          "iso_3166_1_alpha2": "DE",
+          "iso_3166_1_alpha3": "DEU",
+          "description": "Uhlandstrasse: Straße gesperrt zwischen Kantstrasse und Grolmanstrasse",
+          "long_description": "Straße gesperrt wegen Bauarbeiten auf der Uhlandstrasse in beiden Richtungen zwischen Kantstrasse und Grolmanstrasse.",
+          "impact": "minor",
+          "alertc_codes": [
+            735
+          ],
+          "lanes_blocked": [],
+          "length": 303,
+          "closed": true,
+          "congestion": {
+            "value": 101
+          },
+          "geometry_index_start": 5,
+          "geometry_index_end": 16,
+          "affected_road_names": [
+            "Uhlandstraße"
+          ]
+        }
+      ],
+      "admins": [
+        {
+          "iso_3166_1_alpha3": "DEU",
+          "iso_3166_1": "DE"
+        }
+      ],
+      "via_waypoints": [
+        {
+          "waypoint_index": 1,
+          "distance_from_start": 200.348,
+          "geometry_index": 7
+        }
+      ]
+    }
+  ],
+  "geometry": "_hoccB_vilXh@`EtBdScE[{@GyFc@{N_Cm~@iHEAaS}AcJq@aACuGk@uNgAeXmBgAIwDW@cANiHNqHReI",
+  "voiceLocale": "en-US"
+}
