@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.core.R
+import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfConversion
 import java.text.NumberFormat
@@ -167,7 +168,11 @@ object MapboxDistanceUtil {
         locale: Locale
     ): FormattedDistanceData {
         val resources = context.applicationContext.resourcesWithLocale(locale)
-        val unitStringSuffix = getUnitString(resources, getSmallTurfUnitType(unitType))
+        val unitStringSuffix = getUnitString(resources, getSmallTurfUnitType(unitType)).also {
+            if (it.isEmpty()) {
+                logW("Failed to get resource for unit: $unitType. and locale: $locale")
+            }
+        }
         if (distance < 0) {
             return FormattedDistanceData(0.0, "0", unitStringSuffix, unitType)
         }
@@ -193,7 +198,11 @@ object MapboxDistanceUtil {
         locale: Locale
     ): FormattedDistanceData {
         val resources = context.applicationContext.resourcesWithLocale(locale)
-        val unitStringSuffix = getUnitString(resources, getLargeTurfUnitType(unitType))
+        val unitStringSuffix = getUnitString(resources, getLargeTurfUnitType(unitType)).also {
+            if (it.isEmpty()) {
+                logW("Failed to get resource for unit: $unitType. and locale: $locale")
+            }
+        }
         val distanceUnit = roundLargeDistance(
             distance,
             unitType
@@ -219,14 +228,28 @@ object MapboxDistanceUtil {
         }
     }
 
-    private fun getUnitString(resources: Resources, @TurfConstants.TurfUnitCriteria unit: String) =
-        when (unit) {
-            TurfConstants.UNIT_KILOMETERS -> resources.getString(R.string.mapbox_unit_kilometers)
-            TurfConstants.UNIT_METERS -> resources.getString(R.string.mapbox_unit_meters)
-            TurfConstants.UNIT_MILES -> resources.getString(R.string.mapbox_unit_miles)
-            TurfConstants.UNIT_FEET -> resources.getString(R.string.mapbox_unit_feet)
-            else -> ""
+    private fun getUnitString(
+        resources: Resources,
+        @TurfConstants.TurfUnitCriteria unit: String
+    ): String {
+        return try {
+            when (unit) {
+                TurfConstants.UNIT_KILOMETERS -> {
+                    resources.getString(R.string.mapbox_unit_kilometers)
+                }
+                TurfConstants.UNIT_METERS -> resources.getString(R.string.mapbox_unit_meters)
+                TurfConstants.UNIT_MILES -> resources.getString(R.string.mapbox_unit_miles)
+                TurfConstants.UNIT_FEET -> resources.getString(R.string.mapbox_unit_feet)
+                else -> ""
+            }
+        } catch (ex: Exception) {
+            logW(
+                "Unable to get distance resource string for unit: $unit. " +
+                    "Exception was: ${ex.stackTraceToString()}"
+            )
+            ""
         }
+    }
 
     private fun Context.resourcesWithLocale(locale: Locale?): Resources {
         val config = Configuration(this.resources.configuration).also {

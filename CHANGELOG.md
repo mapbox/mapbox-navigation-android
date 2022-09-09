@@ -7,6 +7,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Optimized calls to modify route arrow layer visibility. [#6308](https://github.com/mapbox/mapbox-navigation-android/pull/6308)
 - Provide better java support for `MapboxNavigationApp`. [#6292](https://github.com/mapbox/mapbox-navigation-android/pull/6292)
+- Added a try/catch and logging around calls to get string resources related to distance formatting suffixes. [#6309](https://github.com/mapbox/mapbox-navigation-android/pull/6309)
 
 ## Mapbox Navigation SDK 2.8.0-beta.3 - 09 September, 2022
 ### Changelog
