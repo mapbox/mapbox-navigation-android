@@ -4,6 +4,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.8.0-beta.3 - 09 September, 2022
+### Changelog
+[Changes between v2.8.0-beta.2 and v2.8.0-beta.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.8.0-beta.2...v2.8.0-beta.3)
+
+#### Features
 - Improved the route refresh feature to also refresh _closures_ (`RouteLeg#closures`). [#6274](https://github.com/mapbox/mapbox-navigation-android/pull/6274)
 - Added `requireMapboxNavigation` to offer a simple way to use `MapboxNavigationApp`. [#6233](https://github.com/mapbox/mapbox-navigation-android/pull/6233)
 - Implemented continuous alternatives in Drop-In UI. [#6213](https://github.com/mapbox/mapbox-navigation-android/pull/6213)
@@ -22,6 +29,16 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue where trip progress in `MapboxTripProgressView` could have been cut off if large font size is used. [#6296](https://github.com/mapbox/mapbox-navigation-android/pull/6296)
 - Added Experimental API `NavigationRoute#hasUnexpectedClosures` to check if a route has unexpected closures that might require a re-route. [#6295](https://github.com/mapbox/mapbox-navigation-android/pull/6295)
 - Improved route refresh. Now Navigation SDK recalculates `DirectionsRoute#duration`, `RouteLeg#duration`, `LegStep#duration` after route refresh based on `LegAnnotation#duration`. [#6287](https://github.com/mapbox/mapbox-navigation-android/pull/6287) 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.8.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.8.0-rc.1))
+- Mapbox Navigation Native `v114.0.0`
+- Mapbox Core Common `v23.0.0-rc.2`
+- Mapbox Java `v6.8.0-beta.4` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0-beta.4))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+- Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
+
 
 ## Mapbox Navigation SDK 2.8.0-beta.2 - 01 September, 2022
 ### Changelog
