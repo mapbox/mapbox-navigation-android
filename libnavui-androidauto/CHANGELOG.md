@@ -4,11 +4,24 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## androidauto-v0.10.0 - Sep 9, 2022
+### Changelog
+[Changes between 0.9.0 and 0.10.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.9.0...androidauto-v0.10.0)
+
+#### Features
 - Added support for MUTCD and Vienna designs in the Speed limit widget. [#6275](https://github.com/mapbox/mapbox-navigation-android/pull/6275)
 - Added options to customize behavior of the Speed limit widget. [#6275](https://github.com/mapbox/mapbox-navigation-android/pull/6275)
 
 #### Bug fixes and improvements
 - Bump minimum version nav-sdk requirement to 2.8.0-beta.3. [#6305](https://github.com/mapbox/mapbox-navigation-android/pull/6305)
+
+### Mapbox dependencies
+This release defines minimum versions for the Mapbox dependencies.
+- Mapbox Maps Android Auto Extension `v0.2.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/extension-androidauto-v0.2.0))
+- Mapbox Navigation `v2.8.0-beta.3` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/v2.8.0-beta.3))
+- Mapbox Search `v1.0.0-beta.35` ([release notes](https://github.com/mapbox/mapbox-search-android/releases/tag/v1.0.0-beta.35))
 
 ## androidauto-v0.9.0 - Sep 1, 2022
 ### Changelog
