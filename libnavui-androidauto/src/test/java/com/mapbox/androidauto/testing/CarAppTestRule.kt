@@ -7,6 +7,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.unmockkAll
 import org.junit.rules.TestWatcher
@@ -26,6 +27,7 @@ class CarAppTestRule : TestWatcher() {
         every { AndroidAutoLog.logAndroidAutoFailure(any(), any()) } just runs
 
         mockkObject(MapboxNavigationApp)
+        mockkStatic(MapboxNavigationApp::class)
         every {
             MapboxNavigationApp.registerObserver(any())
         } answers {

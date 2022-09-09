@@ -10,6 +10,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import io.mockk.verify
 import io.mockk.verifyOrder
@@ -50,6 +51,7 @@ class RequireMapboxNavigationTest {
     @Before
     fun setup() {
         mockkObject(MapboxNavigationApp)
+        mockkStatic(MapboxNavigationApp::class)
     }
 
     @After

@@ -7,7 +7,6 @@ import com.mapbox.androidauto.car.navigation.CarDistanceFormatter
 import com.mapbox.androidauto.car.navigation.maneuver.CarManeuverMapper
 import com.mapbox.androidauto.car.telemetry.MapboxCarTelemetry
 import com.mapbox.androidauto.internal.logAndroidAuto
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -24,7 +23,6 @@ import kotlinx.coroutines.flow.StateFlow
  * registered, the trip status of [MapboxNavigation] will be sent to the [NavigationManager].
  * This is needed to keep the vehicle cluster display updated.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 class MapboxCarNavigationManager(
     carContext: CarContext
 ) : MapboxNavigationObserver {

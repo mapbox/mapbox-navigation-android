@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Remove experimental from `MapboxCarNavigationManager` and showcase java. [#6292](https://github.com/mapbox/mapbox-navigation-android/pull/6292)
 
 ## androidauto-v0.10.0 - Sep 9, 2022
 ### Changelog
