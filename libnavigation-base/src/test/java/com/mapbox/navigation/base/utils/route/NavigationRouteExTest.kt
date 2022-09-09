@@ -54,6 +54,20 @@ class NavigationRouteExTest {
                         false,
                     ),
                     arrayOf(
+                        "route closure at starting waypoint, include closures = true",
+                        "route_closure_start_coordinate.json",
+                        provideBooleansProvider(false, false, false),
+                        provideBooleansProvider(true, false, false),
+                        false,
+                    ),
+                    arrayOf(
+                        "route closure at starting waypoint, include closures = true",
+                        "route_closure_start_coordinate.json",
+                        provideBooleansProvider(true, false, false),
+                        provideBooleansProvider(false, false, false),
+                        false,
+                    ),
+                    arrayOf(
                         "route closure at second waypoint, include closures = false",
                         "route_closure_second_waypoint.json",
                         provideBooleansProvider(true, false, true),
