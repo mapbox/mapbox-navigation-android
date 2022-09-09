@@ -4,9 +4,11 @@ import android.app.Application
 import com.mapbox.androidauto.navigation.location.CarAppLocation
 import com.mapbox.androidauto.navigation.location.impl.CarAppLocationImpl
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.ui.app.internal.SharedApp
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidance
+import com.mapbox.navigation.ui.voice.internal.impl.MapboxAudioGuidanceImpl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -44,11 +46,25 @@ object MapboxCarApp {
 
     /**
      * Setup android auto from your [Application.onCreate]
-     *
-     * @param application used to detect when activities are foregrounded
      */
-    fun setup(application: Application) {
-        SharedApp.setup(application)
+    fun setup() {
+        MapboxNavigationApp.registerObserver(sharedServices)
         MapboxNavigationApp.registerObserver(CarAppLocationImpl())
+    }
+
+    // TODO can be replaced with `SharedApp` once backwards compatibility is fixed
+    //    https://github.com/mapbox/mapbox-navigation-android/pull/6303
+    private val sharedServices = object : MapboxNavigationObserver {
+        private lateinit var audioGuidance: MapboxAudioGuidance
+        override fun onAttached(mapboxNavigation: MapboxNavigation) {
+            val context = mapboxNavigation.navigationOptions.applicationContext
+            audioGuidance = MapboxAudioGuidanceImpl.create(context)
+            MapboxNavigationApp.registerObserver(audioGuidance)
+        }
+
+        override fun onDetached(mapboxNavigation: MapboxNavigation) {
+            // Never really happens but is here to separate concerns.
+            MapboxNavigationApp.unregisterObserver(audioGuidance)
+        }
     }
 }

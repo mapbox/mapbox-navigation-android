@@ -13,6 +13,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.android.core.permissions.PermissionsManager
+import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.MapboxCarNavigationManager
 import com.mapbox.androidauto.car.MainCarContext
 import com.mapbox.androidauto.car.MainScreenManager
@@ -47,6 +48,7 @@ class MainCarSession : Session() {
 
     init {
         logAndroidAuto("MainCarSession constructor")
+        MapboxCarApp.setup()
         val logoSurfaceRenderer = CarLogoSurfaceRenderer()
         val compassSurfaceRenderer = CarCompassSurfaceRenderer()
         MapboxNavigationApp.attach(lifecycleOwner = this)
