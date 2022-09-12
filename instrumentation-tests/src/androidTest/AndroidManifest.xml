@@ -1,0 +1,18 @@
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mapbox.navigation.instrumentation_tests.test">
+    <application>
+        <activity
+            android:name="androidx.test.core.app.InstrumentationActivityInvoker$BootstrapActivity"
+            tools:node="merge"
+            android:exported="true">
+            <intent-filter tools:node="removeAll" />
+        </activity>
+        <activity
+            android:name="androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity"
+            tools:node="merge"
+            android:exported="true">
+            <intent-filter tools:node="removeAll" />
+        </activity>
+    </application>
+</manifest>
