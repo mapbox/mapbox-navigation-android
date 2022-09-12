@@ -4,7 +4,11 @@ import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.annotation.Px
 import androidx.annotation.StyleRes
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import com.google.android.material.resources.TextAppearance
+import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
 import com.mapbox.navigation.ui.maneuver.model.ManeuverExitOptions
@@ -55,11 +59,10 @@ class ViewStyleCustomization {
     var infoPanelBackground: Int? = null
 
     /**
-     * Provide custom destination marker icon.
-     * Use [defaultDestinationMarker] to reset to default.
+     * Provide [PointAnnotationOptions] for destination marker.
+     * Use [defaultMarkerAnnotationOptions] to reset to default.
      */
-    @DrawableRes
-    var destinationMarker: Int? = null
+    var destinationMarkerAnnotationOptions: PointAnnotationOptions? = null
 
     /**
      * Provide custom [MapboxRoadNameView] background.
@@ -171,10 +174,18 @@ class ViewStyleCustomization {
         fun defaultInfoPanelBackground(): Int = R.drawable.mapbox_bg_info_panel
 
         /**
-         * Default destination marker icon.
+         * Default [PointAnnotationOptions] for showing destination marker.
          */
-        @DrawableRes
-        fun defaultDestinationMarker(): Int = R.drawable.mapbox_ic_destination_marker
+        fun defaultMarkerAnnotationOptions(context: Context): PointAnnotationOptions =
+            PointAnnotationOptions().apply {
+                withIconImage(
+                    ContextCompat.getDrawable(
+                        context,
+                        R.drawable.mapbox_ic_destination_marker
+                    )!!.toBitmap()
+                )
+                withIconAnchor(IconAnchor.BOTTOM)
+            }
 
         /**
          * Default [MapboxRoadNameView] background.

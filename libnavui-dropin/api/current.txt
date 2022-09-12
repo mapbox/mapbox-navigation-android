@@ -180,7 +180,7 @@ package com.mapbox.navigation.dropin {
     ctor public ViewStyleCustomization();
     method public Integer? getAudioGuidanceButtonStyle();
     method public Integer? getCameraModeButtonStyle();
-    method public Integer? getDestinationMarker();
+    method public com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions? getDestinationMarkerAnnotationOptions();
     method public Integer? getEndNavigationButtonStyle();
     method public Integer? getInfoPanelBackground();
     method public Integer? getInfoPanelMarginEnd();
@@ -197,7 +197,7 @@ package com.mapbox.navigation.dropin {
     method public Integer? getTripProgressStyle();
     method public void setAudioGuidanceButtonStyle(Integer?);
     method public void setCameraModeButtonStyle(Integer?);
-    method public void setDestinationMarker(Integer?);
+    method public void setDestinationMarkerAnnotationOptions(com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions?);
     method public void setEndNavigationButtonStyle(Integer?);
     method public void setInfoPanelBackground(Integer?);
     method public void setInfoPanelMarginEnd(Integer?);
@@ -214,7 +214,7 @@ package com.mapbox.navigation.dropin {
     method public void setTripProgressStyle(Integer?);
     property public final Integer? audioGuidanceButtonStyle;
     property public final Integer? cameraModeButtonStyle;
-    property public final Integer? destinationMarker;
+    property public final com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions? destinationMarkerAnnotationOptions;
     property public final Integer? endNavigationButtonStyle;
     property public final Integer? infoPanelBackground;
     property public final Integer? infoPanelMarginEnd;
@@ -235,13 +235,13 @@ package com.mapbox.navigation.dropin {
   public static final class ViewStyleCustomization.Companion {
     method @StyleRes public int defaultAudioGuidanceButtonStyle();
     method @StyleRes public int defaultCameraModeButtonStyle();
-    method @DrawableRes public int defaultDestinationMarker();
     method @StyleRes public int defaultEndNavigationButtonStyle();
     method @DrawableRes public int defaultInfoPanelBackground();
     method @Px public int defaultInfoPanelMarginEnd();
     method @Px public int defaultInfoPanelMarginStart();
     method @Px public int defaultInfoPanelPeekHeight(android.content.Context context);
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions defaultManeuverViewOptions();
+    method public com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions defaultMarkerAnnotationOptions(android.content.Context context);
     method @StyleRes public int defaultRecenterButtonStyle();
     method @DrawableRes public int defaultRoadNameBackground();
     method @StyleRes public int defaultRoadNameTextAppearance();
