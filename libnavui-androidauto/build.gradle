@@ -43,9 +43,12 @@ dependencies {
     // build.gradle.
     def carNavVersion = "2.8.0-beta.3"
     def carSearchVersion = "1.0.0-beta.35"
-    api("com.mapbox.navigation:android:${carNavVersion}")
     api("com.mapbox.search:mapbox-search-android:${carSearchVersion}")
-    implementation("com.mapbox.navigation:ui-app:${carNavVersion}")
+
+    debugApi project(":libnavigation-android")
+    releaseApi("com.mapbox.navigation:android:${carNavVersion}")
+    debugImplementation project(":libnavui-app")
+    releaseImplementation("com.mapbox.navigation:ui-app:${carNavVersion}")
 
     implementation(dependenciesList.androidXAppCompat)
     implementation(dependenciesList.coroutinesCore)
