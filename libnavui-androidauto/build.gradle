@@ -41,7 +41,10 @@ dependencies {
     // This defines the minimum version of Maps, Navigation, and Search which are included in
     // this SDK. To upgrade the SDK versions, you can specify a newer version in your downstream
     // build.gradle.
-    def carNavVersion = "2.8.0-beta.3"
+    // TODO https://mapbox.atlassian.net/browse/NAVSDK-544
+    //   incompatible change requires a 2.8.0 release
+    //   change to the 2.8.0-rc.1 when available
+    def carNavVersion = "2.9.0-SNAPSHOT"
     def carSearchVersion = "1.0.0-beta.35"
     api("com.mapbox.navigation:android:${carNavVersion}")
     api("com.mapbox.search:mapbox-search-android:${carSearchVersion}")
