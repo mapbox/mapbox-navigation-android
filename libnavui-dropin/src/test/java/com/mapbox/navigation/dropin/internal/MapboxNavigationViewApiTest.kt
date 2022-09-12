@@ -1,6 +1,5 @@
 package com.mapbox.navigation.dropin.internal
 
-import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -126,9 +125,9 @@ class MapboxNavigationViewApiTest {
         val point = Point.fromLngLat(11.0, 22.0)
         val routes = listOf(
             navigationRoute(
-                waypoint(Point.fromLngLat(1.0, 2.0)),
-                waypoint(Point.fromLngLat(2.0, 3.0)),
-                waypoint(point),
+                Point.fromLngLat(1.0, 2.0),
+                Point.fromLngLat(2.0, 3.0),
+                point,
             )
         )
 
@@ -211,9 +210,9 @@ class MapboxNavigationViewApiTest {
         val point = Point.fromLngLat(11.0, 22.0)
         val routes = listOf(
             navigationRoute(
-                waypoint(Point.fromLngLat(1.0, 2.0)),
-                waypoint(Point.fromLngLat(2.0, 3.0)),
-                waypoint(point),
+                Point.fromLngLat(1.0, 2.0),
+                Point.fromLngLat(2.0, 3.0),
+                point,
             )
         )
 
@@ -286,9 +285,9 @@ class MapboxNavigationViewApiTest {
         val point = Point.fromLngLat(11.0, 22.0)
         val routes = listOf(
             navigationRoute(
-                waypoint(Point.fromLngLat(1.0, 2.0)),
-                waypoint(Point.fromLngLat(2.0, 3.0)),
-                waypoint(point),
+                Point.fromLngLat(1.0, 2.0),
+                Point.fromLngLat(2.0, 3.0),
+                point,
             )
         )
 
@@ -334,17 +333,11 @@ class MapboxNavigationViewApiTest {
         verify { testStore.dispatch(TripSessionStarterAction.EnableTripSession) }
     }
 
-    private fun navigationRoute(vararg waypoints: DirectionsWaypoint): NavigationRoute {
+    private fun navigationRoute(vararg waypoints: Point): NavigationRoute {
         return mockk {
-            every { directionsResponse } returns mockk {
-                every { waypoints() } returns waypoints.toList()
+            every { routeOptions } returns mockk(relaxed = true) {
+                every { coordinatesList() } returns waypoints.toList()
             }
-        }
-    }
-
-    private fun waypoint(point: Point): DirectionsWaypoint {
-        return mockk {
-            every { location() } returns point
         }
     }
 }

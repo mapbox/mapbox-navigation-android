@@ -7,21 +7,15 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.destination.Destination
-import io.mockk.MockKAnnotations
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -33,21 +27,12 @@ internal class MapMarkersComponentTest {
     var coroutineRule = MainCoroutineRule()
 
     private lateinit var sut: MapMarkersComponent
-
-    @MockK
-    lateinit var mockAnnotationFactory: MapMarkerFactory
-
-    @MockK
-    lateinit var mockAnnotationManager: PointAnnotationManager
-
     private lateinit var testStore: TestStore
+    private var mockAnnotationManager: PointAnnotationManager = mockk(relaxed = true)
+    private var annotation: PointAnnotationOptions = mockk(relaxed = true)
 
     @Before
     fun setUp() {
-        mockkObject(MapMarkerFactory)
-        MockKAnnotations.init(this, relaxUnitFun = true)
-        every { MapMarkerFactory.create(any()) } returns mockAnnotationFactory
-
         testStore = TestStore()
         val mapView = mockk<MapView> {
             every { context } returns mockk(relaxed = true)
@@ -56,23 +41,14 @@ internal class MapMarkersComponentTest {
             }
         }
 
-        sut = MapMarkersComponent(testStore, mapView, R.drawable.mapbox_ic_destination_marker)
-    }
-
-    @After
-    fun tearDown() {
-        unmockkObject(MapMarkerFactory)
+        sut = MapMarkersComponent(testStore, mapView, annotation)
     }
 
     @Test
     fun `should re-create point annotation on destination change`() =
         coroutineRule.runBlockingTest {
-            val annotation = mockk<PointAnnotationOptions>()
             val point = Point.fromLngLat(10.0, 11.0)
             testStore.setState(State(destination = Destination(point)))
-            every {
-                mockAnnotationFactory.createPin(point, R.drawable.mapbox_ic_destination_marker)
-            } returns annotation
 
             sut.onAttached(mockk())
 
@@ -83,12 +59,11 @@ internal class MapMarkersComponentTest {
         }
 
     @Test
-    fun `onDetached should delete all annotations`() =
-        coroutineRule.runBlockingTest {
-            sut.onAttached(mockk())
+    fun `onDetached should delete all annotations`() = coroutineRule.runBlockingTest {
+        sut.onAttached(mockk())
 
-            sut.onDetached(mockk())
+        sut.onDetached(mockk())
 
-            verify { mockAnnotationManager.deleteAll() }
-        }
+        verify { mockAnnotationManager.deleteAll() }
+    }
 }

@@ -148,7 +148,7 @@ internal class MapboxNavigationViewApi(
     }
 
     private fun NavigationRoute.getDestination(): Point? {
-        return directionsResponse.waypoints()?.lastOrNull()?.location()
+        return routeOptions.coordinatesList().lastOrNull()
     }
 }
 

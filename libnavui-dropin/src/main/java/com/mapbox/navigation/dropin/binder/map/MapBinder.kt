@@ -65,9 +65,9 @@ internal class MapBinder(
             },
             CameraComponent(store, mapView),
             reloadOnChange(
-                context.styles.destinationMarker
-            ) { marker ->
-                MapMarkersComponent(store, mapView, marker)
+                context.styles.destinationMarkerAnnotationOptions
+            ) { markerAnnotationOptions ->
+                MapMarkersComponent(store, mapView, markerAnnotationOptions)
             },
             reloadOnChange(navigationState) {
                 longPressMapComponent(it)

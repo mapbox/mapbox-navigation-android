@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin
 
 import android.content.Context
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,14 +37,14 @@ internal class NavigationViewStyles(context: Context) {
         MutableStateFlow(ViewStyleCustomization.defaultSpeedLimitStyle())
     private var _speedLimitTextAppearance: MutableStateFlow<Int> =
         MutableStateFlow(ViewStyleCustomization.defaultSpeedLimitTextAppearance())
-    private var _destinationMarker: MutableStateFlow<Int> =
-        MutableStateFlow(ViewStyleCustomization.defaultDestinationMarker())
     private var _roadNameBackground: MutableStateFlow<Int> =
         MutableStateFlow(ViewStyleCustomization.defaultRoadNameBackground())
     private var _roadNameTextAppearance: MutableStateFlow<Int> =
         MutableStateFlow(ViewStyleCustomization.defaultRoadNameTextAppearance())
     private var _maneuverViewOptions: MutableStateFlow<ManeuverViewOptions> =
         MutableStateFlow(ViewStyleCustomization.defaultManeuverViewOptions())
+    private var _destinationMarkerAnnotationOptions: MutableStateFlow<PointAnnotationOptions> =
+        MutableStateFlow(ViewStyleCustomization.defaultMarkerAnnotationOptions(context))
 
     val infoPanelPeekHeight: StateFlow<Int> = _infoPanelPeekHeight.asStateFlow()
     val infoPanelMarginStart: StateFlow<Int> = _infoPanelMarginStart.asStateFlow()
@@ -58,7 +59,8 @@ internal class NavigationViewStyles(context: Context) {
     val startNavigationButtonStyle: StateFlow<Int> = _startNavigationButtonStyle.asStateFlow()
     val speedLimitStyle: StateFlow<Int> = _speedLimitStyle.asStateFlow()
     val speedLimitTextAppearance: StateFlow<Int> = _speedLimitTextAppearance.asStateFlow()
-    val destinationMarker: StateFlow<Int> = _destinationMarker.asStateFlow()
+    val destinationMarkerAnnotationOptions: StateFlow<PointAnnotationOptions> =
+        _destinationMarkerAnnotationOptions.asStateFlow()
     val roadNameBackground: StateFlow<Int> = _roadNameBackground.asStateFlow()
     val roadNameTextAppearance: StateFlow<Int> = _roadNameTextAppearance.asStateFlow()
     val maneuverViewOptions: StateFlow<ManeuverViewOptions> = _maneuverViewOptions.asStateFlow()
@@ -78,7 +80,9 @@ internal class NavigationViewStyles(context: Context) {
         customization.speedLimitStyle?.also { _speedLimitStyle.tryEmit(it) }
         customization.maneuverViewOptions?.also { _maneuverViewOptions.tryEmit(it) }
         customization.speedLimitTextAppearance?.also { _speedLimitTextAppearance.tryEmit(it) }
-        customization.destinationMarker?.also { _destinationMarker.tryEmit(it) }
+        customization.destinationMarkerAnnotationOptions?.also {
+            _destinationMarkerAnnotationOptions.tryEmit(it)
+        }
         customization.roadNameBackground?.also { _roadNameBackground.tryEmit(it) }
         customization.roadNameTextAppearance?.also { _roadNameTextAppearance.tryEmit(it) }
     }

@@ -14,12 +14,16 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.SwitchCompat
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.MutableLiveData
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
+import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -37,13 +41,13 @@ import com.mapbox.navigation.dropin.NavigationViewListener
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultAudioGuidanceButtonStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultCameraModeButtonStyle
-import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultDestinationMarker
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultEndNavigationButtonStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelBackground
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelMarginEnd
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelMarginStart
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelPeekHeight
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultManeuverViewOptions
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultMarkerAnnotationOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRecenterButtonStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoadNameBackground
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoadNameTextAppearance
@@ -334,7 +338,15 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 tripProgressStyle = R.style.MyCustomTripProgressStyle
                 speedLimitStyle = R.style.MyCustomSpeedLimitStyle
                 speedLimitTextAppearance = R.style.MyCustomSpeedLimitTextAppearance
-                destinationMarker = R.drawable.mapbox_ic_marker
+                destinationMarkerAnnotationOptions = PointAnnotationOptions().apply {
+                    withIconImage(
+                        ContextCompat.getDrawable(
+                            this@MapboxNavigationViewCustomizedActivity,
+                            R.drawable.mapbox_ic_marker
+                        )!!.toBitmap()
+                    )
+                    withIconAnchor(IconAnchor.BOTTOM)
+                }
                 roadNameBackground = R.drawable.mapbox_bg_road_name
                 roadNameTextAppearance = R.style.MyCustomRoadNameViewTextAppearance
                 audioGuidanceButtonStyle = R.style.MyCustomAudioGuidanceButton
@@ -351,7 +363,9 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 speedLimitStyle = defaultSpeedLimitStyle()
                 speedLimitTextAppearance = defaultSpeedLimitTextAppearance()
                 maneuverViewOptions = defaultManeuverViewOptions()
-                destinationMarker = defaultDestinationMarker()
+                destinationMarkerAnnotationOptions = defaultMarkerAnnotationOptions(
+                    this@MapboxNavigationViewCustomizedActivity
+                )
                 roadNameBackground = defaultRoadNameBackground()
                 roadNameTextAppearance = defaultRoadNameTextAppearance()
                 audioGuidanceButtonStyle = defaultAudioGuidanceButtonStyle()
