@@ -21,6 +21,7 @@
         <item name="subManeuverViewBackgroundColor">#046808</item>
         <item name="upcomingManeuverViewBackgroundColor">#046808</item>
         <item name="maneuverViewIconStyle">@style/MapboxCustomManeuverTurnIconStyle</item>
+        <item name="upcomingManeuverListIconStyle">@style/MapboxCustomManeuverTurnIconStyle</item>
         <item name="laneGuidanceManeuverIconStyle">@style/MapboxCustomManeuverTurnIconStyle</item>
     </style>
 

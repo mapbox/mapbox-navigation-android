@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
 import android.text.SpannableString
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
@@ -13,10 +14,15 @@ import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.ui.maneuver.model.Component
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
+import com.mapbox.navigation.ui.maneuver.model.ManeuverExitOptions
+import com.mapbox.navigation.ui.maneuver.model.ManeuverPrimaryOptions
+import com.mapbox.navigation.ui.maneuver.model.ManeuverSecondaryOptions
+import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.StepDistance
 import com.mapbox.navigation.ui.maneuver.model.TextComponentNode
+import com.mapbox.navigation.ui.maneuver.test.R
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -24,6 +30,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows
 
 @RunWith(RobolectricTestRunner::class)
 class MapboxUpcomingManeuverAdapterTest {
@@ -110,6 +117,129 @@ class MapboxUpcomingManeuverAdapterTest {
         val actual = viewHolder.viewBinding.stepDistance.text
 
         assertEquals(expected.toString(), actual.toString())
+    }
+
+    @Test
+    fun `update turn icon style`() {
+        val style = ContextThemeWrapper(ctx, R.style.MapboxTestStyleTurnIconManeuver)
+        val adapter = MapboxUpcomingManeuverAdapter(ctx)
+        adapter.updateUpcomingManeuverIconStyle(style)
+        val rvParent = RecyclerView(ctx)
+        rvParent.layoutManager = LinearLayoutManager(ctx)
+        val viewHolder: MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder =
+            adapter.onCreateViewHolder(rvParent, 0)
+
+        viewHolder.bindUpcomingManeuver(getUpcomingManeuver("My maneuver").first())
+
+        assertEquals(style, viewHolder.viewBinding.maneuverIcon.getTurnIconTheme())
+    }
+
+    @Test
+    fun updateOptions() {
+        val primaryManeuverOptions = ManeuverPrimaryOptions.Builder()
+            .textAppearance(R.style.CustomPrimaryTextAppearance)
+            .exitOptions(
+                ManeuverExitOptions.Builder()
+                    .textAppearance(R.style.CustomPrimaryExitTextAppearance)
+                    .build()
+            )
+            .build()
+        val secondaryManeuverOptions = ManeuverSecondaryOptions.Builder()
+            .textAppearance(R.style.CustomSecondaryTextAppearance)
+            .exitOptions(
+                ManeuverExitOptions.Builder()
+                    .textAppearance(R.style.CustomSecondaryExitTextAppearance)
+                    .build()
+            )
+            .build()
+        val options = ManeuverViewOptions.Builder()
+            .primaryManeuverOptions(primaryManeuverOptions)
+            .secondaryManeuverOptions(secondaryManeuverOptions)
+            .stepDistanceTextAppearance(R.style.CustomStepDistanceTextAppearance)
+            .build()
+        val adapter = MapboxUpcomingManeuverAdapter(ctx)
+        adapter.updateManeuverViewOptions(options)
+        val rvParent = RecyclerView(ctx)
+        rvParent.layoutManager = LinearLayoutManager(ctx)
+        val viewHolder: MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder =
+            adapter.onCreateViewHolder(rvParent, 0)
+
+        viewHolder.bindUpcomingManeuver(getUpcomingManeuver("My maneuver").first())
+
+        assertEquals(
+            primaryManeuverOptions,
+            viewHolder.viewBinding.primaryManeuverText.getOptions()
+        )
+        assertEquals(
+            secondaryManeuverOptions,
+            viewHolder.viewBinding.secondaryManeuverText.getOptions()
+        )
+        // check text appearance
+        assertEquals(
+            R.style.CustomPrimaryTextAppearance,
+            Shadows.shadowOf(viewHolder.viewBinding.primaryManeuverText).textAppearanceId
+        )
+        assertEquals(
+            R.style.CustomSecondaryTextAppearance,
+            Shadows.shadowOf(viewHolder.viewBinding.secondaryManeuverText).textAppearanceId
+        )
+        assertEquals(
+            R.style.CustomStepDistanceTextAppearance,
+            Shadows.shadowOf(viewHolder.viewBinding.stepDistance).textAppearanceId
+        )
+    }
+
+    @Test
+    fun updateUpcomingPrimaryManeuverTextAppearance() {
+        val adapter = MapboxUpcomingManeuverAdapter(ctx)
+        adapter.updateUpcomingPrimaryManeuverTextAppearance(R.style.CustomPrimaryTextAppearance)
+        val rvParent = RecyclerView(ctx)
+        rvParent.layoutManager = LinearLayoutManager(ctx)
+        val viewHolder: MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder =
+            adapter.onCreateViewHolder(rvParent, 0)
+
+        viewHolder.bindUpcomingManeuver(getUpcomingManeuver("My maneuver").first())
+
+        assertEquals(
+            R.style.CustomPrimaryTextAppearance,
+            Shadows.shadowOf(viewHolder.viewBinding.primaryManeuverText).textAppearanceId
+        )
+    }
+
+    @Test
+    fun updateUpcomingSecondaryManeuverTextAppearance() {
+        val adapter = MapboxUpcomingManeuverAdapter(ctx)
+        adapter.updateUpcomingSecondaryManeuverTextAppearance(R.style.CustomSecondaryTextAppearance)
+        val rvParent = RecyclerView(ctx)
+        rvParent.layoutManager = LinearLayoutManager(ctx)
+        val viewHolder: MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder =
+            adapter.onCreateViewHolder(rvParent, 0)
+
+        viewHolder.bindUpcomingManeuver(getUpcomingManeuver("My maneuver").first())
+
+        assertEquals(
+            R.style.CustomSecondaryTextAppearance,
+            Shadows.shadowOf(viewHolder.viewBinding.secondaryManeuverText).textAppearanceId
+        )
+    }
+
+    @Test
+    fun updateUpcomingManeuverStepDistanceTextAppearance() {
+        val adapter = MapboxUpcomingManeuverAdapter(ctx)
+        adapter.updateUpcomingManeuverStepDistanceTextAppearance(
+            R.style.CustomStepDistanceTextAppearance
+        )
+        val rvParent = RecyclerView(ctx)
+        rvParent.layoutManager = LinearLayoutManager(ctx)
+        val viewHolder: MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder =
+            adapter.onCreateViewHolder(rvParent, 0)
+
+        viewHolder.bindUpcomingManeuver(getUpcomingManeuver("My maneuver").first())
+
+        assertEquals(
+            R.style.CustomStepDistanceTextAppearance,
+            Shadows.shadowOf(viewHolder.viewBinding.stepDistance).textAppearanceId
+        )
     }
 
     private fun getUpcomingManeuver(primaryText: String): List<Maneuver> {

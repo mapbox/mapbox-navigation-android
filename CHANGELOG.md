@@ -13,6 +13,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Marked `MapboxNavigationApp` methods with `@Throws` annotation. [#6324](https://github.com/mapbox/mapbox-navigation-android/pull/6324)
 - Exposed `AlternativeRouteMetadata#alternativeId` which lets user distinguish a new alternative from updated alternatives. [#6329](https://github.com/mapbox/mapbox-navigation-android/pull/6329)
 - Fixed an issue with `NavigationView` that caused maneuver view to be cut off. [#6328](https://github.com/mapbox/mapbox-navigation-android/pull/6328)
+- Introduced  `MapboxUpcomingManeuverViewAdapter#updateManeuverViewOptions()`, `MapboxUpcomingManeuverViewAdapter#updateUpcomingManeuverIconStyle()` and  `upcomingManeuverListIconStyle` attribute to allow for customizing the colors of maneuver turn icons in upcoming maneuver view list. [#6330](https://github.com/mapbox/mapbox-navigation-android/pull/6330)
 
 ## Mapbox Navigation SDK 2.8.0-beta.3 - 09 September, 2022
 ### Changelog

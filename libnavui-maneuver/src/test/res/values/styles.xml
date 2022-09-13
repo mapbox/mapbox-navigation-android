@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="MapboxTestStyleTurnIconManeuver">
+        <item name="maneuverTurnIconColor">#FF0000</item>
+        <item name="maneuverTurnIconShadowColor">#00FFFF</item>
+    </style>
+
+    <style name="CustomPrimaryTextAppearance">
+        <item name="android:textColor">@color/custom_primary_text_color</item>
+    </style>
+    <style name="CustomPrimaryExitTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/custom_primary_exit_text_color</item>
+    </style>
+    <style name="CustomSecondaryTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/custom_secondary_text_color</item>
+    </style>
+    <style name="CustomSecondaryExitTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/custom_secondary_exit_text_color</item>
+    </style>
+    <style name="CustomStepDistanceTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/custom_step_distance_text_color</item>
+    </style>
+
+</resources>

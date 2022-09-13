@@ -19,6 +19,7 @@ import com.mapbox.navigation.ui.maneuver.model.ManeuverPrimaryOptions
 import com.mapbox.navigation.ui.maneuver.model.ManeuverSecondaryOptions
 import com.mapbox.navigation.ui.maneuver.model.ManeuverSubOptions
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
+import com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
 import com.mapbox.navigation.ui.maps.roadname.view.MapboxRoadNameView
 import com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton
@@ -313,6 +314,8 @@ class ViewStyleCustomization {
                         ManeuverExitOptions
                             .Builder()
                             .textAppearance(R.style.DropInStyleExitPrimary)
+                            .mutcdExitProperties(defaultMutcdProperties())
+                            .viennaExitProperties(defaultVienndProperties())
                             .build()
                     )
                     .build()
@@ -325,6 +328,8 @@ class ViewStyleCustomization {
                         ManeuverExitOptions
                             .Builder()
                             .textAppearance(R.style.DropInStyleExitSecondary)
+                            .mutcdExitProperties(defaultMutcdProperties())
+                            .viennaExitProperties(defaultVienndProperties())
                             .build()
                     )
                     .build()
@@ -337,6 +342,8 @@ class ViewStyleCustomization {
                         ManeuverExitOptions
                             .Builder()
                             .textAppearance(R.style.DropInStyleExitSub)
+                            .mutcdExitProperties(defaultMutcdProperties())
+                            .viennaExitProperties(defaultVienndProperties())
                             .build()
                     )
                     .build()
@@ -349,6 +356,20 @@ class ViewStyleCustomization {
         private fun Context.defaultLayoutParams() = LinearLayout.LayoutParams(
             resources.getDimensionPixelSize(R.dimen.mapbox_extendable_button_width),
             resources.getDimensionPixelSize(R.dimen.mapbox_extendable_button_height)
+        )
+
+        private fun defaultMutcdProperties() = MapboxExitProperties.PropertiesMutcd(
+            exitBackground = R.drawable.mapbox_dropin_exit_board_background,
+            fallbackDrawable = R.drawable.mapbox_dropin_ic_exit_arrow_right_mutcd,
+            exitRightDrawable = R.drawable.mapbox_dropin_ic_exit_arrow_right_mutcd,
+            exitLeftDrawable = R.drawable.mapbox_dropin_ic_exit_arrow_left_mutcd
+        )
+
+        private fun defaultVienndProperties() = MapboxExitProperties.PropertiesVienna(
+            exitBackground = R.drawable.mapbox_dropin_exit_board_background,
+            fallbackDrawable = R.drawable.mapbox_dropin_ic_exit_arrow_right_vienna,
+            exitRightDrawable = R.drawable.mapbox_dropin_ic_exit_arrow_right_vienna,
+            exitLeftDrawable = R.drawable.mapbox_dropin_ic_exit_arrow_left_vienna
         )
     }
 }
