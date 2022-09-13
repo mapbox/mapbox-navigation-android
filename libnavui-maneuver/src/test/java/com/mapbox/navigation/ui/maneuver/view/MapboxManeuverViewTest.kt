@@ -8,6 +8,7 @@ import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.BannerComponents
@@ -16,7 +17,6 @@ import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.model.Component
 import com.mapbox.navigation.ui.maneuver.model.DelimiterComponentNode
 import com.mapbox.navigation.ui.maneuver.model.ExitComponentNode
@@ -25,12 +25,14 @@ import com.mapbox.navigation.ui.maneuver.model.Lane
 import com.mapbox.navigation.ui.maneuver.model.LaneIndicator
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
+import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode
 import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.StepDistance
 import com.mapbox.navigation.ui.maneuver.model.SubManeuver
 import com.mapbox.navigation.ui.maneuver.model.TextComponentNode
+import com.mapbox.navigation.ui.maneuver.test.R
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -564,6 +566,29 @@ class MapboxManeuverViewTest {
         )
     }
 
+    @Test
+    fun `update maneuver view options updates turn icon style for upcoming maneuvers`() {
+        val turnIconManeuver = R.style.MapboxTestStyleTurnIconManeuver
+        val laneGuidanceTurnIconManeuver = R.style.MapboxStylePrimaryManeuver
+        val options = ManeuverViewOptions.Builder()
+            .turnIconManeuver(turnIconManeuver)
+            .laneGuidanceTurnIconManeuver(laneGuidanceTurnIconManeuver)
+            .build()
+        val view = MapboxManeuverView(ctx)
+        val rvParent = RecyclerView(ctx)
+        rvParent.layoutManager = LinearLayoutManager(ctx)
+        val viewHolder: MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder =
+            view.getUpcomingManeuverAdapter().onCreateViewHolder(rvParent, 0)
+
+        view.updateManeuverViewOptions(options)
+
+        viewHolder.bindUpcomingManeuver(getMockUpcomingManeuver())
+        assertEquals(
+            turnIconManeuver,
+            viewHolder.viewBinding.maneuverIcon.getTurnIconTheme().themeResId
+        )
+    }
+
     private fun getMockPrimaryManeuver(): PrimaryManeuver {
         val textComponentNode = Component(
             BannerComponents.TEXT,
@@ -689,5 +714,59 @@ class MapboxManeuverViewTest {
         return mockk {
             every { allLanes } returns listOf(laneIndicator1, laneIndicator2)
         }
+    }
+
+    private fun getMockUpcomingManeuver(): Maneuver {
+        val stepDistance = mockk<StepDistance> {
+            every { totalDistance } returns 75.0
+            every { distanceRemaining } returns 45.0
+            every { distanceFormatter.formatDistance(any()) } returns SpannableString("200 ft")
+        }
+        val primaryManeuver = mockk<PrimaryManeuver> {
+            every { id } returns "1234abcd"
+            every { text } returns "Upcoming maneuver"
+            every { type } returns StepManeuver.TURN
+            every { degrees } returns null
+            every { modifier } returns ManeuverModifier.LEFT
+            every { drivingSide } returns null
+            every { componentList } returns listOf(
+                Component(
+                    BannerComponents.TEXT,
+                    TextComponentNode
+                        .Builder()
+                        .text("Upcoming maneuver")
+                        .abbr(null)
+                        .abbrPriority(null)
+                        .build()
+                )
+            )
+        }
+        val secondaryManeuver = mockk<SecondaryManeuver> {
+            every { id } returns "abcd1234"
+            every { text } returns "Davis Street"
+            every { type } returns StepManeuver.TURN
+            every { degrees } returns null
+            every { modifier } returns ManeuverModifier.SLIGHT_LEFT
+            every { drivingSide } returns null
+            every { componentList } returns listOf(
+                Component(
+                    BannerComponents.TEXT,
+                    TextComponentNode
+                        .Builder()
+                        .text("Davis Street")
+                        .abbr(null)
+                        .abbrPriority(null)
+                        .build()
+                )
+            )
+        }
+        return Maneuver(
+            primaryManeuver,
+            stepDistance,
+            secondaryManeuver,
+            null,
+            null,
+            Point.fromLngLat(-122.345234, 37.899765)
+        )
     }
 }

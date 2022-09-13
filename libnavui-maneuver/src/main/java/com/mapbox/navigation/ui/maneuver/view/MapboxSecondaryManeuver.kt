@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
 import android.util.AttributeSet
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.widget.AppCompatTextView
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.model.ManeuverInstructionGenerator
@@ -102,4 +103,7 @@ class MapboxSecondaryManeuver : AppCompatTextView {
     fun updateOptions(options: ManeuverSecondaryOptions) {
         this.options = options
     }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    internal fun getOptions() = options
 }

@@ -59,8 +59,8 @@
     </style>
 
     <style name="MyCustomTurnIconManeuver" parent="MapboxStyleTurnIconManeuver">
-        <item name="maneuverTurnIconColor">@android:color/white</item>
-        <item name="maneuverTurnIconShadowColor">@color/colorSecondary</item>
+        <item name="maneuverTurnIconColor">@color/maneuver_turn_icon_color</item>
+        <item name="maneuverTurnIconShadowColor">@color/maneuver_turn_icon_shadow_color</item>
     </style>
 
     <style name="MyCustomPrimaryManeuver" parent="TextAppearance.AppCompat">
@@ -94,21 +94,21 @@
         <item name="android:textSize">28sp</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:textStyle">italic</item>
-        <item name="android:textColor">@color/secondary</item>
+        <item name="android:textColor">@color/maneuver_exit_text</item>
     </style>
 
     <style name="MyCustomExitTextForSecondary" parent="TextAppearance.AppCompat">
         <item name="android:textSize">22sp</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/secondary</item>
+        <item name="android:textColor">@color/maneuver_exit_text</item>
     </style>
 
     <style name="MyCustomExitTextForSub" parent="TextAppearance.AppCompat">
         <item name="android:textSize">16sp</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/secondary</item>
+        <item name="android:textColor">@color/maneuver_exit_text</item>
     </style>
 
     <style name="MyCustomStepDistance" parent="TextAppearance.AppCompat">

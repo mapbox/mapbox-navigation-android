@@ -10,6 +10,8 @@
     <attr name="upcomingManeuverViewBackgroundColor" format="reference|color"/>
     <!-- Defines the style of maneuver arrow in the primary and sub maneuver view -->
     <attr name="maneuverViewIconStyle" format="reference" />
+    <!-- Defines the style of maneuver arrow in upcoming maneuver list-->
+    <attr name="upcomingManeuverListIconStyle" format="reference" />
     <!-- Defines the style of maneuver arrow in the lane guidance view -->
     <attr name="laneGuidanceManeuverIconStyle" format="reference" />
   </declare-styleable>

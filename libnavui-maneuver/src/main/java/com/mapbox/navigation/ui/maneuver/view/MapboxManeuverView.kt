@@ -5,6 +5,7 @@ import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.annotation.StyleRes
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -202,14 +203,9 @@ class MapboxManeuverView : ConstraintLayout {
         binding.upcomingManeuverRecycler.setBackgroundColor(
             ContextCompat.getColor(context, maneuverViewOptions.upcomingManeuverBackgroundColor)
         )
-        upcomingManeuverAdapter.updateUpcomingPrimaryManeuverTextAppearance(
-            maneuverViewOptions.primaryManeuverOptions.textAppearance
-        )
-        upcomingManeuverAdapter.updateUpcomingSecondaryManeuverTextAppearance(
-            maneuverViewOptions.secondaryManeuverOptions.textAppearance
-        )
-        upcomingManeuverAdapter.updateUpcomingManeuverStepDistanceTextAppearance(
-            maneuverViewOptions.stepDistanceTextAppearance
+        upcomingManeuverAdapter.updateManeuverViewOptions(maneuverViewOptions)
+        upcomingManeuverAdapter.updateUpcomingManeuverIconStyle(
+            ContextThemeWrapper(context, maneuverViewOptions.turnIconManeuver)
         )
     }
 
@@ -452,6 +448,15 @@ class MapboxManeuverView : ConstraintLayout {
                 )
             )
         )
+        upcomingManeuverAdapter.updateUpcomingManeuverIconStyle(
+            ContextThemeWrapper(
+                context,
+                typedArray.getResourceId(
+                    R.styleable.MapboxManeuverView_upcomingManeuverListIconStyle,
+                    R.style.MapboxStyleTurnIconManeuver
+                )
+            )
+        )
     }
 
     private fun drawUpcomingManeuvers(maneuvers: List<Maneuver>) {
@@ -574,6 +579,9 @@ class MapboxManeuverView : ConstraintLayout {
             ContextThemeWrapper(context, style)
         )
         subLayoutBinding.subManeuverIcon.updateTurnIconStyle(
+            ContextThemeWrapper(context, style)
+        )
+        upcomingManeuverAdapter.updateUpcomingManeuverIconStyle(
             ContextThemeWrapper(context, style)
         )
     }
@@ -731,5 +739,10 @@ class MapboxManeuverView : ConstraintLayout {
             setOf(it.toRouteShield())
         }
         renderSub(sub, shields)
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    internal fun getUpcomingManeuverAdapter(): MapboxUpcomingManeuverAdapter {
+        return upcomingManeuverAdapter
     }
 }

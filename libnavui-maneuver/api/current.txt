@@ -1102,11 +1102,13 @@ package com.mapbox.navigation.ui.maneuver.view {
     method public int getItemCount();
     method public void onBindViewHolder(com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder holder, int position);
     method public com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType);
+    method public void updateManeuverViewOptions(com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions maneuverViewOptions);
     method @Deprecated public void updateRoadShields(java.util.Map<java.lang.String,com.mapbox.navigation.ui.maneuver.model.RoadShield> shieldMap);
     method public void updateShields(java.util.Set<? extends com.mapbox.navigation.ui.shield.model.RouteShield> shields);
-    method public void updateUpcomingManeuverStepDistanceTextAppearance(@StyleRes int style);
-    method public void updateUpcomingPrimaryManeuverTextAppearance(@StyleRes int style);
-    method public void updateUpcomingSecondaryManeuverTextAppearance(@StyleRes int style);
+    method public void updateUpcomingManeuverIconStyle(androidx.appcompat.view.ContextThemeWrapper contextThemeWrapper);
+    method @Deprecated public void updateUpcomingManeuverStepDistanceTextAppearance(@StyleRes int style);
+    method @Deprecated public void updateUpcomingPrimaryManeuverTextAppearance(@StyleRes int style);
+    method @Deprecated public void updateUpcomingSecondaryManeuverTextAppearance(@StyleRes int style);
   }
 
   public final class MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {

@@ -78,7 +78,7 @@ class MapboxExitText : AppCompatTextView {
         message = "The API is incapable of rendering exit icons specific to countries following " +
             "VIENNA convention. It also cannot handle fallback in case the modifier value from " +
             "banner component is neither left nor right.",
-        replaceWith = ReplaceWith("setExitProperties")
+        replaceWith = ReplaceWith("updateExitProperties")
     )
     fun setExitStyle(
         background: Drawable?,
@@ -99,6 +99,9 @@ class MapboxExitText : AppCompatTextView {
         properties: MapboxExitProperties?
     ) {
         this.exitProperties = properties
+        if (properties != null) {
+            this.exitBackground = ContextCompat.getDrawable(context, properties.exitBackground)
+        }
     }
 
     /**

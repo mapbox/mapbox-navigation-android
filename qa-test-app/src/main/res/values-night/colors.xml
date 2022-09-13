@@ -7,9 +7,9 @@
     <color name="secondaryVariant">#efefef</color>
     <color name="onSecondary">#131313</color>
     <color name="colorAccent">#0088CC</color>
-    <color name="maneuver_main_background">#30877E</color>
-    <color name="maneuver_sub_background">#09514A</color>
-    <color name="maneuver_exit_text">#0000FF</color>
-    <color name="maneuver_turn_icon_color">@android:color/white</color>
-    <color name="maneuver_turn_icon_shadow_color">@color/colorSecondary</color>
+    <color name="maneuver_main_background">#357A38</color>
+    <color name="maneuver_sub_background">#1D431F</color>
+    <color name="maneuver_exit_text">#00FF00</color>
+    <color name="maneuver_turn_icon_color">#ECB205</color>
+    <color name="maneuver_turn_icon_shadow_color">#876604</color>
 </resources>

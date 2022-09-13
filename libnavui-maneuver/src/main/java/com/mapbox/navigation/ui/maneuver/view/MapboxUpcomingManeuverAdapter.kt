@@ -6,6 +6,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.annotation.StyleRes
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -14,6 +15,9 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.ui.maneuver.databinding.MapboxItemUpcomingManeuversLayoutBinding
 import com.mapbox.navigation.ui.maneuver.databinding.MapboxMainManeuverLayoutBinding
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
+import com.mapbox.navigation.ui.maneuver.model.ManeuverPrimaryOptions
+import com.mapbox.navigation.ui.maneuver.model.ManeuverSecondaryOptions
+import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.RoadShield
 import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
@@ -34,9 +38,8 @@ class MapboxUpcomingManeuverAdapter(
     private val context: Context
 ) : RecyclerView.Adapter<MapboxUpcomingManeuverViewHolder>() {
 
-    @StyleRes private var stepDistanceAppearance: Int? = null
-    @StyleRes private var primaryManeuverAppearance: Int? = null
-    @StyleRes private var secondaryManeuverAppearance: Int? = null
+    private var turnIconContextThemeWrapper: ContextThemeWrapper? = null
+    private var options: ManeuverViewOptions? = null
     private val inflater = LayoutInflater.from(context)
     private val upcomingManeuverList = mutableListOf<Maneuver>()
     private val routeShields = mutableSetOf<RouteShield>()
@@ -105,8 +108,14 @@ class MapboxUpcomingManeuverAdapter(
      * @see [TextViewCompat.setTextAppearance]
      * @param style Int
      */
+    @Deprecated(
+        message = "The method will only apply customized text appearance for step distance.",
+        replaceWith = ReplaceWith("this.updateManeuverViewOptions(maneuverViewOptions)")
+    )
     fun updateUpcomingManeuverStepDistanceTextAppearance(@StyleRes style: Int) {
-        stepDistanceAppearance = style
+        options = (options?.toBuilder() ?: ManeuverViewOptions.Builder())
+            .stepDistanceTextAppearance(style)
+            .build()
     }
 
     /**
@@ -114,8 +123,18 @@ class MapboxUpcomingManeuverAdapter(
      * @see [TextViewCompat.setTextAppearance]
      * @param style Int
      */
+    @Deprecated(
+        message = "The method will only apply customized text appearance for primary maneuver.",
+        replaceWith = ReplaceWith("this.updateManeuverViewOptions(maneuverViewOptions)")
+    )
     fun updateUpcomingPrimaryManeuverTextAppearance(@StyleRes style: Int) {
-        primaryManeuverAppearance = style
+        options = (options?.toBuilder() ?: ManeuverViewOptions.Builder())
+            .primaryManeuverOptions(
+                (options?.primaryManeuverOptions?.toBuilder() ?: ManeuverPrimaryOptions.Builder())
+                    .textAppearance(style)
+                    .build()
+            )
+            .build()
     }
 
     /**
@@ -123,8 +142,36 @@ class MapboxUpcomingManeuverAdapter(
      * @see [TextViewCompat.setTextAppearance]
      * @param style Int
      */
+    @Deprecated(
+        message = "The method will only apply customized text appearance for secondary maneuver.",
+        replaceWith = ReplaceWith("this.updateManeuverViewOptions(maneuverViewOptions)")
+    )
     fun updateUpcomingSecondaryManeuverTextAppearance(@StyleRes style: Int) {
-        secondaryManeuverAppearance = style
+        val secondaryOptionsBuilder = options?.secondaryManeuverOptions?.toBuilder()
+            ?: ManeuverSecondaryOptions.Builder()
+        options = (options?.toBuilder() ?: ManeuverViewOptions.Builder())
+            .secondaryManeuverOptions(
+                secondaryOptionsBuilder
+                    .textAppearance(style)
+                    .build()
+            )
+            .build()
+    }
+
+    /**
+     * Allows you to change the styling of [MapboxTurnIconManeuver].
+     * @param contextThemeWrapper ContextThemeWrapper representing desired style
+     */
+    fun updateUpcomingManeuverIconStyle(contextThemeWrapper: ContextThemeWrapper) {
+        this.turnIconContextThemeWrapper = contextThemeWrapper
+    }
+
+    /**
+     * Allows you to apply styling defined by passed maneuverViewOptions.
+     * @param maneuverViewOptions ManeuverViewOptions defining desired style
+     */
+    fun updateManeuverViewOptions(maneuverViewOptions: ManeuverViewOptions) {
+        this.options = maneuverViewOptions
     }
 
     /**
@@ -156,28 +203,35 @@ class MapboxUpcomingManeuverAdapter(
             val primary = maneuver.primary
             val secondary = maneuver.secondary
             val stepDistance = maneuver.stepDistance
+            updateTurnIconStyle()
+            applyOptions()
             drawPrimaryManeuver(primary, routeShields)
             drawSecondaryManeuver(secondary, routeShields)
             drawTotalStepDistance(stepDistance)
-            updateStepDistanceTextAppearance()
-            updateUpcomingPrimaryManeuverTextAppearance()
-            updateUpcomingSecondaryManeuverTextAppearance()
+            updateTextAppearances()
         }
 
-        private fun updateUpcomingPrimaryManeuverTextAppearance() {
-            ifNonNull(primaryManeuverAppearance) { appearance ->
+        private fun updateTurnIconStyle() {
+            ifNonNull(turnIconContextThemeWrapper) { contextThemeWrapper ->
+                viewBinding.maneuverIcon.updateTurnIconStyle(contextThemeWrapper)
+            }
+        }
+
+        private fun applyOptions() {
+            ifNonNull(options) { options ->
+                viewBinding.primaryManeuverText.updateOptions(options.primaryManeuverOptions)
+                viewBinding.secondaryManeuverText.updateOptions(options.secondaryManeuverOptions)
+            }
+        }
+
+        private fun updateTextAppearances() {
+            ifNonNull(options?.primaryManeuverOptions?.textAppearance) { appearance ->
                 TextViewCompat.setTextAppearance(viewBinding.primaryManeuverText, appearance)
             }
-        }
-
-        private fun updateUpcomingSecondaryManeuverTextAppearance() {
-            ifNonNull(secondaryManeuverAppearance) { appearance ->
+            ifNonNull(options?.secondaryManeuverOptions?.textAppearance) { appearance ->
                 TextViewCompat.setTextAppearance(viewBinding.secondaryManeuverText, appearance)
             }
-        }
-
-        private fun updateStepDistanceTextAppearance() {
-            ifNonNull(stepDistanceAppearance) { appearance ->
+            ifNonNull(options?.stepDistanceTextAppearance) { appearance ->
                 TextViewCompat.setTextAppearance(viewBinding.stepDistance, appearance)
             }
         }

@@ -1,18 +1,20 @@
 package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import androidx.core.content.ContextCompat
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.ManeuverModifier
-import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode
 import com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties
+import com.mapbox.navigation.ui.maneuver.test.R
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows
 
 @RunWith(RobolectricTestRunner::class)
 class MapboxExitTextTest {
@@ -26,12 +28,13 @@ class MapboxExitTextTest {
 
     @Test
     fun `exit text with left modifier and use properties`() {
+        val exitBackground = R.drawable.mapbox_lane_uturn
         val view = MapboxExitText(ctx)
         val properties = MapboxExitProperties.PropertiesMutcd(
             shouldFallbackWithText = false,
-            shouldFallbackWithDrawable = true
+            shouldFallbackWithDrawable = true,
+            exitBackground = exitBackground
         )
-        val leftDrawable = ContextCompat.getDrawable(view.context, properties.exitLeftDrawable)
         view.updateExitProperties(properties)
         val exitNumberComponent = ExitNumberComponentNode
             .Builder()
@@ -42,17 +45,19 @@ class MapboxExitTextTest {
         view.setExit(ManeuverModifier.LEFT, exitNumberComponent)
 
         assertEquals(expectedText, view.text)
+        checkDrawable(exitBackground, view.background)
         assertNotNull(view.compoundDrawables[0])
     }
 
     @Test
     fun `exit text with right modifier and use properties`() {
+        val exitBackground = R.drawable.mapbox_lane_uturn
         val view = MapboxExitText(ctx)
         val properties = MapboxExitProperties.PropertiesMutcd(
             shouldFallbackWithText = false,
-            shouldFallbackWithDrawable = true
+            shouldFallbackWithDrawable = true,
+            exitBackground = exitBackground
         )
-        val rightDrawable = ContextCompat.getDrawable(view.context, properties.exitRightDrawable)
         view.updateExitProperties(properties)
         val exitNumberComponent = ExitNumberComponentNode
             .Builder()
@@ -63,17 +68,19 @@ class MapboxExitTextTest {
         view.setExit(ManeuverModifier.RIGHT, exitNumberComponent)
 
         assertEquals(expectedText, view.text)
+        checkDrawable(exitBackground, view.background)
         assertNotNull(view.compoundDrawables[2])
     }
 
     @Test
     fun `exit text with straight modifier drawable fallback use properties`() {
+        val exitBackground = R.drawable.mapbox_lane_uturn
         val view = MapboxExitText(ctx)
         val properties = MapboxExitProperties.PropertiesMutcd(
             shouldFallbackWithText = false,
-            shouldFallbackWithDrawable = true
+            shouldFallbackWithDrawable = true,
+            exitBackground = exitBackground
         )
-        val fallbackDrawable = ContextCompat.getDrawable(view.context, properties.fallbackDrawable)
         view.updateExitProperties(properties)
         val exitNumberComponent = ExitNumberComponentNode
             .Builder()
@@ -84,7 +91,12 @@ class MapboxExitTextTest {
         view.setExit(ManeuverModifier.STRAIGHT, exitNumberComponent)
 
         assertEquals(expectedText, view.text)
+        checkDrawable(exitBackground, view.background)
         assertNotNull(view.compoundDrawables[2])
+    }
+
+    private fun checkDrawable(expectedId: Int, actual: Drawable) {
+        assertEquals(expectedId, Shadows.shadowOf(actual).createdFromResId)
     }
 
     @Test

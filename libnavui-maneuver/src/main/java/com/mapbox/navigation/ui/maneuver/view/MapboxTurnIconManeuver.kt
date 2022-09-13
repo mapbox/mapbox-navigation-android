@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maneuver.view
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
@@ -42,6 +43,11 @@ class MapboxTurnIconManeuver @JvmOverloads constructor(
      */
     fun updateTurnIconStyle(wrapper: ContextThemeWrapper) {
         this.contextThemeWrapper = wrapper
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    internal fun getTurnIconTheme(): ContextThemeWrapper {
+        return contextThemeWrapper
     }
 
     /**
