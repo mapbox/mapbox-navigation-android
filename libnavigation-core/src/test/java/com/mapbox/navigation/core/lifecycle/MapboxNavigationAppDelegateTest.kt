@@ -397,6 +397,27 @@ class MapboxNavigationAppDelegateTest {
         mapboxNavigationApp.getObserver(ExampleObserverA::class)
     }
 
+    @Test(expected = java.lang.IllegalStateException::class)
+    fun `verify getObserver java will crash when the observer is not registered`() {
+        val observer = ExampleObserverA()
+        mapboxNavigationApp.registerObserver(observer)
+
+        // Should crash
+        mapboxNavigationApp.getObserver(ExampleObserverB::class.java)
+    }
+
+    @Test(expected = java.lang.IllegalStateException::class)
+    fun `verify getObserver java will crash when the observer is removed`() {
+        val observerFirst = ExampleObserverA()
+        val observerSecond = ExampleObserverB()
+        mapboxNavigationApp.registerObserver(observerFirst)
+        mapboxNavigationApp.registerObserver(observerSecond)
+        mapboxNavigationApp.unregisterObserver(observerFirst)
+
+        // Should crash
+        mapboxNavigationApp.getObserver(ExampleObserverA::class.java)
+    }
+
     @Test
     fun `verify getObservers will return the registered observer`() {
         val observer = ExampleObserverA()

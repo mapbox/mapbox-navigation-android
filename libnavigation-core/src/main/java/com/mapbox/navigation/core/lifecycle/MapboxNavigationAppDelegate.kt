@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.lifecycle
 import android.app.Application
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.core.MapboxNavigation
+import kotlin.jvm.Throws
 import kotlin.reflect.KClass
 
 /**
@@ -59,9 +60,11 @@ internal class MapboxNavigationAppDelegate {
 
     fun current(): MapboxNavigation? = mapboxNavigationOwner.current()
 
+    @Throws(IllegalStateException::class)
     fun <T : MapboxNavigationObserver> getObserver(clazz: Class<T>): T =
         mapboxNavigationOwner.getObserver(clazz)
 
+    @Throws(IllegalStateException::class)
     fun <T : MapboxNavigationObserver> getObserver(kClass: KClass<T>): T =
         mapboxNavigationOwner.getObserver(kClass)
 

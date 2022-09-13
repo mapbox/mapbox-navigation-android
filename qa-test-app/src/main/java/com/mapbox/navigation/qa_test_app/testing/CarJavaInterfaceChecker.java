@@ -1,5 +1,7 @@
 package com.mapbox.navigation.qa_test_app.testing;
 
+import android.app.Application;
+
 import androidx.annotation.NonNull;
 import androidx.car.app.CarContext;
 import androidx.lifecycle.LifecycleOwner;
@@ -19,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope;
 class CarJavaInterfaceChecker {
 
   void MapboxNavigationApp(
+          Application application,
           LifecycleOwner lifecycleOwner,
           NavigationOptions navigationOptions,
           MapboxNavigationObserver observer
@@ -33,6 +36,8 @@ class CarJavaInterfaceChecker {
     MapboxNavigationApp.attach(lifecycleOwner);
     MapboxNavigationApp.disable();
     MapboxNavigationApp.detach(lifecycleOwner);
+    MapboxNavigationApp.attachAllActivities(application);
+    MapboxNavigationApp.getLifecycleOwner();
 
     // Get current instance
     MapboxNavigation mapboxNavigation = MapboxNavigationApp.current();
