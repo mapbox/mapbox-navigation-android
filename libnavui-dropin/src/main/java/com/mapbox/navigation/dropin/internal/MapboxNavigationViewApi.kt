@@ -8,15 +8,15 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.dropin.NavigationViewApi
 import com.mapbox.navigation.dropin.NavigationViewApiError
 import com.mapbox.navigation.ui.app.internal.Store
-import com.mapbox.navigation.ui.app.internal.destination.Destination
-import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
 import com.mapbox.navigation.ui.app.internal.endNavigation
 import com.mapbox.navigation.ui.app.internal.extension.dispatch
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
+import com.mapbox.navigation.ui.app.internal.showDestinationPreview
+import com.mapbox.navigation.ui.app.internal.showRoutePreview
+import com.mapbox.navigation.ui.app.internal.startActiveNavigation
+import com.mapbox.navigation.ui.app.internal.startArrival
 import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterAction
 
 @ExperimentalPreviewMapboxNavigationAPI
@@ -29,8 +29,7 @@ internal class MapboxNavigationViewApi(
     }
 
     override fun startDestinationPreview(point: Point) {
-        store.dispatch(DestinationAction.SetDestination(Destination(point)))
-        store.dispatch(NavigationStateAction.Update(NavigationState.DestinationPreview))
+        store.dispatch(showDestinationPreview(point))
     }
 
     override fun startRoutePreview(): Expected<NavigationViewApiError, Unit> =
@@ -45,11 +44,10 @@ internal class MapboxNavigationViewApi(
         routes: List<NavigationRoute>
     ): Expected<NavigationViewApiError, Unit> =
         runCatchingError {
+            checkRoutes(routes)
             val point = findDestinationPoint(routes)
 
-            setDestination(point)
-            setPreviewRoutes(routes)
-            startRoutePreview()
+            store.dispatch(showRoutePreview(point, routes))
         }
 
     override fun startActiveGuidance(): Expected<NavigationViewApiError, Unit> =
@@ -58,19 +56,17 @@ internal class MapboxNavigationViewApi(
             checkPreviewRoutes()
 
             val routes = (store.state.value.previewRoutes as RoutePreviewState.Ready).routes
-            setRoutes(routes)
-            store.dispatch(NavigationStateAction.Update(NavigationState.ActiveNavigation))
+            store.dispatch(startActiveNavigation(routes))
         }
 
     override fun startActiveGuidance(
         routes: List<NavigationRoute>
     ): Expected<NavigationViewApiError, Unit> =
         runCatchingError {
+            checkRoutes(routes)
             val point = findDestinationPoint(routes)
 
-            setDestination(point)
-            setPreviewRoutes(routes)
-            startActiveGuidance()
+            store.dispatch(startActiveNavigation(point, routes))
         }
 
     override fun startArrival(): Expected<NavigationViewApiError, Unit> =
@@ -85,12 +81,10 @@ internal class MapboxNavigationViewApi(
         routes: List<NavigationRoute>
     ): Expected<NavigationViewApiError, Unit> =
         runCatchingError {
+            checkRoutes(routes)
             val point = findDestinationPoint(routes)
 
-            setDestination(point)
-            setPreviewRoutes(routes)
-            setRoutes(routes)
-            startArrival()
+            store.dispatch(startArrival(point, routes))
         }
 
     override fun isReplayEnabled(): Boolean {
@@ -125,6 +119,11 @@ internal class MapboxNavigationViewApi(
         if (store.state.value.routes.isEmpty()) throw NavigationViewApiError.MissingRoutesInfo
     }
 
+    @Throws(NavigationViewApiError.InvalidRoutesInfo::class)
+    private fun checkRoutes(routes: List<NavigationRoute>) {
+        if (routes.isEmpty()) throw NavigationViewApiError.InvalidRoutesInfo
+    }
+
     @Throws(
         NavigationViewApiError.InvalidRoutesInfo::class,
         NavigationViewApiError.IncompleteRoutesInfo::class
@@ -133,18 +132,6 @@ internal class MapboxNavigationViewApi(
         if (routes.isEmpty()) throw NavigationViewApiError.InvalidRoutesInfo
 
         return routes.first().getDestination() ?: throw NavigationViewApiError.IncompleteRoutesInfo
-    }
-
-    private fun setDestination(point: Point) {
-        store.dispatch(DestinationAction.SetDestination(Destination(point)))
-    }
-
-    private fun setPreviewRoutes(routes: List<NavigationRoute>) {
-        store.dispatch(RoutePreviewAction.Ready(routes))
-    }
-
-    private fun setRoutes(routes: List<NavigationRoute>) {
-        store.dispatch(RoutesAction.SetRoutes(routes))
     }
 
     private fun NavigationRoute.getDestination(): Point? {
