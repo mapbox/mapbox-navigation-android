@@ -1,8 +1,10 @@
+@file:JvmName("NavigationViewContextEx")
 package com.mapbox.navigation.dropin.internal
 
 import androidx.appcompat.widget.AppCompatTextView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.NavigationViewContext
+import com.mapbox.navigation.dropin.component.infopanel.ArrivalTextComponent
 import com.mapbox.navigation.dropin.component.infopanel.EndNavigationButtonComponent
 import com.mapbox.navigation.dropin.component.infopanel.POINameComponent
 import com.mapbox.navigation.dropin.component.infopanel.RoutePreviewButtonComponent
@@ -11,7 +13,7 @@ import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.poiNameComponent(textView: AppCompatTextView) =
-    POINameComponent(store, textView)
+    POINameComponent(store, textView, styles.poiNameTextAppearance)
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.routePreviewButtonComponent(button: MapboxExtendableButton) =
@@ -24,3 +26,7 @@ internal fun NavigationViewContext.startNavigationButtonComponent(button: Mapbox
 @ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.endNavigationButtonComponent(button: MapboxExtendableButton) =
     EndNavigationButtonComponent(store, button, styles.endNavigationButtonStyle)
+
+@ExperimentalPreviewMapboxNavigationAPI
+internal fun NavigationViewContext.arrivalTextComponent(textView: AppCompatTextView) =
+    ArrivalTextComponent(textView, styles.arrivalTextAppearance)

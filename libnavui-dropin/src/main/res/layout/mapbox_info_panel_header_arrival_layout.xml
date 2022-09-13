@@ -9,7 +9,7 @@
     tools:layout_height="@dimen/mapbox_infoPanel_peekHeight">
 
     <androidx.appcompat.widget.AppCompatTextView
-        style="@style/DropInInfoPanelHeadlineTextAppearance"
+        tools:style="@style/DropInInfoPanelHeadlineTextAppearance"
         android:id="@+id/arrivedText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

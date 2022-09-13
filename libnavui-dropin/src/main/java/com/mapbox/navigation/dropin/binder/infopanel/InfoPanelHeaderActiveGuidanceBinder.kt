@@ -8,7 +8,7 @@ import com.mapbox.navigation.core.internal.extensions.navigationListOf
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderGuidanceLayoutBinding
+import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderActiveGuidanceLayoutBinding
 import com.mapbox.navigation.dropin.internal.endNavigationButtonComponent
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
@@ -22,11 +22,11 @@ internal class InfoPanelHeaderActiveGuidanceBinder(
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
             viewGroup,
-            R.layout.mapbox_info_panel_header_guidance_layout,
+            R.layout.mapbox_info_panel_header_active_guidance_layout,
             viewGroup.context
         )
         TransitionManager.go(scene)
-        val binding = MapboxInfoPanelHeaderGuidanceLayoutBinding.bind(viewGroup)
+        val binding = MapboxInfoPanelHeaderActiveGuidanceLayoutBinding.bind(viewGroup)
 
         return context.run {
             navigationListOf(

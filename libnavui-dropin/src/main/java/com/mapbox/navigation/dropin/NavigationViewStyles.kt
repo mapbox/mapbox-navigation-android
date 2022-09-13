@@ -19,6 +19,8 @@ internal class NavigationViewStyles(context: Context) {
         MutableStateFlow(ViewStyleCustomization.defaultInfoPanelMarginEnd())
     private var _infoPanelBackground: MutableStateFlow<Int> =
         MutableStateFlow(ViewStyleCustomization.defaultInfoPanelBackground())
+    private var _poiNameTextAppearance: MutableStateFlow<Int> =
+        MutableStateFlow(ViewStyleCustomization.defaultPoiNameTextAppearance())
     private var _tripProgressStyle: MutableStateFlow<Int> =
         MutableStateFlow(ViewStyleCustomization.defaultTripProgressStyle())
     private var _audioGuidanceButtonStyle: MutableStateFlow<Int> =
@@ -45,11 +47,14 @@ internal class NavigationViewStyles(context: Context) {
         MutableStateFlow(ViewStyleCustomization.defaultManeuverViewOptions())
     private var _destinationMarkerAnnotationOptions: MutableStateFlow<PointAnnotationOptions> =
         MutableStateFlow(ViewStyleCustomization.defaultMarkerAnnotationOptions(context))
+    private var _arrivalTextAppearance: MutableStateFlow<Int> =
+        MutableStateFlow(ViewStyleCustomization.defaultArrivalTextAppearance())
 
     val infoPanelPeekHeight: StateFlow<Int> = _infoPanelPeekHeight.asStateFlow()
     val infoPanelMarginStart: StateFlow<Int> = _infoPanelMarginStart.asStateFlow()
     val infoPanelMarginEnd: StateFlow<Int> = _infoPanelMarginEnd.asStateFlow()
     val infoPanelBackground: StateFlow<Int> = _infoPanelBackground.asStateFlow()
+    val poiNameTextAppearance: StateFlow<Int> = _poiNameTextAppearance.asStateFlow()
     val tripProgressStyle: StateFlow<Int> = _tripProgressStyle.asStateFlow()
     val recenterButtonStyle: StateFlow<Int> = _recenterButtonStyle.asStateFlow()
     val audioGuidanceButtonStyle: StateFlow<Int> = _audioGuidanceButtonStyle.asStateFlow()
@@ -64,12 +69,14 @@ internal class NavigationViewStyles(context: Context) {
     val roadNameBackground: StateFlow<Int> = _roadNameBackground.asStateFlow()
     val roadNameTextAppearance: StateFlow<Int> = _roadNameTextAppearance.asStateFlow()
     val maneuverViewOptions: StateFlow<ManeuverViewOptions> = _maneuverViewOptions.asStateFlow()
+    val arrivalTextAppearance: StateFlow<Int> = _arrivalTextAppearance.asStateFlow()
 
     fun applyCustomization(customization: ViewStyleCustomization) {
         customization.infoPanelPeekHeight?.also { _infoPanelPeekHeight.tryEmit(it) }
         customization.infoPanelMarginStart?.also { _infoPanelMarginStart.tryEmit(it) }
         customization.infoPanelMarginEnd?.also { _infoPanelMarginEnd.tryEmit(it) }
         customization.infoPanelBackground?.also { _infoPanelBackground.tryEmit(it) }
+        customization.poiNameTextAppearance?.also { _poiNameTextAppearance.tryEmit(it) }
         customization.tripProgressStyle?.also { _tripProgressStyle.tryEmit(it) }
         customization.recenterButtonStyle?.also { _recenterButtonStyle.tryEmit(it) }
         customization.cameraModeButtonStyle?.also { _cameraModeButtonStyle.tryEmit(it) }
@@ -85,5 +92,6 @@ internal class NavigationViewStyles(context: Context) {
         }
         customization.roadNameBackground?.also { _roadNameBackground.tryEmit(it) }
         customization.roadNameTextAppearance?.also { _roadNameTextAppearance.tryEmit(it) }
+        customization.arrivalTextAppearance?.also { _arrivalTextAppearance.tryEmit(it) }
     }
 }

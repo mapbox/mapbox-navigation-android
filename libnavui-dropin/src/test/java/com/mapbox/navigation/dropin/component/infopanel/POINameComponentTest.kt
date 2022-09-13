@@ -14,6 +14,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -39,7 +40,7 @@ class POINameComponentTest {
         store = spyk(TestStore())
         textView = AppCompatTextView(context)
 
-        sut = POINameComponent(store, textView)
+        sut = POINameComponent(store, textView, MutableStateFlow(0))
     }
 
     @Test

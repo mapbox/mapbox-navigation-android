@@ -8,7 +8,7 @@ import com.mapbox.navigation.core.internal.extensions.navigationListOf
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.R
-import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderDestinationLayoutBinding
+import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderDestinationPreviewLayoutBinding
 import com.mapbox.navigation.dropin.internal.poiNameComponent
 import com.mapbox.navigation.dropin.internal.routePreviewButtonComponent
 import com.mapbox.navigation.dropin.internal.startNavigationButtonComponent
@@ -22,11 +22,11 @@ internal class InfoPanelHeaderDestinationPreviewBinder(
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
             viewGroup,
-            R.layout.mapbox_info_panel_header_destination_layout,
+            R.layout.mapbox_info_panel_header_destination_preview_layout,
             viewGroup.context
         )
         TransitionManager.go(scene)
-        val binding = MapboxInfoPanelHeaderDestinationLayoutBinding.bind(viewGroup)
+        val binding = MapboxInfoPanelHeaderDestinationPreviewLayoutBinding.bind(viewGroup)
 
         return context.run {
             navigationListOf(
