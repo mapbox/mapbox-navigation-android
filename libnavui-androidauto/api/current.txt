@@ -56,22 +56,20 @@ package com.mapbox.androidauto.car {
     method public androidx.car.app.CarContext getCarContext();
     method public com.mapbox.androidauto.car.search.CarPlaceSearchOptions getCarPlaceSearchOptions();
     method public com.mapbox.androidauto.car.settings.CarSettingsStorage getCarSettingsStorage();
-    method public com.mapbox.navigation.base.formatter.DistanceFormatter getDistanceFormatter();
+    method @Deprecated public com.mapbox.navigation.base.formatter.DistanceFormatter getDistanceFormatter();
     method public com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider getFeedbackPollProvider();
-    method public com.mapbox.navigation.utils.internal.JobControl getJobControl();
-    method public com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi getManeuverApi();
+    method @Deprecated public com.mapbox.navigation.utils.internal.JobControl getJobControl();
     method public com.mapbox.maps.extension.androidauto.MapboxCarMap getMapboxCarMap();
-    method public com.mapbox.navigation.core.MapboxNavigation getMapboxNavigation();
+    method @Deprecated public com.mapbox.navigation.core.MapboxNavigation getMapboxNavigation();
     method public com.mapbox.androidauto.car.preview.CarRouteOptionsInterceptor getRouteOptionsInterceptor();
     method public kotlinx.coroutines.flow.MutableStateFlow<com.mapbox.androidauto.car.navigation.speedlimit.SpeedLimitOptions> getSpeedLimitOptions();
     property public final androidx.car.app.CarContext carContext;
     property public final com.mapbox.androidauto.car.search.CarPlaceSearchOptions carPlaceSearchOptions;
     property public final com.mapbox.androidauto.car.settings.CarSettingsStorage carSettingsStorage;
-    property public final com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter;
+    property @Deprecated public final com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter;
     property public final com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider feedbackPollProvider;
-    property public final com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi maneuverApi;
     property public final com.mapbox.maps.extension.androidauto.MapboxCarMap mapboxCarMap;
-    property public final com.mapbox.navigation.core.MapboxNavigation mapboxNavigation;
+    property @Deprecated public final com.mapbox.navigation.core.MapboxNavigation mapboxNavigation;
     property public final com.mapbox.androidauto.car.preview.CarRouteOptionsInterceptor routeOptionsInterceptor;
     property public final kotlinx.coroutines.flow.MutableStateFlow<com.mapbox.androidauto.car.navigation.speedlimit.SpeedLimitOptions> speedLimitOptions;
   }
@@ -324,19 +322,13 @@ package com.mapbox.androidauto.car.navigation {
     method public androidx.car.app.CarContext getCarContext();
     method public com.mapbox.navigation.base.formatter.DistanceFormatter getDistanceFormatter();
     method public com.mapbox.androidauto.car.MainCarContext getMainCarContext();
-    method public com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi getManeuverApi();
     method public com.mapbox.maps.extension.androidauto.MapboxCarMap getMapboxCarMap();
     method public com.mapbox.navigation.core.MapboxNavigation getMapboxNavigation();
-    method public com.mapbox.androidauto.car.navigation.CarNavigationInfoMapper getNavigationInfoMapper();
-    method public com.mapbox.androidauto.car.navigation.CarNavigationEtaMapper getTripProgressMapper();
     property public final androidx.car.app.CarContext carContext;
     property public final com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter;
     property public final com.mapbox.androidauto.car.MainCarContext mainCarContext;
-    property public final com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi maneuverApi;
     property public final com.mapbox.maps.extension.androidauto.MapboxCarMap mapboxCarMap;
     property public final com.mapbox.navigation.core.MapboxNavigation mapboxNavigation;
-    property public final com.mapbox.androidauto.car.navigation.CarNavigationInfoMapper navigationInfoMapper;
-    property public final com.mapbox.androidauto.car.navigation.CarNavigationEtaMapper tripProgressMapper;
   }
 
   public enum CarCameraMode {
@@ -380,7 +372,14 @@ package com.mapbox.androidauto.car.navigation {
 
   public final class CarNavigationEtaMapper {
     ctor public CarNavigationEtaMapper(com.mapbox.androidauto.car.navigation.CarDistanceFormatter carDistanceFormatter, com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi tripProgressApi);
-    method public androidx.car.app.navigation.model.TravelEstimate from(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+    method public androidx.car.app.navigation.model.TravelEstimate getDestinationTravelEstimate(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+  }
+
+  public final class CarNavigationInfo {
+    method public androidx.car.app.navigation.model.TravelEstimate? getDestinationTravelEstimate();
+    method public androidx.car.app.navigation.model.NavigationTemplate.NavigationInfo? getNavigationInfo();
+    property public final androidx.car.app.navigation.model.TravelEstimate? destinationTravelEstimate;
+    property public final androidx.car.app.navigation.model.NavigationTemplate.NavigationInfo? navigationInfo;
   }
 
   public final class CarNavigationInfoMapper {
@@ -388,15 +387,14 @@ package com.mapbox.androidauto.car.navigation {
     method public androidx.car.app.navigation.model.NavigationTemplate.NavigationInfo? mapNavigationInfo(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> expectedManeuvers, java.util.List<? extends com.mapbox.navigation.ui.shield.model.RouteShield> routeShields, com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
   }
 
-  public final class CarNavigationInfoObserver {
-    ctor public CarNavigationInfoObserver(com.mapbox.androidauto.car.navigation.CarActiveGuidanceCarContext carActiveGuidanceCarContext);
-    method public androidx.car.app.navigation.model.NavigationTemplate.NavigationInfo? getNavigationInfo();
-    method public androidx.car.app.navigation.model.TravelEstimate? getTravelEstimateInfo();
-    method public void setTravelEstimateInfo(androidx.car.app.navigation.model.TravelEstimate?);
-    method public void start(kotlin.jvm.functions.Function0<kotlin.Unit> onNavigationInfoChanged);
-    method public void stop();
-    property public final androidx.car.app.navigation.model.NavigationTemplate.NavigationInfo? navigationInfo;
-    property public final androidx.car.app.navigation.model.TravelEstimate? travelEstimateInfo;
+  @com.mapbox.maps.MapboxExperimental public final class CarNavigationInfoProvider implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public CarNavigationInfoProvider();
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.androidauto.car.navigation.CarNavigationInfo> getCarNavigationInfo();
+    method public com.mapbox.androidauto.car.navigation.CarNavigationInfoProvider invalidateOnChange(androidx.car.app.Screen screen);
+    method public void onAttached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
+    method public void onDetached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
+    method public androidx.car.app.navigation.model.NavigationTemplate.Builder setNavigationInfo(androidx.car.app.navigation.model.NavigationTemplate.Builder builder);
+    property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.androidauto.car.navigation.CarNavigationInfo> carNavigationInfo;
   }
 
   public final class MapUserStyleObserver implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {

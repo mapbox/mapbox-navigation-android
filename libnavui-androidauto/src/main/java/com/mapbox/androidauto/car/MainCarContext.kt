@@ -12,7 +12,6 @@ import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
-import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.utils.internal.JobControl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,22 +28,21 @@ class MainCarContext(
 ) {
     val carSettingsStorage = CarSettingsStorage(carContext)
 
+    @Deprecated(message = "This is being removed, replaced with MapboxNavigationApp")
     val mapboxNavigation: MapboxNavigation by lazy {
         MapboxNavigationProvider.retrieve()
     }
 
+    @Deprecated(message = "This is being removed. You can construct one using MapboxNavigationApp")
     val distanceFormatter: DistanceFormatter by lazy {
         MapboxDistanceFormatter(
             mapboxNavigation.navigationOptions.distanceFormatterOptions
         )
     }
 
-    val maneuverApi: MapboxManeuverApi by lazy {
-        MapboxManeuverApi(distanceFormatter)
-    }
-
     val speedLimitOptions = MutableStateFlow(SpeedLimitOptions.Builder().build())
 
+    @Deprecated(message = "This will be removed")
     fun getJobControl(): JobControl {
         val supervisorJob = SupervisorJob()
         val scope = CoroutineScope(supervisorJob + Dispatchers.Main)

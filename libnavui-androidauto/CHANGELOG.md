@@ -6,6 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 - Remove experimental from `MapboxCarNavigationManager` and showcase java. [#6292](https://github.com/mapbox/mapbox-navigation-android/pull/6292)
+- Removed `MapboxNavigation` from `CarNavigationInfoObserver` constructor, and rename to `CarNavigationInfoProvider`. Removed dependencies from `CarActiveGuidanceCarContext` that require `MapboxNavigation`. [#6224](https://github.com/mapbox/mapbox-navigation-android/pull/6224)
 
 ## androidauto-v0.10.0 - Sep 9, 2022
 ### Changelog
