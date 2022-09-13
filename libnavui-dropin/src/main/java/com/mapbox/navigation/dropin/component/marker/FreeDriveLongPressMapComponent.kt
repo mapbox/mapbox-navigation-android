@@ -8,10 +8,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.util.HapticFeedback
 import com.mapbox.navigation.ui.app.internal.Store
-import com.mapbox.navigation.ui.app.internal.destination.Destination
-import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
-import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
-import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
+import com.mapbox.navigation.ui.app.internal.extension.dispatch
+import com.mapbox.navigation.ui.app.internal.showDestinationPreview
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 
 @ExperimentalPreviewMapboxNavigationAPI
@@ -38,8 +36,7 @@ internal class FreeDriveLongPressMapComponent(
 
     private val longClickListener = OnMapLongClickListener { point ->
         if (context.options.enableMapLongClickIntercept.value) {
-            store.dispatch(DestinationAction.SetDestination(Destination(point)))
-            store.dispatch(NavigationStateAction.Update(NavigationState.DestinationPreview))
+            store.dispatch(showDestinationPreview(point))
             hapticFeedback?.tick()
         }
         false

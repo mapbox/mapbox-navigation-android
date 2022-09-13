@@ -7,6 +7,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.NavigationView
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
+import com.mapbox.navigation.ui.app.internal.endNavigation
+import com.mapbox.navigation.ui.app.internal.extension.dispatch
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
@@ -66,10 +68,7 @@ internal class OnKeyListenerComponent(
                 true
             }
             NavigationState.Arrival -> {
-                store.dispatch(RoutesAction.SetRoutes(emptyList()))
-                store.dispatch(RoutePreviewAction.Ready(emptyList()))
-                store.dispatch(DestinationAction.SetDestination(null))
-                store.dispatch(NavigationStateAction.Update(NavigationState.FreeDrive))
+                store.dispatch(endNavigation())
                 true
             }
         }
