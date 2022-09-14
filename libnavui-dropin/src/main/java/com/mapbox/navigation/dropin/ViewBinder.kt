@@ -77,6 +77,11 @@ internal class ViewBinder {
     val infoPanelTripProgressBinder: StateFlow<UIBinder?>
         get() = _infoPanelTripProgressBinder.asStateFlow()
 
+    private val _infoPanelEndNavigationButtonBinder: MutableStateFlow<UIBinder?> =
+        MutableStateFlow(null)
+    val infoPanelEndNavigationButtonBinder: StateFlow<UIBinder?>
+        get() = _infoPanelEndNavigationButtonBinder.asStateFlow()
+
     private val _infoPanelContentBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
     val infoPanelContentBinder: StateFlow<UIBinder?> get() = _infoPanelContentBinder.asStateFlow()
 
@@ -111,6 +116,9 @@ internal class ViewBinder {
             _infoPanelTripProgressBinder.emitOrNull(it)
         }
         customization.infoPanelContentBinder?.also { _infoPanelContentBinder.emitOrNull(it) }
+        customization.infoPanelEndNavigationButtonBinder?.also {
+            _infoPanelEndNavigationButtonBinder.emitOrNull(it)
+        }
     }
 
     private fun <T : UIBinder> MutableStateFlow<T?>.emitOrNull(v: T) {

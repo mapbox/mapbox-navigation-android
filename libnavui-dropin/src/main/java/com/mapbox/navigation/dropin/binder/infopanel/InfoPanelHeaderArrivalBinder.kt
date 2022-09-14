@@ -30,7 +30,7 @@ internal class InfoPanelHeaderArrivalBinder(
         return context.run {
             navigationListOf(
                 arrivalTextComponent(binding.arrivedText),
-                endNavigationButtonComponent(binding.endNavigation)
+                endNavigationButtonComponent(binding.endNavigationButtonLayout)
             )
         }
     }

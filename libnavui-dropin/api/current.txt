@@ -116,6 +116,7 @@ package com.mapbox.navigation.dropin {
     method public java.util.List<com.mapbox.navigation.dropin.ActionButtonDescription>? getCustomActionButtons();
     method public com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder? getInfoPanelBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getInfoPanelContentBinder();
+    method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getInfoPanelEndNavigationButtonBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getInfoPanelHeaderActiveGuidanceBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getInfoPanelHeaderArrivalBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getInfoPanelHeaderBinder();
@@ -132,6 +133,7 @@ package com.mapbox.navigation.dropin {
     method public void setCustomActionButtons(java.util.List<com.mapbox.navigation.dropin.ActionButtonDescription>?);
     method public void setInfoPanelBinder(com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder?);
     method public void setInfoPanelContentBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
+    method public void setInfoPanelEndNavigationButtonBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     method public void setInfoPanelHeaderActiveGuidanceBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     method public void setInfoPanelHeaderArrivalBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     method public void setInfoPanelHeaderBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
@@ -148,6 +150,7 @@ package com.mapbox.navigation.dropin {
     property public final java.util.List<com.mapbox.navigation.dropin.ActionButtonDescription>? customActionButtons;
     property public final com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder? infoPanelBinder;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? infoPanelContentBinder;
+    property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? infoPanelEndNavigationButtonBinder;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? infoPanelHeaderActiveGuidanceBinder;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? infoPanelHeaderArrivalBinder;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? infoPanelHeaderBinder;
