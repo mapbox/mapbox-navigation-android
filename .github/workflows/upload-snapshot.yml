@@ -1,0 +1,38 @@
+on:
+   push:
+     branches:
+       - '*'
+       - '!main'
+
+env:
+  MBX_CI_DOMAIN: o619qyc20d.execute-api.us-east-1.amazonaws.com
+
+# on:
+#   pull_request:
+#     types:
+#       - labeled
+
+# jobs:
+#   upload-snapshot:
+#     if: ${{ github.event.label.name == 'upload-snapshot' }}
+#     steps:
+#     - name: Run tests
+#       run: echo running tests
+
+name: Upload snapshot
+jobs:
+  upload-snapshot:
+    # Set up android environment
+    # if: ${{ github.event.label.name == 'upload-snapshot' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install mbx-ci
+        run: |
+          curl -Ls https://mapbox-release-engineering.s3.amazonaws.com/mbx-ci/latest/mbx-ci-linux-amd64 > mbx-ci && chmod 755 ./mbx-ci
+      - name: Obtain AWS credentials
+        run: |
+          ./mbx-ci aws setup
+      - name: Upload snapshot
+        run: |
+          ./gradlew mapboxSDKRegistryUpload -Psnapshot=true -Pbranch=$GITHUB_REF_NAME

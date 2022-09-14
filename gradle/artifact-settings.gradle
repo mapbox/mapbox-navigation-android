@@ -52,6 +52,9 @@ def getSnapshotVersion(String version) {
         if (!isPreRelease) {
             minor += 1
         }
-        return "${major}.${minor}.0-SNAPSHOT"
+        def snapshot_name = project.hasProperty("snapshotname")
+                ? "-${project.property("snapshotname")}"
+                : ""
+        return "${major}.${minor}.0${snapshot_name}-SNAPSHOT"
     }
 }
