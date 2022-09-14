@@ -9,6 +9,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Optimized calls to modify route arrow layer visibility. [#6308](https://github.com/mapbox/mapbox-navigation-android/pull/6308)
 - Provide better java support for `MapboxNavigationApp`. [#6292](https://github.com/mapbox/mapbox-navigation-android/pull/6292)
 - Expose `PointAnnotationOptions` in Drop-In UI to allow users to define the destination marker icon and it's positioning. [#6314](https://github.com/mapbox/mapbox-navigation-android/pull/6314)
+- Marked `MapboxNavigationApp` methods with `@Throws` annotation. [#6324](https://github.com/mapbox/mapbox-navigation-android/pull/6324)
 
 ## Mapbox Navigation SDK 2.8.0-beta.3 - 09 September, 2022
 ### Changelog

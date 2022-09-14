@@ -7,6 +7,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
+import kotlin.jvm.Throws
 import kotlin.reflect.KClass
 
 /**
@@ -64,6 +65,7 @@ object MapboxNavigationApp {
      * app is in foreground. When both the car and app have been closed, the lifecycle
      * is stopped. The lifecycle is never destroyed.
      */
+    @JvmStatic
     val lifecycleOwner: LifecycleOwner by lazy { mapboxNavigationAppDelegate.lifecycleOwner }
 
     /**
@@ -104,6 +106,7 @@ object MapboxNavigationApp {
      * Detect when any Activity is in the foreground. Use [attach] and [detach] for
      * granular control of which lifecycle is used for creating [MapboxNavigation].
      */
+    @JvmStatic
     fun attachAllActivities(application: Application) = apply {
         mapboxNavigationAppDelegate.attachAllActivities(application)
     }
@@ -173,6 +176,7 @@ object MapboxNavigationApp {
      * @throws IllegalStateException when the class has not been registered.
      */
     @JvmStatic
+    @Throws(IllegalStateException::class)
     fun <T : MapboxNavigationObserver> getObserver(kClass: KClass<T>): T {
         return mapboxNavigationAppDelegate.getObserver(kClass)
     }
@@ -193,6 +197,7 @@ object MapboxNavigationApp {
      * @throws IllegalStateException when the class has not been registered.
      */
     @JvmStatic
+    @Throws(IllegalStateException::class)
     fun <T : MapboxNavigationObserver> getObserver(clazz: Class<T>): T {
         return mapboxNavigationAppDelegate.getObserver(clazz)
     }

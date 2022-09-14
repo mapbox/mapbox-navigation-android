@@ -6,6 +6,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.utils.internal.logI
 import java.util.concurrent.CopyOnWriteArraySet
+import kotlin.jvm.Throws
 import kotlin.reflect.KClass
 
 internal class MapboxNavigationOwner {
@@ -67,9 +68,11 @@ internal class MapboxNavigationOwner {
 
     fun current(): MapboxNavigation? = mapboxNavigation
 
+    @Throws(IllegalStateException::class)
     fun <T : MapboxNavigationObserver> getObserver(clazz: KClass<T>): T = getObserver(clazz.java)
 
     // Java
+    @Throws(IllegalStateException::class)
     fun <T : MapboxNavigationObserver> getObserver(clazz: Class<T>): T =
         getObservers(clazz).firstOrNull()
             ?: error("Class ${clazz.simpleName} is not been registered to MapboxNavigationApp")
