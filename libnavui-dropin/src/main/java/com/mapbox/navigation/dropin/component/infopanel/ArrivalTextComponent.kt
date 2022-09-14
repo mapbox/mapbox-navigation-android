@@ -2,6 +2,7 @@ package com.mapbox.navigation.dropin.component.infopanel
 
 import android.content.res.Resources
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.widget.TextViewCompat
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
@@ -19,7 +20,7 @@ internal class ArrivalTextComponent(
 
         textAppearance.observe {
             try {
-                textView.setTextAppearance(it)
+                TextViewCompat.setTextAppearance(textView, it)
             } catch (e: Resources.NotFoundException) {
                 logE(
                     "Failed to update textAppearance: ${e.localizedMessage}",

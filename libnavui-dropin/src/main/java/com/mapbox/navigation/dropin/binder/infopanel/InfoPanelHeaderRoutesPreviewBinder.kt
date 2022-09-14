@@ -9,8 +9,8 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderRoutePreviewLayoutBinding
-import com.mapbox.navigation.dropin.internal.poiNameComponent
 import com.mapbox.navigation.dropin.internal.startNavigationButtonComponent
+import com.mapbox.navigation.dropin.internal.tripProgressComponent
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 
 @ExperimentalPreviewMapboxNavigationAPI
@@ -29,7 +29,7 @@ internal class InfoPanelHeaderRoutesPreviewBinder(
 
         return context.run {
             navigationListOf(
-                poiNameComponent(binding.poiName),
+                tripProgressComponent(binding.tripProgressLayout),
                 startNavigationButtonComponent(binding.startNavigation)
             )
         }

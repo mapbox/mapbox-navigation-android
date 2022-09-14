@@ -10,9 +10,8 @@ import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderActiveGuidanceLayoutBinding
 import com.mapbox.navigation.dropin.internal.endNavigationButtonComponent
-import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
+import com.mapbox.navigation.dropin.internal.tripProgressComponent
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
-import kotlinx.coroutines.flow.map
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class InfoPanelHeaderActiveGuidanceBinder(
@@ -34,14 +33,5 @@ internal class InfoPanelHeaderActiveGuidanceBinder(
                 endNavigationButtonComponent(binding.endNavigation)
             )
         }
-    }
-
-    private fun tripProgressComponent(
-        tripProgressLayout: ViewGroup
-    ): MapboxNavigationObserver {
-        val binderFlow = context.uiBinders.infoPanelTripProgressBinder.map {
-            it ?: InfoPanelTripProgressBinder(context)
-        }
-        return reloadOnChange(binderFlow) { it.bind(tripProgressLayout) }
     }
 }
