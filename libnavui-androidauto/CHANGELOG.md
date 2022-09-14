@@ -8,6 +8,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Remove experimental from `MapboxCarNavigationManager` and showcase java. [#6292](https://github.com/mapbox/mapbox-navigation-android/pull/6292)
 - Removed `MapboxNavigation` from `CarNavigationInfoObserver` constructor, and rename to `CarNavigationInfoProvider`. Removed dependencies from `CarActiveGuidanceCarContext` that require `MapboxNavigation`. [#6224](https://github.com/mapbox/mapbox-navigation-android/pull/6224)
 - Removed `MapboxNavigation` from `CarSpeedLimitRenderer` constructor. [#6325](https://github.com/mapbox/mapbox-navigation-android/pull/6325)
+- Deleted `CarActiveGuidanceCarContext` because it is no longer needed after `MapboxNavigation` is removed. [#6326](https://github.com/mapbox/mapbox-navigation-android/pull/6326)
+- Added `CarArrivalTrigger` and `CarActiveGuidanceMarkers` for logical components that help build the `ActiveGuidanceScreen`. [#6326](https://github.com/mapbox/mapbox-navigation-android/pull/6326)
 
 ## androidauto-v0.10.0 - Sep 9, 2022
 ### Changelog
