@@ -27,6 +27,7 @@ import com.mapbox.navigation.qa_test_app.view.StatusActivity
 import com.mapbox.navigation.qa_test_app.view.TrafficGradientActivity
 import com.mapbox.navigation.qa_test_app.view.TripOverviewActivity
 import com.mapbox.navigation.qa_test_app.view.customnavview.MapboxNavigationViewCustomizedActivity
+import com.mapbox.navigation.qa_test_app.view.dropin.MapboxNavigationViewInActiveGuidanceActivity
 import com.mapbox.navigation.qa_test_app.view.util.RouteDrawingActivity
 
 typealias LaunchActivityFun = (Activity) -> Unit
@@ -166,6 +167,11 @@ object TestActivitySuite {
             R.string.navigation_view_customized_description,
             launchAfterPermissionResult = false
         ) { activity -> activity.startActivity<MapboxNavigationViewCustomizedActivity>() },
+        TestActivityDescription(
+            "Start NavigationView in Active Guidance",
+            R.string.navigation_view_description,
+            launchAfterPermissionResult = false
+        ) { activity -> activity.startActivity<MapboxNavigationViewInActiveGuidanceActivity>() },
         TestActivityDescription(
             "Fullscreen NavigationView in a Fragment",
             R.string.navigation_view_fragment_description,
