@@ -1,6 +1,7 @@
 package com.mapbox.navigation.qa_test_app.view.customnavview
 
 import android.graphics.Color
+import android.location.Location
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.Gravity
@@ -19,6 +20,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.MutableLiveData
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
@@ -27,12 +29,22 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.formatter.UnitType
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouterCallback
+import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.dump.MapboxDumpRegistry
+import com.mapbox.navigation.core.internal.extensions.attachCreated
 import com.mapbox.navigation.core.internal.extensions.attachResumed
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
+import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.dropin.ActionButtonDescription
 import com.mapbox.navigation.dropin.ActionButtonDescription.Position.END
 import com.mapbox.navigation.dropin.ActionButtonDescription.Position.START
@@ -77,6 +89,7 @@ import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.utils.internal.toPoint
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
@@ -97,11 +110,33 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         }
 
         override fun onMapLongClick(point: Point): Boolean {
-            Toast.makeText(
-                this@MapboxNavigationViewCustomizedActivity,
-                "Long press handled by activity",
-                Toast.LENGTH_LONG
-            ).show()
+            val lastLocation = lastLocation ?: return false
+            if (lastNavigationState != NavigationState.FreeDrive) return false
+            val mapboxNavigation = MapboxNavigationApp.current() ?: return false
+            val routeOptions = RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .applyLanguageAndVoiceUnitOptions(this@MapboxNavigationViewCustomizedActivity)
+                .coordinatesList(listOf(lastLocation.toPoint(), point))
+                .build()
+            val callback = object : NavigationRouterCallback {
+
+                override fun onRoutesReady(
+                    routes: List<NavigationRoute>,
+                    routerOrigin: RouterOrigin,
+                ) {
+                    binding.navigationView.api.startRoutePreview(routes)
+                }
+
+                override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
+                    // no impl
+                }
+
+                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
+                    // no impl
+                }
+            }
+
+            mapboxNavigation.requestRoutes(routeOptions, callback)
             return false
         }
     }
@@ -154,8 +189,34 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         }
     }
 
+    private val locationObserver = object : LocationObserver {
+
+        override fun onNewRawLocation(rawLocation: Location) {
+            // no impl
+        }
+
+        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+            lastLocation = locationMatcherResult.enhancedLocation
+        }
+    }
+
+    private var lastNavigationState: NavigationState? = null
+    private var lastLocation: Location? = null
+
     init {
         attachResumed(dumpCommands)
+        attachCreated(
+            object : MapboxNavigationObserver {
+
+                override fun onAttached(mapboxNavigation: MapboxNavigation) {
+                    mapboxNavigation.registerLocationObserver(locationObserver)
+                }
+
+                override fun onDetached(mapboxNavigation: MapboxNavigation) {
+                    mapboxNavigation.unregisterLocationObserver(locationObserver)
+                }
+            },
+        )
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -165,7 +226,6 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
 
         binding.navigationView.addListener(freeDriveInfoPanelInstaller)
         binding.navigationView.addListener(navViewListener)
-        binding.navigationView.addListener(backPressOverride)
         binding.navigationView.customizeViewOptions {
             routeArrowOptions = customRouteArrowOptions()
         }
@@ -222,9 +282,9 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         )
 
         bindSwitch(
-            menuBinding.toggleOnMapLongClick,
-            viewModel.enableOnMapLongClick,
-            ::toggleOnMapLongClick
+            menuBinding.toggleEnableDestinationPreview,
+            viewModel.enableDestinationPreview,
+            ::toggleEnableDestinationPreview,
         )
 
         bindSwitch(
@@ -468,11 +528,12 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         }
     }
 
-    private fun toggleOnMapLongClick(enable: Boolean) {
-        // If enabled [NavigationView] will intercept map long clicks
+    private fun toggleEnableDestinationPreview(enable: Boolean) {
         if (enable) {
+            binding.navigationView.removeListener(backPressOverride)
             binding.navigationView.unregisterMapObserver(onMapLongClick)
         } else {
+            binding.navigationView.addListener(backPressOverride)
             binding.navigationView.registerMapObserver(onMapLongClick)
         }
         binding.navigationView.customizeViewOptions {
@@ -605,6 +666,22 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         }
 
         override fun onDestinationPreview() {
+            restoreDefaultHeaderBinder()
+        }
+
+        override fun onRoutePreview() {
+            restoreDefaultHeaderBinder()
+        }
+
+        override fun onActiveNavigation() {
+            restoreDefaultHeaderBinder()
+        }
+
+        override fun onArrival() {
+            restoreDefaultHeaderBinder()
+        }
+
+        private fun restoreDefaultHeaderBinder() {
             binding.navigationView.customizeViewBinders {
                 infoPanelHeaderBinder = UIBinder.USE_DEFAULT
             }
@@ -612,30 +689,29 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
     }
 
     private val backPressOverride = object : NavigationViewListener() {
-        private var inRoutePreview = false
 
         override fun onFreeDrive() {
-            inRoutePreview = false
+            lastNavigationState = NavigationState.FreeDrive
         }
 
         override fun onDestinationPreview() {
-            inRoutePreview = false
+            lastNavigationState = NavigationState.DestinationPreview
         }
 
         override fun onRoutePreview() {
-            inRoutePreview = true
+            lastNavigationState = NavigationState.RoutePreview
         }
 
         override fun onActiveNavigation() {
-            inRoutePreview = false
+            lastNavigationState = NavigationState.ActiveNavigation
         }
 
         override fun onArrival() {
-            inRoutePreview = false
+            lastNavigationState = NavigationState.Arrival
         }
 
         override fun onBackPressed(): Boolean {
-            if (inRoutePreview) {
+            if (lastNavigationState == NavigationState.RoutePreview) {
                 binding.navigationView.api.startFreeDrive()
                 return true
             }
@@ -648,5 +724,9 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             if (item == getItem(pos)) return pos
         }
         return null
+    }
+
+    private enum class NavigationState {
+        FreeDrive, DestinationPreview, RoutePreview, ActiveNavigation, Arrival,
     }
 }

@@ -6,7 +6,7 @@ import com.mapbox.navigation.dropin.internal.extensions.onClick
 import com.mapbox.navigation.dropin.internal.extensions.tryUpdateStyle
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.extension.dispatch
-import com.mapbox.navigation.ui.app.internal.startActiveNavigation
+import com.mapbox.navigation.ui.app.internal.fetchRouteAndStartActiveNavigation
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +26,7 @@ internal class StartNavigationButtonComponent(
         }
 
         button.onClick(coroutineScope) {
-            store.dispatch(startActiveNavigation())
+            store.dispatch(fetchRouteAndStartActiveNavigation())
         }
     }
 }
