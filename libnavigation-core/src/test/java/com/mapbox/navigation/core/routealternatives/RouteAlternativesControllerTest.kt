@@ -599,7 +599,7 @@ class RouteAlternativesControllerTest {
             routeAlternativesController.register(firstObserver)
             nativeObserver.captured.onRouteAlternativesChanged(
                 listOf(
-                    createNativeAlternativeMock()
+                    createNativeAlternativeMock(alternativeId = 4)
                 ),
                 emptyList()
             )
@@ -617,6 +617,7 @@ class RouteAlternativesControllerTest {
             assertEquals(platformForkMain, metadata.forkIntersectionOfPrimaryRoute)
             assertEquals(platformInfoStart, metadata.infoFromStartOfPrimary)
             assertEquals(platformInfoFork, metadata.infoFromFork)
+            assertEquals(4, metadata.alternativeId)
 
             unmockkStatic(RouteOptions::fromUrl)
         }
@@ -792,7 +793,9 @@ class RouteAlternativesControllerTest {
         legIndex = 6, // legIndex
     )
 
-    private fun createNativeAlternativeMock(): RouteAlternative {
+    private fun createNativeAlternativeMock(
+        alternativeId: Int = 0,
+    ): RouteAlternative {
         return mockk {
             every { route.routeId } returns UUID.randomUUID().toString()
             every { route.responseJson } returns FileUtils.loadJsonFixture(
@@ -809,6 +812,7 @@ class RouteAlternativesControllerTest {
             every { mainRouteFork } returns nativeForkMain
             every { infoFromFork } returns nativeInfoFork
             every { infoFromStart } returns nativeInfoStart
+            every { id } returns alternativeId
         }
     }
 }
