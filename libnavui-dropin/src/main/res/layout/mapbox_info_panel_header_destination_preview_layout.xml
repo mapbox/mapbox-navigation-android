@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:background="@drawable/mapbox_bg_info_panel"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    tools:layout_height="@dimen/mapbox_infoPanel_peekHeight">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        tools:style="@style/DropInInfoPanelHeadlineTextAppearance"
+        android:id="@+id/poiName"
+        android:layout_width="0dp"
+        android:layout_height="70dp"
+        android:paddingEnd="8dp"
+        android:text=""
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/routePreview"
+        app:layout_constraintBottom_toBottomOf="@+id/routePreview"
+        app:layout_constraintEnd_toStartOf="@+id/routePreview"
+        tools:text="POI Name" />
+
+    <com.mapbox.navigation.ui.base.view.MapboxExtendableButton
+        tools:style="@style/DropInStylePreviewButton"
+        android:id="@+id/routePreview"
+        android:layout_width="72dp"
+        android:layout_height="52dp"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintEnd_toStartOf="@+id/startNavigation"
+        app:layout_constraintBottom_toBottomOf="@+id/startNavigation"
+        app:layout_constraintTop_toTopOf="@+id/startNavigation" />
+
+    <com.mapbox.navigation.ui.base.view.MapboxExtendableButton
+        tools:style="@style/DropInStyleStartButton"
+        android:id="@+id/startNavigation"
+        android:layout_width="72dp"
+        android:layout_height="52dp"
+        android:layout_marginTop="26dp"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</merge>

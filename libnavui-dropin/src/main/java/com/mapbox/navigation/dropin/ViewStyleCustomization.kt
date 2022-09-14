@@ -10,6 +10,8 @@ import com.google.android.material.resources.TextAppearance
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.dropin.component.infopanel.ArrivalTextComponent
+import com.mapbox.navigation.dropin.component.infopanel.POINameComponent
 import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
 import com.mapbox.navigation.ui.maneuver.model.ManeuverExitOptions
 import com.mapbox.navigation.ui.maneuver.model.ManeuverPrimaryOptions
@@ -57,6 +59,13 @@ class ViewStyleCustomization {
      */
     @DrawableRes
     var infoPanelBackground: Int? = null
+
+    /**
+     * Provide custom [POINameComponent] [TextAppearance].
+     * Use [defaultPoiNameTextAppearance] to reset to default.
+     */
+    @StyleRes
+    var poiNameTextAppearance: Int? = null
 
     /**
      * Provide [PointAnnotationOptions] for destination marker.
@@ -147,6 +156,13 @@ class ViewStyleCustomization {
      */
     var maneuverViewOptions: ManeuverViewOptions? = null
 
+    /**
+     * Provide custom [ArrivalTextComponent] [TextAppearance].
+     * Use [defaultArrivalTextAppearance] to reset to default.
+     */
+    @StyleRes
+    var arrivalTextAppearance: Int? = null
+
     companion object {
         /**
          * Default info panel peek height in pixels.
@@ -192,6 +208,12 @@ class ViewStyleCustomization {
          */
         @DrawableRes
         fun defaultRoadNameBackground(): Int = R.drawable.mapbox_road_name_view_background
+
+        /**
+         * Default [POINameComponent] [TextAppearance].
+         */
+        @StyleRes
+        fun defaultPoiNameTextAppearance(): Int = R.style.DropInInfoPanelHeadlineTextAppearance
 
         /**
          * Default [MapboxTripProgressView] style.
@@ -252,6 +274,12 @@ class ViewStyleCustomization {
          */
         @StyleRes
         fun defaultAudioGuidanceButtonStyle(): Int = R.style.MapboxStyleAudioGuidanceButton
+
+        /**
+         * Default [ArrivalTextComponent] [TextAppearance].
+         */
+        @StyleRes
+        fun defaultArrivalTextAppearance(): Int = R.style.DropInInfoPanelHeadlineTextAppearance
 
         /**
          * Default [ManeuverViewOptions] to style [MapboxManeuverView]

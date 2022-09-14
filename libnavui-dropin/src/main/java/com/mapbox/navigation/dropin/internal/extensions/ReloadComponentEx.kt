@@ -3,7 +3,7 @@
 package com.mapbox.navigation.dropin.internal.extensions
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.ui.base.lifecycle.UIComponent
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
@@ -13,8 +13,8 @@ import kotlinx.coroutines.flow.combine
 @ExperimentalPreviewMapboxNavigationAPI
 internal fun <T> reloadOnChange(
     flow: Flow<T>,
-    factory: (T) -> UIComponent?
-): UIComponent =
+    factory: (T) -> MapboxNavigationObserver?
+): MapboxNavigationObserver =
     ReloadingComponent(flow, factory)
 
 /**
@@ -24,8 +24,8 @@ internal fun <T> reloadOnChange(
 internal fun <T1, T2> reloadOnChange(
     flow1: Flow<T1>,
     flow2: Flow<T2>,
-    factory: (T1, T2) -> UIComponent?
-): UIComponent =
+    factory: (T1, T2) -> MapboxNavigationObserver?
+): MapboxNavigationObserver =
     ReloadingComponent(combine(flow1, flow2) { v1, v2 -> v1 to v2 }) {
         factory(it.first, it.second)
     }
@@ -39,8 +39,8 @@ internal fun <T1, T2, T3> reloadOnChange(
     flow1: Flow<T1>,
     flow2: Flow<T2>,
     flow3: Flow<T3>,
-    factory: (T1, T2, T3) -> UIComponent?
-): UIComponent =
+    factory: (T1, T2, T3) -> MapboxNavigationObserver?
+): MapboxNavigationObserver =
     ReloadingComponent(combine(flow1, flow2, flow3) { v1, v2, v3 -> Triple(v1, v2, v3) }) {
         factory(it.first, it.second, it.third)
     }

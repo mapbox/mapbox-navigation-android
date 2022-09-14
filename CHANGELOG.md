@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added `ViewBinderCustomization.infoPanelHeaderFreeDriveBinder`, `ViewBinderCustomization.infoPanelHeaderDestinationPreviewBinder`, `ViewBinderCustomization.infoPanelHeaderRoutesPreviewBinder`, `ViewBinderCustomization.infoPanelHeaderActiveGuidanceBinder` and `ViewBinderCustomization.infoPanelHeaderArrivalBinder` that allows injection of a custom header content for each Navigation State in `NavigationView`. [#6273](https://github.com/mapbox/mapbox-navigation-android/pull/6273)
 #### Bug fixes and improvements
 - Optimized calls to modify route arrow layer visibility. [#6308](https://github.com/mapbox/mapbox-navigation-android/pull/6308)
 - Provide better java support for `MapboxNavigationApp`. [#6292](https://github.com/mapbox/mapbox-navigation-android/pull/6292)

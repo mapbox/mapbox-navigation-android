@@ -49,6 +49,41 @@ class ViewBinderCustomization {
     var infoPanelHeaderBinder: UIBinder? = null
 
     /**
+     * Customize the Info Panel Header for Free Drive state by providing your own [UIBinder]
+     * when using default [infoPanelHeaderBinder].
+     * Use [UIBinder.USE_DEFAULT] to reset to default.
+     */
+    var infoPanelHeaderFreeDriveBinder: UIBinder? = null
+
+    /**
+     * Customize the Info Panel Header for Destination Preview state by providing your own [UIBinder]
+     * when using default [infoPanelHeaderBinder].
+     * Use [UIBinder.USE_DEFAULT] to reset to default.
+     */
+    var infoPanelHeaderDestinationPreviewBinder: UIBinder? = null
+
+    /**
+     * Customize the Info Panel Header for Routes Preview state by providing your own [UIBinder]
+     * when using default [infoPanelHeaderBinder].
+     * Use [UIBinder.USE_DEFAULT] to reset to default.
+     */
+    var infoPanelHeaderRoutesPreviewBinder: UIBinder? = null
+
+    /**
+     * Customize the Info Panel Header for Active Guidance state by providing your own [UIBinder]
+     * when using default [infoPanelHeaderBinder].
+     * Use [UIBinder.USE_DEFAULT] to reset to default.
+     */
+    var infoPanelHeaderActiveGuidanceBinder: UIBinder? = null
+
+    /**
+     * Customize the Info Panel Header for Arrival state by providing your own [UIBinder]
+     * when using default [infoPanelHeaderBinder].
+     * Use [UIBinder.USE_DEFAULT] to reset to default.
+     */
+    var infoPanelHeaderArrivalBinder: UIBinder? = null
+
+    /**
      * Customize the Info Panel Content by providing your own [UIBinder].
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
