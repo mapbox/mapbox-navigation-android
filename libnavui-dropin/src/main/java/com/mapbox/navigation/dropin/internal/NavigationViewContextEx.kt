@@ -14,7 +14,6 @@ import com.mapbox.navigation.dropin.component.infopanel.POINameComponent
 import com.mapbox.navigation.dropin.component.infopanel.RoutePreviewButtonComponent
 import com.mapbox.navigation.dropin.component.infopanel.StartNavigationButtonComponent
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
-import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
 import kotlinx.coroutines.flow.map
 
 @ExperimentalPreviewMapboxNavigationAPI
@@ -22,16 +21,16 @@ internal fun NavigationViewContext.poiNameComponent(textView: AppCompatTextView)
     POINameComponent(store, textView, styles.poiNameTextAppearance)
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal fun NavigationViewContext.routePreviewButtonComponent(button: MapboxExtendableButton) =
-    RoutePreviewButtonComponent(store, button, styles.routePreviewButtonStyle)
+internal fun NavigationViewContext.routePreviewButtonComponent(buttonContainer: ViewGroup) =
+    RoutePreviewButtonComponent(store, buttonContainer, styles.routePreviewButtonParams)
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal fun NavigationViewContext.startNavigationButtonComponent(button: MapboxExtendableButton) =
-    StartNavigationButtonComponent(store, button, styles.startNavigationButtonStyle)
+internal fun NavigationViewContext.startNavigationButtonComponent(buttonContainer: ViewGroup) =
+    StartNavigationButtonComponent(store, buttonContainer, styles.startNavigationButtonParams)
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal fun NavigationViewContext.endNavigationButtonComponent(button: MapboxExtendableButton) =
-    EndNavigationButtonComponent(store, button, styles.endNavigationButtonStyle)
+internal fun NavigationViewContext.endNavigationButtonComponent(buttonContainer: ViewGroup) =
+    EndNavigationButtonComponent(store, buttonContainer, styles.endNavigationButtonParams)
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.arrivalTextComponent(textView: AppCompatTextView) =

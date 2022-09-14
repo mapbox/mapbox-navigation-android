@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.maps.internal.ui
 
 import android.view.View
-import androidx.annotation.StyleRes
 import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -29,15 +28,11 @@ interface CameraModeButtonComponentContract {
 class CameraModeButtonComponent(
     private val cameraModeButton: MapboxCameraModeButton,
     private val contractProvider: Provider<CameraModeButtonComponentContract>,
-    @StyleRes private val cameraModeStyle: Int? = null,
 ) : UIComponent() {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
         val contract = contractProvider.get()
-
-        cameraModeStyle?.also { cameraModeButton.updateStyle(it) }
-
         contract.isVisible.observe { cameraModeButton.isVisible = it }
         contract.buttonState.observe(cameraModeButton::setState)
         cameraModeButton.setOnClickListener(contract::onClick)

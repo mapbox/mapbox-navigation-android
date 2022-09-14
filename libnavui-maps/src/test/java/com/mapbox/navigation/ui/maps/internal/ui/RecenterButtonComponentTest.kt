@@ -46,10 +46,9 @@ class RecenterButtonComponentTest {
             every { isVisible } returns visibilityFlow
         }
 
-        sut = RecenterButtonComponent(
-            button,
-            { contract }
-        )
+        sut = RecenterButtonComponent(button) {
+            contract
+        }
     }
 
     @Test

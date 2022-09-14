@@ -21,29 +21,33 @@
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/routePreview"
-        app:layout_constraintBottom_toBottomOf="@+id/routePreview"
-        app:layout_constraintEnd_toStartOf="@+id/routePreview"
+        app:layout_constraintBottom_toBottomOf="@+id/routePreviewContainer"
+        app:layout_constraintEnd_toStartOf="@+id/routePreviewContainer"
+        app:layout_constraintTop_toTopOf="@+id/routePreviewContainer"
         tools:text="POI Name" />
 
-    <com.mapbox.navigation.ui.base.view.MapboxExtendableButton
-        tools:style="@style/DropInStylePreviewButton"
-        android:id="@+id/routePreview"
-        android:layout_width="72dp"
-        android:layout_height="52dp"
+    <FrameLayout
+        android:id="@+id/routePreviewContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxWidth="72dp"
         android:layout_marginEnd="10dp"
-        app:layout_constraintEnd_toStartOf="@+id/startNavigation"
-        app:layout_constraintBottom_toBottomOf="@+id/startNavigation"
-        app:layout_constraintTop_toTopOf="@+id/startNavigation" />
+        app:layout_constraintBottom_toBottomOf="@+id/startNavigationContainer"
+        app:layout_constraintEnd_toStartOf="@+id/startNavigationContainer"
+        app:layout_constraintTop_toTopOf="@+id/startNavigationContainer"
+        tools:layout_height="52dp"
+        tools:layout_width="72dp" />
 
-    <com.mapbox.navigation.ui.base.view.MapboxExtendableButton
-        tools:style="@style/DropInStyleStartButton"
-        android:id="@+id/startNavigation"
-        android:layout_width="72dp"
-        android:layout_height="52dp"
-        android:layout_marginTop="26dp"
+    <FrameLayout
+        android:id="@+id/startNavigationContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxWidth="72dp"
         android:layout_marginEnd="10dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_height="52dp"
+        tools:layout_width="72dp" />
 
 </merge>

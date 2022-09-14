@@ -30,7 +30,7 @@ internal class InfoPanelHeaderActiveGuidanceBinder(
         return context.run {
             navigationListOf(
                 tripProgressComponent(binding.tripProgressLayout),
-                endNavigationButtonComponent(binding.endNavigation)
+                endNavigationButtonComponent(binding.endNavigationContainer)
             )
         }
     }

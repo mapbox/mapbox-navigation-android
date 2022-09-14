@@ -7,7 +7,9 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.AdapterView
+import android.widget.LinearLayout.LayoutParams
 import android.widget.SpinnerAdapter
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -49,24 +51,25 @@ import com.mapbox.navigation.dropin.ActionButtonDescription
 import com.mapbox.navigation.dropin.ActionButtonDescription.Position.END
 import com.mapbox.navigation.dropin.ActionButtonDescription.Position.START
 import com.mapbox.navigation.dropin.MapViewObserver
+import com.mapbox.navigation.dropin.MapboxExtendableButtonParams
 import com.mapbox.navigation.dropin.NavigationViewListener
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
-import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultAudioGuidanceButtonStyle
-import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultCameraModeButtonStyle
-import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultEndNavigationButtonStyle
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultAudioGuidanceButtonParams
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultCameraModeButtonParams
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultEndNavigationButtonParams
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelBackground
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelMarginEnd
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelMarginStart
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelPeekHeight
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultManeuverViewOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultMarkerAnnotationOptions
-import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRecenterButtonStyle
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRecenterButtonParams
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoadNameBackground
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoadNameTextAppearance
-import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoutePreviewButtonStyle
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoutePreviewButtonParams
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultSpeedLimitStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultSpeedLimitTextAppearance
-import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultStartNavigationButtonStyle
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultStartNavigationButtonParams
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultTripProgressStyle
 import com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder
 import com.mapbox.navigation.qa_test_app.R
@@ -409,31 +412,61 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 }
                 roadNameBackground = R.drawable.mapbox_bg_road_name
                 roadNameTextAppearance = R.style.MyCustomRoadNameViewTextAppearance
-                audioGuidanceButtonStyle = R.style.MyCustomAudioGuidanceButton
-                recenterButtonStyle = R.style.MyCustomRecenterButton
-                cameraModeButtonStyle = R.style.MyCustomCameraModeButton
-                routePreviewButtonStyle = R.style.MyCustomRoutePreviewButton
-                endNavigationButtonStyle = R.style.MyCustomEndNavigationButton
-                startNavigationButtonStyle = R.style.MyCustomStartNavigationButton
+
+                val layoutParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+                audioGuidanceButtonParams = MapboxExtendableButtonParams(
+                    R.style.MyCustomAudioGuidanceButton,
+                    LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                        bottomMargin = 20
+                        gravity = Gravity.START
+                    },
+                )
+                recenterButtonParams = MapboxExtendableButtonParams(
+                    R.style.MyCustomRecenterButton,
+                    LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                        topMargin = 20
+                        bottomMargin = 20
+                        gravity = Gravity.END
+                    },
+                )
+                cameraModeButtonParams = MapboxExtendableButtonParams(
+                    R.style.MyCustomCameraModeButton,
+                    LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                        topMargin = 20
+                        bottomMargin = 20
+                        gravity = Gravity.CENTER_HORIZONTAL
+                    },
+                )
+                routePreviewButtonParams = MapboxExtendableButtonParams(
+                    R.style.MyCustomRoutePreviewButton,
+                    layoutParams,
+                )
+                endNavigationButtonParams = MapboxExtendableButtonParams(
+                    R.style.MyCustomEndNavigationButton,
+                    layoutParams,
+                )
+                startNavigationButtonParams = MapboxExtendableButtonParams(
+                    R.style.MyCustomStartNavigationButton,
+                    layoutParams,
+                )
                 maneuverViewOptions = customManeuverOptions()
             }
         } else {
             binding.navigationView.customizeViewStyles {
+                val context = this@MapboxNavigationViewCustomizedActivity
                 tripProgressStyle = defaultTripProgressStyle()
                 speedLimitStyle = defaultSpeedLimitStyle()
                 speedLimitTextAppearance = defaultSpeedLimitTextAppearance()
                 maneuverViewOptions = defaultManeuverViewOptions()
-                destinationMarkerAnnotationOptions = defaultMarkerAnnotationOptions(
-                    this@MapboxNavigationViewCustomizedActivity
-                )
+                destinationMarkerAnnotationOptions = defaultMarkerAnnotationOptions(context)
                 roadNameBackground = defaultRoadNameBackground()
                 roadNameTextAppearance = defaultRoadNameTextAppearance()
-                audioGuidanceButtonStyle = defaultAudioGuidanceButtonStyle()
-                recenterButtonStyle = defaultRecenterButtonStyle()
-                cameraModeButtonStyle = defaultCameraModeButtonStyle()
-                routePreviewButtonStyle = defaultRoutePreviewButtonStyle()
-                endNavigationButtonStyle = defaultEndNavigationButtonStyle()
-                startNavigationButtonStyle = defaultStartNavigationButtonStyle()
+                audioGuidanceButtonParams = defaultAudioGuidanceButtonParams(context)
+                recenterButtonParams = defaultRecenterButtonParams(context)
+                cameraModeButtonParams = defaultCameraModeButtonParams(context)
+                routePreviewButtonParams = defaultRoutePreviewButtonParams(context)
+                endNavigationButtonParams = defaultEndNavigationButtonParams(context)
+                startNavigationButtonParams = defaultStartNavigationButtonParams(context)
             }
         }
     }

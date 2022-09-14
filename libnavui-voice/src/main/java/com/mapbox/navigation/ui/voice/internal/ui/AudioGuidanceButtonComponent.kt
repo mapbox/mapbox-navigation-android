@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.voice.internal.ui
 
-import androidx.annotation.StyleRes
 import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -8,7 +7,6 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.utils.internal.Provider
 import com.mapbox.navigation.ui.utils.internal.extensions.slice
-import com.mapbox.navigation.ui.voice.R
 import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidance
 import com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
 import kotlinx.coroutines.CoroutineScope
@@ -48,7 +46,6 @@ internal class MapboxAudioComponentContract(
 @ExperimentalPreviewMapboxNavigationAPI
 class AudioGuidanceButtonComponent(
     private val audioGuidanceButton: MapboxAudioGuidanceButton,
-    @StyleRes var audioGuidanceButtonStyle: Int = R.style.MapboxStyleAudioGuidanceButton,
     contractProvider: Provider<AudioComponentContract>? = null
 ) : UIComponent() {
 
@@ -63,7 +60,6 @@ class AudioGuidanceButtonComponent(
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
-        audioGuidanceButton.updateStyle(audioGuidanceButtonStyle)
 
         val contract = contractProvider.get()
         contract.isMuted.observe {

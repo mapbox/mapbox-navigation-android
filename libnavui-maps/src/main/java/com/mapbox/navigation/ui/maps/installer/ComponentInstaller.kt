@@ -138,7 +138,7 @@ fun ComponentInstaller.cameraModeButton(
     }
     return components(
         contract,
-        CameraModeButtonComponent(button, { contract })
+        CameraModeButtonComponent(button) { contract }
     )
 }
 
