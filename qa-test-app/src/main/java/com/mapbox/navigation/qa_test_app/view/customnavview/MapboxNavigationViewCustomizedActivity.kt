@@ -268,6 +268,11 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             ::toggleCustomInfoPanelContent
         )
         bindSwitch(
+            menuBinding.toggleCustomInfoPanelEndNavButton,
+            viewModel.showCustomInfoPanelEndNavButton,
+            ::toggleCustomInfoPanelEndNavButton
+        )
+        bindSwitch(
             menuBinding.toggleCustomInfoPanel,
             viewModel.useCustomInfoPanelLayout,
             ::toggleCustomInfoPanelLayout
@@ -523,6 +528,17 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 }
             } else {
                 infoPanelContentBinder = UIBinder.USE_DEFAULT
+            }
+        }
+    }
+
+    private fun toggleCustomInfoPanelEndNavButton(enabled: Boolean) {
+        binding.navigationView.customizeViewBinders {
+            if (enabled) {
+                infoPanelEndNavigationButtonBinder =
+                    CustomInfoPanelEndNavButtonBinder(binding.navigationView.api)
+            } else {
+                infoPanelEndNavigationButtonBinder = UIBinder.USE_DEFAULT
             }
         }
     }
