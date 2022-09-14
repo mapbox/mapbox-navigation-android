@@ -36,7 +36,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - lp-route-line-threading-cleanup
                 - release-v.*
       - release:
           filters:
