@@ -9,6 +9,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Marked `PredictiveCacheController`, `MapboxBuildingView`, `ViewportDataSourceUpdateObserver`, `NavigationScaleGestureHandler`, `NavigationCameraStateChangedObserver`, `NavigationCameraStateTransition`, `NavigationCameraTransition`, `TransitionEndListener`, `MapboxRecenterButton`, `MapboxRouteOverviewButton`, `MapboxJunctionView`, `MapboxSignboardView`, `MapboxRoadNameLabelView`, `MapboxRoadNameView`, `MapboxRouteArrowView`, `MapboxRouteLineView`, `MapboxCameraModeButton` methods and `View.capture` extension with `@UiThread` annotation. [#6235](https://github.com/mapbox/mapbox-navigation-android/pull/6235)
 - Marked `Binder`, `MapboxExtendableButton` methods and `MapboxNavigation#installComponents` methods with `@UiThread` annotation. [#6268](https://github.com/mapbox/mapbox-navigation-android/pull/6268)
+- Fixed an issue with `NavigationView` that caused `ViewOptionsCustomization.routeArrowOptions` to be ignored, if arrows have already been drawn on the map. [#6333](https://github.com/mapbox/mapbox-navigation-android/pull/6333)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.2 - 16 September, 2022
 ### Changelog

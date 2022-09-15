@@ -7,7 +7,6 @@ import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.maps.Image
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -26,13 +25,13 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import io.mockk.verify
+import io.mockk.verifySequence
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-@OptIn(MapboxExperimental::class)
 class RouteArrowUtilsTest {
 
     private val ctx: Context = mockk()
@@ -389,5 +388,32 @@ class RouteArrowUtilsTest {
 
         verify(exactly = 0) { style.addImage(ARROW_HEAD_ICON_CASING, any<Bitmap>()) }
         verify(exactly = 0) { style.addImage(ARROW_HEAD_ICON_CASING, any<Image>()) }
+    }
+
+    @Test
+    fun `styles sources are removed after style layers and images`() {
+        val style = mockk<Style> {
+            every { removeStyleSource(ARROW_SHAFT_SOURCE_ID) } returns mockk()
+            every { removeStyleSource(ARROW_HEAD_SOURCE_ID) } returns mockk()
+            every { removeStyleLayer(ARROW_SHAFT_CASING_LINE_LAYER_ID) } returns mockk()
+            every { removeStyleLayer(ARROW_HEAD_CASING_LAYER_ID) } returns mockk()
+            every { removeStyleLayer(ARROW_SHAFT_LINE_LAYER_ID) } returns mockk()
+            every { removeStyleLayer(ARROW_HEAD_LAYER_ID) } returns mockk()
+            every { removeStyleImage(ARROW_HEAD_ICON_CASING) } returns mockk()
+            every { removeStyleImage(ARROW_HEAD_ICON) } returns mockk()
+        }
+
+        RouteArrowUtils.removeLayers(style)
+
+        verifySequence {
+            style.removeStyleImage(ARROW_HEAD_ICON_CASING)
+            style.removeStyleImage(ARROW_HEAD_ICON)
+            style.removeStyleLayer(ARROW_SHAFT_CASING_LINE_LAYER_ID)
+            style.removeStyleLayer(ARROW_HEAD_CASING_LAYER_ID)
+            style.removeStyleLayer(ARROW_SHAFT_LINE_LAYER_ID)
+            style.removeStyleLayer(ARROW_HEAD_LAYER_ID)
+            style.removeStyleSource(ARROW_SHAFT_SOURCE_ID)
+            style.removeStyleSource(ARROW_HEAD_SOURCE_ID)
+        }
     }
 }

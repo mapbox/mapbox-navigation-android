@@ -4,7 +4,6 @@ import androidx.core.graphics.drawable.DrawableCompat
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.LayerPosition
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.addPersistentLayer
@@ -55,7 +54,6 @@ internal object RouteArrowUtils {
         return arrowCurrentSliced.coordinates().reversed().plus(arrowUpcomingSliced.coordinates())
     }
 
-    @OptIn(MapboxExperimental::class)
     fun initializeLayers(style: Style, options: RouteArrowOptions) {
         if (layersAreInitialized(style)) {
             return
@@ -261,5 +259,16 @@ internal object RouteArrowUtils {
             style.styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) &&
             style.styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) &&
             style.styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID)
+    }
+
+    internal fun removeLayers(style: Style) {
+        style.removeStyleImage(RouteLayerConstants.ARROW_HEAD_ICON_CASING)
+        style.removeStyleImage(RouteLayerConstants.ARROW_HEAD_ICON)
+        style.removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+        style.removeStyleLayer(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID)
+        style.removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID)
+        style.removeStyleLayer(RouteLayerConstants.ARROW_HEAD_LAYER_ID)
+        style.removeStyleSource(RouteLayerConstants.ARROW_SHAFT_SOURCE_ID)
+        style.removeStyleSource(RouteLayerConstants.ARROW_HEAD_SOURCE_ID)
     }
 }
