@@ -90,6 +90,12 @@ class ViewBinderCustomization {
     var infoPanelContentBinder: UIBinder? = null
 
     /**
+     * Customize the Info Panel End Navigation Button by providing your own [UIBinder].
+     * Use [UIBinder.USE_DEFAULT] to reset to default.
+     */
+    var infoPanelEndNavigationButtonBinder: UIBinder? = null
+
+    /**
      * Customize the Action Buttons by providing your own [UIBinder].
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */

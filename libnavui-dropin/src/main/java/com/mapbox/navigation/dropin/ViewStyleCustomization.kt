@@ -270,7 +270,10 @@ class ViewStyleCustomization {
          */
         fun defaultEndNavigationButtonParams(context: Context) = MapboxExtendableButtonParams(
             R.style.DropInStyleExitButton,
-            context.defaultLayoutParams(),
+            context.defaultLayoutParams().apply {
+                marginEnd =
+                    context.resources.getDimensionPixelSize(R.dimen.mapbox_infoPanel_paddingEnd)
+            },
         )
 
         /**

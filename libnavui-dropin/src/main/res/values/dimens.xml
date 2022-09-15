@@ -4,6 +4,10 @@
 
     <dimen name="mapbox_infoPanel_peekHeight">104dp</dimen>
 
+    <dimen name="mapbox_infoPanel_buttonWidth">72dp</dimen>
+    <dimen name="mapbox_infoPanel_buttonHeight">52dp</dimen>
+    <dimen name="mapbox_infoPanel_paddingEnd">10dp</dimen>
+
     <dimen name="mapbox_infoPanel_text_headline">27sp</dimen>
     <dimen name="mapbox_speed_limit_text_regular">14sp</dimen>
     <dimen name="mapbox_road_name_text_regular">14sp</dimen>
