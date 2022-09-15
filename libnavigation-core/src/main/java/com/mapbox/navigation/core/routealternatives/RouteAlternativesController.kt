@@ -279,6 +279,7 @@ private fun RouteAlternative.mapToMetadata(
         forkIntersectionOfPrimaryRoute = mainRouteFork.mapToPlatform(),
         infoFromFork = infoFromFork.mapToPlatform(),
         infoFromStartOfPrimary = infoFromStart.mapToPlatform(),
+        alternativeId = id
     )
 }
 
