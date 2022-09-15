@@ -56,7 +56,6 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     tools:layout_height="120dp"
-                    app:layout_constraintWidth_max="375dp"
                     tools:background="@color/mapbox_main_maneuver_background_color" />
 
                 <FrameLayout
