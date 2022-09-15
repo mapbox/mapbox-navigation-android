@@ -30,7 +30,7 @@ internal class InfoPanelHeaderRoutesPreviewBinder(
         return context.run {
             navigationListOf(
                 tripProgressComponent(binding.tripProgressLayout),
-                startNavigationButtonComponent(binding.startNavigation)
+                startNavigationButtonComponent(binding.startNavigationContainer)
             )
         }
     }

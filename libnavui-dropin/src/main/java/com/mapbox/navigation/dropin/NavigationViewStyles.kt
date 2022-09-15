@@ -23,18 +23,18 @@ internal class NavigationViewStyles(context: Context) {
         MutableStateFlow(ViewStyleCustomization.defaultPoiNameTextAppearance())
     private var _tripProgressStyle: MutableStateFlow<Int> =
         MutableStateFlow(ViewStyleCustomization.defaultTripProgressStyle())
-    private var _audioGuidanceButtonStyle: MutableStateFlow<Int> =
-        MutableStateFlow(ViewStyleCustomization.defaultAudioGuidanceButtonStyle())
-    private var _recenterButtonStyle: MutableStateFlow<Int> =
-        MutableStateFlow(ViewStyleCustomization.defaultRecenterButtonStyle())
-    private var _cameraModeButtonStyle: MutableStateFlow<Int> =
-        MutableStateFlow(ViewStyleCustomization.defaultCameraModeButtonStyle())
-    private var _routePreviewButtonStyle: MutableStateFlow<Int> =
-        MutableStateFlow(ViewStyleCustomization.defaultRoutePreviewButtonStyle())
-    private var _endNavigationButtonStyle: MutableStateFlow<Int> =
-        MutableStateFlow(ViewStyleCustomization.defaultEndNavigationButtonStyle())
-    private var _startNavigationButtonStyle: MutableStateFlow<Int> =
-        MutableStateFlow(ViewStyleCustomization.defaultStartNavigationButtonStyle())
+    private var _audioGuidanceButtonParams: MutableStateFlow<MapboxExtendableButtonParams> =
+        MutableStateFlow(ViewStyleCustomization.defaultAudioGuidanceButtonParams(context))
+    private var _recenterButtonParams: MutableStateFlow<MapboxExtendableButtonParams> =
+        MutableStateFlow(ViewStyleCustomization.defaultRecenterButtonParams(context))
+    private var _cameraModeButtonParams: MutableStateFlow<MapboxExtendableButtonParams> =
+        MutableStateFlow(ViewStyleCustomization.defaultCameraModeButtonParams(context))
+    private var _routePreviewButtonParams: MutableStateFlow<MapboxExtendableButtonParams> =
+        MutableStateFlow(ViewStyleCustomization.defaultRoutePreviewButtonParams(context))
+    private var _endNavigationButtonParams: MutableStateFlow<MapboxExtendableButtonParams> =
+        MutableStateFlow(ViewStyleCustomization.defaultEndNavigationButtonParams(context))
+    private var _startNavigationButtonParams: MutableStateFlow<MapboxExtendableButtonParams> =
+        MutableStateFlow(ViewStyleCustomization.defaultStartNavigationButtonParams(context))
     private var _speedLimitStyle: MutableStateFlow<Int> =
         MutableStateFlow(ViewStyleCustomization.defaultSpeedLimitStyle())
     private var _speedLimitTextAppearance: MutableStateFlow<Int> =
@@ -56,12 +56,18 @@ internal class NavigationViewStyles(context: Context) {
     val infoPanelBackground: StateFlow<Int> = _infoPanelBackground.asStateFlow()
     val poiNameTextAppearance: StateFlow<Int> = _poiNameTextAppearance.asStateFlow()
     val tripProgressStyle: StateFlow<Int> = _tripProgressStyle.asStateFlow()
-    val recenterButtonStyle: StateFlow<Int> = _recenterButtonStyle.asStateFlow()
-    val audioGuidanceButtonStyle: StateFlow<Int> = _audioGuidanceButtonStyle.asStateFlow()
-    val cameraModeButtonStyle: StateFlow<Int> = _cameraModeButtonStyle.asStateFlow()
-    val routePreviewButtonStyle: StateFlow<Int> = _routePreviewButtonStyle.asStateFlow()
-    val endNavigationButtonStyle: StateFlow<Int> = _endNavigationButtonStyle.asStateFlow()
-    val startNavigationButtonStyle: StateFlow<Int> = _startNavigationButtonStyle.asStateFlow()
+    val recenterButtonParams: StateFlow<MapboxExtendableButtonParams> =
+        _recenterButtonParams.asStateFlow()
+    val audioGuidanceButtonParams: StateFlow<MapboxExtendableButtonParams> =
+        _audioGuidanceButtonParams.asStateFlow()
+    val cameraModeButtonParams: StateFlow<MapboxExtendableButtonParams> =
+        _cameraModeButtonParams.asStateFlow()
+    val routePreviewButtonParams: StateFlow<MapboxExtendableButtonParams> =
+        _routePreviewButtonParams.asStateFlow()
+    val endNavigationButtonParams: StateFlow<MapboxExtendableButtonParams> =
+        _endNavigationButtonParams.asStateFlow()
+    val startNavigationButtonParams: StateFlow<MapboxExtendableButtonParams> =
+        _startNavigationButtonParams.asStateFlow()
     val speedLimitStyle: StateFlow<Int> = _speedLimitStyle.asStateFlow()
     val speedLimitTextAppearance: StateFlow<Int> = _speedLimitTextAppearance.asStateFlow()
     val destinationMarkerAnnotationOptions: StateFlow<PointAnnotationOptions> =
@@ -78,12 +84,16 @@ internal class NavigationViewStyles(context: Context) {
         customization.infoPanelBackground?.also { _infoPanelBackground.tryEmit(it) }
         customization.poiNameTextAppearance?.also { _poiNameTextAppearance.tryEmit(it) }
         customization.tripProgressStyle?.also { _tripProgressStyle.tryEmit(it) }
-        customization.recenterButtonStyle?.also { _recenterButtonStyle.tryEmit(it) }
-        customization.cameraModeButtonStyle?.also { _cameraModeButtonStyle.tryEmit(it) }
-        customization.routePreviewButtonStyle?.also { _routePreviewButtonStyle.tryEmit(it) }
-        customization.audioGuidanceButtonStyle?.also { _audioGuidanceButtonStyle.tryEmit(it) }
-        customization.endNavigationButtonStyle?.also { _endNavigationButtonStyle.tryEmit(it) }
-        customization.startNavigationButtonStyle?.also { _startNavigationButtonStyle.tryEmit(it) }
+        customization.recenterButtonParams?.also { _recenterButtonParams.tryEmit(it) }
+        customization.cameraModeButtonParams?.also {
+            _cameraModeButtonParams.tryEmit(it)
+        }
+        customization.routePreviewButtonParams?.also { _routePreviewButtonParams.tryEmit(it) }
+        customization.audioGuidanceButtonParams?.also {
+            _audioGuidanceButtonParams.tryEmit(it)
+        }
+        customization.endNavigationButtonParams?.also { _endNavigationButtonParams.tryEmit(it) }
+        customization.startNavigationButtonParams?.also { _startNavigationButtonParams.tryEmit(it) }
         customization.speedLimitStyle?.also { _speedLimitStyle.tryEmit(it) }
         customization.maneuverViewOptions?.also { _maneuverViewOptions.tryEmit(it) }
         customization.speedLimitTextAppearance?.also { _speedLimitTextAppearance.tryEmit(it) }

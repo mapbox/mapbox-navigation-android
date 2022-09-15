@@ -8,7 +8,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.voice.R
 import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidance
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
@@ -58,13 +57,6 @@ class AudioGuidanceButtonComponentTest {
     @After
     fun tearDown() {
         unmockkAll()
-    }
-
-    @Test
-    fun `onAttach - should update button style`() {
-        sut.onAttached(mapboxNavigation)
-
-        verify { button.updateStyle(R.style.MapboxStyleAudioGuidanceButton) }
     }
 
     @Test

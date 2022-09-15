@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.maps.internal.ui
 
 import android.location.Location
 import android.view.View
-import androidx.annotation.StyleRes
 import androidx.core.view.isVisible
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.animation.camera
@@ -32,14 +31,12 @@ interface RecenterButtonComponentContract {
 class RecenterButtonComponent(
     private val recenterButton: MapboxExtendableButton,
     private val contractProvider: Provider<RecenterButtonComponentContract>,
-    @StyleRes private val recenterStyle: Int? = null
 ) : UIComponent() {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
-        val contract = contractProvider.get()
 
-        recenterStyle?.also { recenterButton.updateStyle(it) }
+        val contract = contractProvider.get()
         recenterButton.setOnClickListener(contract::onClick)
 
         coroutineScope.launch {

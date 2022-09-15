@@ -64,13 +64,10 @@ internal class ActionButtonBinderTest {
         val binder = MapboxActionButtonsLayoutBinding.bind(viewGroup)
 
         val installedButtons = binder.buttonContainer.children.toList()
-        assertEquals(7, installedButtons.size)
+        assertEquals(4, installedButtons.size)
         assertEquals(customButtons[0].view, installedButtons[0])
         assertEquals(customButtons[1].view, installedButtons[1])
-        // installedButtons[2] -- audio button
-        // installedButtons[3] -- camera mode button
-        // installedButtons[4] -- recenter button
-        assertEquals(customButtons[2].view, installedButtons[5])
-        assertEquals(customButtons[3].view, installedButtons[6])
+        assertEquals(customButtons[2].view, installedButtons[2])
+        assertEquals(customButtons[3].view, installedButtons[3])
     }
 }

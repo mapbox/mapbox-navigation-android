@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin
 
 import android.content.Context
+import android.widget.LinearLayout
 import androidx.annotation.DrawableRes
 import androidx.annotation.Px
 import androidx.annotation.StyleRes
@@ -109,46 +110,40 @@ class ViewStyleCustomization {
     var roadNameTextAppearance: Int? = null
 
     /**
-     * Provide custom [MapboxExtendableButton] style for re-center button.
-     * Use [defaultRecenterButtonStyle] to reset to default.
+     * Provide custom parameters for [MapboxExtendableButton] to customize button styles.
+     * Use [defaultRecenterButtonParams] to reset to default.
      */
-    @StyleRes
-    var recenterButtonStyle: Int? = null
+    var recenterButtonParams: MapboxExtendableButtonParams? = null
 
     /**
-     * Provide custom [MapboxCameraModeButton] style.
-     * Use [defaultCameraModeButtonStyle] to reset to default.
+     * Provide custom parameters for [MapboxCameraModeButton] to customize button styles.
+     * Use [defaultCameraModeButtonParams] to reset to default.
      */
-    @StyleRes
-    var cameraModeButtonStyle: Int? = null
+    var cameraModeButtonParams: MapboxExtendableButtonParams? = null
 
     /**
-     * Provide custom [MapboxExtendableButton] style for route preview button.
-     * Use [defaultRoutePreviewButtonStyle] to reset to default.
+     * Provide custom parameters for [MapboxExtendableButton] to customize button styles.
+     * Use [defaultRoutePreviewButtonParams] to reset to default.
      */
-    @StyleRes
-    var routePreviewButtonStyle: Int? = null
+    var routePreviewButtonParams: MapboxExtendableButtonParams? = null
 
     /**
-     * Provide custom [MapboxAudioGuidanceButton] style.
-     * Use [defaultAudioGuidanceButtonStyle] to reset to default.
+     * Provide custom parameters for [MapboxAudioGuidanceButton] to customize button styles.
+     * Use [defaultAudioGuidanceButtonParams] to reset to default.
      */
-    @StyleRes
-    var audioGuidanceButtonStyle: Int? = null
+    var audioGuidanceButtonParams: MapboxExtendableButtonParams? = null
 
     /**
-     * Provide custom [MapboxExtendableButton] style for end navigation button.
-     * Use [defaultEndNavigationButtonStyle] to reset to default.
+     * Provide custom parameters for [MapboxExtendableButton] to customize button styles.
+     * Use [defaultEndNavigationButtonParams] to reset to default.
      */
-    @StyleRes
-    var endNavigationButtonStyle: Int? = null
+    var endNavigationButtonParams: MapboxExtendableButtonParams? = null
 
     /**
-     * Provide custom [MapboxExtendableButton] style for start navigation button.
-     * Use [defaultStartNavigationButtonStyle] to reset to default.
+     * Provide custom parameters for [MapboxExtendableButton] to customize button styles.
+     * Use [defaultStartNavigationButtonParams] to reset to default.
      */
-    @StyleRes
-    var startNavigationButtonStyle: Int? = null
+    var startNavigationButtonParams: MapboxExtendableButtonParams? = null
 
     /**
      * Provide custom [ManeuverViewOptions] to style [MapboxManeuverView].
@@ -240,40 +235,58 @@ class ViewStyleCustomization {
         fun defaultRoadNameTextAppearance(): Int = R.style.DropInRoadNameViewTextAppearance
 
         /**
-         * Default [MapboxCameraModeButton] style.
+         * Default [MapboxCameraModeButton] params.
          */
-        @StyleRes
-        fun defaultCameraModeButtonStyle(): Int = R.style.MapboxStyleCameraModeButton
+        fun defaultCameraModeButtonParams(context: Context) = MapboxExtendableButtonParams(
+            R.style.MapboxStyleCameraModeButton,
+            context.defaultLayoutParams().apply {
+                bottomMargin = context.defaultSpacing()
+                topMargin = context.defaultSpacing()
+            },
+        )
 
         /**
-         * Default [MapboxExtendableButton] style for re-center button.
+         * Default [MapboxExtendableButton] params.
          */
-        @StyleRes
-        fun defaultRecenterButtonStyle(): Int = R.style.DropInStyleRecenterButton
+        fun defaultRecenterButtonParams(context: Context) = MapboxExtendableButtonParams(
+            R.style.DropInStyleRecenterButton,
+            context.defaultLayoutParams().apply {
+                bottomMargin = context.defaultSpacing()
+                topMargin = context.defaultSpacing()
+            },
+        )
 
         /**
-         * Default [MapboxExtendableButton] style for route preview button.
+         * Default [MapboxExtendableButton] params.
          */
-        @StyleRes
-        fun defaultRoutePreviewButtonStyle(): Int = R.style.DropInStylePreviewButton
+        fun defaultRoutePreviewButtonParams(context: Context) = MapboxExtendableButtonParams(
+            R.style.DropInStylePreviewButton,
+            context.defaultLayoutParams(),
+        )
 
         /**
-         * Default [MapboxExtendableButton] style for end navigation button.
+         * Default [MapboxExtendableButton] params.
          */
-        @StyleRes
-        fun defaultEndNavigationButtonStyle(): Int = R.style.DropInStyleExitButton
+        fun defaultEndNavigationButtonParams(context: Context) = MapboxExtendableButtonParams(
+            R.style.DropInStyleExitButton,
+            context.defaultLayoutParams(),
+        )
 
         /**
-         * Default [MapboxExtendableButton] style for start navigation button.
+         * Default [MapboxExtendableButton] params.
          */
-        @StyleRes
-        fun defaultStartNavigationButtonStyle(): Int = R.style.DropInStyleStartButton
+        fun defaultStartNavigationButtonParams(context: Context) = MapboxExtendableButtonParams(
+            R.style.DropInStyleStartButton,
+            context.defaultLayoutParams(),
+        )
 
         /**
-         * Default [MapboxAudioGuidanceButton] style.
+         * Default [MapboxAudioGuidanceButton] params.
          */
-        @StyleRes
-        fun defaultAudioGuidanceButtonStyle(): Int = R.style.MapboxStyleAudioGuidanceButton
+        fun defaultAudioGuidanceButtonParams(context: Context) = MapboxExtendableButtonParams(
+            R.style.MapboxStyleAudioGuidanceButton,
+            context.defaultLayoutParams().apply { bottomMargin = context.defaultSpacing() },
+        )
 
         /**
          * Default [ArrivalTextComponent] [TextAppearance].
@@ -329,5 +342,13 @@ class ViewStyleCustomization {
                     .build()
             )
             .build()
+
+        private fun Context.defaultSpacing() =
+            resources.getDimensionPixelSize(R.dimen.mapbox_actionList_spacing)
+
+        private fun Context.defaultLayoutParams() = LinearLayout.LayoutParams(
+            resources.getDimensionPixelSize(R.dimen.mapbox_extendable_button_width),
+            resources.getDimensionPixelSize(R.dimen.mapbox_extendable_button_height)
+        )
     }
 }

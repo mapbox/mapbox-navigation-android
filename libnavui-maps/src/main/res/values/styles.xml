@@ -48,4 +48,18 @@
         <item name="extendableButtonIcon">@drawable/mapbox_ic_camera_recenter</item>
     </style>
 
+    <style name="MapboxStyleRecenterButton.Oval" parent="MapboxStyleRecenterButton">
+        <item name="extendableButtonBackground">@drawable/mapbox_bg_circle_outline</item>
+    </style>
+
+    <style name="MapboxStyleRecenterButton.Square" parent="MapboxStyleRecenterButton">
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:minHeight">0dp</item>
+    </style>
+
+    <style name="MapboxStyleRecenterButton.Circle" parent="MapboxStyleRecenterButton.Square">
+        <item name="extendableButtonBackground">@drawable/mapbox_bg_circle_outline</item>
+    </style>
+
 </resources>

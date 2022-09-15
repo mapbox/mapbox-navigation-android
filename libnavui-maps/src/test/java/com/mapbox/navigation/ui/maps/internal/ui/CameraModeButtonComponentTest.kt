@@ -7,7 +7,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton
 import io.mockk.mockk
@@ -42,11 +41,7 @@ class CameraModeButtonComponentTest {
         cameraModeButton = spyk(MapboxCameraModeButton(context, null))
         mapboxNavigation = mockk(relaxed = true)
         contract = spyk(StubContract())
-        sut = CameraModeButtonComponent(
-            cameraModeButton,
-            { contract },
-            R.style.MapboxStyleCameraModeButton
-        )
+        sut = CameraModeButtonComponent(cameraModeButton) { contract }
     }
 
     @Test

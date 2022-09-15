@@ -1,11 +1,15 @@
 package com.mapbox.navigation.dropin.component.infopanel
 
 import android.content.Context
+import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.MapboxExtendableButtonParams
 import com.mapbox.navigation.dropin.R
+import com.mapbox.navigation.dropin.internal.extensions.recreateButton
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.dropin.util.TestingUtil
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -17,12 +21,15 @@ import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.spyk
+import io.mockk.unmockkAll
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runBlockingTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -38,9 +45,16 @@ class RoutePreviewButtonComponentTest {
 
     private lateinit var store: TestStore
     private lateinit var button: MapboxExtendableButton
-    private lateinit var buttonStyle: MutableStateFlow<Int>
+    private lateinit var buttonContainer: ViewGroup
+    private lateinit var buttonParams: MutableStateFlow<MapboxExtendableButtonParams>
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var sut: RoutePreviewButtonComponent
+
+    private val layoutParams: LinearLayout.LayoutParams = mockk(relaxed = true)
+    private val initialParams =
+        MapboxExtendableButtonParams(R.style.DropInStyleExitButton, layoutParams)
+    private val updatedParams =
+        MapboxExtendableButtonParams(R.style.DropInStyleRecenterButton, layoutParams)
 
     @Before
     fun setUp() {
@@ -48,20 +62,28 @@ class RoutePreviewButtonComponentTest {
         mapboxNavigation = mockk(relaxed = true)
         store = spyk(TestStore())
         button = spyk(MapboxExtendableButton(context))
-        buttonStyle = MutableStateFlow(R.style.DropInStylePreviewButton)
+        buttonParams = MutableStateFlow(initialParams)
+        buttonContainer = mockk(relaxed = true)
 
-        sut = RoutePreviewButtonComponent(store, button, buttonStyle)
+        mockkStatic("com.mapbox.navigation.dropin.internal.extensions.ViewGroupExKt")
+        every { buttonContainer.recreateButton(any()) } returns button
+
+        sut = RoutePreviewButtonComponent(store, buttonContainer, buttonParams)
+    }
+
+    @After
+    fun cleanUp() {
+        unmockkAll()
     }
 
     @Test
-    fun `should observe and update button style`() = runBlockingTest {
+    fun `should observe params and recreate button`() = runBlockingTest {
         sut.onAttached(mapboxNavigation)
-
-        buttonStyle.value = R.style.DropInStyleRecenterButton
+        buttonParams.value = updatedParams
 
         verifyOrder {
-            button.updateStyle(R.style.DropInStylePreviewButton)
-            button.updateStyle(R.style.DropInStyleRecenterButton)
+            buttonContainer.recreateButton(initialParams)
+            buttonContainer.recreateButton(updatedParams)
         }
     }
 
