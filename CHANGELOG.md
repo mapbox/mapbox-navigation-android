@@ -4,6 +4,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.8.0-rc.1 - 15 September, 2022
+### Changelog
+[Changes between v2.8.0-beta.3 and v2.8.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.8.0-beta.3...v2.8.0-rc.1)
+
+#### Features
 - Added `ViewBinderCustomization.infoPanelHeaderFreeDriveBinder`, `ViewBinderCustomization.infoPanelHeaderDestinationPreviewBinder`, `ViewBinderCustomization.infoPanelHeaderRoutesPreviewBinder`, `ViewBinderCustomization.infoPanelHeaderActiveGuidanceBinder` and `ViewBinderCustomization.infoPanelHeaderArrivalBinder` that allows injection of a custom header content for each Navigation State in `NavigationView`. [#6273](https://github.com/mapbox/mapbox-navigation-android/pull/6273)
 - Introduced `MapboxExtendableButtonParams` to allow end users to customize the default Drop-In UI buttons. [#6327](https://github.com/mapbox/mapbox-navigation-android/pull/6327)
 - Added `ViewBinderCustomization.infoPanelEndNavigationButtonBinder` that allows injection of a custom Info Panel End Navigation Button in `NavigationView`. [#6331](https://github.com/mapbox/mapbox-navigation-android/pull/6331)
@@ -15,6 +22,16 @@ Mapbox welcomes participation and contributions from everyone.
 - Exposed `AlternativeRouteMetadata#alternativeId` which lets user distinguish a new alternative from updated alternatives. [#6329](https://github.com/mapbox/mapbox-navigation-android/pull/6329)
 - Fixed an issue with `NavigationView` that caused maneuver view to be cut off. [#6328](https://github.com/mapbox/mapbox-navigation-android/pull/6328)
 - Introduced  `MapboxUpcomingManeuverViewAdapter#updateManeuverViewOptions()`, `MapboxUpcomingManeuverViewAdapter#updateUpcomingManeuverIconStyle()` and  `upcomingManeuverListIconStyle` attribute to allow for customizing the colors of maneuver turn icons in upcoming maneuver view list. [#6330](https://github.com/mapbox/mapbox-navigation-android/pull/6330)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.8.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.8.0-rc.1))
+- Mapbox Navigation Native `v114.0.0`
+- Mapbox Core Common `v23.0.0-rc.2`
+- Mapbox Java `v6.8.0-beta.4` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0-beta.4))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+- Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
+
 
 ## Mapbox Navigation SDK 2.8.0-beta.3 - 09 September, 2022
 ### Changelog
