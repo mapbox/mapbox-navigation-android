@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Use `MapboxAudioGuidance` from public api. [#6336](https://github.com/mapbox/mapbox-navigation-android/pull/6336)
 
 ## androidauto-v0.11.0 - Sep 16, 2022
 ### Changelog

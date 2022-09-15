@@ -1,15 +1,17 @@
 package com.mapbox.navigation.ui.voice.internal.impl
 
+import android.content.Context
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.ui.utils.internal.configuration.NavigationConfigOwner
+import com.mapbox.navigation.ui.utils.internal.datastore.NavigationDataStoreOwner
 import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
-import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidanceServices
 import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidanceVoice
 import com.mapbox.navigation.ui.voice.internal.MapboxVoiceInstructions
 
-class MapboxAudioGuidanceServicesImpl : MapboxAudioGuidanceServices {
+class MapboxAudioGuidanceServices {
 
-    override fun mapboxAudioGuidanceVoice(
+    fun mapboxAudioGuidanceVoice(
         mapboxNavigation: MapboxNavigation,
         language: String,
     ): MapboxAudioGuidanceVoice {
@@ -22,7 +24,7 @@ class MapboxAudioGuidanceServicesImpl : MapboxAudioGuidanceServices {
         )
     }
 
-    override fun mapboxSpeechApi(
+    fun mapboxSpeechApi(
         mapboxNavigation: MapboxNavigation,
         language: String
     ): MapboxSpeechApi {
@@ -31,7 +33,7 @@ class MapboxAudioGuidanceServicesImpl : MapboxAudioGuidanceServices {
         return MapboxSpeechApi(applicationContext, accessToken, language)
     }
 
-    override fun mapboxVoiceInstructionsPlayer(
+    fun mapboxVoiceInstructionsPlayer(
         mapboxNavigation: MapboxNavigation,
         language: String,
     ): MapboxVoiceInstructionsPlayer {
@@ -40,5 +42,10 @@ class MapboxAudioGuidanceServicesImpl : MapboxAudioGuidanceServices {
         return MapboxVoiceInstructionsPlayer(applicationContext, accessToken, language)
     }
 
-    override fun mapboxVoiceInstructions() = MapboxVoiceInstructions()
+    fun mapboxVoiceInstructions() = MapboxVoiceInstructions()
+
+    fun configOwner(context: Context): NavigationConfigOwner = NavigationConfigOwner(context)
+
+    fun dataStoreOwner(context: Context, storeName: String) =
+        NavigationDataStoreOwner(context, storeName)
 }

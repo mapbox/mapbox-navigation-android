@@ -8,7 +8,7 @@ import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.audioguidance.AudioAction
 import com.mapbox.navigation.ui.app.internal.audioguidance.AudioGuidanceState
-import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidance
+import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
 
 /**
  * This class is responsible for playing voice instructions. Use the [AudioAction] to turning the
@@ -59,7 +59,7 @@ class AudioGuidanceStateController(
                 if (it.isMuted) {
                     audioGuidance.mute()
                 } else {
-                    audioGuidance.unmute()
+                    audioGuidance.unMute()
                 }
             }
         }

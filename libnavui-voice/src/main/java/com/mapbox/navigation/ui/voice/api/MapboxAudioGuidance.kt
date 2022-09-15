@@ -1,16 +1,14 @@
-package com.mapbox.navigation.ui.voice.internal.impl
+package com.mapbox.navigation.ui.voice.api
 
-import android.content.Context
-import com.mapbox.api.directions.v5.models.VoiceInstructions
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import androidx.annotation.VisibleForTesting
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.ui.utils.internal.configuration.NavigationConfigOwner
 import com.mapbox.navigation.ui.utils.internal.datastore.NavigationDataStoreOwner
 import com.mapbox.navigation.ui.utils.internal.datastore.booleanDataStoreKey
-import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidance
-import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidanceServices
 import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidanceVoice
-import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
+import com.mapbox.navigation.ui.voice.internal.impl.MapboxAudioGuidanceServices
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,15 +33,17 @@ import kotlinx.coroutines.launch
 /**
  * Implementation of [MapboxAudioGuidance]. See interface for details.
  */
-@ExperimentalPreviewMapboxNavigationAPI
-class MapboxAudioGuidanceImpl(
+class MapboxAudioGuidance
+@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+internal constructor(
     private val audioGuidanceServices: MapboxAudioGuidanceServices,
-    private val configOwner: NavigationConfigOwner,
-    dispatcher: CoroutineDispatcher = Dispatchers.Main,
-) : MapboxAudioGuidance {
+    dispatcher: CoroutineDispatcher,
+) : MapboxNavigationObserver {
 
-    var dataStoreOwner: NavigationDataStoreOwner? = null
+    constructor() : this(MapboxAudioGuidanceServices(), Dispatchers.Main)
 
+    private var dataStoreOwner: NavigationDataStoreOwner? = null
+    private var configOwner: NavigationConfigOwner? = null
     private var mutedStateFlow = MutableStateFlow(false)
     private val internalStateFlow = MutableStateFlow(MapboxAudioGuidanceState())
     private val scope = CoroutineScope(SupervisorJob() + dispatcher)
@@ -51,7 +51,13 @@ class MapboxAudioGuidanceImpl(
 
     private var job: Job? = null
 
+    /**
+     * @see [MapboxNavigationApp]
+     */
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        val context = mapboxNavigation.navigationOptions.applicationContext
+        dataStoreOwner = audioGuidanceServices.dataStoreOwner(context, DEFAULT_DATA_STORE_NAME)
+        configOwner = audioGuidanceServices.configOwner(context)
         mapboxVoiceInstructions.registerObservers(mapboxNavigation)
         job = scope.launch {
             restoreMutedState()
@@ -59,6 +65,9 @@ class MapboxAudioGuidanceImpl(
         }
     }
 
+    /**
+     * @see [MapboxNavigationApp]
+     */
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         mapboxVoiceInstructions.unregisterObservers(mapboxNavigation)
         job?.cancel()
@@ -71,14 +80,14 @@ class MapboxAudioGuidanceImpl(
      * In order to enable voice guidance, you must call [MapboxNavigation.startTripSession]
      * and set a route for active guidance through [MapboxNavigation.setRoutes].
      *
-     * You can also control audio guidance by calling [mute], [unmute] or [toggle]
+     * You can also control audio guidance by calling [mute], [unMute] or [toggle]
      */
-    override fun stateFlow(): StateFlow<MapboxAudioGuidance.State> = internalStateFlow
+    fun stateFlow(): StateFlow<MapboxAudioGuidanceState> = internalStateFlow
 
     /**
      * Explicit call to mute the audio guidance state.
      */
-    override fun mute() {
+    fun mute() {
         scope.launch {
             setMutedState(true)
         }
@@ -87,7 +96,7 @@ class MapboxAudioGuidanceImpl(
     /**
      * Explicit call to unmute the audio guidance state.
      */
-    override fun unmute() {
+    fun unMute() {
         scope.launch {
             setMutedState(false)
         }
@@ -96,10 +105,10 @@ class MapboxAudioGuidanceImpl(
     /**
      * Toggle the muted state. E.g., if audio is muted, make it unmuted.
      */
-    override fun toggle() {
+    fun toggle() {
         scope.launch {
             if (mutedStateFlow.value) {
-                unmute()
+                unMute()
             } else {
                 mute()
             }
@@ -112,10 +121,10 @@ class MapboxAudioGuidanceImpl(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun audioGuidanceFlow(
         mapboxNavigation: MapboxNavigation
-    ): Flow<MapboxAudioGuidance.State> {
+    ): Flow<MapboxAudioGuidanceState> {
         return combine(
             mapboxVoiceInstructions.voiceLanguage(),
-            configOwner.language(),
+            configOwner!!.language(),
         ) { voiceLanguage, deviceLanguage -> voiceLanguage ?: deviceLanguage }
             .distinctUntilChanged()
             .flatMapLatest { language ->
@@ -134,7 +143,7 @@ class MapboxAudioGuidanceImpl(
     /**
      * This flow will monitor navigation state to determine if audio is available.
      */
-    private fun silentFlow(): Flow<MapboxAudioGuidance.State> {
+    private fun silentFlow(): Flow<MapboxAudioGuidanceState> {
         return mapboxVoiceInstructions.voiceInstructions()
             .map { state ->
                 internalStateFlow.updateAndGet {
@@ -153,7 +162,7 @@ class MapboxAudioGuidanceImpl(
     @OptIn(FlowPreview::class)
     private fun speechFlow(
         audioGuidance: MapboxAudioGuidanceVoice
-    ): Flow<MapboxAudioGuidance.State> {
+    ): Flow<MapboxAudioGuidanceState> {
         return mapboxVoiceInstructions.voiceInstructions()
             .flatMapConcat { voice ->
                 internalStateFlow.update {
@@ -166,7 +175,14 @@ class MapboxAudioGuidanceImpl(
                 audioGuidance.speak(voice.voiceInstructions)
             }
             .map { speechAnnouncement ->
-                internalStateFlow.updateAndGet { it.copy(speechAnnouncement = speechAnnouncement) }
+                internalStateFlow.updateAndGet {
+                    MapboxAudioGuidanceState(
+                        isPlayable = it.isPlayable,
+                        isMuted = it.isMuted,
+                        voiceInstructions = it.voiceInstructions,
+                        speechAnnouncement = speechAnnouncement
+                    )
+                }
             }
     }
 
@@ -181,22 +197,9 @@ class MapboxAudioGuidanceImpl(
         dataStoreOwner?.write(STORE_AUDIO_GUIDANCE_MUTED, muted)
     }
 
-    companion object {
-        val STORE_AUDIO_GUIDANCE_MUTED =
+    private companion object {
+        private val STORE_AUDIO_GUIDANCE_MUTED =
             booleanDataStoreKey("audio_guidance_muted", false)
-
-        fun create(context: Context): MapboxAudioGuidanceImpl {
-            return MapboxAudioGuidanceImpl(
-                MapboxAudioGuidanceServicesImpl(),
-                NavigationConfigOwner(context)
-            )
-        }
+        private const val DEFAULT_DATA_STORE_NAME = "mapbox_navigation_preferences"
     }
 }
-
-private data class MapboxAudioGuidanceState(
-    override val isPlayable: Boolean = false,
-    override val isMuted: Boolean = false,
-    override val voiceInstructions: VoiceInstructions? = null,
-    override val speechAnnouncement: SpeechAnnouncement? = null,
-) : MapboxAudioGuidance.State

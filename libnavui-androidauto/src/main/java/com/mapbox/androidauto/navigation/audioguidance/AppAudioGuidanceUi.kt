@@ -8,7 +8,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.androidauto.MapboxCarApp
-import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidance
+import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidanceState
 import com.mapbox.navigation.ui.voice.view.MapboxSoundButton
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -40,7 +40,7 @@ fun Fragment.attachAudioGuidance(
  */
 fun Lifecycle.muteAudioGuidance() {
     addObserver(object : DefaultLifecycleObserver {
-        lateinit var initialState: MapboxAudioGuidance.State
+        lateinit var initialState: MapboxAudioGuidanceState
         override fun onResume(owner: LifecycleOwner) {
             with(MapboxCarApp.carAppAudioGuidanceService()) {
                 initialState = stateFlow().value
@@ -50,7 +50,7 @@ fun Lifecycle.muteAudioGuidance() {
 
         override fun onPause(owner: LifecycleOwner) {
             if (!initialState.isMuted) {
-                MapboxCarApp.carAppAudioGuidanceService().unmute()
+                MapboxCarApp.carAppAudioGuidanceService().unMute()
             }
         }
     })

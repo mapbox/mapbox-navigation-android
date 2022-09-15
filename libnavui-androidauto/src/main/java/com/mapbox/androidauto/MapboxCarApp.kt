@@ -1,19 +1,16 @@
 package com.mapbox.androidauto
 
-import android.app.Application
 import com.mapbox.androidauto.navigation.location.CarAppLocation
 import com.mapbox.androidauto.navigation.location.impl.CarAppLocationImpl
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.ui.app.internal.SharedApp
-import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidance
+import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
  * The entry point for your Mapbox Android Auto app.
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 object MapboxCarApp {
 
     private val carAppStateFlow = MutableStateFlow<CarAppState>(FreeDriveState)
@@ -43,12 +40,15 @@ object MapboxCarApp {
     }
 
     /**
-     * Setup android auto from your [Application.onCreate]
-     *
-     * @param application used to detect when activities are foregrounded
+     * Setup android auto with defaults
      */
-    fun setup(application: Application) {
-        SharedApp.setup(application)
-        MapboxNavigationApp.registerObserver(CarAppLocationImpl())
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    fun setup() {
+        if (MapboxNavigationApp.getObservers(MapboxAudioGuidance::class).isEmpty()) {
+            MapboxNavigationApp.registerObserver(MapboxAudioGuidance())
+        }
+        if (MapboxNavigationApp.getObservers(CarAppLocation::class).isEmpty()) {
+            MapboxNavigationApp.registerObserver(CarAppLocationImpl())
+        }
     }
 }

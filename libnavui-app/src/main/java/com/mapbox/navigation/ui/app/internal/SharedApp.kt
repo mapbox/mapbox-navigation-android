@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.app.internal
 
-import android.content.Context
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.extensions.attachCreated
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -17,9 +16,7 @@ import com.mapbox.navigation.ui.app.internal.controller.StateResetController
 import com.mapbox.navigation.ui.app.internal.controller.TripSessionStarterStateController
 import com.mapbox.navigation.ui.maps.internal.ui.RouteAlternativeComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteAlternativeContract
-import com.mapbox.navigation.ui.utils.internal.datastore.NavigationDataStoreOwner
-import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidance
-import com.mapbox.navigation.ui.voice.internal.impl.MapboxAudioGuidanceImpl
+import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
 import java.util.concurrent.atomic.AtomicBoolean
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -55,8 +52,6 @@ object SharedApp {
 
     @JvmOverloads
     fun setup(
-        context: Context,
-        audioGuidance: MapboxAudioGuidance? = null,
         routeAlternativeContract: RouteAlternativeContract? = null
     ) {
         if (isSetup) return
@@ -69,7 +64,12 @@ object SharedApp {
             }
         )
         MapboxNavigationApp.lifecycleOwner.attachCreated(*navigationObservers)
-        MapboxNavigationApp.registerObserver(audioGuidance ?: defaultAudioGuidance(context))
+
+        // TODO Remove this from SharedApp. The components that use `MapboxAudioGuidance`
+        //   will "ensureAudioGuidanceRegistered". See the `ComponentInstaller.audioGuidanceButton`
+        if (MapboxNavigationApp.getObservers(MapboxAudioGuidance::class).isEmpty()) {
+            MapboxNavigationApp.registerObserver(MapboxAudioGuidance())
+        }
     }
 
     fun tripSessionTransaction(updateSession: () -> Unit) {
@@ -80,12 +80,4 @@ object SharedApp {
         updateSession()
         ignoreTripSessionUpdates.set(false)
     }
-
-    private fun defaultAudioGuidance(context: Context): MapboxAudioGuidance {
-        return MapboxAudioGuidanceImpl.create(context).also {
-            it.dataStoreOwner = NavigationDataStoreOwner(context, DEFAULT_DATA_STORE_NAME)
-        }
-    }
-
-    private const val DEFAULT_DATA_STORE_NAME = "mapbox_navigation_preferences"
 }

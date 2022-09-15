@@ -7,7 +7,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.utils.internal.Provider
 import com.mapbox.navigation.ui.utils.internal.extensions.slice
-import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidance
+import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
 import com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,7 +39,7 @@ internal class MapboxAudioComponentContract(
     }
 
     override fun unMute() {
-        audioGuidance.unmute()
+        audioGuidance.unMute()
     }
 }
 

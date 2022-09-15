@@ -1,10 +1,11 @@
 package com.mapbox.navigation.ui.voice
 
 import com.mapbox.api.directions.v5.models.VoiceInstructions
-import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidanceServices
+import com.mapbox.navigation.ui.utils.internal.configuration.NavigationConfigOwner
 import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidanceVoice
 import com.mapbox.navigation.ui.voice.internal.MapboxVoiceInstructions
 import com.mapbox.navigation.ui.voice.internal.MapboxVoiceInstructionsState
+import com.mapbox.navigation.ui.voice.internal.impl.MapboxAudioGuidanceServices
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import io.mockk.Runs
 import io.mockk.every
@@ -15,7 +16,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
 
-class TestMapboxAudioGuidanceServices {
+class TestMapboxAudioGuidanceServices(
+    private val deviceLanguage: String = "en"
+) {
 
     private val voiceInstructionsFlow = MutableStateFlow<MapboxVoiceInstructions.State>(
         MapboxVoiceInstructionsState()
@@ -48,9 +51,19 @@ class TestMapboxAudioGuidanceServices {
         }
     }
 
+    private val testCarAppDataStoreOwner = TestCarAppDataStoreOwner()
+
+    private val carAppConfigOwner: NavigationConfigOwner = mockk {
+        every { language() } returns flowOf(deviceLanguage)
+    }
+
+    val dataStoreOwner = testCarAppDataStoreOwner.carAppDataStoreOwner
+
     val mapboxAudioGuidanceServices = mockk<MapboxAudioGuidanceServices> {
         every { mapboxVoiceInstructions() } returns mapboxVoiceInstructions
         every { mapboxAudioGuidanceVoice(any(), any()) } returns mapboxAudioGuidanceVoice
+        every { configOwner(any()) } returns carAppConfigOwner
+        every { dataStoreOwner(any(), any()) } returns dataStoreOwner
     }
 
     fun emitVoiceInstruction(state: MapboxVoiceInstructions.State) {

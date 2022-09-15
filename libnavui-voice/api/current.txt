@@ -21,6 +21,27 @@ package com.mapbox.navigation.ui.voice.api {
     method public operator void invoke(boolean result);
   }
 
+  public final class MapboxAudioGuidance implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    ctor public MapboxAudioGuidance();
+    method public void mute();
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.voice.api.MapboxAudioGuidanceState> stateFlow();
+    method public void toggle();
+    method public void unMute();
+  }
+
+  public final class MapboxAudioGuidanceState {
+    method public com.mapbox.navigation.ui.voice.model.SpeechAnnouncement? getSpeechAnnouncement();
+    method public com.mapbox.api.directions.v5.models.VoiceInstructions? getVoiceInstructions();
+    method public boolean isMuted();
+    method public boolean isPlayable();
+    property public final boolean isMuted;
+    property public final boolean isPlayable;
+    property public final com.mapbox.navigation.ui.voice.model.SpeechAnnouncement? speechAnnouncement;
+    property public final com.mapbox.api.directions.v5.models.VoiceInstructions? voiceInstructions;
+  }
+
   public final class MapboxSpeechApi {
     ctor public MapboxSpeechApi(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions options = MapboxSpeechApiOptions.<init>().build());
     ctor public MapboxSpeechApi(android.content.Context context, String accessToken, String language);
