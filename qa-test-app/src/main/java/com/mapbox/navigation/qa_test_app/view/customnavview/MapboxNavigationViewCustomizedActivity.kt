@@ -53,6 +53,7 @@ import com.mapbox.navigation.dropin.ActionButtonDescription.Position.START
 import com.mapbox.navigation.dropin.MapViewObserver
 import com.mapbox.navigation.dropin.MapboxExtendableButtonParams
 import com.mapbox.navigation.dropin.NavigationViewListener
+import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteArrowOptions
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultAudioGuidanceButtonParams
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultCameraModeButtonParams
@@ -229,9 +230,6 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
 
         binding.navigationView.addListener(freeDriveInfoPanelInstaller)
         binding.navigationView.addListener(navViewListener)
-        binding.navigationView.customizeViewOptions {
-            routeArrowOptions = customRouteArrowOptions()
-        }
 
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.getDefaultNightMode())
 
@@ -497,6 +495,7 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             }
             binding.navigationView.customizeViewOptions {
                 routeLineOptions = customRouteLineOptions()
+                routeArrowOptions = customRouteArrowOptions()
                 mapStyleUriDay = Style.LIGHT
                 mapStyleUriNight = Style.DARK
             }
@@ -508,6 +507,7 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             }
             binding.navigationView.customizeViewOptions {
                 routeLineOptions = defaultRouteLineOptions(applicationContext)
+                routeArrowOptions = defaultRouteArrowOptions(applicationContext)
                 mapStyleUriDay = NavigationStyles.NAVIGATION_DAY_STYLE
                 mapStyleUriNight = NavigationStyles.NAVIGATION_NIGHT_STYLE
             }

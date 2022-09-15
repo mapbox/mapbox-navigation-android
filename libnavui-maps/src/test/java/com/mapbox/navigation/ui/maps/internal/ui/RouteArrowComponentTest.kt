@@ -10,6 +10,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.maps.route.arrow.RouteArrowUtils
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.ClearArrowsValue
@@ -20,8 +21,10 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,7 +37,7 @@ import org.junit.Test
 class RouteArrowComponentTest {
 
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
     private val context = mockk<Context>()
     private val routeArrowOptions by lazy { RouteArrowOptions.Builder(context).build() }
@@ -42,14 +45,17 @@ class RouteArrowComponentTest {
     @Before
     fun setUp() {
         mockkStatic(AppCompatResources::class)
+        mockkObject(RouteArrowUtils)
         every { AppCompatResources.getDrawable(any(), any()) } returns mockk(relaxed = true) {
             every { intrinsicHeight } returns 24
             every { intrinsicWidth } returns 24
         }
+        every { RouteArrowUtils.removeLayers(any()) } just Runs
     }
 
     @After
     fun tearDown() {
+        unmockkObject(RouteArrowUtils)
         unmockkStatic(AppCompatResources::class)
     }
 
@@ -131,6 +137,7 @@ class RouteArrowComponentTest {
         sut.onDetached(mockMapboxNavigation)
 
         verify { mockView.render(mockStyle, clearValue) }
+        verify { RouteArrowUtils.removeLayers(mockStyle) }
     }
 
     private fun mockMapWithStyleLoaded(style: Style): MapboxMap = mockk {
