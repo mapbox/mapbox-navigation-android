@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core.trip.service
 
-import android.os.Build
 import androidx.test.espresso.Espresso.onIdle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.By
@@ -41,11 +40,7 @@ internal class TripServiceTest :
                 By.res("com.mapbox.navigation.core.test:id/freeDriveText")
 
             openNotification()
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                // Android 12 always places foreground notification on top,
-                // no need to scroll and look for it
-                searchForMyForegroundNotification(freeDriveText)
-            }
+            searchForMyForegroundNotification(freeDriveText)
 
             assertFalse(hasObject(etaContent))
             assertTrue(hasObject(freeDriveText))
