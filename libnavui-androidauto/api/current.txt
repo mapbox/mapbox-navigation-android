@@ -305,7 +305,7 @@ package com.mapbox.androidauto.car.map.widgets.logo {
 package com.mapbox.androidauto.car.navigation {
 
   public final class ActiveGuidanceScreen extends androidx.car.app.Screen {
-    ctor public ActiveGuidanceScreen(com.mapbox.androidauto.car.navigation.CarActiveGuidanceCarContext carActiveGuidanceContext, java.util.List<? extends com.mapbox.androidauto.car.action.MapboxActionProvider> actionProviders, com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil placesLayerUtil = com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil());
+    ctor public ActiveGuidanceScreen(com.mapbox.androidauto.car.MainCarContext mainCarContext, java.util.List<? extends com.mapbox.androidauto.car.action.MapboxActionProvider> actionProviders);
     method public com.mapbox.androidauto.car.location.CarLocationRenderer getCarLocationRenderer();
     method public com.mapbox.androidauto.car.navigation.CarNavigationCamera getCarNavigationCamera();
     method public com.mapbox.androidauto.car.preview.CarRouteLine getCarRouteLine();
@@ -317,18 +317,17 @@ package com.mapbox.androidauto.car.navigation {
     property public final com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer carSpeedLimitRenderer;
   }
 
-  public final class CarActiveGuidanceCarContext {
-    ctor public CarActiveGuidanceCarContext(com.mapbox.androidauto.car.MainCarContext mainCarContext);
-    method public androidx.car.app.CarContext getCarContext();
-    method public com.mapbox.navigation.base.formatter.DistanceFormatter getDistanceFormatter();
-    method public com.mapbox.androidauto.car.MainCarContext getMainCarContext();
-    method public com.mapbox.maps.extension.androidauto.MapboxCarMap getMapboxCarMap();
-    method public com.mapbox.navigation.core.MapboxNavigation getMapboxNavigation();
-    property public final androidx.car.app.CarContext carContext;
-    property public final com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter;
-    property public final com.mapbox.androidauto.car.MainCarContext mainCarContext;
-    property public final com.mapbox.maps.extension.androidauto.MapboxCarMap mapboxCarMap;
-    property public final com.mapbox.navigation.core.MapboxNavigation mapboxNavigation;
+  public final class CarActiveGuidanceMarkers implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public CarActiveGuidanceMarkers();
+    method public void onAttached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
+    method public void onDetached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
+  }
+
+  public final class CarArrivalTrigger implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    ctor public CarArrivalTrigger();
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void triggerArrival();
   }
 
   public enum CarCameraMode {

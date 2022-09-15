@@ -12,7 +12,6 @@ import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.car.feedback.ui.CarGridFeedbackScreen
 import com.mapbox.androidauto.car.navigation.ActiveGuidanceScreen
-import com.mapbox.androidauto.car.navigation.CarActiveGuidanceCarContext
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.navigation.audioguidance.CarAudioGuidanceUi
 import kotlinx.coroutines.flow.collect
@@ -28,7 +27,7 @@ class MainScreenManager(val mainCarContext: MainCarContext) {
             FreeDriveState, RoutePreviewState -> MainCarScreen(mainCarContext)
             ActiveGuidanceState -> {
                 ActiveGuidanceScreen(
-                    CarActiveGuidanceCarContext(mainCarContext),
+                    mainCarContext,
                     listOf(
                         CarFeedbackAction(
                             mainCarContext.mapboxCarMap,
