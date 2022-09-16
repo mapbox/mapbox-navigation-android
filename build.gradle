@@ -76,7 +76,7 @@ allprojects {
 
   tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
-      freeCompilerArgs = freeCompilerArgs + "-Xjvm-default=all"
+      freeCompilerArgs = freeCompilerArgs + "-Xjvm-default=compatibility"
     }
   }
 }
