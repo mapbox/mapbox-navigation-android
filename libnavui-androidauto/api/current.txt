@@ -146,12 +146,12 @@ package com.mapbox.androidauto.car.feedback.core {
   }
 
   public final class CarFeedbackSearchOptions {
-    ctor public CarFeedbackSearchOptions(java.util.List<com.mapbox.search.record.FavoriteRecord>? favoriteRecords = null, java.util.List<? extends com.mapbox.search.result.SearchSuggestion>? searchSuggestions = null, com.mapbox.navigation.core.geodeeplink.GeoDeeplink? geoDeeplink = null, com.mapbox.api.geocoding.v5.models.GeocodingResponse? geocodingResponse = null);
+    ctor public CarFeedbackSearchOptions(java.util.List<com.mapbox.search.record.FavoriteRecord>? favoriteRecords = null, java.util.List<com.mapbox.search.result.SearchSuggestion>? searchSuggestions = null, com.mapbox.navigation.core.geodeeplink.GeoDeeplink? geoDeeplink = null, com.mapbox.api.geocoding.v5.models.GeocodingResponse? geocodingResponse = null);
     method public java.util.List<com.mapbox.search.record.FavoriteRecord>? component1();
     method public java.util.List<com.mapbox.search.result.SearchSuggestion>? component2();
     method public com.mapbox.navigation.core.geodeeplink.GeoDeeplink? component3();
     method public com.mapbox.api.geocoding.v5.models.GeocodingResponse? component4();
-    method public com.mapbox.androidauto.car.feedback.core.CarFeedbackSearchOptions copy(java.util.List<com.mapbox.search.record.FavoriteRecord>? favoriteRecords, java.util.List<? extends com.mapbox.search.result.SearchSuggestion>? searchSuggestions, com.mapbox.navigation.core.geodeeplink.GeoDeeplink? geoDeeplink, com.mapbox.api.geocoding.v5.models.GeocodingResponse? geocodingResponse);
+    method public com.mapbox.androidauto.car.feedback.core.CarFeedbackSearchOptions copy(java.util.List<com.mapbox.search.record.FavoriteRecord>? favoriteRecords, java.util.List<com.mapbox.search.result.SearchSuggestion>? searchSuggestions, com.mapbox.navigation.core.geodeeplink.GeoDeeplink? geoDeeplink, com.mapbox.api.geocoding.v5.models.GeocodingResponse? geocodingResponse);
     method public java.util.List<com.mapbox.search.record.FavoriteRecord>? getFavoriteRecords();
     method public com.mapbox.navigation.core.geodeeplink.GeoDeeplink? getGeoDeeplink();
     method public com.mapbox.api.geocoding.v5.models.GeocodingResponse? getGeocodingResponse();
@@ -202,7 +202,7 @@ package com.mapbox.androidauto.car.feedback.ui {
   }
 
   @Keep public final class CarFeedbackItem {
-    ctor public CarFeedbackItem(String carFeedbackTitle, String? navigationFeedbackType = null, java.util.List<java.lang.String>? navigationFeedbackSubType = null, @com.mapbox.search.analytics.FeedbackEvent.FeedbackReason String? searchFeedbackReason = null, String? favoritesFeedbackReason = null, com.mapbox.navigation.core.geodeeplink.GeoDeeplink? geoDeeplink = null, com.mapbox.api.geocoding.v5.models.GeocodingResponse? geocodingResponse = null, java.util.List<com.mapbox.search.record.FavoriteRecord>? favoriteRecords = null, java.util.List<? extends com.mapbox.search.result.SearchSuggestion>? searchSuggestions = null);
+    ctor public CarFeedbackItem(String carFeedbackTitle, String? navigationFeedbackType = null, java.util.List<java.lang.String>? navigationFeedbackSubType = null, @com.mapbox.search.analytics.FeedbackEvent.FeedbackReason String? searchFeedbackReason = null, String? favoritesFeedbackReason = null, com.mapbox.navigation.core.geodeeplink.GeoDeeplink? geoDeeplink = null, com.mapbox.api.geocoding.v5.models.GeocodingResponse? geocodingResponse = null, java.util.List<com.mapbox.search.record.FavoriteRecord>? favoriteRecords = null, java.util.List<com.mapbox.search.result.SearchSuggestion>? searchSuggestions = null);
     method public String getCarFeedbackTitle();
     method public java.util.List<com.mapbox.search.record.FavoriteRecord>? getFavoriteRecords();
     method public String? getFavoritesFeedbackReason();
