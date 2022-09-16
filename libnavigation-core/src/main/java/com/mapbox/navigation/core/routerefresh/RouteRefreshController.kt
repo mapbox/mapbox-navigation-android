@@ -1,6 +1,8 @@
 package com.mapbox.navigation.core.routerefresh
 
+import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CurrentIndices
 import com.mapbox.navigation.base.internal.route.updateDirectionsRouteOnly
 import com.mapbox.navigation.base.internal.time.parseISO8601DateToLocalTimeOrNull
@@ -12,6 +14,7 @@ import com.mapbox.navigation.core.CurrentIndicesProvider
 import com.mapbox.navigation.core.directions.session.RouteRefresh
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -20,37 +23,102 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Date
+import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.coroutines.resume
 
 /**
  * This class is responsible for refreshing the current direction route's traffic.
  * This does not support alternative routes.
  */
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class RouteRefreshController(
     private val routeRefreshOptions: RouteRefreshOptions,
     private val routeRefresh: RouteRefresh,
     private val currentIndicesProvider: CurrentIndicesProvider,
     private val routeDiffProvider: DirectionsRouteDiffProvider = DirectionsRouteDiffProvider(),
-    private val localDateProvider: () -> Date
+    private val localDateProvider: () -> Date,
 ) {
 
+    private var state: RouteRefreshStateResult? = null
+        set(value) {
+            if (field == value) return
+            field = value
+            value?.let { nonNullValue ->
+                observers.forEach {
+                    it.onNewState(nonNullValue)
+                }
+            }
+        }
+
+    private val observers = CopyOnWriteArraySet<RouteRefreshStatesObserver>()
+
     internal companion object {
+        @VisibleForTesting
         internal const val LOG_CATEGORY = "RouteRefreshController"
-        private const val FAILED_ATTEMPTS_TO_INVALIDATE_EXPIRING_DATA = 3
+
+        @VisibleForTesting
+        internal const val FAILED_ATTEMPTS_TO_INVALIDATE_EXPIRING_DATA = 3
     }
 
     suspend fun refresh(routes: List<NavigationRoute>): RefreshedRouteInfo {
-        return if (routes.isNotEmpty()) {
-            val routesValidationResults = routes.map { validateRoute(it) }
-            if (routesValidationResults.any { it is RouteValidationResult.Valid }) {
-                tryRefreshingRoutesUntilRouteChanges(routes)
+        try {
+            return if (routes.isNotEmpty()) {
+                val routesValidationResults = routes.map { validateRoute(it) }
+                if (routesValidationResults.any { it is RouteValidationResult.Valid }) {
+                    tryRefreshingRoutesUntilRouteChanges(routes)
+                } else {
+                    val message = joinValidationErrorMessages(routesValidationResults, routes)
+                    onNewState(
+                        RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
+                        "No routes which could be refreshed. $message"
+                    )
+                    waitForever("No routes which could be refreshed. $message")
+                }
             } else {
-                val message = joinValidationErrorMessages(routesValidationResults, routes)
-                waitForever("No routes which could be refreshed. $message")
+                resetState()
+                waitForever("routes are empty")
             }
-        } else {
-            waitForever("routes are empty")
+        } catch (e: CancellationException) {
+            onNewStateIfCurrentIs(
+                RouteRefreshExtra.REFRESH_STATE_CANCELED,
+                current = RouteRefreshExtra.REFRESH_STATE_STARTED,
+            )
+            throw e
         }
+    }
+
+    fun registerRouteRefreshStateObserver(observer: RouteRefreshStatesObserver) {
+        observers.add(observer)
+        state?.let { observer.onNewState(it) }
+    }
+
+    fun unregisterRouteRefreshStateObserver(observer: RouteRefreshStatesObserver) {
+        observers.remove(observer)
+    }
+
+    fun unregisterAllRouteRefreshStateObservers() {
+        observers.clear()
+    }
+
+    private fun onNewState(
+        @RouteRefreshExtra.RouteRefreshState state: String,
+        message: String? = null
+    ) {
+        this.state = RouteRefreshStateResult(state, message)
+    }
+
+    private fun onNewStateIfCurrentIs(
+        @RouteRefreshExtra.RouteRefreshState state: String,
+        message: String? = null,
+        @RouteRefreshExtra.RouteRefreshState current: String,
+    ) {
+        if (current == this.state?.state) {
+            onNewState(state, message)
+        }
+    }
+
+    private fun resetState() {
+        this.state = null
     }
 
     private fun joinValidationErrorMessages(
@@ -78,10 +146,14 @@ internal class RouteRefreshController(
         try {
             repeat(FAILED_ATTEMPTS_TO_INVALIDATE_EXPIRING_DATA) {
                 timeUntilNextAttempt.await()
+                if (it == 0) {
+                    onNewState(RouteRefreshExtra.REFRESH_STATE_STARTED)
+                }
                 timeUntilNextAttempt = async { delay(routeRefreshOptions.intervalMillis) }
                 val indicesSnapshot = currentIndicesProvider.getFilledIndicesOrWait()
                 val refreshedRoutes = refreshRoutesOrNull(routes, indicesSnapshot)
                 if (refreshedRoutes.any { it != null }) {
+                    onNewState(RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS)
                     return@coroutineScope RefreshedRouteInfo(
                         refreshedRoutes.mapIndexed { index, navigationRoute ->
                             navigationRoute ?: routes[index]
@@ -93,6 +165,7 @@ internal class RouteRefreshController(
         } finally {
             timeUntilNextAttempt.cancel() // otherwise current coroutine will wait for its child
         }
+        onNewState(RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED)
         val indicesSnapshot = currentIndicesProvider.getFilledIndicesOrWait()
         RefreshedRouteInfo(
             routes.map { removeExpiringDataFromRoute(it, indicesSnapshot.legIndex) },

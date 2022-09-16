@@ -27,6 +27,7 @@ import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routerefresh.RefreshedRouteInfo
+import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.NativeSetRouteError
@@ -1663,6 +1664,41 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         verify {
             historyRecordingStateHandler.unregisterStateChangeObserver(observer)
+        }
+    }
+
+    @Test
+    fun registerRouteRefreshStateObserver() {
+        val observer = mockk<RouteRefreshStatesObserver>()
+        createMapboxNavigation()
+
+        mapboxNavigation.registerRouteRefreshStateObserver(observer)
+
+        verify(exactly = 1) {
+            routeRefreshController.registerRouteRefreshStateObserver(observer)
+        }
+    }
+
+    @Test
+    fun unregisterRouteRefreshStateObserver() {
+        val observer = mockk<RouteRefreshStatesObserver>()
+        createMapboxNavigation()
+
+        mapboxNavigation.unregisterRouteRefreshStateObserver(observer)
+
+        verify(exactly = 1) {
+            routeRefreshController.unregisterRouteRefreshStateObserver(observer)
+        }
+    }
+
+    @Test
+    fun onDestroyUnregisterAllRouteRefreshStateObserver() {
+        createMapboxNavigation()
+
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) {
+            routeRefreshController.unregisterAllRouteRefreshStateObservers()
         }
     }
 }
