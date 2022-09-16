@@ -53,7 +53,9 @@ class AudioGuidanceButtonComponent(
 
     init {
         this.contractProvider = contractProvider ?: Provider {
-            val audioGuidance = MapboxNavigationApp.getObserver(MapboxAudioGuidance::class)
+            val audioGuidance = MapboxNavigationApp
+                .getObservers(MapboxAudioGuidance::class).firstOrNull()
+                ?: MapboxAudioGuidance().also { MapboxNavigationApp.registerObserver(it) }
             MapboxAudioComponentContract(coroutineScope, audioGuidance)
         }
     }

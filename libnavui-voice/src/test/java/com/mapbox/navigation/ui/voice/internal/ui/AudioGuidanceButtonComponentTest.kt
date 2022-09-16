@@ -13,6 +13,7 @@ import com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
@@ -21,6 +22,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.After
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -112,14 +114,31 @@ class AudioGuidanceButtonComponentTest {
             every { toggle() } returns Unit
         }
         every {
-            MapboxNavigationApp.getObserver(MapboxAudioGuidance::class)
-        } returns mockAudioGuidance
+            MapboxNavigationApp.getObservers(MapboxAudioGuidance::class)
+        } returns listOf(mockAudioGuidance)
 
         val sut = AudioGuidanceButtonComponent(button)
         sut.onAttached(mapboxNavigation)
         button.performClick()
 
         verify { mockAudioGuidance.mute() }
+    }
+
+    @Test
+    fun `onAttach - create MapboxAudioGuidance if none exists`() {
+        val slotAudioGuidance = slot<MapboxAudioGuidance>()
+        every {
+            MapboxNavigationApp.getObservers(MapboxAudioGuidance::class)
+        } returns emptyList()
+        every {
+            MapboxNavigationApp.registerObserver(capture(slotAudioGuidance))
+        } returns MapboxNavigationApp
+
+        val sut = AudioGuidanceButtonComponent(button)
+        sut.onAttached(mapboxNavigation)
+        button.performClick()
+
+        assertTrue(slotAudioGuidance.isCaptured)
     }
 
     @Test

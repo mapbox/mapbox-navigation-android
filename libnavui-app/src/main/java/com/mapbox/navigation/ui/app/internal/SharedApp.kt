@@ -16,7 +16,6 @@ import com.mapbox.navigation.ui.app.internal.controller.StateResetController
 import com.mapbox.navigation.ui.app.internal.controller.TripSessionStarterStateController
 import com.mapbox.navigation.ui.maps.internal.ui.RouteAlternativeComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteAlternativeContract
-import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
 import java.util.concurrent.atomic.AtomicBoolean
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -64,12 +63,6 @@ object SharedApp {
             }
         )
         MapboxNavigationApp.lifecycleOwner.attachCreated(*navigationObservers)
-
-        // TODO Remove this from SharedApp. The components that use `MapboxAudioGuidance`
-        //   will "ensureAudioGuidanceRegistered". See the `ComponentInstaller.audioGuidanceButton`
-        if (MapboxNavigationApp.getObservers(MapboxAudioGuidance::class).isEmpty()) {
-            MapboxNavigationApp.registerObserver(MapboxAudioGuidance())
-        }
     }
 
     fun tripSessionTransaction(updateSession: () -> Unit) {
