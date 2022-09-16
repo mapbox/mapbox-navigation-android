@@ -21,8 +21,8 @@ Mapbox welcomes participation and contributions from everyone.
 ### Mapbox dependencies
 This release defines minimum versions for the Mapbox dependencies.
 - Mapbox Maps Android Auto Extension `v0.2.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/extension-androidauto-v0.2.0))
-- Mapbox Navigation `v2.8.0-beta.3` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/v2.8.0-beta.3))
-- Mapbox Search `v1.0.0-beta.35` ([release notes](https://github.com/mapbox/mapbox-search-android/releases/tag/v1.0.0-beta.35))
+- Mapbox Navigation `v2.8.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/v2.8.0-beta.3))
+- Mapbox Search `v1.0.0-beta.36` ([release notes](https://github.com/mapbox/mapbox-search-android/releases/tag/v1.0.0-beta.35))
 
 ## androidauto-v0.10.0 - Sep 9, 2022
 ### Changelog
