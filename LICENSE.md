@@ -4525,6 +4525,12 @@ License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Mapbox Base SDK for Android.
+URL: [https://github.com/mapbox/mapbox-search-android](https://github.com/mapbox/mapbox-search-android)
+License: [Mapbox Terms of Service](https://www.mapbox.com/legal/tos)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Mapbox Common (Artifact that provides Mapbox module and plugin contracts).
 URL: [https://github.com/mapbox/mapbox-base-android](https://github.com/mapbox/mapbox-base-android)
 License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
