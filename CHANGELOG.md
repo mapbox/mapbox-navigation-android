@@ -7,6 +7,23 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Fixed super late hwy exit detection after leaving a tunnel (auto profile only). [#6346](https://github.com/mapbox/mapbox-navigation-android/pull/6346)
 
+## Mapbox Navigation SDK 2.8.0-rc.2 - 16 September, 2022
+### Changelog
+[Changes between v2.8.0-rc.1 and v2.8.0-rc.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.8.0-rc.1...v2.8.0-rc.2)
+
+#### Features
+#### Bug fixes and improvements
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.8.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.8.0))
+- Mapbox Navigation Native `v115.0.0`
+- Mapbox Core Common `v23.0.0`
+- Mapbox Java `v6.8.0-beta.4` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0-beta.4))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+- Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
+
+
 ## Mapbox Navigation SDK 2.9.0-alpha.1 - 15 September, 2022
 ### Changelog
 [Changes between v2.8.0 and v2.9.0-alpha.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.8.0...v2.9.0-alpha.1)
