@@ -5,8 +5,8 @@ import com.mapbox.androidauto.car.feedback.core.CarFeedbackSearchOptionsProvider
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapProvider
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.search.AsyncOperationTask
 import com.mapbox.search.CompletionCallback
+import com.mapbox.search.common.AsyncOperationTask
 import com.mapbox.search.record.FavoriteRecord
 import com.mapbox.search.record.FavoritesDataProvider
 import kotlin.coroutines.resume
