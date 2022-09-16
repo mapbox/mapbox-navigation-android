@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Fixed super late hwy exit detection after leaving a tunnel (auto profile only). [#6346](https://github.com/mapbox/mapbox-navigation-android/pull/6346)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.1 - 15 September, 2022
 ### Changelog
