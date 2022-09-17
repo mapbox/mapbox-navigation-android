@@ -40,8 +40,6 @@ internal constructor(
     dispatcher: CoroutineDispatcher,
 ) : MapboxNavigationObserver {
 
-    constructor() : this(MapboxAudioGuidanceServices(), Dispatchers.Main)
-
     private var dataStoreOwner: NavigationDataStoreOwner? = null
     private var configOwner: NavigationConfigOwner? = null
     private var mutedStateFlow = MutableStateFlow(false)
@@ -197,9 +195,14 @@ internal constructor(
         dataStoreOwner?.write(STORE_AUDIO_GUIDANCE_MUTED, muted)
     }
 
-    private companion object {
+    companion object {
         private val STORE_AUDIO_GUIDANCE_MUTED =
             booleanDataStoreKey("audio_guidance_muted", false)
         private const val DEFAULT_DATA_STORE_NAME = "mapbox_navigation_preferences"
+
+        fun getInstance(): MapboxAudioGuidance = MapboxNavigationApp
+            .getObservers(MapboxAudioGuidance::class)
+            .firstOrNull() ?: MapboxAudioGuidance(MapboxAudioGuidanceServices(), Dispatchers.Main)
+            .also { MapboxNavigationApp.registerObserver(it) }
     }
 }

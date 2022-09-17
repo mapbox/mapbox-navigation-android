@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.voice.internal.ui
 import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.utils.internal.Provider
 import com.mapbox.navigation.ui.utils.internal.extensions.slice
@@ -53,10 +52,7 @@ class AudioGuidanceButtonComponent(
 
     init {
         this.contractProvider = contractProvider ?: Provider {
-            val audioGuidance = MapboxNavigationApp
-                .getObservers(MapboxAudioGuidance::class).firstOrNull()
-                ?: MapboxAudioGuidance().also { MapboxNavigationApp.registerObserver(it) }
-            MapboxAudioComponentContract(coroutineScope, audioGuidance)
+            MapboxAudioComponentContract(coroutineScope, MapboxAudioGuidance.getInstance())
         }
     }
 

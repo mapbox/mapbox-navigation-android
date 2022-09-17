@@ -12,6 +12,7 @@ import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.MainActionStrip
 import com.mapbox.androidauto.car.action.MapboxActionProvider
+import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -28,7 +29,7 @@ class CarAudioGuidanceUi : MapboxActionProvider.ScreenActionProvider {
      * Attach this to the screen while navigating.
      */
     private fun buildSoundButtonAction(screen: Screen): Action {
-        val audioGuidance = MapboxCarApp.carAppAudioGuidanceService()
+        val audioGuidance = MapboxAudioGuidance.getInstance()
         val state = audioGuidance.stateFlow().value
         return if (!state.isMuted) {
             buildIconAction(screen, R.drawable.mapbox_car_ic_volume_on) {
@@ -45,7 +46,7 @@ class CarAudioGuidanceUi : MapboxActionProvider.ScreenActionProvider {
         screen.lifecycle.apply {
             coroutineScope.launch {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    MapboxCarApp.carAppAudioGuidanceService().stateFlow()
+                    MapboxAudioGuidance.getInstance().stateFlow()
                         .distinctUntilChanged { old, new ->
                             old.isMuted == new.isMuted && old.isPlayable == new.isPlayable
                         }

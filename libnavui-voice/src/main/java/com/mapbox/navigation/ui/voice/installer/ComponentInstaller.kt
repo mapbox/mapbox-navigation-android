@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.voice.installer
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.ui.base.installer.ComponentInstaller
 import com.mapbox.navigation.ui.base.installer.Installation
 import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
@@ -17,13 +16,5 @@ import com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
  */
 @ExperimentalPreviewMapboxNavigationAPI
 fun ComponentInstaller.audioGuidanceButton(button: MapboxAudioGuidanceButton): Installation {
-    ensureAudioGuidanceRegistered()
     return component(AudioGuidanceButtonComponent(button))
-}
-
-@ExperimentalPreviewMapboxNavigationAPI
-private fun ensureAudioGuidanceRegistered() {
-    if (MapboxNavigationApp.getObservers(MapboxAudioGuidance::class).isEmpty()) {
-        MapboxNavigationApp.registerObserver(MapboxAudioGuidance())
-    }
 }

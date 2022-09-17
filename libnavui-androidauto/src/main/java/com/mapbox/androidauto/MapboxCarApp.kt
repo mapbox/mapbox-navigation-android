@@ -27,12 +27,6 @@ object MapboxCarApp {
         MapboxNavigationApp.getObserver(CarAppLocation::class)
 
     /**
-     * Audio guidance service available to the car and app.
-     */
-    fun carAppAudioGuidanceService(): MapboxAudioGuidance =
-        MapboxNavigationApp.getObserver(MapboxAudioGuidance::class)
-
-    /**
      * Keep your car and app in sync with CarAppState.
      */
     fun updateCarAppState(carAppState: CarAppState) {
@@ -44,9 +38,6 @@ object MapboxCarApp {
      */
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun setup() {
-        if (MapboxNavigationApp.getObservers(MapboxAudioGuidance::class).isEmpty()) {
-            MapboxNavigationApp.registerObserver(MapboxAudioGuidance())
-        }
         if (MapboxNavigationApp.getObservers(CarAppLocation::class).isEmpty()) {
             MapboxNavigationApp.registerObserver(CarAppLocationImpl())
         }
