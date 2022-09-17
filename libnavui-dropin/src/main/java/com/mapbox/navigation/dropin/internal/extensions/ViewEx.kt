@@ -1,6 +1,9 @@
 package com.mapbox.navigation.dropin.internal.extensions
 
 import android.view.View
+import android.view.ViewGroup
+import androidx.annotation.Px
+import androidx.core.view.updateLayoutParams
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.actor
@@ -24,5 +27,27 @@ fun View.onClick(scope: CoroutineScope, handler: suspend CoroutineScope.(View) -
         // By default, an actor's mailbox is backed by RendezvousChannel,
         // whose trySend operation succeeds only when the receive is active.
         eventActor.trySend(it)
+    }
+}
+
+/**
+ * Updates this view's margins by modifying its layoutParams.
+ * This method version allows using named parameters just to set one or more axes.
+ *
+ * @see ViewGroup.MarginLayoutParams.setMargins
+ */
+fun View.updateMargins(
+    @Px left: Int? = null,
+    @Px top: Int? = null,
+    @Px right: Int? = null,
+    @Px bottom: Int? = null
+) {
+    updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        setMargins(
+            left ?: leftMargin,
+            top ?: topMargin,
+            right ?: rightMargin,
+            bottom ?: bottomMargin
+        )
     }
 }

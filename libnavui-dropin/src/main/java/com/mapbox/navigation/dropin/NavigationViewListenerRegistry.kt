@@ -110,7 +110,7 @@ internal class NavigationViewListenerRegistry(
             }
             launch {
                 infoPanelSubscriber
-                    .infoPanelBehavior
+                    .bottomSheetState
                     .filterNotNull()
                     .collect { behavior ->
                         when (behavior) {
@@ -122,7 +122,9 @@ internal class NavigationViewListenerRegistry(
                         }
                     }
             }
-
+            launch {
+                infoPanelSubscriber.slideOffset.collect(listener::onInfoPanelSlide)
+            }
             launch {
                 maneuverSubscriber
                     .maneuverBehavior

@@ -53,4 +53,14 @@
         <item>HALF_EXPANDED</item>
         <item>EXPANDED</item>
     </string-array>
+    <string-array name="drop_in_info_panel_custom_layout" translatable="false">
+        <item>--</item>
+        <item>CUSTOM</item>
+        <item>CUSTOM WITH FIXED HEIGHT</item>
+    </string-array>
+    <string-array name="drop_in_info_panel_custom_content" translatable="false">
+        <item>--</item>
+        <item>SMALL</item>
+        <item>LARGE</item>
+    </string-array>
 </resources>

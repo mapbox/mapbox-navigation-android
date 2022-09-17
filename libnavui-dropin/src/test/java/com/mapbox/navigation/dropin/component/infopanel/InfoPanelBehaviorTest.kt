@@ -10,8 +10,8 @@ class InfoPanelBehaviorTest {
     fun `when info panel behavior is updated`() {
         val sut = InfoPanelBehavior()
 
-        sut.updateBehavior(BottomSheetBehavior.STATE_HIDDEN)
+        sut.updateBottomSheetState(BottomSheetBehavior.STATE_HIDDEN)
 
-        assertEquals(BottomSheetBehavior.STATE_HIDDEN, sut.infoPanelBehavior.value)
+        assertEquals(BottomSheetBehavior.STATE_HIDDEN, sut.bottomSheetState.value)
     }
 }

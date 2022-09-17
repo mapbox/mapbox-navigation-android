@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.graphics.Insets
+import androidx.core.view.updatePadding
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.extensions.navigationListOf
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -124,12 +125,8 @@ internal class MapboxInfoPanelBinder : InfoPanelBinder() {
         layout.findViewById(R.id.infoPanelContent)
 
     override fun applySystemBarsInsets(layout: ViewGroup, insets: Insets) {
-        layout.setPadding(
-            layout.paddingLeft,
-            layout.paddingTop,
-            layout.paddingRight,
-            insets.bottom
-        )
+        layout.updatePadding(bottom = insets.bottom)
+        // top, left and right insets are applied by InfoPanelComponent
     }
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {

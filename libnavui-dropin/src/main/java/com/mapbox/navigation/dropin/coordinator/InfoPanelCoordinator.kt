@@ -34,12 +34,13 @@ internal class InfoPanelCoordinator(
 
     private val updateGuideline = object : BottomSheetBehavior.BottomSheetCallback() {
         override fun onStateChanged(bottomSheet: View, newState: Int) {
-            context.infoPanelBehavior.updateBehavior(newState)
-            setGuidelinePosition(bottomSheet, context.systemBarsInsets.value)
+            context.infoPanelBehavior.updateBottomSheetState(newState)
+            updateGuidelinePosition()
         }
 
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
-            setGuidelinePosition(bottomSheet, context.systemBarsInsets.value)
+            context.infoPanelBehavior.updateSlideOffset(slideOffset)
+            updateGuidelinePosition()
         }
     }
 
@@ -55,18 +56,19 @@ internal class InfoPanelCoordinator(
         behavior.addBottomSheetCallback(updateGuideline)
         coroutineScope.launch {
             bottomSheetState().collect { state ->
+                val prevState = behavior.state
                 when (state) {
                     BottomSheetBehavior.STATE_HIDDEN -> behavior.hide()
                     BottomSheetBehavior.STATE_COLLAPSED,
                     BottomSheetBehavior.STATE_HALF_EXPANDED,
                     BottomSheetBehavior.STATE_EXPANDED -> behavior.show(state)
                 }
+                resetSlideOffset(prevState, state)
+                updateGuidelinePosition()
             }
         }
         coroutineScope.launch {
-            context.systemBarsInsets.collect {
-                setGuidelinePosition(infoPanel, it)
-            }
+            context.systemBarsInsets.collect(this@InfoPanelCoordinator::updateGuidelinePosition)
         }
         coroutineScope.launch {
             context.options.isInfoPanelHideable.collect { hideable ->
@@ -107,11 +109,12 @@ internal class InfoPanelCoordinator(
     }
 
     private fun bottomSheetState() = combine(
+        context.uiBinders.infoPanelContentBinder,
         store.select { it.destination?.point },
         store.select { it.navigation },
         context.options.showInfoPanelInFreeDrive,
-        context.options.infoPanelForcedState
-    ) { _, navigationState, showInfoPanelInFreeDrive, infoPanelForcedState ->
+        context.options.infoPanelForcedState,
+    ) { _, _, navigationState, showInfoPanelInFreeDrive, infoPanelForcedState ->
         if (infoPanelForcedState != 0) {
             infoPanelForcedState
         } else if (showInfoPanelInFreeDrive || navigationState != NavigationState.FreeDrive) {
@@ -138,9 +141,25 @@ internal class InfoPanelCoordinator(
         state = BottomSheetBehavior.STATE_HIDDEN
     }
 
-    private fun setGuidelinePosition(bottomSheet: View, systemBarsInsets: Insets) {
-        val parentHeight = (bottomSheet.parent as ViewGroup).height
-        guidelineBottom.setGuidelineEnd(parentHeight - bottomSheet.top - systemBarsInsets.bottom)
+    private fun updateGuidelinePosition(systemBarsInsets: Insets = context.systemBarsInsets.value) {
+        val parentHeight = (infoPanel.parent as ViewGroup).height
+        val maxPos = (parentHeight * GUIDELINE_MAX_POSITION_PERCENT).toInt()
+        val pos = parentHeight - infoPanel.top - systemBarsInsets.bottom
+        guidelineBottom.setGuidelineEnd(pos.coerceIn(0, maxPos))
+    }
+
+    private fun resetSlideOffset(prevBottomSheetState: Int, bottomSheetState: Int) {
+        if (prevBottomSheetState == BottomSheetBehavior.STATE_EXPANDED) {
+            when (bottomSheetState) {
+                BottomSheetBehavior.STATE_EXPANDED -> 1.0f
+                BottomSheetBehavior.STATE_HALF_EXPANDED -> 0.5f
+                BottomSheetBehavior.STATE_COLLAPSED -> 0.0f
+                BottomSheetBehavior.STATE_HIDDEN -> -1.0f
+                else -> null
+            }?.also { slideOffset ->
+                context.infoPanelBehavior.updateSlideOffset(slideOffset)
+            }
+        }
     }
 
     /**
@@ -167,5 +186,13 @@ internal class InfoPanelCoordinator(
                 ViewCompat.offsetTopAndBottom(layout, (layout.parent as? View)?.height ?: 0)
             }
         }
+    }
+
+    private companion object {
+        /**
+         * Guideline bottom maximum position within its parent view.
+         * This value must be within 0.0f..1.0f range.
+         */
+        const val GUIDELINE_MAX_POSITION_PERCENT = 0.3f
     }
 }
