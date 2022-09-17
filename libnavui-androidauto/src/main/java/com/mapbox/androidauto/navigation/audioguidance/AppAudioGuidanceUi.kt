@@ -7,7 +7,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
 import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidanceState
 import com.mapbox.navigation.ui.voice.view.MapboxSoundButton

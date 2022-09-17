@@ -8,7 +8,6 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.MainActionStrip
 import com.mapbox.androidauto.car.action.MapboxActionProvider

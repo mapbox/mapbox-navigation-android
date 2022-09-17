@@ -200,9 +200,19 @@ internal constructor(
             booleanDataStoreKey("audio_guidance_muted", false)
         private const val DEFAULT_DATA_STORE_NAME = "mapbox_navigation_preferences"
 
+        /**
+         * Construct an instance without registering to [MapboxNavigationApp].
+         */
+        @JvmStatic
+        fun create() = MapboxAudioGuidance(MapboxAudioGuidanceServices(), Dispatchers.Main)
+
+        /**
+         * Get the registered instance or create one and register it to [MapboxNavigationApp].
+         */
+        @JvmStatic
         fun getInstance(): MapboxAudioGuidance = MapboxNavigationApp
             .getObservers(MapboxAudioGuidance::class)
-            .firstOrNull() ?: MapboxAudioGuidance(MapboxAudioGuidanceServices(), Dispatchers.Main)
+            .firstOrNull() ?: create()
             .also { MapboxNavigationApp.registerObserver(it) }
     }
 }
