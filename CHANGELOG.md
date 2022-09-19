@@ -16,7 +16,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
-- Mapbox Maps SDK `v10.8.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.8.0))
+- Mapbox Maps SDK `v10.8.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.8.0))
 - Mapbox Navigation Native `v115.0.0`
 - Mapbox Core Common `v23.0.0`
 - Mapbox Java `v6.8.0-beta.4` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0-beta.4))
@@ -33,7 +33,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
-- Mapbox Maps SDK `v10.8.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.8.0))
+- Mapbox Maps SDK `v10.8.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.8.0))
 - Mapbox Navigation Native `v115.0.0`
 - Mapbox Core Common `v23.0.0`
 - Mapbox Java `v6.8.0-beta.4` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0-beta.4))
@@ -50,7 +50,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
-- Mapbox Maps SDK `v10.8.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.8.0-rc.1))
+- Mapbox Maps SDK `v10.8.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.8.0-rc.1))
 - Mapbox Navigation Native `v114.0.0`
 - Mapbox Core Common `v23.0.0-rc.2`
 - Mapbox Java `v6.8.0-beta.4` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0-beta.4))
@@ -77,7 +77,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
-- Mapbox Maps SDK `v10.8.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.8.0-rc.1))
+- Mapbox Maps SDK `v10.8.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.8.0-rc.1))
 - Mapbox Navigation Native `v114.0.0`
 - Mapbox Core Common `v23.0.0-rc.2`
 - Mapbox Java `v6.8.0-beta.4` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0-beta.4))
@@ -111,7 +111,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
-- Mapbox Maps SDK `v10.8.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.8.0-rc.1))
+- Mapbox Maps SDK `v10.8.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.8.0-rc.1))
 - Mapbox Navigation Native `v114.0.0`
 - Mapbox Core Common `v23.0.0-rc.2`
 - Mapbox Java `v6.8.0-beta.4` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0-beta.4))
@@ -141,7 +141,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
-- Mapbox Maps SDK `v10.8.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.8.0-rc.1))
+- Mapbox Maps SDK `v10.8.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.8.0-rc.1))
 - Mapbox Navigation Native `v113.0.0`
 - Mapbox Core Common `v23.0.0-rc.2`
 - Mapbox Java `v6.8.0-beta.3` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0-beta.3))
@@ -162,7 +162,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
-- Mapbox Maps SDK `v10.8.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.8.0-beta.1))
+- Mapbox Maps SDK `v10.8.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.8.0-beta.1))
 - Mapbox Navigation Native `v112.0.0`
 - Mapbox Core Common `v23.0.0-beta.1`
 - Mapbox Java `v6.8.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0-beta.2))
