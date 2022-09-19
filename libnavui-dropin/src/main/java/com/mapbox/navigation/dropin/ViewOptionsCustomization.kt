@@ -77,6 +77,12 @@ class ViewOptionsCustomization {
      */
     var distanceFormatterOptions: DistanceFormatterOptions? = null
 
+    /**
+     * Sets whether the camera debug info should be visible.
+     * Set to `false` for the default behavior.
+     */
+    var showCameraDebugInfo: Boolean? = null
+
     companion object {
         /**
          * Default route line options.

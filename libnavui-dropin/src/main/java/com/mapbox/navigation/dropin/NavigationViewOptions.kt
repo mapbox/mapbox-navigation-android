@@ -36,6 +36,8 @@ internal class NavigationViewOptions(context: Context) {
         MutableStateFlow(0)
     private var _distanceFormatterOptions: MutableStateFlow<DistanceFormatterOptions> =
         MutableStateFlow(DistanceFormatterOptions.Builder(context).build())
+    private var _showCameraDebugInfo: MutableStateFlow<Boolean> =
+        MutableStateFlow(false)
 
     var mapStyleUriDay: StateFlow<String> = _mapStyleUriDay.asStateFlow()
     var mapStyleUriNight: StateFlow<String> = _mapStyleUriNight.asStateFlow()
@@ -47,6 +49,7 @@ internal class NavigationViewOptions(context: Context) {
     val infoPanelForcedState: StateFlow<Int> = _infoPanelForcedState.asStateFlow()
     val distanceFormatterOptions: StateFlow<DistanceFormatterOptions> =
         _distanceFormatterOptions.asStateFlow()
+    val showCameraDebugInfo: StateFlow<Boolean> = _showCameraDebugInfo.asStateFlow()
 
     fun applyCustomization(customization: ViewOptionsCustomization) {
         customization.mapStyleUriDay?.also { _mapStyleUriDay.tryEmit(it) }
@@ -58,5 +61,6 @@ internal class NavigationViewOptions(context: Context) {
         customization.isInfoPanelHideable?.also { _isInfoPanelHideable.tryEmit(it) }
         customization.infoPanelForcedState?.also { _infoPanelForcedState.tryEmit(it) }
         customization.distanceFormatterOptions?.also { _distanceFormatterOptions.tryEmit(it) }
+        customization.showCameraDebugInfo?.also { _showCameraDebugInfo.tryEmit(it) }
     }
 }

@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 - Moved `MapboxAudioGuidance` and `MapboxAudioGuidanceState` into public api. [#6336](https://github.com/mapbox/mapbox-navigation-android/pull/6336)
+- Introduced `ViewOptionsCustomization.showCameraDebugInfo` to allow end users to enable camera debug info. [#6356](https://github.com/mapbox/mapbox-navigation-android/pull/6356)
 #### Bug fixes and improvements
 
 ## Mapbox Navigation SDK 2.9.0-alpha.2 - 16 September, 2022

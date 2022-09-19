@@ -17,4 +17,5 @@ class CustomizedViewModel : ViewModel() {
     val infoPanelStateOverride = MutableLiveData("--")
     val fullScreen = MutableLiveData(false)
     val distanceFormatterMetric = MutableLiveData(false)
+    val showCameraDebugInfo = MutableLiveData(false)
 }

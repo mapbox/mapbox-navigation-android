@@ -174,6 +174,7 @@ package com.mapbox.navigation.dropin {
     method public String? getMapStyleUriNight();
     method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions? getRouteArrowOptions();
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions? getRouteLineOptions();
+    method public Boolean? getShowCameraDebugInfo();
     method public Boolean? getShowInfoPanelInFreeDrive();
     method public Boolean? isInfoPanelHideable();
     method public void setDistanceFormatterOptions(com.mapbox.navigation.base.formatter.DistanceFormatterOptions?);
@@ -184,6 +185,7 @@ package com.mapbox.navigation.dropin {
     method public void setMapStyleUriNight(String?);
     method public void setRouteArrowOptions(com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions?);
     method public void setRouteLineOptions(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions?);
+    method public void setShowCameraDebugInfo(Boolean?);
     method public void setShowInfoPanelInFreeDrive(Boolean?);
     property public final com.mapbox.navigation.base.formatter.DistanceFormatterOptions? distanceFormatterOptions;
     property public final Boolean? enableMapLongClickIntercept;
@@ -193,6 +195,7 @@ package com.mapbox.navigation.dropin {
     property public final String? mapStyleUriNight;
     property public final com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions? routeArrowOptions;
     property public final com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions? routeLineOptions;
+    property public final Boolean? showCameraDebugInfo;
     property public final Boolean? showInfoPanelInFreeDrive;
     field public static final com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion Companion;
   }

@@ -63,7 +63,7 @@ internal class MapBinder(
             ) { _, lineOptions ->
                 routeLineComponent(lineOptions)
             },
-            CameraComponent(store, mapView),
+            CameraComponent(context, mapView),
             reloadOnChange(
                 context.styles.destinationMarkerAnnotationOptions
             ) { markerAnnotationOptions ->
