@@ -17,7 +17,6 @@ package com.mapbox.androidauto {
   }
 
   public final class MapboxCarApp {
-    method public com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance carAppAudioGuidanceService();
     method public com.mapbox.androidauto.navigation.location.CarAppLocation carAppLocationService();
     method public kotlinx.coroutines.flow.StateFlow<com.mapbox.androidauto.CarAppState> getCarAppState();
     method public void setup();
