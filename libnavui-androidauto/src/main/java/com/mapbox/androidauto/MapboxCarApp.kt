@@ -4,7 +4,6 @@ import com.mapbox.androidauto.navigation.location.CarAppLocation
 import com.mapbox.androidauto.navigation.location.impl.CarAppLocationImpl
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

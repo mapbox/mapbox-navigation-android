@@ -212,7 +212,6 @@ internal constructor(
         @JvmStatic
         fun getInstance(): MapboxAudioGuidance = MapboxNavigationApp
             .getObservers(MapboxAudioGuidance::class)
-            .firstOrNull() ?: create()
-            .also { MapboxNavigationApp.registerObserver(it) }
+            .firstOrNull() ?: create().also { MapboxNavigationApp.registerObserver(it) }
     }
 }

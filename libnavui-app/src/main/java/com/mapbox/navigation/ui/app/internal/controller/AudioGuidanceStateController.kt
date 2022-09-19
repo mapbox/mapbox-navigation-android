@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.app.internal.controller
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.ui.app.internal.Action
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.Store
@@ -47,7 +46,7 @@ class AudioGuidanceStateController(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        val audioGuidance = MapboxNavigationApp.getObserver(MapboxAudioGuidance::class)
+        val audioGuidance = MapboxAudioGuidance.getInstance()
         audioGuidance.stateFlow().observe {
             if (it.isMuted != store.state.value.audio.isMuted) {
                 val newState = AudioGuidanceState(it.isMuted)

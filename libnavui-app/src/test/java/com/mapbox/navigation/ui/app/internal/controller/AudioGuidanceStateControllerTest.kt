@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.app.internal.controller
 
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.audioguidance.AudioAction
@@ -37,7 +36,7 @@ class AudioGuidanceStateControllerTest {
 
     @Before
     fun setup() {
-        mockkObject(MapboxNavigationApp)
+        mockkObject(MapboxAudioGuidance)
 
         audioGuidanceState = MutableStateFlow(
             mockk { every { isMuted } returns false }
@@ -45,9 +44,7 @@ class AudioGuidanceStateControllerTest {
         mockAudioGuidance = mockk(relaxed = true) {
             every { stateFlow() } returns audioGuidanceState
         }
-        every {
-            MapboxNavigationApp.getObserver(MapboxAudioGuidance::class)
-        } returns mockAudioGuidance
+        every { MapboxAudioGuidance.getInstance() } returns mockAudioGuidance
 
         testStore = spyk(TestStore())
     }
@@ -68,7 +65,7 @@ class AudioGuidanceStateControllerTest {
             )
             audioGuidanceState.value = mockk { every { isMuted } returns true }
 
-            sut.onAttached(mockMapboxNavigation())
+            sut.onAttached(mockk())
             assertTrue(testStore.state.value.audio.isMuted)
         }
 
@@ -83,7 +80,7 @@ class AudioGuidanceStateControllerTest {
             )
             audioGuidanceState.value = mockk { every { isMuted } returns false }
 
-            sut.onAttached(mockMapboxNavigation())
+            sut.onAttached(mockk())
             testStore.setState(
                 State(
                     audio = AudioGuidanceState(isMuted = true)
@@ -103,17 +100,11 @@ class AudioGuidanceStateControllerTest {
         )
         val sut = AudioGuidanceStateController(testStore)
 
-        val mapboxNavigation = mockMapboxNavigation()
+        val mapboxNavigation: MapboxNavigation = mockk()
         sut.onAttached(mapboxNavigation)
         testStore.dispatch(AudioAction.Toggle)
         sut.onDetached(mapboxNavigation)
 
         assertTrue(testStore.state.value.audio.isMuted)
-    }
-
-    private fun mockMapboxNavigation(): MapboxNavigation {
-        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        every { MapboxNavigationApp.current() } returns mapboxNavigation
-        return mapboxNavigation
     }
 }
