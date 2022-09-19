@@ -45,10 +45,9 @@ dependencies {
     def carSearchVersion = "1.0.0-beta.36"
     api("com.mapbox.search:mapbox-search-android:${carSearchVersion}")
 
-    debugApi project(":libnavigation-android")
-    releaseApi("com.mapbox.navigation:android:${carNavVersion}")
-    debugImplementation project(":libnavui-app")
-    releaseImplementation("com.mapbox.navigation:ui-app:${carNavVersion}")
+    // TODO use the carNavVersion when 2.9.0-alpha.2 is available
+    api(project(":libnavigation-android"))
+//    api("com.mapbox.navigation:android:${carNavVersion}")
 
     implementation(dependenciesList.androidXAppCompat)
     implementation(dependenciesList.coroutinesCore)

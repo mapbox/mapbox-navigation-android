@@ -1,17 +1,14 @@
 package com.mapbox.navigation.ui.app.internal.controller
 
-import com.mapbox.api.directions.v5.models.VoiceInstructions
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.audioguidance.AudioAction
 import com.mapbox.navigation.ui.app.internal.audioguidance.AudioGuidanceState
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.testing.TestStore
-import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidance
-import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
+import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
+import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidanceState
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -27,29 +24,27 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class AudioGuidanceStateControllerTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
-    private lateinit var audioGuidanceState: MutableStateFlow<MapboxAudioGuidance.State>
+    private lateinit var audioGuidanceState: MutableStateFlow<MapboxAudioGuidanceState>
     private lateinit var mockAudioGuidance: MapboxAudioGuidance
     private lateinit var testStore: TestStore
 
     @Before
     fun setup() {
-        mockkObject(MapboxNavigationApp)
+        mockkObject(MapboxAudioGuidance)
 
         audioGuidanceState = MutableStateFlow(
-            TestAudioGuidanceState(isMuted = false)
+            mockk { every { isMuted } returns false }
         )
         mockAudioGuidance = mockk(relaxed = true) {
             every { stateFlow() } returns audioGuidanceState
         }
-        every {
-            MapboxNavigationApp.getObserver(MapboxAudioGuidance::class)
-        } returns mockAudioGuidance
+        every { MapboxAudioGuidance.getInstance() } returns mockAudioGuidance
 
         testStore = spyk(TestStore())
     }
@@ -68,9 +63,9 @@ class AudioGuidanceStateControllerTest {
                     audio = AudioGuidanceState(isMuted = false)
                 )
             )
-            audioGuidanceState.value = TestAudioGuidanceState(isMuted = true)
+            audioGuidanceState.value = mockk { every { isMuted } returns true }
 
-            sut.onAttached(mockMapboxNavigation())
+            sut.onAttached(mockk())
             assertTrue(testStore.state.value.audio.isMuted)
         }
 
@@ -83,9 +78,9 @@ class AudioGuidanceStateControllerTest {
                     audio = AudioGuidanceState(isMuted = false)
                 )
             )
-            audioGuidanceState.value = TestAudioGuidanceState(isMuted = false)
+            audioGuidanceState.value = mockk { every { isMuted } returns false }
 
-            sut.onAttached(mockMapboxNavigation())
+            sut.onAttached(mockk())
             testStore.setState(
                 State(
                     audio = AudioGuidanceState(isMuted = true)
@@ -105,24 +100,11 @@ class AudioGuidanceStateControllerTest {
         )
         val sut = AudioGuidanceStateController(testStore)
 
-        val mapboxNavigation = mockMapboxNavigation()
+        val mapboxNavigation: MapboxNavigation = mockk()
         sut.onAttached(mapboxNavigation)
         testStore.dispatch(AudioAction.Toggle)
         sut.onDetached(mapboxNavigation)
 
         assertTrue(testStore.state.value.audio.isMuted)
     }
-
-    private fun mockMapboxNavigation(): MapboxNavigation {
-        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        every { MapboxNavigationApp.current() } returns mapboxNavigation
-        return mapboxNavigation
-    }
-
-    private data class TestAudioGuidanceState(
-        override val isMuted: Boolean,
-        override val isPlayable: Boolean = false,
-        override val voiceInstructions: VoiceInstructions? = null,
-        override val speechAnnouncement: SpeechAnnouncement? = null
-    ) : MapboxAudioGuidance.State
 }
