@@ -34,6 +34,19 @@ class SimilarRoutesTest {
         assertEquals(0.0, similarity, 0.00001)
     }
 
+    @Test
+    fun `half the same routes`() {
+        val a = createNavigationRoutes(
+            DirectionsResponse.fromJson(resourceAsString("a.json")),
+            RouteOptions.fromUrl(URL("https://api.mapbox.com/directions/v5/mapbox/driving/-73.978054%2C40.754434%3B-73.973023%2C40.761265?alternatives=true&geometries=polyline6&language=en&overview=full&steps=true")),
+        ).first()
+        val halfA = createNavigationRoutes(
+            DirectionsResponse.fromJson(resourceAsString("b.json")),
+            RouteOptions.fromUrl(URL("https://api.mapbox.com/directions/v5/mapbox/driving/-73.97406112344191%2C40.758298547604284%3B-73.973023%2C40.761265?alternatives=true&geometries=polyline6&language=en&overview=full&steps=true")),
+        ).first()
+        val similarity = calculateRoutesSimilarity(a, halfA)
+        assertEquals(0.5, similarity, 0.1)
+    }
 
     private fun resourceAsString(
         name: String,
