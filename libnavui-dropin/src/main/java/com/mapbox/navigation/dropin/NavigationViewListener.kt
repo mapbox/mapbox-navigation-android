@@ -147,4 +147,11 @@ abstract class NavigationViewListener {
      * Called when maneuver view has been collapsed.
      */
     open fun onManeuverCollapsed() = Unit
+
+    /**
+     * Called when a map was clicked, but the event was not handled by NavigationView.
+     *
+     * @param point The projected map coordinate the user clicked on.
+     */
+    open fun onMapClicked(point: Point) = Unit
 }

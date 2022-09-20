@@ -106,6 +106,10 @@ class LoggingNavigationViewListener(
         log("listener onManeuverExpanded")
     }
 
+    override fun onMapClicked(point: Point) {
+        log("listener onMapClicked point = $point")
+    }
+
     private fun log(message: String) {
         logD(message, tag)
     }

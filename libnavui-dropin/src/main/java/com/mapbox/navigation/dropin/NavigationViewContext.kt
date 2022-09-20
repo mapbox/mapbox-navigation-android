@@ -6,6 +6,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.dropin.binder.map.MapClickBehavior
 import com.mapbox.navigation.dropin.component.infopanel.InfoPanelBehavior
 import com.mapbox.navigation.dropin.component.maneuver.ManeuverBehavior
 import com.mapbox.navigation.dropin.component.marker.MapMarkerFactory
@@ -46,11 +47,13 @@ internal class NavigationViewContext(
     val infoPanelBehavior = InfoPanelBehavior()
     val mapViewOwner = MapViewOwner()
     val mapStyleLoader = MapStyleLoader(context, options)
+    val mapClickBehavior = MapClickBehavior()
     val listenerRegistry by lazy {
         NavigationViewListenerRegistry(
             store,
             maneuverBehavior,
             infoPanelBehavior,
+            mapClickBehavior,
             lifecycleOwner.lifecycleScope
         )
     }

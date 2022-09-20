@@ -9,8 +9,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.dropin.component.infopanel.InfoPanelBehavior
-import com.mapbox.navigation.dropin.component.maneuver.ManeuverBehavior
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.State
@@ -25,10 +23,11 @@ import io.mockk.spyk
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.junit.Assert.assertTrue
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -37,34 +36,27 @@ import org.junit.Test
 class NavigationViewListenerRegistryTest {
 
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
-    private lateinit var sut: NavigationViewListenerRegistry
-    private lateinit var testStore: TestStore
-    private lateinit var maneuverBehaviorFlow: MutableStateFlow<MapboxManeuverViewState>
-    private lateinit var infoPanelBehaviorFlow: MutableStateFlow<Int?>
-    private lateinit var testListener: NavigationViewListener
-
-    @Before
-    fun setUp() {
-        testStore = TestStore()
-        maneuverBehaviorFlow = MutableStateFlow(MapboxManeuverViewState.COLLAPSED)
-        infoPanelBehaviorFlow = MutableStateFlow(null)
-        val mockManeuverBehavior = mockk<ManeuverBehavior> {
+    private val testStore = TestStore()
+    private val maneuverBehaviorFlow =
+        MutableStateFlow<MapboxManeuverViewState>(MapboxManeuverViewState.COLLAPSED)
+    private val infoPanelBehaviorFlow = MutableStateFlow<Int?>(value = null)
+    private val mapClickBehaviorFlow = MutableSharedFlow<Point>(extraBufferCapacity = 1)
+    private val testListener = spyk(object : NavigationViewListener() {})
+    private val sut = NavigationViewListenerRegistry(
+        testStore,
+        mockk {
             every { maneuverBehavior } returns maneuverBehaviorFlow.asStateFlow()
-        }
-        val mockInfoPanelBehavior = mockk<InfoPanelBehavior> {
+        },
+        mockk {
             every { infoPanelBehavior } returns infoPanelBehaviorFlow.asStateFlow()
-        }
-        testListener = spyk(object : NavigationViewListener() {})
-
-        sut = NavigationViewListenerRegistry(
-            testStore,
-            mockManeuverBehavior,
-            mockInfoPanelBehavior,
-            coroutineRule.coroutineScope
-        )
-    }
+        },
+        mockk {
+            every { mapClickBehavior } returns mapClickBehaviorFlow.asSharedFlow()
+        },
+        coroutineRule.coroutineScope,
+    )
 
     @Test
     fun onDestinationChanged() {
@@ -379,5 +371,14 @@ class NavigationViewListenerRegistryTest {
         verify {
             testListener.onManeuverCollapsed()
         }
+    }
+
+    @Test
+    fun onMapClicked() {
+        sut.registerListener(testListener)
+        val point = mockk<Point>()
+        mapClickBehaviorFlow.tryEmit(point)
+
+        verify { testListener.onMapClicked(point) }
     }
 }

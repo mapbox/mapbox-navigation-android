@@ -36,6 +36,8 @@ interface RouteLineComponentContract {
     fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>)
 
     fun getRouteInPreview(): Flow<List<NavigationRoute>?>
+
+    fun onMapClicked(point: Point)
 }
 
 @ExperimentalPreviewMapboxNavigationAPI
@@ -46,6 +48,10 @@ internal class MapboxRouteLineComponentContract : RouteLineComponentContract {
 
     override fun getRouteInPreview(): Flow<List<NavigationRoute>?> {
         return flowOf(null)
+    }
+
+    override fun onMapClicked(point: Point) {
+        // do nothing
     }
 }
 
@@ -70,7 +76,7 @@ class RouteLineComponent(
 
     private val routeClickPadding = Utils.dpToPx(30f)
 
-    private var onMapClickListener = OnMapClickListener { point ->
+    private val onMapClickListener = OnMapClickListener { point ->
         mapboxNavigation?.also { selectRoute(it, point) }
         false
     }
@@ -144,23 +150,20 @@ class RouteLineComponent(
 
     private fun selectRoute(mapboxNavigation: MapboxNavigation, point: Point) {
         coroutineScope.launch {
-            val result = routeLineApi.findClosestRoute(
-                point,
-                mapboxMap,
-                routeClickPadding
-            )
-
-            result.onValue { resultValue ->
-                if (resultValue.navigationRoute != routeLineApi.getPrimaryNavigationRoute()) {
-                    val reOrderedRoutes = routeLineApi.getNavigationRoutes()
-                        .filter { it != resultValue.navigationRoute }
-                        .toMutableList()
-                        .also {
-                            it.add(0, resultValue.navigationRoute)
+            routeLineApi.findClosestRoute(point, mapboxMap, routeClickPadding).fold(
+                { contractProvider.get().onMapClicked(point) },
+                { result ->
+                    if (result.navigationRoute != routeLineApi.getPrimaryNavigationRoute()) {
+                        val reOrderedRoutes = arrayListOf(result.navigationRoute)
+                        routeLineApi.getNavigationRoutes().filterTo(reOrderedRoutes) { route ->
+                            route != result.navigationRoute
                         }
-                    contractProvider.get().setRoutes(mapboxNavigation, reOrderedRoutes)
-                }
-            }
+                        contractProvider.get().setRoutes(mapboxNavigation, reOrderedRoutes)
+                    } else {
+                        contractProvider.get().onMapClicked(point)
+                    }
+                },
+            )
         }
     }
 
