@@ -1,0 +1,190 @@
+{
+  "routes": [
+    {
+      "country_crossed": false,
+      "weight_name": "auto",
+      "weight": 103.505,
+      "duration": 96.744,
+      "distance": 529.428,
+      "legs": [
+        {
+          "via_waypoints": [],
+          "admins": [{"iso_3166_1_alpha3": "USA", "iso_3166_1": "US"}],
+          "weight": 103.505,
+          "duration": 96.744,
+          "steps": [
+            {
+              "intersections": [
+                {
+                  "entry": [true],
+                  "bearings": [29],
+                  "duration": 9.802,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {"class": "secondary"},
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 11.273,
+                  "geometry_index": 0,
+                  "location": [-73.973813, 40.757229]
+                },
+                {
+                  "mapbox_streets_v8": {"class": "secondary"},
+                  "location": [-73.973423, 40.757764],
+                  "geometry_index": 1,
+                  "admin_index": 0,
+                  "weight": 14.122,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.019,
+                  "turn_weight": 1,
+                  "duration": 13.683,
+                  "bearings": [27, 120, 209, 298],
+                  "out": 0,
+                  "in": 2,
+                  "entry": [true, false, false, true]
+                },
+                {
+                  "mapbox_streets_v8": {"class": "secondary"},
+                  "location": [-73.97298, 40.75841],
+                  "geometry_index": 3,
+                  "admin_index": 0,
+                  "weight": 13.636,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.008,
+                  "turn_weight": 1,
+                  "duration": 13.24,
+                  "bearings": [30, 120, 208, 300],
+                  "out": 0,
+                  "in": 2,
+                  "entry": [true, true, false, false]
+                },
+                {
+                  "mapbox_streets_v8": {"class": "secondary"},
+                  "location": [-73.972512, 40.759017],
+                  "geometry_index": 5,
+                  "admin_index": 0,
+                  "weight": 15.331,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.007,
+                  "turn_weight": 2,
+                  "duration": 13.857,
+                  "bearings": [29, 120, 210, 298],
+                  "out": 0,
+                  "in": 2,
+                  "entry": [true, false, false, true]
+                },
+                {
+                  "mapbox_streets_v8": {"class": "secondary"},
+                  "location": [-73.972059, 40.75964],
+                  "geometry_index": 7,
+                  "admin_index": 0,
+                  "weight": 18.403,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.019,
+                  "turn_weight": 2,
+                  "duration": 16.599,
+                  "bearings": [27, 120, 209, 298],
+                  "out": 0,
+                  "in": 2,
+                  "entry": [true, true, false, false]
+                },
+                {
+                  "mapbox_streets_v8": {"class": "secondary"},
+                  "location": [-73.971616, 40.760289],
+                  "geometry_index": 9,
+                  "admin_index": 0,
+                  "weight": 16.236,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.008,
+                  "turn_weight": 1,
+                  "duration": 15.551,
+                  "bearings": [30, 121, 207, 298],
+                  "out": 0,
+                  "in": 2,
+                  "entry": [true, false, false, true]
+                },
+                {
+                  "bearings": [29, 120, 210, 298],
+                  "entry": [true, true, false, false],
+                  "in": 2,
+                  "turn_weight": 1,
+                  "turn_duration": 2.007,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {"class": "secondary"},
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 10,
+                  "location": [-73.971142, 40.760902]
+                }
+              ],
+              "maneuver": {
+                "type": "depart",
+                "instruction": "Drive northeast on Park Avenue.",
+                "bearing_after": 29,
+                "bearing_before": 0,
+                "location": [-73.973813, 40.757229]
+              },
+              "name": "Park Avenue",
+              "duration": 96.744,
+              "distance": 529.428,
+              "driving_side": "right",
+              "weight": 103.505,
+              "mode": "driving",
+              "geometry": "y}rvlAhb_blCm`@kWyd@{XqAy@sa@yYiBmAeC_Bwa@iXke@eYeAo@ie@s\\c^uU"
+            },
+            {
+              "intersections": [
+                {
+                  "bearings": [209],
+                  "entry": [true],
+                  "in": 0,
+                  "admin_index": 0,
+                  "geometry_index": 11,
+                  "location": [-73.970779, 40.7614]
+                }
+              ],
+              "maneuver": {
+                "type": "arrive",
+                "instruction": "Your destination is on the right.",
+                "modifier": "right",
+                "bearing_after": 0,
+                "bearing_before": 29,
+                "location": [-73.970779, 40.7614]
+              },
+              "name": "Park Avenue",
+              "duration": 0,
+              "distance": 0,
+              "driving_side": "right",
+              "weight": 0,
+              "mode": "driving",
+              "geometry": "ob{vlAtdyalC??"
+            }
+          ],
+          "distance": 529.428,
+          "summary": "Park Avenue"
+        }
+      ],
+      "geometry": "y}rvlAhb_blCm`@kWyd@{XqAy@sa@yYiBmAeC_Bwa@iXke@eYeAo@ie@s\\c^uU"
+    }
+  ],
+  "waypoints": [
+    {
+      "distance": 5.256,
+      "name": "Park Avenue",
+      "location": [-73.973813, 40.757229]
+    },
+    {
+      "distance": 7.239,
+      "name": "Park Avenue",
+      "location": [-73.970779, 40.7614]
+    }
+  ],
+  "code": "Ok",
+  "uuid": "zzX8Aufm--gnW0IxL-rwnbVTr5epBjle6Uk90BeJ8nBIYHsyw4sf6w=="
+}
