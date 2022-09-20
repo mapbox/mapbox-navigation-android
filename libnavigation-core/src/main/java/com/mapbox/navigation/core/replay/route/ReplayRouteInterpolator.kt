@@ -104,7 +104,9 @@ internal class ReplayRouteInterpolator {
         val slowDownDistance = if (maxSpeed > endSpeed) {
             val t3 = (endSpeed - maxSpeed) / options.minAcceleration
             newtonDistance(t3, 0.0, maxSpeed, options.minAcceleration)
-        } else 0.0
+        } else {
+            0.0
+        }
         val cruiseDistance = (distance - (speedUpDistance + slowDownDistance)).removeZeroError()
 
         return ReplayRouteSegment(

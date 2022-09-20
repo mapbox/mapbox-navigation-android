@@ -79,7 +79,8 @@ class PlaceSearchScreen(
                 override fun onSearchSubmitted(searchTerm: String) {
                     logAndroidAutoFailure("onSearchSubmitted not implemented $searchTerm")
                 }
-            })
+            }
+        )
             .setHeaderAction(Action.BACK)
             .setActionStrip(
                 ActionStrip.Builder()

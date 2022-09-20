@@ -1,4 +1,5 @@
 @file:JvmName("MapboxExtendableButtonEx")
+
 package com.mapbox.navigation.dropin.internal.extensions
 
 import android.content.res.Resources

@@ -57,6 +57,7 @@ class HistoryRecordingStateChangeObserverTest :
 
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
+
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
     private lateinit var mapboxNavigation: MapboxNavigation

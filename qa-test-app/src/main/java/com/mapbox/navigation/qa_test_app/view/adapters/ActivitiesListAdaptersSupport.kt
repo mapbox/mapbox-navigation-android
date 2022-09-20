@@ -19,7 +19,9 @@ object ActivitiesListAdaptersSupport {
 
     val viewHolderFactory: (parent: ViewGroup, viewType: Int) -> ActivityViewHolder = { parent, _ ->
         LayoutInflater.from(parent.context).inflate(
-            R.layout.test_activity_item_layout, parent, false
+            R.layout.test_activity_item_layout,
+            parent,
+            false
         ).run {
             ActivityViewHolder(this)
         }

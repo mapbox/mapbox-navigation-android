@@ -150,43 +150,57 @@ class PredictiveCacheTests {
 
         verify(exactly = 2) {
             MapboxNativeNavigatorImpl.createMapsPredictiveCacheControllerTileVariant(
-                tileStore, TILE_VARIANT_1, any()
+                tileStore,
+                TILE_VARIANT_1,
+                any()
             )
         }
 
         verify(exactly = 2) {
             MapboxNativeNavigatorImpl.createMapsPredictiveCacheControllerTileVariant(
-                tileStore, TILE_VARIANT_2, any()
+                tileStore,
+                TILE_VARIANT_2,
+                any()
             )
         }
 
         verify(exactly = 2) {
             MapboxNativeNavigatorImpl.createMapsPredictiveCacheControllerTileVariant(
-                tileStore, TILE_VARIANT_3, any()
+                tileStore,
+                TILE_VARIANT_3,
+                any()
             )
         }
 
         verify(exactly = 2) {
             MapboxNativeNavigatorImpl.createMapsPredictiveCacheControllerTileVariant(
-                tileStore, TILE_VARIANT_4, any()
+                tileStore,
+                TILE_VARIANT_4,
+                any()
             )
         }
 
         verify(exactly = 2) {
             MapboxNativeNavigatorImpl.createMapsPredictiveCacheControllerTileVariant(
-                tileStore, TILE_VARIANT_5, any()
+                tileStore,
+                TILE_VARIANT_5,
+                any()
             )
         }
 
         verify(exactly = 2) {
             MapboxNativeNavigatorImpl.createMapsPredictiveCacheControllerTileVariant(
-                tileStore, TILE_VARIANT_6, any()
+                tileStore,
+                TILE_VARIANT_6,
+                any()
             )
         }
 
         verify(exactly = 2) {
             MapboxNativeNavigatorImpl.createMapsPredictiveCacheControllerTileVariant(
-                tileStore, TILE_VARIANT_7, any()
+                tileStore,
+                TILE_VARIANT_7,
+                any()
             )
         }
 

@@ -103,9 +103,11 @@ class EHorizonOptions private constructor(
          */
         fun length(length: Double): Builder =
             apply {
-                if (length < 0) throw IllegalArgumentException(
-                    "EHorizonOptions.length can't be negative."
-                )
+                if (length < 0) {
+                    throw IllegalArgumentException(
+                        "EHorizonOptions.length can't be negative."
+                    )
+                }
                 this.length = length
             }
 
@@ -115,9 +117,11 @@ class EHorizonOptions private constructor(
          */
         fun expansion(expansion: Int): Builder =
             apply {
-                if (expansion < 0) throw IllegalArgumentException(
-                    "EHorizonOptions.expansion can't be negative."
-                )
+                if (expansion < 0) {
+                    throw IllegalArgumentException(
+                        "EHorizonOptions.expansion can't be negative."
+                    )
+                }
                 this.expansion = expansion
             }
 
@@ -127,9 +131,11 @@ class EHorizonOptions private constructor(
          */
         fun branchLength(branchLength: Double): Builder =
             apply {
-                if (branchLength < 0) throw IllegalArgumentException(
-                    "EHorizonOptions.branchLength can't be negative."
-                )
+                if (branchLength < 0) {
+                    throw IllegalArgumentException(
+                        "EHorizonOptions.branchLength can't be negative."
+                    )
+                }
                 this.branchLength = branchLength
             }
 
@@ -140,9 +146,11 @@ class EHorizonOptions private constructor(
         fun minTimeDeltaBetweenUpdates(minTimeDeltaBetweenUpdates: Double?): Builder =
             apply {
                 minTimeDeltaBetweenUpdates?.let {
-                    if (it < 0) throw IllegalArgumentException(
-                        "EHorizonOptions.minTimeDeltaBetweenUpdates can't be negative."
-                    )
+                    if (it < 0) {
+                        throw IllegalArgumentException(
+                            "EHorizonOptions.minTimeDeltaBetweenUpdates can't be negative."
+                        )
+                    }
                 }
                 this.minTimeDeltaBetweenUpdates = minTimeDeltaBetweenUpdates
             }

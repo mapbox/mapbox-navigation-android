@@ -162,9 +162,13 @@ object TimeFormatter {
         val minutes =
             TimeUnit.SECONDS.toMinutes(leftOverSeconds + TimeUnit.MINUTES.toSeconds(1) / 2)
 
-        return if (minutes == 60L) Pair(initialHoursValue + 1, 0) else Pair(
-            initialHoursValue,
-            minutes
-        )
+        return if (minutes == 60L) {
+            Pair(initialHoursValue + 1, 0)
+        } else {
+            Pair(
+                initialHoursValue,
+                minutes
+            )
+        }
     }
 }

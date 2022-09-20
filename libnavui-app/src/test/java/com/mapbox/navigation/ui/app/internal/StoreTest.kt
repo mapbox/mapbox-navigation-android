@@ -68,8 +68,11 @@ internal class StoreTest {
     fun `dispatch should not accept new actions before all reducers finish`() {
         sut.register(
             Reducer { state, action ->
-                if (action is NavigationStateAction.Update) state.copy(navigation = action.state)
-                else state
+                if (action is NavigationStateAction.Update) {
+                    state.copy(navigation = action.state)
+                } else {
+                    state
+                }
             }
         )
         sut.register(

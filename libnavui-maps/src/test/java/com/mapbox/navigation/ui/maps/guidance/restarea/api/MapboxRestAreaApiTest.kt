@@ -485,16 +485,22 @@ class MapboxRestAreaApiTest {
             )
         } returns checkSapaAvailability
 
-        if (prepareSapaMapRequest != null) every {
-            RestAreaProcessor.process(ofType(RestAreaAction.PrepareRestAreaMapRequest::class))
-        } returns prepareSapaMapRequest
+        if (prepareSapaMapRequest != null) {
+            every {
+                RestAreaProcessor.process(ofType(RestAreaAction.PrepareRestAreaMapRequest::class))
+            } returns prepareSapaMapRequest
+        }
 
-        if (processSapaMapResponse != null) every {
-            RestAreaProcessor.process(ofType(RestAreaAction.ProcessRestAreaMapResponse::class))
-        } returns processSapaMapResponse
+        if (processSapaMapResponse != null) {
+            every {
+                RestAreaProcessor.process(ofType(RestAreaAction.ProcessRestAreaMapResponse::class))
+            } returns processSapaMapResponse
+        }
 
-        if (parseSvgToBitmap != null) every {
-            RestAreaProcessor.process(ofType(RestAreaAction.ParseSvgToBitmap::class))
-        } returns parseSvgToBitmap
+        if (parseSvgToBitmap != null) {
+            every {
+                RestAreaProcessor.process(ofType(RestAreaAction.ParseSvgToBitmap::class))
+            } returns parseSvgToBitmap
+        }
     }
 }

@@ -642,7 +642,9 @@ class MapboxManeuverViewTest {
             every { modifier } returns ManeuverModifier.RIGHT
             every { drivingSide } returns null
             every { componentList } returns listOf(
-                roadShieldNumberComponent, delimiterComponentNode, textComponentNode
+                roadShieldNumberComponent,
+                delimiterComponentNode,
+                textComponentNode
             )
         }
     }

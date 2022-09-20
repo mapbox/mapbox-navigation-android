@@ -69,8 +69,11 @@ internal class MapStyleLoader(
     }
 
     private fun selectStyle(dayStyleUri: String, nightStyleUri: String): String =
-        if (isNightModeEnabled()) nightStyleUri
-        else dayStyleUri
+        if (isNightModeEnabled()) {
+            nightStyleUri
+        } else {
+            dayStyleUri
+        }
 
     private fun currentUiMode(): Int {
         return context.resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)

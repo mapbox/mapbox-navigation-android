@@ -111,12 +111,17 @@ class ManeuverViewOptions private constructor(
 
         @ColorRes private var maneuverBackgroundColor =
             R.color.mapbox_main_maneuver_background_color
+
         @ColorRes private var subManeuverBackgroundColor =
             R.color.mapbox_sub_maneuver_background_color
+
         @ColorRes private var upcomingManeuverBackgroundColor =
             R.color.mapbox_upcoming_maneuver_background_color
+
         @StyleRes private var turnIconManeuver = R.style.MapboxStyleTurnIconManeuver
+
         @StyleRes private var stepDistanceTextAppearance = R.style.MapboxStyleStepDistance
+
         @StyleRes private var laneGuidanceTurnIconManeuver = R.style.MapboxStyleTurnIconManeuver
         private var primaryManeuverOptions = ManeuverPrimaryOptions.Builder().build()
         private var secondaryManeuverOptions = ManeuverSecondaryOptions.Builder().build()

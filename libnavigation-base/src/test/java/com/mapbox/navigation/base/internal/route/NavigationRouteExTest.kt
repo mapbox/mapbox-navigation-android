@@ -231,7 +231,11 @@ class NavigationRouteExTest {
                 "update to null items multi-leg route",
                 provideNavigationRoute(addLeg = true),
                 RefreshLegItemsWrapper(
-                    0, listOf(null, null), listOf(null, null), null, null
+                    0,
+                    listOf(null, null),
+                    listOf(null, null),
+                    null,
+                    null
                 ),
                 LegItemsResult(
                     listOf(null, null),

@@ -1233,4 +1233,6 @@ private fun createTestInitialAndRefreshedTestRoutes(): Pair<NavigationRoute, Nav
 private fun <T> Deferred<T>.getCompletedTest(): T = if (isActive) {
     cancel()
     error("can't get result from a Deferred, coroutine is still active")
-} else getCompleted()
+} else {
+    getCompleted()
+}

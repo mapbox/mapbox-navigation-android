@@ -95,8 +95,11 @@ internal class MapStyleLoaderTest {
     }
 
     private fun givenNightModeEnabled(enabled: Boolean) {
-        val mode = if (enabled) Configuration.UI_MODE_NIGHT_YES
-        else Configuration.UI_MODE_NIGHT_NO
+        val mode = if (enabled) {
+            Configuration.UI_MODE_NIGHT_YES
+        } else {
+            Configuration.UI_MODE_NIGHT_NO
+        }
 
         every { context.resources } returns mockk(relaxed = true) {
             every { configuration } returns Configuration().apply {

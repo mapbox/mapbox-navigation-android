@@ -19,9 +19,12 @@ class CarScene2d : CarSurfaceLayer() {
         super.onVisibleAreaChanged(visibleArea, edgeInsets)
 
         Matrix.multiplyMM(
-            mvpMatrix, 0,
-            camera.projM, 0,
-            camera.viewM, 0
+            mvpMatrix,
+            0,
+            camera.projM,
+            0,
+            camera.viewM,
+            0
         )
 
         logAndroidAuto(

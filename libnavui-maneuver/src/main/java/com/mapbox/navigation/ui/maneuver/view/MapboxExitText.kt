@@ -58,13 +58,16 @@ class MapboxExitText : AppCompatTextView {
     ) : super(context, attrs, defStyleAttr)
 
     private var leftDrawable = ContextCompat.getDrawable(
-        context, R.drawable.mapbox_ic_exit_arrow_left_mutcd
+        context,
+        R.drawable.mapbox_ic_exit_arrow_left_mutcd
     )
     private var rightDrawable = ContextCompat.getDrawable(
-        context, R.drawable.mapbox_ic_exit_arrow_right_mutcd
+        context,
+        R.drawable.mapbox_ic_exit_arrow_right_mutcd
     )
     private var exitBackground = ContextCompat.getDrawable(
-        context, R.drawable.mapbox_exit_board_background
+        context,
+        R.drawable.mapbox_exit_board_background
     )
     private var exitProperties: MapboxExitProperties? = null
 

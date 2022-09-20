@@ -96,7 +96,13 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
             )
         RoadObjectType.TUNNEL ->
             Tunnel(
-                id, metadata.tunnelInfo.toTunnelInfo(), length, location, provider, isUrban, this
+                id,
+                metadata.tunnelInfo.toTunnelInfo(),
+                length,
+                location,
+                provider,
+                isUrban,
+                this
             )
         RoadObjectType.RESTRICTED_AREA -> RestrictedArea(
             id,

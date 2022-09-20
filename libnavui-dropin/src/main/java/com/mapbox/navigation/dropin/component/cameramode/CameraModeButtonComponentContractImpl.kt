@@ -33,8 +33,11 @@ internal class CameraModeButtonComponentContractImpl(
 
     override fun onClick(view: View) {
         val cameraMode = store.state.value.camera.cameraMode.let {
-            if (it != TargetCameraMode.Idle) it
-            else store.state.value.camera.savedCameraMode
+            if (it != TargetCameraMode.Idle) {
+                it
+            } else {
+                store.state.value.camera.savedCameraMode
+            }
         }
         when (cameraMode) {
             TargetCameraMode.Following ->

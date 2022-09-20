@@ -15,7 +15,8 @@ fun Drawable.getBitmap(): Bitmap {
         this.bitmap
     } else {
         val bitmap = Bitmap.createBitmap(
-            intrinsicWidth, intrinsicHeight,
+            intrinsicWidth,
+            intrinsicHeight,
             Bitmap.Config.ARGB_8888
         )
         val canvas = Canvas(bitmap)

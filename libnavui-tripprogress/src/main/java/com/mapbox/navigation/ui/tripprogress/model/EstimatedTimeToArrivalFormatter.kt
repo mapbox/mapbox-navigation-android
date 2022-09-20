@@ -43,7 +43,8 @@ class EstimatedTimeToArrivalFormatter(
                 if (spaceIndex > 0) {
                     spannableString.setSpan(
                         StyleSpan(Typeface.BOLD),
-                        0, spaceIndex,
+                        0,
+                        spaceIndex,
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                 }

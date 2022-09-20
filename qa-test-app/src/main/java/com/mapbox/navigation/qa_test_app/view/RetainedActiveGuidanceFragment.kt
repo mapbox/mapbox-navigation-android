@@ -52,7 +52,8 @@ class RetainedActiveGuidanceFragment : Fragment() {
     }
 
     private fun MapboxNavigation.flowActiveGuidanceStarted() = combine(
-        flowTripSessionState(), flowRoutesUpdated()
+        flowTripSessionState(),
+        flowRoutesUpdated()
     ) { tripSessionState, routesUpdatedResult ->
         TripSessionState.STARTED == tripSessionState && routesUpdatedResult.routes.isNotEmpty()
     }.distinctUntilChanged().onStart { emit(false) }

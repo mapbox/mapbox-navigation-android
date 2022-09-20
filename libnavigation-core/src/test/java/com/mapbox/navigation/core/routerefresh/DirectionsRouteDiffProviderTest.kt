@@ -33,7 +33,8 @@ class DirectionsRouteDiffProviderTest {
             createTestLeg(71.42, 28.57, 42.85, 120, "unknown", 57),
             createTestLeg(142.8, 57.14, 28.57, 90, "low", 71),
             createRouteLeg(
-                incidents = listOf(createIncident()), closures = listOf(createClosure())
+                incidents = listOf(createIncident()),
+                closures = listOf(createClosure())
             ),
         )
 

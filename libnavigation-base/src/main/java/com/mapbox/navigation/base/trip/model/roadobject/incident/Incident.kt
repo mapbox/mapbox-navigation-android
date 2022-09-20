@@ -20,7 +20,13 @@ class Incident internal constructor(
     isUrban: Boolean?,
     nativeRoadObject: com.mapbox.navigator.RoadObject,
 ) : RoadObject(
-    id, RoadObjectType.INCIDENT, length, location, provider, isUrban, nativeRoadObject
+    id,
+    RoadObjectType.INCIDENT,
+    length,
+    location,
+    provider,
+    isUrban,
+    nativeRoadObject
 ) {
 
     /**

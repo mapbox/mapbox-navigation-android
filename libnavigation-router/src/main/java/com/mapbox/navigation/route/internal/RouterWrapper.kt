@@ -224,7 +224,8 @@ class RouterWrapper(
 
                         callback.onFailure(
                             RouterFactory.buildNavigationRouterRefreshError(
-                                "Route refresh failed", Exception(errorMessage)
+                                "Route refresh failed",
+                                Exception(errorMessage)
                             )
                         )
                     }
@@ -263,7 +264,8 @@ class RouterWrapper(
                             { throwable ->
                                 callback.onFailure(
                                     RouterFactory.buildNavigationRouterRefreshError(
-                                        "failed for response: $it", throwable,
+                                        "failed for response: $it",
+                                        throwable,
                                     )
                                 )
                             },

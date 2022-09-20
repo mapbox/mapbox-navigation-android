@@ -30,9 +30,12 @@ class MapboxBuildingView {
      */
     private val buildingHeightExpression: Expression =
         Expression.interpolate(
-            Expression.linear(), Expression.zoom(),
-            literal(15.0), literal(0),
-            literal(15.05), Expression.get(HEIGHT)
+            Expression.linear(),
+            Expression.zoom(),
+            literal(15.0),
+            literal(0),
+            literal(15.05),
+            Expression.get(HEIGHT)
         )
 
     /**
@@ -103,10 +106,12 @@ class MapboxBuildingView {
          * Layer_id used for highlighting a building.
          */
         private const val HIGHLIGHT_BUILDING_LAYER_ID = "mapbox-building-highlight-layer"
+
         /**
          * Source_id used for highlighting a building.
          */
         private const val COMPOSITE_SOURCE_ID = "composite"
+
         /**
          * Source layer that includes building height.
          */

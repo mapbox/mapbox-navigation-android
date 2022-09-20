@@ -244,11 +244,13 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         val firstLocation = historyEvents
             .find { it is HistoryEventUpdateLocation } as HistoryEventUpdateLocation
         assertEquals(
-            mockRoute.routeWaypoints.first().longitude(), firstLocation.location.longitude,
+            mockRoute.routeWaypoints.first().longitude(),
+            firstLocation.location.longitude,
             0.00001
         )
         assertEquals(
-            mockRoute.routeWaypoints.first().latitude(), firstLocation.location.latitude,
+            mockRoute.routeWaypoints.first().latitude(),
+            firstLocation.location.latitude,
             0.00001
         )
 

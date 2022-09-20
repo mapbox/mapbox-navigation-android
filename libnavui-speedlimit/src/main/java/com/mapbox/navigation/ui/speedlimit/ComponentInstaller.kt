@@ -37,6 +37,7 @@ class SpeedLimitConfig internal constructor() {
      * [style] to be set to [MapboxSpeedLimitView].
      */
     @StyleRes var style: Int = R.style.MapboxStyleSpeedLimit
+
     /**
      * [textAppearance] to be set to [MapboxSpeedLimitView].
      */

@@ -137,7 +137,8 @@ class RouterInterfaceAdapterTest {
             assertEquals(400, code)
             assertEquals(RouterErrorType.UNKNOWN, type)
             assertEquals(
-                com.mapbox.navigator.RouterOrigin.ONBOARD, slotNativeRouterOrigin.captured
+                com.mapbox.navigator.RouterOrigin.ONBOARD,
+                slotNativeRouterOrigin.captured
             )
         }
     }
@@ -284,7 +285,9 @@ class RouterInterfaceAdapterTest {
             )
         } just Runs
         return Triple(
-            nativeRouteRefreshCallback, slotNativeRouterRefreshCallback, slotNativeRouterOrigin
+            nativeRouteRefreshCallback,
+            slotNativeRouterRefreshCallback,
+            slotNativeRouterOrigin
         )
     }
 

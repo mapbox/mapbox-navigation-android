@@ -263,16 +263,22 @@ class MapboxSignboardApiTest {
             )
         } returns checkSignboardAvailability
 
-        if (prepareSignboardRequest != null) every {
-            SignboardProcessor.process(ofType(SignboardAction.PrepareSignboardRequest::class))
-        } returns prepareSignboardRequest
+        if (prepareSignboardRequest != null) {
+            every {
+                SignboardProcessor.process(ofType(SignboardAction.PrepareSignboardRequest::class))
+            } returns prepareSignboardRequest
+        }
 
-        if (processSignboardResponse != null) every {
-            SignboardProcessor.process(ofType(SignboardAction.ProcessSignboardResponse::class))
-        } returns processSignboardResponse
+        if (processSignboardResponse != null) {
+            every {
+                SignboardProcessor.process(ofType(SignboardAction.ProcessSignboardResponse::class))
+            } returns processSignboardResponse
+        }
 
-        if (parseSvgToBitmap != null) every {
-            SignboardProcessor.process(ofType(SignboardAction.ParseSvgToBitmap::class))
-        } returns parseSvgToBitmap
+        if (parseSvgToBitmap != null) {
+            every {
+                SignboardProcessor.process(ofType(SignboardAction.ParseSvgToBitmap::class))
+            } returns parseSvgToBitmap
+        }
     }
 }

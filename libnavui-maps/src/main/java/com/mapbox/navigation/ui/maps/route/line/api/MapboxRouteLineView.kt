@@ -329,10 +329,11 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                     val primarySourceKey = getSourceKeyForPrimaryRoute(style).fold(
                         { routeSourceKey ->
                             routeSourceKey
-                        }, { error ->
-                        logE(TAG, error.message)
-                        null
-                    }
+                        },
+                        { error ->
+                            logE(TAG, error.message)
+                            null
+                        }
                     )?.also {
                         updateSource(
                             style,

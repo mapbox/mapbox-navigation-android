@@ -76,7 +76,8 @@ class RouteArrowUtilsRoboTest {
         )
         assertEquals(
             16L,
-            (shaftSourceValueSlots.last().contents as HashMap<String, Value>)["maxzoom"]!!.contents,
+            (shaftSourceValueSlots.last().contents as HashMap<String, Value>)
+            ["maxzoom"]!!.contents,
         )
         assertEquals(
             "",
@@ -84,8 +85,8 @@ class RouteArrowUtilsRoboTest {
         )
         assertEquals(
             RouteLayerConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            (shaftSourceValueSlots.last().contents as HashMap<String, Value>)["tolerance"]
-            !!.contents
+            (shaftSourceValueSlots.last().contents as HashMap<String, Value>)
+            ["tolerance"]!!.contents
         )
 
         verify {

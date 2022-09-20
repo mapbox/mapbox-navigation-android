@@ -60,7 +60,6 @@ internal class LocationsCollectorImpl : LocationsCollector {
     override fun flushBufferFor(
         locationsCollectorListener: LocationsCollector.LocationsCollectorListener
     ) {
-
         logD("flush buffer for only one observer", LOG_CATEGORY)
         eventsLocationsBuffer.find {
             it.locationsCollectorListener === locationsCollectorListener

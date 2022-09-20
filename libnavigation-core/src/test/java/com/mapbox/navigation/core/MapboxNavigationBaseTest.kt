@@ -159,7 +159,9 @@ internal open class MapboxNavigationBaseTest {
         mockkObject(RouteRefreshControllerProvider)
         every {
             RouteRefreshControllerProvider.createRouteRefreshController(
-                any(), any(), any()
+                any(),
+                any(),
+                any()
             )
         } returns routeRefreshController
         mockkObject(RouteAlternativesControllerProvider)
@@ -316,7 +318,13 @@ internal open class MapboxNavigationBaseTest {
         every { MapboxNavigationTelemetry.destroy(any()) } just runs
         every {
             MapboxNavigationTelemetry.postUserFeedback(
-                any(), any(), any(), any(), any(), any(), any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
             )
         } just runs
     }

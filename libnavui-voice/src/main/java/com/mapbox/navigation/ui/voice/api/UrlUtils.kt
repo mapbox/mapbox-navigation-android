@@ -9,11 +9,11 @@
  */
 package com.mapbox.navigation.ui.voice.api
 
+/* ktlint-disable */
 import okio.Buffer
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets.UTF_8
 
-/* ktlint-disable */
 internal object UrlUtils {
 
     private val HEX_DIGITS =

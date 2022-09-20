@@ -124,7 +124,8 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         coVerify(exactly = 1) {
             tripSession.setRoutes(
-                routes, BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, currentLegIndex)
+                routes,
+                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, currentLegIndex)
             )
         }
     }
@@ -271,7 +272,8 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         verify(exactly = 1) {
             directionsSession.setRoutes(
-                emptyList(), BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0)
+                emptyList(),
+                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0)
             )
         }
     }
@@ -362,7 +364,13 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         verify(exactly = 0) {
             MapboxNavigationTelemetry.postUserFeedback(
-                any(), any(), any(), any(), any(), any(), any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
             )
         }
     }
@@ -724,7 +732,12 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), any(), capture(slot), any(), any(), any()
+                any(),
+                any(),
+                capture(slot),
+                any(),
+                any(),
+                any()
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -742,7 +755,12 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), any(), capture(slot), any(), any(), any()
+                any(),
+                any(),
+                capture(slot),
+                any(),
+                any(),
+                any()
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -765,7 +783,12 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val slot = slot<NavigatorConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), capture(slot), any(), any(), any(), any()
+                any(),
+                capture(slot),
+                any(),
+                any(),
+                any(),
+                any()
             )
         } returns navigator
 
@@ -780,7 +803,12 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val slot = slot<NavigatorConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), capture(slot), any(), any(), any(), any()
+                any(),
+                capture(slot),
+                any(),
+                any(),
+                any(),
+                any()
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -803,7 +831,12 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val slot = slot<NavigatorConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), capture(slot), any(), any(), any(), any()
+                any(),
+                capture(slot),
+                any(),
+                any(),
+                any(),
+                any()
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -842,7 +875,8 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         verify(exactly = 1) {
             directionsSession.setRoutes(
-                routes, BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+                routes,
+                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
             )
         }
     }
@@ -990,7 +1024,12 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), any(), capture(slot), any(), any(), any()
+                any(),
+                any(),
+                capture(slot),
+                any(),
+                any(),
+                any()
             )
         } returns navigator
         val tilesVersion = "tilesVersion"
@@ -1188,7 +1227,8 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             verifyOrder {
                 billingController.onExternalRouteSet(routes.first())
                 directionsSession.setRoutes(
-                    routes, BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, 0)
+                    routes,
+                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, 0)
                 )
             }
         }

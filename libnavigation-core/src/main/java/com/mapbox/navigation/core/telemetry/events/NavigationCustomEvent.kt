@@ -27,6 +27,7 @@ internal class NavigationCustomEvent : Event(), MetricEvent {
     val operatingSystem: String = OPERATING_SYSTEM
     val device: String? = Build.MODEL
     var driverMode: String = ""
+
     // Setting driverModeId to the following to match the pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}?"
     val driverModeId: String = "00000000-0000-0000-0000-000000000000"
     val driverModeStartTimestamp: String = "non_valid"

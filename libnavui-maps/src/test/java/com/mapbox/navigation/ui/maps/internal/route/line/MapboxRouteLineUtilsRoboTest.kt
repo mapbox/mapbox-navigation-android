@@ -223,7 +223,8 @@ class MapboxRouteLineUtilsRoboTest {
 
         verify {
             style.addStyleSource(
-                WAYPOINT_SOURCE_ID, capture(waypointSourceValueSlots),
+                WAYPOINT_SOURCE_ID,
+                capture(waypointSourceValueSlots),
             )
         }
         assertEquals(
@@ -253,23 +254,23 @@ class MapboxRouteLineUtilsRoboTest {
         }
         assertEquals(
             "geojson",
-            (primaryRouteSourceValueSlots.last().contents as HashMap<String, Value>)["type"]
-            !!.contents
+            (primaryRouteSourceValueSlots.last().contents as HashMap<String, Value>)
+            ["type"]!!.contents
         )
         assertEquals(
             16L,
-            (primaryRouteSourceValueSlots.last().contents as HashMap<String, Value>)["maxzoom"]
-            !!.contents
+            (primaryRouteSourceValueSlots.last().contents as HashMap<String, Value>)
+            ["maxzoom"]!!.contents
         )
         assertEquals(
             true,
-            (primaryRouteSourceValueSlots.last().contents as HashMap<String, Value>)["lineMetrics"]
-            !!.contents
+            (primaryRouteSourceValueSlots.last().contents as HashMap<String, Value>)
+            ["lineMetrics"]!!.contents
         )
         assertEquals(
             "",
-            (primaryRouteSourceValueSlots.last().contents as HashMap<String, Value>)["data"]
-            !!.contents
+            (primaryRouteSourceValueSlots.last().contents as HashMap<String, Value>)
+            ["data"]!!.contents
         )
         assertEquals(
             DEFAULT_ROUTE_SOURCES_TOLERANCE,
@@ -438,21 +439,21 @@ class MapboxRouteLineUtilsRoboTest {
         assertEquals(
             33.3,
             (
-                (addStyleLayerSlots[20].contents as HashMap<String, Value>)["icon-offset"]
-                !!.contents as ArrayList<Value>
+                (addStyleLayerSlots[20].contents as HashMap<String, Value>)
+                ["icon-offset"]!!.contents as ArrayList<Value>
                 ).first().contents
         )
         assertEquals(
             44.4,
             (
-                (addStyleLayerSlots[20].contents as HashMap<String, Value>)["icon-offset"]
-                !!.contents as ArrayList<Value>
+                (addStyleLayerSlots[20].contents as HashMap<String, Value>)
+                ["icon-offset"]!!.contents as ArrayList<Value>
                 ).component2().contents
         )
         assertEquals(
             "viewport",
-            (addStyleLayerSlots[20].contents as HashMap<String, Value>)["icon-pitch-alignment"]
-            !!.contents
+            (addStyleLayerSlots[20].contents as HashMap<String, Value>)
+            ["icon-pitch-alignment"]!!.contents
         )
         assertEquals(
             LocationComponentConstants.MODEL_LAYER,

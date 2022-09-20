@@ -61,8 +61,11 @@ class AudioGuidanceButtonComponent(
 
         val contract = contractProvider.get()
         contract.isMuted.observe {
-            if (it) audioGuidanceButton.mute()
-            else audioGuidanceButton.unMute()
+            if (it) {
+                audioGuidanceButton.mute()
+            } else {
+                audioGuidanceButton.unMute()
+            }
         }
 
         contract.isVisible.observe {
@@ -70,8 +73,11 @@ class AudioGuidanceButtonComponent(
         }
 
         audioGuidanceButton.setOnClickListener {
-            if (contract.isMuted.value) contract.unMute()
-            else contract.mute()
+            if (contract.isMuted.value) {
+                contract.unMute()
+            } else {
+                contract.mute()
+            }
         }
     }
 

@@ -1387,8 +1387,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         feedbackSubType: Array<String>? = emptyArray(),
     ) {
         postUserFeedback(
-            feedbackType, description, feedbackSource, screenshot,
-            feedbackSubType, feedbackMetadata = null, userFeedbackCallback = null,
+            feedbackType,
+            description,
+            feedbackSource,
+            screenshot,
+            feedbackSubType,
+            feedbackMetadata = null,
+            userFeedbackCallback = null,
         )
     }
 
@@ -1423,8 +1428,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         feedbackMetadata: FeedbackMetadata,
     ) {
         postUserFeedback(
-            feedbackType, description, feedbackSource, screenshot,
-            feedbackSubType, feedbackMetadata, userFeedbackCallback = null,
+            feedbackType,
+            description,
+            feedbackSource,
+            screenshot,
+            feedbackSubType,
+            feedbackMetadata,
+            userFeedbackCallback = null,
         )
     }
 

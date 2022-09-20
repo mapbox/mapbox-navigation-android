@@ -591,7 +591,8 @@ class PredictiveCacheControllerTest {
             val predictiveCacheController = PredictiveCacheController(predictiveCacheOptions)
             predictiveCacheController.predictiveCacheControllerErrorHandler = errorHandler
             predictiveCacheController.createStyleMapControllers(
-                mockedMapboxMap, styles = listOf("mapbox://test_test", "non_valid://test_test")
+                mockedMapboxMap,
+                styles = listOf("mapbox://test_test", "non_valid://test_test")
             )
 
             assertEquals(1, slotListTilesetDescriptorOptions.size)

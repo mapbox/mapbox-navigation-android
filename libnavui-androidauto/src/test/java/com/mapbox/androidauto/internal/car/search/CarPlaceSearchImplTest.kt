@@ -41,7 +41,10 @@ class CarPlaceSearchImplTest {
         mockkStatic(MapboxSearchSdk::class)
         every {
             MapboxSearchSdk.createSearchEngineWithBuiltInDataProviders(
-                any(), any(), any(), any()
+                any(),
+                any(),
+                any(),
+                any()
             )
         } returns searchEngine
     }
@@ -88,7 +91,10 @@ class CarPlaceSearchImplTest {
         val settingsSlot = slot<SearchEngineSettings>()
         every {
             MapboxSearchSdk.createSearchEngineWithBuiltInDataProviders(
-                any(), capture(settingsSlot), any(), any()
+                any(),
+                capture(settingsSlot),
+                any(),
+                any()
             )
         } returns searchEngine
         val mapboxNavigation = mockk<MapboxNavigation>()
@@ -103,7 +109,10 @@ class CarPlaceSearchImplTest {
         val settingsSlot = slot<SearchEngineSettings>()
         every {
             MapboxSearchSdk.createSearchEngineWithBuiltInDataProviders(
-                any(), capture(settingsSlot), any(), any()
+                any(),
+                capture(settingsSlot),
+                any(),
+                any()
             )
         } returns searchEngine
         every { options.accessToken } returns null

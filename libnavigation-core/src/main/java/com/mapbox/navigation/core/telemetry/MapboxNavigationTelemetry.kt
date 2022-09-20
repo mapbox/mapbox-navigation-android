@@ -494,8 +494,13 @@ internal object MapboxNavigationTelemetry {
     ) {
         fun notifyUserFeedbackCallbacks(feedbackEvent: NavigationFeedbackEvent) {
             val userFeedback = UserFeedback(
-                feedbackEvent.feedbackId, feedbackType, feedbackSource, description, screenshot,
-                feedbackSubType, Point.fromLngLat(feedbackEvent.lng, feedbackEvent.lat),
+                feedbackEvent.feedbackId,
+                feedbackType,
+                feedbackSource,
+                description,
+                screenshot,
+                feedbackSubType,
+                Point.fromLngLat(feedbackEvent.lng, feedbackEvent.lat),
             )
             localUserFeedbackCallback?.onNewUserFeedback(userFeedback)
             for (callback in userFeedbackCallbacks) {

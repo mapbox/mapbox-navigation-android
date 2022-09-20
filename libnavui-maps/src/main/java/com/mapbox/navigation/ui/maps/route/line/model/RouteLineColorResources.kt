@@ -213,19 +213,28 @@ class RouteLineColorResources private constructor(
         if (routeClosureColor != other.routeClosureColor) return false
         if (restrictedRoadColor != other.restrictedRoadColor) return false
         if (alternativeRouteDefaultColor != other.alternativeRouteDefaultColor) return false
-        if (alternativeRouteLowCongestionColor != other.alternativeRouteLowCongestionColor)
+        if (alternativeRouteLowCongestionColor != other.alternativeRouteLowCongestionColor) {
             return false
+        }
         if (
             alternativeRouteModerateCongestionColor != other.alternativeRouteModerateCongestionColor
-        ) return false
-        if (alternativeRouteHeavyCongestionColor != other.alternativeRouteHeavyCongestionColor)
+        ) {
             return false
-        if (alternativeRouteSevereCongestionColor != other.alternativeRouteSevereCongestionColor)
+        }
+        if (alternativeRouteHeavyCongestionColor != other.alternativeRouteHeavyCongestionColor) {
             return false
-        if (alternativeRouteUnknownCongestionColor != other.alternativeRouteUnknownCongestionColor)
+        }
+        if (alternativeRouteSevereCongestionColor != other.alternativeRouteSevereCongestionColor) {
             return false
-        if (alternativeRouteRestrictedRoadColor != other.alternativeRouteRestrictedRoadColor)
+        }
+        if (
+            alternativeRouteUnknownCongestionColor != other.alternativeRouteUnknownCongestionColor
+        ) {
             return false
+        }
+        if (alternativeRouteRestrictedRoadColor != other.alternativeRouteRestrictedRoadColor) {
+            return false
+        }
         if (alternativeRouteClosureColor != other.alternativeRouteClosureColor) return false
         if (routeLineTraveledColor != other.routeLineTraveledColor) return false
         if (routeLineTraveledCasingColor != other.routeLineTraveledCasingColor) return false

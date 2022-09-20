@@ -20,7 +20,8 @@ import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 class SpeedLimitWidget(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD) : BitmapWidget(
     drawSpeedLimitSign(speedLimit = null, speed = 0, initialSignFormat, warn = false),
     WidgetPosition(WidgetPosition.Horizontal.RIGHT, WidgetPosition.Vertical.BOTTOM),
-    marginX = 14f, marginY = 30f,
+    marginX = 14f,
+    marginY = 30f,
 ) {
 
     private var lastSpeedLimit: Int? = null
@@ -35,7 +36,9 @@ class SpeedLimitWidget(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD)
             lastSpeed == speed &&
             lastSignFormat == newSignFormat &&
             lastWarn == warn
-        ) return
+        ) {
+            return
+        }
         lastSpeedLimit = speedLimit
         lastSpeed = speed
         lastSignFormat = newSignFormat
@@ -109,7 +112,9 @@ class SpeedLimitWidget(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD)
         private val signBorderRectMutcd =
             createRect(WIDTH_MUTCD, HEIGHT_SIGN, inset = STROKE + STROKE_PADDING)
         private val signBackgroundRectMutcd = createRect(
-            WIDTH_MUTCD, HEIGHT_SIGN, inset = STROKE + STROKE_PADDING + STROKE_SIGN_MUTCD,
+            WIDTH_MUTCD,
+            HEIGHT_SIGN,
+            inset = STROKE + STROKE_PADDING + STROKE_SIGN_MUTCD,
         )
 
         private fun drawSpeedLimitSign(
@@ -139,33 +144,49 @@ class SpeedLimitWidget(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD)
             borderPaint.setShadowLayer(RADIUS_SHADOW, 0f, OFFSET_SHADOW, COLOR_SHADOW)
             canvas.drawRoundRect(borderRectVienna, RADIUS_VIENNA, RADIUS_VIENNA, borderPaint)
             canvas.drawRoundRect(
-                backgroundRectVienna, RADIUS_VIENNA - STROKE, RADIUS_VIENNA - STROKE,
+                backgroundRectVienna,
+                RADIUS_VIENNA - STROKE,
+                RADIUS_VIENNA - STROKE,
                 if (warn) backgroundPaintWarning else backgroundPaintNormal,
             )
 
             val radiusSignBorder = RADIUS_VIENNA - STROKE
             if (warn) {
                 signBorderViennaPaint.setShadowLayer(
-                    RADIUS_SHADOW_SMALL, 0f, OFFSET_SHADOW_SMALL, COLOR_SHADOW,
+                    RADIUS_SHADOW_SMALL,
+                    0f,
+                    OFFSET_SHADOW_SMALL,
+                    COLOR_SHADOW,
                 )
                 canvas.drawRoundRect(
-                    signBorderRectVienna, radiusSignBorder, radiusSignBorder, signBorderViennaPaint,
+                    signBorderRectVienna,
+                    radiusSignBorder,
+                    radiusSignBorder,
+                    signBorderViennaPaint,
                 )
                 signBorderViennaPaint.setShadowLayer(RADIUS_SHADOW, 0f, OFFSET_SHADOW, COLOR_SHADOW)
             } else {
                 signBorderViennaPaint.clearShadowLayer()
             }
             canvas.drawRoundRect(
-                signBorderRectVienna, radiusSignBorder, radiusSignBorder, signBorderViennaPaint,
+                signBorderRectVienna,
+                radiusSignBorder,
+                radiusSignBorder,
+                signBorderViennaPaint,
             )
             canvas.drawRoundRect(
-                signBackgroundRectVienna, radiusSignBorder - STROKE_SIGN_VIENNA,
-                radiusSignBorder - STROKE_SIGN_VIENNA, backgroundPaintNormal,
+                signBackgroundRectVienna,
+                radiusSignBorder - STROKE_SIGN_VIENNA,
+                radiusSignBorder - STROKE_SIGN_VIENNA,
+                backgroundPaintNormal,
             )
 
             val speedLimitText = speedLimit?.toString() ?: SPEED_LIMIT_NO_DATA
             speedLimitPaintVienna.getTextBounds(
-                speedLimitText, 0, speedLimitText.length, speedLimitRect,
+                speedLimitText,
+                0,
+                speedLimitText.length,
+                speedLimitRect,
             )
             val speedLimitY = WIDTH_VIENNA / 2 - RADIUS_SHADOW - speedLimitRect.exactCenterY()
             canvas.drawText(speedLimitText, WIDTH_VIENNA / 2f, speedLimitY, speedLimitPaintVienna)
@@ -194,17 +215,24 @@ class SpeedLimitWidget(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD)
             borderPaint.setShadowLayer(RADIUS_SHADOW, 0f, OFFSET_SHADOW, COLOR_SHADOW)
             canvas.drawRoundRect(borderRectMutcd, RADIUS_MUTCD, RADIUS_MUTCD, borderPaint)
             canvas.drawRoundRect(
-                backgroundRectMutcd, RADIUS_MUTCD - STROKE, RADIUS_MUTCD - STROKE,
+                backgroundRectMutcd,
+                RADIUS_MUTCD - STROKE,
+                RADIUS_MUTCD - STROKE,
                 if (warn) backgroundPaintWarning else backgroundPaintNormal,
             )
 
             val radiusSignBorder = RADIUS_MUTCD - STROKE - STROKE_PADDING
             canvas.drawRoundRect(
-                signBorderRectMutcd, radiusSignBorder, radiusSignBorder, signBorderMutcdPaint,
+                signBorderRectMutcd,
+                radiusSignBorder,
+                radiusSignBorder,
+                signBorderMutcdPaint,
             )
             canvas.drawRoundRect(
-                signBackgroundRectMutcd, radiusSignBorder - STROKE_SIGN_MUTCD,
-                radiusSignBorder - STROKE_SIGN_MUTCD, backgroundPaintNormal,
+                signBackgroundRectMutcd,
+                radiusSignBorder - STROKE_SIGN_MUTCD,
+                radiusSignBorder - STROKE_SIGN_MUTCD,
+                backgroundPaintNormal,
             )
 
             val titleY1 = signBackgroundRectMutcd.top + 7.5f - titleRect1.exactCenterY()
@@ -214,7 +242,10 @@ class SpeedLimitWidget(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD)
 
             val speedLimitText = speedLimit?.toString() ?: SPEED_LIMIT_NO_DATA
             speedLimitPaintMutcd.getTextBounds(
-                speedLimitText, 0, speedLimitText.length, speedLimitRect,
+                speedLimitText,
+                0,
+                speedLimitText.length,
+                speedLimitRect,
             )
             val speedLimitY = signBackgroundRectMutcd.top + 41.5f - speedLimitRect.exactCenterY()
             canvas.drawText(speedLimitText, WIDTH_MUTCD / 2f, speedLimitY, speedLimitPaintVienna)
@@ -258,7 +289,10 @@ class SpeedLimitWidget(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD)
 
         private fun createRect(fullWidth: Int, height: Float, inset: Float): RectF {
             return RectF(
-                RADIUS_SHADOW + inset, inset, fullWidth - RADIUS_SHADOW - inset, height - inset,
+                RADIUS_SHADOW + inset,
+                inset,
+                fullWidth - RADIUS_SHADOW - inset,
+                height - inset,
             )
         }
     }

@@ -30,12 +30,14 @@ class CarCamera2d : CarSurfaceLayer() {
         )
         GLES20.glViewport(visibleArea.left, visibleArea.top, visibleArea.right, visibleArea.bottom)
         Matrix.orthoM(
-            projM, 0,
+            projM,
+            0,
             CAMERA_LEFT,
             surfaceWidth.toFloat(),
             surfaceHeight.toFloat(),
             CAMERA_TOP,
-            CAMERA_NEAR, CAMERA_FAR
+            CAMERA_NEAR,
+            CAMERA_FAR
         )
     }
 

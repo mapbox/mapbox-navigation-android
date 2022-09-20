@@ -74,9 +74,12 @@ class CarTextLayerHost : CustomLayerHost {
 
         // Prepare the coordinate data
         GLES20.glVertexAttribPointer(
-            positionHandle, mapScene.model.dimensions,
-            GLES20.GL_FLOAT, false,
-            mapScene.model.stride, mapScene.model.vertices
+            positionHandle,
+            mapScene.model.dimensions,
+            GLES20.GL_FLOAT,
+            false,
+            mapScene.model.stride,
+            mapScene.model.vertices
         )
 
         // Set color for drawing the background
@@ -84,12 +87,20 @@ class CarTextLayerHost : CustomLayerHost {
 
         // Apply the projection transformation
         GLES20.glUniformMatrix4fv(
-            projectionMatrixHandle, 1, false, mapScene.mvpMatrix, 0
+            projectionMatrixHandle,
+            1,
+            false,
+            mapScene.mvpMatrix,
+            0
         )
 
         // Apply the projection transformation
         GLES20.glUniformMatrix4fv(
-            modelMatrixHandle, 1, false, mapScene.model.modelMatrix, 0
+            modelMatrixHandle,
+            1,
+            false,
+            mapScene.model.modelMatrix,
+            0
         )
 
         // Activate the texture and use the latest bitmap
@@ -100,9 +111,12 @@ class CarTextLayerHost : CustomLayerHost {
 
         GLES20.glEnableVertexAttribArray(texCoordHandle)
         GLES20.glVertexAttribPointer(
-            texCoordHandle, 2,
-            GLES20.GL_FLOAT, false,
-            0, mapScene.model.textureCords
+            texCoordHandle,
+            2,
+            GLES20.GL_FLOAT,
+            false,
+            0,
+            mapScene.model.textureCords
         )
 
         // Draw the background

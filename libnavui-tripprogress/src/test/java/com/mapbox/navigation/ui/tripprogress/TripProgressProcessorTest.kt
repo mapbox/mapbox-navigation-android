@@ -36,7 +36,8 @@ class TripProgressProcessorTest {
 
         assertEquals(
             expectedEta.timeInMillis.toDouble(),
-            result.estimatedTimeToArrival.toDouble(), 30000.0
+            result.estimatedTimeToArrival.toDouble(),
+            30000.0
         )
         assertEquals(100.0, result.distanceRemaining, 0.0)
         assertEquals(2.0, result.currentLegTimeRemaining, 0.0)

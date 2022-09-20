@@ -326,8 +326,11 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             getValue = resources.configuration::isNightMode,
             setValue = {
                 val themeMode =
-                    if (it) AppCompatDelegate.MODE_NIGHT_YES
-                    else AppCompatDelegate.MODE_NIGHT_NO
+                    if (it) {
+                        AppCompatDelegate.MODE_NIGHT_YES
+                    } else {
+                        AppCompatDelegate.MODE_NIGHT_NO
+                    }
                 toggleTheme(themeMode)
             }
         )
@@ -552,13 +555,19 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
     private fun toggleCustomInfoPanelLayout(enabled: Boolean) {
         binding.navigationView.customizeViewBinders {
             infoPanelBinder =
-                if (enabled) CustomInfoPanelBinder()
-                else InfoPanelBinder.defaultBinder()
+                if (enabled) {
+                    CustomInfoPanelBinder()
+                } else {
+                    InfoPanelBinder.defaultBinder()
+                }
         }
         binding.navigationView.customizeViewStyles {
             infoPanelPeekHeight =
-                if (enabled) defaultInfoPanelPeekHeight(applicationContext) + 20.dp
-                else defaultInfoPanelPeekHeight(applicationContext)
+                if (enabled) {
+                    defaultInfoPanelPeekHeight(applicationContext) + 20.dp
+                } else {
+                    defaultInfoPanelPeekHeight(applicationContext)
+                }
         }
     }
 

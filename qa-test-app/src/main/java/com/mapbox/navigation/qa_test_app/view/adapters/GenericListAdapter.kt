@@ -31,7 +31,6 @@ class GenericListAdapter<T, U : RecyclerView.ViewHolder>(
     override fun getItemCount(): Int = values.size
 
     override fun onBindViewHolder(holder: U, position: Int) {
-
         val element: T = values[position]
         itemSelectedDelegate?.let {
             holder.itemView.setOnClickListener {
@@ -76,7 +75,6 @@ class GenericListAdapter<T, U : RecyclerView.ViewHolder>(
         oldValues: List<T>,
         newValues: List<T>
     ): DiffUtil.Callback {
-
         return object : DiffUtil.Callback() {
             override fun getOldListSize(): Int = oldValues.size
             override fun getNewListSize(): Int = newValues.size

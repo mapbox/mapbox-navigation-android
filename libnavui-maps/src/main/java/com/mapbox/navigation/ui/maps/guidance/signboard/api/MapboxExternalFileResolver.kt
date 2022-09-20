@@ -47,7 +47,6 @@ open class MapboxExternalFileResolver(
      * represented by empty string
      */
     override fun resolveFont(fontFamily: String?, fontWeight: Int, fontStyle: String?): Typeface? {
-
         try {
             return getTypeface(fontFamily, fontWeight, fontStyle, ".ttf")
         } catch (exception: RuntimeException) {

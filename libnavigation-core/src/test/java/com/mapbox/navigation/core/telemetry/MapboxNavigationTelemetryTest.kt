@@ -154,6 +154,7 @@ class MapboxNavigationTelemetryTest {
          */
         private val billingService = mockk<BillingServiceInterface>(relaxed = true)
     }
+
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
@@ -1396,14 +1397,21 @@ class MapboxNavigationTelemetryTest {
 
     private fun postCustomEvent() {
         MapboxNavigationTelemetry.postCustomEvent(
-            "testPayload", NavigationCustomEventType.ANALYTICS, "1.2.3"
+            "testPayload",
+            NavigationCustomEventType.ANALYTICS,
+            "1.2.3"
         )
     }
 
     private fun postUserFeedback() {
         MapboxNavigationTelemetry.postUserFeedback(
-            FEEDBACK_TYPE, DESCRIPTION, FEEDBACK_SOURCE, SCREENSHOT,
-            FEEDBACK_SUBTYPE, feedbackMetadata = null, localUserFeedbackCallback,
+            FEEDBACK_TYPE,
+            DESCRIPTION,
+            FEEDBACK_SOURCE,
+            SCREENSHOT,
+            FEEDBACK_SUBTYPE,
+            feedbackMetadata = null,
+            localUserFeedbackCallback,
         )
     }
 
@@ -1551,7 +1559,6 @@ class MapboxNavigationTelemetryTest {
         firstSessionEvents: List<MetricEvent>,
         secondSessionEvents: List<MetricEvent>
     ) {
-
         fun List<MetricEvent>.toPair(): List<Pair<String, String>> {
             return this.mapNotNull { event ->
                 when (event) {
@@ -1574,7 +1581,8 @@ class MapboxNavigationTelemetryTest {
             sessionsElements.reduce { acc, pair ->
                 assertEquals(
                     "navSessionIdentifier equals for all events under this session",
-                    acc.first, pair.first
+                    acc.first,
+                    pair.first
                 )
                 return@reduce pair
             }.also { (navSessionId, _) ->
@@ -1584,7 +1592,8 @@ class MapboxNavigationTelemetryTest {
 
         if (sessionsIds.size > 1) {
             assertNotSame(
-                sessionsIds[0], sessionsIds[1]
+                sessionsIds[0],
+                sessionsIds[1]
             )
         }
     }
@@ -1606,13 +1615,16 @@ class MapboxNavigationTelemetryTest {
 
         return compareData.reduce { acc, sessionEventCompareData ->
             assertEquals(
-                acc.navigatorSessionIdentifier, sessionEventCompareData.navigatorSessionIdentifier
+                acc.navigatorSessionIdentifier,
+                sessionEventCompareData.navigatorSessionIdentifier
             )
             assertEquals(
-                acc.sessionIdentifier, sessionEventCompareData.sessionIdentifier
+                acc.sessionIdentifier,
+                sessionEventCompareData.sessionIdentifier
             )
             assertEquals(
-                acc.startTimestamp, sessionEventCompareData.startTimestamp
+                acc.startTimestamp,
+                sessionEventCompareData.startTimestamp
             )
             if (
                 sessionEventCompareData.driverModeName != SessionEventCompareData.NO_DRIVER_MODE &&

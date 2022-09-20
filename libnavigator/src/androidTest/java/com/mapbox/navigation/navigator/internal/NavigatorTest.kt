@@ -72,7 +72,9 @@ class NavigatorTest {
                 )
                 .waypointNamesList(
                     listOf(
-                        "", "North Quinn Street", ""
+                        "",
+                        "North Quinn Street",
+                        ""
                     )
                 )
                 .build()
@@ -93,7 +95,13 @@ class NavigatorTest {
         ConfigFactory.build(
             SettingsProfile(ProfileApplication.MOBILE, ProfilePlatform.ANDROID),
             NavigatorConfig(
-                null, null, null, null, null, null, null
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
             ),
             ""
         )

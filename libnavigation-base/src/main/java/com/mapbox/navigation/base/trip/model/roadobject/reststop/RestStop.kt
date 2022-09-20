@@ -28,7 +28,13 @@ class RestStop internal constructor(
     isUrban: Boolean?,
     nativeRoadObject: com.mapbox.navigator.RoadObject,
 ) : RoadObject(
-    id, RoadObjectType.REST_STOP, length, location, provider, isUrban, nativeRoadObject
+    id,
+    RoadObjectType.REST_STOP,
+    length,
+    location,
+    provider,
+    isUrban,
+    nativeRoadObject
 ) {
 
     /**

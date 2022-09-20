@@ -30,6 +30,7 @@ class MapboxTripServiceTest {
     private val logger = mockk<LoggerFrontend>(relaxed = true).apply {
         LoggerProvider.setLoggerFrontend(this)
     }
+
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 

@@ -293,7 +293,8 @@ class MapboxNavigationActivity : AppCompatActivity() {
                 .accessToken(getMapboxAccessTokenFromResources())
                 .eventsAppMetadata(
                     EventsAppMetadata.Builder(
-                        BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME
+                        BuildConfig.APPLICATION_ID,
+                        BuildConfig.VERSION_NAME
                     ).build()
                 )
                 .build()

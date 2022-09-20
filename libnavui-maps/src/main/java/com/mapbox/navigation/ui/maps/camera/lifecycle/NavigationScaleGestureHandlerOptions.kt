@@ -56,10 +56,12 @@ class NavigationScaleGestureHandlerOptions private constructor(
 
         if (context != other.context) return false
         if (followingInitialMoveThreshold != other.followingInitialMoveThreshold) return false
-        if (followingMultiFingerMoveThreshold != other.followingMultiFingerMoveThreshold)
+        if (followingMultiFingerMoveThreshold != other.followingMultiFingerMoveThreshold) {
             return false
-        if (followingMultiFingerProtectedMoveArea != other.followingMultiFingerProtectedMoveArea)
+        }
+        if (followingMultiFingerProtectedMoveArea != other.followingMultiFingerProtectedMoveArea) {
             return false
+        }
 
         return true
     }

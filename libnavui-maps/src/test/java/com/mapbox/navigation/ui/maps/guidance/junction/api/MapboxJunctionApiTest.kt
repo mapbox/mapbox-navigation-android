@@ -265,16 +265,22 @@ class MapboxJunctionApiTest {
             JunctionProcessor.process(JunctionAction.CheckJunctionAvailability(bannerInstructions))
         } returns checkJunctionAvailability
 
-        if (prepareJunctionRequest != null) every {
-            JunctionProcessor.process(ofType(JunctionAction.PrepareJunctionRequest::class))
-        } returns prepareJunctionRequest
+        if (prepareJunctionRequest != null) {
+            every {
+                JunctionProcessor.process(ofType(JunctionAction.PrepareJunctionRequest::class))
+            } returns prepareJunctionRequest
+        }
 
-        if (processJunctionResponse != null) every {
-            JunctionProcessor.process(ofType(JunctionAction.ProcessJunctionResponse::class))
-        } returns processJunctionResponse
+        if (processJunctionResponse != null) {
+            every {
+                JunctionProcessor.process(ofType(JunctionAction.ProcessJunctionResponse::class))
+            } returns processJunctionResponse
+        }
 
-        if (parseRasterToBitmap != null) every {
-            JunctionProcessor.process(ofType(JunctionAction.ParseRasterToBitmap::class))
-        } returns parseRasterToBitmap
+        if (parseRasterToBitmap != null) {
+            every {
+                JunctionProcessor.process(ofType(JunctionAction.ParseRasterToBitmap::class))
+            } returns parseRasterToBitmap
+        }
     }
 }
