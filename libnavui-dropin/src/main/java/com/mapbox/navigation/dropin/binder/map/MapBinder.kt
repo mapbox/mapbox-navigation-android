@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin.binder.map
 
 import android.view.ViewGroup
+import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.locationcomponent.location
@@ -91,7 +92,7 @@ internal class MapBinder(
 
     private fun routeLineComponent(lineOptions: MapboxRouteLineOptions) =
         RouteLineComponent(mapView.getMapboxMap(), mapView, lineOptions, contractProvider = {
-            RouteLineComponentContractImpl(store)
+            RouteLineComponentContractImpl(store, context.mapClickBehavior)
         })
 
     private fun longPressMapComponent(navigationState: NavigationState) =
@@ -129,7 +130,8 @@ internal class MapBinder(
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class RouteLineComponentContractImpl(
-    private val store: Store
+    private val store: Store,
+    private val mapClickBehavior: MapClickBehavior,
 ) : RouteLineComponentContract {
     override fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>) {
         when (store.state.value.navigation) {
@@ -160,5 +162,9 @@ internal class RouteLineComponentContractImpl(
                 emptyList()
             }
         }
+    }
+
+    override fun onMapClicked(point: Point) {
+        mapClickBehavior.onMapClicked(point)
     }
 }

@@ -4,6 +4,7 @@ import android.view.KeyEvent
 import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.dropin.binder.map.MapClickBehavior
 import com.mapbox.navigation.dropin.component.infopanel.InfoPanelBehavior
 import com.mapbox.navigation.dropin.component.maneuver.ManeuverBehavior
 import com.mapbox.navigation.ui.app.internal.Store
@@ -15,6 +16,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @ExperimentalPreviewMapboxNavigationAPI
@@ -22,6 +25,7 @@ internal class NavigationViewListenerRegistry(
     private val store: Store,
     private val maneuverSubscriber: ManeuverBehavior,
     private val infoPanelSubscriber: InfoPanelBehavior,
+    private val mapClickSubscriber: MapClickBehavior,
     private val coroutineScope: CoroutineScope
 ) : View.OnKeyListener {
     private var listeners = mutableMapOf<NavigationViewListener, Job>()
@@ -133,6 +137,10 @@ internal class NavigationViewListenerRegistry(
                         }
                     }
             }
+
+            mapClickSubscriber.mapClickBehavior
+                .onEach { listener.onMapClicked(it) }
+                .launchIn(scope = this)
         }
     }
 

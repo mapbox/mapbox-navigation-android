@@ -62,7 +62,7 @@ import java.util.UUID
 class RouteLineComponentTest {
 
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
     private val context = mockk<Context> {
         every { resources } returns mockk()
@@ -374,7 +374,7 @@ class RouteLineComponentTest {
             }
         }
 
-        val customContract = mockk<RouteLineComponentContract>()
+        val customContract = mockk<RouteLineComponentContract>(relaxed = true)
         val sut = RouteLineComponent(mockMap, mapPluginProvider, options, mockApi) {
             customContract
         }
@@ -382,7 +382,63 @@ class RouteLineComponentTest {
         verify { mockGestures.addOnMapClickListener(capture(clickSlot)) }
 
         clickSlot.captured.onMapClick(clickPoint)
-        verify { customContract.setRoutes(mockMapboxNavigation, listOf(newRoute, oldRoute)) }
+        verify(exactly = 1) {
+            customContract.setRoutes(mockMapboxNavigation, listOf(newRoute, oldRoute))
+        }
+        verify(exactly = 0) { customContract.onMapClicked(any()) }
+    }
+
+    @Test
+    fun `onMapClicked should be called if clicked not on a route`() {
+        val consumerSlot =
+            slot<MapboxNavigationConsumer<Expected<RouteNotFound, ClosestRouteValue>>>()
+        val clickSlot = slot<OnMapClickListener>()
+        val clickPoint = mockk<Point>()
+        val mockApi = mockk<MapboxRouteLineApi> {
+            every { findClosestRoute(clickPoint, any(), any(), capture(consumerSlot)) } answers {
+                consumerSlot.captured.accept(ExpectedFactory.createError(mockk()))
+            }
+        }
+
+        val customContract = mockk<RouteLineComponentContract>(relaxed = true)
+        val sut = RouteLineComponent(mockMap, mapPluginProvider, options, mockApi) {
+            customContract
+        }
+        sut.onAttached(mockMapboxNavigation)
+        verify { mockGestures.addOnMapClickListener(capture(clickSlot)) }
+
+        clickSlot.captured.onMapClick(clickPoint)
+        verify(exactly = 0) { customContract.setRoutes(any(), any()) }
+        verify(exactly = 1) { customContract.onMapClicked(clickPoint) }
+    }
+
+    @Test
+    fun `onMapClicked should be called if clicked on a primary route`() {
+        val consumerSlot =
+            slot<MapboxNavigationConsumer<Expected<RouteNotFound, ClosestRouteValue>>>()
+        val clickSlot = slot<OnMapClickListener>()
+        val primaryRoute = mockk<NavigationRoute>(relaxed = true)
+        val alternativeRoute = mockk<NavigationRoute>(relaxed = true)
+        val clickPoint = mockk<Point>()
+        val mockApi = mockk<MapboxRouteLineApi> {
+            every { getPrimaryNavigationRoute() } returns primaryRoute
+            every { getNavigationRoutes() } returns listOf(primaryRoute, alternativeRoute)
+            every { findClosestRoute(clickPoint, any(), any(), capture(consumerSlot)) } answers {
+                val result = ClosestRouteValue(primaryRoute)
+                consumerSlot.captured.accept(ExpectedFactory.createValue(result))
+            }
+        }
+
+        val customContract = mockk<RouteLineComponentContract>(relaxed = true)
+        val sut = RouteLineComponent(mockMap, mapPluginProvider, options, mockApi) {
+            customContract
+        }
+        sut.onAttached(mockMapboxNavigation)
+        verify { mockGestures.addOnMapClickListener(capture(clickSlot)) }
+
+        clickSlot.captured.onMapClick(clickPoint)
+        verify(exactly = 0) { customContract.setRoutes(any(), any()) }
+        verify(exactly = 1) { customContract.onMapClicked(clickPoint) }
     }
 
     @Test

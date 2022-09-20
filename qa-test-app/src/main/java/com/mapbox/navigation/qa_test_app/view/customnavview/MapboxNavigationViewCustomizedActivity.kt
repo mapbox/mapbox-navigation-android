@@ -506,11 +506,7 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 mapStyleUriNight = Style.DARK
             }
             binding.navigationView.customizeViewStyles {
-                locationPuck = LocationPuck2D(
-                    topImage = getDrawable(R.drawable.mapbox_user_icon),
-                    bearingImage = getDrawable(R.drawable.mapbox_user_bearing_icon),
-                    shadowImage = getDrawable(R.drawable.mapbox_user_stroke_icon),
-                )
+                locationPuck = LocationPuck2D(bearingImage = getDrawable(R.drawable.ic_sv_puck))
             }
         } else {
             // Reset defaults
