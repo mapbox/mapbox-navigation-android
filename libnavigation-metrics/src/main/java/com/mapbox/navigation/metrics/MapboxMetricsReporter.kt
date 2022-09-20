@@ -58,7 +58,11 @@ object MapboxMetricsReporter : MetricsReporter {
         accessToken: String,
         userAgent: String
     ) {
-        mapboxTelemetry = MapboxTelemetry(context, accessToken, userAgent)
+        val oldEventsTokenResId = context.resources.getIdentifier("old_mapbox_events_access_token", "string", context.packageName)
+        val oldEventsToken =
+            if (oldEventsTokenResId != 0) context.getString(oldEventsTokenResId) else accessToken
+
+        mapboxTelemetry = MapboxTelemetry(context, oldEventsToken, userAgent)
         mapboxTelemetry.enable()
         val eventsServiceOptions = EventsServerOptions(accessToken, userAgent)
         eventsService = EventsService.getOrCreate(eventsServiceOptions.overrideIfNeeded(context))
