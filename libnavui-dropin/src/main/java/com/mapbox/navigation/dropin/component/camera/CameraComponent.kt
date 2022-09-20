@@ -7,7 +7,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
-import com.mapbox.navigation.ui.app.internal.Store
+import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.ui.app.internal.camera.CameraAction
 import com.mapbox.navigation.ui.app.internal.camera.CameraAction.SetCameraMode
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class CameraComponent constructor(
-    private val store: Store,
+    private val context: NavigationViewContext,
     private val mapView: MapView,
     private val viewportDataSource: MapboxNavigationViewportDataSource =
         MapboxNavigationViewportDataSource(
@@ -45,26 +45,30 @@ internal class CameraComponent constructor(
             cameraPlugin = mapView.camera,
             viewportDataSource = viewportDataSource
         ),
-) : UIComponent() {
-
-    private var isCameraInitialized = false
-    private val gesturesHandler = NavigationBasicGesturesHandler(navigationCamera)
-
-    private val debug = false
-    private val debugger by lazy {
+    private val debugger: MapboxNavigationViewportDataSourceDebugger =
         MapboxNavigationViewportDataSourceDebugger(
             context = mapView.context,
             mapView = mapView,
             layerAbove = "road-label"
         )
-    }
+) : UIComponent() {
+    private val store = context.store
+
+    private var isCameraInitialized = false
+    private val gesturesHandler = NavigationBasicGesturesHandler(navigationCamera)
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
-        if (debug) {
-            debugger.enabled = true
-            navigationCamera.debugger = debugger
-            viewportDataSource.debugger = debugger
+        context.options.showCameraDebugInfo.observe { show ->
+            if (show) {
+                debugger.enabled = true
+                navigationCamera.debugger = debugger
+                viewportDataSource.debugger = debugger
+            } else {
+                debugger.enabled = false
+                navigationCamera.debugger = null
+                viewportDataSource.debugger = null
+            }
         }
 
         mapView.camera.addCameraAnimationsLifecycleListener(gesturesHandler)

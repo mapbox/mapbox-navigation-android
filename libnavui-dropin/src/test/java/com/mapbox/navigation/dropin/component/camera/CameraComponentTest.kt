@@ -17,6 +17,7 @@ import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.dropin.util.TestingUtil.makeLocationMatcherResult
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -28,6 +29,7 @@ import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
+import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
@@ -43,7 +45,12 @@ import io.mockk.unmockkAll
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -57,8 +64,18 @@ class CameraComponentTest {
     private val mockCamera: CameraAnimationsPlugin = mockk(relaxUnitFun = true) {
         every { addCameraAnimationsLifecycleListener(any()) } just Runs
     }
-    private val mockNavigationCamera: NavigationCamera = mockk(relaxed = true)
-    private val mockViewPortDataSource: MapboxNavigationViewportDataSource = mockk(relaxed = true)
+    private val cameraDebuggerSlot = mutableListOf<MapboxNavigationViewportDataSourceDebugger?>()
+    private val mockNavigationCamera: NavigationCamera = mockk(relaxed = true) {
+        every { debugger = captureNullable(cameraDebuggerSlot) } just Runs
+    }
+    private val viewPortDebuggerSlot = mutableListOf<MapboxNavigationViewportDataSourceDebugger?>()
+    private val mockViewPortDataSource: MapboxNavigationViewportDataSource = mockk(relaxed = true) {
+        every { debugger = captureNullable(viewPortDebuggerSlot) } just Runs
+    }
+    private val debuggerSlot = slot<Boolean>()
+    private val mockDebugger: MapboxNavigationViewportDataSourceDebugger = mockk(relaxed = true) {
+        every { enabled = capture(debuggerSlot) } just Runs
+    }
     private val mockMapboxMap: MapboxMap = mockk(relaxUnitFun = true) {
         every { cameraState } returns mockk()
     }
@@ -73,6 +90,7 @@ class CameraComponentTest {
         makeLocationMatcherResult(-121.4567, 37.9876, 45f)
     private lateinit var mockMapboxNavigation: MapboxNavigation
     private lateinit var cameraComponent: CameraComponent
+    private lateinit var viewContext: NavigationViewContext
     private lateinit var testStore: TestStore
 
     @Before
@@ -85,11 +103,16 @@ class CameraComponentTest {
         every { MapboxNavigationApp.current() } returns mockMapboxNavigation
         testStore = spyk(TestStore())
 
+        viewContext = mockk(relaxed = true) {
+            every { store } returns testStore
+        }
+
         cameraComponent = CameraComponent(
-            testStore,
+            viewContext,
             mockMapView,
             mockViewPortDataSource,
             mockNavigationCamera,
+            mockDebugger,
         )
     }
 
@@ -572,5 +595,29 @@ class CameraComponentTest {
             verify(exactly = 0) {
                 mockViewPortDataSource.onRouteProgressChanged(any())
             }
+        }
+
+    @Test
+    fun `when show camera debug info enabled debugger is set`() =
+        coroutineRule.runBlockingTest {
+            every { viewContext.options.showCameraDebugInfo } returns MutableStateFlow(true)
+
+            cameraComponent.onAttached(mockMapboxNavigation)
+
+            assertTrue(debuggerSlot.captured)
+            assertEquals(cameraDebuggerSlot.first(), mockDebugger)
+            assertEquals(viewPortDebuggerSlot.first(), mockDebugger)
+        }
+
+    @Test
+    fun `when show camera debug info disabled debugger is reset`() =
+        coroutineRule.runBlockingTest {
+            every { viewContext.options.showCameraDebugInfo } returns MutableStateFlow(false)
+
+            cameraComponent.onAttached(mockMapboxNavigation)
+
+            assertFalse(debuggerSlot.captured)
+            assertNull(cameraDebuggerSlot.first())
+            assertNull(viewPortDebuggerSlot.first())
         }
 }

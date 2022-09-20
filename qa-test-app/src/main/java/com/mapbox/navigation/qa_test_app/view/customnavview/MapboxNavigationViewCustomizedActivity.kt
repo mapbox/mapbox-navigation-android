@@ -312,6 +312,12 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             viewModel.infoPanelStateOverride,
             ::overrideInfoPanelState
         )
+
+        bindSwitch(
+            menuBinding.showCameraDebugInfo,
+            viewModel.showCameraDebugInfo,
+            ::toggleShowCameraDebugInfo
+        )
     }
 
     override fun onResume() {
@@ -698,6 +704,12 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 .build()
         )
         .build()
+
+    private fun toggleShowCameraDebugInfo(show: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            showCameraDebugInfo = show
+        }
+    }
 
     // NavigationViewListener that will install custom info panel header and content
     // only when in Free Drive state.
