@@ -261,6 +261,7 @@ class CarNavigationCamera(
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
         logAndroidAuto("CarNavigationCamera detached $mapboxCarMapSurface")
         this.mapboxCarMapSurface = null
+        MapboxNavigationApp.unregisterObserver(navigationObserver)
         isLocationInitialized = false
         coroutineScope.cancel()
     }

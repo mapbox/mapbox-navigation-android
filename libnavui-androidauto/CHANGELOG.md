@@ -6,6 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 - Use `MapboxAudioGuidance` from public api. [#6336](https://github.com/mapbox/mapbox-navigation-android/pull/6336)
+- Fixed an issue that caused camera animations to interfere with user gestures. [#6357](https://github.com/mapbox/mapbox-navigation-android/pull/6357)
 
 ## androidauto-v0.11.0 - Sep 16, 2022
 ### Changelog
