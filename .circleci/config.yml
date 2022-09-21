@@ -723,7 +723,7 @@ jobs:
   androidauto-test:
     executor:
       name: android/android-machine
-      resource-class: large
+      resource-class: xlarge
       tag: 2022.04.1
     steps:
       - when:
