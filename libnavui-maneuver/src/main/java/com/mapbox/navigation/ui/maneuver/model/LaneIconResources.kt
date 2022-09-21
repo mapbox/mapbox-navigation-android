@@ -246,147 +246,241 @@ class LaneIconResources private constructor(
 
         if (laneOppositeSlightTurnOrSlightTurn !=
             other.laneOppositeSlightTurnOrSlightTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeSlightTurnOrSlightTurnUsingSlightTurn !=
             other.laneOppositeSlightTurnOrSlightTurnUsingSlightTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeSlightTurnOrStraightOrSlightTurn !=
             other.laneOppositeSlightTurnOrStraightOrSlightTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeSlightTurnOrStraightOrSlightTurnUsingSlightTurn !=
             other.laneOppositeSlightTurnOrStraightOrSlightTurnUsingSlightTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeSlightTurnOrStraightOrSlightTurnUsingStraight !=
             other.laneOppositeSlightTurnOrStraightOrSlightTurnUsingStraight
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeSlightTurnOrStraightOrTurn !=
             other.laneOppositeSlightTurnOrStraightOrTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeSlightTurnOrStraightOrTurnUsingStraight !=
             other.laneOppositeSlightTurnOrStraightOrTurnUsingStraight
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeSlightTurnOrStraightOrTurnUsingTurn !=
             other.laneOppositeSlightTurnOrStraightOrTurnUsingTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeSlightTurnOrTurn !=
             other.laneOppositeSlightTurnOrTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeSlightTurnOrTurnUsingTurn !=
             other.laneOppositeSlightTurnOrTurnUsingTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeTurnOrSlightTurn !=
             other.laneOppositeTurnOrSlightTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeTurnOrSlightTurnUsingSlightTurn !=
             other.laneOppositeTurnOrSlightTurnUsingSlightTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeTurnOrStraightOrSlightTurn !=
             other.laneOppositeTurnOrStraightOrSlightTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeTurnOrStraightOrSlightTurnUsingSlightTurn !=
             other.laneOppositeTurnOrStraightOrSlightTurnUsingSlightTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeTurnOrStraightOrSlightTurnUsingStraight !=
             other.laneOppositeTurnOrStraightOrSlightTurnUsingStraight
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeTurnOrStraightOrTurn !=
             other.laneOppositeTurnOrStraightOrTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeTurnOrStraightOrTurnUsingStraight !=
             other.laneOppositeTurnOrStraightOrTurnUsingStraight
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeTurnOrStraightOrTurnUsingTurn !=
             other.laneOppositeTurnOrStraightOrTurnUsingTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeTurnOrTurn !=
             other.laneOppositeTurnOrTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneOppositeTurnOrTurnUsingTurn !=
             other.laneOppositeTurnOrTurnUsingTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneSharpTurn !=
             other.laneSharpTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneSharpTurnUsingSharpTurn !=
             other.laneSharpTurnUsingSharpTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneSlightTurn !=
             other.laneSlightTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneSlightTurnOrSharpTurn !=
             other.laneSlightTurnOrSharpTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneSlightTurnOrSharpTurnUsingSharpTurn !=
             other.laneSlightTurnOrSharpTurnUsingSharpTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneSlightTurnOrSharpTurnUsingSlightTurn !=
             other.laneSlightTurnOrSharpTurnUsingSlightTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneSlightTurnOrTurn !=
             other.laneSlightTurnOrTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneSlightTurnOrTurnUsingSlightTurn !=
             other.laneSlightTurnOrTurnUsingSlightTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneSlightTurnOrTurnUsingTurn !=
             other.laneSlightTurnOrTurnUsingTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneSlightTurnOrUturn !=
             other.laneSlightTurnOrUturn
-        ) return false
+        ) {
+            return false
+        }
         if (laneSlightTurnOrUturnUsingSlightTurn !=
             other.laneSlightTurnOrUturnUsingSlightTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneSlightTurnOrUturnUsingUturn !=
             other.laneSlightTurnOrUturnUsingUturn
-        ) return false
+        ) {
+            return false
+        }
         if (laneSlightTurnUsingSlightTurn !=
             other.laneSlightTurnUsingSlightTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneStraight !=
             other.laneStraight
-        ) return false
+        ) {
+            return false
+        }
         if (laneStraightOrSharpTurn !=
             other.laneStraightOrSharpTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneStraightOrSharpTurnUsingSharpTurn !=
             other.laneStraightOrSharpTurnUsingSharpTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneStraightOrSharpTurnUsingStraight !=
             other.laneStraightOrSharpTurnUsingStraight
-        ) return false
+        ) {
+            return false
+        }
         if (laneStraightOrSlightTurn !=
             other.laneStraightOrSlightTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneStraightOrSlightTurnOrTurn !=
             other.laneStraightOrSlightTurnOrTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneStraightOrSlightTurnOrTurnUsingSlightTurn !=
             other.laneStraightOrSlightTurnOrTurnUsingSlightTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneStraightOrSlightTurnOrTurnUsingStraight !=
             other.laneStraightOrSlightTurnOrTurnUsingStraight
-        ) return false
+        ) {
+            return false
+        }
         if (laneStraightOrSlightTurnOrTurnUsingTurn !=
             other.laneStraightOrSlightTurnOrTurnUsingTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneStraightOrSlightTurnUsingSlightTurn !=
             other.laneStraightOrSlightTurnUsingSlightTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneStraightOrSlightTurnUsingStraight !=
             other.laneStraightOrSlightTurnUsingStraight
-        ) return false
+        ) {
+            return false
+        }
         if (laneStraightOrTurn != other.laneStraightOrTurn) return false
         if (laneStraightOrTurnOrUturn != other.laneStraightOrTurnOrUturn) return false
         if (laneStraightOrTurnOrUturnUsingStraight !=
             other.laneStraightOrTurnOrUturnUsingStraight
-        ) return false
+        ) {
+            return false
+        }
         if (laneStraightOrTurnOrUturnUsingTurn !=
             other.laneStraightOrTurnOrUturnUsingTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneStraightOrTurnOrUturnUsingUturn !=
             other.laneStraightOrTurnOrUturnUsingUturn
-        ) return false
+        ) {
+            return false
+        }
         if (laneStraightOrTurnUsingStraight != other.laneStraightOrTurnUsingStraight) return false
         if (laneStraightOrTurnUsingTurn != other.laneStraightOrTurnUsingTurn) return false
         if (laneStraightOrUturn != other.laneStraightOrUturn) return false
@@ -397,7 +491,9 @@ class LaneIconResources private constructor(
         if (laneTurnOrSharpTurn != other.laneTurnOrSharpTurn) return false
         if (laneTurnOrSharpTurnUsingSharpTurn !=
             other.laneTurnOrSharpTurnUsingSharpTurn
-        ) return false
+        ) {
+            return false
+        }
         if (laneTurnOrSharpTurnUsingTurn != other.laneTurnOrSharpTurnUsingTurn) return false
         if (laneTurnOrUturn != other.laneTurnOrUturn) return false
         if (laneTurnOrUturnUsingTurn != other.laneTurnOrUturnUsingTurn) return false

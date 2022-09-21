@@ -33,8 +33,9 @@ class PredictiveCacheLocationOptions private constructor(
 
         if (currentLocationRadiusInMeters != other.currentLocationRadiusInMeters) return false
         if (routeBufferRadiusInMeters != other.routeBufferRadiusInMeters) return false
-        if (destinationLocationRadiusInMeters != other.destinationLocationRadiusInMeters)
+        if (destinationLocationRadiusInMeters != other.destinationLocationRadiusInMeters) {
             return false
+        }
 
         return true
     }

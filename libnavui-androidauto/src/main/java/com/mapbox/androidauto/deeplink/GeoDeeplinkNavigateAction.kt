@@ -54,7 +54,10 @@ class GeoDeeplinkNavigateAction(
             ),
             listOf(
                 CarFeedbackAction(
-                    mainCarContext.mapboxCarMap, CarFeedbackSender(), feedbackPoll, placesProvider,
+                    mainCarContext.mapboxCarMap,
+                    CarFeedbackSender(),
+                    feedbackPoll,
+                    placesProvider,
                 )
             )
         )

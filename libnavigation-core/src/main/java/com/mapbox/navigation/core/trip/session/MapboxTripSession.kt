@@ -363,7 +363,9 @@ internal class MapboxTripSession(
                     tripStatus.navigationStatus.nextWaypointIndex
                 )
                 return waypointsCount - nextWaypointIndex
-            } else 0
+            } else {
+                0
+            }
         }
 
         /**

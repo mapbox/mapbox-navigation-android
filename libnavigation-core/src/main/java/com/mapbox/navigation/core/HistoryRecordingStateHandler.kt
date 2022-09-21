@@ -63,14 +63,18 @@ internal class HistoryRecordingStateHandler(
         return if (hasRoutes != newValue) {
             hasRoutes = newValue
             true
-        } else false
+        } else {
+            false
+        }
     }
 
     private fun updateIsDriving(newValue: Boolean): Boolean {
         return if (isDriving != newValue) {
             isDriving = newValue
             true
-        } else false
+        } else {
+            false
+        }
     }
 
     private fun updateStateAndNotifyObservers(

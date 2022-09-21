@@ -53,7 +53,9 @@ internal class MapboxNavigationRerouteInterruptionTest(
             mockk<RerouteController>(relaxed = true) {
                 every { state } returns previousState
             }
-        } else null
+        } else {
+            null
+        }
         val newController = mockk<RerouteController>(relaxed = true)
         oldController?.let { mapboxNavigation.setRerouteController(it) }
 
@@ -71,7 +73,9 @@ internal class MapboxNavigationRerouteInterruptionTest(
             mockk<RerouteController>(relaxed = true) {
                 every { state } returns previousState
             }
-        } else null
+        } else {
+            null
+        }
         val newController: RerouteController? = null
         oldController?.let { mapboxNavigation.setRerouteController(it) }
 
@@ -88,7 +92,9 @@ internal class MapboxNavigationRerouteInterruptionTest(
             mockk<NavigationRerouteController>(relaxed = true) {
                 every { state } returns previousState
             }
-        } else null
+        } else {
+            null
+        }
         val newController = mockk<NavigationRerouteController>(relaxed = true)
         oldController?.let {
             mapboxNavigation.setRerouteController(it)
@@ -110,7 +116,9 @@ internal class MapboxNavigationRerouteInterruptionTest(
             mockk<NavigationRerouteController>(relaxed = true) {
                 every { state } returns previousState
             }
-        } else null
+        } else {
+            null
+        }
         val newController: NavigationRerouteController? = null
         oldController?.let {
             mapboxNavigation.setRerouteController(it)

@@ -209,7 +209,8 @@ class MapboxTripProgressApiTest {
         // For complete route
         assertEquals(
             expectedTotalEta.toDouble(),
-            result.value!!.totalEstimatedTimeToArrival.toDouble(), 30000.0
+            result.value!!.totalEstimatedTimeToArrival.toDouble(),
+            30000.0
         )
         assertEquals(route.directionsRoute.duration(), result.value!!.totalTime, 0.0)
         assertEquals(route.directionsRoute.distance(), result.value!!.totalDistance, 0.0)

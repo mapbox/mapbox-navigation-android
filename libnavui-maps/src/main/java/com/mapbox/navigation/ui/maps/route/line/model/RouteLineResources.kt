@@ -123,16 +123,21 @@ class RouteLineResources private constructor(
         if (routeLineScaleExpression != other.routeLineScaleExpression) return false
         if (routeCasingLineScaleExpression != other.routeCasingLineScaleExpression) return false
         if (routeTrafficLineScaleExpression != other.routeTrafficLineScaleExpression) return false
-        if (alternativeRouteLineScaleExpression != other.alternativeRouteLineScaleExpression)
+        if (alternativeRouteLineScaleExpression != other.alternativeRouteLineScaleExpression) {
             return false
+        }
         if (
             alternativeRouteCasingLineScaleExpression !=
             other.alternativeRouteCasingLineScaleExpression
-        ) return false
+        ) {
+            return false
+        }
         if (
             alternativeRouteTrafficLineScaleExpression !=
             other.alternativeRouteTrafficLineScaleExpression
-        ) return false
+        ) {
+            return false
+        }
         if (restrictedRoadDashArray != other.restrictedRoadDashArray) return false
         if (restrictedRoadOpacity != other.restrictedRoadOpacity) return false
         if (restrictedRoadLineWidth != other.restrictedRoadLineWidth) return false

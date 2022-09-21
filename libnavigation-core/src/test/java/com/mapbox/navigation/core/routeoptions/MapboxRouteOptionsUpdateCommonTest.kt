@@ -36,13 +36,19 @@ object MapboxRouteOptionsUpdateCommonTest {
             updated.roundaboutExits()
         )
         assertEquals(
-            "Check alleyBias", routeOptions.alleyBias(), updated.alleyBias()
+            "Check alleyBias",
+            routeOptions.alleyBias(),
+            updated.alleyBias()
         )
         assertEquals(
-            "Check walkingSpeed", routeOptions.walkingSpeed(), updated.walkingSpeed()
+            "Check walkingSpeed",
+            routeOptions.walkingSpeed(),
+            updated.walkingSpeed()
         )
         assertEquals(
-            "Check walkwayBias", routeOptions.walkwayBias(), updated.walkwayBias()
+            "Check walkwayBias",
+            routeOptions.walkwayBias(),
+            updated.walkwayBias()
         )
         assertEquals(
             "Check Voice Instructions",

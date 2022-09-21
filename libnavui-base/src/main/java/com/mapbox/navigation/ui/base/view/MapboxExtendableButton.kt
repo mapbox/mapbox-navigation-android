@@ -67,7 +67,9 @@ class MapboxExtendableButton : FrameLayout {
      */
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
         this(
-            context, attrs, defStyleAttr,
+            context,
+            attrs,
+            defStyleAttr,
             R.style.MapboxStyleExtendableButton
         )
 

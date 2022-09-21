@@ -47,7 +47,8 @@ class EHorizonSubscriptionManagerTest {
     private val eHorizonObjectDistance: SDKRoadObjectDistanceInfo = mockk(relaxed = true)
     private val subscriptionManager: EHorizonSubscriptionManager =
         EHorizonSubscriptionManagerImpl(
-            navigator, ThreadController(),
+            navigator,
+            ThreadController(),
         )
 
     @Before

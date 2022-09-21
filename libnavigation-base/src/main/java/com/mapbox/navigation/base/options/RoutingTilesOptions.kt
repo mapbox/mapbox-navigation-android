@@ -69,7 +69,9 @@ class RoutingTilesOptions private constructor(
         if (tileStore != other.tileStore) return false
         if (minDaysBetweenServerAndLocalTilesVersion
             != other.minDaysBetweenServerAndLocalTilesVersion
-        ) return false
+        ) {
+            return false
+        }
 
         return true
     }

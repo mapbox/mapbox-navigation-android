@@ -417,7 +417,8 @@ class MapboxRouteLineApiRoboTest {
             val api = MapboxRouteLineApi(options)
             val route = loadNavigationRoute("short_route.json")
             val lineString = LineString.fromPolyline(
-                route.directionsRoute.geometry() ?: "", Constants.PRECISION_6
+                route.directionsRoute.geometry() ?: "",
+                Constants.PRECISION_6
             )
             val routeProgress = mockRouteProgress(route, stepIndexValue = 2)
 

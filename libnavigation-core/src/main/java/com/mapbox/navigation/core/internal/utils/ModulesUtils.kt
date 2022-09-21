@@ -27,7 +27,8 @@ internal fun paramsProvider(moduleParams: ModuleParams): Array<ModuleProviderArg
         )
         is ModuleParams.NavigationTripNotification -> arrayOf(
             ModuleProviderArgument(
-                NavigationOptions::class.java, moduleParams.navigationOptions
+                NavigationOptions::class.java,
+                moduleParams.navigationOptions
             ),
             ModuleProviderArgument(
                 TripNotificationInterceptorOwner::class.java,

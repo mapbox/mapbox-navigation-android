@@ -57,6 +57,7 @@ class RoutesSetSuccess internal constructor(
         return ignoredAlternatives.hashCode()
     }
 }
+
 /**
  * Result when a route failed to be set.
  *

@@ -40,7 +40,8 @@ internal class LocationPermissionComponent(
 
     private val launcher = try {
         componentActivityRef?.get()?.registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions(), callback
+            ActivityResultContracts.RequestMultiplePermissions(),
+            callback
         )
     } catch (illegalStateException: IllegalStateException) {
         logW(

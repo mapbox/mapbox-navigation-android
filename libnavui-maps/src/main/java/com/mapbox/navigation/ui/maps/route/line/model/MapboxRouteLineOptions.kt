@@ -97,12 +97,14 @@ class MapboxRouteLineOptions private constructor(
         if (vanishingRouteLine != other.vanishingRouteLine) return false
         if (tolerance != other.tolerance) return false
         if (displayRestrictedRoadSections != other.displayRestrictedRoadSections) return false
-        if (styleInactiveRouteLegsIndependently != other.styleInactiveRouteLegsIndependently)
+        if (styleInactiveRouteLegsIndependently != other.styleInactiveRouteLegsIndependently) {
             return false
+        }
         if (displaySoftGradientForTraffic != other.displayRestrictedRoadSections) return false
         if (softGradientTransition != other.softGradientTransition) return false
-        if (vanishingRouteLineUpdateIntervalNano != other.vanishingRouteLineUpdateIntervalNano)
+        if (vanishingRouteLineUpdateIntervalNano != other.vanishingRouteLineUpdateIntervalNano) {
             return false
+        }
         if (waypointLayerIconOffset != other.waypointLayerIconOffset) return false
         if (waypointLayerIconAnchor != other.waypointLayerIconAnchor) return false
         if (iconPitchAlignment != other.iconPitchAlignment) return false

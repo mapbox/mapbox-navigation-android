@@ -18,6 +18,8 @@ class FailByRequestMockRequestHandler(
             } else {
                 result
             }
-        } else null
+        } else {
+            null
+        }
     }
 }

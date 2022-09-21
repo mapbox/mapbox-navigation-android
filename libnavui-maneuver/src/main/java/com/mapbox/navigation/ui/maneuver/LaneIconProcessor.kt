@@ -246,6 +246,7 @@ internal class LaneIconProcessor(val laneIconResources: LaneIconResources) {
         var hasLeftwardLane = false
         var hasRightwardLane = false
         var shouldFlip = false
+
         /**
          * The drivingSide used here is a coming from [LegStep.drivingSide] which as per the
          * documentation from directions API is not optional and will always be either right or left

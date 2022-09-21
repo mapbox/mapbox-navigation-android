@@ -66,7 +66,10 @@ class MapboxTurnIconManeuver @JvmOverloads constructor(
      */
     fun renderPrimaryTurnIcon(maneuver: PrimaryManeuver) {
         turnIconsApi.generateTurnIcon(
-            maneuver.type, maneuver.degrees?.toFloat(), maneuver.modifier, maneuver.drivingSide
+            maneuver.type,
+            maneuver.degrees?.toFloat(),
+            maneuver.modifier,
+            maneuver.drivingSide
         ).fold(
             {
                 Log.e(TAG, it.errorMessage)
@@ -83,7 +86,10 @@ class MapboxTurnIconManeuver @JvmOverloads constructor(
     fun renderSubTurnIcon(maneuver: SubManeuver?) {
         ifNonNull(maneuver) { m ->
             turnIconsApi.generateTurnIcon(
-                m.type, m.degrees?.toFloat(), m.modifier, m.drivingSide
+                m.type,
+                m.degrees?.toFloat(),
+                m.modifier,
+                m.drivingSide
             ).fold(
                 {
                     Log.e(TAG, it.errorMessage)

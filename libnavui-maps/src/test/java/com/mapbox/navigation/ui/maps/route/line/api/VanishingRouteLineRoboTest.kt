@@ -100,7 +100,8 @@ class VanishingRouteLineRoboTest {
 
         val route = loadNavigationRoute("short_route.json")
         val lineString = LineString.fromPolyline(
-            route.directionsRoute.geometry() ?: "", Constants.PRECISION_6
+            route.directionsRoute.geometry() ?: "",
+            Constants.PRECISION_6
         )
         val vanishingRouteLine = VanishingRouteLine()
         vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
@@ -145,7 +146,8 @@ class VanishingRouteLineRoboTest {
 
         val route = loadNavigationRoute("short_route.json")
         val lineString = LineString.fromPolyline(
-            route.directionsRoute.geometry() ?: "", Constants.PRECISION_6
+            route.directionsRoute.geometry() ?: "",
+            Constants.PRECISION_6
         )
         val vanishingRouteLine = VanishingRouteLine()
         vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
@@ -185,7 +187,8 @@ class VanishingRouteLineRoboTest {
 
         val route = loadNavigationRoute("route-with-restrictions.json")
         val lineString = LineString.fromPolyline(
-            route.directionsRoute.geometry() ?: "", Constants.PRECISION_6
+            route.directionsRoute.geometry() ?: "",
+            Constants.PRECISION_6
         )
         val vanishingRouteLine = VanishingRouteLine()
         vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
@@ -234,7 +237,8 @@ class VanishingRouteLineRoboTest {
 
         val route = loadNavigationRoute("short_route.json")
         val lineString = LineString.fromPolyline(
-            route.directionsRoute.geometry() ?: "", Constants.PRECISION_6
+            route.directionsRoute.geometry() ?: "",
+            Constants.PRECISION_6
         )
         val vanishingRouteLine = VanishingRouteLine()
         vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1

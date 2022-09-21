@@ -76,7 +76,10 @@ class MeasureSpeedDistanceTest {
         val speedDistances = mockEvents.measureSpeedDistances()
         assertEquals(mockEvents.size - 1, speedDistances.size)
         listOf(
-            1.1969, 3.5880, 5.9847, 8.3695
+            1.1969,
+            3.5880,
+            5.9847,
+            8.3695
         ).forEachIndexed { index, expected ->
             assertEquals(expected, speedDistances[index].locationSpeed, 0.01)
             assertEquals(expected, speedDistances[index].distanceSpeed, 0.01)

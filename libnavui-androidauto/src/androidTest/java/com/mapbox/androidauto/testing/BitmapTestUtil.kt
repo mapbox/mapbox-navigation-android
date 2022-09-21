@@ -91,7 +91,8 @@ class BitmapTestUtil(
             if (difference.similarity > 0.01) {
                 writeBitmapFile(testName, actual)
                 writeBitmapFile(
-                    "${testName.methodName}-diff", difference.difference
+                    "${testName.methodName}-diff",
+                    difference.difference
                 )
                 fail(
                     "The ${testName.methodName} image failed with similarity: " +
@@ -251,9 +252,11 @@ class BitmapTestUtil(
     private fun getSingleImagePixels(bitmap: Bitmap) =
         IntArray(bitmap.width * bitmap.height).also { pixels ->
             bitmap.getPixels(
-                pixels, 0,
+                pixels,
+                0,
                 bitmap.width,
-                0, 0,
+                0,
+                0,
                 bitmap.width,
                 bitmap.height
             )

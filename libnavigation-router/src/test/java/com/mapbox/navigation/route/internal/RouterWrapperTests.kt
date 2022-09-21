@@ -72,6 +72,7 @@ class RouterWrapperTests {
     private val routerRefreshCallback: NavigationRouterRefreshCallback = mockk(relaxed = true)
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
     private val routeUrl = routerOptions.toUrl(accessToken).toString()
+
     // these indices are used in expected files
     private val currentIndices = CurrentIndicesFactory.createIndices(0, 100, 10)
 

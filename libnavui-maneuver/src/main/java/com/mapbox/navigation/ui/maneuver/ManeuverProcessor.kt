@@ -70,7 +70,8 @@ internal object ManeuverProcessor {
         }
         return try {
             val maneuverList = maneuverState.allManeuvers.getManeuversForRouteLeg(
-                maneuverOptions.filterDuplicateManeuvers, routeLegIndex
+                maneuverOptions.filterDuplicateManeuvers,
+                routeLegIndex
             )
             ManeuverResult.GetManeuverList.Success(maneuverList)
         } catch (exception: RuntimeException) {

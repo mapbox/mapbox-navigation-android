@@ -21,7 +21,9 @@ class MapboxStyleExtensionsKtTest {
         Triple("mapbox://styles/mapbox/mnuhbadfvads803124", "mapbox", "mnuhbadfvads803124"),
         Triple("mapbox://styles/user/styleId", "user", "styleId"),
         Triple(
-            "mapbox://styles/some-user-id/custom-style-2123", "some-user-id", "custom-style-2123",
+            "mapbox://styles/some-user-id/custom-style-2123",
+            "some-user-id",
+            "custom-style-2123",
         ),
         Triple("http://asdasd/asdas", null, null),
         Triple("some random string", null, null),

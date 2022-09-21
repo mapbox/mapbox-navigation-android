@@ -20,7 +20,6 @@ fun <T> CoroutineScope.monitorChannelWithException(
     predicate: suspend (T) -> Unit,
     onCancellation: (() -> Unit) = {}
 ): Job {
-
     var isChannelValid = true
     return launch {
         while (isActive && isChannelValid) {

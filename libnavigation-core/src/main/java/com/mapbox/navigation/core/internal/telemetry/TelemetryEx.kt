@@ -86,8 +86,13 @@ fun MapboxNavigation.postUserFeedback(
     userFeedbackCallback: UserFeedbackCallback,
 ) {
     postUserFeedback(
-        feedbackType, description, feedbackSource, screenshot,
-        feedbackSubType, feedbackMetadata, userFeedbackCallback,
+        feedbackType,
+        description,
+        feedbackSource,
+        screenshot,
+        feedbackSubType,
+        feedbackMetadata,
+        userFeedbackCallback,
     )
 }
 

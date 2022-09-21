@@ -136,7 +136,9 @@ class CarRoutePreviewScreen(
             val routeSpannableString = SpannableString("$duration $title")
             routeSpannableString.setSpan(
                 DurationSpan.create(route.duration().toLong()),
-                0, duration.length, 0
+                0,
+                duration.length,
+                0
             )
 
             listBuilder.addItem(

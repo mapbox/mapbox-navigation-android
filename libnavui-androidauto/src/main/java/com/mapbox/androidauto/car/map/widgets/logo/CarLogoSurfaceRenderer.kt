@@ -17,7 +17,8 @@ class CarLogoSurfaceRenderer : MapboxCarMapObserver {
         val logoWidget = LogoWidget(
             mapboxCarMapSurface.carContext,
             WidgetPosition(WidgetPosition.Horizontal.RIGHT, WidgetPosition.Vertical.BOTTOM),
-            marginX = 26f, marginY = 10f,
+            marginX = 26f,
+            marginY = 10f,
         ).also { logoWidget = it }
         mapboxCarMapSurface.mapSurface.addWidget(logoWidget)
     }

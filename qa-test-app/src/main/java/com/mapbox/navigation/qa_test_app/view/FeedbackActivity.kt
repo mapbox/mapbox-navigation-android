@@ -178,7 +178,8 @@ class FeedbackActivity : AppCompatActivity() {
                     }
 
                     override fun onFailure(exception: Exception) = Unit
-                })
+                }
+            )
         }
     }
 
@@ -299,13 +300,17 @@ class FeedbackActivity : AppCompatActivity() {
 
                 override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
                     Toast.makeText(
-                        this@FeedbackActivity, "route request failed", Toast.LENGTH_SHORT
+                        this@FeedbackActivity,
+                        "route request failed",
+                        Toast.LENGTH_SHORT
                     ).show()
                 }
 
                 override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
                     Toast.makeText(
-                        this@FeedbackActivity, "route request canceled", Toast.LENGTH_SHORT
+                        this@FeedbackActivity,
+                        "route request canceled",
+                        Toast.LENGTH_SHORT
                     ).show()
                 }
             }

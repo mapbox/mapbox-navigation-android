@@ -385,8 +385,9 @@ class NotificationTurnIconResources private constructor(
         if (turnIconTurnSlightRight != other.turnIconTurnSlightRight) return false
         if (turnIconTurnSharpLeft != other.turnIconTurnSharpLeft) return false
         if (turnIconTurnSharpRight != other.turnIconTurnSharpRight) return false
-        if (turnIconUturn != other.turnIconUturn)
+        if (turnIconUturn != other.turnIconUturn) {
             return false
+        }
 
         return true
     }

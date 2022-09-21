@@ -38,7 +38,8 @@ suspend fun NavigationRoute.hasUnexpectedClosures(): Boolean =
 
             routeLeg.closures()?.forEach { closure ->
                 val silentWaypointsInClosureRange = silentWaypoints.inGeometryRange(
-                    closure.geometryIndexStart(), closure.geometryIndexEnd()
+                    closure.geometryIndexStart(),
+                    closure.geometryIndexEnd()
                 )
                 if (silentWaypointsInClosureRange.isNotEmpty()) {
                     silentWaypointsInClosureRange.forEach {
@@ -102,12 +103,11 @@ private fun DirectionsRoute.getSnappingResultList(): List<Boolean> {
     val snappingIncludeStaticClosuresList = routeOptions()?.snappingIncludeStaticClosuresList()
 
     val snappingResultList = mutableListOf<Boolean>()
-    for (
-        index in 0 until maxOf(
-            snappingIncludeClosuresList?.size ?: 0,
-            snappingIncludeStaticClosuresList?.size ?: 0
-        )
-    ) {
+    val maxIndex = maxOf(
+        snappingIncludeClosuresList?.size ?: 0,
+        snappingIncludeStaticClosuresList?.size ?: 0
+    )
+    for (index in 0 until maxIndex) {
         snappingResultList.add(
             snappingIncludeClosuresList?.getOrNull(index) ?: false ||
                 snappingIncludeStaticClosuresList?.getOrNull(index) ?: false

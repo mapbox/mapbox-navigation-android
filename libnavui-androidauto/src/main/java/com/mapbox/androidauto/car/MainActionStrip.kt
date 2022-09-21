@@ -53,7 +53,8 @@ class MainActionStrip(
         .setIcon(
             CarIcon.Builder(
                 IconCompat.createWithResource(
-                    carContext, R.drawable.ic_settings
+                    carContext,
+                    R.drawable.ic_settings
                 )
             ).build()
         )
@@ -103,7 +104,10 @@ class MainActionStrip(
             ),
             listOf(
                 CarFeedbackAction(
-                    mainCarContext.mapboxCarMap, CarFeedbackSender(), feedbackPoll, placesProvider,
+                    mainCarContext.mapboxCarMap,
+                    CarFeedbackSender(),
+                    feedbackPoll,
+                    placesProvider,
                 ),
             )
         )

@@ -21,6 +21,8 @@ object NativeRouteParserWrapper : SDKRouteParser {
         routerOrigin: RouterOrigin,
     ): Expected<String, List<RouteInterface>> =
         RouteParser.parseDirectionsResponse(
-            response, request, routerOrigin.mapToNativeRouteOrigin()
+            response,
+            request,
+            routerOrigin.mapToNativeRouteOrigin()
         )
 }

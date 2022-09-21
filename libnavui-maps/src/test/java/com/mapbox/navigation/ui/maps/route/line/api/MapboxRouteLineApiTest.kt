@@ -157,7 +157,8 @@ class MapboxRouteLineApiTest {
 
         assertEquals(
             99.9,
-            result, 0.0
+            result,
+            0.0
         )
     }
 
@@ -216,7 +217,8 @@ class MapboxRouteLineApiTest {
 
         assertEquals(
             0.0,
-            result, 0.0
+            result,
+            0.0
         )
         assertEquals(0.0, options.vanishingRouteLine!!.vanishPointOffset, 0.0)
     }

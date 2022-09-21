@@ -48,7 +48,9 @@ internal class RouteRefreshController(
                 val message = joinValidationErrorMessages(routesValidationResults, routes)
                 waitForever("No routes which could be refreshed. $message")
             }
-        } else waitForever("routes are empty")
+        } else {
+            waitForever("routes are empty")
+        }
     }
 
     private fun joinValidationErrorMessages(
@@ -109,7 +111,9 @@ internal class RouteRefreshController(
                     val legHasAlreadyBeenPassed = legIndex < currentLegIndex
                     if (legHasAlreadyBeenPassed) {
                         leg
-                    } else removeExpiredDataFromLeg(leg)
+                    } else {
+                        removeExpiredDataFromLeg(leg)
+                    }
                 }
             ).build()
         }

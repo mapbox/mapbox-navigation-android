@@ -94,12 +94,14 @@ class RouteRefreshStubTest {
         val stub = RouteRefreshStub()
         val originalRoute = createNavigationRoute(
             createDirectionsRoute(
-                duration = 1.0, requestUuid = "test"
+                duration = 1.0,
+                requestUuid = "test"
             )
         )
         val refreshed = createNavigationRoute(
             createDirectionsRoute(
-                duration = 2.0, requestUuid = "test"
+                duration = 2.0,
+                requestUuid = "test"
             )
         )
         stub.setRefreshedRoute(refreshed)

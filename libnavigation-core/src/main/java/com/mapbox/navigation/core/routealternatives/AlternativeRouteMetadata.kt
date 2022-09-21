@@ -36,8 +36,9 @@ class AlternativeRouteMetadata internal constructor(
         other as AlternativeRouteMetadata
 
         if (navigationRoute.id != other.navigationRoute.id) return false
-        if (forkIntersectionOfAlternativeRoute != other.forkIntersectionOfAlternativeRoute)
+        if (forkIntersectionOfAlternativeRoute != other.forkIntersectionOfAlternativeRoute) {
             return false
+        }
         if (forkIntersectionOfPrimaryRoute != other.forkIntersectionOfPrimaryRoute) return false
         if (infoFromFork != other.infoFromFork) return false
         if (infoFromStartOfPrimary != other.infoFromStartOfPrimary) return false

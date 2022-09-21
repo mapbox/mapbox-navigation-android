@@ -55,19 +55,22 @@ class CarTextModel2d : CarSurfaceLayer() {
         val scaleY = bitmap.height / height.toFloat()
 
         Matrix.translateM(
-            modelMatrix, 0,
+            modelMatrix,
+            0,
             translateX.toFloat(),
             translateY.toFloat(),
             0.0f,
         )
         Matrix.translateM(
-            modelMatrix, 0,
+            modelMatrix,
+            0,
             (width / 2.0f).toFloat() - bitmap.width / 2.0f,
             height.toFloat() - bitmap.height,
             0.0f,
         )
         Matrix.scaleM(
-            modelMatrix, 0,
+            modelMatrix,
+            0,
             width.toFloat() * scaleX,
             height.toFloat() * scaleY,
             1.0f,
@@ -81,16 +84,24 @@ class CarTextModel2d : CarSurfaceLayer() {
 
         // GL_TRIANGLE_STRIP in counterclockwise order
         private val VERTEX_COORDS = floatArrayOf(
-            0.0f, 0.0f,
-            1.0f, 0.0f,
-            0.0f, 1.0f,
-            1.0f, 1.0f
+            0.0f,
+            0.0f,
+            1.0f,
+            0.0f,
+            0.0f,
+            1.0f,
+            1.0f,
+            1.0f
         )
         private var TEXTURE_COORDS = floatArrayOf(
-            0.0f, 0.0f,
-            1.0f, 0.0f,
-            0.0f, 1.0f,
-            1.0f, 1.0f
+            0.0f,
+            0.0f,
+            1.0f,
+            0.0f,
+            0.0f,
+            1.0f,
+            1.0f,
+            1.0f
         )
 
         private val VERTEX_COUNT = VERTEX_COORDS.size / COORDS_PER_VERTEX_2D

@@ -21,7 +21,13 @@ class RailwayCrossing internal constructor(
     isUrban: Boolean?,
     nativeRoadObject: com.mapbox.navigator.RoadObject,
 ) : RoadObject(
-    id, RoadObjectType.RAILWAY_CROSSING, length, location, provider, isUrban, nativeRoadObject
+    id,
+    RoadObjectType.RAILWAY_CROSSING,
+    length,
+    location,
+    provider,
+    isUrban,
+    nativeRoadObject
 ) {
 
     /**

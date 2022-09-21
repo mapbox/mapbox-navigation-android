@@ -43,7 +43,10 @@ class MapboxTurnIconManeuverTest {
         val expectedFlip = 180f
         every {
             turnIconHelper.retrieveTurnIcon(
-                maneuver.type, maneuver.degrees?.toFloat(), maneuver.drivingSide, maneuver.modifier
+                maneuver.type,
+                maneuver.degrees?.toFloat(),
+                maneuver.drivingSide,
+                maneuver.modifier
             )
         } returns turnIcon
 
@@ -68,7 +71,10 @@ class MapboxTurnIconManeuverTest {
         val expectedFlip = 0f
         every {
             turnIconHelper.retrieveTurnIcon(
-                maneuver.type, maneuver.degrees?.toFloat(), maneuver.drivingSide, maneuver.modifier
+                maneuver.type,
+                maneuver.degrees?.toFloat(),
+                maneuver.drivingSide,
+                maneuver.modifier
             )
         } returns turnIcon
 
@@ -93,7 +99,10 @@ class MapboxTurnIconManeuverTest {
         val expectedFlip = 180f
         every {
             turnIconHelper.retrieveTurnIcon(
-                maneuver.type, maneuver.degrees?.toFloat(), maneuver.drivingSide, maneuver.modifier
+                maneuver.type,
+                maneuver.degrees?.toFloat(),
+                maneuver.drivingSide,
+                maneuver.modifier
             )
         } returns turnIcon
 
@@ -118,7 +127,10 @@ class MapboxTurnIconManeuverTest {
         val expectedFlip = 0f
         every {
             turnIconHelper.retrieveTurnIcon(
-                maneuver.type, maneuver.degrees?.toFloat(), maneuver.drivingSide, maneuver.modifier
+                maneuver.type,
+                maneuver.degrees?.toFloat(),
+                maneuver.drivingSide,
+                maneuver.modifier
             )
         } returns turnIcon
 

@@ -71,7 +71,8 @@ class LocationPermissionComponentTest {
     @Test
     fun `onAttached will notify permissions granted when granted`() {
         val locationPermissionComponent = LocationPermissionComponent(
-            componentActivityRef, testStore
+            componentActivityRef,
+            testStore
         )
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns true
 
@@ -87,7 +88,8 @@ class LocationPermissionComponentTest {
     @Test
     fun `onAttached will not notify permissions granted when not granted`() {
         val locationPermissionComponent = LocationPermissionComponent(
-            componentActivityRef, testStore
+            componentActivityRef,
+            testStore
         )
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns false
 
@@ -103,7 +105,8 @@ class LocationPermissionComponentTest {
     @Test
     fun `onAttached will request permissions when not granted`() {
         val locationPermissionComponent = LocationPermissionComponent(
-            componentActivityRef, testStore
+            componentActivityRef,
+            testStore
         )
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns false
 
@@ -115,7 +118,8 @@ class LocationPermissionComponentTest {
     @Test
     fun `onAttached grant location permissions if request succeeds`() {
         val locationPermissionComponent = LocationPermissionComponent(
-            componentActivityRef, testStore
+            componentActivityRef,
+            testStore
         )
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns false
 
@@ -136,7 +140,8 @@ class LocationPermissionComponentTest {
     @Test
     fun `onAttached not grant location permissions if request is denied`() {
         val locationPermissionComponent = LocationPermissionComponent(
-            componentActivityRef, testStore
+            componentActivityRef,
+            testStore
         )
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns false
 
@@ -157,7 +162,8 @@ class LocationPermissionComponentTest {
     @Test
     fun `onDetached will unregister from the launcher`() {
         val locationPermissionComponent = LocationPermissionComponent(
-            componentActivityRef, testStore
+            componentActivityRef,
+            testStore
         )
 
         locationPermissionComponent.onAttached(mockMapboxNavigation())
@@ -170,7 +176,8 @@ class LocationPermissionComponentTest {
     fun `should invoke LocationPermissionResult when permissions are accepted from background`() =
         coroutineRule.runBlockingTest {
             val locationPermissionComponent = LocationPermissionComponent(
-                componentActivityRef, testStore
+                componentActivityRef,
+                testStore
             )
             testStore.setState(
                 State(

@@ -51,7 +51,7 @@ ext {
       robolectric               : '4.7.3',
       mockwebserver             : '4.9.0',
       gmsLocation               : '17.0.0',
-      ktlint                    : '0.45.2',
+      ktlint                    : '0.47.1',
       kotlinStdLib              : kotlinVersion,
       firebaseCrashlytics       : '17.3.1',
       multidex                  : '2.0.1',

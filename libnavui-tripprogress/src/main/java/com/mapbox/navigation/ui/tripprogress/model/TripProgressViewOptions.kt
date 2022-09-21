@@ -60,8 +60,9 @@ class TripProgressViewOptions private constructor(
         if (estimatedArrivalTimeIcon != other.estimatedArrivalTimeIcon) return false
         if (timeRemainingTextAppearance != other.timeRemainingTextAppearance) return false
         if (distanceRemainingTextAppearance != other.distanceRemainingTextAppearance) return false
-        if (estimatedArrivalTimeTextAppearance != other.estimatedArrivalTimeTextAppearance)
+        if (estimatedArrivalTimeTextAppearance != other.estimatedArrivalTimeTextAppearance) {
             return false
+        }
         if (distanceRemainingIconTint != other.distanceRemainingIconTint) return false
         if (estimatedArrivalTimeIconTint != other.estimatedArrivalTimeIconTint) return false
 

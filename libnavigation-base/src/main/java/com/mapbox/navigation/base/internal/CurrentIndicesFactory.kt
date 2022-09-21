@@ -7,6 +7,8 @@ object CurrentIndicesFactory {
         routeGeometryIndex: Int,
         legGeometryIndex: Int?,
     ): CurrentIndices = CurrentIndices(
-        legIndex, routeGeometryIndex, legGeometryIndex
+        legIndex,
+        routeGeometryIndex,
+        legGeometryIndex
     )
 }

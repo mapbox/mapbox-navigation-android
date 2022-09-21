@@ -11,7 +11,9 @@ object TestingUtil {
         return DirectionsRoute.fromJson(routeAsJson).run {
             if (uuid != null) {
                 this.toBuilder().requestUuid(uuid).build()
-            } else this
+            } else {
+                this
+            }
         }
     }
 

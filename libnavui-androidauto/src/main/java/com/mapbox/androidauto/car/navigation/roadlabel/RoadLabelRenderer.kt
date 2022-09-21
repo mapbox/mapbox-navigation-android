@@ -89,9 +89,12 @@ class RoadLabelRenderer(private val resources: Resources) {
         }
 
         drawRoundRect(
-            LABEL_PADDING, LABEL_PADDING,
-            cardWidth, cardHeight,
-            LABEL_RADIUS, LABEL_RADIUS,
+            LABEL_PADDING,
+            LABEL_PADDING,
+            cardWidth,
+            cardHeight,
+            LABEL_RADIUS,
+            LABEL_RADIUS,
             labelPaint
         )
     }

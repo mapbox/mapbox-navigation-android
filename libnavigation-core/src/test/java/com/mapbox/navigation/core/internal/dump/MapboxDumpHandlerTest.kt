@@ -73,7 +73,8 @@ class MapboxDumpHandlerTest {
             every { intercept(any(), any(), any()) } just runs
         }
         every { MapboxDumpRegistry.getInterceptors("test_command") } returns listOf(
-            interceptorOne, interceptorThree
+            interceptorOne,
+            interceptorThree
         )
         every { MapboxDumpRegistry.getInterceptors("not_called") } returns listOf(
             interceptorTwo
@@ -103,7 +104,8 @@ class MapboxDumpHandlerTest {
             every { intercept(any(), any(), any()) } just runs
         }
         every { MapboxDumpRegistry.getInterceptors("system") } returns listOf(
-            interceptorOne, interceptorThree
+            interceptorOne,
+            interceptorThree
         )
         every { MapboxDumpRegistry.getInterceptors("feature") } returns listOf(
             interceptorTwo

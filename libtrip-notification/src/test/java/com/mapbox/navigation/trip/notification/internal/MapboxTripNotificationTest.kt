@@ -468,7 +468,10 @@ class MapboxTripNotificationTest {
         }
 
         val state = buildTripNotificationState(
-            null, 10.0, 10.0, null
+            null,
+            10.0,
+            10.0,
+            null
         )
         notification.updateNotification(state)
 
@@ -487,7 +490,10 @@ class MapboxTripNotificationTest {
         }
 
         val state = buildTripNotificationState(
-            null, 10.0, 10.0, null
+            null,
+            10.0,
+            10.0,
+            null
         )
         notification.updateNotification(state)
 

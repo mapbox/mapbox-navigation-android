@@ -20,8 +20,11 @@ internal object RoadShieldDownloader {
             when (responseData.status) {
                 ResourceLoadStatus.AVAILABLE -> {
                     val blob: ByteArray = responseData.data?.data ?: byteArrayOf()
-                    if (blob.isNotEmpty()) createValue(blob)
-                    else createError("No data available.")
+                    if (blob.isNotEmpty()) {
+                        createValue(blob)
+                    } else {
+                        createError("No data available.")
+                    }
                 }
                 ResourceLoadStatus.UNAUTHORIZED ->
                     createError("Your token cannot access this resource.")

@@ -229,7 +229,9 @@ class NavigationRoute internal constructor(
             routeParser: SDKRouteParser = NativeRouteParserWrapper
         ): List<NavigationRoute> {
             return routeParser.parseDirectionsResponse(
-                directionsResponseJson, routeOptionsUrlString, routerOrigin
+                directionsResponseJson,
+                routeOptionsUrlString,
+                routerOrigin
             ).run {
                 create(this, directionsResponse, routeOptions)
             }
