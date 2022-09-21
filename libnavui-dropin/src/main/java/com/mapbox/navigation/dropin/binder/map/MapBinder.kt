@@ -2,7 +2,6 @@ package com.mapbox.navigation.dropin.binder.map
 
 import android.view.ViewGroup
 import com.mapbox.maps.MapView
-import com.mapbox.maps.plugin.LocationPuck
 import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.scalebar.scalebar
@@ -32,7 +31,6 @@ import com.mapbox.navigation.ui.maps.internal.ui.LocationPuckComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteArrowComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponentContract
-import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import kotlinx.coroutines.FlowPreview
@@ -60,7 +58,7 @@ internal class MapBinder(
             CameraLayoutObserver(store, mapView, binding),
             LocationComponent(context.locationProvider),
             reloadOnChange(context.styles.locationPuck) { locationPuck ->
-                locationPuckComponent(context.locationProvider, locationPuck)
+                LocationPuckComponent(mapView.location, locationPuck, context.locationProvider)
             },
             LogoAttributionComponent(mapView, context.systemBarsInsets),
             reloadOnChange(
@@ -88,18 +86,6 @@ internal class MapBinder(
             ) { _, arrowOptions, navState ->
                 routeArrowComponent(navState, arrowOptions)
             }
-        )
-    }
-
-    private fun locationPuckComponent(
-        locationProvider: NavigationLocationProvider,
-        locationPuck: LocationPuck,
-    ): LocationPuckComponent {
-        return LocationPuckComponent(
-            mapView.getMapboxMap(),
-            mapView.location,
-            locationPuck,
-            locationProvider
         )
     }
 

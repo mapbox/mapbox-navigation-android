@@ -58,7 +58,6 @@ fun ComponentInstaller.locationPuck(
     )
     val locationProvider = componentConfig.locationProvider ?: NavigationLocationProvider()
     val locationPuckComponent = LocationPuckComponent(
-        mapView.getMapboxMap(),
         mapView.location,
         locationPuck,
         locationProvider
