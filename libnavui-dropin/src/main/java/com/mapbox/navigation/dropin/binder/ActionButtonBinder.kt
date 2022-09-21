@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.core.view.children
 import androidx.lifecycle.viewModelScope
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.extensions.navigationListOf
@@ -74,22 +73,18 @@ internal class ActionButtonBinder(
     private fun installCustomButtons(buttonContainer: LinearLayout) {
         val spacing = buttonContainer.resources
             .getDimensionPixelSize(R.dimen.mapbox_actionList_spacing)
-        customButtons.filter { it.position == ActionButtonDescription.Position.START }
-            .reversed()
-            .also {
-                startCustomButtonsCount = it.size
-            }
-            .forEach {
-                buttonContainer.children.firstOrNull()?.setMargins(top = spacing)
-                it.view.setMargins(bottom = spacing)
-                buttonContainer.addView(it.view, 0)
-            }
-        customButtons.filter { it.position == ActionButtonDescription.Position.END }
-            .forEach {
-                buttonContainer.children.lastOrNull()?.setMargins(bottom = spacing)
-                it.view.setMargins(top = spacing)
-                buttonContainer.addView(it.view)
-            }
+        customButtons
+            .filter { it.position == ActionButtonDescription.Position.START }
+            .asReversed()
+            .also { startCustomButtonsCount = it.size }
+            .onEach { buttonContainer.addView(it.view, 0) }
+            .dropLast(1)
+            .forEach { it.view.setMargins(top = spacing) }
+        customButtons
+            .filter { it.position == ActionButtonDescription.Position.END }
+            .onEach { buttonContainer.addView(it.view) }
+            .dropLast(1)
+            .forEach { it.view.setMargins(bottom = spacing) }
     }
 
     private fun audioGuidanceButtonComponent(
