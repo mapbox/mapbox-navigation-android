@@ -7,10 +7,12 @@ Mapbox welcomes participation and contributions from everyone.
 - Moved `MapboxAudioGuidance` and `MapboxAudioGuidanceState` into public api. [#6336](https://github.com/mapbox/mapbox-navigation-android/pull/6336)
 - Introduced `ViewOptionsCustomization.showCameraDebugInfo` to allow end users to enable camera debug info. [#6356](https://github.com/mapbox/mapbox-navigation-android/pull/6356)
 - Added `ComponentInstaller` for the `LocationComponent` that offers simplified integration of map LocationPuck. [#6206](https://github.com/mapbox/mapbox-navigation-android/pull/6206)
+- Added `ViewStyleCustomization.locationPuck` that allows to define a custom location puck using `NavigationView`. [#6365](https://github.com/mapbox/mapbox-navigation-android/pull/6365)
 #### Bug fixes and improvements
 - Marked `PredictiveCacheController`, `MapboxBuildingView`, `ViewportDataSourceUpdateObserver`, `NavigationScaleGestureHandler`, `NavigationCameraStateChangedObserver`, `NavigationCameraStateTransition`, `NavigationCameraTransition`, `TransitionEndListener`, `MapboxRecenterButton`, `MapboxRouteOverviewButton`, `MapboxJunctionView`, `MapboxSignboardView`, `MapboxRoadNameLabelView`, `MapboxRoadNameView`, `MapboxRouteArrowView`, `MapboxRouteLineView`, `MapboxCameraModeButton` methods and `View.capture` extension with `@UiThread` annotation. [#6235](https://github.com/mapbox/mapbox-navigation-android/pull/6235)
 - Marked `Binder`, `MapboxExtendableButton` methods and `MapboxNavigation#installComponents` methods with `@UiThread` annotation. [#6268](https://github.com/mapbox/mapbox-navigation-android/pull/6268)
 - Fixed an issue with `NavigationView` that caused `ViewOptionsCustomization.routeArrowOptions` to be ignored, if arrows have already been drawn on the map. [#6333](https://github.com/mapbox/mapbox-navigation-android/pull/6333)
+- Replaced `ViewStyleCustomization.defaultMarkerAnnotationOptions` with `ViewStyleCustomization.defaultDestinationMarkerAnnotationOptions`. [#6365](https://github.com/mapbox/mapbox-navigation-android/pull/6365)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.2 - 16 September, 2022
 ### Changelog

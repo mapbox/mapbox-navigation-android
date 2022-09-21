@@ -676,11 +676,13 @@ package com.mapbox.navigation.core.routealternatives {
   }
 
   public final class AlternativeRouteMetadata {
+    method public int getAlternativeId();
     method public com.mapbox.navigation.core.routealternatives.AlternativeRouteIntersection getForkIntersectionOfAlternativeRoute();
     method public com.mapbox.navigation.core.routealternatives.AlternativeRouteIntersection getForkIntersectionOfPrimaryRoute();
     method public com.mapbox.navigation.core.routealternatives.AlternativeRouteInfo getInfoFromFork();
     method public com.mapbox.navigation.core.routealternatives.AlternativeRouteInfo getInfoFromStartOfPrimary();
     method public com.mapbox.navigation.base.route.NavigationRoute getNavigationRoute();
+    property public final int alternativeId;
     property public final com.mapbox.navigation.core.routealternatives.AlternativeRouteIntersection forkIntersectionOfAlternativeRoute;
     property public final com.mapbox.navigation.core.routealternatives.AlternativeRouteIntersection forkIntersectionOfPrimaryRoute;
     property public final com.mapbox.navigation.core.routealternatives.AlternativeRouteInfo infoFromFork;
