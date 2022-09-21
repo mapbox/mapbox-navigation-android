@@ -13,6 +13,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Marked `Binder`, `MapboxExtendableButton` methods and `MapboxNavigation#installComponents` methods with `@UiThread` annotation. [#6268](https://github.com/mapbox/mapbox-navigation-android/pull/6268)
 - Fixed an issue with `NavigationView` that caused `ViewOptionsCustomization.routeArrowOptions` to be ignored, if arrows have already been drawn on the map. [#6333](https://github.com/mapbox/mapbox-navigation-android/pull/6333)
 - Replaced `ViewStyleCustomization.defaultMarkerAnnotationOptions` with `ViewStyleCustomization.defaultDestinationMarkerAnnotationOptions`. [#6365](https://github.com/mapbox/mapbox-navigation-android/pull/6365)
+- Fixed the issue with incorrect geometry indices for `RouteLeg#incidents` and `RouteLeg#closures` after refresh. [#6364](https://github.com/mapbox/mapbox-navigation-android/pull/6364)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.2 - 16 September, 2022
 ### Changelog
