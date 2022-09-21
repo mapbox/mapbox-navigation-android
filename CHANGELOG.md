@@ -27,6 +27,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed a rare `java.lang.NullPointerException: Attempt to read from field 'SpeechAnnouncement PlayCallback.announcement' on a null object reference` crash in `PlayCallback.getAnnouncement`. [#6760](https://github.com/mapbox/mapbox-navigation-android/pull/6760)
 - Fixed standalone `MapboxManeuverView` appearance when the app also integrates Drop-In UI. [#6774](https://github.com/mapbox/mapbox-navigation-android/pull/6774)
 - Introduced `NavigationViewListener.onSpeedInfoClicked` that would be triggered when `MapboxSpeedInfoView` is clicked upon. [#6770](https://github.com/mapbox/mapbox-navigation-android/pull/6770)
+- Each newly instantiated MapboxRouteArrowView class will initialize the layers with the provided options on the first render call. Previously this would only be done if the layers hadn't already been initialized.  [#6466](https://github.com/mapbox/mapbox-navigation-android/pull/6466)
 
 ## Mapbox Navigation SDK 2.10.0-rc.1 - 16 December, 2022
 ### Changelog
@@ -64,7 +65,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Navigation Native `v123.1.0`
 - Mapbox Core Common `v23.2.1`
 - Mapbox Java `v6.10.0-beta.3` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.10.0-beta.3))
-
 
 ## Mapbox Navigation SDK 2.9.5 - 13 December, 2022
 ### Changelog
@@ -256,7 +256,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Core Common `v23.1.1`
 - Mapbox Java `v6.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.9.0))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
-
 
 ## Mapbox Navigation SDK 2.9.2 - 18 November, 2022
 ### Changelog
@@ -586,7 +585,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v6.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
 
-
 ## Mapbox Navigation SDK 2.9.0-beta.2 - 14 October, 2022
 ### Changelog
 [Changes between v2.9.0-beta.1 and v2.9.0-beta.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0-beta.1...v2.9.0-beta.2)
@@ -630,7 +628,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Core Common `v23.1.0-rc.2`
 - Mapbox Java `v6.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
-
 
 ## Mapbox Navigation SDK 2.9.0-beta.1 - 06 October, 2022
 ### Changelog

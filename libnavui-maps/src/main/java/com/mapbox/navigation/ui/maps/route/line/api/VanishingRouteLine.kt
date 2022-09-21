@@ -100,9 +100,6 @@ internal class VanishingRouteLine {
         /**
          * Calculate the percentage of the route traveled and update the expression.
          */
-        /**
-         * Calculate the percentage of the route traveled and update the expression.
-         */
         val offset = if (granularDistances.completeDistance >= remainingDistance) {
             (1.0 - remainingDistance / granularDistances.completeDistance)
         } else {
