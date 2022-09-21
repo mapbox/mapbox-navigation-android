@@ -723,7 +723,7 @@ jobs:
   androidauto-test:
     executor:
       name: android/android-machine
-      resource-class: large
+      resource-class: xlarge
       tag: 2022.04.1
     steps:
       - when:
@@ -735,8 +735,8 @@ jobs:
           steps:
             - checkout
             - android/start-emulator-and-run-tests:
-                post-emulator-launch-assemble-command: ./gradlew libnavui-androidauto:assembleDebugAndroidTest
-                test-command: ./gradlew libnavui-androidauto:connectedDebugAndroidTest
+                post-emulator-launch-assemble-command: ./gradlew libnavui-androidauto:assembleDebugAndroidTest -Dorg.gradle.jvmargs=-Xmx3g
+                test-command: ./gradlew libnavui-androidauto:connectedDebugAndroidTest -Dorg.gradle.jvmargs=-Xmx3g
                 system-image: system-images;android-30;google_apis_playstore;x86
                 wait-for-emulator: false
                 save-gradle-cache: false
