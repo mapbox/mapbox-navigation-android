@@ -4,6 +4,7 @@ import android.location.Location
 import androidx.annotation.IntegerRes
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Closure
+import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
@@ -72,6 +73,11 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         Point.fromLngLat(-121.496066, 38.577764),
         Point.fromLngLat(-121.480279, 38.57674),
         Point.fromLngLat(-121.468434, 38.58225)
+    )
+    private val threeCoordinatesWithIncidents = listOf(
+        Point.fromLngLat(-75.474061, 38.546280),
+        Point.fromLngLat(-75.525486, 38.772959),
+        Point.fromLngLat(-74.698765, 39.822911)
     )
 
     private lateinit var failByRequestRouteRefreshResponse: FailByRequestMockRequestHandler
@@ -359,7 +365,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         }
 
     @Test
-    fun expect_route_refresh_to_update_annotations_for_truncated_next_leg() =
+    fun expect_route_refresh_to_update_annotations_incidents_and_closures_for_truncated_next_leg() =
         sdkTest {
             setupMockRequestHandlers(
                 threeCoordinates,
@@ -387,9 +393,126 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 .first()
                 .navigationRoutes
 
+            // annotations
             assertEquals(201.673, requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
             assertEquals(189.086, refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
+
+            // incidents
+            assertEquals(
+                listOf(listOf("9457146989091490", 400, 405)),
+                requestedRoutes[0].directionsRoute.legs()!![1].incidents()!!
+                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() })
+            )
+            assertEquals(
+                listOf(listOf("9457146989091490", 396, 401)),
+                refreshedRoutes[0].directionsRoute.legs()!![1].incidents()!!
+                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() })
+            )
+
+            // closures
+            assertEquals(
+                listOf(
+                    Closure.builder()
+                        .geometryIndexStart(312)
+                        .geometryIndexEnd(313)
+                        .build()
+                ),
+                requestedRoutes[0].directionsRoute.legs()!![1].closures()
+            )
+            assertEquals(
+                listOf(
+                    Closure.builder()
+                        .geometryIndexStart(313)
+                        .geometryIndexEnd(314)
+                        .build()
+                ),
+                refreshedRoutes[0].directionsRoute.legs()!![1].closures()
+            )
         }
+
+    @Test
+    fun expect_route_refresh_to_update_annotations_incidents_and_closures_for_second_leg() =
+        sdkTest {
+            val currentRouteGeometryIndex = 2000
+            // 437 points in leg #0, so currentLegGeometryIndex = 2000 - 437 + 1 (points are duplicated on the start and end of steps and legs) = 1564
+            setupMockRequestHandlers(
+                threeCoordinatesWithIncidents,
+                R.raw.route_response_multileg_with_incidents,
+                R.raw.route_response_route_refresh_multileg_with_incidents,
+                "route_response_multileg_with_incidents",
+                acceptedGeometryIndex = currentRouteGeometryIndex
+            )
+            val routeOptions = generateRouteOptions(threeCoordinatesWithIncidents)
+            val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+
+            mapboxNavigation.setNavigationRoutes(requestedRoutes, initialLegIndex = 1)
+            mapboxNavigation.startTripSession()
+            // corresponds to currentRouteGeometryIndex = 2000, currentLeg = 1
+            stayOnPosition(39.80965, -75.281163)
+            mapboxNavigation.routeProgressUpdates()
+                .filter {
+                    it.currentRouteGeometryIndex == currentRouteGeometryIndex
+                }
+                .first()
+            val refreshedRoutes = mapboxNavigation.routesUpdates()
+                .filter {
+                    it.reason == ROUTES_UPDATE_REASON_REFRESH
+                }
+                .first()
+                .navigationRoutes
+
+            // annotations
+            assertEquals(8595.694, requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
+            assertEquals(8571.824, refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
+
+            // incidents
+            assertEquals(
+                listOf(
+                    listOf("9457146989091490", 2019, 2024),
+                    listOf("5945491930714919", 2044, 2126)
+                ),
+                requestedRoutes[0].directionsRoute.legs()!![1].incidents()!!
+                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() })
+            )
+            assertEquals(
+                listOf(
+                    listOf("9457146989091490", 2019, 2024),
+                    listOf("5945491930714919", 2048, 2130)
+                ),
+                refreshedRoutes[0].directionsRoute.legs()!![1].incidents()!!
+                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() })
+            )
+
+            // closures
+            assertEquals(
+                listOf(
+                    Closure.builder()
+                        .geometryIndexStart(2001)
+                        .geometryIndexEnd(2020)
+                        .build()
+                ),
+                requestedRoutes[0].directionsRoute.legs()!![1].closures()
+            )
+            assertEquals(
+                listOf(
+                    Closure.builder()
+                        .geometryIndexStart(2054)
+                        .geometryIndexEnd(2061)
+                        .build()
+                ),
+                refreshedRoutes[0].directionsRoute.legs()!![1].closures()
+            )
+        }
+
+    private fun List<Incident>.extract(vararg extractors: Incident.() -> Any?): List<List<Any?>> {
+        return map { incident ->
+            extractors.map { extractor ->
+                incident.extractor()
+            }
+        }
+    }
 
     private fun stayOnInitialPosition() {
         mockLocationReplayerRule.loopUpdate(

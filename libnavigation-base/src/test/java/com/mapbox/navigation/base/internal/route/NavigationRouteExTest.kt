@@ -260,8 +260,8 @@ class NavigationRouteExTest {
 
             run {
                 val newLegAnnotations = createRouteLegAnnotation()
-                val newIncidents = mockk<List<Incident>>()
-                val newClosures = mockk<List<Closure>>()
+                val newIncidents = listOf(createIncident(0, 1))
+                val newClosures = listOf(createClosure(10, 15))
                 return@run TestData(
                     "update items route",
                     provideNavigationRoute(addLeg = false),
@@ -283,10 +283,10 @@ class NavigationRouteExTest {
             run {
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newLegAnnotations2 = createRouteLegAnnotation()
-                val newIncidents = mockk<List<Incident>>()
-                val newIncidents2 = mockk<List<Incident>>()
-                val newClosures = mockk<List<Closure>>()
-                val newClosures2 = mockk<List<Closure>>()
+                val newIncidents = listOf(createIncident(0, 1), createIncident(10, 15))
+                val newIncidents2 = listOf(createIncident(0, 1), createIncident(5, 7))
+                val newClosures = listOf(createClosure(0, 3), createClosure(6, 7))
+                val newClosures2 = listOf(createClosure(4, 7), createClosure(14, 17))
                 TestData(
                     "update items multi-leg route",
                     provideNavigationRoute(addLeg = true),
@@ -308,24 +308,28 @@ class NavigationRouteExTest {
             run {
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newLegAnnotations2 = createRouteLegAnnotation()
-                val newIncidents = mockk<List<Incident>>()
-                val newIncidents2 = mockk<List<Incident>>()
-                val newClosures = mockk<List<Closure>>()
-                val newClosures2 = mockk<List<Closure>>()
+                val newInputIncidents = listOf(createIncident(2, 4))
+                val newOutputIncidents = listOf(createIncident(4, 6))
+                val newInputIncidents2 = listOf(createIncident(6, 9))
+                val newOutputIncidents2 = listOf(createIncident(6, 9))
+                val newInputClosures = listOf(createClosure(3, 4))
+                val newOutputClosures = listOf(createClosure(5, 6))
+                val newInputClosures2 = listOf(createClosure(1, 2))
+                val newOutputClosures2 = listOf(createClosure(1, 2))
                 TestData(
                     "update items multi-leg route, geometryIndex is 2",
                     provideNavigationRoute(addLeg = true),
                     RefreshLegItemsWrapper(
                         0,
                         listOf(newLegAnnotations, newLegAnnotations2),
-                        listOf(newIncidents, newIncidents2),
-                        listOf(newClosures, newClosures2),
+                        listOf(newInputIncidents, newInputIncidents2),
+                        listOf(newInputClosures, newInputClosures2),
                         2,
                     ),
                     LegItemsResult(
                         listOf(newLegAnnotations, newLegAnnotations2),
-                        listOf(newIncidents, newIncidents2),
-                        listOf(newClosures, newClosures2),
+                        listOf(newOutputIncidents, newOutputIncidents2),
+                        listOf(newOutputClosures, newOutputClosures2),
                         2,
                     )
                 )
@@ -333,10 +337,10 @@ class NavigationRouteExTest {
             run {
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newLegAnnotations2 = createRouteLegAnnotation()
-                val newIncidents = mockk<List<Incident>>()
-                val newIncidents2 = mockk<List<Incident>>()
-                val newClosures = mockk<List<Closure>>()
-                val newClosures2 = mockk<List<Closure>>()
+                val newIncidents = listOf(createIncident(10, 12))
+                val newIncidents2 = listOf(createIncident(40, 50))
+                val newClosures = listOf(createClosure(13, 17))
+                val newClosures2 = listOf(createClosure(2, 6))
                 TestData(
                     "update items multi-leg route starting with second leg",
                     provideNavigationRoute(addLeg = true),
@@ -358,24 +362,26 @@ class NavigationRouteExTest {
             run {
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newLegAnnotations2 = createRouteLegAnnotation()
-                val newIncidents = mockk<List<Incident>>()
-                val newIncidents2 = mockk<List<Incident>>()
-                val newClosures = mockk<List<Closure>>()
-                val newClosures2 = mockk<List<Closure>>()
+                val newIncidents = listOf(createIncident(10, 12))
+                val newInputIncidents2 = listOf(createIncident(40, 50))
+                val newOutputIncidents2 = listOf(createIncident(44, 54))
+                val newClosures = listOf(createClosure(13, 17))
+                val newInputClosures2 = listOf(createClosure(2, 6))
+                val newOutputClosures2 = listOf(createClosure(6, 10))
                 TestData(
                     "update items multi-leg route starting with second leg, geometryIndex = 4",
                     provideNavigationRoute(addLeg = true),
                     RefreshLegItemsWrapper(
                         1,
                         listOf(newLegAnnotations, newLegAnnotations2),
-                        listOf(newIncidents, newIncidents2),
-                        listOf(newClosures, newClosures2),
+                        listOf(newIncidents, newInputIncidents2),
+                        listOf(newClosures, newInputClosures2),
                         4,
                     ),
                     LegItemsResult(
                         listOf(provideDefaultLegAnnotation(), newLegAnnotations2),
-                        listOf(provideDefaultIncidents(), newIncidents2),
-                        listOf(provideDefaultClosures(), newClosures2),
+                        listOf(provideDefaultIncidents(), newOutputIncidents2),
+                        listOf(provideDefaultClosures(), newOutputClosures2),
                         4,
                     )
                 )
@@ -602,3 +608,18 @@ private fun createNavigationRouteFromResource(
     TestSDKRouteParser(),
     com.mapbox.navigation.base.route.RouterOrigin.Offboard
 ).first()
+
+private fun createIncident(startIndex: Int?, endIndex: Int?): Incident =
+    Incident.builder()
+        .id("id")
+        .geometryIndexStart(startIndex)
+        .geometryIndexEnd(endIndex)
+        .build()
+
+private fun createClosure(startIndex: Int?, endIndex: Int?): Closure =
+    Closure.builder()
+        .apply {
+            startIndex?.let { geometryIndexStart(it) }
+            endIndex?.let { geometryIndexEnd(it) }
+        }
+        .build()
