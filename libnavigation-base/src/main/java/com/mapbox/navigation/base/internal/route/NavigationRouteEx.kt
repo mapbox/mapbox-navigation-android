@@ -49,25 +49,44 @@ fun NavigationRoute.refreshRoute(
             routeLeg
         } else {
             val newAnnotation = legAnnotations?.getOrNull(index)
-            val mergedAnnotation =
+            val startingLegGeometryIndex =
                 if (index == initialLegIndex && currentLegGeometryIndex != null) {
-                    AnnotationsRefresher.getRefreshedAnnotations(
-                        routeLeg.annotation(),
-                        newAnnotation,
-                        currentLegGeometryIndex
-                    )
+                    currentLegGeometryIndex
                 } else {
-                    AnnotationsRefresher.getRefreshedAnnotations(
-                        routeLeg.annotation(),
-                        newAnnotation,
-                        startingLegGeometryIndex = 0
-                    )
+                    0
                 }
+            val mergedAnnotation = AnnotationsRefresher.getRefreshedAnnotations(
+                routeLeg.annotation(),
+                newAnnotation,
+                startingLegGeometryIndex
+            )
             routeLeg.toBuilder()
                 .duration(mergedAnnotation?.duration()?.sumOf { it } ?: routeLeg.duration())
                 .annotation(mergedAnnotation)
-                .incidents(incidents?.getOrNull(index))
-                .closures(closures?.getOrNull(index))
+                .incidents(
+                    incidents?.getOrNull(index)?.map {
+                        it.toBuilder()
+                            .geometryIndexStart(
+                                adjustedIndex(startingLegGeometryIndex, it.geometryIndexStart())
+                            )
+                            .geometryIndexEnd(
+                                adjustedIndex(startingLegGeometryIndex, it.geometryIndexEnd())
+                            )
+                            .build()
+                    }
+                )
+                .closures(
+                    closures?.getOrNull(index)?.map {
+                        it.toBuilder()
+                            .geometryIndexStart(
+                                adjustedIndex(startingLegGeometryIndex, it.geometryIndexStart())
+                            )
+                            .geometryIndexEnd(
+                                adjustedIndex(startingLegGeometryIndex, it.geometryIndexEnd())
+                            )
+                            .build()
+                    }
+                )
                 .steps(routeLeg.steps()?.updateSteps(directionsRoute, mergedAnnotation))
                 .build()
         }
@@ -78,6 +97,10 @@ fun NavigationRoute.refreshRoute(
             .updateRouteDurationBasedOnLegsDuration(updateLegs)
             .build()
     }
+}
+
+private fun adjustedIndex(offsetIndex: Int, originalIndex: Int?): Int {
+    return offsetIndex + (originalIndex ?: 0)
 }
 
 /**
