@@ -27,6 +27,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
+import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
@@ -57,13 +58,14 @@ import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRo
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultAudioGuidanceButtonParams
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultCameraModeButtonParams
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultDestinationMarkerAnnotationOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultEndNavigationButtonParams
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelBackground
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelMarginEnd
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelMarginStart
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelPeekHeight
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultLocationPuck
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultManeuverViewOptions
-import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultMarkerAnnotationOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRecenterButtonParams
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoadNameBackground
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoadNameTextAppearance
@@ -470,7 +472,8 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 speedLimitStyle = defaultSpeedLimitStyle()
                 speedLimitTextAppearance = defaultSpeedLimitTextAppearance()
                 maneuverViewOptions = defaultManeuverViewOptions()
-                destinationMarkerAnnotationOptions = defaultMarkerAnnotationOptions(context)
+                destinationMarkerAnnotationOptions =
+                    defaultDestinationMarkerAnnotationOptions(context)
                 roadNameBackground = defaultRoadNameBackground()
                 roadNameTextAppearance = defaultRoadNameTextAppearance()
                 audioGuidanceButtonParams = defaultAudioGuidanceButtonParams(context)
@@ -502,6 +505,13 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 mapStyleUriDay = Style.LIGHT
                 mapStyleUriNight = Style.DARK
             }
+            binding.navigationView.customizeViewStyles {
+                locationPuck = LocationPuck2D(
+                    topImage = getDrawable(R.drawable.mapbox_user_icon),
+                    bearingImage = getDrawable(R.drawable.mapbox_user_bearing_icon),
+                    shadowImage = getDrawable(R.drawable.mapbox_user_stroke_icon),
+                )
+            }
         } else {
             // Reset defaults
             binding.navigationView.customizeViewBinders {
@@ -513,6 +523,9 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 routeArrowOptions = defaultRouteArrowOptions(applicationContext)
                 mapStyleUriDay = NavigationStyles.NAVIGATION_DAY_STYLE
                 mapStyleUriNight = NavigationStyles.NAVIGATION_NIGHT_STYLE
+            }
+            binding.navigationView.customizeViewStyles {
+                locationPuck = defaultLocationPuck(applicationContext)
             }
         }
     }

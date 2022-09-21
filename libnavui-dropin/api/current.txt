@@ -216,6 +216,7 @@ package com.mapbox.navigation.dropin {
     method public Integer? getInfoPanelMarginEnd();
     method public Integer? getInfoPanelMarginStart();
     method public Integer? getInfoPanelPeekHeight();
+    method public com.mapbox.maps.plugin.LocationPuck? getLocationPuck();
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? getManeuverViewOptions();
     method public Integer? getPoiNameTextAppearance();
     method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams? getRecenterButtonParams();
@@ -235,6 +236,7 @@ package com.mapbox.navigation.dropin {
     method public void setInfoPanelMarginEnd(Integer?);
     method public void setInfoPanelMarginStart(Integer?);
     method public void setInfoPanelPeekHeight(Integer?);
+    method public void setLocationPuck(com.mapbox.maps.plugin.LocationPuck?);
     method public void setManeuverViewOptions(com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions?);
     method public void setPoiNameTextAppearance(Integer?);
     method public void setRecenterButtonParams(com.mapbox.navigation.dropin.MapboxExtendableButtonParams?);
@@ -254,6 +256,7 @@ package com.mapbox.navigation.dropin {
     property public final Integer? infoPanelMarginEnd;
     property public final Integer? infoPanelMarginStart;
     property public final Integer? infoPanelPeekHeight;
+    property public final com.mapbox.maps.plugin.LocationPuck? locationPuck;
     property public final com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? maneuverViewOptions;
     property public final Integer? poiNameTextAppearance;
     property public final com.mapbox.navigation.dropin.MapboxExtendableButtonParams? recenterButtonParams;
@@ -271,13 +274,14 @@ package com.mapbox.navigation.dropin {
     method @StyleRes public int defaultArrivalTextAppearance();
     method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams defaultAudioGuidanceButtonParams(android.content.Context context);
     method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams defaultCameraModeButtonParams(android.content.Context context);
+    method public com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions defaultDestinationMarkerAnnotationOptions(android.content.Context context);
     method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams defaultEndNavigationButtonParams(android.content.Context context);
     method @DrawableRes public int defaultInfoPanelBackground();
     method @Px public int defaultInfoPanelMarginEnd();
     method @Px public int defaultInfoPanelMarginStart();
     method @Px public int defaultInfoPanelPeekHeight(android.content.Context context);
+    method public com.mapbox.maps.plugin.LocationPuck defaultLocationPuck(android.content.Context context);
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions defaultManeuverViewOptions();
-    method public com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions defaultMarkerAnnotationOptions(android.content.Context context);
     method @StyleRes public int defaultPoiNameTextAppearance();
     method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams defaultRecenterButtonParams(android.content.Context context);
     method @DrawableRes public int defaultRoadNameBackground();

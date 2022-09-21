@@ -8,7 +8,10 @@ import androidx.annotation.StyleRes
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.google.android.material.resources.TextAppearance
+import com.mapbox.maps.MapView
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
+import com.mapbox.maps.plugin.LocationPuck
+import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.component.infopanel.ArrivalTextComponent
@@ -71,7 +74,7 @@ class ViewStyleCustomization {
 
     /**
      * Provide [PointAnnotationOptions] for destination marker.
-     * Use [defaultMarkerAnnotationOptions] to reset to default.
+     * Use [defaultDestinationMarkerAnnotationOptions] to reset to default.
      */
     var destinationMarkerAnnotationOptions: PointAnnotationOptions? = null
 
@@ -159,6 +162,12 @@ class ViewStyleCustomization {
     @StyleRes
     var arrivalTextAppearance: Int? = null
 
+    /**
+     * Provide custom [LocationPuck] for [MapView].
+     * Use [defaultLocationPuck] to reset to default.
+     */
+    var locationPuck: LocationPuck? = null
+
     companion object {
         /**
          * Default info panel peek height in pixels.
@@ -188,7 +197,7 @@ class ViewStyleCustomization {
         /**
          * Default [PointAnnotationOptions] for showing destination marker.
          */
-        fun defaultMarkerAnnotationOptions(context: Context): PointAnnotationOptions =
+        fun defaultDestinationMarkerAnnotationOptions(context: Context): PointAnnotationOptions =
             PointAnnotationOptions().apply {
                 withIconImage(
                     ContextCompat.getDrawable(
@@ -352,6 +361,16 @@ class ViewStyleCustomization {
                     .build()
             )
             .build()
+
+        /**
+         * Default [LocationPuck] for [MapView].
+         */
+        fun defaultLocationPuck(context: Context): LocationPuck = LocationPuck2D(
+            bearingImage = ContextCompat.getDrawable(
+                context,
+                R.drawable.mapbox_navigation_puck_icon,
+            )
+        )
 
         private fun Context.defaultSpacing() =
             resources.getDimensionPixelSize(R.dimen.mapbox_actionList_spacing)
