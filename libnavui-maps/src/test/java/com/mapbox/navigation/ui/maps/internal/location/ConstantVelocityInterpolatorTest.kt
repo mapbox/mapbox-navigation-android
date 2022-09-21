@@ -30,6 +30,24 @@ class ConstantVelocityInterpolatorTest {
     }
 
     @Test
+    fun `should not use keypoints that are at ZERO distance from previous point`() {
+        val p0 = Point.fromLngLat(0.0, 0.0)
+        val keyPoints = arrayOf(
+            Point.fromLngLat(0.5, 0.5),
+            Point.fromLngLat(0.5, 0.5),
+            Point.fromLngLat(1.0, 1.0),
+        )
+
+        val sut = ConstantVelocityInterpolator(p0, keyPoints)
+
+        val path = calculatePathValues(p0, *keyPoints)
+        assertEquals(keyPoints.size - 1, path.size)
+        path.forEach { (outTime, inTime) ->
+            assertEquals(outTime, sut.getInterpolation(inTime))
+        }
+    }
+
+    @Test
     fun `should use linear interpolation for key points at zero distance`() {
         val p0 = Point.fromLngLat(1.0, 1.0)
 
@@ -58,18 +76,18 @@ class ConstantVelocityInterpolatorTest {
         val distances = mutableListOf<Double>()
         var totalDistance = 0.0
         points.fold(p0) { a, b ->
-            val d = sqrt(
-                (b.latitude() - a.latitude()).pow(2.0) +
-                    (b.longitude() - a.longitude()).pow(2.0)
-            )
-            distances.add(d)
-            totalDistance += d
+            val d = distance(a, b)
+            if (0 < d) {
+                distances.add(d)
+                totalDistance += d
+            }
             b
         }
-        val timeStep = 1.0f / points.size
-        var pathTime = 0.0
+
+        val timeStep = 1.0f / distances.size
         val velocities = mutableListOf<Double>()
-        val path = mutableListOf<Pair<Float, Float>>()
+        val path = mutableListOf<Pair<Float, Float>>() // animationTime to scaledTime
+        var pathTime = 0.0
         distances.forEachIndexed { i, d ->
             val dt = d / totalDistance
             velocities.add(d / dt)
@@ -78,10 +96,16 @@ class ConstantVelocityInterpolatorTest {
         }
 
         // verify constant velocity
-        for (i in 1 until points.size) {
+        for (i in 1 until distances.size) {
             assertEquals(velocities[i - 1], velocities[i], 0.0001)
         }
 
         return path
     }
+
+    private fun distance(a: Point, b: Point) =
+        sqrt(
+            (b.latitude() - a.latitude()).pow(2.0) +
+                (b.longitude() - a.longitude()).pow(2.0)
+        )
 }
