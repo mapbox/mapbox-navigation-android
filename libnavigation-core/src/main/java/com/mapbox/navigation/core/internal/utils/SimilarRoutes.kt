@@ -9,10 +9,10 @@ fun calculateSimilarity(a: NavigationRoute, b: NavigationRoute): Double {
 
     val aSegments = toSegments(a)
     val bSegments = toSegments(b)
-    val diff = bSegments.toMutableSet().apply {
-        removeAll(aSegments)
+    val diff = aSegments.toMutableSet().apply {
+        removeAll(bSegments)
     }
-    return (1.0 - (diff.size.toDouble() / bSegments.size))
+    return (1.0 - (diff.size.toDouble() / aSegments.size))
 }
 
 private fun toSegments(a: NavigationRoute): MutableSet<Segment> {
