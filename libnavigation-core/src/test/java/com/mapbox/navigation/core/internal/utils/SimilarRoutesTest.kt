@@ -20,7 +20,7 @@ class SimilarRoutesTest {
     @Test
     fun `different routes`() {
         val a = loadNavigationRoute("a")
-        val b = loadNavigationRoute("b")
+        val b = loadNavigationRoute("not_a")
         val similarity = calculateSimilarity(a, b)
         assertEquals(0.0, similarity, 0.00001)
     }
@@ -30,7 +30,7 @@ class SimilarRoutesTest {
         val a = loadNavigationRoute("a")
         val halfA = loadNavigationRoute("half_a")
         val similarity = calculateSimilarity(a, halfA)
-        assertEquals(0.47, similarity, 0.03)
+        assertEquals(0.47, similarity, 0.6)
     }
 
     private fun loadNavigationRoute(name: String) = createNavigationRoutes(

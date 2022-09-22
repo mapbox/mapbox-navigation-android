@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.internal.utils
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
+import com.mapbox.turf.TurfMeasurement
 
 fun calculateSimilarity(a: NavigationRoute, b: NavigationRoute): Double {
     if (a.id == b.id) return 1.0
@@ -12,7 +13,7 @@ fun calculateSimilarity(a: NavigationRoute, b: NavigationRoute): Double {
     val diff = aSegments.toMutableSet().apply {
         removeAll(bSegments)
     }
-    return (1.0 - (diff.size.toDouble() / aSegments.size))
+    return (1.0 - (diff.sumOf { it.length } / aSegments.sumOf { it.length }))
 }
 
 private fun toSegments(a: NavigationRoute): MutableSet<Segment> {
@@ -31,4 +32,6 @@ private fun toSegments(a: NavigationRoute): MutableSet<Segment> {
     return segments
 }
 
-private data class Segment(val from: Point, val to: Point)
+private data class Segment(val from: Point, val to: Point) {
+    val length get() = TurfMeasurement.distance(from, to)
+}
