@@ -83,6 +83,7 @@ internal class RouteRefreshController(
                 RouteRefreshExtra.REFRESH_STATE_CANCELED,
                 current = RouteRefreshExtra.REFRESH_STATE_STARTED,
             )
+            resetState()
             throw e
         }
     }

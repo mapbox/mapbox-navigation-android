@@ -17,7 +17,7 @@ object RouteRefreshExtra {
 
     /**
      * The state becomes [REFRESH_STATE_FINISHED_SUCCESS] when the route is successfully refreshed.
-     * The state is triggered in case if at least one route is refreshed successfully (other might failed).
+     * The state is triggered in case if at least one route is refreshed successfully.
      */
     const val REFRESH_STATE_FINISHED_SUCCESS = "FINISHED_SUCCESS"
 
