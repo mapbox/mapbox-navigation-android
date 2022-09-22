@@ -12,41 +12,31 @@ class SimilarRoutesTest {
 
     @Test
     fun `the same routes`() {
-        val route = createNavigationRoutes(
-            DirectionsResponse.fromJson(resourceAsString("a.json")),
-            RouteOptions.fromUrl(URL("https://api.mapbox.com/directions/v5/mapbox/driving/-73.978054%2C40.754434%3B-73.973023%2C40.761265?alternatives=true&geometries=polyline6&language=en&overview=full&steps=true")),
-        ).first()
-        val similarity = calculateRoutesSimilarity(route, route)
+        val route = loadNavigationRoute("a")
+        val similarity = calculateSimilarity(route, route)
         assertEquals(1.0, similarity, 0.00001)
     }
 
     @Test
     fun `different routes`() {
-        val a = createNavigationRoutes(
-            DirectionsResponse.fromJson(resourceAsString("a.json")),
-            RouteOptions.fromUrl(URL("https://api.mapbox.com/directions/v5/mapbox/driving/-73.978054%2C40.754434%3B-73.973023%2C40.761265?alternatives=true&geometries=polyline6&language=en&overview=full&steps=true")),
-        ).first()
-        val b = createNavigationRoutes(
-            DirectionsResponse.fromJson(resourceAsString("b.json")),
-            RouteOptions.fromUrl(URL("https://api.mapbox.com/directions/v5/mapbox/driving/-73.973758%2C40.757206%3B-73.970704%2C40.761369?alternatives=true&geometries=polyline6&language=en&overview=full&steps=true")),
-        ).first()
-        val similarity = calculateRoutesSimilarity(a, b)
+        val a = loadNavigationRoute("a")
+        val b = loadNavigationRoute("b")
+        val similarity = calculateSimilarity(a, b)
         assertEquals(0.0, similarity, 0.00001)
     }
 
     @Test
     fun `half the same routes`() {
-        val a = createNavigationRoutes(
-            DirectionsResponse.fromJson(resourceAsString("a.json")),
-            RouteOptions.fromUrl(URL("https://api.mapbox.com/directions/v5/mapbox/driving/-73.978054%2C40.754434%3B-73.973023%2C40.761265?alternatives=true&geometries=polyline6&language=en&overview=full&steps=true")),
-        ).first()
-        val halfA = createNavigationRoutes(
-            DirectionsResponse.fromJson(resourceAsString("b.json")),
-            RouteOptions.fromUrl(URL("https://api.mapbox.com/directions/v5/mapbox/driving/-73.97406112344191%2C40.758298547604284%3B-73.973023%2C40.761265?alternatives=true&geometries=polyline6&language=en&overview=full&steps=true")),
-        ).first()
-        val similarity = calculateRoutesSimilarity(a, halfA)
+        val a = loadNavigationRoute("a")
+        val halfA = loadNavigationRoute("half_a")
+        val similarity = calculateSimilarity(a, halfA)
         assertEquals(0.5, similarity, 0.1)
     }
+
+    private fun loadNavigationRoute(name: String) = createNavigationRoutes(
+        DirectionsResponse.fromJson(resourceAsString("${name}_response.json")),
+        RouteOptions.fromUrl(URL(resourceAsString("${name}_request.txt"))),
+    ).first()
 
     private fun resourceAsString(
         name: String,

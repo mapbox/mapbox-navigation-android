@@ -4,13 +4,15 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 
-fun calculateRoutesSimilarity(a: NavigationRoute, b: NavigationRoute): Double {
+fun calculateSimilarity(a: NavigationRoute, b: NavigationRoute): Double {
     if (a.id == b.id) return 1.0
 
     val aSegments = toSegments(a)
     val bSegments = toSegments(b)
-    bSegments.removeAll(aSegments)
-    return bSegments.size.toDouble() / aSegments.size
+    val diff = bSegments.toMutableSet().apply {
+        removeAll(aSegments)
+    }
+    return (1.0 - (diff.size.toDouble() / bSegments.size))
 }
 
 private fun toSegments(a: NavigationRoute): MutableSet<Segment> {
