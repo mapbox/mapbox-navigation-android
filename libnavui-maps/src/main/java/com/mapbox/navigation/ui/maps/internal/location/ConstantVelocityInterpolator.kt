@@ -20,22 +20,16 @@ class ConstantVelocityInterpolator(
         val distances = mutableListOf<Double>()
         var total = 0.0
         keyPoints.fold(startPoint) { prevPoint, point ->
-            val d = distanceTo(prevPoint, point)
-            distances.add(d)
-            total += d
+            val d = distance(prevPoint, point)
+            if (0.0 < d) {
+                distances.add(d)
+                total += d
+            }
             point
         }
 
         innerInterpolator = if (0 < total) {
-            val path = Path()
-            val step = 1.0f / keyPoints.size
-            var pathTime = 0.0
-            keyPoints.forEachIndexed { index, _ ->
-                // simplified from (distances[index] / velocity) where (velocity = total / duration) and duration = 1.0
-                val deltaTime = distances[index] / total
-                pathTime += deltaTime
-                path.lineTo(pathTime.toFloat(), step * (index + 1))
-            }
+            val path = timingPath(distances, total)
             PathInterpolator(path)
         } else {
             TimeInterpolator { it }
@@ -45,7 +39,23 @@ class ConstantVelocityInterpolator(
     override fun getInterpolation(input: Float): Float =
         innerInterpolator.getInterpolation(input)
 
-    private fun distanceTo(p1: Point, p2: Point): Double {
+    private fun distance(p1: Point, p2: Point): Double {
         return hypot(p2.latitude() - p1.latitude(), p2.longitude() - p1.longitude())
+    }
+
+    private fun timingPath(distances: List<Double>, total: Double): Path {
+        val path = Path()
+        val step = 1.0f / distances.size
+        var pathTime = 0.0f
+        // NOTE: The Path must start at (0,0) and end at (1,1)
+        // To avoid PathInterpolator IllegalArgException, we ignore last keypoint distance value
+        // and manually add line to (1,1).
+        for (i in 0..distances.size - 2) {
+            val deltaTime = distances[i] / total
+            pathTime += deltaTime.toFloat()
+            path.lineTo(pathTime, (step * (i + 1)))
+        }
+        path.lineTo(1f, 1f)
+        return path
     }
 }
