@@ -14,6 +14,8 @@ import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.factories.TestSDKRouteParser
+import com.mapbox.navigation.testing.factories.createClosure
+import com.mapbox.navigation.testing.factories.createIncident
 import com.mapbox.navigation.testing.factories.createRouteLegAnnotation
 import com.mapbox.navigator.RouterOrigin
 import io.mockk.every
@@ -264,7 +266,9 @@ class NavigationRouteExTest {
 
             run {
                 val newLegAnnotations = createRouteLegAnnotation()
-                val newIncidents = listOf(createIncident(0, 1))
+                val newIncidents = listOf(
+                    createIncident(startGeometryIndex = 0, endGeometryIndex = 1)
+                )
                 val newClosures = listOf(createClosure(10, 15))
                 return@run TestData(
                     "update items route",
@@ -287,8 +291,14 @@ class NavigationRouteExTest {
             run {
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newLegAnnotations2 = createRouteLegAnnotation()
-                val newIncidents = listOf(createIncident(0, 1), createIncident(10, 15))
-                val newIncidents2 = listOf(createIncident(0, 1), createIncident(5, 7))
+                val newIncidents = listOf(
+                    createIncident(startGeometryIndex = 0, endGeometryIndex = 1),
+                    createIncident(startGeometryIndex = 10, endGeometryIndex = 15)
+                )
+                val newIncidents2 = listOf(
+                    createIncident(startGeometryIndex = 0, endGeometryIndex = 1),
+                    createIncident(startGeometryIndex = 5, endGeometryIndex = 7)
+                )
                 val newClosures = listOf(createClosure(0, 3), createClosure(6, 7))
                 val newClosures2 = listOf(createClosure(4, 7), createClosure(14, 17))
                 TestData(
@@ -312,10 +322,18 @@ class NavigationRouteExTest {
             run {
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newLegAnnotations2 = createRouteLegAnnotation()
-                val newInputIncidents = listOf(createIncident(2, 4))
-                val newOutputIncidents = listOf(createIncident(4, 6))
-                val newInputIncidents2 = listOf(createIncident(6, 9))
-                val newOutputIncidents2 = listOf(createIncident(6, 9))
+                val newInputIncidents = listOf(
+                    createIncident(startGeometryIndex = 2, endGeometryIndex = 4)
+                )
+                val newOutputIncidents = listOf(
+                    createIncident(startGeometryIndex = 4, endGeometryIndex = 6)
+                )
+                val newInputIncidents2 = listOf(
+                    createIncident(startGeometryIndex = 6, endGeometryIndex = 9)
+                )
+                val newOutputIncidents2 = listOf(
+                    createIncident(startGeometryIndex = 6, endGeometryIndex = 9)
+                )
                 val newInputClosures = listOf(createClosure(3, 4))
                 val newOutputClosures = listOf(createClosure(5, 6))
                 val newInputClosures2 = listOf(createClosure(1, 2))
@@ -341,8 +359,12 @@ class NavigationRouteExTest {
             run {
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newLegAnnotations2 = createRouteLegAnnotation()
-                val newIncidents = listOf(createIncident(10, 12))
-                val newIncidents2 = listOf(createIncident(40, 50))
+                val newIncidents = listOf(
+                    createIncident(startGeometryIndex = 10, endGeometryIndex = 12)
+                )
+                val newIncidents2 = listOf(
+                    createIncident(startGeometryIndex = 40, endGeometryIndex = 50)
+                )
                 val newClosures = listOf(createClosure(13, 17))
                 val newClosures2 = listOf(createClosure(2, 6))
                 TestData(
@@ -366,9 +388,15 @@ class NavigationRouteExTest {
             run {
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newLegAnnotations2 = createRouteLegAnnotation()
-                val newIncidents = listOf(createIncident(10, 12))
-                val newInputIncidents2 = listOf(createIncident(40, 50))
-                val newOutputIncidents2 = listOf(createIncident(44, 54))
+                val newIncidents = listOf(
+                    createIncident(startGeometryIndex = 10, endGeometryIndex = 12)
+                )
+                val newInputIncidents2 = listOf(
+                    createIncident(startGeometryIndex = 40, endGeometryIndex = 50)
+                )
+                val newOutputIncidents2 = listOf(
+                    createIncident(startGeometryIndex = 44, endGeometryIndex = 54)
+                )
                 val newClosures = listOf(createClosure(13, 17))
                 val newInputClosures2 = listOf(createClosure(2, 6))
                 val newOutputClosures2 = listOf(createClosure(6, 10))
@@ -612,18 +640,3 @@ private fun createNavigationRouteFromResource(
     TestSDKRouteParser(),
     com.mapbox.navigation.base.route.RouterOrigin.Offboard
 ).first()
-
-private fun createIncident(startIndex: Int?, endIndex: Int?): Incident =
-    Incident.builder()
-        .id("id")
-        .geometryIndexStart(startIndex)
-        .geometryIndexEnd(endIndex)
-        .build()
-
-private fun createClosure(startIndex: Int?, endIndex: Int?): Closure =
-    Closure.builder()
-        .apply {
-            startIndex?.let { geometryIndexStart(it) }
-            endIndex?.let { geometryIndexEnd(it) }
-        }
-        .build()

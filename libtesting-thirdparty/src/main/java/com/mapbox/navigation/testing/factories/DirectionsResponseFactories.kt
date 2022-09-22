@@ -161,11 +161,15 @@ fun createMaxSpeed(
 fun createIncident(
     id: String = "1",
     @Incident.IncidentType type: String = Incident.INCIDENT_CONSTRUCTION,
-    endTime: String? = null
+    endTime: String? = null,
+    startGeometryIndex: Int? = null,
+    endGeometryIndex: Int? = null,
 ): Incident = Incident.builder()
     .id(id)
     .type(type)
     .endTime(endTime)
+    .geometryIndexStart(startGeometryIndex)
+    .geometryIndexEnd(endGeometryIndex)
     .build()
 
 fun createClosure(
