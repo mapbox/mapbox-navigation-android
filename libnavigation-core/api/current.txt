@@ -40,6 +40,7 @@ package com.mapbox.navigation.core {
     method public void registerRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver routeAlternativesObserver);
     method public void registerRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver routeAlternativesObserver);
     method public void registerRouteProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver routeProgressObserver);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void registerRouteRefreshStateObserver(com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver routeRefreshStatesObserver);
     method public void registerRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
     method public void registerTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
     method public void registerVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
@@ -77,6 +78,7 @@ package com.mapbox.navigation.core {
     method public void unregisterRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver routeAlternativesObserver);
     method public void unregisterRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver routeAlternativesObserver);
     method public void unregisterRouteProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver routeProgressObserver);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void unregisterRouteRefreshStateObserver(com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver routeRefreshStatesObserver);
     method public void unregisterRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
     method public void unregisterTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
     method public void unregisterVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
@@ -750,6 +752,31 @@ package com.mapbox.navigation.core.routeoptions {
   }
 
   public final class RouteOptionsUpdaterKt {
+  }
+
+}
+
+package com.mapbox.navigation.core.routerefresh {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteRefreshExtra {
+    field public static final com.mapbox.navigation.core.routerefresh.RouteRefreshExtra INSTANCE;
+    field public static final String REFRESH_STATE_FINISHED_FAILED = "FINISHED_FAILED";
+    field public static final String REFRESH_STATE_FINISHED_SUCCESS = "FINISHED_SUCCESS";
+    field public static final String REFRESH_STATE_STARTED = "STARTED";
+  }
+
+  @StringDef({com.mapbox.navigation.core.routerefresh.RouteRefreshExtra.REFRESH_STATE_STARTED, com.mapbox.navigation.core.routerefresh.RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS, com.mapbox.navigation.core.routerefresh.RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface RouteRefreshExtra.RouteRefreshState {
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteRefreshStateResult {
+    method public String? getMessage();
+    method public String getState();
+    property public final String? message;
+    property public final String state;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface RouteRefreshStatesObserver {
+    method public void onNewState(com.mapbox.navigation.core.routerefresh.RouteRefreshStateResult result);
   }
 
 }
