@@ -30,7 +30,7 @@ class SimilarRoutesTest {
         val a = loadNavigationRoute("a")
         val halfA = loadNavigationRoute("half_a")
         val similarity = calculateSimilarity(a, halfA)
-        assertEquals(0.5, similarity, 0.1)
+        assertEquals(0.47, similarity, 0.03)
     }
 
     private fun loadNavigationRoute(name: String) = createNavigationRoutes(
