@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added _Experimental_ `RouteRefreshStatesObserver` that can be used to observe route refresh states. To subscribe and unsubscribe on updates corresponding use `MapboxNavigation#registerRouteRefreshStateObserver` and `MapboxNavigation#unregisterRouteRefreshStateObserver`. [#6345](https://github.com/mapbox/mapbox-navigation-android/pull/6345)
 #### Bug fixes and improvements
 - Fixed super late hwy exit detection after leaving a tunnel (auto profile only). [#6346](https://github.com/mapbox/mapbox-navigation-android/pull/6346)
 - Fixed the issue with incorrect geometry indices for `RouteLeg#incidents` and `RouteLeg#closures` after refresh. [#6364](https://github.com/mapbox/mapbox-navigation-android/pull/6364)

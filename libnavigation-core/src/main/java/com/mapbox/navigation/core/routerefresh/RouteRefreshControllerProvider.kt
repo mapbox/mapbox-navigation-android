@@ -16,6 +16,6 @@ internal object RouteRefreshControllerProvider {
         directionsSession,
         currentIndicesProvider,
         DirectionsRouteDiffProvider(),
-        { Date() }
+        { Date() },
     )
 }
