@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CurrentIndices
 import com.mapbox.navigation.base.internal.CurrentIndicesFactory
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -31,6 +32,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import io.mockk.verifySequence
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
@@ -45,7 +47,11 @@ import java.time.Month
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@OptIn(
+    ExperimentalMapboxNavigationAPI::class,
+    ExperimentalPreviewMapboxNavigationAPI::class,
+    ExperimentalCoroutinesApi::class,
+)
 class RouteRefreshControllerTest {
 
     private val logger = mockk<LoggerFrontend>(relaxed = true)
@@ -54,6 +60,7 @@ class RouteRefreshControllerTest {
         mockk<CurrentIndicesProvider>(relaxed = true) {
             coEvery { getFilledIndicesOrWait() } returns currentIndices
         }
+    private val mockStatesObserver = mockk<RouteRefreshStatesObserver>(relaxUnitFun = true)
 
     @Before
     fun setup() {
@@ -61,44 +68,63 @@ class RouteRefreshControllerTest {
     }
 
     @Test
-    fun `route with disabled refresh never refreshes`() = runBlockingTest {
-        val testRoute = createNavigationRoute(
-            createDirectionsRoute(
-                routeOptions = createRouteOptions(
-                    enableRefresh = false
+    fun `route with disabled refresh never refreshes and observer is failed`() =
+        runBlockingTest {
+            val testRoute = createNavigationRoute(
+                createDirectionsRoute(
+                    routeOptions = createRouteOptions(
+                        enableRefresh = false
+                    )
                 )
             )
-        )
-        val routeRefreshController = createRouteRefreshController()
+            val routeRefreshController = createRouteRefreshController()
 
-        val refreshJob = async { routeRefreshController.refresh(listOf(testRoute)) }
-        advanceTimeBy(TimeUnit.HOURS.toMillis(3))
+            val refreshJob = async { routeRefreshController.refresh(listOf(testRoute)) }
+            advanceTimeBy(TimeUnit.HOURS.toMillis(3))
 
-        assertTrue(refreshJob.isActive)
-        refreshJob.cancel()
-    }
+            assertTrue(refreshJob.isActive)
+            refreshJob.cancel()
+            verifySequence {
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(
+                        RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
+                        "No routes which could be refreshed. " +
+                            "testUUID#0 RouteOptions#enableRefresh is false"
+                    )
+                )
+            }
+        }
 
     @Test
-    fun `route refreshes`() = runBlockingTest {
-        val (initialRoute, refreshedRoute) = createTestInitialAndRefreshedTestRoutes()
-        val routeRefreshStub = RouteRefreshStub().apply {
-            setRefreshedRoute(refreshedRoute)
+    fun `route refreshes and observer is triggered with valid states`() =
+        runBlockingTest {
+            val (initialRoute, refreshedRoute) = createTestInitialAndRefreshedTestRoutes()
+            val routeRefreshStub = RouteRefreshStub().apply {
+                setRefreshedRoute(refreshedRoute)
+            }
+            val routeRefreshController = createRouteRefreshController(
+                routeRefresh = routeRefreshStub,
+                routeRefreshOptions = RouteRefreshOptions.Builder()
+                    .intervalMillis(30_000)
+                    .build(),
+            )
+
+            val refreshJob = async { routeRefreshController.refresh(listOf(initialRoute)) }
+            advanceTimeBy(TimeUnit.SECONDS.toMillis(30))
+
+            assertEquals(
+                RefreshedRouteInfo(listOf(refreshedRoute), currentIndices),
+                refreshJob.getCompletedTest()
+            )
+            verifySequence {
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_STARTED)
+                )
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS)
+                )
+            }
         }
-        val routeRefreshController = createRouteRefreshController(
-            routeRefresh = routeRefreshStub,
-            routeRefreshOptions = RouteRefreshOptions.Builder()
-                .intervalMillis(30_000)
-                .build(),
-        )
-
-        val refreshJob = async { routeRefreshController.refresh(listOf(initialRoute)) }
-        advanceTimeBy(TimeUnit.SECONDS.toMillis(30))
-
-        assertEquals(
-            RefreshedRouteInfo(listOf(refreshedRoute), currentIndices),
-            refreshJob.getCompletedTest()
-        )
-    }
 
     @Test
     fun `should refresh route with any annotation`() = runBlockingTest {
@@ -127,38 +153,113 @@ class RouteRefreshControllerTest {
     }
 
     @Test
-    fun `should log warning when the only route is not supported`() = runBlockingTest {
-        val primaryRoute = createNavigationRoute(createTestTwoLegRoute(requestUuid = null))
+    fun `should log warning when the only route is not supported, observer is failed`() =
+        runBlockingTest {
+            val primaryRoute = createNavigationRoute(createTestTwoLegRoute(requestUuid = null))
+            val routeRefreshController = createRouteRefreshController()
+
+            val refreshedDeferred = async { routeRefreshController.refresh(listOf(primaryRoute)) }
+            advanceTimeBy(TimeUnit.HOURS.toMillis(6))
+
+            assertTrue(refreshedDeferred.isActive)
+            verify(exactly = 1) {
+                logger.logI(
+                    withArg {
+                        assertTrue(
+                            "message doesn't mention the reason of failure - empty uuid: $it",
+                            it.contains("uuid", ignoreCase = true)
+                        )
+                    },
+                    any()
+                )
+            }
+            refreshedDeferred.cancel()
+            verifySequence {
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(
+                        RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
+                        "No routes which could be refreshed. null#0 DirectionsRoute#requestUuid " +
+                            "is blank. This can be caused by a route being generated by an " +
+                            "Onboard router (in offline mode). Make sure to switch to an " +
+                            "Offboard route when possible, only Offboard routes support " +
+                            "the refresh feature."
+                    )
+                )
+            }
+        }
+
+    @Test
+    fun `refreshing of empty routes, observer is not triggered`() = runBlockingTest {
         val routeRefreshController = createRouteRefreshController()
 
-        val refreshedDeferred = async { routeRefreshController.refresh(listOf(primaryRoute)) }
+        val refreshedDeferred = async {
+            routeRefreshController.refresh(
+                listOf()
+            )
+        }
         advanceTimeBy(TimeUnit.HOURS.toMillis(6))
 
         assertTrue(refreshedDeferred.isActive)
-        verify(exactly = 1) {
-            logger.logI(
-                withArg {
-                    assertTrue(
-                        "message doesn't mention the reason of failure - empty uuid: $it",
-                        it.contains("uuid", ignoreCase = true)
-                    )
-                },
-                any()
-            )
-        }
         refreshedDeferred.cancel()
+
+        verify(exactly = 0) {
+            mockStatesObserver.onNewState(any())
+        }
     }
 
     @Test
-    fun `refreshing of empty routes`() = runBlockingTest {
-        val routeRefreshController = createRouteRefreshController()
+    fun `refresh canceled, observer is not triggered`() = runBlockingTest {
+        val routeRefreshController = createRouteRefreshController(
+            routeRefreshOptions = RouteRefreshOptions.Builder()
+                .intervalMillis(30_000)
+                .build()
+        )
 
-        val refreshedDeferred = async { routeRefreshController.refresh(listOf()) }
-        advanceTimeBy(TimeUnit.HOURS.toMillis(6))
-
-        assertTrue(refreshedDeferred.isActive)
+        val refreshedDeferred = async {
+            routeRefreshController.refresh(
+                listOf(
+                    createNavigationRoute(createTestTwoLegRoute())
+                )
+            )
+        }
+        advanceTimeBy(TimeUnit.SECONDS.toMillis(29))
         refreshedDeferred.cancel()
+
+        assertFalse(refreshedDeferred.isActive)
+        verify(exactly = 0) {
+            mockStatesObserver.onNewState(any())
+        }
     }
+
+    @Test
+    fun `refresh canceled when route refresh started, observer stared, canceled`() =
+        runBlockingTest {
+            val routeRefreshController = createRouteRefreshController(
+                routeRefreshOptions = RouteRefreshOptions.Builder()
+                    .intervalMillis(30_000)
+                    .build()
+            )
+
+            val refreshedDeferred = async {
+                routeRefreshController.refresh(
+                    listOf(
+                        createNavigationRoute(createTestTwoLegRoute())
+                    )
+                )
+            }
+            advanceTimeBy(TimeUnit.SECONDS.toMillis(30))
+            refreshedDeferred.cancel()
+
+            assertFalse(refreshedDeferred.isActive)
+            verifySequence {
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_STARTED)
+                )
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_CANCELED)
+                )
+            }
+        }
 
     @Test
     fun `cancel request when stopped`() = runBlockingTest {
@@ -188,20 +289,33 @@ class RouteRefreshControllerTest {
     }
 
     @Test
-    fun `do not send a request when uuid is empty`() = runBlockingTest {
-        val routeRefresh = mockk<RouteRefresh>(relaxed = true)
-        val routeRefreshController = createRouteRefreshController(
-            routeRefresh = routeRefresh
-        )
-        val route = createNavigationRoute(createTestTwoLegRoute(requestUuid = ""))
+    fun `when uuid is empty, request is not sent, observer is in failed`() =
+        runBlockingTest {
+            val routeRefresh = mockk<RouteRefresh>(relaxed = true)
+            val routeRefreshController = createRouteRefreshController(
+                routeRefresh = routeRefresh
+            )
+            val route = createNavigationRoute(createTestTwoLegRoute(requestUuid = ""))
 
-        val refreshDeferred = launch { routeRefreshController.refresh(listOf(route)) }
-        advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
+            val refreshDeferred = launch { routeRefreshController.refresh(listOf(route)) }
+            advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
 
-        assertTrue(refreshDeferred.isActive)
-        verify(exactly = 0) { routeRefresh.requestRouteRefresh(any(), any(), any()) }
-        refreshDeferred.cancel()
-    }
+            assertTrue(refreshDeferred.isActive)
+            verify(exactly = 0) { routeRefresh.requestRouteRefresh(any(), any(), any()) }
+            refreshDeferred.cancel()
+            verifySequence {
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(
+                        RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
+                        "No routes which could be refreshed. #0 DirectionsRoute#requestUuid " +
+                            "is blank. This can be caused by a route being generated by an " +
+                            "Onboard router (in offline mode). Make sure to switch to an " +
+                            "Offboard route when possible, only Offboard routes support " +
+                            "the refresh feature."
+                    )
+                )
+            }
+        }
 
     @Test
     fun `clean up of a route without legs never returns`() = runBlockingTest {
@@ -439,41 +553,66 @@ class RouteRefreshControllerTest {
             )
         }
 
-    @Test
-    fun `after invalidation route isn't updated until successful refresh`() =
-        runBlockingTest {
-            val initialRoute = createNavigationRoute(createTestTwoLegRoute())
-            val routeRefreshStub = RouteRefreshStub().apply {
-                failRouteRefresh(initialRoute.id)
-            }
-            val routeRefreshOptions = RouteRefreshOptions.Builder().build()
-            val routeRefreshController = createRouteRefreshController(
-                routeRefreshOptions = routeRefreshOptions,
-                routeRefresh = routeRefreshStub
+    @Test(timeout = 2_000_000)
+    fun `after invalidation route isn't updated until successful refresh`() = runBlockingTest {
+        val initialRoute = createNavigationRoute(createTestTwoLegRoute())
+        val routeRefreshStub = RouteRefreshStub().apply {
+            failRouteRefresh(initialRoute.id)
+        }
+        val routeRefreshOptions = RouteRefreshOptions.Builder().build()
+        val routeRefreshController = createRouteRefreshController(
+            routeRefreshOptions = routeRefreshOptions,
+            routeRefresh = routeRefreshStub
+        )
+        val invalidatedRouteDeffer = async {
+            routeRefreshController.refresh(listOf(initialRoute))
+        }
+        advanceTimeBy(
+            expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis)
+        )
+        val invalidatedRoute = invalidatedRouteDeffer.getCompletedTest().routes.first()
+        // act
+        val refreshedRoute = async {
+            routeRefreshController.refresh(listOf(invalidatedRoute))
+        }
+        advanceTimeBy(
+            expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis) * 2
+        )
+        assertFalse(refreshedRoute.isCompleted)
+        routeRefreshStub.setRefreshedRoute(initialRoute)
+        advanceTimeBy(routeRefreshOptions.intervalMillis)
+        // assert
+        assertEquals(
+            RefreshedRouteInfo(listOf(initialRoute), currentIndices),
+            refreshedRoute.getCompletedTest()
+        )
+        verifySequence {
+            mockStatesObserver.onNewState(
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_STARTED)
             )
-            val invalidatedRouteDeffer = async {
-                routeRefreshController.refresh(listOf(initialRoute))
-            }
-            advanceTimeBy(
-                expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis)
+            mockStatesObserver.onNewState(
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED)
             )
-            val invalidatedRoute = invalidatedRouteDeffer.getCompletedTest().routes.first()
-            // act
-            val refreshedRoute = async {
-                routeRefreshController.refresh(listOf(invalidatedRoute))
-            }
-            advanceTimeBy(
-                expectedTimeToInvalidateCongestions(routeRefreshOptions.intervalMillis) * 100
+            mockStatesObserver.onNewState(
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_STARTED)
             )
-            assertFalse(refreshedRoute.isCompleted)
-            routeRefreshStub.setRefreshedRoute(initialRoute)
-            advanceTimeBy(routeRefreshOptions.intervalMillis)
-            // assert
-            assertEquals(
-                RefreshedRouteInfo(listOf(initialRoute), currentIndices),
-                refreshedRoute.getCompletedTest()
+            mockStatesObserver.onNewState(
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED)
+            )
+            mockStatesObserver.onNewState(
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_STARTED)
+            )
+            mockStatesObserver.onNewState(
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED)
+            )
+            mockStatesObserver.onNewState(
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_STARTED)
+            )
+            mockStatesObserver.onNewState(
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS)
             )
         }
+    }
 
     @Test
     fun `after invalidation route isn't updated until incident expiration`() =
@@ -669,7 +808,7 @@ class RouteRefreshControllerTest {
         }
 
     @Test
-    fun `route successfully refreshes on time if first try failed`() =
+    fun `route successfully refreshes on time if first try failed, observer states are started, success`() =
         runBlockingTest {
             val initialRoute = createNavigationRoute(
                 createTestTwoLegRoute(
@@ -715,71 +854,88 @@ class RouteRefreshControllerTest {
                 RefreshedRouteInfo(listOf(refreshed), currentIndices),
                 refreshedDeferred.getCompletedTest()
             )
+            verifySequence {
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_STARTED)
+                )
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS)
+                )
+            }
         }
 
     @Test
-    fun `successful refresh of two routes`() = runBlockingTest {
-        val initialRoutes = createNavigationRoutes(
-            createDirectionsResponse(
-                routes = listOf(
-                    createTestTwoLegRoute(
-                        firstLegAnnotations = createRouteLegAnnotation(
-                            congestion = listOf("severe", "moderate"),
-                            congestionNumeric = listOf(90, 50),
-                        )
-                    ),
-                    createTestTwoLegRoute(
-                        firstLegAnnotations = createRouteLegAnnotation(
-                            congestion = listOf("severe", "moderate"),
-                            congestionNumeric = listOf(90, 50),
+    fun `successful refresh of two routes, observer states are success, start`() =
+        runBlockingTest {
+            val initialRoutes = createNavigationRoutes(
+                createDirectionsResponse(
+                    routes = listOf(
+                        createTestTwoLegRoute(
+                            firstLegAnnotations = createRouteLegAnnotation(
+                                congestion = listOf("severe", "moderate"),
+                                congestionNumeric = listOf(90, 50),
+                            )
+                        ),
+                        createTestTwoLegRoute(
+                            firstLegAnnotations = createRouteLegAnnotation(
+                                congestion = listOf("severe", "moderate"),
+                                congestionNumeric = listOf(90, 50),
+                            )
                         )
                     )
                 )
             )
-        )
-        val refreshedRoutes = createNavigationRoutes(
-            createDirectionsResponse(
-                routes = listOf(
-                    createTestTwoLegRoute(
-                        firstLegAnnotations = createRouteLegAnnotation(
-                            congestion = listOf("severe", "severe"),
-                            congestionNumeric = listOf(90, 90),
-                        )
-                    ),
-                    createTestTwoLegRoute(
-                        firstLegAnnotations = createRouteLegAnnotation(
-                            congestion = listOf("severe", "severe"),
-                            congestionNumeric = listOf(90, 90),
+            val refreshedRoutes = createNavigationRoutes(
+                createDirectionsResponse(
+                    routes = listOf(
+                        createTestTwoLegRoute(
+                            firstLegAnnotations = createRouteLegAnnotation(
+                                congestion = listOf("severe", "severe"),
+                                congestionNumeric = listOf(90, 90),
+                            )
+                        ),
+                        createTestTwoLegRoute(
+                            firstLegAnnotations = createRouteLegAnnotation(
+                                congestion = listOf("severe", "severe"),
+                                congestionNumeric = listOf(90, 90),
+                            )
                         )
                     )
                 )
             )
-        )
-        val routeRefreshStub = RouteRefreshStub().apply {
-            setRefreshedRoute(refreshedRoutes[0])
-            setRefreshedRoute(refreshedRoutes[1])
+            val routeRefreshStub = RouteRefreshStub().apply {
+                setRefreshedRoute(refreshedRoutes[0])
+                setRefreshedRoute(refreshedRoutes[1])
+            }
+            val refreshOptions = RouteRefreshOptions.Builder().build()
+            val routeRefreshController = createRouteRefreshController(
+                routeRefresh = routeRefreshStub,
+                routeRefreshOptions = refreshOptions
+            )
+
+            val refreshedRoutesDeferred = async {
+                routeRefreshController.refresh(initialRoutes)
+            }
+            advanceTimeBy(refreshOptions.intervalMillis)
+
+            val result = refreshedRoutesDeferred.getCompletedTest()
+
+            assertEquals(
+                RefreshedRouteInfo(refreshedRoutes, currentIndices),
+                result
+            )
+            verifySequence {
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_STARTED)
+                )
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS)
+                )
+            }
         }
-        val refreshOptions = RouteRefreshOptions.Builder().build()
-        val routeRefreshController = createRouteRefreshController(
-            routeRefresh = routeRefreshStub,
-            routeRefreshOptions = refreshOptions
-        )
-
-        val refreshedRoutesDeferred = async {
-            routeRefreshController.refresh(initialRoutes)
-        }
-        advanceTimeBy(refreshOptions.intervalMillis)
-
-        val result = refreshedRoutesDeferred.getCompletedTest()
-
-        assertEquals(
-            RefreshedRouteInfo(refreshedRoutes, currentIndices),
-            result
-        )
-    }
 
     @Test
-    fun `primary route refresh failed, alternative route refreshed successfully`() =
+    fun `primary route refresh failed, alternative route refreshed successfully, observer started, success`() =
         runBlockingTest {
             val initialRoutes = createNavigationRoutes(
                 createDirectionsResponse(
@@ -832,6 +988,14 @@ class RouteRefreshControllerTest {
                 RefreshedRouteInfo(expectedRefreshedRoutes, currentIndices),
                 result
             )
+            verifySequence {
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_STARTED)
+                )
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS)
+                )
+            }
         }
 
     @Test
@@ -946,60 +1110,73 @@ class RouteRefreshControllerTest {
         }
 
     @Test
-    fun `no refreshes when all routes disable refresh`() = runBlockingTest {
-        val routes = createNavigationRoutes(
-            createDirectionsResponse(
-                routes = listOf(
-                    createDirectionsRoute(
-                        routeOptions = createRouteOptions(enableRefresh = false)
-                    ),
-                    createDirectionsRoute(
-                        routeOptions = createRouteOptions(enableRefresh = false)
-                    ),
+    fun `no refreshes when all routes disable refresh, observer is started, failed`() =
+        runBlockingTest {
+            val routes = createNavigationRoutes(
+                createDirectionsResponse(
+                    routes = listOf(
+                        createDirectionsRoute(
+                            routeOptions = createRouteOptions(enableRefresh = false)
+                        ),
+                        createDirectionsRoute(
+                            routeOptions = createRouteOptions(enableRefresh = false)
+                        ),
+                    )
                 )
             )
-        )
-        val routeRefresh = RouteRefreshStub()
-        val routeRefreshController = createRouteRefreshController(
-            routeRefresh = routeRefresh
-        )
+            val routeRefresh = RouteRefreshStub()
+            val routeRefreshController = createRouteRefreshController(
+                routeRefresh = routeRefresh
+            )
 
-        val refreshedDeferred = async { routeRefreshController.refresh(routes) }
-        advanceTimeBy(TimeUnit.HOURS.toMillis(8))
-        assertFalse(refreshedDeferred.isCompleted)
-        refreshedDeferred.cancel()
-        verify(exactly = 1) {
-            logger.logI(
-                withArg {
-                    assertTrue(
-                        "message doesn't mention the reason of failure - enableRefresh=false: $it",
-                        it.contains("enableRefresh", ignoreCase = true)
+            val refreshedDeferred = async { routeRefreshController.refresh(routes) }
+            advanceTimeBy(TimeUnit.HOURS.toMillis(8))
+            assertFalse(refreshedDeferred.isCompleted)
+            refreshedDeferred.cancel()
+            verify(exactly = 1) {
+                logger.logI(
+                    withArg {
+                        assertTrue(
+                            "message doesn't mention the reason of failure - " +
+                                "enableRefresh=false: $it",
+                            it.contains("enableRefresh", ignoreCase = true)
+                        )
+                        assertTrue(
+                            "message doesn't mention the route index",
+                            it.contains("0", ignoreCase = true)
+                        )
+                    },
+                    any()
+                )
+                logger.logI(
+                    withArg {
+                        assertTrue(
+                            "message doesn't mention the reason of failure - " +
+                                "enableRefresh=false: $it",
+                            it.contains("enableRefresh", ignoreCase = true)
+                        )
+                        assertTrue(
+                            "message doesn't mention the route index",
+                            it.contains("1", ignoreCase = true)
+                        )
+                    },
+                    any()
+                )
+            }
+            verifySequence {
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(
+                        RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
+                        "No routes which could be refreshed. testUUID#0 " +
+                            "RouteOptions#enableRefresh is false. testUUID#1 " +
+                            "RouteOptions#enableRefresh is false"
                     )
-                    assertTrue(
-                        "message doesn't mention the route index",
-                        it.contains("0", ignoreCase = true)
-                    )
-                },
-                any()
-            )
-            logger.logI(
-                withArg {
-                    assertTrue(
-                        "message doesn't mention the reason of failure - enableRefresh=false: $it",
-                        it.contains("enableRefresh", ignoreCase = true)
-                    )
-                    assertTrue(
-                        "message doesn't mention the route index",
-                        it.contains("1", ignoreCase = true)
-                    )
-                },
-                any()
-            )
+                )
+            }
         }
-    }
 
     @Test
-    fun `traffic annotations are cleaned up if all routes refresh fails`() =
+    fun `traffic annotations are cleaned up if all routes refresh fails, observer states are started, failed`() =
         runBlockingTest {
             val initialRoutes = createNavigationRoutes(
                 createDirectionsResponse(
@@ -1033,10 +1210,18 @@ class RouteRefreshControllerTest {
             val refreshedRoutes = refreshedRoutesDeferred.getCompletedTest().routes
             refreshedRoutes[0].assertCongestionExpiredForLeg(1)
             refreshedRoutes[1].assertCongestionExpiredForLeg(1)
+            verifySequence {
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_STARTED)
+                )
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED)
+                )
+            }
         }
 
     @Test
-    fun `if route refresh works only for one route, the controller updates only one route`() =
+    fun `if route refresh works only for one route, the controller updates only one route, observer states are started, success`() =
         runBlockingTest {
             val currentTime = utcToLocalTime(
                 year = 2022,
@@ -1118,20 +1303,31 @@ class RouteRefreshControllerTest {
                 initialRoutes[1], // no cleanup happens
                 result[1]
             )
+            verifySequence {
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_STARTED)
+                )
+                mockStatesObserver.onNewState(
+                    RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS)
+                )
+            }
         }
 
     private fun createRouteRefreshController(
         routeRefreshOptions: RouteRefreshOptions = RouteRefreshOptions.Builder().build(),
         routeRefresh: RouteRefresh = RouteRefreshStub(),
         routeDiffProvider: DirectionsRouteDiffProvider = DirectionsRouteDiffProvider(),
-        localDateProvider: () -> Date = { Date(1653493148247) }
+        localDateProvider: () -> Date = { Date(1653493148247) },
+        routeRefreshStatesObserver: RouteRefreshStatesObserver = mockStatesObserver,
     ) = RouteRefreshController(
         routeRefreshOptions,
         routeRefresh,
         currentIndicesProvider,
         routeDiffProvider,
-        localDateProvider
-    )
+        localDateProvider,
+    ).also {
+        it.registerRouteRefreshStateObserver(routeRefreshStatesObserver)
+    }
 }
 
 private fun createTestTwoLegRoute(
@@ -1202,7 +1398,8 @@ private fun DirectionsSession.onRefresh(
     return this
 }
 
-private fun expectedTimeToInvalidateCongestions(refreshInterval: Long): Long = refreshInterval * 3
+private fun expectedTimeToInvalidateCongestions(refreshInterval: Long): Long =
+    refreshInterval * RouteRefreshController.FAILED_ATTEMPTS_TO_INVALIDATE_EXPIRING_DATA
 
 // in case of timeout controller will wait for the one more response
 private fun expectedTimeToInvalidateCongestionsInCaseOfTimeout(refreshInterval: Long) =

@@ -83,6 +83,7 @@ import com.mapbox.navigation.core.routealternatives.RouteAlternativesRequestCall
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
+import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
@@ -1050,6 +1051,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ReachabilityService.removeReachabilityObserver(it)
             reachabilityObserverId = null
         }
+        routeRefreshController.unregisterAllRouteRefreshStateObservers()
 
         isDestroyed = true
         hasInstance = false
@@ -1600,6 +1602,28 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         navigationSessionStateObserver: NavigationSessionStateObserver
     ) {
         navigationSession.unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
+    }
+
+    /**
+     * Register a [RouteRefreshStatesObserver] to be notified of Route refresh state changes.
+     *
+     * @param routeRefreshStatesObserver RouteRefreshStatesObserver
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun registerRouteRefreshStateObserver(
+        routeRefreshStatesObserver: RouteRefreshStatesObserver
+    ) {
+        routeRefreshController.registerRouteRefreshStateObserver(routeRefreshStatesObserver)
+    }
+
+    /**
+     * Unregisters a [RouteRefreshStatesObserver].
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun unregisterRouteRefreshStateObserver(
+        routeRefreshStatesObserver: RouteRefreshStatesObserver
+    ) {
+        routeRefreshController.unregisterRouteRefreshStateObserver(routeRefreshStatesObserver)
     }
 
     private fun startSession(withTripService: Boolean, withReplayEnabled: Boolean) {
