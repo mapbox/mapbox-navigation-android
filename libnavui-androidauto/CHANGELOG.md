@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Removed `MapboxNavigation` from `PlaceListOnMapScreen`. [#6371](https://github.com/mapbox/mapbox-navigation-android/pull/6371)
 
 ## androidauto-v0.12.0 - Sep 26, 2022
 ### Changelog

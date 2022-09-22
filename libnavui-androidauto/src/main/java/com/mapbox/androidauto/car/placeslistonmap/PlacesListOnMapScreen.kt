@@ -11,7 +11,7 @@ import androidx.car.app.model.Template
 import androidx.car.app.navigation.model.PlaceListNavigationTemplate
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.mapbox.androidauto.MapboxCarApp
+import androidx.lifecycle.lifecycleScope
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.action.MapboxActionProvider
 import com.mapbox.androidauto.car.location.CarLocationRenderer
@@ -21,136 +21,69 @@ import com.mapbox.androidauto.car.preview.CarRouteRequestCallback
 import com.mapbox.androidauto.car.preview.RoutePreviewCarContext
 import com.mapbox.androidauto.car.search.PlaceRecord
 import com.mapbox.androidauto.car.search.SearchCarContext
-import com.mapbox.androidauto.internal.car.extensions.getStyle
-import com.mapbox.androidauto.internal.car.extensions.handleStyleOnAttached
-import com.mapbox.androidauto.internal.car.extensions.handleStyleOnDetached
 import com.mapbox.androidauto.internal.logAndroidAuto
-import com.mapbox.geojson.Feature
-import com.mapbox.geojson.FeatureCollection
-import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxExperimental
-import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
-import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
-import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.base.route.NavigationRoute
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancelChildren
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.concurrent.CopyOnWriteArrayList
 
 @MapboxExperimental
 class PlacesListOnMapScreen @UiThread constructor(
     private val searchCarContext: SearchCarContext,
-    private val placesProvider: PlacesListOnMapProvider,
-    private val placesListItemMapper: PlacesListItemMapper,
+    placesProvider: PlacesListOnMapProvider,
     private val actionProviders: List<MapboxActionProvider>,
-    private val placesLayerUtil: PlacesListOnMapLayerUtil = PlacesListOnMapLayerUtil()
 ) : Screen(searchCarContext.carContext) {
 
     @VisibleForTesting
     var itemList = buildErrorItemList(R.string.car_search_no_results)
 
-    private val placeRecords by lazy { CopyOnWriteArrayList<PlaceRecord>() }
-    private val jobControl by lazy { searchCarContext.mainCarContext.getJobControl() }
     private val carNavigationCamera = CarLocationsOverviewCamera()
-    private val locationRenderer = CarLocationRenderer(searchCarContext.mainCarContext)
-    private var styleLoadedListener: OnStyleLoadedListener? = null
-
-    private val surfaceListener = object : MapboxCarMapObserver {
-
-        override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
-            super.onAttached(mapboxCarMapSurface)
-            logAndroidAuto("PlacesListOnMapScreen loaded")
-            styleLoadedListener = mapboxCarMapSurface.handleStyleOnAttached {
-                placesLayerUtil.initializePlacesListOnMapLayer(
-                    it,
-                    carContext.resources
-                )
-                loadPlaceRecords()
-            }
-        }
-
-        override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
-            super.onDetached(mapboxCarMapSurface)
-            logAndroidAuto("PlacesListOnMapScreen detached")
-            mapboxCarMapSurface.handleStyleOnDetached(styleLoadedListener)?.let {
-                placesLayerUtil.removePlacesListOnMapLayer(it)
-            }
-        }
-    }
-
-    private val placeClickListener = object : PlacesListItemClickListener {
-
-        override fun onItemClick(placeRecord: PlaceRecord) {
-            logAndroidAuto("PlacesListOnMapScreen request $placeRecord")
-            searchCarContext.carRouteRequest.request(placeRecord, carRouteRequestCallback)
-        }
-    }
-
-    private val carRouteRequestCallback = object : CarRouteRequestCallback {
-
-        override fun onRoutesReady(placeRecord: PlaceRecord, routes: List<NavigationRoute>) {
-            val routePreviewCarContext = RoutePreviewCarContext(searchCarContext.mainCarContext)
-            logAndroidAuto("PlacesListOnMapScreen go to CarRoutePreviewScreen ${routes.size}")
-            screenManager.push(CarRoutePreviewScreen(routePreviewCarContext, placeRecord, routes))
-        }
-
-        override fun onUnknownCurrentLocation() {
-            onErrorItemList(R.string.car_search_unknown_current_location)
-        }
-
-        override fun onDestinationLocationUnknown() {
-            onErrorItemList(R.string.car_search_unknown_search_location)
-        }
-
-        override fun onNoRoutesFound() {
-            onErrorItemList(R.string.car_search_no_results)
-        }
-    }
+    private var carLocationRenderer = CarLocationRenderer(searchCarContext.mainCarContext)
+    private val placesListOnMapManager = PlacesListOnMapManager(placesProvider)
 
     init {
+        lifecycleScope.launch {
+            placesListOnMapManager.placeRecords.collect { placeRecords ->
+                onPlaceRecordsChanged(placeRecords)
+            }
+        }
+        lifecycleScope.launch {
+            placesListOnMapManager.placeSelected.filterNotNull().collect { placeRecord ->
+                onPlaceRecordSelected(placeRecord)
+            }
+        }
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onCreate(owner: LifecycleOwner) {
-                logAndroidAuto("PlacesListOnMapScreen onCreate")
+                super.onCreate(owner)
+                MapboxNavigationApp.registerObserver(searchCarContext.carRouteRequest)
             }
 
             override fun onDestroy(owner: LifecycleOwner) {
-                logAndroidAuto("PlacesListOnMapScreen onDestroy")
-            }
-
-            override fun onStart(owner: LifecycleOwner) {
-                logAndroidAuto("PlacesListOnMapScreen onStart")
-            }
-
-            override fun onStop(owner: LifecycleOwner) {
-                logAndroidAuto("PlacesListOnMapScreen onStop")
+                super.onDestroy(owner)
+                MapboxNavigationApp.unregisterObserver(searchCarContext.carRouteRequest)
             }
 
             override fun onResume(owner: LifecycleOwner) {
-                logAndroidAuto("PlacesListOnMapScreen onResume")
-                searchCarContext.mapboxCarMap.registerObserver(surfaceListener)
-                searchCarContext.mapboxCarMap.registerObserver(carNavigationCamera)
-                searchCarContext.mapboxCarMap.registerObserver(locationRenderer)
+                searchCarContext.mapboxCarMap
+                    .registerObserver(carNavigationCamera)
+                    .registerObserver(carLocationRenderer)
+                    .registerObserver(placesListOnMapManager)
             }
 
             override fun onPause(owner: LifecycleOwner) {
-                logAndroidAuto("PlacesListOnMapScreen onPause")
-                placesProvider.cancel()
-                jobControl.job.cancelChildren()
-                searchCarContext.mapboxCarMap.unregisterObserver(locationRenderer)
-                searchCarContext.mapboxCarMap.unregisterObserver(carNavigationCamera)
-                searchCarContext.mapboxCarMap.unregisterObserver(surfaceListener)
+                super.onPause(owner)
+                searchCarContext.mapboxCarMap
+                    .unregisterObserver(carNavigationCamera)
+                    .unregisterObserver(carLocationRenderer)
+                    .unregisterObserver(placesListOnMapManager)
             }
         })
     }
 
     override fun onGetTemplate(): Template {
-        addPlaceIconsToMap(placeRecords)
-        val locationProvider = MapboxCarApp.carAppLocationService().navigationLocationProvider
-        val placesItemList = locationProvider.lastLocation?.run {
-            placesListItemMapper.mapToItemList(this, placeRecords, placeClickListener)
-        } ?: ItemList.Builder().build()
+        val placesItemList = placesListOnMapManager.currentItemList() ?: ItemList.Builder().build()
         val actionStrip = ActionStrip.Builder().apply {
             actionProviders.forEach {
                 when (it) {
@@ -171,41 +104,40 @@ class PlacesListOnMapScreen @UiThread constructor(
             .build()
     }
 
-    private fun addPlaceIconsToMap(places: List<PlaceRecord>) {
-        logAndroidAuto("PlacesListOnMapScreen addPlaceIconsToMap with ${places.size} places.")
-        searchCarContext.mapboxCarMap.carMapSurface?.let { carMapSurface ->
-            val features = places.filter { it.coordinate != null }.map {
-                Feature.fromGeometry(
-                    Point.fromLngLat(it.coordinate!!.longitude(), it.coordinate.latitude())
-                )
-            }
-            val featureCollection = FeatureCollection.fromFeatures(features)
-            carMapSurface.getStyle()?.let {
-                placesLayerUtil.updatePlacesListOnMapLayer(it, featureCollection)
-            }
-        }
-        val placesWithCoordinates = places.mapNotNull { it.coordinate }
-        carNavigationCamera.updateWithLocations(placesWithCoordinates)
+    private fun onPlaceRecordsChanged(placeRecords: List<PlaceRecord>) {
+        invalidate()
+        val coordinates = placeRecords.mapNotNull { it.coordinate }
+        carNavigationCamera.updateWithLocations(coordinates)
     }
 
-    private fun loadPlaceRecords() {
-        jobControl.scope.launch {
-            val expectedPlaceRecords = withContext(Dispatchers.IO) {
-                placesProvider.getPlaces()
+    private fun onPlaceRecordSelected(placeRecord: PlaceRecord) {
+        val carRouteRequestCallback = object : CarRouteRequestCallback {
+            override fun onRoutesReady(placeRecord: PlaceRecord, routes: List<NavigationRoute>) {
+                onPlaceRecordSelectedRoutesReady(placeRecord, routes)
             }
-            placeRecords.clear()
-            expectedPlaceRecords.fold(
-                {
-                    logAndroidAuto(
-                        "PlacesListOnMapScreen ${it.errorMessage}, ${it.throwable?.stackTrace}"
-                    )
-                },
-                {
-                    placeRecords.addAll(it)
-                    invalidate()
-                }
-            )
+
+            override fun onUnknownCurrentLocation() {
+                onErrorItemList(R.string.car_search_unknown_current_location)
+            }
+
+            override fun onDestinationLocationUnknown() {
+                onErrorItemList(R.string.car_search_unknown_search_location)
+            }
+
+            override fun onNoRoutesFound() {
+                onErrorItemList(R.string.car_search_no_results)
+            }
         }
+        searchCarContext.carRouteRequest.request(placeRecord, carRouteRequestCallback)
+    }
+
+    private fun onPlaceRecordSelectedRoutesReady(
+        placeRecord: PlaceRecord,
+        routes: List<NavigationRoute>
+    ) {
+        logAndroidAuto("PlacesListOnMapScreen go to CarRoutePreviewScreen ${routes.size}")
+        val routePreviewCarContext = RoutePreviewCarContext(searchCarContext.mainCarContext)
+        screenManager.push(CarRoutePreviewScreen(routePreviewCarContext, placeRecord, routes))
     }
 
     private fun onErrorItemList(@StringRes stringRes: Int) {

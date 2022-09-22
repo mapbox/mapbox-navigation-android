@@ -9,8 +9,6 @@ import androidx.core.graphics.drawable.IconCompat
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
-import com.mapbox.androidauto.car.placeslistonmap.PlaceMarkerRenderer
-import com.mapbox.androidauto.car.placeslistonmap.PlacesListItemMapper
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapScreen
 import com.mapbox.androidauto.car.search.FavoritesApi
 import com.mapbox.androidauto.car.search.PlaceSearchScreen
@@ -94,14 +92,6 @@ class MainActionStrip(
         return PlacesListOnMapScreen(
             SearchCarContext(mainCarContext),
             placesProvider,
-            PlacesListItemMapper(
-                PlaceMarkerRenderer(mainCarContext.carContext),
-                mainCarContext
-                    .mapboxNavigation
-                    .navigationOptions
-                    .distanceFormatterOptions
-                    .unitType
-            ),
             listOf(
                 CarFeedbackAction(
                     mainCarContext.mapboxCarMap,
