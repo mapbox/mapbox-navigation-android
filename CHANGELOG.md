@@ -8,6 +8,8 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Fixed super late hwy exit detection after leaving a tunnel (auto profile only). [#6346](https://github.com/mapbox/mapbox-navigation-android/pull/6346)
 - Fixed the issue with incorrect geometry indices for `RouteLeg#incidents` and `RouteLeg#closures` after refresh. [#6364](https://github.com/mapbox/mapbox-navigation-android/pull/6364)
+- Improved alternatives id robustness by adding new alternatives to existing instead of replacing them during `MapboxNavigation#requestAlternativeRoutes`. [#6373](https://github.com/mapbox/mapbox-navigation-android/pull/6373)
+- Improved stop detector for auto profile. [#6373](https://github.com/mapbox/mapbox-navigation-android/pull/6373)
 
 ## Mapbox Navigation SDK 2.8.0-rc.2 - 16 September, 2022
 ### Changelog
