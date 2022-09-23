@@ -250,8 +250,8 @@ class ViewStyleCustomization {
         fun defaultCameraModeButtonParams(context: Context) = MapboxExtendableButtonParams(
             R.style.MapboxStyleCameraModeButton,
             context.defaultLayoutParams().apply {
-                bottomMargin = context.defaultSpacing()
                 topMargin = context.defaultSpacing()
+                bottomMargin = context.defaultSpacing()
             },
         )
 
@@ -261,8 +261,19 @@ class ViewStyleCustomization {
         fun defaultRecenterButtonParams(context: Context) = MapboxExtendableButtonParams(
             R.style.DropInStyleRecenterButton,
             context.defaultLayoutParams().apply {
-                bottomMargin = context.defaultSpacing()
                 topMargin = context.defaultSpacing()
+                bottomMargin = context.defaultSpacing()
+            },
+        )
+
+        /**
+         * Default [MapboxAudioGuidanceButton] params.
+         */
+        fun defaultAudioGuidanceButtonParams(context: Context) = MapboxExtendableButtonParams(
+            R.style.MapboxStyleAudioGuidanceButton,
+            context.defaultLayoutParams().apply {
+                topMargin = context.defaultSpacing()
+                bottomMargin = context.defaultSpacing()
             },
         )
 
@@ -291,14 +302,6 @@ class ViewStyleCustomization {
         fun defaultStartNavigationButtonParams(context: Context) = MapboxExtendableButtonParams(
             R.style.DropInStyleStartButton,
             context.defaultLayoutParams(),
-        )
-
-        /**
-         * Default [MapboxAudioGuidanceButton] params.
-         */
-        fun defaultAudioGuidanceButtonParams(context: Context) = MapboxExtendableButtonParams(
-            R.style.MapboxStyleAudioGuidanceButton,
-            context.defaultLayoutParams().apply { bottomMargin = context.defaultSpacing() },
         )
 
         /**
