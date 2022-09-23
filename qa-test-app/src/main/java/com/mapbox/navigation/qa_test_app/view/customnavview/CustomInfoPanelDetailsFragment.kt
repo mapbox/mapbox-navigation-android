@@ -5,7 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.mapbox.navigation.qa_test_app.databinding.LayoutFragmentInfoPanelDetailsBinding
+import com.mapbox.navigation.qa_test_app.databinding.LayoutFragmentInfoPanelDetailsLargeBinding
+import com.mapbox.navigation.qa_test_app.databinding.LayoutFragmentInfoPanelDetailsSmallBinding
 
 class CustomInfoPanelDetailsFragment : Fragment() {
 
@@ -14,8 +15,25 @@ class CustomInfoPanelDetailsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding =
-            LayoutFragmentInfoPanelDetailsBinding.inflate(inflater, container, false)
-        return binding.root
+        val contentSize = arguments?.getString("content_size") ?: "SMALL"
+        return if (contentSize == "LARGE") {
+            LayoutFragmentInfoPanelDetailsLargeBinding
+                .inflate(inflater, container, false)
+                .root
+        } else {
+            LayoutFragmentInfoPanelDetailsSmallBinding
+                .inflate(inflater, container, false)
+                .root
+        }
+    }
+
+    companion object {
+        fun create(contentSize: String = "SMALL"): CustomInfoPanelDetailsFragment {
+            return CustomInfoPanelDetailsFragment().apply {
+                arguments = Bundle().apply {
+                    putString("content_size", contentSize)
+                }
+            }
+        }
     }
 }

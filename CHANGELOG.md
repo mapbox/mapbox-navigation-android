@@ -9,6 +9,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Added `ComponentInstaller` for the `LocationComponent` that offers simplified integration of map LocationPuck. [#6206](https://github.com/mapbox/mapbox-navigation-android/pull/6206)
 - Added `ViewStyleCustomization.locationPuck` that allows to define a custom location puck using `NavigationView`. [#6365](https://github.com/mapbox/mapbox-navigation-android/pull/6365)
 - Added _Experimental_ `RouteRefreshStatesObserver` that can be used to observe route refresh states. To subscribe and unsubscribe on updates corresponding use `MapboxNavigation#registerRouteRefreshStateObserver` and `MapboxNavigation#unregisterRouteRefreshStateObserver`. [#6345](https://github.com/mapbox/mapbox-navigation-android/pull/6345)
+- Introduced `NavigationViewListener.onInfoPanelSlide` callback that allows observation of `NavigationView`'s Info Panel slide offset. [#6361](https://github.com/mapbox/mapbox-navigation-android/pull/6361)
 #### Bug fixes and improvements
 - Marked `PredictiveCacheController`, `MapboxBuildingView`, `ViewportDataSourceUpdateObserver`, `NavigationScaleGestureHandler`, `NavigationCameraStateChangedObserver`, `NavigationCameraStateTransition`, `NavigationCameraTransition`, `TransitionEndListener`, `MapboxRecenterButton`, `MapboxRouteOverviewButton`, `MapboxJunctionView`, `MapboxSignboardView`, `MapboxRoadNameLabelView`, `MapboxRoadNameView`, `MapboxRouteArrowView`, `MapboxRouteLineView`, `MapboxCameraModeButton` methods and `View.capture` extension with `@UiThread` annotation. [#6235](https://github.com/mapbox/mapbox-navigation-android/pull/6235)
 - Marked `Binder`, `MapboxExtendableButton` methods and `MapboxNavigation#installComponents` methods with `@UiThread` annotation. [#6268](https://github.com/mapbox/mapbox-navigation-android/pull/6268)
@@ -19,6 +20,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed crash caused by `ConstantVelocityInterpolator` creating `PathInterpolator` with an invalid path. [#6367](https://github.com/mapbox/mapbox-navigation-android/pull/6367)
 - Improved alternatives id robustness by adding new alternatives to existing instead of replacing them during `MapboxNavigation#requestAlternativeRoutes`. [#6373](https://github.com/mapbox/mapbox-navigation-android/pull/6373)
 - Improved stop detector for auto profile. [#6373](https://github.com/mapbox/mapbox-navigation-android/pull/6373)
+- Fixed `RoadNameLabel` position issues by making sure that it updates when expanding and collapsing the info panel. [#6361](https://github.com/mapbox/mapbox-navigation-android/pull/6361)
+- Fixed `InfoPanel` overlapping the `RoadNameLabel` in free drive state with the device being in landscape orientation. [#6361](https://github.com/mapbox/mapbox-navigation-android/pull/6361)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.2 - 16 September, 2022
 ### Changelog

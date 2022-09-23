@@ -132,6 +132,16 @@ abstract class NavigationViewListener {
     open fun onInfoPanelSettling() = Unit
 
     /**
+     * Called when the info panel is being dragged.
+     *
+     * @param slideOffset The new offset of info panel within [-1,1] range. Offset increases
+     *  as info panel is moving upward and decreases in the opposite direction.
+     *  Range 0 to 1: Denotes the panel is transitioning from collapsed to expanded state.
+     *  Range -1 to 0: Denotes the panel is transitioning from hidden to collapsed state.
+     */
+    open fun onInfoPanelSlide(slideOffset: Float) = Unit
+
+    /**
      * Called when hardware back button has been pressed.
      *
      * @return True if the listener has consumed the event, false otherwise.

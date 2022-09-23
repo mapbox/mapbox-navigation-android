@@ -100,8 +100,10 @@ package com.mapbox.navigation.dropin {
     method public void onInfoPanelExpanded();
     method public void onInfoPanelHidden();
     method public void onInfoPanelSettling();
+    method public void onInfoPanelSlide(float slideOffset);
     method public void onManeuverCollapsed();
     method public void onManeuverExpanded();
+    method public void onMapClicked(com.mapbox.geojson.Point point);
     method public void onOverviewCameraMode();
     method public void onRouteFetchCanceled(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
     method public void onRouteFetchFailed(java.util.List<com.mapbox.navigation.base.route.RouterFailure> reasons, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);

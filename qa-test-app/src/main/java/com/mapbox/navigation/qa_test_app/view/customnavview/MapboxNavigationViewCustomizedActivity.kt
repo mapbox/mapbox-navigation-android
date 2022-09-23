@@ -56,6 +56,7 @@ import com.mapbox.navigation.dropin.MapboxExtendableButtonParams
 import com.mapbox.navigation.dropin.NavigationViewListener
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteArrowOptions
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
+import com.mapbox.navigation.dropin.ViewStyleCustomization
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultAudioGuidanceButtonParams
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultCameraModeButtonParams
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultDestinationMarkerAnnotationOptions
@@ -63,7 +64,6 @@ import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultEndN
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelBackground
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelMarginEnd
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelMarginStart
-import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelPeekHeight
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultLocationPuck
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultManeuverViewOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRecenterButtonParams
@@ -208,6 +208,8 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
 
     private var lastNavigationState: NavigationState? = null
     private var lastLocation: Location? = null
+    private lateinit var customInfoPanel: CustomInfoPanelBinder
+    private lateinit var customInfoPanelFixedHeight: CustomInfoPanelBinderWithFixedHeight
 
     init {
         attachResumed(dumpCommands)
@@ -229,6 +231,9 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         updateTheme()
         super.onCreate(savedInstanceState)
+
+        customInfoPanel = CustomInfoPanelBinder(binding.navigationView)
+        customInfoPanelFixedHeight = CustomInfoPanelBinderWithFixedHeight(binding.navigationView)
 
         binding.navigationView.addListener(freeDriveInfoPanelInstaller)
         binding.navigationView.addListener(navViewListener)
@@ -262,20 +267,20 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             }
         )
 
-        bindSwitch(
-            menuBinding.toggleCustomInfoPanelContent,
-            viewModel.showCustomInfoPanelContent,
-            ::toggleCustomInfoPanelContent
+        bindSpinner(
+            menuBinding.spinnerCustomInfoPanelContent,
+            viewModel.customInfoPanelContent,
+            ::setCustomInfoPanelContent
         )
         bindSwitch(
             menuBinding.toggleCustomInfoPanelEndNavButton,
             viewModel.showCustomInfoPanelEndNavButton,
             ::toggleCustomInfoPanelEndNavButton
         )
-        bindSwitch(
-            menuBinding.toggleCustomInfoPanel,
-            viewModel.useCustomInfoPanelLayout,
-            ::toggleCustomInfoPanelLayout
+        bindSpinner(
+            menuBinding.spinnerCustomInfoPanelLayout,
+            viewModel.customInfoPanelLayout,
+            ::setCustomInfoPanelLayout
         )
         bindSwitch(
             menuBinding.toggleCustomInfoPanelStyles,
@@ -535,17 +540,24 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         }
     }
 
-    private fun toggleCustomInfoPanelContent(enabled: Boolean) {
+    private fun setCustomInfoPanelContent(contentSize: String) {
         binding.navigationView.customizeViewBinders {
-            if (enabled) {
-                infoPanelContentBinder = UIBinder { viewGroup ->
-                    supportFragmentManager.beginTransaction()
-                        .replace(viewGroup.id, CustomInfoPanelDetailsFragment())
-                        .commitAllowingStateLoss()
-                    UIComponent()
+            when (contentSize) {
+                "SMALL",
+                "LARGE" -> {
+                    infoPanelContentBinder = UIBinder { viewGroup ->
+                        supportFragmentManager.beginTransaction()
+                            .replace(
+                                viewGroup.id,
+                                CustomInfoPanelDetailsFragment.create(contentSize)
+                            )
+                            .commitAllowingStateLoss()
+                        UIComponent()
+                    }
                 }
-            } else {
-                infoPanelContentBinder = UIBinder.USE_DEFAULT
+                else -> {
+                    infoPanelContentBinder = UIBinder.USE_DEFAULT
+                }
             }
         }
     }
@@ -561,22 +573,27 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         }
     }
 
-    private fun toggleCustomInfoPanelLayout(enabled: Boolean) {
-        binding.navigationView.customizeViewBinders {
-            infoPanelBinder =
-                if (enabled) {
-                    CustomInfoPanelBinder()
-                } else {
-                    InfoPanelBinder.defaultBinder()
+    private fun setCustomInfoPanelLayout(selection: String) {
+        when (selection) {
+            "CUSTOM" -> {
+                customInfoPanel.setEnabled(true)
+                customInfoPanelFixedHeight.setEnabled(false)
+            }
+            "CUSTOM WITH FIXED HEIGHT" -> {
+                customInfoPanel.setEnabled(false)
+                customInfoPanelFixedHeight.setEnabled(true)
+            }
+            else -> {
+                customInfoPanel.setEnabled(false)
+                customInfoPanelFixedHeight.setEnabled(false)
+                binding.navigationView.customizeViewBinders {
+                    infoPanelBinder = InfoPanelBinder.defaultBinder()
                 }
-        }
-        binding.navigationView.customizeViewStyles {
-            infoPanelPeekHeight =
-                if (enabled) {
-                    defaultInfoPanelPeekHeight(applicationContext) + 20.dp
-                } else {
-                    defaultInfoPanelPeekHeight(applicationContext)
+                binding.navigationView.customizeViewStyles {
+                    val context = this@MapboxNavigationViewCustomizedActivity
+                    infoPanelPeekHeight = ViewStyleCustomization.defaultInfoPanelPeekHeight(context)
                 }
+            }
         }
     }
 

@@ -5,6 +5,7 @@ import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.graphics.Insets
+import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -21,7 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class CustomInfoPanelBinder(
+class CustomInfoPanelBinderWithFixedHeight(
     private val navigationView: NavigationView
 ) : InfoPanelBinder() {
     private var myLayout: ViewGroup? = null
@@ -49,9 +50,12 @@ class CustomInfoPanelBinder(
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val observer = super.bind(viewGroup)
         val layout = viewGroup.findViewById<ViewGroup>(R.id.infoPanelContainer)
+        layout.updateLayoutParams {
+            height = navigationView.height / 2
+        }
         return navigationListOf(
             observer,
-            CustomInfoPanelComponent(layout, insets, slideOffsetFlow)
+            CustomInfoPanelComponentForFixedHeight(layout, insets, slideOffsetFlow)
         )
     }
 
@@ -60,7 +64,7 @@ class CustomInfoPanelBinder(
 
     private val slideOffsetObserver = object : NavigationViewListener() {
         override fun onInfoPanelSlide(slideOffset: Float) {
-            this@CustomInfoPanelBinder.slideOffsetFlow.value = slideOffset
+            this@CustomInfoPanelBinderWithFixedHeight.slideOffsetFlow.value = slideOffset
         }
     }
 
@@ -68,7 +72,7 @@ class CustomInfoPanelBinder(
         if (enabled) {
             navigationView.addListener(slideOffsetObserver)
             navigationView.customizeViewBinders {
-                infoPanelBinder = this@CustomInfoPanelBinder
+                infoPanelBinder = this@CustomInfoPanelBinderWithFixedHeight
             }
             navigationView.customizeViewStyles {
                 val context = navigationView.context
@@ -81,7 +85,7 @@ class CustomInfoPanelBinder(
 }
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-private class CustomInfoPanelComponent(
+private class CustomInfoPanelComponentForFixedHeight(
     private val layout: ViewGroup,
     private val insets: Insets,
     private val slideOffsetFlow: StateFlow<Float>
@@ -89,16 +93,12 @@ private class CustomInfoPanelComponent(
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
-
-        val navigationView = findNavigationView()
         slideOffsetFlow.observe { slideOffset ->
             val threshold = 0.7
-            val isFullHeightLayout = layout.height == navigationView?.height
-            if (isFullHeightLayout && threshold < slideOffset) {
+            if (threshold < slideOffset) {
                 val f = 1.0f - (1.0f - slideOffset) / (1.0f - threshold)
-                val top = insets.top * f
                 val margins = (10.dp - (10.dp * f)).toInt()
-                layout.updatePadding(top = top.toInt(), bottom = insets.bottom)
+                layout.updatePadding(top = 0, bottom = insets.bottom)
                 layout.updateMargins(left = margins + insets.left, right = margins + insets.right)
                 layout.background.updateCornerRadius(20.dp - (20.dp * f))
             } else {
@@ -107,14 +107,6 @@ private class CustomInfoPanelComponent(
                 layout.background.updateCornerRadius(20.dp)
             }
         }
-    }
-
-    private fun findNavigationView(): NavigationView? {
-        var v = layout.parent
-        while (v != null && v !is NavigationView) {
-            v = v.parent
-        }
-        return v as? NavigationView
     }
 
     private fun Drawable.updateCornerRadius(radius: Number) {
