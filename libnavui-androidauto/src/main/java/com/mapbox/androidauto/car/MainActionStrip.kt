@@ -92,7 +92,7 @@ class MainActionStrip(
         val feedbackPoll = mainCarContext.feedbackPollProvider
             .getSearchFeedbackPoll(mainCarContext.carContext)
         return PlacesListOnMapScreen(
-            mainCarContext,
+            SearchCarContext(mainCarContext),
             placesProvider,
             PlacesListItemMapper(
                 PlaceMarkerRenderer(mainCarContext.carContext),

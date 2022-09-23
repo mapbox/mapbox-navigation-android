@@ -9,6 +9,7 @@ import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.car.placeslistonmap.PlaceMarkerRenderer
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListItemMapper
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapScreen
+import com.mapbox.androidauto.car.search.SearchCarContext
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplink
@@ -43,7 +44,7 @@ class GeoDeeplinkNavigateAction(
         val feedbackPoll = mainCarContext.feedbackPollProvider
             .getSearchFeedbackPoll(mainCarContext.carContext)
         return PlacesListOnMapScreen(
-            mainCarContext,
+            SearchCarContext(mainCarContext),
             placesProvider,
             PlacesListItemMapper(
                 PlaceMarkerRenderer(mainCarContext.carContext),

@@ -13,7 +13,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.R
-import com.mapbox.androidauto.car.MainCarContext
 import com.mapbox.androidauto.car.action.MapboxActionProvider
 import com.mapbox.androidauto.car.location.CarLocationRenderer
 import com.mapbox.androidauto.car.navigation.CarLocationsOverviewCamera
@@ -42,21 +41,20 @@ import java.util.concurrent.CopyOnWriteArrayList
 
 @MapboxExperimental
 class PlacesListOnMapScreen @UiThread constructor(
-    private val mainCarContext: MainCarContext,
+    private val searchCarContext: SearchCarContext,
     private val placesProvider: PlacesListOnMapProvider,
     private val placesListItemMapper: PlacesListItemMapper,
     private val actionProviders: List<MapboxActionProvider>,
-    private val searchCarContext: SearchCarContext = SearchCarContext(mainCarContext),
     private val placesLayerUtil: PlacesListOnMapLayerUtil = PlacesListOnMapLayerUtil()
-) : Screen(mainCarContext.carContext) {
+) : Screen(searchCarContext.carContext) {
 
     @VisibleForTesting
     var itemList = buildErrorItemList(R.string.car_search_no_results)
 
     private val placeRecords by lazy { CopyOnWriteArrayList<PlaceRecord>() }
-    private val jobControl by lazy { mainCarContext.getJobControl() }
+    private val jobControl by lazy { searchCarContext.mainCarContext.getJobControl() }
     private val carNavigationCamera = CarLocationsOverviewCamera()
-    private val locationRenderer = CarLocationRenderer(mainCarContext)
+    private val locationRenderer = CarLocationRenderer(searchCarContext.mainCarContext)
     private var styleLoadedListener: OnStyleLoadedListener? = null
 
     private val surfaceListener = object : MapboxCarMapObserver {
@@ -117,32 +115,32 @@ class PlacesListOnMapScreen @UiThread constructor(
                 logAndroidAuto("PlacesListOnMapScreen onCreate")
             }
 
+            override fun onDestroy(owner: LifecycleOwner) {
+                logAndroidAuto("PlacesListOnMapScreen onDestroy")
+            }
+
             override fun onStart(owner: LifecycleOwner) {
                 logAndroidAuto("PlacesListOnMapScreen onStart")
-            }
-
-            override fun onResume(owner: LifecycleOwner) {
-                logAndroidAuto("PlacesListOnMapScreen onResume")
-                mainCarContext.mapboxCarMap.registerObserver(surfaceListener)
-                mainCarContext.mapboxCarMap.registerObserver(carNavigationCamera)
-                mainCarContext.mapboxCarMap.registerObserver(locationRenderer)
-            }
-
-            override fun onPause(owner: LifecycleOwner) {
-                logAndroidAuto("PlacesListOnMapScreen onPause")
-                placesProvider.cancel()
-                jobControl.job.cancelChildren()
-                mainCarContext.mapboxCarMap.unregisterObserver(locationRenderer)
-                mainCarContext.mapboxCarMap.unregisterObserver(carNavigationCamera)
-                mainCarContext.mapboxCarMap.unregisterObserver(surfaceListener)
             }
 
             override fun onStop(owner: LifecycleOwner) {
                 logAndroidAuto("PlacesListOnMapScreen onStop")
             }
 
-            override fun onDestroy(owner: LifecycleOwner) {
-                logAndroidAuto("PlacesListOnMapScreen onDestroy")
+            override fun onResume(owner: LifecycleOwner) {
+                logAndroidAuto("PlacesListOnMapScreen onResume")
+                searchCarContext.mapboxCarMap.registerObserver(surfaceListener)
+                searchCarContext.mapboxCarMap.registerObserver(carNavigationCamera)
+                searchCarContext.mapboxCarMap.registerObserver(locationRenderer)
+            }
+
+            override fun onPause(owner: LifecycleOwner) {
+                logAndroidAuto("PlacesListOnMapScreen onPause")
+                placesProvider.cancel()
+                jobControl.job.cancelChildren()
+                searchCarContext.mapboxCarMap.unregisterObserver(locationRenderer)
+                searchCarContext.mapboxCarMap.unregisterObserver(carNavigationCamera)
+                searchCarContext.mapboxCarMap.unregisterObserver(surfaceListener)
             }
         })
     }
@@ -175,7 +173,7 @@ class PlacesListOnMapScreen @UiThread constructor(
 
     private fun addPlaceIconsToMap(places: List<PlaceRecord>) {
         logAndroidAuto("PlacesListOnMapScreen addPlaceIconsToMap with ${places.size} places.")
-        mainCarContext.mapboxCarMap.carMapSurface?.let { carMapSurface ->
+        searchCarContext.mapboxCarMap.carMapSurface?.let { carMapSurface ->
             val features = places.filter { it.coordinate != null }.map {
                 Feature.fromGeometry(
                     Point.fromLngLat(it.coordinate!!.longitude(), it.coordinate.latitude())
