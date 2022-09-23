@@ -877,7 +877,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                                     processedRoute.route.routeId == passedRoute.id
                                 }
                             }
-                        directionsSession.setRoutes(routes, setRoutesInfo)
+                        directionsSession.setRoutes(processedRoutes.routes, setRoutesInfo)
                         routesSetResult = ExpectedFactory.createValue(
                             RoutesSetSuccess(
                                 ignoredAlternatives.associate {
@@ -927,7 +927,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         return tripSession.setRoutes(routes, setRoutesInfo).apply {
             if (this is NativeSetRouteValue) {
                 routeAlternativesController.processAlternativesMetadata(
-                    routes,
+                    this.routes,
                     nativeAlternatives
                 )
             }

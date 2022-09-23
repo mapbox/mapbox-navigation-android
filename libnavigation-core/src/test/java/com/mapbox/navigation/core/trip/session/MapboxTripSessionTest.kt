@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.internal.CurrentIndicesFactory
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
+import com.mapbox.navigation.base.internal.route.refreshNativePeer
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -667,6 +668,7 @@ class MapboxTripSessionTest {
             )
 
             assertEquals(nativeAlternatives, (result as NativeSetRouteValue).nativeAlternatives)
+            assertEquals(routes + alternative, result.routes)
         }
 
     @Test
@@ -687,6 +689,7 @@ class MapboxTripSessionTest {
             )
 
             assertEquals(nativeAlternatives, (result as NativeSetRouteValue).nativeAlternatives)
+            assertEquals(routes + alternative, result.routes)
         }
 
     @Test
@@ -703,6 +706,7 @@ class MapboxTripSessionTest {
             )
 
             assertTrue((result as NativeSetRouteValue).nativeAlternatives.isEmpty())
+            assertEquals(emptyList<NavigationRoute>(), result.routes)
         }
 
     @Test
@@ -723,6 +727,7 @@ class MapboxTripSessionTest {
             )
 
             assertEquals(nativeAlternatives, (result as NativeSetRouteValue).nativeAlternatives)
+            assertEquals(routes + alternative, result.routes)
         }
 
     @Test
@@ -732,6 +737,15 @@ class MapboxTripSessionTest {
             coEvery {
                 navigator.refreshRoute(any())
             } returns ExpectedFactory.createValue(mockAlternativesMetadata)
+
+            val refreshedRoutes = routes.map {
+                mockk<NavigationRoute>(relaxed = true) {
+                    every { id } returns "abc#0"
+                }
+            }
+            routes.forEachIndexed { i, route ->
+                every { route.refreshNativePeer() } returns refreshedRoutes[i]
+            }
 
             tripSession.start(true)
             val result = tripSession.setRoutes(
@@ -743,6 +757,11 @@ class MapboxTripSessionTest {
                 mockAlternativesMetadata,
                 (result as NativeSetRouteValue).nativeAlternatives
             )
+
+            result.routes.forEachIndexed { i, route ->
+                assertTrue(route === refreshedRoutes[i])
+            }
+            assertEquals(tripSession.primaryRoute, refreshedRoutes.first())
         }
 
     @Test
@@ -947,19 +966,28 @@ class MapboxTripSessionTest {
         coroutineRule.runBlockingTest {
             val roadObjectsObserver: RoadObjectsOnRouteObserver = mockk(relaxUnitFun = true)
             val roadObjects: List<UpcomingRoadObject> = listOf(mockk())
+            val refreshedRoadObjects: List<UpcomingRoadObject> = listOf(mockk())
+            val initialRoute = mockNavigationRoute(roadObjects = roadObjects)
+            val refreshedRoute = mockNavigationRoute(roadObjects = roadObjects)
+            every {
+                refreshedRoute.refreshNativePeer()
+            } returns mockNavigationRoute(roadObjects = refreshedRoadObjects)
             tripSession = buildTripSession()
 
             tripSession.registerRoadObjectsOnRouteObserver(roadObjectsObserver)
             tripSession.setRoutes(
-                listOf(mockNavigationRoute(roadObjects = roadObjects)),
+                listOf(initialRoute),
                 BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, 0)
             )
             tripSession.setRoutes(
-                listOf(mockNavigationRoute(roadObjects = roadObjects)),
+                listOf(refreshedRoute),
                 SetRefreshedRoutesInfo(CurrentIndicesFactory.createIndices(0, 0, null)),
             )
 
-            verify(exactly = 2) { roadObjectsObserver.onNewRoadObjectsOnTheRoute(any()) }
+            verifyOrder {
+                roadObjectsObserver.onNewRoadObjectsOnTheRoute(roadObjects)
+                roadObjectsObserver.onNewRoadObjectsOnTheRoute(refreshedRoadObjects)
+            }
         }
 
     @Test

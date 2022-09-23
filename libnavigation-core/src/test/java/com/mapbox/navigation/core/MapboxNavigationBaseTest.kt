@@ -294,9 +294,12 @@ internal open class MapboxNavigationBaseTest {
             )
         } returns tripSession
         every { tripSession.getRouteProgress() } returns routeProgress
-        coEvery { tripSession.setRoutes(any(), any()) } returns NativeSetRouteValue(
-            nativeAlternatives = emptyList()
-        )
+        coEvery { tripSession.setRoutes(any(), any()) } answers {
+            NativeSetRouteValue(
+                routes = firstArg(),
+                nativeAlternatives = emptyList()
+            )
+        }
     }
 
     private fun mockDirectionSession() {
