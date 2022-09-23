@@ -8,8 +8,6 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.internal.CurrentIndicesFactory
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
-import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
-import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -1489,10 +1487,7 @@ class MapboxTripSessionTest {
 private fun mockNavigationRoute(
     roadObjects: List<UpcomingRoadObject> = listOf(mockk())
 ): NavigationRoute = mockk(relaxed = true) {
-    val navigationRoute = this
-    every {
-        navigationRoute.nativeRoute().routeInfo.alerts.toUpcomingRoadObjects()
-    } returns roadObjects
+    every { upcomingRoadObjects } returns roadObjects
 }
 
 fun createSetRouteError(
