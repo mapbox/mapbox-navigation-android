@@ -8,9 +8,7 @@ import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.map.ScalebarPlaceholderComponent
 import com.mapbox.navigation.dropin.databinding.MapboxScalebarPlaceholderLayoutBinding
-import com.mapbox.navigation.ui.app.internal.extension.actionsFlowable
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
-import kotlinx.coroutines.flow.map
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class ScalebarPlaceholderBinder(
@@ -22,7 +20,7 @@ internal class ScalebarPlaceholderBinder(
         return ScalebarPlaceholderComponent(
             binding.scalebarPlaceholder,
             context.styles.mapScalebarParams,
-            context.store.state
+            context.maneuverBehavior.maneuverViewHeight
         )
     }
 

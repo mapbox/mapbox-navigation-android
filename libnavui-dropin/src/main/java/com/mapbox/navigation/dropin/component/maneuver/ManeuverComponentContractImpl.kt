@@ -13,4 +13,8 @@ internal class ManeuverComponentContractImpl(
     override fun onManeuverViewStateChanged(state: MapboxManeuverViewState) {
         context.maneuverBehavior.updateBehavior(state)
     }
+
+    override fun onManeuverViewHeightChanged(newHeight: Int) {
+        context.maneuverBehavior.updateViewHeight(newHeight)
+    }
 }
