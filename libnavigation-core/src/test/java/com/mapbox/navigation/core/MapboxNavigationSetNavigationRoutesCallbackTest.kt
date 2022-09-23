@@ -53,6 +53,7 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
                     BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
                 )
             } returns NativeSetRouteValue(
+                routes,
                 listOf(
                     routeAlternativeWithId(alternativeId1),
                     routeAlternativeWithId(alternativeId2),
@@ -78,7 +79,7 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
                     routes,
                     BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
                 )
-            } returns NativeSetRouteValue(emptyList())
+            } returns NativeSetRouteValue(routes, emptyList())
 
             mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)
 
@@ -121,7 +122,7 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
                     BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, initialLegIndex),
 
                 )
-            } returns NativeSetRouteValue(emptyList())
+            } returns NativeSetRouteValue(routes, emptyList())
 
             mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)
 
@@ -142,7 +143,7 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
                     routes,
                     BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
                 )
-            } returns NativeSetRouteValue(emptyList())
+            } returns NativeSetRouteValue(routes, emptyList())
 
             mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)
 
@@ -170,6 +171,7 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
                     BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
                 )
             } returns NativeSetRouteValue(
+                routes,
                 listOf(routeAlternativeWithId("bad id 1"), routeAlternativeWithId("bad id 2"))
             )
 
@@ -198,7 +200,10 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
                     routes,
                     BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
                 )
-            } returns NativeSetRouteValue(listOf(routeAlternativeWithId(alternativeId2)))
+            } returns NativeSetRouteValue(
+                routes,
+                listOf(routeAlternativeWithId(alternativeId2))
+            )
 
             mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)
 
