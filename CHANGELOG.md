@@ -4,6 +4,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.9.0-alpha.3 - 23 September, 2022
+### Changelog
+[Changes between v2.9.0-alpha.2 and v2.9.0-alpha.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0-alpha.2...v2.9.0-alpha.3)
+
+#### Features
 - Moved `MapboxAudioGuidance` and `MapboxAudioGuidanceState` into public api. [#6336](https://github.com/mapbox/mapbox-navigation-android/pull/6336)
 - Introduced `ViewOptionsCustomization.showCameraDebugInfo` to allow end users to enable camera debug info. [#6356](https://github.com/mapbox/mapbox-navigation-android/pull/6356)
 - Added `ComponentInstaller` for the `LocationComponent` that offers simplified integration of map LocationPuck. [#6206](https://github.com/mapbox/mapbox-navigation-android/pull/6206)
@@ -24,6 +31,16 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed `InfoPanel` overlapping the `RoadNameLabel` in free drive state with the device being in landscape orientation. [#6361](https://github.com/mapbox/mapbox-navigation-android/pull/6361)
 - Introduced `ViewStyleCustomization#mapScalebarParams` that allows for configuring map scalebar. [#6355](https://github.com/mapbox/mapbox-navigation-android/pull/6355)
 - Fixed an issue where `NavigationRoute#upcomingRoadObjects` was not refreshed. This issue did not impact the deprecated `RoadObjectsOnRouteObserver`. [#6378](https://github.com/mapbox/mapbox-navigation-android/pull/6378)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.8.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.8.0))
+- Mapbox Navigation Native `v115.0.1`
+- Mapbox Core Common `v23.0.0`
+- Mapbox Java `v6.8.0-beta.4` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0-beta.4))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+- Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
+
 
 ## Mapbox Navigation SDK 2.8.0-rc.3 - 23 September, 2022
 ### Changelog
