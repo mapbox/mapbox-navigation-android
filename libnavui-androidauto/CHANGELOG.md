@@ -5,10 +5,22 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+
+## androidauto-v0.12.0 - Sep 26, 2022
+
+#### Features
+#### Bug fixes and improvements
 - Use `MapboxAudioGuidance` from public api. [#6336](https://github.com/mapbox/mapbox-navigation-android/pull/6336)
 - Fixed an issue that caused camera animations to interfere with user gestures. [#6357](https://github.com/mapbox/mapbox-navigation-android/pull/6357)
 - Marked `CarFeedbackSender`, `CarGridFeedbackScreen`, `CarLocationsOverviewCamera`, `CarNavigationCamera`, `PlacesListItemClickListener`, `PlacesListOnMapLayerUtil`, `PlacesListOnMapScreen`, `CarRoutePreviewScreen`, `CarRouteRequest`, `PlaceSearchScreen`, `MainCarScreen`, `AppAudioGuidanceUtil`, `MapboxCarApp` methods with `@UiThread` annotation. [#6267](https://github.com/mapbox/mapbox-navigation-android/pull/6267)
 - Removed `MapboxNavigation` from `CarRouteRequest` constructor. [#6372](https://github.com/mapbox/mapbox-navigation-android/pull/6372)
+- Removed Search SDK as an inherited library. You must include search directly in order to access the api. [#6388](https://github.com/mapbox/mapbox-navigation-android/pull/6388)
+
+### Mapbox dependencies
+This release defines minimum versions for the Mapbox dependencies.
+- Mapbox Maps Android Auto Extension `v0.3.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/extension-androidauto-v0.3.0))
+- Mapbox Navigation `v2.9.0-alpha.3` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/v2.9.0-alpha.3))
+- Mapbox Search `v1.0.0-beta.36` ([release notes](https://github.com/mapbox/mapbox-search-android/releases/tag/v1.0.0-beta.36))
 
 ## androidauto-v0.11.0 - Sep 16, 2022
 ### Changelog

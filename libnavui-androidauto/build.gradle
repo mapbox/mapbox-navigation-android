@@ -38,16 +38,15 @@ dependencies {
     // Jetpack car library.
     api(dependenciesList.mapboxMapsAndroidAuto)
 
-    // This defines the minimum version of Maps, Navigation, and Search which are included in
-    // this SDK. To upgrade the SDK versions, you can specify a newer version in your downstream
-    // build.gradle.
-    def carNavVersion = "2.8.0-rc.1"
-    def carSearchVersion = "1.0.0-beta.36"
-    api("com.mapbox.search:mapbox-search-android:${carSearchVersion}")
+    // This defines the minimum version of Navigation which is included in this SDK. To upgrade the
+    // Navigation versions, you can specify a newer version in your downstream build.gradle.
+    def carNavVersion = "2.9.0-alpha.3"
+    api("com.mapbox.navigation:android:${carNavVersion}")
 
-    // TODO use the carNavVersion when 2.9.0-alpha.2 is available
-    api(project(":libnavigation-android"))
-//    api("com.mapbox.navigation:android:${carNavVersion}")
+    // Search is currently in beta so it is not included in this SDK. The functionality of search
+    // is included behind this library's api.
+    def carSearchVersion = "1.0.0-beta.36"
+    implementation("com.mapbox.search:mapbox-search-android:${carSearchVersion}")
 
     implementation(dependenciesList.androidXAppCompat)
     implementation(dependenciesList.coroutinesCore)
