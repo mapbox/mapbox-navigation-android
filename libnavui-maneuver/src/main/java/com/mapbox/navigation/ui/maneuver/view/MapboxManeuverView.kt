@@ -45,7 +45,6 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 class MapboxManeuverView : ConstraintLayout {
 
-    private val _heightFlow = MutableStateFlow(0)
     private val _maneuverViewState = MutableStateFlow<MapboxManeuverViewState>(
         MapboxManeuverViewState.COLLAPSED
     )
@@ -54,8 +53,6 @@ class MapboxManeuverView : ConstraintLayout {
      * Observe on [maneuverViewState] to get notified about changes to [MapboxManeuverViewState].
      */
     val maneuverViewState = _maneuverViewState.asStateFlow()
-
-    internal val heightFlow = _heightFlow.asStateFlow()
 
     private var maneuverViewOptions = ManeuverViewOptions.Builder().build()
 
@@ -751,12 +748,5 @@ class MapboxManeuverView : ConstraintLayout {
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)
     internal fun getUpcomingManeuverAdapter(): MapboxUpcomingManeuverAdapter {
         return upcomingManeuverAdapter
-    }
-
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
-        if (h != oldh) {
-            _heightFlow.tryEmit(h)
-        }
     }
 }

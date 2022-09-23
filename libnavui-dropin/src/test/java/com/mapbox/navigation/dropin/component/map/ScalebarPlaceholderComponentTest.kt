@@ -27,26 +27,25 @@ class ScalebarPlaceholderComponentTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val mapboxNavigation = mockk<MapboxNavigation>()
     private val scalebarPlaceholderView = mockk<View>(relaxed = true)
-    private val initialHeight = 7
-    private val heightFlow = MutableStateFlow(initialHeight)
+    private val visibilityFlow = MutableStateFlow(false)
     private val mapScalebarParams = MutableStateFlow(
         MapboxMapScalebarParams.Builder(context).build()
     )
     private val component = ScalebarPlaceholderComponent(
         scalebarPlaceholderView,
         mapScalebarParams,
-        heightFlow
+        visibilityFlow
     )
 
     @Test
-    fun visibilityIsChangedOnOnAttachedHasHeight() {
+    fun visibilityIsChangedOnOnAttachedVisible() {
+        visibilityFlow.tryEmit(true)
         component.onAttached(mapboxNavigation)
         verify { scalebarPlaceholderView.visibility = View.GONE }
     }
 
     @Test
-    fun visibilityIsChangedOnOnAttachedNoHeight() {
-        heightFlow.tryEmit(0)
+    fun visibilityIsChangedOnOnAttachedNotVisible() {
         component.onAttached(mapboxNavigation)
         verify { scalebarPlaceholderView.visibility = View.GONE }
     }
@@ -58,13 +57,14 @@ class ScalebarPlaceholderComponentTest {
     }
 
     @Test
-    fun heightChangeBeforeOnAttached() {
-        heightFlow.tryEmit(8)
+    fun maneuverVisibilityChangeBeforeOnAttached() {
+        visibilityFlow.tryEmit(true)
         verify(exactly = 0) { scalebarPlaceholderView.visibility = any() }
     }
 
     @Test
-    fun mapScalebarParamsChangeAfterOnAttachedHasHeight() {
+    fun mapScalebarParamsChangeAfterOnAttachedVisible() {
+        visibilityFlow.tryEmit(true)
         component.onAttached(mapboxNavigation)
         clearMocks(scalebarPlaceholderView)
         mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
@@ -72,8 +72,7 @@ class ScalebarPlaceholderComponentTest {
     }
 
     @Test
-    fun mapScalebarParamsChangeAfterOnAttachedNoHeight() {
-        heightFlow.tryEmit(0)
+    fun mapScalebarParamsChangeAfterOnAttachedNotVisible() {
         component.onAttached(mapboxNavigation)
         clearMocks(scalebarPlaceholderView)
         mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
@@ -81,20 +80,22 @@ class ScalebarPlaceholderComponentTest {
     }
 
     @Test
-    fun heightChangeAfterOnAttachedHasHeight() {
+    fun maneuverVisibilityChangeAfterOnAttachedVisible() {
         mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
         component.onAttached(mapboxNavigation)
         clearMocks(scalebarPlaceholderView)
-        heightFlow.tryEmit(8)
+        visibilityFlow.tryEmit(true)
         verify { scalebarPlaceholderView.visibility = View.GONE }
     }
 
     @Test
-    fun heightChangeAfterOnAttachedNoHeight() {
+    fun maneuverVisibilityChangeAfterOnAttachedNotVisible() {
+        // so that it will <i>change</i> to false later
+        visibilityFlow.tryEmit(true)
         mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
         component.onAttached(mapboxNavigation)
         clearMocks(scalebarPlaceholderView)
-        heightFlow.tryEmit(0)
+        visibilityFlow.tryEmit(false)
         verify { scalebarPlaceholderView.visibility = View.VISIBLE }
     }
 
@@ -108,12 +109,12 @@ class ScalebarPlaceholderComponentTest {
     }
 
     @Test
-    fun heightChangeAfterOnDetached() {
+    fun maneuverVisibilityChangeAfterOnDetached() {
         mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
         component.onAttached(mapboxNavigation)
         clearMocks(scalebarPlaceholderView)
         component.onDetached(mapboxNavigation)
-        heightFlow.tryEmit(9)
+        visibilityFlow.tryEmit(true)
         verify(exactly = 0) { scalebarPlaceholderView.visibility = any() }
     }
 }

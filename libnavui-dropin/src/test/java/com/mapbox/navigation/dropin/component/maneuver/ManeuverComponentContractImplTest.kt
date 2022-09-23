@@ -29,10 +29,10 @@ class ManeuverComponentContractImplTest {
 
     @Test
     fun `when maneuver view height is changed, contract is notified`() {
-        sut.onManeuverViewHeightChanged(23)
+        sut.onManeuverViewVisibilityChanged(true)
 
         verify {
-            navigationViewContext.maneuverBehavior.updateViewHeight(23)
+            navigationViewContext.maneuverBehavior.updateViewVisibility(true)
         }
     }
 }
