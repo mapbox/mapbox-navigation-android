@@ -18,4 +18,5 @@ class CustomizedViewModel : ViewModel() {
     val fullScreen = MutableLiveData(false)
     val distanceFormatterMetric = MutableLiveData(false)
     val showCameraDebugInfo = MutableLiveData(false)
+    val enableScalebar = MutableLiveData(false)
 }

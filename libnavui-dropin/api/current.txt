@@ -28,6 +28,20 @@ package com.mapbox.navigation.dropin {
     property public final int style;
   }
 
+  public final class MapboxMapScalebarParams {
+    method public boolean getEnabled();
+    method public boolean isMetricUnits();
+    property public final boolean enabled;
+    property public final boolean isMetricUnits;
+  }
+
+  public static final class MapboxMapScalebarParams.Builder {
+    ctor public MapboxMapScalebarParams.Builder(android.content.Context context);
+    method public com.mapbox.navigation.dropin.MapboxMapScalebarParams build();
+    method public com.mapbox.navigation.dropin.MapboxMapScalebarParams.Builder enabled(boolean enabled);
+    method public com.mapbox.navigation.dropin.MapboxMapScalebarParams.Builder isMetricsUnits(Boolean? isMetricUnits);
+  }
+
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NavigationView extends android.widget.FrameLayout implements androidx.lifecycle.LifecycleOwner {
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null, String accessToken = attrs.navigationViewAccessToken(context), androidx.lifecycle.ViewModelStoreOwner viewModelStoreOwner = context.toViewModelStoreOwner());
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null, String accessToken = attrs.navigationViewAccessToken(context));
@@ -220,6 +234,7 @@ package com.mapbox.navigation.dropin {
     method public Integer? getInfoPanelPeekHeight();
     method public com.mapbox.maps.plugin.LocationPuck? getLocationPuck();
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? getManeuverViewOptions();
+    method public com.mapbox.navigation.dropin.MapboxMapScalebarParams? getMapScalebarParams();
     method public Integer? getPoiNameTextAppearance();
     method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams? getRecenterButtonParams();
     method public Integer? getRoadNameBackground();
@@ -240,6 +255,7 @@ package com.mapbox.navigation.dropin {
     method public void setInfoPanelPeekHeight(Integer?);
     method public void setLocationPuck(com.mapbox.maps.plugin.LocationPuck?);
     method public void setManeuverViewOptions(com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions?);
+    method public void setMapScalebarParams(com.mapbox.navigation.dropin.MapboxMapScalebarParams?);
     method public void setPoiNameTextAppearance(Integer?);
     method public void setRecenterButtonParams(com.mapbox.navigation.dropin.MapboxExtendableButtonParams?);
     method public void setRoadNameBackground(Integer?);
@@ -260,6 +276,7 @@ package com.mapbox.navigation.dropin {
     property public final Integer? infoPanelPeekHeight;
     property public final com.mapbox.maps.plugin.LocationPuck? locationPuck;
     property public final com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? maneuverViewOptions;
+    property public final com.mapbox.navigation.dropin.MapboxMapScalebarParams? mapScalebarParams;
     property public final Integer? poiNameTextAppearance;
     property public final com.mapbox.navigation.dropin.MapboxExtendableButtonParams? recenterButtonParams;
     property public final Integer? roadNameBackground;
@@ -284,6 +301,7 @@ package com.mapbox.navigation.dropin {
     method @Px public int defaultInfoPanelPeekHeight(android.content.Context context);
     method public com.mapbox.maps.plugin.LocationPuck defaultLocationPuck(android.content.Context context);
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions defaultManeuverViewOptions();
+    method public com.mapbox.navigation.dropin.MapboxMapScalebarParams defaultMapScalebarParams(android.content.Context context);
     method @StyleRes public int defaultPoiNameTextAppearance();
     method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams defaultRecenterButtonParams(android.content.Context context);
     method @DrawableRes public int defaultRoadNameBackground();

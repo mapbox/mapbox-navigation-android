@@ -22,6 +22,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Improved stop detector for auto profile. [#6373](https://github.com/mapbox/mapbox-navigation-android/pull/6373)
 - Fixed `RoadNameLabel` position issues by making sure that it updates when expanding and collapsing the info panel. [#6361](https://github.com/mapbox/mapbox-navigation-android/pull/6361)
 - Fixed `InfoPanel` overlapping the `RoadNameLabel` in free drive state with the device being in landscape orientation. [#6361](https://github.com/mapbox/mapbox-navigation-android/pull/6361)
+- Introduced `ViewStyleCustomization#mapScalebarParams` that allows for configuring map scalebar. [#6355](https://github.com/mapbox/mapbox-navigation-android/pull/6355)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.2 - 16 September, 2022
 ### Changelog

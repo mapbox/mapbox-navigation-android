@@ -32,6 +32,7 @@ import com.mapbox.navigation.dropin.coordinator.ManeuverCoordinator
 import com.mapbox.navigation.dropin.coordinator.MapLayoutCoordinator
 import com.mapbox.navigation.dropin.coordinator.RightFrameCoordinator
 import com.mapbox.navigation.dropin.coordinator.RoadNameLabelCoordinator
+import com.mapbox.navigation.dropin.coordinator.ScalebarPlaceholderCoordinator
 import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.internal.MapboxNavigationViewApi
@@ -129,6 +130,7 @@ class NavigationView @JvmOverloads constructor(
                 this,
                 navigationContext.listenerRegistry
             ),
+            ScalebarPlaceholderCoordinator(navigationContext, binding.scalebarLayout),
             ManeuverCoordinator(navigationContext, binding.guidanceLayout),
             InfoPanelCoordinator(
                 navigationContext,

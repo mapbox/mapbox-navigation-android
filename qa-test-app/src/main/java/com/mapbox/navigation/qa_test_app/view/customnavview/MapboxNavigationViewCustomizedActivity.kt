@@ -31,6 +31,7 @@ import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.plugin.scalebar.scalebar
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
@@ -53,6 +54,7 @@ import com.mapbox.navigation.dropin.ActionButtonDescription.Position.END
 import com.mapbox.navigation.dropin.ActionButtonDescription.Position.START
 import com.mapbox.navigation.dropin.MapViewObserver
 import com.mapbox.navigation.dropin.MapboxExtendableButtonParams
+import com.mapbox.navigation.dropin.MapboxMapScalebarParams
 import com.mapbox.navigation.dropin.NavigationViewListener
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteArrowOptions
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
@@ -322,6 +324,11 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             menuBinding.showCameraDebugInfo,
             viewModel.showCameraDebugInfo,
             ::toggleShowCameraDebugInfo
+        )
+        bindSwitch(
+            menuBinding.toggleEnableScalebar,
+            viewModel.enableScalebar,
+            ::toggleEnableScalebar
         )
     }
 
@@ -649,6 +656,15 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             binding.navigationView.customizeViewOptions {
                 distanceFormatterOptions = options.toBuilder().unitType(UnitType.IMPERIAL).build()
             }
+        }
+    }
+
+    private fun toggleEnableScalebar(enabled: Boolean) {
+        binding.navigationView.customizeViewStyles {
+            mapScalebarParams = MapboxMapScalebarParams
+                .Builder(this@MapboxNavigationViewCustomizedActivity)
+                .enabled(enabled)
+                .build()
         }
     }
 
