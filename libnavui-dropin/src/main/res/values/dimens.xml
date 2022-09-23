@@ -33,4 +33,6 @@
     <dimen name="mapbox_extendable_button_width">72dp</dimen>
     <dimen name="mapbox_extendable_button_height">52dp</dimen>
 
+    <dimen name="mapbox_scalebar_height">20dp</dimen>
+
 </resources>

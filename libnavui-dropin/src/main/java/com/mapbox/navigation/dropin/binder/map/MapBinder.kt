@@ -5,7 +5,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.maps.plugin.scalebar.scalebar
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
@@ -15,6 +14,7 @@ import com.mapbox.navigation.dropin.NavigationViewContext
 import com.mapbox.navigation.dropin.component.camera.CameraComponent
 import com.mapbox.navigation.dropin.component.camera.CameraLayoutObserver
 import com.mapbox.navigation.dropin.component.logo.LogoAttributionComponent
+import com.mapbox.navigation.dropin.component.map.ScalebarComponent
 import com.mapbox.navigation.dropin.component.marker.FreeDriveLongPressMapComponent
 import com.mapbox.navigation.dropin.component.marker.GeocodingComponent
 import com.mapbox.navigation.dropin.component.marker.MapMarkersComponent
@@ -48,8 +48,13 @@ internal class MapBinder(
 
     init {
         mapView.compass.enabled = false
-        mapView.scalebar.enabled = false
     }
+
+    private val scalebarComponent = ScalebarComponent(
+        mapView,
+        context.styles.mapScalebarParams,
+        context.systemBarsInsets
+    )
 
     private val store = context.store
 
@@ -86,7 +91,8 @@ internal class MapBinder(
                 navigationState
             ) { _, arrowOptions, navState ->
                 routeArrowComponent(navState, arrowOptions)
-            }
+            },
+            scalebarComponent
         )
     }
 

@@ -59,13 +59,21 @@
                     tools:background="@color/mapbox_main_maneuver_background_color" />
 
                 <FrameLayout
+                    android:id="@+id/scalebarLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/guidanceLayout"
+                    />
+
+                <FrameLayout
                     android:id="@+id/speedLimitLayout"
                     android:layout_width="75dp"
                     android:layout_height="86dp"
                     android:layout_marginStart="4dp"
                     android:layout_marginTop="8dp"
                     app:layout_constraintStart_toEndOf="@id/guidanceLayout"
-                    app:layout_constraintTop_toTopOf="@id/guidanceLayout"
+                    app:layout_constraintTop_toBottomOf="@id/scalebarLayout"
                     tools:background="#eee"
                     tools:layout_height="60dp"
                     tools:layout_width="50dp"
