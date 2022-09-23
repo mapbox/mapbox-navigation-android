@@ -17,6 +17,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed the issue with incorrect geometry indices for `RouteLeg#incidents` and `RouteLeg#closures` after refresh. [#6364](https://github.com/mapbox/mapbox-navigation-android/pull/6364)
 - Introduced `NavigationViewListener#onMapClicked` to inform when a map was clicked, but the event was not processed by `NavigationView`. [#6360](https://github.com/mapbox/mapbox-navigation-android/pull/6360)
 - Fixed crash caused by `ConstantVelocityInterpolator` creating `PathInterpolator` with an invalid path. [#6367](https://github.com/mapbox/mapbox-navigation-android/pull/6367)
+- Improved alternatives id robustness by adding new alternatives to existing instead of replacing them during `MapboxNavigation#requestAlternativeRoutes`. [#6373](https://github.com/mapbox/mapbox-navigation-android/pull/6373)
+- Improved stop detector for auto profile. [#6373](https://github.com/mapbox/mapbox-navigation-android/pull/6373)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.2 - 16 September, 2022
 ### Changelog
