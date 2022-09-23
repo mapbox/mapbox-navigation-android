@@ -20,7 +20,7 @@ private fun toSegments(a: NavigationRoute): MutableSet<Segment> {
     val points = a.directionsRoute.completeGeometryToPoints()
     val segments = mutableSetOf<Segment>()
     var previousPoint: Point? = null
-    for (point in points) {
+    for (point in points.drop(1).dropLast(1)) {
         if (previousPoint == null) {
             previousPoint = point
             continue

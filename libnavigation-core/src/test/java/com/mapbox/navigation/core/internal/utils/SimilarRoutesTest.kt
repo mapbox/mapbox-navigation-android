@@ -42,7 +42,9 @@ class SimilarRoutesTest {
         val a = loadNavigationRoute("a")
         val halfA = loadNavigationRoute("half_a")
         val similarity = calculateSimilarity(a, halfA)
-        assertEquals(0.47, similarity, 0.6)
+
+        val expectedSimilarity = halfA.directionsRoute.distance() / a.directionsRoute.distance()
+        assertEquals(expectedSimilarity, similarity, 0.03)
     }
 
     @Test
