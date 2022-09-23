@@ -53,7 +53,11 @@ class CarRouteRequest(
      */
     @UiThread
     fun request(placeRecord: PlaceRecord, callback: CarRouteRequestCallback) {
-        val mapboxNavigation = this.mapboxNavigation ?: return
+        val mapboxNavigation = this.mapboxNavigation
+        if (mapboxNavigation == null) {
+            callback.onNoRoutesFound()
+            return
+        }
         cancelRequest()
 
         val carAppLocation = MapboxNavigationApp.getObserver(CarAppLocation::class)

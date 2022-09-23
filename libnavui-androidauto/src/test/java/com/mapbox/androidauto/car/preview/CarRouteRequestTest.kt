@@ -159,6 +159,25 @@ class CarRouteRequestTest {
     }
 
     @Test
+    fun `onNoRoutesFound is called when mapboxNavigation is not attached`() {
+        every {
+            locationProvider.lastLocation
+        } returns mockk {
+            every { longitude } returns -121.4670161
+            every { latitude } returns 38.5630514
+        }
+        val callback: CarRouteRequestCallback = mockk(relaxUnitFun = true)
+        val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
+        carRouteRequest.request(
+            mockk { every { coordinate } returns searchCoordinate },
+            callback
+        )
+        carRouteRequest.onAttached(mapboxNavigation)
+
+        verify { callback.onNoRoutesFound() }
+    }
+
+    @Test
     fun `should cancel previous route request`() {
         every {
             locationProvider.lastLocation
