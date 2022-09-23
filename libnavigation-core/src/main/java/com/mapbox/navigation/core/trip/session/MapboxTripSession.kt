@@ -7,9 +7,7 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadFactory
-import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
-import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -100,8 +98,7 @@ internal class MapboxTripSession(
                     val primaryRoute = routes.first()
                     navigator.refreshRoute(primaryRoute).onValue {
                         this@MapboxTripSession.primaryRoute = routes.first()
-                        roadObjects = primaryRoute.nativeRoute().routeInfo.alerts
-                            .toUpcomingRoadObjects()
+                        roadObjects = primaryRoute.upcomingRoadObjects
                     }.fold({ NativeSetRouteError(it) }, { NativeSetRouteValue(it) }).also {
                         logD(
                             "routes update (route IDs: ${routes.map { it.id }}) - refresh finished",
@@ -141,8 +138,7 @@ internal class MapboxTripSession(
         ).onValue {
             updateLegIndexJob?.cancel()
             this@MapboxTripSession.primaryRoute = newPrimaryRoute
-            roadObjects = newPrimaryRoute?.nativeRoute()?.routeInfo?.alerts
-                ?.toUpcomingRoadObjects() ?: emptyList()
+            roadObjects = newPrimaryRoute?.upcomingRoadObjects ?: emptyList()
             isOffRoute = false
             invalidateLatestInstructions()
             routeProgress = null
