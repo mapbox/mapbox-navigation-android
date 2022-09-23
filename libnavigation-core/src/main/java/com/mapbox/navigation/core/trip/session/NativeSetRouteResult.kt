@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.trip.session
 
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigator.RouteAlternative
 
 /**
@@ -13,11 +14,12 @@ internal sealed class NativeSetRouteResult
  * @param nativeAlternatives Set routes.
  */
 internal class NativeSetRouteValue(
+    val routes: List<NavigationRoute>,
     val nativeAlternatives: List<RouteAlternative>
 ) : NativeSetRouteResult() {
 
     override fun toString(): String {
-        return "NativeSetRouteValue(nativeAlternatives=$nativeAlternatives)"
+        return "NativeSetRouteValue(routes=$routes, nativeAlternatives=$nativeAlternatives)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -26,13 +28,16 @@ internal class NativeSetRouteValue(
 
         other as NativeSetRouteValue
 
+        if (routes != other.routes) return false
         if (nativeAlternatives != other.nativeAlternatives) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        return nativeAlternatives.hashCode()
+        var result = routes.hashCode()
+        result = 31 * result + nativeAlternatives.hashCode()
+        return result
     }
 }
 

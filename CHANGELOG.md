@@ -10,6 +10,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed the issue with incorrect geometry indices for `RouteLeg#incidents` and `RouteLeg#closures` after refresh. [#6364](https://github.com/mapbox/mapbox-navigation-android/pull/6364)
 - Improved alternatives id robustness by adding new alternatives to existing instead of replacing them during `MapboxNavigation#requestAlternativeRoutes`. [#6373](https://github.com/mapbox/mapbox-navigation-android/pull/6373)
 - Improved stop detector for auto profile. [#6373](https://github.com/mapbox/mapbox-navigation-android/pull/6373)
+- Fixed an issue where `NavigationRoute#upcomingRoadObjects` was not refreshed. This issue did not impact the deprecated `RoadObjectsOnRouteObserver`. [#6378](https://github.com/mapbox/mapbox-navigation-android/pull/6378)
 
 ## Mapbox Navigation SDK 2.8.0-rc.2 - 16 September, 2022
 ### Changelog

@@ -139,10 +139,10 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             val initialRoutes = routeUpdates[0]
             val refreshedRoutes = routeUpdates[1]
 
-            mapboxNavigation.routeProgressUpdates()
+            val routeProgress = mapboxNavigation.routeProgressUpdates()
                 .filter { routeProgress -> isRefreshedRouteDistance(routeProgress) }
                 .first()
-            mapboxNavigation.roadObjectsOnRoute()
+            val roadObjectsFromObserver = mapboxNavigation.roadObjectsOnRoute()
                 .filter { upcomingRoadObjects ->
                     upcomingRoadObjects.size == 2 &&
                         upcomingRoadObjects.map { it.roadObject.id }
@@ -150,6 +150,11 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 }
                 .first()
 
+            assertEquals(roadObjectsFromObserver, refreshedRoutes.first().upcomingRoadObjects)
+            assertEquals(
+                routeProgress.navigationRoute.upcomingRoadObjects,
+                refreshedRoutes.first().upcomingRoadObjects
+            )
             assertEquals(
                 "the test works only with 2 routes",
                 2,
