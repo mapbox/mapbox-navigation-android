@@ -589,19 +589,6 @@ class MapboxManeuverViewTest {
         )
     }
 
-    @Test
-    fun `initial height is zero`() {
-        val view = MapboxManeuverView(ctx)
-        assertEquals(0, view.heightFlow.value)
-    }
-
-    @Test
-    fun `height is changed`() {
-        val view = MapboxManeuverView(ctx)
-        view.layout(10, 10, 50, 60)
-        assertEquals(50, view.heightFlow.value)
-    }
-
     private fun getMockPrimaryManeuver(): PrimaryManeuver {
         val textComponentNode = Component(
             BannerComponents.TEXT,

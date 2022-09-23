@@ -16,11 +16,21 @@ class ManeuverBehaviorTest {
     }
 
     @Test
-    fun `when maneuver view height is updated`() {
+    fun `when maneuver view visibility is updated to true`() {
         val sut = ManeuverBehavior()
 
-        sut.updateViewHeight(43)
+        sut.updateViewVisibility(true)
 
-        assertEquals(43, sut.maneuverViewHeight.value)
+        assertEquals(true, sut.maneuverViewVisibility.value)
+    }
+
+    @Test
+    fun `when maneuver view visibility is updated to false`() {
+        val sut = ManeuverBehavior()
+        sut.updateViewVisibility(true)
+
+        sut.updateViewVisibility(false)
+
+        assertEquals(false, sut.maneuverViewVisibility.value)
     }
 }

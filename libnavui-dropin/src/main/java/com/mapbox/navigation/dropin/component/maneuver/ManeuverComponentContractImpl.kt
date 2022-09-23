@@ -14,7 +14,7 @@ internal class ManeuverComponentContractImpl(
         context.maneuverBehavior.updateBehavior(state)
     }
 
-    override fun onManeuverViewHeightChanged(newHeight: Int) {
-        context.maneuverBehavior.updateViewHeight(newHeight)
+    override fun onManeuverViewVisibilityChanged(isVisible: Boolean) {
+        context.maneuverBehavior.updateViewVisibility(isVisible)
     }
 }

@@ -20,7 +20,7 @@ internal class ScalebarPlaceholderBinder(
         return ScalebarPlaceholderComponent(
             binding.scalebarPlaceholder,
             context.styles.mapScalebarParams,
-            context.maneuverBehavior.maneuverViewHeight
+            context.maneuverBehavior.maneuverViewVisibility
         )
     }
 

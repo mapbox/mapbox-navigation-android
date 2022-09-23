@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 
 interface ManeuverComponentContract {
     fun onManeuverViewStateChanged(state: MapboxManeuverViewState)
-    fun onManeuverViewHeightChanged(newHeight: Int)
+    fun onManeuverViewVisibilityChanged(isVisible: Boolean)
 }
 
 @ExperimentalPreviewMapboxNavigationAPI
@@ -43,11 +43,7 @@ class ManeuverComponent(
                 contract?.get()?.onManeuverViewStateChanged(it)
             }
         }
-        coroutineScope.launch {
-            maneuverView.heightFlow.collect {
-                contract?.get()?.onManeuverViewHeightChanged(it)
-            }
-        }
+        contract?.get()?.onManeuverViewVisibilityChanged(true)
         coroutineScope.launch {
             combine(
                 mapboxNavigation.flowRoutesUpdated(),
@@ -78,6 +74,6 @@ class ManeuverComponent(
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         super.onDetached(mapboxNavigation)
-        contract?.get()?.onManeuverViewHeightChanged(0)
+        contract?.get()?.onManeuverViewVisibilityChanged(false)
     }
 }

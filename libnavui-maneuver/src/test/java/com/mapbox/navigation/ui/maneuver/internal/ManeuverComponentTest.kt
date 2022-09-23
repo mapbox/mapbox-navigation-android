@@ -54,7 +54,6 @@ class ManeuverComponentTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
-    private val initialHeight = 53
     private val maneuverViewOptions = ManeuverViewOptions.Builder().build()
 
     @Before
@@ -309,14 +308,11 @@ class ManeuverComponentTest {
         }
 
     @Test
-    fun `maneuver view height is collected`() =
+    fun `maneuver view visibility is set to true on onAttached`() =
         coroutineRule.runBlockingTest {
             val contract = mockk<ManeuverComponentContract>(relaxed = true) {
                 every { onManeuverViewStateChanged(any()) } just Runs
             }
-            every {
-                maneuverView.heightFlow
-            } returns MutableStateFlow(initialHeight)
             val maneuverComponent =
                 ManeuverComponent(
                     maneuverView = maneuverView,
@@ -331,19 +327,16 @@ class ManeuverComponentTest {
             maneuverComponent.onAttached(mockNavigation)
 
             verify {
-                contract.onManeuverViewHeightChanged(initialHeight)
+                contract.onManeuverViewVisibilityChanged(true)
             }
         }
 
     @Test
-    fun `onDetached proxies zero height`() =
+    fun `maneuver view visibility is set to false on onDetached`() =
         coroutineRule.runBlockingTest {
             val contract = mockk<ManeuverComponentContract>(relaxed = true) {
                 every { onManeuverViewStateChanged(any()) } just Runs
             }
-            every {
-                maneuverView.heightFlow
-            } returns MutableStateFlow(initialHeight)
             val maneuverComponent =
                 ManeuverComponent(
                     maneuverView = maneuverView,
@@ -360,7 +353,7 @@ class ManeuverComponentTest {
             maneuverComponent.onDetached(mockNavigation)
 
             verify {
-                contract.onManeuverViewHeightChanged(0)
+                contract.onManeuverViewVisibilityChanged(false)
             }
         }
 }

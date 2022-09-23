@@ -9,16 +9,16 @@ internal class ManeuverBehavior {
     private val _maneuverBehavior = MutableStateFlow<MapboxManeuverViewState>(
         MapboxManeuverViewState.COLLAPSED
     )
-    private val _maneuverViewHeight = MutableStateFlow(0)
+    private val _maneuverViewVisibility = MutableStateFlow(false)
 
     val maneuverBehavior = _maneuverBehavior.asStateFlow()
-    val maneuverViewHeight = _maneuverViewHeight.asStateFlow()
+    val maneuverViewVisibility = _maneuverViewVisibility.asStateFlow()
 
     fun updateBehavior(newState: MapboxManeuverViewState) {
         _maneuverBehavior.value = newState
     }
 
-    fun updateViewHeight(newHeight: Int) {
-        _maneuverViewHeight.value = newHeight
+    fun updateViewVisibility(visibility: Boolean) {
+        _maneuverViewVisibility.value = visibility
     }
 }
