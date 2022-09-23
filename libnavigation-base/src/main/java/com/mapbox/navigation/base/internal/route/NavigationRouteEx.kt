@@ -120,6 +120,13 @@ fun NavigationRoute.updateDirectionsRouteOnly(
 }
 
 /**
+ * Used to rebuild any [NavigationRoute] fields that are backed by a native peer, which might've been refreshed.
+ *
+ * At the moment, all fields are `val`s, so a simple re-instantiation is enough.
+ */
+fun NavigationRoute.refreshNativePeer(): NavigationRoute = copy()
+
+/**
  * Internal API used for testing purposes. Needed to avoid calling native parser from unit tests.
  */
 @TestOnly

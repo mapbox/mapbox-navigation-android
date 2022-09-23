@@ -35,7 +35,7 @@ internal class MapboxNavigationSetNavigationRoutesHistoryRecordingTest :
                 routes,
                 BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
             )
-        } returns NativeSetRouteValue(emptyList())
+        } returns NativeSetRouteValue(routes, emptyList())
 
         mapboxNavigation.setNavigationRoutes(routes, initialLegIndex)
 
@@ -69,7 +69,7 @@ internal class MapboxNavigationSetNavigationRoutesHistoryRecordingTest :
                 routes,
                 BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
             )
-        } returns NativeSetRouteValue(emptyList())
+        } returns NativeSetRouteValue(routes, emptyList())
 
         mapboxNavigation.setNavigationRoutes(routes, initialLegIndex)
 

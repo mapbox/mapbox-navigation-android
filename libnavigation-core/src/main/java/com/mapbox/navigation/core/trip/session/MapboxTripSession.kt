@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadFactory
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
+import com.mapbox.navigation.base.internal.route.refreshNativePeer
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -90,16 +91,30 @@ internal class MapboxTripSession(
             }
             is SetAlternativeRoutesInfo -> {
                 NativeSetRouteValue(
+                    routes = routes,
                     nativeAlternatives = navigator.setAlternativeRoutes(routes.drop(1))
                 )
             }
             is SetRefreshedRoutesInfo -> {
                 if (routes.isNotEmpty()) {
                     val primaryRoute = routes.first()
-                    navigator.refreshRoute(primaryRoute).onValue {
-                        this@MapboxTripSession.primaryRoute = routes.first()
-                        roadObjects = primaryRoute.upcomingRoadObjects
-                    }.fold({ NativeSetRouteError(it) }, { NativeSetRouteValue(it) }).also {
+                    navigator.refreshRoute(primaryRoute).fold(
+                        { NativeSetRouteError(it) },
+                        { value ->
+                            val refreshedPrimaryRoute = primaryRoute.refreshNativePeer()
+                            this@MapboxTripSession.primaryRoute = refreshedPrimaryRoute
+                            roadObjects = refreshedPrimaryRoute.upcomingRoadObjects
+                            val refreshedRoutes = routes
+                                .drop(1)
+                                .toMutableList().apply {
+                                    add(0, refreshedPrimaryRoute)
+                                }
+                            NativeSetRouteValue(
+                                routes = refreshedRoutes,
+                                nativeAlternatives = value
+                            )
+                        }
+                    ).also {
                         logD(
                             "routes update (route IDs: ${routes.map { it.id }}) - refresh finished",
                             LOG_CATEGORY
@@ -144,7 +159,7 @@ internal class MapboxTripSession(
             routeProgress = null
         }.mapValue {
             it.alternatives
-        }.fold({ NativeSetRouteError(it) }, { NativeSetRouteValue(it) }).also {
+        }.fold({ NativeSetRouteError(it) }, { NativeSetRouteValue(routes, it) }).also {
             logD(
                 "native routes update (route IDs: ${routes.map { it.id }}) - finished",
                 LOG_CATEGORY

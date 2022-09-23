@@ -23,6 +23,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed `RoadNameLabel` position issues by making sure that it updates when expanding and collapsing the info panel. [#6361](https://github.com/mapbox/mapbox-navigation-android/pull/6361)
 - Fixed `InfoPanel` overlapping the `RoadNameLabel` in free drive state with the device being in landscape orientation. [#6361](https://github.com/mapbox/mapbox-navigation-android/pull/6361)
 - Introduced `ViewStyleCustomization#mapScalebarParams` that allows for configuring map scalebar. [#6355](https://github.com/mapbox/mapbox-navigation-android/pull/6355)
+- Fixed an issue where `NavigationRoute#upcomingRoadObjects` was not refreshed. This issue did not impact the deprecated `RoadObjectsOnRouteObserver`. [#6378](https://github.com/mapbox/mapbox-navigation-android/pull/6378)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.2 - 16 September, 2022
 ### Changelog
