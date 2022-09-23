@@ -26,6 +26,7 @@ import com.mapbox.navigation.ui.shield.model.RouteShieldCallback
 import com.mapbox.navigation.ui.shield.model.RouteShieldError
 import com.mapbox.navigation.ui.shield.model.RouteShieldResult
 import io.mockk.Runs
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -53,6 +54,7 @@ class ManeuverComponentTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
+    private val initialHeight = 53
     private val maneuverViewOptions = ManeuverViewOptions.Builder().build()
 
     @Before
@@ -303,6 +305,62 @@ class ManeuverComponentTest {
 
             verify {
                 contract.onManeuverViewStateChanged(MapboxManeuverViewState.COLLAPSED)
+            }
+        }
+
+    @Test
+    fun `maneuver view height is collected`() =
+        coroutineRule.runBlockingTest {
+            val contract = mockk<ManeuverComponentContract>(relaxed = true) {
+                every { onManeuverViewStateChanged(any()) } just Runs
+            }
+            every {
+                maneuverView.heightFlow
+            } returns MutableStateFlow(initialHeight)
+            val maneuverComponent =
+                ManeuverComponent(
+                    maneuverView = maneuverView,
+                    userId = DirectionsCriteria.PROFILE_DEFAULT_USER,
+                    styleId = "navigation-day-v1",
+                    options = maneuverViewOptions,
+                    maneuverApi = mockManeuverApi,
+                    formatterOptions =
+                    DistanceFormatterOptions.Builder(mockk(relaxed = true)).build(),
+                    contract = { contract }
+                )
+            maneuverComponent.onAttached(mockNavigation)
+
+            verify {
+                contract.onManeuverViewHeightChanged(initialHeight)
+            }
+        }
+
+    @Test
+    fun `onDetached proxies zero height`() =
+        coroutineRule.runBlockingTest {
+            val contract = mockk<ManeuverComponentContract>(relaxed = true) {
+                every { onManeuverViewStateChanged(any()) } just Runs
+            }
+            every {
+                maneuverView.heightFlow
+            } returns MutableStateFlow(initialHeight)
+            val maneuverComponent =
+                ManeuverComponent(
+                    maneuverView = maneuverView,
+                    userId = DirectionsCriteria.PROFILE_DEFAULT_USER,
+                    styleId = "navigation-day-v1",
+                    options = maneuverViewOptions,
+                    maneuverApi = mockManeuverApi,
+                    formatterOptions =
+                    DistanceFormatterOptions.Builder(mockk(relaxed = true)).build(),
+                    contract = { contract }
+                )
+            maneuverComponent.onAttached(mockNavigation)
+            clearMocks(contract, answers = false)
+            maneuverComponent.onDetached(mockNavigation)
+
+            verify {
+                contract.onManeuverViewHeightChanged(0)
             }
         }
 }

@@ -7,9 +7,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.MapboxMapScalebarParams
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.app.internal.State
-import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
@@ -30,39 +27,26 @@ class ScalebarPlaceholderComponentTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val mapboxNavigation = mockk<MapboxNavigation>()
     private val scalebarPlaceholderView = mockk<View>(relaxed = true)
-    private val stateFlow = MutableStateFlow(
-        State(
-            navigation = NavigationState.FreeDrive,
-            previewRoutes = RoutePreviewState.Ready(emptyList())
-        )
+    private val initialHeight = 7
+    private val heightFlow = MutableStateFlow(initialHeight)
+    private val mapScalebarParams = MutableStateFlow(
+        MapboxMapScalebarParams.Builder(context).build()
     )
-    private val mapScalebarParams = MutableStateFlow(MapboxMapScalebarParams.Builder(context).build())
-    private val component = ScalebarPlaceholderComponent(scalebarPlaceholderView, mapScalebarParams, stateFlow)
+    private val component = ScalebarPlaceholderComponent(
+        scalebarPlaceholderView,
+        mapScalebarParams,
+        heightFlow
+    )
 
     @Test
-    fun visibilityIsChangedOnOnAttachedActiveGuidance() {
-        stateFlow.tryEmit(State(navigation = NavigationState.FreeDrive))
+    fun visibilityIsChangedOnOnAttachedHasHeight() {
         component.onAttached(mapboxNavigation)
         verify { scalebarPlaceholderView.visibility = View.GONE }
     }
 
     @Test
-    fun visibilityIsChangedOnOnAttachedFreeDrive() {
-        stateFlow.tryEmit(State(navigation = NavigationState.FreeDrive))
-        component.onAttached(mapboxNavigation)
-        verify { scalebarPlaceholderView.visibility = View.GONE }
-    }
-
-    @Test
-    fun visibilityIsChangedOnOnAttachedRoutePreview() {
-        stateFlow.tryEmit(State(navigation = NavigationState.RoutePreview))
-        component.onAttached(mapboxNavigation)
-        verify { scalebarPlaceholderView.visibility = View.GONE }
-    }
-
-    @Test
-    fun visibilityIsChangedOnOnAttachedDestinationPreview() {
-        stateFlow.tryEmit(State(navigation = NavigationState.RoutePreview))
+    fun visibilityIsChangedOnOnAttachedNoHeight() {
+        heightFlow.tryEmit(0)
         component.onAttached(mapboxNavigation)
         verify { scalebarPlaceholderView.visibility = View.GONE }
     }
@@ -74,14 +58,13 @@ class ScalebarPlaceholderComponentTest {
     }
 
     @Test
-    fun stateChangeBeforeOnAttached() {
-        stateFlow.tryEmit(State(navigation = NavigationState.RoutePreview))
+    fun heightChangeBeforeOnAttached() {
+        heightFlow.tryEmit(8)
         verify(exactly = 0) { scalebarPlaceholderView.visibility = any() }
     }
 
     @Test
-    fun mapScalebarParamsChangeAfterOnAttachedActiveGuidance() {
-        stateFlow.tryEmit(State(navigation = NavigationState.ActiveNavigation))
+    fun mapScalebarParamsChangeAfterOnAttachedHasHeight() {
         component.onAttached(mapboxNavigation)
         clearMocks(scalebarPlaceholderView)
         mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
@@ -89,65 +72,29 @@ class ScalebarPlaceholderComponentTest {
     }
 
     @Test
-    fun mapScalebarParamsChangeAfterOnAttachedFreeDrive() {
-        stateFlow.tryEmit(State(navigation = NavigationState.ActiveNavigation))
+    fun mapScalebarParamsChangeAfterOnAttachedNoHeight() {
+        heightFlow.tryEmit(0)
         component.onAttached(mapboxNavigation)
         clearMocks(scalebarPlaceholderView)
         mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
+        verify { scalebarPlaceholderView.visibility = View.VISIBLE }
+    }
+
+    @Test
+    fun heightChangeAfterOnAttachedHasHeight() {
+        mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
+        component.onAttached(mapboxNavigation)
+        clearMocks(scalebarPlaceholderView)
+        heightFlow.tryEmit(8)
         verify { scalebarPlaceholderView.visibility = View.GONE }
     }
 
     @Test
-    fun mapScalebarParamsChangeAfterOnAttachedRoutePreview() {
-        stateFlow.tryEmit(State(navigation = NavigationState.RoutePreview))
-        component.onAttached(mapboxNavigation)
-        clearMocks(scalebarPlaceholderView)
-        mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
-        verify { scalebarPlaceholderView.visibility = View.VISIBLE }
-    }
-
-    @Test
-    fun mapScalebarParamsChangeAfterOnAttachedDestinationPreview() {
-        stateFlow.tryEmit(State(navigation = NavigationState.DestinationPreview))
-        component.onAttached(mapboxNavigation)
-        clearMocks(scalebarPlaceholderView)
-        mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
-        verify { scalebarPlaceholderView.visibility = View.VISIBLE }
-    }
-
-    @Test
-    fun stateChangeAfterOnAttachedActiveGuidance() {
+    fun heightChangeAfterOnAttachedNoHeight() {
         mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
         component.onAttached(mapboxNavigation)
         clearMocks(scalebarPlaceholderView)
-        stateFlow.tryEmit(State(navigation = NavigationState.ActiveNavigation))
-        verify { scalebarPlaceholderView.visibility = View.GONE }
-    }
-
-    @Test
-    fun stateChangeAfterOnAttachedFreeDrive() {
-        mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
-        component.onAttached(mapboxNavigation)
-        clearMocks(scalebarPlaceholderView)
-        stateFlow.tryEmit(State(navigation = NavigationState.FreeDrive))
-        verify { scalebarPlaceholderView.visibility = View.VISIBLE }
-    }
-
-    @Test
-    fun stateChangeAfterOnAttachedRoutePreview() {
-        mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
-        component.onAttached(mapboxNavigation)
-        clearMocks(scalebarPlaceholderView)
-        stateFlow.tryEmit(State(navigation = NavigationState.RoutePreview))
-        verify { scalebarPlaceholderView.visibility = View.VISIBLE }
-    }
-
-    @Test
-    fun stateChangeAfterOnAttachedDestinationPreview() {
-        mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
-        component.onAttached(mapboxNavigation)
-        clearMocks(scalebarPlaceholderView)
-        stateFlow.tryEmit(State(navigation = NavigationState.DestinationPreview))
+        heightFlow.tryEmit(0)
         verify { scalebarPlaceholderView.visibility = View.VISIBLE }
     }
 
@@ -161,12 +108,12 @@ class ScalebarPlaceholderComponentTest {
     }
 
     @Test
-    fun stateChangeAfterOnDetached() {
+    fun heightChangeAfterOnDetached() {
         mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
         component.onAttached(mapboxNavigation)
         clearMocks(scalebarPlaceholderView)
         component.onDetached(mapboxNavigation)
-        stateFlow.tryEmit(State(navigation = NavigationState.FreeDrive))
+        heightFlow.tryEmit(9)
         verify(exactly = 0) { scalebarPlaceholderView.visibility = any() }
     }
 }

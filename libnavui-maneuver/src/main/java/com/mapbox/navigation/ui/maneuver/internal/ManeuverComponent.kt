@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 
 interface ManeuverComponentContract {
     fun onManeuverViewStateChanged(state: MapboxManeuverViewState)
+    fun onManeuverViewHeightChanged(newHeight: Int)
 }
 
 @ExperimentalPreviewMapboxNavigationAPI
@@ -40,6 +41,11 @@ class ManeuverComponent(
         coroutineScope.launch {
             maneuverView.maneuverViewState.collect {
                 contract?.get()?.onManeuverViewStateChanged(it)
+            }
+        }
+        coroutineScope.launch {
+            maneuverView.heightFlow.collect {
+                contract?.get()?.onManeuverViewHeightChanged(it)
             }
         }
         coroutineScope.launch {
@@ -68,5 +74,10 @@ class ManeuverComponent(
                 }
             }.collect()
         }
+    }
+
+    override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        super.onDetached(mapboxNavigation)
+        contract?.get()?.onManeuverViewHeightChanged(0)
     }
 }

@@ -41,7 +41,9 @@ internal class ScalebarComponentTest {
     private val scalebarMock = mockk<ScaleBarPlugin>(relaxed = true) {
         every { marginTop } returns 14f
         every { marginLeft } returns 14f
-        every { updateSettings(any()) } answers { (args[0] as ScaleBarSettings.() -> Unit)(settings) }
+        every { updateSettings(any()) } answers {
+            (args[0] as ScaleBarSettings.() -> Unit)(settings)
+        }
     }
     private val mapView = mockk<MapView>(relaxed = true) {
         every { scalebar } returns scalebarMock
@@ -53,7 +55,9 @@ internal class ScalebarComponentTest {
     )
     private val initialInsetTop = 3
     private val initialInsetLeft = 5
-    private val systemBarsFlow = MutableStateFlow(Insets.of(initialInsetLeft, initialInsetTop, 0, 0))
+    private val systemBarsFlow = MutableStateFlow(
+        Insets.of(initialInsetLeft, initialInsetTop, 0, 0)
+    )
     private val mapboxNavigation = mockk<MapboxNavigation>()
     private val component = ScalebarComponent(mapView, scalebarParamsFlow, systemBarsFlow)
 
@@ -75,7 +79,9 @@ internal class ScalebarComponentTest {
         val isMetricUnits = Random.nextBoolean()
         ScalebarComponent(
             mapView,
-            MutableStateFlow(MapboxMapScalebarParams.Builder(context).isMetricsUnits(isMetricUnits).build()),
+            MutableStateFlow(
+                MapboxMapScalebarParams.Builder(context).isMetricsUnits(isMetricUnits).build()
+            ),
             MutableStateFlow(Insets.NONE)
         )
         verify { settings.isMetricUnits = isMetricUnits }

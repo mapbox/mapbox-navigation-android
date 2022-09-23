@@ -13,17 +13,26 @@ import org.junit.Test
 @ExperimentalPreviewMapboxNavigationAPI
 class ManeuverComponentContractImplTest {
 
+    private val navigationViewContext: NavigationViewContext = mockk(relaxed = true) {
+        every { maneuverBehavior.updateBehavior(any()) } just Runs
+    }
+    private val sut = ManeuverComponentContractImpl(navigationViewContext)
+
     @Test
     fun `when maneuver view state is changed, contract is notified`() {
-        val navigationViewContext: NavigationViewContext = mockk(relaxed = true) {
-            every { maneuverBehavior.updateBehavior(any()) } just Runs
-        }
-        val sut = ManeuverComponentContractImpl(navigationViewContext)
-
         sut.onManeuverViewStateChanged(MapboxManeuverViewState.EXPANDED)
 
         verify {
             navigationViewContext.maneuverBehavior.updateBehavior(MapboxManeuverViewState.EXPANDED)
+        }
+    }
+
+    @Test
+    fun `when maneuver view height is changed, contract is notified`() {
+        sut.onManeuverViewHeightChanged(23)
+
+        verify {
+            navigationViewContext.maneuverBehavior.updateViewHeight(23)
         }
     }
 }
