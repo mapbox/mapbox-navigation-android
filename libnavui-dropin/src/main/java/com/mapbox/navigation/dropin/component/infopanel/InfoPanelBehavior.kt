@@ -16,6 +16,8 @@ internal class InfoPanelBehavior {
     }
 
     fun updateSlideOffset(slideOffset: Float) {
-        _slideOffset.value = slideOffset.coerceIn(-1f, 1f)
+        if (!slideOffset.isNaN()) {
+            _slideOffset.value = slideOffset.coerceIn(-1f, 1f)
+        }
     }
 }

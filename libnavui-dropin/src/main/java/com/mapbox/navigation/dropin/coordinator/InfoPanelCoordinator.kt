@@ -150,6 +150,8 @@ internal class InfoPanelCoordinator(
 
     private fun resetSlideOffset(prevBottomSheetState: Int, bottomSheetState: Int) {
         if (prevBottomSheetState == BottomSheetBehavior.STATE_EXPANDED) {
+            // BottomSheet slideOffset value is always in [-1,1] range.
+            // From -1.0 when hidden, 0.0 when collapsed to 1.0 when expanded.
             when (bottomSheetState) {
                 BottomSheetBehavior.STATE_EXPANDED -> 1.0f
                 BottomSheetBehavior.STATE_HALF_EXPANDED -> 0.5f

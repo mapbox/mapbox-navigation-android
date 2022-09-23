@@ -10,6 +10,7 @@ import com.mapbox.navigation.dropin.NavigationViewModel
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.testutil.TestLifecycleOwner
 import com.mapbox.navigation.dropin.util.TestStore
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.mockk
 import io.mockk.spyk
@@ -27,6 +28,9 @@ class InfoPanelComponentTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private lateinit var ctx: Context
     private lateinit var layout: StubLayout
