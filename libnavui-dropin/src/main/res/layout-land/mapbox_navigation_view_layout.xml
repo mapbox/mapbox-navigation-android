@@ -107,7 +107,8 @@
                     android:layout_height="wrap_content"
                     android:gravity="top|right"
                     android:layout_marginEnd="8dp"
-                    app:layout_constraintTop_toTopOf="@id/speedLimitLayout"
+                    android:layout_marginTop="5dp"
+                    app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     tools:layout_height="200dp"
                     tools:background="#eee" />

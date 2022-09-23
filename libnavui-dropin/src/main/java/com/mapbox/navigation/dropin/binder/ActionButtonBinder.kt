@@ -50,11 +50,11 @@ internal class ActionButtonBinder(
 
         val store = context.store
         return navigationListOf(
-            reloadOnChange(context.styles.audioGuidanceButtonParams) { params ->
-                audioGuidanceButtonComponent(binding, params, store)
-            },
             reloadOnChange(context.styles.cameraModeButtonParams) { params ->
                 cameraModeButtonComponent(binding, params, store)
+            },
+            reloadOnChange(context.styles.audioGuidanceButtonParams) { params ->
+                audioGuidanceButtonComponent(binding, params, store)
             },
             reloadOnChange(context.styles.recenterButtonParams) { params ->
                 recenterButtonComponent(binding, params, store)
@@ -78,13 +78,11 @@ internal class ActionButtonBinder(
             .asReversed()
             .also { startCustomButtonsCount = it.size }
             .onEach { buttonContainer.addView(it.view, 0) }
-            .dropLast(1)
-            .forEach { it.view.setMargins(top = spacing) }
+            .forEach { it.view.setMargins(top = spacing, bottom = spacing) }
         customButtons
             .filter { it.position == ActionButtonDescription.Position.END }
             .onEach { buttonContainer.addView(it.view) }
-            .dropLast(1)
-            .forEach { it.view.setMargins(bottom = spacing) }
+            .forEach { it.view.setMargins(top = spacing, bottom = spacing) }
     }
 
     private fun audioGuidanceButtonComponent(
@@ -168,8 +166,8 @@ internal class ActionButtonBinder(
     }
 
     private companion object {
-        private const val AUDIO_BUTTON_POSITION = 0
-        private const val CAMERA_BUTTON_POSITION = 1
+        private const val AUDIO_BUTTON_POSITION = 1
+        private const val CAMERA_BUTTON_POSITION = 0
         private const val RECENTER_BUTTON_POSITION = 2
     }
 }
