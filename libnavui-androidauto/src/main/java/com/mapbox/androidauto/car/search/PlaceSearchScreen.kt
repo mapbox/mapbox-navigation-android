@@ -67,7 +67,7 @@ class PlaceSearchScreen @UiThread constructor(
     }
 
     init {
-        attachCreated(searchCarContext.carPlaceSearch)
+        attachCreated(searchCarContext.carRouteRequest, searchCarContext.carPlaceSearch)
     }
 
     override fun onGetTemplate(): Template {

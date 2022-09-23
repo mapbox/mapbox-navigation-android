@@ -1,6 +1,5 @@
 package com.mapbox.androidauto.car.search
 
-import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.car.MainCarContext
 import com.mapbox.androidauto.car.preview.CarRouteRequest
 import com.mapbox.androidauto.internal.car.search.CarPlaceSearch
@@ -19,13 +18,10 @@ class SearchCarContext(
     val feedbackPollProvider = mainCarContext.feedbackPollProvider
 
     /** SearchCarContext **/
+    val mapboxCarMap = mainCarContext.mapboxCarMap
+    val carRouteRequest = CarRouteRequest(mainCarContext.routeOptionsInterceptor)
     internal val carPlaceSearch: CarPlaceSearch = CarPlaceSearchImpl(
         mainCarContext.carPlaceSearchOptions,
         CarSearchLocationProvider()
-    )
-    val carRouteRequest = CarRouteRequest(
-        mainCarContext.mapboxNavigation,
-        mainCarContext.routeOptionsInterceptor,
-        MapboxCarApp.carAppLocationService().navigationLocationProvider
     )
 }

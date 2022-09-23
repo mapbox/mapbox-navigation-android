@@ -1,11 +1,14 @@
 package com.mapbox.androidauto.car.preview
 
+import com.mapbox.androidauto.navigation.location.CarAppLocation
+import com.mapbox.androidauto.testing.CarAppTestRule
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import io.mockk.CapturingSlot
@@ -15,6 +18,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.util.Locale
@@ -24,12 +28,15 @@ class CarRouteRequestTest {
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
 
+    @get:Rule
+    val carAppTestRule = CarAppTestRule()
+
     private val routeOptionsSlot = CapturingSlot<RouteOptions>()
     private val routerCallbackSlot = CapturingSlot<NavigationRouterCallback>()
     private val routeOptionsInterceptor = mockk<CarRouteOptionsInterceptor> {
         every { intercept(any()) } answers { firstArg() }
     }
-    private val navigationLocationProvider = mockk<NavigationLocationProvider>()
+    private val locationProvider = mockk<NavigationLocationProvider>()
     private var requestCount = 0L
     private val mapboxNavigation = mockk<MapboxNavigation> {
         every {
@@ -46,19 +53,26 @@ class CarRouteRequestTest {
         every { getZLevel() } returns Z_LEVEL
     }
 
-    private val carRouteRequest =
-        CarRouteRequest(mapboxNavigation, routeOptionsInterceptor, navigationLocationProvider)
+    @Before
+    fun setup() {
+        every { MapboxNavigationApp.getObserver(CarAppLocation::class) } returns mockk {
+            every { navigationLocationProvider } returns locationProvider
+        }
+    }
+
+    private val carRouteRequest = CarRouteRequest(routeOptionsInterceptor)
 
     @Test
     fun `onRoutesReady is called after successful request`() {
         every {
-            navigationLocationProvider.lastLocation
+            locationProvider.lastLocation
         } returns mockk {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
         }
         val callback: CarRouteRequestCallback = mockk(relaxUnitFun = true)
         val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
+        carRouteRequest.onAttached(mapboxNavigation)
         carRouteRequest.request(
             mockk { every { coordinate } returns searchCoordinate },
             callback
@@ -72,9 +86,10 @@ class CarRouteRequestTest {
 
     @Test
     fun `onUnknownCurrentLocation is called when current location is null`() {
-        every { navigationLocationProvider.lastLocation } returns null
+        every { locationProvider.lastLocation } returns null
         val callback: CarRouteRequestCallback = mockk(relaxUnitFun = true)
         val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
+        carRouteRequest.onAttached(mapboxNavigation)
         carRouteRequest.request(
             mockk { every { coordinate } returns searchCoordinate },
             callback
@@ -86,12 +101,13 @@ class CarRouteRequestTest {
     @Test
     fun `onSearchResultLocationUnknown is called when search result coordinate is`() {
         every {
-            navigationLocationProvider.lastLocation
+            locationProvider.lastLocation
         } returns mockk {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
         }
         val callback: CarRouteRequestCallback = mockk(relaxUnitFun = true)
+        carRouteRequest.onAttached(mapboxNavigation)
         carRouteRequest.request(
             mockk { every { coordinate } returns null },
             callback
@@ -103,13 +119,14 @@ class CarRouteRequestTest {
     @Test
     fun `onNoRoutesFound is called when route request is canceled`() {
         every {
-            navigationLocationProvider.lastLocation
+            locationProvider.lastLocation
         } returns mockk {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
         }
         val callback: CarRouteRequestCallback = mockk(relaxUnitFun = true)
         val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
+        carRouteRequest.onAttached(mapboxNavigation)
         carRouteRequest.request(
             mockk { every { coordinate } returns searchCoordinate },
             callback
@@ -123,13 +140,14 @@ class CarRouteRequestTest {
     @Test
     fun `onNoRoutesFound is called when route request fails`() {
         every {
-            navigationLocationProvider.lastLocation
+            locationProvider.lastLocation
         } returns mockk {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
         }
         val callback: CarRouteRequestCallback = mockk(relaxUnitFun = true)
         val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
+        carRouteRequest.onAttached(mapboxNavigation)
         carRouteRequest.request(
             mockk { every { coordinate } returns searchCoordinate },
             callback
@@ -143,13 +161,14 @@ class CarRouteRequestTest {
     @Test
     fun `should cancel previous route request`() {
         every {
-            navigationLocationProvider.lastLocation
+            locationProvider.lastLocation
         } returns mockk {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
         }
         val callback: CarRouteRequestCallback = mockk(relaxUnitFun = true)
         val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
+        carRouteRequest.onAttached(mapboxNavigation)
         carRouteRequest.request(
             mockk { every { coordinate } returns searchCoordinate },
             callback
@@ -164,12 +183,13 @@ class CarRouteRequestTest {
 
     @Test
     fun `z level is passed to route options`() {
-        every { navigationLocationProvider.lastLocation } returns mockk {
+        every { locationProvider.lastLocation } returns mockk {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
         }
         val callback = mockk<CarRouteRequestCallback>(relaxUnitFun = true)
         val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
+        carRouteRequest.onAttached(mapboxNavigation)
         carRouteRequest.request(mockk { every { coordinate } returns searchCoordinate }, callback)
 
         assertEquals(listOf(Z_LEVEL, null), routeOptionsSlot.captured.layersList())
@@ -182,12 +202,13 @@ class CarRouteRequestTest {
             every { build() } returns customRouteOptions
         }
         every { routeOptionsInterceptor.intercept(any()) } returns customRouteOptionsBuilder
-        every { navigationLocationProvider.lastLocation } returns mockk {
+        every { locationProvider.lastLocation } returns mockk {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
         }
         val callback = mockk<CarRouteRequestCallback>(relaxUnitFun = true)
         val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
+        carRouteRequest.onAttached(mapboxNavigation)
         carRouteRequest.request(mockk { every { coordinate } returns searchCoordinate }, callback)
 
         assertEquals(customRouteOptions, routeOptionsSlot.captured)

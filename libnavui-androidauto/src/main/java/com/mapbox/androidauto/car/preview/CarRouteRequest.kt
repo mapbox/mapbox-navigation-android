@@ -4,6 +4,7 @@ import androidx.annotation.UiThread
 import com.mapbox.androidauto.car.search.PlaceRecord
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.internal.logAndroidAutoFailure
+import com.mapbox.androidauto.navigation.location.CarAppLocation
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -15,9 +16,8 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 
 /**
  * This is a view interface. Each callback function represents a view that will be
@@ -34,53 +34,30 @@ interface CarRouteRequestCallback {
  * Service class that requests routes for the preview screen.
  */
 class CarRouteRequest(
-    val mapboxNavigation: MapboxNavigation,
     private val routeOptionsInterceptor: CarRouteOptionsInterceptor,
-    private val navigationLocationProvider: NavigationLocationProvider,
-) {
-    internal var currentRequestId: Long? = null
+) : MapboxNavigationObserver {
+    private var currentRequestId: Long? = null
+    private var mapboxNavigation: MapboxNavigation? = null
 
-    @UiThread
-    suspend fun requestSync(placeRecord: PlaceRecord): List<NavigationRoute>? {
-        return suspendCancellableCoroutine { continuation ->
-            continuation.invokeOnCancellation { cancelRequest() }
-            request(
-                placeRecord,
-                object : CarRouteRequestCallback {
+    override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        this.mapboxNavigation = mapboxNavigation
+    }
 
-                    override fun onRoutesReady(
-                        placeRecord: PlaceRecord,
-                        routes: List<NavigationRoute>
-                    ) {
-                        continuation.resume(routes)
-                    }
-
-                    override fun onUnknownCurrentLocation() {
-                        continuation.resume(value = null)
-                    }
-
-                    override fun onDestinationLocationUnknown() {
-                        continuation.resume(value = null)
-                    }
-
-                    override fun onNoRoutesFound() {
-                        continuation.resume(value = null)
-                    }
-                }
-            )
-        }
+    override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        cancelRequest()
+        this.mapboxNavigation = null
     }
 
     /**
      * When a search result was selected, request a route.
-     *
-     * @param searchResults potential destinations for directions
      */
     @UiThread
     fun request(placeRecord: PlaceRecord, callback: CarRouteRequestCallback) {
-        currentRequestId?.let { mapboxNavigation.cancelRouteRequest(it) }
+        val mapboxNavigation = this.mapboxNavigation ?: return
+        cancelRequest()
 
-        val location = navigationLocationProvider.lastLocation
+        val carAppLocation = MapboxNavigationApp.getObserver(CarAppLocation::class)
+        val location = carAppLocation.navigationLocationProvider.lastLocation
         if (location == null) {
             logAndroidAutoFailure("CarRouteRequest.onUnknownCurrentLocation")
             callback.onUnknownCurrentLocation()
@@ -90,12 +67,12 @@ class CarRouteRequest(
 
         when (placeRecord.coordinate) {
             null -> {
-                logAndroidAutoFailure("CarRouteRequest.onSearchResultLocationUnknown")
+                logAndroidAutoFailure("CarRouteRequest.onDestinationLocationUnknown")
                 callback.onDestinationLocationUnknown()
             }
             else -> {
                 currentRequestId = mapboxNavigation.requestRoutes(
-                    carRouteOptions(origin, placeRecord.coordinate),
+                    mapboxNavigation.carRouteOptions(origin, placeRecord.coordinate),
                     carCallbackTransformer(placeRecord, callback)
                 )
             }
@@ -104,17 +81,20 @@ class CarRouteRequest(
 
     @UiThread
     fun cancelRequest() {
-        currentRequestId?.let { mapboxNavigation.cancelRouteRequest(it) }
+        currentRequestId?.let { mapboxNavigation?.cancelRouteRequest(it) }
     }
 
     /**
      * Default [RouteOptions] for the car.
      */
-    private fun carRouteOptions(origin: Point, destination: Point) = RouteOptions.builder()
+    private fun MapboxNavigation.carRouteOptions(
+        origin: Point,
+        destination: Point
+    ) = RouteOptions.builder()
         .applyDefaultNavigationOptions()
-        .language(mapboxNavigation.navigationOptions.distanceFormatterOptions.locale.language)
+        .language(navigationOptions.distanceFormatterOptions.locale.language)
         .voiceUnits(
-            when (mapboxNavigation.navigationOptions.distanceFormatterOptions.unitType) {
+            when (navigationOptions.distanceFormatterOptions.unitType) {
                 UnitType.IMPERIAL -> DirectionsCriteria.IMPERIAL
                 UnitType.METRIC -> DirectionsCriteria.METRIC
             },
@@ -122,7 +102,7 @@ class CarRouteRequest(
         .alternatives(true)
         .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
         .coordinatesList(listOf(origin, destination))
-        .layersList(listOf(mapboxNavigation.getZLevel(), null))
+        .layersList(listOf(getZLevel(), null))
         .metadata(true)
         .let { routeOptionsInterceptor.intercept(it) }
         .build()
