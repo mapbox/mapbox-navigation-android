@@ -74,27 +74,21 @@ package com.mapbox.navigation.dropin {
     method public abstract com.mapbox.bindgen.Expected<com.mapbox.navigation.dropin.NavigationViewApiError,kotlin.Unit> startRoutePreview(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
   }
 
-  public abstract sealed class NavigationViewApiError extends java.lang.Throwable {
+  public final class NavigationViewApiError extends java.lang.Throwable {
+    method public int getType();
+    property public final int type;
   }
 
-  public static final class NavigationViewApiError.IncompleteRoutesInfo extends com.mapbox.navigation.dropin.NavigationViewApiError {
-    field public static final com.mapbox.navigation.dropin.NavigationViewApiError.IncompleteRoutesInfo INSTANCE;
+  @IntDef({com.mapbox.navigation.dropin.NavigationViewApiErrorTypes.MissingDestinationInfo, com.mapbox.navigation.dropin.NavigationViewApiErrorTypes.MissingPreviewRoutesInfo, com.mapbox.navigation.dropin.NavigationViewApiErrorTypes.MissingRoutesInfo, com.mapbox.navigation.dropin.NavigationViewApiErrorTypes.InvalidRoutesInfo, com.mapbox.navigation.dropin.NavigationViewApiErrorTypes.IncompleteRoutesInfo}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public @interface NavigationViewApiErrorType {
   }
 
-  public static final class NavigationViewApiError.InvalidRoutesInfo extends com.mapbox.navigation.dropin.NavigationViewApiError {
-    field public static final com.mapbox.navigation.dropin.NavigationViewApiError.InvalidRoutesInfo INSTANCE;
-  }
-
-  public static final class NavigationViewApiError.MissingDestinationInfo extends com.mapbox.navigation.dropin.NavigationViewApiError {
-    field public static final com.mapbox.navigation.dropin.NavigationViewApiError.MissingDestinationInfo INSTANCE;
-  }
-
-  public static final class NavigationViewApiError.MissingPreviewRoutesInfo extends com.mapbox.navigation.dropin.NavigationViewApiError {
-    field public static final com.mapbox.navigation.dropin.NavigationViewApiError.MissingPreviewRoutesInfo INSTANCE;
-  }
-
-  public static final class NavigationViewApiError.MissingRoutesInfo extends com.mapbox.navigation.dropin.NavigationViewApiError {
-    field public static final com.mapbox.navigation.dropin.NavigationViewApiError.MissingRoutesInfo INSTANCE;
+  public final class NavigationViewApiErrorTypes {
+    field public static final com.mapbox.navigation.dropin.NavigationViewApiErrorTypes INSTANCE;
+    field public static final int IncompleteRoutesInfo = 5; // 0x5
+    field public static final int InvalidRoutesInfo = 4; // 0x4
+    field public static final int MissingDestinationInfo = 1; // 0x1
+    field public static final int MissingPreviewRoutesInfo = 2; // 0x2
+    field public static final int MissingRoutesInfo = 3; // 0x3
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class NavigationViewListener {

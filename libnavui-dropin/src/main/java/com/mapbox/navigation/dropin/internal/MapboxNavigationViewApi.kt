@@ -7,6 +7,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.dropin.NavigationViewApi
 import com.mapbox.navigation.dropin.NavigationViewApiError
+import com.mapbox.navigation.dropin.NavigationViewApiErrorTypes
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.endNavigation
 import com.mapbox.navigation.ui.app.internal.extension.dispatch
@@ -99,43 +100,68 @@ internal class MapboxNavigationViewApi(
         }
     }
 
-    @Throws(NavigationViewApiError.MissingDestinationInfo::class)
+    @Throws(NavigationViewApiError::class)
     private fun checkDestination() {
         if (store.state.value.destination == null) {
-            throw NavigationViewApiError.MissingDestinationInfo
+            throw MissingDestinationInfoError()
         }
     }
 
-    @Throws(NavigationViewApiError.MissingPreviewRoutesInfo::class)
+    @Throws(NavigationViewApiError::class)
     private fun checkPreviewRoutes() {
         val previewState = store.state.value.previewRoutes
         if (previewState !is RoutePreviewState.Ready || previewState.routes.isEmpty()) {
-            throw NavigationViewApiError.MissingPreviewRoutesInfo
+            throw MissingPreviewRoutesInfoError()
         }
     }
 
-    @Throws(NavigationViewApiError.MissingRoutesInfo::class)
+    @Throws(NavigationViewApiError::class)
     private fun checkRoutes() {
-        if (store.state.value.routes.isEmpty()) throw NavigationViewApiError.MissingRoutesInfo
+        if (store.state.value.routes.isEmpty()) throw MissingRoutesInfoError()
     }
 
-    @Throws(NavigationViewApiError.InvalidRoutesInfo::class)
+    @Throws(NavigationViewApiError::class)
     private fun checkRoutes(routes: List<NavigationRoute>) {
-        if (routes.isEmpty()) throw NavigationViewApiError.InvalidRoutesInfo
+        if (routes.isEmpty()) throw InvalidRoutesInfoError()
     }
 
-    @Throws(
-        NavigationViewApiError.InvalidRoutesInfo::class,
-        NavigationViewApiError.IncompleteRoutesInfo::class
-    )
+    @Throws(NavigationViewApiError::class)
     private fun findDestinationPoint(routes: List<NavigationRoute>): Point {
-        if (routes.isEmpty()) throw NavigationViewApiError.InvalidRoutesInfo
+        if (routes.isEmpty()) throw InvalidRoutesInfoError()
 
-        return routes.first().getDestination() ?: throw NavigationViewApiError.IncompleteRoutesInfo
+        return routes.first().getDestination() ?: throw IncompleteRoutesInfoError()
     }
 
     private fun NavigationRoute.getDestination(): Point? {
         return routeOptions.coordinatesList().lastOrNull()
+    }
+
+    @Suppress("FunctionName")
+    internal companion object {
+        fun MissingDestinationInfoError() = NavigationViewApiError(
+            NavigationViewApiErrorTypes.MissingDestinationInfo,
+            "Destination cannot be empty."
+        )
+
+        fun MissingPreviewRoutesInfoError() = NavigationViewApiError(
+            NavigationViewApiErrorTypes.MissingPreviewRoutesInfo,
+            "Preview Routes cannot be empty."
+        )
+
+        fun MissingRoutesInfoError() = NavigationViewApiError(
+            NavigationViewApiErrorTypes.MissingRoutesInfo,
+            "Routes cannot be empty."
+        )
+
+        fun InvalidRoutesInfoError() = NavigationViewApiError(
+            NavigationViewApiErrorTypes.InvalidRoutesInfo,
+            "Routes cannot be empty."
+        )
+
+        fun IncompleteRoutesInfoError() = NavigationViewApiError(
+            NavigationViewApiErrorTypes.IncompleteRoutesInfo,
+            "Missing destination info in a given route."
+        )
     }
 }
 
