@@ -1,18 +1,12 @@
 package com.mapbox.navigation.ui.app.internal.routefetch
 
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.ui.app.internal.Action
 
 sealed class RoutePreviewAction : Action {
-    /**
-     * The action is used to fetch route based on the list of [points].
-     * @param points list of points
-     */
-    data class FetchPoints(val points: List<Point>) : RoutePreviewAction()
 
     /**
      * The action is used to request and set routes based on [RouteOptions].

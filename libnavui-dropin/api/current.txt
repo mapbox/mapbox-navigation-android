@@ -56,6 +56,7 @@ package com.mapbox.navigation.dropin {
     method public androidx.lifecycle.Lifecycle getLifecycle();
     method public void registerMapObserver(com.mapbox.navigation.dropin.MapViewObserver observer);
     method public void removeListener(com.mapbox.navigation.dropin.NavigationViewListener listener);
+    method public void setRouteOptionsInterceptor(com.mapbox.navigation.dropin.RouteOptionsInterceptor? routeOptionsInterceptor);
     method public void unregisterMapObserver(com.mapbox.navigation.dropin.MapViewObserver observer);
     property public final com.mapbox.navigation.dropin.NavigationViewApi api;
   }
@@ -124,6 +125,10 @@ package com.mapbox.navigation.dropin {
     method public void onRouteFetchSuccessful(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
     method public void onRouteFetching(long requestId);
     method public void onRoutePreview();
+  }
+
+  public fun interface RouteOptionsInterceptor {
+    method public com.mapbox.api.directions.v5.models.RouteOptions.Builder intercept(com.mapbox.api.directions.v5.models.RouteOptions.Builder builder);
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ViewBinderCustomization {

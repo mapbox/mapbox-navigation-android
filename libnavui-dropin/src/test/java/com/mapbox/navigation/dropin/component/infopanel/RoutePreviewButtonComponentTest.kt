@@ -1,9 +1,9 @@
 package com.mapbox.navigation.dropin.component.infopanel
 
-import android.content.Context
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -16,6 +16,7 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
+import com.mapbox.navigation.ui.app.internal.routefetch.RouteOptionsProvider
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
@@ -41,34 +42,27 @@ import org.robolectric.RobolectricTestRunner
 class RoutePreviewButtonComponentTest {
 
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
-    private lateinit var store: TestStore
-    private lateinit var button: MapboxExtendableButton
-    private lateinit var buttonContainer: ViewGroup
-    private lateinit var buttonParams: MutableStateFlow<MapboxExtendableButtonParams>
-    private lateinit var mapboxNavigation: MapboxNavigation
-    private lateinit var sut: RoutePreviewButtonComponent
-
-    private val layoutParams: LinearLayout.LayoutParams = mockk(relaxed = true)
+    private val layoutParams = mockk<LinearLayout.LayoutParams>(relaxed = true)
     private val initialParams =
         MapboxExtendableButtonParams(R.style.DropInStyleExitButton, layoutParams)
     private val updatedParams =
         MapboxExtendableButtonParams(R.style.DropInStyleRecenterButton, layoutParams)
 
+    private val store = spyk(TestStore())
+    private val button = spyk(MapboxExtendableButton(ApplicationProvider.getApplicationContext()))
+    private val buttonContainer = mockk<ViewGroup>(relaxed = true)
+    private val buttonParams = MutableStateFlow(initialParams)
+    private val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+    private val routeOptionsProvider = mockk<RouteOptionsProvider>()
+    private val sut =
+        RoutePreviewButtonComponent(store, buttonContainer, buttonParams, routeOptionsProvider)
+
     @Before
     fun setUp() {
-        val context: Context = ApplicationProvider.getApplicationContext()
-        mapboxNavigation = mockk(relaxed = true)
-        store = spyk(TestStore())
-        button = spyk(MapboxExtendableButton(context))
-        buttonParams = MutableStateFlow(initialParams)
-        buttonContainer = mockk(relaxed = true)
-
         mockkStatic("com.mapbox.navigation.dropin.internal.extensions.ViewGroupExKt")
         every { buttonContainer.recreateButton(any()) } returns button
-
-        sut = RoutePreviewButtonComponent(store, buttonContainer, buttonParams)
     }
 
     @After
@@ -88,9 +82,13 @@ class RoutePreviewButtonComponentTest {
     }
 
     @Test
-    fun `onClick routePreview should FetchPoints`() = runBlockingTest {
+    fun `onClick routePreview should FetchOptions`() = runBlockingTest {
         val origPoint = Point.fromLngLat(1.0, 2.0)
         val destPoint = Point.fromLngLat(2.0, 3.0)
+        val options = mockk<RouteOptions>()
+        every {
+            routeOptionsProvider.getOptions(mapboxNavigation, origPoint, destPoint)
+        } returns options
         store.setState(
             State(
                 location = TestingUtil.makeLocationMatcherResult(
@@ -104,17 +102,16 @@ class RoutePreviewButtonComponentTest {
             )
         )
 
-        sut.onAttached(mockk())
+        sut.onAttached(mapboxNavigation)
         button.performClick()
 
         verify(exactly = 1) {
-            val action = RoutePreviewAction.FetchPoints(listOf(origPoint, destPoint))
-            store.dispatch(action)
+            store.dispatch(RoutePreviewAction.FetchOptions(options))
         }
     }
 
     @Test
-    fun `onClick routePreview should NOT FetchPoints when already in Ready state`() =
+    fun `onClick routePreview should NOT FetchOptions when already in Ready state`() =
         runBlockingTest {
             val origPoint = Point.fromLngLat(1.0, 2.0)
             val destPoint = Point.fromLngLat(2.0, 3.0)
@@ -137,8 +134,7 @@ class RoutePreviewButtonComponentTest {
             button.performClick()
 
             verify(exactly = 0) {
-                val action = RoutePreviewAction.FetchPoints(listOf(origPoint, destPoint))
-                store.dispatch(action)
+                store.dispatch(ofType<RoutePreviewAction.FetchOptions>())
             }
         }
 }

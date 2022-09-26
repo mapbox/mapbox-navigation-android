@@ -22,11 +22,21 @@ internal fun NavigationViewContext.poiNameComponent(textView: AppCompatTextView)
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.routePreviewButtonComponent(buttonContainer: ViewGroup) =
-    RoutePreviewButtonComponent(store, buttonContainer, styles.routePreviewButtonParams)
+    RoutePreviewButtonComponent(
+        store,
+        buttonContainer,
+        styles.routePreviewButtonParams,
+        routeOptionsProvider,
+    )
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.startNavigationButtonComponent(buttonContainer: ViewGroup) =
-    StartNavigationButtonComponent(store, buttonContainer, styles.startNavigationButtonParams)
+    StartNavigationButtonComponent(
+        store,
+        buttonContainer,
+        styles.startNavigationButtonParams,
+        routeOptionsProvider,
+    )
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.endNavigationButtonComponent(

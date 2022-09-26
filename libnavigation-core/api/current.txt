@@ -760,12 +760,13 @@ package com.mapbox.navigation.core.routerefresh {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteRefreshExtra {
     field public static final com.mapbox.navigation.core.routerefresh.RouteRefreshExtra INSTANCE;
+    field public static final String REFRESH_STATE_CANCELED = "CANCELED";
     field public static final String REFRESH_STATE_FINISHED_FAILED = "FINISHED_FAILED";
     field public static final String REFRESH_STATE_FINISHED_SUCCESS = "FINISHED_SUCCESS";
     field public static final String REFRESH_STATE_STARTED = "STARTED";
   }
 
-  @StringDef({com.mapbox.navigation.core.routerefresh.RouteRefreshExtra.REFRESH_STATE_STARTED, com.mapbox.navigation.core.routerefresh.RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS, com.mapbox.navigation.core.routerefresh.RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface RouteRefreshExtra.RouteRefreshState {
+  @StringDef({com.mapbox.navigation.core.routerefresh.RouteRefreshExtra.REFRESH_STATE_STARTED, com.mapbox.navigation.core.routerefresh.RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS, com.mapbox.navigation.core.routerefresh.RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED, com.mapbox.navigation.core.routerefresh.RouteRefreshExtra.REFRESH_STATE_CANCELED}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface RouteRefreshExtra.RouteRefreshState {
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteRefreshStateResult {
