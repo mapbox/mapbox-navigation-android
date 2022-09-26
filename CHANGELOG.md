@@ -12,6 +12,10 @@ Mapbox welcomes participation and contributions from everyone.
 ### Changelog
 [Changes between v2.9.0-alpha.2 and v2.9.0-alpha.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0-alpha.2...v2.9.0-alpha.3)
 
+#### Known issues
+
+:bangbang: `MapboxAudioGuidance` crashes when attached to new instances of `MapboxNavigation`. This will crash `ui-androidauto` and `ui-dropin`. There is no known work around and it will be fixed in 2.9.0-alpha.4. [#6392](https://github.com/mapbox/mapbox-navigation-android/pull/6392)
+
 #### Features
 - Moved `MapboxAudioGuidance` and `MapboxAudioGuidanceState` into public api. [#6336](https://github.com/mapbox/mapbox-navigation-android/pull/6336)
 - Introduced `ViewOptionsCustomization.showCameraDebugInfo` to allow end users to enable camera debug info. [#6356](https://github.com/mapbox/mapbox-navigation-android/pull/6356)
