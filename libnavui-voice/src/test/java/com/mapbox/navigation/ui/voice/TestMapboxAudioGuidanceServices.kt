@@ -63,7 +63,7 @@ class TestMapboxAudioGuidanceServices(
         every { mapboxVoiceInstructions() } returns mapboxVoiceInstructions
         every { mapboxAudioGuidanceVoice(any(), any()) } returns mapboxAudioGuidanceVoice
         every { configOwner(any()) } returns carAppConfigOwner
-        every { dataStoreOwner(any(), any()) } returns dataStoreOwner
+        every { dataStoreOwner(any()) } returns dataStoreOwner
     }
 
     fun emitVoiceInstruction(state: MapboxVoiceInstructions.State) {
