@@ -14,6 +14,7 @@ import com.mapbox.navigation.dropin.util.BitmapMemoryCache
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache.Companion.MB_IN_BYTES
 import com.mapbox.navigation.ui.app.internal.SharedApp
 import com.mapbox.navigation.ui.app.internal.Store
+import com.mapbox.navigation.ui.app.internal.routefetch.RouteOptionsProvider
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.utils.internal.Provider
 import com.mapbox.navigation.ui.utils.internal.getValue
@@ -58,6 +59,7 @@ internal class NavigationViewContext(
         )
     }
     val locationProvider = NavigationLocationProvider()
+    val routeOptionsProvider = RouteOptionsProvider()
 
     fun mapAnnotationFactory() = MapMarkerFactory(
         context,

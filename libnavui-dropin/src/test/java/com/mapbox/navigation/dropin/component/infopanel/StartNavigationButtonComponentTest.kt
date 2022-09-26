@@ -1,6 +1,5 @@
 package com.mapbox.navigation.dropin.component.infopanel
 
-import android.content.Context
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.test.core.app.ApplicationProvider
@@ -42,14 +41,7 @@ import org.robolectric.RobolectricTestRunner
 class StartNavigationButtonComponentTest {
 
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
-
-    private lateinit var store: TestStore
-    private lateinit var button: MapboxExtendableButton
-    private lateinit var buttonParams: MutableStateFlow<MapboxExtendableButtonParams>
-    private lateinit var buttonContainer: ViewGroup
-    private lateinit var mapboxNavigation: MapboxNavigation
-    private lateinit var sut: StartNavigationButtonComponent
+    val coroutineRule = MainCoroutineRule()
 
     private val layoutParams: LinearLayout.LayoutParams = mockk(relaxed = true)
     private val initialParams =
@@ -57,19 +49,17 @@ class StartNavigationButtonComponentTest {
     private val updatedParams =
         MapboxExtendableButtonParams(R.style.DropInStyleRecenterButton, layoutParams)
 
+    private val store = spyk(TestStore())
+    private val button = spyk(MapboxExtendableButton(ApplicationProvider.getApplicationContext()))
+    private val buttonParams = MutableStateFlow(initialParams)
+    private val buttonContainer = mockk<ViewGroup>(relaxed = true)
+    private val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+    private val sut = StartNavigationButtonComponent(store, buttonContainer, buttonParams, mockk())
+
     @Before
     fun setUp() {
-        val context: Context = ApplicationProvider.getApplicationContext()
-        mapboxNavigation = mockk(relaxed = true)
-        store = spyk(TestStore())
-        button = spyk(MapboxExtendableButton(context))
-        buttonParams = MutableStateFlow(initialParams)
-        buttonContainer = mockk(relaxed = true)
-
         mockkStatic("com.mapbox.navigation.dropin.internal.extensions.ViewGroupExKt")
         every { buttonContainer.recreateButton(any()) } returns button
-
-        sut = StartNavigationButtonComponent(store, buttonContainer, buttonParams)
     }
 
     @Test
@@ -116,7 +106,7 @@ class StartNavigationButtonComponentTest {
     }
 
     @Test
-    fun `onClick startNavigation should NOT FetchPoints when already in Ready state`() =
+    fun `onClick startNavigation should NOT FetchOptions when already in Ready state`() =
         runBlockingTest {
             val origPoint = Point.fromLngLat(1.0, 2.0)
             val destPoint = Point.fromLngLat(2.0, 3.0)
@@ -139,8 +129,7 @@ class StartNavigationButtonComponentTest {
             button.performClick()
 
             verify(exactly = 0) {
-                val action = RoutePreviewAction.FetchPoints(listOf(origPoint, destPoint))
-                store.dispatch(action)
+                store.dispatch(ofType<RoutePreviewAction.FetchOptions>())
             }
         }
 }

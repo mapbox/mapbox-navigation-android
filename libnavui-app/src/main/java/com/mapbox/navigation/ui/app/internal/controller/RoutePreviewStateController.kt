@@ -1,10 +1,7 @@
 package com.mapbox.navigation.ui.app.internal.controller
 
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
-import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
@@ -59,7 +56,6 @@ class RoutePreviewStateController(private val store: Store) : StateController() 
 
     private fun processRoutesAction(action: RoutePreviewAction): RoutePreviewState {
         return when (action) {
-            is RoutePreviewAction.FetchPoints,
             is RoutePreviewAction.FetchOptions -> {
                 RoutePreviewState.Fetching(0)
             }
@@ -85,13 +81,11 @@ class RoutePreviewStateController(private val store: Store) : StateController() 
     private suspend fun MapboxNavigation.fetchRouteSaga() {
         store.actionsFlowable()
             .filter {
-                it is RoutePreviewAction.FetchPoints ||
-                    it is RoutePreviewAction.FetchOptions ||
+                it is RoutePreviewAction.FetchOptions ||
                     it is DestinationAction.SetDestination
             }
             .map {
                 when (it) {
-                    is RoutePreviewAction.FetchPoints -> routeOptions(it.points)
                     is RoutePreviewAction.FetchOptions -> it.options
                     else -> null
                 }
@@ -113,16 +107,6 @@ class RoutePreviewStateController(private val store: Store) : StateController() 
                     }
                 }
             }
-    }
-
-    private fun MapboxNavigation.routeOptions(points: List<Point>): RouteOptions {
-        return RouteOptions.builder()
-            .applyDefaultNavigationOptions()
-            .applyLanguageAndVoiceUnitOptions(navigationOptions.applicationContext)
-            .layersList(listOf(getZLevel(), null))
-            .coordinatesList(points)
-            .alternatives(true)
-            .build()
     }
 
     private suspend fun MapboxNavigation.fetchRoute(

@@ -15,6 +15,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -217,6 +218,19 @@ class NavigationView @JvmOverloads constructor(
      */
     fun unregisterMapObserver(observer: MapViewObserver) {
         navigationContext.mapViewOwner.unregisterObserver(observer)
+    }
+
+    /**
+     * Set [RouteOptionsInterceptor]. It allows to modify default [RouteOptions.Builder].
+     */
+    fun setRouteOptionsInterceptor(routeOptionsInterceptor: RouteOptionsInterceptor?) {
+        if (routeOptionsInterceptor != null) {
+            navigationContext.routeOptionsProvider.setInterceptor { routeOptions ->
+                routeOptionsInterceptor.intercept(routeOptions)
+            }
+        } else {
+            navigationContext.routeOptionsProvider.setInterceptor { it }
+        }
     }
 
     private inline fun <reified T : ViewModel> lazyViewModel(): Lazy<T> = lazy {

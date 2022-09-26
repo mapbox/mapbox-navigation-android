@@ -22,10 +22,12 @@ internal class RoutePreviewLongPressMapComponent(
     private val context: NavigationViewContext
 ) : UIComponent() {
 
+    private var mapboxNavigation: MapboxNavigation? = null
     private var hapticFeedback: HapticFeedback? = null
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
+        this.mapboxNavigation = mapboxNavigation
         hapticFeedback =
             HapticFeedback.create(mapboxNavigation.navigationOptions.applicationContext)
         mapView.gestures.addOnMapLongClickListener(longClickListener)
@@ -35,14 +37,18 @@ internal class RoutePreviewLongPressMapComponent(
         super.onDetached(mapboxNavigation)
         mapView.gestures.removeOnMapLongClickListener(longClickListener)
         hapticFeedback = null
+        this.mapboxNavigation = null
     }
 
     private val longClickListener = OnMapLongClickListener { point ->
+        val mapboxNavigation = mapboxNavigation ?: return@OnMapLongClickListener false
         if (context.options.enableMapLongClickIntercept.value) {
             val location = store.state.value.location?.enhancedLocation
             location?.toPoint()?.also { lastPoint ->
                 store.dispatch(DestinationAction.SetDestination(Destination(point)))
-                store.dispatch(RoutePreviewAction.FetchPoints(listOf(lastPoint, point)))
+                val options =
+                    context.routeOptionsProvider.getOptions(mapboxNavigation, lastPoint, point)
+                store.dispatch(RoutePreviewAction.FetchOptions(options))
                 hapticFeedback?.tick()
             } ?: logW(TAG, "Current location is unknown so map long press does nothing")
         }

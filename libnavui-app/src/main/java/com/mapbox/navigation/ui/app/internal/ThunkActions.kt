@@ -2,12 +2,14 @@ package com.mapbox.navigation.ui.app.internal
 
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
 import com.mapbox.navigation.ui.app.internal.extension.ThunkAction
 import com.mapbox.navigation.ui.app.internal.extension.dispatch
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
+import com.mapbox.navigation.ui.app.internal.routefetch.RouteOptionsProvider
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
@@ -76,28 +78,38 @@ fun startArrival(point: Point, routes: List<NavigationRoute>) = ThunkAction { st
 /**
  * Fetch Route and Show Route Preview ThunkAction creator.
  */
-fun CoroutineScope.fetchRouteAndShowRoutePreview() = fetchRouteAndContinue { store ->
+fun CoroutineScope.fetchRouteAndShowRoutePreview(
+    routeOptionsProvider: RouteOptionsProvider,
+    mapboxNavigation: MapboxNavigation,
+) = fetchRouteAndContinue(routeOptionsProvider, mapboxNavigation) { store ->
     store.dispatch(NavigationStateAction.Update(NavigationState.RoutePreview))
 }
 
 /**
  * Fetch Route and Start Active Navigation ThunkAction creator.
  */
-fun CoroutineScope.fetchRouteAndStartActiveNavigation() = fetchRouteAndContinue { store ->
+fun CoroutineScope.fetchRouteAndStartActiveNavigation(
+    routeOptionsProvider: RouteOptionsProvider,
+    mapboxNavigation: MapboxNavigation,
+) = fetchRouteAndContinue(routeOptionsProvider, mapboxNavigation) { store ->
     val previewRoutes = store.state.value.previewRoutes
     if (previewRoutes is RoutePreviewState.Ready) {
         store.dispatch(startActiveNavigation(previewRoutes.routes))
     }
 }
 
-private fun CoroutineScope.fetchRouteAndContinue(continuation: (Store) -> Unit) =
-    ThunkAction { store ->
-        launch {
-            if (fetchRouteIfNeeded(store)) {
-                continuation(store)
-            }
+// TODO: simplify after :libnavui-app module is merged with :libnavui-dropin
+private fun CoroutineScope.fetchRouteAndContinue(
+    routeOptionsProvider: RouteOptionsProvider,
+    mapboxNavigation: MapboxNavigation,
+    continuation: (Store) -> Unit,
+) = ThunkAction { store ->
+    launch {
+        if (fetchRouteIfNeeded(store, routeOptionsProvider, mapboxNavigation)) {
+            continuation(store)
         }
     }
+}
 
 /**
  * Dispatch FetchPoints action and wait for RoutePreviewState.Ready.
@@ -106,16 +118,21 @@ private fun CoroutineScope.fetchRouteAndContinue(continuation: (Store) -> Unit) 
  *
  * @return `true` once in RoutePreviewState.Ready state, otherwise `false`
  */
-private suspend fun fetchRouteIfNeeded(store: Store): Boolean {
+private suspend fun fetchRouteIfNeeded(
+    store: Store,
+    routeOptionsProvider: RouteOptionsProvider,
+    mapboxNavigation: MapboxNavigation,
+): Boolean {
     val storeState = store.state.value
     if (storeState.previewRoutes is RoutePreviewState.Ready) return true
     if (storeState.previewRoutes is RoutePreviewState.Fetching) return false
 
     return ifNonNull(
         storeState.location?.enhancedLocation?.toPoint(),
-        storeState.destination
+        storeState.destination?.point
     ) { lastPoint, destination ->
-        store.dispatch(RoutePreviewAction.FetchPoints(listOf(lastPoint, destination.point)))
+        val options = routeOptionsProvider.getOptions(mapboxNavigation, lastPoint, destination)
+        store.dispatch(RoutePreviewAction.FetchOptions(options))
         store.waitWhileFetching()
         store.state.value.previewRoutes is RoutePreviewState.Ready
     } ?: false

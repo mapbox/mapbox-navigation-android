@@ -63,4 +63,11 @@
         <item>SMALL</item>
         <item>LARGE</item>
     </string-array>
+    <string-array name="drop_in_routing_profile" translatable="false">
+        <item>--</item>
+        <item>DRIVING-TRAFFIC</item>
+        <item>DRIVING</item>
+        <item>WALKING</item>
+        <item>CYCLING</item>
+    </string-array>
 </resources>

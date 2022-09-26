@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.component.marker
 
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.gestures.GesturesPlugin
@@ -16,6 +17,7 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
+import com.mapbox.navigation.ui.app.internal.routefetch.RouteOptionsProvider
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
 import com.mapbox.navigation.utils.internal.toPoint
 import io.mockk.every
@@ -26,6 +28,7 @@ import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.junit.After
@@ -33,17 +36,18 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
 internal class RoutePreviewLongPressMapComponentTest {
 
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
 
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
-    private val enableOnMapLongClick = MutableStateFlow<Boolean>(true)
+    private val enableOnMapLongClick = MutableStateFlow(value = true)
     private val mockGesturesPlugin: GesturesPlugin = mockk(relaxed = true)
+    private val mockRouteOptionsProvider = mockk<RouteOptionsProvider>()
     private val mockMapView: MapView = mockk {
         every { gestures } returns mockGesturesPlugin
     }
@@ -56,18 +60,17 @@ internal class RoutePreviewLongPressMapComponentTest {
         every { options } returns mockk(relaxed = true) {
             every { enableMapLongClickIntercept } returns enableOnMapLongClick.asStateFlow()
         }
+        every { routeOptionsProvider } returns mockRouteOptionsProvider
     }
 
-    lateinit var sut: RoutePreviewLongPressMapComponent
-    private lateinit var testStore: TestStore
+    private val testStore = spyk(TestStore())
+    private val sut =
+        RoutePreviewLongPressMapComponent(testStore, mockMapView, navigationViewContext)
 
     @Before
     fun setUp() {
         mockkObject(HapticFeedback)
         every { HapticFeedback.create(any()) } returns mockk(relaxed = true)
-        testStore = spyk(TestStore())
-
-        sut = RoutePreviewLongPressMapComponent(testStore, mockMapView, navigationViewContext)
     }
 
     @After
@@ -113,13 +116,17 @@ internal class RoutePreviewLongPressMapComponentTest {
         testStore.setState(State(location = locationMatcherResult))
         sut.onAttached(mockMapboxNavigation)
 
+        val origin = locationMatcherResult.enhancedLocation.toPoint()
         val clickPoint = Point.fromLngLat(11.0, 12.0)
+        val options = mockk<RouteOptions>()
+        every {
+            mockRouteOptionsProvider.getOptions(mockMapboxNavigation, origin, clickPoint)
+        } returns options
         slot.captured.onMapLongClick(clickPoint)
 
-        val points = listOf(locationMatcherResult.enhancedLocation.toPoint(), clickPoint)
         verifyOrder {
             testStore.dispatch(DestinationAction.SetDestination(Destination(clickPoint)))
-            testStore.dispatch(RoutePreviewAction.FetchPoints(points))
+            testStore.dispatch(RoutePreviewAction.FetchOptions(options))
         }
     }
 
@@ -135,10 +142,9 @@ internal class RoutePreviewLongPressMapComponentTest {
         val clickPoint = Point.fromLngLat(11.0, 12.0)
         slot.captured.onMapLongClick(clickPoint)
 
-        val points = listOf(locationMatcherResult.enhancedLocation.toPoint(), clickPoint)
         verify(exactly = 0) {
             testStore.dispatch(DestinationAction.SetDestination(Destination(clickPoint)))
-            testStore.dispatch(RoutePreviewAction.FetchPoints(points))
+            testStore.dispatch(ofType<RoutePreviewAction.FetchOptions>())
         }
     }
 }

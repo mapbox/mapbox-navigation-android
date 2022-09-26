@@ -22,6 +22,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.MutableLiveData
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
@@ -324,10 +325,17 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             viewModel.showCameraDebugInfo,
             ::toggleShowCameraDebugInfo
         )
+
         bindSwitch(
             menuBinding.toggleEnableScalebar,
             viewModel.enableScalebar,
             ::toggleEnableScalebar
+        )
+
+        bindSpinner(
+            menuBinding.spinnerProfile,
+            viewModel.routingProfile,
+            ::setRoutingProfile,
         )
     }
 
@@ -667,13 +675,25 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         }
     }
 
+    private fun setRoutingProfile(profile: String) {
+        val routingProfile = when (profile) {
+            "DRIVING-TRAFFIC" -> DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+            "DRIVING" -> DirectionsCriteria.PROFILE_DRIVING
+            "WALKING" -> DirectionsCriteria.PROFILE_WALKING
+            "CYCLING" -> DirectionsCriteria.PROFILE_CYCLING
+            else -> {
+                binding.navigationView.setRouteOptionsInterceptor(null)
+                return
+            }
+        }
+        binding.navigationView.setRouteOptionsInterceptor { defaultBuilder ->
+            defaultBuilder.layers(null).applyDefaultNavigationOptions(routingProfile)
+        }
+    }
+
     private fun customActionButton(text: String): View {
         return AppCompatTextView(this).apply {
-            val w = resources.getDimensionPixelSize(R.dimen.mapbox_actionList_width)
-            layoutParams = ViewGroup.MarginLayoutParams(
-                72.dp,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-            )
+            layoutParams = ViewGroup.MarginLayoutParams(72.dp, WRAP_CONTENT)
             setPadding(0, 20.dp, 0, 20.dp)
             gravity = Gravity.CENTER
             setTextColor(Color.BLACK)
