@@ -39,8 +39,8 @@ class MainCarSession : Session() {
 
     private var mainCarContext: MainCarContext? = null
     private lateinit var mainScreenManager: MainScreenManager
-    private lateinit var mapboxCarMap: MapboxCarMap
     private lateinit var mapboxNavigationManager: MapboxCarNavigationManager
+    private val mapboxCarMap = MapboxCarMap()
     private val carMapStyleLoader = MainCarMapLoader()
     private val notificationInterceptor by lazy {
         CarNotificationInterceptor(carContext, MainCarAppService::class.java)
@@ -66,7 +66,7 @@ class MainCarSession : Session() {
                 mapboxNavigationManager = MapboxCarNavigationManager(carContext)
                 MapboxNavigationApp.registerObserver(mapboxNavigationManager)
 
-                mapboxCarMap = MapboxCarMap(MapInitOptions(context = carContext))
+                mapboxCarMap.setup(carContext, MapInitOptions(context = carContext))
                 mapboxCarMap.registerObserver(carMapStyleLoader)
                 val mainCarContext = MainCarContext(carContext, mapboxCarMap)
                     .also { mainCarContext = it }
@@ -100,9 +100,9 @@ class MainCarSession : Session() {
             override fun onDestroy(owner: LifecycleOwner) {
                 logAndroidAuto("MainCarSession onDestroy")
                 MapboxNavigationApp.unregisterObserver(mapboxNavigationManager)
-                mapboxCarMap.unregisterObserver(carMapStyleLoader)
-                mainCarContext = null
                 MapboxNavigationApp.unregisterObserver(notificationInterceptor)
+                mapboxCarMap.clearObservers()
+                mainCarContext = null
             }
         })
     }
