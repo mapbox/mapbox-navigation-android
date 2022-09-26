@@ -7,6 +7,8 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 
 ## androidauto-v0.12.0 - Sep 26, 2022
+### Changelog
+[Changes between 0.11.0 and 0.12.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.11.0...androidauto-v0.12.0)
 
 #### Features
 #### Bug fixes and improvements
