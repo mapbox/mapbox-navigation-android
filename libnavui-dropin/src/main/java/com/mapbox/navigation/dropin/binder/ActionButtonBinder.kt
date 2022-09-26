@@ -50,7 +50,7 @@ internal class ActionButtonBinder(
 
         val store = context.store
         return navigationListOf(
-            reloadOnChange(context.styles.cameraModeButtonParams) { params ->
+            reloadOnChange(context.styles.cameraModeButtonParams, context.styles.recenterButtonParams) { params, _ ->
                 cameraModeButtonComponent(binding, params, store)
             },
             reloadOnChange(context.styles.audioGuidanceButtonParams) { params ->
