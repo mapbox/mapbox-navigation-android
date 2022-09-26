@@ -619,14 +619,24 @@ class MapboxTripSessionTest {
     @Test
     fun checkNavigatorRefreshRouteWhenReasonIsRefresh() =
         coroutineRule.runBlockingTest {
+            val refreshedRoutes = listOf(
+                mockk<NavigationRoute>(relaxed = true) {
+                    every { id } returns "id0"
+                },
+                mockk<NavigationRoute>(relaxed = true) {
+                    every { id } returns "id1"
+                },
+            )
             tripSession.start(true)
 
             tripSession.setRoutes(
-                routes,
+                refreshedRoutes,
                 SetRefreshedRoutesInfo(CurrentIndicesFactory.createIndices(0, 0, null))
             )
 
-            coVerify(exactly = 1) { navigator.refreshRoute(routes[0]) }
+            refreshedRoutes.forEach {
+                coVerify(exactly = 1) { navigator.refreshRoute(it) }
+            }
             coVerify(exactly = 0) { navigator.setRoutes(any()) }
             coVerify(exactly = 0) { navigator.setAlternativeRoutes(any()) }
         }
@@ -733,28 +743,76 @@ class MapboxTripSessionTest {
     @Test
     fun `route set result - native alternatives returned successfully for refresh`() =
         coroutineRule.runBlockingTest {
-            val mockAlternativesMetadata = listOf<RouteAlternative>(mockk())
-            coEvery {
-                navigator.refreshRoute(any())
-            } returns ExpectedFactory.createValue(mockAlternativesMetadata)
-
-            val refreshedRoutes = routes.map {
+            val mockAlternativesMetadata1 = listOf<RouteAlternative>(mockk())
+            val mockAlternativesMetadata2 = listOf<RouteAlternative>(mockk(), mockk())
+            val refreshedRoutes = listOf(
                 mockk<NavigationRoute>(relaxed = true) {
-                    every { id } returns "abc#0"
-                }
-            }
-            routes.forEachIndexed { i, route ->
+                    every { id } returns "id0"
+                },
+                mockk<NavigationRoute>(relaxed = true) {
+                    every { id } returns "id1"
+                },
+            )
+            coEvery {
+                navigator.refreshRoute(refreshedRoutes[0])
+            } returns ExpectedFactory.createValue(mockAlternativesMetadata1)
+            coEvery {
+                navigator.refreshRoute(refreshedRoutes[1])
+            } returns ExpectedFactory.createValue(mockAlternativesMetadata2)
+
+            refreshedRoutes.forEachIndexed { i, route ->
                 every { route.refreshNativePeer() } returns refreshedRoutes[i]
             }
 
             tripSession.start(true)
             val result = tripSession.setRoutes(
-                routes,
+                refreshedRoutes,
                 SetRefreshedRoutesInfo(indicesSnapshot),
             )
 
             assertEquals(
-                mockAlternativesMetadata,
+                mockAlternativesMetadata2,
+                (result as NativeSetRouteValue).nativeAlternatives
+            )
+
+            result.routes.forEachIndexed { i, route ->
+                assertTrue(route === refreshedRoutes[i])
+            }
+            assertEquals(tripSession.primaryRoute, refreshedRoutes.first())
+        }
+
+    @Test
+    fun `route set result - native alternatives successful for primary and failed for alternatives`() =
+        coroutineRule.runBlockingTest {
+            val error = "some error"
+            val mockAlternativesMetadata1 = listOf<RouteAlternative>(mockk())
+            val refreshedRoutes = listOf(
+                mockk<NavigationRoute>(relaxed = true) {
+                    every { id } returns "id0"
+                },
+                mockk<NavigationRoute>(relaxed = true) {
+                    every { id } returns "id1"
+                },
+            )
+            coEvery {
+                navigator.refreshRoute(refreshedRoutes[0])
+            } returns ExpectedFactory.createValue(mockAlternativesMetadata1)
+            coEvery {
+                navigator.refreshRoute(refreshedRoutes[1])
+            } returns ExpectedFactory.createError(error)
+
+            refreshedRoutes.forEachIndexed { i, route ->
+                every { route.refreshNativePeer() } returns refreshedRoutes[i]
+            }
+
+            tripSession.start(true)
+            val result = tripSession.setRoutes(
+                refreshedRoutes,
+                SetRefreshedRoutesInfo(indicesSnapshot),
+            )
+
+            assertEquals(
+                mockAlternativesMetadata1,
                 (result as NativeSetRouteValue).nativeAlternatives
             )
 

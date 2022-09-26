@@ -5,6 +5,7 @@ import androidx.annotation.MainThread
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadFactory
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
@@ -39,6 +40,7 @@ import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
+import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteState
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -98,7 +100,17 @@ internal class MapboxTripSession(
             is SetRefreshedRoutesInfo -> {
                 if (routes.isNotEmpty()) {
                     val primaryRoute = routes.first()
-                    navigator.refreshRoute(primaryRoute).fold(
+                    lateinit var refreshRouteResult: Expected<String, List<RouteAlternative>>
+                    var lastSavedResultValue: Expected<String, List<RouteAlternative>>? = null
+                    for (route in routes) {
+                        refreshRouteResult = navigator.refreshRoute(route)
+                        if (refreshRouteResult.isValue) {
+                            lastSavedResultValue = refreshRouteResult
+                        }
+                    }
+                    // The latest result contains the most actual cumulated data.
+                    // TODO API change request NN-110
+                    (lastSavedResultValue ?: refreshRouteResult).fold(
                         { NativeSetRouteError(it) },
                         { value ->
                             val refreshedPrimaryRoute = primaryRoute.refreshNativePeer()
