@@ -275,7 +275,6 @@ package com.mapbox.androidauto.car.location {
 
   public final class CarLocationRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
     ctor public CarLocationRenderer(com.mapbox.androidauto.car.MainCarContext mainCarContext);
-    method public void onAttached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
   }
 
 }
@@ -284,8 +283,6 @@ package com.mapbox.androidauto.car.map.widgets.compass {
 
   public final class CarCompassSurfaceRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
     ctor public CarCompassSurfaceRenderer();
-    method public void onAttached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
-    method public void onDetached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
   }
 
 }
@@ -294,9 +291,6 @@ package com.mapbox.androidauto.car.map.widgets.logo {
 
   public final class CarLogoSurfaceRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
     ctor public CarLogoSurfaceRenderer();
-    method public void onAttached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
-    method public void onDetached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
-    method public void onVisibleAreaChanged(android.graphics.Rect visibleArea, com.mapbox.maps.EdgeInsets edgeInsets);
   }
 
 }
@@ -318,8 +312,6 @@ package com.mapbox.androidauto.car.navigation {
 
   public final class CarActiveGuidanceMarkers implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
     ctor public CarActiveGuidanceMarkers();
-    method public void onAttached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
-    method public void onDetached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
   }
 
   public final class CarArrivalTrigger implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
@@ -342,9 +334,6 @@ package com.mapbox.androidauto.car.navigation {
 
   public final class CarLocationsOverviewCamera implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
     ctor public CarLocationsOverviewCamera(com.mapbox.maps.CameraOptions initialCameraOptions = CameraOptions.<init>().zoom(DEFAULT_INITIAL_ZOOM).build());
-    method public void onAttached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
-    method public void onDetached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
-    method public void onVisibleAreaChanged(android.graphics.Rect visibleArea, com.mapbox.maps.EdgeInsets edgeInsets);
     method @UiThread public void updateWithLocations(java.util.List<com.mapbox.geojson.Point> points);
     field public static final double DEFAULT_INITIAL_ZOOM = 15.0;
   }
@@ -354,9 +343,6 @@ package com.mapbox.androidauto.car.navigation {
     method public boolean followingZoomUpdatesAllowed();
     method public com.mapbox.maps.extension.androidauto.DefaultMapboxCarMapGestureHandler getGestureHandler();
     method public kotlinx.coroutines.flow.StateFlow<com.mapbox.androidauto.car.navigation.CarCameraMode> getNextCameraMode();
-    method public void onAttached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
-    method public void onDetached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
-    method public void onVisibleAreaChanged(android.graphics.Rect visibleArea, com.mapbox.maps.EdgeInsets edgeInsets);
     method public void updateCameraMode(com.mapbox.androidauto.car.navigation.CarCameraMode carCameraMode);
     method public void zoomInAction();
     method public void zoomOutAction();
@@ -389,8 +375,6 @@ package com.mapbox.androidauto.car.navigation {
     ctor public CarNavigationInfoProvider();
     method public kotlinx.coroutines.flow.StateFlow<com.mapbox.androidauto.car.navigation.CarNavigationInfo> getCarNavigationInfo();
     method public com.mapbox.androidauto.car.navigation.CarNavigationInfoProvider invalidateOnChange(androidx.car.app.Screen screen);
-    method public void onAttached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
-    method public void onDetached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
     method public androidx.car.app.navigation.model.NavigationTemplate.Builder setNavigationInfo(androidx.car.app.navigation.model.NavigationTemplate.Builder builder);
     property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.androidauto.car.navigation.CarNavigationInfo> carNavigationInfo;
   }
@@ -399,8 +383,6 @@ package com.mapbox.androidauto.car.navigation {
     ctor public MapUserStyleObserver();
     method public String getStyleId();
     method public String getUserId();
-    method public void onAttached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
-    method public void onDetached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
     method public void setStyleId(String);
     method public void setUserId(String);
     property public final String styleId;
@@ -558,9 +540,6 @@ package com.mapbox.androidauto.car.navigation.speedlimit {
 
   public final class CarSpeedLimitRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
     ctor public CarSpeedLimitRenderer(com.mapbox.androidauto.car.MainCarContext mainCarContext);
-    method public void onAttached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
-    method public void onDetached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
-    method public void onVisibleAreaChanged(android.graphics.Rect visibleArea, com.mapbox.maps.EdgeInsets edgeInsets);
   }
 
   public final class SpeedLimitOptions {
@@ -645,8 +624,6 @@ package com.mapbox.androidauto.car.preview {
   public final class CarRouteLine implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
     ctor public CarRouteLine(com.mapbox.androidauto.car.MainCarContext mainCarContext, com.mapbox.androidauto.car.routes.CarRoutesProvider carRoutesProvider = com.mapbox.androidauto.car.routes.NavigationCarRoutesProvider());
     method public com.mapbox.androidauto.car.MainCarContext getMainCarContext();
-    method public void onAttached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
-    method public void onDetached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
     property public final com.mapbox.androidauto.car.MainCarContext mainCarContext;
   }
 
@@ -912,9 +889,6 @@ package com.mapbox.androidauto.surfacelayer {
     method public final com.mapbox.maps.EdgeInsets? getEdgeInsets();
     method protected final com.mapbox.maps.extension.androidauto.MapboxCarMapSurface? getMapboxCarMapSurface();
     method public final android.graphics.Rect? getVisibleArea();
-    method @CallSuper public void onAttached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
-    method @CallSuper public void onDetached(com.mapbox.maps.extension.androidauto.MapboxCarMapSurface mapboxCarMapSurface);
-    method @CallSuper public void onVisibleAreaChanged(android.graphics.Rect visibleArea, com.mapbox.maps.EdgeInsets edgeInsets);
     method public final kotlin.Pair<java.lang.Integer,java.lang.Integer>? surfaceDimensions();
     property public final com.mapbox.maps.EdgeInsets? edgeInsets;
     property protected final com.mapbox.maps.extension.androidauto.MapboxCarMapSurface? mapboxCarMapSurface;
