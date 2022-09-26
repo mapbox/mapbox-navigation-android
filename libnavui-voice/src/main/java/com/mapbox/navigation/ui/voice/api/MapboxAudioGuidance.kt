@@ -54,7 +54,7 @@ internal constructor(
      */
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         val context = mapboxNavigation.navigationOptions.applicationContext
-        dataStoreOwner = audioGuidanceServices.dataStoreOwner(context, DEFAULT_DATA_STORE_NAME)
+        dataStoreOwner = audioGuidanceServices.dataStoreOwner(context)
         configOwner = audioGuidanceServices.configOwner(context)
         mapboxVoiceInstructions.registerObservers(mapboxNavigation)
         job = scope.launch {
@@ -198,7 +198,6 @@ internal constructor(
     companion object {
         private val STORE_AUDIO_GUIDANCE_MUTED =
             booleanDataStoreKey("audio_guidance_muted", false)
-        private const val DEFAULT_DATA_STORE_NAME = "mapbox_navigation_preferences"
 
         /**
          * Construct an instance without registering to [MapboxNavigationApp].

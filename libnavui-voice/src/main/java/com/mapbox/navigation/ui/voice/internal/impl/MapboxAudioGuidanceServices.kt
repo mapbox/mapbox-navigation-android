@@ -46,6 +46,5 @@ class MapboxAudioGuidanceServices {
 
     fun configOwner(context: Context): NavigationConfigOwner = NavigationConfigOwner(context)
 
-    fun dataStoreOwner(context: Context, storeName: String) =
-        NavigationDataStoreOwner(context, storeName)
+    fun dataStoreOwner(context: Context) = NavigationDataStoreOwner(context)
 }
