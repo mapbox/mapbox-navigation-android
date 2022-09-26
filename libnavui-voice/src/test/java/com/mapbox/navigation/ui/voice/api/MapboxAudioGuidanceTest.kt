@@ -204,7 +204,7 @@ class MapboxAudioGuidanceTest {
                 mapboxAudioGuidanceServices.mapboxVoiceInstructions()
             }
             verifySequence {
-                mapboxAudioGuidanceServices.dataStoreOwner(any(), any())
+                mapboxAudioGuidanceServices.dataStoreOwner(any())
                 mapboxAudioGuidanceServices.configOwner(any())
                 mapboxAudioGuidanceServices.mapboxAudioGuidanceVoice(any(), "en")
                 mapboxAudioGuidanceServices.mapboxAudioGuidanceVoice(any(), voiceLanguage)

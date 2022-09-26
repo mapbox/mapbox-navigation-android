@@ -6,10 +6,15 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 - Marked `ReplayProgressObserver`, `MapboxReplayer`, `ReplayLocationEngine`, `RerouteController#RoutesCallback`, `NavigationRerouteController#RoutesCallback`, `LocationObserver`, `NavigationSessionStateObserver`, `OffRouteObserver`, `RouteProgressObserver`, `TripSessionStateObserver`, `VoiceInstructionsObserver` methods with `@UiThread` annotation. [#6266](https://github.com/mapbox/mapbox-navigation-android/pull/6266)
+- Fix crash due to multiple DataStores active. [#6392](https://github.com/mapbox/mapbox-navigation-android/pull/6392)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.3 - 23 September, 2022
 ### Changelog
 [Changes between v2.9.0-alpha.2 and v2.9.0-alpha.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0-alpha.2...v2.9.0-alpha.3)
+
+#### Known issues
+
+:bangbang: `MapboxAudioGuidance` crashes when attached to new instances of `MapboxNavigation`. This will crash `ui-androidauto` and `ui-dropin`. There is no known work around and it will be fixed in 2.9.0-alpha.4. [#6392](https://github.com/mapbox/mapbox-navigation-android/pull/6392)
 
 #### Features
 - Moved `MapboxAudioGuidance` and `MapboxAudioGuidanceState` into public api. [#6336](https://github.com/mapbox/mapbox-navigation-android/pull/6336)
