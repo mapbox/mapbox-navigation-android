@@ -14,9 +14,11 @@ data class MockDirectionsRefreshHandler(
     val testUuid: String,
     val jsonResponse: String,
     val acceptedGeometryIndex: Int? = null,
+    val routeIndex: Int? = null,
 ) : MockRequestHandler {
     override fun handle(request: RecordedRequest): MockResponse? {
-        val prefix = """/directions-refresh/v1/mapbox/driving-traffic/$testUuid"""
+        val prefix = """/directions-refresh/v1/mapbox/driving-traffic/$testUuid""" +
+            if (routeIndex != null) { "/$routeIndex/" } else ""
         if (request.path!!.startsWith(prefix)) {
             val currentGeometryIndex = request.requestUrl
                 ?.queryParameter("current_route_geometry_index")

@@ -8,6 +8,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Marked `ReplayProgressObserver`, `MapboxReplayer`, `ReplayLocationEngine`, `RerouteController#RoutesCallback`, `NavigationRerouteController#RoutesCallback`, `LocationObserver`, `NavigationSessionStateObserver`, `OffRouteObserver`, `RouteProgressObserver`, `TripSessionStateObserver`, `VoiceInstructionsObserver` methods with `@UiThread` annotation. [#6266](https://github.com/mapbox/mapbox-navigation-android/pull/6266)
 - Fix crash due to multiple DataStores active. [#6392](https://github.com/mapbox/mapbox-navigation-android/pull/6392)
 - Replaced `NavigationViewApiError` error classes with single error class that accepts `NavigationViewApiErrorTypes`. [#6390](https://github.com/mapbox/mapbox-navigation-android/pull/6390)
+- Fixed the issue where `AlternativeRouteMetadata` instances were not updated when alternative routes were refreshed. The issue did not impact the primary route. [#6389](https://github.com/mapbox/mapbox-navigation-android/pull/6389)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.3 - 23 September, 2022
 ### Changelog

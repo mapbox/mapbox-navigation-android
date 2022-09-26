@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
@@ -117,6 +118,13 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                     .navigatorPredictionMillis(0L)
                     .build()
             )
+        }
+    }
+
+    @After
+    fun tearDown() {
+        if (this::failByRequestRouteRefreshResponse.isInitialized) {
+            failByRequestRouteRefreshResponse.failResponse = false
         }
     }
 
@@ -306,8 +314,19 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     }
 
     @Test
-    fun routeAlternativeMetadataUpdatedAlongWithRouteRefresh() = sdkTest {
+    fun routeAlternativeMetadataUpdatedAlongWithOnlyPrimaryRouteRefresh() = sdkTest {
         val routeOptions = generateRouteOptions(twoCoordinates)
+        mockWebServerRule.requestHandlers.remove(failByRequestRouteRefreshResponse)
+        mockWebServerRule.requestHandlers.add(
+            FailByRequestMockRequestHandler(
+                MockDirectionsRefreshHandler(
+                    "route_response_route_refresh",
+                    readRawFileText(activity, R.raw.route_response_route_refresh_annotations),
+                    // it will fail for alternative refresh since index will be 1
+                    routeIndex = 0
+                )
+            )
+        )
         val routes = mapboxNavigation.requestRoutes(routeOptions)
             .getSuccessfulResultOrThrowException()
             .routes
@@ -329,8 +348,64 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             alternativesMetadata.navigationRoute.id
         )
         assertNotEquals(alternativesMetadataLegacy, alternativesMetadata)
-        assertEquals(227.9, alternativesMetadataLegacy.infoFromStartOfPrimary.duration, 1.0)
-        assertEquals(235.0, alternativesMetadata.infoFromStartOfPrimary.duration, 1.0)
+        assertEquals(227.918, alternativesMetadataLegacy.infoFromStartOfPrimary.duration, 0.001)
+        // fork index is 4. So take 4 durations from primary refresh response
+        // and add missing durations from the original alternative response.
+        assertEquals(235.048, alternativesMetadata.infoFromStartOfPrimary.duration, 0.001)
+    }
+
+    @Test
+    fun routeAlternativeMetadataUpdatedAlongWithRouteRefresh() = sdkTest {
+        val routeOptions = generateRouteOptions(twoCoordinates)
+        setUpSeparateRefreshHandlersForPrimaryAndAlternative()
+        val routes = mapboxNavigation.requestRoutes(routeOptions)
+            .getSuccessfulResultOrThrowException()
+            .routes
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+        val alternativesMetadataLegacy = mapboxNavigation.getAlternativeMetadataFor(routes).first()
+        mapboxNavigation.startTripSession()
+        stayOnInitialPosition()
+        mapboxNavigation.routesUpdates()
+            .first { it.reason == ROUTES_UPDATE_REASON_REFRESH }
+
+        val alternativesMetadata = mapboxNavigation.getAlternativeMetadataFor(
+            mapboxNavigation.getNavigationRoutes()
+        ).first()
+
+        assertNotNull(alternativesMetadataLegacy)
+        assertNotNull(alternativesMetadata)
+        assertEquals(
+            alternativesMetadataLegacy.navigationRoute.id,
+            alternativesMetadata.navigationRoute.id
+        )
+        assertNotEquals(alternativesMetadataLegacy, alternativesMetadata)
+        assertEquals(227.918, alternativesMetadataLegacy.infoFromStartOfPrimary.duration, 0.001)
+        // fork index is 4. So take 4 durations from primary refresh response
+        // (they should be the same as in alternative refresh response)
+        // and add missing durations from the alternative refresh response.
+        assertEquals(285.185, alternativesMetadata.infoFromStartOfPrimary.duration, 0.001)
+    }
+
+    @Test
+    fun expect_route_refresh_to_update_all_native_routes() = sdkTest {
+        val routeOptions = generateRouteOptions(twoCoordinates)
+        setUpSeparateRefreshHandlersForPrimaryAndAlternative()
+        val routes = mapboxNavigation.requestRoutes(routeOptions)
+            .getSuccessfulResultOrThrowException()
+            .routes
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+        stayOnInitialPosition()
+        val oldAlternative = mapboxNavigation.getNavigationRoutes()[1]
+        val oldInfo = mapboxNavigation.getAlternativeMetadataFor(oldAlternative)!!.infoFromFork
+        mapboxNavigation.routesUpdates()
+            .first { it.reason == ROUTES_UPDATE_REASON_REFRESH }
+        val newAlternative = mapboxNavigation.getNavigationRoutes()[1]
+
+        assertNotEquals(
+            oldInfo,
+            mapboxNavigation.getAlternativeMetadataFor(newAlternative)!!.infoFromFork
+        )
     }
 
     @Test
@@ -589,6 +664,31 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             .coordinatesList(coordinates)
             .baseUrl(mockWebServerRule.baseUrl) // Comment out to test a real server
             .build()
+    }
+
+    private fun setUpSeparateRefreshHandlersForPrimaryAndAlternative() {
+        mockWebServerRule.requestHandlers.remove(failByRequestRouteRefreshResponse)
+        mockWebServerRule.requestHandlers.add(
+            FailByRequestMockRequestHandler(
+                MockDirectionsRefreshHandler(
+                    "route_response_route_refresh",
+                    readRawFileText(activity, R.raw.route_response_route_refresh_annotations),
+                    routeIndex = 0
+                )
+            )
+        )
+        mockWebServerRule.requestHandlers.add(
+            FailByRequestMockRequestHandler(
+                MockDirectionsRefreshHandler(
+                    "route_response_route_refresh",
+                    readRawFileText(
+                        activity,
+                        R.raw.route_response_route_refresh_alternative_annotations
+                    ),
+                    routeIndex = 1
+                )
+            )
+        )
     }
 }
 
