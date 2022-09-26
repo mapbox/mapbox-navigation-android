@@ -5,6 +5,8 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -113,6 +115,27 @@ internal class MapViewOwnerTest {
         sut.updateMapView(mapView2)
         verify(exactly = 1) { observer.onDetached(mapView1) }
         verify(exactly = 1) { observer.onAttached(mapView2) }
+    }
+
+    @Test
+    fun `flow value is null by default`() {
+        val sut = MapViewOwner()
+        assertNull(sut.mapViews.value)
+    }
+
+    @Test
+    fun `flow value is chanhed when mapView is updated`() {
+        val sut = MapViewOwner()
+        val mapView1 = mockk<MapView>()
+        val mapView2 = mockk<MapView>()
+
+        sut.updateMapView(mapView1)
+
+        assertEquals(mapView1, sut.mapViews.value)
+
+        sut.updateMapView(mapView2)
+
+        assertEquals(mapView2, sut.mapViews.value)
     }
 }
 

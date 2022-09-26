@@ -179,6 +179,12 @@ class ViewStyleCustomization {
      */
     var mapScalebarParams: MapboxMapScalebarParams? = null
 
+    /**
+     * Map compass params.
+     * Use [defaultCompassButtonParams] to reset to default.
+     */
+    var compassButtonParams: MapboxEnablableButtonParams? = null
+
     companion object {
         /**
          * Default info panel peek height in pixels.
@@ -391,6 +397,24 @@ class ViewStyleCustomization {
          */
         fun defaultMapScalebarParams(context: Context): MapboxMapScalebarParams =
             MapboxMapScalebarParams.Builder(context).build()
+
+        /**
+         * Default map compass [MapboxEnablableButtonParams] parameters.
+         */
+        fun defaultCompassButtonParams(context: Context): MapboxEnablableButtonParams =
+            MapboxEnablableButtonParams(
+                false,
+                defaultCompassExtendableButtonParams(context)
+            )
+
+        /**
+         * Default map compass [MapboxExtendableButtonParams] parameters.
+         */
+        fun defaultCompassExtendableButtonParams(context: Context): MapboxExtendableButtonParams =
+            MapboxExtendableButtonParams(
+                R.style.DropInStyleCompassButton,
+                context.defaultLayoutParams(),
+            )
 
         private fun Context.defaultSpacing() =
             resources.getDimensionPixelSize(R.dimen.mapbox_actionList_spacing)

@@ -6,6 +6,14 @@ package com.mapbox.navigation.dropin {
     method public com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver bind(android.view.ViewGroup viewGroup);
   }
 
+  public final class MapboxEnablableButtonParams {
+    ctor public MapboxEnablableButtonParams(boolean enabled, com.mapbox.navigation.dropin.MapboxExtendableButtonParams buttonParams);
+    method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams getButtonParams();
+    method public boolean getEnabled();
+    property public final com.mapbox.navigation.dropin.MapboxExtendableButtonParams buttonParams;
+    property public final boolean enabled;
+  }
+
   public final class MapboxExtendableButtonParams {
     ctor public MapboxExtendableButtonParams(@StyleRes int style, android.widget.LinearLayout.LayoutParams layoutParams);
     method public android.widget.LinearLayout.LayoutParams getLayoutParams();
@@ -168,6 +176,7 @@ package com.mapbox.navigation.dropin {
     method public Integer? getArrivalTextAppearance();
     method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams? getAudioGuidanceButtonParams();
     method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams? getCameraModeButtonParams();
+    method public com.mapbox.navigation.dropin.MapboxEnablableButtonParams? getCompassButtonParams();
     method public com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions? getDestinationMarkerAnnotationOptions();
     method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams? getEndNavigationButtonParams();
     method public Integer? getInfoPanelBackground();
@@ -189,6 +198,7 @@ package com.mapbox.navigation.dropin {
     method public void setArrivalTextAppearance(Integer?);
     method public void setAudioGuidanceButtonParams(com.mapbox.navigation.dropin.MapboxExtendableButtonParams?);
     method public void setCameraModeButtonParams(com.mapbox.navigation.dropin.MapboxExtendableButtonParams?);
+    method public void setCompassButtonParams(com.mapbox.navigation.dropin.MapboxEnablableButtonParams?);
     method public void setDestinationMarkerAnnotationOptions(com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions?);
     method public void setEndNavigationButtonParams(com.mapbox.navigation.dropin.MapboxExtendableButtonParams?);
     method public void setInfoPanelBackground(Integer?);
@@ -210,6 +220,7 @@ package com.mapbox.navigation.dropin {
     property public final Integer? arrivalTextAppearance;
     property public final com.mapbox.navigation.dropin.MapboxExtendableButtonParams? audioGuidanceButtonParams;
     property public final com.mapbox.navigation.dropin.MapboxExtendableButtonParams? cameraModeButtonParams;
+    property public final com.mapbox.navigation.dropin.MapboxEnablableButtonParams? compassButtonParams;
     property public final com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions? destinationMarkerAnnotationOptions;
     property public final com.mapbox.navigation.dropin.MapboxExtendableButtonParams? endNavigationButtonParams;
     property public final Integer? infoPanelBackground;
@@ -235,6 +246,8 @@ package com.mapbox.navigation.dropin {
     method @StyleRes public int defaultArrivalTextAppearance();
     method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams defaultAudioGuidanceButtonParams(android.content.Context context);
     method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams defaultCameraModeButtonParams(android.content.Context context);
+    method public com.mapbox.navigation.dropin.MapboxEnablableButtonParams defaultCompassButtonParams(android.content.Context context);
+    method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams defaultCompassExtendableButtonParams(android.content.Context context);
     method public com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions defaultDestinationMarkerAnnotationOptions(android.content.Context context);
     method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams defaultEndNavigationButtonParams(android.content.Context context);
     method @DrawableRes public int defaultInfoPanelBackground();

@@ -137,6 +137,8 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
 - Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
 
+- Introduced `ViewStyleCutomization.compassButtonParams` property along with `MapboxEnablableButtonParams` class to configure compass. [#6395](https://github.com/mapbox/mapbox-navigation-android/pull/6395)
+
 ## Mapbox Navigation SDK 2.9.0-alpha.3 - 23 September, 2022
 ### Changelog
 [Changes between v2.9.0-alpha.2 and v2.9.0-alpha.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0-alpha.2...v2.9.0-alpha.3)

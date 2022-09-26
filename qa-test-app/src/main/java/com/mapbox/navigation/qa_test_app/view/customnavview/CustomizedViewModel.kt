@@ -20,4 +20,5 @@ class CustomizedViewModel : ViewModel() {
     val showCameraDebugInfo = MutableLiveData(false)
     val enableScalebar = MutableLiveData(false)
     val routingProfile = MutableLiveData("--")
+    val enableCompass = MutableLiveData(false)
 }

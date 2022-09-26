@@ -150,4 +150,9 @@
         <item name="extendableButtonIcon">@drawable/mapbox_ic_camera_recenter</item>
     </style>
 
+    <!-- Compass button -->
+    <style name="DropInStyleCompassButton" parent="MapboxStyleExtendableButton">
+        <item name="extendableButtonIcon">@drawable/mapbox_ic_compass</item>
+    </style>
+
 </resources>
