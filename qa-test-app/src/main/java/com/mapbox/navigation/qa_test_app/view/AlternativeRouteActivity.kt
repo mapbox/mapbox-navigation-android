@@ -52,6 +52,7 @@ import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.replay.route.ReplayRouteOptions
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
+import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesRequestCallback
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -321,6 +322,22 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         binding.startNavigation.setOnClickListener {
             mapboxNavigation.startTripSession()
             binding.startNavigation.visibility = View.GONE
+            binding.requestAlternatives.visibility = View.VISIBLE
+        }
+        binding.requestAlternatives.setOnClickListener {
+            binding.requestAlternatives.isEnabled = false
+            mapboxNavigation.requestAlternativeRoutes(object : NavigationRouteAlternativesRequestCallback {
+                override fun onRouteAlternativeRequestFinished(
+                    routeProgress: RouteProgress,
+                    alternatives: List<NavigationRoute>,
+                    routerOrigin: RouterOrigin
+                ) {
+                    binding.requestAlternatives.isEnabled = true
+                }
+                override fun onRouteAlternativesRequestError(error: RouteAlternativesError) {
+                    binding.requestAlternatives.isEnabled = true
+                }
+            })
         }
 
         binding.mapView.gestures.addOnMapClickListener(mapClickListener)
