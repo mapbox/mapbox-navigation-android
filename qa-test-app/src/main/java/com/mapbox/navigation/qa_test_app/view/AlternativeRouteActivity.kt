@@ -31,6 +31,7 @@ import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
+import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -39,7 +40,9 @@ import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
@@ -336,6 +339,28 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                     this
                 )
             }
+            fasterRoute(result)
+        }
+    }
+
+    private var rejectedAlternatives = mutableMapOf<Int, NavigationRoute>()
+
+    private fun fasterRoute(result: RoutesUpdatedResult) {
+        if (result.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE) {
+            val alternatives = result.navigationRoutes.drop(1)
+                .map { Pair(it, mapboxNavigation.getAlternativeMetadataFor(it)!!) }
+                .filter { !rejectedAlternatives.containsKey(it.second.alternativeId) }
+            val fasterAlternative = alternatives.minByOrNull { it.second.infoFromStartOfPrimary.duration } ?: return
+            val alternativeDuration = fasterAlternative.second.infoFromStartOfPrimary.duration
+            val primaryDuration = result.navigationRoutes.first().directionsRoute.duration()
+            if (alternativeDuration < primaryDuration) {
+                Log.d("vadzim-test", "faster route found: ${fasterAlternative.second.alternativeId}, ${fasterAlternative.first.directionsRoute.geometry()}")
+            } else {
+                Log.d("vadzim-test", "alternative ${fasterAlternative.second.alternativeId}($alternativeDuration) is slower then primary route(${primaryDuration})")
+            }
+            alternatives.forEach { rejectedAlternatives[it.second.alternativeId] = it.first }
+        } else {
+
         }
     }
 
