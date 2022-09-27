@@ -7,6 +7,7 @@ import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
+import com.mapbox.navigation.base.internal.CopilotOptions
 import com.mapbox.navigation.testing.BuilderTest
 import io.mockk.every
 import io.mockk.mockk
@@ -79,6 +80,9 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
                     .build()
             )
             .enableSensors(true)
+            .copilotOptions(
+                CopilotOptions.Builder().shouldSendHistoryOnlyWithFeedback(true).build()
+            )
     }
 
     @Test
