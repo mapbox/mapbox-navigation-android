@@ -15,6 +15,8 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.gestures.Utils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.LogConfiguration
+import com.mapbox.common.LoggingLevel
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -45,6 +47,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.replay.route.ReplayRouteOptions
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -129,8 +132,8 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        LogConfiguration.setLoggingLevel(LoggingLevel.DEBUG)
         setContentView(binding.root)
-
         initStyle()
         initListeners()
     }
@@ -154,7 +157,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             enabled = true
         }
         mapboxReplayer.pushRealLocation(this, 0.0)
-        mapboxReplayer.playbackSpeed(1.5)
+        mapboxReplayer.playbackSpeed(3.0)
         mapboxReplayer.play()
     }
 
@@ -315,19 +318,9 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         binding.startNavigation.setOnClickListener {
             mapboxNavigation.startTripSession()
             binding.startNavigation.visibility = View.GONE
-            startSimulation(mapboxNavigation.getRoutes()[0])
         }
 
         binding.mapView.gestures.addOnMapClickListener(mapClickListener)
-    }
-
-    private fun startSimulation(route: DirectionsRoute) {
-        mapboxReplayer.stop()
-        mapboxReplayer.clearEvents()
-        val replayData = replayRouteMapper.mapDirectionsRouteGeometry(route)
-        mapboxReplayer.pushEvents(replayData)
-        mapboxReplayer.seekTo(replayData[0])
-        mapboxReplayer.play()
     }
 
     private val routesObserver = RoutesObserver { result ->
