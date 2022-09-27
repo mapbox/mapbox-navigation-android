@@ -10,10 +10,10 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.gestures.Utils
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.common.LogConfiguration
 import com.mapbox.common.LoggingLevel
@@ -31,7 +31,6 @@ import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
-import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -43,6 +42,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.internal.utils.calculateDescriptionLevensteinSimilarity
+import com.mapbox.navigation.core.internal.utils.calculateGeometrySimilarity
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
@@ -50,7 +51,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
-import com.mapbox.navigation.core.replay.route.ReplayRouteOptions
+import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesRequestCallback
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
@@ -375,9 +376,44 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             } else {
                 Log.d("vadzim-test", "alternative ${fasterAlternative.second.alternativeId}($alternativeDuration) is slower then primary route(${primaryDuration})")
             }
+            compareSimilarity(alternatives)
             alternatives.forEach { rejectedAlternatives[it.second.alternativeId] = it.first }
         } else {
 
+        }
+    }
+
+    private fun compareSimilarity(alternatives: List<Pair<NavigationRoute, AlternativeRouteMetadata>>) {
+        lifecycleScope.launch(Dispatchers.Default) {
+            alternatives.forEach { newAlternative ->
+                for (rejectedAlternativeKV in rejectedAlternatives) {
+                    val rejectedAlternative = rejectedAlternativeKV.value
+                    val geomertySimilarity =
+                        calculateGeometrySimilarity(rejectedAlternative, newAlternative.first)
+                    Log.d(
+                        "vadzim-test",
+                        "geometry similarity: $geomertySimilarity for ${rejectedAlternativeKV.key} and ${newAlternative.second.alternativeId}"
+                    )
+                    Log.d(
+                        "vadzim-test",
+                        "${rejectedAlternativeKV.key} ${rejectedAlternative.directionsRoute.geometry()}"
+                    )
+                    Log.d(
+                        "vadzim-test",
+                        "${newAlternative.second.alternativeId} ${newAlternative.first.directionsRoute.geometry()}"
+                    )
+
+                    val descriptionSimilarity = calculateDescriptionLevensteinSimilarity(
+                        rejectedAlternative,
+                        newAlternative.first
+                    )
+                    Log.d(
+                        "vadzim-test",
+                        "description similarity: $descriptionSimilarity for ${rejectedAlternativeKV.key}({${rejectedAlternative.directionsRoute.legs()?.first()?.summary()}}) and ${newAlternative.second.alternativeId}(${newAlternative.first.directionsRoute.legs()?.first()?.summary()})"
+                    )
+
+                }
+            }
         }
     }
 

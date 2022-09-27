@@ -30,7 +30,7 @@ class SimilarRoutesTest {
     }
 
     @Test
-    fun `different routes`() {
+    fun `different routes geometry similarity`() {
         val a = loadNavigationRoute("a")
         val b = loadNavigationRoute("not_a")
         val similarity = calculateGeometrySimilarity(a, b)

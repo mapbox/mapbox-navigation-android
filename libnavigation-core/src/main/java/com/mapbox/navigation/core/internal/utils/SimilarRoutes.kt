@@ -5,7 +5,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.turf.TurfMeasurement
 
-fun calculateDescriptionSimilarity(a: NavigationRoute, b: NavigationRoute): Double {
+fun calculateDescriptionLevensteinSimilarity(a: NavigationRoute, b: NavigationRoute): Double {
     if (a.id == b.id) return 1.0
     val (shorter, longer) = if (a.directionsRoute.distance() > b.directionsRoute.distance()) {
         Pair(b, a)
@@ -14,13 +14,13 @@ fun calculateDescriptionSimilarity(a: NavigationRoute, b: NavigationRoute): Doub
     val shortedDescription = buildDescription(shorter)
     val longerDescription = buildDescription(longer)
     val distance = levenshtein(shortedDescription, longerDescription)
-    return distance.toDouble() / longerDescription.length
+    return 1.0 - distance.toDouble() / longerDescription.length
 }
 
 private fun buildDescription(route: NavigationRoute) =
     route.directionsRoute.legs()?.joinToString { it.summary() ?: "-" } ?: ""
 
-fun levenshtein(s: String, t: String): Int {
+private fun levenshtein(s: String, t: String): Int {
     // degenerate cases
     if (s == t)  return 0
     if (s == "") return t.length
