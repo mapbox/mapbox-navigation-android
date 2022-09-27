@@ -54,6 +54,14 @@ class SimilarRoutesTest {
         assertEquals(1.0, similarity, 0.001)
     }
 
+    @Test
+    fun `compare partially matched routes`() {
+        val a = loadNavigationRoute("a")
+        val endsLikeA = loadNavigationRoute("ends_like_a")
+        val similarity = calculateSimilarity(endsLikeA, a)
+        assertEquals(0.8, similarity, 0.05)
+    }
+
     private fun loadNavigationRoute(name: String) = createNavigationRoutes(
         DirectionsResponse.fromJson(resourceAsString("${name}_response.json")),
         RouteOptions.fromUrl(URL(resourceAsString("${name}_request.txt"))),

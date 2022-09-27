@@ -1,0 +1,1 @@
+https://api.mapbox.com/directions/v5/mapbox/driving/-73.9741977613816,40.75833579570863;-73.973023,40.761265?geometries=polyline6&language=en&overview=full&steps=true
