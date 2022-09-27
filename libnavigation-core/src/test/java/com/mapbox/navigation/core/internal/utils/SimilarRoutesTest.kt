@@ -14,7 +14,7 @@ class SimilarRoutesTest {
     @Test
     fun `the same routes`() {
         val route = loadNavigationRoute("a")
-        val similarity = calculateSimilarity(route, route)
+        val similarity = calculateGeomertySimilarity(route, route)
         assertEquals(1.0, similarity, 0.00001)
     }
 
@@ -25,7 +25,7 @@ class SimilarRoutesTest {
         val newId = original.updateDirectionsRouteOnly {
             toBuilder().requestUuid("different-id").build()
         }
-        val similarity = calculateSimilarity(original, newId)
+        val similarity = calculateGeomertySimilarity(original, newId)
         assertEquals(1.0, similarity, 0.00001)
     }
 
@@ -33,7 +33,7 @@ class SimilarRoutesTest {
     fun `different routes`() {
         val a = loadNavigationRoute("a")
         val b = loadNavigationRoute("not_a")
-        val similarity = calculateSimilarity(a, b)
+        val similarity = calculateGeomertySimilarity(a, b)
         assertEquals(0.0, similarity, 0.00001)
     }
 
@@ -41,7 +41,7 @@ class SimilarRoutesTest {
     fun `compare route with its half`() {
         val a = loadNavigationRoute("a")
         val halfA = loadNavigationRoute("half_a")
-        val similarity = calculateSimilarity(a, halfA)
+        val similarity = calculateGeomertySimilarity(a, halfA)
 
         assertEquals(1.0, similarity, 0.001)
     }
@@ -50,7 +50,7 @@ class SimilarRoutesTest {
     fun `half of a route matches the route`() {
         val a = loadNavigationRoute("a")
         val halfA = loadNavigationRoute("half_a")
-        val similarity = calculateSimilarity(halfA, a)
+        val similarity = calculateGeomertySimilarity(halfA, a)
         assertEquals(1.0, similarity, 0.001)
     }
 
@@ -58,7 +58,7 @@ class SimilarRoutesTest {
     fun `compare partially matched routes`() {
         val a = loadNavigationRoute("a")
         val endsLikeA = loadNavigationRoute("ends_like_a")
-        val similarity = calculateSimilarity(endsLikeA, a)
+        val similarity = calculateGeomertySimilarity(endsLikeA, a)
         assertEquals(0.8, similarity, 0.05)
     }
 
