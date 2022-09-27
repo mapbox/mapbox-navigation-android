@@ -5,7 +5,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.turf.TurfMeasurement
 
-fun calculateGeomertySimilarity(a: NavigationRoute, b: NavigationRoute): Double {
+fun calculateGeometrySimilarity(a: NavigationRoute, b: NavigationRoute): Double {
     if (a.id == b.id) return 1.0
     val (shorter, longer) = if (a.directionsRoute.distance() > b.directionsRoute.distance()) {
         Pair(b, a)
