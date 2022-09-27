@@ -6,6 +6,7 @@ import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.internal.CopilotOptions
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 
@@ -61,6 +62,7 @@ class NavigationOptions private constructor(
     val historyRecorderOptions: HistoryRecorderOptions,
     val eventsAppMetadata: EventsAppMetadata?,
     val enableSensors: Boolean,
+    internal val copilotOptions: CopilotOptions,
 ) {
 
     /**
@@ -84,6 +86,7 @@ class NavigationOptions private constructor(
         historyRecorderOptions(historyRecorderOptions)
         eventsAppMetadata(eventsAppMetadata)
         enableSensors(enableSensors)
+        copilotOptions(copilotOptions)
     }
 
     /**
@@ -113,6 +116,7 @@ class NavigationOptions private constructor(
         if (historyRecorderOptions != other.historyRecorderOptions) return false
         if (eventsAppMetadata != other.eventsAppMetadata) return false
         if (enableSensors != other.enableSensors) return false
+        if (copilotOptions != other.copilotOptions) return false
 
         return true
     }
@@ -139,6 +143,7 @@ class NavigationOptions private constructor(
         result = 31 * result + historyRecorderOptions.hashCode()
         result = 31 * result + eventsAppMetadata.hashCode()
         result = 31 * result + enableSensors.hashCode()
+        result = 31 * result + copilotOptions.hashCode()
         return result
     }
 
@@ -164,7 +169,8 @@ class NavigationOptions private constructor(
             "incidentsOptions=$incidentsOptions, " +
             "historyRecorderOptions=$historyRecorderOptions, " +
             "eventsAppMetadata=$eventsAppMetadata, " +
-            "enableSensors=$enableSensors" +
+            "enableSensors=$enableSensors, " +
+            "copilotOptions=$copilotOptions" +
             ")"
     }
 
@@ -199,6 +205,7 @@ class NavigationOptions private constructor(
             HistoryRecorderOptions.Builder().build()
         private var eventsAppMetadata: EventsAppMetadata? = null
         private var enableSensors: Boolean = false
+        private var copilotOptions: CopilotOptions = CopilotOptions.Builder().build()
 
         /**
          * Defines [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
@@ -306,6 +313,12 @@ class NavigationOptions private constructor(
             apply { this.enableSensors = value }
 
         /**
+         * Defines configuration for Copilot
+         */
+        internal fun copilotOptions(copilotOptions: CopilotOptions): Builder =
+            apply { this.copilotOptions = copilotOptions }
+
+        /**
          * Build a new instance of [NavigationOptions]
          * @return NavigationOptions
          */
@@ -329,7 +342,8 @@ class NavigationOptions private constructor(
                 incidentsOptions = incidentsOptions,
                 historyRecorderOptions = historyRecorderOptions,
                 eventsAppMetadata = eventsAppMetadata,
-                enableSensors = enableSensors
+                enableSensors = enableSensors,
+                copilotOptions = copilotOptions,
             )
         }
     }
