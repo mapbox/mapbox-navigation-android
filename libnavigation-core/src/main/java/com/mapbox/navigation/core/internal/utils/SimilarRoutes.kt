@@ -5,6 +5,45 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.turf.TurfMeasurement
 
+fun calculateDescriptionSimilarity(a: NavigationRoute, b: NavigationRoute): Double {
+    if (a.id == b.id) return 1.0
+    val (shorter, longer) = if (a.directionsRoute.distance() > b.directionsRoute.distance()) {
+        Pair(b, a)
+    } else Pair(a, b)
+
+    val shortedDescription = buildDescription(shorter)
+    val longerDescription = buildDescription(longer)
+    val distance = levenshtein(shortedDescription, longerDescription)
+    return distance.toDouble() / longerDescription.length
+}
+
+private fun buildDescription(route: NavigationRoute) =
+    route.directionsRoute.legs()?.joinToString { it.summary() ?: "-" } ?: ""
+
+fun levenshtein(s: String, t: String): Int {
+    // degenerate cases
+    if (s == t)  return 0
+    if (s == "") return t.length
+    if (t == "") return s.length
+
+    // create two integer arrays of distances and initialize the first one
+    val v0 = IntArray(t.length + 1) { it }  // previous
+    val v1 = IntArray(t.length + 1)         // current
+
+    var cost: Int
+    for (i in 0 until s.length) {
+        // calculate v1 from v0
+        v1[0] = i + 1
+        for (j in 0 until t.length) {
+            cost = if (s[i] == t[j]) 0 else 1
+            v1[j + 1] = Math.min(v1[j] + 1, Math.min(v0[j + 1] + 1, v0[j] + cost))
+        }
+        // copy v1 to v0 for next iteration
+        for (j in 0 .. t.length) v0[j] = v1[j]
+    }
+    return v1[t.length]
+}
+
 fun calculateGeometrySimilarity(a: NavigationRoute, b: NavigationRoute): Double {
     if (a.id == b.id) return 1.0
     val (shorter, longer) = if (a.directionsRoute.distance() > b.directionsRoute.distance()) {
