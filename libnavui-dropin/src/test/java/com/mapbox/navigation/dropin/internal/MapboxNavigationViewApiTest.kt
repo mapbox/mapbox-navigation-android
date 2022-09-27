@@ -3,7 +3,7 @@ package com.mapbox.navigation.dropin.internal
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.dropin.NavigationViewApiError
+import com.mapbox.navigation.dropin.NavigationViewApiErrorTypes
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.ui.app.internal.Reducer
 import com.mapbox.navigation.ui.app.internal.destination.Destination
@@ -18,6 +18,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -101,7 +102,7 @@ class MapboxNavigationViewApiTest {
 
         val error = sut.startRoutePreview().error
 
-        assertTrue(error is NavigationViewApiError.MissingDestinationInfo)
+        assertEquals(NavigationViewApiErrorTypes.MissingDestinationInfo, error?.type)
     }
 
     @Test
@@ -116,7 +117,7 @@ class MapboxNavigationViewApiTest {
 
         val result = sut.startRoutePreview()
 
-        assertTrue(result.error is NavigationViewApiError.MissingPreviewRoutesInfo)
+        assertEquals(NavigationViewApiErrorTypes.MissingPreviewRoutesInfo, result.error?.type)
     }
 
     @Test
@@ -144,7 +145,7 @@ class MapboxNavigationViewApiTest {
     fun `startRoutePreview should fail with InvalidRoutesInfo error if preview routes are empty`() {
         val result = sut.startRoutePreview(emptyList())
 
-        assertTrue(result.error is NavigationViewApiError.InvalidRoutesInfo)
+        assertEquals(NavigationViewApiErrorTypes.InvalidRoutesInfo, result.error?.type)
     }
 
     @Test
@@ -152,7 +153,7 @@ class MapboxNavigationViewApiTest {
     fun `startRoutePreview should fail with IncompleteRoutesInfo error if preview routes is missing waypoints data`() {
         val result = sut.startRoutePreview(listOf(navigationRoute()))
 
-        assertTrue(result.error is NavigationViewApiError.IncompleteRoutesInfo)
+        assertEquals(NavigationViewApiErrorTypes.IncompleteRoutesInfo, result.error?.type)
     }
 
     @Test
@@ -187,7 +188,7 @@ class MapboxNavigationViewApiTest {
 
         val result = sut.startActiveGuidance()
 
-        assertTrue(result.error is NavigationViewApiError.MissingDestinationInfo)
+        assertEquals(NavigationViewApiErrorTypes.MissingDestinationInfo, result.error?.type)
     }
 
     @Test
@@ -201,7 +202,7 @@ class MapboxNavigationViewApiTest {
 
         val result = sut.startActiveGuidance()
 
-        assertTrue(result.error is NavigationViewApiError.MissingPreviewRoutesInfo)
+        assertEquals(NavigationViewApiErrorTypes.MissingPreviewRoutesInfo, result.error?.type)
     }
 
     @Test
@@ -231,7 +232,7 @@ class MapboxNavigationViewApiTest {
     fun `startActiveGuidance should fail with InvalidRoutesInfo error if preview routes are empty`() {
         val result = sut.startActiveGuidance(emptyList())
 
-        assertTrue(result.error is NavigationViewApiError.InvalidRoutesInfo)
+        assertEquals(NavigationViewApiErrorTypes.InvalidRoutesInfo, result.error?.type)
     }
 
     @Test
@@ -261,7 +262,7 @@ class MapboxNavigationViewApiTest {
 
         val result = sut.startArrival()
 
-        assertTrue(result.error is NavigationViewApiError.MissingDestinationInfo)
+        assertEquals(NavigationViewApiErrorTypes.MissingDestinationInfo, result.error?.type)
     }
 
     @Test
@@ -276,7 +277,7 @@ class MapboxNavigationViewApiTest {
 
         val result = sut.startArrival()
 
-        assertTrue(result.error is NavigationViewApiError.MissingRoutesInfo)
+        assertEquals(NavigationViewApiErrorTypes.MissingRoutesInfo, result.error?.type)
     }
 
     @Test
@@ -307,7 +308,7 @@ class MapboxNavigationViewApiTest {
     fun `startArrival should fail with InvalidRoutesInfo error if preview routes are empty`() {
         val result = sut.startArrival(emptyList())
 
-        assertTrue(result.error is NavigationViewApiError.InvalidRoutesInfo)
+        assertEquals(NavigationViewApiErrorTypes.InvalidRoutesInfo, result.error?.type)
     }
 
     @Test

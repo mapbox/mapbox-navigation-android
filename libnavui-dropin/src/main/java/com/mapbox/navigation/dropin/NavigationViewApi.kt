@@ -111,35 +111,3 @@ abstract class NavigationViewApi {
      */
     abstract fun routeReplayEnabled(enabled: Boolean)
 }
-
-/**
- * Errors returned by the NavigationApi.
- */
-sealed class NavigationViewApiError(message: String) : Throwable(message) {
-    /**
-     * Error returned when the Destination hasn't been set yet.
-     */
-    object MissingDestinationInfo : NavigationViewApiError("Destination cannot be empty.")
-
-    /**
-     * Error returned when the Preview Routes list hasn't been set yet.
-     */
-    object MissingPreviewRoutesInfo : NavigationViewApiError("Preview Routes cannot be empty.")
-
-    /**
-     * Error returned when the Routes list hasn't been set yet.
-     */
-    object MissingRoutesInfo : NavigationViewApiError("Routes cannot be empty.")
-
-    /**
-     * Error returned when given PreviewRoute or Route list is empty.
-     */
-    object InvalidRoutesInfo : NavigationViewApiError("Routes cannot be empty.")
-
-    /**
-     * Error returned when given PreviewRoute or Route list is missing [DirectionsWaypoint]
-     * information that is needed to determine Destination coordinates.
-     */
-    object IncompleteRoutesInfo :
-        NavigationViewApiError("Missing destination info in a given route.")
-}
