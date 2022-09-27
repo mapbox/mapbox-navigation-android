@@ -85,6 +85,8 @@ class PlacesListOnMapManager(
         styleLoadedListener = null
         MapboxNavigationApp.unregisterObserver(navigationObserver)
         carMapSurface = null
+        coroutineScope?.cancel()
+        coroutineScope = null
     }
 
     private fun onAttached(mapboxNavigation: MapboxNavigation) {
@@ -99,8 +101,6 @@ class PlacesListOnMapManager(
 
     private fun onDetached() {
         placesListItemMapper = null
-        coroutineScope?.cancel()
-        coroutineScope = null
     }
 
     private fun loadPlaceRecords() {
