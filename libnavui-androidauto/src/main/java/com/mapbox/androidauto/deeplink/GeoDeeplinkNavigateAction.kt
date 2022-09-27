@@ -6,8 +6,6 @@ import androidx.lifecycle.Lifecycle
 import com.mapbox.androidauto.car.MainCarContext
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
-import com.mapbox.androidauto.car.placeslistonmap.PlaceMarkerRenderer
-import com.mapbox.androidauto.car.placeslistonmap.PlacesListItemMapper
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapScreen
 import com.mapbox.androidauto.car.search.SearchCarContext
 import com.mapbox.androidauto.internal.logAndroidAuto
@@ -46,13 +44,6 @@ class GeoDeeplinkNavigateAction(
         return PlacesListOnMapScreen(
             SearchCarContext(mainCarContext),
             placesProvider,
-            PlacesListItemMapper(
-                PlaceMarkerRenderer(mainCarContext.carContext),
-                mapboxNavigation
-                    .navigationOptions
-                    .distanceFormatterOptions
-                    .unitType
-            ),
             listOf(
                 CarFeedbackAction(
                     mainCarContext.mapboxCarMap,

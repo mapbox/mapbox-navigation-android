@@ -604,13 +604,22 @@ package com.mapbox.androidauto.car.placeslistonmap {
   public static final class PlacesListOnMapLayerUtil.Companion {
   }
 
+  public final class PlacesListOnMapManager implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public PlacesListOnMapManager(com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapProvider placesListOnMapProvider);
+    method public androidx.car.app.model.ItemList? currentItemList();
+    method public kotlinx.coroutines.flow.StateFlow<java.util.List<com.mapbox.androidauto.car.search.PlaceRecord>> getPlaceRecords();
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.androidauto.car.search.PlaceRecord> getPlaceSelected();
+    property public final kotlinx.coroutines.flow.StateFlow<java.util.List<com.mapbox.androidauto.car.search.PlaceRecord>> placeRecords;
+    property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.androidauto.car.search.PlaceRecord> placeSelected;
+  }
+
   public interface PlacesListOnMapProvider {
     method public void cancel();
     method public suspend Object? getPlaces(kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.androidauto.car.search.GetPlacesError,java.util.List<? extends com.mapbox.androidauto.car.search.PlaceRecord>>>);
   }
 
   @com.mapbox.maps.MapboxExperimental public final class PlacesListOnMapScreen extends androidx.car.app.Screen {
-    ctor @UiThread public PlacesListOnMapScreen(com.mapbox.androidauto.car.search.SearchCarContext searchCarContext, com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapProvider placesProvider, com.mapbox.androidauto.car.placeslistonmap.PlacesListItemMapper placesListItemMapper, java.util.List<? extends com.mapbox.androidauto.car.action.MapboxActionProvider> actionProviders, com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil placesLayerUtil = com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil());
+    ctor @UiThread public PlacesListOnMapScreen(com.mapbox.androidauto.car.search.SearchCarContext searchCarContext, com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapProvider placesProvider, java.util.List<? extends com.mapbox.androidauto.car.action.MapboxActionProvider> actionProviders);
     method public androidx.car.app.model.ItemList getItemList();
     method public androidx.car.app.model.Template onGetTemplate();
     method public void setItemList(androidx.car.app.model.ItemList);
