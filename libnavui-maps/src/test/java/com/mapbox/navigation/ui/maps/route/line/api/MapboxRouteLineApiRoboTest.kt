@@ -673,8 +673,8 @@ class MapboxRouteLineApiRoboTest {
         val casingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.5," +
             " [rgba, 47.0, 122.0, 198.0, 1.0]]"
         val restrictedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.5," +
-            " [rgba, 0.0, 0.0, 0.0, 0.0], 0.5032854217424586, [rgba, 0.0, 0.0, 0.0, 1.0]," +
-            " 0.5207714038134984, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+            " [rgba, 0.0, 0.0, 0.0, 0.0], 0.5021643413784516, [rgba, 0.0, 0.0, 0.0, 1.0]," +
+            " 0.5196445159361185, [rgba, 0.0, 0.0, 0.0, 0.0]]"
         val route = loadRoute("route-with-restrictions.json")
 
         val api = MapboxRouteLineApi(
@@ -955,7 +955,13 @@ class MapboxRouteLineApiRoboTest {
         val result = MapboxRouteLineUtils.getAlternativeRouteDeviationOffsets(
             alternativeRouteMetadata,
             distancesProvider = {
-                RouteLineGranularDistances(1.0, emptyArray())
+                RouteLineGranularDistances(
+                    1.0,
+                    emptyArray(),
+                    emptyArray(),
+                    emptyArray(),
+                    emptyArray()
+                )
             }
         )
 
@@ -986,7 +992,10 @@ class MapboxRouteLineApiRoboTest {
             distancesProvider = {
                 RouteLineGranularDistances(
                     0.0,
-                    arrayOf(mockk(relaxed = true), mockk(relaxed = true))
+                    arrayOf(mockk(relaxed = true), mockk(relaxed = true)),
+                    arrayOf(arrayOf(mockk(relaxed = true), mockk(relaxed = true))),
+                    arrayOf(arrayOf(arrayOf(mockk(relaxed = true), mockk(relaxed = true)))),
+                    arrayOf(mockk(relaxed = true), mockk(relaxed = true)),
                 )
             }
         )
@@ -1022,8 +1031,8 @@ class MapboxRouteLineApiRoboTest {
             alternativeRouteMetadata,
             distancesProvider = {
                 RouteLineGranularDistances(
-                    distance = 15.0,
-                    arrayOf(
+                    completeDistance = 15.0,
+                    routeDistances = arrayOf(
                         RouteLineDistancesIndex(
                             point = mockk(),
                             distanceRemaining = 40.0
@@ -1036,7 +1045,10 @@ class MapboxRouteLineApiRoboTest {
                             point = mockk(),
                             distanceRemaining = 20.0
                         )
-                    )
+                    ),
+                    legsDistances = emptyArray(),
+                    stepsDistances = emptyArray(),
+                    flatStepDistances = emptyArray(),
                 )
             }
         )
@@ -1069,8 +1081,8 @@ class MapboxRouteLineApiRoboTest {
             alternativeRouteMetadata,
             distancesProvider = {
                 RouteLineGranularDistances(
-                    distance = 40.0,
-                    arrayOf(
+                    completeDistance = 40.0,
+                    routeDistances = arrayOf(
                         RouteLineDistancesIndex(
                             point = mockk(),
                             distanceRemaining = 40.0
@@ -1083,7 +1095,10 @@ class MapboxRouteLineApiRoboTest {
                             point = mockk(),
                             distanceRemaining = 20.0
                         )
-                    )
+                    ),
+                    legsDistances = emptyArray(),
+                    stepsDistances = emptyArray(),
+                    flatStepDistances = emptyArray(),
                 )
             }
         )

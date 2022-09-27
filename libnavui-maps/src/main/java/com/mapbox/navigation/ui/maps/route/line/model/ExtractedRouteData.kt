@@ -8,7 +8,6 @@ import com.mapbox.api.directions.v5.models.RouteLeg
  *
  * @param distanceFromOrigin the distance from the origin point along the route.
  * @param offset the percentage of the distance traveled along the route from the origin.
- * @param isInRestrictedSection if true this section of the route is designated as restricted.
  * @param trafficCongestionIdentifier indicates the traffic congestion for this section of the route.
  * @param roadClass the road class for this section of the route.
  * @param legIndex indicates the index of the route legs array this data came from.
@@ -17,7 +16,6 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 internal data class ExtractedRouteData(
     val distanceFromOrigin: Double,
     val offset: Double,
-    val isInRestrictedSection: Boolean = false,
     val trafficCongestionIdentifier: String,
     val roadClass: String? = null,
     val legIndex: Int = 0,

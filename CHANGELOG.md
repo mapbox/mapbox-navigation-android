@@ -10,6 +10,9 @@ Mapbox welcomes participation and contributions from everyone.
 - :warning: Restructured the package system of Drop-In UI into feature verticals. [#6430](https://github.com/mapbox/mapbox-navigation-android/pull/6430)
 - [TileStoreService] Use shared memory for marshaling large types and improve error handling. [#6422](https://github.com/mapbox/mapbox-navigation-android/pull/6422)
 - [TileStoreService] Fixed an issue that prevented callbacks to be invoked if an operation had to be retried because of a loss of connection to the service process. [#6422](https://github.com/mapbox/mapbox-navigation-android/pull/6422)
+- Fixed an issue with restricted road visualization on the route line that occurred during route refreshes. [#6399](https://github.com/mapbox/mapbox-navigation-android/pull/6399)
+- Improved precision of restricted sections visualization, especially for long routes. [#6399](https://github.com/mapbox/mapbox-navigation-android/pull/6399)
+- Fixed a rare issue where alternative route would not be vanished until deviation point for `MapboxRouteLineApi#setNavigationRoutes(routes, metadata)` when the route's geometry contained duplicate points. [#6399](https://github.com/mapbox/mapbox-navigation-android/pull/6399)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.4 - 30 September, 2022
 ### Changelog
@@ -133,7 +136,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v6.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
 - Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
-
 
 ## Mapbox Navigation SDK 2.9.0-alpha.3 - 23 September, 2022
 ### Changelog

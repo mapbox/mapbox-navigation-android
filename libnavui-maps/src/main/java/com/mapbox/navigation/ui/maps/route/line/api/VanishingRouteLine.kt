@@ -6,7 +6,7 @@ import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
-import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
+import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteRestrictionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
@@ -64,7 +64,7 @@ internal class VanishingRouteLine {
         granularDistances: RouteLineGranularDistances,
         index: Int
     ): Double? {
-        val upcomingIndex = granularDistances.distancesArray.getOrNull(index)
+        val upcomingIndex = granularDistances.flatStepDistances.getOrNull(index)
         if (upcomingIndex == null) {
             logD(
                 "Upcoming route line index is null.",
@@ -103,8 +103,8 @@ internal class VanishingRouteLine {
         /**
          * Calculate the percentage of the route traveled and update the expression.
          */
-        val offset = if (granularDistances.distance >= remainingDistance) {
-            (1.0 - remainingDistance / granularDistances.distance)
+        val offset = if (granularDistances.completeDistance >= remainingDistance) {
+            (1.0 - remainingDistance / granularDistances.completeDistance)
         } else {
             0.0
         }
@@ -151,7 +151,7 @@ internal class VanishingRouteLine {
         point: Point,
         granularDistances: RouteLineGranularDistances,
         routeLineExpressionData: List<RouteLineExpressionData>,
-        restrictedLineExpressionData: List<ExtractedRouteData>?,
+        restrictedLineExpressionData: List<ExtractedRouteRestrictionData>?,
         routeResourceProvider: RouteLineResources,
         activeLegIndex: Int,
         softGradientTransition: Double,
