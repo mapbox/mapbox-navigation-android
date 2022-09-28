@@ -16,6 +16,9 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.gestures.Utils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
+import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -35,6 +38,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -63,6 +67,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 import java.util.concurrent.TimeUnit
 
 @SuppressLint("MissingPermission")
@@ -279,7 +284,23 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 responseJson = R.raw.sanitized_test_route_6,
                 requestUrlJson = R.raw.test_route_6_url,
             ).first()
-        )
+        ).also {
+            val linestrings = mutableListOf<LineString>()
+            it.forEachIndexed { i, route ->
+                route.directionsRoute.legs()?.mapNotNull { routeLeg ->
+                    routeLeg.steps()?.map { legStep ->
+                        route.directionsRoute.stepGeometryToPoints(legStep)
+                    }
+                }?.flatten()?.flatten()?.toMutableList()?.also {
+                    val linestring = LineString.fromLngLats(it)
+                    linestrings.add(linestring)
+                    val file = File(filesDir, "points_$i")
+                    file.writeText(linestring.toJson())
+                }
+            }
+            val file = File(filesDir, "points_collection")
+            file.writeText(FeatureCollection.fromFeatures(linestrings.map { Feature.fromGeometry(it) }).toJson())
+        }
     }
 
     private fun createRoute(
