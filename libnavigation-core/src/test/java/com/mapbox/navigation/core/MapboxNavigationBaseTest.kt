@@ -42,6 +42,7 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.CacheHandle
@@ -55,6 +56,7 @@ import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Before
@@ -64,6 +66,7 @@ import java.io.File
 import java.util.Locale
 import java.util.UUID
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal open class MapboxNavigationBaseTest {
 
     @get:Rule
@@ -93,7 +96,7 @@ internal open class MapboxNavigationBaseTest {
     lateinit var navigationOptions: NavigationOptions
     val arrivalProgressObserver: ArrivalProgressObserver = mockk(relaxUnitFun = true)
     val historyRecordingStateHandler: HistoryRecordingStateHandler = mockk(relaxUnitFun = true)
-    val threadController = ThreadController()
+    val threadController = mockk<ThreadController>(relaxed = true)
     val currentIndicesProvider = mockk<CurrentIndicesProvider>(relaxed = true)
 
     val applicationContext: Context = mockk(relaxed = true) {
@@ -129,6 +132,9 @@ internal open class MapboxNavigationBaseTest {
 
     @Before
     open fun setUp() {
+        every { threadController.getMainScopeAndRootJob() } answers {
+            JobControl(mockk(), coroutineRule.createTestScope())
+        }
         mockkObject(LoggerProvider)
         mockkObject(NavigatorLoader)
         every {
@@ -242,9 +248,6 @@ internal open class MapboxNavigationBaseTest {
         unmockkObject(MapboxNavigationTelemetry)
         unmockkStatic(TelemetryEnabler::class)
         unmockkObject(NativeRouteParserWrapper)
-
-        threadController.cancelAllNonUICoroutines()
-        threadController.cancelAllUICoroutines()
     }
 
     fun createMapboxNavigation() {
