@@ -11,6 +11,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Replaced `NavigationViewApiError` error classes with single error class that accepts `NavigationViewApiErrorTypes`. [#6390](https://github.com/mapbox/mapbox-navigation-android/pull/6390)
 - Fixed the issue where `AlternativeRouteMetadata` instances were not updated when alternative routes were refreshed. The issue did not impact the primary route. [#6389](https://github.com/mapbox/mapbox-navigation-android/pull/6389)
 - Updated `UiComponent` to use `Dispatchers.Main.Immediate`. [#6393](https://github.com/mapbox/mapbox-navigation-android/pull/6393)
+- Mitigated a rare issue that caused a crash in alternative routes fork offset calculation when using `MapboxRouteLineApi#setNavigationRoutes`. [#6404](https://github.com/mapbox/mapbox-navigation-android/pull/6404)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.3 - 23 September, 2022
 ### Changelog
