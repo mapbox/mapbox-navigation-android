@@ -3,13 +3,7 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.api
 import android.content.Context
 import android.content.res.AssetManager
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.common.Logger
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -84,8 +78,6 @@ class MapboxExternalFileResolverTest {
     }
 
     @Test fun `resolve font when font family file not available`() {
-        mockkStatic(Logger::class)
-        every { Logger.e(any(), any()) } just Runs
         val mockFontFamily = "MyFontFamily"
         val mockFontStyle = "Normal"
         val mockFontWeight = 400
@@ -94,6 +86,5 @@ class MapboxExternalFileResolverTest {
             externalFileResolver.resolveFont(mockFontFamily, mockFontWeight, mockFontStyle)
 
         assertNull(typeface)
-        unmockkStatic(Logger::class)
     }
 }

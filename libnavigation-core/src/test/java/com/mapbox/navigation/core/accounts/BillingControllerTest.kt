@@ -5,7 +5,6 @@ import com.mapbox.common.BillingServiceError
 import com.mapbox.common.BillingServiceErrorCode
 import com.mapbox.common.BillingServiceInterface
 import com.mapbox.common.BillingSessionStatus
-import com.mapbox.common.Logger
 import com.mapbox.common.OnBillingServiceError
 import com.mapbox.common.SessionSKUIdentifier
 import com.mapbox.common.UserSKUIdentifier
@@ -23,10 +22,8 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkObject
-import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.After
@@ -380,8 +377,6 @@ class BillingControllerTest {
 
     @Test
     fun `when resumption fails, restart the session`() {
-        mockkStatic(Logger::class)
-        every { Logger.w(any(), any()) } just Runs
         sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
         sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.FreeDrive("1"))
         sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
@@ -408,7 +403,6 @@ class BillingControllerTest {
                 TimeUnit.HOURS.toMillis(1)
             )
         }
-        unmockkStatic(Logger::class)
     }
 
     @Test

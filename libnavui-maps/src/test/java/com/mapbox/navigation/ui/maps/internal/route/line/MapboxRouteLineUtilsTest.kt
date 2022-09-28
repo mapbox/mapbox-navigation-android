@@ -7,7 +7,6 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.common.Logger
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
@@ -62,9 +61,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
 import com.mapbox.navigator.RouteInterface
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
@@ -486,8 +483,6 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun getBelowLayerIdToUse_whenLayerIdNotFoundReturnsNull() {
-        mockkStatic(Logger::class)
-        every { Logger.e(any(), any()) } just Runs
         val style = mockk<Style> {
             every { styleLayerExists("foobar") } returns false
         }
@@ -495,7 +490,6 @@ class MapboxRouteLineUtilsTest {
         val result = MapboxRouteLineUtils.getBelowLayerIdToUse("foobar", style)
 
         assertNull(result)
-        unmockkStatic(Logger::class)
     }
 
     @Test
@@ -1745,8 +1739,6 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun `getRoadClassArray when route has step intersections with incorrect geometry indexes`() {
-        mockkStatic(Logger::class)
-        every { Logger.e(any(), any()) } returns Unit
         val route = loadRoute("route-with-incorrect-geometry-indexes.json")
 
         val result = MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
@@ -1755,7 +1747,6 @@ class MapboxRouteLineUtilsTest {
         )
 
         assertEquals(0, result.size)
-        unmockkStatic(Logger::class)
     }
 
     @Test
