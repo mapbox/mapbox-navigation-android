@@ -42,6 +42,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.internal.utils.RecordRouteObserverResults
 import com.mapbox.navigation.core.internal.utils.calculateDescriptionLevensteinSimilarity
 import com.mapbox.navigation.core.internal.utils.calculateDescriptionSimilarity
 import com.mapbox.navigation.core.internal.utils.calculateGeometrySimilarity
@@ -50,6 +51,9 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
+import com.mapbox.navigation.core.replay.history.ReplayEventBase
+import com.mapbox.navigation.core.replay.history.ReplayEventLocation
+import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
@@ -75,6 +79,7 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @SuppressLint("MissingPermission")
 class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
@@ -122,6 +127,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 mapboxNavigation.registerLocationObserver(locationObserver)
                 mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
                 mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+                mapboxNavigation.registerRoutesObserver(recordRoutesObserver)
                 mapboxNavigation.registerRoutesObserver(routesObserver)
                 mapboxNavigation.registerRouteAlternativesObserver(alternativesObserver)
             }
@@ -130,6 +136,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
                 mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
                 mapboxNavigation.unregisterLocationObserver(locationObserver)
+                mapboxNavigation.unregisterRoutesObserver(recordRoutesObserver)
                 mapboxNavigation.unregisterRoutesObserver(routesObserver)
                 mapboxNavigation.unregisterRouteAlternativesObserver(alternativesObserver)
             }
@@ -163,7 +170,18 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
             enabled = true
         }
-        mapboxReplayer.pushRealLocation(this, 0.0)
+
+        mapboxReplayer.pushEvents(
+            ReplayEventLocation(
+                lon = 11.574758,
+                lat = 48.150672,
+                provider = "me",
+                0.0,
+                null,
+                null,
+                null,
+                null,
+            ).let { listOf<ReplayEventBase>(ReplayEventUpdateLocation(0.0, it)) })
         mapboxReplayer.playbackSpeed(3.0)
         mapboxReplayer.play()
     }
@@ -329,7 +347,8 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         }
         binding.requestAlternatives.setOnClickListener {
             binding.requestAlternatives.isEnabled = false
-            mapboxNavigation.requestAlternativeRoutes(object : NavigationRouteAlternativesRequestCallback {
+            mapboxNavigation.requestAlternativeRoutes(object :
+                NavigationRouteAlternativesRequestCallback {
                 override fun onRouteAlternativeRequestFinished(
                     routeProgress: RouteProgress,
                     alternatives: List<NavigationRoute>,
@@ -337,6 +356,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 ) {
                     binding.requestAlternatives.isEnabled = true
                 }
+
                 override fun onRouteAlternativesRequestError(error: RouteAlternativesError) {
                     binding.requestAlternatives.isEnabled = true
                 }
@@ -346,6 +366,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         binding.mapView.gestures.addOnMapClickListener(mapClickListener)
     }
 
+    private val recordRoutesObserver = RecordRouteObserverResults { mapboxNavigation }
     private val routesObserver = RoutesObserver { result ->
         CoroutineScope(Dispatchers.Main).launch {
             routeLineApi.setNavigationRoutes(
@@ -377,13 +398,20 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             val alternatives = result.navigationRoutes.drop(1)
                 .map { Pair(it, mapboxNavigation.getAlternativeMetadataFor(it)!!) }
                 .filter { !rejectedAlternatives.containsKey(it.second.alternativeId) }
-            val fasterAlternative = alternatives.minByOrNull { it.second.infoFromStartOfPrimary.duration } ?: return
+            val fasterAlternative =
+                alternatives.minByOrNull { it.second.infoFromStartOfPrimary.duration } ?: return
             val alternativeDuration = fasterAlternative.second.infoFromStartOfPrimary.duration
             val primaryDuration = result.navigationRoutes.first().directionsRoute.duration()
             if (alternativeDuration < primaryDuration) {
-                Log.d("vadzim-test", "faster route found: ${fasterAlternative.second.alternativeId}, ${fasterAlternative.first.directionsRoute.geometry()}")
+                Log.d(
+                    "vadzim-test",
+                    "faster route found: ${fasterAlternative.second.alternativeId}, ${fasterAlternative.first.directionsRoute.geometry()}"
+                )
             } else {
-                Log.d("vadzim-test", "alternative ${fasterAlternative.second.alternativeId}($alternativeDuration) is slower then primary route(${primaryDuration})")
+                Log.d(
+                    "vadzim-test",
+                    "alternative ${fasterAlternative.second.alternativeId}($alternativeDuration) is slower then primary route(${primaryDuration})"
+                )
             }
             compareSimilarity(alternatives)
             alternatives.forEach { rejectedAlternatives[it.second.alternativeId] = it.first }
@@ -418,7 +446,11 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                     )
                     Log.d(
                         "vadzim-test",
-                        "description levinstain similarity: $descriptionLevensteinSimilarity for ${rejectedAlternativeKV.key}({${rejectedAlternative.directionsRoute.legs()?.first()?.summary()}}) and ${newAlternative.second.alternativeId}(${newAlternative.first.directionsRoute.legs()?.first()?.summary()})"
+                        "description levinstain similarity: $descriptionLevensteinSimilarity for ${rejectedAlternativeKV.key}({${
+                            rejectedAlternative.directionsRoute.legs()?.first()?.summary()
+                        }}) and ${newAlternative.second.alternativeId}(${
+                            newAlternative.first.directionsRoute.legs()?.first()?.summary()
+                        })"
                     )
 
                     val descriptionSimilarity = calculateDescriptionSimilarity(
@@ -427,7 +459,11 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                     )
                     Log.d(
                         "vadzim-test",
-                        "description similarity: $descriptionSimilarity for ${rejectedAlternativeKV.key}({${rejectedAlternative.directionsRoute.legs()?.first()?.summary()}}) and ${newAlternative.second.alternativeId}(${newAlternative.first.directionsRoute.legs()?.first()?.summary()})"
+                        "description similarity: $descriptionSimilarity for ${rejectedAlternativeKV.key}({${
+                            rejectedAlternative.directionsRoute.legs()?.first()?.summary()
+                        }}) and ${newAlternative.second.alternativeId}(${
+                            newAlternative.first.directionsRoute.legs()?.first()?.summary()
+                        })"
                     )
 
                 }
