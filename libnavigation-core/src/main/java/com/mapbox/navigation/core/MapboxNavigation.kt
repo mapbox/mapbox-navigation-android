@@ -574,6 +574,12 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *
      * **Starting a session can have an impact on your usage costs.** Refer to the [pricing documentation](https://docs.mapbox.com/android/beta/navigation/guides/pricing/) to learn more.
      *
+     * If you set [withForegroundService] to true and your apps targets Android 12 or higher,
+     * you should only invoke this method when the app is in foreground.
+     * This is dictated by background restrictions introduced in Android 12.
+     * See https://developer.android.com/guide/components/foreground-services#background-start-restrictions
+     * for more info.
+     *
      * @param withForegroundService Boolean if set to false, foreground service will not be started and
      * no notifications will be rendered, and no location updates will be available while the app is in the background.
      * Default value is set to true.

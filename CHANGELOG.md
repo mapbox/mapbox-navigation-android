@@ -12,6 +12,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed the issue where `AlternativeRouteMetadata` instances were not updated when alternative routes were refreshed. The issue did not impact the primary route. [#6389](https://github.com/mapbox/mapbox-navigation-android/pull/6389)
 - Updated `UiComponent` to use `Dispatchers.Main.Immediate`. [#6393](https://github.com/mapbox/mapbox-navigation-android/pull/6393)
 - Mitigated a rare issue that caused a crash in alternative routes fork offset calculation when using `MapboxRouteLineApi#setNavigationRoutes`. [#6404](https://github.com/mapbox/mapbox-navigation-android/pull/6404)
+- Improved `MapboxNavigation#startTripSession(withForegroundService = true)` docs to indicate that it should only be called from a foreground state. [#6405](https://github.com/mapbox/mapbox-navigation-android/pull/6405)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.3 - 23 September, 2022
 ### Changelog
