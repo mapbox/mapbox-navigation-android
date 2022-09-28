@@ -38,6 +38,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Core Common `v23.1.0-beta.2`
 - Mapbox Java `v6.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+- The color resources used by the MapboxRouteLineApi class have been made mutable and can be updated. [#6428](https://github.com/mapbox/mapbox-navigation-android/pull/6428)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.4 - 30 September, 2022
 ### Changelog

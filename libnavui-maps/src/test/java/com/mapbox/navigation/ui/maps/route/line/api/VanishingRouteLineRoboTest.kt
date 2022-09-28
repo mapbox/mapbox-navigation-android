@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
@@ -12,6 +13,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimExpressionProvider
+import com.mapbox.navigation.ui.maps.route.line.model.TrafficCongestionProvider
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
@@ -103,6 +105,10 @@ class VanishingRouteLineRoboTest {
             route.directionsRoute.geometry() ?: "",
             Constants.PRECISION_6
         )
+        val trafficCongestionProvider = getTrafficCongestionProvider(
+            route.directionsRoute,
+            colorResources
+        )
         val vanishingRouteLine = VanishingRouteLine()
         vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
         val segments: List<RouteLineExpressionData> =
@@ -110,7 +116,8 @@ class VanishingRouteLineRoboTest {
                 route.directionsRoute,
                 listOf(),
                 true,
-                colorResources
+                colorResources,
+                trafficCongestionProvider
             )
 
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(
@@ -190,6 +197,10 @@ class VanishingRouteLineRoboTest {
             route.directionsRoute.geometry() ?: "",
             Constants.PRECISION_6
         )
+        val trafficCongestionProvider = getTrafficCongestionProvider(
+            route.directionsRoute,
+            colorResources
+        )
         val vanishingRouteLine = VanishingRouteLine()
         vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
         val segments: List<RouteLineExpressionData> =
@@ -197,7 +208,8 @@ class VanishingRouteLineRoboTest {
                 route.directionsRoute,
                 listOf(),
                 true,
-                colorResources
+                colorResources,
+                trafficCongestionProvider
             )
         val restrictedSegments = MapboxRouteLineUtils.extractRouteRestrictionData(route)
 
@@ -237,6 +249,10 @@ class VanishingRouteLineRoboTest {
             route.directionsRoute.geometry() ?: "",
             Constants.PRECISION_6
         )
+        val trafficCongestionProvider = getTrafficCongestionProvider(
+            route.directionsRoute,
+            colorResources
+        )
         val vanishingRouteLine = VanishingRouteLine()
         vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
         val segments: List<RouteLineExpressionData> =
@@ -244,7 +260,8 @@ class VanishingRouteLineRoboTest {
                 route.directionsRoute,
                 listOf(),
                 true,
-                colorResources
+                colorResources,
+                trafficCongestionProvider
             )
 
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(
@@ -343,5 +360,19 @@ class VanishingRouteLineRoboTest {
             every { restrictedRoadColor } returns 12
         }
         every { trafficBackfillRoadClasses } returns listOf()
+    }
+
+    private fun getTrafficCongestionProvider(
+        route: DirectionsRoute,
+        res: RouteLineColorResources
+    ): TrafficCongestionProvider {
+        return TrafficCongestionProvider().also {
+            it.updateTrafficFunction(
+                MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                    route,
+                    res
+                )
+            )
+        }
     }
 }

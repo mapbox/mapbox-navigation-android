@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
@@ -29,6 +30,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.maps.route.line.model.TrafficCongestionProvider
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
@@ -828,11 +830,17 @@ class MapboxRouteLineApiRoboTest {
         val resources = RouteLineResources.Builder().routeLineColorResources(colorOptions).build()
         val options = MapboxRouteLineOptions.Builder(ctx).withRouteLineResources(resources).build()
         val route = loadRoute("multileg-route-two-legs.json")
+        val trafficCongestionProvider = TrafficCongestionProvider().also {
+            it.updateTrafficFunction(
+                MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(route, colorOptions)
+            )
+        }
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
             true,
-            options.resourceProvider.routeLineColorResources
+            options.resourceProvider.routeLineColorResources,
+            trafficCongestionProvider
         )
         val api = MapboxRouteLineApi(options)
 
@@ -1146,6 +1154,96 @@ class MapboxRouteLineApiRoboTest {
                 "MapboxRouteLineUtils"
             )
         }
+    }
+
+    @Test
+    fun updateColorResourcesCacheCheck() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val altOptions = MapboxRouteLineOptions.Builder(ctx).build()
+        val api = MapboxRouteLineApi(options)
+        val route = loadRoute("short_route.json").toNavigationRoute(RouterOrigin.Offboard)
+        val mockRoute = mockk<DirectionsRoute> {
+            every { legs() } returns null
+            every { geometry() } returns route.directionsRoute.geometry()
+            every { routeOptions() } returns route.routeOptions
+        }
+        val mockNavRoute = mockk<NavigationRoute> {
+            every { directionsRoute } returns mockRoute
+            every { id } returns route.id
+            every { directionsResponse } returns route.directionsResponse
+        }
+        api.setNavigationRoutes(listOf(mockNavRoute))
+        api.updateColorResources(ctx, altOptions.resourceProvider.routeLineColorResources)
+        api.getRouteDrawData {}
+
+        verify(exactly = 1) { mockRoute.legs() }
+    }
+
+    @Test
+    fun updateColorResources() = coroutineRule.runBlockingTest {
+        val altColors = RouteLineColorResources.Builder()
+            .routeLineTraveledColor(Color.CYAN)
+            .routeLineTraveledCasingColor(Color.BLUE)
+            .routeSevereCongestionColor(Color.parseColor("#DA65E6"))
+            .routeHeavyCongestionColor(Color.parseColor("#F069C3"))
+            .routeModerateCongestionColor(Color.parseColor("#D96A7D"))
+            .routeLowCongestionColor(Color.parseColor("#F07769"))
+            .routeUnknownCongestionColor(Color.parseColor("#E68465"))
+            .build()
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val api = MapboxRouteLineApi(options)
+        val originalCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0," +
+            " [rgba, 47.0, 122.0, 198.0, 1.0]]"
+        val originalRouteLineExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
+            "0.0, [rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val originalTrafficLineExpression = "[step, [line-progress], " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            "0.9429639111009005, [rgba, 255.0, 149.0, 0.0, 1.0]]"
+        val altColorCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 255.0, 1.0], " +
+            "0.0, [rgba, 47.0, 122.0, 198.0, 1.0]]"
+        val altColorRouteLineExpression = "[step, [line-progress], " +
+            "[rgba, 0.0, 255.0, 255.0, 1.0], 0.0, [rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val altColorTrafficLineExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0]," +
+            " 0.0, [rgba, 230.0, 132.0, 101.0, 1.0], 0.9429639111009005, " +
+            "[rgba, 217.0, 106.0, 125.0, 1.0]]"
+        val route = loadRoute("short_route.json")
+        val routes = listOf(RouteLine(route, null))
+        api.setRoutes(routes)
+
+        val originalColorResult = api.getRouteDrawData()
+        api.updateColorResources(ctx, altColors)
+        val altColorResult = api.getRouteDrawData()
+
+        assertEquals(
+            originalCasingExpression,
+            originalColorResult.value!!.primaryRouteLineData.dynamicData.casingExpressionProvider
+                .generateExpression().toString()
+        )
+        assertEquals(
+            originalRouteLineExpression,
+            originalColorResult.value!!.primaryRouteLineData.dynamicData.baseExpressionProvider
+                .generateExpression().toString()
+        )
+        assertEquals(
+            originalTrafficLineExpression,
+            originalColorResult.value!!.primaryRouteLineData.dynamicData.trafficExpressionProvider!!
+                .generateExpression().toString()
+        )
+        assertEquals(
+            altColorCasingExpression,
+            altColorResult.value!!.primaryRouteLineData.dynamicData.casingExpressionProvider
+                .generateExpression().toString()
+        )
+        assertEquals(
+            altColorRouteLineExpression,
+            altColorResult.value!!.primaryRouteLineData.dynamicData.baseExpressionProvider
+                .generateExpression().toString()
+        )
+        assertEquals(
+            altColorTrafficLineExpression,
+            altColorResult.value!!.primaryRouteLineData.dynamicData.trafficExpressionProvider!!
+                .generateExpression().toString()
+        )
     }
 
     private fun mockRouteProgress(

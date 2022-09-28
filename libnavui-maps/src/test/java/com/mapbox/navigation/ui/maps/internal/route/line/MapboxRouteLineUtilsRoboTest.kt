@@ -5,8 +5,6 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.LegAnnotation
-import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.bindgen.Value
 import com.mapbox.core.constants.Constants
@@ -22,6 +20,7 @@ import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
+import com.mapbox.navigation.testing.TestingUtils.listElementsAreEqual
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID
@@ -54,6 +53,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_ID
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
+import com.mapbox.navigation.ui.maps.route.line.model.TrafficCongestionProvider
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
 import com.mapbox.navigator.RouteInterface
@@ -628,12 +628,21 @@ class MapboxRouteLineUtilsRoboTest {
     fun calculateRouteLineSegments_when_styleInActiveRouteLegsIndependently() {
         val colors = RouteLineColorResources.Builder().build()
         val route = loadRoute("multileg-route-two-legs.json")
+        val trafficCongestionProvider = TrafficCongestionProvider().also {
+            it.updateTrafficFunction(
+                MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                    route,
+                    colors
+                )
+            )
+        }
 
         val result = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
             true,
-            colors
+            colors,
+            trafficCongestionProvider
         )
 
         result.indexOfFirst { it.legIndex == 1 }
@@ -650,17 +659,30 @@ class MapboxRouteLineUtilsRoboTest {
             "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
             "0.9429639111009005, [rgba, 255.0, 149.0, 0.0, 1.0]]"
         val route = loadRoute("short_route.json")
+        val trafficCongestionProvider = TrafficCongestionProvider().also {
+            it.updateTrafficFunction(
+                MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                    route,
+                    routeLineColorResources
+                )
+            )
+        }
+        val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
+            route,
+            listOf(),
+            true,
+            routeLineColorResources,
+            trafficCongestionProvider
+        )
 
         val result = MapboxRouteLineUtils.getTrafficLineExpressionProducer(
             route,
-            routeLineColorResources,
-            listOf(),
-            true,
             0.0,
             Color.TRANSPARENT,
             routeLineColorResources.routeUnknownCongestionColor,
             false,
-            0.0
+            0.0,
+            segments
         ).generateExpression()
 
         assertEquals(
@@ -677,17 +699,30 @@ class MapboxRouteLineUtilsRoboTest {
             "0.6938979086102405, [rgba, 86.0, 168.0, 251.0, 1.0], " +
             "0.9429639111009005, [rgba, 255.0, 149.0, 0.0, 1.0]]"
         val route = loadRoute("short_route.json")
+        val trafficCongestionProvider = TrafficCongestionProvider().also {
+            it.updateTrafficFunction(
+                MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                    route,
+                    routeLineColorResources
+                )
+            )
+        }
+        val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
+            route,
+            listOf(),
+            true,
+            routeLineColorResources,
+            trafficCongestionProvider
+        )
 
         val result = MapboxRouteLineUtils.getTrafficLineExpressionProducer(
             route,
-            routeLineColorResources,
-            listOf(),
-            true,
             0.0,
             Color.TRANSPARENT,
             routeLineColorResources.routeUnknownCongestionColor,
             true,
-            20.0
+            20.0,
+            segments
         ).generateExpression()
 
         assertEquals(
@@ -705,11 +740,20 @@ class MapboxRouteLineUtilsRoboTest {
             .inActiveRouteLegsColor(Color.YELLOW)
             .build()
         val route = loadRoute("multileg-route-two-legs.json")
+        val trafficCongestionProvider = TrafficCongestionProvider().also {
+            it.updateTrafficFunction(
+                MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                    route,
+                    colorResources
+                )
+            )
+        }
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
             true,
-            colorResources
+            colorResources,
+            trafficCongestionProvider
         )
 
         val result = MapboxRouteLineUtils.getRouteLineExpression(
@@ -745,11 +789,20 @@ class MapboxRouteLineUtilsRoboTest {
             "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val colorResources = RouteLineColorResources.Builder().build()
         val route = loadRoute("multileg-route-two-legs.json")
+        val trafficCongestionProvider = TrafficCongestionProvider().also {
+            it.updateTrafficFunction(
+                MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                    route,
+                    colorResources
+                )
+            )
+        }
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
             true,
-            colorResources
+            colorResources,
+            trafficCongestionProvider
         )
         val stopGap = 20.0 / route.distance()
 
@@ -779,11 +832,20 @@ class MapboxRouteLineUtilsRoboTest {
             "0.8921736630023819, [rgba, 86.0, 168.0, 251.0, 1.0]]"
         val colorResources = RouteLineColorResources.Builder().build()
         val route = loadRoute("route-with-restrictions.json")
+        val trafficCongestionProvider = TrafficCongestionProvider().also {
+            it.updateTrafficFunction(
+                MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                    route,
+                    colorResources
+                )
+            )
+        }
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
             true,
-            colorResources
+            colorResources,
+            trafficCongestionProvider
         )
         val stopGap = 20.0 / route.distance()
 
@@ -812,11 +874,20 @@ class MapboxRouteLineUtilsRoboTest {
             "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val colorResources = RouteLineColorResources.Builder().build()
         val route = loadRoute("route-with-restrictions.json")
+        val trafficCongestionProvider = TrafficCongestionProvider().also {
+            it.updateTrafficFunction(
+                MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                    route,
+                    colorResources
+                )
+            )
+        }
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
             true,
-            colorResources
+            colorResources,
+            trafficCongestionProvider
         )
         val stopGap = 20.0 / route.distance()
 
@@ -843,11 +914,20 @@ class MapboxRouteLineUtilsRoboTest {
             "0.8921736630023819, [rgba, 86.0, 168.0, 251.0, 1.0]]"
         val colorResources = RouteLineColorResources.Builder().build()
         val route = loadRoute("route-with-restrictions.json")
+        val trafficCongestionProvider = TrafficCongestionProvider().also {
+            it.updateTrafficFunction(
+                MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                    route,
+                    colorResources
+                )
+            )
+        }
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
             true,
-            colorResources
+            colorResources,
+            trafficCongestionProvider
         )
         val stopGap = 20.0 / route.distance()
 
@@ -878,11 +958,20 @@ class MapboxRouteLineUtilsRoboTest {
             "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val colorResources = RouteLineColorResources.Builder().build()
         val route = loadRoute("route-with-restrictions.json")
+        val trafficCongestionProvider = TrafficCongestionProvider().also {
+            it.updateTrafficFunction(
+                MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                    route,
+                    colorResources
+                )
+            )
+        }
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
             true,
-            colorResources
+            colorResources,
+            trafficCongestionProvider
         )
         val stopGap = 20.0 / route.distance()
 
@@ -913,11 +1002,20 @@ class MapboxRouteLineUtilsRoboTest {
             "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val colorResources = RouteLineColorResources.Builder().build()
         val route = loadRoute("route-with-restrictions.json")
+        val trafficCongestionProvider = TrafficCongestionProvider().also {
+            it.updateTrafficFunction(
+                MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                    route,
+                    colorResources
+                )
+            )
+        }
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
             true,
-            colorResources
+            colorResources,
+            trafficCongestionProvider
         )
         val stopGap = 20.0 / route.distance()
 
@@ -933,62 +1031,24 @@ class MapboxRouteLineUtilsRoboTest {
     }
 
     @Test
-    fun getRouteLegTrafficCongestionProvider_cacheCheck() {
-        val routeLeg = mockk<RouteLeg> {
-            every { annotation() } returns mockk<LegAnnotation> {
-                every { congestion() } returns listOf()
-            }
-        }
-
-        MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider(routeLeg)
-        MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider(routeLeg)
-        MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider(routeLeg)
-
-        verify(exactly = 1) { routeLeg.annotation() }
-    }
-
-    @Test
-    fun getRouteLegTrafficNumericCongestionProvider_cacheCheck() {
-        val colorResources = RouteLineColorResources.Builder().build()
-
-        val firstResult =
-            MapboxRouteLineUtils.getRouteLegTrafficNumericCongestionProvider(colorResources)
-        val secondResult =
-            MapboxRouteLineUtils.getRouteLegTrafficNumericCongestionProvider(colorResources)
-        val thirdResult =
-            MapboxRouteLineUtils.getRouteLegTrafficNumericCongestionProvider(colorResources)
-
-        assertEquals(firstResult, secondResult)
-        assertEquals(secondResult, thirdResult)
-    }
-
-    @Test
     fun getAnnotationProvider_whenNumericTrafficSource() {
         val colorResources = RouteLineColorResources.Builder().build()
         val routeAsJson = loadJsonFixture(
             "route-with-congestion-numeric.json"
         )
         val route = DirectionsRoute.fromJson(routeAsJson)
-        val expected =
+        val expectedProvider =
             MapboxRouteLineUtils.getRouteLegTrafficNumericCongestionProvider(colorResources)
+        val expected = expectedProvider(route.legs()!!.first())
 
-        val result =
+        val resultProvider =
             MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(route, colorResources)
+        val result = resultProvider(route.legs()!!.first())
 
-        assertEquals(expected, result)
-    }
-
-    @Test
-    fun extractRouteData_cacheCheck() {
-        val route = mockk<DirectionsRoute> {
-            every { legs() } returns null
+        val listsAreEqual = listElementsAreEqual(expected, result!!) { item1, item2 ->
+            item1 == item2
         }
-        val trafficCongestionProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
-        MapboxRouteLineUtils.extractRouteData(route, trafficCongestionProvider)
-        val result = MapboxRouteLineUtils.extractRouteData(route, trafficCongestionProvider)
-
-        assertTrue(result.isEmpty())
-        verify(exactly = 1) { route.legs() }
+        assertTrue(listsAreEqual)
     }
 
     @Test
@@ -999,7 +1059,10 @@ class MapboxRouteLineUtilsRoboTest {
         val route2 = mockk<DirectionsRoute> {
             every { legs() } returns null
         }
-        val trafficCongestionProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        val trafficCongestionProvider = TrafficCongestionProvider().also {
+            it.updateTrafficFunction(MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider)
+        }
+
         MapboxRouteLineUtils.extractRouteData(route1, trafficCongestionProvider)
         MapboxRouteLineUtils.extractRouteData(route1, trafficCongestionProvider)
         MapboxRouteLineUtils.extractRouteData(route2, trafficCongestionProvider)
