@@ -43,6 +43,7 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.internal.utils.calculateDescriptionLevensteinSimilarity
+import com.mapbox.navigation.core.internal.utils.calculateDescriptionSimilarity
 import com.mapbox.navigation.core.internal.utils.calculateGeometrySimilarity
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -71,6 +72,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
 @SuppressLint("MissingPermission")
@@ -361,9 +363,16 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
-    private var rejectedAlternatives = mutableMapOf<Int, NavigationRoute>()
+    private var rejectedAlternatives = ConcurrentHashMap<Int, NavigationRoute>()
 
     private fun fasterRoute(result: RoutesUpdatedResult) {
+        if (result.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW) {
+            rejectedAlternatives.clear()
+            result.navigationRoutes.drop(1).forEach {
+                val alternativeMetadata = mapboxNavigation.getAlternativeMetadataFor(it)!!
+                rejectedAlternatives[alternativeMetadata.alternativeId] = it
+            }
+        }
         if (result.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE) {
             val alternatives = result.navigationRoutes.drop(1)
                 .map { Pair(it, mapboxNavigation.getAlternativeMetadataFor(it)!!) }
@@ -403,7 +412,16 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                         "${newAlternative.second.alternativeId} ${newAlternative.first.directionsRoute.geometry()}"
                     )
 
-                    val descriptionSimilarity = calculateDescriptionLevensteinSimilarity(
+                    val descriptionLevensteinSimilarity = calculateDescriptionLevensteinSimilarity(
+                        rejectedAlternative,
+                        newAlternative.first
+                    )
+                    Log.d(
+                        "vadzim-test",
+                        "description levinstain similarity: $descriptionLevensteinSimilarity for ${rejectedAlternativeKV.key}({${rejectedAlternative.directionsRoute.legs()?.first()?.summary()}}) and ${newAlternative.second.alternativeId}(${newAlternative.first.directionsRoute.legs()?.first()?.summary()})"
+                    )
+
+                    val descriptionSimilarity = calculateDescriptionSimilarity(
                         rejectedAlternative,
                         newAlternative.first
                     )
