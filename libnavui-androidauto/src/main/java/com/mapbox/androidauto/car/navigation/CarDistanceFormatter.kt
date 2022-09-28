@@ -1,105 +1,60 @@
 package com.mapbox.androidauto.car.navigation
 
+import android.text.SpannableString
 import androidx.car.app.model.Distance
-import com.mapbox.navigation.base.formatter.Rounding
-import com.mapbox.navigation.base.formatter.UnitType
-import com.mapbox.turf.TurfConstants
-import com.mapbox.turf.TurfConversion
-import kotlin.math.roundToInt
+import androidx.car.app.model.Template
+import androidx.car.app.navigation.model.RoutingInfo
+import androidx.car.app.navigation.model.TravelEstimate
+import com.mapbox.androidauto.internal.car.extensions.mapboxNavigationForward
+import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 
-class CarDistanceFormatter(
-    private val unitType: UnitType
-) {
+/**
+ * Object for formatting distances. Set the [DistanceFormatterOptions] through the
+ * [NavigationOptions].
+ */
+object CarDistanceFormatter {
 
-    fun carDistance(
-        distanceMeters: Double,
-        @Rounding.Increment roundingIncrement: Int = Rounding.INCREMENT_FIFTY
-    ): Distance = when (unitType) {
-        UnitType.IMPERIAL -> carDistanceImperial(distanceMeters, roundingIncrement)
-        UnitType.METRIC -> carDistanceMetric(distanceMeters, roundingIncrement)
+    private lateinit var delegate: CarDistanceFormatterDelegate
+    private lateinit var mapboxDistanceFormatter: MapboxDistanceFormatter
+    private val navigationObserver = mapboxNavigationForward(this::onAttached) { }
+
+    init {
+        MapboxNavigationApp.registerObserver(navigationObserver)
     }
 
-    private fun carDistanceImperial(distanceMeters: Double, roundingIncrement: Int): Distance {
-        return when (distanceMeters) {
-            !in 0.0..Double.MAX_VALUE -> {
-                Distance.create(0.0, Distance.UNIT_FEET)
-            }
-            in 0.0..smallDistanceMeters -> {
-                val roundedDistance = formatDistanceAndSuffixForSmallUnit(
-                    distanceMeters,
-                    roundingIncrement,
-                    TurfConstants.UNIT_FEET
-                )
-                Distance.create(roundedDistance.toDouble(), Distance.UNIT_FEET)
-            }
-            in smallDistanceMeters..mediumDistanceMeters -> {
-                Distance.create(distanceMeters.metersToMiles(), Distance.UNIT_MILES_P1)
-            }
-            else -> {
-                Distance.create(distanceMeters.metersToMiles(), Distance.UNIT_MILES)
-            }
-        }
+    /**
+     * The distance formatted to locale and unit type, which can be shown in a human viewable
+     * text element.
+     *
+     * @param distance in meters.
+     * @return [SpannableString] formatted with bold and relative size.
+     *
+     * @see DistanceFormatter
+     */
+    @JvmStatic
+    fun formatDistance(distance: Double): SpannableString {
+        return mapboxDistanceFormatter.formatDistance(distance)
     }
 
-    private fun carDistanceMetric(distanceMeters: Double, roundingIncrement: Int): Distance {
-        return when (distanceMeters) {
-            !in 0.0..Double.MAX_VALUE -> {
-                Distance.create(0.0, Distance.UNIT_METERS)
-            }
-            in 0.0..smallDistanceMeters -> {
-                val roundedDistance = formatDistanceAndSuffixForSmallUnit(
-                    distanceMeters,
-                    roundingIncrement,
-                    TurfConstants.UNIT_METERS
-                )
-                Distance.create(roundedDistance.toDouble(), Distance.UNIT_METERS)
-            }
-            in smallDistanceMeters..mediumDistanceMeters -> {
-                Distance.create(distanceMeters.metersToKilometers(), Distance.UNIT_KILOMETERS_P1)
-            }
-            else -> {
-                Distance.create(distanceMeters.metersToKilometers(), Distance.UNIT_KILOMETERS)
-            }
-        }
+    /**
+     * Provides a [Distance] object used in [Template] objects like [RoutingInfo] and
+     * [TravelEstimate].
+     */
+    @JvmStatic
+    fun carDistance(distanceMeters: Double): Distance {
+        return delegate.carDistance(distanceMeters)
     }
 
-    private fun formatDistanceAndSuffixForSmallUnit(
-        distance: Double,
-        roundingIncrement: Int,
-        roundingDistanceUnit: String
-    ): Int {
-        if (distance < 0) {
-            return 0
-        }
-
-        val distanceUnit = TurfConversion.convertLength(
-            distance,
-            TurfConstants.UNIT_METERS,
-            roundingDistanceUnit
-        )
-
-        val roundedValue = if (roundingIncrement > 0) {
-            val roundedDistance = distanceUnit.roundToInt()
-            if (roundedDistance < roundingIncrement) {
-                roundingIncrement
-            } else {
-                roundedDistance / roundingIncrement * roundingIncrement
-            }
-        } else {
-            distance.roundToInt()
-        }
-
-        return roundedValue
-    }
-
-    private fun Double.metersToMiles() = this * MILES_PER_METER
-    private fun Double.metersToKilometers() = this * KILOMETERS_PER_METER
-
-    internal companion object {
-        internal const val smallDistanceMeters = 400.0
-        internal const val mediumDistanceMeters = 10000.0
-
-        private const val MILES_PER_METER = 0.000621371
-        private const val KILOMETERS_PER_METER = 0.001
+    private fun onAttached(mapboxNavigation: MapboxNavigation) {
+        val distanceFormatterOptions = mapboxNavigation.navigationOptions.distanceFormatterOptions
+        val unitType = distanceFormatterOptions.unitType
+        val roundingIncrement = distanceFormatterOptions.roundingIncrement
+        delegate = CarDistanceFormatterDelegate(unitType, roundingIncrement)
+        mapboxDistanceFormatter = MapboxDistanceFormatter(distanceFormatterOptions)
     }
 }

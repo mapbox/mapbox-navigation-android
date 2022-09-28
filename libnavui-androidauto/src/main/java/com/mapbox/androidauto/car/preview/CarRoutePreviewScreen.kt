@@ -20,6 +20,7 @@ import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.car.location.CarLocationRenderer
 import com.mapbox.androidauto.car.navigation.CarCameraMode
+import com.mapbox.androidauto.car.navigation.CarDistanceFormatter
 import com.mapbox.androidauto.car.navigation.CarNavigationCamera
 import com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil
@@ -50,11 +51,14 @@ class CarRoutePreviewScreen @UiThread constructor(
 ) : Screen(routePreviewCarContext.carContext) {
 
     private val carRoutesProvider = PreviewCarRoutesProvider(navigationRoutes)
-    var selectedIndex = 0
-    val carRouteLine = CarRouteLine(routePreviewCarContext.mainCarContext, carRoutesProvider)
-    val carLocationRenderer = CarLocationRenderer(routePreviewCarContext.mainCarContext)
-    val carSpeedLimitRenderer = CarSpeedLimitRenderer(routePreviewCarContext.mainCarContext)
-    val carNavigationCamera = CarNavigationCamera(
+    private var selectedIndex = 0
+    private val carRouteLine = CarRouteLine(
+        routePreviewCarContext.mainCarContext,
+        carRoutesProvider
+    )
+    private val carLocationRenderer = CarLocationRenderer(routePreviewCarContext.mainCarContext)
+    private val carSpeedLimitRenderer = CarSpeedLimitRenderer(routePreviewCarContext.mainCarContext)
+    private val carNavigationCamera = CarNavigationCamera(
         initialCarCameraMode = CarCameraMode.OVERVIEW,
         alternativeCarCameraMode = CarCameraMode.FOLLOWING,
         carRoutesProvider = carRoutesProvider,
@@ -104,6 +108,7 @@ class CarRoutePreviewScreen @UiThread constructor(
         logAndroidAuto("CarRoutePreviewScreen constructor")
         lifecycle.muteAudioGuidance()
         lifecycle.addObserver(object : DefaultLifecycleObserver {
+
             override fun onResume(owner: LifecycleOwner) {
                 logAndroidAuto("CarRoutePreviewScreen onResume")
                 routePreviewCarContext.carContext.onBackPressedDispatcher.addCallback(
@@ -133,7 +138,7 @@ class CarRoutePreviewScreen @UiThread constructor(
         navigationRoutes.forEach { navigationRoute ->
             val route = navigationRoute.directionsRoute
             val title = route.legs()?.first()?.summary() ?: placeRecord.name
-            val duration = routePreviewCarContext.distanceFormatter.formatDistance(route.duration())
+            val duration = CarDistanceFormatter.formatDistance(route.duration())
             val routeSpannableString = SpannableString("$duration $title")
             routeSpannableString.setSpan(
                 DurationSpan.create(route.duration().toLong()),

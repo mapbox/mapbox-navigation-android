@@ -9,14 +9,11 @@ import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
-class CarNavigationEtaMapper(
-    private val carDistanceFormatter: CarDistanceFormatter,
-    private val tripProgressApi: MapboxTripProgressApi,
-) {
+class CarNavigationEtaMapper(private val tripProgressApi: MapboxTripProgressApi) {
 
     fun getDestinationTravelEstimate(routeProgress: RouteProgress): TravelEstimate {
         val result = tripProgressApi.getTripProgress(routeProgress)
-        val distance = carDistanceFormatter.carDistance(result.distanceRemaining)
+        val distance = CarDistanceFormatter.carDistance(result.distanceRemaining)
         val zonedDateTime =
             DateTimeWithZone.create(result.estimatedTimeToArrival, TimeZone.getDefault())
         return TravelEstimate.Builder(distance, zonedDateTime)

@@ -3,13 +3,16 @@ package com.mapbox.androidauto.navigation
 import android.os.Build
 import com.mapbox.androidauto.car.navigation.CarDistanceFormatter
 import com.mapbox.androidauto.car.navigation.CarNavigationEtaMapper
-import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
+import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -19,9 +22,21 @@ import org.robolectric.annotation.Config
 @Config(sdk = [Build.VERSION_CODES.O])
 class CarNavigationEtaMapperTest {
 
+    @Before
+    fun setup() {
+        mockkStatic(CarDistanceFormatter::class)
+    }
+
+    @After
+    fun teardown() {
+        unmockkAll()
+    }
+
     @Test
     fun from() {
-        val formatter = CarDistanceFormatter(UnitType.METRIC)
+        every { CarDistanceFormatter.carDistance(any()) } returns mockk {
+            every { displayDistance } returns 50.0
+        }
         val routeProgress = mockk<RouteProgress>()
         val updateValue = mockk<TripProgressUpdateValue> {
             every { estimatedTimeToArrival } returns 1234567
@@ -31,7 +46,7 @@ class CarNavigationEtaMapperTest {
         val tripProgressApi = mockk<MapboxTripProgressApi> {
             every { getTripProgress(routeProgress) } returns updateValue
         }
-        val mapper = CarNavigationEtaMapper(formatter, tripProgressApi)
+        val mapper = CarNavigationEtaMapper(tripProgressApi)
 
         val result = mapper.getDestinationTravelEstimate(routeProgress)
 

@@ -117,7 +117,7 @@ internal constructor(
     private fun onAttached(mapboxNavigation: MapboxNavigation) {
         val carContext = carContext!!
         maneuverApi = services.maneuverApi(mapboxNavigation)
-        navigationEtaMapper = services.carNavigationEtaMapper(carContext, mapboxNavigation)
+        navigationEtaMapper = services.carNavigationEtaMapper(carContext)
         navigationInfoMapper = services.carNavigationInfoMapper(carContext, mapboxNavigation)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
     }
