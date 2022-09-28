@@ -9,6 +9,7 @@ import android.os.Vibrator
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.RawRes
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
@@ -26,13 +27,9 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
-import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
-import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -47,6 +44,7 @@ import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.AlternativeRouteActivityLayoutBinding
 import com.mapbox.navigation.qa_test_app.utils.Utils.getMapboxAccessToken
 import com.mapbox.navigation.ui.maps.NavigationStyles
@@ -217,8 +215,8 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 currentLocation.longitude,
                 currentLocation.latitude
             )
-            findRoute(originPoint, point)
         }
+        findRoute()
         return false
     }
 
@@ -265,7 +263,39 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
-    private fun findRoute(origin: Point?, destination: Point?) {
+    val routes: List<NavigationRoute> by lazy {
+        listOf(
+            createRoute(
+                responseJson = R.raw.sanitized_test_route_5,
+                requestUrlJson = R.raw.test_route_5_url,
+            ).first(),
+            createRoute(
+                responseJson = R.raw.sanitized_test_route_6,
+                requestUrlJson = R.raw.test_route_6_url,
+            ).first()
+        )
+    }
+
+    private fun createRoute(
+        @RawRes responseJson: Int,
+        @RawRes requestUrlJson: Int
+    ): List<NavigationRoute> = NavigationRoute.create(
+        directionsResponseJson = com.mapbox.navigation.qa_test_app.utils.Utils.readRawFileText(
+            this,
+            responseJson
+        ),
+        routeRequestUrl = RouteOptions.fromJson(
+            com.mapbox.navigation.qa_test_app.utils.Utils.readRawFileText(
+                this,
+                requestUrlJson
+            )
+        ).toUrl("xyz").toString(),
+        routerOrigin = RouterOrigin.Offboard
+    )
+
+    private fun findRoute() {
+        mapboxNavigation.setNavigationRoutes(routes)
+/*
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
@@ -294,7 +324,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                     // no impl
                 }
             }
-        )
+        )*/
     }
 
     @SuppressLint("MissingPermission")
@@ -312,7 +342,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         binding.startNavigation.setOnClickListener {
             mapboxNavigation.startTripSession()
             binding.startNavigation.visibility = View.GONE
-            startSimulation(mapboxNavigation.getRoutes()[0])
+            startSimulation(routes.first().directionsRoute)
         }
 
         binding.mapView.gestures.addOnMapClickListener(mapClickListener)
