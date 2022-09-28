@@ -40,7 +40,7 @@ class PlacesListOnMapScreen @UiThread constructor(
     var itemList = buildErrorItemList(R.string.car_search_no_results)
 
     private val carNavigationCamera = CarLocationsOverviewCamera()
-    private var carLocationRenderer = CarLocationRenderer(searchCarContext.mainCarContext)
+    private var carLocationRenderer = CarLocationRenderer()
     private val placesListOnMapManager = PlacesListOnMapManager(placesProvider)
 
     init {

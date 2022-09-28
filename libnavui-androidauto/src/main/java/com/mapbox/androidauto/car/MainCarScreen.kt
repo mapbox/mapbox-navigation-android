@@ -24,8 +24,8 @@ class MainCarScreen @UiThread constructor(
     private val mainCarContext: MainCarContext
 ) : Screen(mainCarContext.carContext) {
 
-    val carRouteLine = CarRouteLine(mainCarContext)
-    val carLocationRenderer = CarLocationRenderer(mainCarContext)
+    val carRouteLine = CarRouteLine()
+    val carLocationRenderer = CarLocationRenderer()
     val carSpeedLimitRenderer = CarSpeedLimitRenderer(mainCarContext)
     val carNavigationCamera = CarNavigationCamera(
         initialCarCameraMode = CarCameraMode.FOLLOWING,
