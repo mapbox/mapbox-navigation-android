@@ -133,7 +133,6 @@ import com.mapbox.navigator.PollingConfig
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
@@ -1813,7 +1812,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         }
     }
 
-    private fun createChildScope() = CoroutineScope(threadController.getMainScopeAndRootJob().job)
+    private fun createChildScope() = threadController.getMainScopeAndRootJob().scope
 
     private fun restartRouteScope() {
         routeScope.cancel()

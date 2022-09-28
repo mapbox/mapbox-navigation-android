@@ -16,7 +16,14 @@ import kotlin.jvm.Throws
 @ExperimentalCoroutinesApi
 class MainCoroutineRule : TestRule {
     val testDispatcher = TestCoroutineDispatcher()
-    val coroutineScope = TestCoroutineScope(testDispatcher + SupervisorJob())
+    val createdScopes = mutableListOf<TestCoroutineScope>()
+    val coroutineScope = createTestScope()
+
+    fun createTestScope(): TestCoroutineScope {
+        return TestCoroutineScope(testDispatcher + SupervisorJob()).also {
+            createdScopes.add(it)
+        }
+    }
 
     override fun apply(base: Statement, description: Description?) = object : Statement() {
         @Throws(Throwable::class)
@@ -26,7 +33,7 @@ class MainCoroutineRule : TestRule {
             base.evaluate()
 
             Dispatchers.resetMain() // Restore original main dispatcher
-            coroutineScope.cleanupTestCoroutines()
+            createdScopes.forEach { it.cleanupTestCoroutines() }
         }
     }
 
