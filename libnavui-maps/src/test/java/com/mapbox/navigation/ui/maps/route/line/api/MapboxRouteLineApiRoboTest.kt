@@ -15,6 +15,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.testing.FileUtils
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.getRouteDrawData
@@ -24,11 +25,14 @@ import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.sho
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
+import com.mapbox.navigation.utils.internal.LoggerFrontend
 import com.mapbox.navigator.RouteInterface
 import io.mockk.every
 import io.mockk.mockk
@@ -61,6 +65,12 @@ class MapboxRouteLineApiRoboTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
+
+    private val logger = mockk<LoggerFrontend>(relaxed = true)
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule(logger)
+
     private val parentJob = SupervisorJob()
     private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
 
@@ -930,6 +940,164 @@ class MapboxRouteLineApiRoboTest {
         )
 
         assertEquals(0.03856129838762756, result, 0.000000001)
+    }
+
+    @Test
+    fun `getAlternativeRoutesDeviationOffsetsTest empty distances`() {
+        val route = mockk<NavigationRoute> {
+            every { id } returns "abc#0"
+        }
+        val alternativeRouteMetadata = mockk<AlternativeRouteMetadata> {
+            every { navigationRoute } returns route
+        }
+
+        val result = MapboxRouteLineUtils.getAlternativeRouteDeviationOffsets(
+            alternativeRouteMetadata,
+            distancesProvider = {
+                RouteLineGranularDistances(1.0, emptyArray())
+            }
+        )
+
+        assertEquals(0.0, result, 0.000000001)
+        verify {
+            logger.logW(
+                "Remaining distances array size is 0 " +
+                    "and the full distance is 1.0 - " +
+                    "unable to calculate the deviation point of the alternative with ID " +
+                    "'abc#0' to hide the portion that overlaps " +
+                    "with the primary route.",
+                "MapboxRouteLineUtils"
+            )
+        }
+    }
+
+    @Test
+    fun `getAlternativeRoutesDeviationOffsetsTest full distance is zero`() {
+        val route = mockk<NavigationRoute> {
+            every { id } returns "abc#0"
+        }
+        val alternativeRouteMetadata = mockk<AlternativeRouteMetadata> {
+            every { navigationRoute } returns route
+        }
+
+        val result = MapboxRouteLineUtils.getAlternativeRouteDeviationOffsets(
+            alternativeRouteMetadata,
+            distancesProvider = {
+                RouteLineGranularDistances(
+                    0.0,
+                    arrayOf(mockk(relaxed = true), mockk(relaxed = true))
+                )
+            }
+        )
+
+        assertEquals(0.0, result, 0.000000001)
+        verify {
+            logger.logW(
+                "Remaining distances array size is 2 " +
+                    "and the full distance is 0.0 - " +
+                    "unable to calculate the deviation point of the alternative with ID " +
+                    "'abc#0' to hide the portion that overlaps " +
+                    "with the primary route.",
+                "MapboxRouteLineUtils"
+            )
+        }
+    }
+
+    @Test
+    fun `getAlternativeRoutesDeviationOffsetsTest remaining distance greater than full distance`() {
+        val route = mockk<NavigationRoute> {
+            every { id } returns "abc#0"
+        }
+        val alternativeRouteMetadata = mockk<AlternativeRouteMetadata> {
+            every { navigationRoute } returns route
+            every { forkIntersectionOfAlternativeRoute } returns mockk {
+                // the remaining distance at this index (30)
+                // is greater than overall distance (15)
+                every { geometryIndexInRoute } returns 1
+            }
+        }
+
+        val result = MapboxRouteLineUtils.getAlternativeRouteDeviationOffsets(
+            alternativeRouteMetadata,
+            distancesProvider = {
+                RouteLineGranularDistances(
+                    distance = 15.0,
+                    arrayOf(
+                        RouteLineDistancesIndex(
+                            point = mockk(),
+                            distanceRemaining = 40.0
+                        ),
+                        RouteLineDistancesIndex(
+                            point = mockk(),
+                            distanceRemaining = 30.0
+                        ),
+                        RouteLineDistancesIndex(
+                            point = mockk(),
+                            distanceRemaining = 20.0
+                        )
+                    )
+                )
+            }
+        )
+
+        assertEquals(0.0, result, 0.000000001)
+        verify {
+            logger.logW(
+                "distance remaining > full distance - " +
+                    "unable to calculate the deviation point of the alternative with ID " +
+                    "'abc#0' to hide the portion that overlaps " +
+                    "with the primary route.",
+                "MapboxRouteLineUtils"
+            )
+        }
+    }
+
+    @Test
+    fun `getAlternativeRoutesDeviationOffsetsTest distance array out of bounds`() {
+        val route = mockk<NavigationRoute> {
+            every { id } returns "abc#0"
+        }
+        val alternativeRouteMetadata = mockk<AlternativeRouteMetadata> {
+            every { navigationRoute } returns route
+            every { forkIntersectionOfAlternativeRoute } returns mockk {
+                every { geometryIndexInRoute } returns 3
+            }
+        }
+
+        val result = MapboxRouteLineUtils.getAlternativeRouteDeviationOffsets(
+            alternativeRouteMetadata,
+            distancesProvider = {
+                RouteLineGranularDistances(
+                    distance = 40.0,
+                    arrayOf(
+                        RouteLineDistancesIndex(
+                            point = mockk(),
+                            distanceRemaining = 40.0
+                        ),
+                        RouteLineDistancesIndex(
+                            point = mockk(),
+                            distanceRemaining = 30.0
+                        ),
+                        RouteLineDistancesIndex(
+                            point = mockk(),
+                            distanceRemaining = 20.0
+                        )
+                    )
+                )
+            }
+        )
+
+        assertEquals(0.0, result, 0.000000001)
+        verify {
+            logger.logW(
+                "Remaining distance at index '3' requested but there are " +
+                    "3 elements in the distances array - " +
+                    "unable to calculate the deviation point of the alternative with ID " +
+                    "'abc#0' to hide the portion that overlaps " +
+                    "with the primary route.",
+                "MapboxRouteLineUtils"
+            )
+        }
     }
 
     private fun mockRouteProgress(
