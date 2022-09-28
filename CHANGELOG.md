@@ -5,6 +5,8 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- [TileStoreService] Use shared memory for marshaling large types and improve error handling. [#6422](https://github.com/mapbox/mapbox-navigation-android/pull/6422)
+- [TileStoreService] Fixed an issue that prevented callbacks to be invoked if an operation had to be retried because of a loss of connection to the service process. [#6422](https://github.com/mapbox/mapbox-navigation-android/pull/6422)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.4 - 30 September, 2022
 ### Changelog

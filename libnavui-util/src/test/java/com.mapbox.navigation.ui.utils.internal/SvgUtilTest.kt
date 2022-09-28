@@ -3,15 +3,9 @@ package com.mapbox.navigation.ui.utils.internal
 import android.graphics.Bitmap
 import com.caverock.androidsvg.SVGExternalFileResolver
 import com.caverock.androidsvg.SVGParseException
-import com.mapbox.common.Logger
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -31,7 +25,7 @@ class SvgUtilTest {
     val loggerRule = LoggingFrontendTestRule()
 
     @get:Rule
-    private var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
     private val validSvg = "<?xml version='1.0' encoding='utf8'?>\n" +
         "<svg xmlns=\"http://www.w3.org/2000/svg\" baseProfile=\"basic\" " +
@@ -161,28 +155,22 @@ class SvgUtilTest {
 
     @Test
     fun `render bitmap with height bitmap null`() {
-        mockkStatic(Logger::class)
-        every { Logger.e(any(), any()) } just Runs
         val mockHeight = 400
         val mockStream = ByteArrayInputStream(byteArrayOf(12, 55, 98))
 
         val actual = SvgUtil.renderAsBitmapWithHeight(mockStream, mockHeight, "")
 
         assertNull(actual)
-        unmockkStatic(Logger::class)
     }
 
     @Test
     fun `render bitmap with height css styles null`() {
-        mockkStatic(Logger::class)
-        every { Logger.e(any(), any()) } just Runs
         val mockHeight = 400
         val mockStream = ByteArrayInputStream(byteArrayOf(12, 55, 98))
 
         val actual = SvgUtil.renderAsBitmapWithHeight(mockStream, mockHeight)
 
         assertNull(actual)
-        unmockkStatic(Logger::class)
     }
 
     @Test
@@ -216,9 +204,9 @@ class SvgUtilTest {
                 mockResolver
             )
 
-            assertEquals(mockSignboard.height, actual?.height)
-            assertEquals(mockSignboard.width, actual?.width)
-            assertEquals(mockSignboard.config, actual?.config)
+            assertEquals(mockSignboard.height, actual.height)
+            assertEquals(mockSignboard.width, actual.width)
+            assertEquals(mockSignboard.config, actual.config)
         }
 
     @Test

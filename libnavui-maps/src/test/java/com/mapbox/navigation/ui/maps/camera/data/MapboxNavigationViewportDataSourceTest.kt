@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.maps.camera.data
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.common.Logger
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.CameraState
@@ -32,9 +31,7 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.pro
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteIntersections
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
 import com.mapbox.navigation.utils.internal.toPoint
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
@@ -343,8 +340,6 @@ class MapboxNavigationViewportDataSourceTest {
 
     @Test
     fun `verify frame - just routeProgress`() {
-        mockkStatic(Logger::class)
-        every { Logger.w(any(), any()) } just Runs
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.evaluate()
         val data = viewportDataSource.getViewportData()
@@ -372,7 +367,6 @@ class MapboxNavigationViewportDataSourceTest {
             },
             data.cameraForOverview
         )
-        unmockkStatic(Logger::class)
     }
 
     @Test
@@ -1104,8 +1098,6 @@ class MapboxNavigationViewportDataSourceTest {
 
     @Test
     fun `verify frame - location + route + progress + reset route and forget to update`() {
-        mockkStatic(Logger::class)
-        every { Logger.e(any(), any()) } just Runs
         every {
             getPitchFallbackFromRouteProgress(any(), any())
         } returns ZERO_PITCH
@@ -1173,7 +1165,6 @@ class MapboxNavigationViewportDataSourceTest {
             overviewCameraOptions,
             data.cameraForOverview
         )
-        unmockkStatic(Logger::class)
     }
 
     @Test

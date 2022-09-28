@@ -1,7 +1,6 @@
 package com.mapbox.navigation.dropin.component.camera
 
 import com.mapbox.android.gestures.Utils
-import com.mapbox.common.Logger
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
@@ -99,10 +98,9 @@ class CameraComponentTest {
 
     @Before
     fun setUp() {
-        mockkStatic(Utils::class, Logger::class)
+        mockkStatic(Utils::class)
         mockkObject(MapboxNavigationApp)
         every { Utils.dpToPx(any()) } returns 50f
-        every { Logger.d(any(), any()) } returns Unit
         mockMapboxNavigation = mockk(relaxed = true)
         every { MapboxNavigationApp.current() } returns mockMapboxNavigation
         testStore = spyk(TestStore())

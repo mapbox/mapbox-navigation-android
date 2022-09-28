@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.maps.camera.data
 import com.google.gson.Gson
 import com.google.gson.internal.LinkedTreeMap
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.common.Logger
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.ScreenBox
@@ -25,12 +24,8 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.pro
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteIntersections
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.simplifyCompleteRoutePoints
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -205,8 +200,6 @@ class ViewportDataSourceProcessorTest {
 
     @Test
     fun `test simplifyCompleteRoutePoints - enabled, factor zero`() {
-        mockkStatic(Logger::class)
-        every { Logger.e(any(), any()) } just Runs
         val expected: List<List<List<Point>>> = completeRoutePoints
 
         val actual = simplifyCompleteRoutePoints(
@@ -216,13 +209,10 @@ class ViewportDataSourceProcessorTest {
         )
 
         assertArrays3(expected, actual, pointAdapter)
-        unmockkStatic(Logger::class)
     }
 
     @Test
     fun `test simplifyCompleteRoutePoints - enabled, factor negative`() {
-        mockkStatic(Logger::class)
-        every { Logger.e(any(), any()) } just Runs
         val expected: List<List<List<Point>>> = completeRoutePoints
 
         val actual = simplifyCompleteRoutePoints(
@@ -232,7 +222,6 @@ class ViewportDataSourceProcessorTest {
         )
 
         assertArrays3(expected, actual, pointAdapter)
-        unmockkStatic(Logger::class)
     }
 
     @Test
@@ -365,8 +354,6 @@ class ViewportDataSourceProcessorTest {
 
     @Test
     fun `test getPointsToFrameOnCurrentStep, intersections disabled, fully traveled`() {
-        mockkStatic(Logger::class)
-        every { Logger.e(any(), any()) } just Runs
         val stepProgress: RouteStepProgress = mockk {
             every { distanceTraveled } returns 93.4f
             every { distanceRemaining } returns 0f
@@ -391,7 +378,6 @@ class ViewportDataSourceProcessorTest {
         )
 
         assertArrays1(expected, actual, pointAdapter)
-        unmockkStatic(Logger::class)
     }
 
     @Test
@@ -677,8 +663,6 @@ class ViewportDataSourceProcessorTest {
 
     @Test
     fun `test getMapAnchoredPaddingFromUserPadding - invalid horizontally`() {
-        mockkStatic(Logger::class)
-        every { Logger.e(any(), any()) } just Runs
         val mapSize = Size(1000f, 1000f)
         val expected = EdgeInsets(0.0, 0.0, 0.0, 0.0)
 
@@ -693,13 +677,10 @@ class ViewportDataSourceProcessorTest {
         val padding3 = EdgeInsets(0.0, 600.0, 0.0, 600.0)
         val actual3 = getMapAnchoredPaddingFromUserPadding(mapSize, padding3, defaultFocalPoint)
         assertEquals(expected, actual3)
-        unmockkStatic(Logger::class)
     }
 
     @Test
     fun `test getMapAnchoredPaddingFromUserPadding - invalid vertically`() {
-        mockkStatic(Logger::class)
-        every { Logger.e(any(), any()) } just Runs
         val mapSize = Size(1000f, 1000f)
         val expected = EdgeInsets(0.0, 0.0, 0.0, 0.0)
 
@@ -714,7 +695,6 @@ class ViewportDataSourceProcessorTest {
         val padding3 = EdgeInsets(600.0, 0.0, 600.0, 0.0)
         val actual3 = getMapAnchoredPaddingFromUserPadding(mapSize, padding3, defaultFocalPoint)
         assertEquals(expected, actual3)
-        unmockkStatic(Logger::class)
     }
 
     @Test
