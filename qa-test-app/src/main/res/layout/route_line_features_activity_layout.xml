@@ -52,4 +52,13 @@
         app:layout_constraintBottom_toTopOf="@+id/btnToggleTrafficVisibility"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <Button
+        android:id="@+id/btnToggleColors"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:text="Toggle Colors"
+        app:layout_constraintBottom_toTopOf="@id/btnTogglePrimaryRouteVisibility"
+        app:layout_constraintStart_toEndOf="@id/btnToggleAlternativeRouteVisibility" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

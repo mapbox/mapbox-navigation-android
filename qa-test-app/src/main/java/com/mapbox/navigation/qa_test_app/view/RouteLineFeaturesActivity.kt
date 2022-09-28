@@ -69,9 +69,26 @@ class RouteLineFeaturesActivity : AppCompatActivity() {
             .build()
     }
 
+    private val altRouteLineColorResources by lazy {
+        RouteLineColorResources.Builder()
+            .routeUnknownCongestionColor(Color.YELLOW)
+            .alternativeRouteCasingColor(Color.parseColor("#EB06AE"))
+            .alternativeRouteDefaultColor(Color.parseColor("#FF21C4"))
+            .alternativeRouteUnknownCongestionColor(Color.parseColor("#F58407"))
+            .alternativeRouteLowCongestionColor(Color.parseColor("#FF6508"))
+            .alternativeRouteModerateCongestionColor(Color.parseColor("#E83A05"))
+            .alternativeRouteHeavyCongestionColor(Color.parseColor("#FF1D08"))
+            .alternativeRouteSevereCongestionColor(Color.parseColor("#F50737"))
+            .routeDefaultColor(Color.parseColor("#FFF4DB"))
+            .routeCasingColor(Color.parseColor("#EBDAB2"))
+            .build()
+    }
+
+    private var activeColorResources = routeLineColorResources
+
     private val routeLineResources: RouteLineResources by lazy {
         RouteLineResources.Builder()
-            .routeLineColorResources(routeLineColorResources)
+            .routeLineColorResources(activeColorResources)
             .routeTrafficLineScaleExpression(routeTrafficLineScaleExpression)
             .alternativeRouteTrafficLineScaleExpression(routeTrafficLineScaleExpression)
             .build()
@@ -147,6 +164,16 @@ class RouteLineFeaturesActivity : AppCompatActivity() {
                 }
             }
             routesAreShowing = !routesAreShowing
+        }
+
+        viewBinding.btnToggleColors.setOnClickListener {
+            val resources = when (activeColorResources) {
+                routeLineColorResources -> altRouteLineColorResources
+                else -> routeLineColorResources
+            }
+            activeColorResources = resources
+            routeLineApi.updateColorResources(this, activeColorResources)
+            drawRoutes()
         }
     }
 

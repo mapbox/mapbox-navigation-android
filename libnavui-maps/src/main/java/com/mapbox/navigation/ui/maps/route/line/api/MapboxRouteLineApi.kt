@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
+import android.content.Context
 import android.graphics.Color
 import android.util.LruCache
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -54,6 +55,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
+import com.mapbox.navigation.ui.maps.route.line.model.TrafficCongestionProvider
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.route.line.model.toNavigationRouteLines
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils
@@ -198,7 +200,7 @@ import kotlin.coroutines.suspendCoroutine
  * @param routeLineOptions used for determining the appearance and/or behavior of the route line
  */
 class MapboxRouteLineApi(
-    private val routeLineOptions: MapboxRouteLineOptions
+    private var routeLineOptions: MapboxRouteLineOptions
 ) {
     private var primaryRoute: NavigationRoute? = null
     private val routes: MutableList<NavigationRoute> = mutableListOf()
@@ -219,6 +221,10 @@ class MapboxRouteLineApi(
             >,
         List<RouteLineExpressionData>> by lazy { LruCache(2) }
 
+    private val trafficCongestionProvider: TrafficCongestionProvider by lazy {
+        TrafficCongestionProvider()
+    }
+
     companion object {
         private const val INVALID_ACTIVE_LEG_INDEX = -1
         private const val LOG_CATEGORY = "MapboxRouteLineApi"
@@ -228,6 +234,18 @@ class MapboxRouteLineApi(
         trafficBackfillRoadClasses.addAll(
             routeLineOptions.resourceProvider.trafficBackfillRoadClasses
         )
+    }
+
+    /**
+     * Updates the [RouteLineColorResources] used to determine the colors of the route line.
+     *
+     * @param ctx a context
+     * @param res a [RouteLineColorResources]
+     */
+    fun updateColorResources(ctx: Context, res: RouteLineColorResources) {
+        val resources =
+            routeLineOptions.resourceProvider.toBuilder().routeLineColorResources(res).build()
+        routeLineOptions = routeLineOptions.toBuilder(ctx).withRouteLineResources(resources).build()
     }
 
     /**
@@ -876,6 +894,7 @@ class MapboxRouteLineApi(
                                         routeLineOptions
                                             .resourceProvider
                                             .routeLineColorResources
+                                            .restrictedRoadColor
                                     )
                                 }
                             }
@@ -1226,17 +1245,31 @@ class MapboxRouteLineApi(
         val vanishingPointOffset = routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0
         val primaryRouteTrafficLineExpressionDef = jobControl.scope.async {
             partitionedRoutes.first.firstOrNull()?.route?.run {
+                trafficCongestionProvider.updateTrafficFunction(
+                    MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                        this.directionsRoute,
+                        routeLineOptions.resourceProvider.routeLineColorResources
+                    )
+                )
+
+                val segments: List<RouteLineExpressionData> =
+                    MapboxRouteLineUtils.calculateRouteLineSegments(
+                        this.directionsRoute,
+                        trafficBackfillRoadClasses,
+                        isPrimaryRoute = true,
+                        routeLineOptions.resourceProvider.routeLineColorResources,
+                        trafficCongestionProvider
+                    )
+
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
                     this.directionsRoute,
-                    routeLineOptions.resourceProvider.routeLineColorResources,
-                    trafficBackfillRoadClasses,
-                    isPrimaryRoute = true,
                     vanishingPointOffset,
                     Color.TRANSPARENT,
                     routeLineOptions.resourceProvider.routeLineColorResources
                         .routeUnknownCongestionColor,
                     routeLineOptions.displaySoftGradientForTraffic,
-                    routeLineOptions.softGradientTransition
+                    routeLineOptions.softGradientTransition,
+                    segments
                 )
             }?.generateExpression()
         }
@@ -1265,11 +1298,17 @@ class MapboxRouteLineApi(
 
         val alternateRoute1TrafficExpressionDef = jobControl.scope.async {
             partitionedRoutes.second.firstOrNull()?.route?.run {
+                val segments: List<RouteLineExpressionData> =
+                    MapboxRouteLineUtils.calculateRouteLineSegments(
+                        this.directionsRoute,
+                        trafficBackfillRoadClasses,
+                        isPrimaryRoute = false,
+                        routeLineOptions.resourceProvider.routeLineColorResources,
+                        trafficCongestionProvider
+                    )
+
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
                     this.directionsRoute,
-                    routeLineOptions.resourceProvider.routeLineColorResources,
-                    trafficBackfillRoadClasses,
-                    isPrimaryRoute = false,
                     vanishingPointOffset = alternativesDeviationOffset[this.id] ?: 0.0,
                     Color.TRANSPARENT,
                     routeLineOptions
@@ -1277,18 +1316,25 @@ class MapboxRouteLineApi(
                         .routeLineColorResources
                         .alternativeRouteUnknownCongestionColor,
                     routeLineOptions.displaySoftGradientForTraffic,
-                    routeLineOptions.softGradientTransition
+                    routeLineOptions.softGradientTransition,
+                    segments
                 )
             }?.generateExpression()
         }
 
         val alternateRoute2TrafficExpressionDef = jobControl.scope.async {
             if (partitionedRoutes.second.size > 1) {
+                val segments: List<RouteLineExpressionData> =
+                    MapboxRouteLineUtils.calculateRouteLineSegments(
+                        partitionedRoutes.second[1].route.directionsRoute,
+                        trafficBackfillRoadClasses,
+                        isPrimaryRoute = false,
+                        routeLineOptions.resourceProvider.routeLineColorResources,
+                        trafficCongestionProvider
+                    )
+
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
                     partitionedRoutes.second[1].route.directionsRoute,
-                    routeLineOptions.resourceProvider.routeLineColorResources,
-                    trafficBackfillRoadClasses,
-                    false,
                     alternativesDeviationOffset[partitionedRoutes.second[1].route.id] ?: 0.0,
                     Color.TRANSPARENT,
                     routeLineOptions
@@ -1296,7 +1342,8 @@ class MapboxRouteLineApi(
                         .routeLineColorResources
                         .alternativeRouteUnknownCongestionColor,
                     routeLineOptions.displaySoftGradientForTraffic,
-                    routeLineOptions.softGradientTransition
+                    routeLineOptions.softGradientTransition,
+                    segments
                 ).generateExpression()
             } else {
                 null
@@ -1314,7 +1361,10 @@ class MapboxRouteLineApi(
                         extractedRouteData,
                         vanishingPointOffset = 0.0,
                         activeLegIndex = 0,
-                        routeLineOptions.resourceProvider.routeLineColorResources
+                        routeLineOptions
+                            .resourceProvider
+                            .routeLineColorResources
+                            .restrictedRoadColor
                     )
                 } else {
                     MapboxRouteLineUtils.getDisabledRestrictedLineExpressionProducer(
@@ -1356,11 +1406,18 @@ class MapboxRouteLineApi(
             jobControl.scope.launch(Dispatchers.Main) {
                 val segmentsDef = jobControl.scope.async {
                     partitionedRoutes.first.firstOrNull()?.route?.run {
+                        trafficCongestionProvider.updateTrafficFunction(
+                            MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                                this.directionsRoute,
+                                routeLineOptions.resourceProvider.routeLineColorResources,
+                            )
+                        )
                         MapboxRouteLineUtils.calculateRouteLineSegments(
                             this.directionsRoute,
                             trafficBackfillRoadClasses,
                             isPrimaryRoute = true,
-                            routeLineOptions.resourceProvider.routeLineColorResources
+                            routeLineOptions.resourceProvider.routeLineColorResources,
+                            trafficCongestionProvider
                         )
                     } ?: listOf()
                 }
@@ -1383,142 +1440,89 @@ class MapboxRouteLineApi(
                 RouteLineExpressionProvider { exp }
             }
 
-        val primaryRouteBaseExpressionProducer =
-            RouteLineExpressionProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    vanishingPointOffset,
-                    routeLineOptions.resourceProvider.routeLineColorResources
-                        .routeLineTraveledColor,
-                    routeLineOptions.resourceProvider.routeLineColorResources.routeDefaultColor
-                )
-            }
+        val primaryRouteBaseExpressionProducer = getRouteLineExpressionProvider(
+            vanishingPointOffset,
+            routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor,
+            routeLineOptions.resourceProvider.routeLineColorResources.routeDefaultColor
+        )
 
-        val primaryRouteCasingExpressionProducer =
-            RouteLineExpressionProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    vanishingPointOffset,
-                    routeLineOptions
-                        .resourceProvider
-                        .routeLineColorResources
-                        .routeLineTraveledCasingColor,
-                    routeLineOptions.resourceProvider.routeLineColorResources.routeCasingColor
-                )
-            }
+        val primaryRouteCasingExpressionProducer = getRouteLineExpressionProvider(
+            vanishingPointOffset,
+            routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledCasingColor,
+            routeLineOptions.resourceProvider.routeLineColorResources.routeCasingColor
+        )
 
-        val primaryRouteTrailExpressionProducer =
-            RouteLineExpressionProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    vanishingPointOffset,
-                    routeLineOptions.resourceProvider.routeLineColorResources
-                        .routeLineTraveledColor,
-                    routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor
-                )
-            }
+        val primaryRouteTrailExpressionProducer = getRouteLineExpressionProvider(
+            vanishingPointOffset,
+            routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor,
+            routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor
+        )
 
-        val primaryRouteTrailCasingExpressionProducer =
-            RouteLineExpressionProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    vanishingPointOffset,
-                    routeLineOptions
-                        .resourceProvider
-                        .routeLineColorResources
-                        .routeLineTraveledCasingColor,
-                    routeLineOptions
-                        .resourceProvider
-                        .routeLineColorResources
-                        .routeLineTraveledCasingColor
-                )
-            }
+        val primaryRouteTrailCasingExpressionProducer = getRouteLineExpressionProvider(
+            vanishingPointOffset,
+            routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledCasingColor,
+            routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledCasingColor
+        )
 
-        val alternateRoute1BaseExpressionProducer =
-            RouteLineExpressionProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    alternative1PercentageTraveled,
-                    Color.TRANSPARENT,
-                    alternateRoute1LineColors.first
-                )
-            }
+        val alternateRoute1BaseExpressionProducer = getRouteLineExpressionProvider(
+            alternative1PercentageTraveled,
+            Color.TRANSPARENT,
+            alternateRoute1LineColors.first
+        )
 
-        val alternateRoute1CasingExpressionProducer =
-            RouteLineExpressionProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    alternative1PercentageTraveled,
-                    Color.TRANSPARENT,
-                    alternateRoute1LineColors.second
-                )
-            }
+        val alternateRoute1CasingExpressionProducer = getRouteLineExpressionProvider(
+            alternative1PercentageTraveled,
+            Color.TRANSPARENT,
+            alternateRoute1LineColors.second
+        )
 
-        val alternateRoute1TrailExpressionProducer =
-            RouteLineExpressionProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    alternative1PercentageTraveled,
-                    Color.TRANSPARENT,
-                    Color.TRANSPARENT
-                )
-            }
+        val alternateRoute1TrailExpressionProducer = getRouteLineExpressionProvider(
+            alternative1PercentageTraveled,
+            Color.TRANSPARENT,
+            Color.TRANSPARENT
+        )
 
-        val alternateRoute1TrailCasingExpressionProducer =
-            RouteLineExpressionProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    alternative1PercentageTraveled,
-                    Color.TRANSPARENT,
-                    Color.TRANSPARENT
-                )
-            }
+        val alternateRoute1TrailCasingExpressionProducer = getRouteLineExpressionProvider(
+            alternative1PercentageTraveled,
+            Color.TRANSPARENT,
+            Color.TRANSPARENT
+        )
 
-        val alternateRoute1RestrictedSectionsExpressionProducer =
-            RouteLineExpressionProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    alternative1PercentageTraveled,
-                    Color.TRANSPARENT,
-                    Color.TRANSPARENT
-                )
-            }
+        val alternateRoute1RestrictedSectionsExpressionProducer = getRouteLineExpressionProvider(
+            alternative1PercentageTraveled,
+            Color.TRANSPARENT,
+            Color.TRANSPARENT
+        )
 
-        val alternateRoute2BaseExpressionProducer =
-            RouteLineExpressionProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    alternative2PercentageTraveled,
-                    Color.TRANSPARENT,
-                    alternateRoute2LineColors.first
-                )
-            }
+        val alternateRoute2BaseExpressionProducer = getRouteLineExpressionProvider(
+            alternative2PercentageTraveled,
+            Color.TRANSPARENT,
+            alternateRoute2LineColors.first
+        )
 
-        val alternateRoute2CasingExpressionProducer =
-            RouteLineExpressionProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    alternative2PercentageTraveled,
-                    Color.TRANSPARENT,
-                    alternateRoute2LineColors.second
-                )
-            }
+        val alternateRoute2CasingExpressionProducer = getRouteLineExpressionProvider(
+            alternative2PercentageTraveled,
+            Color.TRANSPARENT,
+            alternateRoute2LineColors.second
+        )
 
-        val alternateRoute2TrailExpressionProducer =
-            RouteLineExpressionProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    alternative2PercentageTraveled,
-                    Color.TRANSPARENT,
-                    Color.TRANSPARENT
-                )
-            }
+        val alternateRoute2TrailExpressionProducer = getRouteLineExpressionProvider(
+            alternative2PercentageTraveled,
+            Color.TRANSPARENT,
+            Color.TRANSPARENT
+        )
 
-        val alternateRoute2TrailCasingExpressionProducer =
-            RouteLineExpressionProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    alternative2PercentageTraveled,
-                    Color.TRANSPARENT,
-                    Color.TRANSPARENT
-                )
-            }
+        val alternateRoute2TrailCasingExpressionProducer = getRouteLineExpressionProvider(
+            alternative2PercentageTraveled,
+            Color.TRANSPARENT,
+            Color.TRANSPARENT
+        )
 
-        val alternateRoute2RestrictedSectionsExpressionProducer =
-            RouteLineExpressionProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    alternative2PercentageTraveled,
-                    Color.TRANSPARENT,
-                    Color.TRANSPARENT
-                )
-            }
+        val alternateRoute2RestrictedSectionsExpressionProducer = getRouteLineExpressionProvider(
+            alternative2PercentageTraveled,
+            Color.TRANSPARENT,
+            Color.TRANSPARENT
+        )
 
         val primaryRouteRestrictedSectionsExpressionProducer =
             ifNonNull(primaryRouteRestrictedSectionsExpressionDef.await()) { exp ->
@@ -1596,4 +1600,18 @@ class MapboxRouteLineApi(
                 jobControl.scope
             )
         }.cacheResult(alternativelyStyleSegmentsNotInLegCache)
+
+    private fun getRouteLineExpressionProvider(
+        offset: Double,
+        traveledColor: Int,
+        lineBaseColor: Int
+    ): RouteLineExpressionProvider {
+        return RouteLineExpressionProvider {
+            MapboxRouteLineUtils.getRouteLineExpression(
+                offset,
+                traveledColor,
+                lineBaseColor
+            )
+        }
+    }
 }

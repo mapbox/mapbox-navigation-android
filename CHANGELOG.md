@@ -16,6 +16,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Introduced `ViewStyleCutomization.compassButtonParams` property to configure compass. [#6395](https://github.com/mapbox/mapbox-navigation-android/pull/6395)
 - Introduced `MapboxExtendableButtonParams.enabled` property to enable/disable a button. [#6395](https://github.com/mapbox/mapbox-navigation-android/pull/6395)
 - Renamed `MapboxAudioGuidance.getInstance()` to `getRegisteredInstance`. Rename `unMute` to `unmute` for audio guidance classes. [#6445](https://github.com/mapbox/mapbox-navigation-android/pull/6445)
+- The color resources used by the MapboxRouteLineApi class have been made mutable and can be updated. [#6428](https://github.com/mapbox/mapbox-navigation-android/pull/6428)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.4 - 30 September, 2022
 ### Changelog
