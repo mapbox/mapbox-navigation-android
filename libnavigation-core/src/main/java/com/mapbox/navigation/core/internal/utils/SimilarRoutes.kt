@@ -5,6 +5,20 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.turf.TurfMeasurement
 
+fun calculateDescriptionSimilarity(a: NavigationRoute, b: NavigationRoute): Double {
+    val firstSummary = parseSummaries(a)
+    val secondSummary = parseSummaries(b)
+    return calculateSimilarityOfSets(firstSummary, secondSummary) { it.size.toDouble() }
+}
+
+private fun parseSummaries(route: NavigationRoute) =
+    route.directionsRoute.legs()
+        .orEmpty()
+        .mapNotNull { it.summary() }
+        .map { it.split(", ") }
+        .flatten()
+        .toSet()
+
 fun calculateDescriptionLevensteinSimilarity(a: NavigationRoute, b: NavigationRoute): Double {
     if (a.id == b.id) return 1.0
     val (shorter, longer) = if (a.directionsRoute.distance() > b.directionsRoute.distance()) {
@@ -52,10 +66,18 @@ fun calculateGeometrySimilarity(a: NavigationRoute, b: NavigationRoute): Double 
 
     val shorterRouteSegments = toSegments(shorter)
     val longerRouteSegments = toSegments(longer)
-    val diff = shorterRouteSegments.toMutableSet().apply {
-        removeAll(longerRouteSegments)
+    return calculateSimilarityOfSets(shorterRouteSegments, longerRouteSegments) { it.sumOf { it.length } }
+}
+
+private fun <T> calculateSimilarityOfSets(
+    a: Set<T>,
+    b: Set<T>,
+    aggregator: (Set<T>)->Double
+): Double {
+    val diff = a.toMutableSet().apply {
+        removeAll(b)
     }
-    return (1.0 - (diff.sumOf { it.length } / shorterRouteSegments.sumOf { it.length }))
+    return (1.0 - (aggregator(diff) / aggregator(a)))
 }
 
 private fun toSegments(a: NavigationRoute): MutableSet<Segment> {
