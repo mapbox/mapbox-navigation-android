@@ -1569,10 +1569,18 @@ internal object MapboxRouteLineUtils {
     internal fun getAlternativeRouteDeviationOffsets(
         metadata: AlternativeRouteMetadata
     ): Double {
-        return distinctGranularDistancesProvider(metadata.navigationRoute)?.let {
+        return distinctGranularDistancesProvider(metadata.navigationRoute)?.let { distances ->
             val index = metadata.forkIntersectionOfAlternativeRoute.geometryIndexInRoute
-            val distanceRemaining = it.distancesArray[index].distanceRemaining
-            1.0 - distanceRemaining / it.distance
+            val distanceRemaining = distances.distancesArray.getOrElse(index) {
+                logE(
+                    "Remaining distance at index '$it' requested but there are " +
+                        "${distances.distancesArray.size} elements in the distances array. " +
+                        "The alternative with ID '${metadata.navigationRoute.id}' will be hidden.",
+                    LOG_CATEGORY
+                )
+                distances.distancesArray.last()
+            }.distanceRemaining
+            1.0 - distanceRemaining / distances.distance
         } ?: 0.0
     }
 

@@ -2,29 +2,42 @@ package com.mapbox.navigation.instrumentation_tests.ui.routeline
 
 import android.location.Location
 import android.os.CountDownTimer
+import androidx.annotation.RawRes
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
+import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
+import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.routealternatives.AlternativeRouteIntersection
+import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.BasicNavigationViewActivity
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routesUpdates
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.ui.BaseTest
+import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRoutes
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
@@ -372,6 +385,56 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
         countDownLatch.await()
     }
 
+    /**
+     * This test ensures that we're not crashing when parsing alternative routes metadata
+     * in a specific case (caught by crashlytics) that involved
+     * Nav Native reporting the [AlternativeRouteIntersection.geometryIndexInRoute] of
+     * [AlternativeRouteMetadata.forkIntersectionOfAlternativeRoute] to be out of bounds
+     * for the shape points collection of that particular route.
+     */
+    @Test
+    fun regression_test_NAVAND_692() = sdkTest {
+        val primaryRoute = createRoute(
+            responseJson = R.raw.route_response_japan_1,
+            requestUrlJson = R.raw.route_response_japan_1_url,
+        ).first()
+        val alternativeRoute = createRoute(
+            responseJson = R.raw.route_response_japan_2,
+            requestUrlJson = R.raw.route_response_japan_2_url,
+        ).first()
+        val mapboxNavigation = MapboxNavigation(
+            NavigationOptions.Builder(activity.applicationContext)
+                .accessToken(getMapboxAccessTokenFromResources(activity))
+                .build()
+        )
+
+        mapboxNavigation.setNavigationRoutes(
+            listOf(
+                primaryRoute,
+                alternativeRoute
+            )
+        )
+        val routesUpdate = mapboxNavigation.routesUpdates()
+            .take(1)
+            .map { it.navigationRoutes }
+            .toList().first()
+
+        val options = MapboxRouteLineOptions.Builder(activity)
+            .build()
+        val routeLineApi = MapboxRouteLineApi(options)
+        val result = routeLineApi.setNavigationRoutes(
+            newRoutes = routesUpdate,
+            alternativeRoutesMetadata = mapboxNavigation.getAlternativeMetadataFor(routesUpdate)
+        )
+
+        // we're expecting to hide the invalid route, hence the maximum offset
+        assertEquals(
+            1.0,
+            result.value!!.alternativeRouteLinesData[0].dynamicData.trimOffset!!.offset,
+            0.0000000001
+        )
+    }
+
     private fun getRoute(routeResourceId: Int): NavigationRoute {
         val routeAsString = readRawFileText(activity, routeResourceId)
         return DirectionsRoute.fromJson(routeAsString).toNavigationRoute(
@@ -381,4 +444,21 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
 
     private fun getRouteOriginPoint(route: DirectionsRoute): Point =
         route.completeGeometryToPoints().first()
+
+    private fun createRoute(
+        @RawRes responseJson: Int,
+        @RawRes requestUrlJson: Int
+    ): List<NavigationRoute> = NavigationRoute.create(
+        directionsResponseJson = readRawFileText(
+            activity,
+            responseJson
+        ),
+        routeRequestUrl = RouteOptions.fromJson(
+            readRawFileText(
+                activity,
+                requestUrlJson
+            )
+        ).toUrl("xyz").toString(),
+        routerOrigin = RouterOrigin.Offboard
+    )
 }
