@@ -19,15 +19,14 @@ object CarManeuverMapper {
 
     fun from(
         routeProgress: RouteProgress,
-        maneuverApi: MapboxManeuverApi,
-        distanceFormatter: CarDistanceFormatter,
+        maneuverApi: MapboxManeuverApi
     ): Trip {
         val etaAsCalendar = Calendar.getInstance().also {
             it.add(Calendar.SECOND, routeProgress.durationRemaining.toInt())
         }
 
         val eta = TravelEstimate.Builder(
-            distanceFormatter.carDistance(routeProgress.distanceRemaining.toDouble()),
+            CarDistanceFormatter.carDistance(routeProgress.distanceRemaining.toDouble()),
             DateTimeWithZone.create(etaAsCalendar.timeInMillis, TimeZone.getDefault())
         ).build()
         val maneuvers = maneuverApi.getManeuvers(routeProgress)

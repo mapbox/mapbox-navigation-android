@@ -3,7 +3,6 @@ package com.mapbox.androidauto
 import androidx.car.app.CarContext
 import androidx.car.app.navigation.NavigationManager
 import androidx.car.app.navigation.NavigationManagerCallback
-import com.mapbox.androidauto.car.navigation.CarDistanceFormatter
 import com.mapbox.androidauto.car.navigation.maneuver.CarManeuverMapper
 import com.mapbox.androidauto.car.telemetry.MapboxCarTelemetry
 import com.mapbox.androidauto.internal.logAndroidAuto
@@ -32,14 +31,12 @@ class MapboxCarNavigationManager(
     }
 
     private var maneuverApi: MapboxManeuverApi? = null
-    private var carDistanceFormatter: CarDistanceFormatter? = null
     private var mapboxNavigation: MapboxNavigation? = null
     private val carTelemetry = MapboxCarTelemetry()
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
-        val distanceFormatter = carDistanceFormatter ?: return@RouteProgressObserver
         val maneuverApi = maneuverApi ?: return@RouteProgressObserver
-        val trip = CarManeuverMapper.from(routeProgress, maneuverApi, distanceFormatter)
+        val trip = CarManeuverMapper.from(routeProgress, maneuverApi)
         navigationManager.updateTrip(trip)
     }
 
@@ -79,8 +76,6 @@ class MapboxCarNavigationManager(
             mapboxNavigation.navigationOptions.distanceFormatterOptions
         )
         maneuverApi = MapboxManeuverApi(distanceFormatter)
-        val unitType = mapboxNavigation.navigationOptions.distanceFormatterOptions.unitType
-        carDistanceFormatter = CarDistanceFormatter(unitType)
         navigationManager.setNavigationManagerCallback(navigationManagerCallback)
         mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)

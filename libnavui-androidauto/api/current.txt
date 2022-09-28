@@ -55,7 +55,6 @@ package com.mapbox.androidauto.car {
     method public androidx.car.app.CarContext getCarContext();
     method public com.mapbox.androidauto.car.search.CarPlaceSearchOptions getCarPlaceSearchOptions();
     method public com.mapbox.androidauto.car.settings.CarSettingsStorage getCarSettingsStorage();
-    method @Deprecated public com.mapbox.navigation.base.formatter.DistanceFormatter getDistanceFormatter();
     method public com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider getFeedbackPollProvider();
     method @Deprecated public com.mapbox.navigation.utils.internal.JobControl getJobControl();
     method public com.mapbox.maps.extension.androidauto.MapboxCarMap getMapboxCarMap();
@@ -65,7 +64,6 @@ package com.mapbox.androidauto.car {
     property public final androidx.car.app.CarContext carContext;
     property public final com.mapbox.androidauto.car.search.CarPlaceSearchOptions carPlaceSearchOptions;
     property public final com.mapbox.androidauto.car.settings.CarSettingsStorage carSettingsStorage;
-    property @Deprecated public final com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter;
     property public final com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider feedbackPollProvider;
     property public final com.mapbox.maps.extension.androidauto.MapboxCarMap mapboxCarMap;
     property @Deprecated public final com.mapbox.navigation.core.MapboxNavigation mapboxNavigation;
@@ -328,8 +326,9 @@ package com.mapbox.androidauto.car.navigation {
   }
 
   public final class CarDistanceFormatter {
-    ctor public CarDistanceFormatter(com.mapbox.navigation.base.formatter.UnitType unitType);
-    method public androidx.car.app.model.Distance carDistance(double distanceMeters, @com.mapbox.navigation.base.formatter.Rounding.Increment int roundingIncrement = 50);
+    method public static androidx.car.app.model.Distance carDistance(double distanceMeters);
+    method public static android.text.SpannableString formatDistance(double distance);
+    field public static final com.mapbox.androidauto.car.navigation.CarDistanceFormatter INSTANCE;
   }
 
   public final class CarLocationsOverviewCamera implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
@@ -355,7 +354,7 @@ package com.mapbox.androidauto.car.navigation {
   }
 
   public final class CarNavigationEtaMapper {
-    ctor public CarNavigationEtaMapper(com.mapbox.androidauto.car.navigation.CarDistanceFormatter carDistanceFormatter, com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi tripProgressApi);
+    ctor public CarNavigationEtaMapper(com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi tripProgressApi);
     method public androidx.car.app.navigation.model.TravelEstimate getDestinationTravelEstimate(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
   }
 
@@ -367,7 +366,7 @@ package com.mapbox.androidauto.car.navigation {
   }
 
   public final class CarNavigationInfoMapper {
-    ctor public CarNavigationInfoMapper(android.content.Context context, com.mapbox.androidauto.car.navigation.maneuver.CarManeuverInstructionRenderer carManeuverInstructionRenderer, com.mapbox.androidauto.car.navigation.maneuver.CarManeuverIconRenderer carManeuverIconRenderer, com.mapbox.androidauto.car.navigation.lanes.CarLanesImageRenderer carLanesImageGenerator, com.mapbox.androidauto.car.navigation.CarDistanceFormatter carDistanceFormatter);
+    ctor public CarNavigationInfoMapper(android.content.Context context, com.mapbox.androidauto.car.navigation.maneuver.CarManeuverInstructionRenderer carManeuverInstructionRenderer, com.mapbox.androidauto.car.navigation.maneuver.CarManeuverIconRenderer carManeuverIconRenderer, com.mapbox.androidauto.car.navigation.lanes.CarLanesImageRenderer carLanesImageGenerator);
     method public androidx.car.app.navigation.model.NavigationTemplate.NavigationInfo? mapNavigationInfo(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> expectedManeuvers, java.util.List<? extends com.mapbox.navigation.ui.shield.model.RouteShield> routeShields, com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
   }
 
@@ -472,7 +471,7 @@ package com.mapbox.androidauto.car.navigation.maneuver {
   }
 
   public final class CarManeuverMapper {
-    method public androidx.car.app.navigation.model.Trip from(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi maneuverApi, com.mapbox.androidauto.car.navigation.CarDistanceFormatter distanceFormatter);
+    method public androidx.car.app.navigation.model.Trip from(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi maneuverApi);
     method public androidx.car.app.navigation.model.Maneuver.Builder from(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> expected);
     method public androidx.car.app.navigation.model.Maneuver.Builder from(String? maneuverType, String? maneuverModifier, Double? degrees = null);
     field public static final com.mapbox.androidauto.car.navigation.maneuver.CarManeuverMapper INSTANCE;
@@ -642,18 +641,7 @@ package com.mapbox.androidauto.car.preview {
 
   @com.mapbox.maps.MapboxExperimental public final class CarRoutePreviewScreen extends androidx.car.app.Screen {
     ctor @UiThread public CarRoutePreviewScreen(com.mapbox.androidauto.car.preview.RoutePreviewCarContext routePreviewCarContext, com.mapbox.androidauto.car.search.PlaceRecord placeRecord, java.util.List<com.mapbox.navigation.base.route.NavigationRoute> navigationRoutes, com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil placesLayerUtil = com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil());
-    method public com.mapbox.androidauto.car.location.CarLocationRenderer getCarLocationRenderer();
-    method public com.mapbox.androidauto.car.navigation.CarNavigationCamera getCarNavigationCamera();
-    method public com.mapbox.androidauto.car.preview.CarRouteLine getCarRouteLine();
-    method public com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer getCarSpeedLimitRenderer();
-    method public int getSelectedIndex();
     method public androidx.car.app.model.Template onGetTemplate();
-    method public void setSelectedIndex(int);
-    property public final com.mapbox.androidauto.car.location.CarLocationRenderer carLocationRenderer;
-    property public final com.mapbox.androidauto.car.navigation.CarNavigationCamera carNavigationCamera;
-    property public final com.mapbox.androidauto.car.preview.CarRouteLine carRouteLine;
-    property public final com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer carSpeedLimitRenderer;
-    property public final int selectedIndex;
   }
 
   public final class CarRouteRequest implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
@@ -682,12 +670,10 @@ package com.mapbox.androidauto.car.preview {
     method public com.mapbox.androidauto.car.MainCarContext component1();
     method public com.mapbox.androidauto.car.preview.RoutePreviewCarContext copy(com.mapbox.androidauto.car.MainCarContext mainCarContext);
     method public androidx.car.app.CarContext getCarContext();
-    method public com.mapbox.navigation.base.formatter.DistanceFormatter getDistanceFormatter();
     method public com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider getFeedbackPollProvider();
     method public com.mapbox.androidauto.car.MainCarContext getMainCarContext();
     method public com.mapbox.maps.extension.androidauto.MapboxCarMap getMapboxCarMap();
     property public final androidx.car.app.CarContext carContext;
-    property public final com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter;
     property public final com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider feedbackPollProvider;
     property public final com.mapbox.androidauto.car.MainCarContext mainCarContext;
     property public final com.mapbox.maps.extension.androidauto.MapboxCarMap mapboxCarMap;
@@ -771,13 +757,11 @@ package com.mapbox.androidauto.car.search {
     ctor public SearchCarContext(com.mapbox.androidauto.car.MainCarContext mainCarContext);
     method public androidx.car.app.CarContext getCarContext();
     method public com.mapbox.androidauto.car.preview.CarRouteRequest getCarRouteRequest();
-    method public com.mapbox.navigation.base.formatter.DistanceFormatter getDistanceFormatter();
     method public com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider getFeedbackPollProvider();
     method public com.mapbox.androidauto.car.MainCarContext getMainCarContext();
     method public com.mapbox.maps.extension.androidauto.MapboxCarMap getMapboxCarMap();
     property public final androidx.car.app.CarContext carContext;
     property public final com.mapbox.androidauto.car.preview.CarRouteRequest carRouteRequest;
-    property public final com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter;
     property public final com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider feedbackPollProvider;
     property public final com.mapbox.androidauto.car.MainCarContext mainCarContext;
     property public final com.mapbox.maps.extension.androidauto.MapboxCarMap mapboxCarMap;

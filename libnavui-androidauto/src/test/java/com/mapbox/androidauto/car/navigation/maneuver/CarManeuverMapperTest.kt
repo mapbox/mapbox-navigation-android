@@ -11,8 +11,12 @@ import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import java.util.Calendar
 
@@ -36,6 +40,16 @@ class CarManeuverMapperTest {
         every {
             getManeuvers(mockRouteProgress)
         } returns ExpectedFactory.createValue(listOf(mockManeuver))
+    }
+
+    @Before
+    fun setup() {
+        mockkStatic(CarDistanceFormatter::class)
+    }
+
+    @After
+    fun teardown() {
+        unmockkAll()
     }
 
     @Test
@@ -410,12 +424,10 @@ class CarManeuverMapperTest {
             it.timeInMillis = it.timeInMillis + mockRouteProgress.durationRemaining.toLong()
         }
         val remainingDistance = mockk<Distance>()
-        val distanceFormatter = mockk<CarDistanceFormatter> {
-            every {
-                carDistance(range(1609.34 - 0.1, 1609.34 + 0.1))
-            } returns remainingDistance
-        }
-        val trip = CarManeuverMapper.from(mockRouteProgress, mockManeuverApi, distanceFormatter)
+        every {
+            CarDistanceFormatter.carDistance(range(1609.34 - 0.1, 1609.34 + 0.1))
+        } returns remainingDistance
+        val trip = CarManeuverMapper.from(mockRouteProgress, mockManeuverApi)
 
         val timeDelta = expectedEta.timeInMillis - trip.stepTravelEstimates
             .first()

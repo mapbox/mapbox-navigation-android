@@ -15,6 +15,7 @@ import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSearchOptions
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
+import com.mapbox.androidauto.car.navigation.CarDistanceFormatter
 import com.mapbox.androidauto.car.preview.CarRoutePreviewScreen
 import com.mapbox.androidauto.car.preview.CarRouteRequestCallback
 import com.mapbox.androidauto.car.preview.RoutePreviewCarContext
@@ -128,7 +129,7 @@ class PlaceSearchScreen @UiThread constructor(
 
     private fun formatDistance(searchSuggestion: SearchSuggestion): CharSequence {
         val distanceMeters = searchSuggestion.distanceMeters ?: return ""
-        return searchCarContext.distanceFormatter.formatDistance(distanceMeters)
+        return CarDistanceFormatter.formatDistance(distanceMeters)
     }
 
     private fun onClickSearch(searchSuggestion: SearchSuggestion) {

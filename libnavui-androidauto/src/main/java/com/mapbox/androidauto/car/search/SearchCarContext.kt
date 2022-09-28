@@ -14,7 +14,6 @@ class SearchCarContext(
 ) {
     /** MainCarContext **/
     val carContext = mainCarContext.carContext
-    val distanceFormatter = mainCarContext.distanceFormatter
     val feedbackPollProvider = mainCarContext.feedbackPollProvider
 
     /** SearchCarContext **/

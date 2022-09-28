@@ -6,6 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 - Removed `MapboxNavigation` from `PlaceListOnMapScreen`. [#6371](https://github.com/mapbox/mapbox-navigation-android/pull/6371)
+- Migrate `CarDistanceFormatter` to an object that works with `MapboxNavigationApp`. [#6401](https://github.com/mapbox/mapbox-navigation-android/pull/6401)
 
 ## androidauto-v0.12.0 - Sep 26, 2022
 ### Changelog

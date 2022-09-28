@@ -31,8 +31,7 @@ class CarNavigationInfoMapper(
     private val context: Context,
     private val carManeuverInstructionRenderer: CarManeuverInstructionRenderer,
     private val carManeuverIconRenderer: CarManeuverIconRenderer,
-    private val carLanesImageGenerator: CarLanesImageRenderer,
-    private val carDistanceFormatter: CarDistanceFormatter
+    private val carLanesImageGenerator: CarLanesImageRenderer
 ) {
 
     private val primaryExitOptions = ManeuverPrimaryOptions.Builder().build().exitOptions
@@ -75,7 +74,7 @@ class CarNavigationInfoMapper(
                 .useMapboxLaneGuidance(carLanesImageGenerator, maneuver.laneGuidance)
                 .build()
 
-            val stepDistance = carDistanceFormatter.carDistance(distanceRemaining.toDouble())
+            val stepDistance = CarDistanceFormatter.carDistance(distanceRemaining.toDouble())
             RoutingInfo.Builder()
                 .setCurrentStep(step, stepDistance)
                 .withOptionalNextStep(maneuver, routeShields)

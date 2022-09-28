@@ -3,6 +3,7 @@ package com.mapbox.androidauto.internal.car.search
 import android.text.SpannableString
 import androidx.car.app.model.Row
 import com.mapbox.androidauto.R
+import com.mapbox.androidauto.car.navigation.CarDistanceFormatter
 import com.mapbox.androidauto.car.search.PlaceSearchScreen
 import com.mapbox.androidauto.car.search.SearchCarContext
 import com.mapbox.androidauto.testing.MapboxRobolectricTestRunner
@@ -10,10 +11,14 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -30,10 +35,19 @@ class PlaceSearchScreenTest : MapboxRobolectricTestRunner() {
         }
         every { carPlaceSearch } returns mockk(relaxed = true)
         every { carRouteRequest } returns mockk()
-        every { distanceFormatter } returns mockk()
     }
 
     private val placeSearchScreen = PlaceSearchScreen(searchCarContext)
+
+    @Before
+    fun setup() {
+        mockkStatic(CarDistanceFormatter::class)
+    }
+
+    @After
+    fun teardown() {
+        unmockkAll()
+    }
 
     @Test
     fun `initial results are empty`() {
@@ -54,7 +68,7 @@ class PlaceSearchScreenTest : MapboxRobolectricTestRunner() {
         )
 
         every {
-            searchCarContext.distanceFormatter.formatDistance(559.39)
+            CarDistanceFormatter.formatDistance(559.39)
         } returns SpannableString.valueOf("0.3 mi")
 
         placeSearchScreen.doSearch("starbucks")

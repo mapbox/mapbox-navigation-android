@@ -8,6 +8,5 @@ data class RoutePreviewCarContext internal constructor(
     /** MainCarContext **/
     val carContext = mainCarContext.carContext
     val mapboxCarMap = mainCarContext.mapboxCarMap
-    val distanceFormatter = mainCarContext.distanceFormatter
     val feedbackPollProvider = mainCarContext.feedbackPollProvider
 }

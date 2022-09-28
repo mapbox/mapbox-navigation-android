@@ -1,14 +1,18 @@
 package com.mapbox.navigation.qa_test_app.testing;
 
 import android.app.Application;
+import android.text.SpannableString;
 
 import androidx.annotation.NonNull;
 import androidx.car.app.CarContext;
+import androidx.car.app.model.Distance;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.mapbox.androidauto.MapboxCarNavigationManager;
+import com.mapbox.androidauto.car.navigation.CarDistanceFormatter;
 import com.mapbox.androidauto.internal.car.search.CarPlaceSearch;
 import com.mapbox.maps.extension.androidauto.MapboxCarMap;
+import com.mapbox.navigation.base.formatter.Rounding;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp;
@@ -84,5 +88,10 @@ class CarJavaInterfaceChecker {
     // Register onto MapboxNavigationAPp
     MapboxNavigationApp.registerObserver(sut);
     MapboxNavigationApp.unregisterObserver(sut);
+  }
+
+  void CarDistanceFormatter() {
+    SpannableString spannableString = CarDistanceFormatter.formatDistance(1200.0);
+    Distance distance = CarDistanceFormatter.carDistance(1200.0);
   }
 }

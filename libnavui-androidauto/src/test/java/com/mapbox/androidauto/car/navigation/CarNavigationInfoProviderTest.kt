@@ -40,7 +40,7 @@ class CarNavigationInfoProviderTest {
     private val carNavigationInfoMapper: CarNavigationInfoMapper = mockk(relaxed = true)
     private val maneuverApi: MapboxManeuverApi = mockk(relaxed = true)
     private val serviceProvider: CarNavigationInfoServices = mockk {
-        every { carNavigationEtaMapper(any(), any()) } returns carNavigationEtaMapper
+        every { carNavigationEtaMapper(any()) } returns carNavigationEtaMapper
         every { carNavigationInfoMapper(any(), any()) } returns carNavigationInfoMapper
         every { maneuverApi(any()) } returns maneuverApi
         every { mapUserStyleObserver() } returns mockk(relaxed = true)

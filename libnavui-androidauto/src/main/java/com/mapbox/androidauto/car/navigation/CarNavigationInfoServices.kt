@@ -18,11 +18,9 @@ internal class CarNavigationInfoServices {
 
     fun carNavigationEtaMapper(
         carContext: CarContext,
-        mapboxNavigation: MapboxNavigation,
     ): CarNavigationEtaMapper {
-        val carDistanceFormatter = carDistanceFormatter(mapboxNavigation)
         val mapboxTripProgressApi = mapboxTripProgressApi(carContext)
-        return CarNavigationEtaMapper(carDistanceFormatter, mapboxTripProgressApi)
+        return CarNavigationEtaMapper(mapboxTripProgressApi)
     }
 
     fun carNavigationInfoMapper(
@@ -34,7 +32,6 @@ internal class CarNavigationInfoServices {
             CarManeuverInstructionRenderer(),
             CarManeuverIconRenderer(CarManeuverIconOptions.Builder(carContext).build()),
             CarLanesImageRenderer(carContext),
-            carDistanceFormatter(mapboxNavigation)
         )
     }
 
@@ -45,11 +42,6 @@ internal class CarNavigationInfoServices {
     }
 
     fun mapUserStyleObserver() = MapUserStyleObserver()
-
-    private fun carDistanceFormatter(mapboxNavigation: MapboxNavigation): CarDistanceFormatter {
-        val unitType = mapboxNavigation.navigationOptions.distanceFormatterOptions.unitType
-        return CarDistanceFormatter(unitType)
-    }
 
     private fun mapboxTripProgressApi(carContext: CarContext): MapboxTripProgressApi {
         return MapboxTripProgressApi(TripProgressUpdateFormatter.Builder(carContext).build())
