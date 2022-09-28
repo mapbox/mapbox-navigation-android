@@ -4,7 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
-- Added _Experimental_ `RouteRefreshStatesObserver` that can be used to observe route refresh states. To subscribe and unsubscribe on updates corresponding use `MapboxNavigation#registerRouteRefreshStateObserver` and `MapboxNavigation#unregisterRouteRefreshStateObserver`. [#6345](https://github.com/mapbox/mapbox-navigation-android/pull/6345)
+
 #### Bug fixes and improvements
 - Fixed super late hwy exit detection after leaving a tunnel (auto profile only). [#6346](https://github.com/mapbox/mapbox-navigation-android/pull/6346)
 - Fixed the issue with incorrect geometry indices for `RouteLeg#incidents` and `RouteLeg#closures` after refresh. [#6364](https://github.com/mapbox/mapbox-navigation-android/pull/6364)
@@ -12,6 +12,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Improved stop detector for auto profile. [#6373](https://github.com/mapbox/mapbox-navigation-android/pull/6373)
 - Fixed an issue where `NavigationRoute#upcomingRoadObjects` was not refreshed. This issue did not impact the deprecated `RoadObjectsOnRouteObserver`. [#6378](https://github.com/mapbox/mapbox-navigation-android/pull/6378)
 - Improved `MapboxNavigation#startTripSession(withForegroundService = true)` docs to indicate that it should only be called from a foreground state. [#6405](https://github.com/mapbox/mapbox-navigation-android/pull/6405)
+- Mitigated a rare issue that caused a crash in alternative routes fork offset calculation when using `MapboxRouteLineApi#setNavigationRoutes`. [#6404](https://github.com/mapbox/mapbox-navigation-android/pull/6404)
 
 ## Mapbox Navigation SDK 2.8.0-rc.3 - 23 September, 2022
 ### Changelog

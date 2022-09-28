@@ -52,6 +52,7 @@ import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheRouteResult
 import com.mapbox.navigation.ui.utils.internal.extensions.getBitmap
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMisc
 import kotlin.math.ln
@@ -1567,12 +1568,45 @@ internal object MapboxRouteLineUtils {
      * Returns a percentage offset of the fork intersection along the alternative route's geometry.
      */
     internal fun getAlternativeRouteDeviationOffsets(
-        metadata: AlternativeRouteMetadata
+        metadata: AlternativeRouteMetadata,
+        distancesProvider: (NavigationRoute) -> RouteLineGranularDistances? =
+            distinctGranularDistancesProvider
     ): Double {
-        return distinctGranularDistancesProvider(metadata.navigationRoute)?.let {
+        return distancesProvider(metadata.navigationRoute)?.let { distances ->
+            if (distances.distancesArray.isEmpty() || distances.distance <= 0) {
+                logW(
+                    "Remaining distances array size is ${distances.distancesArray.size} " +
+                        "and the full distance is ${distances.distance} - " +
+                        "unable to calculate the deviation point of the alternative with ID " +
+                        "'${metadata.navigationRoute.id}' to hide the portion that overlaps " +
+                        "with the primary route.",
+                    LOG_CATEGORY
+                )
+                return@let 0.0
+            }
             val index = metadata.forkIntersectionOfAlternativeRoute.geometryIndexInRoute
-            val distanceRemaining = it.distancesArray[index].distanceRemaining
-            1.0 - distanceRemaining / it.distance
+            val distanceRemaining = distances.distancesArray.getOrElse(index) {
+                logW(
+                    "Remaining distance at index '$it' requested but there are " +
+                        "${distances.distancesArray.size} elements in the distances array - " +
+                        "unable to calculate the deviation point of the alternative with ID " +
+                        "'${metadata.navigationRoute.id}' to hide the portion that overlaps " +
+                        "with the primary route.",
+                    LOG_CATEGORY
+                )
+                return@let 0.0
+            }.distanceRemaining
+            if (distanceRemaining > distances.distance) {
+                logW(
+                    "distance remaining > full distance - " +
+                        "unable to calculate the deviation point of the alternative with ID " +
+                        "'${metadata.navigationRoute.id}' to hide the portion that overlaps " +
+                        "with the primary route.",
+                    LOG_CATEGORY
+                )
+                return@let 0.0
+            }
+            1.0 - distanceRemaining / distances.distance
         } ?: 0.0
     }
 

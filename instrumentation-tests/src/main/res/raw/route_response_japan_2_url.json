@@ -1,0 +1,18 @@
+{
+  "profile": "driving-traffic",
+  "overview": "full",
+  "roundabout_exits": "true",
+  "bearings": "22.3317,90;",
+  "coordinates": "140.815553184,37.0352551674;140.868842,38.268035",
+  "annotations": "distance,duration,maxspeed,congestion_numeric",
+  "continue_straight": "true",
+  "voice_instructions": "true",
+  "steps": "true",
+  "waypoints": "0;1",
+  "avoid_maneuver_radius": 270,
+  "geometries": "polyline6",
+  "enable_refresh": "true",
+  "layers": "0;",
+  "alternatives": "true",
+  "banner_instructions": "true"
+}
