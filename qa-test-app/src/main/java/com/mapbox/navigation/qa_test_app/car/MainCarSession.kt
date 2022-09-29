@@ -48,7 +48,6 @@ class MainCarSession : Session() {
 
     init {
         logAndroidAuto("MainCarSession constructor")
-        MapboxCarApp.setup()
         val logoSurfaceRenderer = CarLogoSurfaceRenderer()
         val compassSurfaceRenderer = CarCompassSurfaceRenderer()
         MapboxNavigationApp.attach(lifecycleOwner = this)
