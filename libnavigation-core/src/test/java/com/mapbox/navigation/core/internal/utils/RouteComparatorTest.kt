@@ -8,7 +8,7 @@ import org.junit.Test
 
 class RouteComparatorTest {
     @Test
-    fun `from Munich to Nuremberg by a slowest route`() {
+    fun `from Munich to Nuremberg by the slowest route`() {
         val rejectedRoutesTracker = createRejectedRoutesTracker()
         val recordedRoutesUpdates = readRouteObserverResults("com.mapbox.navigation.core.internal.utils.similarroutes.munichnurberg")
         recordedRoutesUpdates.forEachIndexed { index, recordedRoutesUpdateResult ->
