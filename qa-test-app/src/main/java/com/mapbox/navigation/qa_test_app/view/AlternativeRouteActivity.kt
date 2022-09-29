@@ -409,7 +409,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             } else {
                 Log.d(
                     "vadzim-test",
-                    "alternative ${fasterAlternativeMetadata.alternativeId}($alternativeDuration)<(${primaryDuration})"
+                    "alternative ${fasterAlternativeMetadata.alternativeId}($alternativeDuration) slower then (${primaryDuration})"
                 )
             }
         }

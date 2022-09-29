@@ -3,8 +3,6 @@ package com.mapbox.navigation.core.internal.fasterroute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
-import com.mapbox.navigation.core.internal.utils.RecordedRoutesUpdateResult
-import com.mapbox.navigation.core.internal.utils.readRouteObserverResults
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -13,6 +11,7 @@ class RejectedRoutesTrackerTest {
     fun `from Munich to Nuremberg by the slowest route`() {
         val rejectedRoutesTracker = createRejectedRoutesTracker()
         val recordedRoutesUpdates = readRouteObserverResults("com.mapbox.navigation.core.internal.fasterroute.munichnuremberg")
+        val untrackedRoutesIds = mutableListOf<String>()
         recordedRoutesUpdates.forEachIndexed { index, recordedRoutesUpdateResult ->
             val routesUpdate = recordedRoutesUpdateResult.update
             if (routesUpdate.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW) {
@@ -22,15 +21,18 @@ class RejectedRoutesTrackerTest {
             if (routesUpdate.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE) {
                 val alternatives = createAlternativesMap(routesUpdate, recordedRoutesUpdateResult)
                 val result = rejectedRoutesTracker.trackAlternatives(alternatives)
-                if (index == 26) {
-                    assertEquals(listOf("sZQg3spAjVPQn7DmpgNYzVRIiPdPSwwY9P3cMI6tajmNMjpwfUexjg==#1"), result.untracked.map { it.id })
-                } else if (index == 28) {
-                    assertEquals(listOf("E0WrBAlBb9OhP3e1SxePpciACvyTTgtUwbr4VCXgq1I4XMc_kU6ezQ==#1"), result.untracked.map { it.id })
-                } else {
-                    assertEquals(emptyList<NavigationRoute>(), result.untracked)
-                }
+                untrackedRoutesIds.addAll(result.untracked.map { it.id })
             }
         }
+        assertEquals(
+            listOf(
+                "qsbHcSTKmGlcgMc9w4wrj2Uz_IZhbVuuhHqxuU_4e51RXsroy1proA==#1",
+                "ffXOOuMdvPd1V3gfe-UOoOzITorRiWD84zuynFpMyM0VsILlHDOALA==#1",
+                "h-pdR2s9gIcYG4_HHLLKHMvHvXT0DVx18Qk5pBkJZUcds-HDrik5oA==#1",
+                "TBf3zrsyBxcfFDdUZzijAffv7jRt1RK34S_950--1mQ7GfIVOc_mxw==#1"
+            ),
+            untrackedRoutesIds
+        )
     }
 
     private fun createAlternativesMap(
@@ -39,8 +41,8 @@ class RejectedRoutesTrackerTest {
     ): MutableMap<Int, NavigationRoute> {
         val alternatives = mutableMapOf<Int, NavigationRoute>()
         routesUpdate.navigationRoutes.drop(1).forEach {
-            val alternativeId = recordedRoutesUpdateResult.alternativeIdsMap[it.id]!!
-            alternatives[alternativeId] = it
+            val metadata = recordedRoutesUpdateResult.alternativeMetadata[it.id]!!
+            alternatives[metadata.alternativeId] = it
         }
         return alternatives
     }

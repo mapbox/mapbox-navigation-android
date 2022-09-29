@@ -1,8 +1,15 @@
 package com.mapbox.navigation.core.internal.fasterroute
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.TypeAdapter
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonWriter
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -23,18 +30,28 @@ class RecordRouteObserverResults(
             prepareFolders()
         }
         val content = result.navigationRoutes
-            .map {
+            .map { route ->
                 listOf(
-                    it.routeIndex.toString(),
-                    it.routeOptions.toUrl("***").toString(),
-                    it.directionsResponse.toJson(),
-                    navigation().getAlternativeMetadataFor(it)?.alternativeId?.toString().orEmpty()
+                    route.routeIndex.toString(),
+                    route.routeOptions.toUrl("***").toString(),
+                    route.directionsResponse.toJson(),
+                    navigation().getAlternativeMetadataFor(route)?.let { toJson(it) }.orEmpty()
                 )
             }
             .flatten()
             .joinToString(separator = "\n") { it }
-        writeOnDisk("$routesChangedCounter-${result.reason}.txt", content)
+        val alternativesIds = result.navigationRoutes.drop(1)
+            .map { navigation().getAlternativeMetadataFor(it)!!.alternativeId }
+            .joinToString(separator = ",") { it.toString() }
+        writeOnDisk("$routesChangedCounter-${result.reason}-$alternativesIds.txt", content)
         routesChangedCounter++
+    }
+
+    private fun toJson(metadata: AlternativeRouteMetadata): String {
+        val gson = GsonBuilder()
+            .registerTypeAdapter(NavigationRoute::class.java, NavigationRouteTypeAdapter { error("I can only write") })
+            .create()
+        return gson.toJson(metadata)
     }
 
     private fun prepareFolders() {
@@ -56,5 +73,18 @@ class RecordRouteObserverResults(
             val file = File(folder, fileName)
             file.writeText(content)
         }
+    }
+}
+
+class NavigationRouteTypeAdapter(
+    private val routesProvider: (id: String) -> NavigationRoute
+) : TypeAdapter<NavigationRoute>() {
+    override fun write(out: JsonWriter, value: NavigationRoute) {
+        out.value(value.id)
+    }
+
+    override fun read(`in`: JsonReader): NavigationRoute {
+        val routeId = `in`.nextString()
+        return routesProvider(routeId)
     }
 }
