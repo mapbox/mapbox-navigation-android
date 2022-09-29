@@ -1,12 +1,14 @@
-package com.mapbox.navigation.core.internal.utils
+package com.mapbox.navigation.core.internal.fasterroute
 
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.internal.utils.RecordedRoutesUpdateResult
+import com.mapbox.navigation.core.internal.utils.readRouteObserverResults
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class RouteComparatorTest {
+class RejectedRoutesTrackerTest {
     @Test
     fun `from Munich to Nuremberg by the slowest route`() {
         val rejectedRoutesTracker = createRejectedRoutesTracker()

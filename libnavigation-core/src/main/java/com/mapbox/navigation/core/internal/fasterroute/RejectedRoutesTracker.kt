@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.internal.utils
+package com.mapbox.navigation.core.internal.fasterroute
 
 import com.mapbox.navigation.base.route.NavigationRoute
 

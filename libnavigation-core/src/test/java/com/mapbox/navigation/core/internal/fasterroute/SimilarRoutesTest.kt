@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.internal.utils
+package com.mapbox.navigation.core.internal.fasterroute
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions

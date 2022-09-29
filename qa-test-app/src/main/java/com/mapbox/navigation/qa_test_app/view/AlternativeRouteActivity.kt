@@ -42,7 +42,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
-import com.mapbox.navigation.core.internal.utils.RecordRouteObserverResults
+import com.mapbox.navigation.core.internal.fasterroute.RecordRouteObserverResults
 import com.mapbox.navigation.core.internal.utils.calculateDescriptionLevensteinSimilarity
 import com.mapbox.navigation.core.internal.utils.calculateDescriptionSimilarity
 import com.mapbox.navigation.core.internal.utils.calculateGeometrySimilarity
