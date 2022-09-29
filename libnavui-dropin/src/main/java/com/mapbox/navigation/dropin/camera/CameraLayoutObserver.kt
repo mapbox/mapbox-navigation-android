@@ -3,7 +3,6 @@ package com.mapbox.navigation.dropin.camera
 import android.content.res.Configuration
 import android.view.View
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.R
@@ -16,7 +15,7 @@ import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class CameraLayoutObserver(
     private val store: Store,
-    private val mapView: MapView,
+    private val mapView: View,
     private val binding: MapboxNavigationViewLayoutBinding,
 ) : UIComponent() {
 
@@ -30,16 +29,9 @@ internal class CameraLayoutObserver(
         .getDimensionPixelSize(R.dimen.mapbox_camera_overview_padding_landscape_h).toDouble()
 
     private val layoutListener = View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-        val edgeInsets = when (binding.root.resources.configuration.orientation) {
-            Configuration.ORIENTATION_LANDSCAPE -> {
-                getLandscapePadding()
-            }
-            Configuration.ORIENTATION_PORTRAIT -> {
-                getPortraitPadding()
-            }
-            else -> {
-                getPortraitPadding()
-            }
+        val edgeInsets = when (deviceOrientation()) {
+            Configuration.ORIENTATION_LANDSCAPE -> getLandscapePadding()
+            else -> getPortraitPadding()
         }
         store.dispatch(CameraAction.UpdatePadding(edgeInsets))
     }
@@ -61,11 +53,11 @@ internal class CameraLayoutObserver(
             is NavigationState.DestinationPreview,
             is NavigationState.FreeDrive,
             is NavigationState.RoutePreview -> {
-                EdgeInsets(vPadding, hPadding, vPadding.plus(bottom), hPadding)
+                EdgeInsets(vPadding, hPadding, vPadding + bottom, hPadding)
             }
             is NavigationState.ActiveNavigation,
             is NavigationState.Arrival -> {
-                EdgeInsets(vPadding.plus(top), hPadding, vPadding.plus(bottom), hPadding)
+                EdgeInsets(vPadding + top, hPadding, vPadding + bottom, hPadding)
             }
         }
     }
@@ -79,7 +71,7 @@ internal class CameraLayoutObserver(
                 EdgeInsets(
                     vPaddingLandscape,
                     hPaddingLandscape,
-                    vPaddingLandscape.plus(bottom),
+                    vPaddingLandscape + bottom,
                     hPaddingLandscape
                 )
             }
@@ -89,11 +81,13 @@ internal class CameraLayoutObserver(
             is NavigationState.Arrival -> {
                 EdgeInsets(
                     vPaddingLandscape,
-                    hPaddingLandscape.plus(left),
-                    vPaddingLandscape.plus(bottom),
-                    hPaddingLandscape.plus(right)
+                    hPaddingLandscape + left,
+                    vPaddingLandscape + bottom,
+                    hPaddingLandscape + right
                 )
             }
         }
     }
+
+    private fun deviceOrientation() = binding.root.resources.configuration.orientation
 }
