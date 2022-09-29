@@ -46,11 +46,3 @@ fun createNavigationRoutes(fileContent: String): List<NavigationRoute> {
     }
     return result
 }
-
-//private fun resourceAsString(
-//    name: String,
-//    packageName: String = "com.mapbox.navigation.core.internal.utils.similarroutes"
-//): String {
-//    val inputStream = javaClass.classLoader?.getResourceAsStream("$packageName/$name")
-//    return IOUtils.toString(inputStream, "UTF-8")
-//}
