@@ -25,7 +25,7 @@ internal class RecenterButtonComponentContractImpl(
         transform = ::isVisible
     ).stateIn(
         scope,
-        SharingStarted.WhileSubscribed(),
+        SharingStarted.Eagerly,
         isVisible(store.state.value.camera.cameraMode, store.state.value.navigation)
     )
 
