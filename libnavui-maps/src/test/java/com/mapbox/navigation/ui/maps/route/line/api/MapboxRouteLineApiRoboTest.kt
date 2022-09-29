@@ -15,7 +15,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.testing.FileUtils
-import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.getRouteDrawData
@@ -33,6 +32,7 @@ import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.LoggerFrontend
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigator.RouteInterface
 import io.mockk.every
 import io.mockk.mockk
@@ -66,10 +66,9 @@ class MapboxRouteLineApiRoboTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
-    private val logger = mockk<LoggerFrontend>(relaxed = true)
-
-    @get:Rule
-    val loggerRule = LoggingFrontendTestRule(logger)
+    private val logger = mockk<LoggerFrontend>(relaxed = true).apply {
+        LoggerProvider.setLoggerFrontend(this)
+    }
 
     private val parentJob = SupervisorJob()
     private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
