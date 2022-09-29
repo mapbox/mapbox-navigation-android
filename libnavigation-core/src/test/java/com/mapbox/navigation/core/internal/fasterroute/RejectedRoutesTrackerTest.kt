@@ -12,7 +12,7 @@ class RejectedRoutesTrackerTest {
     @Test
     fun `from Munich to Nuremberg by the slowest route`() {
         val rejectedRoutesTracker = createRejectedRoutesTracker()
-        val recordedRoutesUpdates = readRouteObserverResults("com.mapbox.navigation.core.internal.utils.similarroutes.munichnurberg")
+        val recordedRoutesUpdates = readRouteObserverResults("com.mapbox.navigation.core.internal.fasterroute.munichnuremberg")
         recordedRoutesUpdates.forEachIndexed { index, recordedRoutesUpdateResult ->
             val routesUpdate = recordedRoutesUpdateResult.update
             if (routesUpdate.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW) {

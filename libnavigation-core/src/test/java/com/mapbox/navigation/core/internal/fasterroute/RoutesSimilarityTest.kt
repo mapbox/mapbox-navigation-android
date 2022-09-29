@@ -9,7 +9,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.net.URL
 
-class SimilarRoutesTest {
+class RoutesSimilarityTest {
 
     @Test
     fun `the same routes`() {
@@ -17,7 +17,6 @@ class SimilarRoutesTest {
         val similarity = calculateGeometrySimilarity(route, route)
         assertEquals(1.0, similarity, 0.00001)
     }
-
 
     @Test
     fun `the same routes but different ids`() {
@@ -80,7 +79,7 @@ class SimilarRoutesTest {
 
     private fun resourceAsString(
         name: String,
-        packageName: String = "com.mapbox.navigation.core.internal.utils.similarroutes"
+        packageName: String = "com.mapbox.navigation.core.internal.fasterroute.similarity"
     ): String {
         val inputStream = javaClass.classLoader?.getResourceAsStream("$packageName/$name")
         return IOUtils.toString(inputStream, "UTF-8")
