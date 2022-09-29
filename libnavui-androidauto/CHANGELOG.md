@@ -7,7 +7,8 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Removed `MapboxNavigation` from `PlaceListOnMapScreen`. [#6371](https://github.com/mapbox/mapbox-navigation-android/pull/6371)
 - Migrate `CarDistanceFormatter` to an object that works with `MapboxNavigationApp`. [#6401](https://github.com/mapbox/mapbox-navigation-android/pull/6401)
-- Removed `MainCarContext` from `CarRouteLine` and `CarLocationRenderer` constructor. [#6219](https://github.com/mapbox/mapbox-navigation-android/pull/6219)
+- Removed `MainCarContext` from `CarRouteLine` and `CarLocationRenderer` constructor. [#6406](https://github.com/mapbox/mapbox-navigation-android/pull/6406)
+- Fixed issue where style changes cause `CarRouteLine` to trigger excessive calls to the map style. [#6406](https://github.com/mapbox/mapbox-navigation-android/pull/6406)
 
 ## androidauto-v0.12.0 - Sep 26, 2022
 ### Changelog
