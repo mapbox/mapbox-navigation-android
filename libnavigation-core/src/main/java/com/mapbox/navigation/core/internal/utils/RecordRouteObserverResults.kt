@@ -23,7 +23,14 @@ class RecordRouteObserverResults(
             prepareFolders()
         }
         val content = result.navigationRoutes
-            .map { listOf(it.routeIndex.toString(), it.routeOptions.toUrl("***").toString(), it.directionsResponse.toJson()) }
+            .map {
+                listOf(
+                    it.routeIndex.toString(),
+                    it.routeOptions.toUrl("***").toString(),
+                    it.directionsResponse.toJson(),
+                    navigation().getAlternativeMetadataFor(it)?.alternativeId?.toString().orEmpty()
+                )
+            }
             .flatten()
             .joinToString(separator = "\n") { it }
         writeOnDisk("$routesChangedCounter-${result.reason}.txt", content)

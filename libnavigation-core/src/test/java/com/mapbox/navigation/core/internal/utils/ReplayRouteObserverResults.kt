@@ -8,7 +8,7 @@ import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import org.apache.commons.io.IOUtils
 import java.net.URL
 
-fun Any.readRouteObserverResults(packageName: String): List<RoutesUpdatedResult> {
+fun Any.readRouteObserverResults(packageName: String): List<RecordedRoutesUpdateResult> {
     val clazz = this.javaClass
     val content = IOUtils.toString(clazz.classLoader.getResource(packageName), "UTF-8")
     if (content.isNullOrBlank()) {
@@ -23,17 +23,23 @@ fun Any.readRouteObserverResults(packageName: String): List<RoutesUpdatedResult>
         }
         .sortedBy { it.first }
         .map {
-            RoutesUpdatedResult(
-                createNavigationRoutes(it.third),
-                it.second
+            val (alternativeIds, routes) = createNavigationRoutes(it.third)
+            RecordedRoutesUpdateResult(
+                RoutesUpdatedResult(
+                    routes,
+                    it.second
+                ),
+                alternativeIds
             )
+
         }
 }
 
-fun createNavigationRoutes(fileContent: String): List<NavigationRoute> {
+fun createNavigationRoutes(fileContent: String): Pair<Map<String, Int>, List<NavigationRoute>> {
     val result = mutableListOf<NavigationRoute>()
+    val alternativeIds = mutableMapOf<String, Int>()
     val lines = fileContent.split("\n")
-    for (i in lines.indices step 3) {
+    for (i in lines.indices step 4) {
         val routeIndex = lines[i].toInt()
         val routeOptions = RouteOptions.fromUrl(URL(lines[i+1]))
         val directionsResponse = DirectionsResponse.fromJson(lines[i+2])
@@ -42,7 +48,18 @@ fun createNavigationRoutes(fileContent: String): List<NavigationRoute> {
             routeOptions,
             RouterOrigin.Offboard
         )
-        result.add(routes[routeIndex])
+        val alternativeId = lines[i+3].toIntOrNull()
+
+        val route = routes[routeIndex]
+        result.add(route)
+        if (alternativeId != null) {
+            alternativeIds[route.id] = alternativeId
+        }
     }
-    return result
+    return Pair(alternativeIds, result)
 }
+
+data class RecordedRoutesUpdateResult(
+    val update: RoutesUpdatedResult,
+    val alternativeIdsMap: Map<String, Int>
+)
