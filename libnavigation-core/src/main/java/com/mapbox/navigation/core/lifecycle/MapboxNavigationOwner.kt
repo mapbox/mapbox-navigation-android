@@ -13,7 +13,10 @@ internal class MapboxNavigationOwner {
 
     private lateinit var navigationOptionsProvider: NavigationOptionsProvider
 
+    // ServiceSet is optimized for maintaining order that observers are registered
     private val services = CopyOnWriteArraySet<MapboxNavigationObserver>()
+    // ServiceMap is optimized for fetching services by class type
+    private val serviceMap = mutableMapOf<Class<*>, CopyOnWriteArraySet<MapboxNavigationObserver>>()
     private var mapboxNavigation: MapboxNavigation? = null
     private var attached = false
 
@@ -34,7 +37,7 @@ internal class MapboxNavigationOwner {
         override fun onStop(owner: LifecycleOwner) {
             logI("onStop", LOG_CATEGORY)
             attached = false
-            services.forEach { it.onDetached(mapboxNavigation!!) }
+            services.reversed().forEach { it.onDetached(mapboxNavigation!!) }
             MapboxNavigationProvider.destroy()
             mapboxNavigation = null
         }
@@ -44,21 +47,27 @@ internal class MapboxNavigationOwner {
         this.navigationOptionsProvider = navigationOptionsProvider
     }
 
-    fun register(mapboxNavigationObserver: MapboxNavigationObserver) = apply {
-        if (services.add(mapboxNavigationObserver)) {
-            mapboxNavigation?.let { mapboxNavigationObserver.onAttached(it) }
+    fun <T : MapboxNavigationObserver> register(observer: T) = apply {
+        if (services.add(observer)) {
+            if (serviceMap[observer::class.java] == null) {
+                serviceMap[observer::class.java] = CopyOnWriteArraySet()
+            }
+            serviceMap[observer::class.java]!!.add(observer)
+            mapboxNavigation?.let { observer.onAttached(it) }
         }
     }
 
-    fun unregister(mapboxNavigationObserver: MapboxNavigationObserver) {
-        if (services.remove(mapboxNavigationObserver)) {
-            mapboxNavigation?.let { mapboxNavigationObserver.onDetached(it) }
+    fun <T : MapboxNavigationObserver> unregister(observer: T) {
+        if (services.remove(observer)) {
+            serviceMap[observer::class.java]?.remove(observer)
+            mapboxNavigation?.let { observer.onDetached(it) }
         }
     }
 
     fun disable() {
         if (attached) {
             attached = false
+            val services = serviceMap.values.flatten().reversed()
             services.forEach { it.onDetached(mapboxNavigation!!) }
             MapboxNavigationProvider.destroy()
             mapboxNavigation = null
@@ -81,8 +90,9 @@ internal class MapboxNavigationOwner {
         getObservers(clazz.java)
 
     // Java
+    @Suppress("UNCHECKED_CAST")
     fun <T : MapboxNavigationObserver> getObservers(clazz: Class<T>): List<T> =
-        services.filterIsInstance(clazz)
+        (serviceMap[clazz] as? CopyOnWriteArraySet<T>)?.toList() ?: emptyList()
 
     private companion object {
         private const val LOG_CATEGORY = "MapboxNavigationOwner"

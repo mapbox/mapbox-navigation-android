@@ -452,6 +452,7 @@ class MapboxNavigationAppDelegateTest {
         assertEquals(retrieved, retrievedJava)
     }
 
+    @Test
     fun `verify getObservers will return empty when observer is not registered`() {
         val observer = ExampleObserverA()
         mapboxNavigationApp.registerObserver(observer)
@@ -462,6 +463,7 @@ class MapboxNavigationAppDelegateTest {
         assertEquals(retrieved, retrievedJava)
     }
 
+    @Test
     fun `verify getObservers will return empty when observers are removed`() {
         val observerFirst = ExampleObserverA()
         val observerSecond = ExampleObserverB()
@@ -474,6 +476,31 @@ class MapboxNavigationAppDelegateTest {
         val retrievedJava = mapboxNavigationApp.getObservers(ExampleObserverA::class.java)
         assertTrue(retrieved.isEmpty())
         assertEquals(retrieved, retrievedJava)
+    }
+
+    @Test
+    fun `verify callback order is preserved for different classes`() {
+        mapboxNavigationApp.setup { navigationOptions }
+        val testLifecycleOwner = CarAppLifecycleOwnerTest.TestLifecycleOwner()
+        testLifecycleOwner.lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+
+        val observerFirst: ExampleObserverA = mockk(relaxed = true)
+        val observerSecond: ExampleObserverB = mockk(relaxed = true)
+        val observerThird: ExampleObserverA = mockk(relaxed = true)
+        mapboxNavigationApp.attach(testLifecycleOwner)
+        mapboxNavigationApp.registerObserver(observerFirst)
+        mapboxNavigationApp.registerObserver(observerSecond)
+        mapboxNavigationApp.registerObserver(observerThird)
+        mapboxNavigationApp.detach(testLifecycleOwner)
+
+        verifyOrder {
+            observerFirst.onAttached(any())
+            observerSecond.onAttached(any())
+            observerThird.onAttached(any())
+            observerThird.onDetached(any())
+            observerSecond.onDetached(any())
+            observerFirst.onDetached(any())
+        }
     }
 
     private fun mockActivityLifecycle(): Pair<ComponentActivity, LifecycleRegistry> {
