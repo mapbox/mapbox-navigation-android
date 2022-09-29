@@ -8,7 +8,9 @@ import android.os.SystemClock
 import com.mapbox.navigation.base.trip.model.TripNotificationState
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
+import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -24,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 internal class MapboxTripService(
     private val tripNotification: TripNotification,
-    private val initializeLambda: () -> Unit,
+    private val initializeLambda: () -> Boolean,
     private val terminateLambda: () -> Unit,
     threadController: ThreadController,
 ) : TripService {
@@ -62,17 +64,25 @@ internal class MapboxTripService(
         tripNotification,
         {
             try {
-                applicationContext.startService(intent)
-            } catch (e: IllegalStateException) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     applicationContext.startForegroundService(intent)
                 } else {
-                    throw e
+                    applicationContext.startService(intent)
                 }
+                true
+            } catch (ex: Throwable) {
+                logE("Foreground service could not be started: $ex. The most common reason " +
+                    "for this exception is invoking `MapboxNavigation#startTripSession` " +
+                    "when the app is in background.")
+                false
             }
         },
         {
-            applicationContext.stopService(intent)
+            try {
+                applicationContext.stopService(intent)
+            } catch (ex: Throwable) {
+                logE("Foreground service could not be stopped: $ex.")
+            }
         },
         threadController,
     )
@@ -115,11 +125,14 @@ internal class MapboxTripService(
     override fun startService() {
         when (serviceStarted.compareAndSet(false, true)) {
             true -> {
-                tripNotification.onTripSessionStarted()
-                initializeLambda()
-                currentTripNotification = tripNotification
-                updateNotificationData()
-                allowedNotificationTime = SystemClock.elapsedRealtime() + 500
+                if (initializeLambda()) {
+                    tripNotification.onTripSessionStarted()
+                    currentTripNotification = tripNotification
+                    updateNotificationData()
+                    allowedNotificationTime = SystemClock.elapsedRealtime() + 500
+                } else {
+                    serviceStarted.compareAndSet(true, false)
+                }
             }
             false -> {
                 logI("service already started", LOG_CATEGORY)
@@ -135,8 +148,8 @@ internal class MapboxTripService(
             true -> {
                 currentTripNotification = null
                 notificationJob?.cancel()
-                terminateLambda()
                 tripNotification.onTripSessionStopped()
+                terminateLambda()
             }
             false -> {
                 logI("Service is not started yet", LOG_CATEGORY)
@@ -148,6 +161,10 @@ internal class MapboxTripService(
      * Update the trip's information in the notification bar
      */
     override fun updateNotification(tripNotificationState: TripNotificationState) {
+        if (!serviceStarted.get()) {
+            logW("Cannot update notification: service has not been started yet.")
+            return
+        }
         notificationJob?.cancel()
         if (SystemClock.elapsedRealtime() >= allowedNotificationTime) {
             tripNotification.updateNotification(tripNotificationState)
