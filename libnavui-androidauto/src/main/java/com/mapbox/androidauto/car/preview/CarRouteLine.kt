@@ -150,7 +150,7 @@ class CarRouteLine(
         logAndroidAuto("CarRouteLine onRoutesChanged ${routes.size}")
         carMapSurface?.getStyle()?.let { style ->
             val routesMetadata = MapboxNavigationApp.current()?.getAlternativeMetadataFor(routes)
-            if (routesMetadata != null) {
+            if (!routesMetadata.isNullOrEmpty()) {
                 routeLineApi.setNavigationRoutes(routes, routesMetadata) { value ->
                     routeLineView.renderRouteDrawData(style, value)
                 }
