@@ -90,7 +90,7 @@ class MapboxTripSessionTest {
     val loggerRule = LoggingFrontendTestRule()
 
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
     private lateinit var tripSession: MapboxTripSession
 
@@ -1366,6 +1366,83 @@ class MapboxTripSessionTest {
             assertEquals(0, alertsSlot[0].size)
             assertEquals(1, alertsSlot[1].size)
             assertEquals(0, alertsSlot[2].size)
+        }
+    }
+
+    @Test
+    fun `routeProgress updates ignored while primary route is being set`() = coroutineRule.runBlockingTest {
+        val primary = mockNavigationRoute()
+        val alternative = mockNavigationRoute()
+        coEvery { navigator.setRoutes(primary, legIndex, listOf(alternative)) } coAnswers {
+            delay(100)
+            createSetRouteResult()
+        }
+
+        val observer = mockk<RouteProgressObserver>(relaxUnitFun = true)
+
+        val tripSession = buildTripSession()
+        tripSession.registerRouteProgressObserver(observer)
+        tripSession.start(withTripService = true)
+
+        pauseDispatcher {
+            launch { tripSession.setRoutes(listOf(primary, alternative), setRoutesInfo) }
+            runCurrent()
+            advanceTimeBy(delayTimeMillis = 50)
+            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+            verify(exactly = 0) { observer.onRouteProgressChanged(any()) }
+            advanceTimeBy(delayTimeMillis = 100)
+            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+            verify(exactly = 1) { observer.onRouteProgressChanged(any()) }
+        }
+    }
+
+    @Test
+    fun `routeProgress updates not ignored while only alternative route is being set`() = coroutineRule.runBlockingTest {
+        val primary = mockNavigationRoute()
+        val alternative = mockNavigationRoute()
+        coEvery { navigator.setAlternativeRoutes(listOf(alternative)) } coAnswers {
+            delay(100)
+            emptyList()
+        }
+
+        val observer = mockk<RouteProgressObserver>(relaxUnitFun = true)
+
+        val tripSession = buildTripSession()
+        tripSession.registerRouteProgressObserver(observer)
+        tripSession.start(withTripService = true)
+
+        pauseDispatcher {
+            val setRoutesInfo = SetAlternativeRoutesInfo(legIndex)
+            launch { tripSession.setRoutes(listOf(primary, alternative), setRoutesInfo) }
+            runCurrent()
+            advanceTimeBy(delayTimeMillis = 50)
+            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+            verify(exactly = 1) { observer.onRouteProgressChanged(any()) }
+        }
+    }
+
+    @Test
+    fun `routeProgress updates not ignored while primary route is being refreshed`() = coroutineRule.runBlockingTest {
+        val primary = mockNavigationRoute()
+        val alternative = mockNavigationRoute()
+        coEvery { navigator.refreshRoute(primary) } coAnswers {
+            delay(100)
+            ExpectedFactory.createValue(emptyList())
+        }
+
+        val observer = mockk<RouteProgressObserver>(relaxUnitFun = true)
+
+        val tripSession = buildTripSession()
+        tripSession.registerRouteProgressObserver(observer)
+        tripSession.start(withTripService = true)
+
+        pauseDispatcher {
+            val setRoutesInfo = SetRefreshedRoutesInfo(indicesSnapshot)
+            launch { tripSession.setRoutes(listOf(primary, alternative), setRoutesInfo) }
+            runCurrent()
+            advanceTimeBy(delayTimeMillis = 50)
+            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+            verify(exactly = 1) { observer.onRouteProgressChanged(any()) }
         }
     }
 

@@ -86,10 +86,11 @@ internal class MapboxTripSession(
                 "route IDs: ${routes.map { it.id }}) - starting",
             LOG_CATEGORY
         )
-        isUpdatingRoute = true
         val result = when (setRoutesInfo) {
             is BasicSetRoutesInfo -> {
+                isUpdatingRoute = true
                 setRouteToNativeNavigator(routes, setRoutesInfo.legIndex)
+                    .also { isUpdatingRoute = false }
             }
             is SetAlternativeRoutesInfo -> {
                 NativeSetRouteValue(
@@ -140,7 +141,6 @@ internal class MapboxTripSession(
                 }
             }
         }
-        isUpdatingRoute = false
         logD(
             "routes update (reason: ${setRoutesInfo.reason}, " +
                 "route IDs: ${routes.map { it.id }}) - finished",
