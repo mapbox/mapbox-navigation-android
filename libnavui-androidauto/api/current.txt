@@ -272,7 +272,7 @@ package com.mapbox.androidauto.car.location {
   }
 
   public final class CarLocationRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
-    ctor public CarLocationRenderer(com.mapbox.androidauto.car.MainCarContext mainCarContext);
+    ctor public CarLocationRenderer();
   }
 
 }
@@ -630,9 +630,7 @@ package com.mapbox.androidauto.car.placeslistonmap {
 package com.mapbox.androidauto.car.preview {
 
   public final class CarRouteLine implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
-    ctor public CarRouteLine(com.mapbox.androidauto.car.MainCarContext mainCarContext, com.mapbox.androidauto.car.routes.CarRoutesProvider carRoutesProvider = com.mapbox.androidauto.car.routes.NavigationCarRoutesProvider());
-    method public com.mapbox.androidauto.car.MainCarContext getMainCarContext();
-    property public final com.mapbox.androidauto.car.MainCarContext mainCarContext;
+    ctor public CarRouteLine(com.mapbox.androidauto.car.routes.CarRoutesProvider carRoutesProvider = com.mapbox.androidauto.car.routes.NavigationCarRoutesProvider());
   }
 
   public fun interface CarRouteOptionsInterceptor {
