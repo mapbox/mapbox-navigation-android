@@ -3,12 +3,12 @@
 package com.mapbox.navigation.dropin.internal.extensions
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.NavigationViewContext
-import com.mapbox.navigation.dropin.ViewBinder
-import com.mapbox.navigation.dropin.binder.infopanel.InfoPanelHeaderActiveGuidanceBinder
-import com.mapbox.navigation.dropin.binder.infopanel.InfoPanelHeaderArrivalBinder
-import com.mapbox.navigation.dropin.binder.infopanel.InfoPanelHeaderDestinationPreviewBinder
-import com.mapbox.navigation.dropin.binder.infopanel.InfoPanelHeaderRoutesPreviewBinder
+import com.mapbox.navigation.dropin.infopanel.InfoPanelHeaderActiveGuidanceBinder
+import com.mapbox.navigation.dropin.infopanel.InfoPanelHeaderArrivalBinder
+import com.mapbox.navigation.dropin.infopanel.InfoPanelHeaderDestinationPreviewBinder
+import com.mapbox.navigation.dropin.infopanel.InfoPanelHeaderRoutesPreviewBinder
+import com.mapbox.navigation.dropin.navigationview.NavigationViewBinder
+import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.map
  */
 @ExperimentalPreviewMapboxNavigationAPI
 internal fun <T : UIBinder> NavigationViewContext.flowUiBinder(
-    selector: (value: ViewBinder) -> StateFlow<T>,
+    selector: (value: NavigationViewBinder) -> StateFlow<T>,
     mapper: suspend (value: T) -> T = { it }
 ): Flow<T> {
     return selector(this.uiBinders).map(mapper)

@@ -1,7 +1,8 @@
 package com.mapbox.navigation.dropin
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder
+import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription
+import com.mapbox.navigation.dropin.infopanel.InfoPanelBinder
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 
 /**

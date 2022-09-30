@@ -49,13 +49,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
-import com.mapbox.navigation.dropin.ActionButtonDescription
-import com.mapbox.navigation.dropin.ActionButtonDescription.Position.END
-import com.mapbox.navigation.dropin.ActionButtonDescription.Position.START
-import com.mapbox.navigation.dropin.MapViewObserver
 import com.mapbox.navigation.dropin.MapboxExtendableButtonParams
-import com.mapbox.navigation.dropin.MapboxMapScalebarParams
-import com.mapbox.navigation.dropin.NavigationViewListener
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteArrowOptions
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization
@@ -76,7 +70,13 @@ import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultSpee
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultSpeedLimitTextAppearance
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultStartNavigationButtonParams
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultTripProgressStyle
-import com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder
+import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription
+import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position.END
+import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position.START
+import com.mapbox.navigation.dropin.infopanel.InfoPanelBinder
+import com.mapbox.navigation.dropin.map.MapViewObserver
+import com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams
+import com.mapbox.navigation.dropin.navigationview.NavigationViewListener
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.LayoutActivityNavigationViewBinding
 import com.mapbox.navigation.qa_test_app.databinding.LayoutDrawerMenuNavViewCustomBinding
@@ -578,11 +578,10 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
 
     private fun toggleCustomInfoPanelEndNavButton(enabled: Boolean) {
         binding.navigationView.customizeViewBinders {
-            if (enabled) {
-                infoPanelEndNavigationButtonBinder =
-                    CustomInfoPanelEndNavButtonBinder(binding.navigationView.api)
+            infoPanelEndNavigationButtonBinder = if (enabled) {
+                CustomInfoPanelEndNavButtonBinder(binding.navigationView.api)
             } else {
-                infoPanelEndNavigationButtonBinder = UIBinder.USE_DEFAULT
+                UIBinder.USE_DEFAULT
             }
         }
     }

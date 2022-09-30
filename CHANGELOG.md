@@ -7,6 +7,7 @@ Mapbox welcomes participation and contributions from everyone.
 :bangbang: `MapView` may crash when user selects Disagree in Telemetry Settings dialog.
 #### Features
 #### Bug fixes and improvements
+- :warning: Restructured the package system of Drop-In UI into feature verticals. [#6430](https://github.com/mapbox/mapbox-navigation-android/pull/6430)
 - [TileStoreService] Use shared memory for marshaling large types and improve error handling. [#6422](https://github.com/mapbox/mapbox-navigation-android/pull/6422)
 - [TileStoreService] Fixed an issue that prevented callbacks to be invoked if an operation had to be retried because of a loss of connection to the service process. [#6422](https://github.com/mapbox/mapbox-navigation-android/pull/6422)
 

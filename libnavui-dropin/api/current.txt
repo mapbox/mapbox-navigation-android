@@ -1,23 +1,9 @@
 // Signature format: 3.0
 package com.mapbox.navigation.dropin {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ActionButtonDescription {
-    ctor public ActionButtonDescription(android.view.View view, com.mapbox.navigation.dropin.ActionButtonDescription.Position position = com.mapbox.navigation.dropin.ActionButtonDescription.Position.END);
-    method public com.mapbox.navigation.dropin.ActionButtonDescription.Position getPosition();
-    method public android.view.View getView();
-    property public final com.mapbox.navigation.dropin.ActionButtonDescription.Position position;
-    property public final android.view.View view;
-  }
-
-  public enum ActionButtonDescription.Position {
-    enum_constant public static final com.mapbox.navigation.dropin.ActionButtonDescription.Position END;
-    enum_constant public static final com.mapbox.navigation.dropin.ActionButtonDescription.Position START;
-  }
-
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class MapViewObserver {
-    ctor public MapViewObserver();
-    method public void onAttached(com.mapbox.maps.MapView mapView);
-    method public void onDetached(com.mapbox.maps.MapView mapView);
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class EmptyBinder implements com.mapbox.navigation.ui.base.lifecycle.UIBinder {
+    ctor public EmptyBinder();
+    method public com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver bind(android.view.ViewGroup viewGroup);
   }
 
   public final class MapboxExtendableButtonParams {
@@ -28,36 +14,22 @@ package com.mapbox.navigation.dropin {
     property public final int style;
   }
 
-  public final class MapboxMapScalebarParams {
-    method public boolean getEnabled();
-    method public boolean isMetricUnits();
-    property public final boolean enabled;
-    property public final boolean isMetricUnits;
-  }
-
-  public static final class MapboxMapScalebarParams.Builder {
-    ctor public MapboxMapScalebarParams.Builder(android.content.Context context);
-    method public com.mapbox.navigation.dropin.MapboxMapScalebarParams build();
-    method public com.mapbox.navigation.dropin.MapboxMapScalebarParams.Builder enabled(boolean enabled);
-    method public com.mapbox.navigation.dropin.MapboxMapScalebarParams.Builder isMetricsUnits(Boolean? isMetricUnits);
-  }
-
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NavigationView extends android.widget.FrameLayout implements androidx.lifecycle.LifecycleOwner {
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null, String accessToken = attrs.navigationViewAccessToken(context), androidx.lifecycle.ViewModelStoreOwner viewModelStoreOwner = context.toViewModelStoreOwner());
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null, String accessToken = attrs.navigationViewAccessToken(context));
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public NavigationView(android.content.Context context);
-    method public void addListener(com.mapbox.navigation.dropin.NavigationViewListener listener);
+    method public void addListener(com.mapbox.navigation.dropin.navigationview.NavigationViewListener listener);
     method public void customizeMapView(com.mapbox.maps.MapView? mapView);
     method public void customizeViewBinders(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewBinderCustomization,kotlin.Unit> action);
     method public void customizeViewOptions(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewOptionsCustomization,kotlin.Unit> action);
     method public void customizeViewStyles(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewStyleCustomization,kotlin.Unit> action);
     method public com.mapbox.navigation.dropin.NavigationViewApi getApi();
     method public androidx.lifecycle.Lifecycle getLifecycle();
-    method public void registerMapObserver(com.mapbox.navigation.dropin.MapViewObserver observer);
-    method public void removeListener(com.mapbox.navigation.dropin.NavigationViewListener listener);
+    method public void registerMapObserver(com.mapbox.navigation.dropin.map.MapViewObserver observer);
+    method public void removeListener(com.mapbox.navigation.dropin.navigationview.NavigationViewListener listener);
     method public void setRouteOptionsInterceptor(com.mapbox.navigation.dropin.RouteOptionsInterceptor? routeOptionsInterceptor);
-    method public void unregisterMapObserver(com.mapbox.navigation.dropin.MapViewObserver observer);
+    method public void unregisterMapObserver(com.mapbox.navigation.dropin.map.MapViewObserver observer);
     property public final com.mapbox.navigation.dropin.NavigationViewApi api;
   }
 
@@ -92,35 +64,6 @@ package com.mapbox.navigation.dropin {
     field public static final int MissingRoutesInfo = 3; // 0x3
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class NavigationViewListener {
-    ctor public NavigationViewListener();
-    method public void onActiveNavigation();
-    method public void onArrival();
-    method public void onAudioGuidanceStateChanged(boolean muted);
-    method public boolean onBackPressed();
-    method public void onCameraPaddingChanged(com.mapbox.maps.EdgeInsets padding);
-    method public void onDestinationChanged(com.mapbox.geojson.Point? destination);
-    method public void onDestinationPreview();
-    method public void onFollowingCameraMode();
-    method public void onFreeDrive();
-    method public void onIdleCameraMode();
-    method public void onInfoPanelCollapsed();
-    method public void onInfoPanelDragging();
-    method public void onInfoPanelExpanded();
-    method public void onInfoPanelHidden();
-    method public void onInfoPanelSettling();
-    method public void onInfoPanelSlide(float slideOffset);
-    method public void onManeuverCollapsed();
-    method public void onManeuverExpanded();
-    method public void onMapClicked(com.mapbox.geojson.Point point);
-    method public void onOverviewCameraMode();
-    method public void onRouteFetchCanceled(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
-    method public void onRouteFetchFailed(java.util.List<com.mapbox.navigation.base.route.RouterFailure> reasons, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
-    method public void onRouteFetchSuccessful(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
-    method public void onRouteFetching(long requestId);
-    method public void onRoutePreview();
-  }
-
   public fun interface RouteOptionsInterceptor {
     method public com.mapbox.api.directions.v5.models.RouteOptions.Builder intercept(com.mapbox.api.directions.v5.models.RouteOptions.Builder builder);
   }
@@ -128,8 +71,8 @@ package com.mapbox.navigation.dropin {
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ViewBinderCustomization {
     ctor public ViewBinderCustomization();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getActionButtonsBinder();
-    method public java.util.List<com.mapbox.navigation.dropin.ActionButtonDescription>? getCustomActionButtons();
-    method public com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder? getInfoPanelBinder();
+    method public java.util.List<com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription>? getCustomActionButtons();
+    method public com.mapbox.navigation.dropin.infopanel.InfoPanelBinder? getInfoPanelBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getInfoPanelContentBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getInfoPanelEndNavigationButtonBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getInfoPanelHeaderActiveGuidanceBinder();
@@ -145,8 +88,8 @@ package com.mapbox.navigation.dropin {
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getRoadNameBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getSpeedLimitBinder();
     method public void setActionButtonsBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
-    method public void setCustomActionButtons(java.util.List<com.mapbox.navigation.dropin.ActionButtonDescription>?);
-    method public void setInfoPanelBinder(com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder?);
+    method public void setCustomActionButtons(java.util.List<com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription>?);
+    method public void setInfoPanelBinder(com.mapbox.navigation.dropin.infopanel.InfoPanelBinder?);
     method public void setInfoPanelContentBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     method public void setInfoPanelEndNavigationButtonBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     method public void setInfoPanelHeaderActiveGuidanceBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
@@ -162,8 +105,8 @@ package com.mapbox.navigation.dropin {
     method public void setRoadNameBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     method public void setSpeedLimitBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? actionButtonsBinder;
-    property public final java.util.List<com.mapbox.navigation.dropin.ActionButtonDescription>? customActionButtons;
-    property public final com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder? infoPanelBinder;
+    property public final java.util.List<com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription>? customActionButtons;
+    property public final com.mapbox.navigation.dropin.infopanel.InfoPanelBinder? infoPanelBinder;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? infoPanelContentBinder;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? infoPanelEndNavigationButtonBinder;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? infoPanelHeaderActiveGuidanceBinder;
@@ -233,7 +176,7 @@ package com.mapbox.navigation.dropin {
     method public Integer? getInfoPanelPeekHeight();
     method public com.mapbox.maps.plugin.LocationPuck? getLocationPuck();
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? getManeuverViewOptions();
-    method public com.mapbox.navigation.dropin.MapboxMapScalebarParams? getMapScalebarParams();
+    method public com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams? getMapScalebarParams();
     method public Integer? getPoiNameTextAppearance();
     method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams? getRecenterButtonParams();
     method public Integer? getRoadNameBackground();
@@ -254,7 +197,7 @@ package com.mapbox.navigation.dropin {
     method public void setInfoPanelPeekHeight(Integer?);
     method public void setLocationPuck(com.mapbox.maps.plugin.LocationPuck?);
     method public void setManeuverViewOptions(com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions?);
-    method public void setMapScalebarParams(com.mapbox.navigation.dropin.MapboxMapScalebarParams?);
+    method public void setMapScalebarParams(com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams?);
     method public void setPoiNameTextAppearance(Integer?);
     method public void setRecenterButtonParams(com.mapbox.navigation.dropin.MapboxExtendableButtonParams?);
     method public void setRoadNameBackground(Integer?);
@@ -275,7 +218,7 @@ package com.mapbox.navigation.dropin {
     property public final Integer? infoPanelPeekHeight;
     property public final com.mapbox.maps.plugin.LocationPuck? locationPuck;
     property public final com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? maneuverViewOptions;
-    property public final com.mapbox.navigation.dropin.MapboxMapScalebarParams? mapScalebarParams;
+    property public final com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams? mapScalebarParams;
     property public final Integer? poiNameTextAppearance;
     property public final com.mapbox.navigation.dropin.MapboxExtendableButtonParams? recenterButtonParams;
     property public final Integer? roadNameBackground;
@@ -300,7 +243,7 @@ package com.mapbox.navigation.dropin {
     method @Px public int defaultInfoPanelPeekHeight(android.content.Context context);
     method public com.mapbox.maps.plugin.LocationPuck defaultLocationPuck(android.content.Context context);
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions defaultManeuverViewOptions();
-    method public com.mapbox.navigation.dropin.MapboxMapScalebarParams defaultMapScalebarParams(android.content.Context context);
+    method public com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams defaultMapScalebarParams(android.content.Context context);
     method @StyleRes public int defaultPoiNameTextAppearance();
     method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams defaultRecenterButtonParams(android.content.Context context);
     method @DrawableRes public int defaultRoadNameBackground();
@@ -314,7 +257,24 @@ package com.mapbox.navigation.dropin {
 
 }
 
-package com.mapbox.navigation.dropin.binder.infopanel {
+package com.mapbox.navigation.dropin.actionbutton {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ActionButtonDescription {
+    ctor public ActionButtonDescription(android.view.View view, com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position position = com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position.END);
+    method public com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position getPosition();
+    method public android.view.View getView();
+    property public final com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position position;
+    property public final android.view.View view;
+  }
+
+  public enum ActionButtonDescription.Position {
+    enum_constant public static final com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position END;
+    enum_constant public static final com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position START;
+  }
+
+}
+
+package com.mapbox.navigation.dropin.infopanel {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class InfoPanelBinder implements com.mapbox.navigation.ui.base.lifecycle.UIBinder {
     ctor public InfoPanelBinder();
@@ -323,11 +283,75 @@ package com.mapbox.navigation.dropin.binder.infopanel {
     method public abstract android.view.ViewGroup? getContentLayout(android.view.ViewGroup layout);
     method public abstract android.view.ViewGroup? getHeaderLayout(android.view.ViewGroup layout);
     method public abstract android.view.ViewGroup onCreateLayout(android.view.LayoutInflater layoutInflater, android.view.ViewGroup root);
-    field public static final com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder.Companion Companion;
+    field public static final com.mapbox.navigation.dropin.infopanel.InfoPanelBinder.Companion Companion;
   }
 
   public static final class InfoPanelBinder.Companion {
-    method public com.mapbox.navigation.dropin.binder.infopanel.InfoPanelBinder defaultBinder();
+    method public com.mapbox.navigation.dropin.infopanel.InfoPanelBinder defaultBinder();
+  }
+
+}
+
+package com.mapbox.navigation.dropin.map {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class MapViewObserver {
+    ctor public MapViewObserver();
+    method public void onAttached(com.mapbox.maps.MapView mapView);
+    method public void onDetached(com.mapbox.maps.MapView mapView);
+  }
+
+}
+
+package com.mapbox.navigation.dropin.map.scalebar {
+
+  public final class MapboxMapScalebarParams {
+    method public boolean getEnabled();
+    method public boolean isMetricUnits();
+    property public final boolean enabled;
+    property public final boolean isMetricUnits;
+  }
+
+  public static final class MapboxMapScalebarParams.Builder {
+    ctor public MapboxMapScalebarParams.Builder(android.content.Context context);
+    method public com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams build();
+    method public com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams.Builder enabled(boolean enabled);
+    method public com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams.Builder isMetricsUnits(Boolean? isMetricUnits);
+  }
+
+}
+
+package com.mapbox.navigation.dropin.navigationview {
+
+  public final class MapboxNavigationViewApiKt {
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class NavigationViewListener {
+    ctor public NavigationViewListener();
+    method public void onActiveNavigation();
+    method public void onArrival();
+    method public void onAudioGuidanceStateChanged(boolean muted);
+    method public boolean onBackPressed();
+    method public void onCameraPaddingChanged(com.mapbox.maps.EdgeInsets padding);
+    method public void onDestinationChanged(com.mapbox.geojson.Point? destination);
+    method public void onDestinationPreview();
+    method public void onFollowingCameraMode();
+    method public void onFreeDrive();
+    method public void onIdleCameraMode();
+    method public void onInfoPanelCollapsed();
+    method public void onInfoPanelDragging();
+    method public void onInfoPanelExpanded();
+    method public void onInfoPanelHidden();
+    method public void onInfoPanelSettling();
+    method public void onInfoPanelSlide(float slideOffset);
+    method public void onManeuverCollapsed();
+    method public void onManeuverExpanded();
+    method public void onMapClicked(com.mapbox.geojson.Point point);
+    method public void onOverviewCameraMode();
+    method public void onRouteFetchCanceled(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
+    method public void onRouteFetchFailed(java.util.List<com.mapbox.navigation.base.route.RouterFailure> reasons, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public void onRouteFetchSuccessful(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    method public void onRouteFetching(long requestId);
+    method public void onRoutePreview();
   }
 
 }
