@@ -70,6 +70,7 @@ class RejectedRoutesTrackerTest {
             val routesUpdate = recordedRoutesUpdateResult.update
             if (routesUpdate.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW) {
                 val alternatives = createAlternativesMap(routesUpdate, recordedRoutesUpdateResult)
+                rejectedRoutesTracker.clean()
                 rejectedRoutesTracker.addRejectedRoutes(alternatives)
             }
             if (routesUpdate.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE) {
@@ -79,11 +80,12 @@ class RejectedRoutesTrackerTest {
             }
         }
         assertEquals(
-            // TODO: verify
             listOf(
-                "UOIW_1UUIDFfyICssWNnKB2o4cANnHc5pQ4WjsBOKW694GD7ZFwG5Q==#1",
+                "UOIW_1UUIDFfyICssWNnKB2o4cANnHc5pQ4WjsBOKW694GD7ZFwG5Q==#1", // this one fells like similar to initial alternative because they both go through A9
                 "EX782LX4SasgliEDWdrBLajhSdfTR4DzqjPvoQf-GJOqXJEijULtgw==#1",
                 "qsbHcSTKmGlcgMc9w4wrj2Uz_IZhbVuuhHqxuU_4e51RXsroy1proA==#1",
+                "Rs8ocnvnO9AY584Sd1GLWcSeV6ENJ34phLpjgTS_R2MZBNRUiWiwQg==#1",
+                "2fRI3oZgP9QIffbtczCQl-FsWWdgLirxzAQL_4x8WtoB05ATMs2obA==#1",
                 "ffXOOuMdvPd1V3gfe-UOoOzITorRiWD84zuynFpMyM0VsILlHDOALA==#1",
                 "h-pdR2s9gIcYG4_HHLLKHMvHvXT0DVx18Qk5pBkJZUcds-HDrik5oA==#1",
                 "TBf3zrsyBxcfFDdUZzijAffv7jRt1RK34S_950--1mQ7GfIVOc_mxw==#1"
