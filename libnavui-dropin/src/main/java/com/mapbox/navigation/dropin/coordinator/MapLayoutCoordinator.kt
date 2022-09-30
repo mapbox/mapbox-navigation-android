@@ -15,6 +15,7 @@ import com.mapbox.navigation.ui.base.lifecycle.Binder
 import com.mapbox.navigation.ui.base.lifecycle.UICoordinator
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -49,10 +50,10 @@ internal class MapLayoutCoordinator(
                         viewGroup.context,
                     ).enter()
 
-                    val binding = MapboxMapviewLayoutBinding.bind(viewGroup)
-                    initDefaultMap(binding.mapView.getMapboxMap())
-                    mapViewOwner.updateMapView(binding.mapView)
-                    binding.mapView
+                    val mapView = BoundMapViewProvider.bindLayoutAndGet(viewGroup)
+                    initDefaultMap(mapView.getMapboxMap())
+                    mapViewOwner.updateMapView(mapView)
+                    mapView
                 } else {
                     initCustomMap(mapViewOverride.getMapboxMap())
                     viewGroup.removeAllViews()
