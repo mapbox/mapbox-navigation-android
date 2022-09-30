@@ -11,7 +11,7 @@ import com.mapbox.common.EventsService
 import com.mapbox.common.EventsServiceError
 import com.mapbox.common.EventsServiceInterface
 import com.mapbox.common.EventsServiceObserver
-import com.mapbox.common.Logger
+import com.mapbox.common.MapboxCommonLogger
 import com.mapbox.common.TelemetryUtils
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsObserver
@@ -38,7 +38,7 @@ object MapboxMetricsReporter : MetricsReporter {
     private val eventsServiceObserver by lazy {
         object : EventsServiceObserver {
             override fun didEncounterError(error: EventsServiceError, events: Value) {
-                Logger.e(TAG, "EventsService failure: $error")
+                MapboxCommonLogger.logE(TAG, "EventsService failure: $error")
             }
 
             override fun didSendEvents(events: Value) {}
@@ -64,7 +64,7 @@ object MapboxMetricsReporter : MetricsReporter {
 
         mapboxTelemetry = MapboxTelemetry(context, oldEventsToken, userAgent)
         mapboxTelemetry.enable()
-        val eventsServiceOptions = EventsServerOptions(accessToken, userAgent)
+        val eventsServiceOptions = EventsServerOptions(accessToken, userAgent, null)
         eventsService = EventsService.getOrCreate(eventsServiceOptions.overrideIfNeeded(context))
 
         if (!TelemetryUtils.getEventsCollectionState()) {
@@ -116,9 +116,9 @@ object MapboxMetricsReporter : MetricsReporter {
             mapboxTelemetry.push(it)
         }
 
-        eventsService.sendEvent(Event(EventPriority.IMMEDIATE, metricEvent.toValue())) { error ->
+        eventsService.sendEvent(Event(EventPriority.IMMEDIATE, metricEvent.toValue(), null)) { error ->
             error?.let {
-                Logger.e(TAG, "Failed to send event: $error")
+                MapboxCommonLogger.logE(TAG, "Failed to send event: $error")
             }
         }
 
@@ -159,7 +159,8 @@ fun EventsServerOptions.overrideIfNeeded(context: Context): EventsServerOptions 
     return if (endpointId != 0 || tokenId != 0) {
         EventsServerOptions(
             if (tokenId != 0) context.getString(tokenId) else token,
-            userAgentFragment
+            userAgentFragment,
+            null
         )
     } else this
 }
