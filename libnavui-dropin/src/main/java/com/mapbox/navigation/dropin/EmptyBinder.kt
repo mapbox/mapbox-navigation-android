@@ -1,6 +1,5 @@
 package com.mapbox.navigation.dropin
 
-import android.transition.Scene
 import android.view.ViewGroup
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -18,19 +17,10 @@ class EmptyBinder : UIBinder {
      * @param viewGroup ViewGroup
      */
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
-        Scene.getSceneForLayout(
-            viewGroup,
-            R.layout.mapbox_empty_layout,
-            viewGroup.context,
-        ).enter()
+        viewGroup.removeAllViews()
         return object : MapboxNavigationObserver {
-            override fun onAttached(mapboxNavigation: MapboxNavigation) {
-                // No op for empty view binder
-            }
-
-            override fun onDetached(mapboxNavigation: MapboxNavigation) {
-                // No op for empty view binder
-            }
+            override fun onAttached(mapboxNavigation: MapboxNavigation) = Unit
+            override fun onDetached(mapboxNavigation: MapboxNavigation) = Unit
         }
     }
 }

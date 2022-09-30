@@ -24,8 +24,6 @@ internal class RoadNameViewBinder(
     private val context: NavigationViewContext
 ) : UIBinder {
 
-    private val loadedMapStyle = context.mapStyleLoader.loadedMapStyle
-
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val scene = Scene.getSceneForLayout(
             viewGroup,
@@ -36,7 +34,7 @@ internal class RoadNameViewBinder(
         val binding = MapboxRoadNameLayoutBinding.bind(viewGroup)
 
         return reloadOnChange(
-            loadedMapStyle,
+            context.mapStyleLoader.loadedMapStyle,
             context.styles.roadNameTextAppearance,
             context.styles.roadNameBackground
         ) { style, appearance, background ->
