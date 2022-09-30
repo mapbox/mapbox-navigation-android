@@ -3,7 +3,6 @@ package com.mapbox.navigation.core.telemetry
 import android.app.ActivityManager
 import android.app.AlarmManager
 import android.content.Context
-import android.content.SharedPreferences
 import android.location.Location
 import android.media.AudioManager
 import android.telephony.TelephonyManager
@@ -63,7 +62,8 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionState.Idle
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
-import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEvent
+import com.mapbox.navigation.metrics.internal.EventsServiceProvider
+import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.Runs
@@ -345,7 +345,9 @@ class MapboxNavigationTelemetryTest {
 
         val actualEvent = events[0] as NavigationAppUserTurnstileEvent
         val expectedTurnstileEvent = TurnstileEvent(
-            UserSKUIdentifier.NAV2_SES_MAU, "mock", "mock"
+            UserSKUIdentifier.NAV2_SES_MAU,
+            "mock",
+            "mock"
         )
         assertEquals(expectedTurnstileEvent.skuId, actualEvent.event.skuId)
     }
@@ -1464,7 +1466,9 @@ class MapboxNavigationTelemetryTest {
      * After that method we mock MapboxMetricsReporter to use it in tests.
      */
     private fun initMapboxMetricsReporter() {
-        every { EventsServiceProvider.provideEventsService(any()) } returns mockk(relaxUnitFun = true)
+        every { EventsServiceProvider.provideEventsService(any()) } returns mockk(
+            relaxUnitFun = true
+        )
         val alarmManager = mockk<AlarmManager>()
         every {
             applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager

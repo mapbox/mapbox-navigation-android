@@ -43,7 +43,8 @@ class NavigationCustomEventTest {
             assertEquals(cancelEvent.payload, content["payload"]!!.contents)
             assertEquals(cancelEvent.customEventVersion, content["customEventVersion"]!!.contents)
             assertEquals(
-                cancelEvent.createdMonotime.toLong(), content["createdMonotime"]!!.contents
+                cancelEvent.createdMonotime.toLong(),
+                content["createdMonotime"]!!.contents
             )
             assertEquals(cancelEvent.driverMode, content["driverMode"]!!.contents)
             assertEquals(

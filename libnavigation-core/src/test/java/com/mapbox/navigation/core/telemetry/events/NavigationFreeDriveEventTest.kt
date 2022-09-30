@@ -46,7 +46,8 @@ class NavigationFreeDriveEventTest {
             assertEquals(freeDriveEvent.volumeLevel.toLong(), content["volumeLevel"]!!.contents)
             assertEquals(freeDriveEvent.batteryLevel.toLong(), content["batteryLevel"]!!.contents)
             assertEquals(
-                freeDriveEvent.screenBrightness.toLong(), content["screenBrightness"]!!.contents
+                freeDriveEvent.screenBrightness.toLong(),
+                content["screenBrightness"]!!.contents
             )
             assertEquals(freeDriveEvent.batteryPluggedIn, content["batteryPluggedIn"]!!.contents)
             assertEquals(freeDriveEvent.connectivity, content["connectivity"]!!.contents)

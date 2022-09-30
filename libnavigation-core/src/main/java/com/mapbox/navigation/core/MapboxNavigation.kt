@@ -16,7 +16,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.common.TelemetryUtils
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI

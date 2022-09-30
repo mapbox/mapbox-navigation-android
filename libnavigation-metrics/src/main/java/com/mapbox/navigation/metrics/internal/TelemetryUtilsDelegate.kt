@@ -6,7 +6,7 @@ object TelemetryUtilsDelegate {
 
     fun getEventsCollectionState(): Boolean = TelemetryUtils.getEventsCollectionState()
 
-    fun setEventsCollectionState(enableCollection: Boolean){
+    fun setEventsCollectionState(enableCollection: Boolean) {
         TelemetryUtils.setEventsCollectionState(false, {})
     }
 }

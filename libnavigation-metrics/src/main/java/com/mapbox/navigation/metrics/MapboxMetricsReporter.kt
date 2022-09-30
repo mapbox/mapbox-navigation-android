@@ -6,11 +6,9 @@ import com.mapbox.bindgen.Value
 import com.mapbox.common.Event
 import com.mapbox.common.EventPriority
 import com.mapbox.common.EventsServerOptions
-import com.mapbox.common.EventsService
 import com.mapbox.common.EventsServiceError
 import com.mapbox.common.EventsServiceInterface
 import com.mapbox.common.EventsServiceObserver
-import com.mapbox.common.TelemetryUtils
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
@@ -152,5 +150,7 @@ fun EventsServerOptions.overrideIfNeeded(context: Context): EventsServerOptions 
             userAgentFragment,
             null
         )
-    } else this
+    } else {
+        this
+    }
 }

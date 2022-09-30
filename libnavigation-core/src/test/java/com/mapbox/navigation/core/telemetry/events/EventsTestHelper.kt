@@ -397,10 +397,12 @@ internal object EventsTestHelper {
             assertEquals(location.altitude, content["altitude"]!!.contents)
             assertEquals(location.timestamp, content["timestamp"]!!.contents)
             assertEquals(
-                location.horizontalAccuracy.toDouble(), content["horizontalAccuracy"]!!.contents
+                location.horizontalAccuracy.toDouble(),
+                content["horizontalAccuracy"]!!.contents
             )
             assertEquals(
-                location.verticalAccuracy.toDouble(), content["verticalAccuracy"]!!.contents
+                location.verticalAccuracy.toDouble(),
+                content["verticalAccuracy"]!!.contents
             )
         }
     }

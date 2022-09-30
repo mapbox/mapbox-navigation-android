@@ -54,7 +54,6 @@ import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.verify
 import io.mockk.verifyOrder
@@ -348,20 +347,20 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @ExperimentalPreviewMapboxNavigationAPI
     @Test(expected = IllegalStateException::class)
     fun telemetryIsDisabledTryToGetFeedbackMetadataWrapper() {
-            every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
+        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
 
-            createMapboxNavigation()
-            mapboxNavigation.provideFeedbackMetadataWrapper()
+        createMapboxNavigation()
+        mapboxNavigation.provideFeedbackMetadataWrapper()
     }
 
     @ExperimentalPreviewMapboxNavigationAPI
     fun telemetryIsDisabledTryToPostFeedback() {
-            every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
+        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
 
-            createMapboxNavigation()
+        createMapboxNavigation()
 
-            mapboxNavigation.postUserFeedback(mockk(), mockk(), mockk(), mockk(), mockk())
-            mapboxNavigation.postUserFeedback(mockk(), mockk(), mockk(), mockk(), mockk(), mockk())
+        mapboxNavigation.postUserFeedback(mockk(), mockk(), mockk(), mockk(), mockk())
+        mapboxNavigation.postUserFeedback(mockk(), mockk(), mockk(), mockk(), mockk(), mockk())
 
         verify(exactly = 0) {
             MapboxNavigationTelemetry.postUserFeedback(
@@ -1578,7 +1577,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         createMapboxNavigation()
         val oldRerouteController = mapboxNavigation.getRerouteController()
         mapboxNavigation.setRerouteController(rerouteController)
-        assertFalse(mapboxNavigation.getRerouteController()===oldRerouteController)
+        assertFalse(mapboxNavigation.getRerouteController() === oldRerouteController)
     }
 
     @Test
@@ -1617,13 +1616,13 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @Ignore("API is not supported yet")
     fun `when telemetry is enabled custom event is posted`() = coroutineRule.runBlockingTest {
         createMapboxNavigation()
-            every { TelemetryUtilsDelegate.getEventsCollectionState() } returns true
-            every { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) } just Runs
-            every { MapboxNavigationTelemetry.destroy(any()) } just Runs
+        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns true
+        every { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) } just Runs
+        every { MapboxNavigationTelemetry.destroy(any()) } just Runs
 
-            mapboxNavigation.postCustomEvent("", NavigationCustomEventType.ANALYTICS, "1.0")
+        mapboxNavigation.postCustomEvent("", NavigationCustomEventType.ANALYTICS, "1.0")
 
-            verify(exactly = 1) { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) }
+        verify(exactly = 1) { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) }
     }
 
     @Test

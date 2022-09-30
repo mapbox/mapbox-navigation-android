@@ -21,7 +21,6 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.internal.telemetry.UserFeedback
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.toTelemetryLocation
@@ -795,10 +794,10 @@ internal object MapboxNavigationTelemetry {
 
     private fun postTurnstileEvent() {
         val turnstileEvent = TurnstileEvent(
-                UserSKUIdentifier.NAV2_SES_MAU,
-                sdkIdentifier,
-                BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
-            )
+            UserSKUIdentifier.NAV2_SES_MAU,
+            sdkIdentifier,
+            BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
+        )
         val event = NavigationAppUserTurnstileEvent(turnstileEvent)
         sendEvent(event)
     }

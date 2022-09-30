@@ -1,15 +1,12 @@
 package com.mapbox.navigation.metrics
 
-import android.os.Parcel
 import com.google.gson.Gson
 import com.mapbox.bindgen.Value
 import com.mapbox.common.Event
 import com.mapbox.common.EventPriority
 import com.mapbox.common.EventsService
 import com.mapbox.common.EventsServiceInterface
-import com.mapbox.common.EventsServiceObserver
 import com.mapbox.common.EventsServiceResponseCallback
-import com.mapbox.common.TurnstileEvent
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 import com.mapbox.navigation.metrics.extensions.toTelemetryEvent
