@@ -18,12 +18,12 @@ ext {
   println("Navigation Native version: " + mapboxNavigatorVersion)
 
   version = [
-      mapboxMapSdk              : '10.8.0-beta.1-f540c6c34-SNAPSHOT',
+      mapboxMapSdk              : '10.8.0-beta.1-3f6b1ac17-SNAPSHOT',
       mapboxSdkServices         : '6.8.0-beta.4',
       mapboxEvents              : '8.1.5',
       mapboxCore                : '5.0.2',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
-      mapboxCommonNative        : '23.0.0',
+      mapboxCommonNative        : '23.1.0-beta.2',
       mapboxSearchSdk           : '1.0.0-beta.36',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
