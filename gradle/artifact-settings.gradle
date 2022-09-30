@@ -35,24 +35,23 @@ def getReleaseVersion(String version) {
 }
 
 def getSnapshotVersion(String version) {
-    //if (version.isEmpty()) {
-    //    return "0.1.0-SNAPSHOT"
-    //} else {
-    //    def prefix = project.ext.releaseTagPrefix
-    //    def matcher = version =~ /$prefix(\d+)\.(\d+)\.(\d+.*)/
-    //    def major = (matcher[0][1] as Integer)
-    //    def isPreRelease
-    //    try {
-    //        Integer.parseInt(matcher[0][3])
-    //        isPreRelease = false
-    //    } catch (NumberFormatException ignored) {
-    //        isPreRelease = true
-    //    }
-    //    def minor = (matcher[0][2] as Integer)
-    //    if (!isPreRelease) {
-    //        minor += 1
-    //    }
-    //    return "${major}.${minor}.0-SNAPSHOT"
-    //}
-    return "2.9.2-test-core-telemetry-SNAPSHOT"
+    if (version.isEmpty()) {
+        return "0.1.0-SNAPSHOT"
+    } else {
+        def prefix = project.ext.releaseTagPrefix
+        def matcher = version =~ /$prefix(\d+)\.(\d+)\.(\d+.*)/
+        def major = (matcher[0][1] as Integer)
+        def isPreRelease
+        try {
+            Integer.parseInt(matcher[0][3])
+            isPreRelease = false
+        } catch (NumberFormatException ignored) {
+            isPreRelease = true
+        }
+        def minor = (matcher[0][2] as Integer)
+        if (!isPreRelease) {
+            minor += 1
+        }
+        return "${major}.${minor}.0-SNAPSHOT"
+    }
 }
