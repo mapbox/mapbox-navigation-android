@@ -657,6 +657,7 @@ package com.mapbox.navigation.ui.maps.installer {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation locationPuck(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.maps.MapView mapView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.installer.LocationPuckComponentConfig,kotlin.Unit> config = {});
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation navigationCamera(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.maps.MapView mapView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.installer.NavigationCameraComponentConfig,kotlin.Unit> config = {});
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation recenterButton(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.maps.MapView mapView, com.mapbox.navigation.ui.base.view.MapboxExtendableButton button, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.installer.RecenterButtonComponentConfig,kotlin.Unit> config = {});
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation roadName(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.maps.MapView mapView, com.mapbox.navigation.ui.maps.roadname.view.MapboxRoadNameView roadNameView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.installer.RoadNameComponentConfig,kotlin.Unit> config = {});
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation routeArrow(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.maps.MapView mapView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.installer.RouteArrowComponentConfig,kotlin.Unit> config = {});
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation routeLine(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.maps.MapView mapView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.installer.RouteLineComponentConfig,kotlin.Unit> config = {});
   }
@@ -692,6 +693,12 @@ package com.mapbox.navigation.ui.maps.installer {
     method public void setCameraOptions(com.mapbox.maps.CameraOptions);
     property public final com.mapbox.maps.plugin.animation.MapAnimationOptions? animationOptions;
     property public final com.mapbox.maps.CameraOptions cameraOptions;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RoadNameComponentConfig {
+    method public com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi? getRouteShieldApi();
+    method public void setRouteShieldApi(com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi?);
+    property public final com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi? routeShieldApi;
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteArrowComponentConfig {

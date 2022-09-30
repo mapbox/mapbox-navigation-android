@@ -62,4 +62,15 @@
         <item name="extendableButtonBackground">@drawable/mapbox_bg_circle_outline</item>
     </style>
 
+    <!-- Road name -->
+    <style name="MapboxRoadNameViewTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/colorOnSurface</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="MapboxStyleRoadNameView">
+        <item name="android:textAppearance">@style/MapboxRoadNameViewTextAppearance</item>
+        <item name="android:background">@drawable/mapbox_road_name_view_background</item>
+    </style>
+
 </resources>

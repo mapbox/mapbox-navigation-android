@@ -22,10 +22,10 @@ import kotlinx.coroutines.launch
  * Coordinator for showing current road name.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-internal class RoadNameLabelCoordinator(
-    val context: NavigationViewContext,
-    val roadNameLabelLayout: ViewGroup
-) : UICoordinator<ViewGroup>(roadNameLabelLayout) {
+internal class RoadNameCoordinator(
+    private val context: NavigationViewContext,
+    private val roadNameLayout: ViewGroup
+) : UICoordinator<ViewGroup>(roadNameLayout) {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
@@ -41,7 +41,7 @@ internal class RoadNameLabelCoordinator(
                         ConstraintLayout.LayoutParams.PARENT_ID
                     }
                 }.collect { startConstraintId ->
-                    roadNameLabelLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    roadNameLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
                         startToStart = startConstraintId
                     }
                 }
@@ -49,7 +49,7 @@ internal class RoadNameLabelCoordinator(
     }
 
     private fun isOrientationLandscape() =
-        roadNameLabelLayout.resources.configuration.orientation == ORIENTATION_LANDSCAPE
+        roadNameLayout.resources.configuration.orientation == ORIENTATION_LANDSCAPE
 
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
         return context.uiBinders.roadName.map {

@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 - Introduced `NavigationView.setRouteOptionsInterceptor` that allows to override `RouteOptions` used by `NavigationView`. [#6391](https://github.com/mapbox/mapbox-navigation-android/pull/6391)
+- Added `ComponentInstaller` for the `RoadNameComponent` that offers simplified integration of a `MapboxRoadNameView`. [#6400](https://github.com/mapbox/mapbox-navigation-android/pull/6400)
 #### Bug fixes and improvements
 - Marked `ReplayProgressObserver`, `MapboxReplayer`, `ReplayLocationEngine`, `RerouteController#RoutesCallback`, `NavigationRerouteController#RoutesCallback`, `LocationObserver`, `NavigationSessionStateObserver`, `OffRouteObserver`, `RouteProgressObserver`, `TripSessionStateObserver`, `VoiceInstructionsObserver` methods with `@UiThread` annotation. [#6266](https://github.com/mapbox/mapbox-navigation-android/pull/6266)
 - Fix crash due to multiple DataStores active. [#6392](https://github.com/mapbox/mapbox-navigation-android/pull/6392)
