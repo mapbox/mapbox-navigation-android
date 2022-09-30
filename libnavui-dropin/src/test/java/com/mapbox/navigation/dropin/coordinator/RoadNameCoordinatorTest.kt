@@ -40,7 +40,7 @@ import org.robolectric.RobolectricTestRunner
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
-class RoadNameLabelCoordinatorTest {
+class RoadNameCoordinatorTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
@@ -53,7 +53,7 @@ class RoadNameLabelCoordinatorTest {
 //    private val roadNameLayout = mockk<ViewGroup> {
     private val roadNameLayout = mockk<ConstraintLayout>(relaxed = true) {
         every { resources } returns mockk {
-            every { configuration } returns this@RoadNameLabelCoordinatorTest.configuration
+            every { configuration } returns this@RoadNameCoordinatorTest.configuration
         }
     }
     private val context = mockk<NavigationViewContext>(relaxed = true) {
@@ -65,18 +65,18 @@ class RoadNameLabelCoordinatorTest {
         }
     }
     private val observer = mockk<MapboxNavigationObserver>(relaxed = true)
-    private val coordinator = RoadNameLabelCoordinator(context, roadNameLayout)
+    private val coordinator = RoadNameCoordinator(context, roadNameLayout)
 
     @Before
     fun setUp() {
         mockkStatic("androidx.core.view.ViewKt")
         mockkConstructor(RoadNameViewBinder::class)
         every { anyConstructed<RoadNameViewBinder>().bind(any()) } returns observer
-        every { roadNameLayout.layoutParams } returns this@RoadNameLabelCoordinatorTest.layoutParams
+        every { roadNameLayout.layoutParams } returns this@RoadNameCoordinatorTest.layoutParams
         every { roadNameLayout.context } returns ApplicationProvider.getApplicationContext()
 //        every { roadNameLayout.updateLayoutParams(any()) } answers {
 //            val block = firstArg() as ViewGroup.LayoutParams.() -> Unit
-//            this@RoadNameLabelCoordinatorTest.layoutParams.block()
+//            this@RoadNameCoordinatorTest.layoutParams.block()
 //        }
     }
 
