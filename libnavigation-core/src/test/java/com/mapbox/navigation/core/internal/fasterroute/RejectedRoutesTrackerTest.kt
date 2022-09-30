@@ -3,12 +3,35 @@ package com.mapbox.navigation.core.internal.fasterroute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import org.junit.Assert.assertEquals
+import org.junit.Rule
 import org.junit.Test
 
 class RejectedRoutesTrackerTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
+
     @Test
-    fun `from Munich to Nuremberg by the slowest route`() {
+    fun `track faster route from Munich to Nuremberg moving`() {
+        val fasterRoutes = FasterRouteTracker()
+        val recordedRoutesUpdates = readRouteObserverResults("com.mapbox.navigation.core.internal.fasterroute.munichnuremberg")
+        for (recordedUpdate in recordedRoutesUpdates) {
+            val result = fasterRoutes.routesUpdated(
+                recordedUpdate.update,
+                recordedUpdate.alternativeMetadata.values.toList()
+            )
+            assertEquals(
+                "incorrect result for update with alternatives ${recordedUpdate.alternativeMetadata.values.map { it.alternativeId }.joinToString(separator = ",") { it.toString() }}",
+                FasterRouteResult.NoFasterRoad,
+                result
+            )
+        }
+    }
+
+    @Test
+    fun `track routes from Munich to Nuremberg moving by the slowest route`() {
         val rejectedRoutesTracker = createRejectedRoutesTracker()
         val recordedRoutesUpdates = readRouteObserverResults("com.mapbox.navigation.core.internal.fasterroute.munichnuremberg")
         val untrackedRoutesIds = mutableListOf<String>()
