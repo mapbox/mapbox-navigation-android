@@ -34,11 +34,35 @@ internal class NavigationViewBinderTest {
         assertEquals(c.speedLimitBinder, sut.speedLimit.value)
         assertEquals(c.maneuverBinder, sut.maneuver.value)
         assertEquals(c.roadNameBinder, sut.roadName.value)
-        assertEquals(c.infoPanelTripProgressBinder, sut.infoPanelTripProgressBinder.value)
-        assertEquals(c.infoPanelHeaderBinder, sut.infoPanelHeaderBinder.value)
-        assertEquals(c.infoPanelContentBinder, sut.infoPanelContentBinder.value)
         assertEquals(c.actionButtonsBinder, sut.actionButtonsBinder.value)
+
+        assertEquals(c.leftFrameBinder, sut.leftFrameContentBinder.value)
+        assertEquals(c.rightFrameBinder, sut.rightFrameContentBinder.value)
         assertEquals(c.customActionButtons, sut.customActionButtons.value)
+
+        assertEquals(c.infoPanelBinder, sut.infoPanelBinder.value)
+        assertEquals(c.infoPanelHeaderBinder, sut.infoPanelHeaderBinder.value)
+        assertEquals(c.infoPanelHeaderFreeDriveBinder, sut.infoPanelHeaderFreeDriveBinder.value)
+        assertEquals(
+            c.infoPanelHeaderDestinationPreviewBinder,
+            sut.infoPanelHeaderDestinationPreviewBinder.value
+        )
+        assertEquals(
+            c.infoPanelHeaderRoutesPreviewBinder,
+            sut.infoPanelHeaderRoutesPreviewBinder.value
+        )
+        assertEquals(
+            c.infoPanelHeaderActiveGuidanceBinder,
+            sut.infoPanelHeaderActiveGuidanceBinder.value
+        )
+        assertEquals(c.infoPanelHeaderArrivalBinder, sut.infoPanelHeaderArrivalBinder.value)
+
+        assertEquals(c.infoPanelTripProgressBinder, sut.infoPanelTripProgressBinder.value)
+        assertEquals(c.infoPanelContentBinder, sut.infoPanelContentBinder.value)
+        assertEquals(
+            c.infoPanelEndNavigationButtonBinder,
+            sut.infoPanelEndNavigationButtonBinder.value
+        )
     }
 
     @Test
@@ -50,39 +74,74 @@ internal class NavigationViewBinderTest {
                 speedLimitBinder = UIBinder.USE_DEFAULT
                 maneuverBinder = UIBinder.USE_DEFAULT
                 roadNameBinder = UIBinder.USE_DEFAULT
-                infoPanelTripProgressBinder = UIBinder.USE_DEFAULT
-                infoPanelHeaderBinder = UIBinder.USE_DEFAULT
-                infoPanelContentBinder = UIBinder.USE_DEFAULT
+
                 actionButtonsBinder = UIBinder.USE_DEFAULT
                 customActionButtons = emptyList()
+
+                leftFrameBinder = UIBinder.USE_DEFAULT
+                rightFrameBinder = UIBinder.USE_DEFAULT
+
                 infoPanelBinder = InfoPanelBinder.defaultBinder()
+                infoPanelHeaderBinder = UIBinder.USE_DEFAULT
+                infoPanelHeaderFreeDriveBinder = UIBinder.USE_DEFAULT
+                infoPanelHeaderDestinationPreviewBinder = UIBinder.USE_DEFAULT
+                infoPanelHeaderRoutesPreviewBinder = UIBinder.USE_DEFAULT
+                infoPanelHeaderActiveGuidanceBinder = UIBinder.USE_DEFAULT
+                infoPanelHeaderArrivalBinder = UIBinder.USE_DEFAULT
+
+                infoPanelTripProgressBinder = UIBinder.USE_DEFAULT
+                infoPanelContentBinder = UIBinder.USE_DEFAULT
+                infoPanelEndNavigationButtonBinder = UIBinder.USE_DEFAULT
             }
         )
 
         assertTrue(sut.speedLimit.value == null)
         assertTrue(sut.maneuver.value == null)
         assertTrue(sut.roadName.value == null)
-        assertTrue(sut.infoPanelTripProgressBinder.value == null)
-        assertTrue(sut.infoPanelHeaderBinder.value == null)
-        assertTrue(sut.infoPanelContentBinder.value == null)
+
         assertTrue(sut.actionButtonsBinder.value == null)
         assertTrue(sut.customActionButtons.value.isEmpty())
+
+        assertTrue(sut.leftFrameContentBinder.value == null)
+        assertTrue(sut.rightFrameContentBinder.value == null)
+
         assertTrue(sut.infoPanelBinder.value is MapboxInfoPanelBinder)
+        assertTrue(sut.infoPanelHeaderBinder.value == null)
+        assertTrue(sut.infoPanelHeaderFreeDriveBinder.value == null)
+        assertTrue(sut.infoPanelHeaderDestinationPreviewBinder.value == null)
+        assertTrue(sut.infoPanelHeaderRoutesPreviewBinder.value == null)
+        assertTrue(sut.infoPanelHeaderActiveGuidanceBinder.value == null)
+        assertTrue(sut.infoPanelHeaderArrivalBinder.value == null)
+        assertTrue(sut.infoPanelEndNavigationButtonBinder.value == null)
+
+        assertTrue(sut.infoPanelTripProgressBinder.value == null)
+        assertTrue(sut.infoPanelContentBinder.value == null)
     }
 
     private fun customization() = ViewBinderCustomization().apply {
         speedLimitBinder = EmptyBinder()
         maneuverBinder = EmptyBinder()
         roadNameBinder = EmptyBinder()
-        infoPanelTripProgressBinder = EmptyBinder()
-        infoPanelHeaderBinder = EmptyBinder()
-        infoPanelContentBinder = EmptyBinder()
         actionButtonsBinder = EmptyBinder()
+
+        leftFrameBinder = EmptyBinder()
+        rightFrameBinder = EmptyBinder()
         customActionButtons = listOf(
             ActionButtonDescription(mockk(), START),
             ActionButtonDescription(mockk(), START),
             ActionButtonDescription(mockk(), END)
         )
+
         infoPanelBinder = mockk()
+        infoPanelHeaderBinder = EmptyBinder()
+        infoPanelHeaderFreeDriveBinder = EmptyBinder()
+        infoPanelHeaderDestinationPreviewBinder = EmptyBinder()
+        infoPanelHeaderRoutesPreviewBinder = EmptyBinder()
+        infoPanelHeaderActiveGuidanceBinder = EmptyBinder()
+        infoPanelHeaderArrivalBinder = EmptyBinder()
+
+        infoPanelTripProgressBinder = EmptyBinder()
+        infoPanelContentBinder = EmptyBinder()
+        infoPanelEndNavigationButtonBinder = EmptyBinder()
     }
 }

@@ -22,6 +22,7 @@ internal class ManeuverCoordinator(
     private val context: NavigationViewContext,
     guidanceLayout: ViewGroup
 ) : UICoordinator<ViewGroup>(guidanceLayout) {
+
     private val store = context.store
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -30,12 +31,7 @@ internal class ManeuverCoordinator(
             .flatMapLatest { navigationState ->
                 context.uiBinders.maneuver.map {
                     if (navigationState == NavigationState.ActiveNavigation) {
-                        it ?: ManeuverViewBinder(
-                            context,
-                            context.mapStyleLoader.loadedMapStyle,
-                            context.options.distanceFormatterOptions,
-                            context.styles.maneuverViewOptions,
-                        )
+                        it ?: ManeuverViewBinder(context)
                     } else {
                         EmptyBinder()
                     }

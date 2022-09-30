@@ -1,6 +1,5 @@
 package com.mapbox.navigation.dropin.infopanel
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.graphics.Insets
@@ -80,7 +79,7 @@ abstract class InfoPanelBinder : UIBinder {
      */
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val layout = onCreateLayout(
-            viewGroup.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater,
+            LayoutInflater.from(viewGroup.context),
             viewGroup
         )
         viewGroup.removeAllViews()

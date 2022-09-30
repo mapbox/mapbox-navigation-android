@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.internal.extensions
 
+import androidx.annotation.VisibleForTesting
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -22,7 +23,10 @@ internal class ReloadingComponent<T>(
     private val flow: Flow<T>,
     private val factory: (T) -> MapboxNavigationObserver?
 ) : UIComponent() {
-    private var childComponent: MapboxNavigationObserver? = null
+
+    @VisibleForTesting
+    internal var childComponent: MapboxNavigationObserver? = null
+        private set
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)

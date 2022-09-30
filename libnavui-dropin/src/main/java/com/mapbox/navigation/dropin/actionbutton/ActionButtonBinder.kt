@@ -71,8 +71,7 @@ internal class ActionButtonBinder(
     }
 
     private fun inflateLayout(viewGroup: ViewGroup): MapboxActionButtonsLayoutBinding {
-        val layoutInflater =
-            viewGroup.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val layoutInflater = LayoutInflater.from(viewGroup.context)
         viewGroup.removeAllViews()
         layoutInflater.inflate(R.layout.mapbox_action_buttons_layout, viewGroup)
         return MapboxActionButtonsLayoutBinding.bind(viewGroup)
