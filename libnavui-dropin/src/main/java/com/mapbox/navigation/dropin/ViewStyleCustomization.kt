@@ -14,8 +14,9 @@ import com.mapbox.maps.plugin.LocationPuck
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.component.infopanel.ArrivalTextComponent
-import com.mapbox.navigation.dropin.component.infopanel.POINameComponent
+import com.mapbox.navigation.dropin.arrival.ArrivalTextComponent
+import com.mapbox.navigation.dropin.map.geocoding.POINameComponent
+import com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams
 import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
 import com.mapbox.navigation.ui.maneuver.model.ManeuverExitOptions
 import com.mapbox.navigation.ui.maneuver.model.ManeuverPrimaryOptions

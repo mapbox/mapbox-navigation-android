@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment;
 
 import com.mapbox.geojson.Point;
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI;
-import com.mapbox.navigation.dropin.NavigationViewListener;
+import com.mapbox.navigation.dropin.navigationview.NavigationViewListener;
 import com.mapbox.navigation.qa_test_app.databinding.LayoutFragmentNavigationViewBinding;
 
 /**

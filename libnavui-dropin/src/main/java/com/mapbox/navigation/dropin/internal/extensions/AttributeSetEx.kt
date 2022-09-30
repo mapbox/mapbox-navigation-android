@@ -7,7 +7,7 @@ import android.util.AttributeSet
 import androidx.core.content.res.use
 import com.mapbox.navigation.dropin.R
 
-fun AttributeSet?.navigationViewAccessToken(context: Context): String {
+internal fun AttributeSet?.navigationViewAccessToken(context: Context): String {
     val accessToken = context.obtainStyledAttributes(
         this,
         R.styleable.NavigationView,

@@ -1,3 +1,5 @@
+@file:JvmName("ViewEx")
+
 package com.mapbox.navigation.dropin.internal.extensions
 
 import android.view.View
@@ -17,7 +19,7 @@ import kotlinx.coroutines.channels.actor
  * @param scope a CoroutineScope in which the actor coroutine should launch
  * @param handler the coroutine code which will be invoked when the receiver view is clicked
  */
-fun View.onClick(scope: CoroutineScope, handler: suspend CoroutineScope.(View) -> Unit) {
+internal fun View.onClick(scope: CoroutineScope, handler: suspend CoroutineScope.(View) -> Unit) {
     // launch one actor
     val eventActor = scope.actor<View>(Dispatchers.Main) {
         for (event in channel) handler(event)

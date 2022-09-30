@@ -1,3 +1,5 @@
+@file:JvmName("ViewGroupEx")
+
 package com.mapbox.navigation.dropin.internal.extensions
 
 import android.view.ViewGroup
