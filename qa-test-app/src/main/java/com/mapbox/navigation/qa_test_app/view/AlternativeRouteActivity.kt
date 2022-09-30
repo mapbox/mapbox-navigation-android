@@ -41,6 +41,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.internal.fasterroute.FasterRouteResult
+import com.mapbox.navigation.core.internal.fasterroute.FasterRouteTracker
 import com.mapbox.navigation.core.internal.fasterroute.RecordRouteObserverResults
 import com.mapbox.navigation.core.internal.fasterroute.RejectedRoutesTracker
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -84,7 +86,6 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val routeClickPadding = Utils.dpToPx(30f)
     private val navigationLocationProvider = NavigationLocationProvider()
-    private val replayRouteMapper = ReplayRouteMapper()
     private val mapboxReplayer = MapboxReplayer()
     private val binding: AlternativeRouteActivityLayoutBinding by lazy {
         AlternativeRouteActivityLayoutBinding.inflate(layoutInflater)
@@ -168,8 +169,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
         mapboxReplayer.pushEvents(
             ReplayEventLocation(
-                lon = 11.574758,
-                lat = 48.150672,
+                -77.02975555594794,38.91168725377193,
                 provider = "me",
                 0.0,
                 null,
@@ -380,37 +380,16 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
-    private val rejectedRoutesTracker = RejectedRoutesTracker(
-        minimumGeometrySimilarity = 0.5
+    private val rejectedRoutesTracker = FasterRouteTracker(
+        maximumAcceptedSimilarity = 0.5
     )
 
     private fun fasterRoute(update: RoutesUpdatedResult) {
-        val alternatives = mutableMapOf<Int, NavigationRoute>()
-        update.navigationRoutes.drop(1).forEach {
-            alternatives[mapboxNavigation.getAlternativeMetadataFor(it)!!.alternativeId] = it
+        val message = when (val fasterRouteResult = rejectedRoutesTracker.routesUpdated(update, mapboxNavigation.getAlternativeMetadataFor(update.navigationRoutes))) {
+            is FasterRouteResult.NewFasterRoadFound -> "faster route found: ${mapboxNavigation.getAlternativeMetadataFor(fasterRouteResult.route)!!.alternativeId} is faster then primary by ${fasterRouteResult.fasterThanPrimary}"
+            FasterRouteResult.NoFasterRoad -> "no faster route this time"
         }
-
-        if (update.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW) {
-            rejectedRoutesTracker.addRejectedRoutes(alternatives)
-        }
-        if (update.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE) {
-            val newAlternatives = rejectedRoutesTracker.addRejectedRoutes(alternatives).untracked
-            val fasterAlternative = newAlternatives.minByOrNull { mapboxNavigation.getAlternativeMetadataFor(it)!!.infoFromStartOfPrimary.duration } ?: return
-            val fasterAlternativeMetadata = mapboxNavigation.getAlternativeMetadataFor(fasterAlternative)!!
-            val alternativeDuration = fasterAlternativeMetadata.infoFromStartOfPrimary.duration
-            val primaryDuration = update.navigationRoutes.first().directionsRoute.duration()
-            if (alternativeDuration < primaryDuration) {
-                Log.d(
-                    "vadzim-test",
-                    "faster route found: ${fasterAlternativeMetadata.alternativeId} (${alternativeDuration}>${primaryDuration})"
-                )
-            } else {
-                Log.d(
-                    "vadzim-test",
-                    "alternative ${fasterAlternativeMetadata.alternativeId}($alternativeDuration) slower then (${primaryDuration})"
-                )
-            }
-        }
+        Log.d("faster-route", message)
     }
 
     private val mapClickListener = OnMapClickListener {

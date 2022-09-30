@@ -39,7 +39,6 @@ class FasterRouteTracker(
             if (fasterThanPrimary > 0) {
                 return FasterRouteResult.NewFasterRoadFound(
                     fasterRoute,
-                    similarityToRejectedAlternative = 0.5,
                     fasterThanPrimary = fasterThanPrimary
                 )
             }
@@ -52,7 +51,6 @@ sealed class FasterRouteResult {
     object NoFasterRoad: FasterRouteResult()
     data class NewFasterRoadFound(
         val route: NavigationRoute,
-        val similarityToRejectedAlternative: Double,
         val fasterThanPrimary: Double,
     ): FasterRouteResult()
 }
