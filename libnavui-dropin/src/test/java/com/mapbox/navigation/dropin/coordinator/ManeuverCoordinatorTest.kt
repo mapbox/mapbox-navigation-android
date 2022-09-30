@@ -107,7 +107,6 @@ class ManeuverCoordinatorTest {
         }
     }
 
-
     @Test
     fun `should create new binder when navigation state changes`() = runBlockingTest {
         val collectedBinders = mutableListOf<Binder<ViewGroup>>()

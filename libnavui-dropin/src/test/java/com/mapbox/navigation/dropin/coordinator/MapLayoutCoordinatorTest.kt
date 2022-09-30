@@ -99,11 +99,13 @@ class MapLayoutCoordinatorTest {
 
     @Test
     fun `should use default map`() = coroutineRule.runBlockingTest {
-        verify(exactly = 1) { Scene.getSceneForLayout(
-            binding.mapViewLayout,
-            R.layout.mapbox_mapview_layout,
-            binding.mapViewLayout.context
-        ) }
+        verify(exactly = 1) {
+            Scene.getSceneForLayout(
+                binding.mapViewLayout,
+                R.layout.mapbox_mapview_layout,
+                binding.mapViewLayout.context
+            )
+        }
         verify(exactly = 1) { scene.enter() }
         verify(exactly = 1) { mapStyleLoader.mapboxMap = mapboxMap }
         verify(exactly = 1) { mapStyleLoader.loadInitialStyle() }
@@ -142,7 +144,6 @@ class MapLayoutCoordinatorTest {
         mapViewFlow.value = customMapView2
         // 2 constructed mocks
         verify(exactly = 2) { observer.onAttached(mapboxNavigation) }
-
     }
 
     @Test

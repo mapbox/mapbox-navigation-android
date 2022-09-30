@@ -49,6 +49,7 @@ class RoadNameLabelCoordinatorTest {
     private val mapboxNavigation = mockk<MapboxNavigation>()
     private val configuration = Configuration()
     private val layoutParams = ConstraintLayout.LayoutParams(50, 50)
+
 //    private val roadNameLayout = mockk<ViewGroup> {
     private val roadNameLayout = mockk<ConstraintLayout>(relaxed = true) {
         every { resources } returns mockk {
