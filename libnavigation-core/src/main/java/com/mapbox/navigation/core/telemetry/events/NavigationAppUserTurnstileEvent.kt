@@ -1,15 +1,16 @@
-package com.mapbox.navigation.metrics.internal.event
+package com.mapbox.navigation.core.telemetry.events
 
 import com.google.gson.Gson
-import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.bindgen.Value
+import com.mapbox.common.TurnstileEvent
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
+import com.mapbox.navigation.metrics.internal.event.AppUserTurnstileInterface
 import org.json.JSONObject
 
 class NavigationAppUserTurnstileEvent(
-    val event: AppUserTurnstile
-) : MetricEvent {
+    override val event: TurnstileEvent
+) : MetricEvent, AppUserTurnstileInterface {
 
     override val metricName: String
         get() = NavigationMetrics.APP_USER_TURNSTILE

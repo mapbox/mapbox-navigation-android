@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core.telemetry
 
-import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent

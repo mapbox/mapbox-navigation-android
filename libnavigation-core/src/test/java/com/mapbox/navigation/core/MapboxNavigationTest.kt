@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core
 
-import com.mapbox.android.telemetry.TelemetryEnabler
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -38,6 +37,7 @@ import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.createSetRouteResult
+import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteOptions
@@ -54,9 +54,8 @@ import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkStatic
+import io.mockk.mockkObject
 import io.mockk.slot
-import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.CompletableDeferred
@@ -69,6 +68,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -334,7 +334,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test
     fun telemetryIsDisabled() {
-        every { TelemetryEnabler.isEventsEnabled(any()) } returns false
+        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
 
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
@@ -348,20 +348,20 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @ExperimentalPreviewMapboxNavigationAPI
     @Test(expected = IllegalStateException::class)
     fun telemetryIsDisabledTryToGetFeedbackMetadataWrapper() {
-        every { TelemetryEnabler.isEventsEnabled(any()) } returns false
+            every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
 
-        createMapboxNavigation()
-        mapboxNavigation.provideFeedbackMetadataWrapper()
+            createMapboxNavigation()
+            mapboxNavigation.provideFeedbackMetadataWrapper()
     }
 
     @ExperimentalPreviewMapboxNavigationAPI
     fun telemetryIsDisabledTryToPostFeedback() {
-        every { TelemetryEnabler.isEventsEnabled(any()) } returns false
+            every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
 
-        createMapboxNavigation()
+            createMapboxNavigation()
 
-        mapboxNavigation.postUserFeedback(mockk(), mockk(), mockk(), mockk(), mockk())
-        mapboxNavigation.postUserFeedback(mockk(), mockk(), mockk(), mockk(), mockk(), mockk())
+            mapboxNavigation.postUserFeedback(mockk(), mockk(), mockk(), mockk(), mockk())
+            mapboxNavigation.postUserFeedback(mockk(), mockk(), mockk(), mockk(), mockk(), mockk())
 
         verify(exactly = 0) {
             MapboxNavigationTelemetry.postUserFeedback(
@@ -1578,7 +1578,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         createMapboxNavigation()
         val oldRerouteController = mapboxNavigation.getRerouteController()
         mapboxNavigation.setRerouteController(rerouteController)
-        assertFalse(mapboxNavigation.getRerouteController() === oldRerouteController)
+        assertFalse(mapboxNavigation.getRerouteController()===oldRerouteController)
     }
 
     @Test
@@ -1614,37 +1614,28 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
+    @Ignore("API is not supported yet")
     fun `when telemetry is enabled custom event is posted`() = coroutineRule.runBlockingTest {
         createMapboxNavigation()
-        mockkStatic(TelemetryEnabler::class)
-        every {
-            TelemetryEnabler.isEventsEnabled(navigationOptions.applicationContext)
-        } returns true
-        every { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) } just Runs
-        every { MapboxNavigationTelemetry.destroy(any()) } just Runs
+            every { TelemetryUtilsDelegate.getEventsCollectionState() } returns true
+            every { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) } just Runs
+            every { MapboxNavigationTelemetry.destroy(any()) } just Runs
 
-        mapboxNavigation.postCustomEvent("", NavigationCustomEventType.ANALYTICS, "1.0")
+            mapboxNavigation.postCustomEvent("", NavigationCustomEventType.ANALYTICS, "1.0")
 
-        verify(exactly = 1) { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) }
-
-        unmockkStatic(TelemetryEnabler::class)
+            verify(exactly = 1) { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) }
     }
 
     @Test
     fun `when telemetry is disabled custom event is not posted`() = coroutineRule.runBlockingTest {
         createMapboxNavigation()
-        mockkStatic(TelemetryEnabler::class)
-        every {
-            TelemetryEnabler.isEventsEnabled(navigationOptions.applicationContext)
-        } returns false
+        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
         every { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) } just Runs
         every { MapboxNavigationTelemetry.destroy(any()) } just Runs
 
         mapboxNavigation.postCustomEvent("", NavigationCustomEventType.ANALYTICS, "1.0")
 
         verify(exactly = 0) { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) }
-
-        unmockkStatic(TelemetryEnabler::class)
     }
 
     @Test

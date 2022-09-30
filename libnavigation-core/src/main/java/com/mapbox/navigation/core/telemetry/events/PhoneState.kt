@@ -1,12 +1,12 @@
 package com.mapbox.navigation.core.telemetry.events
 
 import android.content.Context
-import com.mapbox.android.telemetry.TelemetryUtils.isPluggedIn
-import com.mapbox.android.telemetry.TelemetryUtils.obtainApplicationState
-import com.mapbox.android.telemetry.TelemetryUtils.obtainBatteryLevel
-import com.mapbox.android.telemetry.TelemetryUtils.obtainCellularNetworkType
-import com.mapbox.android.telemetry.TelemetryUtils.obtainCurrentDate
-import com.mapbox.android.telemetry.TelemetryUtils.obtainUniversalUniqueIdentifier
+import com.mapbox.common.TelemetrySystemUtils.isPluggedIn
+import com.mapbox.common.TelemetrySystemUtils.obtainApplicationState
+import com.mapbox.common.TelemetrySystemUtils.obtainBatteryLevel
+import com.mapbox.common.TelemetrySystemUtils.obtainCellularNetworkType
+import com.mapbox.common.TelemetrySystemUtils.obtainCurrentDate
+import com.mapbox.common.TelemetrySystemUtils.obtainUniversalUniqueIdentifier
 import com.mapbox.navigation.core.telemetry.obtainAudioType
 import com.mapbox.navigation.core.telemetry.obtainScreenBrightness
 import com.mapbox.navigation.core.telemetry.obtainVolumeLevel

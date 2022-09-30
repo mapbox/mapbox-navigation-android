@@ -22,14 +22,12 @@ internal class NavigationCancelEvent(
         val value = super.toValue()
 
         val fields = hashMapOf<String, Value>()
-        value.contents?.let {
-            it as HashMap<String, Value>
-            fields.putAll(it)
-        }
 
         arrivalTimestamp?.let { fields["arrivalTimestamp"] = it.toValue() }
         fields["rating"] = rating.toValue()
         fields["comment"] = comment.toValue()
+
+        (value.contents as HashMap<String, Value>).putAll(fields)
 
         return value
     }

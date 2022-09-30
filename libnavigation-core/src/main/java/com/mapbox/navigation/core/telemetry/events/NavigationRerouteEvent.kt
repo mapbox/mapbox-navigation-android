@@ -29,10 +29,6 @@ internal class NavigationRerouteEvent(
         val value = super.toValue()
 
         val fields = hashMapOf<String, Value>()
-        value.contents?.let {
-            it as HashMap<String, Value>
-            fields.putAll(it)
-        }
 
         fields["newDistanceRemaining"] = newDistanceRemaining.toValue()
         fields["newDurationRemaining"] = newDurationRemaining.toValue()
@@ -43,6 +39,8 @@ internal class NavigationRerouteEvent(
         locationsBefore?.let { fields["locationsBefore"] = it.toValue() }
         locationsAfter?.let { fields["locationsAfter"] = it.toValue() }
         screenshot?.let { fields["screenshot"] = it.toValue() }
+
+        (value.contents as HashMap<String, Value>).putAll(fields)
 
         return value
     }

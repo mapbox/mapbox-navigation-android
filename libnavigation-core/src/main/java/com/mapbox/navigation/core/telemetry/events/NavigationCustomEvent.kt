@@ -2,17 +2,16 @@ package com.mapbox.navigation.core.telemetry.events
 
 import android.annotation.SuppressLint
 import android.os.Build
-import android.os.Parcel
 import androidx.annotation.CallSuper
 import com.google.gson.Gson
-import com.mapbox.android.telemetry.Event
-import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.bindgen.Value
+import com.mapbox.common.TelemetrySystemUtils
+import com.mapbox.common.TelemetrySystemUtils.obtainCurrentDate
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 
 @SuppressLint("ParcelCreator")
-internal class NavigationCustomEvent : Event(), MetricEvent {
+internal class NavigationCustomEvent : MetricEvent {
 
     private companion object {
         private val OPERATING_SYSTEM = "Android - ${Build.VERSION.RELEASE}"
@@ -24,7 +23,7 @@ internal class NavigationCustomEvent : Event(), MetricEvent {
     var customEventVersion: String = "1.0.0"
     val event: String = NavigationMetrics.CUSTOM_EVENT
 
-    val created: String = TelemetryUtils.obtainCurrentDate()
+    val created: String = TelemetrySystemUtils.obtainCurrentDate()
     var createdMonotime: Int = 0
     val operatingSystem: String = OPERATING_SYSTEM
     val device: String? = Build.MODEL
@@ -46,17 +45,11 @@ internal class NavigationCustomEvent : Event(), MetricEvent {
 
     override fun toJson(gson: Gson): String = gson.toJson(this)
 
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    override fun writeToParcel(dest: Parcel, flags: Int) {
-    }
-
     @CallSuper
     override fun toValue(): Value {
         val fields = hashMapOf<String, Value>()
 
+        fields["type"] = type.toValue()
         payload?.let { fields["payload"] = it.toValue() }
         fields["version"] = version.toValue()
         fields["customEventVersion"] = customEventVersion.toValue()

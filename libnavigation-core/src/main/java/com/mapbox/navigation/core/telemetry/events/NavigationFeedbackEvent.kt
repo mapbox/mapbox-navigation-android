@@ -30,10 +30,6 @@ internal class NavigationFeedbackEvent(
         val value = super.toValue()
 
         val fields = hashMapOf<String, Value>()
-        value.contents?.let {
-            it as HashMap<String, Value>
-            fields.putAll(it)
-        }
 
         fields["userId"] = userId.toValue()
         fields["feedbackId"] = feedbackId.toValue()
@@ -45,6 +41,8 @@ internal class NavigationFeedbackEvent(
         locationsAfter?.let { fields["locationsAfter"] = it.toValue() }
         screenshot?.let { fields["screenshot"] = it.toValue() }
         feedbackSubType?.let { fields["feedbackSubType"] = it.toValue() }
+
+        (value.contents as HashMap<String, Value>).putAll(fields)
 
         return value
     }

@@ -3,9 +3,10 @@ package com.mapbox.navigation.core.telemetry
 import android.app.Application
 import android.content.Context
 import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.telemetry.AppUserTurnstile
-import com.mapbox.android.telemetry.TelemetryUtils.generateCreateDateFormatted
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.common.TelemetrySystemUtils.generateCreateDateFormatted
+import com.mapbox.common.TurnstileEvent
+import com.mapbox.common.UserSKUIdentifier
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.metrics.MetricEvent
@@ -34,6 +35,7 @@ import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.START
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.STOP
 import com.mapbox.navigation.core.telemetry.events.MetricsDirectionsRoute
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
+import com.mapbox.navigation.core.telemetry.events.NavigationAppUserTurnstileEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationCancelEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationCustomEvent
@@ -51,7 +53,6 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionState.Idle
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
-import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEvent
 import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
@@ -793,10 +794,11 @@ internal object MapboxNavigationTelemetry {
     }
 
     private fun postTurnstileEvent() {
-        val turnstileEvent =
-            AppUserTurnstile(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME).also {
-                it.setSkuId(MapboxNavigationAccounts.obtainSkuId())
-            }
+        val turnstileEvent = TurnstileEvent(
+                UserSKUIdentifier.NAV2_SES_MAU,
+                sdkIdentifier,
+                BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
+            )
         val event = NavigationAppUserTurnstileEvent(turnstileEvent)
         sendEvent(event)
     }

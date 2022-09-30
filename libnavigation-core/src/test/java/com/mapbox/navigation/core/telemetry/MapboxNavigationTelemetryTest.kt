@@ -7,15 +7,15 @@ import android.content.SharedPreferences
 import android.location.Location
 import android.media.AudioManager
 import android.telephony.TelephonyManager
-import com.mapbox.android.telemetry.AppUserTurnstile
-import com.mapbox.android.telemetry.MapboxTelemetryConstants
-import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.common.BillingServiceInterface
+import com.mapbox.common.TelemetrySystemUtils
+import com.mapbox.common.TurnstileEvent
+import com.mapbox.common.UserSKUIdentifier
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.metrics.MetricEvent
@@ -44,6 +44,7 @@ import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.START
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.STOP
 import com.mapbox.navigation.core.telemetry.events.MetricsDirectionsRoute
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
+import com.mapbox.navigation.core.telemetry.events.NavigationAppUserTurnstileEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationCancelEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationCustomEvent
@@ -201,7 +202,9 @@ class MapboxNavigationTelemetryTest {
     @Before
     fun setup() {
         mockkObject(BillingServiceProvider)
-        mockkStatic(TelemetryUtils::obtainUniversalUniqueIdentifier)
+        mockkStatic(TelemetrySystemUtils::obtainUniversalUniqueIdentifier)
+        mockkObject(EventsServiceProvider)
+        mockkObject(TelemetryUtilsDelegate)
         every { BillingServiceProvider.getInstance() } returns billingService
         every {
             mapboxNavigation.registerRouteProgressObserver(capture(routeProgressObserverSlot))
@@ -228,13 +231,18 @@ class MapboxNavigationTelemetryTest {
         every {
             localUserFeedbackCallback.onNewUserFeedback(capture(localUserFeedbackSlot))
         } just runs
+
+        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns true
+        every { TelemetryUtilsDelegate.setEventsCollectionState(any()) } just runs
     }
 
     @After
     fun cleanUp() {
         unmockkObject(MapboxMetricsReporter)
-        unmockkStatic(TelemetryUtils::obtainUniversalUniqueIdentifier)
+        unmockkStatic(TelemetrySystemUtils::obtainUniversalUniqueIdentifier)
         unmockkObject(BillingServiceProvider)
+        unmockkObject(EventsServiceProvider)
+        unmockkObject(TelemetryUtilsDelegate)
     }
 
     @Test
@@ -336,7 +344,9 @@ class MapboxNavigationTelemetryTest {
         initTelemetry()
 
         val actualEvent = events[0] as NavigationAppUserTurnstileEvent
-        val expectedTurnstileEvent = AppUserTurnstile("mock", "mock").also { it.setSkuId("09") }
+        val expectedTurnstileEvent = TurnstileEvent(
+            UserSKUIdentifier.NAV2_SES_MAU, "mock", "mock"
+        )
         assertEquals(expectedTurnstileEvent.skuId, actualEvent.event.skuId)
     }
 
@@ -1048,6 +1058,7 @@ class MapboxNavigationTelemetryTest {
     @Test
     fun onInit_registerLocationObserver_called() {
         baseMock()
+        initMapboxMetricsReporter()
 
         onInit { verify(exactly = 1) { mapboxNavigation.registerLocationObserver(any()) } }
     }
@@ -1087,6 +1098,7 @@ class MapboxNavigationTelemetryTest {
     @Test
     fun onUnregisterListener_unregisterRoutesObserver_called() {
         baseMock()
+        initMapboxMetricsReporter()
 
         onUnregister { verify(exactly = 1) { mapboxNavigation.unregisterRoutesObserver(any()) } }
     }
@@ -1094,6 +1106,7 @@ class MapboxNavigationTelemetryTest {
     @Test
     fun onUnregisterListener_unregisterNavigationSessionObserver_called() {
         baseMock()
+        initMapboxMetricsReporter()
 
         onUnregister {
             verify(exactly = 1) { mapboxNavigation.unregisterNavigationSessionStateObserver(any()) }
@@ -1123,7 +1136,7 @@ class MapboxNavigationTelemetryTest {
         baseInitialization()
         mockLocationCollector()
         val feedbackId = "feedback id"
-        every { TelemetryUtils.obtainUniversalUniqueIdentifier() } returns feedbackId
+        every { TelemetrySystemUtils.obtainUniversalUniqueIdentifier() } returns feedbackId
 
         MapboxNavigationTelemetry.registerUserFeedbackCallback(globalUserFeedbackCallback)
         postUserFeedback()
@@ -1451,22 +1464,12 @@ class MapboxNavigationTelemetryTest {
      * After that method we mock MapboxMetricsReporter to use it in tests.
      */
     private fun initMapboxMetricsReporter() {
+        every { EventsServiceProvider.provideEventsService(any()) } returns mockk(relaxUnitFun = true)
         val alarmManager = mockk<AlarmManager>()
         every {
             applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         } returns alarmManager
         every { context.applicationContext } returns applicationContext
-
-        val sharedPreferences = mockk<SharedPreferences>(relaxed = true)
-        every {
-            applicationContext.getSharedPreferences(
-                MapboxTelemetryConstants.MAPBOX_SHARED_PREFERENCES,
-                Context.MODE_PRIVATE
-            )
-        } returns sharedPreferences
-        every {
-            sharedPreferences.getString("mapboxTelemetryState", "ENABLED")
-        } returns "DISABLED"
 
         MapboxMetricsReporter.init(context, "pk.token", "userAgent")
     }

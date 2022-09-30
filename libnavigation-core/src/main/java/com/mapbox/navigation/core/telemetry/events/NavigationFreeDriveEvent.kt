@@ -1,11 +1,9 @@
 package com.mapbox.navigation.core.telemetry.events
 
 import android.annotation.SuppressLint
-import android.os.Parcel
 import com.google.gson.Gson
-import com.mapbox.android.telemetry.Event
-import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.bindgen.Value
+import com.mapbox.common.TelemetrySystemUtils
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 
@@ -21,14 +19,14 @@ import com.mapbox.navigation.base.metrics.NavigationMetrics
 @SuppressLint("ParcelCreator")
 internal class NavigationFreeDriveEvent(
     phoneState: PhoneState
-) : Event(), MetricEvent {
+) : MetricEvent {
 
     /*
      * Don't remove any fields, cause they should match with
      * the schema downloaded from S3. Look at {@link SchemaTest}
      */
     val version = "2.2"
-    val created: String = TelemetryUtils.obtainCurrentDate() // Schema pattern
+    val created: String = TelemetrySystemUtils.obtainCurrentDate() // Schema pattern
     val volumeLevel: Int = phoneState.volumeLevel
     val batteryLevel: Int = phoneState.batteryLevel
     val screenBrightness: Int = phoneState.screenBrightness
@@ -82,13 +80,6 @@ internal class NavigationFreeDriveEvent(
         appMetadata?.let { fields["appMetadata"] = it.toValue() }
 
         return Value.valueOf(fields)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    override fun writeToParcel(dest: Parcel, flags: Int) {
     }
 }
 

@@ -51,7 +51,7 @@ internal fun NavigationStepData.toValue(): Value {
 
 /* FIXME: find the way to generalize following functions with compile-time check. */
 
-internal fun <T : String> Array<T>.toValue(): Value {
+internal fun Array<String>.toValue(): Value {
     val values = mutableListOf<Value>()
     for (item in this) {
         values.add(item.toValue())
@@ -59,7 +59,7 @@ internal fun <T : String> Array<T>.toValue(): Value {
     return Value.valueOf(values)
 }
 
-internal fun <T : TelemetryLocation> Array<T>.toValue(): Value {
+internal fun Array<TelemetryLocation>.toValue(): Value {
     val values = mutableListOf<Value>()
     for (item in this) {
         values.add(item.toValue())

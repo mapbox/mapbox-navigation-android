@@ -1,12 +1,11 @@
 package com.mapbox.navigation.core.telemetry.events
 
 import android.os.Build
-import android.os.Parcel
 import androidx.annotation.CallSuper
 import com.google.gson.Gson
-import com.mapbox.android.telemetry.Event
-import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.bindgen.Value
+import com.mapbox.common.TelemetrySystemUtils
+import com.mapbox.common.TelemetrySystemUtils.obtainCurrentDate
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.core.BuildConfig
 
@@ -20,7 +19,7 @@ import com.mapbox.navigation.core.BuildConfig
  */
 internal abstract class NavigationEvent(
     phoneState: PhoneState
-) : Event(), MetricEvent {
+) : MetricEvent {
 
     private companion object {
         private val OPERATING_SYSTEM = "Android - ${Build.VERSION.RELEASE}"
@@ -34,7 +33,7 @@ internal abstract class NavigationEvent(
     val operatingSystem: String = OPERATING_SYSTEM
     val device: String? = Build.MODEL
     val sdkVersion: String = BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME
-    val created: String = TelemetryUtils.obtainCurrentDate() // Schema pattern
+    val created: String = TelemetrySystemUtils.obtainCurrentDate() // Schema pattern
     val volumeLevel: Int = phoneState.volumeLevel
     val batteryLevel: Int = phoneState.batteryLevel
     val screenBrightness: Int = phoneState.screenBrightness
@@ -83,13 +82,6 @@ internal abstract class NavigationEvent(
     var appMetadata: AppMetadata? = null
 
     internal abstract fun getEventName(): String
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    override fun writeToParcel(dest: Parcel, flags: Int) {
-    }
 
     override fun toJson(gson: Gson): String = gson.toJson(this)
 

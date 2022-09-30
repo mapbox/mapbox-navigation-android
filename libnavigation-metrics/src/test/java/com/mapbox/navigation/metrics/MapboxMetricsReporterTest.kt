@@ -2,9 +2,9 @@ package com.mapbox.navigation.metrics
 
 import android.os.Parcel
 import com.google.gson.Gson
-import com.mapbox.android.telemetry.Event
-import com.mapbox.android.telemetry.MapboxTelemetry
 import com.mapbox.bindgen.Value
+import com.mapbox.common.Event
+import com.mapbox.common.EventPriority
 import com.mapbox.common.EventsService
 import com.mapbox.common.EventsServiceInterface
 import com.mapbox.common.EventsServiceObserver
@@ -13,18 +13,23 @@ import com.mapbox.common.TurnstileEvent
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 import com.mapbox.navigation.metrics.extensions.toTelemetryEvent
+import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
-import io.mockk.unmockkObject
+import io.mockk.runs
+import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,100 +60,62 @@ class MapboxMetricsReporterTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
-    private var eventsServiceMock = object : EventsServiceInterface {
-        override fun registerObserver(observer: EventsServiceObserver) {}
-
-        override fun unregisterObserver(observer: EventsServiceObserver) {}
-
-        override fun sendTurnstileEvent(
-            turnstileEvent: TurnstileEvent,
-            callback: EventsServiceResponseCallback?
-        ) {}
-
-        override fun sendEvent(
-            event: com.mapbox.common.Event,
-            callback: EventsServiceResponseCallback?
-        ) {}
-
-        override fun pauseEventsCollection() {}
-
-        override fun resumeEventsCollection() {}
-    }
-
-    @Test
-    fun telemetryEnabledWhenReporterInit() {
-        val mapboxTelemetry = mockk<MapboxTelemetry>(relaxed = true)
-        val eventsService: EventsServiceInterface = mockk()
-
-        MapboxMetricsReporter.init(mapboxTelemetry, eventsServiceMock, InternalJobControlFactory)
-        verify { mapboxTelemetry.enable() }
-    }
-
     @Test
     fun telemetryDisabledWhenReporterDisable() {
-        val mapboxTelemetry = initMetricsReporterWithTelemetry()
+        mockkObject(TelemetryUtilsDelegate) {
+            every { TelemetryUtilsDelegate.setEventsCollectionState(any()) } just runs
+            val eventService = initMetricsReporterWithTelemetry()
+            every { eventService.unregisterObserver(any()) } just runs
 
-        MapboxMetricsReporter.disable()
+            MapboxMetricsReporter.disable()
 
-        verify { mapboxTelemetry.disable() }
+            verify(exactly = 1) { TelemetryUtilsDelegate.setEventsCollectionState(false) }
+            verify(exactly = 1) { eventService.unregisterObserver(any()) }
+        }
     }
 
     @Test
     fun telemetryPushCalledWhenAddValidEvent() = coroutineRule.runBlockingTest {
-        mockkObject(InternalJobControlFactory)
-        mockIOScopeAndRootJob()
-        val mapboxTelemetry = initMetricsReporterWithTelemetry()
-        val metricEvent = StubNavigationEvent(NavigationMetrics.ARRIVE)
-        val event = metricEvent.toTelemetryEvent()
+        mockkObject(InternalJobControlFactory) {
+            val eventService = initMetricsReporterWithTelemetry()
+            val metricEvent = StubNavigationEvent(NavigationMetrics.ARRIVE)
+            val event = metricEvent.toTelemetryEvent()
+            val slotEvent = slot<Event>()
+            every { eventService.sendEvent(capture(slotEvent), any()) } just runs
 
-        MapboxMetricsReporter.addEvent(metricEvent)
+            MapboxMetricsReporter.addEvent(metricEvent)
 
-        verify { mapboxTelemetry.push(event) }
-        unmockkObject(InternalJobControlFactory)
+            assertTrue(slotEvent.isCaptured)
+            assertEquals(EventPriority.IMMEDIATE, slotEvent.captured.priority)
+            assertEquals(metricEvent.toValue(), slotEvent.captured.attributes)
+            assertEquals(null, slotEvent.captured.deferredOptions)
+        }
     }
 
     @Test
-    fun telemetryPushCalledWhenAddInvalidEvent() = coroutineRule.runBlockingTest {
-        mockkObject(InternalJobControlFactory)
-        mockIOScopeAndRootJob()
-        val mapboxTelemetry = initMetricsReporterWithTelemetry()
-        val metricEvent = StubNavigationEvent("some_event")
-        val event = metricEvent.toTelemetryEvent()
-
-        MapboxMetricsReporter.addEvent(metricEvent)
-
-        verify(exactly = 0) { mapboxTelemetry.push(event) }
-        unmockkObject(InternalJobControlFactory)
-    }
-
-    @Test
+    @Ignore("logging toggle is not supported yet")
     fun telemetryCallsUpdateDebugLoggingEnabledWhenToggleLoggingIsTrue() {
-        val mapboxTelemetry = initMetricsReporterWithTelemetry()
+        val eventService = initMetricsReporterWithTelemetry()
         val isDebugLoggingEnabled = true
         MapboxMetricsReporter.toggleLogging(isDebugLoggingEnabled)
 
-        verify { mapboxTelemetry.updateDebugLoggingEnabled(true) }
+//        verify { eventService.updateDebugLoggingEnabled(true) }
     }
 
     @Test
+    @Ignore("logging toggle is not supported yet")
     fun telemetryCallsUpdateDebugLoggingEnabledWhenToggleLoggingIsFalse() {
-        val mapboxTelemetry = initMetricsReporterWithTelemetry()
+        val eventService = initMetricsReporterWithTelemetry()
         val isDebugLoggingEnabled = false
         MapboxMetricsReporter.toggleLogging(isDebugLoggingEnabled)
 
-        verify { mapboxTelemetry.updateDebugLoggingEnabled(false) }
+//        verify { eventService.updateDebugLoggingEnabled(false) }
     }
 
-    private fun initMetricsReporterWithTelemetry(): MapboxTelemetry {
-        val mapboxTelemetry = mockk<MapboxTelemetry>(relaxed = true)
-        val eventsService: EventsServiceInterface = mockk()
-
-        mockkStatic(EventsService::class)
-        every { eventsService.resumeEventsCollection() } returns Unit
-        every { eventsService.pauseEventsCollection() } returns Unit
-
-        MapboxMetricsReporter.init(mapboxTelemetry, eventsServiceMock, InternalJobControlFactory)
-        return mapboxTelemetry
+    private fun initMetricsReporterWithTelemetry(): EventsServiceInterface {
+        val eventsService: EventsServiceInterface = mockk(relaxUnitFun = true)
+        MapboxMetricsReporter.init(eventsService, InternalJobControlFactory)
+        return eventsService
     }
 
     private fun mockIOScopeAndRootJob() {
@@ -161,11 +128,7 @@ class MapboxMetricsReporterTest {
 
     private class StubNavigationEvent(
         override val metricName: String
-    ) : Event(), MetricEvent {
-
-        override fun writeToParcel(dest: Parcel, flags: Int) {}
-
-        override fun describeContents(): Int = 0
+    ) : Event(Value.nullValue(), null), MetricEvent {
 
         override fun toJson(gson: Gson): String = gson.toJson(this)
 
