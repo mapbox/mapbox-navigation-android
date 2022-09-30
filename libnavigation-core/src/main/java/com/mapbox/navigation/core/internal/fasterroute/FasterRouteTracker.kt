@@ -22,7 +22,9 @@ class FasterRouteTracker(
         }
 
         val alternatives:Map<Int, NavigationRoute> = mutableMapOf<Int, NavigationRoute>().apply {
-            alternativeRoutesMetadata.forEach { this[it.alternativeId] = it.navigationRoute }
+            alternativeRoutesMetadata
+                .filter { it.infoFromStartOfPrimary.duration < update.navigationRoutes.first().directionsRoute.duration() }
+                .forEach { this[it.alternativeId] = it.navigationRoute }
         }
 
         if (update.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW) {
