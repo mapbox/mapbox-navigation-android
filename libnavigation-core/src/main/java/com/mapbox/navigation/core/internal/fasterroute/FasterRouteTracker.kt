@@ -26,10 +26,11 @@ class FasterRouteTracker(
         }
 
         if (update.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW) {
-            rejectedRoutesTracker.trackAlternatives(alternatives)
+            rejectedRoutesTracker.clean()
+            rejectedRoutesTracker.addRejectedRoutes(alternatives)
         }
         if (update.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE) {
-            val untracked = rejectedRoutesTracker.trackAlternatives(alternatives).untracked
+            val untracked = rejectedRoutesTracker.checkAlternatives(alternatives).untracked
             val fasterRoute = untracked.minByOrNull { metadataMap[it.id]!!.infoFromStartOfPrimary.duration }
                 ?: return FasterRouteResult.NoFasterRoad
             val fasterThanPrimary =  update.navigationRoutes.first().directionsRoute.duration() - metadataMap[fasterRoute.id]!!.infoFromStartOfPrimary.duration

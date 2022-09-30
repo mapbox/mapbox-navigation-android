@@ -5,6 +5,7 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -14,7 +15,7 @@ class RejectedRoutesTrackerTest {
     val loggerRule = LoggingFrontendTestRule()
 
     @Test
-    fun `track faster route from Munich to Nuremberg moving`() {
+    fun `no faster route is available from Munich to Nuremberg moving by the slowest road`() {
         val fasterRoutes = FasterRouteTracker(
             maximumAcceptedSimilarity = 0.5
         )
@@ -36,6 +37,31 @@ class RejectedRoutesTrackerTest {
     }
 
     @Test
+    fun `faster route is available Munich to Nuremberg moving by the slowest road`() {
+        val fasterRoutes = FasterRouteTracker(
+            maximumAcceptedSimilarity = 0.5
+        )
+        val preparationUpdates = readRouteObserverResults("com.mapbox.navigation.core.internal.fasterroute.munichnuremberg").take(24)
+        for (recordedUpdate in preparationUpdates) {
+            val result = fasterRoutes.routesUpdated(
+                recordedUpdate.update,
+                recordedUpdate.alternativeMetadata.values.toList()
+            )
+            assertEquals(
+                FasterRouteResult.NoFasterRoad,
+                result
+            )
+        }
+        val updateWithArtificialFasterRoute = readRouteObserverResults("com.mapbox.navigation.core.internal.fasterroute.munichnuremberg-with-artificial-faster-route-22").single()
+
+        val result = fasterRoutes.routesUpdated(updateWithArtificialFasterRoute.update, updateWithArtificialFasterRoute.alternativeMetadata.values.toList())
+
+        assertTrue("result is $result", result is FasterRouteResult.NewFasterRoadFound)
+        val fasterRouteResult = result as FasterRouteResult.NewFasterRoadFound
+        assertEquals("2fRI3oZgP9QIffbtczCQl-FsWWdgLirxzAQL_4x8WtoB05ATMs2obA==#1", fasterRouteResult.route.id)
+    }
+
+    @Test
     fun `track routes from Munich to Nuremberg moving by the slowest route`() {
         val rejectedRoutesTracker = createRejectedRoutesTracker()
         val recordedRoutesUpdates = readRouteObserverResults("com.mapbox.navigation.core.internal.fasterroute.munichnuremberg")
@@ -44,16 +70,19 @@ class RejectedRoutesTrackerTest {
             val routesUpdate = recordedRoutesUpdateResult.update
             if (routesUpdate.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW) {
                 val alternatives = createAlternativesMap(routesUpdate, recordedRoutesUpdateResult)
-                rejectedRoutesTracker.trackAlternatives(alternatives)
+                rejectedRoutesTracker.addRejectedRoutes(alternatives)
             }
             if (routesUpdate.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE) {
                 val alternatives = createAlternativesMap(routesUpdate, recordedRoutesUpdateResult)
-                val result = rejectedRoutesTracker.trackAlternatives(alternatives)
+                val result = rejectedRoutesTracker.checkAlternatives(alternatives)
                 untrackedRoutesIds.addAll(result.untracked.map { it.id })
             }
         }
         assertEquals(
+            // TODO: verify
             listOf(
+                "UOIW_1UUIDFfyICssWNnKB2o4cANnHc5pQ4WjsBOKW694GD7ZFwG5Q==#1",
+                "EX782LX4SasgliEDWdrBLajhSdfTR4DzqjPvoQf-GJOqXJEijULtgw==#1",
                 "qsbHcSTKmGlcgMc9w4wrj2Uz_IZhbVuuhHqxuU_4e51RXsroy1proA==#1",
                 "ffXOOuMdvPd1V3gfe-UOoOzITorRiWD84zuynFpMyM0VsILlHDOALA==#1",
                 "h-pdR2s9gIcYG4_HHLLKHMvHvXT0DVx18Qk5pBkJZUcds-HDrik5oA==#1",

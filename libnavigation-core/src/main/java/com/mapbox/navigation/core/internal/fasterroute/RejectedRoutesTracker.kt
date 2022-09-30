@@ -8,22 +8,32 @@ class RejectedRoutesTracker(
 
     private var rejectedAlternatives = mutableMapOf<Int, NavigationRoute>()
 
-    fun trackAlternatives(alternatives: Map<Int, NavigationRoute>): TrackAlternativesResult {
+    fun addRejectedRoutes(alternatives: Map<Int, NavigationRoute>) {
+        for ((alternativeId, alternative) in alternatives) {
+            rejectedAlternatives[alternativeId] = alternative
+        }
+    }
+
+    fun checkAlternatives(alternatives: Map<Int, NavigationRoute>): CheckAlternativesResult {
         val untracked = mutableListOf<NavigationRoute>()
         for ((alternativeId, alternative) in alternatives) {
             if (rejectedAlternatives.containsKey(alternativeId)) {
                 continue
             }
-            val similarity = rejectedAlternatives.values.maxOfOrNull { calculateGeometrySimilarity(it, alternative) } ?: 0.0
+            val similarities = rejectedAlternatives.values.map { calculateGeometrySimilarity(it, alternative) }
+            val similarity = similarities.maxOrNull() ?: 0.0
             if (similarity < minimumGeometrySimilarity) {
                 untracked.add(alternative)
             }
-            rejectedAlternatives[alternativeId] = alternative
         }
-        return TrackAlternativesResult(untracked)
+        return CheckAlternativesResult(untracked)
+    }
+
+    fun clean() {
+        rejectedAlternatives.clear()
     }
 }
 
-data class TrackAlternativesResult(
+data class CheckAlternativesResult(
     val untracked: List<NavigationRoute>
 )

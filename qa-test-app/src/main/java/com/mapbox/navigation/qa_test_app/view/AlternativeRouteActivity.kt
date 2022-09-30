@@ -10,7 +10,6 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.gestures.Utils
@@ -54,7 +53,6 @@ import com.mapbox.navigation.core.replay.history.ReplayEventLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
-import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesRequestCallback
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
@@ -393,10 +391,10 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         }
 
         if (update.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW) {
-            rejectedRoutesTracker.trackAlternatives(alternatives)
+            rejectedRoutesTracker.addRejectedRoutes(alternatives)
         }
         if (update.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE) {
-            val newAlternatives = rejectedRoutesTracker.trackAlternatives(alternatives).untracked
+            val newAlternatives = rejectedRoutesTracker.addRejectedRoutes(alternatives).untracked
             val fasterAlternative = newAlternatives.minByOrNull { mapboxNavigation.getAlternativeMetadataFor(it)!!.infoFromStartOfPrimary.duration } ?: return
             val fasterAlternativeMetadata = mapboxNavigation.getAlternativeMetadataFor(fasterAlternative)!!
             val alternativeDuration = fasterAlternativeMetadata.infoFromStartOfPrimary.duration
