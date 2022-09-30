@@ -178,10 +178,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     /* ----- Location and route progress callbacks ----- */
     private val locationObserver = object : LocationObserver {
-        override fun onNewRawLocation(rawLocation: Location) {
-            // not handled
-        }
-
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             // update location puck's position on the map
             navigationLocationProvider.changePosition(

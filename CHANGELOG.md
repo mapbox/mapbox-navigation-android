@@ -13,6 +13,9 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue with restricted road visualization on the route line that occurred during route refreshes. [#6399](https://github.com/mapbox/mapbox-navigation-android/pull/6399)
 - Improved precision of restricted sections visualization, especially for long routes. [#6399](https://github.com/mapbox/mapbox-navigation-android/pull/6399)
 - Fixed a rare issue where alternative route would not be vanished until deviation point for `MapboxRouteLineApi#setNavigationRoutes(routes, metadata)` when the route's geometry contained duplicate points. [#6399](https://github.com/mapbox/mapbox-navigation-android/pull/6399)
+- Make `NavigationLocationProvider` an open class so it can be extended. [#6420](https://github.com/mapbox/mapbox-navigation-android/pull/6420)
+- Make `NavigationLocationProvider` inherit from `MapboxNavigationObserver` so it can be used with `MapboxNavigationApp`. [#6420](https://github.com/mapbox/mapbox-navigation-android/pull/6420)
+- Convert `LocationObserver` into a java interface with default functions so the functions are optional and new functions can be added. [#6420](https://github.com/mapbox/mapbox-navigation-android/pull/6420)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.4 - 30 September, 2022
 ### Changelog

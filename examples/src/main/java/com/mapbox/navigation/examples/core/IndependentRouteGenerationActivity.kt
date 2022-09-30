@@ -129,7 +129,6 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
     private val locationObserver = object : LocationObserver {
         private var initialUpdateDone = false
 
-        override fun onNewRawLocation(rawLocation: Location) {}
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             val enhancedLocation = locationMatcherResult.enhancedLocation
             if (!initialUpdateDone) {

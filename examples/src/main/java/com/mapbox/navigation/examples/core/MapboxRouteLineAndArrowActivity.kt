@@ -321,7 +321,6 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
     }
 
     private val locationObserver = object : LocationObserver {
-        override fun onNewRawLocation(rawLocation: Location) {}
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             navigationLocationProvider.changePosition(
                 locationMatcherResult.enhancedLocation,

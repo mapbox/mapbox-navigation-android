@@ -198,11 +198,6 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
     }
 
     private val locationObserver = object : LocationObserver {
-
-        override fun onNewRawLocation(rawLocation: Location) {
-            // no impl
-        }
-
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             lastLocation = locationMatcherResult.enhancedLocation
         }

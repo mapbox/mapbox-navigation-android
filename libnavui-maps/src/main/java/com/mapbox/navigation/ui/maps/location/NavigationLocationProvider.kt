@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.location
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.location.Location
+import androidx.annotation.CallSuper
 import com.mapbox.geojson.Point
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
@@ -10,6 +11,9 @@ import com.mapbox.maps.plugin.locationcomponent.LocationConsumer
 import com.mapbox.maps.plugin.locationcomponent.LocationProvider
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.ui.maps.internal.location.PuckAnimationEvaluator
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -53,7 +57,10 @@ import java.util.concurrent.CopyOnWriteArraySet
  * }
  * ```
  */
-class NavigationLocationProvider : LocationProvider {
+open class NavigationLocationProvider :
+    LocationProvider,
+    LocationObserver,
+    MapboxNavigationObserver {
 
     private val locationConsumers = CopyOnWriteArraySet<LocationConsumer>()
 
@@ -74,6 +81,17 @@ class NavigationLocationProvider : LocationProvider {
         private set
 
     /**
+     * Automatically updated when this class is registered to [MapboxNavigationApp]
+     */
+    @CallSuper
+    override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+        changePosition(
+            locationMatcherResult.enhancedLocation,
+            locationMatcherResult.keyPoints,
+        )
+    }
+
+    /**
      * Register the location consumer to the Location Provider.
      *
      * The Location Consumer will get location and bearing updates from the Location Provider.
@@ -81,7 +99,7 @@ class NavigationLocationProvider : LocationProvider {
      * @param locationConsumer
      */
     @SuppressLint("MissingPermission")
-    override fun registerLocationConsumer(locationConsumer: LocationConsumer) {
+    final override fun registerLocationConsumer(locationConsumer: LocationConsumer) {
         if (locationConsumers.add(locationConsumer)) {
             ifNonNull(lastLocation, lastKeyPoints) { location, keyPoints ->
                 locationConsumer.notifyLocationUpdates(
@@ -103,7 +121,7 @@ class NavigationLocationProvider : LocationProvider {
      *
      * @param locationConsumer
      */
-    override fun unRegisterLocationConsumer(locationConsumer: LocationConsumer) {
+    final override fun unRegisterLocationConsumer(locationConsumer: LocationConsumer) {
         locationConsumers.remove(locationConsumer)
     }
 
@@ -122,6 +140,7 @@ class NavigationLocationProvider : LocationProvider {
      * @see LocationObserver
      * @see MapboxNavigation.registerLocationObserver
      */
+    @CallSuper
     fun changePosition(
         location: Location,
         keyPoints: List<Location> = emptyList(),
@@ -138,6 +157,27 @@ class NavigationLocationProvider : LocationProvider {
         }
         lastLocation = location
         lastKeyPoints = keyPoints
+    }
+
+    /**
+     * Use [getRegisteredInstance] to share a single instance of the [NavigationLocationProvider].
+     *
+     * @see [MapboxNavigationApp]
+     */
+    @CallSuper
+    override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        mapboxNavigation.registerLocationObserver(this)
+    }
+
+    /**
+     * Disabled automatically with the [MapboxNavigationApp]. You can manually disable with
+     * [MapboxNavigationApp.unregisterObserver].
+     *
+     * @see [MapboxNavigationApp]
+     */
+    @CallSuper
+    override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        mapboxNavigation.unregisterLocationObserver(this)
     }
 
     private fun LocationConsumer.notifyLocationUpdates(
@@ -175,5 +215,15 @@ class NavigationLocationProvider : LocationProvider {
             evaluator.installIn(this)
             clientOptions?.also { apply(it) }
         }
+    }
+
+    companion object {
+        /**
+         * Get the registered instance or create one and register it to [MapboxNavigationApp].
+         */
+        @JvmStatic
+        fun getRegisteredInstance(): NavigationLocationProvider = MapboxNavigationApp
+            .getObservers(NavigationLocationProvider::class).firstOrNull()
+            ?: NavigationLocationProvider().also { MapboxNavigationApp.registerObserver(it) }
     }
 }

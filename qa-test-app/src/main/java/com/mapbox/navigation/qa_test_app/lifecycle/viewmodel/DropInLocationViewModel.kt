@@ -26,10 +26,6 @@ class DropInLocationViewModel : ViewModel() {
     val locationLiveData: LiveData<Location> = _locationLiveData
 
     private val locationObserver: LocationObserver = object : LocationObserver {
-        override fun onNewRawLocation(rawLocation: Location) {
-            // no op
-        }
-
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             navigationLocationProvider.changePosition(
                 locationMatcherResult.enhancedLocation,

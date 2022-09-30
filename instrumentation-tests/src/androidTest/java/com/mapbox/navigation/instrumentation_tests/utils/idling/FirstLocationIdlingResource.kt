@@ -54,10 +54,6 @@ class FirstLocationIdlingResource(
 
     /** Used to communicate with [MapboxNavigation.registerLocationObserver] **/
     private val locationObserver = object : LocationObserver {
-        override fun onNewRawLocation(rawLocation: Location) {
-            // Do nothing
-        }
-
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             if (firstLocation == null) {
                 firstLocation = locationMatcherResult.enhancedLocation

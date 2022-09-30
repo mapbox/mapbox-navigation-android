@@ -166,10 +166,6 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private val locationObserver: LocationObserver = object : LocationObserver {
-        override fun onNewRawLocation(rawLocation: Location) {
-            Log.d(TAG, "raw location $rawLocation")
-        }
-
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             navigationLocationProvider.changePosition(locationMatcherResult.enhancedLocation)
         }
