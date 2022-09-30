@@ -15,15 +15,20 @@ class RejectedRoutesTrackerTest {
 
     @Test
     fun `track faster route from Munich to Nuremberg moving`() {
-        val fasterRoutes = FasterRouteTracker()
+        val fasterRoutes = FasterRouteTracker(
+            maximumAcceptedSimilarity = 0.5
+        )
         val recordedRoutesUpdates = readRouteObserverResults("com.mapbox.navigation.core.internal.fasterroute.munichnuremberg")
         for (recordedUpdate in recordedRoutesUpdates) {
             val result = fasterRoutes.routesUpdated(
                 recordedUpdate.update,
                 recordedUpdate.alternativeMetadata.values.toList()
             )
+            val alternativesFromUpdate = recordedUpdate.alternativeMetadata.values
+                .map { it.alternativeId }
+                .joinToString(separator = ",") { it.toString() }
             assertEquals(
-                "incorrect result for update with alternatives ${recordedUpdate.alternativeMetadata.values.map { it.alternativeId }.joinToString(separator = ",") { it.toString() }}",
+                "incorrect result for update with alternatives $alternativesFromUpdate",
                 FasterRouteResult.NoFasterRoad,
                 result
             )

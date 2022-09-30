@@ -5,10 +5,12 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 
-class FasterRouteTracker {
+class FasterRouteTracker(
+    maximumAcceptedSimilarity: Double
+) {
 
     private val rejectedRoutesTracker = RejectedRoutesTracker(
-        minimumGeometrySimilarity = 0.5
+        minimumGeometrySimilarity = maximumAcceptedSimilarity
     )
 
     fun routesUpdated(
@@ -33,6 +35,7 @@ class FasterRouteTracker {
             val fasterThanPrimary =  update.navigationRoutes.first().directionsRoute.duration() - metadataMap[fasterRoute.id]!!.infoFromStartOfPrimary.duration
             if (fasterThanPrimary > 0) {
                 return FasterRouteResult.NewFasterRoadFound(
+                    fasterRoute,
                     similarityToRejectedAlternative = 0.5,
                     fasterThanPrimary = fasterThanPrimary
                 )
@@ -45,6 +48,7 @@ class FasterRouteTracker {
 sealed class FasterRouteResult {
     object NoFasterRoad: FasterRouteResult()
     data class NewFasterRoadFound(
+        val route: NavigationRoute,
         val similarityToRejectedAlternative: Double,
         val fasterThanPrimary: Double,
     ): FasterRouteResult()
