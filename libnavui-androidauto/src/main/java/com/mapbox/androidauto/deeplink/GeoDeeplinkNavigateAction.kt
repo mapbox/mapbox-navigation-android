@@ -1,57 +1,38 @@
 package com.mapbox.androidauto.deeplink
 
 import android.content.Intent
-import androidx.car.app.Screen
-import androidx.lifecycle.Lifecycle
-import com.mapbox.androidauto.car.MainCarContext
-import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
-import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
-import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapScreen
-import com.mapbox.androidauto.car.search.SearchCarContext
+import com.mapbox.androidauto.car.MapboxCarContext
 import com.mapbox.androidauto.internal.logAndroidAuto
+import com.mapbox.androidauto.screenmanager.MapboxScreen
+import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplink
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplinkParser
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 
-class GeoDeeplinkNavigateAction(
-    val mainCarContext: MainCarContext,
-    val lifecycle: Lifecycle
-) {
-    fun onNewIntent(intent: Intent): Screen? {
+class GeoDeeplinkNavigateAction(val mapboxCarContext: MapboxCarContext) {
+    fun onNewIntent(intent: Intent): Boolean {
         val mapboxNavigation = MapboxNavigationApp.current()
-            ?: return null
+            ?: return false
         val geoDeeplink = GeoDeeplinkParser.parse(intent.dataString)
-            ?: return null
+            ?: return false
         return preparePlacesListOnMapScreen(mapboxNavigation, geoDeeplink)
     }
 
     private fun preparePlacesListOnMapScreen(
         mapboxNavigation: MapboxNavigation,
         geoDeeplink: GeoDeeplink
-    ): Screen {
+    ): Boolean {
         logAndroidAuto("GeoDeeplinkNavigateAction preparePlacesListOnMapScreen")
         val accessToken = mapboxNavigation.navigationOptions.accessToken
         checkNotNull(accessToken) {
             "GeoDeeplinkGeocoding requires an access token"
         }
-        val placesProvider = GeoDeeplinkPlacesListOnMapProvider(
+        mapboxCarContext.geoDeeplinkPlacesProvider = GeoDeeplinkPlacesListOnMapProvider(
             GeoDeeplinkGeocoding(accessToken),
             geoDeeplink
         )
-        val feedbackPoll = mainCarContext.feedbackPollProvider
-            .getSearchFeedbackPoll(mainCarContext.carContext)
-        return PlacesListOnMapScreen(
-            SearchCarContext(mainCarContext),
-            placesProvider,
-            listOf(
-                CarFeedbackAction(
-                    mainCarContext.mapboxCarMap,
-                    CarFeedbackSender(),
-                    feedbackPoll,
-                    placesProvider,
-                )
-            )
-        )
+        MapboxScreenManager.push(MapboxScreen.GEO_DEEPLINK)
+        return true
     }
 }

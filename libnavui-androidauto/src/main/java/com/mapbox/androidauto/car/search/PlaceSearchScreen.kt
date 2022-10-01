@@ -12,16 +12,14 @@ import androidx.car.app.model.SearchTemplate
 import androidx.car.app.model.Template
 import androidx.lifecycle.lifecycleScope
 import com.mapbox.androidauto.R
-import com.mapbox.androidauto.car.feedback.core.CarFeedbackSearchOptions
-import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.car.navigation.CarDistanceFormatter
-import com.mapbox.androidauto.car.preview.CarRoutePreviewScreen
-import com.mapbox.androidauto.car.preview.CarRouteRequestCallback
-import com.mapbox.androidauto.car.preview.RoutePreviewCarContext
+import com.mapbox.androidauto.car.preview.CarRoutePreviewRequestCallback
+import com.mapbox.androidauto.internal.car.extensions.addBackPressedHandler
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.internal.logAndroidAutoFailure
-import com.mapbox.maps.MapboxExperimental
+import com.mapbox.androidauto.screenmanager.MapboxScreen
+import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.internal.extensions.attachCreated
@@ -31,8 +29,8 @@ import kotlinx.coroutines.launch
 /**
  * This screen allows the user to search for a destination.
  */
-@OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)
-class PlaceSearchScreen @UiThread constructor(
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+internal class PlaceSearchScreen @UiThread constructor(
     private val searchCarContext: SearchCarContext,
 ) : Screen(searchCarContext.carContext) {
 
@@ -43,15 +41,10 @@ class PlaceSearchScreen @UiThread constructor(
             invalidate()
         }
 
-    // Cached to send to feedback.
-    private var searchSuggestions: List<SearchSuggestion> = emptyList()
-
-    private val carRouteRequestCallback = object : CarRouteRequestCallback {
+    private val carRouteRequestCallback = object : CarRoutePreviewRequestCallback {
 
         override fun onRoutesReady(placeRecord: PlaceRecord, routes: List<NavigationRoute>) {
-            val routePreviewCarContext = RoutePreviewCarContext(searchCarContext.mainCarContext)
-
-            screenManager.push(CarRoutePreviewScreen(routePreviewCarContext, placeRecord, routes))
+            MapboxScreenManager.push(MapboxScreen.ROUTE_PREVIEW)
         }
 
         override fun onUnknownCurrentLocation() {
@@ -68,7 +61,10 @@ class PlaceSearchScreen @UiThread constructor(
     }
 
     init {
-        attachCreated(searchCarContext.carRouteRequest, searchCarContext.carPlaceSearch)
+        addBackPressedHandler {
+            searchCarContext.mapboxScreenManager.goBack()
+        }
+        attachCreated(searchCarContext.carRoutePreviewRequest, searchCarContext.carPlaceSearch)
     }
 
     override fun onGetTemplate(): Template {
@@ -88,13 +84,8 @@ class PlaceSearchScreen @UiThread constructor(
                 ActionStrip.Builder()
                     .addAction(
                         CarFeedbackAction(
-                            searchCarContext.mainCarContext.mapboxCarMap,
-                            CarFeedbackSender(),
-                            searchCarContext.feedbackPollProvider
-                                .getSearchFeedbackPoll(searchCarContext.carContext),
-                        ) {
-                            CarFeedbackSearchOptions(searchSuggestions = searchSuggestions)
-                        }.getAction(this@PlaceSearchScreen)
+                            MapboxScreen.SEARCH_FEEDBACK
+                        ).getAction(this@PlaceSearchScreen)
                     )
                     .build()
             )
@@ -108,7 +99,6 @@ class PlaceSearchScreen @UiThread constructor(
         lifecycleScope.launch {
             val suggestions = searchCarContext.carPlaceSearch.search(searchText)
                 .getOrDefault(emptyList())
-            searchSuggestions = suggestions
             itemList = if (suggestions.isEmpty()) {
                 buildNoItemsList(R.string.car_search_no_results)
             } else {
@@ -139,7 +129,7 @@ class PlaceSearchScreen @UiThread constructor(
                 .getOrDefault(emptyList())
             logAndroidAuto("onClickSearch select ${searchResults.joinToString()}")
             if (searchResults.isNotEmpty()) {
-                searchCarContext.carRouteRequest.request(
+                searchCarContext.carRoutePreviewRequest.request(
                     PlaceRecordMapper.fromSearchResult(searchResults.first()),
                     carRouteRequestCallback
                 )

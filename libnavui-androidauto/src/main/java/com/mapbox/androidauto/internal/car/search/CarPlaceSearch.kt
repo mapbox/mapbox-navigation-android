@@ -1,6 +1,5 @@
 package com.mapbox.androidauto.internal.car.search
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.search.result.SearchResult
 import com.mapbox.search.result.SearchSuggestion
@@ -11,7 +10,6 @@ import com.mapbox.search.result.SearchSuggestion
  * This is an internal interface because [SearchSuggestion] and [SearchResult] are subject to
  * change.
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 interface CarPlaceSearch : MapboxNavigationObserver {
 
     /**

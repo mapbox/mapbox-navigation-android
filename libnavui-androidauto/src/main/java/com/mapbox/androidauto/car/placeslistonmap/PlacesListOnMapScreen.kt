@@ -16,12 +16,12 @@ import com.mapbox.androidauto.R
 import com.mapbox.androidauto.car.action.MapboxActionProvider
 import com.mapbox.androidauto.car.location.CarLocationRenderer
 import com.mapbox.androidauto.car.navigation.CarLocationsOverviewCamera
-import com.mapbox.androidauto.car.preview.CarRoutePreviewScreen
-import com.mapbox.androidauto.car.preview.CarRouteRequestCallback
-import com.mapbox.androidauto.car.preview.RoutePreviewCarContext
+import com.mapbox.androidauto.car.preview.CarRoutePreviewRequestCallback
 import com.mapbox.androidauto.car.search.PlaceRecord
 import com.mapbox.androidauto.car.search.SearchCarContext
-import com.mapbox.androidauto.internal.logAndroidAuto
+import com.mapbox.androidauto.internal.car.extensions.addBackPressedHandler
+import com.mapbox.androidauto.screenmanager.MapboxScreen
+import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -29,8 +29,8 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
-@MapboxExperimental
-class PlacesListOnMapScreen @UiThread constructor(
+@OptIn(MapboxExperimental::class)
+internal class PlacesListOnMapScreen @UiThread constructor(
     private val searchCarContext: SearchCarContext,
     placesProvider: PlacesListOnMapProvider,
     private val actionProviders: List<MapboxActionProvider>,
@@ -44,6 +44,9 @@ class PlacesListOnMapScreen @UiThread constructor(
     private val placesListOnMapManager = PlacesListOnMapManager(placesProvider)
 
     init {
+        addBackPressedHandler {
+            searchCarContext.mapboxScreenManager.goBack()
+        }
         lifecycleScope.launch {
             placesListOnMapManager.placeRecords.collect { placeRecords ->
                 onPlaceRecordsChanged(placeRecords)
@@ -56,13 +59,11 @@ class PlacesListOnMapScreen @UiThread constructor(
         }
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onCreate(owner: LifecycleOwner) {
-                super.onCreate(owner)
-                MapboxNavigationApp.registerObserver(searchCarContext.carRouteRequest)
+                MapboxNavigationApp.registerObserver(searchCarContext.carRoutePreviewRequest)
             }
 
             override fun onDestroy(owner: LifecycleOwner) {
-                super.onDestroy(owner)
-                MapboxNavigationApp.unregisterObserver(searchCarContext.carRouteRequest)
+                MapboxNavigationApp.unregisterObserver(searchCarContext.carRoutePreviewRequest)
             }
 
             override fun onResume(owner: LifecycleOwner) {
@@ -111,9 +112,9 @@ class PlacesListOnMapScreen @UiThread constructor(
     }
 
     private fun onPlaceRecordSelected(placeRecord: PlaceRecord) {
-        val carRouteRequestCallback = object : CarRouteRequestCallback {
+        val carRouteRequestCallback = object : CarRoutePreviewRequestCallback {
             override fun onRoutesReady(placeRecord: PlaceRecord, routes: List<NavigationRoute>) {
-                onPlaceRecordSelectedRoutesReady(placeRecord, routes)
+                MapboxScreenManager.push(MapboxScreen.ROUTE_PREVIEW)
             }
 
             override fun onUnknownCurrentLocation() {
@@ -128,16 +129,7 @@ class PlacesListOnMapScreen @UiThread constructor(
                 onErrorItemList(R.string.car_search_no_results)
             }
         }
-        searchCarContext.carRouteRequest.request(placeRecord, carRouteRequestCallback)
-    }
-
-    private fun onPlaceRecordSelectedRoutesReady(
-        placeRecord: PlaceRecord,
-        routes: List<NavigationRoute>
-    ) {
-        logAndroidAuto("PlacesListOnMapScreen go to CarRoutePreviewScreen ${routes.size}")
-        val routePreviewCarContext = RoutePreviewCarContext(searchCarContext.mainCarContext)
-        screenManager.push(CarRoutePreviewScreen(routePreviewCarContext, placeRecord, routes))
+        searchCarContext.carRoutePreviewRequest.request(placeRecord, carRouteRequestCallback)
     }
 
     private fun onErrorItemList(@StringRes stringRes: Int) {

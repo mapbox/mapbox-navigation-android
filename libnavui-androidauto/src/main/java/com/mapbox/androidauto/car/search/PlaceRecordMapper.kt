@@ -6,7 +6,7 @@ import com.mapbox.search.record.FavoriteRecord
 import com.mapbox.search.result.SearchAddress
 import com.mapbox.search.result.SearchResult
 
-object PlaceRecordMapper {
+internal object PlaceRecordMapper {
     fun fromSearchResult(searchResult: SearchResult): PlaceRecord {
         return PlaceRecord(
             id = searchResult.id,

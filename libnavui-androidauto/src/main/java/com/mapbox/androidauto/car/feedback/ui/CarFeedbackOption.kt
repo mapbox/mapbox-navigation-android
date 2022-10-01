@@ -8,7 +8,6 @@ data class CarFeedbackOption(
     val icon: CarFeedbackIcon,
     val type: String? = null,
     val subType: List<String>? = null,
-    @com.mapbox.search.analytics.FeedbackEvent.FeedbackReason
     val searchFeedbackReason: String? = null,
     val favoritesFeedbackReason: String? = null,
     val nextPoll: CarFeedbackPoll? = null,

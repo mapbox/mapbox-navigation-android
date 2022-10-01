@@ -10,7 +10,7 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class CarFeedbackSender {
+internal class CarFeedbackSender {
 
     private val gson = Gson()
 
@@ -63,7 +63,7 @@ class CarFeedbackSender {
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @Keep
-data class CarFeedbackHistoryEvent(
+internal data class CarFeedbackHistoryEvent(
     val sourceScreen: String,
     val carFeedbackItem: CarFeedbackItem? = null,
     val encodedSnapshot: String? = null,

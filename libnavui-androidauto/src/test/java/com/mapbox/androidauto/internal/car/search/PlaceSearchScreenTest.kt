@@ -29,12 +29,12 @@ class PlaceSearchScreenTest : MapboxRobolectricTestRunner() {
     val coroutineRule = MainCoroutineRule()
 
     private val searchCarContext: SearchCarContext = mockk {
-        every { mainCarContext } returns mockk()
+        every { mapboxCarContext } returns mockk()
         every { carContext } returns mockk {
             every { getString(R.string.car_search_no_results) } returns "No results"
         }
         every { carPlaceSearch } returns mockk(relaxed = true)
-        every { carRouteRequest } returns mockk()
+        every { carRoutePreviewRequest } returns mockk()
     }
 
     private val placeSearchScreen = PlaceSearchScreen(searchCarContext)

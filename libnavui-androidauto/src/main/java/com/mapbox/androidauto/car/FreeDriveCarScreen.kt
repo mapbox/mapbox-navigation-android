@@ -20,42 +20,41 @@ import com.mapbox.maps.MapboxExperimental
  * When the app is launched from Android Auto
  */
 @OptIn(MapboxExperimental::class)
-class MainCarScreen @UiThread constructor(
-    private val mainCarContext: MainCarContext
-) : Screen(mainCarContext.carContext) {
+class FreeDriveCarScreen @UiThread constructor(
+    private val mapboxCarContext: MapboxCarContext
+) : Screen(mapboxCarContext.carContext) {
 
     val carRouteLine = CarRouteLine()
     val carLocationRenderer = CarLocationRenderer()
-    val carSpeedLimitRenderer = CarSpeedLimitRenderer(mainCarContext)
+    val carSpeedLimitRenderer = CarSpeedLimitRenderer(mapboxCarContext)
     val carNavigationCamera = CarNavigationCamera(
         initialCarCameraMode = CarCameraMode.FOLLOWING,
         alternativeCarCameraMode = null,
     )
     private val roadLabelSurfaceLayer = RoadLabelSurfaceLayer(carContext)
-    private val mainActionStrip = MainActionStrip(this, mainCarContext)
     private val mapActionStripBuilder = MainMapActionStrip(this, carNavigationCamera)
 
     init {
-        logAndroidAuto("MainCarScreen constructor")
+        logAndroidAuto("FreeDriveCarScreen constructor")
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onResume(owner: LifecycleOwner) {
-                logAndroidAuto("MainCarScreen onResume")
-                mainCarContext.mapboxCarMap.registerObserver(carRouteLine)
-                mainCarContext.mapboxCarMap.registerObserver(carLocationRenderer)
-                mainCarContext.mapboxCarMap.registerObserver(roadLabelSurfaceLayer)
-                mainCarContext.mapboxCarMap.registerObserver(carSpeedLimitRenderer)
-                mainCarContext.mapboxCarMap.registerObserver(carNavigationCamera)
-                mainCarContext.mapboxCarMap.setGestureHandler(carNavigationCamera.gestureHandler)
+                logAndroidAuto("FreeDriveCarScreen onResume")
+                mapboxCarContext.mapboxCarMap.registerObserver(carRouteLine)
+                mapboxCarContext.mapboxCarMap.registerObserver(carLocationRenderer)
+                mapboxCarContext.mapboxCarMap.registerObserver(roadLabelSurfaceLayer)
+                mapboxCarContext.mapboxCarMap.registerObserver(carSpeedLimitRenderer)
+                mapboxCarContext.mapboxCarMap.registerObserver(carNavigationCamera)
+                mapboxCarContext.mapboxCarMap.setGestureHandler(carNavigationCamera.gestureHandler)
             }
 
             override fun onPause(owner: LifecycleOwner) {
-                logAndroidAuto("MainCarScreen onPause")
-                mainCarContext.mapboxCarMap.unregisterObserver(carRouteLine)
-                mainCarContext.mapboxCarMap.unregisterObserver(carLocationRenderer)
-                mainCarContext.mapboxCarMap.unregisterObserver(roadLabelSurfaceLayer)
-                mainCarContext.mapboxCarMap.unregisterObserver(carSpeedLimitRenderer)
-                mainCarContext.mapboxCarMap.unregisterObserver(carNavigationCamera)
-                mainCarContext.mapboxCarMap.setGestureHandler(null)
+                logAndroidAuto("FreeDriveCarScreen onPause")
+                mapboxCarContext.mapboxCarMap.unregisterObserver(carRouteLine)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(carLocationRenderer)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(roadLabelSurfaceLayer)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(carSpeedLimitRenderer)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(carNavigationCamera)
+                mapboxCarContext.mapboxCarMap.setGestureHandler(null)
             }
         })
     }
@@ -63,7 +62,7 @@ class MainCarScreen @UiThread constructor(
     override fun onGetTemplate(): Template {
         return NavigationTemplate.Builder()
             .setBackgroundColor(CarColor.PRIMARY)
-            .setActionStrip(mainActionStrip.builder().build())
+            .setActionStrip(FreeDriveActionStrip(this).builder().build())
             .setMapActionStrip(mapActionStripBuilder.build())
             .build()
     }

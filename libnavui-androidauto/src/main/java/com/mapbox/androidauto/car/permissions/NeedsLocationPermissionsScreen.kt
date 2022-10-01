@@ -7,10 +7,12 @@ import androidx.car.app.model.MessageTemplate
 import androidx.car.app.model.Template
 import com.mapbox.androidauto.R
 
+/**
+ * Provides instructions for accepting location permissions.
+ */
 class NeedsLocationPermissionsScreen(
     carContext: CarContext
 ) : Screen(carContext) {
-
     override fun onGetTemplate(): Template {
         return MessageTemplate.Builder(
             carContext.getString(R.string.car_message_location_permissions)

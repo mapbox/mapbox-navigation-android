@@ -60,7 +60,7 @@ class CarRouteRequestTest {
         }
     }
 
-    private val carRouteRequest = CarRouteRequest(routeOptionsInterceptor)
+    private val carRouteRequest = CarRoutePreviewRequest(routeOptionsInterceptor)
 
     @Test
     fun `onRoutesReady is called after successful request`() {
@@ -70,7 +70,7 @@ class CarRouteRequestTest {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
         }
-        val callback: CarRouteRequestCallback = mockk(relaxUnitFun = true)
+        val callback: CarRoutePreviewRequestCallback = mockk(relaxUnitFun = true)
         val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
         carRouteRequest.onAttached(mapboxNavigation)
         carRouteRequest.request(
@@ -87,7 +87,7 @@ class CarRouteRequestTest {
     @Test
     fun `onUnknownCurrentLocation is called when current location is null`() {
         every { locationProvider.lastLocation } returns null
-        val callback: CarRouteRequestCallback = mockk(relaxUnitFun = true)
+        val callback: CarRoutePreviewRequestCallback = mockk(relaxUnitFun = true)
         val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
         carRouteRequest.onAttached(mapboxNavigation)
         carRouteRequest.request(
@@ -106,7 +106,7 @@ class CarRouteRequestTest {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
         }
-        val callback: CarRouteRequestCallback = mockk(relaxUnitFun = true)
+        val callback: CarRoutePreviewRequestCallback = mockk(relaxUnitFun = true)
         carRouteRequest.onAttached(mapboxNavigation)
         carRouteRequest.request(
             mockk { every { coordinate } returns null },
@@ -124,7 +124,7 @@ class CarRouteRequestTest {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
         }
-        val callback: CarRouteRequestCallback = mockk(relaxUnitFun = true)
+        val callback: CarRoutePreviewRequestCallback = mockk(relaxUnitFun = true)
         val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
         carRouteRequest.onAttached(mapboxNavigation)
         carRouteRequest.request(
@@ -145,7 +145,7 @@ class CarRouteRequestTest {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
         }
-        val callback: CarRouteRequestCallback = mockk(relaxUnitFun = true)
+        val callback: CarRoutePreviewRequestCallback = mockk(relaxUnitFun = true)
         val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
         carRouteRequest.onAttached(mapboxNavigation)
         carRouteRequest.request(
@@ -166,7 +166,7 @@ class CarRouteRequestTest {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
         }
-        val callback: CarRouteRequestCallback = mockk(relaxUnitFun = true)
+        val callback: CarRoutePreviewRequestCallback = mockk(relaxUnitFun = true)
         val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
         carRouteRequest.request(
             mockk { every { coordinate } returns searchCoordinate },
@@ -185,7 +185,7 @@ class CarRouteRequestTest {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
         }
-        val callback: CarRouteRequestCallback = mockk(relaxUnitFun = true)
+        val callback: CarRoutePreviewRequestCallback = mockk(relaxUnitFun = true)
         val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
         carRouteRequest.onAttached(mapboxNavigation)
         carRouteRequest.request(
@@ -206,7 +206,7 @@ class CarRouteRequestTest {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
         }
-        val callback = mockk<CarRouteRequestCallback>(relaxUnitFun = true)
+        val callback = mockk<CarRoutePreviewRequestCallback>(relaxUnitFun = true)
         val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
         carRouteRequest.onAttached(mapboxNavigation)
         carRouteRequest.request(mockk { every { coordinate } returns searchCoordinate }, callback)
@@ -225,7 +225,7 @@ class CarRouteRequestTest {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
         }
-        val callback = mockk<CarRouteRequestCallback>(relaxUnitFun = true)
+        val callback = mockk<CarRoutePreviewRequestCallback>(relaxUnitFun = true)
         val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
         carRouteRequest.onAttached(mapboxNavigation)
         carRouteRequest.request(mockk { every { coordinate } returns searchCoordinate }, callback)

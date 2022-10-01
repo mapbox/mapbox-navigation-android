@@ -9,8 +9,8 @@ import androidx.car.app.navigation.model.NavigationTemplate
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.androidauto.R
-import com.mapbox.androidauto.car.MainCarContext
 import com.mapbox.androidauto.car.MainMapActionStrip
+import com.mapbox.androidauto.car.MapboxCarContext
 import com.mapbox.androidauto.car.action.MapboxActionProvider
 import com.mapbox.androidauto.car.location.CarLocationRenderer
 import com.mapbox.androidauto.car.navigation.roadlabel.RoadLabelSurfaceLayer
@@ -25,14 +25,14 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
  * for completing the route.
  */
 @OptIn(MapboxExperimental::class)
-class ActiveGuidanceScreen(
-    private val mainCarContext: MainCarContext,
+internal class ActiveGuidanceScreen constructor(
+    private val mapboxCarContext: MapboxCarContext,
     private val actionProviders: List<MapboxActionProvider>,
-) : Screen(mainCarContext.carContext) {
+) : Screen(mapboxCarContext.carContext) {
 
     val carRouteLine = CarRouteLine()
     val carLocationRenderer = CarLocationRenderer()
-    val carSpeedLimitRenderer = CarSpeedLimitRenderer(mainCarContext)
+    val carSpeedLimitRenderer = CarSpeedLimitRenderer(mapboxCarContext)
     val carNavigationCamera = CarNavigationCamera(
         initialCarCameraMode = CarCameraMode.FOLLOWING,
         alternativeCarCameraMode = CarCameraMode.OVERVIEW,
@@ -49,27 +49,27 @@ class ActiveGuidanceScreen(
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onResume(owner: LifecycleOwner) {
                 logAndroidAuto("ActiveGuidanceScreen onResume")
-                mainCarContext.mapboxCarMap.registerObserver(carLocationRenderer)
-                mainCarContext.mapboxCarMap.registerObserver(roadLabelSurfaceLayer)
-                mainCarContext.mapboxCarMap.registerObserver(carSpeedLimitRenderer)
-                mainCarContext.mapboxCarMap.registerObserver(carNavigationCamera)
-                mainCarContext.mapboxCarMap.setGestureHandler(carNavigationCamera.gestureHandler)
-                mainCarContext.mapboxCarMap.registerObserver(carRouteLine)
-                mainCarContext.mapboxCarMap.registerObserver(carActiveGuidanceMarkers)
-                mainCarContext.mapboxCarMap.registerObserver(navigationInfoProvider)
+                mapboxCarContext.mapboxCarMap.registerObserver(carLocationRenderer)
+                mapboxCarContext.mapboxCarMap.registerObserver(roadLabelSurfaceLayer)
+                mapboxCarContext.mapboxCarMap.registerObserver(carSpeedLimitRenderer)
+                mapboxCarContext.mapboxCarMap.registerObserver(carNavigationCamera)
+                mapboxCarContext.mapboxCarMap.setGestureHandler(carNavigationCamera.gestureHandler)
+                mapboxCarContext.mapboxCarMap.registerObserver(carRouteLine)
+                mapboxCarContext.mapboxCarMap.registerObserver(carActiveGuidanceMarkers)
+                mapboxCarContext.mapboxCarMap.registerObserver(navigationInfoProvider)
                 MapboxNavigationApp.registerObserver(carArrivalTrigger)
             }
 
             override fun onPause(owner: LifecycleOwner) {
                 logAndroidAuto("ActiveGuidanceScreen onPause")
-                mainCarContext.mapboxCarMap.unregisterObserver(roadLabelSurfaceLayer)
-                mainCarContext.mapboxCarMap.unregisterObserver(carLocationRenderer)
-                mainCarContext.mapboxCarMap.unregisterObserver(carSpeedLimitRenderer)
-                mainCarContext.mapboxCarMap.unregisterObserver(carNavigationCamera)
-                mainCarContext.mapboxCarMap.setGestureHandler(null)
-                mainCarContext.mapboxCarMap.unregisterObserver(carRouteLine)
-                mainCarContext.mapboxCarMap.unregisterObserver(carActiveGuidanceMarkers)
-                mainCarContext.mapboxCarMap.unregisterObserver(navigationInfoProvider)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(roadLabelSurfaceLayer)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(carLocationRenderer)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(carSpeedLimitRenderer)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(carNavigationCamera)
+                mapboxCarContext.mapboxCarMap.setGestureHandler(null)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(carRouteLine)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(carActiveGuidanceMarkers)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(navigationInfoProvider)
                 MapboxNavigationApp.unregisterObserver(carArrivalTrigger)
             }
         })
