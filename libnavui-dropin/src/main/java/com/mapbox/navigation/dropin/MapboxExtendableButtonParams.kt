@@ -8,12 +8,15 @@ import androidx.annotation.StyleRes
  *
  * @param style style res of a button.
  * @param layoutParams layout params of a button.
+ * @param enabled `true` if the button should be enabled, `false` otherwise
  */
-class MapboxExtendableButtonParams(
+class MapboxExtendableButtonParams @JvmOverloads constructor(
     @StyleRes
     val style: Int,
     val layoutParams: LinearLayout.LayoutParams,
+    val enabled: Boolean = true
 ) {
+
     /**
      * Regenerate whenever a change is made
      */
@@ -25,6 +28,7 @@ class MapboxExtendableButtonParams(
 
         if (style != other.style) return false
         if (layoutParams != other.layoutParams) return false
+        if (enabled != other.enabled) return false
 
         return true
     }
@@ -35,6 +39,7 @@ class MapboxExtendableButtonParams(
     override fun hashCode(): Int {
         var result = style
         result = 31 * result + layoutParams.hashCode()
+        result = 31 * result + enabled.hashCode()
         return result
     }
 
@@ -44,7 +49,8 @@ class MapboxExtendableButtonParams(
     override fun toString(): String {
         return "MapboxExtendableButtonParams(" +
             "style=$style, " +
-            "layoutParams=$layoutParams" +
+            "layoutParams=$layoutParams, " +
+            "enabled=$enabled" +
             ")"
     }
 }

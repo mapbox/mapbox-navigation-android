@@ -13,6 +13,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue with restricted road visualization on the route line that occurred during route refreshes. [#6399](https://github.com/mapbox/mapbox-navigation-android/pull/6399)
 - Improved precision of restricted sections visualization, especially for long routes. [#6399](https://github.com/mapbox/mapbox-navigation-android/pull/6399)
 - Fixed a rare issue where alternative route would not be vanished until deviation point for `MapboxRouteLineApi#setNavigationRoutes(routes, metadata)` when the route's geometry contained duplicate points. [#6399](https://github.com/mapbox/mapbox-navigation-android/pull/6399)
+- Introduced `ViewStyleCutomization.compassButtonParams` property to configure compass. [#6395](https://github.com/mapbox/mapbox-navigation-android/pull/6395)
+- Introduced `MapboxExtendableButtonParams.enabled` property to enable/disable a button. [#6395](https://github.com/mapbox/mapbox-navigation-android/pull/6395)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.4 - 30 September, 2022
 ### Changelog
@@ -136,8 +138,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v6.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
 - Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
-
-- Introduced `ViewStyleCutomization.compassButtonParams` property along with `MapboxEnablableButtonParams` class to configure compass. [#6395](https://github.com/mapbox/mapbox-navigation-android/pull/6395)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.3 - 23 September, 2022
 ### Changelog

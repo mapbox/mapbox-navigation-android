@@ -12,7 +12,6 @@ import com.mapbox.navigation.dropin.databinding.MapboxActionButtonsLayoutBinding
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.dropin.navigationview.NavigationViewStyles
 import com.mapbox.navigation.dropin.util.TestStore
-import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.MainScope
@@ -33,11 +32,10 @@ internal class ActionButtonBinderTest {
 
     @Before
     fun setUp() {
-        MockKAnnotations.init(this, relaxUnitFun = true)
         ctx = ApplicationProvider.getApplicationContext()
         viewGroup = FrameLayout(ctx)
 
-        navContext = mockk {
+        navContext = mockk(relaxed = true) {
             every { store } returns TestStore()
             every { styles } returns NavigationViewStyles(ctx)
             every { viewModel } returns mockk {

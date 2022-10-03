@@ -49,7 +49,6 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
-import com.mapbox.navigation.dropin.MapboxEnablableButtonParams
 import com.mapbox.navigation.dropin.MapboxExtendableButtonParams
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteArrowOptions
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
@@ -699,12 +698,15 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
 
     private fun toggleEnableCompass(enabled: Boolean) {
         binding.navigationView.customizeViewStyles {
-            compassButtonParams = MapboxEnablableButtonParams(
-                enabled,
-                ViewStyleCustomization.defaultCompassExtendableButtonParams(
-                    this@MapboxNavigationViewCustomizedActivity
+            compassButtonParams = ViewStyleCustomization.defaultCompassButtonParams(
+                this@MapboxNavigationViewCustomizedActivity
+            ).let {
+                MapboxExtendableButtonParams(
+                    it.style,
+                    it.layoutParams,
+                    enabled
                 )
-            )
+            }
         }
     }
 

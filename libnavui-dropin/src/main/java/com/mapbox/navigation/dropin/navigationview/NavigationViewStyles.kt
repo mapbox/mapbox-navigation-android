@@ -58,9 +58,8 @@ internal class NavigationViewStyles(context: Context) {
     private val _mapScalebarParams: MutableStateFlow<MapboxMapScalebarParams> = MutableStateFlow(
         ViewStyleCustomization.defaultMapScalebarParams(context)
     )
-    private val _compassButtonParams: MutableStateFlow<MapboxEnablableButtonParams> = MutableStateFlow(
-        ViewStyleCustomization.defaultCompassButtonParams(context)
-    )
+    private val _compassButtonParams: MutableStateFlow<MapboxExtendableButtonParams> =
+        MutableStateFlow(ViewStyleCustomization.defaultCompassButtonParams(context))
 
     val infoPanelPeekHeight: StateFlow<Int> = _infoPanelPeekHeight.asStateFlow()
     val infoPanelMarginStart: StateFlow<Int> = _infoPanelMarginStart.asStateFlow()
@@ -90,7 +89,8 @@ internal class NavigationViewStyles(context: Context) {
     val arrivalTextAppearance: StateFlow<Int> = _arrivalTextAppearance.asStateFlow()
     val locationPuck: StateFlow<LocationPuck> = _locationPuck.asStateFlow()
     val mapScalebarParams: StateFlow<MapboxMapScalebarParams> = _mapScalebarParams.asStateFlow()
-    val compassButtonParams: StateFlow<MapboxEnablableButtonParams> = _compassButtonParams.asStateFlow()
+    val compassButtonParams: StateFlow<MapboxExtendableButtonParams> =
+        _compassButtonParams.asStateFlow()
 
     fun applyCustomization(customization: ViewStyleCustomization) {
         customization.infoPanelPeekHeight?.also { _infoPanelPeekHeight.value = it }

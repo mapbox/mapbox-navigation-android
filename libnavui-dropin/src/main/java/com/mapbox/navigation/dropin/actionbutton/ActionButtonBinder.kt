@@ -11,7 +11,6 @@ import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.extensions.navigationListOf
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
-import com.mapbox.navigation.dropin.MapboxEnablableButtonParams
 import com.mapbox.navigation.dropin.MapboxExtendableButtonParams
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.camera.CameraModeButtonComponentContractImpl
@@ -53,7 +52,10 @@ internal class ActionButtonBinder(
 
         val store = context.store
         return navigationListOf(
-            reloadOnChange(context.styles.compassButtonParams, context.mapViewOwner.mapViews) { params, mapView ->
+            reloadOnChange(
+                context.styles.compassButtonParams,
+                context.mapViewOwner.mapViews
+            ) { params, mapView ->
                 compassButtonComponent(binding, params, mapView)
             },
             reloadOnChange(context.styles.cameraModeButtonParams) { params ->
@@ -93,12 +95,12 @@ internal class ActionButtonBinder(
 
     private fun compassButtonComponent(
         binding: MapboxActionButtonsLayoutBinding,
-        customParams: MapboxEnablableButtonParams,
+        customParams: MapboxExtendableButtonParams,
         mapView: MapView?
     ): CompassButtonComponent {
         compassButton.recreate(
             ::MapboxExtendableButton,
-            customParams.buttonParams,
+            customParams,
             binding.buttonContainer,
             COMPASS_BUTTON_POSITION
         ).let {
@@ -188,10 +190,10 @@ internal class ActionButtonBinder(
     }
 
     private companion object {
-        private const val COMPASS_BUTTON_POSITION = 3
-        private const val CAMERA_BUTTON_POSITION = 0
-        private const val AUDIO_BUTTON_POSITION = 1
-        private const val RECENTER_BUTTON_POSITION = 2
+        private const val COMPASS_BUTTON_POSITION = 0
+        private const val CAMERA_BUTTON_POSITION = 1
+        private const val AUDIO_BUTTON_POSITION = 2
+        private const val RECENTER_BUTTON_POSITION = 3
     }
 }
 

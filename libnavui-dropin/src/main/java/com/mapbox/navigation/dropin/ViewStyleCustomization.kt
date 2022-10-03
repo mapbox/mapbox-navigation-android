@@ -183,7 +183,7 @@ class ViewStyleCustomization {
      * Map compass params.
      * Use [defaultCompassButtonParams] to reset to default.
      */
-    var compassButtonParams: MapboxEnablableButtonParams? = null
+    var compassButtonParams: MapboxExtendableButtonParams? = null
 
     companion object {
         /**
@@ -399,21 +399,16 @@ class ViewStyleCustomization {
             MapboxMapScalebarParams.Builder(context).build()
 
         /**
-         * Default map compass [MapboxEnablableButtonParams] parameters.
-         */
-        fun defaultCompassButtonParams(context: Context): MapboxEnablableButtonParams =
-            MapboxEnablableButtonParams(
-                false,
-                defaultCompassExtendableButtonParams(context)
-            )
-
-        /**
          * Default map compass [MapboxExtendableButtonParams] parameters.
          */
-        fun defaultCompassExtendableButtonParams(context: Context): MapboxExtendableButtonParams =
+        fun defaultCompassButtonParams(context: Context): MapboxExtendableButtonParams =
             MapboxExtendableButtonParams(
                 R.style.DropInStyleCompassButton,
-                context.defaultLayoutParams(),
+                context.defaultLayoutParams().apply {
+                    topMargin = context.defaultSpacing()
+                    bottomMargin = context.defaultSpacing()
+                },
+                false
             )
 
         private fun Context.defaultSpacing() =
