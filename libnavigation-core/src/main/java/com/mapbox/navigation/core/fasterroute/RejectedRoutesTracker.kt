@@ -3,7 +3,7 @@ package com.mapbox.navigation.core.fasterroute
 import com.mapbox.navigation.base.route.NavigationRoute
 
 internal class RejectedRoutesTracker(
-    val minimumGeometrySimilarity: Double
+    val maximumGeometrySimilarity: Double
 ) {
 
     private var rejectedAlternatives = mutableMapOf<Int, NavigationRoute>()
@@ -22,7 +22,7 @@ internal class RejectedRoutesTracker(
             }
             val similarities = rejectedAlternatives.values.map { calculateGeometrySimilarity(it, alternative) }
             val similarity = similarities.maxOrNull() ?: 0.0
-            if (similarity < minimumGeometrySimilarity) {
+            if (similarity < maximumGeometrySimilarity) {
                 untracked.add(alternative)
             }
         }
@@ -34,6 +34,6 @@ internal class RejectedRoutesTracker(
     }
 }
 
-data class CheckAlternativesResult(
+internal data class CheckAlternativesResult(
     val untracked: List<NavigationRoute>
 )

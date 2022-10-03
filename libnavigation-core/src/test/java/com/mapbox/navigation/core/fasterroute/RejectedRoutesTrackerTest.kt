@@ -60,6 +60,6 @@ class RejectedRoutesTrackerTest {
     }
 
     private fun createRejectedRoutesTracker() = RejectedRoutesTracker(
-        minimumGeometrySimilarity = 0.5
+        maximumGeometrySimilarity = 0.5
     )
 }

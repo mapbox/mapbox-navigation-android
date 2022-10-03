@@ -12,7 +12,7 @@ internal class FasterRouteTracker(
 ) {
 
     private val rejectedRoutesTracker = RejectedRoutesTracker(
-        minimumGeometrySimilarity = options.maxSimilarityToExistingRoute
+        maximumGeometrySimilarity = options.maxSimilarityToExistingRoute
     )
 
     fun routesUpdated(
