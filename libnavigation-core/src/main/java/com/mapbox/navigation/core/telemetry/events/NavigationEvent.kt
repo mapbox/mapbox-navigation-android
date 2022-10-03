@@ -5,7 +5,6 @@ import androidx.annotation.CallSuper
 import com.google.gson.Gson
 import com.mapbox.bindgen.Value
 import com.mapbox.common.TelemetrySystemUtils
-
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.core.BuildConfig
 
