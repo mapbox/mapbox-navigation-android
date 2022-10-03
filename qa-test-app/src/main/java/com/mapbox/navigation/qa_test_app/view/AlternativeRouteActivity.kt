@@ -28,6 +28,7 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
@@ -74,8 +75,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-@SuppressLint("MissingPermission")
 class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private companion object {
@@ -138,6 +137,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         onInitialize = this::initNavigation
     )
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     private val fasterRoutes by lazy {
         FasterRoutes(
             FasterRouteOptions(
@@ -156,13 +156,17 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onResume() {
         super.onResume()
+        @OptIn(ExperimentalMapboxNavigationAPI::class)
         fasterRoutes.onNewFasterRouteAvailable = fasterRouteObserver
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onPause() {
         super.onPause()
+        @OptIn(ExperimentalMapboxNavigationAPI::class)
         fasterRoutes.onNewFasterRouteAvailable = {}
     }
 
@@ -352,6 +356,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun initListeners() {
         binding.startNavigation.setOnClickListener {
             mapboxNavigation.startTripSession()
