@@ -10,7 +10,7 @@ class PlaceRecord(
     val name: String,
     val coordinate: Point?,
     val description: String? = null,
-    val categories: List<String> = listOf()
+    val categories: List<String>? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -54,5 +54,5 @@ def getSnapshotVersion(String version) {
     //    }
     //    return "${major}.${minor}.0-SNAPSHOT"
     //}
-    return "2.9.2-test-core-telemetry-SNAPSHOT"
+    return "2.9.0-beta.4-test-core-telemetry-SNAPSHOT"
 }

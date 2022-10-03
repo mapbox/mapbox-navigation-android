@@ -6,7 +6,6 @@ import com.mapbox.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.search.ApiType
-import com.mapbox.search.MapboxSearchSdk
 import com.mapbox.search.ResponseInfo
 import com.mapbox.search.SearchEngine
 import com.mapbox.search.SearchEngineSettings
@@ -31,7 +30,7 @@ class CarPlaceSearchImpl(
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         locationProvider.onAttached(mapboxNavigation)
-        searchEngine = MapboxSearchSdk.createSearchEngineWithBuiltInDataProviders(
+        searchEngine = SearchEngine.createSearchEngineWithBuiltInDataProviders(
             apiType = ApiType.SBS,
             settings = SearchEngineSettings(
                 options.accessToken
