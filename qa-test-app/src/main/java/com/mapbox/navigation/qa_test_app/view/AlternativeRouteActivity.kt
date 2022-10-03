@@ -19,6 +19,7 @@ import com.mapbox.common.LoggingLevel
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
+import com.mapbox.maps.logD
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
@@ -38,13 +39,11 @@ import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
-import com.mapbox.navigation.core.internal.fasterroute.FasterRouteResult
-import com.mapbox.navigation.core.internal.fasterroute.FasterRouteTracker
+import com.mapbox.navigation.core.internal.fasterroute.FasterRouteOptions
+import com.mapbox.navigation.core.internal.fasterroute.FasterRoutes
+import com.mapbox.navigation.core.internal.fasterroute.NewFasterRoute
 import com.mapbox.navigation.core.internal.fasterroute.RecordRouteObserverResults
-import com.mapbox.navigation.core.internal.fasterroute.RejectedRoutesTracker
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
@@ -54,7 +53,6 @@ import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
-import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesRequestCallback
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
@@ -71,6 +69,7 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -140,12 +139,32 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         onInitialize = this::initNavigation
     )
 
+    private val fasterRoutes by lazy {
+        FasterRoutes(
+            FasterRouteOptions(
+                maxSimilarityToExistingRoute = 0.5
+            ),
+            mapboxNavigation
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         LogConfiguration.setLoggingLevel(LoggingLevel.DEBUG)
         setContentView(binding.root)
         initStyle()
         initListeners()
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        fasterRoutes.onNewFasterRouteAvailable = fasterRouteObserver
+    }
+
+    override fun onPause() {
+        super.onPause()
+        fasterRoutes.onNewFasterRouteAvailable = {}
     }
 
     private fun initNavigation() {
@@ -169,7 +188,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
         mapboxReplayer.pushEvents(
             ReplayEventLocation(
-                -77.02975555594794,38.91168725377193,
+                -77.02975555594794, 38.91168725377193,
                 provider = "me",
                 0.0,
                 null,
@@ -375,21 +394,12 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                     this
                 )
             }
-
-            fasterRoute(result)
         }
     }
 
-    private val rejectedRoutesTracker = FasterRouteTracker(
-        maximumAcceptedSimilarity = 0.5
-    )
-
-    private fun fasterRoute(update: RoutesUpdatedResult) {
-        val message = when (val fasterRouteResult = rejectedRoutesTracker.routesUpdated(update, mapboxNavigation.getAlternativeMetadataFor(update.navigationRoutes))) {
-            is FasterRouteResult.NewFasterRoadFound -> "faster route found: ${mapboxNavigation.getAlternativeMetadataFor(fasterRouteResult.route)!!.alternativeId} is faster then primary by ${fasterRouteResult.fasterThanPrimary}"
-            FasterRouteResult.NoFasterRoad -> "no faster route this time"
-        }
-        Log.d("faster-route", message)
+    private val fasterRouteObserver = { newFasterRoute: NewFasterRoute ->
+        val message = "faster route found: ${mapboxNavigation.getAlternativeMetadataFor(newFasterRoute.fasterRoute)?.alternativeId} is faster then primary by ${newFasterRoute.fasterThanPrimary}"
+        logD("faster route", message)
     }
 
     private val mapClickListener = OnMapClickListener {

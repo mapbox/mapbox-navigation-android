@@ -16,9 +16,7 @@ class RejectedRoutesTrackerTest {
 
     @Test
     fun `no faster route is available from Munich to Nuremberg moving by the slowest road`() {
-        val fasterRoutes = FasterRouteTracker(
-            maximumAcceptedSimilarity = 0.5
-        )
+        val fasterRoutes = createFasterRoutesTracker()
         val recordedRoutesUpdates = readRouteObserverResults("com.mapbox.navigation.core.internal.fasterroute.munichnuremberg")
         for (recordedUpdate in recordedRoutesUpdates) {
             val result = fasterRoutes.routesUpdated(
@@ -38,9 +36,7 @@ class RejectedRoutesTrackerTest {
 
     @Test
     fun `faster route is available Munich to Nuremberg moving by the slowest road`() {
-        val fasterRoutes = FasterRouteTracker(
-            maximumAcceptedSimilarity = 0.5
-        )
+        val fasterRoutes = createFasterRoutesTracker()
         val preparationUpdates = readRouteObserverResults("com.mapbox.navigation.core.internal.fasterroute.munichnuremberg").take(24)
         for (recordedUpdate in preparationUpdates) {
             val result = fasterRoutes.routesUpdated(
@@ -108,5 +104,9 @@ class RejectedRoutesTrackerTest {
 
     private fun createRejectedRoutesTracker() = RejectedRoutesTracker(
         minimumGeometrySimilarity = 0.5
+    )
+
+    private fun createFasterRoutesTracker() = FasterRouteTracker(
+        FasterRouteOptions(maxSimilarityToExistingRoute = 0.5)
     )
 }

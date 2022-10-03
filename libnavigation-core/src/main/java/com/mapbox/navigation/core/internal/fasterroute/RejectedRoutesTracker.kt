@@ -2,7 +2,7 @@ package com.mapbox.navigation.core.internal.fasterroute
 
 import com.mapbox.navigation.base.route.NavigationRoute
 
-class RejectedRoutesTracker(
+internal class RejectedRoutesTracker(
     val minimumGeometrySimilarity: Double
 ) {
 
