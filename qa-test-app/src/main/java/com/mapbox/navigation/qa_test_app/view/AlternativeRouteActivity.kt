@@ -40,10 +40,10 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.internal.fasterroute.FasterRouteOptions
-import com.mapbox.navigation.core.internal.fasterroute.FasterRoutes
-import com.mapbox.navigation.core.internal.fasterroute.NewFasterRoute
-import com.mapbox.navigation.core.internal.fasterroute.RecordRouteObserverResults
+import com.mapbox.navigation.core.fasterroute.FasterRouteOptions
+import com.mapbox.navigation.core.fasterroute.FasterRoutes
+import com.mapbox.navigation.core.fasterroute.NewFasterRoute
+import com.mapbox.navigation.core.fasterroute.RecordRouteObserverResults
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
@@ -69,7 +69,6 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
-import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

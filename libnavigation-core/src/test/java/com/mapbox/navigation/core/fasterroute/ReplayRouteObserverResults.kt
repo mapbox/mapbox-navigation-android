@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.internal.fasterroute
+package com.mapbox.navigation.core.fasterroute
 
 import com.google.gson.GsonBuilder
 import com.mapbox.api.directions.v5.models.DirectionsResponse

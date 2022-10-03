@@ -1,5 +1,6 @@
-package com.mapbox.navigation.core.internal.fasterroute
+package com.mapbox.navigation.core.fasterroute
 
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -12,6 +13,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
+@ExperimentalMapboxNavigationAPI
 class FasterRoutes(
     options: FasterRouteOptions,
     private val mapboxNavigation: MapboxNavigation

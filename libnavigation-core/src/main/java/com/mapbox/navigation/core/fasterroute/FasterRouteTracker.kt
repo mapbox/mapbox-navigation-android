@@ -1,10 +1,12 @@
-package com.mapbox.navigation.core.internal.fasterroute
+package com.mapbox.navigation.core.fasterroute
 
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 
+@OptIn(ExperimentalMapboxNavigationAPI::class)
 internal class FasterRouteTracker(
     options: FasterRouteOptions
 ) {
