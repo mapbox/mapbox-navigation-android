@@ -1,4 +1,4 @@
-package com.mapbox.navigation.dropin.component.recenter
+package com.mapbox.navigation.dropin.camera
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.util.TestStore
@@ -10,7 +10,6 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.yield
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -21,7 +20,7 @@ import org.junit.Test
 class RecenterButtonComponentContractImplTest {
 
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
     private lateinit var store: TestStore
     private lateinit var sut: RecenterButtonComponentContractImpl
@@ -41,7 +40,7 @@ class RecenterButtonComponentContractImplTest {
                     navigation = NavigationState.FreeDrive
                 )
             }
-            yield() // yielding to allow isVisible StateFlow run its logic
+            coroutineRule.testDispatcher.advanceUntilIdle()
             assertTrue(
                 "expected TRUE when camera is Idle and not in RoutePreview",
                 sut.isVisible.value
@@ -49,7 +48,7 @@ class RecenterButtonComponentContractImplTest {
         }
 
     @Test
-    fun `isVisible - should return FALSE when camera not Idle or in RoutePreview`() =
+    fun `isVisible - should return FALSE when camera not Idle`() =
         coroutineRule.runBlockingTest {
             store.updateState {
                 it.copy(
@@ -57,16 +56,20 @@ class RecenterButtonComponentContractImplTest {
                     navigation = NavigationState.FreeDrive
                 )
             }
-            yield() // yielding to allow isVisible StateFlow run its logic
+            coroutineRule.testDispatcher.advanceUntilIdle()
             assertFalse("expected FALSE when camera not Idle", sut.isVisible.value)
+        }
 
+    @Test
+    fun `isVisible - should return FALSE when camera in RoutePreview`() =
+        coroutineRule.runBlockingTest {
             store.updateState {
                 it.copy(
                     camera = it.camera.copy(cameraMode = TargetCameraMode.Idle),
                     navigation = NavigationState.RoutePreview
                 )
             }
-            yield() // yielding to allow isVisible StateFlow run its logic
+            coroutineRule.testDispatcher.advanceUntilIdle()
             assertFalse("expected FALSE when NavigationState not RoutePreview", sut.isVisible.value)
         }
 

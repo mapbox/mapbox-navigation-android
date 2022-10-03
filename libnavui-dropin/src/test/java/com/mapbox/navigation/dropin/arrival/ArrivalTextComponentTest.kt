@@ -1,4 +1,4 @@
-package com.mapbox.navigation.dropin.component.infopanel
+package com.mapbox.navigation.dropin.arrival
 
 import android.content.Context
 import android.os.Build
@@ -12,6 +12,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -25,7 +26,7 @@ import org.robolectric.annotation.Config
 class ArrivalTextComponentTest {
 
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
     private lateinit var textView: AppCompatTextView
     private lateinit var textAppearance: MutableStateFlow<Int>
@@ -44,5 +45,20 @@ class ArrivalTextComponentTest {
         sut.onAttached(mockk())
 
         verify { textView.setTextAppearance(textAppearance.value) }
+    }
+
+    @Test
+    fun `onAttached should observe apply textAppearance style to the textView`() = runBlocking {
+        sut.onAttached(mockk())
+
+        textAppearance.value = R.style.TextAppearance_AppCompat_Small
+
+        verify { textView.setTextAppearance(R.style.TextAppearance_AppCompat_Small) }
+    }
+
+    @Test
+    fun `onAttached not crash when wrong style resource id is used`() {
+        textAppearance.value = Int.MAX_VALUE
+        sut.onAttached(mockk())
     }
 }
