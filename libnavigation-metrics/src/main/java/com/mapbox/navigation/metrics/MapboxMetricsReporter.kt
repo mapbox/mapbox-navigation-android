@@ -55,9 +55,8 @@ object MapboxMetricsReporter : MetricsReporter {
         accessToken: String,
         userAgent: String
     ) {
-        val eventsServiceOptions = EventsServerOptions(accessToken, userAgent, null)
         eventsService = EventsServiceProvider.provideEventsService(
-            eventsServiceOptions.overrideIfNeeded(context)
+            EventsServerOptions(accessToken, userAgent, null)
         )
 
         if (!TelemetryUtilsDelegate.getEventsCollectionState()) {
@@ -127,30 +126,5 @@ object MapboxMetricsReporter : MetricsReporter {
      */
     override fun removeObserver() {
         this.metricsObserver = null
-    }
-}
-
-/**
- * Read url and token from resources if they are available
- */
-fun EventsServerOptions.overrideIfNeeded(context: Context): EventsServerOptions {
-    val endpointId = context.resources.getIdentifier(
-        "mapbox_events_url",
-        "string",
-        context.packageName
-    )
-    val tokenId = context.resources.getIdentifier(
-        "mapbox_events_access_token",
-        "string",
-        context.packageName
-    )
-    return if (endpointId != 0 || tokenId != 0) {
-        EventsServerOptions(
-            if (tokenId != 0) context.getString(tokenId) else token,
-            userAgentFragment,
-            null
-        )
-    } else {
-        this
     }
 }

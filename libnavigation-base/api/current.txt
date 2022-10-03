@@ -269,6 +269,7 @@ package com.mapbox.navigation.base.metrics {
   public interface MetricEvent {
     method public String getMetricName();
     method public String toJson(com.google.gson.Gson gson);
+    method public com.mapbox.bindgen.Value toValue();
     property public abstract String metricName;
   }
 

@@ -8,7 +8,7 @@ import com.mapbox.navigation.base.metrics.NavigationMetrics
 import com.mapbox.navigation.metrics.internal.event.AppUserTurnstileInterface
 import org.json.JSONObject
 
-class NavigationAppUserTurnstileEvent(
+internal class NavigationAppUserTurnstileEvent(
     override val event: TurnstileEvent
 ) : MetricEvent, AppUserTurnstileInterface {
 
