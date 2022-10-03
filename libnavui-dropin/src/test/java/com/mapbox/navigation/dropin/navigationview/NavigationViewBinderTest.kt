@@ -8,6 +8,8 @@ import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Positio
 import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position.START
 import com.mapbox.navigation.dropin.infopanel.InfoPanelBinder
 import com.mapbox.navigation.dropin.infopanel.MapboxInfoPanelBinder
+import com.mapbox.navigation.dropin.map.MapViewBinder
+import com.mapbox.navigation.dropin.map.MapboxMapViewBinder
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -63,6 +65,7 @@ internal class NavigationViewBinderTest {
             c.infoPanelEndNavigationButtonBinder,
             sut.infoPanelEndNavigationButtonBinder.value
         )
+        assertEquals(c.mapViewBinder, sut.mapViewBinder.value)
     }
 
     @Test
@@ -92,6 +95,8 @@ internal class NavigationViewBinderTest {
                 infoPanelTripProgressBinder = UIBinder.USE_DEFAULT
                 infoPanelContentBinder = UIBinder.USE_DEFAULT
                 infoPanelEndNavigationButtonBinder = UIBinder.USE_DEFAULT
+
+                mapViewBinder = MapViewBinder.defaultBinder()
             }
         )
 
@@ -116,6 +121,7 @@ internal class NavigationViewBinderTest {
 
         assertTrue(sut.infoPanelTripProgressBinder.value == null)
         assertTrue(sut.infoPanelContentBinder.value == null)
+        assertTrue(sut.mapViewBinder.value is MapboxMapViewBinder)
     }
 
     private fun customization() = ViewBinderCustomization().apply {
@@ -143,5 +149,6 @@ internal class NavigationViewBinderTest {
         infoPanelTripProgressBinder = EmptyBinder()
         infoPanelContentBinder = EmptyBinder()
         infoPanelEndNavigationButtonBinder = EmptyBinder()
+        mapViewBinder = mockk()
     }
 }

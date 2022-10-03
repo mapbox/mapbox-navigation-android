@@ -1,13 +1,10 @@
 package com.mapbox.navigation.dropin.map
 
 import android.view.ViewGroup
-import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
-import com.mapbox.maps.plugin.compass.compass
+import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.navigationListOf
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.camera.CameraComponent
@@ -21,47 +18,57 @@ import com.mapbox.navigation.dropin.map.longpress.RoutePreviewLongPressMapCompon
 import com.mapbox.navigation.dropin.map.marker.MapMarkersComponent
 import com.mapbox.navigation.dropin.map.scalebar.ScalebarComponent
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
-import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.maps.internal.ui.LocationComponent
 import com.mapbox.navigation.ui.maps.internal.ui.LocationPuckComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteArrowComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponent
-import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponentContract
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 
 @ExperimentalPreviewMapboxNavigationAPI
-@FlowPreview
-internal class MapBinder(
-    private val context: NavigationViewContext,
-    private val binding: MapboxNavigationViewLayoutBinding,
-    private val mapView: MapView
-) : UIBinder {
+abstract class MapViewBinder : UIBinder {
 
-    init {
-        mapView.compass.enabled = false
+    companion object {
+        /**
+         * Default Info Panel Binder.
+         */
+        fun defaultBinder(): MapViewBinder = MapboxMapViewBinder()
     }
 
-    private val scalebarComponent = ScalebarComponent(
-        mapView,
-        context.styles.mapScalebarParams,
-        context.systemBarsInsets
-    )
+    internal lateinit var context: NavigationViewContext
+    internal lateinit var navigationViewBinding: MapboxNavigationViewLayoutBinding
 
-    private val store = context.store
+    private val mapboxMapObservers = mutableSetOf<MapboxMapObserver>()
+
+    internal fun registerMapboxMapObserver(observer: MapboxMapObserver) {
+        mapboxMapObservers.add(observer)
+    }
+
+    abstract fun getMapView(viewGroup: ViewGroup): MapView
+
+    @MapStyleLoadPolicy.MapLoadStylePolicy
+    open fun getMapStyleLoadPolicy(): Int = MapStyleLoadPolicy.NEVER
+
+    internal open fun addMapViewToLayout(mapView: MapView, viewGroup: ViewGroup) {
+        viewGroup.removeAllViews()
+        viewGroup.addView(mapView)
+    }
+
+    open fun onMapViewReady(mapView: MapView) { }
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
+        val mapView = getMapView(viewGroup)
+        addMapViewToLayout(mapView, viewGroup)
+        onMapViewReady(mapView)
+        mapboxMapObservers.forEach { it.onMapboxMapReady(mapView.getMapboxMap()) }
+        context.mapViewOwner.updateMapView(mapView)
+
+        val store = context.store
         val navigationState = store.select { it.navigation }
         return navigationListOf(
-            CameraLayoutObserver(store, mapView, binding),
+            CameraLayoutObserver(store, mapView, navigationViewBinding),
             LocationComponent(context.locationProvider),
             reloadOnChange(context.styles.locationPuck) { locationPuck ->
                 LocationPuckComponent(mapView.location, locationPuck, context.locationProvider)
@@ -71,7 +78,7 @@ internal class MapBinder(
                 context.mapStyleLoader.loadedMapStyle,
                 context.options.routeLineOptions
             ) { _, lineOptions ->
-                routeLineComponent(lineOptions)
+                routeLineComponent(lineOptions, mapView)
             },
             CameraComponent(context, mapView),
             reloadOnChange(
@@ -80,7 +87,7 @@ internal class MapBinder(
                 MapMarkersComponent(store, mapView, markerAnnotationOptions)
             },
             reloadOnChange(navigationState) {
-                longPressMapComponent(it)
+                longPressMapComponent(it, mapView)
             },
             reloadOnChange(navigationState) {
                 geocodingComponent(it)
@@ -90,24 +97,28 @@ internal class MapBinder(
                 context.options.routeArrowOptions,
                 navigationState
             ) { _, arrowOptions, navState ->
-                routeArrowComponent(navState, arrowOptions)
+                routeArrowComponent(mapView, navState, arrowOptions)
             },
-            scalebarComponent
+            ScalebarComponent(
+                mapView,
+                context.styles.mapScalebarParams,
+                context.systemBarsInsets
+            )
         )
     }
 
-    private fun routeLineComponent(lineOptions: MapboxRouteLineOptions) =
+    private fun routeLineComponent(lineOptions: MapboxRouteLineOptions, mapView: MapView) =
         RouteLineComponent(mapView.getMapboxMap(), mapView, lineOptions, contractProvider = {
-            RouteLineComponentContractImpl(store, context.mapClickBehavior)
+            RouteLineComponentContractImpl(context.store, context.mapClickBehavior)
         })
 
-    private fun longPressMapComponent(navigationState: NavigationState) =
+    private fun longPressMapComponent(navigationState: NavigationState, mapView: MapView) =
         when (navigationState) {
             NavigationState.FreeDrive,
             NavigationState.DestinationPreview ->
-                FreeDriveLongPressMapComponent(store, mapView, context)
+                FreeDriveLongPressMapComponent(context.store, mapView, context)
             NavigationState.RoutePreview ->
-                RoutePreviewLongPressMapComponent(store, mapView, context)
+                RoutePreviewLongPressMapComponent(context.store, mapView, context)
             NavigationState.ActiveNavigation,
             NavigationState.Arrival ->
                 null
@@ -118,13 +129,14 @@ internal class MapBinder(
             NavigationState.FreeDrive,
             NavigationState.DestinationPreview,
             NavigationState.RoutePreview ->
-                GeocodingComponent(store)
+                GeocodingComponent(context.store)
             NavigationState.ActiveNavigation,
             NavigationState.Arrival ->
                 null
         }
 
     private fun routeArrowComponent(
+        mapView: MapView,
         navigationState: NavigationState,
         arrowOptions: RouteArrowOptions
     ) = if (navigationState == NavigationState.ActiveNavigation) {
@@ -134,43 +146,7 @@ internal class MapBinder(
     }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
-internal class RouteLineComponentContractImpl(
-    private val store: Store,
-    private val mapClickBehavior: MapClickBehavior,
-) : RouteLineComponentContract {
-    override fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>) {
-        when (store.state.value.navigation) {
-            is NavigationState.RoutePreview -> {
-                store.dispatch(RoutePreviewAction.Ready(routes))
-            }
-            is NavigationState.ActiveNavigation -> {
-                store.dispatch(RoutesAction.SetRoutes(routes))
-            }
-            else -> {
-                // no op
-            }
-        }
-    }
+internal fun interface MapboxMapObserver {
 
-    override fun getRouteInPreview(): Flow<List<NavigationRoute>?> {
-        return combine(
-            store.select { it.navigation },
-            store.select { it.previewRoutes },
-        ) { navigationState, routePreviewState ->
-            if (routePreviewState is RoutePreviewState.Ready) {
-                if (navigationState == NavigationState.RoutePreview) {
-                    routePreviewState.routes
-                } else {
-                    null
-                }
-            } else {
-                emptyList()
-            }
-        }
-    }
-
-    override fun onMapClicked(point: Point) {
-        mapClickBehavior.onMapClicked(point)
-    }
+    fun onMapboxMapReady(map: MapboxMap)
 }

@@ -17,7 +17,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.internal.extensions.attachCreated
@@ -167,13 +166,6 @@ class NavigationView @JvmOverloads constructor(
      * Api for changing navigation state.
      */
     val api: NavigationViewApi = MapboxNavigationViewApi(navigationContext.store)
-
-    /**
-     * Customize the views by implementing your own [UIBinder] components.
-     */
-    fun customizeMapView(mapView: MapView?) {
-        navigationContext.mapView.value = mapView
-    }
 
     /**
      * Customize view by providing your own [UIBinder] components.

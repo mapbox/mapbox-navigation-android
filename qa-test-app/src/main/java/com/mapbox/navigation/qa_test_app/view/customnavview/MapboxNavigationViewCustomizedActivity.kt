@@ -74,6 +74,7 @@ import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription
 import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position.END
 import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position.START
 import com.mapbox.navigation.dropin.infopanel.InfoPanelBinder
+import com.mapbox.navigation.dropin.map.MapViewBinder
 import com.mapbox.navigation.dropin.map.MapViewObserver
 import com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams
 import com.mapbox.navigation.dropin.navigationview.NavigationViewListener
@@ -559,9 +560,13 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
     private fun customizeMap(showCustomMapView: Boolean) {
         // Demonstrate map customization
         if (showCustomMapView) {
-            binding.navigationView.customizeMapView(customMapViewFromCode(this))
+            binding.navigationView.customizeViewBinders {
+                mapViewBinder = CustomMapViewBinder(this@MapboxNavigationViewCustomizedActivity)
+            }
         } else {
-            binding.navigationView.customizeMapView(null)
+            binding.navigationView.customizeViewBinders {
+                mapViewBinder = MapViewBinder.defaultBinder()
+            }
         }
     }
 

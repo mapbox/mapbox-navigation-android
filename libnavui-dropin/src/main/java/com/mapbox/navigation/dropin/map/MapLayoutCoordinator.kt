@@ -1,12 +1,9 @@
 package com.mapbox.navigation.dropin.map
 
 import android.view.ViewGroup
-import androidx.transition.Scene
 import com.mapbox.maps.MapView
-import com.mapbox.maps.MapboxMap
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.ui.base.lifecycle.Binder
@@ -27,10 +24,8 @@ internal class MapLayoutCoordinator(
     private val binding: MapboxNavigationViewLayoutBinding
 ) : UICoordinator<ViewGroup>(binding.mapViewLayout) {
 
-    private val viewGroup = binding.mapViewLayout
-    private val mapViewOwner = navigationViewContext.mapViewOwner
+    private var loadStyleJob: Job? = null
     private val mapStyleLoader = navigationViewContext.mapStyleLoader
-    private var reloadStyleJob: Job? = null
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         super.onDetached(mapboxNavigation)
@@ -38,46 +33,28 @@ internal class MapLayoutCoordinator(
     }
 
     override fun MapboxNavigation.flowViewBinders(): Flow<Binder<ViewGroup>> {
-        return navigationViewContext.mapView
-            .map { mapViewOverride ->
-                if (mapViewOverride == null) {
-                    Scene.getSceneForLayout(
-                        viewGroup,
-                        R.layout.mapbox_mapview_layout,
-                        viewGroup.context,
-                    ).enter()
-
-                    val mapView = BoundMapViewProvider.bindLayoutAndGet(viewGroup)
-                    initDefaultMap(mapView.getMapboxMap())
-                    mapViewOwner.updateMapView(mapView)
-                    mapView
-                } else {
-                    initCustomMap(mapViewOverride.getMapboxMap())
-                    viewGroup.removeAllViews()
-                    viewGroup.addView(mapViewOverride)
-                    mapViewOwner.updateMapView(mapViewOverride)
-                    mapViewOverride
+        return navigationViewContext.uiBinders.mapViewBinder.map { customBinder ->
+            loadStyleJob?.cancel()
+            loadStyleJob = null
+            (customBinder ?: MapboxMapViewBinder()).also {
+                it.context = navigationViewContext
+                it.navigationViewBinding = binding
+                it.registerMapboxMapObserver { map ->
+                    mapStyleLoader.mapboxMap = map
+                }
+                when (it.getMapStyleLoadPolicy()) {
+                    MapStyleLoadPolicy.ONCE -> mapStyleLoader.loadInitialStyle()
+                    MapStyleLoadPolicy.ON_CONFIGURATION_CHANGE -> {
+                        mapStyleLoader.loadInitialStyle()
+                        loadStyleJob = coroutineScope.launch {
+                            mapStyleLoader.observeAndReloadNewStyles()
+                        }
+                    }
+                    else -> {
+                        // do nothing
+                    }
                 }
             }
-            .map { mapView ->
-                MapBinder(
-                    navigationViewContext,
-                    binding,
-                    mapView
-                )
-            }
-    }
-
-    private fun initDefaultMap(mapboxMap: MapboxMap) {
-        mapStyleLoader.mapboxMap = mapboxMap
-        mapStyleLoader.loadInitialStyle() // immediately load map style to avoid map flashing
-        reloadStyleJob = coroutineScope.launch {
-            mapStyleLoader.observeAndReloadNewStyles()
         }
-    }
-
-    private fun initCustomMap(mapboxMap: MapboxMap) {
-        reloadStyleJob?.cancel()
-        mapStyleLoader.mapboxMap = mapboxMap
     }
 }

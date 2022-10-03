@@ -1,8 +1,10 @@
 package com.mapbox.navigation.dropin
 
+import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription
 import com.mapbox.navigation.dropin.infopanel.InfoPanelBinder
+import com.mapbox.navigation.dropin.map.MapViewBinder
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 
 /**
@@ -121,4 +123,10 @@ class ViewBinderCustomization {
      * Setting this field to `emptyList()` will remove all custom buttons.
      */
     var customActionButtons: List<ActionButtonDescription>? = null
+
+    /**
+     * Inject your own [MapView] in the [NavigationView].
+     * Use [MapViewBinder.defaultBinder] to reset to default.
+     */
+    var mapViewBinder: MapViewBinder? = null
 }
