@@ -3,6 +3,8 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
+#### Known issues
+:bangbang: `MapView` may crash when user selects Disagree in Telemetry Settings dialog.
 #### Features
 #### Bug fixes and improvements
 - [TileStoreService] Use shared memory for marshaling large types and improve error handling. [#6422](https://github.com/mapbox/mapbox-navigation-android/pull/6422)
