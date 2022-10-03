@@ -34,7 +34,7 @@ class RejectedRoutesTrackerTest {
         }
         assertEquals(
             listOf(
-                "UOIW_1UUIDFfyICssWNnKB2o4cANnHc5pQ4WjsBOKW694GD7ZFwG5Q==#1", // this one fells like similar to initial alternative because they both go through A9
+                "UOIW_1UUIDFfyICssWNnKB2o4cANnHc5pQ4WjsBOKW694GD7ZFwG5Q==#1", // this one feels like similar to initial alternative because they both go through A9
                 "EX782LX4SasgliEDWdrBLajhSdfTR4DzqjPvoQf-GJOqXJEijULtgw==#1",
                 "qsbHcSTKmGlcgMc9w4wrj2Uz_IZhbVuuhHqxuU_4e51RXsroy1proA==#1",
                 "Rs8ocnvnO9AY584Sd1GLWcSeV6ENJ34phLpjgTS_R2MZBNRUiWiwQg==#1",

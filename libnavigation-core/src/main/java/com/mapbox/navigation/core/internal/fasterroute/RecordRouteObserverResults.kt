@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.fasterroute
+package com.mapbox.navigation.core.internal.fasterroute
 
 import com.google.gson.GsonBuilder
 import com.google.gson.TypeAdapter
@@ -16,6 +16,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.File
 
+/***
+ * Records routes updates to record-routes-observer folder.
+ * You can copy records from device file system to unit test resources and replay them using
+ * com.mapbox.navigation.core.fasterroute.ReplayRouteObserverResultsKt.readRouteObserverResults
+ */
 class RecordRouteObserverResults(
     private val navigation: ()->MapboxNavigation
 ) : RoutesObserver {

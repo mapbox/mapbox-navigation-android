@@ -6,10 +6,14 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.internal.fasterroute.NavigationRouteTypeAdapter
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import org.apache.commons.io.IOUtils
 import java.net.URL
 
+/**
+ * Replays route updates recorded with RecordRouteObserverResults
+ */
 fun Any.readRouteObserverResults(packageName: String): List<RecordedRoutesUpdateResult> {
     val clazz = this.javaClass
     val content = IOUtils.toString(clazz.classLoader.getResource(packageName), "UTF-8")

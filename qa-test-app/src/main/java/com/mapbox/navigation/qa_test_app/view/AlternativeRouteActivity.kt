@@ -43,7 +43,7 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.fasterroute.FasterRouteOptions
 import com.mapbox.navigation.core.fasterroute.FasterRoutes
 import com.mapbox.navigation.core.fasterroute.NewFasterRoute
-import com.mapbox.navigation.core.fasterroute.RecordRouteObserverResults
+import com.mapbox.navigation.core.internal.fasterroute.RecordRouteObserverResults
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
