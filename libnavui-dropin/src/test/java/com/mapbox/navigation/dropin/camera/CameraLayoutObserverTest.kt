@@ -1,6 +1,6 @@
 @file:Suppress("PrivatePropertyName", "MaxLineLength")
 
-package com.mapbox.navigation.dropin.component.camera
+package com.mapbox.navigation.dropin.camera
 
 import android.app.Service
 import android.content.Context
