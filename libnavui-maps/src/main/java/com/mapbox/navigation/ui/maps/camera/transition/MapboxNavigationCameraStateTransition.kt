@@ -3,7 +3,10 @@ package com.mapbox.navigation.ui.maps.camera.transition
 import android.animation.AnimatorSet
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.logI
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
+
+private const val TAG = "[Mapbox-CameraCrash]"
 
 /**
  * Helper class that provides default implementation of [NavigationCameraStateTransition]
@@ -48,6 +51,7 @@ class MapboxNavigationCameraStateTransition(
         cameraOptions: CameraOptions,
         transitionOptions: NavigationCameraTransitionOptions
     ): AnimatorSet {
+        logI(TAG, "Update frame for following mode. CameraOptions: $cameraOptions, transitionOptions: $transitionOptions")
         return navigationCameraTransition.transitionLinear(cameraOptions, transitionOptions)
     }
 

@@ -36,7 +36,7 @@ fun logV(msg: String, category: String? = null) {
  * As an example, this is how the logs would look like `D/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`.
  */
 fun logD(msg: String, category: String? = null) {
-    LoggerProvider.frontend.logD(msg, category)
+    LoggerProvider.frontend.logI(msg, category)
 }
 
 /**

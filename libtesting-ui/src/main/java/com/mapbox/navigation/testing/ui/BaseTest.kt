@@ -74,10 +74,10 @@ abstract class BaseTest<A : AppCompatActivity>(activityClass: Class<A>) {
         activityRule.scenario.onActivity { _activity = it }
     }
 
-    @Before
-    fun runSetupMockLocation() {
-        mockLocationUpdatesRule.pushLocationUpdate(setupMockLocation())
-    }
+//    @Before
+//    fun runSetupMockLocation() {
+//        mockLocationUpdatesRule.pushLocationUpdate(setupMockLocation())
+//    }
 
     // The MockLocationUpdatesRule will uses the system's GPS provider.
     // Considering that any device, at any location, can run a test;
@@ -85,5 +85,5 @@ abstract class BaseTest<A : AppCompatActivity>(activityClass: Class<A>) {
     //
     // It is required to specify real location in the tests.
     // Do not return Location(0,0) unless the test is explicitly testing initialization.
-    abstract fun setupMockLocation(): Location
+    open fun setupMockLocation(): Location = Location("gps")
 }
