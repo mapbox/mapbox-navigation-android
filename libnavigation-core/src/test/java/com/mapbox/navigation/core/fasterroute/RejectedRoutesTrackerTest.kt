@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.fasterroute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.fasterroute.TestRoutes.Companion.MUNICH_NUREMBERG
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -17,8 +18,7 @@ class RejectedRoutesTrackerTest {
     @Test
     fun `track routes from Munich to Nuremberg moving by the slowest route`() = runBlocking<Unit> {
         val rejectedRoutesTracker = createRejectedRoutesTracker()
-        val recordedRoutesUpdates =
-            readRouteObserverResults("com.mapbox.navigation.core.internal.fasterroute.munichnuremberg")
+        val recordedRoutesUpdates = readRouteObserverResults(MUNICH_NUREMBERG)
         val untrackedRoutesIds = mutableListOf<String>()
         recordedRoutesUpdates.forEachIndexed { index, recordedRoutesUpdateResult ->
             val routesUpdate = recordedRoutesUpdateResult.update
@@ -35,7 +35,8 @@ class RejectedRoutesTrackerTest {
         }
         assertEquals(
             listOf(
-                "UOIW_1UUIDFfyICssWNnKB2o4cANnHc5pQ4WjsBOKW694GD7ZFwG5Q==#1", // this one feels like similar to initial alternative because they both go through A9
+                // this one feels like similar to initial alternative because they both go through A9
+                "UOIW_1UUIDFfyICssWNnKB2o4cANnHc5pQ4WjsBOKW694GD7ZFwG5Q==#1",
                 "EX782LX4SasgliEDWdrBLajhSdfTR4DzqjPvoQf-GJOqXJEijULtgw==#1",
                 "qsbHcSTKmGlcgMc9w4wrj2Uz_IZhbVuuhHqxuU_4e51RXsroy1proA==#1",
                 "Rs8ocnvnO9AY584Sd1GLWcSeV6ENJ34phLpjgTS_R2MZBNRUiWiwQg==#1",

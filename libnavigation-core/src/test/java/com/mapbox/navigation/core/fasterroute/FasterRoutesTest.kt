@@ -33,7 +33,8 @@ class FasterRoutesTest {
                 any()
             )
         } returns FasterRouteResult.NewFasterRoadFound(
-            mockk(), 8.9
+            mockk(),
+            8.9
         )
 
         routeObserver.onRoutesChanged(mockk(relaxed = true))
@@ -97,7 +98,8 @@ class FasterRoutesTest {
         routeObserver.onRoutesChanged(mockk(relaxed = true))
         firstRouteUpdateProcessing.complete(
             FasterRouteResult.NewFasterRoadFound(
-                mockk(), 8.9
+                mockk(),
+                8.9
             )
         )
         verify(exactly = 0) { fasterRouteCallback.onNewFasterRouteFound(any()) }

@@ -24,7 +24,10 @@ fun Any.readRouteObserverResults(packageName: String): List<RecordedRoutesUpdate
         .filterNot { it.isBlank() }
         .map {
             val parsedName = it.substring(0, it.length - 4).split("-")
-            val fileContent = IOUtils.toString(clazz.classLoader.getResource("$packageName/$it"),"UTF-8")
+            val fileContent = IOUtils.toString(
+                clazz.classLoader.getResource("$packageName/$it"),
+                "UTF-8"
+            )
             Triple(parsedName[0].toInt(), parsedName[1], fileContent)
         }
         .sortedBy { it.first }
@@ -37,24 +40,25 @@ fun Any.readRouteObserverResults(packageName: String): List<RecordedRoutesUpdate
                 ),
                 alternativeIds
             )
-
         }
 }
 
-fun createNavigationRoutes(fileContent: String): Pair<Map<String, AlternativeRouteMetadata>, List<NavigationRoute>> {
+private fun createNavigationRoutes(
+    fileContent: String
+): Pair<Map<String, AlternativeRouteMetadata>, List<NavigationRoute>> {
     val result = mutableListOf<NavigationRoute>()
     val alternativeIds = mutableMapOf<String, AlternativeRouteMetadata>()
     val lines = fileContent.split("\n")
     for (i in lines.indices step 4) {
         val routeIndex = lines[i].toInt()
-        val routeOptions = RouteOptions.fromUrl(URL(lines[i+1]))
-        val directionsResponse = DirectionsResponse.fromJson(lines[i+2])
+        val routeOptions = RouteOptions.fromUrl(URL(lines[i + 1]))
+        val directionsResponse = DirectionsResponse.fromJson(lines[i + 2])
         val routes = com.mapbox.navigation.testing.factories.createNavigationRoutes(
             directionsResponse,
             routeOptions,
             RouterOrigin.Offboard
         )
-        val alternativeMetadata = lines[i+3]
+        val alternativeMetadata = lines[i + 3]
 
         val route = routes[routeIndex]
         result.add(route)
@@ -67,9 +71,16 @@ fun createNavigationRoutes(fileContent: String): Pair<Map<String, AlternativeRou
 
 private fun fromJson(json: String, navigationRoute: NavigationRoute): AlternativeRouteMetadata {
     val gson = GsonBuilder()
-        .registerTypeAdapter(NavigationRoute::class.java, NavigationRouteTypeAdapter {
-            if (it == navigationRoute.id) navigationRoute else error("$it doesn't match route id")
-        })
+        .registerTypeAdapter(
+            NavigationRoute::class.java,
+            NavigationRouteTypeAdapter {
+                if (it == navigationRoute.id) {
+                    navigationRoute
+                } else {
+                    error("$it doesn't match route id")
+                }
+            }
+        )
         .create()
     return gson.fromJson(json, AlternativeRouteMetadata::class.java)
 }

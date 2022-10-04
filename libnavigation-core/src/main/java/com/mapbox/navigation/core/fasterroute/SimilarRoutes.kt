@@ -15,7 +15,9 @@ internal fun calculateGeometrySimilarity(a: NavigationRoute, b: NavigationRoute)
     if (a.id == b.id) return 1.0
     val (shorter, longer) = if (a.directionsRoute.distance() > b.directionsRoute.distance()) {
         Pair(b, a)
-    } else Pair(a, b)
+    } else {
+        Pair(a, b)
+    }
 
     val shorterRouteSegments = toSegments(shorter)
     val longerRouteSegments = toSegments(longer)
@@ -35,7 +37,7 @@ private fun parseSummaries(route: NavigationRoute) =
 private fun <T> calculateSimilarityOfSets(
     a: Set<T>,
     b: Set<T>,
-    aggregator: (Set<T>)->Double
+    aggregator: (Set<T>) -> Double
 ): Double {
     val diff = a.toMutableSet().apply {
         removeAll(b)

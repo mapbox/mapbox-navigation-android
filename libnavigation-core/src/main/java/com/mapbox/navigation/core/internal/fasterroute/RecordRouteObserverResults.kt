@@ -22,7 +22,7 @@ import java.io.File
  * com.mapbox.navigation.core.fasterroute.ReplayRouteObserverResultsKt.readRouteObserverResults
  */
 class RecordRouteObserverResults(
-    private val navigation: ()->MapboxNavigation
+    private val navigation: () -> MapboxNavigation
 ) : RoutesObserver {
 
     private var scope = CoroutineScope(Dispatchers.IO)
@@ -53,14 +53,20 @@ class RecordRouteObserverResults(
 
     private fun toJson(metadata: AlternativeRouteMetadata): String {
         val gson = GsonBuilder()
-            .registerTypeAdapter(NavigationRoute::class.java, NavigationRouteTypeAdapter { error("I can only write") })
+            .registerTypeAdapter(
+                NavigationRoute::class.java,
+                NavigationRouteTypeAdapter { error("I can only write") }
+            )
             .create()
         return gson.toJson(metadata)
     }
 
     private fun prepareFolders() {
         preparation = scope.async {
-            val folder = File(navigation().navigationOptions.applicationContext.filesDir, "record-routes-observer")
+            val folder = File(
+                navigation().navigationOptions.applicationContext.filesDir,
+                "record-routes-observer"
+            )
             if (!folder.exists()) {
                 folder.mkdir()
             } else {

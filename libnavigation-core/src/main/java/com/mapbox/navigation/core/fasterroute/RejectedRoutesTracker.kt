@@ -16,7 +16,9 @@ internal class RejectedRoutesTracker(
         }
     }
 
-    suspend fun checkAlternatives(alternatives: Map<Int, NavigationRoute>): CheckAlternativesResult {
+    suspend fun checkAlternatives(
+        alternatives: Map<Int, NavigationRoute>
+    ): CheckAlternativesResult {
         val untracked = mutableListOf<NavigationRoute>()
         for ((alternativeId, alternative) in alternatives) {
             if (rejectedAlternatives.containsKey(alternativeId)) {
