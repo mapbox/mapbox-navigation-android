@@ -4,6 +4,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -14,7 +15,7 @@ class RejectedRoutesTrackerTest {
     val loggerRule = LoggingFrontendTestRule()
 
     @Test
-    fun `track routes from Munich to Nuremberg moving by the slowest route`() {
+    fun `track routes from Munich to Nuremberg moving by the slowest route`() = runBlocking<Unit> {
         val rejectedRoutesTracker = createRejectedRoutesTracker()
         val recordedRoutesUpdates =
             readRouteObserverResults("com.mapbox.navigation.core.internal.fasterroute.munichnuremberg")

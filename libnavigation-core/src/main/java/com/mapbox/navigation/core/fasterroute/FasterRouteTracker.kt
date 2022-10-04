@@ -15,7 +15,7 @@ internal class FasterRouteTracker(
         maximumGeometrySimilarity = options.maxSimilarityToExistingRoute
     )
 
-    fun routesUpdated(
+    suspend fun routesUpdated(
         update: RoutesUpdatedResult,
         alternativeRoutesMetadata: List<AlternativeRouteMetadata>
     ): FasterRouteResult {

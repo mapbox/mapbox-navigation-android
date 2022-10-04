@@ -42,8 +42,8 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.fasterroute.FasterRouteOptions
-import com.mapbox.navigation.core.fasterroute.FasterRoutes
 import com.mapbox.navigation.core.fasterroute.NewFasterRoute
+import com.mapbox.navigation.core.fasterroute.NewFasterRouteObserver
 import com.mapbox.navigation.core.fasterroute.createFasterRoutes
 import com.mapbox.navigation.core.internal.fasterroute.RecordRouteObserverResults
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -167,7 +167,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     override fun onPause() {
         super.onPause()
         @OptIn(ExperimentalMapboxNavigationAPI::class)
-        fasterRoutes.fasterRouteCallback = {}
+        fasterRoutes.fasterRouteCallback = NewFasterRouteObserver { }
     }
 
     private fun initNavigation() {
@@ -401,7 +401,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
-    private val fasterRouteObserver = { newFasterRoute: NewFasterRoute ->
+    private val fasterRouteObserver = NewFasterRouteObserver { newFasterRoute: NewFasterRoute ->
         val message = "faster route found: ${mapboxNavigation.getAlternativeMetadataFor(newFasterRoute.fasterRoute)?.alternativeId} is faster then primary by ${newFasterRoute.fasterThanPrimary}"
         logD("faster route", message)
     }

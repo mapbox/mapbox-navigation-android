@@ -4,7 +4,11 @@ package com.mapbox.navigation.core.fasterroute
 
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -14,7 +18,7 @@ class FasterRouteTrackerTest {
     val loggerRule = LoggingFrontendTestRule()
 
     @Test
-    fun `no faster route is available from Munich to Nuremberg moving by the slowest road`() {
+    fun `no faster route is available from Munich to Nuremberg moving by the slowest road`() = runBlocking<Unit> {
         val fasterRoutes = createFasterRoutesTracker()
         val recordedRoutesUpdates = readRouteObserverResults("com.mapbox.navigation.core.internal.fasterroute.munichnuremberg")
         for (recordedUpdate in recordedRoutesUpdates) {
@@ -25,7 +29,7 @@ class FasterRouteTrackerTest {
             val alternativesFromUpdate = recordedUpdate.alternativeMetadata.values
                 .map { it.alternativeId }
                 .joinToString(separator = ",") { it.toString() }
-            Assert.assertEquals(
+            assertEquals(
                 "incorrect result for update with alternatives $alternativesFromUpdate",
                 FasterRouteResult.NoFasterRoad,
                 result
@@ -34,7 +38,7 @@ class FasterRouteTrackerTest {
     }
 
     @Test
-    fun `faster route is available Munich to Nuremberg moving by the slowest road`() {
+    fun `faster route is available Munich to Nuremberg moving by the slowest road`() = runBlocking<Unit> {
         val fasterRoutes = createFasterRoutesTracker()
         val preparationUpdates = readRouteObserverResults("com.mapbox.navigation.core.internal.fasterroute.munichnuremberg").take(24)
         for (recordedUpdate in preparationUpdates) {
@@ -42,7 +46,7 @@ class FasterRouteTrackerTest {
                 recordedUpdate.update,
                 recordedUpdate.alternativeMetadata.values.toList()
             )
-            Assert.assertEquals(
+            assertEquals(
                 FasterRouteResult.NoFasterRoad,
                 result
             )
@@ -51,9 +55,9 @@ class FasterRouteTrackerTest {
 
         val result = fasterRoutes.routesUpdated(updateWithArtificialFasterRoute.update, updateWithArtificialFasterRoute.alternativeMetadata.values.toList())
 
-        Assert.assertTrue("result is $result", result is FasterRouteResult.NewFasterRoadFound)
+        assertTrue("result is $result", result is FasterRouteResult.NewFasterRoadFound)
         val fasterRouteResult = result as FasterRouteResult.NewFasterRoadFound
-        Assert.assertEquals(
+        assertEquals(
             "2fRI3oZgP9QIffbtczCQl-FsWWdgLirxzAQL_4x8WtoB05ATMs2obA==#1",
             fasterRouteResult.route.id
         )

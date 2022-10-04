@@ -5,15 +5,14 @@ package com.mapbox.navigation.core.fasterroute
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.Test
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
 
 class FasterRoutesTest {
 
@@ -26,9 +25,9 @@ class FasterRoutesTest {
             mapboxNavigation = mapboxNavigation,
             fasterRouteTracker = fasterRouteTrackerMock
         )
-        val fasterRouteCallback = mockk<NewFasterRouteCallback>()
+        val fasterRouteCallback = mockk<NewFasterRouteObserver>()
         fasterRoutes.fasterRouteCallback = fasterRouteCallback
-        every {
+        coEvery {
             fasterRouteTrackerMock.routesUpdated(
                 any(),
                 any()
@@ -51,9 +50,9 @@ class FasterRoutesTest {
             mapboxNavigation = mapboxNavigation,
             fasterRouteTracker = fasterRouteTrackerMock
         )
-        val fasterRouteCallback = mockk<NewFasterRouteCallback>(relaxed = true)
+        val fasterRouteCallback = mockk<NewFasterRouteObserver>(relaxed = true)
         fasterRoutes.fasterRouteCallback = fasterRouteCallback
-        every {
+        coEvery {
             fasterRouteTrackerMock.routesUpdated(
                 any(),
                 any()
@@ -66,32 +65,28 @@ class FasterRoutesTest {
     }
 
     @Test
-    fun `when routes are updated faster then processing not processed old results are ignored`() {
+    fun `old results are ignored when routes are updated faster then processing not processed `() {
         val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
         val fasterRouteTrackerMock = mockk<FasterRouteTracker>()
         val routeObserver = mapboxNavigation.recordRoutesObservers()
         val fasterRoutes = createFasterRoutes(
             mapboxNavigation = mapboxNavigation,
             fasterRouteTracker = fasterRouteTrackerMock,
-            computationDispatcher = Executors.newFixedThreadPool(1).asCoroutineDispatcher()
         )
-        val fasterRouteCallback = mockk<NewFasterRouteCallback>(relaxed = true)
+        val fasterRouteCallback = mockk<NewFasterRouteObserver>(relaxed = true)
         fasterRoutes.fasterRouteCallback = fasterRouteCallback
-        val countDownLatch = CountDownLatch(1)
-        every {
+        val firstRouteUpdateProcessing = CompletableDeferred<FasterRouteResult>()
+        coEvery {
             fasterRouteTrackerMock.routesUpdated(
                 any(),
                 any()
             )
-        } answers {
-            countDownLatch.await()
-            FasterRouteResult.NewFasterRoadFound(
-                mockk(), 8.9
-            )
+        } coAnswers {
+            firstRouteUpdateProcessing.await()
         }
         routeObserver.onRoutesChanged(mockk(relaxed = true))
         verify(exactly = 0) { fasterRouteCallback.onNewFasterRouteFound(any()) }
-        every {
+        coEvery {
             fasterRouteTrackerMock.routesUpdated(
                 any(),
                 any()
@@ -100,7 +95,11 @@ class FasterRoutesTest {
             FasterRouteResult.NoFasterRoad
         }
         routeObserver.onRoutesChanged(mockk(relaxed = true))
-        countDownLatch.countDown()
+        firstRouteUpdateProcessing.complete(
+            FasterRouteResult.NewFasterRoadFound(
+                mockk(), 8.9
+            )
+        )
         verify(exactly = 0) { fasterRouteCallback.onNewFasterRouteFound(any()) }
     }
 }
@@ -108,12 +107,10 @@ class FasterRoutesTest {
 private fun createFasterRoutes(
     fasterRouteTracker: FasterRouteTracker = createFasterRoutesTracker(),
     mapboxNavigation: MapboxNavigation = mockk(relaxed = true),
-    computationDispatcher: CoroutineDispatcher = TestCoroutineDispatcher(),
     mainDispatcher: CoroutineDispatcher = TestCoroutineDispatcher(),
 ) = FasterRoutes(
     mapboxNavigation = mapboxNavigation,
     fasterRouteTracker = fasterRouteTracker,
-    computationDispatcher = computationDispatcher,
     mainDispatcher = mainDispatcher
 )
 
