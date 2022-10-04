@@ -4,14 +4,13 @@ import com.mapbox.androidauto.car.search.CarPlaceSearchOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.search.MapboxSearchSdk
 import com.mapbox.search.SearchEngine
 import com.mapbox.search.SearchEngineSettings
 import com.mapbox.search.SearchSelectionCallback
 import com.mapbox.search.SearchSuggestionsCallback
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
+import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
@@ -42,9 +41,9 @@ class CarPlaceSearchImplTest {
 
     @Before
     fun setup() {
-        mockkStatic(MapboxSearchSdk::class)
+        mockkObject(SearchEngine)
         every {
-            MapboxSearchSdk.createSearchEngineWithBuiltInDataProviders(
+            SearchEngine.createSearchEngineWithBuiltInDataProviders(
                 any(),
                 any(),
                 any(),
@@ -94,7 +93,7 @@ class CarPlaceSearchImplTest {
     fun `onAttached will create search engine with options access token`() {
         val settingsSlot = slot<SearchEngineSettings>()
         every {
-            MapboxSearchSdk.createSearchEngineWithBuiltInDataProviders(
+            SearchEngine.createSearchEngineWithBuiltInDataProviders(
                 any(),
                 capture(settingsSlot),
                 any(),
@@ -112,7 +111,7 @@ class CarPlaceSearchImplTest {
     fun `onAttached will create search engine with navigation access token when option is null`() {
         val settingsSlot = slot<SearchEngineSettings>()
         every {
-            MapboxSearchSdk.createSearchEngineWithBuiltInDataProviders(
+            SearchEngine.createSearchEngineWithBuiltInDataProviders(
                 any(),
                 capture(settingsSlot),
                 any(),

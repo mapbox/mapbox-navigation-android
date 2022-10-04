@@ -14,7 +14,7 @@ object PlaceRecordMapper {
             coordinate = searchResult.coordinate,
             description = searchResult.descriptionText
                 ?: mapDescriptionFromAddress(searchResult.address),
-            categories = searchResult.categories
+            categories = searchResult.categories.orEmpty(),
         )
     }
 
