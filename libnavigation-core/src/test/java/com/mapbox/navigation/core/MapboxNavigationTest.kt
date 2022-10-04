@@ -67,7 +67,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -1613,7 +1612,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    @Ignore("API is not supported yet")
     fun `when telemetry is enabled custom event is posted`() = coroutineRule.runBlockingTest {
         createMapboxNavigation()
         every { TelemetryUtilsDelegate.getEventsCollectionState() } returns true
