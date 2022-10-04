@@ -60,11 +60,15 @@ commands:
   run-firebase-instrumentation:
     steps:
       - run:
-          name: Run instrumentation tests on public SDK classes on Firebase
-          no_output_timeout: 1200
-          shell: /bin/bash -euo pipefail
+          name: Prepare report folders
           command: |
-            ./gradlew :instrumentation-tests:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.mapbox.navigation.instrumentation_tests.core.CoreRerouteTest -i
+            mkdir -p instrumentation-tests/build/reports/
+      - run:
+          name: Run instrumentation tests
+          continue-on-error: true
+          no_output_timeout: 2h
+          command: |
+            ./gradlew :instrumentation-tests:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.mapbox.navigation.instrumentation_tests.core.CoreRerouteTest -i || adb logcat -d > instrumentation-tests/build/reports/camera-crash.log
 
   prepare-mbx-ci:
     steps:
@@ -91,14 +95,9 @@ jobs:
       BUILDTYPE: Debug
       GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
     steps:
-      - when:
-          condition:
-            not:
-              matches:
-                pattern: "^add-changelog.*"
-                value: << pipeline.git.branch >>
-          steps:
-            - checkout
-            - read-workspace
-            - run-firebase-instrumentation
+      - checkout
+      - read-workspace
+      - run-firebase-instrumentation
+      - store-results:
+          module_target: "instrumentation-tests"
       - run: exit 0
