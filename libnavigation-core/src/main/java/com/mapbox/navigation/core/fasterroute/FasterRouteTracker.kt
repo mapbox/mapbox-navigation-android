@@ -19,28 +19,37 @@ internal class FasterRouteTracker(
         update: RoutesUpdatedResult,
         alternativeRoutesMetadata: List<AlternativeRouteMetadata>
     ): FasterRouteResult {
-        val metadataMap: Map<String, AlternativeRouteMetadata> = mutableMapOf<String, AlternativeRouteMetadata>().apply {
-            alternativeRoutesMetadata.forEach { this[it.navigationRoute.id] = it }
-        }
+        val metadataMap: Map<String, AlternativeRouteMetadata> =
+            mutableMapOf<String, AlternativeRouteMetadata>().apply {
+                alternativeRoutesMetadata.forEach { this[it.navigationRoute.id] = it }
+            }
 
-        val alternatives:Map<Int, NavigationRoute> = mutableMapOf<Int, NavigationRoute>().apply {
-            alternativeRoutesMetadata
-                .filter { it.infoFromStartOfPrimary.duration < update.navigationRoutes.first().directionsRoute.duration() }
-                .forEach { this[it.alternativeId] = it.navigationRoute }
-        }
+        val fasterAlternatives: Map<Int, NavigationRoute> = mutableMapOf<Int, NavigationRoute>()
+            .apply {
+                alternativeRoutesMetadata
+                    .filter {
+                        it.infoFromStartOfPrimary.duration < update.navigationRoutes.first()
+                            .directionsRoute.duration()
+                    }
+                    .forEach { this[it.alternativeId] = it.navigationRoute }
+            }
 
         if (update.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW) {
             rejectedRoutesTracker.clean()
-            rejectedRoutesTracker.addRejectedRoutes(alternatives)
+            rejectedRoutesTracker.addRejectedRoutes(fasterAlternatives)
         }
         if (update.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE) {
-            val untracked = rejectedRoutesTracker.checkAlternatives(alternatives).untracked
-            val fasterRoute = untracked.minByOrNull { metadataMap[it.id]!!.infoFromStartOfPrimary.duration }
-                ?: return FasterRouteResult.NoFasterRoad
-            val fasterThanPrimary =  update.navigationRoutes.first().directionsRoute.duration() - metadataMap[fasterRoute.id]!!.infoFromStartOfPrimary.duration
+            val untracked = rejectedRoutesTracker.checkAlternatives(fasterAlternatives).untracked
+            val fasterAlternative = untracked.minByOrNull {
+                metadataMap[it.id]!!.infoFromStartOfPrimary.duration
+            } ?: return FasterRouteResult.NoFasterRoad
+            val primaryRouteDuration = update.navigationRoutes.first().directionsRoute.duration()
+            val fasterAlternativeRouteDuration = metadataMap[fasterAlternative.id]!!
+                .infoFromStartOfPrimary.duration
+            val fasterThanPrimary = primaryRouteDuration - fasterAlternativeRouteDuration
             if (fasterThanPrimary > 0) {
                 return FasterRouteResult.NewFasterRoadFound(
-                    fasterRoute,
+                    fasterAlternative,
                     fasterThanPrimary = fasterThanPrimary
                 )
             }
@@ -50,9 +59,9 @@ internal class FasterRouteTracker(
 }
 
 internal sealed class FasterRouteResult {
-    object NoFasterRoad: FasterRouteResult()
+    object NoFasterRoad : FasterRouteResult()
     data class NewFasterRoadFound(
         val route: NavigationRoute,
         val fasterThanPrimary: Double,
-    ): FasterRouteResult()
+    ) : FasterRouteResult()
 }
