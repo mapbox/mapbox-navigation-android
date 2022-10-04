@@ -64,7 +64,7 @@ commands:
           no_output_timeout: 1200
           shell: /bin/bash -euo pipefail
           command: |
-            ./gradlew :instrumentation-tests:connectedAndroidTest -i
+            ./gradlew :instrumentation-tests:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.mapbox.navigation.instrumentation_tests.core.CoreRerouteTest -i
 
   prepare-mbx-ci:
     steps:
