@@ -249,7 +249,7 @@ internal object EventsTestHelper {
                 content["tripIdentifier"]!!.contents
             )
             assertEquals(
-                " value",
+                "lat value",
                 lat,
                 content["lat"]!!.contents
             )
@@ -390,13 +390,38 @@ internal object EventsTestHelper {
 
     fun Value.verifyTelemetryLocation(location: TelemetryLocation) {
         (contents as Map<String, Value>).let { content ->
-            assertEquals(location.latitude, content["lat"]!!.contents)
-            assertEquals(location.longitude, content["lng"]!!.contents)
-            assertEquals(location.speed.toDouble(), content["speed"]!!.contents)
-            assertEquals(location.bearing.toDouble(), content["course"]!!.contents)
-            assertEquals(location.altitude, content["altitude"]!!.contents)
-            assertEquals(location.timestamp, content["timestamp"]!!.contents)
             assertEquals(
+                "check TelemetryLocation: latitude value",
+                location.latitude,
+                content["lat"]!!.contents
+            )
+            assertEquals(
+                "check TelemetryLocation: longitude value",
+                location.longitude,
+                content["lng"]!!.contents
+            )
+            assertEquals(
+                "check TelemetryLocation: speed value",
+                location.speed.toDouble(),
+                content["speed"]!!.contents
+            )
+            assertEquals(
+                "check TelemetryLocation: bearing value",
+                location.bearing.toDouble(),
+                content["course"]!!.contents
+            )
+            assertEquals(
+                "check TelemetryLocation: altitude value",
+                location.altitude,
+                content["altitude"]!!.contents
+            )
+            assertEquals(
+                "check TelemetryLocation: timestamp value",
+                location.timestamp,
+                content["timestamp"]!!.contents
+            )
+            assertEquals(
+                "check TelemetryLocation: timestamp value",
                 location.horizontalAccuracy.toDouble(),
                 content["horizontalAccuracy"]!!.contents
             )
@@ -410,7 +435,6 @@ internal object EventsTestHelper {
     fun Value.verifyTelemetryLocations(array: Array<TelemetryLocation>) {
         (contents!! as List<Value>).let { content ->
             assertEquals(array.size, content.size)
-
             array.forEach { locationItem ->
                 content.find {
                     (it.contents as Map<String, Value>)["lat"]!!.contents ==

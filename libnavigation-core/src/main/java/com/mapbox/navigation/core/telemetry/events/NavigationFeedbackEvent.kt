@@ -26,11 +26,7 @@ internal class NavigationFeedbackEvent(
 
     override fun getEventName(): String = NavigationMetrics.FEEDBACK
 
-    override fun toValue(): Value {
-        val value = super.toValue()
-
-        val fields = hashMapOf<String, Value>()
-
+    override fun customFields(): Map<String, Value> = hashMapOf<String, Value>().also { fields ->
         fields["userId"] = userId.toValue()
         fields["feedbackId"] = feedbackId.toValue()
         fields["step"] = step.toValue()
@@ -41,9 +37,5 @@ internal class NavigationFeedbackEvent(
         locationsAfter?.let { fields["locationsAfter"] = it.toValue() }
         screenshot?.let { fields["screenshot"] = it.toValue() }
         feedbackSubType?.let { fields["feedbackSubType"] = it.toValue() }
-
-        (value.contents as HashMap<String, Value>).putAll(fields)
-
-        return value
     }
 }

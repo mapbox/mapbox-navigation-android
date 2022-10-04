@@ -4,8 +4,10 @@ import com.mapbox.bindgen.Value
 import com.mapbox.navigation.core.telemetry.events.EventsTestHelper.fillValues
 import com.mapbox.navigation.core.telemetry.events.EventsTestHelper.verifyNavigationEventFields
 import com.mapbox.navigation.core.telemetry.events.EventsTestHelper.verifyTelemetryLocations
+import com.mapbox.navigation.core.testutil.EventsProvider
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
+import org.junit.Assert
 import org.junit.Test
 
 class NavigationRerouteEventTest {
@@ -14,7 +16,7 @@ class NavigationRerouteEventTest {
     fun testValue() {
         val rerouteEvent = NavigationRerouteEvent(
             EventsTestHelper.mockPhoneState(),
-            MetricsRouteProgress(null)
+            EventsProvider.mockNavigationStepData()
         ).apply {
             fillValues()
             newDistanceRemaining = 50
@@ -73,6 +75,34 @@ class NavigationRerouteEventTest {
             assertTrue(content.containsKey("locationsAfter"))
             (content["locationsAfter"] as Value)
                 .verifyTelemetryLocations(rerouteEvent.locationsAfter!!)
+            // NavigationStepData verify
+            assertTrue(content.containsKey("step"))
+            (content["step"]!!.contents as HashMap<String, Value>).let { stepContent ->
+                Assert.assertEquals(1L, stepContent["durationRemaining"]!!.contents)
+                Assert.assertEquals(2L, stepContent["distance"]!!.contents)
+                Assert.assertEquals(3L, stepContent["distanceRemaining"]!!.contents)
+                Assert.assertEquals(4L, stepContent["duration"]!!.contents)
+                Assert.assertEquals("upcomingName_0", stepContent["upcomingName"]!!.contents)
+                Assert.assertEquals(
+                    "upcomingModifier_0",
+                    stepContent["upcomingModifier"]!!.contents
+                )
+                Assert.assertEquals(
+                    "previousInstruction_0",
+                    stepContent["previousInstruction"]!!.contents
+                )
+                Assert.assertEquals("previousName_0", stepContent["previousName"]!!.contents)
+                Assert.assertEquals(
+                    "upcomingInstruction_0",
+                    stepContent["upcomingInstruction"]!!.contents
+                )
+                Assert.assertEquals("previousType_0", stepContent["previousType"]!!.contents)
+                Assert.assertEquals("upcomingType_0", stepContent["upcomingType"]!!.contents)
+                Assert.assertEquals(
+                    "previousModifier_0",
+                    stepContent["previousModifier"]!!.contents
+                )
+            }
         }
     }
 }

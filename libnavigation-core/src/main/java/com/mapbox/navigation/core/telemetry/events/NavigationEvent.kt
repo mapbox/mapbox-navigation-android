@@ -143,6 +143,13 @@ internal abstract class NavigationEvent(
         fields["totalStepCount"] = totalStepCount.toValue()
         appMetadata?.let { fields["appMetadata"] = it.toValue() }
 
+        fields.putAll(customFields() ?: emptyMap())
+
         return Value.valueOf(fields)
     }
+
+    /**
+     * Provide custom fields here or `null` if they are not needed
+     */
+    protected abstract fun customFields(): Map<String, Value>?
 }

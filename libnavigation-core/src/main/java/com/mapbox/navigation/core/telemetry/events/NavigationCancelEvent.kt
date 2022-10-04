@@ -18,17 +18,9 @@ internal class NavigationCancelEvent(
 
     override fun getEventName(): String = NavigationMetrics.CANCEL_SESSION
 
-    override fun toValue(): Value {
-        val value = super.toValue()
-
-        val fields = hashMapOf<String, Value>()
-
+    override fun customFields(): Map<String, Value> = hashMapOf<String, Value>().also { fields ->
         arrivalTimestamp?.let { fields["arrivalTimestamp"] = it.toValue() }
         fields["rating"] = rating.toValue()
         fields["comment"] = comment.toValue()
-
-        (value.contents as HashMap<String, Value>).putAll(fields)
-
-        return value
     }
 }

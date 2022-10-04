@@ -756,7 +756,7 @@ internal object MapboxNavigationTelemetry {
 
             val navigationRerouteEvent = NavigationRerouteEvent(
                 PhoneState.newInstance(applicationContext),
-                MetricsRouteProgress(routeData.routeProgress)
+                NavigationStepData(MetricsRouteProgress(routeData.routeProgress)),
             ).apply {
                 secondsSinceLastReroute =
                     sessionMetadata

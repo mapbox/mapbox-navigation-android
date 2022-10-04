@@ -15,6 +15,7 @@ import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.metrics.internal.EventsServiceProvider
 import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
@@ -32,18 +33,19 @@ object MapboxMetricsReporter : MetricsReporter {
     private var metricsObserver: MetricsObserver? = null
     private var ioJobController = InternalJobControlFactory.createIOScopeJobControl()
 
-    private val eventsServiceObserver by lazy {
+    private val eventsServiceObserver =
         object : EventsServiceObserver {
             override fun didEncounterError(error: EventsServiceError, events: Value) {
                 logE("EventsService failure: $error", LOG_CATEGORY)
             }
 
-            override fun didSendEvents(events: Value) {}
+            override fun didSendEvents(events: Value) {
+                logD("Event has been set $events", LOG_CATEGORY)
+            }
         }
-    }
 
     /**
-     * Initialize [mapboxTelemetry] that need to send event to Mapbox Telemetry server.
+     * Initialize [EventsServiceInterface] that need to send event to Mapbox Telemetry server.
      *
      * @param context Android context
      * @param accessToken Mapbox access token
@@ -58,6 +60,7 @@ object MapboxMetricsReporter : MetricsReporter {
         eventsService = EventsServiceProvider.provideEventsService(
             EventsServerOptions(accessToken, userAgent, null)
         )
+        eventsService.registerObserver(eventsServiceObserver)
 
         if (!TelemetryUtilsDelegate.getEventsCollectionState()) {
             TelemetryUtilsDelegate.setEventsCollectionState(true)

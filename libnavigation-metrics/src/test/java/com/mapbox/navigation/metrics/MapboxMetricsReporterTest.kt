@@ -9,7 +9,6 @@ import com.mapbox.common.EventsServiceInterface
 import com.mapbox.common.EventsServiceResponseCallback
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
-import com.mapbox.navigation.metrics.extensions.toTelemetryEvent
 import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
@@ -76,7 +75,6 @@ class MapboxMetricsReporterTest {
         mockkObject(InternalJobControlFactory) {
             val eventService = initMetricsReporterWithTelemetry()
             val metricEvent = StubNavigationEvent(NavigationMetrics.ARRIVE)
-            val event = metricEvent.toTelemetryEvent()
             val slotEvent = slot<Event>()
             every { eventService.sendEvent(capture(slotEvent), any()) } just runs
 
