@@ -4,5 +4,5 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 
 @ExperimentalMapboxNavigationAPI
 data class FasterRouteOptions(
-    val maxSimilarityToExistingRoute: Double
+    val maxSimilarityToExistingRoute: Double = 0.5
 )

@@ -1,7 +1,6 @@
 package com.mapbox.navigation.core.fasterroute
 
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
-import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
@@ -13,6 +12,15 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
+
+@ExperimentalMapboxNavigationAPI
+fun MapboxNavigation.createFasterRoutes(
+    options: FasterRouteOptions
+) = FasterRoutes(
+    this,
+    FasterRouteTracker(options),
+    Dispatchers.Main
+)
 
 @ExperimentalMapboxNavigationAPI
 class FasterRoutes internal constructor(
@@ -39,7 +47,7 @@ class FasterRoutes internal constructor(
                         fasterRouteTrackerResult.fasterThanPrimary
                     )
                 )
-                FasterRouteResult.NoFasterRoad -> { }
+                FasterRouteResult.NoFasterRoad -> {}
             }
         }
     }
@@ -65,21 +73,3 @@ class FasterRoutes internal constructor(
         newFasterRoutesObservers.forEach { it.onNewFasterRouteFound(newFasterRoute) }
     }
 }
-
-class NewFasterRoute(
-    val fasterRoute: NavigationRoute,
-    val fasterThanPrimary: Double
-)
-
-fun interface NewFasterRouteObserver {
-    fun onNewFasterRouteFound(newFasterRoute: NewFasterRoute)
-}
-
-@ExperimentalMapboxNavigationAPI
-fun MapboxNavigation.createFasterRoutes(
-    options: FasterRouteOptions
-) = FasterRoutes(
-    this,
-    FasterRouteTracker(options),
-    Dispatchers.Main
-)
