@@ -29,8 +29,8 @@ class RejectedRoutesTrackerTest {
             }
             if (routesUpdate.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE) {
                 val alternatives = createAlternativesMap(routesUpdate, recordedRoutesUpdateResult)
-                val result = rejectedRoutesTracker.checkAlternatives(alternatives)
-                untrackedRoutesIds.addAll(result.untracked.map { it.id })
+                val result = rejectedRoutesTracker.findUntrackedAlternatives(alternatives)
+                untrackedRoutesIds.addAll(result.map { it.id })
             }
         }
         assertEquals(

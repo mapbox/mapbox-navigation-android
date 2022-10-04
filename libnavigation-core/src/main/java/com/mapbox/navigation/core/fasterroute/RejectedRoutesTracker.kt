@@ -16,9 +16,9 @@ internal class RejectedRoutesTracker(
         }
     }
 
-    suspend fun checkAlternatives(
+    suspend fun findUntrackedAlternatives(
         alternatives: Map<Int, NavigationRoute>
-    ): CheckAlternativesResult {
+    ): List<NavigationRoute> {
         val untracked = mutableListOf<NavigationRoute>()
         for ((alternativeId, alternative) in alternatives) {
             if (rejectedAlternatives.containsKey(alternativeId)) {
@@ -32,14 +32,10 @@ internal class RejectedRoutesTracker(
                 untracked.add(alternative)
             }
         }
-        return CheckAlternativesResult(untracked)
+        return untracked
     }
 
     fun clean() {
         rejectedAlternatives.clear()
     }
 }
-
-internal data class CheckAlternativesResult(
-    val untracked: List<NavigationRoute>
-)

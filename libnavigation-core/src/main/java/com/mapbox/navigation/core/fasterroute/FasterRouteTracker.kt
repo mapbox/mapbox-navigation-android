@@ -39,7 +39,7 @@ internal class FasterRouteTracker(
             rejectedRoutesTracker.addRejectedRoutes(fasterAlternatives)
         }
         if (update.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE) {
-            val untracked = rejectedRoutesTracker.checkAlternatives(fasterAlternatives).untracked
+            val untracked = rejectedRoutesTracker.findUntrackedAlternatives(fasterAlternatives)
             val fasterAlternative = untracked.minByOrNull {
                 metadataMap[it.id]!!.infoFromStartOfPrimary.duration
             } ?: return FasterRouteResult.NoFasterRoad
