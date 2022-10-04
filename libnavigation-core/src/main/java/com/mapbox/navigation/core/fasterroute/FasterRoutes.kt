@@ -12,24 +12,20 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import java.util.concurrent.CopyOnWriteArraySet
 
 @ExperimentalMapboxNavigationAPI
 class FasterRoutes internal constructor(
     private val mapboxNavigation: MapboxNavigation,
     private val fasterRouteTracker: FasterRouteTracker,
     mainDispatcher: CoroutineDispatcher
-) : RoutesObserver {
+) {
 
     private val scope = CoroutineScope(SupervisorJob() + mainDispatcher)
     private var previousRouteUpdateProcessing: Job? = null
+    private val newFasterRoutesObservers = CopyOnWriteArraySet<NewFasterRouteObserver>()
 
-    init {
-        mapboxNavigation.registerRoutesObserver(this)
-    }
-
-    var fasterRouteCallback: NewFasterRouteObserver = NewFasterRouteObserver { }
-
-    override fun onRoutesChanged(result: RoutesUpdatedResult) {
+    private val internalObserver = RoutesObserver { result: RoutesUpdatedResult ->
         previousRouteUpdateProcessing?.cancel()
         previousRouteUpdateProcessing = scope.launch {
             val fasterRouteTrackerResult = fasterRouteTracker.routesUpdated(
@@ -37,20 +33,36 @@ class FasterRoutes internal constructor(
                 mapboxNavigation.getAlternativeMetadataFor(result.navigationRoutes)
             )
             when (fasterRouteTrackerResult) {
-                is FasterRouteResult.NewFasterRoadFound -> fasterRouteCallback.onNewFasterRouteFound(
+                is FasterRouteResult.NewFasterRoadFound -> newFasterRouteFound(
                     NewFasterRoute(
                         fasterRouteTrackerResult.route,
                         fasterRouteTrackerResult.fasterThanPrimary
                     )
                 )
-                FasterRouteResult.NoFasterRoad -> {}
+                FasterRouteResult.NoFasterRoad -> { }
             }
         }
     }
 
+    init {
+        mapboxNavigation.registerRoutesObserver(internalObserver)
+    }
+
+    fun registerNewFasterRouteObserver(observer: NewFasterRouteObserver) {
+        newFasterRoutesObservers.add(observer)
+    }
+
+    fun unregisterNewFasterRouteObserver(observer: NewFasterRouteObserver) {
+        newFasterRoutesObservers.remove(observer)
+    }
+
     fun destroy() {
-        mapboxNavigation.unregisterRoutesObserver(this)
+        mapboxNavigation.unregisterRoutesObserver(internalObserver)
         scope.cancel()
+    }
+
+    private fun newFasterRouteFound(newFasterRoute: NewFasterRoute) {
+        newFasterRoutesObservers.forEach { it.onNewFasterRouteFound(newFasterRoute) }
     }
 }
 

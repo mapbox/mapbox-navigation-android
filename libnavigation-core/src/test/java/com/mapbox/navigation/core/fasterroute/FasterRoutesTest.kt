@@ -26,7 +26,7 @@ class FasterRoutesTest {
             fasterRouteTracker = fasterRouteTrackerMock
         )
         val fasterRouteCallback = mockk<NewFasterRouteObserver>()
-        fasterRoutes.fasterRouteCallback = fasterRouteCallback
+        fasterRoutes.registerNewFasterRouteObserver(fasterRouteCallback)
         coEvery {
             fasterRouteTrackerMock.routesUpdated(
                 any(),
@@ -51,7 +51,7 @@ class FasterRoutesTest {
             fasterRouteTracker = fasterRouteTrackerMock
         )
         val fasterRouteCallback = mockk<NewFasterRouteObserver>(relaxed = true)
-        fasterRoutes.fasterRouteCallback = fasterRouteCallback
+        fasterRoutes.registerNewFasterRouteObserver(fasterRouteCallback)
         coEvery {
             fasterRouteTrackerMock.routesUpdated(
                 any(),
@@ -74,7 +74,7 @@ class FasterRoutesTest {
             fasterRouteTracker = fasterRouteTrackerMock,
         )
         val fasterRouteCallback = mockk<NewFasterRouteObserver>(relaxed = true)
-        fasterRoutes.fasterRouteCallback = fasterRouteCallback
+        fasterRoutes.registerNewFasterRouteObserver(fasterRouteCallback)
         val firstRouteUpdateProcessing = CompletableDeferred<FasterRouteResult>()
         coEvery {
             fasterRouteTrackerMock.routesUpdated(

@@ -138,6 +138,15 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         onInitialize = this::initNavigation
     )
 
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        LogConfiguration.setLoggingLevel(LoggingLevel.DEBUG)
+        setContentView(binding.root)
+        initStyle()
+        initListeners()
+    }
+
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     private val fasterRoutes by lazy {
         mapboxNavigation.createFasterRoutes(
@@ -147,27 +156,18 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         )
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        LogConfiguration.setLoggingLevel(LoggingLevel.DEBUG)
-        setContentView(binding.root)
-        initStyle()
-        initListeners()
-
-    }
-
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onResume() {
         super.onResume()
         @OptIn(ExperimentalMapboxNavigationAPI::class)
-        fasterRoutes.fasterRouteCallback = fasterRouteObserver
+        fasterRoutes.registerNewFasterRouteObserver(fasterRouteObserver)
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onPause() {
         super.onPause()
         @OptIn(ExperimentalMapboxNavigationAPI::class)
-        fasterRoutes.fasterRouteCallback = NewFasterRouteObserver { }
+        fasterRoutes.unregisterNewFasterRouteObserver(fasterRouteObserver)
     }
 
     private fun initNavigation() {
