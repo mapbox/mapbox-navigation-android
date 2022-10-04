@@ -34,6 +34,7 @@ class FasterRoutes internal constructor(
     override fun onRoutesChanged(result: RoutesUpdatedResult) {
         previousRouteUpdateProcessing?.cancel()
         previousRouteUpdateProcessing = scope.launch {
+            // TODO: a few threads can enter this section simultaneously
             val fasterRouteTrackerResult = fasterRouteTracker.routesUpdated(
                 result,
                 mapboxNavigation.getAlternativeMetadataFor(result.navigationRoutes)
