@@ -51,6 +51,10 @@ commands:
         description: module target
         type: string
     steps:
+      - run:
+          name: Save logcat
+          command: |
+            adb logcat -d > instrumentation-tests/build/reports/camera-crash.log
       - store_artifacts:
           path: << parameters.module_target >>/build/reports
           destination: << parameters.module_target >>/reports
@@ -60,7 +64,12 @@ commands:
   run-firebase-instrumentation:
     steps:
       - run:
-          name: Run instrumentation tests on public SDK classes on Firebase
+          name: Prepare report folders
+          command: |
+            mkdir -p instrumentation-tests/build/reports/
+      - run:
+          name: Run instrumentation tests
+          continue-on-error: true
           no_output_timeout: 1200
           shell: /bin/bash -euo pipefail
           command: |
@@ -101,4 +110,6 @@ jobs:
             - checkout
             - read-workspace
             - run-firebase-instrumentation
+            - store-results:
+                module_target: "instrumentation-tests"
       - run: exit 0
