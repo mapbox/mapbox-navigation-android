@@ -60,6 +60,6 @@ class FasterRouteTrackerTest {
     }
 }
 
-private fun createFasterRoutesTracker() = FasterRouteTracker(
+internal fun createFasterRoutesTracker() = FasterRouteTracker(
     FasterRouteOptions(maxSimilarityToExistingRoute = 0.5)
 )

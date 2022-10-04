@@ -6,6 +6,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.utils.internal.ThreadController
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -14,20 +15,21 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 @ExperimentalMapboxNavigationAPI
-class FasterRoutes(
-    options: FasterRouteOptions,
-    private val mapboxNavigation: MapboxNavigation
+class FasterRoutes internal constructor(
+    private val mapboxNavigation: MapboxNavigation,
+    private val fasterRouteTracker: FasterRouteTracker,
+    private val computationDispatcher: CoroutineDispatcher,
+    private val mainDispatcher: CoroutineDispatcher
 ) : RoutesObserver {
 
-    private val scope = CoroutineScope(SupervisorJob() + ThreadController.DefaultDispatcher)
-    private val fasterRouteTracker = FasterRouteTracker(options)
+    private val scope = CoroutineScope(SupervisorJob() + computationDispatcher)
     private var previousRouteUpdateProcessing: Job? = null
 
     init {
         mapboxNavigation.registerRoutesObserver(this)
     }
 
-    var onNewFasterRouteAvailable: (NewFasterRoute) -> Unit = { }
+    var fasterRouteCallback: NewFasterRouteCallback = NewFasterRouteCallback { }
 
     override fun onRoutesChanged(result: RoutesUpdatedResult) {
         previousRouteUpdateProcessing?.cancel()
@@ -36,9 +38,9 @@ class FasterRoutes(
                 result,
                 mapboxNavigation.getAlternativeMetadataFor(result.navigationRoutes)
             )
-            launch(Dispatchers.Main) {
+            launch(mainDispatcher) {
                 when (fasterRouteTrackerResult) {
-                    is FasterRouteResult.NewFasterRoadFound -> onNewFasterRouteAvailable(
+                    is FasterRouteResult.NewFasterRoadFound -> fasterRouteCallback.onNewFasterRouteFound(
                         NewFasterRoute(
                             fasterRouteTrackerResult.route,
                             fasterRouteTrackerResult.fasterThanPrimary
@@ -59,4 +61,18 @@ class FasterRoutes(
 class NewFasterRoute(
     val fasterRoute: NavigationRoute,
     val fasterThanPrimary: Double
+)
+
+fun interface NewFasterRouteCallback {
+    fun onNewFasterRouteFound(newFasterRoute: NewFasterRoute)
+}
+
+@ExperimentalMapboxNavigationAPI
+fun MapboxNavigation.createFasterRoutes(
+    options: FasterRouteOptions
+) = FasterRoutes(
+    this,
+    FasterRouteTracker(options),
+    ThreadController.DefaultDispatcher,
+    Dispatchers.Main
 )

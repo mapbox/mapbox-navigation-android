@@ -44,6 +44,7 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.fasterroute.FasterRouteOptions
 import com.mapbox.navigation.core.fasterroute.FasterRoutes
 import com.mapbox.navigation.core.fasterroute.NewFasterRoute
+import com.mapbox.navigation.core.fasterroute.createFasterRoutes
 import com.mapbox.navigation.core.internal.fasterroute.RecordRouteObserverResults
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -139,11 +140,10 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     private val fasterRoutes by lazy {
-        FasterRoutes(
+        mapboxNavigation.createFasterRoutes(
             FasterRouteOptions(
                 maxSimilarityToExistingRoute = 0.5
-            ),
-            mapboxNavigation
+            )
         )
     }
 
@@ -160,14 +160,14 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     override fun onResume() {
         super.onResume()
         @OptIn(ExperimentalMapboxNavigationAPI::class)
-        fasterRoutes.onNewFasterRouteAvailable = fasterRouteObserver
+        fasterRoutes.fasterRouteCallback = fasterRouteObserver
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onPause() {
         super.onPause()
         @OptIn(ExperimentalMapboxNavigationAPI::class)
-        fasterRoutes.onNewFasterRouteAvailable = {}
+        fasterRoutes.fasterRouteCallback = {}
     }
 
     private fun initNavigation() {
@@ -191,7 +191,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
         mapboxReplayer.pushEvents(
             ReplayEventLocation(
-                -77.02975555594794, 38.91168725377193,
+                11.574758,48.150672,
                 provider = "me",
                 0.0,
                 null,
