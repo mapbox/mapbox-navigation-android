@@ -928,7 +928,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routes: List<NavigationRoute>,
         setRoutesInfo: SetRoutesInfo,
     ): NativeSetRouteResult {
-        routeAlternativesController.pauseUpdates()
         return tripSession.setRoutes(routes, setRoutesInfo).apply {
             if (this is NativeSetRouteValue) {
                 routeAlternativesController.processAlternativesMetadata(
@@ -936,8 +935,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                     nativeAlternatives
                 )
             }
-        }.also {
-            routeAlternativesController.resumeUpdates()
         }
     }
 

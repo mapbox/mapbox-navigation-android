@@ -715,45 +715,6 @@ class RouteAlternativesControllerTest {
             assertNull(metadata)
         }
 
-    @Test
-    fun `native updates ignored when controller paused, and resumed successfully`() =
-        coroutineRule.runBlockingTest {
-            mockkStatic(RouteOptions::fromUrl) {
-                every { RouteOptions.fromUrl(eq(genericURL)) } returns mockk()
-                val routeAlternativesController = createRouteAlternativesController()
-                val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
-                every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-                val routeProgress = mockk<RouteProgress>()
-                every { tripSession.getRouteProgress() } returns routeProgress
-                val firstObserver: NavigationRouteAlternativesObserver = mockk(relaxed = true)
-                routeAlternativesController.register(firstObserver)
-
-                routeAlternativesController.pauseUpdates()
-                nativeObserver.captured.onRouteAlternativesChanged(
-                    listOf(
-                        createNativeAlternativeMock()
-                    ),
-                    emptyList()
-                )
-
-                verify(exactly = 0) {
-                    firstObserver.onRouteAlternatives(any(), any(), any())
-                }
-
-                routeAlternativesController.resumeUpdates()
-                nativeObserver.captured.onRouteAlternativesChanged(
-                    listOf(
-                        createNativeAlternativeMock()
-                    ),
-                    emptyList()
-                )
-
-                verify(exactly = 1) {
-                    firstObserver.onRouteAlternatives(any(), any(), any())
-                }
-            }
-        }
-
     private val nativeInfoFork = com.mapbox.navigator.AlternativeRouteInfo(
         100.0, // distance
         200.0, // duration

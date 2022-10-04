@@ -340,7 +340,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
 - Mapbox Android Telemetry `v8.1.5` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/telem-8.1.5-core-5.0.2))
 
-
 ## Mapbox Navigation SDK 2.8.0-beta.1 - 25 August, 2022
 ### Changelog
 [Changes between v2.8.0-alpha.3 and v2.8.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.8.0-alpha.3...v2.8.0-beta.1)
