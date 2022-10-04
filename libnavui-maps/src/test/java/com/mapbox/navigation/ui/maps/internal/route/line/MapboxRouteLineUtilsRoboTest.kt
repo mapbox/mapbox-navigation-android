@@ -51,10 +51,18 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ORIGIN_MARKER_NAM
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.line.api.VanishingRouteLine
+import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
+import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
 import com.mapbox.navigator.RouteInterface
+import com.mapbox.turf.TurfConstants
+import com.mapbox.turf.TurfMeasurement
+import com.mapbox.turf.TurfMisc
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -70,6 +78,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.UUID
+import kotlin.math.abs
 
 @RunWith(RobolectricTestRunner::class)
 class MapboxRouteLineUtilsRoboTest {

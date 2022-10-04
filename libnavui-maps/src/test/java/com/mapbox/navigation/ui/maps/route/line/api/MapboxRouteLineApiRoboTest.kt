@@ -1004,7 +1004,7 @@ class MapboxRouteLineApiRoboTest {
                     emptyArray(),
                     emptyArray(),
                     emptyArray(),
-                    emptyArray()
+                    emptyArray(),
                 )
             }
         )

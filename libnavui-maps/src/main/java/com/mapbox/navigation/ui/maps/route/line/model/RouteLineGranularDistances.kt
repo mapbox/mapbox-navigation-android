@@ -11,10 +11,10 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
  * @param routeDistances values in this array are matching indices of all points in the full route geometry
  * @param legsDistances values in this array are matching indices of all points in each of the route legs
  * @param stepsDistances values in this array are matching indices of all points in each of the leg steps
- * @param flatStepDistances values in this array are matching indices a flatted [stepsDistances].
+ * @param flatStepDistances values in this array are matching indices a flattened [stepsDistances].
  * This means that **duplicate start/end points of adjacent steps are not filtered out**.
  */
-internal data class RouteLineGranularDistances constructor(
+data class RouteLineGranularDistances constructor(
     val completeDistance: Double,
     val routeDistances: Array<RouteLineDistancesIndex>,
     val legsDistances: Array<Array<RouteLineDistancesIndex>>,

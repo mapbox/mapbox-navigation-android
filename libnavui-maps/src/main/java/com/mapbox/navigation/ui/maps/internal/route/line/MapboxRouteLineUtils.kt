@@ -57,13 +57,14 @@ import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.turf.TurfConstants
+import com.mapbox.turf.TurfMeasurement
 import com.mapbox.turf.TurfMisc
 import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-internal object MapboxRouteLineUtils {
+object MapboxRouteLineUtils {
 
     private const val LOG_CATEGORY = "MapboxRouteLineUtils"
     internal const val VANISH_POINT_STOP_GAP = .00000000001
@@ -716,7 +717,7 @@ internal object MapboxRouteLineUtils {
     /**
      * Decodes the route and produces [RouteLineGranularDistances].
      */
-    internal val granularDistancesProvider: (
+    val granularDistancesProvider: (
         route: NavigationRoute,
     ) -> RouteLineGranularDistances? =
         { route: NavigationRoute ->
@@ -876,11 +877,10 @@ internal object MapboxRouteLineUtils {
     private fun generateFeatureCollection(route: NavigationRouteLine): RouteFeatureData =
         generateRouteFeatureData(route.route, route.identifier)
 
-    private fun calculateGranularDistances(
+    private fun  calculateGranularDistances(
         stepsPoints: List<List<List<Point>>>
     ): RouteLineGranularDistances {
         var distance = 0.0
-
         val stepsArray = stepsPoints.map { pointsPerLeg ->
             pointsPerLeg.map { stepPoints ->
                 // there can be a lot of points for each step
@@ -953,6 +953,46 @@ internal object MapboxRouteLineUtils {
             stepsDistances = stepsArray as Array<Array<Array<RouteLineDistancesIndex>>>,
             flatStepDistances = stepsArray.flatten().toTypedArray().flatten().toTypedArray(),
         )
+    }
+
+    fun getFillerPointsForStepPoints(nextSteps: Array<RouteLineDistancesIndex>): List<RouteLineDistancesIndex> {
+        val fillerPoints = mutableListOf<RouteLineDistancesIndex>()
+        nextSteps.forEachIndexed { index, routeLineDistancesIndex ->
+            if (index < nextSteps.lastIndex) {
+                getFillerPoints(routeLineDistancesIndex, nextSteps[index + 1]).apply {
+                    fillerPoints.addAll(this)
+                }
+            }
+        }
+        return fillerPoints
+    }
+
+    //todo the variable names below should be named better
+    fun getFillerPoints(startPoint: RouteLineDistancesIndex, endPoint: RouteLineDistancesIndex): List<RouteLineDistancesIndex> {
+        val gapDist = 1.0 // meters
+        val turfDistance = TurfMeasurement.distance(startPoint.point, endPoint.point, TurfConstants.UNIT_METERS)
+        val fillerPoints = mutableListOf<RouteLineDistancesIndex>()
+        val bearing = TurfMeasurement.bearing(startPoint.point, endPoint.point)
+        var lastCalculatedPoint = startPoint
+        val count = (turfDistance / gapDist).toInt()
+        val delta = startPoint.distanceRemaining - endPoint.distanceRemaining
+        val itemDist = delta / count
+
+        fillerPoints.add(startPoint)
+        var dist = startPoint.distanceRemaining
+        repeat(count) {
+            val fillerPoint = TurfMeasurement.destination(
+                lastCalculatedPoint.point,
+                gapDist,
+                bearing,
+                TurfConstants.UNIT_METERS
+            )
+
+            dist -= itemDist
+            fillerPoints.add(RouteLineDistancesIndex(fillerPoint, dist))
+            lastCalculatedPoint = fillerPoints.last()
+        }
+        return fillerPoints
     }
 
     private val generateRouteFeatureData: (

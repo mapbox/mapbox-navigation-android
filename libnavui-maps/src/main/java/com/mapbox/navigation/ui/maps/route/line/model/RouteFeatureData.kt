@@ -12,7 +12,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
  * @param featureCollection a FeatureCollection created using the route
  * @param lineString a LineString derived from the route's geometry.
  */
-internal data class RouteFeatureData constructor(
+data class RouteFeatureData constructor( // fixme make internal
     val route: NavigationRoute,
     val featureCollection: FeatureCollection,
     val lineString: LineString

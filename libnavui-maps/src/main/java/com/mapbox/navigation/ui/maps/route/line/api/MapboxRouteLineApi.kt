@@ -54,13 +54,11 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
-import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.route.line.model.toNavigationRouteLines
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
-import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.parallelMap
 import com.mapbox.turf.TurfConstants
@@ -439,26 +437,27 @@ class MapboxRouteLineApi(
         point: Point
     ): Expected<RouteLineError, RouteLineUpdateValue> {
         val currentNanoTime = System.nanoTime()
-        if (routeLineOptions.vanishingRouteLine?.vanishingPointState ==
-            VanishingPointState.DISABLED || currentNanoTime - lastIndexUpdateTimeNano >
-            RouteLayerConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO ||
-            currentNanoTime - lastPointUpdateTimeNano <
-            routeLineOptions.vanishingRouteLineUpdateIntervalNano
-        ) {
-            return ExpectedFactory.createError(
-                RouteLineError(
-                    "Vanishing point state is disabled or the update doesn't fall" +
-                        "within the configured interval window.",
-                    null
-                )
-            )
-        }
 
-        val stopGap: Double = ifNonNull(primaryRoute?.directionsRoute) { route ->
-            RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS / route.distance()
-        } ?: .00000000001 // an arbitrarily small value so Expression values are in ascending order
+        //todo does the VanishingPointState matter anymore?
+        //todo is the nano time still needed?
+
+        // if (routeLineOptions.vanishingRouteLine?.vanishingPointState ==
+        //     VanishingPointState.DISABLED || currentNanoTime - lastIndexUpdateTimeNano >
+        //     RouteLayerConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO ||
+        //     currentNanoTime - lastPointUpdateTimeNano <
+        //     routeLineOptions.vanishingRouteLineUpdateIntervalNano
+        // ) {
+        //     return ExpectedFactory.createError(
+        //         RouteLineError(
+        //             "Vanishing point state is disabled or the update doesn't fall" +
+        //                 "within the configured interval window.",
+        //             null
+        //         )
+        //     )
+        // }
 
         val routeLineExpressionProviders = ifNonNull(primaryRoute) { route ->
+            val stopGap: Double = RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS / route.directionsRoute.distance()
             ifNonNull(granularDistancesProvider(route)) { granularDistances ->
                 if (routeLineOptions.styleInactiveRouteLegsIndependently) {
                     val workingRouteLineExpressionData =
@@ -474,7 +473,6 @@ class MapboxRouteLineApi(
                         }
                     routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(
                         point,
-                        granularDistances,
                         workingRouteLineExpressionData,
                         restrictedExpressionData,
                         routeLineOptions.resourceProvider,
@@ -483,10 +481,7 @@ class MapboxRouteLineApi(
                         routeLineOptions.displaySoftGradientForTraffic,
                     )
                 } else {
-                    routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(
-                        point,
-                        granularDistances
-                    )
+                    routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(point)
                 }
             }
         }
@@ -701,27 +696,27 @@ class MapboxRouteLineApi(
         routeProgress: RouteProgress,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>
     ) {
-        val currentPrimaryRoute = primaryRoute
-        if (currentPrimaryRoute == null) {
-            val msg = "You're calling #updateWithRouteProgress without any routes being set."
-            consumer.accept(
-                ExpectedFactory.createError(RouteLineError(msg, throwable = null))
-            )
-            logW(msg, LOG_CATEGORY)
-            return
-        } else if (currentPrimaryRoute.id != routeProgress.navigationRoute.id) {
-            val msg = "Provided primary route (#setNavigationRoutes, ID: " +
-                "${currentPrimaryRoute.id}) and navigated route (#updateWithRouteProgress, ID: " +
-                "${routeProgress.navigationRoute.id}) are not the same. Aborting the update."
-            consumer.accept(
-                ExpectedFactory.createError(RouteLineError(msg, throwable = null))
-            )
-            logE(msg, LOG_CATEGORY)
-            return
-        }
-
-        updateUpcomingRoutePointIndex(routeProgress)
-        updateVanishingPointState(routeProgress.currentState)
+        // val currentPrimaryRoute = primaryRoute
+        // if (currentPrimaryRoute == null) {
+        //     val msg = "You're calling #updateWithRouteProgress without any routes being set."
+        //     consumer.accept(
+        //         ExpectedFactory.createError(RouteLineError(msg, throwable = null))
+        //     )
+        //     logW(msg, LOG_CATEGORY)
+        //     return
+        // } else if (currentPrimaryRoute.id != routeProgress.navigationRoute.id) {
+        //     val msg = "Provided primary route (#setNavigationRoutes, ID: " +
+        //         "${currentPrimaryRoute.id}) and navigated route (#updateWithRouteProgress, ID: " +
+        //         "${routeProgress.navigationRoute.id}) are not the same. Aborting the update."
+        //     consumer.accept(
+        //         ExpectedFactory.createError(RouteLineError(msg, throwable = null))
+        //     )
+        //     logE(msg, LOG_CATEGORY)
+        //     return
+        // }
+        //
+        // updateUpcomingRoutePointIndex(routeProgress)
+        // updateVanishingPointState(routeProgress.currentState)
 
         // If the de-emphasize inactive route legs feature is enabled and the vanishing route line
         // feature is enabled and the active leg index has changed, then calling the
@@ -1079,6 +1074,7 @@ class MapboxRouteLineApi(
         }
     }
 
+    //todo remove this
     internal fun updateUpcomingRoutePointIndex(routeProgress: RouteProgress) {
         ifNonNull(
             routeProgress.currentLegProgress,
@@ -1139,6 +1135,7 @@ class MapboxRouteLineApi(
         lastIndexUpdateTimeNano = System.nanoTime()
     }
 
+    // todo remove this
     internal fun updateVanishingPointState(routeProgressState: RouteProgressState) {
         routeLineOptions.vanishingRouteLine?.updateVanishingPointState(routeProgressState)
     }
@@ -1192,7 +1189,9 @@ class MapboxRouteLineApi(
         if (routes.isEmpty()) return
         withContext(jobControl.scope.coroutineContext) {
             if (vanishingRouteLineEnabled) {
-                granularDistancesProvider(routes.first())
+                granularDistancesProvider(routes.first())?.let {
+                    routeLineOptions.vanishingRouteLine?.setGranularDistances(it)
+                }
             }
             if (alternativeRouteMetadataAvailable) {
                 routes.drop(1).forEach {
