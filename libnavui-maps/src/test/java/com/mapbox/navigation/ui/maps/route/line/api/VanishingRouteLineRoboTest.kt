@@ -115,7 +115,6 @@ class VanishingRouteLineRoboTest {
 
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(
             lineString.coordinates()[0],
-            granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!,
             segments,
             null,
             genericMockResourceProvider,
@@ -153,8 +152,7 @@ class VanishingRouteLineRoboTest {
         vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
 
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(
-            lineString.coordinates()[0],
-            granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!,
+            lineString.coordinates()[0]
         )
 
         assertEquals(
@@ -203,7 +201,6 @@ class VanishingRouteLineRoboTest {
 
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(
             lineString.coordinates()[0],
-            granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!,
             segments,
             restrictedSegments,
             genericMockResourceProvider,
@@ -249,7 +246,6 @@ class VanishingRouteLineRoboTest {
 
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(
             lineString.coordinates()[0],
-            granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!,
             segments,
             null,
             genericMockResourceProvider,
@@ -304,7 +300,6 @@ class VanishingRouteLineRoboTest {
 
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(
             Point.fromLngLat(-122.52351984901476, 37.97384101461195),
-            granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!,
             segments,
             null,
             RouteLineResources.Builder().build(),
