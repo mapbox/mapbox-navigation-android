@@ -15,7 +15,7 @@ import com.mapbox.androidauto.car.search.PlaceSearchScreen
 import com.mapbox.androidauto.car.search.SearchCarContext
 import com.mapbox.androidauto.car.settings.CarSettingsScreen
 import com.mapbox.androidauto.car.settings.SettingsCarContext
-import com.mapbox.search.MapboxSearchSdk
+import com.mapbox.search.ServiceProvider
 
 class MainActionStrip(
     private val screen: Screen,
@@ -86,7 +86,7 @@ class MainActionStrip(
         .build()
 
     private fun favoritesScreen(): PlacesListOnMapScreen {
-        val placesProvider = FavoritesApi(MapboxSearchSdk.serviceProvider.favoritesDataProvider())
+        val placesProvider = FavoritesApi(ServiceProvider.INSTANCE.favoritesDataProvider())
         val feedbackPoll = mainCarContext.feedbackPollProvider
             .getSearchFeedbackPoll(mainCarContext.carContext)
         return PlacesListOnMapScreen(
