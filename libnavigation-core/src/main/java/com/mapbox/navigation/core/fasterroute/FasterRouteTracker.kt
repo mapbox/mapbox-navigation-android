@@ -47,12 +47,10 @@ internal class FasterRouteTracker(
             val fasterAlternativeRouteDuration = metadataMap[fasterAlternative.id]!!
                 .infoFromStartOfPrimary.duration
             val fasterThanPrimary = primaryRouteDuration - fasterAlternativeRouteDuration
-            if (fasterThanPrimary > 0) {
-                return FasterRouteResult.NewFasterRoadFound(
-                    fasterAlternative,
-                    fasterThanPrimary = fasterThanPrimary
-                )
-            }
+            return FasterRouteResult.NewFasterRoadFound(
+                fasterAlternative,
+                fasterThanPrimary = fasterThanPrimary
+            )
         }
         return FasterRouteResult.NoFasterRoad
     }
