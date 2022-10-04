@@ -22,6 +22,10 @@ fun MapboxNavigation.createFasterRoutes(
     Dispatchers.Main
 )
 
+/***
+ * Keeps track of primary and alternatives routes to notify in [NewFasterRouteObserver] that a
+ * new faster route is available.
+ */
 @ExperimentalMapboxNavigationAPI
 class FasterRoutes internal constructor(
     private val mapboxNavigation: MapboxNavigation,
@@ -62,6 +66,14 @@ class FasterRoutes internal constructor(
 
     fun unregisterNewFasterRouteObserver(observer: NewFasterRouteObserver) {
         newFasterRoutesObservers.remove(observer)
+    }
+
+    fun acceptFasterRoute(newFasterRoute: NewFasterRoute) {
+
+    }
+
+    fun declineFasterRoute(newFasterRoute: NewFasterRoute) {
+
     }
 
     fun destroy() {
