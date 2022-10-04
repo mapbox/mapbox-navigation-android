@@ -9,8 +9,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
 
 class FasterRoutesTest {
 
@@ -59,6 +62,45 @@ class FasterRoutesTest {
 
         routeObserver.onRoutesChanged(mockk(relaxed = true))
 
+        verify(exactly = 0) { fasterRouteCallback.onNewFasterRouteFound(any()) }
+    }
+
+    @Test
+    fun `when routes are updated faster then processing not processed old results are ignored`() {
+        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        val fasterRouteTrackerMock = mockk<FasterRouteTracker>()
+        val routeObserver = mapboxNavigation.recordRoutesObservers()
+        val fasterRoutes = createFasterRoutes(
+            mapboxNavigation = mapboxNavigation,
+            fasterRouteTracker = fasterRouteTrackerMock,
+            computationDispatcher = Executors.newFixedThreadPool(1).asCoroutineDispatcher()
+        )
+        val fasterRouteCallback = mockk<NewFasterRouteCallback>(relaxed = true)
+        fasterRoutes.fasterRouteCallback = fasterRouteCallback
+        val countDownLatch = CountDownLatch(1)
+        every {
+            fasterRouteTrackerMock.routesUpdated(
+                any(),
+                any()
+            )
+        } answers {
+            countDownLatch.await()
+            FasterRouteResult.NewFasterRoadFound(
+                mockk(), 8.9
+            )
+        }
+        routeObserver.onRoutesChanged(mockk(relaxed = true))
+        verify(exactly = 0) { fasterRouteCallback.onNewFasterRouteFound(any()) }
+        every {
+            fasterRouteTrackerMock.routesUpdated(
+                any(),
+                any()
+            )
+        } answers {
+            FasterRouteResult.NoFasterRoad
+        }
+        routeObserver.onRoutesChanged(mockk(relaxed = true))
+        countDownLatch.countDown()
         verify(exactly = 0) { fasterRouteCallback.onNewFasterRouteFound(any()) }
     }
 }
