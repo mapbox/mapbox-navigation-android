@@ -130,7 +130,6 @@ class FasterRoutesTest {
             )
         } returns createNewFasterRouteFoundForTest(route = currentRoutes.last())
 
-
         fasterRoutes.registerNewFasterRouteObserver {
             fasterRoutes.acceptFasterRoute(it)
         }
