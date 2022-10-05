@@ -3,12 +3,11 @@
 package com.mapbox.navigation.core.fasterroute
 
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
-import com.mapbox.navigation.core.fasterroute.TestRoutes.Companion.ARTIFICIAL_FASTER_ROUTE_FOR_MUNICH_NUREMBERG
+import com.mapbox.navigation.core.fasterroute.TestRoutes.Companion.FASTER_ROUTE_IN_MUNICH
 import com.mapbox.navigation.core.fasterroute.TestRoutes.Companion.MUNICH_NUREMBERG
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -39,35 +38,51 @@ class FasterRouteTrackerTest {
         }
 
     @Test
-    fun `faster route is available Munich to Nuremberg moving by the slowest road`() =
+    fun `faster route is available driving in Munich after picking the slowest road`() =
         runBlocking<Unit> {
-            val fasterRoutes = createFasterRoutesTracker()
-            val preparationUpdates =
-                readRouteObserverResults(MUNICH_NUREMBERG)
-                    .take(24)
-            for (recordedUpdate in preparationUpdates) {
-                val result = fasterRoutes.routesUpdated(
+            val fasterRoutesTracker = createFasterRoutesTracker()
+            val routeUpdates = readRouteObserverResults(FASTER_ROUTE_IN_MUNICH)
+            val fasterRoutesIds = mutableListOf<String>()
+            for (recordedUpdate in routeUpdates) {
+                val result = fasterRoutesTracker.routesUpdated(
                     recordedUpdate.update,
                     recordedUpdate.alternativeMetadata.values.toList()
                 )
-                assertEquals(
-                    FasterRouteResult.NoFasterRoad,
-                    result
-                )
+                if (result is FasterRouteResult.NewFasterRoadFound) {
+                    fasterRoutesIds.add(result.route.id)
+                }
             }
-            val updateWithArtificialFasterRoute =
-                readRouteObserverResults(ARTIFICIAL_FASTER_ROUTE_FOR_MUNICH_NUREMBERG).single()
-
-            val result = fasterRoutes.routesUpdated(
-                updateWithArtificialFasterRoute.update,
-                updateWithArtificialFasterRoute.alternativeMetadata.values.toList()
-            )
-
-            assertTrue("result is $result", result is FasterRouteResult.NewFasterRoadFound)
-            val fasterRouteResult = result as FasterRouteResult.NewFasterRoadFound
             assertEquals(
-                "2fRI3oZgP9QIffbtczCQl-FsWWdgLirxzAQL_4x8WtoB05ATMs2obA==#1",
-                fasterRouteResult.route.id
+                listOf(
+                    "JJXKpAxo3Yhh3rbJJmToNPPkzjh-hJHZV8u2Uksl1gwue_3sdZZ0ig==#1",
+                    "b_dZe9Trx9MkOIphyCILePn4cBI6taAQmSctw1k5jaNzWz8vL-10-w==#1",
+                    "b_dZe9Trx9MkOIphyCILePn4cBI6taAQmSctw1k5jaNzWz8vL-10-w==#1"
+                ),
+                fasterRoutesIds
+            )
+        }
+
+    @Test
+    fun `rejecting first faster route driving in Munich filters other similar faster routes`() =
+        runBlocking<Unit> {
+            val fasterRoutesTracker = createFasterRoutesTracker()
+            val routeUpdates = readRouteObserverResults(FASTER_ROUTE_IN_MUNICH)
+            val fasterRoutesIds = mutableListOf<String>()
+            for (recordedUpdate in routeUpdates) {
+                val result = fasterRoutesTracker.routesUpdated(
+                    recordedUpdate.update,
+                    recordedUpdate.alternativeMetadata.values.toList()
+                )
+                if (result is FasterRouteResult.NewFasterRoadFound) {
+                    fasterRoutesIds.add(result.route.id)
+                    fasterRoutesTracker.fasterRouteDeclined(result.alternativeId, result.route)
+                }
+            }
+            assertEquals(
+                listOf(
+                    "JJXKpAxo3Yhh3rbJJmToNPPkzjh-hJHZV8u2Uksl1gwue_3sdZZ0ig==#1"
+                ),
+                fasterRoutesIds
             )
         }
 }
