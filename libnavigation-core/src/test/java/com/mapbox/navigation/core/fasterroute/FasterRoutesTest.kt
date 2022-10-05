@@ -5,6 +5,9 @@ package com.mapbox.navigation.core.fasterroute
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.testing.factories.createDirectionsResponse
+import com.mapbox.navigation.testing.factories.createDirectionsRoute
+import com.mapbox.navigation.testing.factories.createNavigationRoutes
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -103,6 +106,46 @@ class FasterRoutesTest {
             )
         )
         verify(exactly = 0) { fasterRouteCallback.onNewFasterRouteFound(any()) }
+    }
+
+    @Test
+    fun `accept faster route`() {
+        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        val fasterRouteTrackerMock = mockk<FasterRouteTracker>()
+        val routeObserver = mapboxNavigation.recordRoutesObservers()
+        val fasterRoutes = createFasterRoutes(
+            mapboxNavigation = mapboxNavigation,
+            fasterRouteTracker = fasterRouteTrackerMock
+        )
+        val currentRoutes = createNavigationRoutes(
+            response = createDirectionsResponse(
+                uuid = "testRoutes",
+                routes = listOf(
+                    createDirectionsRoute(),
+                    createDirectionsRoute(),
+                    createDirectionsRoute(),
+                )
+            )
+        )
+        every { mapboxNavigation.getNavigationRoutes() } returns currentRoutes
+        coEvery {
+            fasterRouteTrackerMock.routesUpdated(
+                any(),
+                any()
+            )
+        } returns FasterRouteResult.NewFasterRoadFound(
+            currentRoutes.last(),
+            8.9
+        )
+
+
+        fasterRoutes.registerNewFasterRouteObserver {
+            fasterRoutes.acceptFasterRoute(it)
+        }
+        routeObserver.onRoutesChanged(mockk(relaxed = true))
+
+        val expectedRoutes = listOf(currentRoutes[2], currentRoutes[0], currentRoutes[1])
+        verify { mapboxNavigation.setNavigationRoutes(expectedRoutes) }
     }
 }
 

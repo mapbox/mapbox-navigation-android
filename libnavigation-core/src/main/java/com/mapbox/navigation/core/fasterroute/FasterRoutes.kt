@@ -4,6 +4,7 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -68,10 +69,24 @@ class FasterRoutes internal constructor(
         newFasterRoutesObservers.remove(observer)
     }
 
+    /***
+     * Sets faster route as primary to [MapboxNavigation]
+     */
     fun acceptFasterRoute(newFasterRoute: NewFasterRoute) {
-
+        val currentRoutes = mapboxNavigation.getNavigationRoutes()
+        if (currentRoutes.contains(newFasterRoute.fasterRoute)) {
+            mapboxNavigation.setNavigationRoutes(
+                listOf(newFasterRoute.fasterRoute) +
+                    currentRoutes.filterNot { it == newFasterRoute.fasterRoute }
+            )
+        } else {
+            logE("Ignoring accepted faster route as it's not present in faster routes")
+        }
     }
 
+    /***
+     * Remembers faster route as declined to not offer similar to this one again.
+     */
     fun declineFasterRoute(newFasterRoute: NewFasterRoute) {
 
     }

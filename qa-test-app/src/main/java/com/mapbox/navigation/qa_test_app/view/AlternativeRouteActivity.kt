@@ -156,14 +156,12 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         )
     }
 
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onResume() {
         super.onResume()
         @OptIn(ExperimentalMapboxNavigationAPI::class)
         fasterRoutes.registerNewFasterRouteObserver(fasterRouteObserver)
     }
 
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onPause() {
         super.onPause()
         @OptIn(ExperimentalMapboxNavigationAPI::class)

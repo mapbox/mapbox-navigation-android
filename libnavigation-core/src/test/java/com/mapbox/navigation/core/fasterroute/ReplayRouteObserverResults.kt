@@ -32,7 +32,7 @@ fun Any.readRouteObserverResults(packageName: String): List<RecordedRoutesUpdate
         }
         .sortedBy { it.first }
         .map {
-            val (alternativeIds, routes) = createNavigationRoutes(it.third)
+            val (alternativeIds, routes) = readAlternativeMetadataAndNavigationRoutes(it.third)
             RecordedRoutesUpdateResult(
                 RoutesUpdatedResult(
                     routes,
@@ -43,7 +43,7 @@ fun Any.readRouteObserverResults(packageName: String): List<RecordedRoutesUpdate
         }
 }
 
-private fun createNavigationRoutes(
+private fun readAlternativeMetadataAndNavigationRoutes(
     fileContent: String
 ): Pair<Map<String, AlternativeRouteMetadata>, List<NavigationRoute>> {
     val result = mutableListOf<NavigationRoute>()
