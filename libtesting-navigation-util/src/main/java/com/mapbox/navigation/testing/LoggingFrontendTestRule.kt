@@ -14,6 +14,9 @@ private object NoLoggingFrontend : LoggerFrontend {
     override fun logD(msg: String, category: String?) {
     }
 
+    override fun logD(category: String?, lazyMsg: () -> String) {
+    }
+
     override fun logI(msg: String, category: String?) {
     }
 

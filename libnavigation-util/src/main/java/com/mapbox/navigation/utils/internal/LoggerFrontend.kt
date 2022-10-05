@@ -1,5 +1,7 @@
 package com.mapbox.navigation.utils.internal
 
+import com.mapbox.common.LogConfiguration
+import com.mapbox.common.LoggingLevel
 import com.mapbox.common.NativeLoggerWrapper
 
 private const val NAV_SDK_CATEGORY = "nav-sdk"
@@ -7,6 +9,7 @@ private const val NAV_SDK_CATEGORY = "nav-sdk"
 interface LoggerFrontend {
     fun logV(msg: String, category: String? = null)
     fun logD(msg: String, category: String? = null)
+    fun logD(category: String? = null, lazyMsg: () -> String)
     fun logI(msg: String, category: String? = null)
     fun logE(msg: String, category: String? = null)
     fun logW(msg: String, category: String? = null)
@@ -22,6 +25,13 @@ internal class MapboxCommonLoggerFrontend : LoggerFrontend {
     override fun logD(msg: String, category: String?) {
         val message = createMessage(msg, category)
         NativeLoggerWrapper.debug(message, NAV_SDK_CATEGORY)
+    }
+
+    override fun logD(category: String?, lazyMsg: () -> String) {
+        when (LogConfiguration.getLoggingLevel()) {
+            LoggingLevel.DEBUG -> logD(lazyMsg(), category)
+            LoggingLevel.ERROR, LoggingLevel.INFO, LoggingLevel.WARNING -> { }
+        }
     }
 
     override fun logI(msg: String, category: String?) {

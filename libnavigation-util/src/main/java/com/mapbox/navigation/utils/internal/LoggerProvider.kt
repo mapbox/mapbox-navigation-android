@@ -40,6 +40,16 @@ fun logD(msg: String, category: String? = null) {
 }
 
 /**
+ * @param category optional string to identify the source or category of the log message.
+ * @param lazyMsg is a lazy message to log. Isn't executed if current log level less verbose then Debug.
+ * Noting that the category is appended to the log message to give extra context along with the `[nav-sdk]` parent category.
+ * As an example, this is how the logs would look like `D/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`.
+ */
+fun logD(category: String? = null, lazyMsg: () -> String) {
+    LoggerProvider.frontend.logD(category, lazyMsg)
+}
+
+/**
  * @param msg to log.
  * @param category optional string to identify the source or category of the log message.
  * Noting that the category is appended to the log message to give extra context along with the `[nav-sdk]` parent category.
