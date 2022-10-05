@@ -5,6 +5,9 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.turf.TurfMeasurement
 
+/***
+ * The function uses summary of route leg which is not guaranteed to have a stable format.
+ */
 internal fun calculateDescriptionSimilarity(a: NavigationRoute, b: NavigationRoute): Double {
     val firstSummary = parseSummaries(a)
     val secondSummary = parseSummaries(b)

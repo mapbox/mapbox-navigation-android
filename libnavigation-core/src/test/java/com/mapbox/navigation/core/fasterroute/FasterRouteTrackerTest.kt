@@ -73,5 +73,5 @@ class FasterRouteTrackerTest {
 }
 
 internal fun createFasterRoutesTracker() = FasterRouteTracker(
-    FasterRouteOptions(maxSimilarityToExistingRoute = 0.5)
+    FasterRouteOptions.Builder().build()
 )

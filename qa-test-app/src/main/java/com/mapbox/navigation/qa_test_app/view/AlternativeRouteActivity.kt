@@ -150,9 +150,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     private val fasterRoutes by lazy {
         mapboxNavigation.createFasterRoutes(
-            FasterRouteOptions(
-                maxSimilarityToExistingRoute = 0.5
-            )
+            FasterRouteOptions.Builder().build()
         )
     }
 
