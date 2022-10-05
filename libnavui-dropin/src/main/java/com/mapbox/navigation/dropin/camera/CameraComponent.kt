@@ -22,11 +22,12 @@ import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHan
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import com.mapbox.navigation.ui.maps.internal.extensions.flowNavigationCameraState
 import com.mapbox.navigation.utils.internal.logD
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -127,13 +128,14 @@ internal class CameraComponent constructor(
         }
     }
 
+    @OptIn(FlowPreview::class)
     private fun syncNavigationCameraState() {
-        // using immediate dispatcher causes nested store updates
-        navigationCamera.flowNavigationCameraState().observe(Dispatchers.Main) {
+        // debounce is necessary to skip intermediate IDLE state when transitioning to FOLLOWING
+        navigationCamera.flowNavigationCameraState().debounce(10).observe {
             store.dispatch(SetCameraMode(it.toTargetCameraMode()))
         }
 
-        store.select { it.camera.cameraMode }.observe(Dispatchers.Main) {
+        store.select { it.camera.cameraMode }.observe {
             val currentMode = navigationCamera.state.toTargetCameraMode()
             if (isCameraInitialized && it != currentMode) {
                 when (it) {
@@ -221,8 +223,7 @@ internal class CameraComponent constructor(
                 viewportDataSource.evaluate()
             }
         }
-        // using immediate dispatcher causes nested store updates
-        coroutineScope.launch(Dispatchers.Main) {
+        coroutineScope.launch {
             store.select { it.navigation }.collectLatest { navigationState ->
                 when (navigationState) {
                     NavigationState.FreeDrive -> {

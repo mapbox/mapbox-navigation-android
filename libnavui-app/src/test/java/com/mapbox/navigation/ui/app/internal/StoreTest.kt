@@ -23,7 +23,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -35,14 +34,9 @@ internal class StoreTest {
     val loggerRule = LoggingFrontendTestRule()
 
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
-    private lateinit var sut: TestStore
-
-    @Before
-    fun setUp() {
-        sut = TestStore()
-    }
+    private val sut = TestStore()
 
     @Test
     fun `dispatch should call each reducer and update state`() {
@@ -69,7 +63,7 @@ internal class StoreTest {
     }
 
     @Test
-    fun `dispatch should not accept new actions before all reducers finish`() {
+    fun `dispatch should queue new actions before all reducers finish`() {
         sut.register(
             Reducer { state, action ->
                 if (action is NavigationStateAction.Update) {
@@ -81,14 +75,16 @@ internal class StoreTest {
         )
         sut.register(
             Reducer { state, _ ->
-                sut.dispatch(NavigationStateAction.Update(NavigationState.Arrival))
+                if (state.navigation == NavigationState.ActiveNavigation) {
+                    sut.dispatch(NavigationStateAction.Update(NavigationState.Arrival))
+                }
                 state
             }
         )
 
         sut.dispatch(NavigationStateAction.Update(NavigationState.ActiveNavigation))
 
-        assertEquals(NavigationState.ActiveNavigation, sut.state.value.navigation)
+        assertEquals(NavigationState.Arrival, sut.state.value.navigation)
     }
 
     @Test

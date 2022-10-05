@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.app.internal
 
 import com.mapbox.navigation.ui.utils.internal.extensions.slice
-import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,7 +56,8 @@ open class Store {
 
     private val middlewares = ConcurrentLinkedQueue<Middleware>()
     private val reducers = ConcurrentLinkedQueue<Reducer>()
-    private var isDispatching = false
+    private val actions = ConcurrentLinkedQueue<Action>()
+    private var isProcessing = false
 
     fun <T> select(selector: (State) -> T): Flow<T> {
         return state.map { selector(it) }.distinctUntilChanged()
@@ -68,20 +68,17 @@ open class Store {
     }
 
     fun dispatch(action: Action) {
-        if (isDispatching) {
-            logW(
-                "Cannot dispatch new actions during reducer processing. " +
-                    "Action dropped: ${action::class.java.simpleName}.",
-                "Store"
-            )
-            return
-        }
+        actions.add(action)
+        if (isProcessing) return
 
-        isDispatching = true
-        if (!intercept(action)) {
-            reduce(action)
+        isProcessing = true
+        while (actions.isNotEmpty()) {
+            val head = actions.remove()
+            if (!intercept(head)) {
+                reduce(head)
+            }
         }
-        isDispatching = false
+        isProcessing = false
     }
 
     private fun intercept(action: Action): Boolean {

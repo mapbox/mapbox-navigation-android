@@ -252,6 +252,7 @@ class CameraComponentTest {
                 NavigationCameraState.IDLE to TargetCameraMode.Idle,
             ).forEach { (cameraState, mode) ->
                 observer.captured.onNavigationCameraStateChanged(cameraState)
+                advanceTimeBy(delayTimeMillis = 10)
 
                 verify { testStore.dispatch(SetCameraMode(mode)) }
             }
