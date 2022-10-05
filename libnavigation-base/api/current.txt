@@ -269,7 +269,6 @@ package com.mapbox.navigation.base.metrics {
   public interface MetricEvent {
     method public String getMetricName();
     method public String toJson(com.google.gson.Gson gson);
-    method public com.mapbox.bindgen.Value toValue();
     property public abstract String metricName;
   }
 
@@ -283,11 +282,12 @@ package com.mapbox.navigation.base.metrics {
   public interface MetricsReporter {
     method public void addEvent(com.mapbox.navigation.base.metrics.MetricEvent metricEvent);
     method public void removeObserver();
+    method public void sendTurnstileEvent(com.mapbox.common.TurnstileEvent turnstileEvent);
     method public void setMetricsObserver(com.mapbox.navigation.base.metrics.MetricsObserver metricsObserver);
   }
 
   public final class NavigationMetrics {
-    field public static final String APP_USER_TURNSTILE = "appUserTurnstile";
+    field @Deprecated public static final String APP_USER_TURNSTILE = "appUserTurnstile";
     field public static final String ARRIVE = "navigation.arrive";
     field public static final String CANCEL_SESSION = "navigation.cancel";
     field public static final String CUSTOM_EVENT = "navigation.customEvent";

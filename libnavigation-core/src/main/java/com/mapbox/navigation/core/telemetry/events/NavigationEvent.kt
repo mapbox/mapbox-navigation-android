@@ -5,7 +5,7 @@ import androidx.annotation.CallSuper
 import com.google.gson.Gson
 import com.mapbox.bindgen.Value
 import com.mapbox.common.TelemetrySystemUtils
-import com.mapbox.navigation.base.metrics.MetricEvent
+import com.mapbox.navigation.base.internal.metric.MetricEventInternal
 import com.mapbox.navigation.core.BuildConfig
 
 /**
@@ -18,7 +18,7 @@ import com.mapbox.navigation.core.BuildConfig
  */
 internal abstract class NavigationEvent(
     phoneState: PhoneState
-) : MetricEvent {
+) : MetricEventInternal {
 
     private companion object {
         private val OPERATING_SYSTEM = "Android - ${Build.VERSION.RELEASE}"

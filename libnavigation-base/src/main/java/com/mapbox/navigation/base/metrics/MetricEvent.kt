@@ -2,7 +2,6 @@ package com.mapbox.navigation.base.metrics
 
 import androidx.annotation.StringDef
 import com.google.gson.Gson
-import com.mapbox.bindgen.Value
 
 /**
  * An interface with types of metrics events that the SDK would send via Telemetry
@@ -41,13 +40,6 @@ interface MetricEvent {
      * @return String
      */
     fun toJson(gson: Gson): String
-
-    /**
-     * Present [MetricEvent] as [Value]
-     *
-     * @return Value
-     */
-    fun toValue(): Value
 }
 
 /**
@@ -94,7 +86,7 @@ object NavigationMetrics {
      * Navigation Event "App User turnstile" name
      */
     @Deprecated(
-        "APP_USER_TURNSTILE event is handle under the hood and not spread via any observer"
+        "APP_USER_TURNSTILE event is handled under the hood and not spread via any observer"
     )
     const val APP_USER_TURNSTILE = "appUserTurnstile"
 

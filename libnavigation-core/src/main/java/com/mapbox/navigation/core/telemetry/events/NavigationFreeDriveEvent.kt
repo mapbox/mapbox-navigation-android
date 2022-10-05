@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import com.google.gson.Gson
 import com.mapbox.bindgen.Value
 import com.mapbox.common.TelemetrySystemUtils
-import com.mapbox.navigation.base.metrics.MetricEvent
+import com.mapbox.navigation.base.internal.metric.MetricEventInternal
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 
 /**
@@ -19,7 +19,7 @@ import com.mapbox.navigation.base.metrics.NavigationMetrics
 @SuppressLint("ParcelCreator")
 internal class NavigationFreeDriveEvent(
     phoneState: PhoneState
-) : MetricEvent {
+) : MetricEventInternal {
 
     /*
      * Don't remove any fields, cause they should match with

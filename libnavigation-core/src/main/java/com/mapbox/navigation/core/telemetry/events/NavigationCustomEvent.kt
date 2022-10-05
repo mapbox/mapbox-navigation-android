@@ -6,11 +6,11 @@ import androidx.annotation.CallSuper
 import com.google.gson.Gson
 import com.mapbox.bindgen.Value
 import com.mapbox.common.TelemetrySystemUtils
-import com.mapbox.navigation.base.metrics.MetricEvent
+import com.mapbox.navigation.base.internal.metric.MetricEventInternal
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 
 @SuppressLint("ParcelCreator")
-internal class NavigationCustomEvent : MetricEvent {
+internal class NavigationCustomEvent : MetricEventInternal {
 
     private companion object {
         private val OPERATING_SYSTEM = "Android - ${Build.VERSION.RELEASE}"

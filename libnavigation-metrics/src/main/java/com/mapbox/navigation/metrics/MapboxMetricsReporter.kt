@@ -11,6 +11,7 @@ import com.mapbox.common.EventsServiceInterface
 import com.mapbox.common.EventsServiceObserver
 import com.mapbox.common.TelemetryService
 import com.mapbox.common.TurnstileEvent
+import com.mapbox.navigation.base.internal.metric.MetricEventInternal
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
@@ -19,6 +20,7 @@ import com.mapbox.navigation.metrics.internal.TelemetryServiceProvider
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 
@@ -39,7 +41,7 @@ object MapboxMetricsReporter : MetricsReporter {
     private val eventsServiceObserver =
         object : EventsServiceObserver {
             override fun didEncounterError(error: EventsServiceError, events: Value) {
-                logE("EventsService failure: $error", LOG_CATEGORY)
+                logE("EventsService failure: $error for event $events", LOG_CATEGORY)
             }
 
             override fun didSendEvents(events: Value) {
@@ -94,6 +96,13 @@ object MapboxMetricsReporter : MetricsReporter {
      * Adds an event to the metrics reporter when this event occurs.
      */
     override fun addEvent(metricEvent: MetricEvent) {
+        if (metricEvent !is MetricEventInternal) {
+            logW(
+                "metricEvent must inherited from MetricEventInternal to be sent",
+                LOG_CATEGORY
+            )
+            return
+        }
         eventsService.sendEvent(
             Event(EventPriority.IMMEDIATE, metricEvent.toValue(), null)
         ) {
