@@ -2,6 +2,7 @@ package com.mapbox.navigation.utils.internal
 
 import androidx.annotation.VisibleForTesting
 import com.mapbox.base.common.logger.Logger
+import com.mapbox.common.LoggingLevel
 
 /**
  * Singleton provider of [Logger].
@@ -45,8 +46,10 @@ fun logD(msg: String, category: String? = null) {
  * Noting that the category is appended to the log message to give extra context along with the `[nav-sdk]` parent category.
  * As an example, this is how the logs would look like `D/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`.
  */
-fun logD(category: String? = null, lazyMsg: () -> String) {
-    LoggerProvider.frontend.logD(category, lazyMsg)
+inline fun logD(category: String? = null, lazyMsg: () -> String) {
+    if (logLevel().atLeast(LoggingLevel.DEBUG)) {
+        logD(lazyMsg(), category)
+    }
 }
 
 /**
@@ -78,3 +81,8 @@ fun logW(msg: String, category: String? = null) {
 fun logE(msg: String, category: String? = null) {
     LoggerProvider.frontend.logE(msg, category)
 }
+
+/**
+ * Should not be used directly. Added to support inline calls.
+ */
+fun logLevel() = LoggerProvider.frontend.getLogLevel()
