@@ -25,14 +25,14 @@ class CoreTelemetryEventUtilsTest {
         val toValue = telemetryLocation.toValue()
 
         (toValue.contents as HashMap<String, Value>).let { content ->
-            assertEquals(1.1, content["lat"]!!.contents)
-            assertEquals(2.2, content["lng"]!!.contents)
-            assertEquals(3.3, content["speed"]!!.contents)
-            assertEquals(4.4, content["course"]!!.contents)
-            assertEquals(5.5, content["altitude"]!!.contents)
+            assertEquals(1.1, content["lat"]!!.contents as Double, 0.000001)
+            assertEquals(2.2, content["lng"]!!.contents as Double, 0.000001)
+            assertEquals(3.3, content["speed"]!!.contents as Double, 0.001)
+            assertEquals(4.4, content["course"]!!.contents as Double, 0.001)
+            assertEquals(5.5, content["altitude"]!!.contents as Double, 0.001)
             assertEquals("timestamp_0", content["timestamp"]!!.contents)
-            assertEquals(6.6, content["horizontalAccuracy"]!!.contents)
-            assertEquals(7.7, content["verticalAccuracy"]!!.contents)
+            assertEquals(6.6, content["horizontalAccuracy"]!!.contents as Double, 0.001)
+            assertEquals(7.7, content["verticalAccuracy"]!!.contents as Double, 0.001)
         }
     }
 
@@ -85,7 +85,7 @@ class CoreTelemetryEventUtilsTest {
             "string_2",
         )
 
-        val toValue = strings.toValue()
+        val toValue = strings.toValue { toValue() }
 
         assertArrayEquals(
             strings,
@@ -97,7 +97,7 @@ class CoreTelemetryEventUtilsTest {
     fun `Array of TelemetryLocation to value`() {
         val telemetryLocations = EventsProvider.provideDefaultTelemetryLocationsArray()
 
-        val toValue = telemetryLocations.toValue()
+        val toValue = telemetryLocations.toValue { toValue() }
 
         toValue.verifyTelemetryLocations(telemetryLocations)
     }

@@ -22,7 +22,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.RouteProgressState.OFF_ROUTE
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.RouteProgressState.TRACKING
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -43,7 +43,6 @@ import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.START
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.STOP
 import com.mapbox.navigation.core.telemetry.events.MetricsDirectionsRoute
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
-import com.mapbox.navigation.core.telemetry.events.NavigationAppUserTurnstileEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationCancelEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationCustomEvent
@@ -63,6 +62,7 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.EventsServiceProvider
+import com.mapbox.navigation.metrics.internal.TelemetryServiceProvider
 import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -204,6 +204,7 @@ class MapboxNavigationTelemetryTest {
         mockkObject(BillingServiceProvider)
         mockkStatic(TelemetrySystemUtils::obtainUniversalUniqueIdentifier)
         mockkObject(EventsServiceProvider)
+        mockkObject(TelemetryServiceProvider)
         mockkObject(TelemetryUtilsDelegate)
         every { BillingServiceProvider.getInstance() } returns billingService
         every {
@@ -242,6 +243,7 @@ class MapboxNavigationTelemetryTest {
         unmockkStatic(TelemetrySystemUtils::obtainUniversalUniqueIdentifier)
         unmockkObject(BillingServiceProvider)
         unmockkObject(EventsServiceProvider)
+        unmockkObject(TelemetryServiceProvider)
         unmockkObject(TelemetryUtilsDelegate)
     }
 
@@ -276,16 +278,17 @@ class MapboxNavigationTelemetryTest {
         updateRoute(anotherRoute)
         updateRouteProgress()
 
-        val events = captureAndVerifyMetricsReporter(4)
-        checkIdentifiersDifferentNavSessions(events.subList(0, 3), events.subList(3, 4))
-        checkEventsInSameSession(events.subList(0, 3))
-        checkEventsInSameSession(events.subList(3, 4))
+        val events = captureAndVerifyMetricsReporter(2)
+        checkIdentifiersDifferentNavSessions(events.subList(0, 1), events.subList(1, 2))
+        checkEventsInSameSession(events.subList(0, 1))
+        checkEventsInSameSession(events.subList(1, 2))
     }
 
     @Test
     fun `telemetry idle after call destroy`() {
         baseMock()
         mockAnotherRoute()
+        val turnstileEvents = captureTurnstileEvents()
 
         initTelemetry()
         resetTelemetry()
@@ -298,8 +301,8 @@ class MapboxNavigationTelemetryTest {
         updateRoute(anotherRoute)
         arrive()
 
-        val events = captureAndVerifyMetricsReporter(1)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        captureAndVerifyMetricsReporter(0)
+        assertEquals(1, turnstileEvents.size)
     }
 
     @Test
@@ -317,9 +320,8 @@ class MapboxNavigationTelemetryTest {
         arrive()
         resetTelemetry()
 
-        val events = captureAndVerifyMetricsReporter(4)
+        val events = captureAndVerifyMetricsReporter(3)
         events.checkSequence(
-            NavigationAppUserTurnstileEvent::class,
             NavigationDepartEvent::class,
             NavigationFeedbackEvent::class,
             NavigationArriveEvent::class,
@@ -329,33 +331,36 @@ class MapboxNavigationTelemetryTest {
     @Test
     fun turnstileEvent_sent_on_telemetry_init() {
         baseMock()
+        val turnstileEvents = captureTurnstileEvents()
 
         initTelemetry()
 
-        val events = captureAndVerifyMetricsReporter(exactly = 1)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        captureAndVerifyMetricsReporter(exactly = 0)
+        assertEquals(1, turnstileEvents.size)
     }
 
     @Test
     fun turnstileEvent_populated_correctly() {
         baseMock()
-        val events = captureMetricsReporter()
-
-        initTelemetry()
-
-        val actualEvent = events[0] as NavigationAppUserTurnstileEvent
         val expectedTurnstileEvent = TurnstileEvent(
             UserSKUIdentifier.NAV2_SES_MAU,
             "mock",
             "mock"
         )
-        assertEquals(expectedTurnstileEvent.skuId, actualEvent.event.skuId)
+        val turnstileEvents = captureTurnstileEvents()
+
+        initTelemetry()
+
+        assertEquals(1, turnstileEvents.size)
+        val actualEvent = turnstileEvents[0]
+        assertEquals(expectedTurnstileEvent.skuId, actualEvent.skuId)
     }
 
     @Test
     fun departEvent_sent_on_active_guidance_when_route_and_routeProgress_available() {
         baseMock()
         mockAnotherRoute()
+        val turnstileEvents = captureTurnstileEvents()
 
         initTelemetry()
         updateSessionState(Idle)
@@ -363,86 +368,92 @@ class MapboxNavigationTelemetryTest {
         updateRoute(anotherRoute)
         updateRoute(originalRoute)
 
-        val events = captureAndVerifyMetricsReporter(exactly = 1)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        captureAndVerifyMetricsReporter(exactly = 0)
+        assertEquals(1, turnstileEvents.size)
     }
 
     @Test
     fun active_guidance_events_are_not_sent_in_idle() {
         baseMock()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
 
-        val events = captureAndVerifyMetricsReporter(exactly = 2)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
+        val events = captureAndVerifyMetricsReporter(exactly = 1)
+        assertTrue(events[0] is NavigationDepartEvent)
+        assertEquals(1, turnstileEvents.size)
     }
 
     @Test
     fun departEvent_not_sent_without_route_and_routeProgress() {
         baseMock()
+        val turnstileEvents = captureTurnstileEvents()
 
         initTelemetry()
         updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
 
-        val events = captureAndVerifyMetricsReporter(exactly = 1)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        captureAndVerifyMetricsReporter(exactly = 0)
+        assertEquals(1, turnstileEvents.size)
     }
 
     @Test
     fun departEvent_not_sent_without_route() {
         baseMock()
+        val turnstileEvents = captureTurnstileEvents()
 
         initTelemetry()
         updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
         updateRouteProgress()
 
-        val events = captureAndVerifyMetricsReporter(exactly = 1)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        captureAndVerifyMetricsReporter(exactly = 0)
+        assertEquals(1, turnstileEvents.size)
     }
 
     @Test
     fun departEvent_not_sent_without_routeProgress() {
         baseMock()
+        val turnstileEvents = captureTurnstileEvents()
 
         initTelemetry()
         updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
         updateRoute(originalRoute)
 
-        val events = captureAndVerifyMetricsReporter(exactly = 1)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        captureAndVerifyMetricsReporter(exactly = 0)
+        assertEquals(1, turnstileEvents.size)
     }
 
     @Test
     fun cancelEvent_sent_on_active_guidance_stop() {
         baseMock()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
         updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
 
-        val events = captureAndVerifyMetricsReporter(exactly = 4)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
-        assertTrue(events[2] is NavigationCancelEvent)
-        assertTrue(events[3] is NavigationFreeDriveEvent)
-        assertEquals(4, events.size)
+        val events = captureAndVerifyMetricsReporter(exactly = 3)
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationDepartEvent)
+        assertTrue(events[1] is NavigationCancelEvent)
+        assertTrue(events[2] is NavigationFreeDriveEvent)
+        assertEquals(3, events.size)
         verify { locationsCollector.flushBuffers() }
-        checkEventsDividedBySessionsInSameNavSession(events.subList(0, 3), events.subList(3, 4))
+        checkEventsDividedBySessionsInSameNavSession(events.subList(0, 2), events.subList(2, 3))
     }
 
     @Test
     fun arriveEvent_sent_on_arrival() {
         baseMock()
         mockRouteProgress()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
         arrive()
 
-        val events = captureAndVerifyMetricsReporter(exactly = 3)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
-        assertTrue(events[2] is NavigationArriveEvent)
-        assertEquals(3, events.size)
+        val events = captureAndVerifyMetricsReporter(exactly = 2)
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationDepartEvent)
+        assertTrue(events[1] is NavigationArriveEvent)
+        assertEquals(2, events.size)
         checkEventsInSameSession(events)
     }
 
@@ -450,33 +461,35 @@ class MapboxNavigationTelemetryTest {
     fun cancel_and_depart_events_sent_on_external_route() {
         baseMock()
         mockAnotherRoute()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
         updateRoute(anotherRoute)
         updateRouteProgress()
 
-        val events = captureAndVerifyMetricsReporter(exactly = 4)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
-        assertTrue(events[2] is NavigationCancelEvent)
-        assertTrue(events[3] is NavigationDepartEvent)
-        assertEquals(4, events.size)
-        checkEventsDividedBySessionsInSameNavSession(events.subList(0, 3), events.subList(3, 4))
+        val events = captureAndVerifyMetricsReporter(exactly = 3)
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationDepartEvent)
+        assertTrue(events[1] is NavigationCancelEvent)
+        assertTrue(events[2] is NavigationDepartEvent)
+        assertEquals(3, events.size)
+        checkEventsDividedBySessionsInSameNavSession(events.subList(0, 2), events.subList(2, 3))
     }
 
     @Test
     fun depart_event_not_sent_on_external_route_without_route_progress() {
         baseMock()
         mockAnotherRoute()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
         updateRoute(anotherRoute)
 
-        val events = captureAndVerifyMetricsReporter(exactly = 3)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
-        assertTrue(events[2] is NavigationCancelEvent)
-        assertEquals(3, events.size)
+        val events = captureAndVerifyMetricsReporter(exactly = 2)
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationDepartEvent)
+        assertTrue(events[1] is NavigationCancelEvent)
+        assertEquals(2, events.size)
         checkEventsInSameSession(events)
     }
 
@@ -490,8 +503,8 @@ class MapboxNavigationTelemetryTest {
         updateRoute(anotherRoute)
         updateRouteProgress()
 
-        val firstDepart = events[1] as NavigationDepartEvent
-        val secondDepart = events[3] as NavigationDepartEvent
+        val firstDepart = events[0] as NavigationDepartEvent
+        val secondDepart = events[2] as NavigationDepartEvent
         assertNotSame(firstDepart.originalEstimatedDistance, secondDepart.originalEstimatedDistance)
         assertNotSame(firstDepart.originalRequestIdentifier, secondDepart.originalRequestIdentifier)
     }
@@ -500,34 +513,37 @@ class MapboxNavigationTelemetryTest {
     fun alternative_route() {
         baseMock()
         mockAnotherRoute()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
         updateRoute(anotherRoute, RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE)
         updateRouteProgress()
 
-        val events = captureAndVerifyMetricsReporter(exactly = 2)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
+        val events = captureAndVerifyMetricsReporter(exactly = 1)
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationDepartEvent)
     }
 
     @Test
     fun refresh_route() {
         baseMock()
         mockAnotherRoute()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
         updateRoute(anotherRoute, RoutesExtra.ROUTES_UPDATE_REASON_REFRESH)
         updateRouteProgress()
 
-        val events = captureAndVerifyMetricsReporter(exactly = 2)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
+        val events = captureAndVerifyMetricsReporter(exactly = 1)
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationDepartEvent)
     }
 
     @Test
     fun clean_up_routes() {
         baseMock()
         mockAnotherRoute()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
         routesObserverSlot.ifCaptured {
@@ -535,15 +551,16 @@ class MapboxNavigationTelemetryTest {
         }
         updateRouteProgress()
 
-        val events = captureAndVerifyMetricsReporter(exactly = 2)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
+        val events = captureAndVerifyMetricsReporter(exactly = 1)
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationDepartEvent)
     }
 
     @Test
     fun feedback_and_reroute_events_not_sent_on_arrival() {
         baseMock()
         mockAnotherRoute()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
         postUserFeedback()
@@ -551,11 +568,11 @@ class MapboxNavigationTelemetryTest {
         postUserFeedback()
         arrive()
 
-        val events = captureAndVerifyMetricsReporter(exactly = 3)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
-        assertTrue(events[2] is NavigationArriveEvent)
-        assertEquals(3, events.size)
+        val events = captureAndVerifyMetricsReporter(exactly = 2)
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationDepartEvent)
+        assertTrue(events[1] is NavigationArriveEvent)
+        assertEquals(2, events.size)
         checkEventsInSameSession(events)
     }
 
@@ -563,6 +580,7 @@ class MapboxNavigationTelemetryTest {
     fun feedback_and_reroute_events_sent_on_free_drive() {
         baseMock()
         mockAnotherRoute()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
         postUserFeedback()
@@ -576,27 +594,28 @@ class MapboxNavigationTelemetryTest {
         postUserFeedback()
         resetTelemetry()
 
-        val events = captureAndVerifyMetricsReporter(exactly = 12)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
-        assertTrue(events[2] is NavigationFeedbackEvent)
-        assertTrue(events[3] is NavigationRerouteEvent)
+        val events = captureAndVerifyMetricsReporter(exactly = 11)
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationDepartEvent)
+        assertTrue(events[1] is NavigationFeedbackEvent)
+        assertTrue(events[2] is NavigationRerouteEvent)
+        assertTrue(events[3] is NavigationFeedbackEvent)
         assertTrue(events[4] is NavigationFeedbackEvent)
         assertTrue(events[5] is NavigationFeedbackEvent)
         assertTrue(events[6] is NavigationFeedbackEvent)
-        assertTrue(events[7] is NavigationFeedbackEvent)
-        assertTrue(events[8] is NavigationCancelEvent)
-        assertTrue(events[9] is NavigationFreeDriveEvent)
+        assertTrue(events[7] is NavigationCancelEvent)
+        assertTrue(events[8] is NavigationFreeDriveEvent)
+        assertTrue(events[9] is NavigationFeedbackEvent)
         assertTrue(events[10] is NavigationFeedbackEvent)
-        assertTrue(events[11] is NavigationFeedbackEvent)
-        assertEquals(12, events.size)
-        checkEventsDividedBySessionsInSameNavSession(events.subList(0, 9), events.subList(9, 12))
+        assertEquals(11, events.size)
+        checkEventsDividedBySessionsInSameNavSession(events.subList(0, 8), events.subList(8, 11))
     }
 
     @Test
     fun feedback_and_reroute_events_sent_on_idle_state() {
         baseMock()
         mockAnotherRoute()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
         postUserFeedback()
@@ -608,18 +627,18 @@ class MapboxNavigationTelemetryTest {
         postUserFeedback()
         updateSessionState(Idle)
 
-        val events = captureAndVerifyMetricsReporter(exactly = 10)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
+        val events = captureAndVerifyMetricsReporter(exactly = 9)
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationDepartEvent)
+        assertTrue(events[1] is NavigationFeedbackEvent)
         assertTrue(events[2] is NavigationFeedbackEvent)
         assertTrue(events[3] is NavigationFeedbackEvent)
         assertTrue(events[4] is NavigationFeedbackEvent)
         assertTrue(events[5] is NavigationFeedbackEvent)
-        assertTrue(events[6] is NavigationFeedbackEvent)
-        assertTrue(events[7] is NavigationRerouteEvent)
-        assertTrue(events[8] is NavigationFeedbackEvent)
-        assertTrue(events[9] is NavigationCancelEvent)
-        assertEquals(10, events.size)
+        assertTrue(events[6] is NavigationRerouteEvent)
+        assertTrue(events[7] is NavigationFeedbackEvent)
+        assertTrue(events[8] is NavigationCancelEvent)
+        assertEquals(9, events.size)
         checkEventsInSameSession(events)
     }
 
@@ -627,6 +646,7 @@ class MapboxNavigationTelemetryTest {
     fun cache_feedback_send_on_session_stop() {
         baseMock()
         mockAnotherRoute()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
         updateRoute(anotherRoute, RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
@@ -634,13 +654,13 @@ class MapboxNavigationTelemetryTest {
         updateSessionState(Idle)
         postUserFeedbackCached()
 
-        val events = captureAndVerifyMetricsReporter(exactly = 5)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
-        assertTrue(events[2] is NavigationRerouteEvent)
-        assertTrue(events[3] is NavigationCancelEvent)
-        assertTrue(events[4] is NavigationFeedbackEvent)
-        assertEquals(5, events.size)
+        val events = captureAndVerifyMetricsReporter(exactly = 4)
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationDepartEvent)
+        assertTrue(events[1] is NavigationRerouteEvent)
+        assertTrue(events[2] is NavigationCancelEvent)
+        assertTrue(events[3] is NavigationFeedbackEvent)
+        assertEquals(4, events.size)
     }
 
     @Test
@@ -697,12 +717,11 @@ class MapboxNavigationTelemetryTest {
         baseInitialization()
 
         postUserFeedbackCached(cachedFeedbackMetadata)
-        val events = captureAndVerifyMetricsReporter(exactly = 3)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
-        assertTrue(events[2] is NavigationFeedbackEvent)
+        val events = captureAndVerifyMetricsReporter(exactly = 2)
+        assertTrue(events[0] is NavigationDepartEvent)
+        assertTrue(events[1] is NavigationFeedbackEvent)
 
-        val feedbackEvent = events[2] as NavigationFeedbackEvent
+        val feedbackEvent = events[1] as NavigationFeedbackEvent
         assertEquals(sessionIdentifier, feedbackEvent.navigatorSessionIdentifier)
         assertEquals(driverModeIdentifier, feedbackEvent.sessionIdentifier)
         assertEquals(driverMode, feedbackEvent.driverMode)
@@ -724,16 +743,17 @@ class MapboxNavigationTelemetryTest {
         baseMock()
         mockAnotherRoute()
         mockRouteProgress()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
         updateRoute(anotherRoute, RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
         locationsCollector.flushBuffers()
 
-        val events = captureAndVerifyMetricsReporter(exactly = 3)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
-        assertTrue(events[2] is NavigationRerouteEvent)
-        assertEquals(3, events.size)
+        val events = captureAndVerifyMetricsReporter(exactly = 2)
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationDepartEvent)
+        assertTrue(events[1] is NavigationRerouteEvent)
+        assertEquals(2, events.size)
         checkEventsInSameSession(events)
     }
 
@@ -742,25 +762,26 @@ class MapboxNavigationTelemetryTest {
         baseMock()
         mockAnotherRoute()
         mockRouteProgress()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
         updateRoute(anotherRoute, RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
         locationsCollector.flushBuffers()
-        every { routeProgress.currentState } returns OFF_ROUTE
+        every { routeProgress.currentState } returns RouteProgressState.OFF_ROUTE
         updateRouteProgress(count = 1)
         every { routeProgress.currentState } returns TRACKING
         updateRouteProgress(count = 1)
         updateRoute(anotherRoute, RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
         locationsCollector.flushBuffers()
 
-        val events = captureAndVerifyMetricsReporter(exactly = 4)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
+        val events = captureAndVerifyMetricsReporter(exactly = 3)
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationDepartEvent)
+        assertTrue(events[1] is NavigationRerouteEvent)
         assertTrue(events[2] is NavigationRerouteEvent)
-        assertTrue(events[3] is NavigationRerouteEvent)
         assertEquals(
             (ROUTE_PROGRESS_DISTANCE_TRAVELED * 2).toInt(),
-            (events[3] as NavigationRerouteEvent).distanceCompleted
+            (events[2] as NavigationRerouteEvent).distanceCompleted
         )
     }
 
@@ -771,7 +792,7 @@ class MapboxNavigationTelemetryTest {
 
         baseInitialization()
 
-        val departEvent = events[1] as NavigationDepartEvent
+        val departEvent = events[0] as NavigationDepartEvent
         checkOriginalParams(departEvent, originalRoute)
         assertEquals(0, departEvent.distanceCompleted)
     }
@@ -788,7 +809,7 @@ class MapboxNavigationTelemetryTest {
         updateRoute(anotherRoute, RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
         locationsCollector.flushBuffers()
 
-        val rerouteEvent = events[2] as NavigationRerouteEvent
+        val rerouteEvent = events[1] as NavigationRerouteEvent
         checkOriginalParams(rerouteEvent, anotherRoute)
         assertEquals(routeProgress.distanceTraveled.toInt(), rerouteEvent.distanceCompleted)
     }
@@ -796,6 +817,7 @@ class MapboxNavigationTelemetryTest {
     @Test
     fun events_sent_correctly_on_multi_waypoints() {
         baseMock()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
         nextWaypoint()
@@ -806,32 +828,33 @@ class MapboxNavigationTelemetryTest {
         updateRouteProgress()
         arrive()
 
-        val events = captureAndVerifyMetricsReporter(exactly = 12)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        val events = captureAndVerifyMetricsReporter(exactly = 11)
+        assertEquals(1, turnstileEvents.size)
         // origin
-        assertTrue(events[1] is NavigationDepartEvent)
+        assertTrue(events[0] is NavigationDepartEvent)
         // waypoint1
-        assertTrue(events[2] is NavigationArriveEvent)
-        assertTrue(events[3] is NavigationCancelEvent)
-        assertTrue(events[4] is NavigationDepartEvent)
+        assertTrue(events[1] is NavigationArriveEvent)
+        assertTrue(events[2] is NavigationCancelEvent)
+        assertTrue(events[3] is NavigationDepartEvent)
         // waypoint2
-        assertTrue(events[5] is NavigationArriveEvent)
-        assertTrue(events[6] is NavigationCancelEvent)
-        assertTrue(events[7] is NavigationDepartEvent)
+        assertTrue(events[4] is NavigationArriveEvent)
+        assertTrue(events[5] is NavigationCancelEvent)
+        assertTrue(events[6] is NavigationDepartEvent)
         // waypoint3
-        assertTrue(events[8] is NavigationArriveEvent)
-        assertTrue(events[9] is NavigationCancelEvent)
-        assertTrue(events[10] is NavigationDepartEvent)
+        assertTrue(events[7] is NavigationArriveEvent)
+        assertTrue(events[8] is NavigationCancelEvent)
+        assertTrue(events[9] is NavigationDepartEvent)
         // destination
-        assertTrue(events[11] is NavigationArriveEvent)
+        assertTrue(events[10] is NavigationArriveEvent)
 
-        assertEquals(12, events.size)
+        assertEquals(11, events.size)
         checkEventsInSameSession(events)
     }
 
     @Test
     fun feedback_events_sent_correctly_on_multi_waypoints() {
         baseMock()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
         postUserFeedback()
@@ -845,35 +868,36 @@ class MapboxNavigationTelemetryTest {
         arrive()
         updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
 
-        val events = captureAndVerifyMetricsReporter(exactly = 14)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        val events = captureAndVerifyMetricsReporter(exactly = 13)
+        assertEquals(1, turnstileEvents.size)
         // origin
-        assertTrue(events[1] is NavigationDepartEvent)
+        assertTrue(events[0] is NavigationDepartEvent)
         // waypoint1
-        assertTrue(events[2] is NavigationArriveEvent)
-        assertTrue(events[3] is NavigationFeedbackEvent)
-        assertTrue(events[4] is NavigationCancelEvent)
-        assertTrue(events[5] is NavigationDepartEvent)
+        assertTrue(events[1] is NavigationArriveEvent)
+        assertTrue(events[2] is NavigationFeedbackEvent)
+        assertTrue(events[3] is NavigationCancelEvent)
+        assertTrue(events[4] is NavigationDepartEvent)
         // waypoint2
-        assertTrue(events[6] is NavigationArriveEvent)
+        assertTrue(events[5] is NavigationArriveEvent)
+        assertTrue(events[6] is NavigationFeedbackEvent)
         assertTrue(events[7] is NavigationFeedbackEvent)
-        assertTrue(events[8] is NavigationFeedbackEvent)
-        assertTrue(events[9] is NavigationCancelEvent)
-        assertTrue(events[10] is NavigationDepartEvent)
+        assertTrue(events[8] is NavigationCancelEvent)
+        assertTrue(events[9] is NavigationDepartEvent)
         // destination
-        assertTrue(events[11] is NavigationArriveEvent)
-        assertTrue(events[12] is NavigationCancelEvent)
+        assertTrue(events[10] is NavigationArriveEvent)
+        assertTrue(events[11] is NavigationCancelEvent)
         // free drive
-        assertTrue(events[13] is NavigationFreeDriveEvent)
+        assertTrue(events[12] is NavigationFreeDriveEvent)
 
-        assertEquals(14, events.size)
-        checkEventsDividedBySessionsInSameNavSession(events.subList(0, 13), events.subList(13, 14))
+        assertEquals(13, events.size)
+        checkEventsDividedBySessionsInSameNavSession(events.subList(0, 12), events.subList(12, 13))
     }
 
     @Test
     fun reroute_event_sent_correctly_on_multi_waypoints() {
         baseMock()
         mockAnotherRoute()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
         nextWaypoint()
@@ -884,59 +908,62 @@ class MapboxNavigationTelemetryTest {
         updateRoute(anotherRoute, RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
         updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
 
-        val events = captureAndVerifyMetricsReporter(exactly = 11)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        val events = captureAndVerifyMetricsReporter(exactly = 10)
+        assertEquals(1, turnstileEvents.size)
         // origin
-        assertTrue(events[1] is NavigationDepartEvent)
+        assertTrue(events[0] is NavigationDepartEvent)
         // waypoint1
-        assertTrue(events[2] is NavigationArriveEvent)
-        assertTrue(events[3] is NavigationCancelEvent)
-        assertTrue(events[4] is NavigationDepartEvent)
+        assertTrue(events[1] is NavigationArriveEvent)
+        assertTrue(events[2] is NavigationCancelEvent)
+        assertTrue(events[3] is NavigationDepartEvent)
         // waypoint2
-        assertTrue(events[5] is NavigationArriveEvent)
-        assertTrue(events[6] is NavigationCancelEvent)
-        assertTrue(events[7] is NavigationDepartEvent)
+        assertTrue(events[4] is NavigationArriveEvent)
+        assertTrue(events[5] is NavigationCancelEvent)
+        assertTrue(events[6] is NavigationDepartEvent)
         // destination
-        assertTrue(events[8] is NavigationRerouteEvent)
-        assertTrue(events[9] is NavigationCancelEvent)
+        assertTrue(events[7] is NavigationRerouteEvent)
+        assertTrue(events[8] is NavigationCancelEvent)
         // free drive
-        assertTrue(events[10] is NavigationFreeDriveEvent)
+        assertTrue(events[9] is NavigationFreeDriveEvent)
 
-        assertEquals(11, events.size)
-        checkEventsDividedBySessionsInSameNavSession(events.subList(0, 10), events.subList(10, 11))
+        assertEquals(10, events.size)
+        checkEventsDividedBySessionsInSameNavSession(events.subList(0, 9), events.subList(9, 10))
     }
 
     @Test
     fun freeDrive_sent_when_state_changes_from_idle_to_free_drive() {
         baseMock()
+        val turnstileEvents = captureTurnstileEvents()
 
         initTelemetry()
         updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
 
-        val events = captureAndVerifyMetricsReporter(exactly = 2)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationFreeDriveEvent)
+        val events = captureAndVerifyMetricsReporter(exactly = 1)
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationFreeDriveEvent)
         checkEventsInSameSession(events)
     }
 
     @Test
     fun freeDrive_sent_when_state_changes_from_active_guidance_to_free_drive() {
         baseMock()
+        val turnstileEvents = captureTurnstileEvents()
 
         baseInitialization()
         updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
 
-        val events = captureAndVerifyMetricsReporter(exactly = 4)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
-        assertTrue(events[2] is NavigationCancelEvent)
-        assertTrue(events[3] is NavigationFreeDriveEvent)
-        checkEventsDividedBySessionsInSameNavSession(events.subList(0, 3), events.subList(3, 4))
+        val events = captureAndVerifyMetricsReporter(exactly = 3)
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationDepartEvent)
+        assertTrue(events[1] is NavigationCancelEvent)
+        assertTrue(events[2] is NavigationFreeDriveEvent)
+        checkEventsDividedBySessionsInSameNavSession(events.subList(0, 2), events.subList(2, 3))
     }
 
     @Test
     fun freeDrive_sent_when_state_changes_from_free_drive_to_active_guidance() {
         baseMock()
+        val turnstileEvents = captureTurnstileEvents()
 
         initTelemetry()
         updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
@@ -944,27 +971,29 @@ class MapboxNavigationTelemetryTest {
         updateRoute(originalRoute)
         updateRouteProgress()
 
-        val events = captureAndVerifyMetricsReporter(exactly = 4)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationFreeDriveEvent) // start free drive
-        assertTrue(events[2] is NavigationFreeDriveEvent) // stop free drive
-        assertTrue(events[3] is NavigationDepartEvent)
+        val events = captureAndVerifyMetricsReporter(exactly = 3)
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationFreeDriveEvent) // start free drive
+        assertTrue(events[1] is NavigationFreeDriveEvent) // stop free drive
+        assertTrue(events[2] is NavigationDepartEvent)
 
-        checkEventsDividedBySessionsInSameNavSession(events.subList(0, 3), events.subList(3, 4))
+        checkEventsDividedBySessionsInSameNavSession(events.subList(0, 2), events.subList(2, 3))
     }
 
     @Test
     fun freeDrive_sent_when_state_changes_from_free_drive_to_idle() {
         baseMock()
+        val turnstileEvents = captureTurnstileEvents()
 
         initTelemetry()
         updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
         updateSessionState(Idle)
 
-        val events = captureAndVerifyMetricsReporter(exactly = 3)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationFreeDriveEvent) // start free drive
-        assertTrue(events[2] is NavigationFreeDriveEvent) // stop free drive
+        val events = captureAndVerifyMetricsReporter(exactly = 2)
+
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationFreeDriveEvent) // start free drive
+        assertTrue(events[1] is NavigationFreeDriveEvent) // stop free drive
         checkEventsInSameSession(events)
     }
 
@@ -972,15 +1001,17 @@ class MapboxNavigationTelemetryTest {
     fun freeDrive_sent_when_location_not_available() {
         baseMock()
         every { locationsCollector.lastLocation } returns null
+        val turnstileEvents = captureTurnstileEvents()
 
         initTelemetry()
         updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
         updateSessionState(Idle)
 
-        val events = captureAndVerifyMetricsReporter(exactly = 3)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationFreeDriveEvent) // start free drive
-        assertTrue(events[2] is NavigationFreeDriveEvent) // stop free drive
+        val events = captureAndVerifyMetricsReporter(exactly = 2)
+
+        assertEquals(1, turnstileEvents.size)
+        assertTrue(events[0] is NavigationFreeDriveEvent) // start free drive
+        assertTrue(events[1] is NavigationFreeDriveEvent) // stop free drive
         checkEventsInSameSession(events)
     }
 
@@ -995,8 +1026,8 @@ class MapboxNavigationTelemetryTest {
         every { locationsCollector.lastLocation } returns lastLocation
         updateSessionState(Idle)
 
-        val freeDriveStart = events[1] as NavigationFreeDriveEvent
-        val freeDriveStop = events[2] as NavigationFreeDriveEvent
+        val freeDriveStart = events[0] as NavigationFreeDriveEvent
+        val freeDriveStop = events[1] as NavigationFreeDriveEvent
 
         assertEquals(null, freeDriveStart.location)
         assertEquals(lastLocation.toTelemetryLocation(), freeDriveStop.location)
@@ -1013,8 +1044,8 @@ class MapboxNavigationTelemetryTest {
         every { locationsCollector.lastLocation } returns lastLocation
         updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
 
-        val freeDriveStart = events[1] as NavigationFreeDriveEvent
-        val freeDriveStop = events[2] as NavigationFreeDriveEvent
+        val freeDriveStart = events[0] as NavigationFreeDriveEvent
+        val freeDriveStop = events[1] as NavigationFreeDriveEvent
 
         assertEquals(null, freeDriveStart.location)
         assertEquals(lastLocation.toTelemetryLocation(), freeDriveStop.location)
@@ -1029,8 +1060,8 @@ class MapboxNavigationTelemetryTest {
         updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
         updateSessionState(Idle)
 
-        val startFreeDriveEvent = events[1] as NavigationFreeDriveEvent
-        val stopFreeDriveEvent = events[2] as NavigationFreeDriveEvent
+        val startFreeDriveEvent = events[0] as NavigationFreeDriveEvent
+        val stopFreeDriveEvent = events[1] as NavigationFreeDriveEvent
         assertEquals(START.type, startFreeDriveEvent.eventType)
         assertEquals(STOP.type, stopFreeDriveEvent.eventType)
     }
@@ -1044,8 +1075,8 @@ class MapboxNavigationTelemetryTest {
         updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
         updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
 
-        val startFreeDriveEvent = events[1] as NavigationFreeDriveEvent
-        val stopFreeDriveEvent = events[2] as NavigationFreeDriveEvent
+        val startFreeDriveEvent = events[0] as NavigationFreeDriveEvent
+        val stopFreeDriveEvent = events[1] as NavigationFreeDriveEvent
         assertEquals(START.type, startFreeDriveEvent.eventType)
         assertEquals(STOP.type, stopFreeDriveEvent.eventType)
     }
@@ -1199,9 +1230,8 @@ class MapboxNavigationTelemetryTest {
 
         postCustomEvent()
 
-        val events = captureAndVerifyMetricsReporter(3)
+        val events = captureAndVerifyMetricsReporter(2)
         events.checkSequence(
-            NavigationAppUserTurnstileEvent::class,
             NavigationDepartEvent::class,
             NavigationCustomEvent::class,
         )
@@ -1261,6 +1291,14 @@ class MapboxNavigationTelemetryTest {
         val events = mutableListOf<MetricEvent>()
         verify(exactly = exactly) { MapboxMetricsReporter.addEvent(capture(events)) }
         return events
+    }
+
+    private fun captureTurnstileEvents(): List<TurnstileEvent> {
+        val turnstileEvents = mutableListOf<TurnstileEvent>()
+        every {
+            MapboxMetricsReporter.sendTurnstileEvent(capture(turnstileEvents))
+        } just runs
+        return turnstileEvents
     }
 
     private fun baseMock() {
@@ -1466,9 +1504,12 @@ class MapboxNavigationTelemetryTest {
      * After that method we mock MapboxMetricsReporter to use it in tests.
      */
     private fun initMapboxMetricsReporter() {
-        every { EventsServiceProvider.provideEventsService(any()) } returns mockk(
-            relaxUnitFun = true
-        )
+        every {
+            EventsServiceProvider.provideEventsService(any())
+        } returns mockk(relaxUnitFun = true)
+        every {
+            TelemetryServiceProvider.provideTelemetryService(any())
+        } returns mockk(relaxUnitFun = true)
         val alarmManager = mockk<AlarmManager>()
         every {
             applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -1573,7 +1614,6 @@ class MapboxNavigationTelemetryTest {
         fun List<MetricEvent>.toPair(): List<Pair<String, String>> {
             return this.mapNotNull { event ->
                 when (event) {
-                    is NavigationAppUserTurnstileEvent -> null
                     is NavigationEvent -> event.navigatorSessionIdentifier!! to event.toString()
                     is NavigationFreeDriveEvent ->
                         event.navigatorSessionIdentifier!! to event.toString()
@@ -1650,7 +1690,6 @@ class MapboxNavigationTelemetryTest {
     private fun List<MetricEvent>.asSessionEventCompareData(): List<SessionEventCompareData> {
         return this.mapNotNull { event ->
             when (event) {
-                is NavigationAppUserTurnstileEvent -> null
                 is NavigationEvent -> SessionEventCompareData(
                     event.navigatorSessionIdentifier!!,
                     event.sessionIdentifier!!,

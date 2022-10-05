@@ -799,7 +799,8 @@ internal object MapboxNavigationTelemetry {
             BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
         )
         val event = NavigationAppUserTurnstileEvent(turnstileEvent)
-        sendEvent(event)
+        log("TurnstileEvent sent")
+        metricsReporter.sendTurnstileEvent(event.event)
     }
 
     private fun processArrival() {

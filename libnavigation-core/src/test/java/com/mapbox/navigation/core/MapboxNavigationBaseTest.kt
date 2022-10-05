@@ -37,6 +37,7 @@ import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.createSetRouteResult
 import com.mapbox.navigation.metrics.internal.EventsServiceProvider
+import com.mapbox.navigation.metrics.internal.TelemetryServiceProvider
 import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
@@ -238,6 +239,7 @@ internal open class MapboxNavigationBaseTest {
         unmockkObject(RouteAlternativesControllerProvider)
         unmockkObject(MapboxNavigationTelemetry)
         unmockkObject(EventsServiceProvider)
+        unmockkObject(TelemetryServiceProvider)
         unmockkObject(TelemetryUtilsDelegate)
         unmockkObject(NativeRouteParserWrapper)
     }
@@ -316,6 +318,11 @@ internal open class MapboxNavigationBaseTest {
         mockkObject(EventsServiceProvider)
         every {
             EventsServiceProvider.provideEventsService(any())
+        } returns mockk(relaxUnitFun = true)
+
+        mockkObject(TelemetryServiceProvider)
+        every {
+            TelemetryServiceProvider.provideTelemetryService(any())
         } returns mockk(relaxUnitFun = true)
 
         mockkObject(MapboxNavigationTelemetry)

@@ -33,9 +33,9 @@ internal class NavigationFeedbackEvent(
         feedbackType?.let { fields["feedbackType"] = it.toValue() }
         source?.let { fields["source"] = it.toValue() }
         description?.let { fields["description"] = it.toValue() }
-        locationsBefore?.let { fields["locationsBefore"] = it.toValue() }
-        locationsAfter?.let { fields["locationsAfter"] = it.toValue() }
+        locationsBefore?.let { fields["locationsBefore"] = it.toValue { toValue() } }
+        locationsAfter?.let { fields["locationsAfter"] = it.toValue { toValue() } }
         screenshot?.let { fields["screenshot"] = it.toValue() }
-        feedbackSubType?.let { fields["feedbackSubType"] = it.toValue() }
+        feedbackSubType?.let { fields["feedbackSubType"] = it.toValue { toValue() } }
     }
 }

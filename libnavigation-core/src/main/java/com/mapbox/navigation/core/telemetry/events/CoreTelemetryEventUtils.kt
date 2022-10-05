@@ -4,9 +4,11 @@ import com.mapbox.bindgen.Value
 
 internal fun String.toValue(): Value = Value.valueOf(this)
 internal fun Boolean.toValue(): Value = Value.valueOf(this)
-internal fun Int.toValue(): Value = Value.valueOf(this.toString().toLong())
+internal fun Int.toValue(): Value = Value.valueOf(this.toLong())
 internal fun Double.toValue(): Value = Value.valueOf(this)
-internal fun Float.toValue(): Value = Value.valueOf(this.toString().toDouble())
+
+// FIXME: require to support Value.valueOf(Float). #CORESDK-1351
+internal fun Float.toValue(): Value = Value.valueOf(this.toDouble())
 
 internal fun TelemetryLocation.toValue(): Value {
     val fields = hashMapOf<String, Value>()
@@ -49,15 +51,7 @@ internal fun NavigationStepData.toValue(): Value {
     return Value.valueOf(fields)
 }
 
-/* FIXME: find the way to generalize following functions with compile-time check. */
-internal fun Array<String>.toValue(): Value {
-    val values = mutableListOf<Value>()
-    for (item in this) {
-        values.add(item.toValue())
-    }
-    return Value.valueOf(values)
-}
-internal fun Array<TelemetryLocation>.toValue(): Value {
+internal fun <T> Array<T>.toValue(toValue: T.() -> Value): Value {
     val values = mutableListOf<Value>()
     for (item in this) {
         values.add(item.toValue())

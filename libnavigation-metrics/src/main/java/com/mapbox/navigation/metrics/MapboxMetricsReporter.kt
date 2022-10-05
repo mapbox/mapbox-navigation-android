@@ -9,11 +9,13 @@ import com.mapbox.common.EventsServerOptions
 import com.mapbox.common.EventsServiceError
 import com.mapbox.common.EventsServiceInterface
 import com.mapbox.common.EventsServiceObserver
+import com.mapbox.common.TelemetryService
+import com.mapbox.common.TurnstileEvent
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.metrics.internal.EventsServiceProvider
-import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
+import com.mapbox.navigation.metrics.internal.TelemetryServiceProvider
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
@@ -28,6 +30,7 @@ object MapboxMetricsReporter : MetricsReporter {
 
     private val gson = Gson()
     private lateinit var eventsService: EventsServiceInterface
+    private lateinit var telemetryService: TelemetryService
 
     @Volatile
     private var metricsObserver: MetricsObserver? = null
@@ -45,7 +48,8 @@ object MapboxMetricsReporter : MetricsReporter {
         }
 
     /**
-     * Initialize [EventsServiceInterface] that need to send event to Mapbox Telemetry server.
+     * Initialize [EventsServiceInterface] and [TelemetryService] that need to send event to
+     * Mapbox Telemetry server.
      *
      * @param context Android context
      * @param accessToken Mapbox access token
@@ -57,23 +61,10 @@ object MapboxMetricsReporter : MetricsReporter {
         accessToken: String,
         userAgent: String
     ) {
-        eventsService = EventsServiceProvider.provideEventsService(
-            EventsServerOptions(accessToken, userAgent, null)
-        )
+        val eventsServerOptions = EventsServerOptions(accessToken, userAgent, null)
+        eventsService = EventsServiceProvider.provideEventsService(eventsServerOptions)
+        telemetryService = TelemetryServiceProvider.provideTelemetryService(eventsServerOptions)
         eventsService.registerObserver(eventsServiceObserver)
-
-        if (!TelemetryUtilsDelegate.getEventsCollectionState()) {
-            TelemetryUtilsDelegate.setEventsCollectionState(true)
-        }
-    }
-
-    // For test purposes only
-    internal fun init(
-        eventsService: EventsServiceInterface,
-        jobControlFactory: InternalJobControlFactory
-    ) {
-        this.eventsService = eventsService
-        ioJobController = jobControlFactory.createIOScopeJobControl()
     }
 
     /**
@@ -81,14 +72,14 @@ object MapboxMetricsReporter : MetricsReporter {
      *
      * @param isDebugLoggingEnabled true to enable logging, false to disable logging
      */
+    @Deprecated("toggleLogging is deprecated and do no operations")
     @JvmStatic
     fun toggleLogging(isDebugLoggingEnabled: Boolean) {
-        // todo need support on core side
-        // mapboxTelemetry.updateDebugLoggingEnabled(isDebugLoggingEnabled)
+        // do nothing
     }
 
     /**
-     * Disables metrics reporting and ends [mapboxTelemetry] session.
+     * Disables metrics reporting and ends [EventsServiceInterface] and [TelemetryService] session.
      * This method also removes metrics observer and stops background thread used for
      * events dispatching.
      */
@@ -96,7 +87,6 @@ object MapboxMetricsReporter : MetricsReporter {
     fun disable() {
         removeObserver()
         eventsService.unregisterObserver(eventsServiceObserver)
-        TelemetryUtilsDelegate.setEventsCollectionState(false)
         ioJobController.job.cancelChildren()
     }
 
@@ -106,14 +96,21 @@ object MapboxMetricsReporter : MetricsReporter {
     override fun addEvent(metricEvent: MetricEvent) {
         eventsService.sendEvent(
             Event(EventPriority.IMMEDIATE, metricEvent.toValue(), null)
-        ) { error ->
-            error?.let {
-                logE("Failed to send event: $error", LOG_CATEGORY)
-            }
+        ) {
+            logE("Failed to send event: $it", LOG_CATEGORY)
         }
 
         ioJobController.scope.launch {
             metricsObserver?.onMetricUpdated(metricEvent.metricName, metricEvent.toJson(gson))
+        }
+    }
+
+    /**
+     * Send [TurnstileEvent] event.
+     */
+    override fun sendTurnstileEvent(turnstileEvent: TurnstileEvent) {
+        eventsService.sendTurnstileEvent(turnstileEvent) {
+            logE("Failed to send Turnstile event: $it", LOG_CATEGORY)
         }
     }
 

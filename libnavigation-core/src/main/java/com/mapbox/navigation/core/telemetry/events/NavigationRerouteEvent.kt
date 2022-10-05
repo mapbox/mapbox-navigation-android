@@ -32,8 +32,8 @@ internal class NavigationRerouteEvent(
         newGeometry?.let { fields["newGeometry"] = it.toValue() }
         fields["step"] = step.toValue()
         fields["secondsSinceLastReroute"] = secondsSinceLastReroute.toValue()
-        locationsBefore?.let { fields["locationsBefore"] = it.toValue() }
-        locationsAfter?.let { fields["locationsAfter"] = it.toValue() }
+        locationsBefore?.let { fields["locationsBefore"] = it.toValue { toValue() } }
+        locationsAfter?.let { fields["locationsAfter"] = it.toValue { toValue() } }
         screenshot?.let { fields["screenshot"] = it.toValue() }
     }
 }

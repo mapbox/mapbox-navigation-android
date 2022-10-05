@@ -4,7 +4,6 @@ import com.mapbox.bindgen.Value
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 
 internal object EventsTestHelper {
@@ -251,12 +250,14 @@ internal object EventsTestHelper {
             assertEquals(
                 "lat value",
                 lat,
-                content["lat"]!!.contents
+                content["lat"]!!.contents as Double,
+                0.0
             )
             assertEquals(
                 "lng value",
                 lng,
-                content["lng"]!!.contents
+                content["lng"]!!.contents as Double,
+                0.0
             )
             assertEquals(
                 "simulation value",
@@ -393,22 +394,26 @@ internal object EventsTestHelper {
             assertEquals(
                 "check TelemetryLocation: latitude value",
                 location.latitude,
-                content["lat"]!!.contents
+                content["lat"]!!.contents as Double,
+                0.000001
             )
             assertEquals(
                 "check TelemetryLocation: longitude value",
                 location.longitude,
-                content["lng"]!!.contents
+                content["lng"]!!.contents as Double,
+                0.000001
             )
             assertEquals(
                 "check TelemetryLocation: speed value",
-                location.speed.toDouble(),
-                content["speed"]!!.contents
+                location.speed.toString().toDouble(),
+                content["speed"]!!.contents as Double,
+                0.001
             )
             assertEquals(
                 "check TelemetryLocation: bearing value",
-                location.bearing.toDouble(),
-                content["course"]!!.contents
+                location.bearing.toString().toDouble(),
+                content["course"]!!.contents as Double,
+                0.001
             )
             assertEquals(
                 "check TelemetryLocation: altitude value",
@@ -422,12 +427,15 @@ internal object EventsTestHelper {
             )
             assertEquals(
                 "check TelemetryLocation: timestamp value",
-                location.horizontalAccuracy.toDouble(),
-                content["horizontalAccuracy"]!!.contents
+                location.horizontalAccuracy.toString().toDouble(),
+                content["horizontalAccuracy"]!!.contents as Double,
+                0.001
             )
             assertEquals(
-                location.verticalAccuracy.toDouble(),
-                content["verticalAccuracy"]!!.contents
+                "check TelemetryLocation: verticalAccuracy value",
+                location.verticalAccuracy.toString().toDouble(),
+                content["verticalAccuracy"]!!.contents as Double,
+                0.001
             )
         }
     }
@@ -435,55 +443,8 @@ internal object EventsTestHelper {
     fun Value.verifyTelemetryLocations(array: Array<TelemetryLocation>) {
         (contents!! as List<Value>).let { content ->
             assertEquals(array.size, content.size)
-            array.forEach { locationItem ->
-                content.find {
-                    (it.contents as Map<String, Value>)["lat"]!!.contents ==
-                        locationItem.latitude
-                }?.let {
-                    assertNotNull(it)
-                }
-                content.find {
-                    (it.contents as Map<String, Value>)["lng"]!!.contents ==
-                        locationItem.longitude
-                }?.let {
-                    assertNotNull(it)
-                }
-                content.find {
-                    (it.contents as Map<String, Value>)["speed"]!!.contents ==
-                        locationItem.speed
-                }?.let {
-                    assertNotNull(it)
-                }
-                content.find {
-                    (it.contents as Map<String, Value>)["course"]!!.contents ==
-                        locationItem.bearing
-                }?.let {
-                    assertNotNull(it)
-                }
-                content.find {
-                    (it.contents as Map<String, Value>)["altitude"]!!.contents ==
-                        locationItem.altitude
-                }?.let {
-                    assertNotNull(it)
-                }
-                content.find {
-                    (it.contents as Map<String, Value>)["timestamp"]!!.contents ==
-                        locationItem.timestamp
-                }?.let {
-                    assertNotNull(it)
-                }
-                content.find {
-                    (it.contents as Map<String, Value>)["horizontalAccuracy"]!!.contents ==
-                        locationItem.horizontalAccuracy
-                }?.let {
-                    assertNotNull(it)
-                }
-                content.find {
-                    (it.contents as Map<String, Value>)["verticalAccuracy"]!!.contents ==
-                        locationItem.verticalAccuracy
-                }?.let {
-                    assertNotNull(it)
-                }
+            content.forEachIndexed { index, value ->
+                value.verifyTelemetryLocation(array[index])
             }
         }
     }

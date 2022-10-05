@@ -93,6 +93,9 @@ object NavigationMetrics {
     /**
      * Navigation Event "App User turnstile" name
      */
+    @Deprecated(
+        "APP_USER_TURNSTILE event is handle under the hood and not spread via any observer"
+    )
     const val APP_USER_TURNSTILE = "appUserTurnstile"
 
     /**
