@@ -29,11 +29,7 @@ abstract class BaseTest<A : AppCompatActivity>(activityClass: Class<A>) {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        ) + if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            listOf(Manifest.permission.POST_NOTIFICATIONS)
-        } else {
-            emptyList()
-        }
+        )
     }
 
     @get:Rule
