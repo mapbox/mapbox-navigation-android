@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.qa_test_app.view
 
 import android.annotation.SuppressLint

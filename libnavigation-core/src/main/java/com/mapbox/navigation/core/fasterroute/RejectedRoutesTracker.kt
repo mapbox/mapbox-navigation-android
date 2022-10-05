@@ -1,7 +1,9 @@
 package com.mapbox.navigation.core.fasterroute
 
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.fasterroute.Log.Companion.FASTER_ROUTE_LOG_CATEGORY
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.withContext
 
 internal class RejectedRoutesTracker(
@@ -25,7 +27,14 @@ internal class RejectedRoutesTracker(
                 continue
             }
             val similarities = withContext(ThreadController.DefaultDispatcher) {
-                rejectedAlternatives.values.map { calculateGeometrySimilarity(it, alternative) }
+                rejectedAlternatives.values.map {
+                    val similarity = calculateGeometrySimilarity(it, alternative)
+                    logD(
+                        "route ${it.id} has $similarity similarity with ${alternative.id}",
+                        FASTER_ROUTE_LOG_CATEGORY
+                    )
+                    similarity
+                }
             }
             val similarity = similarities.maxOrNull() ?: 0.0
             if (similarity < maximumGeometrySimilarity) {

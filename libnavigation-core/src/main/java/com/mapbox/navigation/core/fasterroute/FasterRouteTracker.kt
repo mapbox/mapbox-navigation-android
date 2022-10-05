@@ -4,7 +4,9 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.fasterroute.Log.Companion.FASTER_ROUTE_LOG_CATEGORY
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
+import com.mapbox.navigation.utils.internal.logD
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
 internal class FasterRouteTracker(
@@ -35,11 +37,26 @@ internal class FasterRouteTracker(
             }
 
         if (update.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW) {
+            logD(
+                "New routes were set, resetting tracker state",
+                FASTER_ROUTE_LOG_CATEGORY
+            )
             rejectedRoutesTracker.clean()
             rejectedRoutesTracker.addRejectedRoutes(fasterAlternatives)
         }
         if (update.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE) {
+            val fasterAlternativesIdsLog = fasterAlternatives.entries
+                .joinToString(separator = ", ") { "${it.value.id}(${it.key})" }
+            logD(
+                "considering following routes as a faster alternative: $fasterAlternativesIdsLog",
+                FASTER_ROUTE_LOG_CATEGORY
+            )
             val untracked = rejectedRoutesTracker.findUntrackedAlternatives(fasterAlternatives)
+            logD(
+                "routes ${untracked.map { it.id }.joinToString(separator = ", ") { it }} " +
+                    "are not similar to already rejected",
+                FASTER_ROUTE_LOG_CATEGORY
+            )
             val fasterAlternative = untracked.minByOrNull {
                 metadataMap[it.id]!!.infoFromStartOfPrimary.duration
             } ?: return FasterRouteResult.NoFasterRoad
@@ -47,6 +64,10 @@ internal class FasterRouteTracker(
             val fasterAlternativeRouteDuration = metadataMap[fasterAlternative.id]!!
                 .infoFromStartOfPrimary.duration
             val fasterThanPrimary = primaryRouteDuration - fasterAlternativeRouteDuration
+            logD(
+                "route ${fasterAlternative.id} is faster then primary by $fasterThanPrimary",
+                FASTER_ROUTE_LOG_CATEGORY
+            )
             return FasterRouteResult.NewFasterRoadFound(
                 fasterAlternative,
                 fasterThanPrimary = fasterThanPrimary,

@@ -17,5 +17,3 @@ class FasterRouteOptions internal constructor(
         fun build() = FasterRouteOptions(maxSimilarityToExistingRoute)
     }
 }
-
-
