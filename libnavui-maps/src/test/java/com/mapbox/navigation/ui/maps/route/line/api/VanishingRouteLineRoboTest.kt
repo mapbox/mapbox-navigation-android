@@ -177,9 +177,9 @@ class VanishingRouteLineRoboTest {
     @Test
     fun getTraveledRouteLineExpressions_withRestrictedLineExpressionData() {
         val expectedRestrictedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0]," +
-            " 0.0, [rgba, 0.0, 0.0, 0.0, 0.0], 0.44865144220494346, [rgba, 0.0, 0.0, 12.0, 0.0]," +
-            " 0.468779750455607, [rgba, 0.0, 0.0, 0.0, 0.0], 0.5032854217424586, " +
-            "[rgba, 0.0, 0.0, 12.0, 0.0], 0.5207714038134984, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+            " 0.0, [rgba, 0.0, 0.0, 0.0, 0.0], 0.4476941554901612, [rgba, 0.0, 0.0, 12.0, 0.0]," +
+            " 0.4677574367125704, [rgba, 0.0, 0.0, 0.0, 0.0], 0.5021643413784516, " +
+            "[rgba, 0.0, 0.0, 12.0, 0.0], 0.5196445159361185, [rgba, 0.0, 0.0, 0.0, 0.0]]"
 
         val colorResources = RouteLineColorResources.Builder()
             .restrictedRoadColor(Color.CYAN)
@@ -199,10 +199,7 @@ class VanishingRouteLineRoboTest {
                 true,
                 colorResources
             )
-        val restrictedSegments = MapboxRouteLineUtils.extractRouteData(
-            route.directionsRoute,
-            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
-        )
+        val restrictedSegments = MapboxRouteLineUtils.extractRouteRestrictionData(route)
 
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(
             lineString.coordinates()[0],

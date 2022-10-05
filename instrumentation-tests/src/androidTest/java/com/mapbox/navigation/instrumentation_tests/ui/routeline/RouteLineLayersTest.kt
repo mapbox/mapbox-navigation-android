@@ -17,8 +17,6 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.core.MapboxNavigationProvider
-import com.mapbox.navigation.core.routealternatives.AlternativeRouteIntersection
-import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.BasicNavigationViewActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
@@ -393,16 +391,39 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
     /**
      * This test ensures that we're not crashing when parsing alternative routes metadata
      * in a specific case (caught by crashlytics) that involved
-     * Nav Native reporting the [AlternativeRouteIntersection.geometryIndexInRoute] of
-     * [AlternativeRouteMetadata.forkIntersectionOfAlternativeRoute] to be out of bounds
-     * for the shape points collection of that particular route.
+     * Directions API returning a route which contains a duplicate point in a step.
      */
     @Test
-    fun should_not_crash_when_fork_intersection_out_of_bounds_NAVAND_692() = sdkTest {
+    fun should_provide_valid_offset_when_route_contains_duplicate_points_NAVAND_692() = sdkTest {
         val primaryRoute = createRoute(
             responseJson = R.raw.route_response_japan_1,
             requestUrlJson = R.raw.route_response_japan_1_url,
         ).first()
+
+        /**
+         * this route contains a duplicate point somewhere in the middle of the first step.
+         * Inspecting a decoded portion of the `LineString` presents this:
+         * ```
+         * ...
+         *     [
+         *       140.9184,
+         *       37.718443
+         *     ],
+         *     [
+         *       140.918069,
+         *       37.719383
+         *     ],
+         *     [
+         *       140.918069,
+         *       37.719383
+         *     ],
+         *     [
+         *       140.917924,
+         *       37.719839
+         *     ],
+         * ...
+         * ```
+         */
         val alternativeRoute = createRoute(
             responseJson = R.raw.route_response_japan_2,
             requestUrlJson = R.raw.route_response_japan_2_url,
@@ -432,10 +453,10 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
             alternativeRoutesMetadata = mapboxNavigation.getAlternativeMetadataFor(routesUpdate)
         )
 
-        // we're expecting to ignore the attempt to hide the alternative until the deviation point,
-        // hence the cleared offset
+        // the alternative route turns out to fully overlaps with the original route,
+        // hence the 1.0 offset
         assertEquals(
-            0.0,
+            1.0,
             result.value!!.alternativeRouteLinesData[0].dynamicData.trimOffset!!.offset,
             0.0000000001
         )

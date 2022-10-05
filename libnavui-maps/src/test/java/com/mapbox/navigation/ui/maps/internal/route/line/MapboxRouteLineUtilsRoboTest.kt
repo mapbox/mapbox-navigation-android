@@ -12,6 +12,7 @@ import com.mapbox.bindgen.Value
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
@@ -543,37 +544,66 @@ class MapboxRouteLineUtilsRoboTest {
     }
 
     @Test
-    fun `calculateRouteGranularDistances with duplicates`() {
+    fun `calculateRouteGranularDistances - flat steps list distances`() {
         val route = loadNavigationRoute("short_route.json")
 
         val result = MapboxRouteLineUtils.granularDistancesProvider(route)!!
 
-        assertEquals(8, result.distancesArray.size)
-        assertEquals(result.distancesArray[1], result.distancesArray[2])
-        assertEquals(result.distancesArray[4], result.distancesArray[5])
-        assertEquals(result.distancesArray[6], result.distancesArray[7])
-        assertEquals(Point.fromLngLat(-122.523671, 37.975379), result.distancesArray[0].point)
-        assertEquals(0.0000025451727518618744, result.distancesArray[0].distanceRemaining, 0.0)
-        assertEquals(Point.fromLngLat(-122.523117, 37.975107), result.distancesArray[4].point)
-        assertEquals(0.0, result.distancesArray[4].distanceRemaining, 0.00000014622044645899132)
-        assertEquals(Point.fromLngLat(-122.523131, 37.975067), result.distancesArray[7].point)
-        assertEquals(0.0, result.distancesArray[7].distanceRemaining, 0.0)
+        assertEquals(8, result.flatStepDistances.size)
+        assertEquals(result.flatStepDistances[1], result.flatStepDistances[2])
+        assertEquals(result.flatStepDistances[4], result.flatStepDistances[5])
+        assertEquals(result.flatStepDistances[6], result.flatStepDistances[7])
+        assertEquals(Point.fromLngLat(-122.523671, 37.975379), result.flatStepDistances[0].point)
+        assertEquals(0.0000025451727518618744, result.flatStepDistances[0].distanceRemaining, 0.0)
+        assertEquals(Point.fromLngLat(-122.523117, 37.975107), result.flatStepDistances[4].point)
+        assertEquals(0.00000014622044645899132, result.flatStepDistances[4].distanceRemaining, 0.0)
+        assertEquals(Point.fromLngLat(-122.523131, 37.975067), result.flatStepDistances[7].point)
+        assertEquals(0.0, result.flatStepDistances[7].distanceRemaining, 0.0)
     }
 
     @Test
-    fun `calculateRouteGranularDistances distinct`() {
+    fun `calculateRouteGranularDistances - route distances`() {
         val route = loadNavigationRoute("short_route.json")
 
-        val result = MapboxRouteLineUtils.distinctGranularDistancesProvider(route)!!
+        val result = MapboxRouteLineUtils.granularDistancesProvider(route)!!
 
-        assertEquals(5, result.distancesArray.size)
-        assertEquals(5, result.distancesArray.distinct().size)
-        assertEquals(Point.fromLngLat(-122.523671, 37.975379), result.distancesArray[0].point)
-        assertEquals(0.0000025451727518618744, result.distancesArray[0].distanceRemaining, 0.0)
-        assertEquals(Point.fromLngLat(-122.523117, 37.975107), result.distancesArray[3].point)
-        assertEquals(0.0, result.distancesArray[3].distanceRemaining, 0.00000014622044645899132)
-        assertEquals(Point.fromLngLat(-122.523131, 37.975067), result.distancesArray[4].point)
-        assertEquals(0.0, result.distancesArray[4].distanceRemaining, 0.0)
+        assertEquals(
+            PolylineUtils.decode(route.directionsRoute.geometry()!!, 6).size,
+            result.routeDistances.size
+        )
+        assertEquals(5, result.routeDistances.size)
+        assertEquals(Point.fromLngLat(-122.523671, 37.975379), result.routeDistances[0].point)
+        assertEquals(0.0000025451727518618744, result.routeDistances[0].distanceRemaining, 0.0)
+        assertEquals(Point.fromLngLat(-122.523117, 37.975107), result.routeDistances[3].point)
+        assertEquals(0.00000014622044645899132, result.routeDistances[3].distanceRemaining, 0.0)
+        assertEquals(Point.fromLngLat(-122.523131, 37.975067), result.routeDistances[4].point)
+        assertEquals(0.0, result.routeDistances[4].distanceRemaining, 0.0)
+    }
+
+    @Test
+    fun `calculateRouteGranularDistances - leg distances`() {
+        val route = loadNavigationRoute("two-leg-route-with-restrictions.json")
+
+        val result = MapboxRouteLineUtils.granularDistancesProvider(route)!!
+
+        assertEquals(
+            PolylineUtils.decode(route.directionsRoute.geometry()!!, 6).size,
+            result.routeDistances.size
+        )
+        assertEquals(18, result.legsDistances[0].size)
+        assertEquals(30, result.legsDistances[1].size)
+        assertEquals(Point.fromLngLat(-122.523163, 37.974969), result.legsDistances[0][0].point)
+        assertEquals(Point.fromLngLat(-122.524298, 37.970763), result.legsDistances[1][0].point)
+        assertEquals(0.00003094931666768714, result.legsDistances[0][0].distanceRemaining, 0.0)
+        assertEquals(0.000015791208023023606, result.legsDistances[1][0].distanceRemaining, 0.0)
+        assertEquals(Point.fromLngLat(-122.523452, 37.974087), result.legsDistances[0][3].point)
+        assertEquals(Point.fromLngLat(-122.523718, 37.970713), result.legsDistances[1][3].point)
+        assertEquals(0.000027738689813981653, result.legsDistances[0][3].distanceRemaining, 0.0)
+        assertEquals(0.000014170490514018856, result.legsDistances[1][3].distanceRemaining, 0.0)
+        assertEquals(Point.fromLngLat(-122.524298, 37.970763), result.legsDistances[0][17].point)
+        assertEquals(Point.fromLngLat(-122.518908, 37.970549), result.legsDistances[1][29].point)
+        assertEquals(0.000015791208023023606, result.legsDistances[0][17].distanceRemaining, 0.0)
+        assertEquals(0.0, result.legsDistances[1][29].distanceRemaining, 0.0)
     }
 
     @Test
@@ -583,7 +613,7 @@ class MapboxRouteLineUtilsRoboTest {
             route.directionsRoute.geometry()!!,
             Constants.PRECISION_6
         )
-        val distances = MapboxRouteLineUtils.distinctGranularDistancesProvider(route)
+        val distances = MapboxRouteLineUtils.granularDistancesProvider(route)
 
         val result = MapboxRouteLineUtils.findDistanceToNearestPointOnCurrentLine(
             lineString.coordinates()[15],
@@ -591,7 +621,7 @@ class MapboxRouteLineUtilsRoboTest {
             12
         )
 
-        assertEquals(141.6772603078415, result, 0.0)
+        assertEquals(296.6434687878863, result, 0.0)
     }
 
     @Test

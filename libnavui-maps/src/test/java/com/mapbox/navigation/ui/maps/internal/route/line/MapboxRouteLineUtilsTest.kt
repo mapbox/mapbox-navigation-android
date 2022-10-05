@@ -7,10 +7,8 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
-import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
@@ -18,6 +16,7 @@ import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -191,37 +190,34 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun getRestrictedSectionExpressionData() {
-        val route = loadRoute("route-with-restrictions.json")
-
-        val result = MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
-            route,
-            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        val route = loadRoute("route-with-restrictions.json").toNavigationRoute(
+            RouterOrigin.Offboard
         )
 
-        assertEquals(14, result.size)
-        assertTrue(result[4].isInRestrictedSection)
-        assertFalse(result[5].isInRestrictedSection)
-        assertTrue(result[6].isInRestrictedSection)
+        val result = MapboxRouteLineUtils.extractRouteRestrictionData(route)
+
+        assertEquals(5, result.size)
+        assertTrue(result[1].isInRestrictedSection)
+        assertFalse(result[2].isInRestrictedSection)
+        assertTrue(result[3].isInRestrictedSection)
+        assertFalse(result[4].isInRestrictedSection)
     }
 
     @Test
     fun getRestrictedLineExpression() {
-        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
-            "0.2, [rgba, 0.0, 0.0, 0.0, 0.0], 0.44865144220494346, " +
-            "[rgba, 255.0, 255.0, 255.0, 1.0], 0.468779750455607, [rgba, 0.0, 0.0, 0.0, 0.0]," +
-            " 0.5032854217424586, [rgba, 255.0, 255.0, 255.0, 1.0], 0.5207714038134984, " +
-            "[rgba, 0.0, 0.0, 0.0, 0.0]]"
-
-        val route = loadRoute("route-with-restrictions.json")
-        val expData = MapboxRouteLineUtils.extractRouteData(
-            route,
-            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.2, " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.4476941554901612, [rgba, 0.0, 255.0, 255.0, 1.0], " +
+            "0.4677574367125704, [rgba, 0.0, 0.0, 0.0, 0.0], 0.5021643413784516, " +
+            "[rgba, 0.0, 255.0, 255.0, 1.0], 0.5196445159361185, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val route = loadRoute("route-with-restrictions.json").toNavigationRoute(
+            RouterOrigin.Offboard
         )
+        val expData = MapboxRouteLineUtils.extractRouteRestrictionData(route)
 
         val expression = MapboxRouteLineUtils.getRestrictedLineExpression(
             0.2,
             0,
-            -1,
+            Color.CYAN,
             expData
         )
 
@@ -233,15 +229,17 @@ class MapboxRouteLineUtilsTest {
         val colorResources = RouteLineColorResources.Builder()
             .restrictedRoadColor(Color.CYAN)
             .build()
-        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
-            "0.2, [rgba, 0.0, 0.0, 0.0, 0.0], 0.44865144220494346, " +
-            "[rgba, 0.0, 255.0, 255.0, 1.0], 0.468779750455607, [rgba, 0.0, 0.0, 0.0, 0.0]," +
-            " 0.5032854217424586, [rgba, 0.0, 255.0, 255.0, 1.0], 0.5207714038134984," +
-            " [rgba, 0.0, 0.0, 0.0, 0.0]]"
-        val route = loadRoute("route-with-restrictions.json")
+        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.2, " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.4476941554901612, [rgba, 0.0, 255.0, 255.0, 1.0], " +
+            "0.4677574367125704, [rgba, 0.0, 0.0, 0.0, 0.0], 0.5021643413784516, " +
+            "[rgba, 0.0, 255.0, 255.0, 1.0], 0.5196445159361185, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val route = loadRoute("route-with-restrictions.json").toNavigationRoute(
+            RouterOrigin.Offboard
+        )
+        val expData = MapboxRouteLineUtils.extractRouteRestrictionData(route)
 
         val expression = MapboxRouteLineUtils.getRestrictedLineExpressionProducer(
-            route,
+            expData,
             0.2,
             0,
             colorResources
@@ -268,11 +266,10 @@ class MapboxRouteLineUtilsTest {
     fun getRestrictedLineExpression_whenNoRestrictionsInRoute() {
         val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.2, " +
             "[rgba, 0.0, 0.0, 0.0, 0.0]]"
-        val route = loadRoute("short_route.json")
-        val expData = MapboxRouteLineUtils.extractRouteData(
-            route,
-            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        val route = loadRoute("short_route.json").toNavigationRoute(
+            RouterOrigin.Offboard
         )
+        val expData = MapboxRouteLineUtils.extractRouteRestrictionData(route)
 
         val expression = MapboxRouteLineUtils.getRestrictedLineExpression(
             0.2,
@@ -967,62 +964,33 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun getRouteLineTrafficExpressionDataWithRestrictedSections() {
-        val route = loadRoute("route-with-restrictions.json")
-        val expectedDistanceFromOriginIndex3 =
-            route.legs()!!.first().annotation()!!.distance()!!.subList(0, 3).sum()
-        val expectedDistanceFromOriginIndex17 =
-            route.legs()!!.first().annotation()!!.distance()!!.subList(0, 17).sum()
-        val expectedDistanceFromOriginIndex18 =
-            route.legs()!!.first().annotation()!!.distance()!!.subList(0, 18).sum()
-        val expectedDistanceFromOriginIndex19 =
-            route.legs()!!.first().annotation()!!.distance()!!.subList(0, 19).sum()
-        val expectedDistanceFromOriginIndex20 =
-            route.legs()!!.first().annotation()!!.distance()!!.subList(0, 20).sum()
-
-        val trafficExpressionData = MapboxRouteLineUtils.extractRouteData(
-            route,
-            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        val route = loadRoute("route-with-restrictions.json").toNavigationRoute(
+            RouterOrigin.Offboard
         )
+
+        val trafficExpressionData = MapboxRouteLineUtils.extractRouteRestrictionData(route)
 
         assertEquals(0.0, trafficExpressionData[0].offset, 0.0)
-        assertEquals(true, trafficExpressionData[0].isLegOrigin)
+        assertFalse(trafficExpressionData[0].isInRestrictedSection)
+        assertEquals(0, trafficExpressionData[0].legIndex)
 
-        assertEquals(
-            expectedDistanceFromOriginIndex3,
-            trafficExpressionData[3].offset * route.distance(),
-            0.0
-        )
+        assertEquals(0, trafficExpressionData[1].legIndex)
+        assertTrue(trafficExpressionData[1].isInRestrictedSection)
+        assertEquals(0.4476941554901612, trafficExpressionData[1].offset, 0.0)
+
+        assertEquals(0, trafficExpressionData[2].legIndex)
+        assertFalse(trafficExpressionData[2].isInRestrictedSection)
+        assertEquals(0.4677574367125704, trafficExpressionData[2].offset, 0.0)
+
         assertEquals(0, trafficExpressionData[3].legIndex)
-        assertEquals(false, trafficExpressionData[3].isInRestrictedSection)
-        assertEquals(false, trafficExpressionData[3].isLegOrigin)
+        assertTrue(trafficExpressionData[3].isInRestrictedSection)
+        assertEquals(0.5021643413784516, trafficExpressionData[3].offset, 0.0)
 
-        assertEquals(
-            expectedDistanceFromOriginIndex17,
-            trafficExpressionData[17].offset * route.distance(),
-            0.0
-        )
-        assertEquals(true, trafficExpressionData[17].isInRestrictedSection)
+        assertEquals(0, trafficExpressionData[4].legIndex)
+        assertFalse(trafficExpressionData[4].isInRestrictedSection)
+        assertEquals(0.5196445159361185, trafficExpressionData[4].offset, 0.0)
 
-        assertEquals(
-            expectedDistanceFromOriginIndex18,
-            trafficExpressionData[18].offset * route.distance(),
-            0.0
-        )
-        assertEquals(false, trafficExpressionData[18].isInRestrictedSection)
-
-        assertEquals(
-            expectedDistanceFromOriginIndex19,
-            trafficExpressionData[19].offset * route.distance(),
-            0.000000000001
-        )
-        assertEquals(true, trafficExpressionData[19].isInRestrictedSection)
-
-        assertEquals(
-            expectedDistanceFromOriginIndex20,
-            trafficExpressionData[20].offset * route.distance(),
-            0.0
-        )
-        assertEquals(false, trafficExpressionData[20].isInRestrictedSection)
+        assertEquals(5, trafficExpressionData.size)
     }
 
     @Test
@@ -1064,7 +1032,6 @@ class MapboxRouteLineUtilsTest {
                 item1,
                 item2,
                 { it.distanceFromOrigin },
-                { it.isInRestrictedSection },
                 { it.isLegOrigin },
                 { it.offset },
                 { it.trafficCongestionIdentifier }
@@ -1358,27 +1325,6 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
-    fun getRestrictedRouteLegRangesTest() {
-        val route = loadRoute("route-with-restrictions.json")
-        val coordinates = LineString.fromPolyline(
-            route.geometry() ?: "",
-            Constants.PRECISION_6
-        )
-
-        val result = MapboxRouteLineUtils.getRestrictedRouteLegRanges(route.legs()!!.first())
-
-        assertEquals(2, result.size)
-        assertEquals(37.971947, coordinates.coordinates()[result[0].first].latitude(), 0.0)
-        assertEquals(-122.526159, coordinates.coordinates()[result[0].first].longitude(), 0.0)
-        assertEquals(37.971947, coordinates.coordinates()[result[0].last].latitude(), 0.0)
-        assertEquals(-122.526159, coordinates.coordinates()[result[0].last].longitude(), 0.0)
-        assertEquals(37.972037, coordinates.coordinates()[result[1].first].latitude(), 0.0)
-        assertEquals(-122.526951, coordinates.coordinates()[result[1].first].longitude(), 0.0)
-        assertEquals(37.972037, coordinates.coordinates()[result[1].last].latitude(), 0.0)
-        assertEquals(-122.526951, coordinates.coordinates()[result[1].last].longitude(), 0.0)
-    }
-
-    @Test
     fun getRouteColorForCongestionNonPrimaryRouteCongestionClosure() {
         val expectedColor = Color.parseColor("#ffcc00")
         val resources = RouteLineColorResources.Builder()
@@ -1474,7 +1420,7 @@ class MapboxRouteLineUtilsTest {
         val result = MapboxRouteLineUtils.routePointsProvider(route)!!
 
         assertEquals(128, result.flatList.size)
-        assertEquals(15, result.nestedList.flatten().size)
+        assertEquals(15, result.stepPoints.flatten().size)
         assertEquals(result.flatList[1].latitude(), result.flatList[2].latitude(), 0.0)
         assertEquals(result.flatList[1].longitude(), result.flatList[2].longitude(), 0.0)
         assertEquals(result.flatList[126].latitude(), result.flatList[127].latitude(), 0.0)
@@ -1665,44 +1611,23 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
-    fun getRouteRestrictedSectionsExpressionData() {
-        val route = loadRoute("route-with-restrictions.json")
-
-        val result = MapboxRouteLineUtils.extractRouteData(
-            route,
-            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
-        )
-
-        assertEquals(40, result.size)
-        assertTrue(result.first().isLegOrigin)
-        assertFalse(result[16].isInRestrictedSection)
-        assertTrue(result[17].isInRestrictedSection)
-        assertFalse(result[18].isInRestrictedSection)
-        assertTrue(result[19].isInRestrictedSection)
-        assertFalse(result[20].isInRestrictedSection)
-    }
-
-    @Test
     fun getRouteRestrictedSectionsExpressionData_multiLegRoute() {
-        val route = loadRoute("two-leg-route-with-restrictions.json")
-
-        val result = MapboxRouteLineUtils.extractRouteData(
-            route,
-            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        val route = loadRoute("two-leg-route-with-restrictions.json").toNavigationRoute(
+            RouterOrigin.Offboard
         )
 
-        assertEquals(45, result.size)
-        assertTrue(result.first().isLegOrigin)
-        assertFalse(result[1].isInRestrictedSection)
+        val result = MapboxRouteLineUtils.extractRouteRestrictionData(route)
+
+        assertEquals(7, result.size)
+        assertTrue(result[1].isInRestrictedSection)
         assertTrue(result[2].isInRestrictedSection)
-        assertTrue(result[3].isInRestrictedSection)
-        assertTrue(result[4].isInRestrictedSection)
-        assertFalse(result[5].isInRestrictedSection)
-        assertTrue(result[17].isLegOrigin)
-        assertFalse(result[36].isInRestrictedSection)
-        assertTrue(result[37].isInRestrictedSection)
-        assertEquals(result[37].roadClass, "tertiary")
-        assertFalse(result[38].isInRestrictedSection)
+        assertFalse(result[3].isInRestrictedSection)
+        assertFalse(result[4].isInRestrictedSection)
+        assertEquals(1, result[4].legIndex)
+        assertEquals(1, result[5].legIndex)
+        assertTrue(result[5].isInRestrictedSection)
+        assertEquals(1, result[6].legIndex)
+        assertFalse(result[6].isInRestrictedSection)
     }
 
     @Test
@@ -2104,6 +2029,92 @@ class MapboxRouteLineUtilsTest {
         )
 
         assertEquals(MapboxRouteLineUtils.layerGroup1SourceLayerIds, result)
+    }
+
+    @Test
+    fun `extractRouteRestrictionData with restriction at end of route`() {
+        val route = loadRoute("route-with-restrictions-at-end.json").toNavigationRoute(
+            RouterOrigin.Offboard
+        )
+
+        val result = MapboxRouteLineUtils.extractRouteRestrictionData(route)
+
+        assertEquals(3, result.size)
+        assertEquals(0.0, result[0].offset, 0.0)
+        assertEquals(0, result[0].legIndex)
+        assertFalse(result[0].isInRestrictedSection)
+        assertEquals(0.9963424099457971, result[1].offset, 0.0)
+        assertEquals(0, result[1].legIndex)
+        assertTrue(result[1].isInRestrictedSection)
+    }
+
+    @Test
+    fun `getRestrictedLineExpression with restriction at end of route`() {
+        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.9963424099457971, " +
+            "[rgba, 0.0, 255.0, 255.0, 1.0], 1.0, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val route = loadRoute("route-with-restrictions-at-end.json").toNavigationRoute(
+            RouterOrigin.Offboard
+        )
+        val expressionData = MapboxRouteLineUtils.extractRouteRestrictionData(route)
+
+        val result = MapboxRouteLineUtils.getRestrictedLineExpression(
+            0.0,
+            0,
+            Color.CYAN,
+            expressionData
+        )
+
+        assertEquals(expectedExpression, result.toString())
+    }
+
+    @Test
+    fun `extractRouteRestrictionData with restriction at start of route`() {
+        val route =
+            loadRoute("route-with-restrictions-at-start.json").toNavigationRoute(
+                RouterOrigin.Offboard
+            )
+
+        val result = MapboxRouteLineUtils.extractRouteRestrictionData(route)
+
+        assertEquals(2, result.size)
+        assertEquals(0.0, result[0].offset, 0.0)
+        assertEquals(0, result[0].legIndex)
+        assertTrue(result[0].isInRestrictedSection)
+        assertEquals(0.0036660165533364264, result[1].offset, 0.0)
+        assertEquals(0, result[1].legIndex)
+        assertFalse(result[1].isInRestrictedSection)
+    }
+
+    @Test
+    fun routeHasRestrictions_when_routeNull() {
+        val result = MapboxRouteLineUtils.routeHasRestrictions(null)
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun routeHasRestrictions() {
+        val route =
+            loadRoute("route-with-restrictions-at-start.json").toNavigationRoute(
+                RouterOrigin.Offboard
+            )
+
+        val result = MapboxRouteLineUtils.routeHasRestrictions(route)
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun routeHasRestrictions_whenNoRestrictions() {
+        val route =
+            loadRoute("short_route.json").toNavigationRoute(
+                RouterOrigin.Offboard
+            )
+
+        val result = MapboxRouteLineUtils.routeHasRestrictions(route)
+
+        assertFalse(result)
     }
 
     private fun <T> listElementsAreEqual(
