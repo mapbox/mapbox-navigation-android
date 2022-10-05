@@ -209,7 +209,7 @@ package com.mapbox.navigation.core.fasterroute {
     method @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public static com.mapbox.navigation.core.fasterroute.FasterRoutes createFasterRoutes(com.mapbox.navigation.core.MapboxNavigation, com.mapbox.navigation.core.fasterroute.FasterRouteOptions options);
   }
 
-  public final class NewFasterRoute {
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class NewFasterRoute {
     ctor public NewFasterRoute(com.mapbox.navigation.base.route.NavigationRoute fasterRoute, double fasterThanPrimary, int alternativeId);
     method public int getAlternativeId();
     method public com.mapbox.navigation.base.route.NavigationRoute getFasterRoute();
@@ -219,7 +219,7 @@ package com.mapbox.navigation.core.fasterroute {
     property public final double fasterThanPrimary;
   }
 
-  public fun interface NewFasterRouteObserver {
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public fun interface NewFasterRouteObserver {
     method public void onNewFasterRouteFound(com.mapbox.navigation.core.fasterroute.NewFasterRoute newFasterRoute);
   }
 
