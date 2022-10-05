@@ -1,11 +1,15 @@
 package com.mapbox.navigation.testing.ui
 
 import android.Manifest
+import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.rule.DDGrantPermissionRule
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.uiautomator.UiDevice
 import com.adevinta.android.barista.rule.cleardata.ClearDatabaseRule
@@ -33,9 +37,9 @@ abstract class BaseTest<A : AppCompatActivity>(activityClass: Class<A>) {
     }
 
     @get:Rule
-    val permissionsRule: GrantPermissionRule = GrantPermissionRule.grant(
-        *permissionsToGrant.toTypedArray()
-    )
+    val permissionsRule: GrantPermissionRule = DDGrantPermissionRule().also {
+        it.permissionGranter.addPermissions(*permissionsToGrant.toTypedArray())
+    }
 
     @get:Rule
     val activityRule = ActivityScenarioRule(activityClass)
@@ -65,9 +69,24 @@ abstract class BaseTest<A : AppCompatActivity>(activityClass: Class<A>) {
     private lateinit var _activity: A
     val activity: A get() = _activity
 
+    @RequiresApi(Build.VERSION_CODES.P)
     @Before
     fun initializeActivity() {
-        activityRule.scenario.onActivity { _activity = it }
+        activityRule.scenario.onActivity {
+            _activity = it
+            val uiAutomation = InstrumentationRegistry.getInstrumentation().uiAutomation
+            permissionsToGrant.forEach { permission ->
+                uiAutomation.grantRuntimePermission("com.mapbox.navigation.instrumentation_tests", permission)
+                var attempts = 0
+                while (attempts < 10) {
+                    if (ContextCompat.checkSelfPermission(it, permission) != PackageManager.PERMISSION_GRANTED) {
+                        Thread.sleep(1000)
+                    }
+                    attempts++
+                }
+
+            }
+        }
     }
 
 //    @Before
