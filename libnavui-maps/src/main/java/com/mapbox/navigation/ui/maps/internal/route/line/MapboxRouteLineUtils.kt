@@ -347,14 +347,23 @@ internal object MapboxRouteLineUtils {
         }
     }
 
+    /**
+     * We're removing all stops before the vanishing offset and then we're also removing all duplicate offsets,
+     * however, strictly leaving the last valid offset, not the first valid offset.
+     * This is needed to workaround a problem where Direction API injects an intersection in the leg arrival step
+     * that doesn't have a `restricted` road class assigned, even if it is in a restricted area. In such case,
+     * if we were to filter restriction data by distinct first offset, we'd have a gap in the restricted line at the beginning of a leg.
+     */
     // todo this has a lot in common with the method above by the same name
     // find a way to reduce the code duplication
-    internal fun getFilteredRouteLineExpressionData(
+    private fun getFilteredRestrictedRouteLineExpressionData(
         distanceOffset: Double,
         routeLineExpressionData: List<ExtractedRouteRestrictionData>
     ): List<ExtractedRouteRestrictionData> {
-        val filteredItems = routeLineExpressionData
-            .filter { it.offset > distanceOffset }.distinctBy { it.offset }
+        val filteredItems = routeLineExpressionData.filterIndexed { index, restrictionData ->
+            restrictionData.offset > distanceOffset &&
+                restrictionData.offset != routeLineExpressionData.getOrNull(index + 1)?.offset
+        }
         return when (filteredItems.isEmpty()) {
             true -> when (routeLineExpressionData.isEmpty()) {
                 true -> listOf(
@@ -1517,7 +1526,7 @@ internal object MapboxRouteLineUtils {
         expressionBuilder.lineProgress()
         expressionBuilder.color(Color.TRANSPARENT)
 
-        getFilteredRouteLineExpressionData(
+        getFilteredRestrictedRouteLineExpressionData(
             vanishingPointOffset,
             routeLineExpressionData
         ).forEach {

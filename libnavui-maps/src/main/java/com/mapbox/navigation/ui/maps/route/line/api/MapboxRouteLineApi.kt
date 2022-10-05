@@ -1313,7 +1313,7 @@ class MapboxRouteLineApi(
                     getRestrictedLineExpressionProducer(
                         extractedRouteData,
                         vanishingPointOffset = 0.0,
-                        activeLegIndex = 0,
+                        activeLegIndex = activeLegIndex,
                         routeLineOptions.resourceProvider.routeLineColorResources
                     )
                 } else {

@@ -2087,6 +2087,26 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
+    fun `getRestrictedLineExpression with restriction across two legs`() {
+        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.3956457979751531, " +
+            "[rgba, 0.0, 255.0, 255.0, 1.0], 0.5540039481345271, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val route = loadRoute("multileg_route_two_legs_with_restrictions.json").toNavigationRoute(
+            RouterOrigin.Offboard
+        )
+        val expressionData = MapboxRouteLineUtils.extractRouteRestrictionData(route)
+
+        val result = MapboxRouteLineUtils.getRestrictedLineExpression(
+            vanishingPointOffset = 0.0,
+            activeLegIndex = -1,
+            Color.CYAN,
+            expressionData
+        )
+
+        assertEquals(expectedExpression, result.toString())
+    }
+
+    @Test
     fun routeHasRestrictions_when_routeNull() {
         val result = MapboxRouteLineUtils.routeHasRestrictions(null)
 
