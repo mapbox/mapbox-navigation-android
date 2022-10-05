@@ -45,7 +45,7 @@ object MapboxMetricsReporter : MetricsReporter {
             }
 
             override fun didSendEvents(events: Value) {
-                logD("Event has been set $events", LOG_CATEGORY)
+                logD("Event has been sent $events", LOG_CATEGORY)
             }
         }
 
@@ -106,7 +106,7 @@ object MapboxMetricsReporter : MetricsReporter {
         eventsService.sendEvent(
             Event(EventPriority.IMMEDIATE, metricEvent.toValue(), null)
         ) {
-            logE("Failed to send event: $it", LOG_CATEGORY)
+            logE("Failed to send event ${metricEvent.metricName}: $it", LOG_CATEGORY)
         }
 
         ioJobController.scope.launch {
