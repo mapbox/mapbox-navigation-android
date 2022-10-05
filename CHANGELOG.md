@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Fixed an issue where restrictions were drawn only on the first leg of the route, if independent leg styling was not used (default behavior). [#6440](https://github.com/mapbox/mapbox-navigation-android/pull/6440)
 
 ## Mapbox Navigation SDK 2.9.0-beta.1 - 06 October, 2022
 ### Changelog
@@ -37,7 +38,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Core Common `v23.1.0-beta.2`
 - Mapbox Java `v6.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
-
 
 ## Mapbox Navigation SDK 2.9.0-alpha.4 - 30 September, 2022
 ### Changelog

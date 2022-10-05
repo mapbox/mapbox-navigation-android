@@ -11,6 +11,7 @@ import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
@@ -173,6 +174,37 @@ class MapboxRouteLineApiRoboTest {
         assertEquals(
             expectedWaypointFeature1,
             result.value!!.waypointsSource.features()!![1].geometry().toString()
+        )
+    }
+
+    @Test
+    fun `setRoutes with restrictions across legs`() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .displayRestrictedRoadSections(true)
+            .withRouteLineResources(
+                RouteLineResources.Builder()
+                    .routeLineColorResources(
+                        RouteLineColorResources.Builder()
+                            .restrictedRoadColor(Color.CYAN)
+                            .build()
+                    )
+                    .build()
+            )
+            .build()
+        val api = MapboxRouteLineApi(options)
+        val expectedRestrictedExpression =
+            "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+                "[rgba, 0.0, 0.0, 0.0, 0.0], 0.3956457979751531, " +
+                "[rgba, 0.0, 255.0, 255.0, 1.0], 0.5540039481345271, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val route = loadRoute("multileg_route_two_legs_with_restrictions.json")
+            .toNavigationRoute(RouterOrigin.Offboard)
+
+        val result = api.setNavigationRoutes(listOf(route))
+
+        assertEquals(
+            expectedRestrictedExpression,
+            result.value!!.primaryRouteLineData.dynamicData.restrictedSectionExpressionProvider!!
+                .generateExpression().toString()
         )
     }
 
