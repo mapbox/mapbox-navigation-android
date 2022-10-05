@@ -76,7 +76,7 @@ internal constructor(
         val signFormat = speedLimitOptions.forcedSignFormat
             ?: locationMatcherResult.speedLimit?.speedLimitSign
         val threshold = speedLimitOptions.warningThreshold
-        when (distanceFormatterOptions?.unitType) {
+        when (distanceFormatterOptions!!.unitType) {
             UnitType.IMPERIAL -> {
                 val speedLimit =
                     locationMatcherResult.speedLimit?.speedKmph?.let { speedLimitKmph ->
