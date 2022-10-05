@@ -209,7 +209,7 @@ internal constructor(
          * Get the registered instance or create one and register it to [MapboxNavigationApp].
          */
         @JvmStatic
-        fun getInstance(): MapboxAudioGuidance = MapboxNavigationApp
+        fun getRegisteredInstance(): MapboxAudioGuidance = MapboxNavigationApp
             .getObservers(MapboxAudioGuidance::class)
             .firstOrNull() ?: create().also { MapboxNavigationApp.registerObserver(it) }
     }

@@ -44,7 +44,7 @@ class AudioGuidanceStateControllerTest {
         mockAudioGuidance = mockk(relaxed = true) {
             every { stateFlow() } returns audioGuidanceState
         }
-        every { MapboxAudioGuidance.getInstance() } returns mockAudioGuidance
+        every { MapboxAudioGuidance.getRegisteredInstance() } returns mockAudioGuidance
 
         testStore = spyk(TestStore())
     }

@@ -23,7 +23,7 @@ package com.mapbox.navigation.ui.voice.api {
 
   public final class MapboxAudioGuidance implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
     method public static com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance create();
-    method public static com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance getInstance();
+    method public static com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance getRegisteredInstance();
     method public void mute();
     method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
@@ -35,7 +35,7 @@ package com.mapbox.navigation.ui.voice.api {
 
   public static final class MapboxAudioGuidance.Companion {
     method public com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance create();
-    method public com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance getInstance();
+    method public com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance getRegisteredInstance();
   }
 
   public final class MapboxAudioGuidanceState {
