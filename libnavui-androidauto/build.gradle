@@ -40,7 +40,7 @@ dependencies {
 
     // This defines the minimum version of Navigation which is included in this SDK. To upgrade the
     // Navigation versions, you can specify a newer version in your downstream build.gradle.
-    // TODO uncomment when the release is ready
+    // TODO uncomment when the release is ready and make license
     // api("com.mapbox.navigation:android:2.9.0-beta.1")
     api project(":libnavigation-android")
 
