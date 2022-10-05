@@ -53,11 +53,11 @@ internal class CameraLayoutObserver(
             is NavigationState.DestinationPreview,
             is NavigationState.FreeDrive,
             is NavigationState.RoutePreview -> {
-                EdgeInsets(vPadding, hPadding, vPadding + bottom, hPadding)
+                EdgeInsets(vPadding, hPadding, bottom, hPadding)
             }
             is NavigationState.ActiveNavigation,
             is NavigationState.Arrival -> {
-                EdgeInsets(vPadding + top, hPadding, vPadding + bottom, hPadding)
+                EdgeInsets(vPadding + top, hPadding, bottom, hPadding)
             }
         }
     }
@@ -68,12 +68,7 @@ internal class CameraLayoutObserver(
         val bottom = mapView.height.toDouble() - binding.roadNameLayout.top.toDouble()
         return when (store.state.value.navigation) {
             is NavigationState.FreeDrive -> {
-                EdgeInsets(
-                    vPaddingLandscape,
-                    hPaddingLandscape,
-                    vPaddingLandscape + bottom,
-                    hPaddingLandscape
-                )
+                EdgeInsets(vPaddingLandscape, hPaddingLandscape, bottom, hPaddingLandscape)
             }
             is NavigationState.DestinationPreview,
             is NavigationState.RoutePreview,
@@ -82,8 +77,8 @@ internal class CameraLayoutObserver(
                 EdgeInsets(
                     vPaddingLandscape,
                     hPaddingLandscape + left,
-                    vPaddingLandscape + bottom,
-                    hPaddingLandscape + right
+                    bottom,
+                    right - hPaddingLandscape
                 )
             }
         }
