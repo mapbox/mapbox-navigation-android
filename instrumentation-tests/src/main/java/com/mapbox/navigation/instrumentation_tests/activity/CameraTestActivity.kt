@@ -68,6 +68,8 @@ import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.launch
 import java.util.Locale
 import com.mapbox.navigation.instrumentation_tests.databinding.LayoutActivityVoiceBinding
+import kotlinx.coroutines.delay
+
 class CameraTestActivity : AppCompatActivity() {
 
     private val routes = RoutesProvider.routes
@@ -337,6 +339,11 @@ class CameraTestActivity : AppCompatActivity() {
     }
 
     fun startTesting() {
+        lifecycleScope.launch {
+            while (true) {
+                delay(1)
+            }
+        }
         mapboxMap = binding.mapView.getMapboxMap()
         locationComponent = binding.mapView.location.apply {
             setLocationProvider(navigationLocationProvider)
