@@ -42,7 +42,7 @@ fun logD(msg: String, category: String? = null) {
 
 /**
  * @param category optional string to identify the source or category of the log message.
- * @param lazyMsg is a lazy message to log. Isn't executed if current log level less verbose then Debug.
+ * @param lazyMsg is a lazy message to log. Isn't executed if current log level less verbose than Debug.
  * Noting that the category is appended to the log message to give extra context along with the `[nav-sdk]` parent category.
  * As an example, this is how the logs would look like `D/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`.
  */
@@ -63,6 +63,18 @@ fun logI(msg: String, category: String? = null) {
 }
 
 /**
+ * @param category optional string to identify the source or category of the log message.
+ * @param lazyMsg is a lazy message to log. Isn't executed if current log level less verbose than Inline.
+ * Noting that the category is appended to the log message to give extra context along with the `[nav-sdk]` parent category.
+ * As an example, this is how the logs would look like `I/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`.
+ */
+inline fun logI(category: String? = null, lazyMsg: () -> String) {
+    if (logLevel().atLeast(LoggingLevel.INFO)) {
+        logI(lazyMsg(), category)
+    }
+}
+
+/**
  * @param msg to log.
  * @param category optional string to identify the source or category of the log message.
  * Noting that the category is appended to the log message to give extra context along with the `[nav-sdk]` parent category.
@@ -73,6 +85,18 @@ fun logW(msg: String, category: String? = null) {
 }
 
 /**
+ * @param category optional string to identify the source or category of the log message.
+ * @param lazyMsg is a lazy message to log. Isn't executed if current log level less verbose than Warning.
+ * Noting that the category is appended to the log message to give extra context along with the `[nav-sdk]` parent category.
+ * As an example, this is how the logs would look like `W/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`.
+ */
+inline fun logW(category: String? = null, lazyMsg: () -> String) {
+    if (logLevel().atLeast(LoggingLevel.WARNING)) {
+        logW(lazyMsg(), category)
+    }
+}
+
+/**
  * @param msg to log.
  * @param category optional string to identify the source or category of the log message.
  * Noting that the category is appended to the log message to give extra context along with the `[nav-sdk]` parent category.
@@ -80,6 +104,18 @@ fun logW(msg: String, category: String? = null) {
  */
 fun logE(msg: String, category: String? = null) {
     LoggerProvider.frontend.logE(msg, category)
+}
+
+/**
+ * @param category optional string to identify the source or category of the log message.
+ * @param lazyMsg is a lazy message to log. Isn't executed if current log level less verbose than Error.
+ * Noting that the category is appended to the log message to give extra context along with the `[nav-sdk]` parent category.
+ * As an example, this is how the logs would look like `E/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`.
+ */
+inline fun logE(category: String? = null, lazyMsg: () -> String) {
+    if (logLevel().atLeast(LoggingLevel.ERROR)) {
+        logE(lazyMsg(), category)
+    }
 }
 
 /**
