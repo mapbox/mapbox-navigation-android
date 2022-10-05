@@ -53,8 +53,10 @@ internal class FasterRouteTracker(
             )
             val untracked = rejectedRoutesTracker.findUntrackedAlternatives(fasterAlternatives)
             logD(
-                "routes ${untracked.map { it.id }.joinToString(separator = ", ") { it }} " +
-                    "are not similar to already rejected",
+                "following routes are not similar to already rejected: " +
+                    untracked.joinToString(separator = ", ") {
+                        "${it.id}(${metadataMap[it.id]!!.alternativeId})"
+                    },
                 FASTER_ROUTE_LOG_CATEGORY
             )
             val fasterAlternative = untracked.minByOrNull {

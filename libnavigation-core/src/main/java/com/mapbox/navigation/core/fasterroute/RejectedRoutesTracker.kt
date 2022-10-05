@@ -22,15 +22,17 @@ internal class RejectedRoutesTracker(
         alternatives: Map<Int, NavigationRoute>
     ): List<NavigationRoute> {
         val untracked = mutableListOf<NavigationRoute>()
-        for ((alternativeId, alternative) in alternatives) {
+        for ((alternativeId, alternativeRoute) in alternatives) {
             if (rejectedAlternatives.containsKey(alternativeId)) {
                 continue
             }
             val similarities = withContext(ThreadController.DefaultDispatcher) {
-                rejectedAlternatives.values.map {
-                    val similarity = calculateGeometrySimilarity(it, alternative)
+                rejectedAlternatives.entries.map { (rejectedRouteAlternativeId, rejectedRoute) ->
+                    val similarity = calculateGeometrySimilarity(rejectedRoute, alternativeRoute)
                     logD(
-                        "route ${it.id} has $similarity similarity with ${alternative.id}",
+                        "${alternativeRoute.id}($alternativeId) route has " +
+                            "similarity $similarity with rejected" +
+                            " ${rejectedRoute.id}($rejectedRouteAlternativeId)",
                         FASTER_ROUTE_LOG_CATEGORY
                     )
                     similarity
@@ -38,7 +40,7 @@ internal class RejectedRoutesTracker(
             }
             val similarity = similarities.maxOrNull() ?: 0.0
             if (similarity < maximumGeometrySimilarity) {
-                untracked.add(alternative)
+                untracked.add(alternativeRoute)
             }
         }
         return untracked
