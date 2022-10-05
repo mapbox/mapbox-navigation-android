@@ -3,6 +3,7 @@
 package com.mapbox.navigation.core.fasterroute
 
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.testing.factories.createDirectionsResponse
@@ -35,10 +36,7 @@ class FasterRoutesTest {
                 any(),
                 any()
             )
-        } returns FasterRouteResult.NewFasterRoadFound(
-            mockk(),
-            8.9
-        )
+        } returns createNewFasterRouteFoundForTest()
 
         routeObserver.onRoutesChanged(mockk(relaxed = true))
 
@@ -100,10 +98,7 @@ class FasterRoutesTest {
         }
         routeObserver.onRoutesChanged(mockk(relaxed = true))
         firstRouteUpdateProcessing.complete(
-            FasterRouteResult.NewFasterRoadFound(
-                mockk(),
-                8.9
-            )
+            createNewFasterRouteFoundForTest()
         )
         verify(exactly = 0) { fasterRouteCallback.onNewFasterRouteFound(any()) }
     }
@@ -133,10 +128,7 @@ class FasterRoutesTest {
                 any(),
                 any()
             )
-        } returns FasterRouteResult.NewFasterRoadFound(
-            currentRoutes.last(),
-            8.9
-        )
+        } returns createNewFasterRouteFoundForTest(route = currentRoutes.last())
 
 
         fasterRoutes.registerNewFasterRouteObserver {
@@ -165,3 +157,11 @@ private fun MapboxNavigation.recordRoutesObservers(): RoutesObserver {
     every { navigation.registerRoutesObserver(capture(observers)) } returns Unit
     return RoutesObserver { result -> observers.forEach { it.onRoutesChanged(result) } }
 }
+
+private fun createNewFasterRouteFoundForTest(
+    route: NavigationRoute = mockk(relaxed = true)
+) = FasterRouteResult.NewFasterRoadFound(
+    route,
+    8.9,
+    1
+)

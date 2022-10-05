@@ -49,7 +49,8 @@ class FasterRoutes internal constructor(
                 is FasterRouteResult.NewFasterRoadFound -> newFasterRouteFound(
                     NewFasterRoute(
                         fasterRouteTrackerResult.route,
-                        fasterRouteTrackerResult.fasterThanPrimary
+                        fasterRouteTrackerResult.fasterThanPrimary,
+                        fasterRouteTrackerResult.alternativeId
                     )
                 )
                 FasterRouteResult.NoFasterRoad -> {}
@@ -88,7 +89,10 @@ class FasterRoutes internal constructor(
      * Remembers faster route as declined to not offer similar to this one again.
      */
     fun declineFasterRoute(newFasterRoute: NewFasterRoute) {
-
+        fasterRouteTracker.fasterRouteDeclined(
+            newFasterRoute.alternativeId,
+            newFasterRoute.fasterRoute
+        )
     }
 
     fun destroy() {

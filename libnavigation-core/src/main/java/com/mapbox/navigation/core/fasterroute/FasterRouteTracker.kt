@@ -49,10 +49,15 @@ internal class FasterRouteTracker(
             val fasterThanPrimary = primaryRouteDuration - fasterAlternativeRouteDuration
             return FasterRouteResult.NewFasterRoadFound(
                 fasterAlternative,
-                fasterThanPrimary = fasterThanPrimary
+                fasterThanPrimary = fasterThanPrimary,
+                alternativeId = metadataMap[fasterAlternative.id]!!.alternativeId
             )
         }
         return FasterRouteResult.NoFasterRoad
+    }
+
+    fun fasterRouteDeclined(alternativeId: Int, route: NavigationRoute) {
+        rejectedRoutesTracker.addRejectedRoutes(mapOf(alternativeId to route))
     }
 }
 
@@ -61,5 +66,6 @@ internal sealed class FasterRouteResult {
     data class NewFasterRoadFound(
         val route: NavigationRoute,
         val fasterThanPrimary: Double,
+        val alternativeId: Int
     ) : FasterRouteResult()
 }

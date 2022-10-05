@@ -14,5 +14,6 @@ fun interface NewFasterRouteObserver {
 
 class NewFasterRoute(
     val fasterRoute: NavigationRoute,
-    val fasterThanPrimary: Double
+    val fasterThanPrimary: Double,
+    val alternativeId: Int
 )
