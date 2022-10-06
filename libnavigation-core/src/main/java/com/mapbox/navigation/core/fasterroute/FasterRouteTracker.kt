@@ -17,16 +17,87 @@ internal class FasterRouteTracker(
         maximumGeometrySimilarity = options.maxSimilarityToExistingRoute
     )
 
+    fun fasterRouteDeclined(alternativeId: Int, route: NavigationRoute) {
+        rejectedRoutesTracker.addRejectedRoutes(mapOf(alternativeId to route))
+    }
+
     suspend fun routesUpdated(
         update: RoutesUpdatedResult,
         alternativeRoutesMetadata: List<AlternativeRouteMetadata>
     ): FasterRouteResult {
-        val metadataMap: Map<String, AlternativeRouteMetadata> =
-            mutableMapOf<String, AlternativeRouteMetadata>().apply {
-                alternativeRoutesMetadata.forEach { this[it.navigationRoute.id] = it }
+        val metadataByRouteId = mutableMapOf<String, AlternativeRouteMetadata>().apply {
+            alternativeRoutesMetadata.forEach { this[it.navigationRoute.id] = it }
+        }
+        return when (update.reason) {
+            RoutesExtra.ROUTES_UPDATE_REASON_NEW, RoutesExtra.ROUTES_UPDATE_REASON_REROUTE -> {
+                onNewRoutes(alternativeRoutesMetadata)
+                FasterRouteResult.NoFasterRoad
             }
+            RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE ->
+                onAlternativesChanged(alternativeRoutesMetadata, update, metadataByRouteId)
+            else -> FasterRouteResult.NoFasterRoad
+        }
+    }
 
-        val fasterAlternatives: Map<Int, NavigationRoute> = mutableMapOf<Int, NavigationRoute>()
+    private suspend fun onAlternativesChanged(
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
+        update: RoutesUpdatedResult,
+        metadataByRouteId: Map<String, AlternativeRouteMetadata>
+    ): FasterRouteResult {
+        val fasterAlternatives: Map<Int, NavigationRoute> = findFasterAlternatives(
+            alternativeRoutesMetadata,
+            update
+        )
+        if (fasterAlternatives.isEmpty()) {
+            logD(FASTER_ROUTE_LOG_CATEGORY) {
+                "no alternatives which are faster then primary route found"
+            }
+            return FasterRouteResult.NoFasterRoad
+        }
+        logPotentialFasterRoutes(fasterAlternatives)
+
+        val untrackedAlternatives = rejectedRoutesTracker.findUntrackedAlternatives(
+            fasterAlternatives
+        )
+        if (untrackedAlternatives.isEmpty()) {
+            logD(FASTER_ROUTE_LOG_CATEGORY) {
+                "all faster alternatives are similar to already rejected"
+            }
+            return FasterRouteResult.NoFasterRoad
+        }
+        logUntrackedFasterRoutes(untrackedAlternatives, metadataByRouteId)
+
+        return findTheFastestAlternative(untrackedAlternatives, metadataByRouteId, update)
+    }
+
+    private fun findTheFastestAlternative(
+        untracked: List<NavigationRoute>,
+        metadataByRouteId: Map<String, AlternativeRouteMetadata>,
+        update: RoutesUpdatedResult
+    ): FasterRouteResult {
+        val fasterAlternative = untracked.minByOrNull {
+            metadataByRouteId[it.id]!!.infoFromStartOfPrimary.duration
+        } ?: return FasterRouteResult.NoFasterRoad
+        val primaryRouteDuration = update.navigationRoutes.first().directionsRoute.duration()
+        val fasterAlternativeRouteDuration = metadataByRouteId[fasterAlternative.id]!!
+            .infoFromStartOfPrimary.duration
+        val fasterThanPrimary = primaryRouteDuration - fasterAlternativeRouteDuration
+        logD(
+            "route ${fasterAlternative.id} is faster than primary by $fasterThanPrimary",
+            FASTER_ROUTE_LOG_CATEGORY
+        )
+        return FasterRouteResult.NewFasterRoadFound(
+            fasterAlternative,
+            fasterThanPrimary = fasterThanPrimary,
+            alternativeId = metadataByRouteId[fasterAlternative.id]!!.alternativeId
+        )
+    }
+
+    private fun findFasterAlternatives(
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
+        update: RoutesUpdatedResult
+    ): MutableMap<Int, NavigationRoute> {
+        return mutableMapOf<Int, NavigationRoute>()
             .apply {
                 alternativeRoutesMetadata
                     .filter {
@@ -35,52 +106,41 @@ internal class FasterRouteTracker(
                     }
                     .forEach { this[it.alternativeId] = it.navigationRoute }
             }
-
-        if (update.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW) {
-            logD(
-                "New routes were set, resetting tracker state",
-                FASTER_ROUTE_LOG_CATEGORY
-            )
-            rejectedRoutesTracker.clean()
-            rejectedRoutesTracker.addRejectedRoutes(fasterAlternatives)
-        }
-        if (update.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE) {
-            val fasterAlternativesIdsLog = fasterAlternatives.entries
-                .joinToString(separator = ", ") { "${it.value.id}(${it.key})" }
-            logD(
-                "considering following routes as a faster alternative: $fasterAlternativesIdsLog",
-                FASTER_ROUTE_LOG_CATEGORY
-            )
-            val untracked = rejectedRoutesTracker.findUntrackedAlternatives(fasterAlternatives)
-            logD(
-                "following routes are not similar to already rejected: " +
-                    untracked.joinToString(separator = ", ") {
-                        "${it.id}(${metadataMap[it.id]!!.alternativeId})"
-                    },
-                FASTER_ROUTE_LOG_CATEGORY
-            )
-            val fasterAlternative = untracked.minByOrNull {
-                metadataMap[it.id]!!.infoFromStartOfPrimary.duration
-            } ?: return FasterRouteResult.NoFasterRoad
-            val primaryRouteDuration = update.navigationRoutes.first().directionsRoute.duration()
-            val fasterAlternativeRouteDuration = metadataMap[fasterAlternative.id]!!
-                .infoFromStartOfPrimary.duration
-            val fasterThanPrimary = primaryRouteDuration - fasterAlternativeRouteDuration
-            logD(
-                "route ${fasterAlternative.id} is faster then primary by $fasterThanPrimary",
-                FASTER_ROUTE_LOG_CATEGORY
-            )
-            return FasterRouteResult.NewFasterRoadFound(
-                fasterAlternative,
-                fasterThanPrimary = fasterThanPrimary,
-                alternativeId = metadataMap[fasterAlternative.id]!!.alternativeId
-            )
-        }
-        return FasterRouteResult.NoFasterRoad
     }
 
-    fun fasterRouteDeclined(alternativeId: Int, route: NavigationRoute) {
-        rejectedRoutesTracker.addRejectedRoutes(mapOf(alternativeId to route))
+    private fun onNewRoutes(alternativeRoutesMetadata: List<AlternativeRouteMetadata>) {
+        val routeByAlternativeId: Map<Int, NavigationRoute> = mutableMapOf<Int, NavigationRoute>()
+            .apply {
+                alternativeRoutesMetadata.forEach {
+                    this[it.alternativeId] = it.navigationRoute
+                }
+            }
+        logD(
+            "New routes were set, resetting tracker state",
+            FASTER_ROUTE_LOG_CATEGORY
+        )
+        rejectedRoutesTracker.clean()
+        rejectedRoutesTracker.addRejectedRoutes(routeByAlternativeId)
+    }
+
+    private fun logUntrackedFasterRoutes(
+        untracked: List<NavigationRoute>,
+        metadataMap: Map<String, AlternativeRouteMetadata>
+    ) {
+        logD(FASTER_ROUTE_LOG_CATEGORY) {
+            "following routes are not similar to already rejected: " +
+                untracked.joinToString(separator = ", ") {
+                    "${it.id}(${metadataMap[it.id]!!.alternativeId})"
+                }
+        }
+    }
+
+    private fun logPotentialFasterRoutes(fasterAlternatives: Map<Int, NavigationRoute>) {
+        val fasterAlternativesIdsLog = fasterAlternatives.entries
+            .joinToString(separator = ", ") { "${it.value.id}(${it.key})" }
+        logD(FASTER_ROUTE_LOG_CATEGORY) {
+            "considering following routes as a faster alternative: $fasterAlternativesIdsLog"
+        }
     }
 }
 
