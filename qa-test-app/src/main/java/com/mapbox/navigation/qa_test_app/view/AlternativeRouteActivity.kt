@@ -44,6 +44,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.fasterroute.FasterRouteOptions
+import com.mapbox.navigation.core.fasterroute.FasterRoutes
 import com.mapbox.navigation.core.fasterroute.NewFasterRoute
 import com.mapbox.navigation.core.fasterroute.NewFasterRouteObserver
 import com.mapbox.navigation.core.fasterroute.createFasterRoutes
@@ -118,6 +119,19 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private val mapboxNavigation: MapboxNavigation by requireMapboxNavigation(
+        onCreatedObserver = object : MapboxNavigationObserver {
+            private lateinit var fasterRoutes: FasterRoutes
+            override fun onAttached(mapboxNavigation: MapboxNavigation) {
+                fasterRoutes = mapboxNavigation.createFasterRoutes(
+                    FasterRouteOptions.Builder().build()
+                )
+                fasterRoutes.registerNewFasterRouteObserver(fasterRouteObserver)
+            }
+            override fun onDetached(mapboxNavigation: MapboxNavigation) {
+                fasterRoutes.unregisterNewFasterRouteObserver(fasterRouteObserver)
+                fasterRoutes.destroy()
+            }
+        },
         onResumedObserver = object : MapboxNavigationObserver {
             override fun onAttached(mapboxNavigation: MapboxNavigation) {
                 mapboxNavigation.registerLocationObserver(locationObserver)
@@ -140,32 +154,12 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         onInitialize = this::initNavigation
     )
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         LogConfiguration.setLoggingLevel(LoggingLevel.DEBUG)
         setContentView(binding.root)
         initStyle()
         initListeners()
-    }
-
-    @OptIn(ExperimentalMapboxNavigationAPI::class)
-    private val fasterRoutes by lazy {
-        mapboxNavigation.createFasterRoutes(
-            FasterRouteOptions.Builder().build()
-        )
-    }
-
-    override fun onResume() {
-        super.onResume()
-        @OptIn(ExperimentalMapboxNavigationAPI::class)
-        fasterRoutes.registerNewFasterRouteObserver(fasterRouteObserver)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        @OptIn(ExperimentalMapboxNavigationAPI::class)
-        fasterRoutes.unregisterNewFasterRouteObserver(fasterRouteObserver)
     }
 
     private fun initNavigation() {
