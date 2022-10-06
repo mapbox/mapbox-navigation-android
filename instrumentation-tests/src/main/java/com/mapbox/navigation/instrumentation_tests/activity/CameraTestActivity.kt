@@ -185,6 +185,7 @@ class CameraTestActivity : AppCompatActivity() {
             )
 
             // update camera position to account for new location
+            viewportDataSource.followingZoomPropertyOverride(18.0 - locationMatcherResult.enhancedLocation.speed * 0.1)
             viewportDataSource.onLocationChanged(locationMatcherResult.enhancedLocation)
             viewportDataSource.evaluate()
         }
