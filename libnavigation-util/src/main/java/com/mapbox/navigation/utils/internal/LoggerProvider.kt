@@ -118,8 +118,5 @@ inline fun logE(category: String? = null, lazyMsg: () -> String) {
     }
 }
 
-/**
- * Should not be used directly.
- * Added to support inline calls. Public inline functions can use only public API inside.
- */
-fun logLevel() = LoggerProvider.frontend.getLogLevel()
+@PublishedApi
+internal fun logLevel() = LoggerProvider.frontend.getLogLevel()
