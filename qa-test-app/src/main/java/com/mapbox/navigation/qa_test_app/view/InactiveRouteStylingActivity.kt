@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -175,10 +174,6 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
     }
 
     private val locationObserver = object : LocationObserver {
-        override fun onNewRawLocation(rawLocation: Location) {
-            Log.d(TAG, "raw location $rawLocation")
-        }
-
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             if (locationMatcherResult.enhancedLocation.provider == "ReplayRoute") {
                 navigationLocationProvider.changePosition(

@@ -932,8 +932,8 @@ package com.mapbox.navigation.core.trip.session {
   }
 
   @UiThread public interface LocationObserver {
-    method public void onNewLocationMatcherResult(com.mapbox.navigation.core.trip.session.LocationMatcherResult locationMatcherResult);
-    method public void onNewRawLocation(android.location.Location rawLocation);
+    method public default void onNewLocationMatcherResult(com.mapbox.navigation.core.trip.session.LocationMatcherResult);
+    method public default void onNewRawLocation(android.location.Location);
   }
 
   public abstract sealed class NavigationSessionState {

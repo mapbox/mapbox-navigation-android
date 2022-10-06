@@ -133,9 +133,6 @@ abstract class BaseNavigationActivity : AppCompatActivity(), OnMapLongClickListe
     lateinit var viewportDataSource: MapboxNavigationViewportDataSource
 
     private val locationObserver = object : LocationObserver {
-
-        override fun onNewRawLocation(rawLocation: Location) {}
-
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             viewportDataSource.onLocationChanged(locationMatcherResult.enhancedLocation)
             viewportDataSource.evaluate()

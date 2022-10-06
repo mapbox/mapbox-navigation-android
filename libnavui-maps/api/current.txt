@@ -717,15 +717,23 @@ package com.mapbox.navigation.ui.maps.installer {
 
 package com.mapbox.navigation.ui.maps.location {
 
-  public final class NavigationLocationProvider implements com.mapbox.maps.plugin.locationcomponent.LocationProvider {
+  public class NavigationLocationProvider implements com.mapbox.navigation.core.trip.session.LocationObserver com.mapbox.maps.plugin.locationcomponent.LocationProvider com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
     ctor public NavigationLocationProvider();
-    method public void changePosition(android.location.Location location, java.util.List<? extends android.location.Location> keyPoints = emptyList(), kotlin.jvm.functions.Function1<? super android.animation.ValueAnimator,kotlin.Unit>? latLngTransitionOptions = null, kotlin.jvm.functions.Function1<? super android.animation.ValueAnimator,kotlin.Unit>? bearingTransitionOptions = null);
-    method public java.util.List<android.location.Location> getLastKeyPoints();
-    method public android.location.Location? getLastLocation();
-    method public void registerLocationConsumer(com.mapbox.maps.plugin.locationcomponent.LocationConsumer locationConsumer);
-    method public void unRegisterLocationConsumer(com.mapbox.maps.plugin.locationcomponent.LocationConsumer locationConsumer);
+    method @CallSuper public final void changePosition(android.location.Location location, java.util.List<? extends android.location.Location> keyPoints = emptyList(), kotlin.jvm.functions.Function1<? super android.animation.ValueAnimator,kotlin.Unit>? latLngTransitionOptions = null, kotlin.jvm.functions.Function1<? super android.animation.ValueAnimator,kotlin.Unit>? bearingTransitionOptions = null);
+    method public final java.util.List<android.location.Location> getLastKeyPoints();
+    method public final android.location.Location? getLastLocation();
+    method public static final com.mapbox.navigation.ui.maps.location.NavigationLocationProvider getRegisteredInstance();
+    method @CallSuper public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method @CallSuper public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public final void registerLocationConsumer(com.mapbox.maps.plugin.locationcomponent.LocationConsumer locationConsumer);
+    method public final void unRegisterLocationConsumer(com.mapbox.maps.plugin.locationcomponent.LocationConsumer locationConsumer);
     property public final java.util.List<android.location.Location> lastKeyPoints;
     property public final android.location.Location? lastLocation;
+    field public static final com.mapbox.navigation.ui.maps.location.NavigationLocationProvider.Companion Companion;
+  }
+
+  public static final class NavigationLocationProvider.Companion {
+    method public com.mapbox.navigation.ui.maps.location.NavigationLocationProvider getRegisteredInstance();
   }
 
 }

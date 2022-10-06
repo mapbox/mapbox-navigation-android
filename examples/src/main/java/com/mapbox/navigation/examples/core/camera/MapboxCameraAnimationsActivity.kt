@@ -146,9 +146,6 @@ class MapboxCameraAnimationsActivity :
     private val poiSource = geoJsonSource("circle_source") {}.data("")
 
     private val locationObserver = object : LocationObserver {
-
-        override fun onNewRawLocation(rawLocation: Location) {}
-
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             val transitionOptions: (ValueAnimator.() -> Unit) =
                 if (locationMatcherResult.isTeleport) {

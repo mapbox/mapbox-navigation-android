@@ -4,21 +4,23 @@ import android.animation.ValueAnimator
 import android.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.maps.plugin.locationcomponent.LocationConsumer
+import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
+import com.mapbox.navigation.core.trip.session.LocationObserver
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.Assert.assertEquals
-import org.junit.Before
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class NavigationLocationProviderTest {
 
-    private lateinit var navigationLocationProvider: NavigationLocationProvider
-
-    @Before
-    fun setup() {
-        navigationLocationProvider = NavigationLocationProvider()
-    }
+    private val navigationLocationProvider = NavigationLocationProvider()
 
     @Test
     fun `location is cached`() {
@@ -183,5 +185,69 @@ class NavigationLocationProviderTest {
         verify(exactly = 0) {
             consumer.onBearingUpdated(any())
         }
+    }
+
+    @Test
+    fun `onAttached will register a LocationObserver and receive raw locations`() {
+        val locationObserverSlot = slot<LocationObserver>()
+        val mapboxNavigation: MapboxNavigation = mockk {
+            every { registerLocationObserver(capture(locationObserverSlot)) } just runs
+        }
+        val rawLocationSlot = mutableListOf<Location>()
+        val navigationLocationProvider = object : NavigationLocationProvider() {
+            override fun onNewRawLocation(rawLocation: Location) {
+                rawLocationSlot.add(rawLocation)
+            }
+        }
+
+        // Expect 3 locations
+        navigationLocationProvider.onAttached(mapboxNavigation)
+        locationObserverSlot.captured.onNewRawLocation(mockk())
+        locationObserverSlot.captured.onNewRawLocation(mockk())
+        locationObserverSlot.captured.onNewRawLocation(mockk())
+
+        assertEquals(3, rawLocationSlot.size)
+    }
+
+    @Test
+    fun `onAttached will register a LocationObserver and receive map matched locations`() {
+        val locationObserverSlot = slot<LocationObserver>()
+        val mapboxNavigation: MapboxNavigation = mockk {
+            every { registerLocationObserver(capture(locationObserverSlot)) } just runs
+        }
+        val locationMatcherResultSlot = mutableListOf<LocationMatcherResult>()
+        val navigationLocationProvider = object : NavigationLocationProvider() {
+            override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+                super.onNewLocationMatcherResult(locationMatcherResult)
+                locationMatcherResultSlot.add(locationMatcherResult)
+            }
+        }
+
+        navigationLocationProvider.onAttached(mapboxNavigation)
+        locationObserverSlot.captured.onNewLocationMatcherResult(
+            mockk(relaxed = true) { every { isOffRoad } returns false }
+        )
+        locationObserverSlot.captured.onNewLocationMatcherResult(
+            mockk(relaxed = true) { every { isOffRoad } returns true }
+        )
+
+        assertEquals(2, locationMatcherResultSlot.size)
+        assertFalse(locationMatcherResultSlot[0].isOffRoad)
+        assertTrue(locationMatcherResultSlot[1].isOffRoad)
+    }
+
+    @Test
+    fun `onDetached will unregister a LocationObserver and receive raw locations`() {
+        val mapboxNavigation: MapboxNavigation = mockk(relaxed = true)
+        val rawLocationSlot = mutableListOf<Location>()
+        val navigationLocationProvider = object : NavigationLocationProvider() {
+            override fun onNewRawLocation(rawLocation: Location) {
+                rawLocationSlot.add(rawLocation)
+            }
+        }
+
+        navigationLocationProvider.onDetached(mapboxNavigation)
+
+        verify { mapboxNavigation.unregisterLocationObserver(navigationLocationProvider) }
     }
 }

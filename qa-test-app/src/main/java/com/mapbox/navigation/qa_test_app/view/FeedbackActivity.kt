@@ -37,7 +37,6 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
-import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.qa_test_app.databinding.FeedbackActivityBinding
 import com.mapbox.navigation.qa_test_app.utils.Utils
@@ -62,17 +61,14 @@ class FeedbackActivity : AppCompatActivity() {
         FeedbackActivityBinding.inflate(layoutInflater)
     }
 
-    private val navigationLocationProvider = NavigationLocationProvider()
-
     private val mapCamera: CameraAnimationsPlugin by lazy {
         binding.mapView.camera
     }
 
-    private val locationObserver = object : LocationObserver {
-        override fun onNewRawLocation(rawLocation: Location) = Unit
-
+    private val navigationLocationProvider = object : NavigationLocationProvider() {
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
-            updateCamera(locationMatcherResult.enhancedLocation, locationMatcherResult.keyPoints)
+            super.onNewLocationMatcherResult(locationMatcherResult)
+            updateCamera(locationMatcherResult.enhancedLocation)
         }
     }
 
@@ -136,12 +132,12 @@ class FeedbackActivity : AppCompatActivity() {
                     setLocationProvider(navigationLocationProvider)
                     enabled = true
                 }
-                mapboxNavigation.registerLocationObserver(locationObserver)
                 mapboxNavigation.registerRoutesObserver(routesObserver)
+                navigationLocationProvider.onAttached(mapboxNavigation)
             }
 
             override fun onDetached(mapboxNavigation: MapboxNavigation) {
-                mapboxNavigation.unregisterLocationObserver(locationObserver)
+                navigationLocationProvider.onDetached(mapboxNavigation)
                 mapboxNavigation.unregisterRoutesObserver(routesObserver)
             }
         }
@@ -173,7 +169,7 @@ class FeedbackActivity : AppCompatActivity() {
                 object : LocationEngineCallback<LocationEngineResult> {
                     override fun onSuccess(result: LocationEngineResult) {
                         result.lastLocation?.let {
-                            updateCamera(it, emptyList())
+                            updateCamera(it)
                         }
                     }
 
@@ -266,8 +262,7 @@ class FeedbackActivity : AppCompatActivity() {
         sharedPrefs.registerOnSharedPreferenceChangeListener(spListener)
     }
 
-    private fun updateCamera(location: Location, keyPoints: List<Location>) {
-        navigationLocationProvider.changePosition(location, keyPoints, null, null)
+    private fun updateCamera(location: Location) {
         val mapAnimationOptionsBuilder = MapAnimationOptions.Builder()
         mapAnimationOptionsBuilder.duration(1500L)
         mapCamera.easeTo(

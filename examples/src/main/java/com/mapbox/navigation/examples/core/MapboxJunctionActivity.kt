@@ -129,7 +129,6 @@ class MapboxJunctionActivity : AppCompatActivity(), OnMapLongClickListener {
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
     private val locationObserver = object : LocationObserver {
-        override fun onNewRawLocation(rawLocation: Location) {}
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             navigationLocationProvider.changePosition(
                 locationMatcherResult.enhancedLocation,
