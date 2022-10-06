@@ -53,7 +53,7 @@ fun Lifecycle.muteAudioGuidance() {
 
         override fun onPause(owner: LifecycleOwner) {
             if (!initialState.isMuted) {
-                MapboxAudioGuidance.getRegisteredInstance().unMute()
+                MapboxAudioGuidance.getRegisteredInstance().unmute()
             }
         }
     })

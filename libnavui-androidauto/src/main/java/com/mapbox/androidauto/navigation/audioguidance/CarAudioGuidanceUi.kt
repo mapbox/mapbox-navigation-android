@@ -36,7 +36,7 @@ class CarAudioGuidanceUi : MapboxActionProvider.ScreenActionProvider {
             }
         } else {
             buildIconAction(screen, R.drawable.mapbox_car_ic_volume_off) {
-                audioGuidance.unMute()
+                audioGuidance.unmute()
             }
         }
     }

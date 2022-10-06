@@ -78,7 +78,7 @@ internal constructor(
      * In order to enable voice guidance, you must call [MapboxNavigation.startTripSession]
      * and set a route for active guidance through [MapboxNavigation.setRoutes].
      *
-     * You can also control audio guidance by calling [mute], [unMute] or [toggle]
+     * You can also control audio guidance by calling [mute], [unmute] or [toggle]
      */
     fun stateFlow(): StateFlow<MapboxAudioGuidanceState> = internalStateFlow
 
@@ -94,7 +94,7 @@ internal constructor(
     /**
      * Explicit call to unmute the audio guidance state.
      */
-    fun unMute() {
+    fun unmute() {
         scope.launch {
             setMutedState(false)
         }
@@ -106,7 +106,7 @@ internal constructor(
     fun toggle() {
         scope.launch {
             if (mutedStateFlow.value) {
-                unMute()
+                unmute()
             } else {
                 mute()
             }

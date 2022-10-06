@@ -38,7 +38,7 @@ internal class MapboxAudioComponentContract(
     }
 
     override fun unMute() {
-        audioGuidance.unMute()
+        audioGuidance.unmute()
     }
 }
 
@@ -65,7 +65,7 @@ class AudioGuidanceButtonComponent(
             if (it) {
                 audioGuidanceButton.mute()
             } else {
-                audioGuidanceButton.unMute()
+                audioGuidanceButton.unmute()
             }
         }
 

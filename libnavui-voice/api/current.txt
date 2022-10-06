@@ -29,7 +29,7 @@ package com.mapbox.navigation.ui.voice.api {
     method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.voice.api.MapboxAudioGuidanceState> stateFlow();
     method public void toggle();
-    method public void unMute();
+    method public void unmute();
     field public static final com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance.Companion Companion;
   }
 
@@ -199,26 +199,26 @@ package com.mapbox.navigation.ui.voice.view {
     method public int getMuteIconResId();
     method public String? getMuteText();
     method public androidx.appcompat.widget.AppCompatTextView getTextView();
-    method public int getUnMuteIconResId();
-    method public String? getUnMuteText();
+    method public int getUnmuteIconResId();
+    method public String? getUnmuteText();
     method @UiThread public void mute();
     method @UiThread public void muteAndExtend(long duration = 2000L);
     method @UiThread public void muteAndExtend();
     method public void setMuteIconResId(int);
     method public void setMuteText(String?);
-    method public void setUnMuteIconResId(int);
-    method public void setUnMuteText(String?);
-    method @UiThread public void unMute();
-    method @UiThread public void unMuteAndExtend(long duration = 2000L);
-    method @UiThread public void unMuteAndExtend();
+    method public void setUnmuteIconResId(int);
+    method public void setUnmuteText(String?);
+    method @UiThread public void unmute();
+    method @UiThread public void unmuteAndExtend(long duration = 2000L);
+    method @UiThread public void unmuteAndExtend();
     method public void updateStyle(@StyleRes int style);
     property public final androidx.constraintlayout.widget.ConstraintLayout containerView;
     property public final androidx.appcompat.widget.AppCompatImageView iconImage;
     property public final int muteIconResId;
     property public final String? muteText;
     property public final androidx.appcompat.widget.AppCompatTextView textView;
-    property public final int unMuteIconResId;
-    property public final String? unMuteText;
+    property public final int unmuteIconResId;
+    property public final String? unmuteText;
   }
 
   public final class MapboxSoundButton extends androidx.constraintlayout.widget.ConstraintLayout {

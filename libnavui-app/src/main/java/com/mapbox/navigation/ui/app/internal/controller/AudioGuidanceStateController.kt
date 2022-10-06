@@ -58,7 +58,7 @@ class AudioGuidanceStateController(
                 if (it.isMuted) {
                     audioGuidance.mute()
                 } else {
-                    audioGuidance.unMute()
+                    audioGuidance.unmute()
                 }
             }
         }

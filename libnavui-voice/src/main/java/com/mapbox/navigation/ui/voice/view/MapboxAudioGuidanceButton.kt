@@ -58,7 +58,7 @@ class MapboxAudioGuidanceButton : FrameLayout {
      * Icon  Drawable Resource Id for UNMUTE audio guidance.
      */
     @DrawableRes
-    var unMuteIconResId: Int = 0
+    var unmuteIconResId: Int = 0
 
     /**
      * Extended mode Text for MUTE audio guidance.
@@ -68,15 +68,15 @@ class MapboxAudioGuidanceButton : FrameLayout {
     /**
      * Extended mode Text for UNMUTE audio guidance.
      */
-    var unMuteText: String? = null
+    var unmuteText: String? = null
 
     /**
-     * Default button that allows user to mute and un-mute audio guidance.
+     * Default button that allows user to mute and unmute audio guidance.
      */
     constructor(context: Context) : this(context, null)
 
     /**
-     * Default button that allows user to mute and un-mute audio guidance.
+     * Default button that allows user to mute and unmute audio guidance.
      */
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
@@ -125,8 +125,8 @@ class MapboxAudioGuidanceButton : FrameLayout {
      * @param state new camera state
      */
     @UiThread
-    fun unMute() {
-        iconImage.setImageResource(unMuteIconResId)
+    fun unmute() {
+        iconImage.setImageResource(unmuteIconResId)
     }
 
     /**
@@ -148,18 +148,18 @@ class MapboxAudioGuidanceButton : FrameLayout {
 
     /**
      * Update this button to represent audio guidance state in un-muted state.
-     * Extend button for the [duration] and show [unMuteText].
+     * Extend button for the [duration] and show [unmuteText].
      * This method does nothing if button is already in given state.
      *
      * @param duration duration in milliseconds. Defaults to [EXTEND_DURATION].
      */
     @UiThread
     @JvmOverloads
-    fun unMuteAndExtend(duration: Long = EXTEND_DURATION) {
-        iconImage.setImageResource(unMuteIconResId)
+    fun unmuteAndExtend(duration: Long = EXTEND_DURATION) {
+        iconImage.setImageResource(unmuteIconResId)
 
-        if (unMuteText != null && !helper.isAnimationRunning) {
-            helper.showTextAndExtend(unMuteText!!, duration)
+        if (unmuteText != null && !helper.isAnimationRunning) {
+            helper.showTextAndExtend(unmuteText!!, duration)
         }
     }
 
@@ -182,7 +182,7 @@ class MapboxAudioGuidanceButton : FrameLayout {
             R.styleable.MapboxAudioGuidanceButton_audioGuidanceButtonMuteIcon,
             R.drawable.mapbox_ic_sound_off
         )
-        unMuteIconResId = typedArray.getResourceId(
+        unmuteIconResId = typedArray.getResourceId(
             R.styleable.MapboxAudioGuidanceButton_audioGuidanceButtonUnmuteIcon,
             R.drawable.mapbox_ic_sound_on
         )
@@ -206,7 +206,7 @@ class MapboxAudioGuidanceButton : FrameLayout {
         }
         muteText =
             typedArray.getString(R.styleable.MapboxAudioGuidanceButton_audioGuidanceButtonMuteText)
-        unMuteText =
+        unmuteText =
             typedArray.getString(
                 R.styleable.MapboxAudioGuidanceButton_audioGuidanceButtonUnmuteText
             )

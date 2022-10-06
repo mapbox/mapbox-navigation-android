@@ -12,7 +12,7 @@ class JavaInterfaceChecker {
   ) {
     MapboxAudioGuidance sut = MapboxAudioGuidance.getRegisteredInstance();
     sut.mute();
-    sut.unMute();
+    sut.unmute();
     sut.toggle();
     MapboxNavigationApp.registerObserver(sut);
     MapboxNavigationApp.unregisterObserver(sut);

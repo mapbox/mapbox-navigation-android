@@ -68,7 +68,7 @@ class AudioGuidanceButtonComponentTest {
         testContract.isMuted.value = true
 
         verifyOrder {
-            button.unMute()
+            button.unmute()
             button.mute()
         }
     }
@@ -110,7 +110,7 @@ class AudioGuidanceButtonComponentTest {
         val mockAudioGuidance = mockk<MapboxAudioGuidance> {
             every { stateFlow() } returns testState
             every { mute() } returns Unit
-            every { unMute() } returns Unit
+            every { unmute() } returns Unit
             every { toggle() } returns Unit
         }
         every {
