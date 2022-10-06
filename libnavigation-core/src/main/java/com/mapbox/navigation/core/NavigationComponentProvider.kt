@@ -23,6 +23,8 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.TilesConfig
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharedFlow
 
 internal object NavigationComponentProvider {
     fun createDirectionsSession(
@@ -90,9 +92,13 @@ internal object NavigationComponentProvider {
         tripSession: TripSession
     ): ArrivalProgressObserver = ArrivalProgressObserver(tripSession)
 
-    fun createHistoryRecordingStateHandler(
-        initialState: NavigationSessionState
-    ): HistoryRecordingStateHandler = HistoryRecordingStateHandler(initialState)
+    fun createHistoryRecordingStateHandler(scope: CoroutineScope): HistoryRecordingStateHandler =
+        HistoryRecordingStateHandler(scope)
+
+    fun createDeveloperMetadataAggregator(
+        copilotSessionIdFlow: SharedFlow<String>,
+        mainScope: CoroutineScope,
+    ): DeveloperMetadataAggregator = DeveloperMetadataAggregator(copilotSessionIdFlow, mainScope)
 
     fun createCurrentIndicesProvider(): CurrentIndicesProvider =
         CurrentIndicesProvider()

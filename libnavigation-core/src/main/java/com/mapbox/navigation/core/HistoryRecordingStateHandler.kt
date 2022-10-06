@@ -7,12 +7,25 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionUtils
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
 
 @UiThread
 internal class HistoryRecordingStateHandler(
-    private var currentState: NavigationSessionState
-) : TripSessionStateObserver {
+    private val scope: CoroutineScope
+): TripSessionStateObserver {
+
+    private var currentState: NavigationSessionState = NavigationSessionState.Idle
+    private val _sessionIdFlow: MutableSharedFlow<String> = MutableSharedFlow<String>(
+        replay = 1,
+    ).also {
+        it.tryEmit(currentState.sessionId)
+    }
+    val sessionIdFlow: SharedFlow<String> = _sessionIdFlow.asSharedFlow()
 
     private val historyRecordingStateChangeObservers =
         CopyOnWriteArraySet<HistoryRecordingStateChangeObserver>()
@@ -82,15 +95,19 @@ internal class HistoryRecordingStateHandler(
     ) {
         val newState = NavigationSessionUtils.getNewState(isDriving, hasRoutes)
         if (newState::class != currentState::class) {
-            if (currentState !is NavigationSessionState.Idle) {
-                historyRecordingStateChangeObservers.forEach {
-                    finishRecordingBlock(it, currentState)
-                }
-            }
-            if (newState !is NavigationSessionState.Idle) {
-                historyRecordingStateChangeObservers.forEach { it.onShouldStartRecording(newState) }
-            }
+            val oldState = currentState
             currentState = newState
+            scope.launch {
+                if (oldState !is NavigationSessionState.Idle) {
+                    historyRecordingStateChangeObservers.forEach {
+                        finishRecordingBlock(it, oldState)
+                    }
+                }
+                if (newState !is NavigationSessionState.Idle) {
+                    historyRecordingStateChangeObservers.forEach { it.onShouldStartRecording(newState) }
+                }
+                _sessionIdFlow.emit(newState.sessionId)
+            }
         }
     }
 }
