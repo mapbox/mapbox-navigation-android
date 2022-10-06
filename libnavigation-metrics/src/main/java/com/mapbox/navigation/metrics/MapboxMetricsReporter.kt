@@ -35,6 +35,9 @@ object MapboxMetricsReporter : MetricsReporter {
     private lateinit var telemetryService: TelemetryService
 
     @Volatile
+    private var enableTelemetry = false
+
+    @Volatile
     private var metricsObserver: MetricsObserver? = null
     private var ioJobController = InternalJobControlFactory.createIOScopeJobControl()
 
@@ -63,6 +66,7 @@ object MapboxMetricsReporter : MetricsReporter {
         accessToken: String,
         userAgent: String
     ) {
+        enableTelemetry = true
         val eventsServerOptions = EventsServerOptions(accessToken, userAgent, null)
         eventsService = EventsServiceProvider.provideEventsService(eventsServerOptions)
         telemetryService = TelemetryServiceProvider.provideTelemetryService(eventsServerOptions)
@@ -81,11 +85,12 @@ object MapboxMetricsReporter : MetricsReporter {
     }
 
     /**
-     * The method removes metrics observer and stops background thread used for
-     * events dispatching.
+     * The method disables navigation telemetry, removes metrics observer and stops background
+     * thread used for events dispatching.
      */
     @JvmStatic
     fun disable() {
+        enableTelemetry = false
         removeObserver()
         eventsService.unregisterObserver(eventsServiceObserver)
         ioJobController.job.cancelChildren()
@@ -95,21 +100,23 @@ object MapboxMetricsReporter : MetricsReporter {
      * Adds an event to the metrics reporter when this event occurs.
      */
     override fun addEvent(metricEvent: MetricEvent) {
-        if (metricEvent !is MetricEventInternal) {
-            logW(
-                "metricEvent must inherited from MetricEventInternal to be sent",
-                LOG_CATEGORY
-            )
-            return
-        }
-        eventsService.sendEvent(
-            Event(EventPriority.IMMEDIATE, metricEvent.toValue(), null)
-        ) {
-            logE("Failed to send event ${metricEvent.metricName}: $it", LOG_CATEGORY)
-        }
+        ifTelemetryIsRunning {
+            if (metricEvent !is MetricEventInternal) {
+                logW(
+                    "metricEvent must inherited from MetricEventInternal to be sent",
+                    LOG_CATEGORY
+                )
+                return
+            }
+            eventsService.sendEvent(
+                Event(EventPriority.IMMEDIATE, metricEvent.toValue(), null)
+            ) {
+                logE("Failed to send event ${metricEvent.metricName}: $it", LOG_CATEGORY)
+            }
 
-        ioJobController.scope.launch {
-            metricsObserver?.onMetricUpdated(metricEvent.metricName, metricEvent.toJson(gson))
+            ioJobController.scope.launch {
+                metricsObserver?.onMetricUpdated(metricEvent.metricName, metricEvent.toJson(gson))
+            }
         }
     }
 
@@ -117,8 +124,10 @@ object MapboxMetricsReporter : MetricsReporter {
      * Send [TurnstileEvent] event.
      */
     override fun sendTurnstileEvent(turnstileEvent: TurnstileEvent) {
-        eventsService.sendTurnstileEvent(turnstileEvent) {
-            logE("Failed to send Turnstile event: $it", LOG_CATEGORY)
+        ifTelemetryIsRunning {
+            eventsService.sendTurnstileEvent(turnstileEvent) {
+                logE("Failed to send Turnstile event: $it", LOG_CATEGORY)
+            }
         }
     }
 
@@ -134,5 +143,16 @@ object MapboxMetricsReporter : MetricsReporter {
      */
     override fun removeObserver() {
         this.metricsObserver = null
+    }
+
+    private inline fun ifTelemetryIsRunning(func: () -> Unit) {
+        if (enableTelemetry) {
+            func.invoke()
+        } else {
+            logW(
+                "Navigation Telemetry is disabled",
+                LOG_CATEGORY
+            )
+        }
     }
 }

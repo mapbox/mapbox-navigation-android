@@ -11,9 +11,11 @@ import com.mapbox.navigation.base.metrics.NavigationMetrics
 import com.mapbox.navigation.metrics.internal.EventsServiceProvider
 import com.mapbox.navigation.metrics.internal.TelemetryServiceProvider
 import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.LoggerFrontend
+import com.mapbox.navigation.utils.internal.logW
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -39,9 +41,13 @@ class MapboxMetricsReporterTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
+    private val logger = mockk<LoggerFrontend>(relaxUnitFun = true)
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule(logger)
+
     @Before
     fun setup() {
-        LoggerProvider.setLoggerFrontend(mockk(relaxUnitFun = true))
         mockkObject(EventsServiceProvider)
         mockkObject(TelemetryUtilsDelegate)
         mockkObject(TelemetryServiceProvider)
@@ -65,12 +71,29 @@ class MapboxMetricsReporterTest {
     }
 
     @Test
+    fun `telemetry events are not processed till it becomes init`() {
+        MapboxMetricsReporter.sendTurnstileEvent(mockk())
+        MapboxMetricsReporter.addEvent(mockk())
+
+        verify(exactly = 2) {
+            logger.logW(
+                "Navigation Telemetry is disabled",
+                "MapboxMetricsReporter"
+            )
+        }
+    }
+
+    @Test
     fun telemetryDisabledWhenReporterDisable() {
         val eventService = initMetricsReporterWithTelemetry()
 
         MapboxMetricsReporter.disable()
+        MapboxMetricsReporter.sendTurnstileEvent(mockk())
+        MapboxMetricsReporter.addEvent(mockk())
 
         verify(exactly = 1) { eventService.unregisterObserver(any()) }
+        verify(exactly = 0) { eventService.sendTurnstileEvent(any(), any()) }
+        verify(exactly = 0) { eventService.sendEvent(any(), any()) }
     }
 
     @Test
