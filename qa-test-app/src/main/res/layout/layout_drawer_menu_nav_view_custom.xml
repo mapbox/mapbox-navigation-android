@@ -152,6 +152,15 @@
                 android:text="Enable scalebar"
                 android:textAllCaps="true" />
 
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/toggleEnableCompass"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingVertical="10dp"
+                android:text="Enable compass"
+                android:textAllCaps="true" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

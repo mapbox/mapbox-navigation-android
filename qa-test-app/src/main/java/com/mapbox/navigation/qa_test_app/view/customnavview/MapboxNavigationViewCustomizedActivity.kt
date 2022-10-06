@@ -337,6 +337,12 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             viewModel.routingProfile,
             ::setRoutingProfile,
         )
+
+        bindSwitch(
+            menuBinding.toggleEnableCompass,
+            viewModel.enableCompass,
+            ::toggleEnableCompass
+        )
     }
 
     override fun onResume() {
@@ -687,6 +693,20 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         }
         binding.navigationView.setRouteOptionsInterceptor { defaultBuilder ->
             defaultBuilder.layers(null).applyDefaultNavigationOptions(routingProfile)
+        }
+    }
+
+    private fun toggleEnableCompass(enabled: Boolean) {
+        binding.navigationView.customizeViewStyles {
+            compassButtonParams = ViewStyleCustomization.defaultCompassButtonParams(
+                this@MapboxNavigationViewCustomizedActivity
+            ).let {
+                MapboxExtendableButtonParams(
+                    it.style,
+                    it.layoutParams,
+                    enabled
+                )
+            }
         }
     }
 

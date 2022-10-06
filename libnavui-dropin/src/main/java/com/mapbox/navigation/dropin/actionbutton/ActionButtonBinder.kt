@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.lifecycle.viewModelScope
+import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.extensions.navigationListOf
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -23,6 +24,7 @@ import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
 import com.mapbox.navigation.ui.maps.internal.ui.CameraModeButtonComponent
+import com.mapbox.navigation.ui.maps.internal.ui.CompassButtonComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RecenterButtonComponent
 import com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton
 import com.mapbox.navigation.ui.voice.internal.ui.AudioComponentContract
@@ -37,6 +39,7 @@ internal class ActionButtonBinder(
     private val customButtons: List<ActionButtonDescription>
 ) : UIBinder {
 
+    private var compassButton: MapboxExtendableButton? = null
     private var audioButton: MapboxAudioGuidanceButton? = null
     private var recenterButton: MapboxExtendableButton? = null
     private var cameraButton: MapboxCameraModeButton? = null
@@ -49,6 +52,12 @@ internal class ActionButtonBinder(
 
         val store = context.store
         return navigationListOf(
+            reloadOnChange(
+                context.styles.compassButtonParams,
+                context.mapViewOwner.mapViews
+            ) { params, mapView ->
+                compassButtonComponent(binding, params, mapView)
+            },
             reloadOnChange(context.styles.cameraModeButtonParams) { params ->
                 cameraModeButtonComponent(binding, params, store)
             },
@@ -82,6 +91,22 @@ internal class ActionButtonBinder(
             .filter { it.position == ActionButtonDescription.Position.END }
             .onEach { buttonContainer.addView(it.view) }
             .forEach { it.view.setMargins(top = spacing, bottom = spacing) }
+    }
+
+    private fun compassButtonComponent(
+        binding: MapboxActionButtonsLayoutBinding,
+        customParams: MapboxExtendableButtonParams,
+        mapView: MapView?
+    ): CompassButtonComponent {
+        compassButton.recreate(
+            ::MapboxExtendableButton,
+            customParams,
+            binding.buttonContainer,
+            COMPASS_BUTTON_POSITION
+        ).let {
+            compassButton = it
+            return CompassButtonComponent(it, mapView, customParams.enabled)
+        }
     }
 
     private fun audioGuidanceButtonComponent(
@@ -165,9 +190,10 @@ internal class ActionButtonBinder(
     }
 
     private companion object {
-        private const val AUDIO_BUTTON_POSITION = 1
-        private const val CAMERA_BUTTON_POSITION = 0
-        private const val RECENTER_BUTTON_POSITION = 2
+        private const val COMPASS_BUTTON_POSITION = 0
+        private const val CAMERA_BUTTON_POSITION = 1
+        private const val AUDIO_BUTTON_POSITION = 2
+        private const val RECENTER_BUTTON_POSITION = 3
     }
 }
 
