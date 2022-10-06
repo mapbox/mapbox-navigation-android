@@ -69,6 +69,7 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 import com.mapbox.navigation.instrumentation_tests.databinding.LayoutActivityVoiceBinding
 import kotlinx.coroutines.delay
+import kotlin.random.Random
 
 class CameraTestActivity : AppCompatActivity() {
 
@@ -271,6 +272,14 @@ class CameraTestActivity : AppCompatActivity() {
         binding.mapView.camera.addCameraAnimationsLifecycleListener(
             NavigationBasicGesturesHandler(navigationCamera)
         )
+        lifecycleScope.launch {
+            while (true) {
+                delay(Random.nextLong(1000) + 500)
+                navigationCamera.requestNavigationCameraToOverview()
+                delay(Random.nextLong(1000) + 500)
+                navigationCamera.requestNavigationCameraToFollowing()
+            }
+        }
     }
 
     private fun initStyle() {
