@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.app.internal
 
 import com.mapbox.navigation.ui.utils.internal.extensions.slice
+import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -72,8 +73,16 @@ open class Store {
         if (isProcessing) return
 
         isProcessing = true
+        val processedActions = hashSetOf<Action>()
         while (actions.isNotEmpty()) {
             val head = actions.remove()
+            if (!processedActions.add(head)) {
+                logW(category = "Store") {
+                    "Possibly infinite loop detected. Current action: $action, " +
+                        "processed actions: $processedActions, pending actions: $actions"
+                }
+                break
+            }
             if (!intercept(head)) {
                 reduce(head)
             }
