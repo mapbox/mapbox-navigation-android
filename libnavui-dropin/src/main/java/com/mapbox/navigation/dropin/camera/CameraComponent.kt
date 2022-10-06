@@ -22,6 +22,7 @@ import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHan
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import com.mapbox.navigation.ui.maps.internal.extensions.flowNavigationCameraState
 import com.mapbox.navigation.utils.internal.logD
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
@@ -127,11 +128,12 @@ internal class CameraComponent constructor(
     }
 
     private fun syncNavigationCameraState() {
-        navigationCamera.flowNavigationCameraState().observe {
+        // using immediate dispatcher causes nested store updates
+        navigationCamera.flowNavigationCameraState().observe(Dispatchers.Main) {
             store.dispatch(SetCameraMode(it.toTargetCameraMode()))
         }
 
-        store.select { it.camera.cameraMode }.observe {
+        store.select { it.camera.cameraMode }.observe(Dispatchers.Main) {
             val currentMode = navigationCamera.state.toTargetCameraMode()
             if (isCameraInitialized && it != currentMode) {
                 when (it) {
@@ -219,7 +221,8 @@ internal class CameraComponent constructor(
                 viewportDataSource.evaluate()
             }
         }
-        coroutineScope.launch {
+        // using immediate dispatcher causes nested store updates
+        coroutineScope.launch(Dispatchers.Main) {
             store.select { it.navigation }.collectLatest { navigationState ->
                 when (navigationState) {
                     NavigationState.FreeDrive -> {
