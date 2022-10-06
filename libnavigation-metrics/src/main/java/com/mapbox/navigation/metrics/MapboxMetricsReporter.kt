@@ -78,7 +78,7 @@ object MapboxMetricsReporter : MetricsReporter {
      *
      * @param isDebugLoggingEnabled true to enable logging, false to disable logging
      */
-    @Deprecated("toggleLogging is deprecated and do no operations")
+    @Deprecated("no-ops")
     @JvmStatic
     fun toggleLogging(isDebugLoggingEnabled: Boolean) {
         // do nothing
