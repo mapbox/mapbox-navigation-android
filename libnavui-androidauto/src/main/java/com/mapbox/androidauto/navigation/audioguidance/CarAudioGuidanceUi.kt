@@ -28,7 +28,7 @@ class CarAudioGuidanceUi : MapboxActionProvider.ScreenActionProvider {
      * Attach this to the screen while navigating.
      */
     private fun buildSoundButtonAction(screen: Screen): Action {
-        val audioGuidance = MapboxAudioGuidance.getInstance()
+        val audioGuidance = MapboxAudioGuidance.getRegisteredInstance()
         val state = audioGuidance.stateFlow().value
         return if (!state.isMuted) {
             buildIconAction(screen, R.drawable.mapbox_car_ic_volume_on) {
@@ -36,7 +36,7 @@ class CarAudioGuidanceUi : MapboxActionProvider.ScreenActionProvider {
             }
         } else {
             buildIconAction(screen, R.drawable.mapbox_car_ic_volume_off) {
-                audioGuidance.unMute()
+                audioGuidance.unmute()
             }
         }
     }
@@ -45,7 +45,7 @@ class CarAudioGuidanceUi : MapboxActionProvider.ScreenActionProvider {
         screen.lifecycle.apply {
             coroutineScope.launch {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    MapboxAudioGuidance.getInstance().stateFlow()
+                    MapboxAudioGuidance.getRegisteredInstance().stateFlow()
                         .distinctUntilChanged { old, new ->
                             old.isMuted == new.isMuted && old.isPlayable == new.isPlayable
                         }

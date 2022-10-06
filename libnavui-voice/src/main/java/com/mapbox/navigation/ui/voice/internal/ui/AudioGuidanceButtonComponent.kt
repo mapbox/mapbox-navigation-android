@@ -38,7 +38,7 @@ internal class MapboxAudioComponentContract(
     }
 
     override fun unMute() {
-        audioGuidance.unMute()
+        audioGuidance.unmute()
     }
 }
 
@@ -52,7 +52,8 @@ class AudioGuidanceButtonComponent(
 
     init {
         this.contractProvider = contractProvider ?: Provider {
-            MapboxAudioComponentContract(coroutineScope, MapboxAudioGuidance.getInstance())
+            val mapboxAudioGuidance = MapboxAudioGuidance.getRegisteredInstance()
+            MapboxAudioComponentContract(coroutineScope, mapboxAudioGuidance)
         }
     }
 
@@ -64,7 +65,7 @@ class AudioGuidanceButtonComponent(
             if (it) {
                 audioGuidanceButton.mute()
             } else {
-                audioGuidanceButton.unMute()
+                audioGuidanceButton.unmute()
             }
         }
 

@@ -19,7 +19,7 @@ fun Fragment.attachAudioGuidance(
     mapboxSoundButton: MapboxSoundButton
 ) {
     val lifecycleOwner = viewLifecycleOwner
-    val flow = MapboxAudioGuidance.getInstance().stateFlow()
+    val flow = MapboxAudioGuidance.getRegisteredInstance().stateFlow()
     lifecycleOwner.lifecycleScope.launch {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             flow.collect { state ->
@@ -33,7 +33,7 @@ fun Fragment.attachAudioGuidance(
         }
     }
     mapboxSoundButton.setOnClickListener {
-        MapboxAudioGuidance.getInstance().toggle()
+        MapboxAudioGuidance.getRegisteredInstance().toggle()
     }
 }
 
@@ -45,7 +45,7 @@ fun Lifecycle.muteAudioGuidance() {
     addObserver(object : DefaultLifecycleObserver {
         lateinit var initialState: MapboxAudioGuidanceState
         override fun onResume(owner: LifecycleOwner) {
-            with(MapboxAudioGuidance.getInstance()) {
+            with(MapboxAudioGuidance.getRegisteredInstance()) {
                 initialState = stateFlow().value
                 mute()
             }
@@ -53,7 +53,7 @@ fun Lifecycle.muteAudioGuidance() {
 
         override fun onPause(owner: LifecycleOwner) {
             if (!initialState.isMuted) {
-                MapboxAudioGuidance.getInstance().unMute()
+                MapboxAudioGuidance.getRegisteredInstance().unmute()
             }
         }
     })

@@ -46,8 +46,8 @@ class DropInButtonsActivity : BaseNavigationActivity() {
                 binding.audioButton.mute()
                 binding.circleAudioButton.mute()
             } else {
-                binding.audioButton.unMute()
-                binding.circleAudioButton.unMute()
+                binding.audioButton.unmute()
+                binding.circleAudioButton.unmute()
             }
         }
     }
@@ -71,7 +71,7 @@ class DropInButtonsActivity : BaseNavigationActivity() {
 
         if (muted.value == true) {
             muted.value = false
-            button.unMuteAndExtend()
+            button.unmuteAndExtend()
         } else {
             muted.value = true
             button.muteAndExtend()

@@ -10,9 +10,9 @@ class JavaInterfaceChecker {
   void MapboxAudioGuidance(
           CoroutineScope coroutineScope
   ) {
-    MapboxAudioGuidance sut = MapboxAudioGuidance.getInstance();
+    MapboxAudioGuidance sut = MapboxAudioGuidance.getRegisteredInstance();
     sut.mute();
-    sut.unMute();
+    sut.unmute();
     sut.toggle();
     MapboxNavigationApp.registerObserver(sut);
     MapboxNavigationApp.unregisterObserver(sut);

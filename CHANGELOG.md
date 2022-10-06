@@ -15,6 +15,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed a rare issue where alternative route would not be vanished until deviation point for `MapboxRouteLineApi#setNavigationRoutes(routes, metadata)` when the route's geometry contained duplicate points. [#6399](https://github.com/mapbox/mapbox-navigation-android/pull/6399)
 - Introduced `ViewStyleCutomization.compassButtonParams` property to configure compass. [#6395](https://github.com/mapbox/mapbox-navigation-android/pull/6395)
 - Introduced `MapboxExtendableButtonParams.enabled` property to enable/disable a button. [#6395](https://github.com/mapbox/mapbox-navigation-android/pull/6395)
+- Renamed `MapboxAudioGuidance.getInstance()` to `getRegisteredInstance`. Rename `unMute` to `unmute` for audio guidance classes. [#6445](https://github.com/mapbox/mapbox-navigation-android/pull/6445)
 
 ## Mapbox Navigation SDK 2.9.0-alpha.4 - 30 September, 2022
 ### Changelog

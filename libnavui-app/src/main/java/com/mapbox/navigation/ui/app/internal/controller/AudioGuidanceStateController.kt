@@ -46,7 +46,7 @@ class AudioGuidanceStateController(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        val audioGuidance = MapboxAudioGuidance.getInstance()
+        val audioGuidance = MapboxAudioGuidance.getRegisteredInstance()
         audioGuidance.stateFlow().observe {
             if (it.isMuted != store.state.value.audio.isMuted) {
                 val newState = AudioGuidanceState(it.isMuted)
@@ -58,7 +58,7 @@ class AudioGuidanceStateController(
                 if (it.isMuted) {
                     audioGuidance.mute()
                 } else {
-                    audioGuidance.unMute()
+                    audioGuidance.unmute()
                 }
             }
         }
