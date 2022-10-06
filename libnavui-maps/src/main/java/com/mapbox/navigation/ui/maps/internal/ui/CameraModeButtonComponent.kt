@@ -34,7 +34,7 @@ class CameraModeButtonComponent(
         super.onAttached(mapboxNavigation)
         val contract = contractProvider.get()
         contract.isVisible.observe { cameraModeButton.isVisible = it }
-        contract.buttonState.observe(cameraModeButton::setState)
+        contract.buttonState.observe(action = cameraModeButton::setState)
         cameraModeButton.setOnClickListener(contract::onClick)
     }
 

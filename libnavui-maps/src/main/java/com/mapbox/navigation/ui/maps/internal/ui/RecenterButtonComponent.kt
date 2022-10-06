@@ -74,6 +74,6 @@ internal class MapboxRecenterButtonComponentContract(
 
         mapboxNavigation.flowLocationMatcherResult()
             .map { it.enhancedLocation }
-            .observe(location::set)
+            .observe(action = location::set)
     }
 }

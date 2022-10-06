@@ -22,6 +22,7 @@ import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHan
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import com.mapbox.navigation.ui.maps.internal.extensions.flowNavigationCameraState
 import com.mapbox.navigation.utils.internal.logD
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
@@ -59,7 +60,7 @@ internal class CameraComponent constructor(
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
-        context.options.showCameraDebugInfo.observe { show ->
+        context.options.showCameraDebugInfo.observe(Dispatchers.Main) { show ->
             if (show) {
                 debugger.enabled = true
                 navigationCamera.debugger = debugger
@@ -73,7 +74,7 @@ internal class CameraComponent constructor(
 
         mapView.camera.addCameraAnimationsLifecycleListener(gesturesHandler)
 
-        store.select { it.camera.cameraPadding }.observe {
+        store.select { it.camera.cameraPadding }.observe(Dispatchers.Main) {
             viewportDataSource.overviewPadding = it
             viewportDataSource.followingPadding = it
             viewportDataSource.evaluate()
@@ -109,7 +110,7 @@ internal class CameraComponent constructor(
 
     private fun controlCameraFrameOverrides() {
         viewportDataSource.overviewPitchPropertyOverride(OVERVIEW_PITCH_OVERRIDE)
-        coroutineScope.launch {
+        coroutineScope.launch(Dispatchers.Main) {
             store.select { it.navigation }.collect {
                 when (it) {
                     is NavigationState.FreeDrive -> {
@@ -127,11 +128,11 @@ internal class CameraComponent constructor(
     }
 
     private fun syncNavigationCameraState() {
-        navigationCamera.flowNavigationCameraState().observe {
+        navigationCamera.flowNavigationCameraState().observe(Dispatchers.Main) {
             store.dispatch(SetCameraMode(it.toTargetCameraMode()))
         }
 
-        store.select { it.camera.cameraMode }.observe {
+        store.select { it.camera.cameraMode }.observe(Dispatchers.Main) {
             val currentMode = navigationCamera.state.toTargetCameraMode()
             if (isCameraInitialized && it != currentMode) {
                 when (it) {
@@ -147,7 +148,7 @@ internal class CameraComponent constructor(
     }
 
     private fun updateCameraLocation() {
-        coroutineScope.launch {
+        coroutineScope.launch(Dispatchers.Main) {
             combine(
                 store.select { it.location?.enhancedLocation },
                 store.select { it.navigation }
@@ -185,7 +186,7 @@ internal class CameraComponent constructor(
     }
 
     private fun onRouteProgressUpdates(mapboxNavigation: MapboxNavigation) {
-        coroutineScope.launch {
+        coroutineScope.launch(Dispatchers.Main) {
             mapboxNavigation.flowRouteProgress().collect { routeProgress ->
                 viewportDataSource.onRouteProgressChanged(routeProgress)
                 viewportDataSource.evaluate()
@@ -210,7 +211,7 @@ internal class CameraComponent constructor(
                 else -> emptyList()
             }
         }
-        routesFlow.observe { routes ->
+        routesFlow.observe(Dispatchers.Main) { routes ->
             if (routes.isEmpty()) {
                 viewportDataSource.clearRouteData()
                 viewportDataSource.evaluate()
@@ -219,7 +220,7 @@ internal class CameraComponent constructor(
                 viewportDataSource.evaluate()
             }
         }
-        coroutineScope.launch {
+        coroutineScope.launch(Dispatchers.Main) {
             store.select { it.navigation }.collectLatest { navigationState ->
                 when (navigationState) {
                     NavigationState.FreeDrive -> {

@@ -11,6 +11,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * Using the [UIComponent] gives you access to a [coroutineScope] which uses
@@ -42,7 +44,10 @@ open class UIComponent : MapboxNavigationObserver {
         coroutineScope.cancel()
     }
 
-    protected inline fun <T> Flow<T>.observe(crossinline action: suspend (value: T) -> Unit) {
-        coroutineScope.launch { collect(action) }
+    protected inline fun <T> Flow<T>.observe(
+        context: CoroutineContext = EmptyCoroutineContext,
+        crossinline action: suspend (value: T) -> Unit
+    ) {
+        coroutineScope.launch(context) { collect(action) }
     }
 }
