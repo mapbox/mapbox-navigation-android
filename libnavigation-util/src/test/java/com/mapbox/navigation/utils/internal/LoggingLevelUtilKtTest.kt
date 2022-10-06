@@ -67,12 +67,12 @@ class LoggingLevelUtilKtTest(val parameter: LogLevelData) {
                 expected = true
             ),
             LogLevelData(
-                what = LoggingLevel.ERROR,
+                what = LoggingLevel.WARNING,
                 atLeast = LoggingLevel.INFO,
                 expected = true
             ),
             LogLevelData(
-                what = LoggingLevel.ERROR,
+                what = LoggingLevel.WARNING,
                 atLeast = LoggingLevel.DEBUG,
                 expected = true
             ),
