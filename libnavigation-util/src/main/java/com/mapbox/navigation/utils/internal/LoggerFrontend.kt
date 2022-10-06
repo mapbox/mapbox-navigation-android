@@ -1,10 +1,12 @@
 package com.mapbox.navigation.utils.internal
 
+import com.mapbox.common.LoggingLevel
 import com.mapbox.common.NativeLoggerWrapper
 
 private const val NAV_SDK_CATEGORY = "nav-sdk"
 
 interface LoggerFrontend {
+    fun getLogLevel(): LoggingLevel?
     fun logV(msg: String, category: String? = null)
     fun logD(msg: String, category: String? = null)
     fun logI(msg: String, category: String? = null)
@@ -13,6 +15,9 @@ interface LoggerFrontend {
 }
 
 internal class MapboxCommonLoggerFrontend : LoggerFrontend {
+
+    override fun getLogLevel() = NativeLoggerWrapper.getLogLevel(NAV_SDK_CATEGORY)
+
     override fun logV(msg: String, category: String?) {
         val message = createMessage(msg, category)
         // There's no com.mapbox.common.Log.verbose available - using Log.debug instead

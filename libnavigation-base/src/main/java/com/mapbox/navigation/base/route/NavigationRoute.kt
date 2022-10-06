@@ -184,10 +184,9 @@ class NavigationRoute internal constructor(
                 }
                 val deferredRouteOptionsParsing = async(ThreadController.DefaultDispatcher) {
                     RouteOptions.fromUrl(URL(routeRequestUrl)).also {
-                        logD(
-                            "parsed request url to RouteOptions: ${it.toUrl("***")}",
-                            LOG_CATEGORY
-                        )
+                        logD(LOG_CATEGORY) {
+                            "parsed request url to RouteOptions: ${it.toUrl("***")}"
+                        }
                     }
                 }
                 create(

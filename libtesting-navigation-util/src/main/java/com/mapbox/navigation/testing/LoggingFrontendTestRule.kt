@@ -1,6 +1,7 @@
 package com.mapbox.navigation.testing
 
 import android.annotation.SuppressLint
+import com.mapbox.common.LoggingLevel
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import org.junit.rules.TestRule
@@ -8,6 +9,9 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
 private object NoLoggingFrontend : LoggerFrontend {
+
+    override fun getLogLevel(): LoggingLevel = LoggingLevel.DEBUG
+
     override fun logV(msg: String, category: String?) {
     }
 
