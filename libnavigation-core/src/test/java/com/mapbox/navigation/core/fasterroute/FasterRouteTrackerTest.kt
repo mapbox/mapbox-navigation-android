@@ -31,7 +31,7 @@ class FasterRouteTrackerTest {
                     .joinToString(separator = ",") { it.toString() }
                 assertEquals(
                     "incorrect result for update with alternatives $alternativesFromUpdate",
-                    FasterRouteResult.NoFasterRoad,
+                    FasterRouteResult.NoFasterRoute,
                     result
                 )
             }
@@ -48,7 +48,7 @@ class FasterRouteTrackerTest {
                     recordedUpdate.update,
                     recordedUpdate.alternativeMetadata.values.toList()
                 )
-                if (result is FasterRouteResult.NewFasterRoadFound) {
+                if (result is FasterRouteResult.NewFasterRouteFound) {
                     fasterRoutesIds.add(result.route.id)
                 }
             }
@@ -73,7 +73,7 @@ class FasterRouteTrackerTest {
                     recordedUpdate.update,
                     recordedUpdate.alternativeMetadata.values.toList()
                 )
-                if (result is FasterRouteResult.NewFasterRoadFound) {
+                if (result is FasterRouteResult.NewFasterRouteFound) {
                     fasterRoutesIds.add(result.route.id)
                     fasterRoutesTracker.fasterRouteDeclined(result.alternativeId, result.route)
                 }

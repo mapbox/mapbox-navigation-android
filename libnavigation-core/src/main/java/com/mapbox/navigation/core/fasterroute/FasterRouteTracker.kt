@@ -31,11 +31,11 @@ internal class FasterRouteTracker(
         return when (update.reason) {
             RoutesExtra.ROUTES_UPDATE_REASON_NEW, RoutesExtra.ROUTES_UPDATE_REASON_REROUTE -> {
                 onNewRoutes(alternativeRoutesMetadata)
-                FasterRouteResult.NoFasterRoad
+                FasterRouteResult.NoFasterRoute
             }
             RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE ->
                 onAlternativesChanged(alternativeRoutesMetadata, update, metadataByRouteId)
-            else -> FasterRouteResult.NoFasterRoad
+            else -> FasterRouteResult.NoFasterRoute
         }
     }
 
@@ -52,7 +52,7 @@ internal class FasterRouteTracker(
             logD(FASTER_ROUTE_LOG_CATEGORY) {
                 "no alternatives which are faster then primary route found"
             }
-            return FasterRouteResult.NoFasterRoad
+            return FasterRouteResult.NoFasterRoute
         }
         logPotentialFasterRoutes(fasterAlternatives)
 
@@ -63,7 +63,7 @@ internal class FasterRouteTracker(
             logD(FASTER_ROUTE_LOG_CATEGORY) {
                 "all faster alternatives are similar to already rejected"
             }
-            return FasterRouteResult.NoFasterRoad
+            return FasterRouteResult.NoFasterRoute
         }
         logUntrackedFasterRoutes(untrackedAlternatives, metadataByRouteId)
 
@@ -77,7 +77,7 @@ internal class FasterRouteTracker(
     ): FasterRouteResult {
         val fasterAlternative = untracked.minByOrNull {
             metadataByRouteId[it.id]!!.infoFromStartOfPrimary.duration
-        } ?: return FasterRouteResult.NoFasterRoad
+        } ?: return FasterRouteResult.NoFasterRoute
         val primaryRouteDuration = update.navigationRoutes.first().directionsRoute.duration()
         val fasterAlternativeRouteDuration = metadataByRouteId[fasterAlternative.id]!!
             .infoFromStartOfPrimary.duration
@@ -86,7 +86,7 @@ internal class FasterRouteTracker(
             "route ${fasterAlternative.id} is faster than primary by $fasterThanPrimary",
             FASTER_ROUTE_LOG_CATEGORY
         )
-        return FasterRouteResult.NewFasterRoadFound(
+        return FasterRouteResult.NewFasterRouteFound(
             fasterAlternative,
             fasterThanPrimary = fasterThanPrimary,
             alternativeId = metadataByRouteId[fasterAlternative.id]!!.alternativeId
@@ -145,8 +145,8 @@ internal class FasterRouteTracker(
 }
 
 internal sealed class FasterRouteResult {
-    object NoFasterRoad : FasterRouteResult()
-    data class NewFasterRoadFound(
+    object NoFasterRoute : FasterRouteResult()
+    data class NewFasterRouteFound(
         val route: NavigationRoute,
         val fasterThanPrimary: Double,
         val alternativeId: Int

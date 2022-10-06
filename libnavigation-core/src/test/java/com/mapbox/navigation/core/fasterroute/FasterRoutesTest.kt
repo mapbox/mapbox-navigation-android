@@ -59,7 +59,7 @@ class FasterRoutesTest {
                 any(),
                 any()
             )
-        } returns FasterRouteResult.NoFasterRoad
+        } returns FasterRouteResult.NoFasterRoute
 
         routeObserver.onRoutesChanged(mockk(relaxed = true))
 
@@ -94,7 +94,7 @@ class FasterRoutesTest {
                 any()
             )
         } answers {
-            FasterRouteResult.NoFasterRoad
+            FasterRouteResult.NoFasterRoute
         }
         routeObserver.onRoutesChanged(mockk(relaxed = true))
         firstRouteUpdateProcessing.complete(
@@ -159,7 +159,7 @@ private fun MapboxNavigation.recordRoutesObservers(): RoutesObserver {
 
 private fun createNewFasterRouteFoundForTest(
     route: NavigationRoute = mockk(relaxed = true)
-) = FasterRouteResult.NewFasterRoadFound(
+) = FasterRouteResult.NewFasterRouteFound(
     route,
     8.9,
     1

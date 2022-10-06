@@ -46,14 +46,14 @@ class FasterRoutes internal constructor(
                 mapboxNavigation.getAlternativeMetadataFor(result.navigationRoutes)
             )
             when (fasterRouteTrackerResult) {
-                is FasterRouteResult.NewFasterRoadFound -> newFasterRouteFound(
+                is FasterRouteResult.NewFasterRouteFound -> newFasterRouteFound(
                     NewFasterRoute(
                         fasterRouteTrackerResult.route,
                         fasterRouteTrackerResult.fasterThanPrimary,
                         fasterRouteTrackerResult.alternativeId
                     )
                 )
-                FasterRouteResult.NoFasterRoad -> {}
+                FasterRouteResult.NoFasterRoute -> {}
             }
         }
     }
