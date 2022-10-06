@@ -5,8 +5,8 @@ import android.location.Location
 import android.media.AudioManager
 import android.provider.Settings
 import android.text.TextUtils
-import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.common.TelemetrySystemUtils
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
@@ -119,13 +119,13 @@ private fun calculateScreenBrightnessPercentage(screenBrightness: Int): Int =
     floor(PERCENT_NORMALIZER * screenBrightness / SCREEN_BRIGHTNESS_MAX).toInt()
 
 internal fun navObtainUniversalSessionId(): String =
-    TelemetryUtils.obtainUniversalUniqueIdentifier()
+    TelemetrySystemUtils.obtainUniversalUniqueIdentifier()
 
 internal fun navObtainUniversalTelemetryNavigationSessionId(): String =
-    TelemetryUtils.obtainUniversalUniqueIdentifier()
+    TelemetrySystemUtils.obtainUniversalUniqueIdentifier()
 
 internal fun navObtainUniversalTelemetryNavigationModeId(): String =
-    TelemetryUtils.obtainUniversalUniqueIdentifier()
+    TelemetrySystemUtils.obtainUniversalUniqueIdentifier()
 
 internal fun navObtainUniversalTelemetryTripId(): String =
-    TelemetryUtils.obtainUniversalUniqueIdentifier()
+    TelemetrySystemUtils.obtainUniversalUniqueIdentifier()

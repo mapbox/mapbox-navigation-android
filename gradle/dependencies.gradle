@@ -20,7 +20,6 @@ ext {
   version = [
       mapboxMapSdk              : '10.9.0-beta.2',
       mapboxSdkServices         : '6.8.0',
-      mapboxEvents              : '8.1.5',
       mapboxCore                : '5.0.2',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
       mapboxCommonNative        : '23.1.0-beta.2',
@@ -77,7 +76,6 @@ ext {
       mapboxSdkTurf             : "com.mapbox.mapboxsdk:mapbox-sdk-turf:${version.mapboxSdkServices}",
       mapboxSdkDirectionsModels : "com.mapbox.mapboxsdk:mapbox-sdk-directions-models:${version.mapboxSdkServices}",
       mapboxSdkRefreshModels    : "com.mapbox.mapboxsdk:mapbox-sdk-directions-refresh-models:${version.mapboxSdkServices}",
-      mapboxEvents              : "com.mapbox.mapboxsdk:mapbox-android-telemetry:${version.mapboxEvents}",
       mapboxCore                : "com.mapbox.mapboxsdk:mapbox-android-core:${version.mapboxCore}",
       mapboxNavigator           : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
       mapboxCommonNative        : "com.mapbox.common:common:${version.mapboxCommonNative}",

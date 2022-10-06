@@ -1,119 +1,144 @@
 package com.mapbox.navigation.metrics
 
-import android.os.Parcel
 import com.google.gson.Gson
-import com.mapbox.android.telemetry.Event
-import com.mapbox.android.telemetry.MapboxTelemetry
+import com.mapbox.bindgen.Value
+import com.mapbox.common.Event
+import com.mapbox.common.EventPriority
+import com.mapbox.common.EventsServiceInterface
+import com.mapbox.navigation.base.internal.metric.MetricEventInternal
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
-import com.mapbox.navigation.metrics.extensions.toTelemetryEvent
+import com.mapbox.navigation.metrics.internal.EventsServiceProvider
+import com.mapbox.navigation.metrics.internal.TelemetryServiceProvider
+import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
-import com.mapbox.navigation.utils.internal.JobControl
+import com.mapbox.navigation.utils.internal.LoggerFrontend
+import com.mapbox.navigation.utils.internal.logW
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.runs
+import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 @ExperimentalCoroutinesApi
+@RunWith(RobolectricTestRunner::class)
 class MapboxMetricsReporterTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
+    private val logger = mockk<LoggerFrontend>(relaxUnitFun = true)
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule(logger)
+
+    @Before
+    fun setup() {
+        mockkObject(EventsServiceProvider)
+        mockkObject(TelemetryUtilsDelegate)
+        mockkObject(TelemetryServiceProvider)
+
+        every { TelemetryUtilsDelegate.setEventsCollectionState(any()) } just runs
+        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
+    }
+
+    @After
+    fun cleanup() {
+        unmockkObject(EventsServiceProvider)
+        unmockkObject(TelemetryUtilsDelegate)
+        unmockkObject(TelemetryServiceProvider)
+    }
+
     @Test
-    fun telemetryEnabledWhenReporterInit() {
-        val mapboxTelemetry = mockk<MapboxTelemetry>(relaxed = true)
+    fun onTelemetryInit() {
+        val eventService = initMetricsReporterWithTelemetry()
 
-        MapboxMetricsReporter.init(mapboxTelemetry, InternalJobControlFactory)
+        verify(exactly = 1) { eventService.registerObserver(any()) }
+    }
 
-        verify { mapboxTelemetry.enable() }
+    @Test
+    fun `telemetry events are not processed till it becomes init`() {
+        MapboxMetricsReporter.sendTurnstileEvent(mockk())
+        MapboxMetricsReporter.addEvent(mockk())
+
+        verify(exactly = 2) {
+            logger.logW(
+                "Navigation Telemetry is disabled",
+                "MapboxMetricsReporter"
+            )
+        }
     }
 
     @Test
     fun telemetryDisabledWhenReporterDisable() {
-        val mapboxTelemetry = initMetricsReporterWithTelemetry()
+        val eventService = initMetricsReporterWithTelemetry()
 
         MapboxMetricsReporter.disable()
+        MapboxMetricsReporter.sendTurnstileEvent(mockk())
+        MapboxMetricsReporter.addEvent(mockk())
 
-        verify { mapboxTelemetry.disable() }
+        verify(exactly = 1) { eventService.unregisterObserver(any()) }
+        verify(exactly = 0) { eventService.sendTurnstileEvent(any(), any()) }
+        verify(exactly = 0) { eventService.sendEvent(any(), any()) }
     }
 
     @Test
     fun telemetryPushCalledWhenAddValidEvent() = coroutineRule.runBlockingTest {
-        mockkObject(InternalJobControlFactory)
-        mockIOScopeAndRootJob()
-        val mapboxTelemetry = initMetricsReporterWithTelemetry()
-        val metricEvent = StubNavigationEvent(NavigationMetrics.ARRIVE)
-        val event = metricEvent.toTelemetryEvent()
+        mockkObject(InternalJobControlFactory) {
+            val eventService = initMetricsReporterWithTelemetry()
+            val metricEvent = StubNavigationEvent(NavigationMetrics.ARRIVE)
+            val slotEvent = slot<Event>()
+            every { eventService.sendEvent(capture(slotEvent), any()) } just runs
+
+            MapboxMetricsReporter.addEvent(metricEvent)
+
+            assertTrue(slotEvent.isCaptured)
+            assertEquals(EventPriority.IMMEDIATE, slotEvent.captured.priority)
+            assertEquals(metricEvent.toValue(), slotEvent.captured.attributes)
+            assertEquals(null, slotEvent.captured.deferredOptions)
+        }
+    }
+
+    @Test
+    fun `reporter is not sent pure MetricEvent (must be MetricEventInternal)`() {
+        val eventService = initMetricsReporterWithTelemetry()
+        val metricEvent = mockk<MetricEvent>()
 
         MapboxMetricsReporter.addEvent(metricEvent)
 
-        verify { mapboxTelemetry.push(event) }
-        unmockkObject(InternalJobControlFactory)
+        verify(exactly = 0) { eventService.sendEvent(any(), any()) }
     }
 
-    @Test
-    fun telemetryPushCalledWhenAddInvalidEvent() = coroutineRule.runBlockingTest {
-        mockkObject(InternalJobControlFactory)
-        mockIOScopeAndRootJob()
-        val mapboxTelemetry = initMetricsReporterWithTelemetry()
-        val metricEvent = StubNavigationEvent("some_event")
-        val event = metricEvent.toTelemetryEvent()
-
-        MapboxMetricsReporter.addEvent(metricEvent)
-
-        verify(exactly = 0) { mapboxTelemetry.push(event) }
-        unmockkObject(InternalJobControlFactory)
-    }
-
-    @Test
-    fun telemetryCallsUpdateDebugLoggingEnabledWhenToggleLoggingIsTrue() {
-        val mapboxTelemetry = initMetricsReporterWithTelemetry()
-        val isDebugLoggingEnabled = true
-        MapboxMetricsReporter.toggleLogging(isDebugLoggingEnabled)
-
-        verify { mapboxTelemetry.updateDebugLoggingEnabled(true) }
-    }
-
-    @Test
-    fun telemetryCallsUpdateDebugLoggingEnabledWhenToggleLoggingIsFalse() {
-        val mapboxTelemetry = initMetricsReporterWithTelemetry()
-        val isDebugLoggingEnabled = false
-        MapboxMetricsReporter.toggleLogging(isDebugLoggingEnabled)
-
-        verify { mapboxTelemetry.updateDebugLoggingEnabled(false) }
-    }
-
-    private fun initMetricsReporterWithTelemetry(): MapboxTelemetry {
-        val mapboxTelemetry = mockk<MapboxTelemetry>(relaxed = true)
-        MapboxMetricsReporter.init(mapboxTelemetry, InternalJobControlFactory)
-
-        return mapboxTelemetry
-    }
-
-    private fun mockIOScopeAndRootJob() {
-        val parentJob = SupervisorJob()
-        val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
+    private fun initMetricsReporterWithTelemetry(): EventsServiceInterface {
+        val eventsService: EventsServiceInterface = mockk(relaxUnitFun = true)
+        every { EventsServiceProvider.provideEventsService(any()) } returns eventsService
         every {
-            InternalJobControlFactory.createIOScopeJobControl()
-        } returns JobControl(parentJob, testScope)
+            TelemetryServiceProvider.provideTelemetryService(any())
+        } returns mockk(relaxUnitFun = true)
+        MapboxMetricsReporter.init(mockk(), "access_token", "user_agent")
+        return eventsService
     }
 
     private class StubNavigationEvent(
         override val metricName: String
-    ) : Event(), MetricEvent {
-
-        override fun writeToParcel(dest: Parcel, flags: Int) {}
-
-        override fun describeContents(): Int = 0
+    ) : Event(Value.nullValue(), null), MetricEventInternal {
 
         override fun toJson(gson: Gson): String = gson.toJson(this)
+
+        override fun toValue(): Value = Value.nullValue()
     }
 }

@@ -1,5 +1,7 @@
 package com.mapbox.navigation.base.metrics
 
+import com.mapbox.common.TurnstileEvent
+
 /**
  * Defines API for handling metric events.
  */
@@ -11,6 +13,11 @@ interface MetricsReporter {
      * @param metricEvent event that should be handled
      */
     fun addEvent(metricEvent: MetricEvent)
+
+    /**
+     * Send [TurnstileEvent] event.
+     */
+    fun sendTurnstileEvent(turnstileEvent: TurnstileEvent)
 
     /**
      * Adds an observer that will be triggered when a metric event is handled

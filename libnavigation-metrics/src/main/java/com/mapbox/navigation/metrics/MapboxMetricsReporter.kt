@@ -2,12 +2,25 @@ package com.mapbox.navigation.metrics
 
 import android.content.Context
 import com.google.gson.Gson
-import com.mapbox.android.telemetry.MapboxTelemetry
+import com.mapbox.bindgen.Value
+import com.mapbox.common.Event
+import com.mapbox.common.EventPriority
+import com.mapbox.common.EventsServerOptions
+import com.mapbox.common.EventsServiceError
+import com.mapbox.common.EventsServiceInterface
+import com.mapbox.common.EventsServiceObserver
+import com.mapbox.common.TelemetryService
+import com.mapbox.common.TurnstileEvent
+import com.mapbox.navigation.base.internal.metric.MetricEventInternal
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
-import com.mapbox.navigation.metrics.extensions.toTelemetryEvent
+import com.mapbox.navigation.metrics.internal.EventsServiceProvider
+import com.mapbox.navigation.metrics.internal.TelemetryServiceProvider
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.logD
+import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 
@@ -15,16 +28,33 @@ import kotlinx.coroutines.launch
  * Default implementation of [MetricsReporter] interface.
  */
 object MapboxMetricsReporter : MetricsReporter {
+    private const val LOG_CATEGORY = "MapboxMetricsReporter"
 
     private val gson = Gson()
-    private lateinit var mapboxTelemetry: MapboxTelemetry
+    private lateinit var eventsService: EventsServiceInterface
+    private lateinit var telemetryService: TelemetryService
+
+    @Volatile
+    private var enableTelemetry = false
 
     @Volatile
     private var metricsObserver: MetricsObserver? = null
     private var ioJobController = InternalJobControlFactory.createIOScopeJobControl()
 
+    private val eventsServiceObserver =
+        object : EventsServiceObserver {
+            override fun didEncounterError(error: EventsServiceError, events: Value) {
+                logE("EventsService failure: $error for event $events", LOG_CATEGORY)
+            }
+
+            override fun didSendEvents(events: Value) {
+                logD("Event has been sent $events", LOG_CATEGORY)
+            }
+        }
+
     /**
-     * Initialize [mapboxTelemetry] that need to send event to Mapbox Telemetry server.
+     * Initialize [EventsServiceInterface] and [TelemetryService] that need to send event to
+     * Mapbox Telemetry server.
      *
      * @param context Android context
      * @param accessToken Mapbox access token
@@ -36,18 +66,11 @@ object MapboxMetricsReporter : MetricsReporter {
         accessToken: String,
         userAgent: String
     ) {
-        mapboxTelemetry = MapboxTelemetry(context, accessToken, userAgent)
-        mapboxTelemetry.enable()
-    }
-
-    // For test purposes only
-    internal fun init(
-        mapboxTelemetry: MapboxTelemetry,
-        jobControlFactory: InternalJobControlFactory,
-    ) {
-        this.mapboxTelemetry = mapboxTelemetry
-        ioJobController = jobControlFactory.createIOScopeJobControl()
-        mapboxTelemetry.enable()
+        enableTelemetry = true
+        val eventsServerOptions = EventsServerOptions(accessToken, userAgent, null)
+        eventsService = EventsServiceProvider.provideEventsService(eventsServerOptions)
+        telemetryService = TelemetryServiceProvider.provideTelemetryService(eventsServerOptions)
+        eventsService.registerObserver(eventsServiceObserver)
     }
 
     /**
@@ -55,20 +78,21 @@ object MapboxMetricsReporter : MetricsReporter {
      *
      * @param isDebugLoggingEnabled true to enable logging, false to disable logging
      */
+    @Deprecated("no-ops")
     @JvmStatic
     fun toggleLogging(isDebugLoggingEnabled: Boolean) {
-        mapboxTelemetry.updateDebugLoggingEnabled(isDebugLoggingEnabled)
+        // do nothing
     }
 
     /**
-     * Disables metrics reporting and ends [mapboxTelemetry] session.
-     * This method also removes metrics observer and stops background thread used for
-     * events dispatching.
+     * The method disables navigation telemetry, removes metrics observer and stops background
+     * thread used for events dispatching.
      */
     @JvmStatic
     fun disable() {
+        enableTelemetry = false
         removeObserver()
-        mapboxTelemetry.disable()
+        eventsService.unregisterObserver(eventsServiceObserver)
         ioJobController.job.cancelChildren()
     }
 
@@ -76,12 +100,34 @@ object MapboxMetricsReporter : MetricsReporter {
      * Adds an event to the metrics reporter when this event occurs.
      */
     override fun addEvent(metricEvent: MetricEvent) {
-        metricEvent.toTelemetryEvent()?.let {
-            mapboxTelemetry.push(it)
-        }
+        ifTelemetryIsRunning {
+            if (metricEvent !is MetricEventInternal) {
+                logW(
+                    "metricEvent must inherited from MetricEventInternal to be sent",
+                    LOG_CATEGORY
+                )
+                return
+            }
+            eventsService.sendEvent(
+                Event(EventPriority.IMMEDIATE, metricEvent.toValue(), null)
+            ) {
+                logE("Failed to send event ${metricEvent.metricName}: $it", LOG_CATEGORY)
+            }
 
-        ioJobController.scope.launch {
-            metricsObserver?.onMetricUpdated(metricEvent.metricName, metricEvent.toJson(gson))
+            ioJobController.scope.launch {
+                metricsObserver?.onMetricUpdated(metricEvent.metricName, metricEvent.toJson(gson))
+            }
+        }
+    }
+
+    /**
+     * Send [TurnstileEvent] event.
+     */
+    override fun sendTurnstileEvent(turnstileEvent: TurnstileEvent) {
+        ifTelemetryIsRunning {
+            eventsService.sendTurnstileEvent(turnstileEvent) {
+                logE("Failed to send Turnstile event: $it", LOG_CATEGORY)
+            }
         }
     }
 
@@ -97,5 +143,16 @@ object MapboxMetricsReporter : MetricsReporter {
      */
     override fun removeObserver() {
         this.metricsObserver = null
+    }
+
+    private inline fun ifTelemetryIsRunning(func: () -> Unit) {
+        if (enableTelemetry) {
+            func.invoke()
+        } else {
+            logW(
+                "Navigation Telemetry is disabled",
+                LOG_CATEGORY
+            )
+        }
     }
 }

@@ -5,8 +5,6 @@ import android.app.NotificationManager
 import android.content.Context
 import android.net.ConnectivityManager
 import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.telemetry.MapboxTelemetryConstants
-import com.mapbox.android.telemetry.TelemetryEnabler
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.MapboxSDKCommon
@@ -38,6 +36,9 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.createSetRouteResult
+import com.mapbox.navigation.metrics.internal.EventsServiceProvider
+import com.mapbox.navigation.metrics.internal.TelemetryServiceProvider
+import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -55,7 +56,6 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.unmockkObject
-import io.mockk.unmockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.json.JSONObject
 import org.junit.After
@@ -105,14 +105,6 @@ internal open class MapboxNavigationBaseTest {
             getSystemService(Context.NOTIFICATION_SERVICE)
         } returns mockk<NotificationManager>()
         every { getSystemService(Context.ALARM_SERVICE) } returns mockk<AlarmManager>()
-        every {
-            getSharedPreferences(
-                MapboxTelemetryConstants.MAPBOX_SHARED_PREFERENCES,
-                Context.MODE_PRIVATE
-            )
-        } returns mockk(relaxed = true) {
-            every { getString("mapboxTelemetryState", "ENABLED"); } returns "DISABLED"
-        }
         every { packageManager } returns mockk(relaxed = true)
         every { packageName } returns "com.mapbox.navigation.core.MapboxNavigationTest"
         every { filesDir } returns File("some/path")
@@ -202,8 +194,8 @@ internal open class MapboxNavigationBaseTest {
         } returns currentIndicesProvider
 
         every { navigator.create(any(), any(), any(), any(), any(), any()) } returns navigator
-        mockkStatic(TelemetryEnabler::class)
-        every { TelemetryEnabler.isEventsEnabled(any()) } returns true
+        mockkObject(TelemetryUtilsDelegate)
+        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns true
 
         mockkObject(NativeRouteParserWrapper)
         every {
@@ -246,7 +238,9 @@ internal open class MapboxNavigationBaseTest {
         unmockkObject(RouteRefreshControllerProvider)
         unmockkObject(RouteAlternativesControllerProvider)
         unmockkObject(MapboxNavigationTelemetry)
-        unmockkStatic(TelemetryEnabler::class)
+        unmockkObject(EventsServiceProvider)
+        unmockkObject(TelemetryServiceProvider)
+        unmockkObject(TelemetryUtilsDelegate)
         unmockkObject(NativeRouteParserWrapper)
     }
 
@@ -321,6 +315,16 @@ internal open class MapboxNavigationBaseTest {
     }
 
     private fun mockNavTelemetry() {
+        mockkObject(EventsServiceProvider)
+        every {
+            EventsServiceProvider.provideEventsService(any())
+        } returns mockk(relaxUnitFun = true)
+
+        mockkObject(TelemetryServiceProvider)
+        every {
+            TelemetryServiceProvider.provideTelemetryService(any())
+        } returns mockk(relaxUnitFun = true)
+
         mockkObject(MapboxNavigationTelemetry)
         every { MapboxNavigationTelemetry.initialize(any(), any(), any(), any()) } just runs
         every { MapboxNavigationTelemetry.destroy(any()) } just runs

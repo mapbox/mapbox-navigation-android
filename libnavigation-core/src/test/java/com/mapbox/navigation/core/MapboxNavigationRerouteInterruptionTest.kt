@@ -16,7 +16,7 @@ import org.robolectric.ParameterizedRobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @ExperimentalPreviewMapboxNavigationAPI
-@Config(shadows = [ShadowReachabilityFactory::class])
+@Config(shadows = [ShadowReachabilityFactory::class, ShadowEventsService::class])
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @RunWith(ParameterizedRobolectricTestRunner::class)

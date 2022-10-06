@@ -1,11 +1,10 @@
 package com.mapbox.navigation.core.telemetry.events
 
 import android.annotation.SuppressLint
-import android.os.Parcel
 import com.google.gson.Gson
-import com.mapbox.android.telemetry.Event
-import com.mapbox.android.telemetry.TelemetryUtils
-import com.mapbox.navigation.base.metrics.MetricEvent
+import com.mapbox.bindgen.Value
+import com.mapbox.common.TelemetrySystemUtils
+import com.mapbox.navigation.base.internal.metric.MetricEventInternal
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 
 /**
@@ -20,14 +19,14 @@ import com.mapbox.navigation.base.metrics.NavigationMetrics
 @SuppressLint("ParcelCreator")
 internal class NavigationFreeDriveEvent(
     phoneState: PhoneState
-) : Event(), MetricEvent {
+) : MetricEventInternal {
 
     /*
      * Don't remove any fields, cause they should match with
      * the schema downloaded from S3. Look at {@link SchemaTest}
      */
     val version = "2.2"
-    val created: String = TelemetryUtils.obtainCurrentDate() // Schema pattern
+    val created: String = TelemetrySystemUtils.obtainCurrentDate() // Schema pattern
     val volumeLevel: Int = phoneState.volumeLevel
     val batteryLevel: Int = phoneState.batteryLevel
     val screenBrightness: Int = phoneState.screenBrightness
@@ -55,11 +54,32 @@ internal class NavigationFreeDriveEvent(
 
     override fun toJson(gson: Gson): String = gson.toJson(this)
 
-    override fun describeContents(): Int {
-        return 0
-    }
+    override fun toValue(): Value {
+        val fields = hashMapOf<String, Value>()
 
-    override fun writeToParcel(dest: Parcel, flags: Int) {
+        fields["version"] = version.toValue()
+        fields["created"] = created.toValue()
+        fields["volumeLevel"] = volumeLevel.toValue()
+        fields["batteryLevel"] = batteryLevel.toValue()
+        fields["screenBrightness"] = screenBrightness.toValue()
+        fields["batteryPluggedIn"] = batteryPluggedIn.toValue()
+        fields["connectivity"] = connectivity.toValue()
+        fields["audioType"] = audioType.toValue()
+        fields["applicationState"] = applicationState.toValue()
+        fields["event"] = event.toValue()
+        fields["eventVersion"] = eventVersion.toValue()
+        locationEngine?.let { fields["locationEngine"] = it.toValue() }
+        fields["percentTimeInPortrait"] = percentTimeInPortrait.toValue()
+        fields["percentTimeInForeground"] = percentTimeInForeground.toValue()
+        fields["simulation"] = simulation.toValue()
+        navigatorSessionIdentifier?.let { fields["navigatorSessionIdentifier"] = it.toValue() }
+        startTimestamp?.let { fields["startTimestamp"] = it.toValue() }
+        sessionIdentifier?.let { fields["sessionIdentifier"] = it.toValue() }
+        location?.let { fields["location"] = it.toValue() }
+        eventType?.let { fields["eventType"] = it.toValue() }
+        appMetadata?.let { fields["appMetadata"] = it.toValue() }
+
+        return Value.valueOf(fields)
     }
 }
 

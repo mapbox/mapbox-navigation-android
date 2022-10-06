@@ -85,6 +85,9 @@ object NavigationMetrics {
     /**
      * Navigation Event "App User turnstile" name
      */
+    @Deprecated(
+        "APP_USER_TURNSTILE event is handled under and not available on the client-side"
+    )
     const val APP_USER_TURNSTILE = "appUserTurnstile"
 
     /**

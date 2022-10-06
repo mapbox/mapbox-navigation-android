@@ -10,7 +10,6 @@ import androidx.annotation.RequiresPermission
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.telemetry.TelemetryEnabler
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -115,6 +114,7 @@ import com.mapbox.navigation.core.trip.session.eh.GraphAccessor
 import com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcher
 import com.mapbox.navigation.core.trip.session.eh.RoadObjectsStore
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
+import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.navigator.internal.router.RouterInterfaceAdapter
@@ -1744,7 +1744,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     private inline fun <T> runInTelemetryContext(func: (MapboxNavigationTelemetry) -> T): T? {
-        return if (TelemetryEnabler.isEventsEnabled(navigationOptions.applicationContext)) {
+        return if (TelemetryUtilsDelegate.getEventsCollectionState()) {
             func(MapboxNavigationTelemetry)
         } else {
             null

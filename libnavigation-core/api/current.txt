@@ -815,6 +815,9 @@ package com.mapbox.navigation.core.telemetry.events {
   public final class BitmapEncodeOptionsKt {
   }
 
+  public final class CoreTelemetryEventUtilsKt {
+  }
+
   public final class FeedbackEvent {
     field public static final String ALTERNATIVE_ROUTE_NOT_EXPECTED = "alternative_route_not_expected";
     field public static final String ARRIVAL_FEEDBACK_CONFUSING_INSTRUCTIONS = "arrival_feedback_confusing_instructions";
