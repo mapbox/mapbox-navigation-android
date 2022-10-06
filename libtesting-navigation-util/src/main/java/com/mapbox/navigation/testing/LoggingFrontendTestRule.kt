@@ -10,7 +10,7 @@ import org.junit.runners.model.Statement
 
 private object NoLoggingFrontend : LoggerFrontend {
 
-    override fun getLogLevel(): LoggingLevel? = null
+    override fun getLogLevel(): LoggingLevel = LoggingLevel.DEBUG
 
     override fun logV(msg: String, category: String?) {
     }

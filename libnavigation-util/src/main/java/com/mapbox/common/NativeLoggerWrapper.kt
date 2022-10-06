@@ -21,5 +21,5 @@ internal object NativeLoggerWrapper {
         Log.error(message, category)
     }
 
-    fun getLogLevel() = LogConfiguration.getLoggingLevel()
+    fun getLogLevel(category: String) = LogConfiguration.getLoggingLevel(category)
 }

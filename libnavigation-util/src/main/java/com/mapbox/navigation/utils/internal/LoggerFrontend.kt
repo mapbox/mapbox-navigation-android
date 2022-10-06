@@ -16,7 +16,7 @@ interface LoggerFrontend {
 
 internal class MapboxCommonLoggerFrontend : LoggerFrontend {
 
-    override fun getLogLevel() = NativeLoggerWrapper.getLogLevel()
+    override fun getLogLevel() = NativeLoggerWrapper.getLogLevel(NAV_SDK_CATEGORY)
 
     override fun logV(msg: String, category: String?) {
         val message = createMessage(msg, category)
