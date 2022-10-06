@@ -81,8 +81,7 @@ object MapboxMetricsReporter : MetricsReporter {
     }
 
     /**
-     * Disables metrics reporting and ends [EventsServiceInterface] and [TelemetryService] session.
-     * This method also removes metrics observer and stops background thread used for
+     * The method removes metrics observer and stops background thread used for
      * events dispatching.
      */
     @JvmStatic
