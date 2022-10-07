@@ -29,7 +29,7 @@ class FasterRoutesTest {
             mapboxNavigation = mapboxNavigation,
             fasterRouteTrackerCore = fasterRouteTrackerMock
         )
-        val fasterRouteCallback = mockk<NewFasterRouteObserver>()
+        val fasterRouteCallback = mockk<NewFasterRouteObserver>(relaxed = true)
         fasterRoutes.registerNewFasterRouteObserver(fasterRouteCallback)
         coEvery {
             fasterRouteTrackerMock.findFasterRouteInUpdate(
@@ -146,7 +146,7 @@ private fun CoroutineScope.createFasterRoutes(
     mapboxNavigation: MapboxNavigation = mockk(relaxed = true),
 ) = FasterRoutesTracker(
     mapboxNavigation = mapboxNavigation,
-    fasterRouteTracker = fasterRouteTrackerCore,
+    fasterRouteTrackerCore = fasterRouteTrackerCore,
     this
 )
 
