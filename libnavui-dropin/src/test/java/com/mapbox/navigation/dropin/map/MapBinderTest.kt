@@ -256,8 +256,8 @@ class MapBinderTest {
                 NavigationState.ActiveNavigation,
                 NavigationState.Arrival -> {
                     val c = components.findComponent {
-                        it is RoutePreviewLongPressMapComponent
-                            || it is FreeDriveLongPressMapComponent
+                        it is RoutePreviewLongPressMapComponent ||
+                            it is FreeDriveLongPressMapComponent
                     }
                     assertNull("Should not attach for $navState", c)
                 }
