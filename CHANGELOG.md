@@ -10,8 +10,13 @@ Mapbox welcomes participation and contributions from everyone.
 ### Changelog
 [Changes between v2.9.0-alpha.3 and v2.9.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0-alpha.3...v2.9.0-beta.1)
 
-#### Known issues
-:bangbang: `MapView` may crash when user selects Disagree in Telemetry Settings dialog.
+#### Known issues :bangbang: 
+- `MapView` may crash when user selects Disagree in Telemetry Settings dialog.
+- Navigation SDK unintentionally brings in the `ACCESS_BACKGROUND_LOCATION` permission definition in the merged manifest. You can remove the permission from your app's manifest with:
+```
+<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" tools:node="remove" />
+```
+
 #### Features
 #### Bug fixes and improvements
 - :warning: Restructured the package system of Drop-In UI into feature verticals. [#6430](https://github.com/mapbox/mapbox-navigation-android/pull/6430)
