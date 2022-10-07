@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.fasterroute
 
+import androidx.annotation.UiThread
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -73,6 +74,7 @@ class FasterRoutes internal constructor(
     /***
      * Sets faster route as primary to [MapboxNavigation]
      */
+    @UiThread
     fun acceptFasterRoute(newFasterRoute: NewFasterRoute) {
         val currentRoutes = mapboxNavigation.getNavigationRoutes()
         if (currentRoutes.contains(newFasterRoute.fasterRoute)) {
@@ -88,6 +90,7 @@ class FasterRoutes internal constructor(
     /***
      * Remembers faster route as declined to not offer similar to this one again.
      */
+    @UiThread
     fun declineFasterRoute(newFasterRoute: NewFasterRoute) {
         fasterRouteTracker.fasterRouteDeclined(
             newFasterRoute.alternativeId,
@@ -95,6 +98,7 @@ class FasterRoutes internal constructor(
         )
     }
 
+    @UiThread
     fun destroy() {
         mapboxNavigation.unregisterRoutesObserver(internalObserver)
         scope.cancel()

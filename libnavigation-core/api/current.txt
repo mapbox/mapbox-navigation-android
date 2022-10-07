@@ -198,9 +198,9 @@ package com.mapbox.navigation.core.fasterroute {
   }
 
   @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class FasterRoutes {
-    method public void acceptFasterRoute(com.mapbox.navigation.core.fasterroute.NewFasterRoute newFasterRoute);
-    method public void declineFasterRoute(com.mapbox.navigation.core.fasterroute.NewFasterRoute newFasterRoute);
-    method public void destroy();
+    method @UiThread public void acceptFasterRoute(com.mapbox.navigation.core.fasterroute.NewFasterRoute newFasterRoute);
+    method @UiThread public void declineFasterRoute(com.mapbox.navigation.core.fasterroute.NewFasterRoute newFasterRoute);
+    method @UiThread public void destroy();
     method public void registerNewFasterRouteObserver(com.mapbox.navigation.core.fasterroute.NewFasterRouteObserver observer);
     method public void unregisterNewFasterRouteObserver(com.mapbox.navigation.core.fasterroute.NewFasterRouteObserver observer);
   }

@@ -10,12 +10,10 @@ internal class RejectedRoutesTracker(
     val maximumGeometrySimilarity: Double
 ) {
 
-    private var rejectedAlternatives = mutableMapOf<Int, NavigationRoute>()
+    private val rejectedAlternatives = mutableMapOf<Int, NavigationRoute>()
 
     fun addRejectedRoutes(alternatives: Map<Int, NavigationRoute>) {
-        for ((alternativeId, alternative) in alternatives) {
-            rejectedAlternatives[alternativeId] = alternative
-        }
+        rejectedAlternatives.putAll(alternatives)
     }
 
     suspend fun findUntrackedAlternatives(
