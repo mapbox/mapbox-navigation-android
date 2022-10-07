@@ -1254,7 +1254,7 @@ class MapboxRouteLineApi(
 
                 val segments: List<RouteLineExpressionData> =
                     MapboxRouteLineUtils.calculateRouteLineSegments(
-                        this.directionsRoute,
+                        this,
                         trafficBackfillRoadClasses,
                         isPrimaryRoute = true,
                         routeLineOptions.resourceProvider.routeLineColorResources,
@@ -1300,7 +1300,7 @@ class MapboxRouteLineApi(
             partitionedRoutes.second.firstOrNull()?.route?.run {
                 val segments: List<RouteLineExpressionData> =
                     MapboxRouteLineUtils.calculateRouteLineSegments(
-                        this.directionsRoute,
+                        this,
                         trafficBackfillRoadClasses,
                         isPrimaryRoute = false,
                         routeLineOptions.resourceProvider.routeLineColorResources,
@@ -1326,7 +1326,7 @@ class MapboxRouteLineApi(
             if (partitionedRoutes.second.size > 1) {
                 val segments: List<RouteLineExpressionData> =
                     MapboxRouteLineUtils.calculateRouteLineSegments(
-                        partitionedRoutes.second[1].route.directionsRoute,
+                        partitionedRoutes.second[1].route,
                         trafficBackfillRoadClasses,
                         isPrimaryRoute = false,
                         routeLineOptions.resourceProvider.routeLineColorResources,
@@ -1413,7 +1413,7 @@ class MapboxRouteLineApi(
                             )
                         )
                         MapboxRouteLineUtils.calculateRouteLineSegments(
-                            this.directionsRoute,
+                            this,
                             trafficBackfillRoadClasses,
                             isPrimaryRoute = true,
                             routeLineOptions.resourceProvider.routeLineColorResources,

@@ -71,7 +71,7 @@ internal object MapboxRouteLineUtils {
 
     private val extractRouteDataCache: LruCache<
         CacheResultUtils.CacheResultKey2<
-            DirectionsRoute, TrafficCongestionProvider,
+            NavigationRoute, TrafficCongestionProvider,
             List<ExtractedRouteData>
             >,
         List<ExtractedRouteData>> by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
@@ -506,7 +506,7 @@ internal object MapboxRouteLineUtils {
      * used to represent the traffic congestion.
      */
     fun calculateRouteLineSegments(
-        route: DirectionsRoute,
+        route: NavigationRoute,
         trafficBackfillRoadClasses: List<String>,
         isPrimaryRoute: Boolean,
         routeLineColorResources: RouteLineColorResources,
@@ -521,7 +521,6 @@ internal object MapboxRouteLineUtils {
             false -> {
                 getRouteLineExpressionDataWithStreetClassOverride(
                     annotationExpressionData,
-                    route.distance(),
                     routeLineColorResources,
                     isPrimaryRoute,
                     trafficBackfillRoadClasses
@@ -547,17 +546,17 @@ internal object MapboxRouteLineUtils {
      * performance reasons.
      */
     internal val extractRouteDataWithTrafficAndRoadClassDeDuped: (
-        route: DirectionsRoute,
+        route: NavigationRoute,
         trafficCongestionProvider: TrafficCongestionProvider
     ) -> List<ExtractedRouteData> =
-        { route: DirectionsRoute, trafficCongestionProvider: TrafficCongestionProvider ->
+        { route: NavigationRoute, trafficCongestionProvider: TrafficCongestionProvider ->
             val extractedRouteDataItems = extractRouteData(
                 route,
                 trafficCongestionProvider
             )
             extractedRouteDataItems.filterIndexed { index, extractedRouteData ->
                 when {
-                    index == 0 -> true
+                    extractedRouteData.offset != extractedRouteDataItems.getOrNull(index + 1)?.offset -> true
                     extractedRouteDataItems[index].isLegOrigin -> true
                     extractedRouteDataItems[index - 1].trafficCongestionIdentifier ==
                         extractedRouteData.trafficCongestionIdentifier &&
@@ -653,50 +652,38 @@ internal object MapboxRouteLineUtils {
      * are cached for performance reasons.
      */
     internal val extractRouteData: (
-        route: DirectionsRoute,
+        route: NavigationRoute,
         trafficCongestionProvider: TrafficCongestionProvider
     ) -> List<ExtractedRouteData> =
-        { route: DirectionsRoute, trafficCongestionProvider: TrafficCongestionProvider ->
-            var runningDistance = 0.0
+        { route: NavigationRoute, trafficCongestionProvider: TrafficCongestionProvider ->
             val itemsToReturn = mutableListOf<ExtractedRouteData>()
-            route.legs()?.forEachIndexed { legIndex, leg ->
+            val granularDistances = granularDistancesProvider(route)!!
+            route.directionsRoute.legs()?.forEachIndexed { legIndex, leg ->
                 val closureRanges = getClosureRanges(leg).asSequence()
                 val roadClassArray = getRoadClassArray(leg.steps())
                 val trafficCongestion = trafficCongestionProvider.getTrafficFunction().invoke(leg)
-                var isLegOrigin = true
 
-                leg.annotation()?.distance()?.forEachIndexed { index, distance ->
-                    // If the distance is 0 it offers no value to upstream calculations and in fact
-                    // causes problems in creating the traffic expression since the expression
-                    // values need to be in strictly ascending order. A value of 0 can be caused
-                    // by the first point in a route leg being the same as the last point in the
-                    // previous route leg. There may be other causes as well.
-                    if (distance > 0.0) {
-                        val percentDistanceTraveled = runningDistance / route.distance()
-                        val isInAClosure = closureRanges.any { it.contains(index) }
-                        val congestionValue: String = when {
-                            isInAClosure -> RouteLayerConstants.CLOSURE_CONGESTION_VALUE
-                            trafficCongestion.isNullOrEmpty() ->
-                                RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
-                            index >= trafficCongestion.size ->
-                                RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
-                            else -> trafficCongestion[index]
-                        }
-                        val roadClass = getRoadClassForIndex(roadClassArray, index)
-
-                        itemsToReturn.add(
-                            ExtractedRouteData(
-                                runningDistance,
-                                percentDistanceTraveled,
-                                congestionValue,
-                                roadClass,
-                                legIndex,
-                                isLegOrigin
-                            )
-                        )
-                        isLegOrigin = false
-                        runningDistance += distance
+                granularDistances.legsDistances[legIndex].forEachIndexed { index, legDistances ->
+                    val isInAClosure = closureRanges.any { it.contains(index) }
+                    val congestionValue: String = when {
+                        isInAClosure -> RouteLayerConstants.CLOSURE_CONGESTION_VALUE
+                        trafficCongestion.isNullOrEmpty() ->
+                            RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
+                        index >= trafficCongestion.size ->
+                            RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
+                        else -> trafficCongestion[index]
                     }
+                    val roadClass = getRoadClassForIndex(roadClassArray, index)
+
+                    itemsToReturn.add(
+                        ExtractedRouteData(
+                            offset = 1.0 - legDistances.distanceRemaining / granularDistances.completeDistance,
+                            congestionValue,
+                            roadClass,
+                            legIndex,
+                            index == 0
+                        )
+                    )
                 }
             }
 
@@ -833,14 +820,12 @@ internal object MapboxRouteLineUtils {
      */
     internal fun getRouteLineExpressionDataWithStreetClassOverride(
         annotationExpressionData: List<ExtractedRouteData>,
-        routeDistance: Double,
         routeLineColorResources: RouteLineColorResources,
         isPrimaryRoute: Boolean,
         trafficOverrideRoadClasses: List<String>
     ): List<RouteLineExpressionData> {
         val expressionDataToReturn = mutableListOf<RouteLineExpressionData>()
         annotationExpressionData.forEachIndexed { index, annotationExpData ->
-            val percentDistanceTraveled = annotationExpData.distanceFromOrigin / routeDistance
             val trafficIdentifier =
                 if (
                     annotationExpData.trafficCongestionIdentifier ==
@@ -861,7 +846,7 @@ internal object MapboxRouteLineUtils {
             if (index == 0 || annotationExpData.isLegOrigin) {
                 expressionDataToReturn.add(
                     RouteLineExpressionData(
-                        percentDistanceTraveled,
+                        annotationExpData.offset,
                         trafficColor,
                         annotationExpData.legIndex
                     )
@@ -869,7 +854,7 @@ internal object MapboxRouteLineUtils {
             } else if (trafficColor != expressionDataToReturn.last().segmentColor) {
                 expressionDataToReturn.add(
                     RouteLineExpressionData(
-                        percentDistanceTraveled,
+                        annotationExpData.offset,
                         trafficColor,
                         annotationExpData.legIndex
                     )
