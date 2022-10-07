@@ -341,6 +341,11 @@ class NavigationCamera(
                         "transitionOptions=$frameTransitionOptions",
                     "[MapboxCamera-Crash]"
                 )
+                logI(
+                    "transition interface: " +
+                        "${stateTransition::class.qualifiedName}-${stateTransition::class}",
+                    "[MapboxCamera-Crash]"
+                )
                 startAnimation(
                     stateTransition.updateFrameForFollowing(
                         viewportData.cameraForFollowing,

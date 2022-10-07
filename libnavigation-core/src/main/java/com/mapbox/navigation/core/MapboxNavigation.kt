@@ -413,6 +413,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         private set
 
     init {
+        MapboxCrashHandler.setUp()
         if (hasInstance) {
             throw IllegalStateException(
                 """
