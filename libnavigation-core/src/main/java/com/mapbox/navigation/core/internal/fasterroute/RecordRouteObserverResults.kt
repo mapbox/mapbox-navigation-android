@@ -86,7 +86,7 @@ class RecordRouteObserverResults(
     }
 }
 
-class NavigationRouteTypeAdapter(
+internal class NavigationRouteTypeAdapter(
     private val routesProvider: (id: String) -> NavigationRoute
 ) : TypeAdapter<NavigationRoute>() {
     override fun write(out: JsonWriter, value: NavigationRoute) {
