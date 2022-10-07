@@ -28,6 +28,7 @@ import com.mapbox.navigation.ui.maps.camera.transition.MapboxNavigationCameraSta
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener
+import com.mapbox.navigation.utils.internal.logI
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -335,6 +336,11 @@ class NavigationCamera(
     private fun updateFrame(viewportData: ViewportData, instant: Boolean) {
         when (state) {
             FOLLOWING -> {
+                logI(
+                    "update following frame, cameraOptions=${viewportData.cameraForFollowing}, " +
+                        "transitionOptions=$frameTransitionOptions",
+                    "[MapboxCamera-Crash]"
+                )
                 startAnimation(
                     stateTransition.updateFrameForFollowing(
                         viewportData.cameraForFollowing,
@@ -346,6 +352,11 @@ class NavigationCamera(
                 )
             }
             OVERVIEW -> {
+                logI(
+                    "update overview frame, cameraOptions=${viewportData.cameraForOverview}, " +
+                        "transitionOptions=$frameTransitionOptions",
+                    "[MapboxCamera-Crash]"
+                )
                 startAnimation(
                     stateTransition.updateFrameForOverview(
                         viewportData.cameraForOverview,
