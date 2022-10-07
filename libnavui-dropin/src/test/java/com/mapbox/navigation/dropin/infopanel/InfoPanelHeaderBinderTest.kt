@@ -53,15 +53,12 @@ internal class InfoPanelHeaderBinderTest {
     fun setUp() {
         ctx = ApplicationProvider.getApplicationContext()
         store = TestStore()
-        navContext = spyk(
-            NavigationViewContext(
-                context = ctx,
-                lifecycleOwner = TestLifecycleOwner(),
-                viewModel = NavigationViewModel(),
-                storeProvider = { store }
-            )
+        navContext = NavigationViewContext(
+            context = ctx,
+            lifecycleOwner = TestLifecycleOwner(),
+            viewModel = NavigationViewModel(),
+            storeProvider = { store }
         )
-
         sut = InfoPanelHeaderBinder(navContext)
     }
 

@@ -16,7 +16,6 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.speedlimit.internal.SpeedLimitComponent
 import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
 import io.mockk.mockk
-import io.mockk.spyk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertNotEquals
@@ -46,13 +45,11 @@ class SpeedLimitViewBinderTest {
     @Before
     fun setUp() {
         ctx = ApplicationProvider.getApplicationContext()
-        navContext = spyk(
-            NavigationViewContext(
-                context = ctx,
-                lifecycleOwner = TestLifecycleOwner(),
-                viewModel = NavigationViewModel(),
-                storeProvider = { TestStore() }
-            )
+        navContext = NavigationViewContext(
+            context = ctx,
+            lifecycleOwner = TestLifecycleOwner(),
+            viewModel = NavigationViewModel(),
+            storeProvider = { TestStore() }
         )
         mapboxNavigation = mockk(relaxed = true)
 

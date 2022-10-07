@@ -16,7 +16,6 @@ import com.mapbox.navigation.dropin.util.TestingUtil.findComponent
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.mockk
-import io.mockk.spyk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertNotNull
 import org.junit.Before
@@ -43,13 +42,11 @@ class InfoPanelHeaderActiveGuidanceBinderTest {
     @Before
     fun setUp() {
         ctx = ApplicationProvider.getApplicationContext()
-        navContext = spyk(
-            NavigationViewContext(
-                context = ctx,
-                lifecycleOwner = TestLifecycleOwner(),
-                viewModel = NavigationViewModel(),
-                storeProvider = { TestStore() }
-            )
+        navContext = NavigationViewContext(
+            context = ctx,
+            lifecycleOwner = TestLifecycleOwner(),
+            viewModel = NavigationViewModel(),
+            storeProvider = { TestStore() }
         )
         mapboxNavigation = mockk(relaxed = true)
 
