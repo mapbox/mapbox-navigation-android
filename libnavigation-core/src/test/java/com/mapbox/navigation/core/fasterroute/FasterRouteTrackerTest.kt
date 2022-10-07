@@ -1,8 +1,8 @@
-@file:OptIn(ExperimentalMapboxNavigationAPI::class)
+@file:OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 
 package com.mapbox.navigation.core.fasterroute
 
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.fasterroute.TestRoutes.Companion.FASTER_ROUTE_IN_MUNICH
 import com.mapbox.navigation.core.fasterroute.TestRoutes.Companion.MUNICH_NUREMBERG
 import com.mapbox.navigation.testing.LoggingFrontendTestRule

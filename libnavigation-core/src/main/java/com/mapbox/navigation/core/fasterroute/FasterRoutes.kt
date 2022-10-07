@@ -1,41 +1,28 @@
 package com.mapbox.navigation.core.fasterroute
 
 import androidx.annotation.UiThread
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.utils.internal.logE
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
-
-@ExperimentalMapboxNavigationAPI
-fun MapboxNavigation.createFasterRoutes(
-    options: FasterRouteOptions
-) = FasterRoutes(
-    this,
-    FasterRouteTracker(options),
-    Dispatchers.Main
-)
 
 /***
  * Keeps track of primary and alternatives routes to notify in [NewFasterRouteObserver] that a
  * new faster route is available.
  */
-@ExperimentalMapboxNavigationAPI
+@ExperimentalPreviewMapboxNavigationAPI
 class FasterRoutes internal constructor(
     private val mapboxNavigation: MapboxNavigation,
     private val fasterRouteTracker: FasterRouteTracker,
-    mainDispatcher: CoroutineDispatcher
+    private val scope: CoroutineScope
 ) {
 
-    private val scope = CoroutineScope(SupervisorJob() + mainDispatcher)
     private var previousRouteUpdateProcessing: Job? = null
     private val newFasterRoutesObservers = CopyOnWriteArraySet<NewFasterRouteObserver>()
 
@@ -98,11 +85,18 @@ class FasterRoutes internal constructor(
         )
     }
 
+    /***
+     * Stops observation and processing routes from [MapboxNavigation]
+     */
     @UiThread
     fun destroy() {
         mapboxNavigation.unregisterRoutesObserver(internalObserver)
         scope.cancel()
+        isDestroyed = true
     }
+
+    internal var isDestroyed = false
+        private set
 
     private fun newFasterRouteFound(newFasterRoute: NewFasterRoute) {
         newFasterRoutesObservers.forEach { it.onNewFasterRouteFound(newFasterRoute) }

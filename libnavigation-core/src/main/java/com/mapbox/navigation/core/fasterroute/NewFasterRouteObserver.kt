@@ -1,9 +1,9 @@
 package com.mapbox.navigation.core.fasterroute
 
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 
-@ExperimentalMapboxNavigationAPI
+@ExperimentalPreviewMapboxNavigationAPI
 fun interface NewFasterRouteObserver {
     /***
      * Called every time a faster route is available.
@@ -14,7 +14,7 @@ fun interface NewFasterRouteObserver {
     fun onNewFasterRouteFound(newFasterRoute: NewFasterRoute)
 }
 
-@ExperimentalMapboxNavigationAPI
+@ExperimentalPreviewMapboxNavigationAPI
 data class NewFasterRoute(
     val fasterRoute: NavigationRoute,
     val fasterThanPrimaryRouteBy: Double,

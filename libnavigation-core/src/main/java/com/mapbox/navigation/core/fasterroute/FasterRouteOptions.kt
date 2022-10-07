@@ -1,8 +1,8 @@
 package com.mapbox.navigation.core.fasterroute
 
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
-@ExperimentalMapboxNavigationAPI
+@ExperimentalPreviewMapboxNavigationAPI
 class FasterRouteOptions internal constructor(
     val maxGeometrySimilarityToRejectedAlternatives: Double
 ) {

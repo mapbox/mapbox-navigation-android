@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMapboxNavigationAPI::class)
+@file:OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 
 package com.mapbox.navigation.qa_test_app.view
 
@@ -30,7 +30,6 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
@@ -43,11 +42,8 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.fasterroute.FasterRouteOptions
-import com.mapbox.navigation.core.fasterroute.FasterRoutes
 import com.mapbox.navigation.core.fasterroute.NewFasterRoute
 import com.mapbox.navigation.core.fasterroute.NewFasterRouteObserver
-import com.mapbox.navigation.core.fasterroute.createFasterRoutes
 import com.mapbox.navigation.core.internal.fasterroute.RecordRouteObserverResults
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -119,19 +115,6 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private val mapboxNavigation: MapboxNavigation by requireMapboxNavigation(
-        onCreatedObserver = object : MapboxNavigationObserver {
-            private lateinit var fasterRoutes: FasterRoutes
-            override fun onAttached(mapboxNavigation: MapboxNavigation) {
-                fasterRoutes = mapboxNavigation.createFasterRoutes(
-                    FasterRouteOptions.Builder().build()
-                )
-                fasterRoutes.registerNewFasterRouteObserver(fasterRouteObserver)
-            }
-            override fun onDetached(mapboxNavigation: MapboxNavigation) {
-                fasterRoutes.unregisterNewFasterRouteObserver(fasterRouteObserver)
-                fasterRoutes.destroy()
-            }
-        },
         onResumedObserver = object : MapboxNavigationObserver {
             override fun onAttached(mapboxNavigation: MapboxNavigation) {
                 mapboxNavigation.registerLocationObserver(locationObserver)
@@ -140,6 +123,8 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 mapboxNavigation.registerRoutesObserver(recordRoutesObserver)
                 mapboxNavigation.registerRoutesObserver(routesObserver)
                 mapboxNavigation.registerRouteAlternativesObserver(alternativesObserver)
+                mapboxNavigation.getFasterRoute()
+                    .registerNewFasterRouteObserver(fasterRouteObserver)
             }
 
             override fun onDetached(mapboxNavigation: MapboxNavigation) {
@@ -149,6 +134,8 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 mapboxNavigation.unregisterRoutesObserver(recordRoutesObserver)
                 mapboxNavigation.unregisterRoutesObserver(routesObserver)
                 mapboxNavigation.unregisterRouteAlternativesObserver(alternativesObserver)
+                mapboxNavigation.getFasterRoute()
+                    .unregisterNewFasterRouteObserver(fasterRouteObserver)
             }
         },
         onInitialize = this::initNavigation
@@ -183,7 +170,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
         mapboxReplayer.pushEvents(
             ReplayEventLocation(
-                11.574758,48.150672,
+                11.574758, 48.150672,
                 provider = "me",
                 0.0,
                 null,
@@ -394,7 +381,8 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private val fasterRouteObserver = NewFasterRouteObserver { newFasterRoute: NewFasterRoute ->
-        val message = "faster route found: ${mapboxNavigation.getAlternativeMetadataFor(newFasterRoute.fasterRoute)?.alternativeId} is faster than primary by ${newFasterRoute.fasterThanPrimaryRouteBy}"
+        val message =
+            "faster route found: ${mapboxNavigation.getAlternativeMetadataFor(newFasterRoute.fasterRoute)?.alternativeId} is faster than primary by ${newFasterRoute.fasterThanPrimaryRouteBy}"
         logD("faster-route", message)
     }
 
