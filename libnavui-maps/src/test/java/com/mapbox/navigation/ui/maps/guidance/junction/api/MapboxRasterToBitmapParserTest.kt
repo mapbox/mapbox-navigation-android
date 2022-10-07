@@ -1,28 +1,28 @@
 package com.mapbox.navigation.ui.maps.guidance.junction.api
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import androidx.test.core.app.ApplicationProvider
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class MapboxRasterToBitmapParserTest {
 
-    private lateinit var ctx: Context
-
     @Before
-    fun setUp() {
-        ctx = ApplicationProvider.getApplicationContext()
+    fun `set up`() {
+        mockkStatic(BitmapFactory::class)
+    }
+
+    @After
+    fun `tear down`() {
+        unmockkStatic(BitmapFactory::class)
     }
 
     @Test
@@ -37,10 +37,21 @@ class MapboxRasterToBitmapParserTest {
     }
 
     @Test
+    fun `when raster invalid parse fail`() {
+        val mockRaster = byteArrayOf(34, 87, 88, 45, 22, 90, 77)
+
+        every { BitmapFactory.decodeByteArray(mockRaster, 0, mockRaster.size) } returns null
+        val expected = ExpectedFactory.createError<String, Bitmap>("Raster is not a valid bitmap")
+
+        val actual = MapboxRasterToBitmapParser.parse(mockRaster)
+
+        assertEquals(expected.error!!, actual.error!!)
+    }
+
+    @Test
     fun `when raster not empty parse success`() {
         val mockRaster = byteArrayOf(34, 87, 88, 45, 22, 90, 77)
         val mockBitmap = mockk<Bitmap>()
-        mockkStatic(BitmapFactory::class)
         every { BitmapFactory.decodeByteArray(mockRaster, 0, mockRaster.size) } returns mockBitmap
         val expected: Expected<String, Bitmap> = ExpectedFactory.createValue(mockBitmap)
 

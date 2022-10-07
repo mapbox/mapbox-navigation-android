@@ -19,9 +19,9 @@ internal object MapboxRasterToBitmapParser {
     @JvmStatic
     fun parse(raster: ByteArray): Expected<String, Bitmap> {
         return when {
-            raster.isNotEmpty() -> ExpectedFactory.createValue(
-                BitmapFactory.decodeByteArray(raster, 0, raster.size)
-            )
+            raster.isNotEmpty() -> BitmapFactory.decodeByteArray(raster, 0, raster.size)
+                ?.let { ExpectedFactory.createValue(it) }
+                ?: ExpectedFactory.createError("Raster is not a valid bitmap")
             else -> ExpectedFactory.createError("Error parsing raster to bitmap as raster is empty")
         }
     }
