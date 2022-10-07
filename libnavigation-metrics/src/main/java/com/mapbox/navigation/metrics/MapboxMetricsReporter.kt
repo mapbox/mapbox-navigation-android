@@ -111,7 +111,9 @@ object MapboxMetricsReporter : MetricsReporter {
             eventsService.sendEvent(
                 Event(EventPriority.IMMEDIATE, metricEvent.toValue(), null)
             ) {
-                logE("Failed to send event ${metricEvent.metricName}: $it", LOG_CATEGORY)
+                if (it != null) {
+                    logE("Failed to send event ${metricEvent.metricName}: $it", LOG_CATEGORY)
+                }
             }
 
             ioJobController.scope.launch {
@@ -126,7 +128,9 @@ object MapboxMetricsReporter : MetricsReporter {
     override fun sendTurnstileEvent(turnstileEvent: TurnstileEvent) {
         ifTelemetryIsRunning {
             eventsService.sendTurnstileEvent(turnstileEvent) {
-                logE("Failed to send Turnstile event: $it", LOG_CATEGORY)
+                if (it != null) {
+                    logE("Failed to send Turnstile event: $it", LOG_CATEGORY)
+                }
             }
         }
     }
