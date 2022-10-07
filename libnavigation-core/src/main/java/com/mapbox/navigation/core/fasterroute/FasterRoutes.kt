@@ -81,7 +81,7 @@ class FasterRoutes internal constructor(
                     currentRoutes.filterNot { it == newFasterRoute.fasterRoute }
             )
         } else {
-            logE("Ignoring accepted faster route as it's not present in faster routes")
+            logE("Ignoring accepted faster route as it's not present in current routes")
         }
     }
 
