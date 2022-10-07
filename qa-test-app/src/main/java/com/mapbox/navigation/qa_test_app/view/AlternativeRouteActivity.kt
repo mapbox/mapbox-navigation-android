@@ -123,7 +123,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 mapboxNavigation.registerRoutesObserver(recordRoutesObserver)
                 mapboxNavigation.registerRoutesObserver(routesObserver)
                 mapboxNavigation.registerRouteAlternativesObserver(alternativesObserver)
-                mapboxNavigation.getFasterRoute()
+                mapboxNavigation.getFasterRoutesTracker()
                     .registerNewFasterRouteObserver(fasterRouteObserver)
             }
 
@@ -134,7 +134,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 mapboxNavigation.unregisterRoutesObserver(recordRoutesObserver)
                 mapboxNavigation.unregisterRoutesObserver(routesObserver)
                 mapboxNavigation.unregisterRouteAlternativesObserver(alternativesObserver)
-                mapboxNavigation.getFasterRoute()
+                mapboxNavigation.getFasterRoutesTracker()
                     .unregisterNewFasterRouteObserver(fasterRouteObserver)
             }
         },

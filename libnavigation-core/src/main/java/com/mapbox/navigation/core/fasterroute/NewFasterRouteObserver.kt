@@ -8,8 +8,8 @@ fun interface NewFasterRouteObserver {
     /***
      * Called every time a faster route is available.
      *
-     * You can accept it using [FasterRoutes.acceptFasterRoute]
-     * or decline it using [FasterRoutes.declineFasterRoute]
+     * You can accept it using [FasterRoutesTracker.acceptFasterRoute]
+     * or decline it using [FasterRoutesTracker.declineFasterRoute]
      */
     fun onNewFasterRouteFound(newFasterRoute: NewFasterRoute)
 }

@@ -17,9 +17,9 @@ import java.util.concurrent.CopyOnWriteArraySet
  * new faster route is available.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class FasterRoutes internal constructor(
+class FasterRoutesTracker internal constructor(
     private val mapboxNavigation: MapboxNavigation,
-    private val fasterRouteTracker: FasterRouteTracker,
+    private val fasterRouteTrackerCore: FasterRouteTrackerCore,
     private val scope: CoroutineScope
 ) {
 
@@ -29,7 +29,7 @@ class FasterRoutes internal constructor(
     private val internalObserver = RoutesObserver { result: RoutesUpdatedResult ->
         previousRouteUpdateProcessing?.cancel()
         previousRouteUpdateProcessing = scope.launch {
-            val fasterRouteTrackerResult = fasterRouteTracker.findFasterRouteInUpdate(
+            val fasterRouteTrackerResult = fasterRouteTrackerCore.findFasterRouteInUpdate(
                 result,
                 mapboxNavigation.getAlternativeMetadataFor(result.navigationRoutes)
             )
@@ -79,7 +79,7 @@ class FasterRoutes internal constructor(
      */
     @UiThread
     fun declineFasterRoute(newFasterRoute: NewFasterRoute) {
-        fasterRouteTracker.fasterRouteDeclined(
+        fasterRouteTrackerCore.fasterRouteDeclined(
             newFasterRoute.alternativeId,
             newFasterRoute.fasterRoute
         )

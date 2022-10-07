@@ -23,11 +23,11 @@ class FasterRoutesTest {
     @Test
     fun `faster route found`() = runBlockingTest {
         val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val fasterRouteTrackerMock = mockk<FasterRouteTracker>()
+        val fasterRouteTrackerMock = mockk<FasterRouteTrackerCore>()
         val routeObserver = mapboxNavigation.recordRoutesObservers()
         val fasterRoutes = createFasterRoutes(
             mapboxNavigation = mapboxNavigation,
-            fasterRouteTracker = fasterRouteTrackerMock
+            fasterRouteTrackerCore = fasterRouteTrackerMock
         )
         val fasterRouteCallback = mockk<NewFasterRouteObserver>()
         fasterRoutes.registerNewFasterRouteObserver(fasterRouteCallback)
@@ -46,11 +46,11 @@ class FasterRoutesTest {
     @Test
     fun `no faster route found`() = runBlockingTest {
         val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val fasterRouteTrackerMock = mockk<FasterRouteTracker>()
+        val fasterRouteTrackerMock = mockk<FasterRouteTrackerCore>()
         val routeObserver = mapboxNavigation.recordRoutesObservers()
         val fasterRoutes = createFasterRoutes(
             mapboxNavigation = mapboxNavigation,
-            fasterRouteTracker = fasterRouteTrackerMock
+            fasterRouteTrackerCore = fasterRouteTrackerMock
         )
         val fasterRouteCallback = mockk<NewFasterRouteObserver>(relaxed = true)
         fasterRoutes.registerNewFasterRouteObserver(fasterRouteCallback)
@@ -70,11 +70,11 @@ class FasterRoutesTest {
     fun `old results are ignored when routes are updated faster then processing not processed `() =
         runBlockingTest {
             val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-            val fasterRouteTrackerMock = mockk<FasterRouteTracker>()
+            val fasterRouteTrackerMock = mockk<FasterRouteTrackerCore>()
             val routeObserver = mapboxNavigation.recordRoutesObservers()
             val fasterRoutes = createFasterRoutes(
                 mapboxNavigation = mapboxNavigation,
-                fasterRouteTracker = fasterRouteTrackerMock,
+                fasterRouteTrackerCore = fasterRouteTrackerMock,
             )
             val fasterRouteCallback = mockk<NewFasterRouteObserver>(relaxed = true)
             fasterRoutes.registerNewFasterRouteObserver(fasterRouteCallback)
@@ -107,11 +107,11 @@ class FasterRoutesTest {
     @Test
     fun `accept faster route`() = runBlockingTest {
         val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val fasterRouteTrackerMock = mockk<FasterRouteTracker>()
+        val fasterRouteTrackerMock = mockk<FasterRouteTrackerCore>()
         val routeObserver = mapboxNavigation.recordRoutesObservers()
         val fasterRoutes = createFasterRoutes(
             mapboxNavigation = mapboxNavigation,
-            fasterRouteTracker = fasterRouteTrackerMock
+            fasterRouteTrackerCore = fasterRouteTrackerMock
         )
         val currentRoutes = createNavigationRoutes(
             response = createDirectionsResponse(
@@ -142,11 +142,11 @@ class FasterRoutesTest {
 }
 
 private fun CoroutineScope.createFasterRoutes(
-    fasterRouteTracker: FasterRouteTracker = createFasterRoutesTracker(),
+    fasterRouteTrackerCore: FasterRouteTrackerCore = createFasterRoutesTracker(),
     mapboxNavigation: MapboxNavigation = mockk(relaxed = true),
-) = FasterRoutes(
+) = FasterRoutesTracker(
     mapboxNavigation = mapboxNavigation,
-    fasterRouteTracker = fasterRouteTracker,
+    fasterRouteTracker = fasterRouteTrackerCore,
     this
 )
 

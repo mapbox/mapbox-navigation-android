@@ -87,6 +87,6 @@ class FasterRouteTrackerTest {
         }
 }
 
-internal fun createFasterRoutesTracker() = FasterRouteTracker(
+internal fun createFasterRoutesTracker() = FasterRouteTrackerCore(
     FasterRouteOptions.Builder().build()
 )

@@ -9,7 +9,7 @@ import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.utils.internal.logD
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal class FasterRouteTracker(
+internal class FasterRouteTrackerCore(
     options: FasterRouteOptions
 ) {
 

@@ -7,7 +7,7 @@ package com.mapbox.navigation.core {
     method public com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata? getAlternativeMetadataFor(com.mapbox.navigation.base.route.NavigationRoute navigationRoute);
     method public java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> getAlternativeMetadataFor(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> navigationRoutes);
     method public com.mapbox.navigator.Experimental getExperimental();
-    method @UiThread @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.core.fasterroute.FasterRoutes getFasterRoute(com.mapbox.navigation.core.fasterroute.FasterRouteOptions fasterRouteOptions = FasterRouteOptions.<init>().build());
+    method @UiThread @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.core.fasterroute.FasterRoutesTracker getFasterRoutesTracker(com.mapbox.navigation.core.fasterroute.FasterRouteOptions fasterRouteOptions = FasterRouteOptions.<init>().build());
     method public com.mapbox.navigation.core.trip.session.eh.GraphAccessor getGraphAccessor();
     method public com.mapbox.navigation.core.history.MapboxHistoryRecorder getHistoryRecorder();
     method public com.mapbox.navigation.core.replay.MapboxReplayer getMapboxReplayer();
@@ -198,7 +198,7 @@ package com.mapbox.navigation.core.fasterroute {
     method public void maxGeometrySimilarityToRejectedAlternatives(double value);
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class FasterRoutes {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class FasterRoutesTracker {
     method @UiThread public void acceptFasterRoute(com.mapbox.navigation.core.fasterroute.NewFasterRoute newFasterRoute);
     method @UiThread public void declineFasterRoute(com.mapbox.navigation.core.fasterroute.NewFasterRoute newFasterRoute);
     method @UiThread public void destroy();
