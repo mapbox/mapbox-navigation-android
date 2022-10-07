@@ -32,7 +32,7 @@ class FasterRoutesTest {
         val fasterRouteCallback = mockk<NewFasterRouteObserver>()
         fasterRoutes.registerNewFasterRouteObserver(fasterRouteCallback)
         coEvery {
-            fasterRouteTrackerMock.routesUpdated(
+            fasterRouteTrackerMock.findFasterRouteInUpdate(
                 any(),
                 any()
             )
@@ -55,7 +55,7 @@ class FasterRoutesTest {
         val fasterRouteCallback = mockk<NewFasterRouteObserver>(relaxed = true)
         fasterRoutes.registerNewFasterRouteObserver(fasterRouteCallback)
         coEvery {
-            fasterRouteTrackerMock.routesUpdated(
+            fasterRouteTrackerMock.findFasterRouteInUpdate(
                 any(),
                 any()
             )
@@ -79,7 +79,7 @@ class FasterRoutesTest {
         fasterRoutes.registerNewFasterRouteObserver(fasterRouteCallback)
         val firstRouteUpdateProcessing = CompletableDeferred<FasterRouteResult>()
         coEvery {
-            fasterRouteTrackerMock.routesUpdated(
+            fasterRouteTrackerMock.findFasterRouteInUpdate(
                 any(),
                 any()
             )
@@ -89,7 +89,7 @@ class FasterRoutesTest {
         routeObserver.onRoutesChanged(mockk(relaxed = true))
         verify(exactly = 0) { fasterRouteCallback.onNewFasterRouteFound(any()) }
         coEvery {
-            fasterRouteTrackerMock.routesUpdated(
+            fasterRouteTrackerMock.findFasterRouteInUpdate(
                 any(),
                 any()
             )
@@ -124,7 +124,7 @@ class FasterRoutesTest {
         )
         every { mapboxNavigation.getNavigationRoutes() } returns currentRoutes
         coEvery {
-            fasterRouteTrackerMock.routesUpdated(
+            fasterRouteTrackerMock.findFasterRouteInUpdate(
                 any(),
                 any()
             )

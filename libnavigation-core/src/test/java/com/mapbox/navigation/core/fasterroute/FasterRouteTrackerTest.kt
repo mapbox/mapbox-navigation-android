@@ -22,7 +22,7 @@ class FasterRouteTrackerTest {
             val fasterRoutes = createFasterRoutesTracker()
             val recordedRoutesUpdates = readRouteObserverResults(MUNICH_NUREMBERG)
             for (recordedUpdate in recordedRoutesUpdates) {
-                val result = fasterRoutes.routesUpdated(
+                val result = fasterRoutes.findFasterRouteInUpdate(
                     recordedUpdate.update,
                     recordedUpdate.alternativeMetadata.values.toList()
                 )
@@ -44,7 +44,7 @@ class FasterRouteTrackerTest {
             val routeUpdates = readRouteObserverResults(FASTER_ROUTE_IN_MUNICH)
             val fasterRoutesIds = mutableListOf<String>()
             for (recordedUpdate in routeUpdates) {
-                val result = fasterRoutesTracker.routesUpdated(
+                val result = fasterRoutesTracker.findFasterRouteInUpdate(
                     recordedUpdate.update,
                     recordedUpdate.alternativeMetadata.values.toList()
                 )
@@ -69,7 +69,7 @@ class FasterRouteTrackerTest {
             val routeUpdates = readRouteObserverResults(FASTER_ROUTE_IN_MUNICH)
             val fasterRoutesIds = mutableListOf<String>()
             for (recordedUpdate in routeUpdates) {
-                val result = fasterRoutesTracker.routesUpdated(
+                val result = fasterRoutesTracker.findFasterRouteInUpdate(
                     recordedUpdate.update,
                     recordedUpdate.alternativeMetadata.values.toList()
                 )

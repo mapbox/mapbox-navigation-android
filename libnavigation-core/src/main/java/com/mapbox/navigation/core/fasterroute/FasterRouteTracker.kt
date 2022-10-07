@@ -21,7 +21,7 @@ internal class FasterRouteTracker(
         rejectedRoutesTracker.addRejectedRoutes(mapOf(alternativeId to route))
     }
 
-    suspend fun routesUpdated(
+    suspend fun findFasterRouteInUpdate(
         update: RoutesUpdatedResult,
         alternativeRoutesMetadata: List<AlternativeRouteMetadata>
     ): FasterRouteResult {

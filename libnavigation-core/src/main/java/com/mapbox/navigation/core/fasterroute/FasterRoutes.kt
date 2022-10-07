@@ -42,7 +42,7 @@ class FasterRoutes internal constructor(
     private val internalObserver = RoutesObserver { result: RoutesUpdatedResult ->
         previousRouteUpdateProcessing?.cancel()
         previousRouteUpdateProcessing = scope.launch {
-            val fasterRouteTrackerResult = fasterRouteTracker.routesUpdated(
+            val fasterRouteTrackerResult = fasterRouteTracker.findFasterRouteInUpdate(
                 result,
                 mapboxNavigation.getAlternativeMetadataFor(result.navigationRoutes)
             )
