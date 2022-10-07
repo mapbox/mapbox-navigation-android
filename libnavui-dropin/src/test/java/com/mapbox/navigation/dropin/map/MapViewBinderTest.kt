@@ -17,7 +17,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -52,7 +51,7 @@ class MapViewBinderTest {
     }
 
     private val sut = object : MapViewBinder() {
-        override fun getMapView(viewGroup: ViewGroup): MapView = mapView
+        override fun onCreateMapView(viewGroup: ViewGroup): MapView = mapView
     }
 
     @Before
@@ -62,28 +61,13 @@ class MapViewBinderTest {
     }
 
     @Test
-    fun `bind adds mapView`() {
-        sut.bind(viewGroup)
-        assertEquals(1, viewGroup.childCount)
-        assertTrue(viewGroup.getChildAt(0) === mapView)
-    }
-
-    @Test
-    fun `bind notifies listeners`() {
-        val listener = mockk<MapboxMapObserver>(relaxed = true)
-        sut.registerMapboxMapObserver(listener)
-        sut.bind(viewGroup)
-        verify { listener.onMapboxMapReady(map) }
-    }
-
-    @Test
     fun `bind updates mapView`() {
         sut.bind(viewGroup)
         verify { mapViewOwner.updateMapView(mapView) }
     }
 
     @Test
-    fun `getMapLoadStylePolicy returns NEVER`() {
-        assertEquals(MapStyleLoadPolicy.NEVER, sut.getMapStyleLoadPolicy())
+    fun `shouldLoadMapStyle should be true`() {
+        assertTrue(sut.shouldLoadMapStyle)
     }
 }

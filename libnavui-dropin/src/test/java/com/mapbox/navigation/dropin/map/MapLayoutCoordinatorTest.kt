@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -78,7 +79,7 @@ class MapLayoutCoordinatorTest {
     fun `should use default binder`() = coroutineRule.runBlockingTest {
         verify { anyConstructed<MapboxMapViewBinder>().context = context }
         verify { anyConstructed<MapboxMapViewBinder>().navigationViewBinding = binding }
-        verify { anyConstructed<MapboxMapViewBinder>().registerMapboxMapObserver(any()) }
+        verify { mapViewOwner.registerObserver(any()) }
         // 1 constructed binder
         verify(exactly = 1) { observer.onAttached(mapboxNavigation) }
     }
@@ -89,7 +90,7 @@ class MapLayoutCoordinatorTest {
         mapViewBinderFlow.value = customBinder
         verify { customBinder.context = context }
         verify { customBinder.navigationViewBinding = binding }
-        verify { customBinder.registerMapboxMapObserver(any()) }
+        verify { mapViewOwner.registerObserver(any()) }
         verify(exactly = 0) { observer.onAttached(any()) }
     }
 
@@ -101,43 +102,31 @@ class MapLayoutCoordinatorTest {
         mapViewBinderFlow.value = newCustomBinder
         verify { newCustomBinder.context = context }
         verify { newCustomBinder.navigationViewBinding = binding }
-        verify { newCustomBinder.registerMapboxMapObserver(any()) }
+        verify { mapViewOwner.registerObserver(any()) }
         verify(exactly = 0) { observer.onAttached(any()) }
     }
 
     @Test
-    fun `should not interact with styles if policy is NEVER`() = coroutineRule.runBlockingTest {
-        every { customBinder.getMapStyleLoadPolicy() } returns MapStyleLoadPolicy.NEVER
-        clearMocks(mapStyleLoader, answers = false)
-        mapViewBinderFlow.value = customBinder
-        verify(exactly = 0) {
-            mapStyleLoader.loadInitialStyle()
-        }
-        coVerify(exactly = 0) {
-            mapStyleLoader.observeAndReloadNewStyles()
-        }
-    }
-
-    @Test
-    fun `should only load style once if policy is ONCE`() = coroutineRule.runBlockingTest {
-        every { customBinder.getMapStyleLoadPolicy() } returns MapStyleLoadPolicy.ONCE
-        clearMocks(mapStyleLoader, answers = false)
-        mapViewBinderFlow.value = customBinder
-        verify(exactly = 1) {
-            mapStyleLoader.loadInitialStyle()
-        }
-        coVerify(exactly = 0) {
-            mapStyleLoader.observeAndReloadNewStyles()
-        }
-    }
-
-    @Test
-    fun `should load and reload style if policy is ON_CONFIGURATION_CHANGE`() =
+    fun `should not interact with styles if shouldLoadMapStyle is false`() =
         coroutineRule.runBlockingTest {
-            every {
-                customBinder.getMapStyleLoadPolicy()
-            } returns MapStyleLoadPolicy.ON_CONFIGURATION_CHANGE
+            every { customBinder.shouldLoadMapStyle } returns false
             clearMocks(mapStyleLoader, answers = false)
+            mapViewBinderFlow.value = customBinder
+            attachMapView()
+            verify(exactly = 0) {
+                mapStyleLoader.loadInitialStyle()
+            }
+            coVerify(exactly = 0) {
+                mapStyleLoader.observeAndReloadNewStyles()
+            }
+        }
+
+    @Test
+    fun `should load and reload style if shouldLoadMapStyle is true`() =
+        coroutineRule.runBlockingTest {
+            every { customBinder.shouldLoadMapStyle } returns true
+            clearMocks(mapStyleLoader, answers = false)
+            attachMapView()
             mapViewBinderFlow.value = customBinder
             verify(exactly = 1) {
                 mapStyleLoader.loadInitialStyle()
@@ -147,11 +136,15 @@ class MapLayoutCoordinatorTest {
             }
         }
 
+    private fun attachMapView() {
+        val observers = mutableListOf<MapViewObserver>()
+        verify { mapViewOwner.registerObserver(capture(observers)) }
+        observers.last().onAttached(mockk(relaxed = true))
+    }
+
     @Test
     fun `new binder should cancel previous load style job`() = coroutineRule.runBlockingTest {
-        every {
-            customBinder.getMapStyleLoadPolicy()
-        } returns MapStyleLoadPolicy.ON_CONFIGURATION_CHANGE
+        every { customBinder.shouldLoadMapStyle } returns true
         var reloadFinished = false
         coEvery {
             mapStyleLoader.observeAndReloadNewStyles()
@@ -169,12 +162,16 @@ class MapLayoutCoordinatorTest {
     @Test
     fun `listener should update mapbox map`() = coroutineRule.runBlockingTest {
         val map = mockk<MapboxMap>()
-        val listeners = mutableListOf<MapboxMapObserver>()
-        verify {
-            anyConstructed<MapboxMapViewBinder>().registerMapboxMapObserver(capture(listeners))
+        val mapView = mockk<MapView> {
+            every { getMapboxMap() } returns map
         }
-        listeners.first().onMapboxMapReady(map)
+        val listeners = mutableListOf<MapViewObserver>()
+        verify {
+            mapViewOwner.registerObserver(capture(listeners))
+        }
+        listeners.first().onAttached(mapView)
         verify { mapStyleLoader.mapboxMap = map }
+        verify { mapViewOwner.unregisterObserver(listeners.first()) }
     }
 
     @Test

@@ -2,7 +2,6 @@ package com.mapbox.navigation.dropin.map
 
 import android.view.ViewGroup
 import com.mapbox.maps.MapView
-import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.extensions.navigationListOf
@@ -27,42 +26,37 @@ import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponent
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 
+/**
+ * Base Binder class used for inflating and binding Map View.
+ * Use [MapViewBinder.defaultBinder] to access default implementation.
+ */
 @ExperimentalPreviewMapboxNavigationAPI
 abstract class MapViewBinder : UIBinder {
-
-    companion object {
-        /**
-         * Default Info Panel Binder.
-         */
-        fun defaultBinder(): MapViewBinder = MapboxMapViewBinder()
-    }
 
     internal lateinit var context: NavigationViewContext
     internal lateinit var navigationViewBinding: MapboxNavigationViewLayoutBinding
 
-    private val mapboxMapObservers = mutableSetOf<MapboxMapObserver>()
+    /**
+     * Create [MapView].
+     *
+     * @param viewGroup Parent view which the [MapView] will belong to.
+     * @return [MapView] that will host the map.
+     *  Returned view must not be attached to [viewGroup] view.
+     */
+    abstract fun onCreateMapView(viewGroup: ViewGroup): MapView
 
-    internal fun registerMapboxMapObserver(observer: MapboxMapObserver) {
-        mapboxMapObservers.add(observer)
-    }
+    /**
+     * `True` if Mapbox should load map style,
+     * `false` if it will be loaded by the user or handled in any other way.
+     */
+    open val shouldLoadMapStyle: Boolean = true
 
-    abstract fun getMapView(viewGroup: ViewGroup): MapView
-
-    @MapStyleLoadPolicy.MapLoadStylePolicy
-    open fun getMapStyleLoadPolicy(): Int = MapStyleLoadPolicy.NEVER
-
-    internal open fun addMapViewToLayout(mapView: MapView, viewGroup: ViewGroup) {
-        viewGroup.removeAllViews()
-        viewGroup.addView(mapView)
-    }
-
-    open fun onMapViewReady(mapView: MapView) { }
-
+    /**
+     * Triggered when this view binder instance is attached. The [viewGroup] returns a
+     * [MapboxNavigationObserver] which gives this view a simple lifecycle.
+     */
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
-        val mapView = getMapView(viewGroup)
-        addMapViewToLayout(mapView, viewGroup)
-        onMapViewReady(mapView)
-        mapboxMapObservers.forEach { it.onMapboxMapReady(mapView.getMapboxMap()) }
+        val mapView = onCreateMapView(viewGroup)
         context.mapViewOwner.updateMapView(mapView)
 
         val store = context.store
@@ -144,9 +138,11 @@ abstract class MapViewBinder : UIBinder {
     } else {
         null
     }
-}
 
-internal fun interface MapboxMapObserver {
-
-    fun onMapboxMapReady(map: MapboxMap)
+    companion object {
+        /**
+         * Default Info Panel Binder.
+         */
+        fun defaultBinder(): MapViewBinder = MapboxMapViewBinder()
+    }
 }

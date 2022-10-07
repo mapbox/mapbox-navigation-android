@@ -11,23 +11,14 @@ import com.mapbox.navigation.dropin.databinding.MapboxMapviewLayoutBinding
 @ExperimentalPreviewMapboxNavigationAPI
 internal class MapboxMapViewBinder : MapViewBinder() {
 
-    override fun getMapView(viewGroup: ViewGroup): MapView {
+    override fun onCreateMapView(viewGroup: ViewGroup): MapView {
         Scene.getSceneForLayout(
             viewGroup,
             R.layout.mapbox_mapview_layout,
             viewGroup.context,
         ).enter()
-        return MapboxMapviewLayoutBinding.bind(viewGroup).mapView
+        return MapboxMapviewLayoutBinding.bind(viewGroup).mapView.also {
+            it.compass.enabled = false
+        }
     }
-
-    override fun addMapViewToLayout(mapView: MapView, viewGroup: ViewGroup) {
-        // do nothing
-    }
-
-    override fun onMapViewReady(mapView: MapView) {
-        mapView.compass.enabled = false
-    }
-
-    @MapStyleLoadPolicy.MapLoadStylePolicy
-    override fun getMapStyleLoadPolicy(): Int = MapStyleLoadPolicy.ON_CONFIGURATION_CHANGE
 }

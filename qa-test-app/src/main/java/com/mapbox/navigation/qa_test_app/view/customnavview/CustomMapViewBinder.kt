@@ -9,7 +9,10 @@ import com.mapbox.navigation.dropin.map.MapViewBinder
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class CustomMapViewBinder(private val context: Context) : MapViewBinder() {
 
-    override fun getMapView(viewGroup: ViewGroup): MapView {
-        return customMapViewFromCode(context)
+    override fun onCreateMapView(viewGroup: ViewGroup): MapView {
+        return customMapViewFromCode(context).also {
+            viewGroup.removeAllViews()
+            viewGroup.addView(it)
+        }
     }
 }

@@ -39,22 +39,26 @@ internal class MapLayoutCoordinator(
             (customBinder ?: MapboxMapViewBinder()).also {
                 it.context = navigationViewContext
                 it.navigationViewBinding = binding
-                it.registerMapboxMapObserver { map ->
-                    mapStyleLoader.mapboxMap = map
-                }
-                when (it.getMapStyleLoadPolicy()) {
-                    MapStyleLoadPolicy.ONCE -> mapStyleLoader.loadInitialStyle()
-                    MapStyleLoadPolicy.ON_CONFIGURATION_CHANGE -> {
+                navigationViewContext.mapViewOwner.doOnAttachMapView { mapView ->
+                    mapStyleLoader.mapboxMap = mapView.getMapboxMap()
+                    if (it.shouldLoadMapStyle) {
                         mapStyleLoader.loadInitialStyle()
                         loadStyleJob = coroutineScope.launch {
                             mapStyleLoader.observeAndReloadNewStyles()
                         }
                     }
-                    else -> {
-                        // do nothing
-                    }
                 }
             }
         }
     }
+}
+
+@ExperimentalPreviewMapboxNavigationAPI
+internal inline fun MapViewOwner.doOnAttachMapView(crossinline action: (MapView) -> Unit) {
+    registerObserver(object: MapViewObserver() {
+        override fun onAttached(mapView: MapView) {
+            action(mapView)
+            unregisterObserver(this)
+        }
+    })
 }
