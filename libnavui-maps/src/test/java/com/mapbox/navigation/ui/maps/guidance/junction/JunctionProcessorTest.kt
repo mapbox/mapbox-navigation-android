@@ -109,19 +109,19 @@ class JunctionProcessorTest {
     }
 
     @Test
-    fun `process action junction signboard availability result available`() {
+    fun `process action junction signboard availability result unavailable`() {
         val bannerInstructions: BannerInstructions = mockk()
         val bannerView: BannerView = mockk()
         val bannerComponentsList: MutableList<BannerComponents> = mutableListOf()
         bannerComponentsList.add(getGuidanceViewSubType(BannerComponents.SIGNBOARD))
         every { bannerInstructions.view() } returns bannerView
         every { bannerView.components() } returns bannerComponentsList
-        val expected = JunctionResult.JunctionAvailable("https://abc.mapbox.com")
+        val expected = JunctionResult.JunctionUnavailable
         val action = JunctionAction.CheckJunctionAvailability(bannerInstructions)
 
-        val result = JunctionProcessor.process(action) as JunctionResult.JunctionAvailable
+        val result = JunctionProcessor.process(action)
 
-        assertEquals(expected.junctionUrl, result.junctionUrl)
+        assertEquals(expected, result)
     }
 
     @Test
