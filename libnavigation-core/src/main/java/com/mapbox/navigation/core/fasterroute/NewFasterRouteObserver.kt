@@ -15,8 +15,8 @@ fun interface NewFasterRouteObserver {
 }
 
 @ExperimentalMapboxNavigationAPI
-class NewFasterRoute(
+data class NewFasterRoute(
     val fasterRoute: NavigationRoute,
-    val fasterThanPrimary: Double,
+    val fasterThanPrimaryRouteBy: Double,
     val alternativeId: Int
 )

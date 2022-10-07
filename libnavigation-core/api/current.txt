@@ -187,14 +187,14 @@ package com.mapbox.navigation.core.directions.session {
 package com.mapbox.navigation.core.fasterroute {
 
   @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class FasterRouteOptions {
-    method public double getMaxSimilarityToExistingRoute();
-    property public final double maxSimilarityToExistingRoute;
+    method public double getMaxGeometrySimilarityToRejectedAlternatives();
+    property public final double maxGeometrySimilarityToRejectedAlternatives;
   }
 
   public static final class FasterRouteOptions.Builder {
     ctor public FasterRouteOptions.Builder();
     method public com.mapbox.navigation.core.fasterroute.FasterRouteOptions build();
-    method public void maxSimilarityToExistingRoute(double value);
+    method public void maxGeometrySimilarityToRejectedAlternatives(double value);
   }
 
   @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class FasterRoutes {
@@ -210,13 +210,17 @@ package com.mapbox.navigation.core.fasterroute {
   }
 
   @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class NewFasterRoute {
-    ctor public NewFasterRoute(com.mapbox.navigation.base.route.NavigationRoute fasterRoute, double fasterThanPrimary, int alternativeId);
+    ctor public NewFasterRoute(com.mapbox.navigation.base.route.NavigationRoute fasterRoute, double fasterThanPrimaryRouteBy, int alternativeId);
+    method public com.mapbox.navigation.base.route.NavigationRoute component1();
+    method public double component2();
+    method public int component3();
+    method public com.mapbox.navigation.core.fasterroute.NewFasterRoute copy(com.mapbox.navigation.base.route.NavigationRoute fasterRoute, double fasterThanPrimaryRouteBy, int alternativeId);
     method public int getAlternativeId();
     method public com.mapbox.navigation.base.route.NavigationRoute getFasterRoute();
-    method public double getFasterThanPrimary();
+    method public double getFasterThanPrimaryRouteBy();
     property public final int alternativeId;
     property public final com.mapbox.navigation.base.route.NavigationRoute fasterRoute;
-    property public final double fasterThanPrimary;
+    property public final double fasterThanPrimaryRouteBy;
   }
 
   @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public fun interface NewFasterRouteObserver {

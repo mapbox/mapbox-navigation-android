@@ -88,7 +88,7 @@ internal class FasterRouteTracker(
         )
         return FasterRouteResult.NewFasterRouteFound(
             fasterAlternative,
-            fasterThanPrimary = fasterThanPrimary,
+            fasterThanPrimaryBy = fasterThanPrimary,
             alternativeId = metadataByRouteId[fasterAlternative.id]!!.alternativeId
         )
     }
@@ -148,7 +148,7 @@ internal sealed class FasterRouteResult {
     object NoFasterRoute : FasterRouteResult()
     data class NewFasterRouteFound(
         val route: NavigationRoute,
-        val fasterThanPrimary: Double,
+        val fasterThanPrimaryBy: Double,
         val alternativeId: Int
     ) : FasterRouteResult()
 }

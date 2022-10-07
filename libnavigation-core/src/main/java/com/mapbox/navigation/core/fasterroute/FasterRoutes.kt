@@ -49,7 +49,7 @@ class FasterRoutes internal constructor(
                 is FasterRouteResult.NewFasterRouteFound -> newFasterRouteFound(
                     NewFasterRoute(
                         fasterRouteTrackerResult.route,
-                        fasterRouteTrackerResult.fasterThanPrimary,
+                        fasterRouteTrackerResult.fasterThanPrimaryBy,
                         fasterRouteTrackerResult.alternativeId
                     )
                 )

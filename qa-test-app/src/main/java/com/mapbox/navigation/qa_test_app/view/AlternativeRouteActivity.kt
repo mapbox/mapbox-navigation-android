@@ -394,7 +394,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private val fasterRouteObserver = NewFasterRouteObserver { newFasterRoute: NewFasterRoute ->
-        val message = "faster route found: ${mapboxNavigation.getAlternativeMetadataFor(newFasterRoute.fasterRoute)?.alternativeId} is faster then primary by ${newFasterRoute.fasterThanPrimary}"
+        val message = "faster route found: ${mapboxNavigation.getAlternativeMetadataFor(newFasterRoute.fasterRoute)?.alternativeId} is faster than primary by ${newFasterRoute.fasterThanPrimaryRouteBy}"
         logD("faster-route", message)
     }
 
