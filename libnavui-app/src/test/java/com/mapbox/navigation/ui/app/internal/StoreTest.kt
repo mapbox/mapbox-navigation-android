@@ -16,6 +16,8 @@ import com.mapbox.navigation.ui.app.testing.TestStore
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -136,5 +138,38 @@ internal class StoreTest {
 
         assertFalse(action1 in reducer.actions)
         assertTrue(action2 in reducer.actions)
+    }
+
+    @Test
+    fun `should allow action dispatch from state observer`() = coroutineRule.runBlockingTest {
+        val actionsCapture = TestReducer()
+        sut.register(actionsCapture)
+        sut.register(
+            Reducer { state, action ->
+                if (action is NavigationStateAction.Update) {
+                    state.copy(navigation = action.state)
+                } else {
+                    state
+                }
+            }
+        )
+        launch {
+            sut.select { it.navigation }
+                .filter { it == NavigationState.RoutePreview }
+                .take(1)
+                .collect {
+                    sut.dispatch(NavigationStateAction.Update(NavigationState.ActiveNavigation))
+                }
+        }
+        sut.dispatch(NavigationStateAction.Update(NavigationState.RoutePreview))
+
+        assertEquals(
+            listOf(
+                NavigationStateAction.Update(NavigationState.RoutePreview),
+                NavigationStateAction.Update(NavigationState.ActiveNavigation)
+            ),
+            actionsCapture.actions
+        )
+        assertEquals(NavigationState.ActiveNavigation, sut.state.value.navigation)
     }
 }
