@@ -82,11 +82,14 @@ open class Store {
             return
         }
 
-        isDispatching = true
         if (!intercept(action)) {
-            reduce(action)
+            isDispatching = true
+            val newState = reduce(_state.value, action)
+            isDispatching = false
+            // IMPORTANT! After all reducers finish processing the action, we assign a new state
+            // to ensure that only fully reduced state is always emitted.
+            _state.value = newState
         }
-        isDispatching = false
     }
 
     private fun intercept(action: Action): Boolean {
@@ -96,11 +99,10 @@ open class Store {
         return false
     }
 
-    private fun reduce(action: Action) {
-        reducers.forEach { reducer ->
-            _state.value = reducer.process(_state.value, action)
+    private fun reduce(state: State, action: Action): State =
+        reducers.fold(state) { s, reducer ->
+            reducer.process(s, action)
         }
-    }
 
     fun register(vararg reducers: Reducer) {
         this.reducers.addAll(reducers)
