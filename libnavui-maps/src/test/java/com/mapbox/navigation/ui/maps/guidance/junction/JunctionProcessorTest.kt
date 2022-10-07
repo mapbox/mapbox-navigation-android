@@ -299,17 +299,18 @@ class JunctionProcessorTest {
 
     @Test
     fun `process action junction process raster to bitmap failure`() {
-        mockkStatic(MapboxRasterToBitmapParser::class)
-        val mockData = byteArrayOf()
-        val action = JunctionAction.ParseRasterToBitmap(mockData)
-        every { MapboxRasterToBitmapParser.parse(any()) } returns
-            ExpectedFactory.createError(
-                "Error parsing raster to bitmap as raster is empty"
-            )
+        mockkStatic(MapboxRasterToBitmapParser::class) {
+            val mockData = byteArrayOf()
+            val action = JunctionAction.ParseRasterToBitmap(mockData)
+            every { MapboxRasterToBitmapParser.parse(any()) } returns
+                ExpectedFactory.createError(
+                    "Error parsing raster to bitmap as raster is empty"
+                )
 
-        val result = JunctionProcessor.process(action) as JunctionResult.JunctionBitmap.Failure
+            val result = JunctionProcessor.process(action) as JunctionResult.JunctionBitmap.Failure
 
-        assertEquals("Error parsing raster to bitmap as raster is empty", result.message)
+            assertEquals("Error parsing raster to bitmap as raster is empty", result.message)
+        }
     }
 
     private fun getComponentGuidanceViewType(): BannerComponents {
