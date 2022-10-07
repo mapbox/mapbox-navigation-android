@@ -8,7 +8,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Mapbox Navigation SDK 2.9.0-beta.1 - 06 October, 2022
 ### Changelog
-[Changes between v2.9.0-alpha.3 and v2.9.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0-alpha.3...v2.9.0-beta.1)
+[Changes between v2.9.0-alpha.4 and v2.9.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0-alpha.4...v2.9.0-beta.1)
 
 #### Known issues :bangbang: 
 - `MapView` may crash when user selects Disagree in Telemetry Settings dialog.
