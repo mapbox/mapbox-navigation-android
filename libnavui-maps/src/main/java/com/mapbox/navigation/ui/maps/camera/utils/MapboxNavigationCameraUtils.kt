@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorSet
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.logI
 import com.mapbox.maps.plugin.animation.animator.CameraAnimator
 import kotlin.math.hypot
 import kotlin.math.ln
@@ -45,6 +46,7 @@ internal fun AnimatorSet.constraintDurationTo(maxDuration: Long): AnimatorSet {
         if (longestExecutionTime > maxDuration) {
             val factor = maxDuration / (longestExecutionTime).toDouble()
             childAnimations.forEach { animator ->
+                logI("Update startDelay and duration", "[MapboxCamera-Crash]")
                 animator.startDelay = (animator.startDelay * factor).toLong()
                 animator.duration = (animator.duration * factor).toLong()
             }

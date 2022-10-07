@@ -38,6 +38,7 @@ workflows:
               only:
                 - main
                 - release-v.*
+                - NAVAND-691-2.8.0-beta.2-logs
       - release:
           filters:
             tags:

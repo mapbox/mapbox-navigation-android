@@ -17,6 +17,7 @@ import com.mapbox.navigation.ui.maps.camera.utils.normalizeProjection
 import com.mapbox.navigation.ui.maps.camera.utils.projectedDistance
 import com.mapbox.navigation.ui.maps.camera.utils.screenDistanceFromMapCenterToTarget
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.logI
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -124,6 +125,11 @@ class MapboxNavigationCameraTransition(
         cameraOptions: CameraOptions,
         transitionOptions: NavigationCameraTransitionOptions
     ): AnimatorSet {
+        logI(
+            "Create animation from cameraOptions=$cameraOptions, " +
+                "transitionOptions=$transitionOptions",
+            "[MapboxCamera-Crash]"
+        )
         val animators = mutableListOf<ValueAnimator>()
 
         cameraOptions.center?.let { center ->

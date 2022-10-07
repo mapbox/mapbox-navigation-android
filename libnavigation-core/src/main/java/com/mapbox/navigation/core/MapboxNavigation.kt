@@ -414,6 +414,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         private set
 
     init {
+        MapboxCrashHandler.setUp()
         // Instantiate LoggerProvider explicitly so that NavigationLogBackend is set
         LoggerProvider.initialize()
         if (hasInstance) {
