@@ -170,14 +170,18 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
         mapboxReplayer.pushEvents(
             ReplayEventLocation(
-                11.574758, 48.150672,
+                11.574758,
+                48.150672,
                 provider = "me",
                 0.0,
                 null,
                 null,
                 null,
                 null,
-            ).let { listOf<ReplayEventBase>(ReplayEventUpdateLocation(0.0, it)) })
+            ).let {
+                listOf<ReplayEventBase>(ReplayEventUpdateLocation(0.0, it))
+            }
+        )
         mapboxReplayer.playbackSpeed(3.0)
         mapboxReplayer.play()
     }
@@ -344,8 +348,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         }
         binding.requestAlternatives.setOnClickListener {
             binding.requestAlternatives.isEnabled = false
-            mapboxNavigation.requestAlternativeRoutes(object :
-                NavigationRouteAlternativesRequestCallback {
+            val callback = object : NavigationRouteAlternativesRequestCallback {
                 override fun onRouteAlternativeRequestFinished(
                     routeProgress: RouteProgress,
                     alternatives: List<NavigationRoute>,
@@ -357,7 +360,8 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 override fun onRouteAlternativesRequestError(error: RouteAlternativesError) {
                     binding.requestAlternatives.isEnabled = true
                 }
-            })
+            }
+            mapboxNavigation.requestAlternativeRoutes(callback)
         }
 
         binding.mapView.gestures.addOnMapClickListener(mapClickListener)
@@ -382,7 +386,10 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val fasterRouteObserver = NewFasterRouteObserver { newFasterRoute: NewFasterRoute ->
         val message =
-            "faster route found: ${mapboxNavigation.getAlternativeMetadataFor(newFasterRoute.fasterRoute)?.alternativeId} is faster than primary by ${newFasterRoute.fasterThanPrimaryRouteBy}"
+            "faster route found: " +
+                "${newFasterRoute.alternativeId} " +
+                "is faster than primary by " +
+                "${newFasterRoute.fasterThanPrimaryRouteBy}"
         logD("faster-route", message)
     }
 
