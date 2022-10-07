@@ -5,10 +5,22 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+
+## androidauto-v0.13.0 - October 6, 2022
+### Changelog
+[Changes between 0.12.0 and 0.13.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.12.0...androidauto-v0.13.0)
+
+#### Bug fixes and improvements
 - Removed `MapboxNavigation` from `PlaceListOnMapScreen`. [#6371](https://github.com/mapbox/mapbox-navigation-android/pull/6371)
 - Migrate `CarDistanceFormatter` to an object that works with `MapboxNavigationApp`. [#6401](https://github.com/mapbox/mapbox-navigation-android/pull/6401)
 - Removed `MainCarContext` from `CarRouteLine` and `CarLocationRenderer` constructor. [#6406](https://github.com/mapbox/mapbox-navigation-android/pull/6406)
 - Fixed issue where style changes cause `CarRouteLine` to trigger excessive calls to the map style. [#6406](https://github.com/mapbox/mapbox-navigation-android/pull/6406)
+
+### Mapbox dependencies
+This release defines minimum versions for the Mapbox dependencies.
+- Mapbox Maps Android Auto Extension `v0.3.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/extension-androidauto-v0.3.0))
+- Mapbox Navigation `v2.9.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/v2.9.0-beta.1))
+- Mapbox Search `v1.0.0-beta.37` ([release notes](https://github.com/mapbox/mapbox-search-android/releases/tag/v1.0.0-beta.37))
 
 ## androidauto-v0.12.0 - Sep 26, 2022
 ### Changelog
