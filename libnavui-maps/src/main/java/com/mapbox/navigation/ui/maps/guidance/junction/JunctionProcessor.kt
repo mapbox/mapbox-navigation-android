@@ -52,7 +52,6 @@ internal object JunctionProcessor {
                     it.subType() == BannerComponents.JCT ||
                         it.subType() == BannerComponents.SAPA ||
                         it.subType() == BannerComponents.CITYREAL ||
-                        it.subType() == BannerComponents.SIGNBOARD ||
                         it.subType() == BannerComponents.AFTERTOLL ||
                         it.subType() == BannerComponents.TOLLBRANCH ||
                         it.subType() == BannerComponents.EXPRESSWAY_EXIT ||

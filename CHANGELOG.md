@@ -7,6 +7,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Fixed an issue where restrictions were drawn only on the first leg of the route, if independent leg styling was not used (default behavior). [#6440](https://github.com/mapbox/mapbox-navigation-android/pull/6440)
 - Fixed a crash in `MapboxJunctionApi` that happens when a junction contains an invalid bitmap. [#6459](https://github.com/mapbox/mapbox-navigation-android/pull/6459)
+- Updated `MapboxJunctionApi` to ignore banner components with subtype `signboard`. `MapboxSignboardApi` should be used to handle such components. [#6459](https://github.com/mapbox/mapbox-navigation-android/pull/6459)
 
 ## Mapbox Navigation SDK 2.9.0-beta.1 - 06 October, 2022
 ### Changelog
