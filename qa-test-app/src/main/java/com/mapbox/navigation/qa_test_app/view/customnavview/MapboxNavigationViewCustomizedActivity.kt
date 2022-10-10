@@ -274,6 +274,11 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             viewModel.customInfoPanelContent,
             ::setCustomInfoPanelContent
         )
+        bindSpinner(
+            menuBinding.spinnerCustomInfoPanelPeekHeight,
+            viewModel.customInfoPanelPeekHeight,
+            ::setCustomInfoPanelPeekHeight,
+        )
         bindSwitch(
             menuBinding.toggleCustomInfoPanelEndNavButton,
             viewModel.showCustomInfoPanelEndNavButton,
@@ -578,6 +583,16 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 else -> {
                     infoPanelContentBinder = UIBinder.USE_DEFAULT
                 }
+            }
+        }
+    }
+
+    private fun setCustomInfoPanelPeekHeight(peekHeight: String) {
+        val defaultPeekHeight = ViewStyleCustomization.defaultInfoPanelPeekHeight(context = this)
+        binding.navigationView.customizeViewStyles {
+            infoPanelPeekHeight = when (peekHeight) {
+                "LARGE" -> defaultPeekHeight * 2
+                else -> defaultPeekHeight
             }
         }
     }

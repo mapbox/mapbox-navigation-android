@@ -13,6 +13,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Marked `InfoPanelBinder`, `NavigationView`, `NavigationViewApi` methods with `@UiThread` annotation. [#6269](https://github.com/mapbox/mapbox-navigation-android/pull/6269)
 - Marked `MapboxExitText`, `MapboxLaneGuidance`, `MapboxLaneGuidanceAdapter`, `MapboxManeuverView`, `MapboxPrimaryManeuver`, `MapboxSecondaryManeuver`, `MapboxStepDistance`, `MapboxSubManeuver`, `MapboxTurnIconManeuver`, `MapboxUpcomingManeuverAdapter` methods with `@UiThread` annotation. [#6270](https://github.com/mapbox/mapbox-navigation-android/pull/6270)
 - Marked `RouteShieldCallback` methods with `@UiThread` annotation. [#6271](https://github.com/mapbox/mapbox-navigation-android/pull/6271)
+- Fixed an issue with `NavigationView` that caused road label position to not update after changing peek height of the Info Panel. [#6463](https://github.com/mapbox/mapbox-navigation-android/pull/6463)
 
 ## Mapbox Navigation SDK 2.9.0-beta.1 - 06 October, 2022
 ### Changelog

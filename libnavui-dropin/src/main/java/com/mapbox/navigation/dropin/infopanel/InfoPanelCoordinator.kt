@@ -12,9 +12,13 @@ import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.base.lifecycle.UICoordinator
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 /**
@@ -42,9 +46,19 @@ internal class InfoPanelCoordinator(
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val infoPanelTop = callbackFlow {
+        val onLayoutChangeListener = View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+            trySend(infoPanel.top)
+        }
+        val parent = infoPanel.parent as View
+        parent.addOnLayoutChangeListener(onLayoutChangeListener)
+        awaitClose { parent.removeOnLayoutChangeListener(onLayoutChangeListener) }
+    }.distinctUntilChanged()
+
     init {
         infoPanel.addOnLayoutChangeListener(FixBottomSheetLayoutWhenHidden(infoPanel, behavior))
-        behavior.peekHeight = context.styles.infoPanelPeekHeight.value
+        behavior.setPeekHeight(context.styles.infoPanelPeekHeight.value, true)
         behavior.hide()
     }
 
@@ -80,7 +94,10 @@ internal class InfoPanelCoordinator(
             }
         }
         coroutineScope.launch {
-            bottomSheetPeekHeight().collect(behavior::setPeekHeight)
+            bottomSheetPeekHeight().collect { behavior.setPeekHeight(it, true) }
+        }
+        coroutineScope.launch {
+            infoPanelTop.collect { updateGuidelinePosition() }
         }
     }
 

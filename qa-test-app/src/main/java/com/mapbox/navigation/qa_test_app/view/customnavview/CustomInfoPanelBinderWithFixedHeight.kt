@@ -12,7 +12,6 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.navigationListOf
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.NavigationView
-import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelPeekHeight
 import com.mapbox.navigation.dropin.infopanel.InfoPanelBinder
 import com.mapbox.navigation.dropin.internal.extensions.updateMargins
 import com.mapbox.navigation.dropin.navigationview.NavigationViewListener
@@ -73,10 +72,6 @@ class CustomInfoPanelBinderWithFixedHeight(
             navigationView.addListener(slideOffsetObserver)
             navigationView.customizeViewBinders {
                 infoPanelBinder = this@CustomInfoPanelBinderWithFixedHeight
-            }
-            navigationView.customizeViewStyles {
-                val context = navigationView.context
-                infoPanelPeekHeight = defaultInfoPanelPeekHeight(context) + insets.bottom
             }
         } else {
             navigationView.removeListener(slideOffsetObserver)
