@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.maps.internal.ui
 
 import android.view.View
-import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
@@ -17,8 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 @ExperimentalPreviewMapboxNavigationAPI
 interface CameraModeButtonComponentContract {
 
-    val isVisible: StateFlow<Boolean>
-
     val buttonState: StateFlow<NavigationCameraState>
 
     fun onClick(view: View)
@@ -33,7 +30,6 @@ class CameraModeButtonComponent(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
         val contract = contractProvider.get()
-        contract.isVisible.observe { cameraModeButton.isVisible = it }
         contract.buttonState.observe { cameraModeButton.setState(it) }
         cameraModeButton.setOnClickListener(contract::onClick)
     }
@@ -49,8 +45,6 @@ internal class MapboxCameraModeButtonComponentContract(
     private val navigationCameraProvider: Provider<NavigationCamera?>
 ) : UIComponent(),
     CameraModeButtonComponentContract {
-
-    override val isVisible: StateFlow<Boolean> = MutableStateFlow(true)
 
     private val _buttonState = MutableStateFlow(NavigationCameraState.OVERVIEW)
     override val buttonState: StateFlow<NavigationCameraState> = _buttonState.asStateFlow()

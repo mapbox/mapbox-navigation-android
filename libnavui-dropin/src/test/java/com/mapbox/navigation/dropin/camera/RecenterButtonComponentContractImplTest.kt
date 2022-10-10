@@ -32,7 +32,7 @@ class RecenterButtonComponentContractImplTest {
     }
 
     @Test
-    fun `isVisible - should return TRUE when camera is Idle and not in RoutePreview`() =
+    fun `isVisible - should return TRUE when camera is Idle`() =
         coroutineRule.runBlockingTest {
             store.updateState {
                 it.copy(
@@ -42,7 +42,7 @@ class RecenterButtonComponentContractImplTest {
             }
             coroutineRule.testDispatcher.advanceUntilIdle()
             assertTrue(
-                "expected TRUE when camera is Idle and not in RoutePreview",
+                "expected TRUE when camera is Idle",
                 sut.isVisible.value
             )
         }
@@ -58,19 +58,6 @@ class RecenterButtonComponentContractImplTest {
             }
             coroutineRule.testDispatcher.advanceUntilIdle()
             assertFalse("expected FALSE when camera not Idle", sut.isVisible.value)
-        }
-
-    @Test
-    fun `isVisible - should return FALSE when camera in RoutePreview`() =
-        coroutineRule.runBlockingTest {
-            store.updateState {
-                it.copy(
-                    camera = it.camera.copy(cameraMode = TargetCameraMode.Idle),
-                    navigation = NavigationState.RoutePreview
-                )
-            }
-            coroutineRule.testDispatcher.advanceUntilIdle()
-            assertFalse("expected FALSE when NavigationState not RoutePreview", sut.isVisible.value)
         }
 
     @Test

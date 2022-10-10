@@ -6,7 +6,6 @@ import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.camera.CameraAction
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
 import com.mapbox.navigation.ui.app.internal.camera.toNavigationCameraState
-import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.internal.ui.CameraModeButtonComponentContract
 import kotlinx.coroutines.CoroutineScope
@@ -27,9 +26,6 @@ internal class CameraModeButtonComponentContractImpl(
                 cameraState.cameraMode.toNavigationCameraState()
             }
         }
-
-    override val isVisible: StateFlow<Boolean> =
-        store.slice(coroutineScope) { it.navigation != NavigationState.RoutePreview }
 
     override fun onClick(view: View) {
         val cameraMode = store.state.value.camera.cameraMode.let {
