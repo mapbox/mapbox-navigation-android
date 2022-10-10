@@ -14,7 +14,7 @@ internal class FasterRouteTrackerCore(
 ) {
 
     private val rejectedRoutesTracker = RejectedRoutesTracker(
-        maximumGeometrySimilarity = options.maxGeometrySimilarityToRejectedAlternatives
+        maximumGeometrySimilarity = options.maxAcceptableGeometrySimilarityToRejectedAlternatives
     )
 
     fun fasterRouteDeclined(alternativeId: Int, route: NavigationRoute) {
