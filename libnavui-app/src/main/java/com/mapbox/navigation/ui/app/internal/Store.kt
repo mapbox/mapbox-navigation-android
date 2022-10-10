@@ -5,6 +5,7 @@ import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -63,8 +64,12 @@ open class Store {
         return state.map { selector(it) }.distinctUntilChanged()
     }
 
-    fun <T> slice(scope: CoroutineScope, selector: (State) -> T): StateFlow<T> {
-        return state.slice(scope, selector = selector)
+    fun <T> slice(
+        scope: CoroutineScope,
+        started: SharingStarted = SharingStarted.WhileSubscribed(),
+        selector: (State) -> T
+    ): StateFlow<T> {
+        return state.slice(scope, started = started, selector = selector)
     }
 
     fun dispatch(action: Action) {

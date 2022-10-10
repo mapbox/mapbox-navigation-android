@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.maps.internal.ui
 
 import android.content.Context
 import android.view.View
-import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -15,8 +14,6 @@ import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -45,17 +42,6 @@ class CameraModeButtonComponentTest {
     }
 
     @Test
-    fun `should update button visibility`() = runBlockingTest {
-        sut.onAttached(mapboxNavigation)
-
-        contract.isVisible.value = false
-        assertFalse(cameraModeButton.isVisible)
-
-        contract.isVisible.value = true
-        assertTrue(cameraModeButton.isVisible)
-    }
-
-    @Test
     fun `should update button state`() = runBlockingTest {
         sut.onAttached(mapboxNavigation)
 
@@ -76,7 +62,6 @@ class CameraModeButtonComponentTest {
     }
 
     private class StubContract : CameraModeButtonComponentContract {
-        override var isVisible = MutableStateFlow(false)
         override var buttonState = MutableStateFlow(NavigationCameraState.IDLE)
         override fun onClick(view: View) = Unit
     }

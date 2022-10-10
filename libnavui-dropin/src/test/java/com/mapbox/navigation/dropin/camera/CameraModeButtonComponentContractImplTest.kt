@@ -6,7 +6,6 @@ import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.camera.CameraAction
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
-import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.internal.ui.CameraModeButtonComponentContract
 import io.mockk.mockk
@@ -79,24 +78,6 @@ class CameraModeButtonComponentContractImplTest {
         val navCamState = sut.buttonState.take(1).toList().first()
 
         assertEquals(NavigationCameraState.FOLLOWING, navCamState)
-    }
-
-    @Test
-    fun `isVisible use NavigationState to determine visibility`() = runBlockingTest {
-        testStore.updateState {
-            it.copy(navigation = NavigationState.RoutePreview)
-        }
-        val visibility = mutableListOf<Boolean>()
-        val job = launch {
-            sut.isVisible.take(2).toList(visibility)
-            yield()
-        }
-        testStore.updateState {
-            it.copy(navigation = NavigationState.ActiveNavigation)
-        }
-
-        job.join()
-        assertEquals(listOf(false, true), visibility)
     }
 
     @Test
