@@ -188,14 +188,16 @@ package com.mapbox.navigation.core.directions.session {
 package com.mapbox.navigation.core.fasterroute {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class FasterRouteOptions {
-    method public double getMaxGeometrySimilarityToRejectedAlternatives();
-    property public final double maxGeometrySimilarityToRejectedAlternatives;
+    method public double component1();
+    method public com.mapbox.navigation.core.fasterroute.FasterRouteOptions copy(double maxAcceptableGeometrySimilarityToRejectedAlternatives);
+    method public double getMaxAcceptableGeometrySimilarityToRejectedAlternatives();
+    property public final double maxAcceptableGeometrySimilarityToRejectedAlternatives;
   }
 
   public static final class FasterRouteOptions.Builder {
     ctor public FasterRouteOptions.Builder();
     method public com.mapbox.navigation.core.fasterroute.FasterRouteOptions build();
-    method public void maxGeometrySimilarityToRejectedAlternatives(double value);
+    method public com.mapbox.navigation.core.fasterroute.FasterRouteOptions.Builder maxAcceptableGeometrySimilarityToRejectedAlternatives(double value);
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class FasterRoutesTracker {
