@@ -8,10 +8,16 @@ import com.mapbox.turf.TurfMeasurement
 /***
  * The function uses summary of route leg which is not guaranteed to have a stable format.
  */
-internal fun calculateDescriptionSimilarity(a: NavigationRoute, b: NavigationRoute): Double {
+internal fun calculateSummarySimilarity(a: NavigationRoute, b: NavigationRoute): Double {
     val firstSummary = parseSummaries(a)
     val secondSummary = parseSummaries(b)
     return calculateSimilarityOfSets(firstSummary, secondSummary) { it.size.toDouble() }
+}
+
+internal fun calculateStreetsSimilarity(a: NavigationRoute, b: NavigationRoute): Double {
+    val firstStreetNames = setOfStreetNames(a)
+    val secondStreetNames = setOfStreetNames(b)
+    return calculateSimilarityOfSets(firstStreetNames, secondStreetNames) { it.size.toDouble() }
 }
 
 internal fun calculateGeometrySimilarity(a: NavigationRoute, b: NavigationRoute): Double {
@@ -35,6 +41,12 @@ private fun parseSummaries(route: NavigationRoute) =
         .mapNotNull { it.summary() }
         .map { it.split(", ") }
         .flatten()
+        .toSet()
+
+private fun setOfStreetNames(route: NavigationRoute) =
+    route.directionsRoute.legs().orEmpty()
+        .flatMap { it.steps() ?: emptyList() }
+        .map { it.name() }
         .toSet()
 
 private fun <T> calculateSimilarityOfSets(

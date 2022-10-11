@@ -24,18 +24,26 @@ class RoutesSimilarityTest {
         val newId = original.updateDirectionsRouteOnly {
             toBuilder().requestUuid("different-id").build()
         }
-        val similarity = calculateGeometrySimilarity(original, newId)
-        assertEquals(1.0, similarity, 0.00001)
+
+        val geometrySimilarity = calculateGeometrySimilarity(original, newId)
+        val streetsSimilarity = calculateStreetsSimilarity(original, newId)
+
+        assertEquals(1.0, geometrySimilarity, 0.00001)
+        assertEquals(1.0, streetsSimilarity, 0.00001)
     }
 
     @Test
     fun `different routes  similarity`() {
         val a = loadNavigationRoute("a")
         val b = loadNavigationRoute("not_a")
+
         val similarity = calculateGeometrySimilarity(a, b)
-        val summarySimilarity = calculateDescriptionSimilarity(a, b)
+        val summarySimilarity = calculateSummarySimilarity(a, b)
+        val streetsSimilarity = calculateStreetsSimilarity(a, b)
+
         assertEquals(0.0, similarity, 0.00001)
         assertEquals(0.0, summarySimilarity, 0.00001)
+        assertEquals(0.0, streetsSimilarity, 0.00001)
     }
 
     @Test
@@ -43,11 +51,13 @@ class RoutesSimilarityTest {
         val a = loadNavigationRoute("a")
         val halfA = loadNavigationRoute("half_a")
 
-        val similarity = calculateGeometrySimilarity(a, halfA)
-        val descriptionSimilarity = calculateDescriptionSimilarity(a, halfA)
+        val geometrySimilarity = calculateGeometrySimilarity(a, halfA)
+        val summarySimilarity = calculateSummarySimilarity(a, halfA)
+        val streetsSimilarity = calculateStreetsSimilarity(a, halfA)
 
-        assertEquals(1.0, similarity, 0.001)
-        assertEquals(1.0, descriptionSimilarity, 0.001)
+        assertEquals(1.0, geometrySimilarity, 0.001)
+        assertEquals(1.0, summarySimilarity, 0.001)
+        assertEquals(1.0, streetsSimilarity, 0.001)
     }
 
     @Test
@@ -56,20 +66,27 @@ class RoutesSimilarityTest {
         val halfA = loadNavigationRoute("half_a")
 
         val similarity = calculateGeometrySimilarity(halfA, a)
-        val descriptionSimilarity = calculateDescriptionSimilarity(halfA, a)
+        val descriptionSimilarity = calculateSummarySimilarity(halfA, a)
+        val streetsSimilarity = calculateStreetsSimilarity(halfA, a)
+
 
         assertEquals(1.0, similarity, 0.001)
         assertEquals(1.0, descriptionSimilarity, 0.001)
+        assertEquals(1.0, streetsSimilarity, 0.001)
     }
 
     @Test
     fun `compare partially matched routes`() {
         val a = loadNavigationRoute("a")
         val endsLikeA = loadNavigationRoute("ends_like_a")
+
         val geometrySimilarity = calculateGeometrySimilarity(endsLikeA, a)
-        val summarySimilarity = calculateDescriptionSimilarity(endsLikeA, a)
+        val summarySimilarity = calculateSummarySimilarity(endsLikeA, a)
+        val streetsSimilarity = calculateSummarySimilarity(endsLikeA, a)
+
         assertEquals(0.8, geometrySimilarity, 0.05)
         assertEquals(0.5, summarySimilarity, 0.001)
+        assertEquals(0.5, streetsSimilarity, 0.001)
     }
 
     private fun loadNavigationRoute(name: String) = createNavigationRoutes(
