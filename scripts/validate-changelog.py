@@ -29,6 +29,7 @@ with requests.get(api_url, headers=headers) as pr_response:
             with requests.get(files_url, headers) as files_response:
                 contents_urls_by_file = validate_changelog_utils.parse_contents_url(files_response.json())
                 for (filename, contents_url) in contents_urls_by_file.items():
+                    validate_changelog_utils.check_for_duplications(added_lines_by_file[filename])
                     with requests.get(contents_url, headers) as contents_response:
                         content = base64.b64decode(contents_response.json()["content"]).decode("utf-8")
                         validate_changelog_utils.check_version_section(content, added_lines_by_file[filename])

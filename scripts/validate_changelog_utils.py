@@ -10,6 +10,9 @@ pr_link_regex = "\[#\d+]\(https:\/\/github\.com\/mapbox\/mapbox-navigation-andro
 def is_line_added(line):
     return line.strip().startswith('+')
 
+def is_line_not_blank(line):
+    return len(line.strip()) > 0
+
 def remove_plus(line):
     return line.strip()[1:]
 
@@ -24,7 +27,7 @@ def group_by_versions(lines):
                     groups[group_name] = group
                 group = []
             group_name = line
-        elif len(line.strip()) > 0:
+        elif is_line_not_blank(line):
             group.append(line)
     if len(group) > 0 and len(group_name.strip()) > 0:
         groups[group_name] = group
@@ -98,7 +101,7 @@ def extract_added_lines(whole_diff):
         diff_searchable = diff_starting_at_changelog[first_changelog_diff_index:last_reachable_index]
 
         diff_lines = diff_searchable.split('\n')
-        added_lines[filename] = list(map(remove_plus, list(filter(is_line_added, diff_lines))))
+        added_lines[filename] = list(filter(is_line_not_blank, map(remove_plus, list(filter(is_line_added, diff_lines)))))
         diff = diff[last_reachable_index:]
     return added_lines
 
@@ -118,8 +121,16 @@ def check_version_section(content, added_lines):
 
     for added_line in added_lines:
         if added_line not in unreleased_group:
-            raise Exception(added_line + " should be placed in 'Unreleased' section")
+            raise Exception("\"" + added_line + "\" should be placed in 'Unreleased' section")
 
         for stable_version in stable_versions:
             if added_line in stable_versions[stable_version]:
                 raise Exception("The changelog entry \"" + added_line + "\" is already contained in " + stable_version + " changelog.")
+
+def check_for_duplications(added_lines):
+    unique_added_lines = set()
+    for added_line in added_lines:
+        if added_line in unique_added_lines:
+            raise Exception("\"" + added_line + "\" is added more than once" )
+        else:
+            unique_added_lines.add(added_line)
