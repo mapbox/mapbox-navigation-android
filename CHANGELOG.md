@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added an experimental `DeveloperMetadataObserver` that can be registered via `MapboxNavigation#registerDeveloperMetadataObserver` that can be used for getting `DeveloperMetadata` that contains useful information (e. g. `copilotSessionId`) and should be included when reporting an issue. [#6456](https://github.com/mapbox/mapbox-navigation-android/pull/6456)
 #### Bug fixes and improvements
 - Updated `RecenterButtonComponent` and `CameraModeButtonComponent` to show in `RoutePreview` state. [#6465](https://github.com/mapbox/mapbox-navigation-android/pull/6465)
 - Fixed an issue where restrictions were drawn only on the first leg of the route, if independent leg styling was not used (default behavior). [#6440](https://github.com/mapbox/mapbox-navigation-android/pull/6440)
