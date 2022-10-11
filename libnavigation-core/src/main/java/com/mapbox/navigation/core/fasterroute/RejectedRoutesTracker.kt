@@ -26,7 +26,7 @@ internal class RejectedRoutesTracker(
             }
             val similarities = withContext(ThreadController.DefaultDispatcher) {
                 rejectedAlternatives.entries.map { (rejectedRouteAlternativeId, rejectedRoute) ->
-                    val similarity = calculateGeometrySimilarity(rejectedRoute, alternativeRoute)
+                    val similarity = calculateStreetsSimilarity(rejectedRoute, alternativeRoute)
                     logD(
                         "${alternativeRoute.id}($alternativeId) route has " +
                             "similarity $similarity with rejected" +

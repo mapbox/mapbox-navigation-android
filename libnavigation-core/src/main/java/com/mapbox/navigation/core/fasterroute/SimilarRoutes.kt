@@ -4,6 +4,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.turf.TurfMeasurement
+import java.lang.Double.min
 
 /***
  * The function uses summary of route leg which is not guaranteed to have a stable format.
@@ -15,9 +16,25 @@ internal fun calculateSummarySimilarity(a: NavigationRoute, b: NavigationRoute):
 }
 
 internal fun calculateStreetsSimilarity(a: NavigationRoute, b: NavigationRoute): Double {
-    val firstStreetNames = setOfStreetNames(a)
-    val secondStreetNames = setOfStreetNames(b)
-    return calculateSimilarityOfSets(firstStreetNames, secondStreetNames) { it.size.toDouble() }
+    val (shorter, longer) = if (a.directionsRoute.distance() > b.directionsRoute.distance()) {
+        Pair(b, a)
+    } else {
+        Pair(a, b)
+    }
+
+    val shorterNames = streetNamesToDistances(shorter)
+    val longerNames = streetNamesToDistances(longer)
+
+    val similar = mutableMapOf<String, Double>()
+
+    shorterNames.entries.forEach { (key, value) ->
+        val secondValue = longerNames[key]
+        if (secondValue != null) {
+            similar[key] = min(value, secondValue)
+        }
+    }
+
+    return similar.values.sum() / shorterNames.values.sum()
 }
 
 internal fun calculateGeometrySimilarity(a: NavigationRoute, b: NavigationRoute): Double {
@@ -43,11 +60,16 @@ private fun parseSummaries(route: NavigationRoute) =
         .flatten()
         .toSet()
 
-private fun setOfStreetNames(route: NavigationRoute) =
+private fun streetNamesToDistances(route: NavigationRoute): Map<String, Double> {
+    val result = mutableMapOf<String, Double>()
     route.directionsRoute.legs().orEmpty()
         .flatMap { it.steps() ?: emptyList() }
-        .map { it.name() }
-        .toSet()
+        .forEach {
+            val name = it.name().orEmpty()
+            result[name] = (result[name] ?: 0.0) + it.distance()
+        }
+    return result
+}
 
 private fun <T> calculateSimilarityOfSets(
     a: Set<T>,
