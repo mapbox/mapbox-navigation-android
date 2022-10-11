@@ -1,12 +1,10 @@
 package com.mapbox.navigation.ui.maps.internal.ui
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 
-@ExperimentalPreviewMapboxNavigationAPI
 class LocationComponent(
     val locationProvider: NavigationLocationProvider
 ) : UIComponent() {

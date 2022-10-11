@@ -2,13 +2,11 @@ package com.mapbox.navigation.dropin.actionbutton
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.R
 
 /**
  * Default Action Buttons Binder implementation.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 internal class MapboxActionButtonsBinder : ActionButtonsBinder() {
 
     override fun onCreateLayout(layoutInflater: LayoutInflater, root: ViewGroup): ViewGroup =

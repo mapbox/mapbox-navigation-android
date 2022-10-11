@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
-@ExperimentalPreviewMapboxNavigationAPI
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class CameraComponent constructor(
     private val context: NavigationViewContext,
     private val mapView: MapView,

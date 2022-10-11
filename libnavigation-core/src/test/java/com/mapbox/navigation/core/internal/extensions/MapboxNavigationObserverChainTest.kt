@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core.internal.extensions
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.testutil.TestMapboxNavigationObserver
 import io.mockk.mockk
@@ -10,7 +9,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxNavigationObserverChainTest {
 
     private lateinit var sut: MapboxNavigationObserverChain

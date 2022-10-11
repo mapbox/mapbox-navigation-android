@@ -32,7 +32,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class MapboxFlowableExtensionsTest {
+class MapboxNavigationExtensionsTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()

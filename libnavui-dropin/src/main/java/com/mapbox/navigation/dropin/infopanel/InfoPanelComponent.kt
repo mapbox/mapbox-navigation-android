@@ -2,7 +2,6 @@ package com.mapbox.navigation.dropin.infopanel
 
 import android.view.ViewGroup
 import androidx.core.view.updatePadding
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.NavigationView
 import com.mapbox.navigation.dropin.internal.extensions.updateMargins
@@ -10,7 +9,6 @@ import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import kotlinx.coroutines.flow.combine
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class InfoPanelComponent(
     private val layout: ViewGroup,
     private val context: NavigationViewContext

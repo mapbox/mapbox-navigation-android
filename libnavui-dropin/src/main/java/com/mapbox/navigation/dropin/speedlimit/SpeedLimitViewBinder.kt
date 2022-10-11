@@ -4,7 +4,6 @@ import android.view.ViewGroup
 import androidx.transition.Fade
 import androidx.transition.Scene
 import androidx.transition.TransitionManager
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxSpeedLimitLayoutBinding
@@ -13,7 +12,6 @@ import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.speedlimit.internal.SpeedLimitComponent
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class SpeedLimitViewBinder(
     val context: NavigationViewContext
 ) : UIBinder {

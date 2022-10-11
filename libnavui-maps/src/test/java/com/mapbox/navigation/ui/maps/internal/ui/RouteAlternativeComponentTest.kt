@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.maps.internal.ui
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -24,7 +23,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class RouteAlternativeComponentTest {
 
     @get:Rule

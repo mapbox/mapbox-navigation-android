@@ -2,7 +2,6 @@ package com.mapbox.navigation.dropin.navigationview
 
 import android.content.Context
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.ViewStyleCustomization
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions
@@ -10,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class NavigationViewStyles(context: Context) {
 
     private val _infoPanelPeekHeight: MutableStateFlow<Int> =

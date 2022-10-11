@@ -2,7 +2,6 @@ package com.mapbox.navigation.dropin.map.geocoding
 
 import com.mapbox.api.geocoding.v5.models.CarmenFeature
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.util.Geocoder
 import com.mapbox.navigation.dropin.util.TestStore
@@ -26,7 +25,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class GeocodingComponentTest {
 
     @get:Rule

@@ -16,9 +16,7 @@ import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
 /**
  * Install components that render [MapboxManeuverView].
  *
- * @param maneuverView
- * @param userId
- * @param styleId
+ * @param maneuverView MapboxManeuverView
  * @param config options that can be used to configure [ManeuverViewOptions]
  */
 @ExperimentalPreviewMapboxNavigationAPI

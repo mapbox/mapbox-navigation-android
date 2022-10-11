@@ -4,11 +4,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.UiThread
 import androidx.core.graphics.Insets
-import androidx.core.view.updatePadding
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.extensions.navigationListOf
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
-import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -17,7 +14,6 @@ import com.mapbox.navigation.utils.internal.ifNonNull
  * Base Binder class used for inflating and binding Info Panel layout.
  * Use [InfoPanelBinder.defaultBinder] to access default implementation.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 abstract class InfoPanelBinder : UIBinder {
 
     private var headerBinder: UIBinder? = null
@@ -36,7 +32,7 @@ abstract class InfoPanelBinder : UIBinder {
     abstract fun onCreateLayout(layoutInflater: LayoutInflater, root: ViewGroup): ViewGroup
 
     /**
-     * Get layout that can be passed to header UIBinder.
+     * Get layout that can be passed to header [UIBinder].
      *
      * @param layout ViewGroup returned by [onCreateLayout]
      *
@@ -47,7 +43,7 @@ abstract class InfoPanelBinder : UIBinder {
     abstract fun getHeaderLayout(layout: ViewGroup): ViewGroup?
 
     /**
-     * Get layout that can be passed to content UIBinder.
+     * Get layout that can be passed to content [UIBinder].
      *
      * @param layout ViewGroup returned by [onCreateLayout]
      *
@@ -110,36 +106,5 @@ abstract class InfoPanelBinder : UIBinder {
          * Default Info Panel Binder.
          */
         fun defaultBinder(): InfoPanelBinder = MapboxInfoPanelBinder()
-    }
-}
-
-@ExperimentalPreviewMapboxNavigationAPI
-internal class MapboxInfoPanelBinder : InfoPanelBinder() {
-
-    override fun onCreateLayout(layoutInflater: LayoutInflater, root: ViewGroup): ViewGroup {
-        return layoutInflater
-            .inflate(R.layout.mapbox_info_panel_layout, root, false) as ViewGroup
-    }
-
-    override fun getHeaderLayout(layout: ViewGroup): ViewGroup? =
-        layout.findViewById(R.id.infoPanelHeader)
-
-    override fun getContentLayout(layout: ViewGroup): ViewGroup? =
-        layout.findViewById(R.id.infoPanelContent)
-
-    override fun applySystemBarsInsets(layout: ViewGroup, insets: Insets) {
-        layout.updatePadding(bottom = insets.bottom)
-        // top, left and right insets are applied by InfoPanelComponent
-    }
-
-    override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
-        val observer = super.bind(viewGroup)
-        return context?.let { context ->
-            val layout = viewGroup.findViewById<ViewGroup>(R.id.infoPanelContainer)
-            navigationListOf(
-                InfoPanelComponent(layout, context),
-                observer
-            )
-        } ?: observer
     }
 }

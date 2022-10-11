@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.voice.internal.ui
 
 import androidx.core.view.isVisible
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.utils.internal.Provider
@@ -12,7 +11,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-@ExperimentalPreviewMapboxNavigationAPI
 interface AudioComponentContract {
     val isMuted: StateFlow<Boolean>
     val isVisible: StateFlow<Boolean>
@@ -21,7 +19,6 @@ interface AudioComponentContract {
     fun unMute()
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class MapboxAudioComponentContract(
     scope: CoroutineScope,
     private val audioGuidance: MapboxAudioGuidance
@@ -42,7 +39,6 @@ internal class MapboxAudioComponentContract(
     }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 class AudioGuidanceButtonComponent(
     private val audioGuidanceButton: MapboxAudioGuidanceButton,
     contractProvider: Provider<AudioComponentContract>? = null

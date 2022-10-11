@@ -10,9 +10,8 @@ import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
 /**
  * Install components that render [MapboxSpeedLimitView].
  *
- * @param style definition for [MapboxSpeedLimitView]
- * @param textAppearance for [MapboxSpeedLimitView]
  * @param speedLimitView [MapboxSpeedLimitView]
+ * @param config SpeedLimitConfig
  */
 @ExperimentalPreviewMapboxNavigationAPI
 fun ComponentInstaller.speedLimit(
@@ -32,6 +31,7 @@ fun ComponentInstaller.speedLimit(
 /**
  * Speed limit view component configuration class.
  */
+@ExperimentalPreviewMapboxNavigationAPI
 class SpeedLimitConfig internal constructor() {
     /**
      * [style] to be set to [MapboxSpeedLimitView].

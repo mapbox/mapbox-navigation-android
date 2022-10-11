@@ -4,7 +4,6 @@ import android.content.Context
 import android.widget.FrameLayout
 import androidx.core.graphics.Insets
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.extensions.MapboxNavigationObserverChain
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import io.mockk.MockKAnnotations
@@ -19,7 +18,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @RunWith(RobolectricTestRunner::class)
 internal class MapboxInfoPanelBinderTest {
 

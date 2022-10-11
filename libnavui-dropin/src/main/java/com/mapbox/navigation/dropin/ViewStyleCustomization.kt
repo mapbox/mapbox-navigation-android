@@ -13,7 +13,6 @@ import com.mapbox.maps.plugin.LocationPuck
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.LocationPuck3D
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.arrival.ArrivalTextComponent
 import com.mapbox.navigation.dropin.map.geocoding.POINameComponent
 import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
@@ -36,7 +35,6 @@ import com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
  * If not specified, [NavigationView] uses the default styles defined for each of the standalone
  * components.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 class ViewStyleCustomization {
     /**
      * Specify info panel peek height.
@@ -328,7 +326,7 @@ class ViewStyleCustomization {
                             .Builder()
                             .textAppearance(R.style.DropInStyleExitPrimary)
                             .mutcdExitProperties(defaultMutcdProperties())
-                            .viennaExitProperties(defaultVienndProperties())
+                            .viennaExitProperties(defaultViennaProperties())
                             .build()
                     )
                     .build()
@@ -342,7 +340,7 @@ class ViewStyleCustomization {
                             .Builder()
                             .textAppearance(R.style.DropInStyleExitSecondary)
                             .mutcdExitProperties(defaultMutcdProperties())
-                            .viennaExitProperties(defaultVienndProperties())
+                            .viennaExitProperties(defaultViennaProperties())
                             .build()
                     )
                     .build()
@@ -356,7 +354,7 @@ class ViewStyleCustomization {
                             .Builder()
                             .textAppearance(R.style.DropInStyleExitSub)
                             .mutcdExitProperties(defaultMutcdProperties())
-                            .viennaExitProperties(defaultVienndProperties())
+                            .viennaExitProperties(defaultViennaProperties())
                             .build()
                     )
                     .build()
@@ -376,7 +374,7 @@ class ViewStyleCustomization {
             exitLeftDrawable = R.drawable.mapbox_dropin_ic_exit_arrow_left_mutcd
         )
 
-        private fun defaultVienndProperties() = MapboxExitProperties.PropertiesVienna(
+        private fun defaultViennaProperties() = MapboxExitProperties.PropertiesVienna(
             exitBackground = R.drawable.mapbox_dropin_exit_board_background,
             fallbackDrawable = R.drawable.mapbox_dropin_ic_exit_arrow_right_vienna,
             exitRightDrawable = R.drawable.mapbox_dropin_ic_exit_arrow_right_vienna,

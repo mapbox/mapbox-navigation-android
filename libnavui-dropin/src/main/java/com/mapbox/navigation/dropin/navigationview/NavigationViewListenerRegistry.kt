@@ -2,7 +2,6 @@ package com.mapbox.navigation.dropin.navigationview
 
 import androidx.annotation.VisibleForTesting
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.infopanel.InfoPanelBehavior
 import com.mapbox.navigation.dropin.maneuver.ManeuverBehavior
 import com.mapbox.navigation.dropin.map.MapClickBehavior
@@ -19,7 +18,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class NavigationViewListenerRegistry(
     private val store: Store,
     private val maneuverSubscriber: ManeuverBehavior,

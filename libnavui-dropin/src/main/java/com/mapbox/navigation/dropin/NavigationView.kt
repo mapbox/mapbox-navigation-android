@@ -18,7 +18,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.internal.extensions.attachCreated
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -62,25 +61,24 @@ import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
  * - Free Drive: A user will be in free drive state when there is no destination or route set.
  * - DestinationPreview: A user will be in destination preview when a destination is set.
  * - RoutePreview: A user will be in route preview when a destination is set along with a route
- * joining the origin/destination pair.
+ * joining the origin/destination pair including waypoints.
  * - Active Guidance: A user will be in active guidance when a single destination or multi waypoint
  * route is set and the user has explicitly initiated start navigation action.
  * - Arrival: A user will be in arrival state when they are about to reach the final destination.
  *
  * [NavigationView] by default does not uses [MapboxReplayer], rather it uses the actual location
  * engine and hooks onto the users current location derived from device GPS. However, this can be
- * overridden and instead you can simulate active guidance by enabling `isReplayEnabled`.
- *
- * Note: [NavigationView] is `Experimental` and the API(s) are subject to breaking changes.
+ * overridden and instead you can simulate active guidance by enabling `routeReplayEnabled`.
  *
  * A Mapbox access token must also be set by the developer (to initialize navigation).
  *
  * @param viewModelStoreOwner Defaults to store owner tied to the hosting [Activity].
- * If you prefer the lifecycle of the [ViewModel]s internal to [NavigationView] to be tied to the hosting [Fragment] instead,
- * provide that [Fragment] as an argument. Providing a [Fragment]'s store owner allows to achieve tighter memory control if the resources
- * used by the [NavigationView] shouldn't outlive its hosting [Fragment] (in anticipation of potential [Fragment] recreation).
+ * If you prefer the lifecycle of the [ViewModel]s internal to [NavigationView] to be tied to the
+ * hosting [Fragment] instead, provide that [Fragment] as an argument. Providing a [Fragment]'s
+ * store owner allows to achieve tighter memory control if the resources used by the
+ * [NavigationView] shouldn't outlive its hosting [Fragment] (in anticipation of potential
+ * [Fragment] recreation).
  */
-@ExperimentalPreviewMapboxNavigationAPI
 @UiThread
 class NavigationView @JvmOverloads constructor(
     context: Context,

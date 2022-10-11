@@ -1,7 +1,6 @@
 package com.mapbox.navigation.dropin.internal.extensions
 
 import androidx.annotation.VisibleForTesting
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
@@ -18,7 +17,6 @@ import kotlinx.coroutines.flow.Flow
  *   }
  * ```
  */
-@ExperimentalPreviewMapboxNavigationAPI
 internal class ReloadingComponent<T>(
     private val flow: Flow<T>,
     private val factory: (T) -> MapboxNavigationObserver?

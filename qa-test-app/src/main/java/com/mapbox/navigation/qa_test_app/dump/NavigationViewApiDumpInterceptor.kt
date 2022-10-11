@@ -1,12 +1,10 @@
 package com.mapbox.navigation.qa_test_app.dump
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.dump.MapboxDumpInterceptor
 import com.mapbox.navigation.dropin.NavigationViewApi
 import java.io.FileDescriptor
 import java.io.PrintWriter
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class NavigationViewApiDumpInterceptor(
     private val navigationViewApi: NavigationViewApi
 ) : MapboxDumpInterceptor {

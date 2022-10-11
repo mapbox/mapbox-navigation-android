@@ -1,7 +1,6 @@
 package com.mapbox.navigation.core.internal.extensions
 
 import androidx.lifecycle.Lifecycle
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.testutil.TestLifecycleOwner
 import com.mapbox.navigation.core.testutil.TestMapboxNavigationObserver
@@ -13,7 +12,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @RunWith(RobolectricTestRunner::class)
 class MapboxLifecycleExtensionsKtTest {
 

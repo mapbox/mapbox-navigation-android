@@ -17,8 +17,12 @@ class CustomInfoPanelEndNavButtonBinder(
     private val api: NavigationViewApi
 ) : UIBinder {
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
-        val button = MapboxExtendableButton(viewGroup.context)
-        button.updateStyle(R.style.DropInStyleExitButton)
+        val button = MapboxExtendableButton(
+            viewGroup.context,
+            null,
+            R.style.DropInStyleExitButton
+        )
+        button.iconImage.setImageResource(R.drawable.mapbox_ic_stop_navigation)
         button.setPadding(0)
         button.setBackgroundResource(R.drawable.mapbox_bg_circle_outline)
         button.foregroundGravity = Gravity.CENTER

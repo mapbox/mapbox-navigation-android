@@ -1,21 +1,8 @@
 // Signature format: 3.0
-package com.mapbox.navigation.ui.tripprogress.api {
-
-  public final class MapboxTripProgressApi {
-    ctor public MapboxTripProgressApi(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter formatter);
-    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter getFormatter();
-    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.tripprogress.model.TripOverviewError,com.mapbox.navigation.ui.tripprogress.model.TripOverviewValue> getTripDetails(com.mapbox.navigation.base.route.NavigationRoute route);
-    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue getTripProgress(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
-    method public void setFormatter(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter);
-    property public final com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter formatter;
-  }
-
-}
-
-package com.mapbox.navigation.ui.tripprogress.installer {
+package com.mapbox.navigation.ui.tripprogress {
 
   public final class ComponentInstallerKt {
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation tripProgress(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView tripProgressView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.tripprogress.installer.TripProgressConfig,kotlin.Unit> config = {});
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation tripProgress(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView tripProgressView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.tripprogress.TripProgressConfig,kotlin.Unit> config = {});
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class TripProgressConfig {
@@ -25,6 +12,19 @@ package com.mapbox.navigation.ui.tripprogress.installer {
     method public void setTripProgressFormatter(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter);
     property public final kotlinx.coroutines.flow.Flow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> tripOverviewRoutes;
     property public final com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter tripProgressFormatter;
+  }
+
+}
+
+package com.mapbox.navigation.ui.tripprogress.api {
+
+  public final class MapboxTripProgressApi {
+    ctor public MapboxTripProgressApi(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter formatter);
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter getFormatter();
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.tripprogress.model.TripOverviewError,com.mapbox.navigation.ui.tripprogress.model.TripOverviewValue> getTripDetails(com.mapbox.navigation.base.route.NavigationRoute route);
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue getTripProgress(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+    method public void setFormatter(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter);
+    property public final com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter formatter;
   }
 
 }

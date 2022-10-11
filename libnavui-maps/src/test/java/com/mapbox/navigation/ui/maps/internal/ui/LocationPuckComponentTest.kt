@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.maps.internal.ui
 
 import com.mapbox.maps.plugin.LocationPuck
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import io.mockk.mockk
@@ -10,7 +9,6 @@ import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class LocationPuckComponentTest {
 
     private lateinit var sut: LocationPuckComponent

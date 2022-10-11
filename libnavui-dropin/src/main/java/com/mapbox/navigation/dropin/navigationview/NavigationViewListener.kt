@@ -1,18 +1,18 @@
 package com.mapbox.navigation.dropin.navigationview
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.dropin.NavigationView
 
 /**
  * Interface definition for the NavigationView listener.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 abstract class NavigationViewListener {
     /**
      * Called when destination has changed.
@@ -22,27 +22,27 @@ abstract class NavigationViewListener {
     open fun onDestinationChanged(destination: Point?) = Unit
 
     /**
-     * Called when NavigationView enters Free Drive state.
+     * Called when [NavigationView] enters Free Drive state.
      */
     open fun onFreeDrive() = Unit
 
     /**
-     * Called when NavigationView enters Destination Preview state.
+     * Called when [NavigationView] enters Destination Preview state.
      */
     open fun onDestinationPreview() = Unit
 
     /**
-     * Called when NavigationView enters Route Preview state.
+     * Called when [NavigationView] enters Route Preview state.
      */
     open fun onRoutePreview() = Unit
 
     /**
-     * Called when NavigationView enters Active Navigation state.
+     * Called when [NavigationView] enters Active Navigation state.
      */
     open fun onActiveNavigation() = Unit
 
     /**
-     * Called when NavigationView enters Arrival state.
+     * Called when [NavigationView] enters Arrival state.
      */
     open fun onArrival() = Unit
 
@@ -62,14 +62,16 @@ abstract class NavigationViewListener {
     open fun onFollowingCameraMode() = Unit
 
     /**
-     * Called when `NavigationCamera` padding has changed. The padding is defined as a box relative to map size which the user location indicator and route geometry is fit into during camera following and overview states.
+     * Called when `NavigationCamera` padding has changed. The padding is defined as a box relative
+     * to map size in which the user location indicator and route geometry is fit into during camera
+     * following and overview states.
      *
      * @param padding New camera padding value.
      */
     open fun onCameraPaddingChanged(padding: EdgeInsets) = Unit
 
     /**
-     * Called when Audio Guidance mute state has change.
+     * Called when audio guidance mute state has changed.
      *
      * @param muted Audio Guidance muted state.
      */
@@ -107,27 +109,27 @@ abstract class NavigationViewListener {
     open fun onRouteFetching(requestId: Long) = Unit
 
     /**
-     * Called when the info panel behavior updates to hidden.
+     * Called when the info panel behavior updates to [BottomSheetBehavior.STATE_HIDDEN].
      */
     open fun onInfoPanelHidden() = Unit
 
     /**
-     * Called when the info panel behavior updates to expanded.
+     * Called when the info panel behavior updates to [BottomSheetBehavior.STATE_EXPANDED].
      */
     open fun onInfoPanelExpanded() = Unit
 
     /**
-     * Called when the info panel behavior updates to collapsed.
+     * Called when the info panel behavior updates to [BottomSheetBehavior.STATE_COLLAPSED].
      */
     open fun onInfoPanelCollapsed() = Unit
 
     /**
-     * Called when the info panel behavior updates to dragging.
+     * Called when the info panel behavior updates to [BottomSheetBehavior.STATE_DRAGGING].
      */
     open fun onInfoPanelDragging() = Unit
 
     /**
-     * Called when the info panel behavior updates to settling.
+     * Called when the info panel behavior updates to [BottomSheetBehavior.STATE_SETTLING].
      */
     open fun onInfoPanelSettling() = Unit
 

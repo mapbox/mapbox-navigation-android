@@ -3,7 +3,6 @@ package com.mapbox.navigation.dropin.extendablebutton
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.dropin.util.TestingUtil
@@ -28,7 +27,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class StartNavigationButtonComponentTest {
 

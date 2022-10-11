@@ -29,11 +29,11 @@ package com.mapbox.navigation.ui.base.installer {
 
 package com.mapbox.navigation.ui.base.lifecycle {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface Binder<T> {
+  public interface Binder<T> {
     method @UiThread public com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver bind(T? viewGroup);
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface UIBinder extends com.mapbox.navigation.ui.base.lifecycle.Binder<android.view.ViewGroup> {
+  public fun interface UIBinder extends com.mapbox.navigation.ui.base.lifecycle.Binder<android.view.ViewGroup> {
     field public static final com.mapbox.navigation.ui.base.lifecycle.UIBinder.Companion Companion;
   }
 
@@ -42,7 +42,7 @@ package com.mapbox.navigation.ui.base.lifecycle {
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder USE_DEFAULT;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public class UIComponent implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+  public class UIComponent implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
     ctor public UIComponent();
     method public final kotlinx.coroutines.CoroutineScope getCoroutineScope();
     method protected final inline <T> void observe(kotlinx.coroutines.flow.Flow<? extends T>, kotlin.coroutines.CoroutineContext context = EmptyCoroutineContext, kotlin.jvm.functions.Function2<? super T,? super kotlin.coroutines.Continuation<? super kotlin.Unit>,?> action);
@@ -53,7 +53,7 @@ package com.mapbox.navigation.ui.base.lifecycle {
     field public kotlinx.coroutines.CoroutineScope coroutineScope;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class UICoordinator<T extends android.view.ViewGroup> implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+  public abstract class UICoordinator<T extends android.view.ViewGroup> implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
     ctor public UICoordinator(T viewGroup);
     method public abstract kotlinx.coroutines.flow.Flow<com.mapbox.navigation.ui.base.lifecycle.Binder<T>> flowViewBinders(com.mapbox.navigation.core.MapboxNavigation);
     method public final kotlinx.coroutines.CoroutineScope getCoroutineScope();
@@ -76,7 +76,7 @@ package com.mapbox.navigation.ui.base.util {
 
 package com.mapbox.navigation.ui.base.view {
 
-  @UiThread @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxExtendableButton extends android.widget.FrameLayout {
+  @UiThread public final class MapboxExtendableButton extends android.widget.FrameLayout {
     ctor public MapboxExtendableButton(android.content.Context context);
     ctor public MapboxExtendableButton(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxExtendableButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
@@ -85,7 +85,6 @@ package com.mapbox.navigation.ui.base.view {
     method public androidx.appcompat.widget.AppCompatImageView getIconImage();
     method public androidx.appcompat.widget.AppCompatTextView getTextView();
     method public void setState(com.mapbox.navigation.ui.base.view.MapboxExtendableButton.State state);
-    method public void updateStyle(@StyleRes int style);
     property public final androidx.constraintlayout.widget.ConstraintLayout containerView;
     property public final androidx.appcompat.widget.AppCompatImageView iconImage;
     property public final androidx.appcompat.widget.AppCompatTextView textView;

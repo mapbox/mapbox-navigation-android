@@ -25,19 +25,19 @@ import com.mapbox.navigation.ui.base.installer.Installation
 import com.mapbox.navigation.ui.base.installer.installComponents
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
-import com.mapbox.navigation.ui.maps.installer.cameraModeButton
-import com.mapbox.navigation.ui.maps.installer.locationPuck
-import com.mapbox.navigation.ui.maps.installer.navigationCamera
-import com.mapbox.navigation.ui.maps.installer.recenterButton
-import com.mapbox.navigation.ui.maps.installer.roadName
-import com.mapbox.navigation.ui.maps.installer.routeArrow
-import com.mapbox.navigation.ui.maps.installer.routeLine
+import com.mapbox.navigation.ui.maps.cameraModeButton
+import com.mapbox.navigation.ui.maps.locationPuck
+import com.mapbox.navigation.ui.maps.navigationCamera
+import com.mapbox.navigation.ui.maps.recenterButton
+import com.mapbox.navigation.ui.maps.roadName
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
-import com.mapbox.navigation.ui.voice.installer.audioGuidanceButton
+import com.mapbox.navigation.ui.maps.routeArrow
+import com.mapbox.navigation.ui.maps.routeLine
+import com.mapbox.navigation.ui.voice.audioGuidanceButton
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class ComponentsAltActivity : AppCompatActivity() {
@@ -45,7 +45,6 @@ class ComponentsAltActivity : AppCompatActivity() {
     private val binding: ComponentsActivityLayoutBinding by lazy {
         ComponentsActivityLayoutBinding.inflate(layoutInflater)
     }
-
     private val viewModel: DropInNavigationViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {

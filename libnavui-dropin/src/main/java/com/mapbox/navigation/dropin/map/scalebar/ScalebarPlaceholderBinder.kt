@@ -2,14 +2,12 @@ package com.mapbox.navigation.dropin.map.scalebar
 
 import android.view.View
 import android.view.ViewGroup
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxScalebarPlaceholderLayoutBinding
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class ScalebarPlaceholderBinder(
     private val context: NavigationViewContext,
 ) : UIBinder {
