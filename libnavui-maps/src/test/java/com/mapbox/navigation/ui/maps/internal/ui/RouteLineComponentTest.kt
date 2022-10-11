@@ -15,7 +15,6 @@ import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -56,8 +55,7 @@ import java.util.UUID
 
 @OptIn(
     FlowPreview::class,
-    ExperimentalCoroutinesApi::class,
-    ExperimentalPreviewMapboxNavigationAPI::class
+    ExperimentalCoroutinesApi::class
 )
 class RouteLineComponentTest {
 

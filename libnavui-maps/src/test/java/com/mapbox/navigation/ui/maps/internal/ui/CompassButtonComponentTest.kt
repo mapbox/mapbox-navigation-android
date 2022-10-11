@@ -8,7 +8,6 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.flyTo
 import com.mapbox.maps.plugin.delegates.MapPluginExtensionsDelegate
 import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
 import io.mockk.every
@@ -21,7 +20,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class CompassButtonComponentTest {
 
     private val mapboxMap = mockk<MapboxMap>(relaxed = true)

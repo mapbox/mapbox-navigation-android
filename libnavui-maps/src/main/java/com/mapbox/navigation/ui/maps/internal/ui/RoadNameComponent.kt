@@ -5,7 +5,6 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadedListener
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
@@ -28,13 +27,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
-@ExperimentalPreviewMapboxNavigationAPI
 interface RoadNameComponentContract {
     val roadInfo: StateFlow<Road?>
     val mapStyle: StateFlow<Style?>
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 class RoadNameComponent(
     private val roadNameView: MapboxRoadNameView,
     private val contractProvider: Provider<RoadNameComponentContract>,
@@ -88,7 +85,6 @@ class RoadNameComponent(
         }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class MapboxRoadNameComponentContract(
     private val map: MapboxMap
 ) : UIComponent(),

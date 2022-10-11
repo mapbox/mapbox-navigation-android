@@ -2,13 +2,11 @@ package com.mapbox.navigation.ui.maps.internal.ui
 
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.animation.camera
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class NavigationCameraGestureComponent(
     private val mapView: MapView,
     navigationCamera: NavigationCamera

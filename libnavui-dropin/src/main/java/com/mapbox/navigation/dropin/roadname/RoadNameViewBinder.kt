@@ -9,7 +9,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import androidx.lifecycle.viewModelScope
 import com.mapbox.maps.Style
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxRoadNameLayoutBinding
@@ -19,7 +18,6 @@ import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.maps.internal.ui.RoadNameComponent
 import com.mapbox.navigation.ui.maps.roadname.view.MapboxRoadNameView
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class RoadNameViewBinder(
     private val context: NavigationViewContext
 ) : UIBinder {

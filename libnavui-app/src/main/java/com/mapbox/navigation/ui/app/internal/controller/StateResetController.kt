@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.app.internal.controller
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
@@ -10,7 +9,6 @@ import com.mapbox.navigation.ui.app.internal.extension.dispatch
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import java.util.concurrent.atomic.AtomicBoolean
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class StateResetController(
     private val store: Store,
     private val ignoreTripSessionUpdates: AtomicBoolean

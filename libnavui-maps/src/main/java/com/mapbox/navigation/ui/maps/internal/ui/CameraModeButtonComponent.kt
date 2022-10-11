@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.maps.internal.ui
 
 import android.view.View
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
@@ -13,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-@ExperimentalPreviewMapboxNavigationAPI
 interface CameraModeButtonComponentContract {
 
     val buttonState: StateFlow<NavigationCameraState>
@@ -21,7 +19,6 @@ interface CameraModeButtonComponentContract {
     fun onClick(view: View)
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 class CameraModeButtonComponent(
     private val cameraModeButton: MapboxCameraModeButton,
     private val contractProvider: Provider<CameraModeButtonComponentContract>,
@@ -40,7 +37,6 @@ class CameraModeButtonComponent(
     }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class MapboxCameraModeButtonComponentContract(
     private val navigationCameraProvider: Provider<NavigationCamera?>
 ) : UIComponent(),

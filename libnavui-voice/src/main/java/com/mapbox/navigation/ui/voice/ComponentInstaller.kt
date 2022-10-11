@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.voice.installer
+package com.mapbox.navigation.ui.voice
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.base.installer.ComponentInstaller
@@ -11,7 +11,7 @@ import com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
  * Install component that connects [MapboxAudioGuidanceButton] to the default [MapboxAudioGuidance] instance.
  *
  * The installed component:
- * - handles button onClick events and mutes/un-umutes voice instructions playback
+ * - handles button onClick events and mutes/un-mutes voice instructions playback
  * - updates button muted/un-muted state
  */
 @ExperimentalPreviewMapboxNavigationAPI

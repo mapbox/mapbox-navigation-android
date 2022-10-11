@@ -9,7 +9,6 @@ import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
@@ -30,7 +29,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-@ExperimentalPreviewMapboxNavigationAPI
 interface RouteLineComponentContract {
     fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>)
 
@@ -39,7 +37,6 @@ interface RouteLineComponentContract {
     fun onMapClicked(point: Point)
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class MapboxRouteLineComponentContract : RouteLineComponentContract {
     override fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>) {
         mapboxNavigation.setNavigationRoutes(routes)
@@ -54,7 +51,6 @@ internal class MapboxRouteLineComponentContract : RouteLineComponentContract {
     }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 class RouteLineComponent(
     private val mapboxMap: MapboxMap,
     private val mapPlugins: MapPluginProviderDelegate,

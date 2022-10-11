@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.maneuver.internal
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
@@ -23,7 +22,6 @@ interface ManeuverComponentContract {
     fun onManeuverViewVisibilityChanged(isVisible: Boolean)
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 class ManeuverComponent(
     val maneuverView: MapboxManeuverView,
     val userId: String?,

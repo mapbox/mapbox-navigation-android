@@ -4,14 +4,12 @@ import android.content.Context
 import android.view.View
 import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @RunWith(RobolectricTestRunner::class)
 class EmptyBinderTest {
 

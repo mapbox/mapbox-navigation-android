@@ -5,7 +5,6 @@ import androidx.core.content.ContextCompat
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.ViewStyleCustomization
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
@@ -16,7 +15,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @RunWith(RobolectricTestRunner::class)
 class NavigationViewStylesTest {
 

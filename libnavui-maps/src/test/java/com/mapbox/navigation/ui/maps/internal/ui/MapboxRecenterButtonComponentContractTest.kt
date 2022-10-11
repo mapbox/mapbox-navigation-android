@@ -12,7 +12,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.maps.installer.RecenterButtonComponentConfig
+import com.mapbox.navigation.ui.maps.RecenterButtonConfig
 import com.mapbox.navigation.utils.internal.toPoint
 import io.mockk.every
 import io.mockk.mockk
@@ -31,7 +31,7 @@ class MapboxRecenterButtonComponentContractTest {
 
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var cameraPlugin: CameraAnimationsPlugin
-    private lateinit var componentConfig: RecenterButtonComponentConfig
+    private lateinit var componentConfig: RecenterButtonConfig
 
     private lateinit var sut: MapboxRecenterButtonComponentContract
 
@@ -42,7 +42,7 @@ class MapboxRecenterButtonComponentContractTest {
         val mapView: MapView = mockk {
             every { camera } returns cameraPlugin
         }
-        componentConfig = RecenterButtonComponentConfig().apply {
+        componentConfig = RecenterButtonConfig().apply {
             cameraOptions = CameraOptions.Builder().zoom(4.0).build()
             animationOptions = MapAnimationOptions.mapAnimationOptions {
                 duration(2000L)

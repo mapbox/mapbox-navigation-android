@@ -1,7 +1,6 @@
 package com.mapbox.navigation.dropin.actionbutton
 
 import android.view.ViewGroup
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.EmptyBinder
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
@@ -14,7 +13,6 @@ import kotlinx.coroutines.flow.combine
  * Coordinator for navigation actions.
  * This is the side panel for a portrait view.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 internal class ActionButtonsCoordinator(
     private val context: NavigationViewContext,
     actionList: ViewGroup

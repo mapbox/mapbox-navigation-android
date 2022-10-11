@@ -17,8 +17,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-@ExperimentalPreviewMapboxNavigationAPI
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
 class AnalyticsComponentTest {
 
     @get:Rule
@@ -33,12 +32,12 @@ class AnalyticsComponentTest {
 
     @Before
     fun setUp() {
-        mockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationEx")
+        mockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationExtensions")
     }
 
     @After
     fun tearDown() {
-        unmockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationEx")
+        unmockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationExtensions")
     }
 
     @Test

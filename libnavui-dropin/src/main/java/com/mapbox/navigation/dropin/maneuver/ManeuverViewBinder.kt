@@ -3,7 +3,6 @@ package com.mapbox.navigation.dropin.maneuver
 import android.transition.Scene
 import android.transition.TransitionManager
 import android.view.ViewGroup
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxManeuverGuidanceLayoutBinding
@@ -14,7 +13,6 @@ import com.mapbox.navigation.ui.maneuver.internal.ManeuverComponent
 import com.mapbox.navigation.ui.maps.internal.extensions.getStyleId
 import com.mapbox.navigation.ui.maps.internal.extensions.getUserId
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class ManeuverViewBinder(
     private val context: NavigationViewContext
 ) : UIBinder {

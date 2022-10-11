@@ -1,8 +1,8 @@
 package com.mapbox.navigation.dropin.navigationview
 
 import android.content.Context
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.dropin.NavigationView
 import com.mapbox.navigation.dropin.ViewOptionsCustomization
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteArrowOptions
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 /**
  * A class that is a central place to hold all the configurable options for [NavigationView].
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class NavigationViewOptions(context: Context) {
 
     private var _mapStyleUriDay: MutableStateFlow<String> =

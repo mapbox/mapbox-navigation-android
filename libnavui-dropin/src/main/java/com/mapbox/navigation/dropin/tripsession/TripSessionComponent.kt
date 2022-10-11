@@ -3,7 +3,6 @@ package com.mapbox.navigation.dropin.tripsession
 import android.annotation.SuppressLint
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.ui.app.internal.SharedApp.tripSessionTransaction
@@ -17,14 +16,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
-/**
- * Component class that is responsible for starting and stopping [MapboxNavigation] trip session
- * and replay trip session when [TripSessionStarterState] changes.
- *
- * @param lifecycle Parent view Lifecycle to which this component is attached to.
- * @param store Store instance that holds NavigationState and TripSessionStarterState state
- */
-@ExperimentalPreviewMapboxNavigationAPI
 @SuppressLint("MissingPermission")
 internal class TripSessionComponent(
     private val lifecycle: Lifecycle,

@@ -3,7 +3,6 @@ package com.mapbox.navigation.dropin.backpress
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.OnBackPressedDispatcher
 import androidx.lifecycle.Lifecycle
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.testutil.TestLifecycleOwner
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -24,7 +23,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
-@ExperimentalPreviewMapboxNavigationAPI
 @OptIn(ExperimentalCoroutinesApi::class)
 class BackPressedComponentTest {
 

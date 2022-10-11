@@ -3,7 +3,6 @@ package com.mapbox.navigation.dropin
 import android.content.Context
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.dropin.infopanel.InfoPanelBinder
 import com.mapbox.navigation.ui.base.lifecycle.Binder
@@ -18,7 +17,6 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
  * [NavigationView]. If not specified, [NavigationView] uses the default values defined for
  * each of these properties.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 class ViewOptionsCustomization {
     /**
      * Provide custom navigation style for day mode.
@@ -80,7 +78,7 @@ class ViewOptionsCustomization {
     var distanceFormatterOptions: DistanceFormatterOptions? = null
 
     /**
-     * Sets whether the camera debug info should be visible.
+     * Set to show the camera debug info window.
      * Set to `false` for the default behavior.
      */
     var showCameraDebugInfo: Boolean? = null

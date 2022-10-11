@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import androidx.activity.ComponentActivity
 import androidx.annotation.Px
 import androidx.constraintlayout.widget.Guideline
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.EmptyBinder
 import com.mapbox.navigation.dropin.LeftFrameCoordinator
@@ -36,11 +35,6 @@ import com.mapbox.navigation.dropin.tripprogress.TripProgressBinder
 import com.mapbox.navigation.dropin.tripsession.TripSessionComponent
 import kotlinx.coroutines.flow.combine
 
-//
-// Components
-//
-
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.poiNameComponent(
     viewGroup: ViewGroup
 ): MapboxNavigationObserver {
@@ -57,7 +51,6 @@ internal fun NavigationViewContext.poiNameComponent(
     return reloadOnChange(binderFlow) { it.bind(viewGroup) }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.routePreviewButtonComponent(
     buttonContainer: ViewGroup
 ): MapboxNavigationObserver {
@@ -74,7 +67,6 @@ internal fun NavigationViewContext.routePreviewButtonComponent(
     return reloadOnChange(binderFlow) { it.bind(buttonContainer) }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.startNavigationButtonComponent(
     buttonContainer: ViewGroup
 ): MapboxNavigationObserver {
@@ -91,7 +83,6 @@ internal fun NavigationViewContext.startNavigationButtonComponent(
     return reloadOnChange(binderFlow) { it.bind(buttonContainer) }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.endNavigationButtonComponent(
     endNavigationButtonLayout: ViewGroup
 ): MapboxNavigationObserver {
@@ -108,7 +99,6 @@ internal fun NavigationViewContext.endNavigationButtonComponent(
     return reloadOnChange(binderFlow) { it.bind(endNavigationButtonLayout) }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.arrivalTextComponent(
     viewGroup: ViewGroup
 ): MapboxNavigationObserver {
@@ -125,7 +115,6 @@ internal fun NavigationViewContext.arrivalTextComponent(
     return reloadOnChange(binderFlow) { it.bind(viewGroup) }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.tripProgressComponent(
     tripProgressLayout: ViewGroup
 ): MapboxNavigationObserver {
@@ -142,7 +131,6 @@ internal fun NavigationViewContext.tripProgressComponent(
     return reloadOnChange(binderFlow) { it.bind(tripProgressLayout) }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.compassButtonComponent(
     buttonContainer: ViewGroup,
     @Px verticalSpacing: Int
@@ -160,7 +148,6 @@ internal fun NavigationViewContext.compassButtonComponent(
     return reloadOnChange(binderFlow) { it.bind(buttonContainer) }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.cameraModeButtonComponent(
     buttonContainer: ViewGroup,
     @Px verticalSpacing: Int
@@ -178,7 +165,6 @@ internal fun NavigationViewContext.cameraModeButtonComponent(
     return reloadOnChange(binderFlow) { it.bind(buttonContainer) }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.audioGuidanceButtonComponent(
     buttonContainer: ViewGroup,
     @Px verticalSpacing: Int
@@ -196,7 +182,6 @@ internal fun NavigationViewContext.audioGuidanceButtonComponent(
     return reloadOnChange(binderFlow) { it.bind(buttonContainer) }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.recenterButtonComponent(
     buttonContainer: ViewGroup,
     @Px verticalSpacing: Int
@@ -214,61 +199,44 @@ internal fun NavigationViewContext.recenterButtonComponent(
     return reloadOnChange(binderFlow) { it.bind(buttonContainer) }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.analyticsComponent() =
     AnalyticsComponent()
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.locationPermissionComponent(activity: ComponentActivity) =
     LocationPermissionComponent(activity, store)
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.tripSessionComponent() =
     TripSessionComponent(lifecycleOwner.lifecycle, store)
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.backPressedComponent(activity: ComponentActivity) =
     BackPressedComponent(activity.onBackPressedDispatcher, store, lifecycleOwner)
 
-//
-// Coordinators
-//
-
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.mapLayoutCoordinator(
     binding: MapboxNavigationViewLayoutBinding
 ) = MapLayoutCoordinator(this, binding)
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.scalebarPlaceholderCoordinator(scalebarLayout: ViewGroup) =
     ScalebarPlaceholderCoordinator(this, scalebarLayout)
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.maneuverCoordinator(guidanceLayout: ViewGroup) =
     ManeuverCoordinator(this, guidanceLayout)
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.infoPanelCoordinator(
     infoPanelLayout: ViewGroup,
     guidelineBottom: Guideline
 ) = InfoPanelCoordinator(this, infoPanelLayout, guidelineBottom)
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.actionButtonsCoordinator(actionListLayout: ViewGroup) =
     ActionButtonsCoordinator(this, actionListLayout)
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.speedLimitCoordinator(speedLimitLayout: ViewGroup) =
     SpeedLimitCoordinator(this, speedLimitLayout)
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.roadNameCoordinator(roadNameLayout: ViewGroup) =
     RoadNameCoordinator(this, roadNameLayout)
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.leftFrameCoordinator(emptyLeftContainer: ViewGroup) =
     LeftFrameCoordinator(this, emptyLeftContainer)
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.rightFrameCoordinator(emptyRightContainer: ViewGroup) =
     RightFrameCoordinator(this, emptyRightContainer)

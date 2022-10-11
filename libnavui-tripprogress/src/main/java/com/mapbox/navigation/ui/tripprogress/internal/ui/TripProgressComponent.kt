@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.tripprogress.internal.ui
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
@@ -17,7 +16,6 @@ interface TripProgressComponentContract {
     val previewRoutes: Flow<List<NavigationRoute>>
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 class TripProgressComponent(
     private val tripProgressView: MapboxTripProgressView,
     private val contactProvider: Provider<TripProgressComponentContract>,

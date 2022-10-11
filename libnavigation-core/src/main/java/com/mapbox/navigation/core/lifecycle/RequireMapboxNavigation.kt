@@ -5,7 +5,6 @@ package com.mapbox.navigation.core.lifecycle
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp.lifecycleOwner
 import kotlin.properties.ReadOnlyProperty
@@ -51,7 +50,6 @@ import kotlin.reflect.KProperty
  *
  * @see [RequireMapboxNavigationDelegate] for more details.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 fun LifecycleOwner.requireMapboxNavigation(
     onCreatedObserver: MapboxNavigationObserver? = null,
     onStartedObserver: MapboxNavigationObserver? = null,

@@ -4,7 +4,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -32,7 +31,6 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@ExperimentalPreviewMapboxNavigationAPI
 class NavigationViewListenerRegistryTest {
 
     @get:Rule

@@ -5,7 +5,6 @@ import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.EmptyBinder
 import com.mapbox.navigation.dropin.R
@@ -22,7 +21,6 @@ import kotlinx.coroutines.launch
 /**
  * Coordinator for showing current road name.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 internal class RoadNameCoordinator(
     private val context: NavigationViewContext,
     private val roadNameLayout: ViewGroup

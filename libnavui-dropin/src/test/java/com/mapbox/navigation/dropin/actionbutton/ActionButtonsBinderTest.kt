@@ -8,7 +8,6 @@ import androidx.core.view.children
 import androidx.core.view.isEmpty
 import androidx.core.view.isNotEmpty
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxActionButtonsLayoutBinding
@@ -37,7 +36,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class ActionButtonsBinderTest {
 

@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.base.view
 import android.content.Context
 import android.view.View
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.base.view.MapboxExtendableButton.State
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -13,7 +12,6 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalPreviewMapboxNavigationAPI
 class MapboxExtendableButtonTest {
 
     private lateinit var ctx: Context

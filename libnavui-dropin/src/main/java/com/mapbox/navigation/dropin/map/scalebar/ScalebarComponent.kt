@@ -4,14 +4,12 @@ import android.view.Gravity
 import androidx.core.graphics.Insets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.scalebar.scalebar
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import kotlinx.coroutines.flow.StateFlow
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class ScalebarComponent(
     private val mapView: MapView,
     private val isEnabled: StateFlow<Boolean>,
