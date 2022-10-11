@@ -330,6 +330,10 @@ package com.mapbox.navigation.core.history.model {
 
 package com.mapbox.navigation.core.lifecycle {
 
+  public final class ForwardMapboxNavigation {
+    method public static com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver forwardMapboxNavigation(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.core.MapboxNavigation,kotlin.Unit> attach, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.core.MapboxNavigation,kotlin.Unit> detach);
+  }
+
   public final class MapboxNavigationApp {
     method @UiThread public static com.mapbox.navigation.core.lifecycle.MapboxNavigationApp attach(androidx.lifecycle.LifecycleOwner lifecycleOwner);
     method public static com.mapbox.navigation.core.lifecycle.MapboxNavigationApp attachAllActivities(android.app.Application application);
@@ -360,7 +364,7 @@ package com.mapbox.navigation.core.lifecycle {
   }
 
   public final class RequireMapboxNavigation {
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static kotlin.properties.ReadOnlyProperty<java.lang.Object,com.mapbox.navigation.core.MapboxNavigation> requireMapboxNavigation(androidx.lifecycle.LifecycleOwner, com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver? onCreatedObserver = null, com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver? onStartedObserver = null, com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver? onResumedObserver = null, kotlin.jvm.functions.Function0<kotlin.Unit>? onInitialize = null);
+    method public static kotlin.properties.ReadOnlyProperty<java.lang.Object,com.mapbox.navigation.core.MapboxNavigation> requireMapboxNavigation(androidx.lifecycle.LifecycleOwner, com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver? onCreatedObserver = null, com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver? onStartedObserver = null, com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver? onResumedObserver = null, kotlin.jvm.functions.Function0<kotlin.Unit>? onInitialize = null);
   }
 
 }

@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.NavigationView
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.databinding.LayoutActivityNavigationViewLifecycleTestBinding
@@ -20,7 +19,6 @@ import com.mapbox.navigation.utils.internal.logD
 private const val FIRST_FRAGMENT_TAG = "FirstFragment"
 private const val SECOND_FRAGMENT_TAG = "SecondFragment"
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class NavigationViewLifecycleTestActivity : AppCompatActivity() {
 
     private lateinit var binding: LayoutActivityNavigationViewLifecycleTestBinding
@@ -66,7 +64,6 @@ class NavigationViewLifecycleTestActivity : AppCompatActivity() {
     }
 }
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class PageNavigationFragment(private val logTag: String) : Fragment() {
 
     var navigationView: NavigationView? = null

@@ -2,7 +2,6 @@
 
 package com.mapbox.navigation.core.internal.extensions
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -11,11 +10,9 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * When returning an observer, you can use this extension to return a list of observers. This will
  * attach one to many observers to your view binder.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 fun navigationListOf(vararg elements: MapboxNavigationObserver): MapboxNavigationObserver =
     MapboxNavigationObserverChain().apply { addAll(*elements) }
 
-@ExperimentalPreviewMapboxNavigationAPI
 class MapboxNavigationObserverChain : MapboxNavigationObserver {
     private val queue = ConcurrentLinkedQueue<MapboxNavigationObserver>()
     private var attached: MapboxNavigation? = null

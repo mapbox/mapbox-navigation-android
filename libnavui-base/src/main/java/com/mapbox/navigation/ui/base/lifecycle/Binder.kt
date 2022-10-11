@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.base.lifecycle
 
 import android.view.ViewGroup
 import androidx.annotation.UiThread
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 
@@ -11,7 +10,6 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
  * are responsible for transitioning a view(s) into the [ViewGroup]. They are also responsible for
  * deciding what components should be part of the view.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 interface Binder<T> {
 
     /**
@@ -27,7 +25,6 @@ interface Binder<T> {
  * are responsible for transitioning a view(s) into the [ViewGroup]. They are also responsible for
  * deciding what components should be part of the view.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 fun interface UIBinder : Binder<ViewGroup> {
     companion object {
         /**
@@ -37,7 +34,6 @@ fun interface UIBinder : Binder<ViewGroup> {
     }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal object NoOpMapboxNavigationObserver : MapboxNavigationObserver {
     override fun onAttached(mapboxNavigation: MapboxNavigation) = Unit
     override fun onDetached(mapboxNavigation: MapboxNavigation) = Unit

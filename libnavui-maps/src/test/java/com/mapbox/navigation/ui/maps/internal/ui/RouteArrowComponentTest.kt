@@ -5,7 +5,6 @@ import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -33,7 +32,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class RouteArrowComponentTest {
 
     @get:Rule

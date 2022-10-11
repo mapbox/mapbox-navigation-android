@@ -2,7 +2,6 @@
 
 package com.mapbox.navigation.dropin.internal.extensions
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -10,7 +9,6 @@ import kotlinx.coroutines.flow.combine
 /**
  * Return UIComponent that gets re-created using [factory] when [flow] changes.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun <T> reloadOnChange(
     flow: Flow<T>,
     factory: (T) -> MapboxNavigationObserver?
@@ -20,7 +18,6 @@ internal fun <T> reloadOnChange(
 /**
  * Return UIComponent that gets re-created using [factory] when either [flow1] or [flow2] changes.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun <T1, T2> reloadOnChange(
     flow1: Flow<T1>,
     flow2: Flow<T2>,
@@ -34,7 +31,6 @@ internal fun <T1, T2> reloadOnChange(
  * Return UIComponent that gets re-created using [factory] when either [flow1] or [flow2] or
  * [flow3] changes.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 internal fun <T1, T2, T3> reloadOnChange(
     flow1: Flow<T1>,
     flow2: Flow<T2>,

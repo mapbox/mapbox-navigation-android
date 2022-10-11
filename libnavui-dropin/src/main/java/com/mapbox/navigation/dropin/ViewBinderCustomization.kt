@@ -1,7 +1,6 @@
 package com.mapbox.navigation.dropin
 
 import com.mapbox.maps.MapView
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription
 import com.mapbox.navigation.dropin.actionbutton.ActionButtonsBinder
 import com.mapbox.navigation.dropin.infopanel.InfoPanelBinder
@@ -13,7 +12,6 @@ import com.mapbox.navigation.ui.base.lifecycle.UIBinder
  * [NavigationView]. If not specified, [NavigationView] uses the default [UIBinder] defined for
  * each of these views.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 class ViewBinderCustomization {
 
     /**
@@ -65,60 +63,60 @@ class ViewBinderCustomization {
     var infoPanelHeaderBinder: UIBinder? = null
 
     /**
-     * Customize the Info Panel Header for Free Drive state by providing your own [UIBinder]
+     * Customize the Info Panel Header for free drive state by providing your own [UIBinder]
      * when using default [infoPanelHeaderBinder].
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var infoPanelHeaderFreeDriveBinder: UIBinder? = null
 
     /**
-     * Customize the Info Panel Header for Destination Preview state by providing your own [UIBinder]
+     * Customize the Info Panel Header for destination preview state by providing your own [UIBinder]
      * when using default [infoPanelHeaderBinder].
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var infoPanelHeaderDestinationPreviewBinder: UIBinder? = null
 
     /**
-     * Customize the Info Panel Header for Routes Preview state by providing your own [UIBinder]
+     * Customize the Info Panel Header for routes preview state by providing your own [UIBinder]
      * when using default [infoPanelHeaderBinder].
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var infoPanelHeaderRoutesPreviewBinder: UIBinder? = null
 
     /**
-     * Customize the Info Panel Header for Active Guidance state by providing your own [UIBinder]
+     * Customize the Info Panel Header for active guidance state by providing your own [UIBinder]
      * when using default [infoPanelHeaderBinder].
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var infoPanelHeaderActiveGuidanceBinder: UIBinder? = null
 
     /**
-     * Customize the Info Panel Header for Arrival state by providing your own [UIBinder]
+     * Customize the Info Panel Header for arrival state by providing your own [UIBinder]
      * when using default [infoPanelHeaderBinder].
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var infoPanelHeaderArrivalBinder: UIBinder? = null
 
     /**
-     * Customize the Info Panel Content by providing your own [UIBinder].
+     * Customize the Info Panel content by providing your own [UIBinder].
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var infoPanelContentBinder: UIBinder? = null
 
     /**
-     * Customize the Info Panel Route Preview Button by providing your own [UIBinder].
+     * Customize the Info Panel route preview button by providing your own [UIBinder].
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var infoPanelRoutePreviewButtonBinder: UIBinder? = null
 
     /**
-     * Customize the Info Panel Start Navigation Button by providing your own [UIBinder].
+     * Customize the Info Panel start navigation button by providing your own [UIBinder].
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var infoPanelStartNavigationButtonBinder: UIBinder? = null
 
     /**
-     * Customize the Info Panel End Navigation Button by providing your own [UIBinder].
+     * Customize the Info Panel end navigation button by providing your own [UIBinder].
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var infoPanelEndNavigationButtonBinder: UIBinder? = null
@@ -130,28 +128,29 @@ class ViewBinderCustomization {
     var actionButtonsBinder: UIBinder? = null
 
     /**
-     * Customize the Compass Action Button by providing your own [UIBinder]
+     * Customize the compass action button by providing your own [UIBinder]
      * when using [actionButtonsBinder] with [ActionButtonsBinder.defaultBinder] implementation.
+     * Customize the action buttons by providing your own [UIBinder].
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var actionCompassButtonBinder: UIBinder? = null
 
     /**
-     * Customize the Camera Mode Action Button by providing your own [UIBinder]
+     * Customize the camera mode action button by providing your own [UIBinder]
      * when using [actionButtonsBinder] with [ActionButtonsBinder.defaultBinder] implementation.
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var actionCameraModeButtonBinder: UIBinder? = null
 
     /**
-     * Customize the Toggle Audio Guidance Action Button by providing your own [UIBinder]
+     * Customize the toggle audio guidance action button by providing your own [UIBinder]
      * when using [actionButtonsBinder] with [ActionButtonsBinder.defaultBinder] implementation.
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var actionToggleAudioButtonBinder: UIBinder? = null
 
     /**
-     * Customize the Recenter Camera Action Button by providing your own [UIBinder]
+     * Customize the recenter camera action button by providing your own [UIBinder]
      * when using [actionButtonsBinder] with [ActionButtonsBinder.defaultBinder] implementation.
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
@@ -170,7 +169,7 @@ class ViewBinderCustomization {
     var rightFrameBinder: UIBinder? = null
 
     /**
-     * Add custom Action Buttons to the [NavigationView].
+     * Add custom action buttons to the [NavigationView].
      * Custom buttons can only be added to default [actionButtonsBinder] and can be placed either
      * before or after existing controls.
      * Setting this field to `emptyList()` will remove all custom buttons.

@@ -5,7 +5,6 @@ import androidx.activity.OnBackPressedDispatcher
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.NavigationView
 import com.mapbox.navigation.ui.app.internal.Store
@@ -30,7 +29,6 @@ import kotlinx.coroutines.launch
  * (FreeDrive) <- (DestinationPreview) <- (RoutePreview) <- (ActiveNavigation)
  *             <- (Arrival)
  */
-@ExperimentalPreviewMapboxNavigationAPI
 internal class BackPressedComponent(
     onBackPressedDispatcher: OnBackPressedDispatcher,
     private val store: Store,

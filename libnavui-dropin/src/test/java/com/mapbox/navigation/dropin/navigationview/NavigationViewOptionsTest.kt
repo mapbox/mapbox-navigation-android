@@ -5,7 +5,6 @@ import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.maps.Style
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.dropin.ViewOptionsCustomization
@@ -20,7 +19,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalPreviewMapboxNavigationAPI
 internal class NavigationViewOptionsTest {
 
     lateinit var ctx: Context

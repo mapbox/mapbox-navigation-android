@@ -4,14 +4,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewModel
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 
 /**
  * There is a single ViewModel for the navigation view. Use this class to store state that should
  * survive configuration changes.
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class NavigationViewModel : ViewModel() {
 
     /**

@@ -3,7 +3,6 @@ package com.mapbox.navigation.dropin.map.geocoding
 import android.content.res.Resources
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.widget.TextViewCompat
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.ui.app.internal.Store
@@ -11,7 +10,6 @@ import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.flow.StateFlow
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class POINameComponent(
     private val store: Store,
     private val textView: AppCompatTextView,

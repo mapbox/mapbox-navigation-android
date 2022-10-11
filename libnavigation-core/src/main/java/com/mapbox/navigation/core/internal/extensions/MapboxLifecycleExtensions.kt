@@ -4,12 +4,10 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 
-@ExperimentalPreviewMapboxNavigationAPI
 fun <T : MapboxNavigationObserver> LifecycleOwner.attachCreated(vararg observers: T) = apply {
     lifecycle.addObserver(object : DefaultLifecycleObserver {
         override fun onCreate(owner: LifecycleOwner) {
@@ -22,7 +20,6 @@ fun <T : MapboxNavigationObserver> LifecycleOwner.attachCreated(vararg observers
     })
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 fun <T : MapboxNavigationObserver> LifecycleOwner.attachStarted(vararg observers: T) = apply {
     lifecycle.addObserver(object : DefaultLifecycleObserver {
         override fun onStart(owner: LifecycleOwner) {
@@ -39,7 +36,6 @@ fun <T : MapboxNavigationObserver> LifecycleOwner.attachStarted(vararg observers
     })
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 fun <T : MapboxNavigationObserver> LifecycleOwner.attachResumed(vararg observers: T) = apply {
     lifecycle.addObserver(object : DefaultLifecycleObserver {
         override fun onResume(owner: LifecycleOwner) {
@@ -56,7 +52,6 @@ fun <T : MapboxNavigationObserver> LifecycleOwner.attachResumed(vararg observers
     })
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 fun LifecycleOwner.attachCreated(
     mapboxNavigation: MapboxNavigation,
     observer: MapboxNavigationObserver
@@ -67,7 +62,6 @@ fun LifecycleOwner.attachCreated(
     observer
 )
 
-@ExperimentalPreviewMapboxNavigationAPI
 fun LifecycleOwner.attachStarted(
     mapboxNavigation: MapboxNavigation,
     observer: MapboxNavigationObserver
@@ -78,7 +72,6 @@ fun LifecycleOwner.attachStarted(
     observer
 )
 
-@ExperimentalPreviewMapboxNavigationAPI
 fun LifecycleOwner.attachResumed(
     mapboxNavigation: MapboxNavigation,
     observer: MapboxNavigationObserver
@@ -89,7 +82,6 @@ fun LifecycleOwner.attachResumed(
     observer
 )
 
-@ExperimentalPreviewMapboxNavigationAPI
 fun LifecycleOwner.attachOnLifecycle(
     attachEvent: Lifecycle.Event,
     detachEvent: Lifecycle.Event,
@@ -99,7 +91,6 @@ fun LifecycleOwner.attachOnLifecycle(
     lifecycle.addObserver(AttachOnLifecycle(attachEvent, detachEvent, mapboxNavigation, observer))
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class AttachOnLifecycle(
     private val attachEvent: Lifecycle.Event,
     private val detachEvent: Lifecycle.Event,

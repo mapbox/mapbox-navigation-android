@@ -3,7 +3,6 @@ package com.mapbox.navigation.dropin.navigationview
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.dropin.NavigationViewApi
 import com.mapbox.navigation.dropin.NavigationViewApiError
@@ -22,7 +21,6 @@ import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterActio
 import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class MapboxNavigationViewApi(
     private val store: Store
 ) : NavigationViewApi() {
@@ -175,7 +173,6 @@ internal class MapboxNavigationViewApi(
  * Calls the specified function [block] and returns its encapsulated result if invocation was successful,
  * catching any [NavigationViewApiError] that was thrown from the [block] function execution and encapsulating it as a failure.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 private inline fun <R : Any> runCatchingError(
     block: () -> R
 ): Expected<NavigationViewApiError, R> {

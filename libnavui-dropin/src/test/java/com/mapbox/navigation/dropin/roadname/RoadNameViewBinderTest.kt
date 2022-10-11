@@ -4,7 +4,6 @@ import android.content.Context
 import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.maps.Style
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.internal.extensions.ReloadingComponent
@@ -32,7 +31,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class RoadNameViewBinderTest {
 

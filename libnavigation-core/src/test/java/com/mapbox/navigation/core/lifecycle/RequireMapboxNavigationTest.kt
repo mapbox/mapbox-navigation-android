@@ -4,7 +4,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -44,7 +43,6 @@ class RequireMapboxNavigationTest {
             lifecycleRegistry.currentState = state
         }
 
-        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         val mapboxNavigation by requireMapboxNavigation(
             onCreatedObserver = onCreatedObserver,
             onStartedObserver = onStartedObserver,

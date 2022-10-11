@@ -5,7 +5,6 @@ import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.bindgen.Expected
 import com.mapbox.maps.Style
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.core.MapboxNavigation
@@ -34,7 +33,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 internal class RoadNameComponentTest {
 
@@ -49,7 +48,7 @@ internal class RoadNameComponentTest {
 
     @Before
     fun setUp() {
-        mockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationEx")
+        mockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationExtensions")
 
         val context: Context = ApplicationProvider.getApplicationContext()
         contract = TestContract()

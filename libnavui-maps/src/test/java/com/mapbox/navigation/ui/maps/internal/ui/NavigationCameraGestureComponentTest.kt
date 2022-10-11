@@ -4,7 +4,6 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener
 import com.mapbox.maps.plugin.animation.CameraAnimatorType
 import com.mapbox.maps.plugin.animation.camera
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import io.mockk.every
@@ -14,7 +13,6 @@ import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class NavigationCameraGestureComponentTest {
 
     private lateinit var mapView: MapView

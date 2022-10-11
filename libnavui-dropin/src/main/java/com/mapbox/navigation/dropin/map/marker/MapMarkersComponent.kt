@@ -4,15 +4,10 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 
-/**
- * Component for rendering all drop-in UI map markers.
- */
-@ExperimentalPreviewMapboxNavigationAPI
 internal open class MapMarkersComponent(
     private val store: Store,
     protected val mapView: MapView,

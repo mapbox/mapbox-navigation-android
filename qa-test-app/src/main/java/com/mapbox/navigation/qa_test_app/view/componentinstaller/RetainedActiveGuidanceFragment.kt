@@ -19,7 +19,7 @@ import com.mapbox.navigation.ui.base.installer.installComponents
 import com.mapbox.navigation.ui.maneuver.maneuver
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.speedlimit.speedLimit
-import com.mapbox.navigation.ui.tripprogress.installer.tripProgress
+import com.mapbox.navigation.ui.tripprogress.tripProgress
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.onStart

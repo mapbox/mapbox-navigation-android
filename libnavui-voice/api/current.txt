@@ -1,4 +1,12 @@
 // Signature format: 3.0
+package com.mapbox.navigation.ui.voice {
+
+  public final class ComponentInstallerKt {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation audioGuidanceButton(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton button);
+  }
+
+}
+
 package com.mapbox.navigation.ui.voice.api {
 
   public interface AsyncAudioFocusDelegate {
@@ -82,14 +90,6 @@ package com.mapbox.navigation.ui.voice.api {
     method protected abstract kotlin.jvm.functions.Function2<android.speech.tts.TextToSpeech,android.os.Bundle,kotlin.Unit> configureTextToSpeech();
     method public abstract com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions getOptions();
     property public abstract com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options;
-  }
-
-}
-
-package com.mapbox.navigation.ui.voice.installer {
-
-  public final class ComponentInstallerKt {
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation audioGuidanceButton(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton button);
   }
 
 }
@@ -196,7 +196,7 @@ package com.mapbox.navigation.ui.voice.options {
 
 package com.mapbox.navigation.ui.voice.view {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxAudioGuidanceButton extends android.widget.FrameLayout {
+  public final class MapboxAudioGuidanceButton extends android.widget.FrameLayout {
     ctor public MapboxAudioGuidanceButton(android.content.Context context);
     ctor public MapboxAudioGuidanceButton(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxAudioGuidanceButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);

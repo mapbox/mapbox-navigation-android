@@ -5,7 +5,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.IdlingResource
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.NavigationView
 import com.mapbox.navigation.instrumentation_tests.activity.NavigationViewLifecycleTestActivity
 import com.mapbox.navigation.testing.ui.BaseTest
@@ -13,7 +12,6 @@ import com.mapbox.navigation.testing.ui.idling.NavigationIdlingResource
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class NavigationViewLifecycleTest : BaseTest<NavigationViewLifecycleTestActivity>(
     NavigationViewLifecycleTestActivity::class.java
 ) {
@@ -92,7 +90,6 @@ class NavigationViewLifecycleTest : BaseTest<NavigationViewLifecycleTestActivity
     }
 }
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class ViewLifecycleIdlingResource(
     navigationView: NavigationView,
     private val targetState: Lifecycle.State

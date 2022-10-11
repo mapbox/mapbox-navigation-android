@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.maps.internal.ui
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
@@ -32,7 +31,6 @@ internal class MapboxRouteAlternativeComponentContract : RouteAlternativeContrac
     }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 class RouteAlternativeComponent(
     private val provider: Provider<RouteAlternativeContract>? = null
 ) : UIComponent() {

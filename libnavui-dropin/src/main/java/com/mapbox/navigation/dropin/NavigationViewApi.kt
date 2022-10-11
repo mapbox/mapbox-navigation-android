@@ -6,27 +6,26 @@ import androidx.annotation.UiThread
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.dropin.navigationview.NavigationViewListener
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
 
 /**
- * Api that gives you the ability to change the state for navigation apps.
+ * Api that gives you the ability to change the state of [NavigationView].
  */
-@ExperimentalPreviewMapboxNavigationAPI
 @UiThread
 abstract class NavigationViewApi {
 
     /**
-     * Clear Route data and request [NavigationView] to enter Free Drive state.
+     * Clear route data and request [NavigationView] to enter free drive state.
      *
      * [NavigationViewListener.onFreeDrive] will be called once [NavigationView] enters
-     * Free Drive state.
+     * free drive state.
      */
     abstract fun startFreeDrive()
 
     /**
-     * Sets a [point] as destination and request [NavigationView] to enter Destination Preview state.
+     * Sets a [point] as destination and request [NavigationView] to enter destination preview state.
      *
      * [NavigationViewListener.onDestinationChanged] will be called once new destination is set
      * and [NavigationViewListener.onDestinationPreview] once [NavigationView] enters
@@ -35,22 +34,22 @@ abstract class NavigationViewApi {
     abstract fun startDestinationPreview(point: Point)
 
     /**
-     * Request [NavigationView] to enter Route Preview state.
+     * Request [NavigationView] to enter route preview state.
      *
      * [NavigationViewListener.onRoutePreview] will be called once [NavigationView] enters
-     * Route Preview state.
+     * route preview state.
      *
-     * Fails with an error when either Destination or Preview Routes has not been set.
+     * Fails with an error when either destination or preview routes has not been set.
      */
     abstract fun startRoutePreview(): Expected<NavigationViewApiError, Unit>
 
     /**
-     * Sets a preview [routes] and request Request [NavigationView] to enter Route Preview state.
+     * Sets preview [routes] and request [NavigationView] to enter route preview state.
      * Last [DirectionsWaypoint] location will be used as the destination.
      *
      * [NavigationViewListener.onDestinationChanged] will be called once new destination is set
      * and [NavigationViewListener.onRoutePreview] will be called once [NavigationView] enters
-     * Route Preview state.
+     * route preview state.
      *
      * Fails with an error when [routes] is an empty list.
      */
@@ -59,22 +58,22 @@ abstract class NavigationViewApi {
     ): Expected<NavigationViewApiError, Unit>
 
     /**
-     * Request [NavigationView] to enter Active Navigation state.
+     * Request [NavigationView] to enter active navigation state.
      *
      * [NavigationViewListener.onActiveNavigation] will be called once [NavigationView] enters
-     * Route Preview state.
+     * route preview state.
      *
-     * Fails with an error when either Destination or Preview Routes has not been set.
+     * Fails with an error when either destination or preview routes has not been set.
      */
     abstract fun startActiveGuidance(): Expected<NavigationViewApiError, Unit>
 
     /**
-     * Sets [routes] and request [NavigationView] to enter Active Navigation state.
+     * Sets [routes] and request [NavigationView] to enter active navigation state.
      * Last [DirectionsWaypoint] location will be used as the destination.
      *
      * [NavigationViewListener.onDestinationChanged] will be called once new destination is set
      * and [NavigationViewListener.onActiveNavigation] will be called once [NavigationView] enters
-     * Active Navigation state.
+     * active navigation state.
      *
      * Fails with an error when [routes] is an empty list.
      */
@@ -83,22 +82,22 @@ abstract class NavigationViewApi {
     ): Expected<NavigationViewApiError, Unit>
 
     /**
-     * Request [NavigationView] to enter Arrival state.
+     * Request [NavigationView] to enter arrival state.
      *
      * [NavigationViewListener.onArrival] will be called once [NavigationView] enters
-     * Arrival state.
+     * arrival state.
      *
-     * Fails with an error when either Destination or Routes has not been set.
+     * Fails with an error when either destination or routes has not been set.
      */
     abstract fun startArrival(): Expected<NavigationViewApiError, Unit>
 
     /**
-     * Sets [routes] and request [NavigationView] to enter Arrival state.
+     * Sets [routes] and request [NavigationView] to enter arrival state.
      * Last [DirectionsWaypoint] location will be used as the destination.
      *
      * [NavigationViewListener.onDestinationChanged] will be called once new destination is set
      * and [NavigationViewListener.onArrival] will be called once [NavigationView] enters
-     * Arrival state.
+     * arrival state.
      *
      * Fails with an error when [routes] is an empty list.
      */

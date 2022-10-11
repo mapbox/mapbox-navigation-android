@@ -2,13 +2,11 @@ package com.mapbox.navigation.dropin.map
 
 import android.view.ViewGroup
 import com.mapbox.maps.MapView
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.ui.base.lifecycle.Binder
 import com.mapbox.navigation.ui.base.lifecycle.UICoordinator
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -17,8 +15,6 @@ import kotlinx.coroutines.launch
 /**
  * Coordinator for inflating [MapView].
  */
-@OptIn(FlowPreview::class)
-@ExperimentalPreviewMapboxNavigationAPI
 internal class MapLayoutCoordinator(
     private val navigationViewContext: NavigationViewContext,
     private val binding: MapboxNavigationViewLayoutBinding
@@ -54,7 +50,6 @@ internal class MapLayoutCoordinator(
     }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal inline fun MapViewOwner.doOnAttachMapView(crossinline action: (MapView) -> Unit) {
     registerObserver(object : MapViewObserver() {
         override fun onAttached(mapView: MapView) {

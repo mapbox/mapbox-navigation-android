@@ -1,7 +1,6 @@
 package com.mapbox.navigation.dropin.map.scalebar
 
 import android.view.View
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.clearMocks
@@ -14,7 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class ScalebarPlaceholderComponentTest {
 

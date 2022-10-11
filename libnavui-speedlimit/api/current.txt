@@ -5,7 +5,7 @@ package com.mapbox.navigation.ui.speedlimit {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation speedLimit(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView speedLimitView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.speedlimit.SpeedLimitConfig,kotlin.Unit> config = {});
   }
 
-  public final class SpeedLimitConfig {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class SpeedLimitConfig {
     method public int getStyle();
     method public int getTextAppearance();
     method public void setStyle(int);

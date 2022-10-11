@@ -1,16 +1,16 @@
 package com.mapbox.navigation.dropin.actionbutton
 
 import android.view.View
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.dropin.NavigationView
 
 /**
- * Custom Action Button description.
+ * Metadata describing the custom [view] and the [position] to which it should be attached in the
+ * [ActionButtonBinder].
  *
- * @param view a view that will be added to the [NavigationView]
+ * @param view a view that will be added to the [NavigationView] [ActionButtonBinder]
  * @param position determines if the custom button should be placed before or after existing controls.
  *                Defaults to Position.END.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 class ActionButtonDescription(
     val view: View,
     val position: Position = Position.END
