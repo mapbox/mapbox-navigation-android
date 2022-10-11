@@ -55,4 +55,10 @@ class DeveloperMetadata internal constructor(
     override fun toString(): String {
         return "DeveloperMetadata(copilotSessionId='$copilotSessionId')"
     }
+
+    internal fun copy(
+        copilotSessionId: String = this.copilotSessionId
+    ): DeveloperMetadata {
+        return DeveloperMetadata(copilotSessionId)
+    }
 }

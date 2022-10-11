@@ -11,6 +11,8 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.core.DeveloperMetadata
+import com.mapbox.navigation.core.DeveloperMetadataObserver
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
@@ -20,7 +22,6 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.clearNavigationRoutesAndWaitForUpdate
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.collectMetadata
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routesUpdates
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.setNavigationRoutesAndAwaitError
@@ -33,8 +34,6 @@ import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -73,7 +72,11 @@ class CopilotIntegrationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cl
 
     @Test
     fun copilotObserverReceivesSameIdsAsDeveloperMetadata() = sdkTest {
-        val expectedMetaInfoCount = 7
+        val collectedDeveloperMetadatas = mutableListOf<DeveloperMetadata>()
+        val developerMetadataObserver = DeveloperMetadataObserver {
+            Log.i("[DeveloperMetadataObserver]", "collected metadata: $it")
+            collectedDeveloperMetadatas.add(it)
+        }
         val startedSessionObserverIds = mutableListOf<String>()
         val historyRecordingStateObserver = object : HistoryRecordingStateChangeObserver {
             override fun onShouldStartRecording(state: NavigationSessionState) {
@@ -86,7 +89,7 @@ class CopilotIntegrationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cl
             override fun onShouldCancelRecording(state: NavigationSessionState) {
             }
         }
-        val metadatas = mapboxNavigation.collectMetadata(expectedMetaInfoCount)
+        mapboxNavigation.registerDeveloperMetadataObserver(developerMetadataObserver)
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         mapboxNavigation.historyRecorder.startRecording()
         mapboxNavigation.registerHistoryRecordingStateChangeObserver(historyRecordingStateObserver)
@@ -138,7 +141,7 @@ class CopilotIntegrationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cl
         // Idle
         mapboxNavigation.stopTripSession()
 
-        val collectedIds = metadatas.take(expectedMetaInfoCount).toList().map { it.copilotSessionId }
+        val collectedIds = collectedDeveloperMetadatas.map { it.copilotSessionId }
         // first and last are idle: not recorded by HistoryRecordingStateChangeObserver
         assertEquals(startedSessionObserverIds, collectedIds.drop(1).dropLast(1))
     }

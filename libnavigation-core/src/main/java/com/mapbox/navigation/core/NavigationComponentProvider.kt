@@ -92,13 +92,16 @@ internal object NavigationComponentProvider {
         tripSession: TripSession
     ): ArrivalProgressObserver = ArrivalProgressObserver(tripSession)
 
-    fun createHistoryRecordingStateHandler(scope: CoroutineScope): HistoryRecordingStateHandler =
-        HistoryRecordingStateHandler(scope)
+    fun createHistoryRecordingStateHandler(): HistoryRecordingStateHandler =
+        HistoryRecordingStateHandler()
 
     fun createDeveloperMetadataAggregator(
-        copilotSessionIdFlow: SharedFlow<String>,
-        mainScope: CoroutineScope,
-    ): DeveloperMetadataAggregator = DeveloperMetadataAggregator(copilotSessionIdFlow, mainScope)
+        historyRecordingStateHandler: HistoryRecordingStateHandler,
+    ): DeveloperMetadataAggregator = DeveloperMetadataAggregator(
+        historyRecordingStateHandler.currentCopilotSession().sessionId
+    ).also {
+        historyRecordingStateHandler.registerCopilotSessionObserver(it)
+    }
 
     fun createCurrentIndicesProvider(): CurrentIndicesProvider =
         CurrentIndicesProvider()

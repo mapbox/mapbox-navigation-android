@@ -1,44 +1,224 @@
 package com.mapbox.navigation.core.internal
 
+import com.mapbox.navigation.core.CopilotSessionObserver
 import com.mapbox.navigation.core.HistoryRecordingStateHandler
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
-import com.mapbox.navigation.core.trip.session.NavigationSessionUtils
 import com.mapbox.navigation.core.trip.session.TripSessionState
-import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.clearMocks
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
-import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HistoryRecordingStateHandlerTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
-
+    
     private val observer = mockk<HistoryRecordingStateChangeObserver>(relaxUnitFun = true)
+    private val copilotObserver = mockk<CopilotSessionObserver>(relaxUnitFun = true)
     private lateinit var stateHandler: HistoryRecordingStateHandler
 
     @Before
     fun setUp() {
-        stateHandler = HistoryRecordingStateHandler(coroutineRule.coroutineScope)
+        stateHandler = HistoryRecordingStateHandler()
         stateHandler.registerStateChangeObserver(observer)
+        stateHandler.registerCopilotSessionObserver(copilotObserver)
     }
 
     @Test
-    fun observersNotification() = coroutineRule.runBlockingTest {
+    fun currentCopilotSessionShouldBeIdle() {
+        assertTrue(stateHandler.currentCopilotSession() is NavigationSessionState.Idle)
+    }
+
+    @Test
+    fun currentCopilotSessionShouldBeFreeDrive() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        assertTrue(stateHandler.currentCopilotSession() is NavigationSessionState.FreeDrive)
+    }
+
+    @Test
+    fun currentCopilotSessionShouldBeActiveGuidance() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        stateHandler.setRoutes(listOf(mockk()))
+        assertTrue(stateHandler.currentCopilotSession() is NavigationSessionState.ActiveGuidance)
+    }
+
+    @Test
+    fun shouldNotifyCopilotObserverOnRegister() {
+        verify {
+            copilotObserver.onCopilotSessionChanged(ofType<NavigationSessionState.Idle>())
+        }
+    }
+
+    @Test
+    fun shouldNotifyCopilotObserverOnChangeFromIdleToFreeDrive() {
+        clearMocks(copilotObserver)
+
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+
+        verify {
+            copilotObserver.onCopilotSessionChanged(ofType<NavigationSessionState.FreeDrive>())
+        }
+    }
+
+    @Test
+    fun shouldNotifyCopilotObserverOnChangeFromIdleToActiveGuidance() {
+        stateHandler.setRoutes(listOf(mockk()))
+        clearMocks(copilotObserver)
+
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+
+        verify {
+            copilotObserver.onCopilotSessionChanged(ofType<NavigationSessionState.ActiveGuidance>())
+        }
+    }
+
+    @Test
+    fun shouldNotNotifyCopilotObserverOnChangeFromIdleToIdle() {
+        clearMocks(copilotObserver)
+
+        stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
+
+        verify(exactly = 0) { copilotObserver.onCopilotSessionChanged(any()) }
+    }
+
+    @Test
+    fun shouldNotifyCopilotObserverOnChangeFromFreeDriveToIdle() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        clearMocks(copilotObserver)
+
+        stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
+
+        verify {
+            copilotObserver.onCopilotSessionChanged(ofType<NavigationSessionState.Idle>())
+        }
+    }
+
+    @Test
+    fun shouldNotNotifyCopilotObserverOnChangeFromFreeDriveToFreeDrive() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        clearMocks(copilotObserver)
+
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+
+        verify(exactly = 0) { copilotObserver.onCopilotSessionChanged(any()) }
+    }
+
+    @Test
+    fun shouldNotifyCopilotObserverOnChangeFromFreeDriveToActiveGuidance() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        clearMocks(copilotObserver)
+
+        stateHandler.setRoutes(listOf(mockk()))
+
+        verify {
+            copilotObserver.onCopilotSessionChanged(ofType<NavigationSessionState.ActiveGuidance>())
+        }
+    }
+
+    @Test
+    fun shouldNotifyCopilotObserverOnChangeFromActiveGuidanceToIdle() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        stateHandler.setRoutes(listOf(mockk()))
+        clearMocks(copilotObserver)
+
+        stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
+
+        verify {
+            copilotObserver.onCopilotSessionChanged(ofType<NavigationSessionState.Idle>())
+        }
+    }
+
+    @Test
+    fun shouldNotifyCopilotObserverOnChangeFromActiveGuidanceToFreeDrive() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        stateHandler.setRoutes(listOf(mockk()))
+        clearMocks(copilotObserver)
+
+        stateHandler.setRoutes(emptyList())
+
+        verify {
+            copilotObserver.onCopilotSessionChanged(ofType<NavigationSessionState.FreeDrive>())
+        }
+    }
+
+    @Test
+    fun shouldNotNotifyCopilotObserverOnChangeFromActiveGuidanceToActiveGuidance() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        stateHandler.setRoutes(listOf(mockk()))
+        clearMocks(copilotObserver)
+
+        stateHandler.setRoutes(listOf(mockk(), mockk()))
+
+        verify(exactly = 0) { copilotObserver.onCopilotSessionChanged(any()) }
+    }
+
+    @Test
+    fun copilotObserversNotification() {
+        val observer1 = mockk<CopilotSessionObserver>(relaxUnitFun = true)
+        val observer2 = mockk<CopilotSessionObserver>(relaxUnitFun = true)
+        val observer3 = mockk<CopilotSessionObserver>(relaxUnitFun = true)
+        stateHandler = HistoryRecordingStateHandler()
+
+        // no observers
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+
+        verifyNoInteractions(observer1, observer2, observer3)
+
+        // 1 observer
+        stateHandler.registerCopilotSessionObserver(observer1)
+        verify(exactly = 1) {
+            observer1.onCopilotSessionChanged(ofType<NavigationSessionState.FreeDrive>())
+        }
+        stateHandler.setRoutes(listOf(mockk()))
+
+        verify(exactly = 1) {
+            observer1.onCopilotSessionChanged(ofType<NavigationSessionState.ActiveGuidance>())
+        }
+        verifyNoInteractions(observer2, observer3)
+
+        // 3 observers
+        clearMocks(observer1, observer2, observer3)
+
+        stateHandler.registerCopilotSessionObserver(observer2)
+        stateHandler.registerCopilotSessionObserver(observer3)
+        stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
+
+        verify(exactly = 1) {
+            observer1.onCopilotSessionChanged(ofType<NavigationSessionState.Idle>())
+            observer2.onCopilotSessionChanged(ofType<NavigationSessionState.Idle>())
+            observer3.onCopilotSessionChanged(ofType<NavigationSessionState.Idle>())
+        }
+
+        // 2 observers
+        clearMocks(observer1, observer2, observer3)
+
+        stateHandler.unregisterCopilotSessionObserver(observer2)
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        stateHandler.setRoutes(listOf(mockk()))
+
+        verify(exactly = 1) {
+            observer1.onCopilotSessionChanged(ofType<NavigationSessionState.ActiveGuidance>())
+            observer3.onCopilotSessionChanged(ofType<NavigationSessionState.ActiveGuidance>())
+        }
+        verifyNoInteractions(observer2)
+
+        // no observers
+        clearMocks(observer1, observer2, observer3)
+
+        stateHandler.unregisterAllCopilotSessionObservers()
+        stateHandler.setRoutes(emptyList())
+
+        verifyNoInteractions(observer1, observer2, observer3)
+    }
+
+    @Test
+    fun observersNotification() {
         val observer1 = mockk<HistoryRecordingStateChangeObserver>(relaxUnitFun = true)
         val observer2 = mockk<HistoryRecordingStateChangeObserver>(relaxUnitFun = true)
         val observer3 = mockk<HistoryRecordingStateChangeObserver>(relaxUnitFun = true)
-        stateHandler = HistoryRecordingStateHandler(coroutineRule.coroutineScope)
+        stateHandler = HistoryRecordingStateHandler()
 
         // no observers
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
@@ -95,14 +275,14 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun setEmptyRoutesOverEmptyRoutesNotDriving() = coroutineRule.runBlockingTest {
+    fun setEmptyRoutesOverEmptyRoutesNotDriving() {
         stateHandler.setRoutes(emptyList())
 
         verifyNoInteractions(observer)
     }
 
     @Test
-    fun setEmptyRoutesOverEmptyRoutesDriving() = coroutineRule.runBlockingTest {
+    fun setEmptyRoutesOverEmptyRoutesDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         clearMocks(observer)
 
@@ -112,7 +292,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun setEmptyRoutesOverEmptyRoutesStoppedDriving() = coroutineRule.runBlockingTest {
+    fun setEmptyRoutesOverEmptyRoutesStoppedDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
         clearMocks(observer)
@@ -123,7 +303,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun setEmptyRoutesOverEmptyRoutesFailed() = coroutineRule.runBlockingTest {
+    fun setEmptyRoutesOverEmptyRoutesFailed() {
         stateHandler.setRoutes(listOf(mockk()))
         stateHandler.lastSetRoutesFailed()
         clearMocks(observer)
@@ -134,14 +314,14 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun setNonEmptyRoutesOverEmptyRoutesNotDriving() = coroutineRule.runBlockingTest {
+    fun setNonEmptyRoutesOverEmptyRoutesNotDriving() {
         stateHandler.setRoutes(listOf(mockk()))
 
         verifyNoInteractions(observer)
     }
 
     @Test
-    fun setNonEmptyRoutesOverEmptyRoutesDriving() = coroutineRule.runBlockingTest {
+    fun setNonEmptyRoutesOverEmptyRoutesDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
 
         stateHandler.setRoutes(listOf(mockk()))
@@ -157,7 +337,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun setNonEmptyRoutesOverEmptyRoutesStoppedDriving() = coroutineRule.runBlockingTest {
+    fun setNonEmptyRoutesOverEmptyRoutesStoppedDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
         clearMocks(observer)
@@ -168,7 +348,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun setNonEmptyRoutesOverEmptyRoutesFailedNotDriving() = coroutineRule.runBlockingTest {
+    fun setNonEmptyRoutesOverEmptyRoutesFailedNotDriving() {
         stateHandler.setRoutes(listOf(mockk()))
         stateHandler.lastSetRoutesFailed()
         clearMocks(observer)
@@ -179,39 +359,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun setNonEmptyRoutesOverEmptyFailedRoutesDriving() = coroutineRule.runBlockingTest {
-        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
-        stateHandler.setRoutes(listOf(mockk()))
-        clearMocks(observer)
-        stateHandler.lastSetRoutesFailed()
-
-        stateHandler.setRoutes(listOf(mockk()))
-
-        val freeDrives = mutableListOf<NavigationSessionState.FreeDrive>()
-        verify(exactly = 1) {
-            observer.onShouldStartRecording(capture(freeDrives))
-        }
-        verify(exactly = 1) {
-            observer.onShouldStopRecording(freeDrives[0])
-            observer.onShouldStartRecording(ofType<NavigationSessionState.ActiveGuidance>())
-        }
-    }
-
-    @Test
-    fun setNonEmptyRoutesOverEmptyFailedRoutesStoppedDriving() = coroutineRule.runBlockingTest {
-        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
-        stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
-        stateHandler.setRoutes(listOf(mockk()))
-        stateHandler.lastSetRoutesFailed()
-        clearMocks(observer)
-
-        stateHandler.setRoutes(listOf(mockk()))
-
-        verifyNoInteractions(observer)
-    }
-
-    @Test
-    fun setNonEmptyRoutesOverEmptyRoutesFailedDriving() = coroutineRule.runBlockingTest {
+    fun setNonEmptyRoutesOverEmptyFailedRoutesDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.setRoutes(listOf(mockk()))
         clearMocks(observer)
@@ -230,7 +378,39 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun setNonEmptyRoutesOverEmptyRoutesFailedStoppedDriving() = coroutineRule.runBlockingTest {
+    fun setNonEmptyRoutesOverEmptyFailedRoutesStoppedDriving() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
+        stateHandler.setRoutes(listOf(mockk()))
+        stateHandler.lastSetRoutesFailed()
+        clearMocks(observer)
+
+        stateHandler.setRoutes(listOf(mockk()))
+
+        verifyNoInteractions(observer)
+    }
+
+    @Test
+    fun setNonEmptyRoutesOverEmptyRoutesFailedDriving() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        stateHandler.setRoutes(listOf(mockk()))
+        clearMocks(observer)
+        stateHandler.lastSetRoutesFailed()
+
+        stateHandler.setRoutes(listOf(mockk()))
+
+        val freeDrives = mutableListOf<NavigationSessionState.FreeDrive>()
+        verify(exactly = 1) {
+            observer.onShouldStartRecording(capture(freeDrives))
+        }
+        verify(exactly = 1) {
+            observer.onShouldStopRecording(freeDrives[0])
+            observer.onShouldStartRecording(ofType<NavigationSessionState.ActiveGuidance>())
+        }
+    }
+
+    @Test
+    fun setNonEmptyRoutesOverEmptyRoutesFailedStoppedDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
         stateHandler.setRoutes(listOf(mockk()))
@@ -243,7 +423,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun setNonEmptyRoutesOverNonEmptyRoutesNotDriving() = coroutineRule.runBlockingTest {
+    fun setNonEmptyRoutesOverNonEmptyRoutesNotDriving() {
         stateHandler.setRoutes(listOf(mockk()))
         clearMocks(observer)
 
@@ -253,7 +433,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun setNonEmptyRoutesOverNonEmptyRoutesDriving() = coroutineRule.runBlockingTest {
+    fun setNonEmptyRoutesOverNonEmptyRoutesDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.setRoutes(listOf(mockk()))
         clearMocks(observer)
@@ -264,73 +444,48 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun setNonEmptyRoutesOverNonEmptyRoutesStoppedDriving() = coroutineRule.runBlockingTest {
-        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
-        stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
-        stateHandler.setRoutes(listOf(mockk()))
-        clearMocks(observer)
-
-        stateHandler.setRoutes(listOf(mockk()))
-
-        verifyNoInteractions(observer)
-    }
-
-    @Test
-    fun setRoutesFailedOverEmptyRoutesNotDriving() = coroutineRule.runBlockingTest {
-        stateHandler.lastSetRoutesFailed()
-
-        verifyNoInteractions(observer)
-    }
-
-    @Test
-    fun setRoutesFailedOverEmptyRoutesDriving() = coroutineRule.runBlockingTest {
-        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
-        clearMocks(observer)
-
-        stateHandler.lastSetRoutesFailed()
-
-        verifyNoInteractions(observer)
-    }
-
-    @Test
-    fun setRoutesFailedOverEmptyRoutesStoppedDriving() = coroutineRule.runBlockingTest {
-        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
-        stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
-        clearMocks(observer)
-
-        stateHandler.lastSetRoutesFailed()
-
-        verifyNoInteractions(observer)
-    }
-
-    @Test
-    fun setRoutesFailedOverEmptyRoutesFailedNotDriving() = coroutineRule.runBlockingTest {
-        stateHandler.setRoutes(listOf(mockk()))
-        stateHandler.lastSetRoutesFailed()
-        clearMocks(observer)
-
-        stateHandler.lastSetRoutesFailed()
-
-        verifyNoInteractions(observer)
-    }
-
-    @Test
-    fun setRoutesFailedOverEmptyRoutesFailedDriving() = coroutineRule.runBlockingTest {
-        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
-        stateHandler.setRoutes(listOf(mockk()))
-        stateHandler.lastSetRoutesFailed()
-        clearMocks(observer)
-
-        stateHandler.lastSetRoutesFailed()
-
-        verifyNoInteractions(observer)
-    }
-
-    @Test
-    fun setRoutesFailedOverEmptyRoutesFailedStoppedDriving() = coroutineRule.runBlockingTest {
+    fun setNonEmptyRoutesOverNonEmptyRoutesStoppedDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
         stateHandler.setRoutes(listOf(mockk()))
+        clearMocks(observer)
+
+        stateHandler.setRoutes(listOf(mockk()))
+
+        verifyNoInteractions(observer)
+    }
+
+    @Test
+    fun setRoutesFailedOverEmptyRoutesNotDriving() {
+        stateHandler.lastSetRoutesFailed()
+
+        verifyNoInteractions(observer)
+    }
+
+    @Test
+    fun setRoutesFailedOverEmptyRoutesDriving() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        clearMocks(observer)
+
+        stateHandler.lastSetRoutesFailed()
+
+        verifyNoInteractions(observer)
+    }
+
+    @Test
+    fun setRoutesFailedOverEmptyRoutesStoppedDriving() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
+        clearMocks(observer)
+
+        stateHandler.lastSetRoutesFailed()
+
+        verifyNoInteractions(observer)
+    }
+
+    @Test
+    fun setRoutesFailedOverEmptyRoutesFailedNotDriving() {
+        stateHandler.setRoutes(listOf(mockk()))
         stateHandler.lastSetRoutesFailed()
         clearMocks(observer)
 
@@ -340,7 +495,32 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun setRoutesFailedOverNonEmptyRoutesNotDriving() = coroutineRule.runBlockingTest {
+    fun setRoutesFailedOverEmptyRoutesFailedDriving() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        stateHandler.setRoutes(listOf(mockk()))
+        stateHandler.lastSetRoutesFailed()
+        clearMocks(observer)
+
+        stateHandler.lastSetRoutesFailed()
+
+        verifyNoInteractions(observer)
+    }
+
+    @Test
+    fun setRoutesFailedOverEmptyRoutesFailedStoppedDriving() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
+        stateHandler.setRoutes(listOf(mockk()))
+        stateHandler.lastSetRoutesFailed()
+        clearMocks(observer)
+
+        stateHandler.lastSetRoutesFailed()
+
+        verifyNoInteractions(observer)
+    }
+
+    @Test
+    fun setRoutesFailedOverNonEmptyRoutesNotDriving() {
         stateHandler.setRoutes(listOf(mockk()))
 
         stateHandler.lastSetRoutesFailed()
@@ -349,7 +529,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun setRoutesFailedOverNonEmptyRoutesDriving() = coroutineRule.runBlockingTest {
+    fun setRoutesFailedOverNonEmptyRoutesDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         clearMocks(observer)
         stateHandler.setRoutes(listOf(mockk()))
@@ -367,7 +547,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun setRoutesFailedOverNonEmptyRoutesStoppedDriving() = coroutineRule.runBlockingTest {
+    fun setRoutesFailedOverNonEmptyRoutesStoppedDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
         clearMocks(observer)
@@ -379,7 +559,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun setRoutesFailedOverNonEmptyRoutesTwiceNotDriving() = coroutineRule.runBlockingTest {
+    fun setRoutesFailedOverNonEmptyRoutesTwiceNotDriving() {
         stateHandler.setRoutes(listOf(mockk()))
         clearMocks(observer)
         stateHandler.setRoutes(listOf(mockk()))
@@ -390,7 +570,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun setRoutesFailedOverNonEmptyRoutesTwiceDriving() = coroutineRule.runBlockingTest {
+    fun setRoutesFailedOverNonEmptyRoutesTwiceDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.setRoutes(listOf(mockk()))
         clearMocks(observer)
@@ -402,7 +582,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun setRoutesFailedOverNonEmptyRoutesTwiceStoppedDriving() = coroutineRule.runBlockingTest {
+    fun setRoutesFailedOverNonEmptyRoutesTwiceStoppedDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
         stateHandler.setRoutes(listOf(mockk()))
@@ -415,7 +595,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStartedOverEmptyRoutesNotDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStartedOverEmptyRoutesNotDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
 
         verify(exactly = 0) {
@@ -428,7 +608,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStartedOverEmptyRoutesDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStartedOverEmptyRoutesDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         clearMocks(observer)
 
@@ -438,7 +618,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStartedOverEmptyRoutesStoppedDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStartedOverEmptyRoutesStoppedDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
         clearMocks(observer)
@@ -455,37 +635,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStartedOverEmptyFailedRoutesNotDriving() = coroutineRule.runBlockingTest {
-        stateHandler.setRoutes(listOf(mockk()))
-        stateHandler.lastSetRoutesFailed()
-        clearMocks(observer)
-        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
-
-        verify(exactly = 0) {
-            observer.onShouldStopRecording(any())
-            observer.onShouldCancelRecording(any())
-        }
-        verify(exactly = 1) {
-            observer.onShouldStartRecording(ofType<NavigationSessionState.FreeDrive>())
-        }
-    }
-
-    @Test
-    fun onSessionStateChangedToStartedOverEmptyFailedRoutesDriving() = coroutineRule.runBlockingTest {
-        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
-        stateHandler.setRoutes(listOf(mockk()))
-        stateHandler.lastSetRoutesFailed()
-        clearMocks(observer)
-
-        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
-
-        verifyNoInteractions(observer)
-    }
-
-    @Test
-    fun onSessionStateChangedToStartedOverEmptyFailedRoutesStoppedDriving() = coroutineRule.runBlockingTest {
-        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
-        stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
+    fun onSessionStateChangedToStartedOverEmptyFailedRoutesNotDriving() {
         stateHandler.setRoutes(listOf(mockk()))
         stateHandler.lastSetRoutesFailed()
         clearMocks(observer)
@@ -501,7 +651,37 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStartedOverEmptyExplicitRoutesNotDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStartedOverEmptyFailedRoutesDriving() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        stateHandler.setRoutes(listOf(mockk()))
+        stateHandler.lastSetRoutesFailed()
+        clearMocks(observer)
+
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+
+        verifyNoInteractions(observer)
+    }
+
+    @Test
+    fun onSessionStateChangedToStartedOverEmptyFailedRoutesStoppedDriving() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
+        stateHandler.setRoutes(listOf(mockk()))
+        stateHandler.lastSetRoutesFailed()
+        clearMocks(observer)
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+
+        verify(exactly = 0) {
+            observer.onShouldStopRecording(any())
+            observer.onShouldCancelRecording(any())
+        }
+        verify(exactly = 1) {
+            observer.onShouldStartRecording(ofType<NavigationSessionState.FreeDrive>())
+        }
+    }
+
+    @Test
+    fun onSessionStateChangedToStartedOverEmptyExplicitRoutesNotDriving() {
         stateHandler.setRoutes(listOf(mockk()))
         stateHandler.setRoutes(emptyList())
         clearMocks(observer)
@@ -517,7 +697,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStartedOverEmptyExplicitRoutesDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStartedOverEmptyExplicitRoutesDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.setRoutes(listOf(mockk()))
         stateHandler.setRoutes(emptyList())
@@ -529,7 +709,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStartedOverEmptyExplicitRoutesStoppedDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStartedOverEmptyExplicitRoutesStoppedDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
         stateHandler.setRoutes(listOf(mockk()))
@@ -547,7 +727,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStartedOverNonEmptyRoutesNotDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStartedOverNonEmptyRoutesNotDriving() {
         stateHandler.setRoutes(listOf(mockk()))
 
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
@@ -562,7 +742,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStartedOverNonEmptyRoutesDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStartedOverNonEmptyRoutesDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.setRoutes(listOf(mockk()))
         clearMocks(observer)
@@ -573,7 +753,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStartedOverNonEmptyRoutesStoppedDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStartedOverNonEmptyRoutesStoppedDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
         clearMocks(observer)
@@ -591,14 +771,14 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStoppedOverEmptyRoutesNotDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStoppedOverEmptyRoutesNotDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
 
         verifyNoInteractions(observer)
     }
 
     @Test
-    fun onSessionStateChangedToStoppedOverEmptyRoutesDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStoppedOverEmptyRoutesDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
 
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
@@ -613,7 +793,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStoppedOverEmptyRoutesStoppedDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStoppedOverEmptyRoutesStoppedDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
         clearMocks(observer)
@@ -624,7 +804,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStoppedOverEmptyFailedRoutesNotDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStoppedOverEmptyFailedRoutesNotDriving() {
         stateHandler.setRoutes(listOf(mockk()))
         stateHandler.lastSetRoutesFailed()
         clearMocks(observer)
@@ -634,7 +814,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStoppedOverEmptyFailedRoutesDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStoppedOverEmptyFailedRoutesDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.setRoutes(listOf(mockk()))
         clearMocks(observer)
@@ -652,7 +832,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStoppedOverEmptyFailedRoutesStoppedDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStoppedOverEmptyFailedRoutesStoppedDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
         stateHandler.setRoutes(listOf(mockk()))
@@ -664,7 +844,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStoppedOverEmptyExplicitRoutesNotDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStoppedOverEmptyExplicitRoutesNotDriving() {
         stateHandler.setRoutes(listOf(mockk()))
         stateHandler.setRoutes(emptyList())
         clearMocks(observer)
@@ -674,7 +854,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStoppedOverEmptyExplicitRoutesDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStoppedOverEmptyExplicitRoutesDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.setRoutes(listOf(mockk()))
         clearMocks(observer)
@@ -692,7 +872,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStoppedOverEmptyExplicitRoutesStoppedDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStoppedOverEmptyExplicitRoutesStoppedDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
         stateHandler.setRoutes(listOf(mockk()))
@@ -704,7 +884,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStoppedOverNonEmptyRoutesNotDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStoppedOverNonEmptyRoutesNotDriving() {
         stateHandler.setRoutes(listOf(mockk()))
 
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
@@ -713,7 +893,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStoppedOverNonEmptyRoutesDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStoppedOverNonEmptyRoutesDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         clearMocks(observer)
         stateHandler.setRoutes(listOf(mockk()))
@@ -730,7 +910,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun onSessionStateChangedToStoppedOverNonEmptyRoutesStoppedDriving() = coroutineRule.runBlockingTest {
+    fun onSessionStateChangedToStoppedOverNonEmptyRoutesStoppedDriving() {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
         clearMocks(observer)
@@ -742,7 +922,7 @@ class HistoryRecordingStateHandlerTest {
     }
 
     @Test
-    fun observerUnregistersItselfFromCallback() = coroutineRule.runBlockingTest {
+    fun observerUnregistersItselfFromCallback() {
         val unregisteringObserver = object : HistoryRecordingStateChangeObserver {
             override fun onShouldStartRecording(state: NavigationSessionState) {
                 stateHandler.unregisterStateChangeObserver(this)
@@ -752,63 +932,11 @@ class HistoryRecordingStateHandlerTest {
 
             override fun onShouldCancelRecording(state: NavigationSessionState) { }
         }
-        stateHandler = HistoryRecordingStateHandler(coroutineRule.coroutineScope)
+        stateHandler = HistoryRecordingStateHandler()
         stateHandler.registerStateChangeObserver(unregisteringObserver)
         stateHandler.registerStateChangeObserver(observer)
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         // no ConcurrentModificationException
-    }
-
-    @Test
-    fun flowUpdates() = coroutineRule.runBlockingTest {
-        mockkObject(NavigationSessionUtils) {
-            // initial state
-            every {
-                NavigationSessionUtils.getNewState(any(), any())
-            } returns NavigationSessionState.Idle
-            val idleId = ""
-            stateHandler = HistoryRecordingStateHandler(coroutineRule.coroutineScope)
-            stateHandler.registerStateChangeObserver(observer)
-
-            val collectedSessionIds = mutableListOf<String>()
-            val job = coroutineRule.coroutineScope.launch {
-                stateHandler.sessionIdFlow.collect {
-                    collectedSessionIds.add(it)
-                }
-            }
-
-            // Free Drive
-            val freeDriveId1 = "456-654"
-            every {
-                NavigationSessionUtils.getNewState(any(), any())
-            } returns NavigationSessionState.FreeDrive(freeDriveId1)
-            stateHandler.onSessionStateChanged(TripSessionState.STARTED)
-            // Active Guidance
-            val activeGuidanceId = "222-333"
-            every {
-                NavigationSessionUtils.getNewState(any(), any())
-            } returns NavigationSessionState.ActiveGuidance(activeGuidanceId)
-            stateHandler.setRoutes(listOf(mockk()))
-            // Free Drive
-            val freeDriveId2 = "444-555"
-            every {
-                NavigationSessionUtils.getNewState(any(), any())
-            } returns NavigationSessionState.FreeDrive(freeDriveId2)
-            stateHandler.setRoutes(emptyList())
-            // Idle
-            every {
-                NavigationSessionUtils.getNewState(any(), any())
-            } returns NavigationSessionState.Idle
-            stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
-
-            coroutineRule.testDispatcher.advanceUntilIdle()
-            job.cancel()
-
-            assertEquals(
-                listOf(idleId, freeDriveId1, activeGuidanceId, freeDriveId2, idleId),
-                collectedSessionIds
-            )
-        }
     }
 
     private fun verifyNoInteractions(vararg observers: HistoryRecordingStateChangeObserver) {
@@ -817,6 +945,14 @@ class HistoryRecordingStateHandlerTest {
                 it.onShouldStartRecording(any())
                 it.onShouldStopRecording(any())
                 it.onShouldCancelRecording(any())
+            }
+        }
+    }
+
+    private fun verifyNoInteractions(vararg observers: CopilotSessionObserver) {
+        observers.forEach {
+            verify(exactly = 0) {
+                it.onCopilotSessionChanged(any())
             }
         }
     }

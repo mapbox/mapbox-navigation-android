@@ -443,10 +443,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
         navigationSession = NavigationComponentProvider.createNavigationSession()
         historyRecordingStateHandler = NavigationComponentProvider
-            .createHistoryRecordingStateHandler(threadController.getMainScopeAndRootJob().scope)
+            .createHistoryRecordingStateHandler()
         developerMetadataAggregator = NavigationComponentProvider.createDeveloperMetadataAggregator(
-            historyRecordingStateHandler.sessionIdFlow,
-            threadController.getMainScopeAndRootJob().scope
+            historyRecordingStateHandler
         )
 
         val notification: TripNotification = MapboxModuleProvider
@@ -1046,6 +1045,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
         navigationSession.unregisterAllNavigationSessionStateObservers()
         historyRecordingStateHandler.unregisterAllStateChangeObservers()
+        historyRecordingStateHandler.unregisterAllCopilotSessionObservers()
         developerMetadataAggregator.unregisterAllObservers()
         runInTelemetryContext { telemetry ->
             telemetry.destroy(this@MapboxNavigation)

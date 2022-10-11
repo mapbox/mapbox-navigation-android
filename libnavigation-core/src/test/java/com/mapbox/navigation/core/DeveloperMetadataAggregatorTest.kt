@@ -1,49 +1,36 @@
 package com.mapbox.navigation.core
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
-import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
 class DeveloperMetadataAggregatorTest {
 
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
-    private val sessionIdFlow = MutableSharedFlow<String>(replay = 1)
+    private val initialId = "123-123"
     private val observer = mockk<DeveloperMetadataObserver>(relaxed = true)
-    private lateinit var sut: DeveloperMetadataAggregator
-
-    @Before
-    fun setUp() {
-        sut = DeveloperMetadataAggregator(sessionIdFlow, coroutineRule.coroutineScope)
-    }
+    private val sut = DeveloperMetadataAggregator(initialId)
 
     @Test
-    fun `observer receives saved value`() = coroutineRule.runBlockingTest {
-        val savedValue = "456-654"
-        sessionIdFlow.tryEmit(savedValue)
-
+    fun `observer receives initial value`() {
         sut.registerObserver(observer)
 
         verify(exactly = 1) {
-            observer.onDeveloperMetadataChanged(DeveloperMetadata(savedValue))
+            observer.onDeveloperMetadataChanged(DeveloperMetadata(initialId))
         }
     }
 
     @Test
-    fun `observer receives changed value`() = coroutineRule.runBlockingTest {
+    fun `observer receives changed value`() {
         val newValue = "456-654"
 
         sut.registerObserver(observer)
         clearMocks(observer)
-        sessionIdFlow.tryEmit(newValue)
+        sut.onCopilotSessionChanged(NavigationSessionState.FreeDrive(sessionId = newValue))
 
         verify(exactly = 1) {
             observer.onDeveloperMetadataChanged(DeveloperMetadata(newValue))
@@ -51,27 +38,36 @@ class DeveloperMetadataAggregatorTest {
     }
 
     @Test
-    fun `observer does not receive changed value after unregister`() =
-        coroutineRule.runBlockingTest {
-            val newValue = "456-654"
-            sut.registerObserver(observer)
-            clearMocks(observer)
+    fun `observer does not receive same value`() {
+        val newValue = "456-654"
 
-            sut.unregisterObserver(observer)
-            sessionIdFlow.tryEmit(newValue)
+        sut.registerObserver(observer)
+        sut.onCopilotSessionChanged(NavigationSessionState.FreeDrive(sessionId = newValue))
+        clearMocks(observer)
+        sut.onCopilotSessionChanged(NavigationSessionState.ActiveGuidance(sessionId = newValue))
 
-            verify(exactly = 0) {
-                observer.onDeveloperMetadataChanged(any())
-            }
-        }
+        verify(exactly = 0) { observer.onDeveloperMetadataChanged(any()) }
+    }
 
     @Test
-    fun unregisterAllObservers() = coroutineRule.runBlockingTest {
+    fun `observer does not receive changed value after unregister`() {
+        val newValue = "456-654"
+        sut.registerObserver(observer)
+        clearMocks(observer)
+
+        sut.unregisterObserver(observer)
+        sut.onCopilotSessionChanged(NavigationSessionState.FreeDrive(sessionId = newValue))
+
+        verify(exactly = 0) { observer.onDeveloperMetadataChanged(any()) }
+    }
+
+    @Test
+    fun unregisterAllObservers() {
         val newValue = "456-654"
         val secondObserver = mockk<DeveloperMetadataObserver>(relaxed = true)
         sut.registerObserver(observer)
         sut.registerObserver(secondObserver)
-        sessionIdFlow.tryEmit(newValue)
+        sut.onCopilotSessionChanged(NavigationSessionState.FreeDrive(sessionId = newValue))
 
         verify(exactly = 1) {
             observer.onDeveloperMetadataChanged(DeveloperMetadata(newValue))
@@ -82,7 +78,7 @@ class DeveloperMetadataAggregatorTest {
 
         sut.unregisterAllObservers()
         clearMocks(observer, secondObserver)
-        sessionIdFlow.tryEmit("789-987")
+        sut.onCopilotSessionChanged(NavigationSessionState.FreeDrive(sessionId = "789-987"))
 
         verify(exactly = 0) {
             observer.onDeveloperMetadataChanged(any())
@@ -104,7 +100,7 @@ class DeveloperMetadataAggregatorTest {
         }
         sut.registerObserver(observer)
 
-        sessionIdFlow.tryEmit(newId)
+        sut.onCopilotSessionChanged(NavigationSessionState.FreeDrive(sessionId = newId))
         // verify no crash
     }
 }

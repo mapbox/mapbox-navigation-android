@@ -7,28 +7,16 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionUtils
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
 
 @UiThread
-internal class HistoryRecordingStateHandler(
-    private val scope: CoroutineScope
-): TripSessionStateObserver {
+internal class HistoryRecordingStateHandler: TripSessionStateObserver {
 
     private var currentState: NavigationSessionState = NavigationSessionState.Idle
-    private val _sessionIdFlow: MutableSharedFlow<String> = MutableSharedFlow<String>(
-        replay = 1,
-    ).also {
-        it.tryEmit(currentState.sessionId)
-    }
-    val sessionIdFlow: SharedFlow<String> = _sessionIdFlow.asSharedFlow()
 
     private val historyRecordingStateChangeObservers =
         CopyOnWriteArraySet<HistoryRecordingStateChangeObserver>()
+    private val copilotSessionObservers = CopyOnWriteArraySet<CopilotSessionObserver>()
 
     private var savedHasRoutes = false
     private var hasRoutes = false
@@ -43,8 +31,25 @@ internal class HistoryRecordingStateHandler(
         historyRecordingStateChangeObservers.remove(observer)
     }
 
+    fun registerCopilotSessionObserver(observer: CopilotSessionObserver) {
+        copilotSessionObservers.add(observer)
+        observer.onCopilotSessionChanged(currentState)
+    }
+
+    fun unregisterCopilotSessionObserver(observer: CopilotSessionObserver) {
+        copilotSessionObservers.remove(observer)
+    }
+
     fun unregisterAllStateChangeObservers() {
         historyRecordingStateChangeObservers.clear()
+    }
+
+    fun unregisterAllCopilotSessionObservers() {
+        copilotSessionObservers.clear()
+    }
+
+    fun currentCopilotSession(): NavigationSessionState {
+        return currentState
     }
 
     fun setRoutes(routes: List<NavigationRoute>) {
@@ -97,17 +102,15 @@ internal class HistoryRecordingStateHandler(
         if (newState::class != currentState::class) {
             val oldState = currentState
             currentState = newState
-            scope.launch {
-                if (oldState !is NavigationSessionState.Idle) {
-                    historyRecordingStateChangeObservers.forEach {
-                        finishRecordingBlock(it, oldState)
-                    }
+            if (oldState !is NavigationSessionState.Idle) {
+                historyRecordingStateChangeObservers.forEach {
+                    finishRecordingBlock(it, oldState)
                 }
-                if (newState !is NavigationSessionState.Idle) {
-                    historyRecordingStateChangeObservers.forEach { it.onShouldStartRecording(newState) }
-                }
-                _sessionIdFlow.emit(newState.sessionId)
             }
+            if (newState !is NavigationSessionState.Idle) {
+                historyRecordingStateChangeObservers.forEach { it.onShouldStartRecording(newState) }
+            }
+            copilotSessionObservers.forEach { it.onCopilotSessionChanged(newState) }
         }
     }
 }

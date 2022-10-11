@@ -2,20 +2,16 @@
 
 package com.mapbox.navigation.instrumentation_tests.utils.coroutines
 
-import android.util.Log
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
-import com.mapbox.navigation.core.DeveloperMetadata
-import com.mapbox.navigation.core.DeveloperMetadataObserver
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.RoutesSetCallback
 import com.mapbox.navigation.core.RoutesSetError
@@ -27,12 +23,9 @@ import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -157,25 +150,4 @@ suspend fun MapboxNavigation.voiceInstructions(): Flow<VoiceInstructions> {
             navigation.unregisterVoiceInstructionsObserver(observer)
         }
     }
-}
-
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
-fun MapboxNavigation.collectMetadata(maxItems: Int): Flow<DeveloperMetadata> {
-    val navigation = this
-    return callbackFlow {
-        val observer = object : DeveloperMetadataObserver {
-            override fun onDeveloperMetadataChanged(metadata: DeveloperMetadata) {
-                Log.i("[DeveloperMetadataObserver]", "onDeveloperMetadataChanged: $metadata")
-                trySend(metadata)
-            }
-        }
-        navigation.registerDeveloperMetadataObserver(observer)
-        awaitClose {
-            navigation.unregisterDeveloperMetadataObserver(observer)
-        }
-    }.shareIn(
-        MainScope(),
-        replay = maxItems,
-        started = SharingStarted.Eagerly
-    )
 }

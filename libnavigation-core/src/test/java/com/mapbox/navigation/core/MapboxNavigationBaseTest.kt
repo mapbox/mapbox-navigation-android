@@ -187,10 +187,10 @@ internal open class MapboxNavigationBaseTest {
             NavigationComponentProvider.createArrivalProgressObserver(tripSession)
         } returns arrivalProgressObserver
         every {
-            NavigationComponentProvider.createHistoryRecordingStateHandler(any())
+            NavigationComponentProvider.createHistoryRecordingStateHandler()
         } returns historyRecordingStateHandler
         every {
-            NavigationComponentProvider.createDeveloperMetadataAggregator(any(), any())
+            NavigationComponentProvider.createDeveloperMetadataAggregator(any())
         } returns developerMetadataAggregator
         every {
             NavigationComponentProvider.createCurrentIndicesProvider()
