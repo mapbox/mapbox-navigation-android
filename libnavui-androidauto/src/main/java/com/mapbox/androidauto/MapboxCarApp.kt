@@ -26,6 +26,7 @@ object MapboxCarApp {
     fun carAppLocationService(): CarAppLocation =
         MapboxNavigationApp.getObserver(CarAppLocation::class)
 
+
     /**
      * Keep your car and app in sync with CarAppState.
      */

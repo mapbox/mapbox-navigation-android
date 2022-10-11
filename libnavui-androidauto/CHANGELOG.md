@@ -4,7 +4,14 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added a new `MapboxScreenManager` framework. This makes it possible to build custom user experiences that are drastically different than the default provided by the SDK. [#6371](https://github.com/mapbox/mapbox-navigation-android/pull/6429)
+- Added a default `MapboxScreenGraph` that prepares an end to end navigation experience. [#6371](https://github.com/mapbox/mapbox-navigation-android/pull/6429)
+
 #### Bug fixes and improvements
+- Delete `CarAppState` in favor of a `MapboxScreenEvent` which can be accessed through `MapboxScreenManager.screenEvent`. [#6371](https://github.com/mapbox/mapbox-navigation-android/pull/6429)
+- Replaced all public implementations of `Screen` with backwards compatible implementations of `MapboxScreenFactory` and `MapboxScreen`. [#6371](https://github.com/mapbox/mapbox-navigation-android/pull/6429)
+- Renamed `MainCarContext` to `MapboxCarContext`. [#6371](https://github.com/mapbox/mapbox-navigation-android/pull/6429)
+- Removed all public apis with `com.mapbox.search` while the SDK is in beta. [#6371](https://github.com/mapbox/mapbox-navigation-android/pull/6429)
 
 ## androidauto-v0.13.0 - October 6, 2022
 ### Changelog

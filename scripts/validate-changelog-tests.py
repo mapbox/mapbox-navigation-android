@@ -124,6 +124,26 @@ class TestValidateChangelog(unittest.TestCase):
         '''
         self.assertEqual(validate_changelog_utils.extract_added_lines(diff), expected)
 
+    def test_extract_added_lines_only_changelog_has_added_with_blank_lines(self):
+        expected = {
+            "CHANGELOG.md" : ['- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)']
+        }
+        diff = '''diff --git a/CHANGELOG.md b/CHANGELOG.md
+        --- a/CHANGELOG.md	(revision fca6af9072a1b6cb7263460f7c3270e48bffed07)
+        +++ b/CHANGELOG.md	(date 1659101777554)
+        @@ -6,6 +6,7 @@
+         #### Features
+         - Added first unreleased feature. [#6049](https://github.com/mapbox/mapbox-navigation-android/pull/6049)
+         - Added second unreleased feature. [#6048](https://github.com/mapbox/mapbox-navigation-android/pull/6048)
+        +- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)
+        +
+        +
+
+         #### Bug fixes and improvements
+         - Fixed first unreleased bug. [#6047](https://github.com/mapbox/mapbox-navigation-android/pull/6047)
+        '''
+        self.assertEqual(validate_changelog_utils.extract_added_lines(diff), expected)
+
     def test_extract_added_lines_only_changelog_with_path_has_added(self):
         expected = {
             "libnavui-androidauto/CHANGELOG.md" : ['- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)']
@@ -641,6 +661,27 @@ class TestValidateChangelog(unittest.TestCase):
         content = self.read_test_changelog("test_changelog_single_line_repeats_unstable_version.md")
         added_lines = ['- Added first feature to 2.7.0-beta1. [#6045](https://github.com/mapbox/mapbox-navigation-android/pull/6045)']
         validate_changelog_utils.check_version_section(content, added_lines)
+
+    def test_check_for_duplications_empty_list(self):
+        validate_changelog_utils.check_for_duplications([])
+
+    def test_check_for_duplications_single_unique_element(self):
+        added_lines = ['- Line 1']
+        validate_changelog_utils.check_for_duplications(added_lines)
+
+    def test_check_for_duplications_single_repeated_element(self):
+        added_lines = ['- Line 1', '- Line 1']
+        with self.assertRaises(Exception):
+            validate_changelog_utils.check_for_duplications(added_lines)
+
+    def test_check_for_duplications_multiple_unique_elements(self):
+        added_lines = ['- Line 1', '- Line 2', '- Line 3']
+        validate_changelog_utils.check_for_duplications(added_lines)
+
+    def test_check_for_duplications_multiple_elements_with_repeated(self):
+        added_lines = ['- Line 1', '- Line 2', '- Line 3', '- Line 2']
+        with self.assertRaises(Exception):
+            validate_changelog_utils.check_for_duplications(added_lines)
 
     def read_test_changelog(self, filename):
         script_dir = os.path.dirname(__file__)
