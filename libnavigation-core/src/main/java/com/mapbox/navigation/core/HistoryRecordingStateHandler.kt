@@ -10,7 +10,7 @@ import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import java.util.concurrent.CopyOnWriteArraySet
 
 @UiThread
-internal class HistoryRecordingStateHandler: TripSessionStateObserver {
+internal class HistoryRecordingStateHandler : TripSessionStateObserver {
 
     private var currentState: NavigationSessionState = NavigationSessionState.Idle
 

@@ -1641,6 +1641,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeRefreshController.unregisterRouteRefreshStateObserver(routeRefreshStatesObserver)
     }
 
+    /**
+     * Registers a [DeveloperMetadataObserver] to be notified of [DeveloperMetadata] changes.
+     *
+     * @param developerMetadataObserver [DeveloperMetadataObserver]
+     */
     @ExperimentalPreviewMapboxNavigationAPI
     fun registerDeveloperMetadataObserver(
         developerMetadataObserver: DeveloperMetadataObserver
@@ -1648,6 +1653,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         developerMetadataAggregator.registerObserver(developerMetadataObserver)
     }
 
+    /**
+     * Unregisters a [DeveloperMetadataObserver].
+     *
+     * @param developerMetadataObserver [DeveloperMetadataObserver]
+     */
     @ExperimentalPreviewMapboxNavigationAPI
     fun unregisterDeveloperMetadataObserver(
         developerMetadataObserver: DeveloperMetadataObserver

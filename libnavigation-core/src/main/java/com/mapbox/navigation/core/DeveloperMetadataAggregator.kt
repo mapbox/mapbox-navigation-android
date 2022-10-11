@@ -8,7 +8,7 @@ import java.util.concurrent.CopyOnWriteArraySet
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class DeveloperMetadataAggregator(
     initialCopilotSessionId: String
-): CopilotSessionObserver {
+) : CopilotSessionObserver {
 
     private val observers = CopyOnWriteArraySet<DeveloperMetadataObserver>()
     private var currentMetadata: DeveloperMetadata = DeveloperMetadata(initialCopilotSessionId)

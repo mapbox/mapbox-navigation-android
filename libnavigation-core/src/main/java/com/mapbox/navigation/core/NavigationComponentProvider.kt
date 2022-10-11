@@ -13,7 +13,6 @@ import com.mapbox.navigation.core.trip.service.MapboxTripService
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.MapboxTripSession
 import com.mapbox.navigation.core.trip.session.NavigationSession
-import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManagerImpl
@@ -23,8 +22,6 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.TilesConfig
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharedFlow
 
 internal object NavigationComponentProvider {
     fun createDirectionsSession(

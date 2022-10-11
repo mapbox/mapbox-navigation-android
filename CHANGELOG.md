@@ -6,7 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Known issues
 :bangbang: `MapView` may crash when user selects Disagree in Telemetry Settings dialog.
 #### Features
-- Added an experimental `DeveloperMetadataObserver` that can be registered via `MapboxNavigation#registerDeveloperMetadataObserver` that can be used for getting `DeveloperMetadata` that contains useful information (e. g. `copilotSessionId`) and should be included when reporting an issue. [#6456](https://github.com/mapbox/mapbox-navigation-android/pull/6456)  
+- Added an experimental `DeveloperMetadataObserver` that can be registered via `MapboxNavigation#registerDeveloperMetadataObserver` and can be used for getting `DeveloperMetadata` which contains useful information (e.g. `copilotSessionId`) that should be included when reporting an issue. [#6456](https://github.com/mapbox/mapbox-navigation-android/pull/6456)
 #### Bug fixes and improvements
 - :warning: Restructured the package system of Drop-In UI into feature verticals. [#6430](https://github.com/mapbox/mapbox-navigation-android/pull/6430)
 - [TileStoreService] Use shared memory for marshaling large types and improve error handling. [#6422](https://github.com/mapbox/mapbox-navigation-android/pull/6422)

@@ -14,7 +14,7 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HistoryRecordingStateHandlerTest {
-    
+
     private val observer = mockk<HistoryRecordingStateChangeObserver>(relaxUnitFun = true)
     private val copilotObserver = mockk<CopilotSessionObserver>(relaxUnitFun = true)
     private lateinit var stateHandler: HistoryRecordingStateHandler
