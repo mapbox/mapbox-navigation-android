@@ -10,12 +10,13 @@ import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import java.util.concurrent.CopyOnWriteArraySet
 
 @UiThread
-internal class HistoryRecordingStateHandler(
-    private var currentState: NavigationSessionState
-) : TripSessionStateObserver {
+internal class HistoryRecordingStateHandler : TripSessionStateObserver {
+
+    private var currentState: NavigationSessionState = NavigationSessionState.Idle
 
     private val historyRecordingStateChangeObservers =
         CopyOnWriteArraySet<HistoryRecordingStateChangeObserver>()
+    private val copilotSessionObservers = CopyOnWriteArraySet<CopilotSessionObserver>()
 
     private var savedHasRoutes = false
     private var hasRoutes = false
@@ -30,8 +31,25 @@ internal class HistoryRecordingStateHandler(
         historyRecordingStateChangeObservers.remove(observer)
     }
 
+    fun registerCopilotSessionObserver(observer: CopilotSessionObserver) {
+        copilotSessionObservers.add(observer)
+        observer.onCopilotSessionChanged(currentState)
+    }
+
+    fun unregisterCopilotSessionObserver(observer: CopilotSessionObserver) {
+        copilotSessionObservers.remove(observer)
+    }
+
     fun unregisterAllStateChangeObservers() {
         historyRecordingStateChangeObservers.clear()
+    }
+
+    fun unregisterAllCopilotSessionObservers() {
+        copilotSessionObservers.clear()
+    }
+
+    fun currentCopilotSession(): NavigationSessionState {
+        return currentState
     }
 
     fun setRoutes(routes: List<NavigationRoute>) {
@@ -82,15 +100,17 @@ internal class HistoryRecordingStateHandler(
     ) {
         val newState = NavigationSessionUtils.getNewState(isDriving, hasRoutes)
         if (newState::class != currentState::class) {
-            if (currentState !is NavigationSessionState.Idle) {
+            val oldState = currentState
+            currentState = newState
+            if (oldState !is NavigationSessionState.Idle) {
                 historyRecordingStateChangeObservers.forEach {
-                    finishRecordingBlock(it, currentState)
+                    finishRecordingBlock(it, oldState)
                 }
             }
             if (newState !is NavigationSessionState.Idle) {
                 historyRecordingStateChangeObservers.forEach { it.onShouldStartRecording(newState) }
             }
-            currentState = newState
+            copilotSessionObservers.forEach { it.onCopilotSessionChanged(newState) }
         }
     }
 }
