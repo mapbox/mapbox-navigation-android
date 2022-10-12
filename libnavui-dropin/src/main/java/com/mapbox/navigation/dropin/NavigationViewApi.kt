@@ -8,6 +8,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
 
 /**
  * Api that gives you the ability to change the state for navigation apps.
@@ -112,4 +113,9 @@ abstract class NavigationViewApi {
      * Enable/Disable replay trip session based on simulated locations.
      */
     abstract fun routeReplayEnabled(enabled: Boolean)
+
+    /**
+     * Current instance of a voice instructions player.
+     */
+    abstract val currentVoiceInstructionsPlayer: MapboxVoiceInstructionsPlayer?
 }

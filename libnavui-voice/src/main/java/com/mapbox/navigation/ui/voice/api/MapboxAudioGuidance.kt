@@ -50,6 +50,11 @@ internal constructor(
     private var job: Job? = null
 
     /**
+     * Current instance of a [VoiceInstructionsPlayer].
+     */
+    val currentVoiceInstructionsPlayer get() = audioGuidanceServices.voiceInstructionsPlayer
+
+    /**
      * @see [MapboxNavigationApp]
      */
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
