@@ -4,9 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.LegAnnotation
-import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.bindgen.Value
@@ -57,7 +54,6 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_I
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
-import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
 import com.mapbox.navigator.RouteInterface
 import io.mockk.every
 import io.mockk.mockk
@@ -69,7 +65,6 @@ import io.mockk.verify
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -682,7 +677,7 @@ class MapboxRouteLineUtilsRoboTest {
     @Test
     fun calculateRouteLineSegments_when_styleInActiveRouteLegsIndependently() {
         val colors = RouteLineColorResources.Builder().build()
-        val route = loadRoute("multileg-route-two-legs.json")
+        val route = loadNavigationRoute("multileg-route-two-legs.json")
 
         val result = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
@@ -691,11 +686,9 @@ class MapboxRouteLineUtilsRoboTest {
             colors
         )
 
-        result.indexOfFirst { it.legIndex == 1 }
-
-        assertEquals(11, result.size)
+        assertEquals(12, result.size)
         assertEquals(5, result.indexOfFirst { it.legIndex == 1 })
-        assertEquals(0.48807892461540975, result[5].offset, 0.0)
+        assertEquals(0.4897719974699625, result[5].offset, 0.0)
     }
 
     @Test
@@ -703,8 +696,9 @@ class MapboxRouteLineUtilsRoboTest {
         val routeLineColorResources = RouteLineColorResources.Builder().build()
         val expectedPrimaryTrafficLineExpression = "[step, [line-progress], " +
             "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
-            "0.9429639111009005, [rgba, 255.0, 149.0, 0.0, 1.0]]"
-        val route = loadRoute("short_route.json")
+            "0.9425498931842539, [rgba, 255.0, 149.0, 0.0, 1.0], 1.0, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val route = loadNavigationRoute("short_route.json")
 
         val result = MapboxRouteLineUtils.getTrafficLineExpressionProducer(
             route,
@@ -724,14 +718,116 @@ class MapboxRouteLineUtilsRoboTest {
         )
     }
 
+    /**
+     * The route used here for testing produced an erroneous duplicate edge (a point in the geometry is duplicate).
+     * This could cause an error when creating the
+     * traffic expression because the values need to be in ascending order to create a
+     * valid line gradient expression. This error won't occur in single leg routes and will
+     * only occur in multileg routes when there is a traffic congestion change at the first point in
+     * the leg. This is because duplicate traffic congestion values are dropped. The route
+     * used in the test below has a traffic change at the first point in the second leg and
+     * the distance annotation is 0.0 which would have caused an error prior to the fix this
+     * test is checking for.
+     * The duplicate point in this test has a 'severe' congestion set but it's expected to be overridden
+     * by the value coming out of the second duplicate point to the next distinct point,
+     * as a segment that has '0' distance cannot and should not be visualized.
+     */
+    @Test
+    fun `getTrafficLineExpressionProducer when duplicate point`() {
+        val routeLineColorResources = RouteLineColorResources.Builder().build()
+        val expectedPrimaryTrafficLineExpression = "[step, [line-progress], " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.10373821458415478, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.1240124365711821, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.2718982903427929, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.32264099467350016, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4897719974699625, " +
+            // this is the moderate color at the start of the second leg
+            // even though it's preceded by a duplicate 'severe' point which is ignored
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5421388243827154, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.5710651139490561, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5916095976376619, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.88674421638117, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.9423002251348892, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val route = loadNavigationRoute("multileg-route-two-legs.json")
+
+        val result = MapboxRouteLineUtils.getTrafficLineExpressionProducer(
+            route,
+            routeLineColorResources,
+            trafficBackfillRoadClasses = listOf(),
+            isPrimaryRoute = true,
+            vanishingPointOffset = 0.0,
+            lineStartColor = Color.TRANSPARENT,
+            lineColor = routeLineColorResources.routeUnknownCongestionColor,
+            useSoftGradient = false,
+            softGradientTransitionDistance = 0.0
+        ).generateExpression()
+
+        assertEquals(
+            expectedPrimaryTrafficLineExpression,
+            result.toString()
+        )
+    }
+
+    /**
+     * The route used here for testing produced an erroneous duplicate edge (a point in the geometry is duplicate).
+     * This could cause an error when creating the
+     * traffic expression because the values need to be in ascending order to create a
+     * valid line gradient expression. This error won't occur in single leg routes and will
+     * only occur in multileg routes when there is a traffic congestion change at the first point in
+     * the leg. This is because duplicate traffic congestion values are dropped. The route
+     * used in the test below has a traffic change at the first point in the second leg and
+     * the distance annotation is 0.0 which would have caused an error prior to the fix this
+     * test is checking for.
+     * The duplicate point in this test is caused by a multi leg route on a motorway with full class override.
+     */
+    @Test
+    fun `getTrafficLineExpressionProducer with classes override when duplicate point`() {
+        val colorResources = RouteLineColorResources.Builder()
+            .routeUnknownCongestionColor(-9)
+            .routeLowCongestionColor(-1)
+            .routeCasingColor(33)
+            .routeDefaultColor(33)
+            .routeHeavyCongestionColor(33)
+            .routeLineTraveledCasingColor(33)
+            .routeLineTraveledColor(33)
+            .routeModerateCongestionColor(33)
+            .routeSevereCongestionColor(33)
+            .build()
+        val expectedPrimaryTrafficLineExpression = "[step, [line-progress], " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+            "[rgba, 255.0, 255.0, 247.0, 1.0], 0.5688813850361385, " +
+            "[rgba, 255.0, 255.0, 255.0, 1.0], 1.0, " +
+            "[rgba, 255.0, 255.0, 247.0, 1.0]]"
+        val route = loadNavigationRoute("motorway-with-road-classes-multi-leg.json")
+
+        val result = MapboxRouteLineUtils.getTrafficLineExpressionProducer(
+            route,
+            colorResources,
+            trafficBackfillRoadClasses = listOf("motorway"),
+            isPrimaryRoute = true,
+            vanishingPointOffset = 0.0,
+            lineStartColor = Color.TRANSPARENT,
+            lineColor = colorResources.routeUnknownCongestionColor,
+            useSoftGradient = false,
+            softGradientTransitionDistance = 0.0
+        ).generateExpression()
+
+        assertEquals(
+            expectedPrimaryTrafficLineExpression,
+            result.toString()
+        )
+    }
+
     @Test
     fun getTrafficLineExpressionProducer_whenUseSoftGradient() {
         val routeLineColorResources = RouteLineColorResources.Builder().build()
         val expectedPrimaryTrafficLineExpression = "[interpolate, [linear], [line-progress], " +
             "0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
-            "0.6938979086102405, [rgba, 86.0, 168.0, 251.0, 1.0], " +
-            "0.9429639111009005, [rgba, 255.0, 149.0, 0.0, 1.0]]"
-        val route = loadRoute("short_route.json")
+            "0.6934838906935938, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            "0.9425498931842539, [rgba, 255.0, 149.0, 0.0, 1.0]]"
+        val route = loadNavigationRoute("short_route.json")
 
         val result = MapboxRouteLineUtils.getTrafficLineExpressionProducer(
             route,
@@ -753,13 +849,13 @@ class MapboxRouteLineUtilsRoboTest {
 
     @Test
     fun getRouteLineExpression() {
-        val expectedExpression = "[step, [line-progress], [rgba, 255.0, 0.0, 0.0, 1.0], 0.2," +
-            " [rgba, 86.0, 168.0, 251.0, 1.0], 0.48807892461540975, " +
+        val expectedExpression = "[step, [line-progress], [rgba, 255.0, 0.0, 0.0, 1.0], 0.2, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4897719974699625, " +
             "[rgba, 255.0, 255.0, 0.0, 1.0]]"
         val colorResources = RouteLineColorResources.Builder()
             .inActiveRouteLegsColor(Color.YELLOW)
             .build()
-        val route = loadRoute("multileg-route-two-legs.json")
+        val route = loadNavigationRoute("multileg-route-two-legs.json")
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
@@ -782,31 +878,31 @@ class MapboxRouteLineUtilsRoboTest {
     @Test
     fun getTrafficLineExpressionSoftGradient_multiLegRoute() {
         val expectedExpression = "[interpolate, [linear], [line-progress], 0.0, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.0829948286268944, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.10338667841237215, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.10338667842237215, [rgba, 255.0, 149.0, 0.0, 1.0]," +
-            " 0.1235746096999951, [rgba, 86.0, 168.0, 251.0, 1.0], 0.250513874614594, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.27090572440007177, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.3010856620825788, [rgba, 255.0, 149.0, 0.0, 1.0]," +
-            " 0.32147751186805656, [rgba, 86.0, 168.0, 251.0, 1.0], 0.467687074829932," +
-            " [rgba, 86.0, 168.0, 251.0, 1.0], 0.48807892461540975, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5198902102807551, [rgba, 255.0, 149.0, 0.0, 1.0]," +
-            " 0.5402820600662328, [rgba, 86.0, 168.0, 251.0, 1.0], 0.548744677727206, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.5691365275126837, [rgba, 255.0, 149.0, 0.0, 1.0]," +
-            " 0.5692384867616113, [rgba, 255.0, 149.0, 0.0, 1.0], 0.589630336547089, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8632889606682003, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.883680810453678, [rgba, 255.0, 149.0, 0.0, 1.0]," +
-            " 0.9186528328357723, [rgba, 255.0, 149.0, 0.0, 1.0], 0.93904468262125, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.08334636479867703, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.10373821458415478, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.10373821459415478, [rgba, 255.0, 149.0, 0.0, 1.0]," +
+            " 0.1240124365711821, [rgba, 86.0, 168.0, 251.0, 1.0], 0.25150644055731514, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.2718982903427929, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.3022491448880224, [rgba, 255.0, 149.0, 0.0, 1.0]," +
+            " 0.32264099467350016, [rgba, 86.0, 168.0, 251.0, 1.0], 0.4693801476844847," +
+            " [rgba, 86.0, 168.0, 251.0, 1.0], 0.4897719974699625, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5217469745972377, [rgba, 255.0, 149.0, 0.0, 1.0]," +
+            " 0.5421388243827154, [rgba, 86.0, 168.0, 251.0, 1.0], 0.5506732641635784, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.5710651139490561, [rgba, 255.0, 149.0, 0.0, 1.0]," +
+            " 0.5712177478521842, [rgba, 255.0, 149.0, 0.0, 1.0], 0.5916095976376619, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8663523665956923, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.88674421638117, [rgba, 255.0, 149.0, 0.0, 1.0]," +
+            " 0.9219083753494115, [rgba, 255.0, 149.0, 0.0, 1.0], 0.9423002251348892, " +
             "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val colorResources = RouteLineColorResources.Builder().build()
-        val route = loadRoute("multileg-route-two-legs.json")
+        val route = loadNavigationRoute("multileg-route-two-legs.json")
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
             true,
             colorResources
         )
-        val stopGap = 20.0 / route.distance()
+        val stopGap = 20.0 / route.directionsRoute.distance()
 
         val result = MapboxRouteLineUtils.getTrafficLineExpressionSoftGradient(
             0.0,
@@ -823,24 +919,24 @@ class MapboxRouteLineUtilsRoboTest {
     fun getTrafficLineExpressionSoftGradient() {
         val expectedExpression = "[interpolate, [linear], [line-progress], " +
             "0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
-            "0.4532366552813495, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            "0.4522143415383129, [rgba, 86.0, 168.0, 251.0, 1.0], " +
             // notice this value (below) minus the stopGap value equals the previous value (above)
-            "0.468779750455607, [rgba, 255.0, 149.0, 0.0, 1.0], " +
-            "0.4877423265682011, [rgba, 255.0, 149.0, 0.0, 1.0], " +
-            "0.5032854217424586, [rgba, 86.0, 168.0, 251.0, 1.0], " +
-            "0.8454666620037381, [rgba, 86.0, 168.0, 251.0, 1.0], " +
-            "0.8610097571779957, [rgba, 255.0, 149.0, 0.0, 1.0], " +
-            "0.8766305678281243, [rgba, 255.0, 149.0, 0.0, 1.0], " +
-            "0.8921736630023819, [rgba, 86.0, 168.0, 251.0, 1.0]]"
+            "0.4677574367125704, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "0.48662124620419406, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "0.5021643413784516, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            "0.8435770151055655, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            "0.859120110279823, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "0.8746827711270166, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "0.8902258663012742, [rgba, 86.0, 168.0, 251.0, 1.0]]"
         val colorResources = RouteLineColorResources.Builder().build()
-        val route = loadRoute("route-with-restrictions.json")
+        val route = loadNavigationRoute("route-with-restrictions.json")
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
             true,
             colorResources
         )
-        val stopGap = 20.0 / route.distance()
+        val stopGap = 20.0 / route.directionsRoute.distance()
 
         val result = MapboxRouteLineUtils.getTrafficLineExpressionSoftGradient(
             0.0,
@@ -858,22 +954,22 @@ class MapboxRouteLineUtilsRoboTest {
         val expectedExpression = "[interpolate, [linear], [line-progress], 0.0, " +
             "[rgba, 0.0, 0.0, 0.0, 0.0], 0.46999999999, " +
             "[rgba, 0.0, 0.0, 0.0, 0.0], 0.47, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.4877423265682011, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5032854217424586, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8454666620037381, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8610097571779957, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8766305678281243, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8921736630023819, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.48662124620419406, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5021643413784516, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8435770151055655, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.859120110279823, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8746827711270166, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8902258663012742, " +
             "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val colorResources = RouteLineColorResources.Builder().build()
-        val route = loadRoute("route-with-restrictions.json")
+        val route = loadNavigationRoute("route-with-restrictions.json")
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
             true,
             colorResources
         )
-        val stopGap = 20.0 / route.distance()
+        val stopGap = 20.0 / route.directionsRoute.distance()
 
         val result = MapboxRouteLineUtils.getTrafficLineExpressionSoftGradient(
             0.47,
@@ -893,18 +989,18 @@ class MapboxRouteLineUtilsRoboTest {
             "0.8454666619937382, [rgba, 0.0, 0.0, 0.0, 0.0], " +
             "0.8454666620037382, [rgba, 86.0, 168.0, 251.0, 1.0], " + // this is the value to notice
             "0.8454666620137382, [rgba, 86.0, 168.0, 251.0, 1.0], " + // this is the value to notice
-            "0.8610097571779957, [rgba, 255.0, 149.0, 0.0, 1.0], " +
-            "0.8766305678281243, [rgba, 255.0, 149.0, 0.0, 1.0], " +
-            "0.8921736630023819, [rgba, 86.0, 168.0, 251.0, 1.0]]"
+            "0.859120110279823, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "0.8746827711270166, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "0.8902258663012742, [rgba, 86.0, 168.0, 251.0, 1.0]]"
         val colorResources = RouteLineColorResources.Builder().build()
-        val route = loadRoute("route-with-restrictions.json")
+        val route = loadNavigationRoute("route-with-restrictions.json")
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
             true,
             colorResources
         )
-        val stopGap = 20.0 / route.distance()
+        val stopGap = 20.0 / route.directionsRoute.distance()
 
         val result = MapboxRouteLineUtils.getTrafficLineExpressionSoftGradient(
             0.8454666620037382,
@@ -922,24 +1018,24 @@ class MapboxRouteLineUtilsRoboTest {
         val expectedExpression = "[interpolate, [linear], [line-progress], 0.0, " +
             // notice no stop added before the vanishing point
             "[rgba, 0.0, 0.0, 0.0, 0.0], 1.0267342531733E-12, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4532366552813495, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.468779750455607, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.4877423265682011, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5032854217424586, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8454666620037381, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8610097571779957, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8766305678281243, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8921736630023819, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4522143415383129, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4677574367125704, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.48662124620419406, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5021643413784516, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8435770151055655, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.859120110279823, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8746827711270166, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8902258663012742, " +
             "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val colorResources = RouteLineColorResources.Builder().build()
-        val route = loadRoute("route-with-restrictions.json")
+        val route = loadNavigationRoute("route-with-restrictions.json")
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
             true,
             colorResources
         )
-        val stopGap = 20.0 / route.distance()
+        val stopGap = 20.0 / route.directionsRoute.distance()
 
         val result = MapboxRouteLineUtils.getTrafficLineExpressionSoftGradient(
             0.0000000000010267342531733,
@@ -957,24 +1053,24 @@ class MapboxRouteLineUtilsRoboTest {
         val expectedExpression = "[interpolate, [linear], [line-progress], 0.0, " +
             // notice no stop added before the vanishing point
             "[rgba, 0.0, 0.0, 0.0, 0.0], 1.0E-11, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4532366552813495, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.468779750455607, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.4877423265682011, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5032854217424586, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8454666620037381, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8610097571779957, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8766305678281243, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8921736630023819, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4522143415383129, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4677574367125704, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.48662124620419406, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5021643413784516, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8435770151055655, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.859120110279823, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8746827711270166, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8902258663012742, " +
             "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val colorResources = RouteLineColorResources.Builder().build()
-        val route = loadRoute("route-with-restrictions.json")
+        val route = loadNavigationRoute("route-with-restrictions.json")
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
             true,
             colorResources
         )
-        val stopGap = 20.0 / route.distance()
+        val stopGap = 20.0 / route.directionsRoute.distance()
 
         val result = MapboxRouteLineUtils.getTrafficLineExpressionSoftGradient(
             MapboxRouteLineUtils.VANISH_POINT_STOP_GAP,
@@ -985,21 +1081,6 @@ class MapboxRouteLineUtilsRoboTest {
         )
 
         assertEquals(expectedExpression, result.toString())
-    }
-
-    @Test
-    fun getRouteLegTrafficCongestionProvider_cacheCheck() {
-        val routeLeg = mockk<RouteLeg> {
-            every { annotation() } returns mockk<LegAnnotation> {
-                every { congestion() } returns listOf()
-            }
-        }
-
-        MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider(routeLeg)
-        MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider(routeLeg)
-        MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider(routeLeg)
-
-        verify(exactly = 1) { routeLeg.annotation() }
     }
 
     @Test
@@ -1020,10 +1101,9 @@ class MapboxRouteLineUtilsRoboTest {
     @Test
     fun getAnnotationProvider_whenNumericTrafficSource() {
         val colorResources = RouteLineColorResources.Builder().build()
-        val routeAsJson = loadJsonFixture(
+        val route = loadNavigationRoute(
             "route-with-congestion-numeric.json"
         )
-        val route = DirectionsRoute.fromJson(routeAsJson)
         val expected =
             MapboxRouteLineUtils.getRouteLegTrafficNumericCongestionProvider(colorResources)
 
@@ -1035,50 +1115,51 @@ class MapboxRouteLineUtilsRoboTest {
 
     @Test
     fun extractRouteData_cacheCheck() {
-        val route = mockk<DirectionsRoute> {
-            every { legs() } returns null
-        }
+        MapboxRouteLineUtils.extractRouteDataCache.evictAll()
+        val route = loadNavigationRoute("short_route.json", "xyz")
         val trafficCongestionProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
-        MapboxRouteLineUtils.extractRouteData(route, trafficCongestionProvider)
-        val result = MapboxRouteLineUtils.extractRouteData(route, trafficCongestionProvider)
 
-        assertTrue(result.isEmpty())
-        verify(exactly = 1) { route.legs() }
+        MapboxRouteLineUtils.extractRouteData(route, trafficCongestionProvider)
+        val putCount = MapboxRouteLineUtils.extractRouteDataCache.putCount()
+        val hitCount = MapboxRouteLineUtils.extractRouteDataCache.hitCount()
+        MapboxRouteLineUtils.extractRouteData(route, trafficCongestionProvider)
+
+        assertEquals(putCount, MapboxRouteLineUtils.extractRouteDataCache.putCount())
+        assertEquals(hitCount + 1, MapboxRouteLineUtils.extractRouteDataCache.hitCount())
     }
 
     @Test
     fun `trim route data cache`() {
-        val route1 = mockk<DirectionsRoute> {
-            every { legs() } returns null
-        }
-        val route2 = mockk<DirectionsRoute> {
-            every { legs() } returns null
-        }
+        val putCount = MapboxRouteLineUtils.extractRouteDataCache.putCount()
+        val hitCount = MapboxRouteLineUtils.extractRouteDataCache.hitCount()
+        val route1 = loadNavigationRoute("short_route.json", "xyz1")
+        val route2 = loadNavigationRoute("multileg-route-two-legs.json", "xyz2")
         val trafficCongestionProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+
         MapboxRouteLineUtils.extractRouteData(route1, trafficCongestionProvider)
         MapboxRouteLineUtils.extractRouteData(route1, trafficCongestionProvider)
         MapboxRouteLineUtils.extractRouteData(route2, trafficCongestionProvider)
         MapboxRouteLineUtils.extractRouteData(route2, trafficCongestionProvider)
-        verify(exactly = 1) { route1.legs() }
-        verify(exactly = 1) { route2.legs() }
+        assertEquals(putCount + 2, MapboxRouteLineUtils.extractRouteDataCache.putCount())
+        assertEquals(hitCount + 2, MapboxRouteLineUtils.extractRouteDataCache.hitCount())
 
         MapboxRouteLineUtils.trimRouteDataCacheToSize(1) // removes route1
         MapboxRouteLineUtils.extractRouteData(route1, trafficCongestionProvider)
         MapboxRouteLineUtils.extractRouteData(route2, trafficCongestionProvider)
-        verify(exactly = 2) { route1.legs() }
-        verify(exactly = 1) { route2.legs() }
+        assertEquals(putCount + 3, MapboxRouteLineUtils.extractRouteDataCache.putCount())
+        assertEquals(hitCount + 3, MapboxRouteLineUtils.extractRouteDataCache.hitCount())
 
         MapboxRouteLineUtils.trimRouteDataCacheToSize(0) // removes both routes
         MapboxRouteLineUtils.extractRouteData(route1, trafficCongestionProvider)
         MapboxRouteLineUtils.extractRouteData(route2, trafficCongestionProvider)
-        verify(exactly = 3) { route1.legs() }
-        verify(exactly = 2) { route2.legs() }
+        assertEquals(putCount + 5, MapboxRouteLineUtils.extractRouteDataCache.putCount())
+        assertEquals(hitCount + 3, MapboxRouteLineUtils.extractRouteDataCache.hitCount())
 
         MapboxRouteLineUtils.trimRouteDataCacheToSize(2) // doesn't remove anything
         MapboxRouteLineUtils.extractRouteData(route1, trafficCongestionProvider)
         MapboxRouteLineUtils.extractRouteData(route2, trafficCongestionProvider)
-        verify(exactly = 3) { route1.legs() }
-        verify(exactly = 2) { route2.legs() }
+        assertEquals(putCount + 5, MapboxRouteLineUtils.extractRouteDataCache.putCount())
+        assertEquals(hitCount + 5, MapboxRouteLineUtils.extractRouteDataCache.hitCount())
     }
 
     @Test

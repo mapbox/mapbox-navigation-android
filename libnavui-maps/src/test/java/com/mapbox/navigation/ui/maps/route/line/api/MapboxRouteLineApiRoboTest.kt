@@ -125,7 +125,8 @@ class MapboxRouteLineApiRoboTest {
             "0.0, [rgba, 86.0, 168.0, 251.0, 1.0]]"
         val expectedTrafficLineExpression = "[step, [line-progress], " +
             "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
-            "0.9429639111009005, [rgba, 255.0, 149.0, 0.0, 1.0]]"
+            "0.9425498931842539, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "1.0, [rgba, 86.0, 168.0, 251.0, 1.0]]"
         val expectedPrimaryRouteSourceGeometry = "LineString{type=LineString, bbox=null, " +
             "coordinates=[Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}," +
             " Point{type=Point, bbox=null, coordinates=[-122.523729, 37.975194]}, " +
@@ -211,23 +212,28 @@ class MapboxRouteLineApiRoboTest {
     @Test
     fun setRoutesTrafficExpressionsWithAlternativeRoutes() = coroutineRule.runBlockingTest {
         val expectedPrimaryTrafficLineExpression = "[step, [line-progress], " +
-            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
-            "0.9429639111009005, [rgba, 255.0, 149.0, 0.0, 1.0]]"
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.9425498931842539, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 1.0, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val expectedAlternative1TrafficLineExpression = "[step, [line-progress], " +
-            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, [rgba, 134.0, 148.0, 165.0, 1.0], " +
-            "0.4277038222190263, [rgba, 190.0, 160.0, 135.0, 1.0], 0.49556716073574053, " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+            "[rgba, 134.0, 148.0, 165.0, 1.0], 0.427862393222051, " +
+            "[rgba, 190.0, 160.0, 135.0, 1.0], 0.49586410393058233, " +
             "[rgba, 134.0, 148.0, 165.0, 1.0]]"
         val expectedAlternative2TrafficLineExpression = "[step, [line-progress], " +
-            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, [rgba, 134.0, 148.0, 165.0, 1.0], " +
-            "0.09121273901463474, [rgba, 190.0, 160.0, 135.0, 1.0], 0.09968837805505427, " +
-            "[rgba, 134.0, 148.0, 165.0, 1.0], 0.7428990170270018, " +
-            "[rgba, 190.0, 160.0, 135.0, 1.0], 0.7533307965366008, " +
-            "[rgba, 134.0, 148.0, 165.0, 1.0], 0.791100847370589, " +
-            "[rgba, 190.0, 160.0, 135.0, 1.0], 0.8172213571475897, " +
-            "[rgba, 134.0, 148.0, 165.0, 1.0], 0.8647489907014745, " +
-            "[rgba, 190.0, 160.0, 135.0, 1.0], 0.8661754437401568, " +
-            "[rgba, 134.0, 148.0, 165.0, 1.0], 0.8880749995256708, " +
-            "[rgba, 181.0, 130.0, 129.0, 1.0], 0.92754943810966, [rgba, 134.0, 148.0, 165.0, 1.0]]"
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+            "[rgba, 134.0, 148.0, 165.0, 1.0], 0.09121734244852364, " +
+            "[rgba, 190.0, 160.0, 135.0, 1.0], 0.09969321187435165, " +
+            "[rgba, 134.0, 148.0, 165.0, 1.0], 0.7429050463377456, " +
+            "[rgba, 190.0, 160.0, 135.0, 1.0], 0.7533370645549629, " +
+            "[rgba, 134.0, 148.0, 165.0, 1.0], 0.7911074842354495, " +
+            "[rgba, 190.0, 160.0, 135.0, 1.0], 0.8172277935183009, " +
+            "[rgba, 134.0, 148.0, 165.0, 1.0], 0.8647541038618146, " +
+            "[rgba, 190.0, 160.0, 135.0, 1.0], 0.8661804981074899, " +
+            "[rgba, 134.0, 148.0, 165.0, 1.0], 0.8880790433163495, " +
+            "[rgba, 181.0, 130.0, 129.0, 1.0], 0.9275512210064087, " +
+            "[rgba, 134.0, 148.0, 165.0, 1.0]]"
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val api = MapboxRouteLineApi(options)
         val route = loadRoute("short_route.json")
@@ -267,8 +273,10 @@ class MapboxRouteLineApiRoboTest {
         val expectedRouteLineExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
             "0.0, [rgba, 86.0, 168.0, 251.0, 1.0]]"
         val expectedTrafficLineExpression = "[step, [line-progress], " +
-            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
-            "0.9429639111009005, [rgba, 255.0, 149.0, 0.0, 1.0]]"
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.9425498931842539, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 1.0, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val expectedPrimaryRouteSourceGeometry = "LineString{type=LineString, bbox=null, " +
             "coordinates=[Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}," +
             " Point{type=Point, bbox=null, coordinates=[-122.523729, 37.975194]}, " +
@@ -498,12 +506,12 @@ class MapboxRouteLineApiRoboTest {
     @Test
     fun updateWithRouteProgress_whenDeEmphasizeInactiveLegSegments() =
         coroutineRule.runBlockingTest {
-            val expectedTrafficExp = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0," +
-                " [rgba, 86.0, 168.0, 251.0, 1.0], 0.10338667841237215, " +
-                "[rgba, 255.0, 149.0, 0.0, 1.0], 0.1235746096999951, " +
-                "[rgba, 86.0, 168.0, 251.0, 1.0], 0.27090572440007177, " +
-                "[rgba, 255.0, 149.0, 0.0, 1.0], 0.32147751186805656, " +
-                "[rgba, 86.0, 168.0, 251.0, 1.0], 0.48807892461540975, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+            val expectedTrafficExp = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+                "[rgba, 86.0, 168.0, 251.0, 1.0], 0.10373821458415478, " +
+                "[rgba, 255.0, 149.0, 0.0, 1.0], 0.1240124365711821, " +
+                "[rgba, 86.0, 168.0, 251.0, 1.0], 0.2718982903427929, " +
+                "[rgba, 255.0, 149.0, 0.0, 1.0], 0.32264099467350016, " +
+                "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4897719974699625, [rgba, 0.0, 0.0, 0.0, 0.0]]"
             val realOptions = MapboxRouteLineOptions.Builder(ctx)
                 .styleInactiveRouteLegsIndependently(true)
                 .build()
@@ -540,16 +548,16 @@ class MapboxRouteLineApiRoboTest {
     @Test
     fun highlightActiveLeg() = coroutineRule.runBlockingTest {
         var callbackCalled = false
-        val expectedTrafficExp = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0," +
-            " [rgba, 0.0, 0.0, 0.0, 0.0], 0.48807892461540975, [rgba, 255.0, 149.0, 0.0, 1.0]," +
-            " 0.5402820600662328, [rgba, 86.0, 168.0, 251.0, 1.0], 0.5691365275126837, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.589630336547089, [rgba, 86.0, 168.0, 251.0, 1.0]," +
-            " 0.883680810453678, [rgba, 255.0, 149.0, 0.0, 1.0], 0.93904468262125, " +
+        val expectedTrafficExp = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.4897719974699625, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "0.5421388243827154, [rgba, 86.0, 168.0, 251.0, 1.0], 0.5710651139490561, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5916095976376619, [rgba, 86.0, 168.0, 251.0, 1.0]," +
+            " 0.88674421638117, [rgba, 255.0, 149.0, 0.0, 1.0], 0.9423002251348892, " +
             "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val expectedRouteLineExp = "[step, [line-progress], [rgba, 86.0, 168.0, 251.0, 1.0], 0.0," +
-            " [rgba, 0.0, 0.0, 0.0, 0.0], 0.48807892461540975, [rgba, 86.0, 168.0, 251.0, 1.0]]"
+            " [rgba, 0.0, 0.0, 0.0, 0.0], 0.4897719974699625, [rgba, 86.0, 168.0, 251.0, 1.0]]"
         val expectedCasingExp = "[step, [line-progress], [rgba, 47.0, 122.0, 198.0, 1.0], 0.0," +
-            " [rgba, 0.0, 0.0, 0.0, 0.0], 0.48807892461540975, [rgba, 47.0, 122.0, 198.0, 1.0]]"
+            " [rgba, 0.0, 0.0, 0.0, 0.0], 0.4897719974699625, [rgba, 47.0, 122.0, 198.0, 1.0]]"
         val route = loadNavigationRoute("multileg-route-two-legs.json")
         val options = MapboxRouteLineOptions.Builder(ctx)
             .styleInactiveRouteLegsIndependently(true)
@@ -582,16 +590,16 @@ class MapboxRouteLineApiRoboTest {
 
     @Test
     fun showRouteWithLegIndexHighlighted() = coroutineRule.runBlockingTest {
-        val expectedTrafficExp = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0," +
-            " [rgba, 0.0, 0.0, 0.0, 0.0], 0.48807892461540975, [rgba, 255.0, 149.0, 0.0, 1.0]," +
-            " 0.5402820600662328, [rgba, 86.0, 168.0, 251.0, 1.0], 0.5691365275126837, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.589630336547089, [rgba, 86.0, 168.0, 251.0, 1.0]," +
-            " 0.883680810453678, [rgba, 255.0, 149.0, 0.0, 1.0], 0.93904468262125, " +
+        val expectedTrafficExp = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.4897719974699625, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "0.5421388243827154, [rgba, 86.0, 168.0, 251.0, 1.0], 0.5710651139490561, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5916095976376619, [rgba, 86.0, 168.0, 251.0, 1.0]," +
+            " 0.88674421638117, [rgba, 255.0, 149.0, 0.0, 1.0], 0.9423002251348892, " +
             "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val expectedRouteLineExp = "[step, [line-progress], [rgba, 86.0, 168.0, 251.0, 1.0], 0.0," +
-            " [rgba, 0.0, 0.0, 0.0, 0.0], 0.48807892461540975, [rgba, 86.0, 168.0, 251.0, 1.0]]"
+            " [rgba, 0.0, 0.0, 0.0, 0.0], 0.4897719974699625, [rgba, 86.0, 168.0, 251.0, 1.0]]"
         val expectedCasingExp = "[step, [line-progress], [rgba, 47.0, 122.0, 198.0, 1.0], 0.0," +
-            " [rgba, 0.0, 0.0, 0.0, 0.0], 0.48807892461540975, [rgba, 47.0, 122.0, 198.0, 1.0]]"
+            " [rgba, 0.0, 0.0, 0.0, 0.0], 0.4897719974699625, [rgba, 47.0, 122.0, 198.0, 1.0]]"
         val route = loadRoute("multileg-route-two-legs.json")
         val options = MapboxRouteLineOptions.Builder(ctx)
             .styleInactiveRouteLegsIndependently(true)
@@ -697,8 +705,8 @@ class MapboxRouteLineApiRoboTest {
             .displayRestrictedRoadSections(true)
             .build()
         val trafficExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.5, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5032854217424586, [rgba, 86.0, 168.0, 251.0, 1.0]," +
-            " 0.8610097571779957, [rgba, 255.0, 149.0, 0.0, 1.0], 0.8921736630023819, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5021643413784516, [rgba, 86.0, 168.0, 251.0, 1.0]," +
+            " 0.859120110279823, [rgba, 255.0, 149.0, 0.0, 1.0], 0.8902258663012742, " +
             "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val routeLineExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.5," +
             " [rgba, 86.0, 168.0, 251.0, 1.0]]"
@@ -749,8 +757,8 @@ class MapboxRouteLineApiRoboTest {
             .displayRestrictedRoadSections(false)
             .build()
         val trafficExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.5, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5032854217424586, [rgba, 86.0, 168.0, 251.0, 1.0]," +
-            " 0.8610097571779957, [rgba, 255.0, 149.0, 0.0, 1.0], 0.8921736630023819, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5021643413784516, [rgba, 86.0, 168.0, 251.0, 1.0]," +
+            " 0.859120110279823, [rgba, 255.0, 149.0, 0.0, 1.0], 0.8902258663012742, " +
             "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val routeLineExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.5," +
             " [rgba, 86.0, 168.0, 251.0, 1.0]]"
@@ -816,7 +824,7 @@ class MapboxRouteLineApiRoboTest {
                 ).size
         }
 
-        assertEquals(7, shortRouteDef.await())
+        assertEquals(9, shortRouteDef.await())
         assertEquals(625, longRouteDef.await())
     }
 
@@ -827,7 +835,7 @@ class MapboxRouteLineApiRoboTest {
             .build()
         val resources = RouteLineResources.Builder().routeLineColorResources(colorOptions).build()
         val options = MapboxRouteLineOptions.Builder(ctx).withRouteLineResources(resources).build()
-        val route = loadRoute("multileg-route-two-legs.json")
+        val route = loadNavigationRoute("multileg-route-two-legs.json")
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
@@ -838,13 +846,17 @@ class MapboxRouteLineApiRoboTest {
 
         val result = api.alternativelyStyleSegmentsNotInLeg(1, segments)
 
-        assertEquals(11, result.size)
+        assertEquals(12, result.size)
         assertEquals(-256, result.first().segmentColor)
         assertEquals(0, result.first().legIndex)
         assertEquals(-256, result[4].segmentColor)
         assertEquals(0, result[4].legIndex)
-        assertEquals(-27392, result[5].segmentColor)
-        assertEquals(1, result[5].legIndex)
+        // this will be ignored, it's only here because the test route has an incorrect geometry
+        // with a duplicate point
+        assertEquals(0.4897719974699625, result[5].offset, 0.0)
+        assertEquals(-27392, result[6].segmentColor)
+        assertEquals(1, result[6].legIndex)
+        assertEquals(0.4897719974699625, result[6].offset, 0.0)
     }
 
     @Test
@@ -922,8 +934,8 @@ class MapboxRouteLineApiRoboTest {
             assertEquals(
                 "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
                     "0.03856129838762756, [rgba, 134.0, 148.0, 165.0, 1.0], " +
-                    "0.6557962353895171, [rgba, 190.0, 160.0, 135.0, 1.0], " +
-                    "0.7379144868819574, [rgba, 134.0, 148.0, 165.0, 1.0]]",
+                    "0.656312259715939, [rgba, 190.0, 160.0, 135.0, 1.0], " +
+                    "0.738533256181577, [rgba, 134.0, 148.0, 165.0, 1.0]]",
                 result
                     .alternativeRouteLinesData[0]
                     .dynamicData

@@ -1,4 +1,5 @@
 {
+  "routeIndex": "0",
   "weight_typical": 49.666,
   "duration_typical": 36.767,
   "weight_name": "auto",
@@ -328,5 +329,23 @@
       "summary": "Lincoln Boulevard, Washington Boulevard"
     }
   ],
-  "geometry": "s`fbgAbvlrhFpCz@jNjErDpAhCfA`CjA`CpAjC~AzB|AdDbCvK|I|BdBd@ZjBnAlAyA~Ai@pBUbFLpHShIcArIcBhQ}G"
+  "geometry": "s`fbgAbvlrhFpCz@jNjErDpAhCfA`CjA`CpAjC~AzB|AdDbCvK|I|BdBd@ZjBnAlAyA~Ai@pBUbFLpHShIcArIcBhQ}G",
+  "routeOptions": {
+    "note": "THESE ARE FAKE OPTIONS",
+    "baseUrl": "https://api.mapbox.com",
+    "user": "mapbox",
+    "profile": "driving-traffic",
+    "coordinates": "-122.477426,37.801498;-122.477848,37.799296",
+    "language": "en",
+    "continue_straight": true,
+    "roundabout_exits": true,
+    "geometries": "polyline6",
+    "overview": "full",
+    "steps": true,
+    "annotations": "congestion_numeric,maxspeed,speed,duration,distance,closure",
+    "voice_instructions": true,
+    "banner_instructions": true,
+    "voice_units": "imperial",
+    "enable_refresh": true
+  }
 }

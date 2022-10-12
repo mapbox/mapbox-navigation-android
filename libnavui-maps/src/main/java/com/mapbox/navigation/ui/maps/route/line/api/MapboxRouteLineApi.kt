@@ -1227,7 +1227,7 @@ class MapboxRouteLineApi(
         val primaryRouteTrafficLineExpressionDef = jobControl.scope.async {
             partitionedRoutes.first.firstOrNull()?.route?.run {
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
-                    this.directionsRoute,
+                    this,
                     routeLineOptions.resourceProvider.routeLineColorResources,
                     trafficBackfillRoadClasses,
                     isPrimaryRoute = true,
@@ -1266,7 +1266,7 @@ class MapboxRouteLineApi(
         val alternateRoute1TrafficExpressionDef = jobControl.scope.async {
             partitionedRoutes.second.firstOrNull()?.route?.run {
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
-                    this.directionsRoute,
+                    this,
                     routeLineOptions.resourceProvider.routeLineColorResources,
                     trafficBackfillRoadClasses,
                     isPrimaryRoute = false,
@@ -1285,7 +1285,7 @@ class MapboxRouteLineApi(
         val alternateRoute2TrafficExpressionDef = jobControl.scope.async {
             if (partitionedRoutes.second.size > 1) {
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
-                    partitionedRoutes.second[1].route.directionsRoute,
+                    partitionedRoutes.second[1].route,
                     routeLineOptions.resourceProvider.routeLineColorResources,
                     trafficBackfillRoadClasses,
                     false,
@@ -1357,7 +1357,7 @@ class MapboxRouteLineApi(
                 val segmentsDef = jobControl.scope.async {
                     partitionedRoutes.first.firstOrNull()?.route?.run {
                         MapboxRouteLineUtils.calculateRouteLineSegments(
-                            this.directionsRoute,
+                            this,
                             trafficBackfillRoadClasses,
                             isPrimaryRoute = true,
                             routeLineOptions.resourceProvider.routeLineColorResources
@@ -1583,8 +1583,8 @@ class MapboxRouteLineApi(
             segments.parallelMap(
                 {
                     if (it.legIndex != activeLegIndex) {
-                        it.copy(
-                            segmentColor = routeLineOptions
+                        it.copyWithNewSegmentColor(
+                            newSegmentColor = routeLineOptions
                                 .resourceProvider
                                 .routeLineColorResources
                                 .inActiveRouteLegsColor

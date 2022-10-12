@@ -84,7 +84,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
                         .generateExpression().contents as ArrayList<*>
                 assertEquals(shortRoute.directionsRoute, primaryRoute?.directionsRoute)
                 assertEquals(
-                    7,
+                    9,
                     contents.size
                 )
                 myResourceIdler.decrement()
@@ -124,7 +124,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
                     .contents as ArrayList<*>
                 assertEquals(shortRoute, primaryRoute)
                 assertEquals(
-                    7,
+                    9,
                     contents.size
                 )
 
