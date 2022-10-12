@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.core.trip.session.NavigationSessionState
+import com.mapbox.navigation.core.internal.HistoryRecordingSessionState
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
@@ -30,7 +30,7 @@ class DeveloperMetadataAggregatorTest {
 
         sut.registerObserver(observer)
         clearMocks(observer)
-        sut.onCopilotSessionChanged(NavigationSessionState.FreeDrive(sessionId = newValue))
+        sut.onCopilotSessionChanged(HistoryRecordingSessionState.FreeDrive(sessionId = newValue))
 
         verify(exactly = 1) {
             observer.onDeveloperMetadataChanged(DeveloperMetadata(newValue))
@@ -42,9 +42,11 @@ class DeveloperMetadataAggregatorTest {
         val newValue = "456-654"
 
         sut.registerObserver(observer)
-        sut.onCopilotSessionChanged(NavigationSessionState.FreeDrive(sessionId = newValue))
+        sut.onCopilotSessionChanged(HistoryRecordingSessionState.FreeDrive(sessionId = newValue))
         clearMocks(observer)
-        sut.onCopilotSessionChanged(NavigationSessionState.ActiveGuidance(sessionId = newValue))
+        sut.onCopilotSessionChanged(
+            HistoryRecordingSessionState.ActiveGuidance(sessionId = newValue)
+        )
 
         verify(exactly = 0) { observer.onDeveloperMetadataChanged(any()) }
     }
@@ -56,7 +58,7 @@ class DeveloperMetadataAggregatorTest {
         clearMocks(observer)
 
         sut.unregisterObserver(observer)
-        sut.onCopilotSessionChanged(NavigationSessionState.FreeDrive(sessionId = newValue))
+        sut.onCopilotSessionChanged(HistoryRecordingSessionState.FreeDrive(sessionId = newValue))
 
         verify(exactly = 0) { observer.onDeveloperMetadataChanged(any()) }
     }
@@ -67,7 +69,7 @@ class DeveloperMetadataAggregatorTest {
         val secondObserver = mockk<DeveloperMetadataObserver>(relaxed = true)
         sut.registerObserver(observer)
         sut.registerObserver(secondObserver)
-        sut.onCopilotSessionChanged(NavigationSessionState.FreeDrive(sessionId = newValue))
+        sut.onCopilotSessionChanged(HistoryRecordingSessionState.FreeDrive(sessionId = newValue))
 
         verify(exactly = 1) {
             observer.onDeveloperMetadataChanged(DeveloperMetadata(newValue))
@@ -78,7 +80,7 @@ class DeveloperMetadataAggregatorTest {
 
         sut.unregisterAllObservers()
         clearMocks(observer, secondObserver)
-        sut.onCopilotSessionChanged(NavigationSessionState.FreeDrive(sessionId = "789-987"))
+        sut.onCopilotSessionChanged(HistoryRecordingSessionState.FreeDrive(sessionId = "789-987"))
 
         verify(exactly = 0) {
             observer.onDeveloperMetadataChanged(any())
@@ -100,7 +102,7 @@ class DeveloperMetadataAggregatorTest {
         }
         sut.registerObserver(observer)
 
-        sut.onCopilotSessionChanged(NavigationSessionState.FreeDrive(sessionId = newId))
+        sut.onCopilotSessionChanged(HistoryRecordingSessionState.FreeDrive(sessionId = newId))
         // verify no crash
     }
 }

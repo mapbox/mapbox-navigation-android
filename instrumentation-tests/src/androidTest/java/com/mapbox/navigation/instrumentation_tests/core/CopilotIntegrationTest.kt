@@ -13,9 +13,9 @@ import com.mapbox.navigation.core.DeveloperMetadataObserver
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.internal.HistoryRecordingSessionState
 import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.registerHistoryRecordingStateChangeObserver
-import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.clearNavigationRoutesAndWaitForUpdate
@@ -85,13 +85,13 @@ class CopilotIntegrationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cl
         }
         val startedSessionObserverIds = mutableListOf<String>()
         val historyRecordingStateObserver = object : HistoryRecordingStateChangeObserver {
-            override fun onShouldStartRecording(state: NavigationSessionState) {
+            override fun onShouldStartRecording(state: HistoryRecordingSessionState) {
                 startedSessionObserverIds.add(state.sessionId)
             }
-            override fun onShouldStopRecording(state: NavigationSessionState) {
+            override fun onShouldStopRecording(state: HistoryRecordingSessionState) {
             }
 
-            override fun onShouldCancelRecording(state: NavigationSessionState) {
+            override fun onShouldCancelRecording(state: HistoryRecordingSessionState) {
             }
         }
         mapboxNavigation.registerDeveloperMetadataObserver(developerMetadataObserver)

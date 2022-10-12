@@ -2,7 +2,7 @@ package com.mapbox.navigation.core
 
 import androidx.annotation.UiThread
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.core.trip.session.NavigationSessionState
+import com.mapbox.navigation.core.internal.HistoryRecordingSessionState
 import java.util.concurrent.CopyOnWriteArraySet
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -35,7 +35,7 @@ internal class DeveloperMetadataAggregator(
         observers.clear()
     }
 
-    override fun onCopilotSessionChanged(session: NavigationSessionState) {
+    override fun onCopilotSessionChanged(session: HistoryRecordingSessionState) {
         currentMetadata = currentMetadata.copy(copilotSessionId = session.sessionId)
     }
 }

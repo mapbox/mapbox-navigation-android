@@ -6,7 +6,7 @@ package com.mapbox.navigation.core {
     property public final String copilotSessionId;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface DeveloperMetadataObserver {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface DeveloperMetadataObserver {
     method public void onDeveloperMetadataChanged(com.mapbox.navigation.core.DeveloperMetadata metadata);
   }
 
