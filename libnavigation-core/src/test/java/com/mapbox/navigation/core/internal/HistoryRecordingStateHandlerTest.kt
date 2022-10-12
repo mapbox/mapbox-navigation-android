@@ -1,23 +1,216 @@
 package com.mapbox.navigation.core.internal
 
+import com.mapbox.navigation.core.CopilotSessionObserver
 import com.mapbox.navigation.core.HistoryRecordingStateHandler
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class HistoryRecordingStateHandlerTest {
 
     private val observer = mockk<HistoryRecordingStateChangeObserver>(relaxUnitFun = true)
+    private val copilotObserver = mockk<CopilotSessionObserver>(relaxUnitFun = true)
     private lateinit var stateHandler: HistoryRecordingStateHandler
 
     @Before
     fun setUp() {
-        stateHandler = HistoryRecordingStateHandler(NavigationSessionState.Idle)
+        stateHandler = HistoryRecordingStateHandler()
         stateHandler.registerStateChangeObserver(observer)
+        stateHandler.registerCopilotSessionObserver(copilotObserver)
+    }
+
+    @Test
+    fun currentCopilotSessionShouldBeIdle() {
+        assertTrue(stateHandler.currentCopilotSession() is NavigationSessionState.Idle)
+    }
+
+    @Test
+    fun currentCopilotSessionShouldBeFreeDrive() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        assertTrue(stateHandler.currentCopilotSession() is NavigationSessionState.FreeDrive)
+    }
+
+    @Test
+    fun currentCopilotSessionShouldBeActiveGuidance() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        stateHandler.setRoutes(listOf(mockk()))
+        assertTrue(stateHandler.currentCopilotSession() is NavigationSessionState.ActiveGuidance)
+    }
+
+    @Test
+    fun shouldNotifyCopilotObserverOnRegister() {
+        verify {
+            copilotObserver.onCopilotSessionChanged(ofType<NavigationSessionState.Idle>())
+        }
+    }
+
+    @Test
+    fun shouldNotifyCopilotObserverOnChangeFromIdleToFreeDrive() {
+        clearMocks(copilotObserver)
+
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+
+        verify {
+            copilotObserver.onCopilotSessionChanged(ofType<NavigationSessionState.FreeDrive>())
+        }
+    }
+
+    @Test
+    fun shouldNotifyCopilotObserverOnChangeFromIdleToActiveGuidance() {
+        stateHandler.setRoutes(listOf(mockk()))
+        clearMocks(copilotObserver)
+
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+
+        verify {
+            copilotObserver.onCopilotSessionChanged(ofType<NavigationSessionState.ActiveGuidance>())
+        }
+    }
+
+    @Test
+    fun shouldNotNotifyCopilotObserverOnChangeFromIdleToIdle() {
+        clearMocks(copilotObserver)
+
+        stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
+
+        verify(exactly = 0) { copilotObserver.onCopilotSessionChanged(any()) }
+    }
+
+    @Test
+    fun shouldNotifyCopilotObserverOnChangeFromFreeDriveToIdle() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        clearMocks(copilotObserver)
+
+        stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
+
+        verify {
+            copilotObserver.onCopilotSessionChanged(ofType<NavigationSessionState.Idle>())
+        }
+    }
+
+    @Test
+    fun shouldNotNotifyCopilotObserverOnChangeFromFreeDriveToFreeDrive() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        clearMocks(copilotObserver)
+
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+
+        verify(exactly = 0) { copilotObserver.onCopilotSessionChanged(any()) }
+    }
+
+    @Test
+    fun shouldNotifyCopilotObserverOnChangeFromFreeDriveToActiveGuidance() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        clearMocks(copilotObserver)
+
+        stateHandler.setRoutes(listOf(mockk()))
+
+        verify {
+            copilotObserver.onCopilotSessionChanged(ofType<NavigationSessionState.ActiveGuidance>())
+        }
+    }
+
+    @Test
+    fun shouldNotifyCopilotObserverOnChangeFromActiveGuidanceToIdle() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        stateHandler.setRoutes(listOf(mockk()))
+        clearMocks(copilotObserver)
+
+        stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
+
+        verify {
+            copilotObserver.onCopilotSessionChanged(ofType<NavigationSessionState.Idle>())
+        }
+    }
+
+    @Test
+    fun shouldNotifyCopilotObserverOnChangeFromActiveGuidanceToFreeDrive() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        stateHandler.setRoutes(listOf(mockk()))
+        clearMocks(copilotObserver)
+
+        stateHandler.setRoutes(emptyList())
+
+        verify {
+            copilotObserver.onCopilotSessionChanged(ofType<NavigationSessionState.FreeDrive>())
+        }
+    }
+
+    @Test
+    fun shouldNotNotifyCopilotObserverOnChangeFromActiveGuidanceToActiveGuidance() {
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        stateHandler.setRoutes(listOf(mockk()))
+        clearMocks(copilotObserver)
+
+        stateHandler.setRoutes(listOf(mockk(), mockk()))
+
+        verify(exactly = 0) { copilotObserver.onCopilotSessionChanged(any()) }
+    }
+
+    @Test
+    fun copilotObserversNotification() {
+        val observer1 = mockk<CopilotSessionObserver>(relaxUnitFun = true)
+        val observer2 = mockk<CopilotSessionObserver>(relaxUnitFun = true)
+        val observer3 = mockk<CopilotSessionObserver>(relaxUnitFun = true)
+        stateHandler = HistoryRecordingStateHandler()
+
+        // no observers
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+
+        verifyNoInteractions(observer1, observer2, observer3)
+
+        // 1 observer
+        stateHandler.registerCopilotSessionObserver(observer1)
+        verify(exactly = 1) {
+            observer1.onCopilotSessionChanged(ofType<NavigationSessionState.FreeDrive>())
+        }
+        stateHandler.setRoutes(listOf(mockk()))
+
+        verify(exactly = 1) {
+            observer1.onCopilotSessionChanged(ofType<NavigationSessionState.ActiveGuidance>())
+        }
+        verifyNoInteractions(observer2, observer3)
+
+        // 3 observers
+        clearMocks(observer1, observer2, observer3)
+
+        stateHandler.registerCopilotSessionObserver(observer2)
+        stateHandler.registerCopilotSessionObserver(observer3)
+        stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
+
+        verify(exactly = 1) {
+            observer1.onCopilotSessionChanged(ofType<NavigationSessionState.Idle>())
+            observer2.onCopilotSessionChanged(ofType<NavigationSessionState.Idle>())
+            observer3.onCopilotSessionChanged(ofType<NavigationSessionState.Idle>())
+        }
+
+        // 2 observers
+        clearMocks(observer1, observer2, observer3)
+
+        stateHandler.unregisterCopilotSessionObserver(observer2)
+        stateHandler.onSessionStateChanged(TripSessionState.STARTED)
+        stateHandler.setRoutes(listOf(mockk()))
+
+        verify(exactly = 1) {
+            observer1.onCopilotSessionChanged(ofType<NavigationSessionState.ActiveGuidance>())
+            observer3.onCopilotSessionChanged(ofType<NavigationSessionState.ActiveGuidance>())
+        }
+        verifyNoInteractions(observer2)
+
+        // no observers
+        clearMocks(observer1, observer2, observer3)
+
+        stateHandler.unregisterAllCopilotSessionObservers()
+        stateHandler.setRoutes(emptyList())
+
+        verifyNoInteractions(observer1, observer2, observer3)
     }
 
     @Test
@@ -25,7 +218,7 @@ class HistoryRecordingStateHandlerTest {
         val observer1 = mockk<HistoryRecordingStateChangeObserver>(relaxUnitFun = true)
         val observer2 = mockk<HistoryRecordingStateChangeObserver>(relaxUnitFun = true)
         val observer3 = mockk<HistoryRecordingStateChangeObserver>(relaxUnitFun = true)
-        stateHandler = HistoryRecordingStateHandler(NavigationSessionState.Idle)
+        stateHandler = HistoryRecordingStateHandler()
 
         // no observers
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
@@ -739,7 +932,7 @@ class HistoryRecordingStateHandlerTest {
 
             override fun onShouldCancelRecording(state: NavigationSessionState) { }
         }
-        stateHandler = HistoryRecordingStateHandler(NavigationSessionState.Idle)
+        stateHandler = HistoryRecordingStateHandler()
         stateHandler.registerStateChangeObserver(unregisteringObserver)
         stateHandler.registerStateChangeObserver(observer)
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
@@ -752,6 +945,14 @@ class HistoryRecordingStateHandlerTest {
                 it.onShouldStartRecording(any())
                 it.onShouldStopRecording(any())
                 it.onShouldCancelRecording(any())
+            }
+        }
+    }
+
+    private fun verifyNoInteractions(vararg observers: CopilotSessionObserver) {
+        observers.forEach {
+            verify(exactly = 0) {
+                it.onCopilotSessionChanged(any())
             }
         }
     }

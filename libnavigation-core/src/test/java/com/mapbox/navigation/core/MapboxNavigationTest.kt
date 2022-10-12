@@ -266,6 +266,15 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
+    fun onDestroy_unregisters_DeveloperMetadataAggregator_observers() {
+        createMapboxNavigation()
+
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { developerMetadataAggregator.unregisterAllObservers() }
+    }
+
+    @Test
     fun onDestroySetsRoutesToEmpty() = coroutineRule.runBlockingTest {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
@@ -1653,6 +1662,18 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
+    fun registerDeveloperMetadataObserver() {
+        val observer = mockk<DeveloperMetadataObserver>(relaxed = true)
+        createMapboxNavigation()
+
+        mapboxNavigation.registerDeveloperMetadataObserver(observer)
+
+        verify {
+            developerMetadataAggregator.registerObserver(observer)
+        }
+    }
+
+    @Test
     fun unregisterRouteRefreshStateObserver() {
         val observer = mockk<RouteRefreshStatesObserver>()
         createMapboxNavigation()
@@ -1672,6 +1693,18 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         verify(exactly = 1) {
             routeRefreshController.unregisterAllRouteRefreshStateObservers()
+        }
+    }
+
+    @Test
+    fun unregisterDeveloperMetadataObserver() {
+        val observer = mockk<DeveloperMetadataObserver>(relaxed = true)
+        createMapboxNavigation()
+
+        mapboxNavigation.unregisterDeveloperMetadataObserver(observer)
+
+        verify {
+            developerMetadataAggregator.unregisterObserver(observer)
         }
     }
 }
