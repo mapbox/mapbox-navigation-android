@@ -10,6 +10,7 @@ class CustomizedViewModel : ViewModel() {
     val customInfoPanelLayout = MutableLiveData("--")
     val useCustomInfoPanelStyles = MutableLiveData(false)
     val customInfoPanelContent = MutableLiveData("--")
+    val customInfoPanelPeekHeight = MutableLiveData("--")
     val showCustomInfoPanelEndNavButton = MutableLiveData(false)
     val showBottomSheetInFreeDrive = MutableLiveData(false)
     val enableDestinationPreview = MutableLiveData(true)

@@ -63,6 +63,10 @@
         <item>SMALL</item>
         <item>LARGE</item>
     </string-array>
+    <string-array name="drop_in_info_panel_custom_peek_height" translatable="false">
+        <item>--</item>
+        <item>LARGE</item>
+    </string-array>
     <string-array name="drop_in_routing_profile" translatable="false">
         <item>--</item>
         <item>DRIVING-TRAFFIC</item>
