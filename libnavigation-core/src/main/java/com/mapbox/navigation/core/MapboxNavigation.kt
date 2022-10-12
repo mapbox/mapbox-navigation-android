@@ -244,6 +244,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val tripSession: TripSession
     private val navigationSession: NavigationSession
     internal val historyRecordingStateHandler: HistoryRecordingStateHandler
+    private val developerMetadataAggregator: DeveloperMetadataAggregator
     private val tripSessionLocationEngine: TripSessionLocationEngine
     private val billingController: BillingController
     private val connectivityHandler: ConnectivityHandler = ConnectivityHandler(
@@ -439,7 +440,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
         navigationSession = NavigationComponentProvider.createNavigationSession()
         historyRecordingStateHandler = NavigationComponentProvider
-            .createHistoryRecordingStateHandler(navigationSession.state)
+            .createHistoryRecordingStateHandler()
+        developerMetadataAggregator = NavigationComponentProvider.createDeveloperMetadataAggregator(
+            historyRecordingStateHandler
+        )
 
         val notification: TripNotification = MapboxModuleProvider
             .createModule(
@@ -1032,6 +1036,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
         navigationSession.unregisterAllNavigationSessionStateObservers()
         historyRecordingStateHandler.unregisterAllStateChangeObservers()
+        historyRecordingStateHandler.unregisterAllCopilotSessionObservers()
+        developerMetadataAggregator.unregisterAllObservers()
         runInTelemetryContext { telemetry ->
             telemetry.destroy(this@MapboxNavigation)
         }
@@ -1591,6 +1597,30 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         navigationSessionStateObserver: NavigationSessionStateObserver
     ) {
         navigationSession.unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
+    }
+
+    /**
+     * Registers a [DeveloperMetadataObserver] to be notified of [DeveloperMetadata] changes.
+     *
+     * @param developerMetadataObserver [DeveloperMetadataObserver]
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun registerDeveloperMetadataObserver(
+        developerMetadataObserver: DeveloperMetadataObserver
+    ) {
+        developerMetadataAggregator.registerObserver(developerMetadataObserver)
+    }
+
+    /**
+     * Unregisters a [DeveloperMetadataObserver].
+     *
+     * @param developerMetadataObserver [DeveloperMetadataObserver]
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun unregisterDeveloperMetadataObserver(
+        developerMetadataObserver: DeveloperMetadataObserver
+    ) {
+        developerMetadataAggregator.unregisterObserver(developerMetadataObserver)
     }
 
     private fun startSession(withTripService: Boolean, withReplayEnabled: Boolean) {

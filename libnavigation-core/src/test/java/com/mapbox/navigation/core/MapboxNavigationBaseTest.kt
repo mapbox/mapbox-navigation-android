@@ -89,7 +89,8 @@ internal open class MapboxNavigationBaseTest {
     val tripSessionLocationEngine: TripSessionLocationEngine = mockk(relaxUnitFun = true)
     lateinit var navigationOptions: NavigationOptions
     val arrivalProgressObserver: ArrivalProgressObserver = mockk(relaxUnitFun = true)
-    val historyRecordingStateHandler: HistoryRecordingStateHandler = mockk(relaxUnitFun = true)
+    val historyRecordingStateHandler: HistoryRecordingStateHandler = mockk(relaxed = true)
+    val developerMetadataAggregator: DeveloperMetadataAggregator = mockk(relaxUnitFun = true)
     val threadController = ThreadController()
 
     val applicationContext: Context = mockk(relaxed = true) {
@@ -183,9 +184,11 @@ internal open class MapboxNavigationBaseTest {
             NavigationComponentProvider.createArrivalProgressObserver(tripSession)
         } returns arrivalProgressObserver
         every {
-            NavigationComponentProvider
-                .createHistoryRecordingStateHandler(NavigationSessionState.Idle)
+            NavigationComponentProvider.createHistoryRecordingStateHandler()
         } returns historyRecordingStateHandler
+        every {
+            NavigationComponentProvider.createDeveloperMetadataAggregator(any())
+        } returns developerMetadataAggregator
 
         every { navigator.create(any(), any(), any(), any(), any(), any()) } returns navigator
         mockkStatic(TelemetryEnabler::class)
