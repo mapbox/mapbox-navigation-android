@@ -40,7 +40,10 @@ internal class NavigationSession : RoutesObserver, TripSessionStateObserver {
         }
 
     private fun updateState() {
-        state = NavigationSessionUtils.getNewState(isDriving = isDriving, hasRoutes = hasRoutes)
+        state = NavigationSessionUtils.getNewNavigationSessionState(
+            isDriving = isDriving,
+            hasRoutes = hasRoutes
+        )
     }
 
     internal fun registerNavigationSessionStateObserver(

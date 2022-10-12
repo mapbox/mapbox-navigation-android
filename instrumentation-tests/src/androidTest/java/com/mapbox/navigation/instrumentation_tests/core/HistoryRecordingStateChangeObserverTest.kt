@@ -13,10 +13,10 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.model.HistoryEvent
 import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
+import com.mapbox.navigation.core.internal.HistoryRecordingSessionState
 import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.registerHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.unregisterHistoryRecordingStateChangeObserver
-import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
@@ -81,7 +81,7 @@ class HistoryRecordingStateChangeObserverTest :
         assertEquals(
             HistoryRecordingStateChangeEvent(
                 HistoryRecordingStateChangeEventType.START,
-                NavigationSessionState.FreeDrive::class
+                HistoryRecordingSessionState.FreeDrive::class
             ),
             eventsChannel.receive()
         )
@@ -90,11 +90,11 @@ class HistoryRecordingStateChangeObserverTest :
             listOf(
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.STOP,
-                    NavigationSessionState.FreeDrive::class
+                    HistoryRecordingSessionState.FreeDrive::class
                 ),
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.START,
-                    NavigationSessionState.ActiveGuidance::class
+                    HistoryRecordingSessionState.ActiveGuidance::class
                 ),
             ),
             eventsChannel.receive(2)
@@ -115,11 +115,11 @@ class HistoryRecordingStateChangeObserverTest :
             listOf(
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.STOP,
-                    NavigationSessionState.ActiveGuidance::class
+                    HistoryRecordingSessionState.ActiveGuidance::class
                 ),
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.START,
-                    NavigationSessionState.FreeDrive::class
+                    HistoryRecordingSessionState.FreeDrive::class
                 ),
             ),
             eventsChannel.receive(2)
@@ -128,7 +128,7 @@ class HistoryRecordingStateChangeObserverTest :
         assertEquals(
             HistoryRecordingStateChangeEvent(
                 HistoryRecordingStateChangeEventType.STOP,
-                NavigationSessionState.FreeDrive::class
+                HistoryRecordingSessionState.FreeDrive::class
             ),
             eventsChannel.receive()
         )
@@ -139,7 +139,7 @@ class HistoryRecordingStateChangeObserverTest :
         assertEquals(
             HistoryRecordingStateChangeEvent(
                 HistoryRecordingStateChangeEventType.START,
-                NavigationSessionState.ActiveGuidance::class
+                HistoryRecordingSessionState.ActiveGuidance::class
             ),
             eventsChannel.receive()
         )
@@ -147,7 +147,7 @@ class HistoryRecordingStateChangeObserverTest :
         assertEquals(
             HistoryRecordingStateChangeEvent(
                 HistoryRecordingStateChangeEventType.STOP,
-                NavigationSessionState.ActiveGuidance::class
+                HistoryRecordingSessionState.ActiveGuidance::class
             ),
             eventsChannel.receive()
         )
@@ -158,7 +158,7 @@ class HistoryRecordingStateChangeObserverTest :
         assertEquals(
             HistoryRecordingStateChangeEvent(
                 HistoryRecordingStateChangeEventType.START,
-                NavigationSessionState.FreeDrive::class
+                HistoryRecordingSessionState.FreeDrive::class
             ),
             eventsChannel.receive()
         )
@@ -168,19 +168,19 @@ class HistoryRecordingStateChangeObserverTest :
             listOf(
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.STOP,
-                    NavigationSessionState.FreeDrive::class
+                    HistoryRecordingSessionState.FreeDrive::class
                 ),
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.START,
-                    NavigationSessionState.ActiveGuidance::class
+                    HistoryRecordingSessionState.ActiveGuidance::class
                 ),
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.CANCEL,
-                    NavigationSessionState.ActiveGuidance::class
+                    HistoryRecordingSessionState.ActiveGuidance::class
                 ),
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.START,
-                    NavigationSessionState.FreeDrive::class
+                    HistoryRecordingSessionState.FreeDrive::class
                 ),
             ),
             eventsChannel.receive(4)
@@ -189,7 +189,7 @@ class HistoryRecordingStateChangeObserverTest :
         assertEquals(
             HistoryRecordingStateChangeEvent(
                 HistoryRecordingStateChangeEventType.STOP,
-                NavigationSessionState.FreeDrive::class
+                HistoryRecordingSessionState.FreeDrive::class
             ),
             eventsChannel.receive()
         )
@@ -225,15 +225,15 @@ class HistoryRecordingStateChangeObserverTest :
             listOf(
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.START,
-                    NavigationSessionState.FreeDrive::class
+                    HistoryRecordingSessionState.FreeDrive::class
                 ),
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.STOP,
-                    NavigationSessionState.FreeDrive::class
+                    HistoryRecordingSessionState.FreeDrive::class
                 ),
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.START,
-                    NavigationSessionState.ActiveGuidance::class
+                    HistoryRecordingSessionState.ActiveGuidance::class
                 ),
             ),
             eventsChannel.receive(3)
@@ -247,7 +247,7 @@ class HistoryRecordingStateChangeObserverTest :
         assertEquals(
             HistoryRecordingStateChangeEvent(
                 HistoryRecordingStateChangeEventType.STOP,
-                NavigationSessionState.ActiveGuidance::class
+                HistoryRecordingSessionState.ActiveGuidance::class
             ),
             eventsChannel.receive()
         )
@@ -273,15 +273,15 @@ class HistoryRecordingStateChangeObserverTest :
             listOf(
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.START,
-                    NavigationSessionState.FreeDrive::class
+                    HistoryRecordingSessionState.FreeDrive::class
                 ),
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.STOP,
-                    NavigationSessionState.FreeDrive::class
+                    HistoryRecordingSessionState.FreeDrive::class
                 ),
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.START,
-                    NavigationSessionState.ActiveGuidance::class
+                    HistoryRecordingSessionState.ActiveGuidance::class
                 ),
             ),
             eventsChannel.receive(3)
@@ -296,7 +296,7 @@ class HistoryRecordingStateChangeObserverTest :
         assertEquals(
             HistoryRecordingStateChangeEvent(
                 HistoryRecordingStateChangeEventType.STOP,
-                NavigationSessionState.ActiveGuidance::class
+                HistoryRecordingSessionState.ActiveGuidance::class
             ),
             eventsChannel.receive()
         )
@@ -382,7 +382,7 @@ class HistoryRecordingStateChangeObserverTest :
     ) {
         val observer = object : HistoryRecordingStateChangeObserver {
 
-            override fun onShouldStartRecording(state: NavigationSessionState) {
+            override fun onShouldStartRecording(state: HistoryRecordingSessionState) {
                 eventsChannel.trySend(
                     HistoryRecordingStateChangeEvent(
                         HistoryRecordingStateChangeEventType.START,
@@ -391,7 +391,7 @@ class HistoryRecordingStateChangeObserverTest :
                 )
             }
 
-            override fun onShouldStopRecording(state: NavigationSessionState) {
+            override fun onShouldStopRecording(state: HistoryRecordingSessionState) {
                 eventsChannel.trySend(
                     HistoryRecordingStateChangeEvent(
                         HistoryRecordingStateChangeEventType.STOP,
@@ -400,7 +400,7 @@ class HistoryRecordingStateChangeObserverTest :
                 )
             }
 
-            override fun onShouldCancelRecording(state: NavigationSessionState) {
+            override fun onShouldCancelRecording(state: HistoryRecordingSessionState) {
                 eventsChannel.trySend(
                     HistoryRecordingStateChangeEvent(
                         HistoryRecordingStateChangeEventType.CANCEL,
@@ -416,22 +416,22 @@ class HistoryRecordingStateChangeObserverTest :
         routes: List<NavigationRoute>
     ) = suspendCancellableCoroutine<String?> { continuation ->
         val observer = object : HistoryRecordingStateChangeObserver {
-            override fun onShouldStartRecording(state: NavigationSessionState) {
+            override fun onShouldStartRecording(state: HistoryRecordingSessionState) {
                 mapboxNavigation.historyRecorder.startRecording()
             }
 
-            override fun onShouldStopRecording(state: NavigationSessionState) {
+            override fun onShouldStopRecording(state: HistoryRecordingSessionState) {
                 mapboxNavigation.historyRecorder.stopRecording { filePath ->
-                    if (state is NavigationSessionState.ActiveGuidance) {
+                    if (state is HistoryRecordingSessionState.ActiveGuidance) {
                         mapboxNavigation.unregisterHistoryRecordingStateChangeObserver(this)
                         continuation.resume(filePath)
                     }
                 }
             }
 
-            override fun onShouldCancelRecording(state: NavigationSessionState) {
+            override fun onShouldCancelRecording(state: HistoryRecordingSessionState) {
                 mapboxNavigation.historyRecorder.stopRecording {
-                    if (state is NavigationSessionState.ActiveGuidance) {
+                    if (state is HistoryRecordingSessionState.ActiveGuidance) {
                         mapboxNavigation.unregisterHistoryRecordingStateChangeObserver(this)
                         continuation.resume(null)
                     }
@@ -449,7 +449,7 @@ class HistoryRecordingStateChangeObserverTest :
 
 data class HistoryRecordingStateChangeEvent(
     val type: HistoryRecordingStateChangeEventType,
-    val state: KClass<out NavigationSessionState>,
+    val state: KClass<out HistoryRecordingSessionState>,
 ) {
 
     override fun toString(): String {
