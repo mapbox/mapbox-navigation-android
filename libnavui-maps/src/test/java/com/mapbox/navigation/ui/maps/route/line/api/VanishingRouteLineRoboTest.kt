@@ -107,7 +107,7 @@ class VanishingRouteLineRoboTest {
         vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
         val segments: List<RouteLineExpressionData> =
             MapboxRouteLineUtils.calculateRouteLineSegments(
-                route.directionsRoute,
+                route,
                 listOf(),
                 true,
                 colorResources
@@ -194,7 +194,7 @@ class VanishingRouteLineRoboTest {
         vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
         val segments: List<RouteLineExpressionData> =
             MapboxRouteLineUtils.calculateRouteLineSegments(
-                route.directionsRoute,
+                route,
                 listOf(),
                 true,
                 colorResources
@@ -241,7 +241,7 @@ class VanishingRouteLineRoboTest {
         vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
         val segments: List<RouteLineExpressionData> =
             MapboxRouteLineUtils.calculateRouteLineSegments(
-                route.directionsRoute,
+                route,
                 listOf(),
                 true,
                 colorResources

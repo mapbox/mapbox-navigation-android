@@ -1261,20 +1261,6 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final Throwable? throwable;
   }
 
-  public final class RouteLineExpressionData {
-    ctor public RouteLineExpressionData(double offset, @ColorInt int segmentColor, int legIndex);
-    method public double component1();
-    method public int component2();
-    method public int component3();
-    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData copy(double offset, @ColorInt int segmentColor, int legIndex);
-    method public int getLegIndex();
-    method public double getOffset();
-    method public int getSegmentColor();
-    property public final int legIndex;
-    property public final double offset;
-    property public final int segmentColor;
-  }
-
   public fun interface RouteLineExpressionProvider {
     method public com.mapbox.maps.extension.style.expressions.generated.Expression generateExpression();
   }

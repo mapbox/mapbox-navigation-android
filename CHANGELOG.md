@@ -5,6 +5,8 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Improved precision of congestion visualization and independent leg styling transitions, especially for long routes. [#6476](https://github.com/mapbox/mapbox-navigation-android/pull/6476)
+- Fixed an issue with congestion visualization on the route line that occurred during route refreshes. [#6476](https://github.com/mapbox/mapbox-navigation-android/pull/6476)
 
 ## Mapbox Navigation SDK 2.9.0-beta.2 - 14 October, 2022
 ### Changelog

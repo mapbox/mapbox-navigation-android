@@ -34,6 +34,7 @@ import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToLineString
 import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.line.model.ExpressionOffsetData
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteRestrictionData
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -68,9 +69,9 @@ internal object MapboxRouteLineUtils {
     internal const val VANISH_POINT_STOP_GAP = .00000000001
     private const val NUMBER_OF_SUPPORTED_ROUTES = 3
 
-    private val extractRouteDataCache: LruCache<
+    internal val extractRouteDataCache: LruCache<
         CacheResultUtils.CacheResultKey2<
-            DirectionsRoute, (RouteLeg) -> List<String>?,
+            NavigationRoute, (RouteLeg) -> List<String>?,
             List<ExtractedRouteData>
             >,
         List<ExtractedRouteData>> by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
@@ -153,7 +154,9 @@ internal object MapboxRouteLineUtils {
         getFilteredRouteLineExpressionData(
             distanceOffset,
             routeLineExpressionData,
-            lineColor
+            defaultObjectCreator = {
+                RouteLineExpressionData(distanceOffset, lineColor, 0)
+            }
         ).forEach {
             // If the color hasn't changed there's no reason to add it to the expression. A smaller
             // expression is less work for the map to process.
@@ -193,7 +196,9 @@ internal object MapboxRouteLineUtils {
         val filteredItems = getFilteredRouteLineExpressionData(
             distanceOffset,
             routeLineExpressionData,
-            lineColor
+            defaultObjectCreator = {
+                RouteLineExpressionData(distanceOffset, lineColor, 0)
+            }
         )
         filteredItems.forEachIndexed { index, expressionData ->
             if (index == 0) {
@@ -216,21 +221,26 @@ internal object MapboxRouteLineUtils {
                     color(expressionData.segmentColor)
                 }
             } else {
-                val stopGapOffset = expressionData.offset - softGradientStopGap
-                val stopGapOffsetToUse = if (stopGapOffset > filteredItems[index - 1].offset) {
-                    stopGapOffset
-                } else {
-                    filteredItems[index - 1].offset + vanishPointStopGap
-                }
+                // ignoring offset points that are at the end of a route
+                // as that would create a gradient slope towards the last point of the route
+                // which is not necessary
+                if (expressionData.offset < 1.0) {
+                    val stopGapOffset = expressionData.offset - softGradientStopGap
+                    val stopGapOffsetToUse = if (stopGapOffset > filteredItems[index - 1].offset) {
+                        stopGapOffset
+                    } else {
+                        filteredItems[index - 1].offset + vanishPointStopGap
+                    }
 
-                expressionBuilder.stop {
-                    literal(stopGapOffsetToUse)
-                    color(filteredItems[index - 1].segmentColor)
-                }
+                    expressionBuilder.stop {
+                        literal(stopGapOffsetToUse)
+                        color(filteredItems[index - 1].segmentColor)
+                    }
 
-                expressionBuilder.stop {
-                    literal(expressionData.offset)
-                    color(expressionData.segmentColor)
+                    expressionBuilder.stop {
+                        literal(expressionData.offset)
+                        color(expressionData.segmentColor)
+                    }
                 }
             }
         }
@@ -274,7 +284,9 @@ internal object MapboxRouteLineUtils {
         getFilteredRouteLineExpressionData(
             distanceOffset,
             routeLineExpressionData,
-            defaultColor
+            defaultObjectCreator = {
+                RouteLineExpressionData(distanceOffset, defaultColor, 0)
+            }
         ).forEach {
             val colorToUse = if (activeLegIndex >= 0 && it.legIndex != activeLegIndex) {
                 substitutionColor
@@ -323,55 +335,26 @@ internal object MapboxRouteLineUtils {
         return expressionBuilder.build()
     }
 
-    internal fun getFilteredRouteLineExpressionData(
-        distanceOffset: Double,
-        routeLineExpressionData: List<RouteLineExpressionData>,
-        lineBaseColor: Int
-    ): List<RouteLineExpressionData> {
-        val filteredItems = routeLineExpressionData
-            .filter { it.offset > distanceOffset }.distinctBy { it.offset }
-        return when (filteredItems.isEmpty()) {
-            true -> when (routeLineExpressionData.isEmpty()) {
-                true -> listOf(RouteLineExpressionData(distanceOffset, lineBaseColor, 0))
-                false -> listOf(routeLineExpressionData.last().copy(offset = distanceOffset))
-            }
-            false -> {
-                val firstItemIndex = routeLineExpressionData.indexOf(filteredItems.first())
-                val fillerItem = if (firstItemIndex == 0) {
-                    routeLineExpressionData[firstItemIndex]
-                } else {
-                    routeLineExpressionData[firstItemIndex - 1]
-                }
-                listOf(fillerItem.copy(offset = distanceOffset)).plus(filteredItems)
-            }
-        }
-    }
-
     /**
      * We're removing all stops before the vanishing offset and then we're also removing all duplicate offsets,
      * however, strictly leaving the last valid offset, not the first valid offset.
      * This is needed to workaround a problem where Direction API injects an intersection in the leg arrival step
-     * that doesn't have a `restricted` road class assigned, even if it is in a restricted area. In such case,
-     * if we were to filter restriction data by distinct first offset, we'd have a gap in the restricted line at the beginning of a leg.
+     * that doesn't have a `restricted` road class assigned, even if it is in a restricted area, or if there are duplicate points in the route.
+     * In such cases, if we were to filter the expression data by distinct first offset, we'd have a gap in the line at the point of the duplication.
      */
-    // todo this has a lot in common with the method above by the same name
-    // find a way to reduce the code duplication
-    private fun getFilteredRestrictedRouteLineExpressionData(
+    internal fun <T : ExpressionOffsetData> getFilteredRouteLineExpressionData(
         distanceOffset: Double,
-        routeLineExpressionData: List<ExtractedRouteRestrictionData>
-    ): List<ExtractedRouteRestrictionData> {
+        routeLineExpressionData: List<T>,
+        defaultObjectCreator: () -> T
+    ): List<T> {
         val filteredItems = routeLineExpressionData.filterIndexed { index, restrictionData ->
             restrictionData.offset > distanceOffset &&
                 restrictionData.offset != routeLineExpressionData.getOrNull(index + 1)?.offset
         }
         return when (filteredItems.isEmpty()) {
             true -> when (routeLineExpressionData.isEmpty()) {
-                true -> listOf(
-                    ExtractedRouteRestrictionData(
-                        distanceOffset
-                    )
-                )
-                false -> listOf(routeLineExpressionData.last().copy(offset = distanceOffset))
+                true -> listOf(defaultObjectCreator())
+                false -> listOf(routeLineExpressionData.last().copyWithNewOffset(distanceOffset))
             }
             false -> {
                 val firstItemIndex = routeLineExpressionData.indexOf(filteredItems.first())
@@ -380,7 +363,7 @@ internal object MapboxRouteLineUtils {
                 } else {
                     routeLineExpressionData[firstItemIndex - 1]
                 }
-                listOf(fillerItem.copy(offset = distanceOffset)).plus(filteredItems)
+                listOf<T>(fillerItem.copyWithNewOffset(distanceOffset)).plus(filteredItems)
             }
         }
     }
@@ -505,7 +488,7 @@ internal object MapboxRouteLineUtils {
      * used to represent the traffic congestion.
      */
     fun calculateRouteLineSegments(
-        route: DirectionsRoute,
+        route: NavigationRoute,
         trafficBackfillRoadClasses: List<String>,
         isPrimaryRoute: Boolean,
         routeLineColorResources: RouteLineColorResources,
@@ -521,7 +504,6 @@ internal object MapboxRouteLineUtils {
             false -> {
                 getRouteLineExpressionDataWithStreetClassOverride(
                     annotationExpressionData,
-                    route.distance(),
                     routeLineColorResources,
                     isPrimaryRoute,
                     trafficBackfillRoadClasses
@@ -547,10 +529,10 @@ internal object MapboxRouteLineUtils {
      * performance reasons.
      */
     internal val extractRouteDataWithTrafficAndRoadClassDeDuped: (
-        route: DirectionsRoute,
+        route: NavigationRoute,
         trafficCongestionProvider: (RouteLeg) -> List<String>?
     ) -> List<ExtractedRouteData> =
-        { route: DirectionsRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
+        { route: NavigationRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
             val extractedRouteDataItems = extractRouteData(
                 route,
                 trafficCongestionProvider
@@ -653,26 +635,22 @@ internal object MapboxRouteLineUtils {
      * are cached for performance reasons.
      */
     internal val extractRouteData: (
-        route: DirectionsRoute,
+        route: NavigationRoute,
         trafficCongestionProvider: (RouteLeg) -> List<String>?
     ) -> List<ExtractedRouteData> =
-        { route: DirectionsRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
-            var runningDistance = 0.0
+        { route: NavigationRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
             val itemsToReturn = mutableListOf<ExtractedRouteData>()
-            route.legs()?.forEachIndexed { legIndex, leg ->
-                val closureRanges = getClosureRanges(leg).asSequence()
-                val roadClassArray = getRoadClassArray(leg.steps())
-                val trafficCongestion = trafficCongestionProvider.invoke(leg)
-                var isLegOrigin = true
+            val granularDistances = granularDistancesProvider(route)
+            if (
+                granularDistances != null &&
+                granularDistances.legsDistances.size == (route.directionsRoute.legs()?.size ?: 0)
+            ) {
+                route.directionsRoute.legs()?.forEachIndexed { legIndex, leg ->
+                    val closureRanges = getClosureRanges(leg).asSequence()
+                    val roadClassArray = getRoadClassArray(leg.steps())
+                    val trafficCongestion = trafficCongestionProvider.invoke(leg)
 
-                leg.annotation()?.distance()?.forEachIndexed { index, distance ->
-                    // If the distance is 0 it offers no value to upstream calculations and in fact
-                    // causes problems in creating the traffic expression since the expression
-                    // values need to be in strictly ascending order. A value of 0 can be caused
-                    // by the first point in a route leg being the same as the last point in the
-                    // previous route leg. There may be other causes as well.
-                    if (distance > 0.0) {
-                        val percentDistanceTraveled = runningDistance / route.distance()
+                    granularDistances.legsDistances[legIndex].forEachIndexed { index, distanceObj ->
                         val isInAClosure = closureRanges.any { it.contains(index) }
                         val congestionValue: String = when {
                             isInAClosure -> RouteLayerConstants.CLOSURE_CONGESTION_VALUE
@@ -684,22 +662,24 @@ internal object MapboxRouteLineUtils {
                         }
                         val roadClass = getRoadClassForIndex(roadClassArray, index)
 
+                        val offset =
+                            1.0 - distanceObj.distanceRemaining / granularDistances.completeDistance
                         itemsToReturn.add(
                             ExtractedRouteData(
-                                runningDistance,
-                                percentDistanceTraveled,
+                                offset,
                                 congestionValue,
                                 roadClass,
                                 legIndex,
-                                isLegOrigin
+                                isLegOrigin = index == 0
                             )
                         )
-                        isLegOrigin = false
-                        runningDistance += distance
                     }
                 }
+            } else {
+                logE(LOG_CATEGORY) {
+                    "Unable to produce route granular distances for '${route.id}'."
+                }
             }
-
             itemsToReturn
         }.cacheResult(extractRouteDataCache)
 
@@ -716,7 +696,7 @@ internal object MapboxRouteLineUtils {
     internal val getRouteLegTrafficCongestionProvider: (RouteLeg) -> List<String> =
         { routeLeg: RouteLeg ->
             routeLeg.annotation()?.congestion() ?: listOf()
-        }.cacheResult(1)
+        }
 
     /**
      * Decodes the route geometry into [RoutePoints].
@@ -749,11 +729,11 @@ internal object MapboxRouteLineUtils {
         }.cacheRouteResult(granularDistancesCache)
 
     internal fun getTrafficCongestionAnnotationProvider(
-        route: DirectionsRoute,
+        route: NavigationRoute,
         routeLineColorResources: RouteLineColorResources
     ): (RouteLeg) -> List<String>? {
         return if (
-            route.routeOptions()
+            route.directionsRoute.routeOptions()
                 ?.annotationsList()
                 ?.contains(DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC) == true
         ) {
@@ -825,7 +805,6 @@ internal object MapboxRouteLineUtils {
      * annotationExpressionData collection and included in the returned data.
      *
      * @param annotationExpressionData the route data to perform the substitution on
-     * @param routeDistance the total distance of the route
      * @param routeLineColorResources provides color values for the route line
      * @param isPrimaryRoute indicates if the route used is the primary route
      * @param trafficOverrideRoadClasses a collection of road classes for which a color
@@ -833,14 +812,12 @@ internal object MapboxRouteLineUtils {
      */
     internal fun getRouteLineExpressionDataWithStreetClassOverride(
         annotationExpressionData: List<ExtractedRouteData>,
-        routeDistance: Double,
         routeLineColorResources: RouteLineColorResources,
         isPrimaryRoute: Boolean,
         trafficOverrideRoadClasses: List<String>
     ): List<RouteLineExpressionData> {
         val expressionDataToReturn = mutableListOf<RouteLineExpressionData>()
         annotationExpressionData.forEachIndexed { index, annotationExpData ->
-            val percentDistanceTraveled = annotationExpData.distanceFromOrigin / routeDistance
             val trafficIdentifier =
                 if (
                     annotationExpData.trafficCongestionIdentifier ==
@@ -861,7 +838,7 @@ internal object MapboxRouteLineUtils {
             if (index == 0 || annotationExpData.isLegOrigin) {
                 expressionDataToReturn.add(
                     RouteLineExpressionData(
-                        percentDistanceTraveled,
+                        annotationExpData.offset,
                         trafficColor,
                         annotationExpData.legIndex
                     )
@@ -869,7 +846,7 @@ internal object MapboxRouteLineUtils {
             } else if (trafficColor != expressionDataToReturn.last().segmentColor) {
                 expressionDataToReturn.add(
                     RouteLineExpressionData(
-                        percentDistanceTraveled,
+                        annotationExpData.offset,
                         trafficColor,
                         annotationExpData.legIndex
                     )
@@ -1453,7 +1430,7 @@ internal object MapboxRouteLineUtils {
     }
 
     internal fun getTrafficLineExpressionProducer(
-        route: DirectionsRoute,
+        route: NavigationRoute,
         colorResources: RouteLineColorResources,
         trafficBackfillRoadClasses: List<String>,
         isPrimaryRoute: Boolean,
@@ -1470,7 +1447,7 @@ internal object MapboxRouteLineUtils {
             colorResources
         )
         if (useSoftGradient) {
-            val stopGap = softGradientTransitionDistance / route.distance()
+            val stopGap = softGradientTransitionDistance / route.directionsRoute.distance()
             getTrafficLineExpressionSoftGradient(
                 vanishingPointOffset,
                 lineStartColor,
@@ -1526,9 +1503,12 @@ internal object MapboxRouteLineUtils {
         expressionBuilder.lineProgress()
         expressionBuilder.color(Color.TRANSPARENT)
 
-        getFilteredRestrictedRouteLineExpressionData(
+        getFilteredRouteLineExpressionData(
             vanishingPointOffset,
-            routeLineExpressionData
+            routeLineExpressionData,
+            defaultObjectCreator = {
+                ExtractedRouteRestrictionData(vanishingPointOffset)
+            }
         ).forEach {
             val colorToUse = if (activeLegIndex >= 0 && it.legIndex != activeLegIndex) {
                 Color.TRANSPARENT
