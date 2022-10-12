@@ -19,6 +19,7 @@ import com.mapbox.navigation.ui.app.internal.showRoutePreview
 import com.mapbox.navigation.ui.app.internal.startActiveNavigation
 import com.mapbox.navigation.ui.app.internal.startArrival
 import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterAction
+import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class MapboxNavigationViewApi(
@@ -99,6 +100,9 @@ internal class MapboxNavigationViewApi(
             store.dispatch(TripSessionStarterAction.EnableTripSession)
         }
     }
+
+    override val currentVoiceInstructionsPlayer
+        get() = MapboxAudioGuidance.getRegisteredInstance().currentVoiceInstructionsPlayer
 
     @Throws(NavigationViewApiError::class)
     private fun checkDestination() {

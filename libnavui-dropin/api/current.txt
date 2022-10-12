@@ -37,6 +37,7 @@ package com.mapbox.navigation.dropin {
 
   @UiThread @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class NavigationViewApi {
     ctor public NavigationViewApi();
+    method public abstract com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer? getCurrentVoiceInstructionsPlayer();
     method public abstract boolean isReplayEnabled();
     method public abstract void routeReplayEnabled(boolean enabled);
     method public abstract com.mapbox.bindgen.Expected<com.mapbox.navigation.dropin.NavigationViewApiError,kotlin.Unit> startActiveGuidance();
@@ -47,6 +48,7 @@ package com.mapbox.navigation.dropin {
     method public abstract void startFreeDrive();
     method public abstract com.mapbox.bindgen.Expected<com.mapbox.navigation.dropin.NavigationViewApiError,kotlin.Unit> startRoutePreview();
     method public abstract com.mapbox.bindgen.Expected<com.mapbox.navigation.dropin.NavigationViewApiError,kotlin.Unit> startRoutePreview(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    property public abstract com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer? currentVoiceInstructionsPlayer;
   }
 
   public final class NavigationViewApiError extends java.lang.Throwable {

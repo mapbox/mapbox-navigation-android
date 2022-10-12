@@ -23,6 +23,7 @@ package com.mapbox.navigation.ui.voice.api {
 
   public final class MapboxAudioGuidance implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
     method public static com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance create();
+    method public com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer? getCurrentVoiceInstructionsPlayer();
     method public static com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance getRegisteredInstance();
     method public void mute();
     method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
@@ -30,6 +31,7 @@ package com.mapbox.navigation.ui.voice.api {
     method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.voice.api.MapboxAudioGuidanceState> stateFlow();
     method public void toggle();
     method public void unmute();
+    property public final com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer? currentVoiceInstructionsPlayer;
     field public static final com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance.Companion Companion;
   }
 

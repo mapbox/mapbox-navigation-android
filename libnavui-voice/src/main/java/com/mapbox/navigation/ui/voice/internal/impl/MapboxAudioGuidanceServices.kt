@@ -11,7 +11,7 @@ import com.mapbox.navigation.ui.voice.internal.MapboxVoiceInstructions
 
 class MapboxAudioGuidanceServices {
 
-    private var voiceInstructionsPlayer: MapboxVoiceInstructionsPlayer? = null
+    var voiceInstructionsPlayer: MapboxVoiceInstructionsPlayer? = null
 
     fun mapboxAudioGuidanceVoice(
         mapboxNavigation: MapboxNavigation,
