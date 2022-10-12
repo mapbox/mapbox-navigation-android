@@ -96,7 +96,6 @@ dependencies {
 
     // Android Auto
     implementation project(':libnavui-androidauto')
-    implementation dependenciesList.mapboxSearchSdk
 
     // test
     androidTestImplementation project(':libtesting-ui')

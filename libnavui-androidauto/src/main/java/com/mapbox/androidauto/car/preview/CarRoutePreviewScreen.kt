@@ -1,7 +1,6 @@
 package com.mapbox.androidauto.car.preview
 
 import android.text.SpannableString
-import androidx.activity.OnBackPressedCallback
 import androidx.annotation.UiThread
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
@@ -13,10 +12,7 @@ import androidx.car.app.model.Template
 import androidx.car.app.navigation.model.RoutePreviewNavigationTemplate
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.mapbox.androidauto.ActiveGuidanceState
-import com.mapbox.androidauto.MapboxCarApp
 import com.mapbox.androidauto.R
-import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.car.location.CarLocationRenderer
 import com.mapbox.androidauto.car.navigation.CarCameraMode
@@ -25,10 +21,13 @@ import com.mapbox.androidauto.car.navigation.CarNavigationCamera
 import com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil
 import com.mapbox.androidauto.car.search.PlaceRecord
+import com.mapbox.androidauto.internal.car.extensions.addBackPressedHandler
 import com.mapbox.androidauto.internal.car.extensions.handleStyleOnAttached
 import com.mapbox.androidauto.internal.car.extensions.handleStyleOnDetached
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.navigation.audioguidance.muteAudioGuidance
+import com.mapbox.androidauto.screenmanager.MapboxScreen
+import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.MapboxExperimental
@@ -42,8 +41,8 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
  * After a destination has been selected. This view previews the route and lets
  * you select alternatives. From here, you can start turn-by-turn navigation.
  */
-@MapboxExperimental
-class CarRoutePreviewScreen @UiThread constructor(
+@OptIn(MapboxExperimental::class)
+internal class CarRoutePreviewScreen @UiThread constructor(
     private val routePreviewCarContext: RoutePreviewCarContext,
     private val placeRecord: PlaceRecord,
     private val navigationRoutes: List<NavigationRoute>,
@@ -54,21 +53,14 @@ class CarRoutePreviewScreen @UiThread constructor(
     private var selectedIndex = 0
     private val carRouteLine = CarRouteLine(carRoutesProvider)
     private val carLocationRenderer = CarLocationRenderer()
-    private val carSpeedLimitRenderer = CarSpeedLimitRenderer(routePreviewCarContext.mainCarContext)
+    private val carSpeedLimitRenderer = CarSpeedLimitRenderer(
+        routePreviewCarContext.mapboxCarContext
+    )
     private val carNavigationCamera = CarNavigationCamera(
         initialCarCameraMode = CarCameraMode.OVERVIEW,
         alternativeCarCameraMode = CarCameraMode.FOLLOWING,
         carRoutesProvider = carRoutesProvider,
     )
-
-    private val backPressCallback = object : OnBackPressedCallback(true) {
-
-        override fun handleOnBackPressed() {
-            logAndroidAuto("CarRoutePreviewScreen OnBackPressedCallback")
-            MapboxNavigationApp.current()!!.setNavigationRoutes(emptyList())
-            screenManager.pop()
-        }
-    }
 
     private var styleLoadedListener: OnStyleLoadedListener? = null
 
@@ -103,14 +95,15 @@ class CarRoutePreviewScreen @UiThread constructor(
 
     init {
         logAndroidAuto("CarRoutePreviewScreen constructor")
+        addBackPressedHandler {
+            logAndroidAuto("CarRoutePreviewScreen onBackPressed")
+            routePreviewCarContext.mapboxScreenManager.goBack()
+        }
         lifecycle.muteAudioGuidance()
         lifecycle.addObserver(object : DefaultLifecycleObserver {
 
             override fun onResume(owner: LifecycleOwner) {
                 logAndroidAuto("CarRoutePreviewScreen onResume")
-                routePreviewCarContext.carContext.onBackPressedDispatcher.addCallback(
-                    backPressCallback
-                )
                 routePreviewCarContext.mapboxCarMap.registerObserver(carLocationRenderer)
                 routePreviewCarContext.mapboxCarMap.registerObserver(carSpeedLimitRenderer)
                 routePreviewCarContext.mapboxCarMap.registerObserver(carNavigationCamera)
@@ -120,7 +113,6 @@ class CarRoutePreviewScreen @UiThread constructor(
 
             override fun onPause(owner: LifecycleOwner) {
                 logAndroidAuto("CarRoutePreviewScreen onPause")
-                backPressCallback.remove()
                 routePreviewCarContext.mapboxCarMap.unregisterObserver(carLocationRenderer)
                 routePreviewCarContext.mapboxCarMap.unregisterObserver(carSpeedLimitRenderer)
                 routePreviewCarContext.mapboxCarMap.unregisterObserver(carNavigationCamera)
@@ -174,10 +166,7 @@ class CarRoutePreviewScreen @UiThread constructor(
                 ActionStrip.Builder()
                     .addAction(
                         CarFeedbackAction(
-                            routePreviewCarContext.mapboxCarMap,
-                            CarFeedbackSender(),
-                            routePreviewCarContext.feedbackPollProvider
-                                .getRoutePreviewFeedbackPoll(routePreviewCarContext.carContext),
+                            MapboxScreen.ROUTE_PREVIEW_FEEDBACK
                         ).getAction(this@CarRoutePreviewScreen)
                     )
                     .build()
@@ -187,11 +176,10 @@ class CarRoutePreviewScreen @UiThread constructor(
                 Action.Builder()
                     .setTitle(carContext.getString(R.string.car_action_preview_navigate_button))
                     .setOnClickListener {
-                        val mapboxNavigation = MapboxNavigationApp.current()!!
-                        mapboxNavigation.setNavigationRoutes(
+                        MapboxNavigationApp.current()!!.setNavigationRoutes(
                             carRoutesProvider.navigationRoutes.value
                         )
-                        MapboxCarApp.updateCarAppState(ActiveGuidanceState)
+                        MapboxScreenManager.replaceTop(MapboxScreen.ACTIVE_GUIDANCE)
                     }
                     .build(),
             )

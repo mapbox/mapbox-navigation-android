@@ -1,12 +1,12 @@
 package com.mapbox.androidauto.car.preview
 
-import com.mapbox.androidauto.car.MainCarContext
+import com.mapbox.androidauto.car.MapboxCarContext
 
 data class RoutePreviewCarContext internal constructor(
-    val mainCarContext: MainCarContext
+    val mapboxCarContext: MapboxCarContext
 ) {
-    /** MainCarContext **/
-    val carContext = mainCarContext.carContext
-    val mapboxCarMap = mainCarContext.mapboxCarMap
-    val feedbackPollProvider = mainCarContext.feedbackPollProvider
+    /** MapboxCarContext **/
+    val carContext = mapboxCarContext.carContext
+    val mapboxCarMap = mapboxCarContext.mapboxCarMap
+    val mapboxScreenManager = mapboxCarContext.mapboxScreenManager
 }

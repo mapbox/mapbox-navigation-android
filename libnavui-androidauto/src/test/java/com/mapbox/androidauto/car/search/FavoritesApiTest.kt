@@ -1,5 +1,6 @@
 package com.mapbox.androidauto.car.search
 
+import com.mapbox.androidauto.internal.car.search.FavoritesApi
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.search.CompletionCallback
@@ -47,7 +48,8 @@ class FavoritesApiTest {
             }
         }
 
-        val result = FavoritesApi(mockFavoritesProvider).getPlaces().value
+        val result = FavoritesApi(mockFavoritesProvider)
+            .getPlaces().value
 
         assertEquals("id", result!!.first().id)
         assertEquals("name", result.first().name)
@@ -66,7 +68,8 @@ class FavoritesApiTest {
             }
         }
 
-        val result = FavoritesApi(mockFavoritesProvider).getFavorites().value!!
+        val result = FavoritesApi(mockFavoritesProvider)
+            .getFavorites().value!!
 
         assertEquals(expectedItemList, result)
     }
@@ -100,7 +103,8 @@ class FavoritesApiTest {
             }
         }
 
-        val result = FavoritesApi(mockFavoritesProvider).getFavorites().error
+        val result = FavoritesApi(mockFavoritesProvider)
+            .getFavorites().error
 
         assertEquals("Exception Message", result!!.errorMessage)
     }
@@ -116,7 +120,8 @@ class FavoritesApiTest {
             }
         }
 
-        val result = FavoritesApi(mockFavoritesProvider).addFavorite(expected)
+        val result = FavoritesApi(mockFavoritesProvider)
+            .addFavorite(expected)
 
         assertEquals(expected, result.value)
     }
@@ -151,7 +156,8 @@ class FavoritesApiTest {
             }
         }
 
-        val result = FavoritesApi(mockFavoritesProvider).removeFavorite("foobar")
+        val result = FavoritesApi(mockFavoritesProvider)
+            .removeFavorite("foobar")
 
         assertTrue(result.value!!)
     }

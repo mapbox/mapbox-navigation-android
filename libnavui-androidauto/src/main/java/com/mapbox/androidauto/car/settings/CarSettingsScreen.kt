@@ -8,15 +8,21 @@ import androidx.car.app.model.Row
 import androidx.car.app.model.Template
 import androidx.car.app.model.Toggle
 import com.mapbox.androidauto.R
+import com.mapbox.androidauto.car.MapboxCarContext
+import com.mapbox.androidauto.internal.car.extensions.addBackPressedHandler
 
 /**
  * Handle the android auto car app settings.
  */
 class CarSettingsScreen(
-    private val settingsCarContext: SettingsCarContext
-) : Screen(settingsCarContext.carContext) {
+    private val mapboxCarContext: MapboxCarContext
+) : Screen(mapboxCarContext.carContext) {
 
-    private val carSettingsStorage = settingsCarContext.carSettingsStorage
+    init {
+        addBackPressedHandler {
+            mapboxCarContext.mapboxScreenManager.goBack()
+        }
+    }
 
     override fun onGetTemplate(): Template {
         val templateBuilder = ListTemplate.Builder().setSingleList(
@@ -36,14 +42,14 @@ class CarSettingsScreen(
     }
 
     private fun buildRowToggle(labelResource: Int, prefKeyResource: Int): Row {
-        val storage = settingsCarContext.carSettingsStorage
+        val storage = mapboxCarContext.carSettingsStorage
         val label = carContext.getString(labelResource)
         val key = carContext.getString(prefKeyResource)
         return Row.Builder()
             .setTitle(label)
             .setToggle(
                 Toggle.Builder { value ->
-                    carSettingsStorage.writeSharedPref(key, value)
+                    mapboxCarContext.carSettingsStorage.writeSharedPref(key, value)
                 }
                     .setChecked(storage.readSharedPref(key, false))
                     .build()

@@ -23,7 +23,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
  * This is a view interface. Each callback function represents a view that will be
  * shown for the situations.
  */
-interface CarRouteRequestCallback {
+interface CarRoutePreviewRequestCallback {
     fun onRoutesReady(placeRecord: PlaceRecord, routes: List<NavigationRoute>)
     fun onUnknownCurrentLocation()
     fun onDestinationLocationUnknown()
@@ -33,18 +33,23 @@ interface CarRouteRequestCallback {
 /**
  * Service class that requests routes for the preview screen.
  */
-class CarRouteRequest(
+class CarRoutePreviewRequest internal constructor(
     private val routeOptionsInterceptor: CarRouteOptionsInterceptor,
 ) : MapboxNavigationObserver {
     private var currentRequestId: Long? = null
     private var mapboxNavigation: MapboxNavigation? = null
 
+    var repository: CarRoutePreviewRepository? = null
+        private set
+
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        repository = CarRoutePreviewRepository()
         this.mapboxNavigation = mapboxNavigation
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         cancelRequest()
+        repository = null
         this.mapboxNavigation = null
     }
 
@@ -52,7 +57,7 @@ class CarRouteRequest(
      * When a search result was selected, request a route.
      */
     @UiThread
-    fun request(placeRecord: PlaceRecord, callback: CarRouteRequestCallback) {
+    fun request(placeRecord: PlaceRecord, callback: CarRoutePreviewRequestCallback) {
         val mapboxNavigation = this.mapboxNavigation
         if (mapboxNavigation == null) {
             callback.onNoRoutesFound()
@@ -63,7 +68,7 @@ class CarRouteRequest(
         val carAppLocation = MapboxNavigationApp.getObserver(CarAppLocation::class)
         val location = carAppLocation.navigationLocationProvider.lastLocation
         if (location == null) {
-            logAndroidAutoFailure("CarRouteRequest.onUnknownCurrentLocation")
+            logAndroidAutoFailure("CarRoutePreview.onUnknownCurrentLocation")
             callback.onUnknownCurrentLocation()
             return
         }
@@ -71,7 +76,7 @@ class CarRouteRequest(
 
         when (placeRecord.coordinate) {
             null -> {
-                logAndroidAutoFailure("CarRouteRequest.onDestinationLocationUnknown")
+                logAndroidAutoFailure("CarRoutePreview.onDestinationLocationUnknown")
                 callback.onDestinationLocationUnknown()
             }
             else -> {
@@ -113,31 +118,32 @@ class CarRouteRequest(
 
     /**
      * This creates a callback that transforms
-     * [RouterCallback] into [CarRouteRequestCallback]
+     * [RouterCallback] into [CarRoutePreviewRequestCallback]
      */
     private fun carCallbackTransformer(
-        searchResult: PlaceRecord,
-        callback: CarRouteRequestCallback
+        placeRecord: PlaceRecord,
+        callback: CarRoutePreviewRequestCallback
     ): NavigationRouterCallback {
         return object : NavigationRouterCallback {
             override fun onRoutesReady(routes: List<NavigationRoute>, routerOrigin: RouterOrigin) {
                 currentRequestId = null
 
-                logAndroidAuto("onRoutesReady ${routes.size}")
-                callback.onRoutesReady(searchResult, routes)
+                logAndroidAuto("CarRoutePreview.onRoutesReady ${routes.size}")
+                repository?.setRoutePreview(placeRecord, routes)
+                callback.onRoutesReady(placeRecord, routes)
             }
 
             override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
                 currentRequestId = null
 
-                logAndroidAutoFailure("onCanceled $routeOptions")
+                logAndroidAutoFailure("CarRoutePreview.onRequestCanceled $routeOptions")
                 callback.onNoRoutesFound()
             }
 
             override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
                 currentRequestId = null
 
-                logAndroidAutoFailure("onRoutesRequestFailure $routeOptions $reasons")
+                logAndroidAutoFailure("CarRoutePreview.onFailure $routeOptions $reasons")
                 callback.onNoRoutesFound()
             }
         }

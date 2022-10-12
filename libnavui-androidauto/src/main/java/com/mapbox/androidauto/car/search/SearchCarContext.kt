@@ -1,7 +1,6 @@
 package com.mapbox.androidauto.car.search
 
-import com.mapbox.androidauto.car.MainCarContext
-import com.mapbox.androidauto.car.preview.CarRouteRequest
+import com.mapbox.androidauto.car.MapboxCarContext
 import com.mapbox.androidauto.internal.car.search.CarPlaceSearch
 import com.mapbox.androidauto.internal.car.search.CarPlaceSearchImpl
 import com.mapbox.androidauto.internal.car.search.CarSearchLocationProvider
@@ -9,18 +8,18 @@ import com.mapbox.androidauto.internal.car.search.CarSearchLocationProvider
 /**
  * Contains the dependencies for the search feature.
  */
-class SearchCarContext(
-    val mainCarContext: MainCarContext,
+internal class SearchCarContext(
+    val mapboxCarContext: MapboxCarContext,
 ) {
-    /** MainCarContext **/
-    val carContext = mainCarContext.carContext
-    val feedbackPollProvider = mainCarContext.feedbackPollProvider
+    /** MapboxCarContext **/
+    val carContext = mapboxCarContext.carContext
+    val mapboxScreenManager = mapboxCarContext.mapboxScreenManager
 
     /** SearchCarContext **/
-    val mapboxCarMap = mainCarContext.mapboxCarMap
-    val carRouteRequest = CarRouteRequest(mainCarContext.routeOptionsInterceptor)
-    internal val carPlaceSearch: CarPlaceSearch = CarPlaceSearchImpl(
-        mainCarContext.carPlaceSearchOptions,
+    val mapboxCarMap = mapboxCarContext.mapboxCarMap
+    val carRoutePreviewRequest = mapboxCarContext.carRoutePreviewRequest
+    val carPlaceSearch: CarPlaceSearch = CarPlaceSearchImpl(
+        mapboxCarContext.carPlaceSearchOptions,
         CarSearchLocationProvider()
     )
 }

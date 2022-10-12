@@ -1,4 +1,4 @@
-@file:JvmName("MapboxNavigationExtensionsEx")
+@file:JvmName("MapboxNavigationEx")
 
 package com.mapbox.androidauto.internal.car.extensions
 

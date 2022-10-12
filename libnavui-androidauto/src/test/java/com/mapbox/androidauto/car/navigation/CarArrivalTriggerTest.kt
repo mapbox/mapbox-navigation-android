@@ -1,7 +1,7 @@
 package com.mapbox.androidauto.car.navigation
 
-import com.mapbox.androidauto.ArrivalState
-import com.mapbox.androidauto.MapboxCarApp
+import com.mapbox.androidauto.screenmanager.MapboxScreen
+import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -27,7 +27,7 @@ class CarArrivalTriggerTest {
 
     @Before
     fun setup() {
-        mockkObject(MapboxCarApp)
+        mockkObject(MapboxScreenManager)
     }
 
     @After
@@ -45,7 +45,7 @@ class CarArrivalTriggerTest {
         sut.onAttached(mapboxNavigation)
         observerSlot.captured.onFinalDestinationArrival(mockk())
 
-        verify { MapboxCarApp.updateCarAppState(ArrivalState) }
+        verify { MapboxScreenManager.replaceTop(MapboxScreen.ARRIVAL) }
     }
 
     @Test

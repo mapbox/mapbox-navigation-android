@@ -30,7 +30,8 @@ class GeoDeeplinkPlacesListOnMapProviderTest {
     fun cancel() {
         val geoDeeplinkGeocoding = mockk<GeoDeeplinkGeocoding>(relaxed = true)
         val geoDeeplink = mockk<GeoDeeplink>()
-        GeoDeeplinkPlacesListOnMapProvider(geoDeeplinkGeocoding, geoDeeplink).cancel()
+        GeoDeeplinkPlacesListOnMapProvider(geoDeeplinkGeocoding, geoDeeplink)
+            .cancel()
 
         verify { geoDeeplinkGeocoding.cancel() }
     }

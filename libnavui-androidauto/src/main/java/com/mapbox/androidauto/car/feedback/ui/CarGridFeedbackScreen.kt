@@ -1,8 +1,6 @@
 package com.mapbox.androidauto.car.feedback.ui
 
-import androidx.activity.OnBackPressedCallback
 import androidx.annotation.UiThread
-import androidx.car.app.CarContext
 import androidx.car.app.CarToast
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
@@ -10,52 +8,33 @@ import androidx.car.app.model.GridItem
 import androidx.car.app.model.GridTemplate
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.Template
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import com.mapbox.androidauto.R
-import com.mapbox.androidauto.car.feedback.core.CarFeedbackSearchOptions
+import com.mapbox.androidauto.car.MapboxCarContext
 import com.mapbox.androidauto.car.feedback.core.CarFeedbackSender
-import com.mapbox.androidauto.internal.logAndroidAuto
+import com.mapbox.androidauto.internal.car.extensions.addBackPressedHandler
 
 /**
  * This screen allows the user to search for a destination.
  */
-class CarGridFeedbackScreen @UiThread constructor(
-    carContext: CarContext,
+internal abstract class CarGridFeedbackScreen @UiThread constructor(
+    mapboxCarContext: MapboxCarContext,
     private val sourceScreenSimpleName: String,
     private val carFeedbackSender: CarFeedbackSender,
     initialPoll: CarFeedbackPoll,
     private val encodedSnapshot: String?,
-    private val searchOptions: CarFeedbackSearchOptions = CarFeedbackSearchOptions(),
-    private val onFinish: () -> Unit,
-) : Screen(carContext) {
+) : Screen(mapboxCarContext.carContext) {
 
     private var currentPoll = initialPoll
-    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
-
-        override fun handleOnBackPressed() {
-            onFinish()
-        }
-    }
 
     private val iconDownloader = CarFeedbackIconDownloader(screen = this)
 
     init {
-        logAndroidAuto("FeedbackScreen constructor")
-        lifecycle.addObserver(
-            object : DefaultLifecycleObserver {
-                override fun onResume(owner: LifecycleOwner) {
-                    logAndroidAuto("FeedbackScreen onResume")
-                    carContext.onBackPressedDispatcher.addCallback(onBackPressedCallback)
-                }
-
-                override fun onPause(owner: LifecycleOwner) {
-                    logAndroidAuto("FeedbackScreen onPause")
-                    onBackPressedCallback.remove()
-                }
-            },
-        )
+        addBackPressedHandler {
+            onFinish()
+        }
     }
+
+    abstract fun onFinish()
 
     override fun onGetTemplate(): Template {
         return GridTemplate.Builder()
@@ -84,10 +63,11 @@ class CarGridFeedbackScreen @UiThread constructor(
     private fun selectOption(option: CarFeedbackOption) {
         if (option.nextPoll == null) {
             val selectedItem = CarFeedbackItem(
-                option.title, option.type, option.subType,
-                option.searchFeedbackReason, option.favoritesFeedbackReason,
-                searchOptions.geoDeeplink, searchOptions.geocodingResponse,
-                searchOptions.favoriteRecords, searchOptions.searchSuggestions,
+                option.title,
+                option.type,
+                option.subType,
+                option.searchFeedbackReason,
+                option.favoritesFeedbackReason,
             )
             carFeedbackSender.send(selectedItem, encodedSnapshot, sourceScreenSimpleName)
             CarToast.makeText(

@@ -9,7 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.androidauto.R
-import com.mapbox.androidauto.car.MainActionStrip
+import com.mapbox.androidauto.car.FreeDriveActionStrip
 import com.mapbox.androidauto.car.action.MapboxActionProvider
 import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
 import kotlinx.coroutines.flow.collect
@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 
 /**
  * We're still deciding on a pattern here.
- * Another similar class is [MainActionStrip].
+ * Another similar class is [FreeDriveActionStrip].
  *
  * This class creates an action for enabling and disabling audio guidance.
  */
