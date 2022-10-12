@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.core.trip.session.NavigationSessionState
+import com.mapbox.navigation.core.internal.HistoryRecordingSessionState
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -14,7 +14,7 @@ class NavigationComponentProviderTest {
     fun `create DeveloperMetadataAggregator`() {
         val id = "123-123"
         val historyRecordingStateHandler = mockk<HistoryRecordingStateHandler>(relaxed = true) {
-            every { currentCopilotSession() } returns NavigationSessionState.FreeDrive(id)
+            every { currentCopilotSession() } returns HistoryRecordingSessionState.FreeDrive(id)
         }
         val observer = mockk<DeveloperMetadataObserver>(relaxed = true)
 

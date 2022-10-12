@@ -1,7 +1,6 @@
 package com.mapbox.navigation.core.internal
 
 import androidx.annotation.UiThread
-import com.mapbox.navigation.core.trip.session.NavigationSessionState
 
 /**
  * Interface definition for an observer that gets notified whenever
@@ -14,14 +13,14 @@ interface HistoryRecordingStateChangeObserver {
     /**
      * Invoked when history recording should be started:
      * ```kotlin
-     * override fun onShouldStartRecording(state: NavigationSessionState) {
+     * override fun onShouldStartRecording(state: HistoryRecordingSessionState) {
      *     mapboxNavigation.historyRecorder.startRecording()
      * }
      * ```
      *
      * @param state session that should be recorded.
      */
-    fun onShouldStartRecording(state: NavigationSessionState)
+    fun onShouldStartRecording(state: HistoryRecordingSessionState)
 
     /**
      * Invoked when history recording should be stopped. Meaning that the session was valid
@@ -36,7 +35,7 @@ interface HistoryRecordingStateChangeObserver {
      *
      * @param state session for which the recording should be stopped.
      */
-    fun onShouldStopRecording(state: NavigationSessionState)
+    fun onShouldStopRecording(state: HistoryRecordingSessionState)
 
     /**
      * Invoked when history recording should be cancelled. Meaning that the session was empty
@@ -53,5 +52,5 @@ interface HistoryRecordingStateChangeObserver {
      *
      * @param state session for which the recording should be cancelled.
      */
-    fun onShouldCancelRecording(state: NavigationSessionState)
+    fun onShouldCancelRecording(state: HistoryRecordingSessionState)
 }
