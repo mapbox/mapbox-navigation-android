@@ -7,6 +7,7 @@ package com.mapbox.navigation.core {
     method public com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata? getAlternativeMetadataFor(com.mapbox.navigation.base.route.NavigationRoute navigationRoute);
     method public java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> getAlternativeMetadataFor(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> navigationRoutes);
     method public com.mapbox.navigator.Experimental getExperimental();
+    method @UiThread @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.core.fasterroute.FasterRoutesTracker getFasterRoutesTracker(com.mapbox.navigation.core.fasterroute.FasterRouteOptions fasterRouteOptions = FasterRouteOptions.<init>().build());
     method public com.mapbox.navigation.core.trip.session.eh.GraphAccessor getGraphAccessor();
     method public com.mapbox.navigation.core.history.MapboxHistoryRecorder getHistoryRecorder();
     method public com.mapbox.navigation.core.replay.MapboxReplayer getMapboxReplayer();
@@ -180,6 +181,52 @@ package com.mapbox.navigation.core.directions.session {
     property public final java.util.List<com.mapbox.navigation.base.route.NavigationRoute> navigationRoutes;
     property public final String reason;
     property @Deprecated public final java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> routes;
+  }
+
+}
+
+package com.mapbox.navigation.core.fasterroute {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class FasterRouteOptions {
+    method public double component1();
+    method public com.mapbox.navigation.core.fasterroute.FasterRouteOptions copy(double maxAcceptableGeometrySimilarityToRejectedAlternatives);
+    method public double getMaxAcceptableGeometrySimilarityToRejectedAlternatives();
+    property public final double maxAcceptableGeometrySimilarityToRejectedAlternatives;
+  }
+
+  public static final class FasterRouteOptions.Builder {
+    ctor public FasterRouteOptions.Builder();
+    method public com.mapbox.navigation.core.fasterroute.FasterRouteOptions build();
+    method public com.mapbox.navigation.core.fasterroute.FasterRouteOptions.Builder maxAcceptableGeometrySimilarityToRejectedAlternatives(double value);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class FasterRoutesTracker {
+    method @UiThread public void acceptFasterRoute(com.mapbox.navigation.core.fasterroute.NewFasterRoute newFasterRoute);
+    method @UiThread public void declineFasterRoute(com.mapbox.navigation.core.fasterroute.NewFasterRoute newFasterRoute);
+    method @UiThread public void destroy();
+    method public void registerNewFasterRouteObserver(com.mapbox.navigation.core.fasterroute.NewFasterRouteObserver observer);
+    method public void unregisterNewFasterRouteObserver(com.mapbox.navigation.core.fasterroute.NewFasterRouteObserver observer);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NewFasterRoute {
+    ctor public NewFasterRoute(com.mapbox.navigation.base.route.NavigationRoute fasterRoute, double fasterThanPrimaryRouteBy, int alternativeId);
+    method public com.mapbox.navigation.base.route.NavigationRoute component1();
+    method public double component2();
+    method public int component3();
+    method public com.mapbox.navigation.core.fasterroute.NewFasterRoute copy(com.mapbox.navigation.base.route.NavigationRoute fasterRoute, double fasterThanPrimaryRouteBy, int alternativeId);
+    method public int getAlternativeId();
+    method public com.mapbox.navigation.base.route.NavigationRoute getFasterRoute();
+    method public double getFasterThanPrimaryRouteBy();
+    property public final int alternativeId;
+    property public final com.mapbox.navigation.base.route.NavigationRoute fasterRoute;
+    property public final double fasterThanPrimaryRouteBy;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface NewFasterRouteObserver {
+    method public void onNewFasterRouteFound(com.mapbox.navigation.core.fasterroute.NewFasterRoute newFasterRoute);
+  }
+
+  public final class SimilarRoutesKt {
   }
 
 }

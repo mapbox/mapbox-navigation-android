@@ -13,18 +13,27 @@ private object NoLoggingFrontend : LoggerFrontend {
     override fun getLogLevel(): LoggingLevel = LoggingLevel.DEBUG
 
     override fun logV(msg: String, category: String?) {
+        printLog("V", msg, category)
     }
 
     override fun logD(msg: String, category: String?) {
+        printLog("D", msg, category)
     }
 
     override fun logI(msg: String, category: String?) {
+        printLog("I", msg, category)
     }
 
     override fun logE(msg: String, category: String?) {
+        printLog("D", msg, category)
     }
 
     override fun logW(msg: String, category: String?) {
+        printLog("E", msg, category)
+    }
+
+    private fun printLog(level: String, msg: String, category: String?) {
+        println("$level/[$category]: $msg")
     }
 }
 

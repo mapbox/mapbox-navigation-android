@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.qa_test_app.view
 
 import android.annotation.SuppressLint
@@ -13,11 +15,13 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.gestures.Utils
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.LogConfiguration
+import com.mapbox.common.LoggingLevel
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
+import com.mapbox.maps.logD
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
@@ -38,14 +42,20 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.fasterroute.NewFasterRoute
+import com.mapbox.navigation.core.fasterroute.NewFasterRouteObserver
+import com.mapbox.navigation.core.internal.fasterroute.RecordRouteObserverResults
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
+import com.mapbox.navigation.core.replay.history.ReplayEventBase
+import com.mapbox.navigation.core.replay.history.ReplayEventLocation
+import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
-import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
+import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesRequestCallback
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -65,7 +75,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-@SuppressLint("MissingPermission")
 class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private companion object {
@@ -74,7 +83,6 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val routeClickPadding = Utils.dpToPx(30f)
     private val navigationLocationProvider = NavigationLocationProvider()
-    private val replayRouteMapper = ReplayRouteMapper()
     private val mapboxReplayer = MapboxReplayer()
     private val binding: AlternativeRouteActivityLayoutBinding by lazy {
         AlternativeRouteActivityLayoutBinding.inflate(layoutInflater)
@@ -112,16 +120,22 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 mapboxNavigation.registerLocationObserver(locationObserver)
                 mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
                 mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+                mapboxNavigation.registerRoutesObserver(recordRoutesObserver)
                 mapboxNavigation.registerRoutesObserver(routesObserver)
                 mapboxNavigation.registerRouteAlternativesObserver(alternativesObserver)
+                mapboxNavigation.getFasterRoutesTracker()
+                    .registerNewFasterRouteObserver(fasterRouteObserver)
             }
 
             override fun onDetached(mapboxNavigation: MapboxNavigation) {
                 mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
                 mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
                 mapboxNavigation.unregisterLocationObserver(locationObserver)
+                mapboxNavigation.unregisterRoutesObserver(recordRoutesObserver)
                 mapboxNavigation.unregisterRoutesObserver(routesObserver)
                 mapboxNavigation.unregisterRouteAlternativesObserver(alternativesObserver)
+                mapboxNavigation.getFasterRoutesTracker()
+                    .unregisterNewFasterRouteObserver(fasterRouteObserver)
             }
         },
         onInitialize = this::initNavigation
@@ -129,8 +143,8 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        LogConfiguration.setLoggingLevel(LoggingLevel.DEBUG)
         setContentView(binding.root)
-
         initStyle()
         initListeners()
     }
@@ -153,8 +167,22 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
             enabled = true
         }
-        mapboxReplayer.pushRealLocation(this, 0.0)
-        mapboxReplayer.playbackSpeed(1.5)
+
+        mapboxReplayer.pushEvents(
+            ReplayEventLocation(
+                11.574758,
+                48.150672,
+                provider = "me",
+                0.0,
+                null,
+                null,
+                null,
+                null,
+            ).let {
+                listOf<ReplayEventBase>(ReplayEventUpdateLocation(0.0, it))
+            }
+        )
+        mapboxReplayer.playbackSpeed(3.0)
         mapboxReplayer.play()
     }
 
@@ -311,25 +339,35 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun initListeners() {
         binding.startNavigation.setOnClickListener {
             mapboxNavigation.startTripSession()
             binding.startNavigation.visibility = View.GONE
-            startSimulation(mapboxNavigation.getRoutes()[0])
+            binding.requestAlternatives.visibility = View.VISIBLE
+        }
+        binding.requestAlternatives.setOnClickListener {
+            binding.requestAlternatives.isEnabled = false
+            val callback = object : NavigationRouteAlternativesRequestCallback {
+                override fun onRouteAlternativeRequestFinished(
+                    routeProgress: RouteProgress,
+                    alternatives: List<NavigationRoute>,
+                    routerOrigin: RouterOrigin
+                ) {
+                    binding.requestAlternatives.isEnabled = true
+                }
+
+                override fun onRouteAlternativesRequestError(error: RouteAlternativesError) {
+                    binding.requestAlternatives.isEnabled = true
+                }
+            }
+            mapboxNavigation.requestAlternativeRoutes(callback)
         }
 
         binding.mapView.gestures.addOnMapClickListener(mapClickListener)
     }
 
-    private fun startSimulation(route: DirectionsRoute) {
-        mapboxReplayer.stop()
-        mapboxReplayer.clearEvents()
-        val replayData = replayRouteMapper.mapDirectionsRouteGeometry(route)
-        mapboxReplayer.pushEvents(replayData)
-        mapboxReplayer.seekTo(replayData[0])
-        mapboxReplayer.play()
-    }
-
+    private val recordRoutesObserver = RecordRouteObserverResults { mapboxNavigation }
     private val routesObserver = RoutesObserver { result ->
         CoroutineScope(Dispatchers.Main).launch {
             routeLineApi.setNavigationRoutes(
@@ -344,6 +382,15 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 )
             }
         }
+    }
+
+    private val fasterRouteObserver = NewFasterRouteObserver { newFasterRoute: NewFasterRoute ->
+        val message =
+            "faster route found: " +
+                "${newFasterRoute.alternativeId} " +
+                "is faster than primary by " +
+                "${newFasterRoute.fasterThanPrimaryRouteBy}"
+        logD("faster-route", message)
     }
 
     private val mapClickListener = OnMapClickListener {

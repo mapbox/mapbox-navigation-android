@@ -52,6 +52,9 @@ import com.mapbox.navigation.core.directions.LegacyRouterAdapter
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.fasterroute.FasterRouteOptions
+import com.mapbox.navigation.core.fasterroute.FasterRouteTrackerCore
+import com.mapbox.navigation.core.fasterroute.FasterRoutesTracker
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.ReachabilityService
@@ -271,6 +274,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigationOptions.eHorizonOptions.alertServiceOptions.collectRestrictedAreas
         )
     )
+
+    @ExperimentalPreviewMapboxNavigationAPI
+    private var fasterRoutesInstance: FasterRoutesTracker? = null
 
     private val routeUpdateMutex = Mutex()
 
@@ -1633,6 +1639,32 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeRefreshStatesObserver: RouteRefreshStatesObserver
     ) {
         routeRefreshController.unregisterRouteRefreshStateObserver(routeRefreshStatesObserver)
+    }
+
+    /***
+     * @return existing instance of [FasterRoutesTracker].
+     * New instance is created for the first call or after calling [FasterRoutesTracker.destroy] on existing
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    @UiThread
+    fun getFasterRoutesTracker(
+        fasterRouteOptions: FasterRouteOptions = FasterRouteOptions.Builder().build()
+    ): FasterRoutesTracker {
+        val currentInstance = fasterRoutesInstance
+        return if (currentInstance == null || currentInstance.isDestroyed) {
+            if (directionsSession.routes.isNotEmpty()) {
+                error("FasterRoutes should be created before setting the routes")
+            }
+            val newInstance = FasterRoutesTracker(
+                this,
+                FasterRouteTrackerCore(fasterRouteOptions),
+                threadController.getMainScopeAndRootJob().scope
+            )
+            fasterRoutesInstance = newInstance
+            newInstance
+        } else {
+            currentInstance
+        }
     }
 
     private fun startSession(withTripService: Boolean, withReplayEnabled: Boolean) {
