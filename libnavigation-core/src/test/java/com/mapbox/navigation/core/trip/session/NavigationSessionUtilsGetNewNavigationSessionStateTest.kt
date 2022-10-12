@@ -7,7 +7,7 @@ import org.junit.runners.Parameterized
 import kotlin.reflect.KClass
 
 @RunWith(Parameterized::class)
-class NavigationSessionUtilsGetNewStateTest(
+class NavigationSessionUtilsGetNewNavigationSessionStateTest(
     private val isDriving: Boolean,
     private val hasRoutes: Boolean,
     private val expected: KClass<out NavigationSessionState>,
@@ -28,8 +28,8 @@ class NavigationSessionUtilsGetNewStateTest(
     }
 
     @Test
-    fun getNewState() {
-        val actual = NavigationSessionUtils.getNewState(isDriving, hasRoutes)
+    fun getNewNavigationSessionState() {
+        val actual = NavigationSessionUtils.getNewNavigationSessionState(isDriving, hasRoutes)
         assertEquals(expected, actual::class)
     }
 }
