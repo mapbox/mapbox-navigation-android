@@ -561,7 +561,7 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         // Demonstrate map customization
         if (showCustomMapView) {
             binding.navigationView.customizeViewBinders {
-                mapViewBinder = CustomMapViewBinder(this@MapboxNavigationViewCustomizedActivity)
+                mapViewBinder = CustomMapViewBinder()
             }
         } else {
             binding.navigationView.customizeViewBinders {

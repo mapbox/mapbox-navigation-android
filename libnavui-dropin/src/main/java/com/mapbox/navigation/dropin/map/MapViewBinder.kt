@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.map
 
+import android.content.Context
 import android.view.ViewGroup
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.locationcomponent.location
@@ -38,12 +39,12 @@ abstract class MapViewBinder : UIBinder {
 
     /**
      * Create [MapView].
+     * NOTE: you shouldn't attach [MapView] to any parent:
+     * Navigation SDK will do that under the hood.
      *
-     * @param viewGroup Parent view which the [MapView] will belong to.
      * @return [MapView] that will host the map.
-     *  Returned view must not be attached to [viewGroup] view.
      */
-    abstract fun onCreateMapView(viewGroup: ViewGroup): MapView
+    abstract fun getMapView(context: Context): MapView
 
     /**
      * `True` if Mapbox should load map style,
@@ -56,7 +57,13 @@ abstract class MapViewBinder : UIBinder {
      * [MapboxNavigationObserver] which gives this view a simple lifecycle.
      */
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
-        val mapView = onCreateMapView(viewGroup)
+        val mapView = getMapView(viewGroup.context)
+        viewGroup.removeAllViews()
+        viewGroup.addView(
+            mapView,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
         context.mapViewOwner.updateMapView(mapView)
 
         val store = context.store

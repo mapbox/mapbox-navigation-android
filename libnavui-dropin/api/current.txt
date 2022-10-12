@@ -309,8 +309,8 @@ package com.mapbox.navigation.dropin.map {
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class MapViewBinder implements com.mapbox.navigation.ui.base.lifecycle.UIBinder {
     ctor public MapViewBinder();
     method public com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver bind(android.view.ViewGroup viewGroup);
+    method public abstract com.mapbox.maps.MapView getMapView(android.content.Context context);
     method public boolean getShouldLoadMapStyle();
-    method public abstract com.mapbox.maps.MapView onCreateMapView(android.view.ViewGroup viewGroup);
     property public boolean shouldLoadMapStyle;
     field public static final com.mapbox.navigation.dropin.map.MapViewBinder.Companion Companion;
   }

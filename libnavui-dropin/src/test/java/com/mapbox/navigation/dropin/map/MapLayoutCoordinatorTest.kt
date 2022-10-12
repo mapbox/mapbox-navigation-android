@@ -160,6 +160,17 @@ class MapLayoutCoordinatorTest {
     }
 
     @Test
+    fun `new binder should set mapView to null`() = coroutineRule.runBlockingTest {
+        clearMocks(mapViewOwner)
+
+        mapViewBinderFlow.value = customBinder
+
+        verify {
+            mapViewOwner.updateMapView(null)
+        }
+    }
+
+    @Test
     fun `listener should update mapbox map`() = coroutineRule.runBlockingTest {
         val map = mockk<MapboxMap>()
         val mapView = mockk<MapView> {

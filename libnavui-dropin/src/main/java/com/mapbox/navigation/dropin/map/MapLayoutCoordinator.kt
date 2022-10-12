@@ -36,6 +36,7 @@ internal class MapLayoutCoordinator(
         return navigationViewContext.uiBinders.mapViewBinder.map { customBinder ->
             loadStyleJob?.cancel()
             loadStyleJob = null
+            navigationViewContext.mapViewOwner.updateMapView(null)
             (customBinder ?: MapboxMapViewBinder()).also {
                 it.context = navigationViewContext
                 it.navigationViewBinding = binding
@@ -55,7 +56,7 @@ internal class MapLayoutCoordinator(
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal inline fun MapViewOwner.doOnAttachMapView(crossinline action: (MapView) -> Unit) {
-    registerObserver(object: MapViewObserver() {
+    registerObserver(object : MapViewObserver() {
         override fun onAttached(mapView: MapView) {
             action(mapView)
             unregisterObserver(this)
