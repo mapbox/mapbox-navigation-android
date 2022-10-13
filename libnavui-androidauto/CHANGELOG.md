@@ -4,6 +4,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## androidauto-v0.14.0 - October 13, 2022
+### Changelog
+[Changes between 0.13.0 and 0.14.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.13.0...androidauto-v0.14.0)
+
+#### Features
 - Added a new `MapboxScreenManager` framework. This makes it possible to build custom user experiences that are drastically different than the default provided by the SDK. [#6429](https://github.com/mapbox/mapbox-navigation-android/pull/6429)
 - Added a default `MapboxScreenGraph` that prepares an end to end navigation experience. [#6429](https://github.com/mapbox/mapbox-navigation-android/pull/6429)
 
@@ -13,6 +20,12 @@ Mapbox welcomes participation and contributions from everyone.
 - Renamed `MainCarContext` to `MapboxCarContext`. [#6429](https://github.com/mapbox/mapbox-navigation-android/pull/6429)
 - Renamed `MainCarScreen` to `FreeDriveCarScreen`. [#6429](https://github.com/mapbox/mapbox-navigation-android/pull/6429)
 - Removed all public apis with `com.mapbox.search` while the SDK is in beta. [#6429](https://github.com/mapbox/mapbox-navigation-android/pull/6429)
+
+### Mapbox dependencies
+This release defines minimum versions for the Mapbox dependencies.
+- Mapbox Maps Android Auto Extension `v0.3.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/extension-androidauto-v0.3.0))
+- Mapbox Navigation `v2.9.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/v2.9.0-beta.1))
+- Mapbox Search `v1.0.0-beta.37` ([release notes](https://github.com/mapbox/mapbox-search-android/releases/tag/v1.0.0-beta.37))
 
 ## androidauto-v0.13.0 - October 6, 2022
 ### Changelog
