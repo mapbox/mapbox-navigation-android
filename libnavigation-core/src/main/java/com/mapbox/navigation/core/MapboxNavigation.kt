@@ -1726,7 +1726,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
         currentIndicesProvider.clear()
-        if (result.navigationRoutes.isNotEmpty()) {
+        if (result.navigationRoutes.isNotEmpty()
+            && result.reason != RoutesExtra.ROUTES_UPDATE_REASON_PREVIEW
+        ) {
             routeScope.launch {
                 val refreshed = routeRefreshController.refresh(
                     result.navigationRoutes

@@ -40,6 +40,7 @@ import com.mapbox.navigation.core.trip.session.createSetRouteResult
 import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
+import com.mapbox.navigation.testing.factories.createNavigationRoutes
 import com.mapbox.navigation.testing.factories.createRouteOptions
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigatorConfig
@@ -656,6 +657,25 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         createMapboxNavigation()
         val routes = emptyList<NavigationRoute>()
         val reason = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+        val routeObserversSlot = mutableListOf<RoutesObserver>()
+        every { tripSession.getState() } returns TripSessionState.STARTED
+        verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
+
+        routeObserversSlot.forEach {
+            it.onRoutesChanged(RoutesUpdatedResult(routes, reason))
+        }
+
+        coVerify(exactly = 1) {
+            currentIndicesProvider.clear()
+        }
+        coVerify(exactly = 0) { routeRefreshController.refresh(any()) }
+    }
+
+    @Test
+    fun internalRouteObserver_preview() {
+        createMapboxNavigation()
+        val routes = createNavigationRoutes()
+        val reason = RoutesExtra.ROUTES_UPDATE_REASON_PREVIEW
         val routeObserversSlot = mutableListOf<RoutesObserver>()
         every { tripSession.getState() } returns TripSessionState.STARTED
         verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
