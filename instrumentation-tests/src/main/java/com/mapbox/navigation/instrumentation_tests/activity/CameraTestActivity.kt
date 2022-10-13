@@ -274,9 +274,9 @@ class CameraTestActivity : AppCompatActivity() {
         )
         lifecycleScope.launch {
             while (true) {
-                delay(Random.nextLong(1000) + 500)
+                delay(Random.nextLong(60000) + 500)
                 navigationCamera.requestNavigationCameraToOverview()
-                delay(Random.nextLong(1000) + 500)
+                delay(Random.nextLong(60000) + 500)
                 navigationCamera.requestNavigationCameraToFollowing()
             }
         }
@@ -351,7 +351,10 @@ class CameraTestActivity : AppCompatActivity() {
     fun startTesting() {
         lifecycleScope.launch {
             while (true) {
-                delay(1)
+                val timeout = Random.nextLong(1000) + 500
+                println("[ddlog] sleep for $timeout")
+                Thread.sleep(timeout)
+                delay(100)
             }
         }
         mapboxMap = binding.mapView.getMapboxMap()

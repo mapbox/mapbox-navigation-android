@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.camera.transition
 
 import android.animation.AnimatorSet
+import androidx.core.view.animation.PathInterpolatorCompat
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.logI
@@ -16,7 +17,7 @@ class MapboxNavigationCameraStateTransition(
     private val mapboxMap: MapboxMap,
     cameraPlugin: CameraAnimationsPlugin,
     private val navigationCameraTransition: NavigationCameraTransition =
-        MapboxNavigationCameraTransition(mapboxMap, cameraPlugin)
+        CustomCameraTransitions(mapboxMap, cameraPlugin, PathInterpolatorCompat.create(0f, 0f, 1f, 1f))
 ) : NavigationCameraStateTransition {
 
     override fun transitionToFollowing(
