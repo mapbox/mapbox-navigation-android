@@ -15,6 +15,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Marked `RouteShieldCallback` methods with `@UiThread` annotation. [#6271](https://github.com/mapbox/mapbox-navigation-android/pull/6271)
 - Fixed an issue with `NavigationView` that caused road label position to not update after changing peek height of the Info Panel. [#6463](https://github.com/mapbox/mapbox-navigation-android/pull/6463)
 - Updated `Store` to allow `Action` dispatch from `State` observers. [#6455](https://github.com/mapbox/mapbox-navigation-android/pull/6455)
+- Improved `NavigationView` to restore navigation camera state after the view is recreated, e.g. due to a configuration change. [#6472](https://github.com/mapbox/mapbox-navigation-android/pull/6472)
 
 ## Mapbox Navigation SDK 2.9.0-beta.1 - 06 October, 2022
 ### Changelog

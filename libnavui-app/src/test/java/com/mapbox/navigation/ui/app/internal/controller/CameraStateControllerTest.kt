@@ -2,20 +2,17 @@ package com.mapbox.navigation.ui.app.internal.controller
 
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.camera.CameraAction
 import com.mapbox.navigation.ui.app.internal.camera.CameraAction.SetCameraMode
-import com.mapbox.navigation.ui.app.internal.camera.CameraState
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
+import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.testing.TestStore
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.spyk
 import io.mockk.unmockkObject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
@@ -24,18 +21,17 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class CameraStateControllerTest {
 
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
-    private lateinit var testStore: TestStore
+    private val testStore = TestStore()
 
     @Before
     fun setup() {
         mockkObject(MapboxNavigationApp)
-        testStore = spyk(TestStore())
     }
 
     @After
@@ -57,15 +53,15 @@ class CameraStateControllerTest {
     @Test
     fun `when action toIdle should copy currentCamera mode value to savedCameraMode`() =
         coroutineRule.runBlockingTest {
-            val initialState = State(camera = CameraState(cameraMode = TargetCameraMode.Following))
-            testStore.setState(initialState)
-
             val sut = CameraStateController(testStore)
             sut.onAttached(mockMapboxNavigation())
+
+            val initialCameraMode = TargetCameraMode.Following
+            testStore.dispatch(SetCameraMode(initialCameraMode))
             testStore.dispatch(SetCameraMode(TargetCameraMode.Idle))
 
             val cameraState = testStore.state.value.camera
-            assertEquals(initialState.camera.cameraMode, cameraState.savedCameraMode)
+            assertEquals(initialCameraMode, cameraState.savedCameraMode)
         }
 
     @Test
@@ -121,6 +117,66 @@ class CameraStateControllerTest {
 
         assertEquals(cameraState, testStore.state.value.camera.mapCameraState)
     }
+
+    @Test
+    fun `camera is set to overview in route preview mode`() =
+        coroutineRule.runBlockingTest {
+            val sut = CameraStateController(testStore)
+            sut.onAttached(mockMapboxNavigation())
+
+            val state = testStore.state.value.copy(navigation = NavigationState.RoutePreview)
+            testStore.setState(state)
+
+            assertEquals(TargetCameraMode.Overview, testStore.state.value.camera.cameraMode)
+        }
+
+    @Test
+    fun `camera is set to overview in free drive mode`() =
+        coroutineRule.runBlockingTest {
+            val sut = CameraStateController(testStore)
+            sut.onAttached(mockMapboxNavigation())
+
+            val state = testStore.state.value.copy(navigation = NavigationState.FreeDrive)
+            testStore.setState(state)
+
+            assertEquals(TargetCameraMode.Overview, testStore.state.value.camera.cameraMode)
+        }
+
+    @Test
+    fun `camera is set to following in active navigation mode`() =
+        coroutineRule.runBlockingTest {
+            val sut = CameraStateController(testStore)
+            sut.onAttached(mockMapboxNavigation())
+
+            val state = testStore.state.value.copy(navigation = NavigationState.ActiveNavigation)
+            testStore.setState(state)
+
+            assertEquals(TargetCameraMode.Following, testStore.state.value.camera.cameraMode)
+        }
+
+    @Test
+    fun `camera is set to following in arrival mode`() =
+        coroutineRule.runBlockingTest {
+            val sut = CameraStateController(testStore)
+            sut.onAttached(mockMapboxNavigation())
+
+            val state = testStore.state.value.copy(navigation = NavigationState.Arrival)
+            testStore.setState(state)
+
+            assertEquals(TargetCameraMode.Following, testStore.state.value.camera.cameraMode)
+        }
+
+    @Test
+    fun `camera is set to idle in destination preview mode`() =
+        coroutineRule.runBlockingTest {
+            val sut = CameraStateController(testStore)
+            sut.onAttached(mockMapboxNavigation())
+
+            val state = testStore.state.value.copy(navigation = NavigationState.DestinationPreview)
+            testStore.setState(state)
+
+            assertEquals(TargetCameraMode.Idle, testStore.state.value.camera.cameraMode)
+        }
 
     private fun mockMapboxNavigation(): MapboxNavigation {
         val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)

@@ -22,12 +22,10 @@ import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHan
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import com.mapbox.navigation.ui.maps.internal.extensions.flowNavigationCameraState
 import com.mapbox.navigation.utils.internal.logD
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -128,12 +126,11 @@ internal class CameraComponent constructor(
     }
 
     private fun syncNavigationCameraState() {
-        // using immediate dispatcher causes nested store updates
-        navigationCamera.flowNavigationCameraState().observe(Dispatchers.Main) {
+        navigationCamera.flowNavigationCameraState().drop(1).observe {
             store.dispatch(SetCameraMode(it.toTargetCameraMode()))
         }
 
-        store.select { it.camera.cameraMode }.observe(Dispatchers.Main) {
+        store.select { it.camera.cameraMode }.observe {
             val currentMode = navigationCamera.state.toTargetCameraMode()
             if (isCameraInitialized && it != currentMode) {
                 when (it) {
@@ -152,31 +149,31 @@ internal class CameraComponent constructor(
         coroutineScope.launch {
             combine(
                 store.select { it.location?.enhancedLocation },
-                store.select { it.navigation }
-            ) { location, navigationState ->
+                store.select { it.camera.cameraMode }
+            ) { location, cameraMode ->
                 location?.let {
                     viewportDataSource.onLocationChanged(it)
                     viewportDataSource.evaluate()
                     if (!isCameraInitialized) {
-                        when (navigationState) {
-                            NavigationState.ActiveNavigation,
-                            NavigationState.Arrival -> {
+                        when (cameraMode) {
+                            TargetCameraMode.Idle -> {
+                                navigationCamera.requestNavigationCameraToIdle()
+                            }
+                            TargetCameraMode.Following -> {
                                 navigationCamera.requestNavigationCameraToFollowing(
                                     stateTransitionOptions = NavigationCameraTransitionOptions
                                         .Builder()
                                         .maxDuration(0) // instant transition
                                         .build()
                                 )
-                                store.dispatch(SetCameraMode(TargetCameraMode.Following))
                             }
-                            else -> {
+                            TargetCameraMode.Overview -> {
                                 navigationCamera.requestNavigationCameraToOverview(
                                     stateTransitionOptions = NavigationCameraTransitionOptions
                                         .Builder()
                                         .maxDuration(0) // instant transition
                                         .build()
                                 )
-                                store.dispatch(SetCameraMode(TargetCameraMode.Overview))
                             }
                         }
                     }
@@ -219,26 +216,6 @@ internal class CameraComponent constructor(
             } else {
                 viewportDataSource.onRouteChanged(routes.first())
                 viewportDataSource.evaluate()
-            }
-        }
-        // using immediate dispatcher causes nested store updates
-        coroutineScope.launch(Dispatchers.Main) {
-            store.select { it.navigation }.collectLatest { navigationState ->
-                when (navigationState) {
-                    NavigationState.FreeDrive -> {
-                        routesFlow.firstOrNull { it.isEmpty() } ?: return@collectLatest
-                        store.dispatch(SetCameraMode(TargetCameraMode.Overview))
-                    }
-                    NavigationState.DestinationPreview -> {
-                        store.dispatch(SetCameraMode(TargetCameraMode.Idle))
-                    }
-                    NavigationState.RoutePreview -> {
-                        store.dispatch(SetCameraMode(TargetCameraMode.Overview))
-                    }
-                    NavigationState.ActiveNavigation, NavigationState.Arrival -> {
-                        store.dispatch(SetCameraMode(TargetCameraMode.Following))
-                    }
-                }
             }
         }
     }
