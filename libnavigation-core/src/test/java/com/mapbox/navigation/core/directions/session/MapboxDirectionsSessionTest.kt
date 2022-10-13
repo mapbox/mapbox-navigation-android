@@ -412,6 +412,26 @@ class MapboxDirectionsSessionTest {
     }
 
     @Test
+    fun `register route observer during preview state`() {
+        val testRoutes = createNavigationRoutes()
+        session.setRoutes(
+            testRoutes,
+            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_PREVIEW, 0)
+        )
+
+        session.registerRoutesObserver(observer)
+
+        verify {
+            observer.onRoutesChanged(
+                match {
+                    it.navigationRoutes == testRoutes
+                        && it.reason == RoutesExtra.ROUTES_UPDATE_REASON_PREVIEW
+                }
+            )
+        }
+    }
+
+    @Test
     fun `clean set previewed route`() {
         session.setRoutes(
             createNavigationRoutes(),

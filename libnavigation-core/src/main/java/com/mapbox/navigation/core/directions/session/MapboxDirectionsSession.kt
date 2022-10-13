@@ -140,6 +140,9 @@ internal class MapboxDirectionsSession(
     override fun registerRoutesObserver(routesObserver: RoutesObserver) {
         routesObservers.add(routesObserver)
         if (routesInitialized) {
+            val routes = if (routesUpdateReason == RoutesExtra.ROUTES_UPDATE_REASON_PREVIEW) {
+                previewedRoutes
+            } else routes
             routesObserver.onRoutesChanged(RoutesUpdatedResult(routes, routesUpdateReason))
         }
     }

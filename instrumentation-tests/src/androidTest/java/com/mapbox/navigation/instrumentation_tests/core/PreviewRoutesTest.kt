@@ -67,15 +67,11 @@ class PreviewRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         val routes = RoutesProvider.dc_very_short(activity).toNavigationRoutes()
         pushPrimaryRouteOriginAsLocation(routes)
         mapboxNavigation.startTripSession()
-        val previewedRouteDeffer = async {
-            mapboxNavigation.waitForPreviewRoute()
-        }
 
         mapboxNavigation.previewNavigationRoutes(routes)
+        val previewRouteUpdate = mapboxNavigation.waitForPreviewRoute()
 
-        val previewRouteUpdate = previewedRouteDeffer.await()
         assertEquals(routes, previewRouteUpdate.navigationRoutes)
-        assertEquals(RoutesExtra.ROUTES_UPDATE_REASON_PREVIEW, previewRouteUpdate.reason)
         assertEquals(routes, mapboxNavigation.getPreviewedNavigationRoutes())
         assertEquals(emptyList<NavigationRoute>(), mapboxNavigation.getNavigationRoutes())
         assertIs<NavigationSessionState.FreeDrive>(mapboxNavigation.getNavigationSessionState())
