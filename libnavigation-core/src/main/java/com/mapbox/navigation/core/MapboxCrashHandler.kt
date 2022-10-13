@@ -5,27 +5,29 @@ import com.mapbox.navigation.utils.internal.logI
 
 internal object MapboxCrashHandler {
 
+    private const val TAG = "[MapboxCamera-Crash2]"
+
     @Volatile
     private var defaultCrashHandler: Thread.UncaughtExceptionHandler? = null
 
     fun setUp() {
         defaultCrashHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
-            logE("Caught a crash: $throwable", "[MapboxCamera-Crash]")
+            logE("Caught a crash: $throwable", TAG)
             printThreadsDump()
             defaultCrashHandler?.uncaughtException(thread, throwable)
         }
     }
 
     private fun printThreadsDump() {
-        logI("All threads dump:", "[MapboxCamera-Crash]")
+        logI("All threads dump:", TAG)
         Thread.getAllStackTraces().forEach { (thread, stacktrace) ->
-            logI("Thread: ${thread.name} with id: ${thread.id}, state: ${thread.state.explain()}", "[MapboxCamera-Crash]")
+            logI("Thread: ${thread.name} with id: ${thread.id}, state: ${thread.state.explain()}", TAG)
             stacktrace.forEach {
-                logI("at ${it.className}.${it.methodName}:${it.lineNumber} (${it.fileName})", "[MapboxCamera-Crash]")
+                logI("at ${it.className}.${it.methodName}:${it.lineNumber} (${it.fileName})", TAG)
             }
         }
-        logI("==================================================", "[MapboxCamera-Crash]")
+        logI("==================================================", TAG)
     }
 
     private fun Thread.State.explain(): String {

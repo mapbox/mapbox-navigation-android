@@ -46,7 +46,6 @@ internal fun AnimatorSet.constraintDurationTo(maxDuration: Long): AnimatorSet {
         if (longestExecutionTime > maxDuration) {
             val factor = maxDuration / (longestExecutionTime).toDouble()
             childAnimations.forEach { animator ->
-                logI("Update startDelay and duration", "[MapboxCamera-Crash]")
                 animator.startDelay = (animator.startDelay * factor).toLong()
                 animator.duration = (animator.duration * factor).toLong()
             }

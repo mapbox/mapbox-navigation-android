@@ -339,12 +339,12 @@ class NavigationCamera(
                 logI(
                     "update following frame, cameraOptions=${viewportData.cameraForFollowing}, " +
                         "transitionOptions=$frameTransitionOptions",
-                    "[MapboxCamera-Crash]"
+                    MapboxCameraCrashLog.TAG
                 )
                 logI(
                     "transition interface: " +
                         "${stateTransition::class.qualifiedName}-${stateTransition::class}",
-                    "[MapboxCamera-Crash]"
+                    MapboxCameraCrashLog.TAG
                 )
                 startAnimation(
                     stateTransition.updateFrameForFollowing(
@@ -360,7 +360,7 @@ class NavigationCamera(
                 logI(
                     "update overview frame, cameraOptions=${viewportData.cameraForOverview}, " +
                         "transitionOptions=$frameTransitionOptions",
-                    "[MapboxCamera-Crash]"
+                    MapboxCameraCrashLog.TAG
                 )
                 startAnimation(
                     stateTransition.updateFrameForOverview(
@@ -404,6 +404,7 @@ class NavigationCamera(
 
     private fun cancelAnimation() {
         runningAnimation?.let { set ->
+            logI("Cancel animation: $set", MapboxCameraCrashLog.TAG)
             set.cancel()
             set.childAnimations.forEach {
                 cameraPlugin.unregisterAnimators(it as ValueAnimator)
@@ -431,8 +432,57 @@ class NavigationCamera(
         // workaround for https://github.com/mapbox/mapbox-maps-android/issues/277
         cameraPlugin.anchor = null
 
-        animatorSet.start()
+        try {
+            logI("Starting animation: $animatorSet", MapboxCameraCrashLog.TAG)
+            logI("Duration: ${animatorSet.duration}", MapboxCameraCrashLog.TAG)
+            logI("Interpolator: ${animatorSet.interpolator}", MapboxCameraCrashLog.TAG)
+            logI("Start delay: ${animatorSet.startDelay}", MapboxCameraCrashLog.TAG)
+            animatorSet.childAnimations.forEach {
+                logI("Child animation: $it", MapboxCameraCrashLog.TAG)
+                logI("Child animation start delay: ${it.startDelay}", MapboxCameraCrashLog.TAG)
+                logI("Child animation duration: ${it.duration}", MapboxCameraCrashLog.TAG)
+                logI("Child animation interpolator: ${it.interpolator}", MapboxCameraCrashLog.TAG)
+            }
+            animatorSet.start()
+        } catch (ex: Throwable) {
+            logI("Caught exception: $ex", MapboxCameraCrashLog.TAG)
+            logI("All threads dump:", MapboxCameraCrashLog.TAG)
+            Thread.getAllStackTraces().forEach { (thread, stacktrace) ->
+                logI("Thread: ${thread.name} with id: ${thread.id}, state: ${thread.state.explain()}",
+                    MapboxCameraCrashLog.TAG
+                )
+                stacktrace.forEach {
+                    logI("at ${it.className}.${it.methodName}:${it.lineNumber} (${it.fileName})",
+                        MapboxCameraCrashLog.TAG
+                    )
+                }
+            }
+            logI("==================================================", MapboxCameraCrashLog.TAG)
+
+            logI("Starting animation: $animatorSet", MapboxCameraCrashLog.TAG)
+            logI("Duration: ${animatorSet.duration}", MapboxCameraCrashLog.TAG)
+            logI("Interpolator: ${animatorSet.interpolator}", MapboxCameraCrashLog.TAG)
+            logI("Start delay: ${animatorSet.startDelay}", MapboxCameraCrashLog.TAG)
+            animatorSet.childAnimations.forEach {
+                logI("Child animation: $it", MapboxCameraCrashLog.TAG)
+                logI("Child animation start delay: ${it.startDelay}", MapboxCameraCrashLog.TAG)
+                logI("Child animation duration: ${it.duration}", MapboxCameraCrashLog.TAG)
+                logI("Child animation interpolator: ${it.interpolator}", MapboxCameraCrashLog.TAG)
+            }
+            throw ex
+        }
         runningAnimation = animatorSet
+    }
+
+    private fun Thread.State.explain(): String {
+        return when(this) {
+            Thread.State.NEW -> "NEW"
+            Thread.State.RUNNABLE -> "RUNNABLE"
+            Thread.State.BLOCKED -> "BLOCKED"
+            Thread.State.WAITING -> "WAITING"
+            Thread.State.TIMED_WAITING -> "TIMED_WAITING"
+            Thread.State.TERMINATED -> "TERMINATED"
+        }
     }
 
     private fun finishAnimation(animatorSet: AnimatorSet) {

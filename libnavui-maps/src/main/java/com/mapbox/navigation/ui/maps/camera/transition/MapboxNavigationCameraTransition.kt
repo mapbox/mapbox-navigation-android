@@ -8,6 +8,7 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImpl
 import com.mapbox.maps.plugin.animation.CameraAnimatorOptions
+import com.mapbox.navigation.ui.maps.camera.MapboxCameraCrashLog
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.NAVIGATION_CAMERA_OWNER
 import com.mapbox.navigation.ui.maps.camera.utils.constraintDurationTo
 import com.mapbox.navigation.ui.maps.camera.utils.createAnimatorSet
@@ -128,7 +129,7 @@ class MapboxNavigationCameraTransition(
         logI(
             "Create animation from cameraOptions=$cameraOptions, " +
                 "transitionOptions=$transitionOptions",
-            "[MapboxCamera-Crash]"
+            MapboxCameraCrashLog.TAG
         )
         val animators = mutableListOf<ValueAnimator>()
 
