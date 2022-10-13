@@ -131,6 +131,20 @@ class PreviewRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         assertIs<NavigationSessionState.FreeDrive>(mapboxNavigation.getNavigationSessionState())
         assertIs<NavigationSessionStateV2.FreeDrive>(mapboxNavigation.getNavigationSessionStateV2())
     }
+
+    @Test
+    fun start_preview_after_active_guidance() = sdkTest {
+        val routes = RoutesProvider.dc_short_with_alternative(activity).toNavigationRoutes()
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.setNavigationRoutes(routes)
+        mapboxNavigation.waitForNewRoute()
+
+        mapboxNavigation.previewNavigationRoutes(mapboxNavigation.getNavigationRoutes())
+        mapboxNavigation.waitForPreviewRoute()
+
+        assertIs<NavigationSessionState.FreeDrive>(mapboxNavigation.getNavigationSessionState())
+        assertIs<NavigationSessionStateV2.RoutePreview>(mapboxNavigation.getNavigationSessionStateV2())
+    }
 }
 
 private inline fun <reified T> assertIs(obj: Any) {

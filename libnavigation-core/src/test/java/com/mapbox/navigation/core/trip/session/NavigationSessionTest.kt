@@ -3,7 +3,6 @@ package com.mapbox.navigation.core.trip.session
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
-import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.testing.factories.createNavigationRoutes
 import io.mockk.clearMocks
 import io.mockk.every
