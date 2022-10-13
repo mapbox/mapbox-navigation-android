@@ -64,7 +64,7 @@ internal class PlaceSearchScreen @UiThread constructor(
         addBackPressedHandler {
             searchCarContext.mapboxScreenManager.goBack()
         }
-        attachCreated(searchCarContext.carRoutePreviewRequest, searchCarContext.carPlaceSearch)
+        attachCreated(searchCarContext.routePreviewRequest, searchCarContext.carPlaceSearch)
     }
 
     override fun onGetTemplate(): Template {
@@ -129,7 +129,7 @@ internal class PlaceSearchScreen @UiThread constructor(
                 .getOrDefault(emptyList())
             logAndroidAuto("onClickSearch select ${searchResults.joinToString()}")
             if (searchResults.isNotEmpty()) {
-                searchCarContext.carRoutePreviewRequest.request(
+                searchCarContext.routePreviewRequest.request(
                     PlaceRecordMapper.fromSearchResult(searchResults.first()),
                     carRouteRequestCallback
                 )

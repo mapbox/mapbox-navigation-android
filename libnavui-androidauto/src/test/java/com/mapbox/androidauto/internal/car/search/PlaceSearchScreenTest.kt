@@ -34,7 +34,7 @@ class PlaceSearchScreenTest : MapboxRobolectricTestRunner() {
             every { getString(R.string.car_search_no_results) } returns "No results"
         }
         every { carPlaceSearch } returns mockk(relaxed = true)
-        every { carRoutePreviewRequest } returns mockk()
+        every { routePreviewRequest } returns mockk()
     }
 
     private val placeSearchScreen = PlaceSearchScreen(searchCarContext)

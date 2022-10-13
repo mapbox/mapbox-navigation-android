@@ -1,6 +1,7 @@
 package com.mapbox.androidauto.car.preview
 
 import androidx.annotation.UiThread
+import com.mapbox.androidauto.car.MapboxCarOptions
 import com.mapbox.androidauto.car.search.PlaceRecord
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.internal.logAndroidAutoFailure
@@ -34,7 +35,7 @@ interface CarRoutePreviewRequestCallback {
  * Service class that requests routes for the preview screen.
  */
 class CarRoutePreviewRequest internal constructor(
-    private val routeOptionsInterceptor: CarRouteOptionsInterceptor,
+    private val options: MapboxCarOptions,
 ) : MapboxNavigationObserver {
     private var currentRequestId: Long? = null
     private var mapboxNavigation: MapboxNavigation? = null
@@ -113,7 +114,7 @@ class CarRoutePreviewRequest internal constructor(
         .coordinatesList(listOf(origin, destination))
         .layersList(listOf(getZLevel(), null))
         .metadata(true)
-        .let { routeOptionsInterceptor.intercept(it) }
+        .let { options.routeOptionsInterceptor.intercept(it) }
         .build()
 
     /**

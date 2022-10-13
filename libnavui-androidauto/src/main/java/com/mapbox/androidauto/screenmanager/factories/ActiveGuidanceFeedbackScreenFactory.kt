@@ -15,6 +15,7 @@ class ActiveGuidanceFeedbackScreenFactory(
     override fun getSourceName(): String = MapboxScreen.ACTIVE_GUIDANCE
 
     override fun getCarFeedbackPoll(carContext: CarContext): CarFeedbackPoll {
-        return mapboxCarContext.feedbackPollProvider.getActiveGuidanceFeedbackPoll(carContext)
+        return mapboxCarContext.options.feedbackPollProvider
+            .getActiveGuidanceFeedbackPoll(carContext)
     }
 }

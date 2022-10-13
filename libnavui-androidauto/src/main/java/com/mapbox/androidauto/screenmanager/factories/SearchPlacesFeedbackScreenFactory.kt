@@ -15,7 +15,7 @@ class SearchPlacesFeedbackScreenFactory(
     override fun getSourceName(): String = MapboxScreen.SEARCH
 
     override fun getCarFeedbackPoll(carContext: CarContext): CarFeedbackPoll {
-        return mapboxCarContext.feedbackPollProvider
+        return mapboxCarContext.options.feedbackPollProvider
             .getSearchFeedbackPoll(carContext)
     }
 }

@@ -37,8 +37,9 @@ import com.mapbox.androidauto.screenmanager.factories.SettingsScreenFactory
  *
  * You can swap in your own [MapboxScreenFactory] to customize the experience.
  */
-fun MapboxScreenManager.prepareScreens(mapboxCarContext: MapboxCarContext) = apply {
-    putAll(
+fun MapboxCarContext.prepareScreens() = apply {
+    val mapboxCarContext = this
+    mapboxScreenManager.putAll(
         NEEDS_LOCATION_PERMISSION
             to NeedsLocationPermissionScreenFactory(),
         SETTINGS

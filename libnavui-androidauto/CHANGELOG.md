@@ -4,7 +4,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added a new `MapboxCarOptions` that contains mutable options for `MapboxCarContext`. [#6478](https://github.com/mapbox/mapbox-navigation-android/pull/6478)
+- Added a new `MapboxCarOptionsCustomization` that allows you to change the `MapboxCarOptions`. [#6478](https://github.com/mapbox/mapbox-navigation-android/pull/6478)
+
 #### Bug fixes and improvements
+- Removed options from the `MapboxCarContext` constructor so that it can be compatible with future changes. [#6478](https://github.com/mapbox/mapbox-navigation-android/pull/6478)
+- Deleted `RoutePreviewCarContext` in favor of `MapboxCarContext`. [#6478](https://github.com/mapbox/mapbox-navigation-android/pull/6478)
+- Renamed `CarSettingsStorage` to `MapboxCarStorage`. [#6478](https://github.com/mapbox/mapbox-navigation-android/pull/6478)
 
 ## androidauto-v0.14.0 - October 13, 2022
 ### Changelog
@@ -15,7 +21,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Added a default `MapboxScreenGraph` that prepares an end to end navigation experience. [#6429](https://github.com/mapbox/mapbox-navigation-android/pull/6429)
 
 #### Bug fixes and improvements
-- Delete `CarAppState` in favor of a `MapboxScreenEvent` which can be accessed through `MapboxScreenManager.screenEvent`. [#6429](https://github.com/mapbox/mapbox-navigation-android/pull/6429)
+- Deleted `CarAppState` in favor of a `MapboxScreenEvent` which can be accessed through `MapboxScreenManager.screenEvent`. [#6429](https://github.com/mapbox/mapbox-navigation-android/pull/6429)
 - Replaced all public implementations of `Screen` with backwards compatible implementations of `MapboxScreenFactory` and `MapboxScreen`. [#6429](https://github.com/mapbox/mapbox-navigation-android/pull/6429)
 - Renamed `MainCarContext` to `MapboxCarContext`. [#6429](https://github.com/mapbox/mapbox-navigation-android/pull/6429)
 - Renamed `MainCarScreen` to `FreeDriveCarScreen`. [#6429](https://github.com/mapbox/mapbox-navigation-android/pull/6429)
