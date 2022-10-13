@@ -3,7 +3,7 @@ package com.mapbox.navigation.core.trip.session
 /**
  * Callback that provides the various session states that can happen within a navigation session
  *
- * @see NavigationSessionState
+ * @see NavigationSessionStateV2
  */
 fun interface NavigationSessionStateObserverV2 {
     /**

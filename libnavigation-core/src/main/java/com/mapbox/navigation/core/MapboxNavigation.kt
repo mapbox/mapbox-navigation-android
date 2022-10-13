@@ -657,6 +657,14 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @see [registerNavigationSessionStateObserver]
      */
     fun getNavigationSessionState(): NavigationSessionState = navigationSession.state
+
+    /**
+     * Provides the current navigation session state.
+     * Replacement of [MapboxNavigation.getNavigationSessionState] which to be depricated.
+     *
+     * @return current [NavigationSessionStateV2]
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
     fun getNavigationSessionStateV2(): NavigationSessionStateV2 = navigationSession.stateV2
 
     /**
@@ -1012,6 +1020,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     fun getNavigationRoutes(): List<NavigationRoute> = directionsSession.routes
 
+    /**
+     * Get a list of previewed routes.
+     *
+     * If the list is not empty, the route at index 0 is the one treated as the primary route.
+     *
+     * @return a list of [NavigationRoute]s
+     */
     fun getPreviewedNavigationRoutes(): List<NavigationRoute> = directionsSession.previewedRoutes
 
     /**

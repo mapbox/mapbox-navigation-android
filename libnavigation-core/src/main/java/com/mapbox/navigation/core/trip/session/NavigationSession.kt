@@ -188,6 +188,9 @@ sealed class NavigationSessionStateV2 {
         override val sessionId: String
     ) : NavigationSessionStateV2()
 
+    /**
+     * Route preview state
+     */
     data class RoutePreview internal constructor(
         override val sessionId: String
     ) : NavigationSessionStateV2()
