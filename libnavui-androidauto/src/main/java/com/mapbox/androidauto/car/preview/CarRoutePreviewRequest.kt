@@ -16,6 +16,7 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesPreview
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 
@@ -39,17 +40,12 @@ class CarRoutePreviewRequest internal constructor(
     private var currentRequestId: Long? = null
     private var mapboxNavigation: MapboxNavigation? = null
 
-    var repository: CarRoutePreviewRepository? = null
-        private set
-
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
-        repository = CarRoutePreviewRepository()
         this.mapboxNavigation = mapboxNavigation
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         cancelRequest()
-        repository = null
         this.mapboxNavigation = null
     }
 
@@ -129,7 +125,7 @@ class CarRoutePreviewRequest internal constructor(
                 currentRequestId = null
 
                 logAndroidAuto("CarRoutePreview.onRoutesReady ${routes.size}")
-                repository?.setRoutePreview(placeRecord, routes)
+                mapboxNavigation?.setRoutePreviewRoutes(routes)
                 callback.onRoutesReady(placeRecord, routes)
             }
 

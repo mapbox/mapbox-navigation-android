@@ -18,6 +18,7 @@ import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesPreviewObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -50,7 +51,6 @@ private const val DEFAULT_INITIAL_ZOOM = 15.0
 class CarNavigationCamera(
     private val initialCarCameraMode: CarCameraMode,
     private val alternativeCarCameraMode: CarCameraMode?,
-    private val carRoutesProvider: CarRoutesProvider = NavigationCarRoutesProvider(),
     private val initialCameraOptions: CameraOptions? = CameraOptions.Builder()
         .zoom(DEFAULT_INITIAL_ZOOM)
         .build()
@@ -111,15 +111,28 @@ class CarNavigationCamera(
         viewportDataSource.evaluate()
     }
 
+
+    private val routesPreviewObserver = RoutesPreviewObserver { routesPreview ->
+        val routes = routesPreview.navigationRoutes
+        if (routes.isEmpty()) {
+            viewportDataSource.clearRouteData()
+        } else {
+            viewportDataSource.onRouteChanged(routes.first())
+        }
+        viewportDataSource.evaluate()
+    }
+
     private val navigationObserver = object : MapboxNavigationObserver {
         override fun onAttached(mapboxNavigation: MapboxNavigation) {
             mapboxNavigation.registerLocationObserver(locationObserver)
             mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+            mapboxNavigation.registerRoutePreviewObserver(routesPreviewObserver)
         }
 
         override fun onDetached(mapboxNavigation: MapboxNavigation) {
             mapboxNavigation.unregisterLocationObserver(locationObserver)
             mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+            mapboxNavigation.unregisterRoutePreviewObserver(routesPreviewObserver)
         }
     }
 
@@ -175,17 +188,6 @@ class CarNavigationCamera(
         )
 
         MapboxNavigationApp.registerObserver(navigationObserver)
-
-        coroutineScope.launch {
-            carRoutesProvider.navigationRoutes.collect { routes ->
-                if (routes.isEmpty()) {
-                    viewportDataSource.clearRouteData()
-                } else {
-                    viewportDataSource.onRouteChanged(routes.first())
-                }
-                viewportDataSource.evaluate()
-            }
-        }
     }
 
     override fun onVisibleAreaChanged(visibleArea: Rect, edgeInsets: EdgeInsets) {

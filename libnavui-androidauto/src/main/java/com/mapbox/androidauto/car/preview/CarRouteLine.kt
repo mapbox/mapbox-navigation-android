@@ -16,6 +16,7 @@ import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListen
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesPreviewObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
@@ -42,9 +43,7 @@ import kotlinx.coroutines.launch
  * Anything for rendering the car's route line, is handled here at this point.
  */
 @OptIn(MapboxExperimental::class)
-class CarRouteLine(
-    private val carRoutesProvider: CarRoutesProvider = NavigationCarRoutesProvider()
-) : MapboxCarMapObserver {
+class CarRouteLine : MapboxCarMapObserver {
 
     private val routeLineColorResources by lazy {
         RouteLineColorResources.Builder().build()
@@ -83,6 +82,27 @@ class CarRouteLine(
         }
     }
 
+    private val routesPreviewObserver = RoutesPreviewObserver { routesPreview ->
+        val routes = routesPreview.navigationRoutes
+        logAndroidAuto("CarRouteLine onRoutesChanged ${routes.size}")
+        styleFlow.value?.let { style ->
+            if (routes.isNotEmpty()) {
+                val routesMetadata = MapboxNavigationApp.current()
+                    ?.getAlternativeMetadataFor(routes)
+                    ?: emptyList()
+                routeLineApi.setNavigationRoutes(routes, routesMetadata) { value ->
+                    routeLineView.renderRouteDrawData(style, value)
+                }
+            } else {
+                routeLineApi.clearRouteLine { value ->
+                    routeLineView.renderClearRouteLineValue(style, value)
+                }
+                val clearArrowValue = routeArrowApi.clearArrows()
+                routeArrowView.render(style, clearArrowValue)
+            }
+        }
+    }
+
     private val navigationObserver = mapboxNavigationForward(this::onAttached, this::onDetached)
 
     private var styleLoadedListener: OnStyleLoadedListener? = null
@@ -106,11 +126,6 @@ class CarRouteLine(
         val locationPlugin = mapboxCarMapSurface.mapSurface.location
         locationPlugin.addOnIndicatorPositionChangedListener(onPositionChangedListener)
         MapboxNavigationApp.registerObserver(navigationObserver)
-        coroutineScope.launch {
-            carRoutesProvider.navigationRoutes
-                .combine(styleFlow) { routes, _ -> routes }
-                .collect { onRoutesChanged(it) }
-        }
     }
 
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
@@ -126,6 +141,7 @@ class CarRouteLine(
 
     private fun onAttached(mapboxNavigation: MapboxNavigation) {
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.registerRoutePreviewObserver(routesPreviewObserver)
     }
 
     private fun onDetached(mapboxNavigation: MapboxNavigation) {
@@ -147,25 +163,5 @@ class CarRouteLine(
         return style.styleLayers
             .firstOrNull { layer -> layer.id.contains("road-label") }
             ?.id ?: "road-label-navigation"
-    }
-
-    private fun onRoutesChanged(routes: List<NavigationRoute>) {
-        logAndroidAuto("CarRouteLine onRoutesChanged ${routes.size}")
-        styleFlow.value?.let { style ->
-            if (routes.isNotEmpty()) {
-                val routesMetadata = MapboxNavigationApp.current()
-                    ?.getAlternativeMetadataFor(routes)
-                    ?: emptyList()
-                routeLineApi.setNavigationRoutes(routes, routesMetadata) { value ->
-                    routeLineView.renderRouteDrawData(style, value)
-                }
-            } else {
-                routeLineApi.clearRouteLine { value ->
-                    routeLineView.renderClearRouteLineValue(style, value)
-                }
-                val clearArrowValue = routeArrowApi.clearArrows()
-                routeArrowView.render(style, clearArrowValue)
-            }
-        }
     }
 }

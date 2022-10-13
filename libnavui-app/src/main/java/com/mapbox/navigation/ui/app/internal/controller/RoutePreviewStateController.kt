@@ -48,7 +48,7 @@ class RoutePreviewStateController(private val store: Store) : StateController() 
     override fun process(state: State, action: Action): State {
         if (action is RoutePreviewAction && mapboxNavigation != null) {
             return state.copy(
-                previewRoutes = processRoutesAction(action)
+                routePreviewState = processRoutesAction(action)
             )
         }
         return state
@@ -66,7 +66,7 @@ class RoutePreviewStateController(private val store: Store) : StateController() 
                 if (action.routes.isEmpty()) {
                     RoutePreviewState.Empty
                 } else {
-                    RoutePreviewState.Ready(action.routes)
+                    mapboxNavigation!!.setRoutePreviewRoutes(action.routes)
                 }
             }
             is RoutePreviewAction.Canceled -> {

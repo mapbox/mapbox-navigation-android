@@ -20,10 +20,10 @@ import com.mapbox.androidauto.car.navigation.CarDistanceFormatter
 import com.mapbox.androidauto.car.navigation.CarNavigationCamera
 import com.mapbox.androidauto.car.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapLayerUtil
-import com.mapbox.androidauto.car.search.PlaceRecord
 import com.mapbox.androidauto.internal.car.extensions.addBackPressedHandler
 import com.mapbox.androidauto.internal.car.extensions.handleStyleOnAttached
 import com.mapbox.androidauto.internal.car.extensions.handleStyleOnDetached
+import com.mapbox.androidauto.internal.car.extensions.mapboxNavigationForward
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.navigation.audioguidance.muteAudioGuidance
 import com.mapbox.androidauto.screenmanager.MapboxScreen
@@ -31,10 +31,13 @@ import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.MapboxExperimental
+import com.mapbox.maps.Style
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
-import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesPreview
+import com.mapbox.navigation.core.directions.session.RoutesPreviewObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 
 /**
@@ -44,14 +47,9 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 @OptIn(MapboxExperimental::class)
 internal class CarRoutePreviewScreen @UiThread constructor(
     private val routePreviewCarContext: RoutePreviewCarContext,
-    private val placeRecord: PlaceRecord,
-    private val navigationRoutes: List<NavigationRoute>,
     private val placesLayerUtil: PlacesListOnMapLayerUtil = PlacesListOnMapLayerUtil(),
 ) : Screen(routePreviewCarContext.carContext) {
-
-    private val carRoutesProvider = PreviewCarRoutesProvider(navigationRoutes)
-    private var selectedIndex = 0
-    private val carRouteLine = CarRouteLine(carRoutesProvider)
+    private val carRouteLine = CarRouteLine()
     private val carLocationRenderer = CarLocationRenderer()
     private val carSpeedLimitRenderer = CarSpeedLimitRenderer(
         routePreviewCarContext.mapboxCarContext
@@ -59,10 +57,15 @@ internal class CarRoutePreviewScreen @UiThread constructor(
     private val carNavigationCamera = CarNavigationCamera(
         initialCarCameraMode = CarCameraMode.OVERVIEW,
         alternativeCarCameraMode = CarCameraMode.FOLLOWING,
-        carRoutesProvider = carRoutesProvider,
     )
 
     private var styleLoadedListener: OnStyleLoadedListener? = null
+    private var style: Style? = null
+    private val navigationObserver = mapboxNavigationForward(this::onAttached, this::onDetached)
+
+    private val routesPreviewObserver = RoutesPreviewObserver {
+        updateRoutePreview(style, it)
+    }
 
     private val surfaceListener = object : MapboxCarMapObserver {
 
@@ -74,14 +77,10 @@ internal class CarRoutePreviewScreen @UiThread constructor(
                     style,
                     carContext.resources
                 )
-                val coordinate = placeRecord.coordinate ?: return@handleStyleOnAttached
-                val featureCollection =
-                    FeatureCollection.fromFeature(Feature.fromGeometry(coordinate))
-                placesLayerUtil.updatePlacesListOnMapLayer(
-                    style,
-                    featureCollection
-                )
+                this@CarRoutePreviewScreen.style = style
+                updateRoutePreview(style, MapboxNavigationApp.current()?.getRoutePreview())
             }
+            MapboxNavigationApp.registerObserver(navigationObserver)
         }
 
         override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
@@ -90,7 +89,22 @@ internal class CarRoutePreviewScreen @UiThread constructor(
             mapboxCarMapSurface.handleStyleOnDetached(styleLoadedListener)?.let {
                 placesLayerUtil.removePlacesListOnMapLayer(it)
             }
+            this@CarRoutePreviewScreen.style = null
+            MapboxNavigationApp.unregisterObserver(navigationObserver)
         }
+    }
+
+    private fun updateRoutePreview(style: Style?, routes: RoutesPreview?) {
+        val coordinate = routes?.navigationRoutes?.lastOrNull()?.routeOptions
+            ?.coordinatesList()?.lastOrNull()
+            ?: return
+        val style = style
+            ?: return
+        val featureCollection = FeatureCollection.fromFeature(Feature.fromGeometry(coordinate))
+        placesLayerUtil.updatePlacesListOnMapLayer(
+            style,
+            featureCollection
+        )
     }
 
     init {
@@ -122,11 +136,21 @@ internal class CarRoutePreviewScreen @UiThread constructor(
         })
     }
 
+    private fun onAttached(mapboxNavigation: MapboxNavigation) {
+        mapboxNavigation.registerRoutePreviewObserver(routesPreviewObserver)
+    }
+
+    private fun onDetached(mapboxNavigation: MapboxNavigation) {
+        mapboxNavigation.unregisterRoutePreviewObserver(routesPreviewObserver)
+    }
+
     override fun onGetTemplate(): Template {
         val listBuilder = ItemList.Builder()
+        val routesPreview = MapboxNavigationApp.current()!!.getRoutePreview()
+        val navigationRoutes = routesPreview.navigationRoutes
         navigationRoutes.forEach { navigationRoute ->
             val route = navigationRoute.directionsRoute
-            val title = route.legs()?.first()?.summary() ?: placeRecord.name
+            val title = route.legs()?.first()?.summary() ?: routesPreview.destinationName
             val duration = CarDistanceFormatter.formatDistance(route.duration())
             val routeSpannableString = SpannableString("$duration $title")
             routeSpannableString.setSpan(
@@ -144,18 +168,9 @@ internal class CarRoutePreviewScreen @UiThread constructor(
             )
         }
         if (navigationRoutes.isNotEmpty()) {
-            listBuilder.setSelectedIndex(selectedIndex)
+            listBuilder.setSelectedIndex(routesPreview.selectedIndex)
             listBuilder.setOnSelectedListener { index ->
-                val newRouteOrder = navigationRoutes.toMutableList()
-                selectedIndex = index
-                if (index > 0) {
-                    val swap = newRouteOrder[0]
-                    newRouteOrder[0] = newRouteOrder[index]
-                    newRouteOrder[index] = swap
-                    carRoutesProvider.updateRoutes(newRouteOrder)
-                } else {
-                    carRoutesProvider.updateRoutes(navigationRoutes)
-                }
+                MapboxNavigationApp.current()!!.setRoutePreviewIndex(index)
             }
         }
 
@@ -176,9 +191,7 @@ internal class CarRoutePreviewScreen @UiThread constructor(
                 Action.Builder()
                     .setTitle(carContext.getString(R.string.car_action_preview_navigate_button))
                     .setOnClickListener {
-                        MapboxNavigationApp.current()!!.setNavigationRoutes(
-                            carRoutesProvider.navigationRoutes.value
-                        )
+                        MapboxNavigationApp.current()!!.startActiveGuidance()
                         MapboxScreenManager.replaceTop(MapboxScreen.ACTIVE_GUIDANCE)
                     }
                     .build(),

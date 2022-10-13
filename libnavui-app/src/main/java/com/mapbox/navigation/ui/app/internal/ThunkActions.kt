@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.app.internal
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesPreview
 import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
 import com.mapbox.navigation.ui.app.internal.extension.ThunkAction
@@ -11,7 +12,6 @@ import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RouteOptionsProvider
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.toPoint
@@ -92,9 +92,9 @@ fun CoroutineScope.fetchRouteAndStartActiveNavigation(
     routeOptionsProvider: RouteOptionsProvider,
     mapboxNavigation: MapboxNavigation,
 ) = fetchRouteAndContinue(routeOptionsProvider, mapboxNavigation) { store ->
-    val previewRoutes = store.state.value.previewRoutes
-    if (previewRoutes is RoutePreviewState.Ready) {
-        store.dispatch(startActiveNavigation(previewRoutes.routes))
+    val navigationRoutes = mapboxNavigation.getRoutePreview().navigationRoutes
+    if (navigationRoutes.isNotEmpty()) {
+        store.dispatch(startActiveNavigation(navigationRoutes))
     }
 }
 
@@ -123,9 +123,10 @@ private suspend fun fetchRouteIfNeeded(
     routeOptionsProvider: RouteOptionsProvider,
     mapboxNavigation: MapboxNavigation,
 ): Boolean {
+    val routesPreview = mapboxNavigation.getRoutePreview()
     val storeState = store.state.value
-    if (storeState.previewRoutes is RoutePreviewState.Ready) return true
-    if (storeState.previewRoutes is RoutePreviewState.Fetching) return false
+    if (routesPreview.navigationRoutes.isNotEmpty()) return true
+    if (routesPreview.state == RoutesPreview.FETCHING) return false
 
     return ifNonNull(
         storeState.location?.enhancedLocation?.toPoint(),
@@ -134,12 +135,12 @@ private suspend fun fetchRouteIfNeeded(
         val options = routeOptionsProvider.getOptions(mapboxNavigation, lastPoint, destination)
         store.dispatch(RoutePreviewAction.FetchOptions(options))
         store.waitWhileFetching()
-        store.state.value.previewRoutes is RoutePreviewState.Ready
+        mapboxNavigation.getRoutePreview().navigationRoutes.isNotEmpty()
     } ?: false
 }
 
 private suspend fun Store.waitWhileFetching() {
-    select { it.previewRoutes }.takeWhile { it is RoutePreviewState.Fetching }.collect()
+    select { it.routePreviewState }.takeWhile { it is RoutePreviewState.Fetching }.collect()
 }
 
 private fun Store.setDestination(point: Point) {
