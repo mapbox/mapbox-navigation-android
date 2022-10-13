@@ -6,7 +6,7 @@ import androidx.lifecycle.LifecycleRegistry
 
 internal class TestLifecycleOwner : LifecycleOwner {
     @Suppress("MemberVisibilityCanBePrivate")
-    val lifecycleRegistry = LifecycleRegistry(this)
+    val lifecycleRegistry = LifecycleRegistry.createUnsafe(this)
         .also { it.currentState = Lifecycle.State.INITIALIZED }
 
     override fun getLifecycle(): Lifecycle = lifecycleRegistry

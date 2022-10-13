@@ -142,13 +142,6 @@ abstract class NavigationViewListener {
     open fun onInfoPanelSlide(slideOffset: Float) = Unit
 
     /**
-     * Called when hardware back button has been pressed.
-     *
-     * @return True if the listener has consumed the event, false otherwise.
-     */
-    open fun onBackPressed(): Boolean = false
-
-    /**
      * Called when maneuver view has been expanded.
      */
     open fun onManeuverExpanded() = Unit

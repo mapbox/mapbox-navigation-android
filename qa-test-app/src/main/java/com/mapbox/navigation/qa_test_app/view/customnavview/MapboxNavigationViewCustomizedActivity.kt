@@ -12,6 +12,7 @@ import android.widget.AdapterView
 import android.widget.LinearLayout.LayoutParams
 import android.widget.SpinnerAdapter
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.AppCompatSpinner
@@ -120,7 +121,6 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
 
         override fun onMapLongClick(point: Point): Boolean {
             val lastLocation = lastLocation ?: return false
-            if (lastNavigationState != NavigationState.FreeDrive) return false
             val mapboxNavigation = MapboxNavigationApp.current() ?: return false
             val routeOptions = RouteOptions.builder()
                 .applyDefaultNavigationOptions()
@@ -209,7 +209,6 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         }
     }
 
-    private var lastNavigationState: NavigationState? = null
     private var lastLocation: Location? = null
     private lateinit var customInfoPanel: CustomInfoPanelBinder
     private lateinit var customInfoPanelFixedHeight: CustomInfoPanelBinderWithFixedHeight
@@ -659,11 +658,11 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
 
     private fun toggleEnableDestinationPreview(enable: Boolean) {
         if (enable) {
-            binding.navigationView.removeListener(backPressOverride)
+            binding.navigationView.removeListener(navigationStateListener)
             binding.navigationView.unregisterMapObserver(onMapLongClick)
+            onBackPressCallback.isEnabled = false
         } else {
-            binding.navigationView.addListener(backPressOverride)
-            binding.navigationView.registerMapObserver(onMapLongClick)
+            binding.navigationView.addListener(navigationStateListener)
         }
         binding.navigationView.customizeViewOptions {
             enableMapLongClickIntercept = enable
@@ -858,45 +857,43 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         }
     }
 
-    private val backPressOverride = object : NavigationViewListener() {
+    private val navigationStateListener = object : NavigationViewListener() {
 
         override fun onFreeDrive() {
-            lastNavigationState = NavigationState.FreeDrive
+            binding.navigationView.registerMapObserver(onMapLongClick)
+            onBackPressCallback.isEnabled = false
         }
 
         override fun onDestinationPreview() {
-            lastNavigationState = NavigationState.DestinationPreview
+            binding.navigationView.unregisterMapObserver(onMapLongClick)
+            onBackPressCallback.isEnabled = false
         }
 
         override fun onRoutePreview() {
-            lastNavigationState = NavigationState.RoutePreview
+            binding.navigationView.unregisterMapObserver(onMapLongClick)
+            onBackPressCallback.isEnabled = true
         }
 
         override fun onActiveNavigation() {
-            lastNavigationState = NavigationState.ActiveNavigation
+            binding.navigationView.unregisterMapObserver(onMapLongClick)
+            onBackPressCallback.isEnabled = false
         }
 
         override fun onArrival() {
-            lastNavigationState = NavigationState.Arrival
-        }
-
-        override fun onBackPressed(): Boolean {
-            if (lastNavigationState == NavigationState.RoutePreview) {
-                binding.navigationView.api.startFreeDrive()
-                return true
-            }
-            return super.onBackPressed()
+            binding.navigationView.unregisterMapObserver(onMapLongClick)
+            onBackPressCallback.isEnabled = false
         }
     }
+
+    private val onBackPressCallback =
+        onBackPressedDispatcher.addCallback(owner = this, enabled = false) {
+            binding.navigationView.api.startFreeDrive()
+        }
 
     private fun SpinnerAdapter.findItemPosition(item: Any): Int? {
         for (pos in 0..count) {
             if (item == getItem(pos)) return pos
         }
         return null
-    }
-
-    private enum class NavigationState {
-        FreeDrive, DestinationPreview, RoutePreview, ActiveNavigation, Arrival,
     }
 }

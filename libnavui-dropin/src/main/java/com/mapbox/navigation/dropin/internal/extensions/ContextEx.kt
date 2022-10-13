@@ -7,8 +7,6 @@ import android.content.Context
 import android.content.ContextWrapper
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModelStoreOwner
-import com.mapbox.navigation.utils.internal.logW
-import java.lang.ref.WeakReference
 
 internal tailrec fun Context.recursiveUnwrap(): Context =
     if (this !is Activity && this is ContextWrapper) {
@@ -25,10 +23,10 @@ internal fun Context.toViewModelStoreOwner(): ViewModelStoreOwner {
     return viewModelStoreOwner
 }
 
-internal fun Context.toComponentActivityRef(): WeakReference<ComponentActivity>? {
+internal fun Context.toComponentActivity(): ComponentActivity {
     val componentActivity = this.recursiveUnwrap() as? ComponentActivity
-    if (componentActivity == null) {
-        logW("Unable to find ComponentActivity to request location permissions")
+    checkNotNull(componentActivity) {
+        "Please ensure that the hosting Context is a valid ComponentActivity"
     }
-    return componentActivity?.let { WeakReference(it) }
+    return componentActivity
 }

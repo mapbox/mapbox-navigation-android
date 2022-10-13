@@ -20,14 +20,16 @@ import java.lang.ref.WeakReference
 /**
  * Default experience for location permissions.
  *
- * @param componentActivityRef used for requesting location permissions
+ * @param componentActivity used for requesting location permissions
  * @param tripSessionStarterViewModel used to notify when location permissions are granted
  */
 @ExperimentalPreviewMapboxNavigationAPI
 internal class LocationPermissionComponent(
-    private val componentActivityRef: WeakReference<ComponentActivity>?,
+    componentActivity: ComponentActivity,
     private val store: Store
 ) : UIComponent() {
+
+    private val componentActivityRef = WeakReference(componentActivity)
 
     private val callback = ActivityResultCallback { permissions: Map<String, Boolean> ->
         val accessFineLocation = permissions[FINE_LOCATION_PERMISSIONS]
@@ -39,7 +41,7 @@ internal class LocationPermissionComponent(
     }
 
     private val launcher = try {
-        componentActivityRef?.get()?.registerForActivityResult(
+        componentActivityRef.get()?.registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions(),
             callback
         )
@@ -82,7 +84,7 @@ internal class LocationPermissionComponent(
      */
     private fun notifyGrantedOnForegrounded(applicationContext: Context) {
         coroutineScope.launch {
-            componentActivityRef?.get()?.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            componentActivityRef.get()?.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 if (!store.state.value.tripSession.isLocationPermissionGranted) {
                     val isGranted = PermissionsManager.areLocationPermissionsGranted(
                         applicationContext

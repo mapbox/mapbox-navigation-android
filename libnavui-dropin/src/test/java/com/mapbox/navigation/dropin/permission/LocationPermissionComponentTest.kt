@@ -29,7 +29,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.lang.ref.WeakReference
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
@@ -37,13 +36,13 @@ import java.lang.ref.WeakReference
 class LocationPermissionComponentTest {
 
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
     private val testLauncher = mockk<ActivityResultLauncher<Any>>(relaxed = true)
     private val resultContractSlot = slot<ActivityResultContract<Any, Any>>()
     private val callbackSlot = slot<ActivityResultCallback<Any>>()
     private val testLifecycle = TestLifecycleOwner()
-    private var componentActivity: ComponentActivity = mockk(relaxed = true) {
+    private val componentActivity = mockk<ComponentActivity>(relaxed = true) {
         every { lifecycle } returns testLifecycle.lifecycle
         every {
             registerForActivityResult(
@@ -54,8 +53,7 @@ class LocationPermissionComponentTest {
             testLauncher
         }
     }
-    private val componentActivityRef = WeakReference(componentActivity)
-    private var testStore: TestStore = spyk(TestStore())
+    private val testStore = spyk(TestStore())
 
     @Before
     fun setup() {
@@ -71,7 +69,7 @@ class LocationPermissionComponentTest {
     @Test
     fun `onAttached will notify permissions granted when granted`() {
         val locationPermissionComponent = LocationPermissionComponent(
-            componentActivityRef,
+            componentActivity,
             testStore
         )
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns true
@@ -88,7 +86,7 @@ class LocationPermissionComponentTest {
     @Test
     fun `onAttached will not notify permissions granted when not granted`() {
         val locationPermissionComponent = LocationPermissionComponent(
-            componentActivityRef,
+            componentActivity,
             testStore
         )
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns false
@@ -105,7 +103,7 @@ class LocationPermissionComponentTest {
     @Test
     fun `onAttached will request permissions when not granted`() {
         val locationPermissionComponent = LocationPermissionComponent(
-            componentActivityRef,
+            componentActivity,
             testStore
         )
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns false
@@ -118,7 +116,7 @@ class LocationPermissionComponentTest {
     @Test
     fun `onAttached grant location permissions if request succeeds`() {
         val locationPermissionComponent = LocationPermissionComponent(
-            componentActivityRef,
+            componentActivity,
             testStore
         )
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns false
@@ -140,7 +138,7 @@ class LocationPermissionComponentTest {
     @Test
     fun `onAttached not grant location permissions if request is denied`() {
         val locationPermissionComponent = LocationPermissionComponent(
-            componentActivityRef,
+            componentActivity,
             testStore
         )
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns false
@@ -162,7 +160,7 @@ class LocationPermissionComponentTest {
     @Test
     fun `onDetached will unregister from the launcher`() {
         val locationPermissionComponent = LocationPermissionComponent(
-            componentActivityRef,
+            componentActivity,
             testStore
         )
 
@@ -176,7 +174,7 @@ class LocationPermissionComponentTest {
     fun `should invoke LocationPermissionResult when permissions are accepted from background`() =
         coroutineRule.runBlockingTest {
             val locationPermissionComponent = LocationPermissionComponent(
-                componentActivityRef,
+                componentActivity,
                 testStore
             )
             testStore.setState(
