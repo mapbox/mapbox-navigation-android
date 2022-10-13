@@ -6,11 +6,13 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateV2
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routeProgressUpdates
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routesUpdates
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.waitForNewRoute
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.waitForPreviewRoute
@@ -24,6 +26,8 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.takeWhile
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -151,12 +155,20 @@ class PreviewRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         mapboxNavigation.waitForNewRoute()
         val activeGuidanceRouteProgress = mapboxNavigation.routeProgressUpdates().first()
 
+        val routeUpdates = mutableListOf<RoutesUpdatedResult>()
+        mapboxNavigation.registerRoutesObserver {
+            routeUpdates.add(it)
+        }
         mapboxNavigation.previewNavigationRoutes(mapboxNavigation.getNavigationRoutes())
         mapboxNavigation.waitForPreviewRoute()
         val previewRouteProgress = withTimeoutOrNull(1) {
             mapboxNavigation.routeProgressUpdates().first()
         }
 
+        assertEquals(
+            listOf(RoutesExtra.ROUTES_UPDATE_REASON_NEW, RoutesExtra.ROUTES_UPDATE_REASON_PREVIEW),
+            routeUpdates.map { it.reason }
+        )
         assertNotNull(activeGuidanceRouteProgress)
         assertNull(previewRouteProgress)
         assertIs<NavigationSessionState.FreeDrive>(mapboxNavigation.getNavigationSessionState())

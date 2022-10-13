@@ -852,7 +852,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     ) {
         internalSetNavigationRoutes(
             emptyList(),
-            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0)
+            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0),
+            updateRoutesInDirectionSession = false
         )
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
@@ -909,6 +910,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routes: List<NavigationRoute>,
         setRoutesInfo: SetRoutesInfo,
         callback: RoutesSetCallback? = null,
+        updateRoutesInDirectionSession: Boolean = true
     ) {
         rerouteController?.interrupt()
         restartRouteScope()
@@ -925,7 +927,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                                     processedRoute.route.routeId == passedRoute.id
                                 }
                             }
-                        directionsSession.setRoutes(processedRoutes.routes, setRoutesInfo)
+                        if (updateRoutesInDirectionSession) {
+                            directionsSession.setRoutes(processedRoutes.routes, setRoutesInfo)
+                        }
                         routesSetResult = ExpectedFactory.createValue(
                             RoutesSetSuccess(
                                 ignoredAlternatives.associate {
