@@ -98,17 +98,11 @@ class PreviewRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         val routes = RoutesProvider.dc_short_with_alternative(activity).toNavigationRoutes()
         pushPrimaryRouteOriginAsLocation(routes)
         mapboxNavigation.startTripSession()
-        val previewedRouteDeferred = async {
-            mapboxNavigation.waitForPreviewRoute()
-        }
         mapboxNavigation.previewNavigationRoutes(routes)
-        previewedRouteDeferred.await()
-        val activeGuidanceRouteUpdateDefer = async {
-            mapboxNavigation.waitForNewRoute()
-        }
+        mapboxNavigation.waitForPreviewRoute()
 
         mapboxNavigation.setNavigationRoutes(mapboxNavigation.getPreviewedNavigationRoutes())
-        val activeGuidanceRouteUpdate = activeGuidanceRouteUpdateDefer.await()
+        val activeGuidanceRouteUpdate = mapboxNavigation.waitForNewRoute()
 
         assertEquals(RoutesExtra.ROUTES_UPDATE_REASON_NEW, activeGuidanceRouteUpdate.reason)
         assertEquals(routes, activeGuidanceRouteUpdate.navigationRoutes)
