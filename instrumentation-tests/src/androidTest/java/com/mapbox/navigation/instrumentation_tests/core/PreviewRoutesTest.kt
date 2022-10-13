@@ -83,16 +83,13 @@ class PreviewRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         val routes = RoutesProvider.dc_short_with_alternative(activity).toNavigationRoutes()
         pushPrimaryRouteOriginAsLocation(routes)
         mapboxNavigation.startTripSession()
-        val previewedRouteDeffer = async {
-            mapboxNavigation.waitForPreviewRoute()
-        }
 
         mapboxNavigation.previewNavigationRoutes(routes)
-
-        val previewRouteUpdate = previewedRouteDeffer.await()
+        val previewRouteUpdate = mapboxNavigation.waitForPreviewRoute()
         val previewedRouteMetadata = mapboxNavigation.getAlternativeMetadataFor(
             previewRouteUpdate.navigationRoutes[1]
         )
+
         assertNotNull(previewedRouteMetadata)
     }
 
