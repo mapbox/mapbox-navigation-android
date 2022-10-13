@@ -16,9 +16,12 @@ import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.dropin.util.TestingUtil.findComponent
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.base.lifecycle.UIBinder
+import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -87,5 +90,43 @@ class InfoPanelHeaderDestinationPreviewBinderTest {
         components.onAttached(mapboxNavigation)
 
         assertNotNull(components.findComponent { it is StartNavigationButtonComponent })
+    }
+
+    @Test
+    fun `bind should use custom binder for Route Preview Button`() {
+        class MyPreviewButtonComponent : UIComponent()
+        navContext.applyBinderCustomization {
+            infoPanelRoutePreviewButtonBinder = UIBinder {
+                MyPreviewButtonComponent()
+            }
+        }
+
+        val components = sut.bind(FrameLayout(ctx))
+        components.onAttached(mapboxNavigation)
+
+        assertNotNull(components.findComponent { it is MyPreviewButtonComponent })
+        assertNull(
+            "should NOT bind default RoutePreviewButtonComponent",
+            components.findComponent { it is RoutePreviewButtonComponent }
+        )
+    }
+
+    @Test
+    fun `bind should use custom binder for Start Navigation Button`() {
+        class MyStartButtonComponent : UIComponent()
+        navContext.applyBinderCustomization {
+            infoPanelStartNavigationButtonBinder = UIBinder {
+                MyStartButtonComponent()
+            }
+        }
+
+        val components = sut.bind(FrameLayout(ctx))
+        components.onAttached(mapboxNavigation)
+
+        assertNotNull(components.findComponent { it is MyStartButtonComponent })
+        assertNull(
+            "should NOT bind default StartNavigationButtonComponent",
+            components.findComponent { it is StartNavigationButtonComponent }
+        )
     }
 }

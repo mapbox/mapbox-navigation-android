@@ -36,11 +36,16 @@ internal class NavigationViewBinderTest {
         assertEquals(c.speedLimitBinder, sut.speedLimit.value)
         assertEquals(c.maneuverBinder, sut.maneuver.value)
         assertEquals(c.roadNameBinder, sut.roadName.value)
+
         assertEquals(c.actionButtonsBinder, sut.actionButtonsBinder.value)
+        assertEquals(c.customActionButtons, sut.customActionButtons.value)
+        assertEquals(c.actionCompassButtonBinder, sut.actionCompassButtonBinder.value)
+        assertEquals(c.actionCameraModeButtonBinder, sut.actionCameraModeButtonBinder.value)
+        assertEquals(c.actionToggleAudioButtonBinder, sut.actionToggleAudioButtonBinder.value)
+        assertEquals(c.actionRecenterButtonBinder, sut.actionRecenterButtonBinder.value)
 
         assertEquals(c.leftFrameBinder, sut.leftFrameContentBinder.value)
         assertEquals(c.rightFrameBinder, sut.rightFrameContentBinder.value)
-        assertEquals(c.customActionButtons, sut.customActionButtons.value)
 
         assertEquals(c.infoPanelBinder, sut.infoPanelBinder.value)
         assertEquals(c.infoPanelHeaderBinder, sut.infoPanelHeaderBinder.value)
@@ -62,6 +67,14 @@ internal class NavigationViewBinderTest {
         assertEquals(c.infoPanelTripProgressBinder, sut.infoPanelTripProgressBinder.value)
         assertEquals(c.infoPanelContentBinder, sut.infoPanelContentBinder.value)
         assertEquals(
+            c.infoPanelRoutePreviewButtonBinder,
+            sut.infoPanelRoutePreviewButtonBinder.value
+        )
+        assertEquals(
+            c.infoPanelStartNavigationButtonBinder,
+            sut.infoPanelStartNavigationButtonBinder.value
+        )
+        assertEquals(
             c.infoPanelEndNavigationButtonBinder,
             sut.infoPanelEndNavigationButtonBinder.value
         )
@@ -80,6 +93,10 @@ internal class NavigationViewBinderTest {
 
                 actionButtonsBinder = UIBinder.USE_DEFAULT
                 customActionButtons = emptyList()
+                actionCompassButtonBinder = UIBinder.USE_DEFAULT
+                actionCameraModeButtonBinder = UIBinder.USE_DEFAULT
+                actionToggleAudioButtonBinder = UIBinder.USE_DEFAULT
+                actionRecenterButtonBinder = UIBinder.USE_DEFAULT
 
                 leftFrameBinder = UIBinder.USE_DEFAULT
                 rightFrameBinder = UIBinder.USE_DEFAULT
@@ -94,6 +111,8 @@ internal class NavigationViewBinderTest {
 
                 infoPanelTripProgressBinder = UIBinder.USE_DEFAULT
                 infoPanelContentBinder = UIBinder.USE_DEFAULT
+                infoPanelRoutePreviewButtonBinder = UIBinder.USE_DEFAULT
+                infoPanelStartNavigationButtonBinder = UIBinder.USE_DEFAULT
                 infoPanelEndNavigationButtonBinder = UIBinder.USE_DEFAULT
 
                 mapViewBinder = MapViewBinder.defaultBinder()
@@ -106,6 +125,10 @@ internal class NavigationViewBinderTest {
 
         assertTrue(sut.actionButtonsBinder.value == null)
         assertTrue(sut.customActionButtons.value.isEmpty())
+        assertTrue(sut.actionCompassButtonBinder.value == null)
+        assertTrue(sut.actionCameraModeButtonBinder.value == null)
+        assertTrue(sut.actionToggleAudioButtonBinder.value == null)
+        assertTrue(sut.actionRecenterButtonBinder.value == null)
 
         assertTrue(sut.leftFrameContentBinder.value == null)
         assertTrue(sut.rightFrameContentBinder.value == null)
@@ -117,6 +140,8 @@ internal class NavigationViewBinderTest {
         assertTrue(sut.infoPanelHeaderRoutesPreviewBinder.value == null)
         assertTrue(sut.infoPanelHeaderActiveGuidanceBinder.value == null)
         assertTrue(sut.infoPanelHeaderArrivalBinder.value == null)
+        assertTrue(sut.infoPanelRoutePreviewButtonBinder.value == null)
+        assertTrue(sut.infoPanelStartNavigationButtonBinder.value == null)
         assertTrue(sut.infoPanelEndNavigationButtonBinder.value == null)
 
         assertTrue(sut.infoPanelTripProgressBinder.value == null)
@@ -128,15 +153,20 @@ internal class NavigationViewBinderTest {
         speedLimitBinder = EmptyBinder()
         maneuverBinder = EmptyBinder()
         roadNameBinder = EmptyBinder()
-        actionButtonsBinder = EmptyBinder()
 
         leftFrameBinder = EmptyBinder()
         rightFrameBinder = EmptyBinder()
+
+        actionButtonsBinder = EmptyBinder()
         customActionButtons = listOf(
             ActionButtonDescription(mockk(), START),
             ActionButtonDescription(mockk(), START),
             ActionButtonDescription(mockk(), END)
         )
+        actionCompassButtonBinder = EmptyBinder()
+        actionCameraModeButtonBinder = EmptyBinder()
+        actionToggleAudioButtonBinder = EmptyBinder()
+        actionRecenterButtonBinder = EmptyBinder()
 
         infoPanelBinder = mockk()
         infoPanelHeaderBinder = EmptyBinder()
@@ -148,6 +178,8 @@ internal class NavigationViewBinderTest {
 
         infoPanelTripProgressBinder = EmptyBinder()
         infoPanelContentBinder = EmptyBinder()
+        infoPanelRoutePreviewButtonBinder = EmptyBinder()
+        infoPanelStartNavigationButtonBinder = EmptyBinder()
         infoPanelEndNavigationButtonBinder = EmptyBinder()
         mapViewBinder = mockk()
     }
