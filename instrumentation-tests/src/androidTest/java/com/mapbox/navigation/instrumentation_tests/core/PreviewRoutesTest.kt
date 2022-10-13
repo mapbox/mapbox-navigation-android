@@ -104,7 +104,6 @@ class PreviewRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         mapboxNavigation.setNavigationRoutes(mapboxNavigation.getPreviewedNavigationRoutes())
         val activeGuidanceRouteUpdate = mapboxNavigation.waitForNewRoute()
 
-        assertEquals(RoutesExtra.ROUTES_UPDATE_REASON_NEW, activeGuidanceRouteUpdate.reason)
         assertEquals(routes, activeGuidanceRouteUpdate.navigationRoutes)
         assertIs<NavigationSessionState.ActiveGuidance>(mapboxNavigation.getNavigationSessionState())
         assertIs<NavigationSessionStateV2.ActiveGuidance>(mapboxNavigation.getNavigationSessionStateV2())
