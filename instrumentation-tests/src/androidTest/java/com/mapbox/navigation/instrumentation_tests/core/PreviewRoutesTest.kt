@@ -63,7 +63,7 @@ class PreviewRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     }
 
     @Test
-    fun preview_route() = sdkTest {
+    fun preview_route_from_free_drive() = sdkTest {
         val routes = RoutesProvider.dc_very_short(activity).toNavigationRoutes()
         pushPrimaryRouteOriginAsLocation(routes)
         mapboxNavigation.startTripSession()
@@ -79,10 +79,9 @@ class PreviewRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     }
 
     @Test
-    fun preview_route_with_alternative() = sdkTest {
+    fun preview_route_with_alternative_from_idle() = sdkTest {
         val routes = RoutesProvider.dc_short_with_alternative(activity).toNavigationRoutes()
         pushPrimaryRouteOriginAsLocation(routes)
-        mapboxNavigation.startTripSession()
 
         mapboxNavigation.previewNavigationRoutes(routes)
         val previewRouteUpdate = mapboxNavigation.waitForPreviewRoute()
