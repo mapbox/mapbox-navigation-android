@@ -850,6 +850,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routes: List<NavigationRoute>,
         initialLegIndex: Int = 0,
     ) {
+        internalSetNavigationRoutes(
+            emptyList(),
+            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0)
+        )
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
                 val alternatives = routes.drop(1)
@@ -861,7 +865,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                     routes,
                     routesData.alternativeRoutes()
                 )
-                directionsSession.setRoutes(routes, BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_PREVIEW, initialLegIndex))
+                directionsSession.setRoutes(
+                    routes,
+                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_PREVIEW, initialLegIndex)
+                )
             }
         }
     }

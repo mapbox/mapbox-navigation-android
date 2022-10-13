@@ -10,6 +10,7 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateV2
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.waitForNewRoute
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.waitForPreviewRoute
@@ -19,9 +20,15 @@ import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.t
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -54,6 +61,7 @@ class PreviewRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     @Test
     fun preview_route() = sdkTest {
         val routes = RoutesProvider.dc_very_short(activity).toNavigationRoutes()
+        pushPrimaryRouteOriginAsLocation(routes)
         mapboxNavigation.startTripSession()
         val previewedRouteDeffer = async {
             mapboxNavigation.waitForPreviewRoute()
@@ -73,6 +81,7 @@ class PreviewRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     @Test
     fun preview_route_with_alternative() = sdkTest {
         val routes = RoutesProvider.dc_short_with_alternative(activity).toNavigationRoutes()
+        pushPrimaryRouteOriginAsLocation(routes)
         mapboxNavigation.startTripSession()
         val previewedRouteDeffer = async {
             mapboxNavigation.waitForPreviewRoute()
@@ -90,6 +99,7 @@ class PreviewRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     @Test
     fun start_active_guidance_after_preview() = sdkTest {
         val routes = RoutesProvider.dc_short_with_alternative(activity).toNavigationRoutes()
+        pushPrimaryRouteOriginAsLocation(routes)
         mapboxNavigation.startTripSession()
         val previewedRouteDeferred = async {
             mapboxNavigation.waitForPreviewRoute()
@@ -101,11 +111,10 @@ class PreviewRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         }
 
         mapboxNavigation.setNavigationRoutes(mapboxNavigation.getPreviewedNavigationRoutes())
-
         val activeGuidanceRouteUpdate = activeGuidanceRouteUpdateDefer.await()
+
         assertEquals(RoutesExtra.ROUTES_UPDATE_REASON_NEW, activeGuidanceRouteUpdate.reason)
         assertEquals(routes, activeGuidanceRouteUpdate.navigationRoutes)
-
         assertIs<NavigationSessionState.ActiveGuidance>(mapboxNavigation.getNavigationSessionState())
         assertIs<NavigationSessionStateV2.ActiveGuidance>(mapboxNavigation.getNavigationSessionStateV2())
     }
@@ -113,6 +122,7 @@ class PreviewRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     @Test
     fun switch_to_free_drive_after_preview() = sdkTest {
         val routes = RoutesProvider.dc_very_short(activity).toNavigationRoutes()
+        pushPrimaryRouteOriginAsLocation(routes)
         mapboxNavigation.startTripSession()
         val previewedRouteDeffer = async {
             mapboxNavigation.waitForPreviewRoute()
@@ -135,15 +145,30 @@ class PreviewRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     @Test
     fun start_preview_after_active_guidance() = sdkTest {
         val routes = RoutesProvider.dc_short_with_alternative(activity).toNavigationRoutes()
+        pushPrimaryRouteOriginAsLocation(routes)
         mapboxNavigation.startTripSession()
         mapboxNavigation.setNavigationRoutes(routes)
         mapboxNavigation.waitForNewRoute()
+        val activeGuidanceRouteProgress = mapboxNavigation.routeProgressUpdates().first()
 
         mapboxNavigation.previewNavigationRoutes(mapboxNavigation.getNavigationRoutes())
         mapboxNavigation.waitForPreviewRoute()
+        val previewRouteProgress = withTimeoutOrNull(1) {
+            mapboxNavigation.routeProgressUpdates().first()
+        }
 
+        assertNotNull(activeGuidanceRouteProgress)
+        assertNull(previewRouteProgress)
         assertIs<NavigationSessionState.FreeDrive>(mapboxNavigation.getNavigationSessionState())
         assertIs<NavigationSessionStateV2.RoutePreview>(mapboxNavigation.getNavigationSessionStateV2())
+    }
+
+    private fun pushPrimaryRouteOriginAsLocation(routes: List<NavigationRoute>) {
+        val origin = routes.first().routeOptions.coordinatesList().first()
+        mockLocationUpdatesRule.pushLocationUpdate {
+            latitude = origin.latitude()
+            longitude = origin.longitude()
+        }
     }
 }
 
