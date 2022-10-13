@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.core.graphics.Insets
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.ViewBinderCustomization
 import com.mapbox.navigation.dropin.ViewOptionsCustomization
@@ -41,8 +40,6 @@ internal class NavigationViewContext(
     storeProvider: Provider<Store> = Provider { SharedApp.store }
 ) {
     val store by storeProvider
-
-    val mapView = MutableStateFlow<MapView?>(null)
 
     val systemBarsInsets = MutableStateFlow(Insets.NONE)
 

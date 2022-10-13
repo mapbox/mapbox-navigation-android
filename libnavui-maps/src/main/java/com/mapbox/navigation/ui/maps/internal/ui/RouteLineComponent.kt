@@ -21,7 +21,6 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.utils.internal.Provider
 import com.mapbox.navigation.utils.internal.ifNonNull
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
@@ -56,7 +55,6 @@ internal class MapboxRouteLineComponentContract : RouteLineComponentContract {
 }
 
 @ExperimentalPreviewMapboxNavigationAPI
-@FlowPreview
 class RouteLineComponent(
     private val mapboxMap: MapboxMap,
     private val mapPlugins: MapPluginProviderDelegate,

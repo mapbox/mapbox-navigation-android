@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin.map
 import android.content.Context
 import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.maps.MapView
@@ -48,12 +49,14 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -66,7 +69,7 @@ import org.robolectric.RobolectricTestRunner
     FlowPreview::class
 )
 @RunWith(RobolectricTestRunner::class)
-class MapBinderTest {
+class MapViewBinderTest {
 
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
@@ -78,8 +81,10 @@ class MapBinderTest {
     private lateinit var store: TestStore
     private lateinit var navContext: NavigationViewContext
     private lateinit var mapboxNavigation: MapboxNavigation
-    private lateinit var sut: MapBinder
+    private lateinit var sut: MapViewBinder
     private lateinit var loadedMapStyleFlow: MutableStateFlow<Style?>
+    private lateinit var mapView: MapView
+    private lateinit var mapViewOwner: MapViewOwner
 
     @Suppress("PrivatePropertyName")
     private var MAP_STYLE = mockk<Style> {
@@ -90,6 +95,7 @@ class MapBinderTest {
     fun setUp() {
         ctx = ApplicationProvider.getApplicationContext()
         store = TestStore()
+        mapViewOwner = mockk(relaxed = true)
         navContext = spyk(
             NavigationViewContext(
                 context = ctx,
@@ -98,12 +104,13 @@ class MapBinderTest {
                 storeProvider = { store }
             )
         )
+        every { navContext.mapViewOwner } returns mapViewOwner
         loadedMapStyleFlow = MutableStateFlow(null)
         every { navContext.mapStyleLoader } returns mockk {
             every { loadedMapStyle } returns loadedMapStyleFlow
         }
         mapboxNavigation = mockk(relaxed = true)
-        val mapView: MapView = mockk {
+        mapView = mockk(relaxed = true) {
             every { getMapboxMap() } returns mockk(relaxed = true) {
                 every { getStyle() } returns null
             }
@@ -123,12 +130,16 @@ class MapBinderTest {
             every { resources } returns ctx.resources
             every { width } returns 100
             every { height } returns 100
+            every { parent } returns null
         }
 
-        sut = MapBinder(
-            navContext,
-            MapboxNavigationViewLayoutBinding.inflate(LayoutInflater.from(ctx), FrameLayout(ctx)),
-            mapView
+        sut = object : MapViewBinder() {
+            override fun getMapView(context: Context): MapView = mapView
+        }
+        sut.context = navContext
+        sut.navigationViewBinding = MapboxNavigationViewLayoutBinding.inflate(
+            LayoutInflater.from(ctx),
+            FrameLayout(ctx)
         )
     }
 
@@ -354,5 +365,32 @@ class MapBinderTest {
         components.onAttached(mapboxNavigation)
 
         assertNotNull(components.findComponent { it is ScalebarComponent })
+    }
+
+    @Test
+    fun `bind adds mapView to layout`() {
+        val viewGroup = spyk(FrameLayout(ctx))
+
+        sut.bind(viewGroup)
+
+        verify {
+            viewGroup.removeAllViews()
+            viewGroup.addView(
+                mapView,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
+    }
+
+    @Test
+    fun `bind updates mapView`() {
+        sut.bind(FrameLayout(ctx))
+        verify { mapViewOwner.updateMapView(mapView) }
+    }
+
+    @Test
+    fun `shouldLoadMapStyle should be true`() {
+        assertTrue(sut.shouldLoadMapStyle)
     }
 }

@@ -23,7 +23,6 @@ package com.mapbox.navigation.dropin {
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public NavigationView(android.content.Context context);
     method public void addListener(com.mapbox.navigation.dropin.navigationview.NavigationViewListener listener);
-    method public void customizeMapView(com.mapbox.maps.MapView? mapView);
     method public void customizeViewBinders(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewBinderCustomization,kotlin.Unit> action);
     method public void customizeViewOptions(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewOptionsCustomization,kotlin.Unit> action);
     method public void customizeViewStyles(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.dropin.ViewStyleCustomization,kotlin.Unit> action);
@@ -87,6 +86,7 @@ package com.mapbox.navigation.dropin {
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getInfoPanelTripProgressBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getLeftFrameBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getManeuverBinder();
+    method public com.mapbox.navigation.dropin.map.MapViewBinder? getMapViewBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getRightFrameBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getRoadNameBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getSpeedLimitBinder();
@@ -104,6 +104,7 @@ package com.mapbox.navigation.dropin {
     method public void setInfoPanelTripProgressBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     method public void setLeftFrameBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     method public void setManeuverBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
+    method public void setMapViewBinder(com.mapbox.navigation.dropin.map.MapViewBinder?);
     method public void setRightFrameBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     method public void setRoadNameBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     method public void setSpeedLimitBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
@@ -121,6 +122,7 @@ package com.mapbox.navigation.dropin {
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? infoPanelTripProgressBinder;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? leftFrameBinder;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? maneuverBinder;
+    property public final com.mapbox.navigation.dropin.map.MapViewBinder? mapViewBinder;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? rightFrameBinder;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? roadNameBinder;
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? speedLimitBinder;
@@ -300,6 +302,22 @@ package com.mapbox.navigation.dropin.infopanel {
 }
 
 package com.mapbox.navigation.dropin.map {
+
+  public final class MapLayoutCoordinatorKt {
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class MapViewBinder implements com.mapbox.navigation.ui.base.lifecycle.UIBinder {
+    ctor public MapViewBinder();
+    method public com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver bind(android.view.ViewGroup viewGroup);
+    method public abstract com.mapbox.maps.MapView getMapView(android.content.Context context);
+    method public boolean getShouldLoadMapStyle();
+    property public boolean shouldLoadMapStyle;
+    field public static final com.mapbox.navigation.dropin.map.MapViewBinder.Companion Companion;
+  }
+
+  public static final class MapViewBinder.Companion {
+    method public com.mapbox.navigation.dropin.map.MapViewBinder defaultBinder();
+  }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class MapViewObserver {
     ctor public MapViewObserver();

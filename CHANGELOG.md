@@ -16,6 +16,19 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue with `NavigationView` that caused road label position to not update after changing peek height of the Info Panel. [#6463](https://github.com/mapbox/mapbox-navigation-android/pull/6463)
 - Updated `Store` to allow `Action` dispatch from `State` observers. [#6455](https://github.com/mapbox/mapbox-navigation-android/pull/6455)
 - Improved `NavigationView` to restore navigation camera state after the view is recreated, e.g. due to a configuration change. [#6472](https://github.com/mapbox/mapbox-navigation-android/pull/6472)
+- Introduced `ViewBinderCustomization.mapViewBinder` instead of `NavigationView.customizeMapView` to allow for customizing mapView. [#6433](https://github.com/mapbox/mapbox-navigation-android/pull/6433)
+  To migrate change your code from:
+```kotlin
+binding.navigationView.customizeMapView(customMapView)
+```
+into:
+```kotlin
+binding.navigationView.customizeViewBinders {
+    mapViewBinder = object : MapViewBinder() {
+      override fun getMapView(viewGroup: ViewGroup): MapView = customMapView
+    }
+}
+```
 
 ## Mapbox Navigation SDK 2.9.0-beta.1 - 06 October, 2022
 ### Changelog

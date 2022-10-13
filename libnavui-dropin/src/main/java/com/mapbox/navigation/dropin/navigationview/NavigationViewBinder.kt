@@ -4,6 +4,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.ViewBinderCustomization
 import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription
 import com.mapbox.navigation.dropin.infopanel.InfoPanelBinder
+import com.mapbox.navigation.dropin.map.MapViewBinder
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -87,6 +88,9 @@ internal class NavigationViewBinder {
     private val _infoPanelContentBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
     val infoPanelContentBinder: StateFlow<UIBinder?> get() = _infoPanelContentBinder.asStateFlow()
 
+    private val _mapViewBinder: MutableStateFlow<MapViewBinder?> = MutableStateFlow(null)
+    val mapViewBinder: StateFlow<MapViewBinder?> get() = _mapViewBinder.asStateFlow()
+
     fun applyCustomization(customization: ViewBinderCustomization) {
         customization.speedLimitBinder?.also { _speedLimit.emitOrNull(it) }
         customization.maneuverBinder?.also { _maneuver.emitOrNull(it) }
@@ -120,6 +124,9 @@ internal class NavigationViewBinder {
         customization.infoPanelContentBinder?.also { _infoPanelContentBinder.emitOrNull(it) }
         customization.infoPanelEndNavigationButtonBinder?.also {
             _infoPanelEndNavigationButtonBinder.emitOrNull(it)
+        }
+        customization.mapViewBinder?.also {
+            _mapViewBinder.emitOrNull(it)
         }
     }
 
