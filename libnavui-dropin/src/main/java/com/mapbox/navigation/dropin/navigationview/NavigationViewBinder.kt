@@ -26,8 +26,24 @@ internal class NavigationViewBinder {
     private val _roadName: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
     val roadName: StateFlow<UIBinder?> get() = _roadName.asStateFlow()
 
+    // Map Action Buttons
+
     private val _actionButtonsBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
-    val actionButtonsBinder: StateFlow<UIBinder?> get() = _actionButtonsBinder.asStateFlow()
+    val actionButtonsBinder: StateFlow<UIBinder?> = _actionButtonsBinder.asStateFlow()
+
+    private val _actionCompassButtonBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
+    val actionCompassButtonBinder: StateFlow<UIBinder?> = _actionCompassButtonBinder.asStateFlow()
+
+    private val _actionCameraModeButtonBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
+    val actionCameraModeButtonBinder: StateFlow<UIBinder?> =
+        _actionCameraModeButtonBinder.asStateFlow()
+
+    private val _actionToggleAudioButtonBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
+    val actionToggleAudioButtonBinder: StateFlow<UIBinder?> =
+        _actionToggleAudioButtonBinder.asStateFlow()
+
+    private val _actionRecenterButtonBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
+    val actionRecenterButtonBinder: StateFlow<UIBinder?> = _actionRecenterButtonBinder.asStateFlow()
 
     // Additional frames
 
@@ -80,10 +96,20 @@ internal class NavigationViewBinder {
     val infoPanelTripProgressBinder: StateFlow<UIBinder?>
         get() = _infoPanelTripProgressBinder.asStateFlow()
 
+    private val _infoPanelRoutePreviewButtonBinder: MutableStateFlow<UIBinder?> =
+        MutableStateFlow(null)
+    val infoPanelRoutePreviewButtonBinder: StateFlow<UIBinder?> =
+        _infoPanelRoutePreviewButtonBinder.asStateFlow()
+
+    private val _infoPanelStartNavigationButtonBinder: MutableStateFlow<UIBinder?> =
+        MutableStateFlow(null)
+    val infoPanelStartNavigationButtonBinder: StateFlow<UIBinder?> =
+        _infoPanelStartNavigationButtonBinder.asStateFlow()
+
     private val _infoPanelEndNavigationButtonBinder: MutableStateFlow<UIBinder?> =
         MutableStateFlow(null)
-    val infoPanelEndNavigationButtonBinder: StateFlow<UIBinder?>
-        get() = _infoPanelEndNavigationButtonBinder.asStateFlow()
+    val infoPanelEndNavigationButtonBinder: StateFlow<UIBinder?> =
+        _infoPanelEndNavigationButtonBinder.asStateFlow()
 
     private val _infoPanelContentBinder: MutableStateFlow<UIBinder?> = MutableStateFlow(null)
     val infoPanelContentBinder: StateFlow<UIBinder?> get() = _infoPanelContentBinder.asStateFlow()
@@ -95,7 +121,20 @@ internal class NavigationViewBinder {
         customization.speedLimitBinder?.also { _speedLimit.emitOrNull(it) }
         customization.maneuverBinder?.also { _maneuver.emitOrNull(it) }
         customization.roadNameBinder?.also { _roadName.emitOrNull(it) }
+
         customization.actionButtonsBinder?.also { _actionButtonsBinder.emitOrNull(it) }
+        customization.actionCompassButtonBinder?.also {
+            _actionCompassButtonBinder.emitOrNull(it)
+        }
+        customization.actionCameraModeButtonBinder?.also {
+            _actionCameraModeButtonBinder.emitOrNull(it)
+        }
+        customization.actionToggleAudioButtonBinder?.also {
+            _actionToggleAudioButtonBinder.emitOrNull(it)
+        }
+        customization.actionRecenterButtonBinder?.also {
+            _actionRecenterButtonBinder.emitOrNull(it)
+        }
 
         customization.leftFrameBinder?.also { _leftFrameBinder.emitOrNull(it) }
         customization.rightFrameBinder?.also { _rightFrameBinder.emitOrNull(it) }
@@ -122,6 +161,13 @@ internal class NavigationViewBinder {
             _infoPanelTripProgressBinder.emitOrNull(it)
         }
         customization.infoPanelContentBinder?.also { _infoPanelContentBinder.emitOrNull(it) }
+
+        customization.infoPanelRoutePreviewButtonBinder?.also {
+            _infoPanelRoutePreviewButtonBinder.emitOrNull(it)
+        }
+        customization.infoPanelStartNavigationButtonBinder?.also {
+            _infoPanelStartNavigationButtonBinder.emitOrNull(it)
+        }
         customization.infoPanelEndNavigationButtonBinder?.also {
             _infoPanelEndNavigationButtonBinder.emitOrNull(it)
         }

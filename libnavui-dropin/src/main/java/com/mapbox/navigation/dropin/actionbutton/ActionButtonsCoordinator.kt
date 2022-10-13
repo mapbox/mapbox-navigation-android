@@ -24,7 +24,12 @@ internal class ActionButtonsCoordinator(
             context.uiBinders.actionButtonsBinder,
             context.uiBinders.customActionButtons
         ) { uiBinder, customButtons ->
-            uiBinder ?: ActionButtonBinder(context, customButtons)
+            val binder = uiBinder ?: ActionButtonsBinder.defaultBinder()
+            if (binder is ActionButtonsBinder) {
+                binder.context = context
+                binder.customButtons = customButtons
+            }
+            binder
         }
     }
 }

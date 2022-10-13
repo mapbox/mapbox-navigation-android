@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin
 import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription
+import com.mapbox.navigation.dropin.actionbutton.ActionButtonsBinder
 import com.mapbox.navigation.dropin.infopanel.InfoPanelBinder
 import com.mapbox.navigation.dropin.map.MapViewBinder
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
@@ -93,6 +94,18 @@ class ViewBinderCustomization {
     var infoPanelContentBinder: UIBinder? = null
 
     /**
+     * Customize the Info Panel Route Preview Button by providing your own [UIBinder].
+     * Use [UIBinder.USE_DEFAULT] to reset to default.
+     */
+    var infoPanelRoutePreviewButtonBinder: UIBinder? = null
+
+    /**
+     * Customize the Info Panel Start Navigation Button by providing your own [UIBinder].
+     * Use [UIBinder.USE_DEFAULT] to reset to default.
+     */
+    var infoPanelStartNavigationButtonBinder: UIBinder? = null
+
+    /**
      * Customize the Info Panel End Navigation Button by providing your own [UIBinder].
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
@@ -100,9 +113,37 @@ class ViewBinderCustomization {
 
     /**
      * Customize the Action Buttons by providing your own [UIBinder].
-     * Use [UIBinder.USE_DEFAULT] to reset to default.
+     * Use [UIBinder.USE_DEFAULT] to reset to use default [ActionButtonsBinder] implementation.
      */
     var actionButtonsBinder: UIBinder? = null
+
+    /**
+     * Customize the Compass Action Button by providing your own [UIBinder]
+     * when using [actionButtonsBinder] with [ActionButtonsBinder] implementation.
+     * Use [UIBinder.USE_DEFAULT] to reset to default.
+     */
+    var actionCompassButtonBinder: UIBinder? = null
+
+    /**
+     * Customize the Camera Mode Action Button by providing your own [UIBinder]
+     * when using [actionButtonsBinder] with [ActionButtonsBinder] implementation.
+     * Use [UIBinder.USE_DEFAULT] to reset to default.
+     */
+    var actionCameraModeButtonBinder: UIBinder? = null
+
+    /**
+     * Customize the Toggle Audio Guidance Action Button by providing your own [UIBinder]
+     * when using [actionButtonsBinder] with [ActionButtonsBinder] implementation.
+     * Use [UIBinder.USE_DEFAULT] to reset to default.
+     */
+    var actionToggleAudioButtonBinder: UIBinder? = null
+
+    /**
+     * Customize the Recenter Camera Action Button by providing your own [UIBinder]
+     * when using [actionButtonsBinder] with [ActionButtonsBinder] implementation.
+     * Use [UIBinder.USE_DEFAULT] to reset to default.
+     */
+    var actionRecenterButtonBinder: UIBinder? = null
 
     /**
      * Customize the empty frame container on left side of the screen by providing your own [UIBinder].

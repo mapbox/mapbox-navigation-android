@@ -41,7 +41,7 @@ class ActionButtonsCoordinatorTest {
         sut.apply {
             val mapboxNavigation = mockk<MapboxNavigation>()
             val binders = mapboxNavigation.flowViewBinders().take(1).toList()
-            assertTrue(binders.firstOrNull() is ActionButtonBinder)
+            assertTrue(binders.firstOrNull() is ActionButtonsBinder)
         }
     }
 
@@ -78,7 +78,7 @@ class ActionButtonsCoordinatorTest {
             }
 
             assertNotEquals(binders[0], binders[1])
-            assertTrue(binders[1] is ActionButtonBinder)
+            assertTrue(binders[1] is ActionButtonsBinder)
         }
 
     @Test

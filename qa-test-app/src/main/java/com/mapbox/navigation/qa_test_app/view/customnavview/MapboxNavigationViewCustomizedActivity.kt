@@ -461,8 +461,9 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 audioGuidanceButtonParams = MapboxExtendableButtonParams(
                     R.style.MyCustomAudioGuidanceButton,
                     LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                        topMargin = 20
                         bottomMargin = 20
-                        gravity = Gravity.START
+                        gravity = Gravity.CENTER
                     },
                 )
                 recenterButtonParams = MapboxExtendableButtonParams(
@@ -470,7 +471,7 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                     LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
                         topMargin = 20
                         bottomMargin = 20
-                        gravity = Gravity.END
+                        gravity = Gravity.CENTER
                     },
                 )
                 cameraModeButtonParams = MapboxExtendableButtonParams(
@@ -478,7 +479,7 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                     LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
                         topMargin = 20
                         bottomMargin = 20
-                        gravity = Gravity.CENTER_HORIZONTAL
+                        gravity = Gravity.CENTER
                     },
                 )
                 routePreviewButtonParams = MapboxExtendableButtonParams(
