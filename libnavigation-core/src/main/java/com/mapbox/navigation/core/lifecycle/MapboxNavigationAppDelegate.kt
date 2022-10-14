@@ -16,7 +16,11 @@ internal class MapboxNavigationAppDelegate {
 
     val lifecycleOwner: LifecycleOwner by lazy { carAppLifecycleOwner }
 
+    var isOptionsChanging = false
+        private set
+
     var isSetup = false
+        private set
 
     fun setup(navigationOptionsProvider: NavigationOptionsProvider) = apply {
         if (carAppLifecycleOwner.isConfigurationChanging()) {
@@ -24,12 +28,17 @@ internal class MapboxNavigationAppDelegate {
         }
 
         if (isSetup) {
+            isOptionsChanging = true
             disable()
         }
-
         mapboxNavigationOwner.setup(navigationOptionsProvider)
         carAppLifecycleOwner.lifecycle.addObserver(mapboxNavigationOwner.carAppLifecycleObserver)
+        isOptionsChanging = false
         isSetup = true
+    }
+
+    fun isConfigurationChanging(): Boolean {
+        return carAppLifecycleOwner.isConfigurationChanging()
     }
 
     fun attachAllActivities(application: Application) {
