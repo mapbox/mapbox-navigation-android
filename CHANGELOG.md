@@ -5,6 +5,12 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.9.0-beta.2 - 14 October, 2022
+### Changelog
+[Changes between v2.9.0-beta.1 and v2.9.0-beta.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0-beta.1...v2.9.0-beta.2)
+
+#### Bug fixes and improvements
 - Updated `RecenterButtonComponent` and `CameraModeButtonComponent` to show in `RoutePreview` state. [#6465](https://github.com/mapbox/mapbox-navigation-android/pull/6465)
 - Fixed an issue where restrictions were drawn only on the first leg of the route, if independent leg styling was not used (default behavior). [#6440](https://github.com/mapbox/mapbox-navigation-android/pull/6440)
 - Fixed a crash in `MapboxJunctionApi` that happens when a junction contains an invalid bitmap. [#6459](https://github.com/mapbox/mapbox-navigation-android/pull/6459)
@@ -33,6 +39,15 @@ binding.navigationView.customizeViewBinders {
 - Fixed false detection of passed alternatives that led to their removal. [#6464](https://github.com/mapbox/mapbox-navigation-android/pull/6464)
 - Improved route matching. [#6464](https://github.com/mapbox/mapbox-navigation-android/pull/6464)
 - Updated `LocationMatcherResult#zLevel`, `LocationMatcherResult#road` to have no values during `RouteProgressState#OFF_ROUTE` state. [#6464](https://github.com/mapbox/mapbox-navigation-android/pull/6464)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.9.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0-rc.1))
+- Mapbox Navigation Native `v118.0.0`
+- Mapbox Core Common `v23.1.0-rc.2`
+- Mapbox Java `v6.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
 
 ## Mapbox Navigation SDK 2.9.0-beta.1 - 06 October, 2022
 ### Changelog
