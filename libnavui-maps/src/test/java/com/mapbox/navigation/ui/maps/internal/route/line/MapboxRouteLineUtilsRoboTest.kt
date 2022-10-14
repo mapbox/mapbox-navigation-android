@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.bindgen.Value
 import com.mapbox.core.constants.Constants
@@ -21,6 +22,7 @@ import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlig
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON_CASING
@@ -604,6 +606,59 @@ class MapboxRouteLineUtilsRoboTest {
         assertEquals(Point.fromLngLat(-122.518908, 37.970549), result.legsDistances[1][29].point)
         assertEquals(0.000015791208023023606, result.legsDistances[0][17].distanceRemaining, 0.0)
         assertEquals(0.0, result.legsDistances[1][29].distanceRemaining, 0.0)
+    }
+
+    @Test
+    fun `calculateRouteGranularDistances with duplicate point`() {
+        /**
+         * this route contains a duplicate point somewhere in the middle of the first step.
+         * Inspecting a decoded portion of the `LineString` presents this:
+         * ```
+         * ...
+         *     [
+         *       140.9184,
+         *       37.718443
+         *     ],
+         *     [
+         *       140.918069,
+         *       37.719383
+         *     ],
+         *     [
+         *       140.918069,
+         *       37.719383
+         *     ],
+         *     [
+         *       140.917924,
+         *       37.719839
+         *     ],
+         * ...
+         * ```
+         * This point should not be filtered out.
+         */
+        val route = NavigationRoute.create(
+            directionsResponseJson = loadJsonFixture(
+                "route_response_duplicate_geometry_point.json"
+            ),
+            routeRequestUrl = RouteOptions.fromJson(
+                loadJsonFixture("route_response_duplicate_geometry_point_url.json")
+            ).toUrl("xyz").toString(),
+            routerOrigin = RouterOrigin.Offboard
+        )
+
+        val result = MapboxRouteLineUtils.granularDistancesProvider(route.first())!!
+
+        val routeGeometrySize =
+            PolylineUtils.decode(route.first().directionsRoute.geometry()!!, 6).size
+        assertEquals(
+            routeGeometrySize,
+            result.routeDistances.size
+        )
+        assertEquals(
+            routeGeometrySize,
+            result.legsDistances[0].size
+        )
+        assertEquals(1832, result.routeDistances.lastIndex)
+        assertEquals(1832, result.legsDistances[0].lastIndex)
     }
 
     @Test
