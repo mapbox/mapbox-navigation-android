@@ -488,7 +488,7 @@ object MapboxRouteLineUtils {
      * @return a list of items representing the distance offset of each route leg and the color
      * used to represent the traffic congestion.
      */
-    fun calculateRouteLineSegments(
+    internal fun calculateRouteLineSegments(
         route: NavigationRoute,
         trafficBackfillRoadClasses: List<String>,
         isPrimaryRoute: Boolean,
@@ -969,7 +969,7 @@ object MapboxRouteLineUtils {
 
     //todo the variable names below should be named better
     fun getFillerPoints(startPoint: RouteLineDistancesIndex, endPoint: RouteLineDistancesIndex): List<RouteLineDistancesIndex> {
-        val gapDist = 1.0 // meters
+        val gapDist = 2.0 // meters
         val turfDistance = TurfMeasurement.distance(startPoint.point, endPoint.point, TurfConstants.UNIT_METERS)
         val fillerPoints = mutableListOf<RouteLineDistancesIndex>()
         val bearing = TurfMeasurement.bearing(startPoint.point, endPoint.point)

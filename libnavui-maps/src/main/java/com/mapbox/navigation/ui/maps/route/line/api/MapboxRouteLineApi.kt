@@ -226,6 +226,7 @@ class MapboxRouteLineApi(
         trafficBackfillRoadClasses.addAll(
             routeLineOptions.resourceProvider.trafficBackfillRoadClasses
         )
+        routeLineOptions.vanishingRouteLine?.setScope(jobControl.scope)
     }
 
     /**
@@ -545,7 +546,7 @@ class MapboxRouteLineApi(
     ) {
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
-                routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
+                //routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0 //todo remove this?
                 activeLegIndex = INVALID_ACTIVE_LEG_INDEX
                 routes.clear()
                 routeFeatureData.clear()
@@ -581,7 +582,7 @@ class MapboxRouteLineApi(
     fun setVanishingOffset(
         offset: Double
     ): Expected<RouteLineError, RouteLineUpdateValue> {
-        routeLineOptions.vanishingRouteLine?.vanishPointOffset = offset
+        //routeLineOptions.vanishingRouteLine?.vanishPointOffset = offset
         return if (offset >= 0) {
             val workingExpressionData = if (routeLineOptions.styleInactiveRouteLegsIndependently) {
                 alternativelyStyleSegmentsNotInLeg(activeLegIndex, routeLineExpressionData)
@@ -1074,72 +1075,6 @@ class MapboxRouteLineApi(
         }
     }
 
-    //todo remove this
-    internal fun updateUpcomingRoutePointIndex(routeProgress: RouteProgress) {
-        ifNonNull(
-            routeProgress.currentLegProgress,
-            routeProgress.currentLegProgress?.currentStepProgress,
-            routePointsProvider(routeProgress.navigationRoute)
-        ) { currentLegProgress, currentStepProgress, completeRoutePoints ->
-            var allRemainingPoints = 0
-
-            /**
-             * Finds the count of remaining points in the current step.
-             *
-             * TurfMisc.lineSliceAlong places an additional point at index 0 to mark the precise
-             * cut-off point which we can safely ignore.
-             * We'll add the distance from the upcoming point to the current's puck position later.
-             */
-            allRemainingPoints += try {
-                TurfMisc.lineSliceAlong(
-                    LineString.fromLngLats(currentStepProgress.stepPoints ?: emptyList()),
-                    currentStepProgress.distanceTraveled.toDouble(),
-                    currentStepProgress.step?.distance() ?: 0.0,
-                    TurfConstants.UNIT_METERS
-                ).coordinates().drop(1).size
-            } catch (e: TurfException) {
-                0
-            }
-
-            /**
-             * Add to the count of remaining points all of the remaining points on the current leg,
-             * after the current step.
-             */
-            if (currentLegProgress.legIndex < completeRoutePoints.stepPoints.size) {
-                val currentLegSteps = completeRoutePoints.stepPoints[currentLegProgress.legIndex]
-                allRemainingPoints += if (currentStepProgress.stepIndex < currentLegSteps.size) {
-                    currentLegSteps.slice(
-                        currentStepProgress.stepIndex + 1 until currentLegSteps.size - 1
-                    ).flatten().size
-                } else {
-                    0
-                }
-            }
-
-            /**
-             * Add to the count of remaining points all of the remaining legs.
-             */
-            for (i in currentLegProgress.legIndex + 1 until completeRoutePoints.stepPoints.size) {
-                allRemainingPoints += completeRoutePoints.stepPoints[i].flatten().size
-            }
-
-            /**
-             * When we know the number of remaining points and the number of all points,
-             * calculate the index of the upcoming point.
-             */
-            val allPoints = completeRoutePoints.flatList.size
-            routeLineOptions.vanishingRouteLine?.primaryRouteRemainingDistancesIndex =
-                allPoints - allRemainingPoints - 1
-        } ?: run { routeLineOptions.vanishingRouteLine?.primaryRouteRemainingDistancesIndex = null }
-
-        lastIndexUpdateTimeNano = System.nanoTime()
-    }
-
-    // todo remove this
-    internal fun updateVanishingPointState(routeProgressState: RouteProgressState) {
-        routeLineOptions.vanishingRouteLine?.updateVanishingPointState(routeProgressState)
-    }
-
     private suspend fun setNewRouteData(
         newRoutes: List<NavigationRoute>,
         featureDataProvider: () -> List<RouteFeatureData>,
@@ -1157,11 +1092,11 @@ class MapboxRouteLineApi(
             distinctNewRoutes.find { it.id == metadata.navigationRoute.id } != null
         }
 
-        ifNonNull(distinctNewRoutes.firstOrNull()) { primaryRouteCandidate ->
-            if (!primaryRouteCandidate.directionsRoute.isSameRoute(primaryRoute?.directionsRoute)) {
-                routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
-            }
-        }
+        // ifNonNull(distinctNewRoutes.firstOrNull()) { primaryRouteCandidate ->
+        //     if (!primaryRouteCandidate.directionsRoute.isSameRoute(primaryRoute?.directionsRoute)) {
+        //         routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
+        //     }
+        // }
 
         routes.clear()
         routes.addAll(distinctNewRoutes)
@@ -1189,7 +1124,7 @@ class MapboxRouteLineApi(
         if (routes.isEmpty()) return
         withContext(jobControl.scope.coroutineContext) {
             if (vanishingRouteLineEnabled) {
-                granularDistancesProvider(routes.first())?.let {
+                granularDistancesProvider(routes.first())?.also {
                     routeLineOptions.vanishingRouteLine?.setGranularDistances(it)
                 }
             }
@@ -1595,4 +1530,8 @@ class MapboxRouteLineApi(
                 jobControl.scope
             )
         }.cacheResult(alternativelyStyleSegmentsNotInLegCache)
+
+    fun deleteMeGetTreePoints(): List<Point> {
+        return routeLineOptions.vanishingRouteLine!!.deleteMeGetTreePoints()
+    }
 }
