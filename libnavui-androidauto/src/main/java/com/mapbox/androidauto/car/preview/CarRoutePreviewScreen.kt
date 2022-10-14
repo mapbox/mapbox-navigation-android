@@ -36,7 +36,7 @@ import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.directions.session.RoutesPreview
+import com.mapbox.navigation.core.directions.session.RoutePreview
 import com.mapbox.navigation.core.directions.session.RoutesPreviewObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 
@@ -94,7 +94,7 @@ internal class CarRoutePreviewScreen @UiThread constructor(
         }
     }
 
-    private fun updateRoutePreview(style: Style?, routes: RoutesPreview?) {
+    private fun updateRoutePreview(style: Style?, routes: RoutePreview?) {
         val coordinate = routes?.navigationRoutes?.lastOrNull()?.routeOptions
             ?.coordinatesList()?.lastOrNull()
             ?: return

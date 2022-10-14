@@ -52,7 +52,7 @@ import com.mapbox.navigation.core.directions.LegacyRouterAdapter
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.directions.session.RoutesPreview
+import com.mapbox.navigation.core.directions.session.RoutePreview
 import com.mapbox.navigation.core.directions.session.RoutesPreviewController
 import com.mapbox.navigation.core.directions.session.RoutesPreviewObserver
 import com.mapbox.navigation.core.history.MapboxHistoryReader
@@ -140,13 +140,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.lang.reflect.Field
 import java.util.Locale
-import java.util.concurrent.CopyOnWriteArraySet
 
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER =
@@ -392,8 +390,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @see [MapboxHistoryReader] to read the files
      */
     val historyRecorder = MapboxHistoryRecorder(navigationOptions)
-
-    val routesPreviewController by lazy { RoutesPreviewController(this) }
 
     /**
      * **THIS IS AN EXPERIMENTAL API, DO NOT USE IN A PRODUCTION ENVIRONMENT.**
@@ -844,35 +840,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             setRoutesInfo,
             callback,
         )
-    }
-
-    fun getRoutePreview(): RoutesPreview {
-        return routesPreviewController.getRoutesPreview()
-    }
-
-    fun setRoutePreviewRoutes(navigationRoutes: List<NavigationRoute>) {
-        routesPreviewController.setRoutePreviewRoutes(navigationRoutes)
-    }
-
-    fun setRoutePreviewIndex(index: Int) {
-        routesPreviewController.setRoutePreviewIndex(index)
-    }
-
-    fun setRoutePreview(routesPreview: RoutesPreview) {
-        routesPreviewController.setRoutePreview(routesPreview)
-    }
-
-    @Throws(IllegalStateException::class)
-    fun startActiveGuidance() {
-        routesPreviewController.startActiveGuidance()
-    }
-
-    fun registerRoutePreviewObserver(observer: RoutesPreviewObserver) = apply {
-        routesPreviewController.registerObserver(observer)
-    }
-
-    fun unregisterRoutePreviewObserver(observer: RoutesPreviewObserver) = apply {
-        routesPreviewController.unregisterObserver(observer)
     }
 
     /**

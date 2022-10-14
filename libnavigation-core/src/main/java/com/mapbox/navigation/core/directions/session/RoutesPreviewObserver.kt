@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.directions.session
 
 fun interface RoutesPreviewObserver {
-    fun onRoutesPreviewChanged(routesPreview: RoutesPreview)
+    // What happens during active navigation
+    fun onRoutesPreviewChanged(routePreview: RoutePreview)
 }

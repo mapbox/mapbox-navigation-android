@@ -3,7 +3,7 @@ package com.mapbox.navigation.ui.app.internal
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.directions.session.RoutesPreview
+import com.mapbox.navigation.core.directions.session.RoutePreview
 import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
 import com.mapbox.navigation.ui.app.internal.extension.ThunkAction
@@ -126,7 +126,7 @@ private suspend fun fetchRouteIfNeeded(
     val routesPreview = mapboxNavigation.getRoutePreview()
     val storeState = store.state.value
     if (routesPreview.navigationRoutes.isNotEmpty()) return true
-    if (routesPreview.state == RoutesPreview.FETCHING) return false
+    if (routesPreview.state == RoutePreview.FETCHING) return false
 
     return ifNonNull(
         storeState.location?.enhancedLocation?.toPoint(),

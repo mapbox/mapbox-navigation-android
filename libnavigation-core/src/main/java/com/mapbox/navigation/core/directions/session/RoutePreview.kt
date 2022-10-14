@@ -5,7 +5,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterFailure
 
-class RoutesPreview private constructor(
+class RoutePreview private constructor(
     @State
     val state: String,
     val navigationRoutes: List<NavigationRoute>,
@@ -64,14 +64,14 @@ class RoutesPreview private constructor(
             this.failureReasons = failureReasons
         }
 
-        fun build(): RoutesPreview {
+        fun build(): RoutePreview {
             val state = when {
                 navigationRoutes.isNotEmpty() -> READY
                 navigationRoutes.isEmpty() -> EMPTY
                 failureReasons != null -> FAILED
                 else -> FAILED
             }
-            return RoutesPreview(
+            return RoutePreview(
                 state = state,
                 navigationRoutes = navigationRoutes,
                 selectedIndex = selectedIndex,
