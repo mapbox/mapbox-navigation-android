@@ -29,6 +29,10 @@ binding.navigationView.customizeViewBinders {
     }
 }
 ```
+- :warning: Improved alternatives route processing. `MapboxNavigation#setNavigationRoutes` doesn't accept alternatives which don't deviate from primary route or which have different destinations. Rejected alternatives will be present in `RoutesSetSuccess.ignoredAlternatives` and won't produce `AlternativeRouteMetadata`. [#6464](https://github.com/mapbox/mapbox-navigation-android/pull/6464)
+- Fixed false detection of passed alternatives that led to their removal. [#6464](https://github.com/mapbox/mapbox-navigation-android/pull/6464)
+- Improved route matching. [#6464](https://github.com/mapbox/mapbox-navigation-android/pull/6464)
+- Updated `LocationMatcherResult#zLevel`, `LocationMatcherResult#road` to have no values during `RouteProgressState#OFF_ROUTE` state. [#6464](https://github.com/mapbox/mapbox-navigation-android/pull/6464)
 
 ## Mapbox Navigation SDK 2.9.0-beta.1 - 06 October, 2022
 ### Changelog

@@ -388,13 +388,8 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
         countDownLatch.await()
     }
 
-    /**
-     * This test ensures that we're not crashing when parsing alternative routes metadata
-     * in a specific case (caught by crashlytics) that involved
-     * Directions API returning a route which contains a duplicate point in a step.
-     */
     @Test
-    fun should_provide_valid_offset_when_route_contains_duplicate_points_NAVAND_692() = sdkTest {
+    fun should_provide_valid_offset_for_alternative_route() = sdkTest {
         val primaryRoute = createRoute(
             responseJson = R.raw.route_response_japan_1,
             requestUrlJson = R.raw.route_response_japan_1_url,
@@ -448,15 +443,16 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
         val options = MapboxRouteLineOptions.Builder(activity)
             .build()
         val routeLineApi = MapboxRouteLineApi(options)
+        val alternativeMetadata = mapboxNavigation.getAlternativeMetadataFor(routesUpdate)
         val result = routeLineApi.setNavigationRoutes(
             newRoutes = routesUpdate,
-            alternativeRoutesMetadata = mapboxNavigation.getAlternativeMetadataFor(routesUpdate)
+            alternativeRoutesMetadata = alternativeMetadata
         )
 
-        // the alternative route turns out to fully overlaps with the original route,
-        // hence the 1.0 offset
+        assertEquals(1, alternativeMetadata.size)
+        // the alternative route overlaps primary on ~92%
         assertEquals(
-            1.0,
+            0.9263153441670023,
             result.value!!.alternativeRouteLinesData[0].dynamicData.trimOffset!!.offset,
             0.0000000001
         )

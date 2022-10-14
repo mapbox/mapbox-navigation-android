@@ -65,7 +65,7 @@ class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
 
     @Test
     fun set_navigation_routes_ignore_alternatives() = sdkTest {
-        val mockRoute = RoutesProvider.dc_very_short_with_invalid_alternatives(activity)
+        val mockRoute = RoutesProvider.dc_short_with_invalid_alternatives(activity)
         val routes = NavigationRoute.create(
             mockRoute.routeResponse,
             RouteOptions.builder()
@@ -78,8 +78,9 @@ class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         val result = mapboxNavigation.setNavigationRoutesAsync(routes)
         result.run {
             assertTrue(this.isValue)
-            assertEquals(1, this.value!!.ignoredAlternatives.size)
-            assertNotNull(this.value!!.ignoredAlternatives[routes[1].id])
+            assertEquals(2, this.value!!.ignoredAlternatives.size)
+            assertNotNull(this.value!!.ignoredAlternatives[routes[2].id])
+            assertNotNull(this.value!!.ignoredAlternatives[routes[3].id])
         }
     }
 
