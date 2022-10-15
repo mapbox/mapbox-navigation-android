@@ -151,7 +151,7 @@ class MapboxRouteLineApiTest {
         )
     }
 
-    @Test
+    @Test //todo
     fun getVanishPointOffset() {
         val options = MapboxRouteLineOptions.Builder(ctx)
             .withVanishingRouteLineEnabled(true)

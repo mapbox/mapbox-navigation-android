@@ -750,6 +750,14 @@ class MapboxRouteLineApi(
         }
     }
 
+    fun updateUpcomingRoutePointIndex(routeProgress: RouteProgress) {
+        // del me
+    }
+
+    fun updateVanishingPointState(state: RouteProgressState) {
+        // del me
+    }
+
     /**
      * Adjusts the route line visibility so that only the current route leg is visible. This is
      * intended to be used with routes that have multiple waypoints.

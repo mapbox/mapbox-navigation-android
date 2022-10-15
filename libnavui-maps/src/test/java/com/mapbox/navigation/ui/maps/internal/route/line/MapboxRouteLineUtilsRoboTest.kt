@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.bindgen.Value
@@ -20,6 +21,7 @@ import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON_CASING
@@ -58,7 +60,9 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
+import com.mapbox.navigation.ui.maps.testing.TestingUtil
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
@@ -78,7 +82,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.UUID
-import kotlin.math.abs
 
 @RunWith(RobolectricTestRunner::class)
 class MapboxRouteLineUtilsRoboTest {
@@ -1203,5 +1206,21 @@ class MapboxRouteLineUtilsRoboTest {
         MapboxRouteLineUtils.routePointsProvider(route2)
         verify(exactly = 3) { route1.directionsRoute }
         verify(exactly = 2) { route2.directionsRoute }
+    }
+
+    @Test
+    fun scratch() {
+        val routeJson = "{\"routeIndex\":\"0\",\"distance\":728.195,\"duration\":178.495,\"geometry\":\"yxh`vAtyg~hFyXQiZO}SKsp@YEnd@I|_@|]HrTJxf@B~FgAPoj@UoK{@iJu@oIB_c@?uE@gM?QDoV?{@?gHB_V\",\"weight\":241.413,\"weight_name\":\"auto\",\"legs\":[{\"weight\":241.413,\"via_waypoints\":[],\"distance\":728.195,\"duration\":178.495,\"summary\":\"Main Street, West McLoughlin Boulevard\",\"admins\":[{\"iso_3166_1\":\"US\",\"iso_3166_1_alpha3\":\"USA\"}],\"steps\":[{\"distance\":220.325,\"duration\":29.108,\"geometry\":\"yxh`vAtyg~hFyXQiZO}SKsp@Y\",\"name\":\"Main Street\",\"mode\":\"driving\",\"maneuver\":{\"location\":[-122.671531,45.634461],\"bearing_before\":0.0,\"bearing_after\":1.0,\"instruction\":\"Drive north on Main Street.\",\"type\":\"depart\"},\"driving_side\":\"right\",\"weight\":35.461,\"intersections\":[{\"duration\":7.5,\"weight\":9,\"location\":[-122.671531,45.634461],\"bearings\":[1],\"entry\":[true],\"out\":0,\"geometry_index\":0,\"is_urban\":true,\"admin_index\":0,\"mapbox_streets_v8\":{\"class\":\"secondary\"}},{\"weight\":9.34,\"turn_duration\":2.019,\"turn_weight\":1.5,\"duration\":8.552,\"location\":[-122.671522,45.634874],\"bearings\":[1,82,181,259],\"entry\":[true,true,false,true],\"in\":2,\"out\":0,\"geometry_index\":1,\"is_urban\":true,\"admin_index\":0,\"mapbox_streets_v8\":{\"class\":\"secondary\"},\"traffic_signal\":true},{\"duration\":3.719,\"turn_weight\":0.5,\"turn_duration\":0.019,\"weight\":4.94,\"location\":[-122.671514,45.635311],\"bearings\":[1,90,181],\"entry\":[true,true,false],\"in\":2,\"out\":0,\"geometry_index\":2,\"is_urban\":true,\"admin_index\":0,\"mapbox_streets_v8\":{\"class\":\"secondary\"}},{\"turn_weight\":1,\"turn_duration\":0.019,\"location\":[-122.671508,45.635646],\"bearings\":[1,92,181,249],\"entry\":[true,true,false,true],\"in\":2,\"out\":0,\"geometry_index\":3,\"is_urban\":true,\"admin_index\":0,\"mapbox_streets_v8\":{\"class\":\"secondary\"}}]},{\"distance\":87.726,\"duration\":31.082,\"geometry\":\"otl`vAlwg~hFEnd@I|_@\",\"name\":\"West 20th Street\",\"mode\":\"driving\",\"maneuver\":{\"location\":[-122.671495,45.63644],\"bearing_before\":1.0,\"bearing_after\":270.0,\"instruction\":\"Turn left onto West 20th Street.\",\"type\":\"turn\",\"modifier\":\"left\"},\"driving_side\":\"right\",\"weight\":45.681,\"intersections\":[{\"duration\":19.722,\"turn_weight\":12.5,\"turn_duration\":5.622,\"weight\":29.773,\"location\":[-122.671495,45.63644],\"bearings\":[1,104,181,270],\"entry\":[true,true,false,true],\"in\":2,\"out\":3,\"geometry_index\":4,\"is_urban\":true,\"admin_index\":0,\"mapbox_streets_v8\":{\"class\":\"street\"}},{\"turn_weight\":2,\"turn_duration\":0.007,\"location\":[-122.672095,45.636443],\"bearings\":[1,90,182,271],\"entry\":[true,false,true,true],\"in\":1,\"out\":3,\"geometry_index\":5,\"is_urban\":true,\"admin_index\":0,\"mapbox_streets_v8\":{\"class\":\"street\"}}]},{\"distance\":179.057,\"duration\":68.349,\"geometry\":\"_ul`vAz}i~hF|]HrTJxf@B~FgA\",\"name\":\"Washington Street\",\"mode\":\"driving\",\"maneuver\":{\"location\":[-122.672622,45.636448],\"bearing_before\":271.0,\"bearing_after\":180.0,\"instruction\":\"Turn left onto Washington Street.\",\"type\":\"turn\",\"modifier\":\"left\"},\"driving_side\":\"right\",\"weight\":88.24,\"intersections\":[{\"duration\":30.372,\"turn_weight\":10,\"turn_duration\":5.622,\"weight\":39.7,\"location\":[-122.672622,45.636448],\"bearings\":[1,91,180,270],\"entry\":[true,false,true,true],\"in\":1,\"out\":2,\"geometry_index\":6,\"is_urban\":true,\"admin_index\":0,\"mapbox_streets_v8\":{\"class\":\"street\"}},{\"duration\":17.558,\"turn_weight\":1,\"turn_duration\":0.008,\"weight\":22.06,\"location\":[-122.672627,45.635953],\"bearings\":[0,92,181],\"entry\":[false,true,true],\"in\":0,\"out\":2,\"geometry_index\":7,\"is_urban\":true,\"admin_index\":0,\"mapbox_streets_v8\":{\"class\":\"street\"}},{\"turn_weight\":2,\"turn_duration\":0.019,\"location\":[-122.672633,45.635607],\"bearings\":[1,92,180,270],\"entry\":[false,true,true,true],\"in\":0,\"out\":2,\"geometry_index\":8,\"is_urban\":true,\"admin_index\":0,\"mapbox_streets_v8\":{\"class\":\"street\"}}]},{\"distance\":241.086,\"duration\":49.955,\"geometry\":\"spi`vAl|i~hFPoj@UoK{@iJu@oIB_c@?uE@gM?QDoV?{@?gHB_V\",\"name\":\"West McLoughlin Boulevard\",\"mode\":\"driving\",\"maneuver\":{\"location\":[-122.672599,45.634842],\"bearing_before\":169.0,\"bearing_after\":91.0,\"instruction\":\"Turn left onto West McLoughlin Boulevard.\",\"type\":\"turn\",\"modifier\":\"left\"},\"driving_side\":\"right\",\"weight\":72.031,\"intersections\":[{\"duration\":22.522,\"turn_weight\":12.5,\"turn_duration\":3.622,\"weight\":35.18,\"location\":[-122.672599,45.634842],\"bearings\":[91,182,270,349],\"entry\":[true,true,true,false],\"in\":3,\"out\":0,\"geometry_index\":10,\"is_urban\":true,\"admin_index\":0,\"mapbox_streets_v8\":{\"class\":\"tertiary\"}},{\"weight\":14.931,\"turn_duration\":2.008,\"turn_weight\":3,\"duration\":11.951,\"location\":[-122.671522,45.634874],\"bearings\":[1,82,182,259],\"entry\":[true,true,true,false],\"in\":3,\"out\":1,\"geometry_index\":13,\"is_urban\":true,\"admin_index\":0,\"mapbox_streets_v8\":{\"class\":\"tertiary\"},\"traffic_signal\":true},{\"duration\":1.371,\"turn_weight\":0.75,\"weight\":2.396,\"location\":[-122.670778,45.634899],\"bearings\":[90,270],\"entry\":[true,false],\"in\":1,\"out\":0,\"geometry_index\":15,\"is_urban\":true,\"admin_index\":0,\"mapbox_streets_v8\":{\"class\":\"tertiary\"}},{\"duration\":3.086,\"turn_weight\":0.75,\"weight\":4.453,\"location\":[-122.670671,45.634899],\"bearings\":[90,270],\"entry\":[true,false],\"in\":1,\"out\":0,\"geometry_index\":16,\"is_urban\":true,\"admin_index\":0,\"mapbox_streets_v8\":{\"class\":\"tertiary\"}},{\"weight\":6.469,\"turn_duration\":2.008,\"turn_weight\":2,\"duration\":5.732,\"location\":[-122.670443,45.634898],\"bearings\":[1,91,182,270],\"entry\":[true,true,true,false],\"in\":3,\"out\":1,\"lanes\":[{\"valid\":false,\"active\":false,\"indications\":[\"left\"]},{\"valid\":true,\"active\":true,\"valid_indication\":\"straight\",\"indications\":[\"straight\",\"right\"]}],\"geometry_index\":17,\"is_urban\":true,\"admin_index\":0,\"mapbox_streets_v8\":{\"class\":\"tertiary\"},\"traffic_signal\":true},{\"duration\":0.248,\"turn_weight\":0.75,\"weight\":1.048,\"location\":[-122.670058,45.634895],\"bearings\":[90,271],\"entry\":[true,false],\"in\":1,\"out\":0,\"geometry_index\":19,\"is_urban\":true,\"admin_index\":0,\"mapbox_streets_v8\":{\"class\":\"tertiary\"}},{\"duration\":1.49,\"turn_weight\":0.75,\"weight\":2.538,\"location\":[-122.670028,45.634895],\"bearings\":[90,270],\"entry\":[true,false],\"in\":1,\"out\":0,\"geometry_index\":20,\"is_urban\":true,\"admin_index\":0,\"mapbox_streets_v8\":{\"class\":\"tertiary\"}},{\"turn_weight\":0.75,\"location\":[-122.66988,45.634895],\"bearings\":[90,270],\"entry\":[true,false],\"in\":1,\"out\":0,\"geometry_index\":21,\"is_urban\":true,\"admin_index\":0,\"mapbox_streets_v8\":{\"class\":\"tertiary\"}}]},{\"distance\":0.0,\"duration\":0.0,\"geometry\":\"ysi`vAn{c~hF??\",\"name\":\"West McLoughlin Boulevard\",\"mode\":\"driving\",\"maneuver\":{\"location\":[-122.669512,45.634893],\"bearing_before\":90.0,\"bearing_after\":0.0,\"instruction\":\"You have arrived at your destination.\",\"type\":\"arrive\"},\"driving_side\":\"right\",\"weight\":0.0,\"intersections\":[{\"location\":[-122.669512,45.634893],\"bearings\":[270],\"entry\":[true],\"in\":0,\"geometry_index\":22,\"admin_index\":0}]}],\"annotation\":{\"distance\":[46.0,48.6,37.3,88.4,46.7,41.1,55.1,38.5,70.9,14.5,54.2,15.6,14.5,13.4,44.8,8.4,17.7,0.7,29.3,2.3,11.5,28.7],\"congestion_numeric\":[0,null,4,4,null,null,null,null,null,null,0,0,0,4,4,4,4,1,1,1,1,1]}}],\"routeOptions\":{\"baseUrl\":\"https://api.mapbox.com\",\"user\":\"mapbox\",\"profile\":\"driving-traffic\",\"coordinates\":\"-122.6715815,45.6344615;-122.6716338,45.6364896;-122.6726954,45.6364085;-122.672707,45.6348712;-122.6695105,45.6350132\",\"geometries\":\"polyline6\",\"overview\":\"full\",\"steps\":true,\"annotations\":\"congestion_numeric,distance\",\"voice_instructions\":false,\"banner_instructions\":false,\"waypoints\":\"0;4\"},\"requestUuid\":\"mapmatching\"}"
+        //val route = DirectionsRoute.fromJson(routeJson).toNavigationRoute(RouterOrigin.Offboard)
+        val route = TestingUtil.loadNavigationRoute("short_route.json", "xyz")
+        val granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)
+        val vanishingRouteLine = VanishingRouteLine().also {
+            it.setScope(InternalJobControlFactory.createMainScopeJobControl().scope)
+        }
+        vanishingRouteLine.setGranularDistances(granularDistances!!)
+
+        granularDistances.flatStepDistances.forEach {
+            vanishingRouteLine.trimTree(it.point)
+        }
     }
 }

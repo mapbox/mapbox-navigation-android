@@ -2,8 +2,10 @@ package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
 import android.util.Log
+import android.util.Range
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.maps.internal.route.line.LocationSearchTree
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS
@@ -20,6 +22,7 @@ import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * This class implements a feature that can change the appearance of the route line behind the puck.
@@ -37,7 +40,15 @@ internal class VanishingRouteLine {
      * a value representing the percentage distance traveled
      */
     var vanishPointOffset: Double = 0.0
-        private set
+        //private set todo
+
+    var primaryRouteRemainingDistancesIndex: Int? = null //todo delme
+
+    var vanishingPointState: RouteProgressState? = null //todo delme
+
+    fun updateVanishingPointState(state: RouteProgressState) {
+        //todo  delme
+    }
 
     private var scope: CoroutineScope? = null
 
@@ -160,7 +171,10 @@ internal class VanishingRouteLine {
     private var stepsPoints: List<Array<RouteLineDistancesIndex>> = emptyList()
     private val fillerPointsInTree = mutableListOf<List<RouteLineDistancesIndex>>()
     private var indexOfLastStepPointsLoadedInTree = 0
-    private val distanceToLastStepPointInMeters = 20.0
+    private val distanceToLastStepPointInMeters = 30.0
+    private var stepPointRange: Range<Int>? = null
+    private val stepPointRangeSize = 5
+    private val maxAllowedFillerPointListsInTree = 3
 
     fun setGranularDistances(distances: RouteLineGranularDistances) {
         if (distances != granularDistances) {
@@ -173,14 +187,33 @@ internal class VanishingRouteLine {
             vanishPointOffset = 0.0
             Log.e("foobar", "everything got cleared, starting fresh")
 
-            if (stepsPoints.isNotEmpty()) {
-                val firstSteps = stepsPoints.first()
-                val fillerPoints = MapboxRouteLineUtils.getFillerPointsForStepPoints(firstSteps)
-                locationSearchTree.addAll(fillerPoints)
-                fillerPointsInTree.add(fillerPoints)
+            // if (stepsPoints.isNotEmpty()) {
+            //     val firstSteps = stepsPoints.first()
+            //     val fillerPoints = MapboxRouteLineUtils.getFillerPointsForStepPoints(firstSteps)
+            //     locationSearchTree.addAll(fillerPoints)
+            //     fillerPointsInTree.add(fillerPoints)
+            // }
+
+            if (distances.flatStepDistances.isNotEmpty()) {
+                val endRange = if (distances.flatStepDistances.size > stepPointRangeSize) {
+                    stepPointRangeSize
+                } else {
+                    distances.flatStepDistances.lastIndex
+                }
+                stepPointRange = Range(0, endRange).also {
+                    val fillerPoints = getFillerPointsForRange(it, distances.flatStepDistances)
+                    locationSearchTree.addAll(fillerPoints)
+                    fillerPointsInTree.add(fillerPoints)
+                }
             }
         }
     }
+
+    private fun getFillerPointsForRange(range: Range<Int>, flatStepDistances: Array<RouteLineDistancesIndex>): List<RouteLineDistancesIndex> {
+        val fillerSteps = flatStepDistances.copyOfRange(range.lower, range.upper)
+        return MapboxRouteLineUtils.getFillerPointsForStepPoints(fillerSteps)
+    }
+
 
     fun getOffset(point: Point): Double? {
         val offset = ifNonNull(locationSearchTree.getNearestNeighbor(point), granularDistances)
@@ -198,34 +231,64 @@ internal class VanishingRouteLine {
         return offset
     }
 
-    private fun trimTree(point: Point) {
+    //todo make private
+    fun trimTree(point: Point) {
         //if getting close to the last step point, load the points for the next step
         //and remove the points long since passed.
-        scope?.launch(Dispatchers.Main) {
-            if (fillerPointsInTree.isNotEmpty()) {
-                val nearEndStepPoint = fillerPointsInTree.last()[fillerPointsInTree.last().lastIndex]
+        scope?.launch(Dispatchers.Main.immediate) {
+            val trimStart = System.currentTimeMillis()
+            if (fillerPointsInTree.isNotEmpty() && fillerPointsInTree.last().isNotEmpty()) {
+                val nearEndStepPoint = fillerPointsInTree.last().last()
                 val distanceToNearEndStepPoint =
                     TurfMeasurement.distance(point, nearEndStepPoint.point, TurfConstants.UNIT_METERS)
                 if (distanceToNearEndStepPoint <= distanceToLastStepPointInMeters) {
-                    if (indexOfLastStepPointsLoadedInTree + 1 < stepsPoints.size) {
-                        val nextSteps = stepsPoints[indexOfLastStepPointsLoadedInTree + 1]
-                        val fillerPoints = MapboxRouteLineUtils.getFillerPointsForStepPoints(nextSteps)
-
-                        val startAdd = System.currentTimeMillis()
-                        locationSearchTree.addAll(fillerPoints)
-                        Log.e("foobar", "time to add ${fillerPoints.size} is ${System.currentTimeMillis() - startAdd}")
-
-                        fillerPointsInTree.add(fillerPoints)
-                        indexOfLastStepPointsLoadedInTree++
-                        if (fillerPointsInTree.size == 3) {
-                            val pointsToDrop = fillerPointsInTree.drop(1).flatten()
-                            val startRemove = System.currentTimeMillis()
-                            locationSearchTree.removeAll(pointsToDrop)
-                            Log.e("foobar", "time to remove ${pointsToDrop.size} is ${System.currentTimeMillis() - startRemove}")
+                    stepPointRange = ifNonNull(stepPointRange, granularDistances) { currentStepPointRange, distances ->
+                        val endOfRange = if (currentStepPointRange.upper + stepPointRangeSize < distances.flatStepDistances.lastIndex) {
+                            currentStepPointRange.upper + stepPointRangeSize
+                        } else {
+                            distances.flatStepDistances.lastIndex
+                        }
+                        Range(currentStepPointRange.upper - 1, endOfRange).also {
+                            val fillerPoints = getFillerPointsForRange(it, distances.flatStepDistances)
+                            if (fillerPoints.isNotEmpty()) {
+                                locationSearchTree.addAll(fillerPoints)
+                                fillerPointsInTree.add(fillerPoints)
+                            }
                         }
                     }
+                    if (fillerPointsInTree.size == maxAllowedFillerPointListsInTree) {
+                        val pointsToDrop = fillerPointsInTree.removeFirst()
+                        val startRemove = System.currentTimeMillis()
+                        locationSearchTree.removeAll(pointsToDrop)
+                        Log.e("foobar", "time to remove ${pointsToDrop.size} is ${System.currentTimeMillis() - startRemove}")
+                    }
+
+
+
+                    // if (indexOfLastStepPointsLoadedInTree + 1 < stepsPoints.size) {
+                    //     val nextSteps = stepsPoints[indexOfLastStepPointsLoadedInTree + 1]
+                    //     val fillerPoints = MapboxRouteLineUtils.getFillerPointsForStepPoints(nextSteps)
+                    //
+                    //     val startAdd = System.currentTimeMillis()
+                    //     locationSearchTree.addAll(fillerPoints)
+                    //     Log.e("foobar", "time to add ${fillerPoints.size} is ${System.currentTimeMillis() - startAdd}")
+                    //
+                    //     fillerPointsInTree.add(fillerPoints)
+                    //     indexOfLastStepPointsLoadedInTree++
+                    //     if (fillerPointsInTree.size == 3) {
+                    //         val pointsToDrop = fillerPointsInTree.removeFirst()
+                    //         val startRemove = System.currentTimeMillis()
+                    //         locationSearchTree.removeAll(pointsToDrop)
+                    //         Log.e("foobar", "time to remove ${pointsToDrop.size} is ${System.currentTimeMillis() - startRemove}")
+                    //     }
+                    // }
                 }
             }
+            val trimTotal = System.currentTimeMillis() - trimStart
+            if (trimTotal > 5) {
+                Log.e("foobar", "time to trim tree is ${System.currentTimeMillis() - trimStart}")
+            }
+
         }
     }
 
