@@ -24,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArrayList
 
+// todo adjust doc
 /**
  * This class implements a feature that can change the appearance of the route line behind the puck.
  * The route line behind the puck can be configured to be transparent or a specified color and
@@ -179,20 +180,14 @@ internal class VanishingRouteLine {
     fun setGranularDistances(distances: RouteLineGranularDistances) {
         if (distances != granularDistances) {
             granularDistances = distances
-            stepsPoints =
-                granularDistances!!.stepsDistances.flatten() // todo test for multileg routes
+            stepsPoints = distances.stepsDistances.flatten()
             locationSearchTree.clear()
             fillerPointsInTree.clear()
             indexOfLastStepPointsLoadedInTree = 0
             vanishPointOffset = 0.0
-            Log.e("foobar", "everything got cleared, starting fresh")
 
-            // if (stepsPoints.isNotEmpty()) {
-            //     val firstSteps = stepsPoints.first()
-            //     val fillerPoints = MapboxRouteLineUtils.getFillerPointsForStepPoints(firstSteps)
-            //     locationSearchTree.addAll(fillerPoints)
-            //     fillerPointsInTree.add(fillerPoints)
-            // }
+            // todo remove logging
+            Log.e("foobar", "everything got cleared, starting fresh")
 
             if (distances.flatStepDistances.isNotEmpty()) {
                 val endRange = if (distances.flatStepDistances.size > stepPointRangeSize) {
@@ -222,6 +217,7 @@ internal class VanishingRouteLine {
             if (distanceBetweenPoints <= ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS ) {
                 (1.0 - closestPoint.distanceRemaining / distances.completeDistance)
             } else {
+                // todo remove logging
                 Log.e("foobar", "distance of $distanceBetweenPoints beyond distance threshold")
                 Log.e("foobar", "incoming point $point nearest neighbor ${closestPoint.point}")
                 null
@@ -233,7 +229,7 @@ internal class VanishingRouteLine {
 
     //todo make private
     fun trimTree(point: Point) {
-        //if getting close to the last step point, load the points for the next step
+        //if getting close to the last step point, load the points for the next step range
         //and remove the points long since passed.
         scope?.launch(Dispatchers.Main.immediate) {
             val trimStart = System.currentTimeMillis()
@@ -258,34 +254,13 @@ internal class VanishingRouteLine {
                     }
                     if (fillerPointsInTree.size == maxAllowedFillerPointListsInTree) {
                         val pointsToDrop = fillerPointsInTree.removeFirst()
-                        val startRemove = System.currentTimeMillis()
                         locationSearchTree.removeAll(pointsToDrop)
-                        Log.e("foobar", "time to remove ${pointsToDrop.size} is ${System.currentTimeMillis() - startRemove}")
                     }
-
-
-
-                    // if (indexOfLastStepPointsLoadedInTree + 1 < stepsPoints.size) {
-                    //     val nextSteps = stepsPoints[indexOfLastStepPointsLoadedInTree + 1]
-                    //     val fillerPoints = MapboxRouteLineUtils.getFillerPointsForStepPoints(nextSteps)
-                    //
-                    //     val startAdd = System.currentTimeMillis()
-                    //     locationSearchTree.addAll(fillerPoints)
-                    //     Log.e("foobar", "time to add ${fillerPoints.size} is ${System.currentTimeMillis() - startAdd}")
-                    //
-                    //     fillerPointsInTree.add(fillerPoints)
-                    //     indexOfLastStepPointsLoadedInTree++
-                    //     if (fillerPointsInTree.size == 3) {
-                    //         val pointsToDrop = fillerPointsInTree.removeFirst()
-                    //         val startRemove = System.currentTimeMillis()
-                    //         locationSearchTree.removeAll(pointsToDrop)
-                    //         Log.e("foobar", "time to remove ${pointsToDrop.size} is ${System.currentTimeMillis() - startRemove}")
-                    //     }
-                    // }
                 }
             }
             val trimTotal = System.currentTimeMillis() - trimStart
-            if (trimTotal > 5) {
+            if (trimTotal > 10) {
+                // todo remove logging
                 Log.e("foobar", "time to trim tree is ${System.currentTimeMillis() - trimStart}")
             }
 

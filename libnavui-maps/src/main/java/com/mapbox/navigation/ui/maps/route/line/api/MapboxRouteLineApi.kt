@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
+import android.util.Log
 import android.util.LruCache
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -438,52 +439,44 @@ class MapboxRouteLineApi(
         point: Point
     ): Expected<RouteLineError, RouteLineUpdateValue> {
         val currentNanoTime = System.nanoTime()
-
-        //todo does the VanishingPointState matter anymore?
-        //todo is the nano time still needed?
-
-        // if (routeLineOptions.vanishingRouteLine?.vanishingPointState ==
-        //     VanishingPointState.DISABLED || currentNanoTime - lastIndexUpdateTimeNano >
-        //     RouteLayerConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO ||
-        //     currentNanoTime - lastPointUpdateTimeNano <
-        //     routeLineOptions.vanishingRouteLineUpdateIntervalNano
-        // ) {
-        //     return ExpectedFactory.createError(
-        //         RouteLineError(
-        //             "Vanishing point state is disabled or the update doesn't fall" +
-        //                 "within the configured interval window.",
-        //             null
-        //         )
-        //     )
-        // }
+        if (
+            currentNanoTime - lastPointUpdateTimeNano <
+            routeLineOptions.vanishingRouteLineUpdateIntervalNano
+        ) {
+            return ExpectedFactory.createError(
+                RouteLineError(
+                    "Vanishing point state is disabled or the update doesn't fall" +
+                        "within the configured interval window.",
+                    null
+                )
+            )
+        }
 
         val routeLineExpressionProviders = ifNonNull(primaryRoute) { route ->
-            val stopGap: Double = RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS / route.directionsRoute.distance()
-            ifNonNull(granularDistancesProvider(route)) { granularDistances ->
-                if (routeLineOptions.styleInactiveRouteLegsIndependently) {
-                    val workingRouteLineExpressionData =
-                        alternativelyStyleSegmentsNotInLeg(activeLegIndex, routeLineExpressionData)
-
-                    val restrictedExpressionData: List<ExtractedRouteRestrictionData>? =
-                        if (routeLineOptions.displayRestrictedRoadSections &&
-                            MapboxRouteLineUtils.routeHasRestrictions(primaryRoute)
-                        ) {
-                            extractRouteRestrictionData(route)
-                        } else {
-                            null
-                        }
-                    routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(
-                        point,
-                        workingRouteLineExpressionData,
-                        restrictedExpressionData,
-                        routeLineOptions.resourceProvider,
-                        activeLegIndex,
-                        stopGap,
-                        routeLineOptions.displaySoftGradientForTraffic,
-                    )
-                } else {
-                    routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(point)
-                }
+            if (routeLineOptions.styleInactiveRouteLegsIndependently) {
+                val stopGap: Double =
+                    RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS / route.directionsRoute.distance()
+                val workingRouteLineExpressionData =
+                    alternativelyStyleSegmentsNotInLeg(activeLegIndex, routeLineExpressionData)
+                val restrictedExpressionData: List<ExtractedRouteRestrictionData>? =
+                    if (routeLineOptions.displayRestrictedRoadSections &&
+                        MapboxRouteLineUtils.routeHasRestrictions(primaryRoute)
+                    ) {
+                        extractRouteRestrictionData(route)
+                    } else {
+                        null
+                    }
+                routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(
+                    point,
+                    workingRouteLineExpressionData,
+                    restrictedExpressionData,
+                    routeLineOptions.resourceProvider,
+                    activeLegIndex,
+                    stopGap,
+                    routeLineOptions.displaySoftGradientForTraffic,
+                )
+            } else {
+                routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(point)
             }
         }
 
@@ -679,6 +672,7 @@ class MapboxRouteLineApi(
         }
     }
 
+    // todo adjust doc
     /**
      * Updates the state of the route line based on data in the [RouteProgress] passing a result
      * to the consumer that should be rendered by the [MapboxRouteLineView].
@@ -697,28 +691,6 @@ class MapboxRouteLineApi(
         routeProgress: RouteProgress,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>
     ) {
-        // val currentPrimaryRoute = primaryRoute
-        // if (currentPrimaryRoute == null) {
-        //     val msg = "You're calling #updateWithRouteProgress without any routes being set."
-        //     consumer.accept(
-        //         ExpectedFactory.createError(RouteLineError(msg, throwable = null))
-        //     )
-        //     logW(msg, LOG_CATEGORY)
-        //     return
-        // } else if (currentPrimaryRoute.id != routeProgress.navigationRoute.id) {
-        //     val msg = "Provided primary route (#setNavigationRoutes, ID: " +
-        //         "${currentPrimaryRoute.id}) and navigated route (#updateWithRouteProgress, ID: " +
-        //         "${routeProgress.navigationRoute.id}) are not the same. Aborting the update."
-        //     consumer.accept(
-        //         ExpectedFactory.createError(RouteLineError(msg, throwable = null))
-        //     )
-        //     logE(msg, LOG_CATEGORY)
-        //     return
-        // }
-        //
-        // updateUpcomingRoutePointIndex(routeProgress)
-        // updateVanishingPointState(routeProgress.currentState)
-
         // If the de-emphasize inactive route legs feature is enabled and the vanishing route line
         // feature is enabled and the active leg index has changed, then calling the
         // alternativelyStyleSegmentsNotInLeg() method here will get the resulting calculation cached so
@@ -751,11 +723,11 @@ class MapboxRouteLineApi(
     }
 
     fun updateUpcomingRoutePointIndex(routeProgress: RouteProgress) {
-        // del me
+        // todo del me
     }
 
     fun updateVanishingPointState(state: RouteProgressState) {
-        // del me
+        // todo del me
     }
 
     /**
