@@ -25,6 +25,9 @@ internal class HistoryRecordingStateHandler : TripSessionStateObserver {
 
     fun registerStateChangeObserver(observer: HistoryRecordingStateChangeObserver) {
         historyRecordingStateChangeObservers.add(observer)
+        if (shouldNotifyOnStart(currentState)) {
+            observer.onShouldStartRecording(currentState)
+        }
     }
 
     fun unregisterStateChangeObserver(observer: HistoryRecordingStateChangeObserver) {
@@ -113,10 +116,14 @@ internal class HistoryRecordingStateHandler : TripSessionStateObserver {
                     finishRecordingBlock(it, oldState)
                 }
             }
-            if (newState !is HistoryRecordingSessionState.Idle) {
+            if (shouldNotifyOnStart(newState)) {
                 historyRecordingStateChangeObservers.forEach { it.onShouldStartRecording(newState) }
             }
             copilotSessionObservers.forEach { it.onCopilotSessionChanged(newState) }
         }
+    }
+
+    private fun shouldNotifyOnStart(state: HistoryRecordingSessionState): Boolean {
+        return state !is HistoryRecordingSessionState.Idle
     }
 }
