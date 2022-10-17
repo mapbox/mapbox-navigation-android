@@ -8,6 +8,8 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 @ExperimentalPreviewMapboxNavigationAPI
 internal class MapboxMapViewBinder : MapViewBinder() {
 
+    override val shouldLoadMapStyle: Boolean = true
+
     override fun getMapView(context: Context): MapView {
         return MapView(context).apply {
             compass.enabled = false

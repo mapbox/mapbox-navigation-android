@@ -11,6 +11,4 @@ class CustomMapViewBinder : MapViewBinder() {
     override fun getMapView(context: Context): MapView {
         return customMapViewFromCode(context)
     }
-
-    override val shouldLoadMapStyle: Boolean = false
 }

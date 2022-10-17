@@ -7,6 +7,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Improved precision of congestion visualization and independent leg styling transitions, especially for long routes. [#6476](https://github.com/mapbox/mapbox-navigation-android/pull/6476)
 - Fixed an issue with congestion visualization on the route line that occurred during route refreshes. [#6476](https://github.com/mapbox/mapbox-navigation-android/pull/6476)
+- Made `MapViewBinder#shouldLoadMapStyle` false by default. [#6485](https://github.com/mapbox/mapbox-navigation-android/pull/6485)
 
 ## Mapbox Navigation SDK 2.9.0-beta.2 - 14 October, 2022
 ### Changelog
@@ -37,6 +38,7 @@ binding.navigationView.customizeViewBinders {
     }
 }
 ```
+- Removed force disabling of `MapView#compass` for custom MapViews. [#6433](https://github.com/mapbox/mapbox-navigation-android/pull/6433)
 - :warning: Improved alternatives route processing. `MapboxNavigation#setNavigationRoutes` doesn't accept alternatives which don't deviate from primary route or which have different destinations. Rejected alternatives will be present in `RoutesSetSuccess.ignoredAlternatives` and won't produce `AlternativeRouteMetadata`. [#6464](https://github.com/mapbox/mapbox-navigation-android/pull/6464)
 - Fixed false detection of passed alternatives that led to their removal. [#6464](https://github.com/mapbox/mapbox-navigation-android/pull/6464)
 - Improved route matching. [#6464](https://github.com/mapbox/mapbox-navigation-android/pull/6464)

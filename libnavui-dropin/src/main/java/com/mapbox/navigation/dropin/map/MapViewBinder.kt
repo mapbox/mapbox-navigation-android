@@ -50,7 +50,7 @@ abstract class MapViewBinder : UIBinder {
      * `True` if Mapbox should load map style,
      * `false` if it will be loaded by the user or handled in any other way.
      */
-    open val shouldLoadMapStyle: Boolean = true
+    open val shouldLoadMapStyle: Boolean = false
 
     /**
      * Triggered when this view binder instance is attached. The [viewGroup] returns a
