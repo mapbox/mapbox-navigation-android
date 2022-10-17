@@ -41,6 +41,7 @@ binding.navigationView.customizeViewBinders {
 - Fixed false detection of passed alternatives that led to their removal. [#6464](https://github.com/mapbox/mapbox-navigation-android/pull/6464)
 - Improved route matching. [#6464](https://github.com/mapbox/mapbox-navigation-android/pull/6464)
 - Updated `LocationMatcherResult#zLevel`, `LocationMatcherResult#road` to have no values during `RouteProgressState#OFF_ROUTE` state. [#6464](https://github.com/mapbox/mapbox-navigation-android/pull/6464)
+- Fixed crash when user selects Disagree in Telemetry Settings dialog. [#6464](https://github.com/mapbox/mapbox-navigation-android/pull/6464)
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
