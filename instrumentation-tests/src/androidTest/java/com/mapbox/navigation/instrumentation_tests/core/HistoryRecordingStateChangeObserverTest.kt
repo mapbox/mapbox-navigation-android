@@ -196,6 +196,41 @@ class HistoryRecordingStateChangeObserverTest :
     }
 
     @Test
+    fun history_recording_observer_receives_current_state_event_for_active_sessions() = sdkTest {
+        createMapboxNavigation()
+        val nonEmptyRoutes = RoutesProvider.dc_very_short(activity).toNavigationRoutes()
+        val eventsChannelIdle = Channel<HistoryRecordingStateChangeEvent>(Channel.UNLIMITED)
+        val eventsChannelFreeDrive = Channel<HistoryRecordingStateChangeEvent>(Channel.UNLIMITED)
+        val eventsChannelActiveGuidance =
+            Channel<HistoryRecordingStateChangeEvent>(Channel.UNLIMITED)
+
+        observeHistoryRecordingEvents(eventsChannelIdle)
+        checkHasNoNextElement(eventsChannelIdle)
+
+        mapboxNavigation.startTripSession()
+        observeHistoryRecordingEvents(eventsChannelFreeDrive)
+
+        assertEquals(
+            HistoryRecordingStateChangeEvent(
+                HistoryRecordingStateChangeEventType.START,
+                HistoryRecordingSessionState.FreeDrive::class
+            ),
+            eventsChannelFreeDrive.receive()
+        )
+
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(nonEmptyRoutes)
+        observeHistoryRecordingEvents(eventsChannelActiveGuidance)
+
+        assertEquals(
+            HistoryRecordingStateChangeEvent(
+                HistoryRecordingStateChangeEventType.START,
+                HistoryRecordingSessionState.ActiveGuidance::class
+            ),
+            eventsChannelActiveGuidance.receive()
+        )
+    }
+
+    @Test
     fun history_recording_observer_route_refresh() = sdkTest {
         val mockRoute = RoutesProvider.dc_very_short(activity)
         setUpMockRequestHandlersForRefresh(mockRoute)
