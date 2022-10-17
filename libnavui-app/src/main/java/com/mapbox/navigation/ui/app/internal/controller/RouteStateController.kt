@@ -3,13 +3,14 @@ package com.mapbox.navigation.ui.app.internal.controller
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
 import com.mapbox.navigation.ui.app.internal.Action
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class RouteStateController(store: Store) : StateController() {
+class RouteStateController(private val store: Store) : StateController() {
     init {
         store.register(this)
     }
@@ -19,6 +20,9 @@ class RouteStateController(store: Store) : StateController() {
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
         this.mapboxNavigation = mapboxNavigation
+        mapboxNavigation.flowRoutesUpdated().observe { result ->
+            store.dispatch(RoutesAction.SynchronizeRoutes(result.navigationRoutes))
+        }
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
@@ -44,6 +48,9 @@ class RouteStateController(store: Store) : StateController() {
         return when (action) {
             is RoutesAction.SetRoutes -> {
                 mapboxNavigation.setNavigationRoutes(action.routes, action.legIndex)
+                action.routes
+            }
+            is RoutesAction.SynchronizeRoutes -> {
                 action.routes
             }
         }

@@ -6,7 +6,6 @@ import com.mapbox.maps.toCameraOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
-import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.ui.app.internal.camera.CameraAction
 import com.mapbox.navigation.ui.app.internal.camera.CameraAction.SetCameraMode
@@ -22,12 +21,9 @@ import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHan
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import com.mapbox.navigation.ui.maps.internal.extensions.flowNavigationCameraState
 import com.mapbox.navigation.utils.internal.logD
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @ExperimentalPreviewMapboxNavigationAPI
@@ -80,11 +76,11 @@ internal class CameraComponent constructor(
 
         restoreCameraState()
         controlCameraFrameOverrides()
-        syncNavigationCameraState()
         updateCameraLocation()
 
         onRouteProgressUpdates(mapboxNavigation)
-        onRouteUpdates(mapboxNavigation)
+        onRouteUpdates()
+        syncNavigationCameraState()
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
@@ -192,24 +188,12 @@ internal class CameraComponent constructor(
         }
     }
 
-    private fun onRouteUpdates(mapboxNavigation: MapboxNavigation) {
-        val routesFlow = combine(
-            store.select { it.previewRoutes },
-            mapboxNavigation.flowRoutesUpdated()
-                .map { it.navigationRoutes }
-                .stateIn(
-                    coroutineScope,
-                    SharingStarted.WhileSubscribed(),
-                    mapboxNavigation.getNavigationRoutes(),
-                ),
-        ) { previewRoutes, navigationRoutes ->
-            when {
-                navigationRoutes.isNotEmpty() -> navigationRoutes
-                previewRoutes is RoutePreviewState.Ready -> previewRoutes.routes
-                else -> emptyList()
+    private fun onRouteUpdates() {
+        store.select { state ->
+            state.routes.ifEmpty {
+                (state.previewRoutes as? RoutePreviewState.Ready)?.routes.orEmpty()
             }
-        }
-        routesFlow.observe { routes ->
+        }.observe { routes ->
             if (routes.isEmpty()) {
                 viewportDataSource.clearRouteData()
                 viewportDataSource.evaluate()
