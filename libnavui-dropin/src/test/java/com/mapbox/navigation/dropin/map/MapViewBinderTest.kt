@@ -53,10 +53,10 @@ import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -390,7 +390,7 @@ class MapViewBinderTest {
     }
 
     @Test
-    fun `shouldLoadMapStyle should be true`() {
-        assertTrue(sut.shouldLoadMapStyle)
+    fun `shouldLoadMapStyle should be false`() {
+        assertFalse(sut.shouldLoadMapStyle)
     }
 }
