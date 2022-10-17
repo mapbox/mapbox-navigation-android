@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.app.internal.routefetch
 
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.app.internal.Action
 
 /**
@@ -15,4 +16,11 @@ sealed class RoutesAction : Action {
      * @param legIndex optional index of [RouteLeg]
      */
     data class SetRoutes(val routes: List<NavigationRoute>, val legIndex: Int = 0) : RoutesAction()
+
+    /**
+     * The action is used to synchronize the [NavigationRoute]
+     * supplied to [MapboxNavigation] and NavigationView.
+     * @param routes list of [NavigationRoute]
+     */
+    data class SynchronizeRoutes(val routes: List<NavigationRoute>) : RoutesAction()
 }
