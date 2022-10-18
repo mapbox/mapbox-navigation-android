@@ -6,6 +6,7 @@ package com.mapbox.navigation.core
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
@@ -828,6 +829,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     ) {
         routeAlternativesController.pauseUpdates()
         tripSession.setRoutes(routes, legIndex, reason).run {
+            Log.d("alternative-test", "set routes: ${this.nativeAlternatives?.map { it.id }}")
             if (nativeAlternatives != null) {
                 routeAlternativesController.processAlternativesMetadata(
                     routes,
@@ -1129,6 +1131,17 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     @JvmOverloads
     fun setRerouteController(
+        rerouteController: NavigationRerouteController? = defaultRerouteController
+    ) {
+        this.rerouteController = rerouteController
+        if (rerouteController?.state == RerouteState.FetchingRoute) {
+            rerouteController.interrupt()
+            reroute()
+        }
+    }
+
+    @JvmOverloads
+    fun setRerouteController2(
         rerouteController: NavigationRerouteController? = defaultRerouteController
     ) {
         this.rerouteController = rerouteController

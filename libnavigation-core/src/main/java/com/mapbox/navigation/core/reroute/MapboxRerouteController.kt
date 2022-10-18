@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.reroute
 
+import android.util.Log
 import androidx.annotation.MainThread
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -106,11 +107,12 @@ internal class MapboxRerouteController(
         interrupt()
         state = RerouteState.FetchingRoute
         logD("Fetching route", LOG_CATEGORY)
-
+        Log.d("alternative-test", "reroute: ${tripSession.getRouteProgress()?.currentState}, ${tripSession.getRouteProgress()?.routeAlternativeId}")
         ifNonNull(
             directionsSession.routes,
             tripSession.getRouteProgress()?.routeAlternativeId,
         ) { routes, routeAlternativeId ->
+            Log.d("alternative-test", "mapbox reroute controller: $routeAlternativeId")
             val relevantAlternative = routes.find { it.id == routeAlternativeId }
             if (relevantAlternative != null) {
                 val newList = mutableListOf(relevantAlternative).apply {
