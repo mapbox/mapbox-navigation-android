@@ -29,7 +29,7 @@ import kotlin.concurrent.schedule
 class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
     private val context: Context,
     private val accessToken: String,
-    private val language: String,
+    language: String,
     private val options: VoiceInstructionsPlayerOptions = defaultOptions(),
     private val audioFocusDelegate: AsyncAudioFocusDelegate =
         defaultAudioFocusDelegate(context, options),
@@ -73,6 +73,15 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
             currentClientCallback.accept(currentAnnouncement)
             play()
         }
+
+    /**
+     * Change language in runtime.
+     *
+     * @param language the new [Locale] language (in a format acceptable by [Locale])
+     */
+    fun updateLanguage(language: String) {
+        textPlayer.updateLanguage(language)
+    }
 
     /**
      * Given [SpeechAnnouncement] the method will play the voice instruction.

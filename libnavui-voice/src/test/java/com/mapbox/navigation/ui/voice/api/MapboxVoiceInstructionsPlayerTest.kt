@@ -72,6 +72,40 @@ class MapboxVoiceInstructionsPlayerTest {
     }
 
     @Test
+    fun updateLanguage() {
+        val newLanguage = "IT"
+        val anyAccessToken = "pk.123"
+        val anyLanguage = Locale.US.language
+        val mockedFilePlayer: VoiceInstructionsFilePlayer = mockk(relaxed = true)
+        val mockedTextPlayer: VoiceInstructionsTextPlayer = mockk(relaxed = true)
+        every {
+            retrieveVoiceInstructionsFilePlayer(
+                aMockedContext,
+                anyAccessToken,
+                mockedPlayerAttributes,
+            )
+        } returns mockedFilePlayer
+        every {
+            retrieveVoiceInstructionsTextPlayer(
+                aMockedContext,
+                anyLanguage,
+                mockedPlayerAttributes,
+            )
+        } returns mockedTextPlayer
+        val mapboxVoiceInstructionsPlayer =
+            MapboxVoiceInstructionsPlayer(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage,
+                mockedPlayerOptions
+            )
+
+        mapboxVoiceInstructionsPlayer.updateLanguage(newLanguage)
+
+        verify(exactly = 1) { mockedTextPlayer.updateLanguage(newLanguage) }
+    }
+
+    @Test
     fun `play VoiceInstructionsFilePlayer if file available`() {
         val anyAccessToken = "pk.123"
         val anyLanguage = Locale.US.language

@@ -66,6 +66,7 @@ package com.mapbox.navigation.ui.voice.api {
     method public void clear();
     method public void play(com.mapbox.navigation.ui.voice.model.SpeechAnnouncement announcement, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.voice.model.SpeechAnnouncement> consumer);
     method public void shutdown();
+    method public void updateLanguage(String language);
     method @kotlin.jvm.Throws(exceptionClasses=IllegalArgumentException::class) public void volume(com.mapbox.navigation.ui.voice.model.SpeechVolume state) throws java.lang.IllegalArgumentException;
   }
 
