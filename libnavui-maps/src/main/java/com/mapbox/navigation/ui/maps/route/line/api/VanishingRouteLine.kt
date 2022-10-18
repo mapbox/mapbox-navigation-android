@@ -178,27 +178,29 @@ internal class VanishingRouteLine {
     private val maxAllowedFillerPointListsInTree = 3
 
     fun setGranularDistances(distances: RouteLineGranularDistances) {
-        if (distances != granularDistances) {
-            granularDistances = distances
-            stepsPoints = distances.stepsDistances.flatten()
-            locationSearchTree.clear()
-            fillerPointsInTree.clear()
-            indexOfLastStepPointsLoadedInTree = 0
-            vanishPointOffset = 0.0
+        scope?.launch(Dispatchers.Main.immediate) {
+            if (distances != granularDistances) {
+                granularDistances = distances
+                stepsPoints = distances.stepsDistances.flatten()
+                locationSearchTree.clear()
+                fillerPointsInTree.clear()
+                indexOfLastStepPointsLoadedInTree = 0
+                vanishPointOffset = 0.0
 
-            // todo remove logging
-            Log.e("foobar", "everything got cleared, starting fresh")
+                // todo remove logging
+                Log.e("foobar", "everything got cleared, starting fresh")
 
-            if (distances.flatStepDistances.isNotEmpty()) {
-                val endRange = if (distances.flatStepDistances.size > stepPointRangeSize) {
-                    stepPointRangeSize
-                } else {
-                    distances.flatStepDistances.lastIndex
-                }
-                stepPointRange = Range(0, endRange).also {
-                    val fillerPoints = getFillerPointsForRange(it, distances.flatStepDistances)
-                    locationSearchTree.addAll(fillerPoints)
-                    fillerPointsInTree.add(fillerPoints)
+                if (distances.flatStepDistances.isNotEmpty()) {
+                    val endRange = if (distances.flatStepDistances.size > stepPointRangeSize) {
+                        stepPointRangeSize
+                    } else {
+                        distances.flatStepDistances.lastIndex
+                    }
+                    stepPointRange = Range(0, endRange).also {
+                        val fillerPoints = getFillerPointsForRange(it, distances.flatStepDistances)
+                        locationSearchTree.addAll(fillerPoints)
+                        fillerPointsInTree.add(fillerPoints)
+                    }
                 }
             }
         }
@@ -213,18 +215,48 @@ internal class VanishingRouteLine {
     fun getOffset(point: Point): Double? {
         val offset = ifNonNull(locationSearchTree.getNearestNeighbor(point), granularDistances)
         { closestPoint, distances ->
-            val distanceBetweenPoints = TurfMeasurement.distance(point, closestPoint.point)
+            val distanceBetweenPoints = TurfMeasurement.distance(point, closestPoint.point, TurfConstants.UNIT_METERS)
             if (distanceBetweenPoints <= ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS ) {
                 (1.0 - closestPoint.distanceRemaining / distances.completeDistance)
             } else {
                 // todo remove logging
-                Log.e("foobar", "distance of $distanceBetweenPoints beyond distance threshold")
-                Log.e("foobar", "incoming point $point nearest neighbor ${closestPoint.point}")
+                //Log.e("foobar", "distance of $distanceBetweenPoints beyond distance threshold")
+                //Log.e("foobar", "incoming point $point nearest neighbor ${closestPoint.point}")
+                if (distanceBetweenPoints >= distanceToLastStepPointInMeters) {
+                    recalculateRange(point)
+                }
                 null
             }
         }
         trimTree(point)
         return offset
+    }
+
+    fun recalculateRange(point: Point) {
+        scope?.launch(Dispatchers.Main.immediate) {
+            ifNonNull(granularDistances) { distances ->
+                val indexOfClosestStepPoint = distances.flatStepDistances.mapIndexed { index, routeLineDistancesIndex ->
+                    val dist = TurfMeasurement.distance(point, routeLineDistancesIndex.point, TurfConstants.UNIT_METERS)
+                    Pair(index, dist)
+                }.minByOrNull { it.second }
+                ifNonNull(indexOfClosestStepPoint) {
+                    val endOfRange = if (it.first + stepPointRangeSize < distances.flatStepDistances.lastIndex) {
+                        it.first + stepPointRangeSize
+                    } else {
+                        distances.flatStepDistances.lastIndex
+                    }
+                    stepPointRange = Range(it.first - 1, endOfRange).also { range ->
+                        val fillerPoints = getFillerPointsForRange(range, distances.flatStepDistances)
+                        if (fillerPoints.isNotEmpty()) {
+                            locationSearchTree.clear()
+                            locationSearchTree.addAll(fillerPoints)
+                            fillerPointsInTree.clear()
+                            fillerPointsInTree.add(fillerPoints)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     //todo make private
