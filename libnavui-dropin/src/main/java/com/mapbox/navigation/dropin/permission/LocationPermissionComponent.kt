@@ -80,11 +80,12 @@ internal class LocationPermissionComponent(
     /**
      * When the app is launched without location permissions. Run a check to see if location
      * permissions have been accepted yet. This will catch the case where a user will enable
-     * location permissions through the app settings.
+     * location permissions through the app settings or
+     * when developers request location permissions themselves.
      */
     private fun notifyGrantedOnForegrounded(applicationContext: Context) {
         coroutineScope.launch {
-            componentActivityRef.get()?.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            componentActivityRef.get()?.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 if (!store.state.value.tripSession.isLocationPermissionGranted) {
                     val isGranted = PermissionsManager.areLocationPermissionsGranted(
                         applicationContext

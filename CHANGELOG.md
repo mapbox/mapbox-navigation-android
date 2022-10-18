@@ -10,6 +10,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Made `MapViewBinder#shouldLoadMapStyle` false by default. [#6485](https://github.com/mapbox/mapbox-navigation-android/pull/6485)
 - Fixed an issue that prevented any registered `OnBackPressedCallback`s to fire when `NavigationView` is attached. [#6483](https://github.com/mapbox/mapbox-navigation-android/pull/6483)
 - Removed `NavigationViewListener.onBackPressed()`. You can register your own [OnBackPressedCallback](https://developer.android.com/reference/androidx/activity/OnBackPressedCallback) to intercept any `NavigationView` BACK press events. [#6483](https://github.com/mapbox/mapbox-navigation-android/pull/6483)
+- Fixed an issue with `NavigationView` that caused trip session not to start after granting location permissions that were requested outside of Drop-In UI by an application. [#6489](https://github.com/mapbox/mapbox-navigation-android/pull/6489)
 
 ## Mapbox Navigation SDK 2.9.0-beta.2 - 14 October, 2022
 ### Changelog

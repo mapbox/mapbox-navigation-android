@@ -188,7 +188,7 @@ class LocationPermissionComponentTest {
 
             locationPermissionComponent.onAttached(mockMapboxNavigation())
             every { PermissionsManager.areLocationPermissionsGranted(any()) } returns true
-            testLifecycle.lifecycleRegistry.currentState = Lifecycle.State.STARTED
+            testLifecycle.lifecycleRegistry.currentState = Lifecycle.State.RESUMED
 
             verify {
                 testStore.dispatch(
