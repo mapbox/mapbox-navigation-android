@@ -1,11 +1,11 @@
-package com.mapbox.navigation.ui.maps.internal.route.line
+package com.mapbox.navigation.ui.maps.util
 
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import java.util.function.Supplier
 
-class LocationSearchTree<T: Supplier<Point>>(private val capacity: Int = 10) {
+internal class LocationSearchTree<T: Supplier<Point>>(private val capacity: Int = 10) {
     private var rootNode: LocationTreeNode<T>? = null
 
     fun size() = rootNode?.size() ?: 0

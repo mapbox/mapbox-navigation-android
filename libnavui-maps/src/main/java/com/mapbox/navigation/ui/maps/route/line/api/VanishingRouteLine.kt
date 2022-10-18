@@ -1,12 +1,10 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
-import android.util.Log
 import android.util.Range
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
-import com.mapbox.navigation.base.trip.model.RouteProgressState
-import com.mapbox.navigation.ui.maps.internal.route.line.LocationSearchTree
+import com.mapbox.navigation.ui.maps.util.LocationSearchTree
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteRestrictionData
@@ -22,18 +20,16 @@ import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.concurrent.CopyOnWriteArrayList
 
-// todo adjust doc
 /**
  * This class implements a feature that can change the appearance of the route line behind the puck.
  * The route line behind the puck can be configured to be transparent or a specified color and
  * will update during navigation.
  *
- * To enable this feature add an instance of this class to the constructor of the MapboxRouteLineApi
- * class. Be sure to send route progress updates and location updates from a
- * OnIndicatorPositionChangedListener to the MapboxRouteLineApi. See the documentation for more
- * information.
+ * Enable this feature with the [MapboxRouteLineOptions] class.  Be sure to create a
+ * [OnIndicatorPositionChangedListener] and pass the values generated to the [MapboxRouteLineApi] instance.
+ *
+ * See the documentation for more information.
  */
 internal class VanishingRouteLine {
 
@@ -41,17 +37,17 @@ internal class VanishingRouteLine {
      * a value representing the percentage distance traveled
      */
     var vanishPointOffset: Double = 0.0
-        //private set todo
-
-    var primaryRouteRemainingDistancesIndex: Int? = null //todo delme
-
-    var vanishingPointState: RouteProgressState? = null //todo delme
-
-    fun updateVanishingPointState(state: RouteProgressState) {
-        //todo  delme
-    }
+        private set
 
     private var scope: CoroutineScope? = null
+    private var granularDistances: RouteLineGranularDistances? = null
+    private val locationSearchTree = LocationSearchTree<RouteLineDistancesIndex>()
+    private val fillerPointsInTree = mutableListOf<List<RouteLineDistancesIndex>>()
+    private var indexOfLastStepPointsLoadedInTree = 0
+    private val distanceToLastStepPointInMeters = 30.0
+    private var stepPointRange: Range<Int>? = null
+    private val stepPointRangeSize = 5
+    private val maxAllowedFillerPointListsInTree = 3
 
     fun setScope(scope: CoroutineScope) {
         this.scope = scope
@@ -164,31 +160,27 @@ internal class VanishingRouteLine {
         }
     }
 
-
-    ////////////
-
-    private var granularDistances: RouteLineGranularDistances? = null
-    private val locationSearchTree = LocationSearchTree<RouteLineDistancesIndex>()
-    private var stepsPoints: List<Array<RouteLineDistancesIndex>> = emptyList()
-    private val fillerPointsInTree = mutableListOf<List<RouteLineDistancesIndex>>()
-    private var indexOfLastStepPointsLoadedInTree = 0
-    private val distanceToLastStepPointInMeters = 30.0
-    private var stepPointRange: Range<Int>? = null
-    private val stepPointRangeSize = 5
-    private val maxAllowedFillerPointListsInTree = 3
-
+    /**
+     * When the granular distances are received the flatStepDistances are used to generate
+     * a range of very granular points along the route.  These granular points are added
+     * to a search tree. When a call is made to get the offset for a specific point a
+     * nearest neighbor search of the granular points generated is performed. If a neighbor is
+     * found within the distance threshold it is used to determine the offset.
+     *
+     * The range of granular points adjusts at runtime according to the point coming in for the
+     * offset calculation. The range begins with the first step points in flatStepDistances.
+     * As the route is navigated the range is adjusted to include upcoming step points and
+     * the points that have been passed are removed. This constantly adjusting range keeps the
+     * number of points to search low to optimize performance.
+     */
     fun setGranularDistances(distances: RouteLineGranularDistances) {
         scope?.launch(Dispatchers.Main.immediate) {
             if (distances != granularDistances) {
                 granularDistances = distances
-                stepsPoints = distances.stepsDistances.flatten()
                 locationSearchTree.clear()
                 fillerPointsInTree.clear()
                 indexOfLastStepPointsLoadedInTree = 0
                 vanishPointOffset = 0.0
-
-                // todo remove logging
-                Log.e("foobar", "everything got cleared, starting fresh")
 
                 if (distances.flatStepDistances.isNotEmpty()) {
                     val endRange = if (distances.flatStepDistances.size > stepPointRangeSize) {
@@ -206,22 +198,17 @@ internal class VanishingRouteLine {
         }
     }
 
-    private fun getFillerPointsForRange(range: Range<Int>, flatStepDistances: Array<RouteLineDistancesIndex>): List<RouteLineDistancesIndex> {
-        val fillerSteps = flatStepDistances.copyOfRange(range.lower, range.upper)
-        return MapboxRouteLineUtils.getFillerPointsForStepPoints(fillerSteps)
-    }
-
-
     fun getOffset(point: Point): Double? {
         val offset = ifNonNull(locationSearchTree.getNearestNeighbor(point), granularDistances)
         { closestPoint, distances ->
-            val distanceBetweenPoints = TurfMeasurement.distance(point, closestPoint.point, TurfConstants.UNIT_METERS)
+            val distanceBetweenPoints = TurfMeasurement.distance(
+                point,
+                closestPoint.point,
+                TurfConstants.UNIT_METERS
+            )
             if (distanceBetweenPoints <= ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS ) {
                 (1.0 - closestPoint.distanceRemaining / distances.completeDistance)
             } else {
-                // todo remove logging
-                //Log.e("foobar", "distance of $distanceBetweenPoints beyond distance threshold")
-                //Log.e("foobar", "incoming point $point nearest neighbor ${closestPoint.point}")
                 if (distanceBetweenPoints >= distanceToLastStepPointInMeters) {
                     recalculateRange(point)
                 }
@@ -232,25 +219,39 @@ internal class VanishingRouteLine {
         return offset
     }
 
-    fun recalculateRange(point: Point) {
+    /**
+     * It's possible the incoming point is not at the beginning of the route. This method
+     * searches the route for the closest step point and creates a point range around it
+     * so that the correct offset can be determined. Any/All points in the search tree
+     * are removed and the points falling withing the range defined here are added.
+     */
+    private fun recalculateRange(point: Point) {
         scope?.launch(Dispatchers.Main.immediate) {
             ifNonNull(granularDistances) { distances ->
-                val indexOfClosestStepPoint = distances.flatStepDistances.mapIndexed { index, routeLineDistancesIndex ->
-                    val dist = TurfMeasurement.distance(point, routeLineDistancesIndex.point, TurfConstants.UNIT_METERS)
+                val indexOfClosestStepPoint =
+                    distances.flatStepDistances.mapIndexed { index, routeLineDistancesIndex ->
+                        val dist = TurfMeasurement.distance(
+                            point, routeLineDistancesIndex.point,
+                            TurfConstants.UNIT_METERS
+                        )
                     Pair(index, dist)
                 }.minByOrNull { it.second }
                 ifNonNull(indexOfClosestStepPoint) {
-                    val endOfRange = if (it.first + stepPointRangeSize < distances.flatStepDistances.lastIndex) {
-                        it.first + stepPointRangeSize
-                    } else {
-                        distances.flatStepDistances.lastIndex
-                    }
-                    stepPointRange = Range(it.first - 1, endOfRange).also { range ->
-                        val fillerPoints = getFillerPointsForRange(range, distances.flatStepDistances)
+                    val endOfRange =
+                        if (it.first + stepPointRangeSize < distances.flatStepDistances.lastIndex) {
+                            it.first + stepPointRangeSize
+                        } else {
+                            distances.flatStepDistances.lastIndex
+                        }
+                    stepPointRange = Range(it.first, endOfRange).also { range ->
+                        val fillerPoints = getFillerPointsForRange(
+                            range,
+                            distances.flatStepDistances
+                        )
                         if (fillerPoints.isNotEmpty()) {
                             locationSearchTree.clear()
-                            locationSearchTree.addAll(fillerPoints)
                             fillerPointsInTree.clear()
+                            locationSearchTree.addAll(fillerPoints)
                             fillerPointsInTree.add(fillerPoints)
                         }
                     }
@@ -259,25 +260,49 @@ internal class VanishingRouteLine {
         }
     }
 
-    //todo make private
-    fun trimTree(point: Point) {
-        //if getting close to the last step point, load the points for the next step range
-        //and remove the points long since passed.
+    /**
+     * Gets the generated points between the points in the range so they can be added to the
+     * search tree.
+     */
+    private fun getFillerPointsForRange(
+        range: Range<Int>,
+        flatStepDistances: Array<RouteLineDistancesIndex>
+    ): List<RouteLineDistancesIndex> {
+        val fillerSteps = flatStepDistances.copyOfRange(range.lower, range.upper)
+        return MapboxRouteLineUtils.getFillerPointsForStepPoints(fillerSteps)
+    }
+
+    /**
+     * When the incoming point gets close to the last point in the currently defined range
+     * the range is redefined with the upcoming points.  The points in the newly defined
+     * range are added to the search tree and the points passed are removed.
+     */
+    private fun trimTree(point: Point) {
         scope?.launch(Dispatchers.Main.immediate) {
-            val trimStart = System.currentTimeMillis()
             if (fillerPointsInTree.isNotEmpty() && fillerPointsInTree.last().isNotEmpty()) {
                 val nearEndStepPoint = fillerPointsInTree.last().last()
-                val distanceToNearEndStepPoint =
-                    TurfMeasurement.distance(point, nearEndStepPoint.point, TurfConstants.UNIT_METERS)
+                val distanceToNearEndStepPoint = TurfMeasurement.distance(
+                    point,
+                    nearEndStepPoint.point,
+                    TurfConstants.UNIT_METERS
+                )
                 if (distanceToNearEndStepPoint <= distanceToLastStepPointInMeters) {
-                    stepPointRange = ifNonNull(stepPointRange, granularDistances) { currentStepPointRange, distances ->
-                        val endOfRange = if (currentStepPointRange.upper + stepPointRangeSize < distances.flatStepDistances.lastIndex) {
-                            currentStepPointRange.upper + stepPointRangeSize
-                        } else {
-                            distances.flatStepDistances.lastIndex
-                        }
+                    stepPointRange = ifNonNull(stepPointRange, granularDistances)
+                    { currentStepPointRange, distances ->
+                        val endOfRange =
+                            if (
+                                currentStepPointRange.upper + stepPointRangeSize
+                                < distances.flatStepDistances.lastIndex
+                            ) {
+                                currentStepPointRange.upper + stepPointRangeSize
+                            } else {
+                                distances.flatStepDistances.lastIndex
+                            }
                         Range(currentStepPointRange.upper - 1, endOfRange).also {
-                            val fillerPoints = getFillerPointsForRange(it, distances.flatStepDistances)
+                            val fillerPoints = getFillerPointsForRange(
+                                it,
+                                distances.flatStepDistances
+                            )
                             if (fillerPoints.isNotEmpty()) {
                                 locationSearchTree.addAll(fillerPoints)
                                 fillerPointsInTree.add(fillerPoints)
@@ -290,22 +315,6 @@ internal class VanishingRouteLine {
                     }
                 }
             }
-            val trimTotal = System.currentTimeMillis() - trimStart
-            if (trimTotal > 10) {
-                // todo remove logging
-                Log.e("foobar", "time to trim tree is ${System.currentTimeMillis() - trimStart}")
-            }
-
         }
-    }
-
-    fun deleteMeGetTreePoints(): List<Point> {
-        val allPoints = mutableListOf<Point>()
-        fillerPointsInTree.forEach { distanceIndexes ->
-            distanceIndexes.map { it.point }.forEach {
-                allPoints.add(it)
-            }
-        }
-        return allPoints
     }
 }

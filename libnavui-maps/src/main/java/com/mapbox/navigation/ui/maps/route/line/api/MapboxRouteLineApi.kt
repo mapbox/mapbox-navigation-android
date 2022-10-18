@@ -1,14 +1,12 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
-import android.util.Log
 import android.util.LruCache
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.FeatureCollection
-import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.QueriedFeature
@@ -19,7 +17,6 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPluginImpl
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
-import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -36,7 +33,6 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.gr
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup1SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup2SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup3SourceLayerIds
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.routePointsProvider
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteRestrictionData
@@ -62,9 +58,6 @@ import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.parallelMap
-import com.mapbox.turf.TurfConstants
-import com.mapbox.turf.TurfException
-import com.mapbox.turf.TurfMisc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
@@ -539,7 +532,6 @@ class MapboxRouteLineApi(
     ) {
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
-                //routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0 //todo remove this?
                 activeLegIndex = INVALID_ACTIVE_LEG_INDEX
                 routes.clear()
                 routeFeatureData.clear()
@@ -723,11 +715,11 @@ class MapboxRouteLineApi(
     }
 
     fun updateUpcomingRoutePointIndex(routeProgress: RouteProgress) {
-        // todo del me
+        // todo delete me
     }
 
     fun updateVanishingPointState(state: RouteProgressState) {
-        // todo del me
+        // todo delete me
     }
 
     /**
@@ -1072,6 +1064,7 @@ class MapboxRouteLineApi(
             distinctNewRoutes.find { it.id == metadata.navigationRoute.id } != null
         }
 
+        // todo is this still needed?
         // ifNonNull(distinctNewRoutes.firstOrNull()) { primaryRouteCandidate ->
         //     if (!primaryRouteCandidate.directionsRoute.isSameRoute(primaryRoute?.directionsRoute)) {
         //         routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
@@ -1510,8 +1503,4 @@ class MapboxRouteLineApi(
                 jobControl.scope
             )
         }.cacheResult(alternativelyStyleSegmentsNotInLegCache)
-
-    fun deleteMeGetTreePoints(): List<Point> {
-        return routeLineOptions.vanishingRouteLine!!.deleteMeGetTreePoints()
-    }
 }

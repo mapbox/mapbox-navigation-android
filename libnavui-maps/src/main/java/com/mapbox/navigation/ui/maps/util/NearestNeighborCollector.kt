@@ -1,7 +1,6 @@
-package com.mapbox.navigation.ui.maps.internal.route.line
+package com.mapbox.navigation.ui.maps.util
 
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.ui.maps.util.DistanceComparator
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
@@ -9,7 +8,10 @@ import java.util.Collections
 import java.util.PriorityQueue
 import java.util.function.Supplier
 
-class NearestNeighborCollector<T: Supplier<Point>>(val queryPoint: Point, private val capacity: Int) {
+internal class NearestNeighborCollector<T: Supplier<Point>>(
+    val queryPoint: Point,
+    private val capacity: Int
+) {
 
     private val distanceComparator by lazy {
         DistanceComparator(queryPoint)
@@ -26,7 +28,11 @@ class NearestNeighborCollector<T: Supplier<Point>>(val queryPoint: Point, privat
             priorityQueue.add(offeredPoint)
         } else {
             if (priorityQueue.isNotEmpty()) {
-                val distanceToNewPoint = TurfMeasurement.distance(queryPoint, offeredPoint.get(), TurfConstants.UNIT_METERS)
+                val distanceToNewPoint = TurfMeasurement.distance(
+                    queryPoint,
+                    offeredPoint.get(),
+                    TurfConstants.UNIT_METERS
+                )
                 if (distanceToNewPoint < distanceToFarthestPoint) {
                     priorityQueue.poll()
                     priorityQueue.add(offeredPoint)
@@ -40,8 +46,13 @@ class NearestNeighborCollector<T: Supplier<Point>>(val queryPoint: Point, privat
         }
 
         if (pointAdded && priorityQueue.isNotEmpty()) {
-            distanceToFarthestPoint = ifNonNull(priorityQueue.peek()) { pointSupplier: Supplier<Point>  ->
-                TurfMeasurement.distance(queryPoint, pointSupplier.get(), TurfConstants.UNIT_METERS)
+            distanceToFarthestPoint =
+                ifNonNull(priorityQueue.peek()) { pointSupplier: Supplier<Point>  ->
+                    TurfMeasurement.distance(
+                        queryPoint,
+                        pointSupplier.get(),
+                        TurfConstants.UNIT_METERS
+                    )
             } ?: Double.MAX_VALUE
         }
     }

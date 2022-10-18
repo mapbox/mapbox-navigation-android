@@ -1,7 +1,6 @@
 package com.mapbox.navigation.qa_test_app.view
 
 import android.annotation.SuppressLint
-import android.graphics.Color
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
@@ -16,16 +15,9 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.gestures.Utils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.geojson.Feature
-import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.Style
-import com.mapbox.maps.extension.style.layers.generated.CircleLayer
-import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
-import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
-import com.mapbox.maps.extension.style.sources.getSource
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
@@ -162,7 +154,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             enabled = true
         }
         mapboxReplayer.pushRealLocation(this, 0.0)
-        mapboxReplayer.playbackSpeed(1.0)
+        mapboxReplayer.playbackSpeed(1.5)
         mapboxReplayer.play()
     }
 
@@ -217,7 +209,6 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 }
             )
             binding.mapView.gestures.addOnMapLongClickListener(this)
-            initTreePointLayer(it)
         }
     }
 
@@ -275,10 +266,6 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             binding.mapView.getMapboxMap().getStyle()?.apply {
                 routeLineView.renderRouteLineUpdate(this, result)
             }
-        }
-
-        routeLineApi.deleteMeGetTreePoints().apply {
-            addTreePoints(this)
         }
     }
 
@@ -379,30 +366,5 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             }
         }
         false
-    }
-
-    //todo delete below
-    private val TREE_LINE_LAYER_ID = "TREE_LINE_LAYER_ID"
-    private val TREE_LINE_SOURCE_ID = "TREE_LINE_SOURCE_ID"
-    private fun initTreePointLayer(style: Style) {
-        if (!style.styleSourceExists(TREE_LINE_SOURCE_ID)) {
-            geoJsonSource(TREE_LINE_SOURCE_ID) {}.bindTo(style)
-        }
-
-        if (!style.styleLayerExists(TREE_LINE_LAYER_ID)) {
-            CircleLayer(TREE_LINE_LAYER_ID, TREE_LINE_SOURCE_ID)
-                .circleRadius(2.0)
-                .circleOpacity(.75)
-                .circleColor(Color.MAGENTA)
-                .bindTo(style)
-        }
-    }
-
-    private fun addTreePoints(points: List<Point>) {
-        val features = points.map { Feature.fromGeometry(it) }
-
-        (binding.mapView.getMapboxMap().getStyle()!!.getSource(TREE_LINE_SOURCE_ID) as GeoJsonSource).apply {
-            this.featureCollection(FeatureCollection.fromFeatures(features))
-        }
     }
 }

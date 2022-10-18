@@ -14,7 +14,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
  * @param flatStepDistances values in this array are matching indices a flattened [stepsDistances].
  * This means that **duplicate start/end points of adjacent steps are not filtered out**.
  */
-data class RouteLineGranularDistances constructor(
+internal data class RouteLineGranularDistances constructor(
     val completeDistance: Double,
     val routeDistances: Array<RouteLineDistancesIndex>,
     val legsDistances: Array<Array<RouteLineDistancesIndex>>,

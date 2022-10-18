@@ -1,20 +1,18 @@
-package com.mapbox.navigation.ui.maps.internal.route.line
+package com.mapbox.navigation.ui.maps.util
 
 import com.mapbox.geojson.Point
 import java.util.function.Supplier
 
-class LocationTreeNode<T: Supplier<Point>>(
+internal class LocationTreeNode<T: Supplier<Point>>(
     private val points: MutableList<T>,
-    private val capacity: Int = 32,
+    private val capacity: Int = 10,
     private val distanceCalcFunction: (Point, Point) ->  Double
 ) {
 
     private val vantagePoint: Point by lazy {
         points.random().get()
     }
-
     private var threshold = 0.0
-
     private var closer: LocationTreeNode<T>? = null
     private var farther: LocationTreeNode<T>? = null
 
