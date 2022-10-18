@@ -1,12 +1,12 @@
 package com.mapbox.androidauto.car.placeslistonmap
 
 import androidx.car.app.model.ItemList
+import com.mapbox.androidauto.car.location.CarLocationProvider
 import com.mapbox.androidauto.car.search.PlaceRecord
 import com.mapbox.androidauto.internal.car.extensions.handleStyleOnAttached
 import com.mapbox.androidauto.internal.car.extensions.handleStyleOnDetached
 import com.mapbox.androidauto.internal.car.extensions.mapboxNavigationForward
 import com.mapbox.androidauto.internal.logAndroidAuto
-import com.mapbox.androidauto.navigation.location.CarAppLocation
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
@@ -52,8 +52,7 @@ class PlacesListOnMapManager(
     }
 
     fun currentItemList(): ItemList? {
-        val carAppLocation = MapboxNavigationApp.getObserver(CarAppLocation::class)
-        val currentLocation = carAppLocation.navigationLocationProvider.lastLocation
+        val currentLocation = CarLocationProvider.getRegisteredInstance().lastLocation
             ?: return null
         return placesListItemMapper?.mapToItemList(
             currentLocation,
