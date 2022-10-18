@@ -24,11 +24,11 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.dropin.actionbutton.ActionButtonsCoordinator
 import com.mapbox.navigation.dropin.analytics.AnalyticsComponent
-import com.mapbox.navigation.dropin.backpress.OnKeyListenerComponent
+import com.mapbox.navigation.dropin.backpress.BackPressedComponent
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.infopanel.InfoPanelCoordinator
 import com.mapbox.navigation.dropin.internal.extensions.navigationViewAccessToken
-import com.mapbox.navigation.dropin.internal.extensions.toComponentActivityRef
+import com.mapbox.navigation.dropin.internal.extensions.toComponentActivity
 import com.mapbox.navigation.dropin.internal.extensions.toViewModelStoreOwner
 import com.mapbox.navigation.dropin.maneuver.ManeuverCoordinator
 import com.mapbox.navigation.dropin.map.MapLayoutCoordinator
@@ -124,15 +124,16 @@ class NavigationView @JvmOverloads constructor(
 
         MapboxNavigationApp.attach(this)
 
+        val componentActivity = context.toComponentActivity()
         attachCreated(
             AnalyticsComponent(),
-            LocationPermissionComponent(context.toComponentActivityRef(), navigationContext.store),
+            LocationPermissionComponent(componentActivity, navigationContext.store),
             TripSessionComponent(lifecycle, navigationContext.store),
             MapLayoutCoordinator(navigationContext, binding),
-            OnKeyListenerComponent(
+            BackPressedComponent(
+                componentActivity.onBackPressedDispatcher,
                 navigationContext.store,
-                this,
-                navigationContext.listenerRegistry
+                lifecycleOwner = this,
             ),
             ScalebarPlaceholderCoordinator(navigationContext, binding.scalebarLayout),
             ManeuverCoordinator(navigationContext, binding.guidanceLayout),

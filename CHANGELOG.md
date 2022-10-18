@@ -8,6 +8,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Improved precision of congestion visualization and independent leg styling transitions, especially for long routes. [#6476](https://github.com/mapbox/mapbox-navigation-android/pull/6476)
 - Fixed an issue with congestion visualization on the route line that occurred during route refreshes. [#6476](https://github.com/mapbox/mapbox-navigation-android/pull/6476)
 - Made `MapViewBinder#shouldLoadMapStyle` false by default. [#6485](https://github.com/mapbox/mapbox-navigation-android/pull/6485)
+- Fixed an issue that prevented any registered `OnBackPressedCallback`s to fire when `NavigationView` is attached. [#6483](https://github.com/mapbox/mapbox-navigation-android/pull/6483)
+- Removed `NavigationViewListener.onBackPressed()`. You can register your own [OnBackPressedCallback](https://developer.android.com/reference/androidx/activity/OnBackPressedCallback) to intercept any `NavigationView` BACK press events. [#6483](https://github.com/mapbox/mapbox-navigation-android/pull/6483)
 
 ## Mapbox Navigation SDK 2.9.0-beta.2 - 14 October, 2022
 ### Changelog
