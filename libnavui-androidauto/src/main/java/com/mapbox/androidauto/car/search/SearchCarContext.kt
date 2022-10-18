@@ -17,9 +17,9 @@ internal class SearchCarContext(
 
     /** SearchCarContext **/
     val mapboxCarMap = mapboxCarContext.mapboxCarMap
-    val carRoutePreviewRequest = mapboxCarContext.carRoutePreviewRequest
+    val routePreviewRequest = mapboxCarContext.routePreviewRequest
     val carPlaceSearch: CarPlaceSearch = CarPlaceSearchImpl(
-        mapboxCarContext.carPlaceSearchOptions,
+        mapboxCarContext.options,
         CarSearchLocationProvider()
     )
 }

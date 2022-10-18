@@ -4,6 +4,7 @@ import android.graphics.Rect
 import android.location.Location
 import androidx.annotation.VisibleForTesting
 import com.mapbox.androidauto.car.MapboxCarContext
+import com.mapbox.androidauto.car.MapboxCarOptions
 import com.mapbox.androidauto.internal.car.extensions.mapboxNavigationForward
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.maps.EdgeInsets
@@ -33,14 +34,15 @@ class CarSpeedLimitRenderer
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 internal constructor(
     private val services: CarSpeedLimitServices,
-    private val mapboxCarContext: MapboxCarContext,
+    private val options: MapboxCarOptions,
 ) : MapboxCarMapObserver {
+
     /**
      * Public constructor and the internal constructor is for unit testing.
      */
     constructor(mapboxCarContext: MapboxCarContext) : this(
         CarSpeedLimitServices(),
-        mapboxCarContext
+        mapboxCarContext.options
     )
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -75,7 +77,7 @@ internal constructor(
     private fun updateSpeed(locationMatcherResult: LocationMatcherResult) {
         val speedKmph =
             locationMatcherResult.enhancedLocation.speed / METERS_IN_KILOMETER * SECONDS_IN_HOUR
-        val speedLimitOptions = mapboxCarContext.speedLimitOptions.value
+        val speedLimitOptions = options.speedLimitOptions.value
         val signFormat = speedLimitOptions.forcedSignFormat
             ?: locationMatcherResult.speedLimit?.speedLimitSign
         val threshold = speedLimitOptions.warningThreshold
@@ -97,13 +99,13 @@ internal constructor(
 
     override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
         logAndroidAuto("CarSpeedLimitRenderer carMapSurface loaded")
-        val signFormat = mapboxCarContext.speedLimitOptions.value.forcedSignFormat
+        val signFormat = options.speedLimitOptions.value.forcedSignFormat
             ?: SpeedLimitSign.MUTCD
         val speedLimitWidget = services.speedLimitWidget(signFormat).also { speedLimitWidget = it }
         mapboxCarMapSurface.mapSurface.addWidget(speedLimitWidget)
         MapboxNavigationApp.registerObserver(navigationObserver)
         scope = MainScope()
-        mapboxCarContext.speedLimitOptions
+        options.speedLimitOptions
             .onEach { speedLimitWidget.update(it.forcedSignFormat, it.warningThreshold) }
             .launchIn(scope)
     }

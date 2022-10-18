@@ -1,6 +1,6 @@
 package com.mapbox.androidauto.internal.car.search
 
-import com.mapbox.androidauto.car.search.CarPlaceSearchOptions
+import com.mapbox.androidauto.car.MapboxCarOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -32,8 +32,10 @@ class CarPlaceSearchImplTest {
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
-    private val options: CarPlaceSearchOptions = mockk {
-        every { accessToken } returns "pk.search-token"
+    private val options: MapboxCarOptions = mockk {
+        every { carPlaceSearchOptions } returns mockk {
+            every { accessToken } returns "pk.search-token"
+        }
     }
     private val locationProvider: CarSearchLocationProvider = mockk(relaxed = true)
     private val searchEngine: SearchEngine = mockk()
@@ -118,7 +120,7 @@ class CarPlaceSearchImplTest {
                 any()
             )
         } returns searchEngine
-        every { options.accessToken } returns null
+        every { options.carPlaceSearchOptions.accessToken } returns null
         val mapboxNavigation = mockk<MapboxNavigation> {
             every { navigationOptions } returns mockk {
                 every { accessToken } returns "pk.navigation-token"

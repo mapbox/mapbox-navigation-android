@@ -17,14 +17,14 @@ import org.junit.Test
 class CarSettingsScreenTest : MapboxRobolectricTestRunner() {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val mockCarSettingsStorage: CarSettingsStorage = mockk(relaxUnitFun = true)
+    private val mockCarSettingsStorage: MapboxCarStorage = mockk(relaxUnitFun = true)
     private val mapboxCarContext: MapboxCarContext = mockk {
         every { carContext } returns mockk {
             every { getString(any()) } answers {
                 context.getString(args[0].toString().toInt())
             }
         }
-        every { carSettingsStorage } returns mockCarSettingsStorage
+        every { mapboxCarStorage } returns mockCarSettingsStorage
     }
     private val searchScreen = CarSettingsScreen(mapboxCarContext)
 

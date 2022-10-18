@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
  * registered, the trip status of [MapboxNavigation] will be sent to the [NavigationManager].
  * This is needed to keep the vehicle cluster display updated.
  */
-class MapboxCarNavigationManager(
+class MapboxCarNavigationManager internal constructor(
     carContext: CarContext
 ) : MapboxNavigationObserver {
 

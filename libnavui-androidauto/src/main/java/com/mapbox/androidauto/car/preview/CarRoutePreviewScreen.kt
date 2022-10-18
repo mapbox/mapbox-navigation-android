@@ -13,6 +13,7 @@ import androidx.car.app.navigation.model.RoutePreviewNavigationTemplate
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.androidauto.R
+import com.mapbox.androidauto.car.MapboxCarContext
 import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.car.location.CarLocationRenderer
 import com.mapbox.androidauto.car.navigation.CarCameraMode
@@ -43,19 +44,17 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
  */
 @OptIn(MapboxExperimental::class)
 internal class CarRoutePreviewScreen @UiThread constructor(
-    private val routePreviewCarContext: RoutePreviewCarContext,
+    private val mapboxCarContext: MapboxCarContext,
     private val placeRecord: PlaceRecord,
     private val navigationRoutes: List<NavigationRoute>,
     private val placesLayerUtil: PlacesListOnMapLayerUtil = PlacesListOnMapLayerUtil(),
-) : Screen(routePreviewCarContext.carContext) {
+) : Screen(mapboxCarContext.carContext) {
 
     private val carRoutesProvider = PreviewCarRoutesProvider(navigationRoutes)
     private var selectedIndex = 0
     private val carRouteLine = CarRouteLine(carRoutesProvider)
     private val carLocationRenderer = CarLocationRenderer()
-    private val carSpeedLimitRenderer = CarSpeedLimitRenderer(
-        routePreviewCarContext.mapboxCarContext
-    )
+    private val carSpeedLimitRenderer = CarSpeedLimitRenderer(mapboxCarContext)
     private val carNavigationCamera = CarNavigationCamera(
         initialCarCameraMode = CarCameraMode.OVERVIEW,
         alternativeCarCameraMode = CarCameraMode.FOLLOWING,
@@ -97,27 +96,27 @@ internal class CarRoutePreviewScreen @UiThread constructor(
         logAndroidAuto("CarRoutePreviewScreen constructor")
         addBackPressedHandler {
             logAndroidAuto("CarRoutePreviewScreen onBackPressed")
-            routePreviewCarContext.mapboxScreenManager.goBack()
+            mapboxCarContext.mapboxScreenManager.goBack()
         }
         lifecycle.muteAudioGuidance()
         lifecycle.addObserver(object : DefaultLifecycleObserver {
 
             override fun onResume(owner: LifecycleOwner) {
                 logAndroidAuto("CarRoutePreviewScreen onResume")
-                routePreviewCarContext.mapboxCarMap.registerObserver(carLocationRenderer)
-                routePreviewCarContext.mapboxCarMap.registerObserver(carSpeedLimitRenderer)
-                routePreviewCarContext.mapboxCarMap.registerObserver(carNavigationCamera)
-                routePreviewCarContext.mapboxCarMap.registerObserver(carRouteLine)
-                routePreviewCarContext.mapboxCarMap.registerObserver(surfaceListener)
+                mapboxCarContext.mapboxCarMap.registerObserver(carLocationRenderer)
+                mapboxCarContext.mapboxCarMap.registerObserver(carSpeedLimitRenderer)
+                mapboxCarContext.mapboxCarMap.registerObserver(carNavigationCamera)
+                mapboxCarContext.mapboxCarMap.registerObserver(carRouteLine)
+                mapboxCarContext.mapboxCarMap.registerObserver(surfaceListener)
             }
 
             override fun onPause(owner: LifecycleOwner) {
                 logAndroidAuto("CarRoutePreviewScreen onPause")
-                routePreviewCarContext.mapboxCarMap.unregisterObserver(carLocationRenderer)
-                routePreviewCarContext.mapboxCarMap.unregisterObserver(carSpeedLimitRenderer)
-                routePreviewCarContext.mapboxCarMap.unregisterObserver(carNavigationCamera)
-                routePreviewCarContext.mapboxCarMap.unregisterObserver(carRouteLine)
-                routePreviewCarContext.mapboxCarMap.unregisterObserver(surfaceListener)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(carLocationRenderer)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(carSpeedLimitRenderer)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(carNavigationCamera)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(carRouteLine)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(surfaceListener)
             }
         })
     }

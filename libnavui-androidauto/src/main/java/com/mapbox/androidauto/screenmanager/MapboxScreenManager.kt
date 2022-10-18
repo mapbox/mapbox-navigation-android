@@ -2,7 +2,6 @@ package com.mapbox.androidauto.screenmanager
 
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
-import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.ScreenManager
 import androidx.car.app.Session
@@ -10,6 +9,7 @@ import androidx.car.app.model.Template
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.mapbox.androidauto.internal.car.context.MapboxCarContextOwner
 import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,49 +24,31 @@ import java.util.Deque
  * The Mapbox Navigation Android Auto SDK is prepared with a default experience. This object allows
  * you to customize the experience to meet your needs.
  */
-class MapboxScreenManager(
-    carContext: CarContext,
-    lifecycleOwner: LifecycleOwner,
+class MapboxScreenManager internal constructor(
+    private val carContextOwner: MapboxCarContextOwner
 ) {
-    private var carContext: CarContext?
-    private var lifecycleOwner: LifecycleOwner?
-    private var screenManager: ScreenManager?
+    private var screenManager: ScreenManager? = null
     private val screenFactoryMap = mutableMapOf<String, MapboxScreenFactory>()
 
     @VisibleForTesting
     internal val screenStack: Deque<Pair<String, Screen>> = ArrayDeque()
 
-    private val lifecycleObserver: DefaultLifecycleObserver = object : DefaultLifecycleObserver {
+    private val lifecycleObserver = object : DefaultLifecycleObserver {
         override fun onCreate(owner: LifecycleOwner) {
+            screenManager = carContextOwner.carContext().getCarService(ScreenManager::class.java)
             owner.lifecycleScope.launch {
                 screenEvent.collect { onScreenEvent(it) }
             }
         }
 
         override fun onDestroy(owner: LifecycleOwner) {
-            onDestroy()
+            screenFactoryMap.clear()
+            screenManager = null
         }
     }
 
     init {
-        this.carContext = carContext
-        this.lifecycleOwner = lifecycleOwner
-        this.screenManager = carContext.getCarService(ScreenManager::class.java)
-        lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
-    }
-
-    /**
-     * Gives you the ability to completely disable the [MapboxScreenManager]. This is not required
-     * for cleaning up the object because the lifecycleOwner will trigger the clean up when the
-     * lifecycle has been destroyed.
-     */
-    @UiThread
-    fun onDestroy() {
-        lifecycleOwner?.lifecycle?.removeObserver(lifecycleObserver)
-        screenFactoryMap.clear()
-        carContext = null
-        screenManager = null
-        lifecycleOwner = null
+        carContextOwner.lifecycle.addObserver(lifecycleObserver)
     }
 
     /**
@@ -84,7 +66,7 @@ class MapboxScreenManager(
             }
         }
         val factory: MapboxScreenFactory = requireScreenFactory(screenKey)
-        return factory.create(requireCarContext()).also { screen ->
+        return factory.create(carContextOwner.carContext()).also { screen ->
             val event = MapboxScreenEvent(screenKey, MapboxScreenOperation.CREATED)
             logI(TAG) { "createScreen Push ${screen.javaClass.simpleName}" }
             screenManager.push(screen)
@@ -169,20 +151,6 @@ class MapboxScreenManager(
     }
 
     /**
-     * Provides access to the [CarContext] to perform manual operations. This will throw an
-     * exception if it is accessed when it is not available.
-     */
-    @Throws(IllegalStateException::class)
-    internal fun requireCarContext(): CarContext {
-        val carContext = this.carContext
-        checkNotNull(carContext) {
-            "You cannot use the CarContext when it does not exist. Make sure the car Session" +
-                " is created and the MapboxScreenManager has been attached."
-        }
-        return carContext
-    }
-
-    /**
      * Provides access to the [ScreenManager] to perform manual operations. This will throw an
      * exception if it is accessed when it is not available.
      */
@@ -213,7 +181,7 @@ class MapboxScreenManager(
             return
         }
         val factory: MapboxScreenFactory = requireScreenFactory(key)
-        val screen = factory.create(requireCarContext())
+        val screen = factory.create(carContextOwner.carContext())
         screenStack.push(Pair(key, screen))
         val screenManager = requireScreenManager()
         logI(TAG) { "replaceTop $key remove ${screenManager.stackSize} screens" }
@@ -237,7 +205,7 @@ class MapboxScreenManager(
             return
         }
         val factory: MapboxScreenFactory = requireScreenFactory(key)
-        val screen = factory.create(requireCarContext())
+        val screen = factory.create(carContextOwner.carContext())
         screenStack.push(Pair(key, screen))
         logI(TAG) { "Push $key on top of ${screenManager?.stackSize} screens" }
         requireScreenManager().push(screen)

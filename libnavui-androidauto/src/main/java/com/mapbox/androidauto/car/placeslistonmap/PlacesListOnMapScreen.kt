@@ -59,11 +59,11 @@ internal class PlacesListOnMapScreen @UiThread constructor(
         }
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onCreate(owner: LifecycleOwner) {
-                MapboxNavigationApp.registerObserver(searchCarContext.carRoutePreviewRequest)
+                MapboxNavigationApp.registerObserver(searchCarContext.routePreviewRequest)
             }
 
             override fun onDestroy(owner: LifecycleOwner) {
-                MapboxNavigationApp.unregisterObserver(searchCarContext.carRoutePreviewRequest)
+                MapboxNavigationApp.unregisterObserver(searchCarContext.routePreviewRequest)
             }
 
             override fun onResume(owner: LifecycleOwner) {
@@ -129,7 +129,7 @@ internal class PlacesListOnMapScreen @UiThread constructor(
                 onErrorItemList(R.string.car_search_no_results)
             }
         }
-        searchCarContext.carRoutePreviewRequest.request(placeRecord, carRouteRequestCallback)
+        searchCarContext.routePreviewRequest.request(placeRecord, carRouteRequestCallback)
     }
 
     private fun onErrorItemList(@StringRes stringRes: Int) {

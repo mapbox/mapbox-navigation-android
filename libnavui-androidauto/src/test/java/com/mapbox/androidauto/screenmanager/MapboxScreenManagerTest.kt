@@ -5,6 +5,7 @@ import androidx.car.app.Screen
 import androidx.car.app.ScreenManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
+import com.mapbox.androidauto.internal.car.context.MapboxCarContextOwner
 import com.mapbox.androidauto.testing.MapboxRobolectricTestRunner
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -42,12 +43,16 @@ class MapboxScreenManagerTest : MapboxRobolectricTestRunner() {
     private val carContext: CarContext = mockk {
         every { getCarService(ScreenManager::class.java) } returns screenManager
     }
-
+    private val carContextOwner: MapboxCarContextOwner = mockk {
+        every { carContext() } returns carContext
+        every { lifecycle } returns lifecycleOwner.lifecycle
+    }
     private val screenEvent = MutableSharedFlow<MapboxScreenEvent>(
         replay = MapboxScreenManager.REPLAY_CACHE,
         onBufferOverflow = BufferOverflow.SUSPEND
     )
-    private val mapboxScreenManager = MapboxScreenManager(carContext, lifecycleOwner)
+
+    private val mapboxScreenManager = MapboxScreenManager(carContextOwner)
 
     @Before
     fun setup() {
@@ -69,9 +74,9 @@ class MapboxScreenManagerTest : MapboxRobolectricTestRunner() {
     }
 
     @Test
-    fun `screen manager and car context are available after setup`() {
+    fun `screen manager is available when the lifecycle is created`() {
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
         assertNotNull(mapboxScreenManager.requireScreenManager())
-        assertNotNull(mapboxScreenManager.requireCarContext())
     }
 
     @Test
@@ -463,13 +468,5 @@ class MapboxScreenManagerTest : MapboxRobolectricTestRunner() {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
         assertNotNull(mapboxScreenManager.requireScreenManager())
-    }
-
-    @Test(expected = IllegalStateException::class)
-    fun `requireCarContext will crash if accessed after the lifecycle is destroyed`() {
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-
-        assertNotNull(mapboxScreenManager.requireCarContext())
     }
 }

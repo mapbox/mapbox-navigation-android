@@ -15,6 +15,7 @@ class RoutePreviewFeedbackScreenFactory(
     override fun getSourceName(): String = MapboxScreen.ROUTE_PREVIEW
 
     override fun getCarFeedbackPoll(carContext: CarContext): CarFeedbackPoll {
-        return mapboxCarContext.feedbackPollProvider.getRoutePreviewFeedbackPoll(carContext)
+        return mapboxCarContext.options.feedbackPollProvider
+            .getRoutePreviewFeedbackPoll(carContext)
     }
 }

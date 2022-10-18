@@ -12,20 +12,18 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.androidauto.MapboxCarApp
-import com.mapbox.androidauto.MapboxCarNavigationManager
 import com.mapbox.androidauto.car.MapboxCarContext
 import com.mapbox.androidauto.car.map.widgets.compass.CarCompassSurfaceRenderer
 import com.mapbox.androidauto.car.map.widgets.logo.CarLogoSurfaceRenderer
 import com.mapbox.androidauto.deeplink.GeoDeeplinkNavigateAction
 import com.mapbox.androidauto.internal.logAndroidAuto
-import com.mapbox.androidauto.notification.CarNotificationInterceptor
+import com.mapbox.androidauto.notification.MapboxCarNotificationOptions
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.androidauto.screenmanager.prepareScreens
 import com.mapbox.maps.MapInitOptions
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -33,16 +31,19 @@ import com.mapbox.navigation.qa_test_app.utils.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, MapboxExperimental::class)
+@OptIn(MapboxExperimental::class)
 class MainCarSession : Session() {
 
-    private var mapboxCarContext: MapboxCarContext? = null
-    private lateinit var mapboxNavigationManager: MapboxCarNavigationManager
+    private val carMapLoader = MainCarMapLoader()
     private val mapboxCarMap = MapboxCarMap()
-    private val carMapStyleLoader = MainCarMapLoader()
-    private val notificationInterceptor by lazy {
-        CarNotificationInterceptor(carContext, MainCarAppService::class.java)
-    }
+        .registerObserver(carMapLoader)
+    private val mapboxCarContext = MapboxCarContext(lifecycle, mapboxCarMap)
+        .prepareScreens()
+        .customize {
+            notificationOptions = MapboxCarNotificationOptions.Builder()
+                .startAppService(MainCarAppService::class.java)
+                .build()
+        }
 
     init {
         logAndroidAuto("MainCarSession constructor")
@@ -51,7 +52,6 @@ class MainCarSession : Session() {
         val compassSurfaceRenderer = CarCompassSurfaceRenderer()
         MapboxNavigationApp.attach(lifecycleOwner = this)
         lifecycle.addObserver(object : DefaultLifecycleObserver {
-
             override fun onCreate(owner: LifecycleOwner) {
                 logAndroidAuto("MainCarSession onCreate")
                 if (!MapboxNavigationApp.isSetup()) {
@@ -62,19 +62,6 @@ class MainCarSession : Session() {
                     )
                 }
                 mapboxCarMap.setup(carContext, MapInitOptions(context = carContext))
-                mapboxCarMap.registerObserver(carMapStyleLoader)
-                val mapboxCarContext = MapboxCarContext(
-                    carContext = carContext,
-                    lifecycleOwner = this@MainCarSession,
-                    mapboxCarMap = mapboxCarMap,
-                ).also {
-                    this@MainCarSession.mapboxCarContext = it
-                }
-                mapboxCarContext.mapboxScreenManager.prepareScreens(mapboxCarContext)
-                mapboxNavigationManager = MapboxCarNavigationManager(carContext)
-                MapboxNavigationApp.registerObserver(mapboxNavigationManager)
-                MapboxNavigationApp.registerObserver(notificationInterceptor)
-
                 repeatWhenStarted {
                     if (hasLocationPermission()) {
                         startTripSession()
@@ -100,10 +87,7 @@ class MainCarSession : Session() {
 
             override fun onDestroy(owner: LifecycleOwner) {
                 logAndroidAuto("MainCarSession onDestroy")
-                MapboxNavigationApp.unregisterObserver(mapboxNavigationManager)
-                MapboxNavigationApp.unregisterObserver(notificationInterceptor)
                 mapboxCarMap.clearObservers()
-                mapboxCarContext = null
             }
         })
     }
@@ -115,7 +99,7 @@ class MainCarSession : Session() {
         } else {
             MapboxScreen.NEEDS_LOCATION_PERMISSION
         }
-        return mapboxCarContext!!.mapboxScreenManager.createScreen(firstScreenKey)
+        return mapboxCarContext.mapboxScreenManager.createScreen(firstScreenKey)
     }
 
     @SuppressLint("MissingPermission")
@@ -134,14 +118,14 @@ class MainCarSession : Session() {
     override fun onCarConfigurationChanged(newConfiguration: Configuration) {
         logAndroidAuto("onCarConfigurationChanged ${carContext.isDarkMode}")
 
-        carMapStyleLoader.updateMapStyle(carContext.isDarkMode)
+        carMapLoader.updateMapStyle(carContext.isDarkMode)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         logAndroidAuto("onNewIntent $intent")
 
-        GeoDeeplinkNavigateAction(mapboxCarContext!!).onNewIntent(intent)
+        GeoDeeplinkNavigateAction(mapboxCarContext).onNewIntent(intent)
     }
 }
 

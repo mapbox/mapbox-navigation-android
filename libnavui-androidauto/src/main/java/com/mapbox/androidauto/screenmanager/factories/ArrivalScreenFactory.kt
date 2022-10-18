@@ -17,7 +17,7 @@ class ArrivalScreenFactory(
     override fun getSourceName(): String = MapboxScreen.ARRIVAL
 
     override fun getCarFeedbackPoll(carContext: CarContext): CarFeedbackPoll {
-        return mapboxCarContext.feedbackPollProvider.getArrivalFeedbackPoll(carContext)
+        return mapboxCarContext.options.feedbackPollProvider.getArrivalFeedbackPoll(carContext)
     }
 
     override fun onFinish() {

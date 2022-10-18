@@ -1,37 +1,114 @@
 package com.mapbox.androidauto.car
 
 import androidx.car.app.CarContext
-import androidx.lifecycle.LifecycleOwner
-import com.mapbox.androidauto.car.feedback.core.CarFeedbackOptions
-import com.mapbox.androidauto.car.feedback.core.CarFeedbackPollProvider
-import com.mapbox.androidauto.car.navigation.speedlimit.SpeedLimitOptions
-import com.mapbox.androidauto.car.preview.CarRouteOptionsInterceptor
+import androidx.car.app.Screen
+import androidx.car.app.Session
+import androidx.car.app.navigation.NavigationManager
+import androidx.lifecycle.Lifecycle
+import com.mapbox.androidauto.MapboxCarNavigationManager
 import com.mapbox.androidauto.car.preview.CarRoutePreviewRequest
-import com.mapbox.androidauto.car.search.CarPlaceSearchOptions
-import com.mapbox.androidauto.car.settings.CarSettingsStorage
+import com.mapbox.androidauto.car.settings.MapboxCarStorage
 import com.mapbox.androidauto.deeplink.GeoDeeplinkPlacesListOnMapProvider
+import com.mapbox.androidauto.internal.car.context.MapboxCarContextOwner
+import com.mapbox.androidauto.internal.car.context.mapboxCarNavigationService
+import com.mapbox.androidauto.internal.car.context.mapboxCarService
+import com.mapbox.androidauto.notification.ActiveGuidanceExtenderUpdater
+import com.mapbox.androidauto.notification.FreeDriveExtenderUpdater
+import com.mapbox.androidauto.notification.IdleExtenderUpdater
+import com.mapbox.androidauto.notification.MapboxCarNotification
+import com.mapbox.androidauto.notification.MapboxCarNotificationOptions
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
-import kotlinx.coroutines.flow.MutableStateFlow
 
+/**
+ * This is the entry point for Mapbox Navigation in Android Auto. Create this object and then you
+ * have access to services and options for customization.
+ *
+ * The [lifecycle] must come from a [Session.getLifecycle] or [Screen.getLifecycle] at this time.
+ *
+ * @param lifecycle used to access the [CarContext].
+ * @param mapboxCarMap controls the Mapbox car map surface.
+ */
 @OptIn(MapboxExperimental::class)
 class MapboxCarContext(
-    val carContext: CarContext,
-    val lifecycleOwner: LifecycleOwner,
+    /**
+     * Gives access to the [Lifecycle] that owns the [CarContext].
+     */
+    val lifecycle: Lifecycle,
+    /**
+     * [MapboxCarMap] controls the Mapbox car map surface
+     */
     val mapboxCarMap: MapboxCarMap,
-    val feedbackPollProvider: CarFeedbackPollProvider = CarFeedbackPollProvider(),
-    val carFeedbackOptions: CarFeedbackOptions = CarFeedbackOptions.Builder().build(),
-    routeOptionsInterceptor: CarRouteOptionsInterceptor = CarRouteOptionsInterceptor { it },
-    val carPlaceSearchOptions: CarPlaceSearchOptions = CarPlaceSearchOptions.Builder().build(),
 ) {
-    val carSettingsStorage = CarSettingsStorage(carContext)
-    val mapboxScreenManager = MapboxScreenManager(carContext, lifecycleOwner)
+    private val carContextOwner = MapboxCarContextOwner(lifecycle)
 
-    val speedLimitOptions = MutableStateFlow(SpeedLimitOptions.Builder().build())
+    /**
+     * Options available for customizing Mapbox Android Auto Navigation.
+     */
+    val options: MapboxCarOptions = MapboxCarOptions()
 
-    val carRoutePreviewRequest = CarRoutePreviewRequest(routeOptionsInterceptor)
+    /**
+     * Gives access to the [CarContext]. Throws an [IllegalStateException] when accessed before the
+     * lifecycle is [Lifecycle.State.CREATED]
+     */
+    val carContext: CarContext by mapboxCarService("CarContext") {
+        carContextOwner.carContext()
+    }
+
+    /**
+     * Control the screens shown with the [MapboxScreenManager].
+     */
+    val mapboxScreenManager = MapboxScreenManager(carContextOwner)
+
+    /**
+     * Integrates Mapbox with the car libraries [NavigationManager]. Gives access to the auto
+     * drive state. Throws an [IllegalStateException] when accessed before the lifecycle is
+     * [Lifecycle.State.CREATED].
+     *
+     * @see MapboxCarNavigationManager
+     * @see NavigationManager
+     */
+    val mapboxNavigationManager by mapboxCarNavigationService("MapboxCarNavigationManager") {
+        MapboxCarNavigationManager(carContext)
+    }
+
+    /**
+     * See the [MapboxCarNotificationOptions] for customization.
+     *
+     * @see MapboxCarNotification
+     */
+    internal val mapboxNotification by mapboxCarNavigationService("MapboxCarNotification") {
+        MapboxCarNotification(
+            options,
+            carContext,
+            IdleExtenderUpdater(carContext),
+            FreeDriveExtenderUpdater(carContext),
+            ActiveGuidanceExtenderUpdater(carContext)
+        )
+    }
+
+    /**
+     * Access to persistent storage. Throws an [IllegalStateException] when accessed before
+     * the [lifecycle] is [Lifecycle.State.CREATED].
+     */
+    val mapboxCarStorage by mapboxCarService("MapboxCarStorage") {
+        MapboxCarStorage(carContext)
+    }
+
+    /**
+     * Control and access the route preview.
+     */
+    val routePreviewRequest = CarRoutePreviewRequest(options)
 
     // This is internal because it surfaces search objects which will likely change.
     internal var geoDeeplinkPlacesProvider: GeoDeeplinkPlacesListOnMapProvider? = null
+
+    /**
+     * Allows you to define values used by the Mapbox Android Auto Navigation SDK.
+     */
+    fun customize(action: MapboxCarOptionsCustomization.() -> Unit) = apply {
+        val customization = MapboxCarOptionsCustomization().apply(action)
+        options.applyCustomization(customization)
+    }
 }

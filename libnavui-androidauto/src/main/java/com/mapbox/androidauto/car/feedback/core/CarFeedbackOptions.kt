@@ -2,6 +2,9 @@ package com.mapbox.androidauto.car.feedback.core
 
 import com.mapbox.navigation.core.telemetry.events.BitmapEncodeOptions
 
+/**
+ * Modify the car feedback.
+ */
 class CarFeedbackOptions private constructor(
     val bitmapEncodeOptions: BitmapEncodeOptions
 ) {

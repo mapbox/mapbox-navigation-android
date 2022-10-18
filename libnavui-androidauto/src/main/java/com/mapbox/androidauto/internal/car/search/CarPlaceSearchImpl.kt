@@ -1,6 +1,6 @@
 package com.mapbox.androidauto.internal.car.search
 
-import com.mapbox.androidauto.car.search.CarPlaceSearchOptions
+import com.mapbox.androidauto.car.MapboxCarOptions
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.core.MapboxNavigation
@@ -20,7 +20,7 @@ import kotlin.coroutines.resume
  * Default implementation of the [CarPlaceSearch].
  */
 class CarPlaceSearchImpl(
-    private val options: CarPlaceSearchOptions,
+    private val options: MapboxCarOptions,
     private val locationProvider: CarSearchLocationProvider,
 ) : CarPlaceSearch {
 
@@ -31,7 +31,7 @@ class CarPlaceSearchImpl(
         searchEngine = SearchEngine.createSearchEngineWithBuiltInDataProviders(
             apiType = ApiType.SBS,
             settings = SearchEngineSettings(
-                options.accessToken
+                options.carPlaceSearchOptions.accessToken
                     ?: mapboxNavigation.navigationOptions.accessToken!!,
                 locationProvider,
             )

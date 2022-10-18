@@ -42,14 +42,14 @@ class CarSettingsScreen(
     }
 
     private fun buildRowToggle(labelResource: Int, prefKeyResource: Int): Row {
-        val storage = mapboxCarContext.carSettingsStorage
+        val storage = mapboxCarContext.mapboxCarStorage
         val label = carContext.getString(labelResource)
         val key = carContext.getString(prefKeyResource)
         return Row.Builder()
             .setTitle(label)
             .setToggle(
                 Toggle.Builder { value ->
-                    mapboxCarContext.carSettingsStorage.writeSharedPref(key, value)
+                    mapboxCarContext.mapboxCarStorage.writeSharedPref(key, value)
                 }
                     .setChecked(storage.readSharedPref(key, false))
                     .build()

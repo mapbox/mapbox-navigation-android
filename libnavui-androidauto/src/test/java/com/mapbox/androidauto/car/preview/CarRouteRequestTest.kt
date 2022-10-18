@@ -1,5 +1,6 @@
 package com.mapbox.androidauto.car.preview
 
+import com.mapbox.androidauto.car.MapboxCarOptions
 import com.mapbox.androidauto.navigation.location.CarAppLocation
 import com.mapbox.androidauto.testing.CarAppTestRule
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -33,9 +34,12 @@ class CarRouteRequestTest {
 
     private val routeOptionsSlot = CapturingSlot<RouteOptions>()
     private val routerCallbackSlot = CapturingSlot<NavigationRouterCallback>()
-    private val routeOptionsInterceptor = mockk<CarRouteOptionsInterceptor> {
-        every { intercept(any()) } answers { firstArg() }
+    private val options: MapboxCarOptions = mockk {
+        every { routeOptionsInterceptor } returns mockk {
+            every { intercept(any()) } answers { firstArg() }
+        }
     }
+
     private val locationProvider = mockk<NavigationLocationProvider>()
     private var requestCount = 0L
     private val mapboxNavigation = mockk<MapboxNavigation> {
@@ -60,7 +64,7 @@ class CarRouteRequestTest {
         }
     }
 
-    private val carRouteRequest = CarRoutePreviewRequest(routeOptionsInterceptor)
+    private val carRouteRequest = CarRoutePreviewRequest(options)
 
     @Test
     fun `onRoutesReady is called after successful request`() {
@@ -220,7 +224,7 @@ class CarRouteRequestTest {
         val customRouteOptionsBuilder = mockk<RouteOptions.Builder> {
             every { build() } returns customRouteOptions
         }
-        every { routeOptionsInterceptor.intercept(any()) } returns customRouteOptionsBuilder
+        every { options.routeOptionsInterceptor.intercept(any()) } returns customRouteOptionsBuilder
         every { locationProvider.lastLocation } returns mockk {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514

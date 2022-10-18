@@ -15,6 +15,6 @@ class FreeDriveFeedbackScreenFactory(
     override fun getSourceName(): String = MapboxScreen.FREE_DRIVE
 
     override fun getCarFeedbackPoll(carContext: CarContext): CarFeedbackPoll {
-        return mapboxCarContext.feedbackPollProvider.getFreeDriveFeedbackPoll(carContext)
+        return mapboxCarContext.options.feedbackPollProvider.getFreeDriveFeedbackPoll(carContext)
     }
 }
