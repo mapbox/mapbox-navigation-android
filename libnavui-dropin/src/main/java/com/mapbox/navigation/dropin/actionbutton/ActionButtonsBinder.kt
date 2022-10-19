@@ -158,16 +158,22 @@ abstract class ActionButtonsBinder : UIBinder {
         customButtons
             .filter { it.position == ActionButtonDescription.Position.START }
             .asReversed()
-            .onEach { layout.addView(it.view, 0) }
-            .forEach { it.view.updateMargins(top = spacing, bottom = spacing) }
+            .forEach {
+                (it.view.parent as? ViewGroup)?.apply { removeView(it.view) }
+                layout.addView(it.view, 0)
+                it.view.updateMargins(top = spacing, bottom = spacing)
+            }
     }
 
     private fun installEndButtons(layout: ViewGroup) {
         val spacing = verticalSpacing(layout.resources)
         customButtons
             .filter { it.position == ActionButtonDescription.Position.END }
-            .onEach { layout.addView(it.view) }
-            .forEach { it.view.updateMargins(top = spacing, bottom = spacing) }
+            .forEach {
+                (it.view.parent as? ViewGroup)?.apply { removeView(it.view) }
+                layout.addView(it.view)
+                it.view.updateMargins(top = spacing, bottom = spacing)
+            }
     }
 
     companion object {
