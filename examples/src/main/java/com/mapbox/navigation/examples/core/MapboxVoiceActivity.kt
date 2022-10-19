@@ -110,7 +110,6 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
             .build()
         MapboxVoiceInstructionsPlayer(
             this,
-            getMapboxAccessTokenFromResources(),
             Locale.US.toLanguageTag(),
             options
         )

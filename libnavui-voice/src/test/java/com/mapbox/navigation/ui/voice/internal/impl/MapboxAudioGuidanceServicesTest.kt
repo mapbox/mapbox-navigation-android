@@ -45,7 +45,10 @@ class MapboxAudioGuidanceServicesTest {
         val newLanguage = "it"
         val firstInstance = sut.getOrUpdateMapboxVoiceInstructionsPlayer(mapboxNavigation, "en")
 
-        val secondInstance = sut.getOrUpdateMapboxVoiceInstructionsPlayer(mapboxNavigation, newLanguage)
+        val secondInstance = sut.getOrUpdateMapboxVoiceInstructionsPlayer(
+            mapboxNavigation,
+            newLanguage
+        )
 
         assertEquals(firstInstance, secondInstance)
         verify { textPlayer.updateLanguage(newLanguage) }

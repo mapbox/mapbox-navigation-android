@@ -19,7 +19,6 @@ import kotlin.concurrent.schedule
  * Hybrid implementation of [MapboxVoiceInstructionsPlayer] combining [VoiceInstructionsTextPlayer] and
  * [VoiceInstructionsFilePlayer] speech players.
  * @param context Context
- * @param accessToken String
  * @param language [Locale] language (in a format acceptable by [Locale])
  * @param options [VoiceInstructionsPlayerOptions] (optional)
  * @param audioFocusDelegate [AsyncAudioFocusDelegate] (optional)
@@ -28,20 +27,40 @@ import kotlin.concurrent.schedule
 @UiThread
 class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
     private val context: Context,
-    private val accessToken: String,
     language: String,
     private val options: VoiceInstructionsPlayerOptions = defaultOptions(),
     private val audioFocusDelegate: AsyncAudioFocusDelegate =
         defaultAudioFocusDelegate(context, options),
     private var timerFactory: Provider<Timer> = defaultTimerFactory()
 ) {
+
+    @JvmOverloads
+    @Deprecated("Access token is unused. Use the constructor that does not require it.")
+    constructor(
+        context: Context,
+        accessToken: String,
+        language: String,
+        options: VoiceInstructionsPlayerOptions = defaultOptions(),
+        audioFocusDelegate: AsyncAudioFocusDelegate =
+            defaultAudioFocusDelegate(context, options),
+        timerFactory: Provider<Timer> = defaultTimerFactory()
+    ) : this(context, language, options, audioFocusDelegate, timerFactory)
+
+    @Deprecated("Access token is unused. Use the constructor that does not require it.")
     constructor(
         context: Context,
         accessToken: String,
         language: String,
         options: VoiceInstructionsPlayerOptions = defaultOptions(),
         audioFocusDelegate: AudioFocusDelegate,
-    ) : this(context, accessToken, language, options, wrapDelegate(audioFocusDelegate))
+    ) : this(context, language, options, audioFocusDelegate)
+
+    constructor(
+        context: Context,
+        language: String,
+        options: VoiceInstructionsPlayerOptions = defaultOptions(),
+        audioFocusDelegate: AudioFocusDelegate,
+    ) : this(context, language, options, wrapDelegate(audioFocusDelegate))
 
     private val attributes: VoiceInstructionsPlayerAttributes =
         VoiceInstructionsPlayerAttributesProvider.retrievePlayerAttributes(options)
@@ -49,7 +68,6 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
     private val filePlayer: VoiceInstructionsFilePlayer =
         VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
             context,
-            accessToken,
             attributes,
         )
     private val textPlayer: VoiceInstructionsTextPlayer =

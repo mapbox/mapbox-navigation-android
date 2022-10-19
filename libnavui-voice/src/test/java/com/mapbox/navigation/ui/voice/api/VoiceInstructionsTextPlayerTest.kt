@@ -424,7 +424,9 @@ class VoiceInstructionsTextPlayerTest {
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
         val textPlayer =
             VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
-        every { mockedTextToSpeech.isLanguageAvailable(Locale(newLanguage)) } returns LANG_NOT_SUPPORTED
+        every {
+            mockedTextToSpeech.isLanguageAvailable(Locale(newLanguage))
+        } returns LANG_NOT_SUPPORTED
         invokeOnInitListener(TextToSpeech.SUCCESS)
         clearMocks(mockedTextToSpeech, answers = false)
 

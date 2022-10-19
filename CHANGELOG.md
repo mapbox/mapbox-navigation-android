@@ -13,6 +13,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue with `NavigationView` that caused trip session not to start after granting location permissions that were requested outside of Drop-In UI by an application. [#6489](https://github.com/mapbox/mapbox-navigation-android/pull/6489)
 - Fixed an issue with `NavigationView` that caused unexpected camera movements when switching between navigation states. [#6487](https://github.com/mapbox/mapbox-navigation-android/pull/6487)
 - Supported changing `MapboxVoiceInstructionsPlayer` language in runtime via `updateLanguage` method. [#6491](https://github.com/mapbox/mapbox-navigation-android/pull/6491)
+- Deprecated `MapboxVoiceInstructionsPlayer` constructors that accept access token and introduced the ones without it. [#6491](https://github.com/mapbox/mapbox-navigation-android/pull/6491)
 
 ## Mapbox Navigation SDK 2.9.0-beta.2 - 14 October, 2022
 ### Changelog

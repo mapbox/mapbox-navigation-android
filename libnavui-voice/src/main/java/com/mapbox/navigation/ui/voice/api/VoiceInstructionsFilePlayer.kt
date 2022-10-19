@@ -14,12 +14,10 @@ import java.io.IOException
  * Online implementation of [VoiceInstructionsPlayer].
  * Will retrieve synthesized speech mp3s from Mapbox's API Voice.
  * @property context Context
- * @property accessToken String
  * @property playerAttributes [VoiceInstructionsPlayerAttributes]
  */
 internal class VoiceInstructionsFilePlayer(
     private val context: Context,
-    private val accessToken: String,
     private val playerAttributes: VoiceInstructionsPlayerAttributes,
 ) : VoiceInstructionsPlayer {
 

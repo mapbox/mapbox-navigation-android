@@ -41,8 +41,7 @@ class MapboxAudioGuidanceServices {
     ): MapboxVoiceInstructionsPlayer {
         return voiceInstructionsPlayer?.apply { updateLanguage(language) } ?: run {
             val applicationContext = mapboxNavigation.navigationOptions.applicationContext
-            val accessToken = mapboxNavigation.navigationOptions.accessToken!!
-            return MapboxVoiceInstructionsPlayer(applicationContext, accessToken, language).also {
+            return MapboxVoiceInstructionsPlayer(applicationContext, language).also {
                 voiceInstructionsPlayer = it
             }
         }

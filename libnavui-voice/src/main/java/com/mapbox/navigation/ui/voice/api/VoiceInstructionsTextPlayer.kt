@@ -24,7 +24,7 @@ internal class VoiceInstructionsTextPlayer(
     @VisibleForTesting
     internal var isLanguageSupported: Boolean = false
 
-    private var textToSpeechInitStatus: Int = TextToSpeech.ERROR
+    private var textToSpeechInitStatus: Int? = null
 
     @VisibleForTesting
     internal val textToSpeech =
