@@ -105,14 +105,7 @@ package com.mapbox.androidauto.car {
 
 package com.mapbox.androidauto.car.action {
 
-  public sealed interface MapboxActionProvider {
-  }
-
-  public static interface MapboxActionProvider.ActionProvider extends com.mapbox.androidauto.car.action.MapboxActionProvider {
-    method public androidx.car.app.model.Action getAction();
-  }
-
-  public static interface MapboxActionProvider.ScreenActionProvider extends com.mapbox.androidauto.car.action.MapboxActionProvider {
+  public fun interface MapboxActionProvider {
     method public androidx.car.app.model.Action getAction(androidx.car.app.Screen screen);
   }
 
@@ -151,7 +144,7 @@ package com.mapbox.androidauto.car.feedback.core {
 
 package com.mapbox.androidauto.car.feedback.ui {
 
-  public final class CarFeedbackAction implements com.mapbox.androidauto.car.action.MapboxActionProvider.ScreenActionProvider {
+  public final class CarFeedbackAction implements com.mapbox.androidauto.car.action.MapboxActionProvider {
     ctor public CarFeedbackAction(String carFeedbackScreen);
     method public androidx.car.app.model.Action getAction(androidx.car.app.Screen screen);
   }
@@ -705,7 +698,7 @@ package com.mapbox.androidauto.navigation.audioguidance {
     method @UiThread public static void muteAudioGuidance(androidx.lifecycle.Lifecycle);
   }
 
-  public final class CarAudioGuidanceUi implements com.mapbox.androidauto.car.action.MapboxActionProvider.ScreenActionProvider {
+  public final class CarAudioGuidanceUi implements com.mapbox.androidauto.car.action.MapboxActionProvider {
     ctor public CarAudioGuidanceUi();
     method public androidx.car.app.model.Action getAction(androidx.car.app.Screen screen);
   }

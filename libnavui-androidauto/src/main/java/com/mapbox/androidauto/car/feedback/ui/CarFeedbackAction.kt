@@ -10,7 +10,7 @@ import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 
 class CarFeedbackAction(
     private val carFeedbackScreen: String,
-) : MapboxActionProvider.ScreenActionProvider {
+) : MapboxActionProvider {
 
     override fun getAction(screen: Screen): Action {
         return buildSnapshotAction(screen)

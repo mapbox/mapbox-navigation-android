@@ -87,14 +87,7 @@ internal class PlacesListOnMapScreen @UiThread constructor(
         val placesItemList = placesListOnMapManager.currentItemList() ?: ItemList.Builder().build()
         val actionStrip = ActionStrip.Builder().apply {
             actionProviders.forEach {
-                when (it) {
-                    is MapboxActionProvider.ScreenActionProvider -> {
-                        this.addAction(it.getAction(this@PlacesListOnMapScreen))
-                    }
-                    is MapboxActionProvider.ActionProvider -> {
-                        this.addAction(it.getAction())
-                    }
-                }
+                this.addAction(it.getAction(this@PlacesListOnMapScreen))
             }
         }.build()
 

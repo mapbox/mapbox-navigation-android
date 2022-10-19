@@ -79,14 +79,7 @@ internal class ActiveGuidanceScreen constructor(
         logAndroidAuto("ActiveGuidanceScreen onGetTemplate")
         val actionStrip = ActionStrip.Builder().apply {
             actionProviders.forEach {
-                when (it) {
-                    is MapboxActionProvider.ScreenActionProvider -> {
-                        this.addAction(it.getAction(this@ActiveGuidanceScreen))
-                    }
-                    is MapboxActionProvider.ActionProvider -> {
-                        this.addAction(it.getAction())
-                    }
-                }
+                this.addAction(it.getAction(this@ActiveGuidanceScreen))
             }
             this.addAction(
                 Action.Builder()
