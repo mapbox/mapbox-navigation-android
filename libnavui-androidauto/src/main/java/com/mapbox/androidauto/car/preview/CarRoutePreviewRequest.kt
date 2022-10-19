@@ -65,7 +65,7 @@ class CarRoutePreviewRequest internal constructor(
         }
         cancelRequest()
 
-        val location = CarLocationProvider.getRegisteredInstance().lastLocation
+        val location = CarLocationProvider.getRegisteredInstance().lastLocation()
         if (location == null) {
             logAndroidAutoFailure("CarRoutePreview.onUnknownCurrentLocation")
             callback.onUnknownCurrentLocation()

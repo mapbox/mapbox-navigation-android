@@ -70,7 +70,7 @@ class CarRoutePreviewRequestTest {
     @Test
     fun `onRoutesReady is called after successful request`() {
         every {
-            locationProvider.lastLocation
+            locationProvider.lastLocation()
         } returns mockk {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
@@ -91,7 +91,7 @@ class CarRoutePreviewRequestTest {
 
     @Test
     fun `onUnknownCurrentLocation is called when current location is null`() {
-        every { locationProvider.lastLocation } returns null
+        every { locationProvider.lastLocation() } returns null
         val callback: CarRoutePreviewRequestCallback = mockk(relaxUnitFun = true)
         val searchCoordinate = Point.fromLngLat(-121.467001, 38.568105)
         carRouteRequest.onAttached(mapboxNavigation)
@@ -106,7 +106,7 @@ class CarRoutePreviewRequestTest {
     @Test
     fun `onSearchResultLocationUnknown is called when search result coordinate is`() {
         every {
-            locationProvider.lastLocation
+            locationProvider.lastLocation()
         } returns mockk {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
@@ -124,7 +124,7 @@ class CarRoutePreviewRequestTest {
     @Test
     fun `onNoRoutesFound is called when route request is canceled`() {
         every {
-            locationProvider.lastLocation
+            locationProvider.lastLocation()
         } returns mockk {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
@@ -145,7 +145,7 @@ class CarRoutePreviewRequestTest {
     @Test
     fun `onNoRoutesFound is called when route request fails`() {
         every {
-            locationProvider.lastLocation
+            locationProvider.lastLocation()
         } returns mockk {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
@@ -166,7 +166,7 @@ class CarRoutePreviewRequestTest {
     @Test
     fun `onNoRoutesFound is called when mapboxNavigation is not attached`() {
         every {
-            locationProvider.lastLocation
+            locationProvider.lastLocation()
         } returns mockk {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
@@ -185,7 +185,7 @@ class CarRoutePreviewRequestTest {
     @Test
     fun `should cancel previous route request`() {
         every {
-            locationProvider.lastLocation
+            locationProvider.lastLocation()
         } returns mockk {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
@@ -207,7 +207,7 @@ class CarRoutePreviewRequestTest {
 
     @Test
     fun `z level is passed to route options`() {
-        every { locationProvider.lastLocation } returns mockk {
+        every { locationProvider.lastLocation() } returns mockk {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
         }
@@ -226,7 +226,7 @@ class CarRoutePreviewRequestTest {
             every { build() } returns customRouteOptions
         }
         every { options.routeOptionsInterceptor.intercept(any()) } returns customRouteOptionsBuilder
-        every { locationProvider.lastLocation } returns mockk {
+        every { locationProvider.lastLocation() } returns mockk {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
         }

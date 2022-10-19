@@ -52,7 +52,7 @@ class PlacesListOnMapManager(
     }
 
     fun currentItemList(): ItemList? {
-        val currentLocation = CarLocationProvider.getRegisteredInstance().lastLocation
+        val currentLocation = CarLocationProvider.getRegisteredInstance().lastLocation()
             ?: return null
         return placesListItemMapper?.mapToItemList(
             currentLocation,

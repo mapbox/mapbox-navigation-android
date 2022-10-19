@@ -58,8 +58,7 @@ class CarLocationProvider private constructor() : MapboxNavigationObserver, Loca
     /**
      * Immediately access the last location received.
      */
-    val lastLocation: Location?
-        get() = navigationLocationProvider.lastLocation
+    fun lastLocation(): Location? = navigationLocationProvider.lastLocation
 
     /**
      * Wait until a non-null location is received. Improves results when the app is starting.
