@@ -1,11 +1,13 @@
 package com.mapbox.navigation.core
 
-import com.mapbox.navigation.base.internal.CurrentIndices
-import com.mapbox.navigation.base.internal.CurrentIndicesFactory
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.routerefresh.EVDataHolder
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -16,11 +18,15 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class CurrentIndicesProviderTest {
+class RouteRefreshRequestDataProviderTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
-    private val provider = CurrentIndicesProvider()
+    private val evData = mapOf("aaa" to "bbb")
+    private val evDataHolder = mockk<EVDataHolder>(relaxed = true) {
+        every { currentData() } returns evData
+    }
+    private val provider = RouteRefreshRequestDataProvider(evDataHolder)
     private val currentLegIndex = 9
     private val routeGeometryIndex = 44
     private val legGeometryIndex = 33
@@ -31,17 +37,18 @@ class CurrentIndicesProviderTest {
             every { geometryIndex } returns legGeometryIndex
         }
     }
-    private val expected = CurrentIndicesFactory.createIndices(
+    private val expected = RouteRefreshRequestData(
         currentLegIndex,
         routeGeometryIndex,
-        legGeometryIndex
+        legGeometryIndex,
+        evData
     )
 
     @Test
     fun stateAfterUpdate() = runBlocking {
         provider.onRouteProgressChanged(routeProgress)
 
-        assertEquals(expected, provider.getFilledIndicesOrWait())
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
     }
 
     @Test
@@ -51,7 +58,7 @@ class CurrentIndicesProviderTest {
             provider.onRouteProgressChanged(routeProgress)
         }
 
-        assertEquals(expected, provider.getFilledIndicesOrWait())
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
     }
 
     @Test
@@ -61,16 +68,16 @@ class CurrentIndicesProviderTest {
                 delay(100)
                 provider.onRouteProgressChanged(routeProgress)
             }
-            var value: CurrentIndices? = null
+            var value: RouteRefreshRequestData? = null
             val update = launch {
-                value = provider.getFilledIndicesOrWait()
+                value = provider.getRouteRefreshRequestDataOrWait()
                 throw AssertionError()
             }
             advanceTimeBy(50)
             update.cancel()
             advanceTimeBy(50)
             assertNull(value)
-            assertEquals(expected, provider.getFilledIndicesOrWait())
+            assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
         }
     }
 
@@ -81,11 +88,11 @@ class CurrentIndicesProviderTest {
             every { currentRouteGeometryIndex } returns routeIndex
             every { currentLegProgress } returns null
         }
-        val expected = CurrentIndicesFactory.createIndices(0, routeIndex, null)
+        val expected = RouteRefreshRequestData(0, routeIndex, null, evData)
 
         provider.onRouteProgressChanged(routeProgress)
 
-        assertEquals(expected, provider.getFilledIndicesOrWait())
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
     }
 
     @Test
@@ -110,16 +117,17 @@ class CurrentIndicesProviderTest {
                 every { geometryIndex } returns legGeometryIndex2
             }
         }
-        val expected = CurrentIndicesFactory.createIndices(
+        val expected = RouteRefreshRequestData(
             legIndex2,
             routeGeometryIndex2,
-            legGeometryIndex2
+            legGeometryIndex2,
+            evData
         )
 
         provider.onRouteProgressChanged(routeProgress1)
         provider.onRouteProgressChanged(routeProgress2)
 
-        assertEquals(expected, provider.getFilledIndicesOrWait())
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
     }
 
     @Test
@@ -144,10 +152,11 @@ class CurrentIndicesProviderTest {
                 every { geometryIndex } returns legGeometryIndex2
             }
         }
-        val expected = CurrentIndicesFactory.createIndices(
+        val expected = RouteRefreshRequestData(
             legIndex1,
             routeGeometryIndex1,
-            legGeometryIndex1
+            legGeometryIndex1,
+            evData
         )
         provider.onRouteProgressChanged(routeProgress1)
 
@@ -156,7 +165,7 @@ class CurrentIndicesProviderTest {
             provider.onRouteProgressChanged(routeProgress2)
         }
 
-        assertEquals(expected, provider.getFilledIndicesOrWait())
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
     }
 
     @Test
@@ -181,19 +190,53 @@ class CurrentIndicesProviderTest {
                 every { geometryIndex } returns legGeometryIndex2
             }
         }
-        val expected = CurrentIndicesFactory.createIndices(
+        val expected = RouteRefreshRequestData(
             legIndex2,
             routeGeometryIndex2,
-            legGeometryIndex2
+            legGeometryIndex2,
+            evData
         )
         provider.onRouteProgressChanged(routeProgress1)
 
-        provider.clear()
+        provider.onNewRoute()
         launch {
             delay(100)
             provider.onRouteProgressChanged(routeProgress2)
         }
 
-        assertEquals(expected, provider.getFilledIndicesOrWait())
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
+    }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    @Test
+    fun setEVDataUpdater() {
+        val firstUpdater = mockk<EVDataUpdater>(relaxed = true)
+        val secondUpdater = mockk<EVDataUpdater>(relaxed = true)
+        provider.setEVDataUpdater(firstUpdater)
+
+        verify(exactly = 1) { firstUpdater.registerEVDataObserver(evDataHolder) }
+
+        provider.setEVDataUpdater(secondUpdater)
+
+        verify(exactly = 1) {
+            firstUpdater.unregisterEVDataObserver(evDataHolder)
+            secondUpdater.registerEVDataObserver(evDataHolder)
+        }
+    }
+
+    @Test
+    fun destroyWithoutUpdater() {
+        provider.destroy()
+    }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    @Test
+    fun destroyWithUpdater() {
+        val updater = mockk<EVDataUpdater>(relaxed = true)
+        provider.setEVDataUpdater(updater)
+
+        provider.destroy()
+
+        verify { updater.unregisterEVDataObserver(evDataHolder) }
     }
 }

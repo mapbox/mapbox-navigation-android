@@ -3,7 +3,7 @@ package com.mapbox.navigation.core.directions.session
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.CurrentIndices
+import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -83,16 +83,16 @@ internal class MapboxDirectionsSession(
      * Refresh the traffic annotations for a given [DirectionsRoute]
      *
      * @param route DirectionsRoute the direction route to refresh
-     * @param legIndex Object containing information about consistent current indices
+     * @param routeRefreshRequestData Object containing information needed for refresh request
      * @param callback Callback that gets notified with the results of the request
      */
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun requestRouteRefresh(
         route: NavigationRoute,
-        currentIndices: CurrentIndices,
+        routeRefreshRequestData: RouteRefreshRequestData,
         callback: NavigationRouterRefreshCallback
     ): Long {
-        return router.getRouteRefresh(route, currentIndices, callback)
+        return router.getRouteRefresh(route, routeRefreshRequestData, callback)
     }
 
     /**

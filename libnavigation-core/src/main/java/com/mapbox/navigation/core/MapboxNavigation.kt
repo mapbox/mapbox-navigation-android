@@ -280,8 +280,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     // native Router Interface
     private val nativeRouter: RouterInterface
 
-    private val currentIndicesProvider =
-        NavigationComponentProvider.createCurrentIndicesProvider()
+    private val routeRefreshRequestDataProvider =
+        NavigationComponentProvider.createRouteRefreshRequestDataProvider()
 
     // Router provided via @Modules, might be outer
     private val moduleRouter: NavigationRouterV2
@@ -486,7 +486,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             threadController,
         )
 
-        tripSession.registerRouteProgressObserver(currentIndicesProvider)
+        tripSession.registerRouteProgressObserver(routeRefreshRequestDataProvider)
         tripSession.registerStateObserver(navigationSession)
         tripSession.registerStateObserver(historyRecordingStateHandler)
 
@@ -541,7 +541,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
             navigationOptions.routeRefreshOptions,
             directionsSession,
-            currentIndicesProvider,
+            routeRefreshRequestDataProvider,
         )
 
         defaultRerouteController = MapboxRerouteController(
@@ -1062,6 +1062,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             reachabilityObserverId = null
         }
         routeRefreshController.unregisterAllRouteRefreshStateObservers()
+        routeRefreshRequestDataProvider.destroy()
 
         isDestroyed = true
         hasInstance = false
@@ -1670,6 +1671,19 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         developerMetadataAggregator.unregisterObserver(developerMetadataObserver)
     }
 
+    /**
+     * Provide a [EVDataUpdater] that will notify Nav SDK of EV data updates
+     * to be used in route refresh requests.
+     * Set to null to stop providing updates.
+     * NOTE: after setting the updater to null the last saved state will be used in refresh requests.
+     *
+     * @param updater [EVDataUpdater] that will notify Nav SDK of EV data updates
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun setEVDataUpdater(updater: EVDataUpdater?) {
+        routeRefreshRequestDataProvider.setEVDataUpdater(updater)
+    }
+
     private fun createHistoryRecorderHandles(config: ConfigHandle) =
         NavigatorLoader.createHistoryRecorderHandles(
             config,
@@ -1697,7 +1711,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
-        currentIndicesProvider.clear()
+        routeRefreshRequestDataProvider.onNewRoute()
         if (result.navigationRoutes.isNotEmpty()) {
             routeScope.launch {
                 val refreshed = routeRefreshController.refresh(
@@ -1705,7 +1719,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 )
                 internalSetNavigationRoutes(
                     refreshed.routes,
-                    SetRefreshedRoutesInfo(refreshed.usedIndicesSnapshot),
+                    SetRefreshedRoutesInfo(refreshed.requestData),
                 )
             }
         }

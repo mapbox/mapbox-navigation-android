@@ -99,6 +99,6 @@ internal object NavigationComponentProvider {
         historyRecordingStateHandler.registerCopilotSessionObserver(it)
     }
 
-    fun createCurrentIndicesProvider(): CurrentIndicesProvider =
-        CurrentIndicesProvider()
+    fun createRouteRefreshRequestDataProvider(): RouteRefreshRequestDataProvider =
+        RouteRefreshRequestDataProvider()
 }

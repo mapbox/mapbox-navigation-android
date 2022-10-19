@@ -9,8 +9,7 @@ import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.CurrentIndices
-import com.mapbox.navigation.base.internal.CurrentIndicesFactory
+import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.route.InternalRouter
 import com.mapbox.navigation.base.internal.route.refreshRoute
@@ -163,14 +162,14 @@ class RouterWrapper(
         callback: NavigationRouterRefreshCallback
     ): Long = getRouteRefresh(
         route,
-        CurrentIndicesFactory.createIndices(legIndex, 0, null),
+        RouteRefreshRequestData(legIndex, 0, null, emptyMap()),
         callback
     )
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun getRouteRefresh(
         route: NavigationRoute,
-        indicesSnapshot: CurrentIndices,
+        routeRefreshRequestData: RouteRefreshRequestData,
         callback: NavigationRouterRefreshCallback
     ): Long {
         val routeOptions = route.routeOptions
@@ -198,10 +197,10 @@ class RouterWrapper(
         val refreshOptions = RouteRefreshOptions(
             requestUuid,
             routeIndex,
-            indicesSnapshot.legIndex,
+            routeRefreshRequestData.legIndex,
             RoutingProfile(routeOptions.profile().mapToRoutingMode(), routeOptions.user()),
-            indicesSnapshot.routeGeometryIndex,
-            hashMapOf(),
+            routeRefreshRequestData.routeGeometryIndex,
+            hashMapOf<String, String>().addEvData(routeOptions, routeRefreshRequestData.evData)
         )
 
         return router.getRouteRefresh(
@@ -218,7 +217,7 @@ class RouterWrapper(
                                code = ${it.code}
                                type = ${it.type}
                                requestId = ${it.requestId}
-                               indicesSnapshot = $indicesSnapshot
+                               routeRefreshRequestData = $routeRefreshRequestData
                             """.trimIndent()
 
                         logW(errorMessage, LOG_CATEGORY)
@@ -251,7 +250,7 @@ class RouterWrapper(
                                 .mapValue { routeRefresh ->
                                     route.refreshRoute(
                                         initialLegIndex = refreshOptions.legIndex,
-                                        currentLegGeometryIndex = indicesSnapshot.legGeometryIndex,
+                                        currentLegGeometryIndex = routeRefreshRequestData.legGeometryIndex,
                                         legAnnotations = routeRefresh.legs()?.map {
                                             it.annotation()
                                         },
@@ -322,5 +321,18 @@ class RouterWrapper(
 
         private const val LOG_CATEGORY = "RouterWrapper"
         private const val REQUEST_FAILURE = -1L
+    }
+}
+
+private const val KEY_ENGINE = "engine"
+private const val VALUE_ELECTRIC = "electric"
+
+private fun HashMap<String, String>.addEvData(
+    originalRouteOptions: RouteOptions,
+    currentEvData: Map<String, String>
+): HashMap<String, String> = apply {
+    if (originalRouteOptions.getUnrecognizedProperty(KEY_ENGINE)?.asString == VALUE_ELECTRIC) {
+        put(KEY_ENGINE, VALUE_ELECTRIC)
+        putAll(currentEvData)
     }
 }

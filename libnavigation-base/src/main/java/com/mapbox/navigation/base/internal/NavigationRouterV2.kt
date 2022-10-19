@@ -7,14 +7,14 @@ import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 
 /**
  * Extends [NavigationRouter] to also provide ability for refreshing routes partially
- * using indices stored in [CurrentIndices].
+ * using state snapshot stored in [RouteRefreshRequestData].
  */
 interface NavigationRouterV2 : NavigationRouter {
 
     @Deprecated(
         "Use getRouteRefresh(" +
             "NavigationRoute, " +
-            "CurrentIndices, " +
+            "RouteRefreshRequestData, " +
             "NavigationRouterRefreshCallback" +
             ")"
     )
@@ -28,14 +28,14 @@ interface NavigationRouterV2 : NavigationRouter {
      * Refresh the traffic annotations for a given underlying [DirectionsRoute]
      *
      * @param route [NavigationRoute] the route to refresh
-     * @param indicesSnapshot Object containing information about consistent current indices
+     * @param routeRefreshRequestData Object containing information needed for refresh request
      * @param callback Callback that gets notified with the results of the request
      *
      * @return request ID, can be used to cancel the request with [cancelRouteRefreshRequest]
      */
     fun getRouteRefresh(
         route: NavigationRoute,
-        indicesSnapshot: CurrentIndices,
+        routeRefreshRequestData: RouteRefreshRequestData,
         callback: NavigationRouterRefreshCallback
     ): Long
 }

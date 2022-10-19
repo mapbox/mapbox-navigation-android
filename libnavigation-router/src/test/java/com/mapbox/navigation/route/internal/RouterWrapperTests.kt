@@ -8,8 +8,9 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.coordinates
-import com.mapbox.navigation.base.internal.CurrentIndicesFactory
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
+import com.mapbox.navigation.base.internal.RouteRefreshRequestData
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshError
 import com.mapbox.navigation.base.route.RouterCallback
@@ -76,9 +77,10 @@ class RouterWrapperTests {
     private val routerRefreshCallback: NavigationRouterRefreshCallback = mockk(relaxed = true)
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
     private val routeUrl = routerOptions.toUrl(accessToken).toString()
+    private val evData = mapOf("aaa" to "bbb")
 
-    // these indices are used in expected files
-    private val currentIndices = CurrentIndicesFactory.createIndices(0, 100, 10)
+    // these data is used in expected files
+    private val routeRefreshRequestData = RouteRefreshRequestData(0, 100, 10, evData)
 
     private val testRouteFixtures = TestRouteFixtures()
 
@@ -317,7 +319,7 @@ class RouterWrapperTests {
                 .build()
         )
 
-        routerWrapper.getRouteRefresh(route, currentIndices, routerRefreshCallback)
+        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
 
         val expectedErrorMessage =
             """
@@ -333,33 +335,91 @@ class RouterWrapperTests {
     }
 
     @Test
-    fun `route refresh set right params`() {
+    fun `route refresh set right params for non-ev route`() {
         mockkStatic("com.mapbox.navigation.base.route.NavigationRouteEx") {
-            val route = createNavigationRoute(
-                createDirectionsRoute(
-                    routeOptions = routerOptions,
-                    requestUuid = UUID,
-                    routeIndex = "0"
-                )
-            )
+            val evRouterOptions = provideDefaultRouteOptions()
+                .toBuilder()
+                .unrecognizedProperties(mapOf("engine" to "non-electric"))
+                .build()
+            val route = NavigationRoute.create(
+                DirectionsResponse.builder()
+                    .code("200")
+                    .uuid(UUID)
+                    .routes(listOf(createDirectionsRoute(
+                        routeIndex = "0"
+                    )))
+                    .build(),
+                evRouterOptions,
+                Offboard
+            ).first()
 
             val legIndex = 12
             val routeGeometryIndex = 23
             val legGeometryIndex = 19
-            val indicesSnapshot = CurrentIndicesFactory.createIndices(
+            val requestData = RouteRefreshRequestData(
                 legIndex,
                 routeGeometryIndex,
-                legGeometryIndex
+                legGeometryIndex,
+                evData
             )
-            routerWrapper.getRouteRefresh(route, indicesSnapshot, routerRefreshCallback)
+            routerWrapper.getRouteRefresh(route, requestData, routerRefreshCallback)
 
             val expectedRefreshOptions = RouteRefreshOptions(
                 UUID,
                 0,
                 legIndex,
-                RoutingProfile(routerOptions.profile().mapToRoutingMode(), routerOptions.user()),
+                RoutingProfile(evRouterOptions.profile().mapToRoutingMode(), evRouterOptions.user()),
                 routeGeometryIndex,
-                hashMapOf(),
+                hashMapOf<String, String>()
+            )
+
+            verify(exactly = 1) {
+                router.getRouteRefresh(
+                    expectedRefreshOptions,
+                    any()
+                )
+            }
+        }
+    }
+
+
+    @Test
+    fun `route refresh set right params for ev route`() {
+        mockkStatic("com.mapbox.navigation.base.route.NavigationRouteEx") {
+            val evRouterOptions = provideDefaultRouteOptions()
+                .toBuilder()
+                .unrecognizedProperties(mapOf("engine" to "electric"))
+                .build()
+            val route = NavigationRoute.create(
+                DirectionsResponse.builder()
+                    .code("200")
+                    .uuid(UUID)
+                    .routes(listOf(createDirectionsRoute(
+                        routeIndex = "0"
+                    )))
+                    .build(),
+                evRouterOptions,
+                Offboard
+            ).first()
+
+            val legIndex = 12
+            val routeGeometryIndex = 23
+            val legGeometryIndex = 19
+            val requestData = RouteRefreshRequestData(
+                legIndex,
+                routeGeometryIndex,
+                legGeometryIndex,
+                evData
+            )
+            routerWrapper.getRouteRefresh(route, requestData, routerRefreshCallback)
+
+            val expectedRefreshOptions = RouteRefreshOptions(
+                UUID,
+                0,
+                legIndex,
+                RoutingProfile(evRouterOptions.profile().mapToRoutingMode(), evRouterOptions.user()),
+                routeGeometryIndex,
+                hashMapOf("engine" to "electric", "aaa" to "bbb")
             )
 
             verify(exactly = 1) {
@@ -391,7 +451,7 @@ class RouterWrapperTests {
             ).routes().first()
         )
 
-        routerWrapper.getRouteRefresh(route, currentIndices, routerRefreshCallback)
+        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
         refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard)
 
         val expected = createNavigationRoute(
@@ -426,10 +486,11 @@ class RouterWrapperTests {
 
         routerWrapper.getRouteRefresh(
             route,
-            CurrentIndicesFactory.createIndices(
+            RouteRefreshRequestData(
                 1,
-                currentIndices.routeGeometryIndex,
-                currentIndices.legGeometryIndex
+                routeRefreshRequestData.routeGeometryIndex,
+                routeRefreshRequestData.legGeometryIndex,
+                evData
             ),
             routerRefreshCallback
         )
@@ -457,7 +518,7 @@ class RouterWrapperTests {
                 .build()
         )
 
-        routerWrapper.getRouteRefresh(route, currentIndices, routerRefreshCallback)
+        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
         refreshRouteSlot.captured.run(routerResultFailure, nativeOriginOnboard)
 
         val errorMessage =
@@ -467,7 +528,7 @@ class RouterWrapperTests {
                code = $FAILURE_CODE
                type = $FAILURE_TYPE
                requestId = $REQUEST_ID
-               indicesSnapshot = $currentIndices
+               routeRefreshRequestData = $routeRefreshRequestData
             """.trimIndent()
 
         val errorSlot = slot<NavigationRouterRefreshError>()
