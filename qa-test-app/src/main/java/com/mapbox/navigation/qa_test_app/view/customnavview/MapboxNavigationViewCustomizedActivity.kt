@@ -70,6 +70,7 @@ import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription
 import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position.END
 import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position.START
 import com.mapbox.navigation.dropin.infopanel.InfoPanelBinder
+import com.mapbox.navigation.dropin.internal.extensions.updateMargins
 import com.mapbox.navigation.dropin.map.MapViewBinder
 import com.mapbox.navigation.dropin.map.MapViewObserver
 import com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams
@@ -149,6 +150,7 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         initActivityOptions()
         initGeneralOptions()
         initMapOptions()
+        initActionsOptions()
         initInfoPanelOptions()
     }
 
@@ -301,12 +303,6 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         if (enabled) {
             binding.navigationView.customizeViewBinders {
                 speedLimitBinder = CustomSpeedLimitViewBinder()
-                customActionButtons = listOf(
-                    ActionButtonDescription(customActionButton("button 1"), START),
-                    ActionButtonDescription(customActionButton("button 2"), START),
-                    ActionButtonDescription(customActionButton("button 3"), END),
-                    ActionButtonDescription(customActionButton("button 4"), END)
-                )
             }
             binding.navigationView.customizeViewOptions {
                 routeLineOptions = customRouteLineOptions(applicationContext)
@@ -321,7 +317,6 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             // Reset defaults
             binding.navigationView.customizeViewBinders {
                 speedLimitBinder = UIBinder.USE_DEFAULT
-                customActionButtons = emptyList()
             }
             binding.navigationView.customizeViewOptions {
                 routeLineOptions = defaultRouteLineOptions(applicationContext)
@@ -428,6 +423,140 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                     it.layoutParams,
                     enabled
                 )
+            }
+        }
+    }
+
+    //endregion
+
+    //region Actions Options
+
+    private fun initActionsOptions() {
+        bindSwitch(
+            menuBinding.toggleCustomCompassButton,
+            viewModel.actionsCustomCompassButton,
+            ::toggleCustomCompassButton
+        )
+        bindSwitch(
+            menuBinding.toggleCustomCameraModeButton,
+            viewModel.actionsCustomCameraButton,
+            ::toggleCustomCameraButton
+        )
+        bindSwitch(
+            menuBinding.toggleCustomAudioButton,
+            viewModel.actionsCustomAudioButton,
+            ::toggleCustomAudioButton
+        )
+        bindSwitch(
+            menuBinding.toggleCustomRecenterButton,
+            viewModel.actionsCustomRecenterButton,
+            ::toggleCustomRecenterButton
+        )
+        bindSwitch(
+            menuBinding.toggleAdditionalActionButtons,
+            viewModel.actionsAdditionalButtons,
+            ::toggleAdditionalActionButtons
+        )
+        bindSwitch(
+            menuBinding.toggleCustomActionsLayout,
+            viewModel.actionsCustomLayout,
+            ::toggleCustomActionsLayout
+        )
+    }
+
+    private fun toggleCustomCompassButton(enabled: Boolean) {
+        binding.navigationView.customizeViewBinders {
+            actionCompassButtonBinder = if (enabled) {
+                UIBinder {
+                    it.removeAllViews()
+                    it.addView(
+                        customActionButton("Compass").apply {
+                            updateMargins(top = 10.dp, bottom = 10.dp)
+                        }
+                    )
+                    UIComponent()
+                }
+            } else {
+                UIBinder.USE_DEFAULT
+            }
+        }
+    }
+
+    private fun toggleCustomCameraButton(enabled: Boolean) {
+        binding.navigationView.customizeViewBinders {
+            actionCameraModeButtonBinder = if (enabled) {
+                UIBinder {
+                    it.removeAllViews()
+                    it.addView(
+                        customActionButton("Camera").apply {
+                            updateMargins(top = 10.dp, bottom = 10.dp)
+                        }
+                    )
+                    UIComponent()
+                }
+            } else {
+                UIBinder.USE_DEFAULT
+            }
+        }
+    }
+
+    private fun toggleCustomAudioButton(enabled: Boolean) {
+        binding.navigationView.customizeViewBinders {
+            actionToggleAudioButtonBinder = if (enabled) {
+                UIBinder {
+                    it.removeAllViews()
+                    it.addView(
+                        customActionButton("Audio").apply {
+                            updateMargins(top = 10.dp, bottom = 10.dp)
+                        }
+                    )
+                    UIComponent()
+                }
+            } else {
+                UIBinder.USE_DEFAULT
+            }
+        }
+    }
+
+    private fun toggleCustomRecenterButton(enabled: Boolean) {
+        binding.navigationView.customizeViewBinders {
+            actionRecenterButtonBinder = if (enabled) {
+                UIBinder {
+                    it.removeAllViews()
+                    it.addView(
+                        customActionButton("Recenter").apply {
+                            updateMargins(top = 10.dp, bottom = 10.dp)
+                        }
+                    )
+                    UIComponent()
+                }
+            } else {
+                UIBinder.USE_DEFAULT
+            }
+        }
+    }
+
+    private fun toggleAdditionalActionButtons(enabled: Boolean) {
+        binding.navigationView.customizeViewBinders {
+            customActionButtons = if (enabled) {
+                listOf(
+                    ActionButtonDescription(customActionButton("button 1"), START),
+                    ActionButtonDescription(customActionButton("button 2"), START),
+                    ActionButtonDescription(customActionButton("button 3"), END),
+                    ActionButtonDescription(customActionButton("button 4"), END)
+                )
+            } else {
+                emptyList()
+            }
+        }
+    }
+
+    private fun toggleCustomActionsLayout(enabled: Boolean) {
+        binding.navigationView.customizeViewBinders {
+            actionButtonsBinder = if (enabled) {
+                CustomActionButtonsBinder()
+            } else {
+                UIBinder.USE_DEFAULT
             }
         }
     }

@@ -204,6 +204,77 @@
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 
+            <!-- Actions Customization -->
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="10dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:paddingVertical="10dp"
+                    android:text="Action Buttons" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleCustomCompassButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Custom Compass Button"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleCustomCameraModeButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Custom Camera Button"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleCustomAudioButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Custom Audio Button"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleCustomRecenterButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Custom Recenter Button"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleAdditionalActionButtons"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Additional Button"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleCustomActionsLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Custom Layout"
+                    android:textAllCaps="true" />
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
             <!-- Info Panel Customization -->
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
