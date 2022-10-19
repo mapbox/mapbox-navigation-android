@@ -180,6 +180,7 @@ internal class MapboxTripSession(
     }
 
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
+    private val defaultJobController: JobControl = threadController.getDefaultScopeAndRootJob()
 
     private val locationObservers = CopyOnWriteArraySet<LocationObserver>()
     private val routeProgressObservers = CopyOnWriteArraySet<RouteProgressObserver>()
@@ -355,6 +356,7 @@ internal class MapboxTripSession(
                     nativeBannerInstruction?.index
                 )
             }
+
             val remainingWaypoints = calculateRemainingWaypoints(tripStatus)
             val routeProgress = getRouteProgressFrom(
                 tripStatus.route,
@@ -417,6 +419,7 @@ internal class MapboxTripSession(
         tripService.stopService()
         tripSessionLocationEngine.stopLocationUpdates()
         mainJobController.job.cancelChildren()
+        defaultJobController.job.cancelChildren()
         reset()
         state = TripSessionState.STOPPED
     }
@@ -665,11 +668,16 @@ internal class MapboxTripSession(
         navigator.setFallbackVersionsObserver(null)
     }
 
+    private var locationJob: Job? = null
     private fun updateLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
         this.locationMatcherResult = locationMatcherResult
-        locationObservers.forEach { it.onNewLocationMatcherResult(locationMatcherResult) }
+        locationJob?.cancel()
+        locationJob = defaultJobController.scope.launch {
+            locationObservers.forEach { it.onNewLocationMatcherResult(locationMatcherResult) }
+        }
     }
 
+    private var routeProgressJob: Job? = null
     private fun updateRouteProgress(
         progress: RouteProgress?,
         shouldTriggerBannerInstructionsObserver: Boolean
@@ -678,30 +686,39 @@ internal class MapboxTripSession(
         if (tripService.hasServiceStarted()) {
             tripService.updateNotification(buildTripNotificationState(progress))
         }
-        progress?.let { progress ->
-            logD(
-                "dispatching progress update; state: ${progress.currentState}",
-                LOG_CATEGORY
-            )
-            routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
-            if (shouldTriggerBannerInstructionsObserver) {
-                checkBannerInstructionEvent { bannerInstruction ->
-                    bannerInstructionsObservers.forEach {
-                        it.onNewBannerInstructions(bannerInstruction)
+        routeProgressJob?.cancel()
+        routeProgressJob = defaultJobController.scope.launch {
+            progress?.let { progress ->
+                logD(
+                    "dispatching progress update; state: ${progress.currentState}",
+                    LOG_CATEGORY
+                )
+                routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
+                if (shouldTriggerBannerInstructionsObserver) {
+                    checkBannerInstructionEvent { bannerInstruction ->
+                        bannerInstructionsObservers.forEach {
+                            it.onNewBannerInstructions(bannerInstruction)
+                        }
                     }
                 }
             }
         }
     }
 
+    private var voiceInstructionJob: Job? = null
     private fun triggerVoiceInstructionEvent(progress: RouteProgress?, status: NavigationStatus) {
-        val voiceInstructions = progress?.voiceInstructions
-        val navigatorTriggeredNewInstruction = status.voiceInstruction != null
-        if (voiceInstructions != null && navigatorTriggeredNewInstruction) {
-            voiceInstructionsObservers.forEach {
-                it.onNewVoiceInstructions(voiceInstructions)
+        voiceInstructionJob?.cancel()
+        voiceInstructionJob = defaultJobController.scope.launch {
+            val voiceInstructions = progress?.voiceInstructions
+            val navigatorTriggeredNewInstruction = status.voiceInstruction != null
+            if (voiceInstructions != null && navigatorTriggeredNewInstruction) {
+                voiceInstructionsObservers.forEach {
+                    it.onNewVoiceInstructions(voiceInstructions)
+                }
+                mainJobController.scope.launch {
+                    lastVoiceInstruction = progress.voiceInstructions
+                }
             }
-            lastVoiceInstruction = progress.voiceInstructions
         }
     }
 

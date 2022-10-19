@@ -52,6 +52,7 @@ class ThreadController {
     }
 
     internal var ioRootJob = SupervisorJob()
+    internal var defaultRootJob = SupervisorJob()
     internal var mainRootJob = SupervisorJob()
 
     /**
@@ -61,6 +62,7 @@ class ThreadController {
      * It is basically a kill switch for all non-UI scoped coroutines.
      */
     fun cancelAllNonUICoroutines() {
+        defaultRootJob.cancelChildren()
         ioRootJob.cancelChildren()
     }
 
@@ -71,6 +73,11 @@ class ThreadController {
      */
     fun cancelAllUICoroutines() {
         mainRootJob.cancelChildren()
+    }
+
+    fun getDefaultScopeAndRootJob(): JobControl {
+        val parentJob = SupervisorJob(defaultRootJob)
+        return JobControl(parentJob, CoroutineScope(parentJob + DefaultDispatcher))
     }
 
     /**
