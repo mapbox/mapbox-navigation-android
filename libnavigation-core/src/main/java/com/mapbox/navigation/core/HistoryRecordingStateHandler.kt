@@ -7,6 +7,7 @@ import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.trip.session.NavigationSessionUtils
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
+import com.mapbox.navigation.utils.internal.logI
 import java.util.concurrent.CopyOnWriteArraySet
 
 @UiThread
@@ -108,6 +109,7 @@ internal class HistoryRecordingStateHandler : TripSessionStateObserver {
             isDriving,
             hasRoutes
         )
+        logI("try to update state from $currentState to $newState", "[ddlog]")
         if (newState::class != currentState::class) {
             val oldState = currentState
             currentState = newState

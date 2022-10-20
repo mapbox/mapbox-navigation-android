@@ -123,6 +123,7 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import com.mapbox.navigator.AlertsServiceOptions
 import com.mapbox.navigator.ElectronicHorizonOptions
@@ -875,10 +876,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         restartRouteScope()
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
+                logI("before set ${routes.size} routes to historyRecordingStateHandler", "[ddlog]")
                 historyRecordingStateHandler.setRoutes(routes)
+                logI("after set ${routes.size} routes to historyRecordingStateHandler", "[ddlog]")
                 val routesSetResult: Expected<RoutesSetError, RoutesSetSuccess>
                 when (val processedRoutes = setRoutesToTripSession(routes, setRoutesInfo)) {
                     is NativeSetRouteValue -> {
+                        logI("${routes.size} routes are set successfully to NN")
                         val (acceptedAlternatives, ignoredAlternatives) = routes
                             .drop(1)
                             .partition { passedRoute ->
@@ -898,7 +902,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                     is NativeSetRouteError -> {
                         logE(
                             "Routes with IDs ${routes.map { it.id }} " +
-                                "will be ignored as they are not valid"
+                                "will be ignored as they are not valid",
+                            "[ddlog]"
                         )
                         routesSetResult = ExpectedFactory.createError(
                             RoutesSetError(processedRoutes.error)

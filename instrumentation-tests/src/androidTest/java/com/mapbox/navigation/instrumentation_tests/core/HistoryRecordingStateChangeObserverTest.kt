@@ -37,6 +37,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
+import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.filter
@@ -350,7 +351,11 @@ class HistoryRecordingStateChangeObserverTest :
         while (reader.hasNext()) {
             historyEvents.add(reader.next())
         }
-        val setRouteEvent = historyEvents.filterIsInstance<HistoryEventSetRoute>().first()
+        val setRouteEvent = historyEvents.filterIsInstance<HistoryEventSetRoute>()
+            .first {
+//                it.navigationRoute != null
+                true
+            }
         assertEquals(routes[0].id, setRouteEvent.navigationRoute!!.id)
     }
 
@@ -452,6 +457,7 @@ class HistoryRecordingStateChangeObserverTest :
     ) = suspendCancellableCoroutine<String?> { continuation ->
         val observer = object : HistoryRecordingStateChangeObserver {
             override fun onShouldStartRecording(state: HistoryRecordingSessionState) {
+                logI("start recording for: $state", "[ddlog]")
                 mapboxNavigation.historyRecorder.startRecording()
             }
 
@@ -477,7 +483,10 @@ class HistoryRecordingStateChangeObserverTest :
             mapboxNavigation.unregisterHistoryRecordingStateChangeObserver(observer)
         }
         mapboxNavigation.registerHistoryRecordingStateChangeObserver(observer)
-        mapboxNavigation.setNavigationRoutes(routes)
+        logI("before set routes", "[ddlog]")
+        mapboxNavigation.setNavigationRoutes(routes) {
+            logI("after set routes, success: ${it.isValue}, $it", "[ddlog]")
+        }
         mapboxNavigation.setNavigationRoutes(emptyList())
     }
 }

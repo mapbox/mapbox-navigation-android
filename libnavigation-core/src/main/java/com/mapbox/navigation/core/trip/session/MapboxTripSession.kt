@@ -84,7 +84,7 @@ internal class MapboxTripSession(
         logD(
             "routes update (reason: ${setRoutesInfo.reason}, " +
                 "route IDs: ${routes.map { it.id }}) - starting",
-            LOG_CATEGORY
+            "[ddlog]"
         )
         val result = when (setRoutesInfo) {
             is BasicSetRoutesInfo -> {
@@ -155,7 +155,7 @@ internal class MapboxTripSession(
     ): NativeSetRouteResult {
         logD(
             "native routes update (route IDs: ${routes.map { it.id }}) - starting",
-            LOG_CATEGORY
+            "[ddlog]"
         )
         val newPrimaryRoute = routes.firstOrNull()
         return navigator.setRoutes(
@@ -174,7 +174,7 @@ internal class MapboxTripSession(
         }.fold({ NativeSetRouteError(it) }, { NativeSetRouteValue(routes, it) }).also {
             logD(
                 "native routes update (route IDs: ${routes.map { it.id }}) - finished",
-                LOG_CATEGORY
+                "[ddlog]"
             )
         }
     }
