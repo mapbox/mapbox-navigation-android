@@ -119,28 +119,28 @@ class ViewBinderCustomization {
 
     /**
      * Customize the Compass Action Button by providing your own [UIBinder]
-     * when using [actionButtonsBinder] with [ActionButtonsBinder] implementation.
+     * when using [actionButtonsBinder] with [ActionButtonsBinder.defaultBinder] implementation.
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var actionCompassButtonBinder: UIBinder? = null
 
     /**
      * Customize the Camera Mode Action Button by providing your own [UIBinder]
-     * when using [actionButtonsBinder] with [ActionButtonsBinder] implementation.
+     * when using [actionButtonsBinder] with [ActionButtonsBinder.defaultBinder] implementation.
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var actionCameraModeButtonBinder: UIBinder? = null
 
     /**
      * Customize the Toggle Audio Guidance Action Button by providing your own [UIBinder]
-     * when using [actionButtonsBinder] with [ActionButtonsBinder] implementation.
+     * when using [actionButtonsBinder] with [ActionButtonsBinder.defaultBinder] implementation.
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var actionToggleAudioButtonBinder: UIBinder? = null
 
     /**
      * Customize the Recenter Camera Action Button by providing your own [UIBinder]
-     * when using [actionButtonsBinder] with [ActionButtonsBinder] implementation.
+     * when using [actionButtonsBinder] with [ActionButtonsBinder.defaultBinder] implementation.
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */
     var actionRecenterButtonBinder: UIBinder? = null
