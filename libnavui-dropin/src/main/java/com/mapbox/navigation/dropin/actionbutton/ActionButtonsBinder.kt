@@ -112,7 +112,13 @@ abstract class ActionButtonsBinder : UIBinder {
     protected abstract fun getCustomButtonsEndContainer(layout: ViewGroup): ViewGroup?
 
     /**
-     * Vertical spacing between custom buttons.
+     * Vertical spacing between buttons.
+     *
+     * This value is ignored for buttons installed using custom binder:
+     * - [ViewBinderCustomization.actionCompassButtonBinder]
+     * - [ViewBinderCustomization.actionCameraModeButtonBinder]
+     * - [ViewBinderCustomization.actionToggleAudioButtonBinder]
+     * - [ViewBinderCustomization.actionRecenterButtonBinder]
      */
     @Px
     @UiThread
@@ -135,18 +141,19 @@ abstract class ActionButtonsBinder : UIBinder {
 
         return navigationContext.run {
             val components = mutableListOf<MapboxNavigationObserver>()
+            val spacing = verticalSpacing(context.resources)
 
             getCompassButtonContainer(layout)?.also {
-                components.add(compassButtonComponent(it))
+                components.add(compassButtonComponent(it, spacing))
             }
             getCameraModeButtonContainer(layout)?.also {
-                components.add(cameraModeButtonComponent(it))
+                components.add(cameraModeButtonComponent(it, spacing))
             }
             getToggleAudioButtonContainer(layout)?.also {
-                components.add(audioGuidanceButtonComponent(it))
+                components.add(audioGuidanceButtonComponent(it, spacing))
             }
             getRecenterButtonContainer(layout)?.also {
-                components.add(recenterButtonComponent(it))
+                components.add(recenterButtonComponent(it, spacing))
             }
 
             navigationListOf(*components.toTypedArray())
