@@ -35,7 +35,7 @@ abstract class ActionButtonsBinder : UIBinder {
      * @param layoutInflater The LayoutInflater service.
      * @param root Parent view that provides a set of LayoutParams values for root of the returned hierarchy.
      *
-     * @return ViewGroup that can host both header and content layouts.
+     * @return ViewGroup that can host action button layout.
      *   Returned view must not be attached to the root view.
      */
     @UiThread
@@ -182,33 +182,4 @@ abstract class ActionButtonsBinder : UIBinder {
          */
         fun defaultBinder(): ActionButtonsBinder = MapboxActionButtonsBinder()
     }
-}
-
-/**
- * Default Action Buttons Binder implementation.
- */
-@ExperimentalPreviewMapboxNavigationAPI
-internal class MapboxActionButtonsBinder : ActionButtonsBinder() {
-
-    override fun onCreateLayout(layoutInflater: LayoutInflater, root: ViewGroup): ViewGroup =
-        layoutInflater
-            .inflate(R.layout.mapbox_action_buttons_layout, root, false) as ViewGroup
-
-    override fun getCustomButtonsStartContainer(layout: ViewGroup): ViewGroup? =
-        layout.findViewById(R.id.buttonsContainerTop)
-
-    override fun getCompassButtonContainer(layout: ViewGroup): ViewGroup? =
-        layout.findViewById(R.id.buttonsContainerCompass)
-
-    override fun getCameraModeButtonContainer(layout: ViewGroup): ViewGroup? =
-        layout.findViewById(R.id.buttonsContainerCamera)
-
-    override fun getToggleAudioButtonContainer(layout: ViewGroup): ViewGroup? =
-        layout.findViewById(R.id.buttonsContainerAudio)
-
-    override fun getRecenterButtonContainer(layout: ViewGroup): ViewGroup? =
-        layout.findViewById(R.id.buttonsContainerRecenter)
-
-    override fun getCustomButtonsEndContainer(layout: ViewGroup): ViewGroup? =
-        layout.findViewById(R.id.buttonsContainerBottom)
 }
