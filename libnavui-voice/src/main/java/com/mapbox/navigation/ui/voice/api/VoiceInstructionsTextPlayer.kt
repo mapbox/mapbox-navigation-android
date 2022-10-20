@@ -17,19 +17,26 @@ import java.util.Locale
  */
 internal class VoiceInstructionsTextPlayer(
     private val context: Context,
-    private val language: String,
+    private var language: String,
     private val playerAttributes: VoiceInstructionsPlayerAttributes,
 ) : VoiceInstructionsPlayer {
 
     @VisibleForTesting
     internal var isLanguageSupported: Boolean = false
 
+    private var textToSpeechInitStatus: Int? = null
+
     @VisibleForTesting
-    internal var textToSpeech = TextToSpeech(context.applicationContext) { status ->
-        if (status == TextToSpeech.SUCCESS) {
-            initializeWithLanguage(Locale(language))
+    internal val textToSpeech =
+        TextToSpeechProvider.getTextToSpeech(context.applicationContext) { status ->
+            textToSpeechInitStatus = status
+            if (status == TextToSpeech.SUCCESS) {
+                initializeWithLanguage(Locale(language))
+                if (isLanguageSupported) {
+                    setUpUtteranceProgressListener()
+                }
+            }
         }
-    }
 
     @VisibleForTesting
     internal var volumeLevel: Float = DEFAULT_VOLUME_LEVEL
@@ -37,6 +44,13 @@ internal class VoiceInstructionsTextPlayer(
 
     @VisibleForTesting
     internal var currentPlay: SpeechAnnouncement? = null
+
+    fun updateLanguage(language: String) {
+        this.language = language
+        if (textToSpeechInitStatus == TextToSpeech.SUCCESS) {
+            initializeWithLanguage(Locale(language))
+        }
+    }
 
     /**
      * Given [SpeechAnnouncement] the method will play the voice instruction.
@@ -112,6 +126,9 @@ internal class VoiceInstructionsTextPlayer(
             return
         }
         textToSpeech.language = language
+    }
+
+    private fun setUpUtteranceProgressListener() {
         textToSpeech.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onDone(utteranceId: String?) {
                 donePlaying()

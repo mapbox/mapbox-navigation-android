@@ -6,11 +6,9 @@ internal object VoiceInstructionsFilePlayerProvider {
 
     fun retrieveVoiceInstructionsFilePlayer(
         context: Context,
-        accessToken: String,
         playerAttributes: VoiceInstructionsPlayerAttributes,
     ): VoiceInstructionsFilePlayer = VoiceInstructionsFilePlayer(
         context,
-        accessToken,
         playerAttributes,
     )
 }

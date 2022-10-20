@@ -381,7 +381,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
         )
         voiceInstructionsPlayer = MapboxVoiceInstructionsPlayer(
             this,
-            getMapboxAccessTokenFromResources(),
             Locale.US.language
         )
 
