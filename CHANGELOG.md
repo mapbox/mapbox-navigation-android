@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added `ViewBinderCustomization.infoPanelRoutePreviewButtonBinder` and `ViewBinderCustomization.infoPanelStartNavigationButtonBinder` that allows injection of custom Info Panel buttons for Route Preview and Start Navigation in `NavigationView`. [#6490](https://github.com/mapbox/mapbox-navigation-android/pull/6490)
 - Added `ViewBinderCustomization.actionCompassButtonBinder`, `ViewBinderCustomization.actionCameraModeButtonBinder`, `ViewBinderCustomization.actionToggleAudioButtonBinder` and `ViewBinderCustomization.actionRecenterButtonBinder` that allows injection of a custom Compass, Camera Mode, Toggle Voice Instructions and Camera Recenter Buttons in `NavigationView`. [#6490](https://github.com/mapbox/mapbox-navigation-android/pull/6490)
 - Introduced `ActionButtonsBinder` base `UIBinder` class, that allows use of a custom action buttons layout with default action buttons in `NavigationView`. [#6490](https://github.com/mapbox/mapbox-navigation-android/pull/6490)
 #### Bug fixes and improvements
