@@ -1,6 +1,6 @@
 package com.mapbox.androidauto.deeplink
 
-import com.mapbox.androidauto.MapboxCarApp
+import com.mapbox.androidauto.car.location.CarLocationProvider
 import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapProvider
 import com.mapbox.androidauto.car.search.GetPlacesError
 import com.mapbox.androidauto.car.search.PlaceRecord
@@ -17,8 +17,8 @@ internal class GeoDeeplinkPlacesListOnMapProvider(
 
     override suspend fun getPlaces(): Expected<GetPlacesError, List<PlaceRecord>> {
         // Wait for an origin location
-        val origin = MapboxCarApp.carAppLocationService().validLocation()
-            ?.run { Point.fromLngLat(longitude, latitude) }
+        val origin = CarLocationProvider.getRegisteredInstance().validLocation()
+            .run { Point.fromLngLat(longitude, latitude) }
             ?: return ExpectedFactory.createError(
                 GetPlacesError("Did not find current location.", null)
             )

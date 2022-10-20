@@ -1,8 +1,7 @@
 package com.mapbox.androidauto.deeplink
 
 import android.location.Location
-import com.mapbox.androidauto.MapboxCarApp
-import com.mapbox.androidauto.navigation.location.CarAppLocation
+import com.mapbox.androidauto.car.location.CarLocationProvider
 import com.mapbox.api.geocoding.v5.models.CarmenFeature
 import com.mapbox.api.geocoding.v5.models.GeocodingResponse
 import com.mapbox.geojson.Point
@@ -13,9 +12,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
-import io.mockk.unmockkObject
+import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -36,9 +36,14 @@ class GeoDeeplinkPlacesListOnMapProviderTest {
         verify { geoDeeplinkGeocoding.cancel() }
     }
 
+    @After
+    fun teardown() {
+        unmockkAll()
+    }
+
     @Test
     fun getPlaces() = coroutineRule.runBlockingTest {
-        mockkObject(MapboxCarApp)
+        mockkObject(CarLocationProvider)
         val location = mockk<Location> {
             every { longitude } returns -121.8544717
             every { latitude } returns 45.6824467
@@ -61,10 +66,10 @@ class GeoDeeplinkPlacesListOnMapProviderTest {
         val response = mockk<GeocodingResponse> {
             every { features() } returns listOf(carmenFeature1, carmenFeature2)
         }
-        val carAppLocation = mockk<CarAppLocation> {
+        val carLocationProvider = mockk<CarLocationProvider> {
             coEvery { validLocation() } returns location
         }
-        every { MapboxCarApp.carAppLocationService() } returns carAppLocation
+        every { CarLocationProvider.getRegisteredInstance() } returns carLocationProvider
         val originSlot = slot<Point>()
         val geoDeeplink = mockk<GeoDeeplink>()
         val geoDeeplinkGeocoding = mockk<GeoDeeplinkGeocoding>(relaxed = true) {
@@ -79,6 +84,5 @@ class GeoDeeplinkPlacesListOnMapProviderTest {
         assertEquals(45.6824467, originSlot.captured.latitude(), 0.0001)
         assertEquals(-121.8544717, originSlot.captured.longitude(), 0.0001)
         assertEquals(2, result.size)
-        unmockkObject(MapboxCarApp)
     }
 }

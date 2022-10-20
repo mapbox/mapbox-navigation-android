@@ -2,10 +2,10 @@ package com.mapbox.androidauto.car.preview
 
 import androidx.annotation.UiThread
 import com.mapbox.androidauto.car.MapboxCarOptions
+import com.mapbox.androidauto.car.location.CarLocationProvider
 import com.mapbox.androidauto.car.search.PlaceRecord
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.internal.logAndroidAutoFailure
-import com.mapbox.androidauto.navigation.location.CarAppLocation
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -17,7 +17,6 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 
 /**
@@ -66,8 +65,7 @@ class CarRoutePreviewRequest internal constructor(
         }
         cancelRequest()
 
-        val carAppLocation = MapboxNavigationApp.getObserver(CarAppLocation::class)
-        val location = carAppLocation.navigationLocationProvider.lastLocation
+        val location = CarLocationProvider.getRegisteredInstance().lastLocation()
         if (location == null) {
             logAndroidAutoFailure("CarRoutePreview.onUnknownCurrentLocation")
             callback.onUnknownCurrentLocation()

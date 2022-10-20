@@ -12,6 +12,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Deleted `RoutePreviewCarContext` in favor of `MapboxCarContext`. [#6478](https://github.com/mapbox/mapbox-navigation-android/pull/6478)
 - Renamed `CarSettingsStorage` to `MapboxCarStorage`. [#6478](https://github.com/mapbox/mapbox-navigation-android/pull/6478)
 - Deleted `ActionProvider` and `ScreenActionProvider` in favor of `MapboxActionProvider`. [#6494](https://github.com/mapbox/mapbox-navigation-android/pull/6494)
+- Renamed `CarAppLocation` to `CarLocationProvider` with a `getRegisteredInstance` accessor. [#6492](https://github.com/mapbox/mapbox-navigation-android/pull/6492)
+- Removed `MapboxCarApp` as it is no longer needed. Use `CarLocationProvider.getRegisteredInstance()` if needed. [#6492](https://github.com/mapbox/mapbox-navigation-android/pull/6492)
 
 ## androidauto-v0.14.0 - October 13, 2022
 ### Changelog
