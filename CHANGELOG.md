@@ -3,6 +3,8 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
+#### Known issues :bangbang:
+- Found a race condition in the underneath `LocationEngine` implementation which may result in stopping receiving location updates if `requestLocationUpdates` is called immediately after `removeLocationUpdates`. This will be fixed in the next release `v2.9.0-rc.1`.
 #### Features
 #### Bug fixes and improvements
 - Improved precision of congestion visualization and independent leg styling transitions, especially for long routes. [#6476](https://github.com/mapbox/mapbox-navigation-android/pull/6476)
