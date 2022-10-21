@@ -10,11 +10,13 @@ import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
 import com.mapbox.navigation.base.internal.utils.DirectionsRouteMissingConditionsCheck
 import com.mapbox.navigation.testing.FileUtils
+import com.mapbox.navigation.testing.MapboxJavaObjectsFactory
 import com.mapbox.navigator.RouteInterface
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.verify
 import org.json.JSONObject
@@ -96,7 +98,7 @@ class NavigationRouteTest {
 
     @Test
     fun `toNavigationRoute - waypoints back filled from route options`() {
-        val directionsRoute = mockk<DirectionsRoute> {
+        val directionsRoute = spyk(MapboxJavaObjectsFactory.directionsRoute()) {
             every { requestUuid() } returns "asdf"
             every { routeIndex() } returns "0"
             every { routeOptions() } returns RouteOptions.builder()
@@ -109,7 +111,6 @@ class NavigationRouteTest {
                 )
                 .build()
             every { legs() } returns null
-            every { toBuilder() } returns mockk(relaxed = true)
         }
 
         val navigationRoute = directionsRoute.toNavigationRoute()
@@ -133,7 +134,7 @@ class NavigationRouteTest {
 
     @Test
     fun `toNavigationRoute - uuid from route used`() {
-        val directionsRoute = mockk<DirectionsRoute> {
+        val directionsRoute = spyk(MapboxJavaObjectsFactory.directionsRoute()) {
             every { requestUuid() } returns "asdf"
             every { routeIndex() } returns "0"
             every { routeOptions() } returns RouteOptions.builder()
@@ -146,7 +147,6 @@ class NavigationRouteTest {
                 )
                 .build()
             every { legs() } returns null
-            every { toBuilder() } returns mockk(relaxed = true)
         }
 
         val navigationRoute = directionsRoute.toNavigationRoute(RouterOrigin.Offboard)
@@ -165,7 +165,7 @@ class NavigationRouteTest {
 
     @Test
     fun `toNavigationRoute - waypoints back filled from route options ignoring silent`() {
-        val directionsRoute = mockk<DirectionsRoute> {
+        val directionsRoute = spyk(MapboxJavaObjectsFactory.directionsRoute()) {
             every { requestUuid() } returns "asdf"
             every { routeIndex() } returns "0"
             every { routeOptions() } returns RouteOptions.builder()
@@ -181,7 +181,6 @@ class NavigationRouteTest {
                 .waypointIndicesList(listOf(0, 2, 3))
                 .build()
             every { legs() } returns null
-            every { toBuilder() } returns mockk(relaxed = true)
         }
 
         val navigationRoute = directionsRoute.toNavigationRoute()

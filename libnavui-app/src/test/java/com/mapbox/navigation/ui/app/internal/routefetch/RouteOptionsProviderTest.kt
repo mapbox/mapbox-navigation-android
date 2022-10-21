@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.testing.MapboxJavaObjectsFactory
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -30,11 +31,6 @@ class RouteOptionsProviderTest {
     }
     private val origin = Point.fromLngLat(1.0, 2.0)
     private val destination = Point.fromLngLat(3.0, 4.0)
-    private val routeOptions = mockk<RouteOptions>()
-    private val optionsBuilder = mockk<RouteOptions.Builder> {
-        every { build() } returns routeOptions
-    }
-    private val interceptor: (RouteOptions.Builder) -> RouteOptions.Builder = { optionsBuilder }
 
     @Before
     fun `set up`() {
@@ -57,11 +53,15 @@ class RouteOptionsProviderTest {
 
     @Test
     fun `provider returns options from interceptor if set`() {
+        val resultBuilder = MapboxJavaObjectsFactory.routeOptions().toBuilder()
+        val result = resultBuilder.build()
+        val interceptor: (RouteOptions.Builder) -> RouteOptions.Builder = { resultBuilder }
+
         routeOptionsProvider.setInterceptor(interceptor)
 
         val options = routeOptionsProvider.getOptions(mapboxNavigation, origin, destination)
 
-        assertEquals(options, routeOptions)
+        assertEquals(options, result)
     }
 
     private companion object {

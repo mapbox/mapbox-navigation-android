@@ -504,9 +504,14 @@ class NavigationRouteExTest {
             ),
             5
         )
-        val validStep = mockk<LegStep>(relaxed = true) {
-            every { geometry() } returns twoPointGeometry
-        }
+        val validStep = LegStep.builder()
+            .geometry(twoPointGeometry)
+            .distance(1.0)
+            .duration(2.0)
+            .weight(3.0)
+            .mode("mode")
+            .maneuver(mockk())
+            .build()
         return NavigationRoute(
             DirectionsResponse.builder()
                 .routes(

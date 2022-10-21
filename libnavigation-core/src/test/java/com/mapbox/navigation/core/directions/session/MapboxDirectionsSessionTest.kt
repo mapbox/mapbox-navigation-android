@@ -13,6 +13,7 @@ import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.BasicSetRoutesInfo
 import com.mapbox.navigation.core.NavigationComponentProvider
+import com.mapbox.navigation.testing.MapboxJavaObjectsFactory
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
@@ -33,7 +34,7 @@ class MapboxDirectionsSessionTest {
     private lateinit var session: MapboxDirectionsSession
 
     private val router: NavigationRouterV2 = mockk(relaxUnitFun = true)
-    private val routeOptions: RouteOptions = mockk(relaxUnitFun = true)
+    private val routeOptions: RouteOptions = MapboxJavaObjectsFactory.routeOptions()
     private val routerCallback: NavigationRouterCallback = mockk(relaxUnitFun = true)
     private val routesRefreshRequestCallback: NavigationRouterRefreshCallback =
         mockk(relaxUnitFun = true)
@@ -50,19 +51,7 @@ class MapboxDirectionsSessionTest {
 
     @Before
     fun setUp() {
-        val routeOptionsBuilder: RouteOptions.Builder = mockk(relaxUnitFun = true)
-        every { routeOptionsBuilder.waypointIndices(any()) } returns routeOptionsBuilder
-        every { routeOptionsBuilder.waypointNames(any()) } returns routeOptionsBuilder
-        every { routeOptionsBuilder.waypointTargets(any()) } returns routeOptionsBuilder
-        every { routeOptionsBuilder.build() } returns routeOptions
-        every { routeOptions.toBuilder() } returns routeOptionsBuilder
-        every { routeOptions.waypointIndices() } returns ""
-        every { routeOptions.waypointNames() } returns ""
-        every { routeOptions.waypointTargets() } returns ""
-        val routeBuilder: DirectionsRoute.Builder = mockk(relaxUnitFun = true)
-        every { route.directionsRoute.toBuilder() } returns routeBuilder
-        every { routeBuilder.routeOptions(any()) } returns routeBuilder
-        every { routeBuilder.build() } returns mockk()
+        every { route.directionsRoute } returns MapboxJavaObjectsFactory.directionsRoute()
 
         val routeListener = slot<NavigationRouterCallback>()
         val refreshListener = slot<NavigationRouterRefreshCallback>()

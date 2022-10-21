@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.testing.MapboxJavaObjectsFactory
 import io.mockk.CapturingSlot
 import io.mockk.Runs
 import io.mockk.every
@@ -32,9 +33,7 @@ class CarRoutePreviewRequestTest {
     private val routeOptionsSlot = CapturingSlot<RouteOptions>()
     private val routerCallbackSlot = CapturingSlot<NavigationRouterCallback>()
     private val options: MapboxCarOptions = mockk {
-        every { routeOptionsInterceptor } returns mockk {
-            every { intercept(any()) } answers { firstArg() }
-        }
+        every { routeOptionsInterceptor } returns CarRouteOptionsInterceptor { it }
     }
 
     private val locationProvider = mockk<CarLocationProvider>()
@@ -221,11 +220,12 @@ class CarRoutePreviewRequestTest {
 
     @Test
     fun `custom route options provided by interceptor are used for route request`() {
-        val customRouteOptions = mockk<RouteOptions>()
-        val customRouteOptionsBuilder = mockk<RouteOptions.Builder> {
-            every { build() } returns customRouteOptions
-        }
-        every { options.routeOptionsInterceptor.intercept(any()) } returns customRouteOptionsBuilder
+        val customRouteOptions = MapboxJavaObjectsFactory.routeOptions(
+            coordinates = listOf(Point.fromLngLat(23.4, 12.56), Point.fromLngLat(98.7, 45.4))
+        )
+        every {
+            options.routeOptionsInterceptor
+        } returns CarRouteOptionsInterceptor { customRouteOptions.toBuilder() }
         every { locationProvider.lastLocation() } returns mockk {
             every { longitude } returns -121.4670161
             every { latitude } returns 38.5630514
