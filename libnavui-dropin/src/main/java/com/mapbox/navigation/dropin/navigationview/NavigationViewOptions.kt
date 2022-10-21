@@ -40,8 +40,18 @@ internal class NavigationViewOptions(context: Context) {
     private var _showCameraDebugInfo: MutableStateFlow<Boolean> =
         MutableStateFlow(false)
 
-    private var _showCompassActionButton: MutableStateFlow<Boolean> =
-        MutableStateFlow(false)
+    private var _showManeuver: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private var _showSpeedLimit: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private var _showRoadName: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private var _showActionButtons: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private var _showCompassActionButton: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    private var _showCameraModeActionButton: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private var _showToggleAudioActionButton: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private var _showRecenterActionButton: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private var _showTripProgress: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private var _showRoutePreviewButton: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private var _showEndNavigationButton: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private var _showStartNavigationButton: MutableStateFlow<Boolean> = MutableStateFlow(true)
 
     var mapStyleUriDay: StateFlow<String> = _mapStyleUriDay.asStateFlow()
     var mapStyleUriNight: StateFlow<String> = _mapStyleUriNight.asStateFlow()
@@ -55,20 +65,43 @@ internal class NavigationViewOptions(context: Context) {
         _distanceFormatterOptions.asStateFlow()
     val showCameraDebugInfo: StateFlow<Boolean> = _showCameraDebugInfo.asStateFlow()
 
+    val showManeuver: StateFlow<Boolean> = _showManeuver.asStateFlow()
+    val showSpeedLimit: StateFlow<Boolean> = _showSpeedLimit.asStateFlow()
+    val showRoadName: StateFlow<Boolean> = _showRoadName.asStateFlow()
+    val showActionButtons: StateFlow<Boolean> = _showActionButtons.asStateFlow()
     val showCompassActionButton: StateFlow<Boolean> = _showCompassActionButton.asStateFlow()
+    val showCameraModeActionButton: StateFlow<Boolean> = _showCameraModeActionButton.asStateFlow()
+    val showToggleAudioActionButton: StateFlow<Boolean> = _showToggleAudioActionButton.asStateFlow()
+    val showRecenterActionButton: StateFlow<Boolean> = _showRecenterActionButton.asStateFlow()
+    val showTripProgress: StateFlow<Boolean> = _showTripProgress.asStateFlow()
+    val showRoutePreviewButton: StateFlow<Boolean> = _showRoutePreviewButton.asStateFlow()
+    val showEndNavigationButton: StateFlow<Boolean> = _showEndNavigationButton.asStateFlow()
+    val showStartNavigationButton: StateFlow<Boolean> = _showStartNavigationButton.asStateFlow()
 
     fun applyCustomization(customization: ViewOptionsCustomization) {
-        customization.mapStyleUriDay?.also { _mapStyleUriDay.tryEmit(it) }
-        customization.mapStyleUriNight?.also { _mapStyleUriNight.tryEmit(it) }
-        customization.routeLineOptions?.also { _routeLineOptions.tryEmit(it) }
-        customization.routeArrowOptions?.also { _routeArrowOptions.tryEmit(it) }
-        customization.showInfoPanelInFreeDrive?.also { _showInfoPanelInFreeDrive.tryEmit(it) }
-        customization.enableMapLongClickIntercept?.also { _enableMapLongClickIntercept.tryEmit(it) }
-        customization.isInfoPanelHideable?.also { _isInfoPanelHideable.tryEmit(it) }
-        customization.infoPanelForcedState?.also { _infoPanelForcedState.tryEmit(it) }
-        customization.distanceFormatterOptions?.also { _distanceFormatterOptions.tryEmit(it) }
-        customization.showCameraDebugInfo?.also { _showCameraDebugInfo.tryEmit(it) }
-
-        customization.showCompassActionButton?.also { _showCompassActionButton.tryEmit(it) }
+        customization.mapStyleUriDay?.also { _mapStyleUriDay.value = it }
+        customization.mapStyleUriNight?.also { _mapStyleUriNight.value = it }
+        customization.routeLineOptions?.also { _routeLineOptions.value = it }
+        customization.routeArrowOptions?.also { _routeArrowOptions.value = it }
+        customization.showInfoPanelInFreeDrive?.also { _showInfoPanelInFreeDrive.value = it }
+        customization.enableMapLongClickIntercept?.also { _enableMapLongClickIntercept.value = it }
+        customization.isInfoPanelHideable?.also { _isInfoPanelHideable.value = it }
+        customization.infoPanelForcedState?.also { _infoPanelForcedState.value = it }
+        customization.distanceFormatterOptions?.also { _distanceFormatterOptions.value = it }
+        customization.showCameraDebugInfo?.also { _showCameraDebugInfo.value = it }
+        customization.showManeuver?.also { _showManeuver.value = it }
+        customization.showSpeedLimit?.also { _showSpeedLimit.value = it }
+        customization.showRoadName?.also { _showRoadName.value = it }
+        customization.showActionButtons?.also { _showActionButtons.value = it }
+        customization.showCompassActionButton?.also { _showCompassActionButton.value = it }
+        customization.showCameraModeActionButton?.also { _showCameraModeActionButton.value = it }
+        customization.showToggleAudioActionButton?.also {
+            _showToggleAudioActionButton.value = it
+        }
+        customization.showRecenterActionButton?.also { _showRecenterActionButton.value = it }
+        customization.showTripProgress?.also { _showTripProgress.value = it }
+        customization.showRoutePreviewButton?.also { _showRoutePreviewButton.value = it }
+        customization.showEndNavigationButton?.also { _showEndNavigationButton.value = it }
+        customization.showStartNavigationButton?.also { _showStartNavigationButton.value = it }
     }
 }

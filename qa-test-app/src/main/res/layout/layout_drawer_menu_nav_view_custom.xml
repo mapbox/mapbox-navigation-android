@@ -30,6 +30,7 @@
             android:paddingBottom="50dp"
             android:paddingHorizontal="15dp">
 
+            <!-- Debug options -->
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/toggleReplay"
                 android:layout_width="match_parent"
@@ -38,6 +39,37 @@
                 android:paddingVertical="10dp"
                 android:text="enable replay"
                 android:textAllCaps="true" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/showCameraDebugInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingVertical="10dp"
+                android:text="show camera debug info"
+                android:textAllCaps="true" />
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:gravity="center_vertical"
+                android:paddingVertical="5dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAllCaps="true"
+                    android:textColor="@color/colorOnSurface"
+                    android:layout_weight="1"
+                    android:text="Test Voice INSTRUCTION" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/buttonVoiceInstruction"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="PLAY" />
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
 
             <!-- Activity customization -->
             <androidx.appcompat.widget.LinearLayoutCompat
@@ -89,6 +121,42 @@
                     android:paddingVertical="10dp"
                     android:text="General" />
 
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleShowManeuver"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Show Maneuver"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleShowSpeedLimit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Show Speed Limit"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleShowRoadName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Show Road Name"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleShowActionButtons"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Show Action Buttons"
+                    android:textAllCaps="true" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -138,15 +206,6 @@
                     android:layout_weight="1"
                     android:paddingVertical="10dp"
                     android:text="use metric"
-                    android:textAllCaps="true" />
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/showCameraDebugInfo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingVertical="10dp"
-                    android:text="show camera debug info"
                     android:textAllCaps="true" />
 
             </androidx.appcompat.widget.LinearLayoutCompat>
@@ -217,6 +276,33 @@
                     android:layout_weight="1"
                     android:paddingVertical="10dp"
                     android:text="Show Compass Button"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleShowCameraButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Show Camera Mode Button"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleShowAudioButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Show Toggle Audio Button"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleShowRecenterButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Show Recenter Button"
                     android:textAllCaps="true" />
 
                 <androidx.appcompat.widget.SwitchCompat
@@ -291,6 +377,42 @@
                     android:text="Info Panel" />
 
                 <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleShowTripProgress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Show Trip Progress"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleShowRoutePreviewButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Show Route Preview Button"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleShowStartNavButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Show Start Nav Button"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleShowEndNavButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Show End Nav Button"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/toggleBottomSheetFD"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -342,6 +464,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAllCaps="true"
+                        android:layout_weight="1"
                         android:textColor="@color/colorOnSurface"
                         android:text="Custom Content" />
 
@@ -366,6 +489,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAllCaps="true"
+                        android:layout_weight="1"
                         android:textColor="@color/colorOnSurface"
                         android:text="Custom Peek Height" />
 
@@ -422,12 +546,6 @@
                 </androidx.appcompat.widget.LinearLayoutCompat>
 
             </androidx.appcompat.widget.LinearLayoutCompat>
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/buttonVoiceInstruction"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Play voice instruction" />
 
         </androidx.appcompat.widget.LinearLayoutCompat>
 

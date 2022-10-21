@@ -4,6 +4,19 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Introduced new `ViewOptionsCustomization` options that allows showing/hiding of various `NavigationView` subviews. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showManeuver` can be used to show/hide the maneuver view. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showSpeedLimit` can be used to show/hide the speed limit view. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showRoadName` can be used to show/hide the road name view. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showActionButtons` can be used to show/hide action buttons layout. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showCompassActionButton` can be used to show/hide compass action button. The default is `false`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showCameraModeActionButton` can be used to show/hide toggle camera mode action button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showToggleAudioActionButton` can be used to show/hide toggle voice instructions action button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showRecenterActionButton` can be used to show/hide re-center camera action button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showTripProgress` can be used to show/hide info panel's trip progress view. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showRoutePreviewButton` can be used to show/hide info panel's show route preview button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showStartNavigationButton` can be used to show/hide info panel's start navigation button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showEndNavigationButton` can be used to show/hide info panel's end navigation button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
 #### Bug fixes and improvements
 - :warning: Updated `NavigationView` buttons customization to allow styling via XML styles: [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
   - `ViewStyleCustomization.compassButtonParams` option has been replaced by `ViewStyleCustomization.compassButtonStyle`. The default style can be accessed via `ViewStyleCustomization.defaultCompassButtonStyle()` [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
