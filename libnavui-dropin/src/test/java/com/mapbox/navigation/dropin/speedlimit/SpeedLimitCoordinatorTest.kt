@@ -1,35 +1,59 @@
 package com.mapbox.navigation.dropin.speedlimit
 
-import android.view.ViewGroup
+import android.content.Context
+import android.widget.FrameLayout
+import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.EmptyBinder
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
-import com.mapbox.navigation.ui.base.lifecycle.Binder
+import com.mapbox.navigation.dropin.navigationview.NavigationViewModel
+import com.mapbox.navigation.dropin.testutil.TestLifecycleOwner
+import com.mapbox.navigation.dropin.util.TestStore
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.Assert
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
 class SpeedLimitCoordinatorTest {
 
-    private val mapboxNavigation = mockk<MapboxNavigation>()
-    private val speedLimitBinderFlow = MutableStateFlow<UIBinder?>(null)
-    private val context = mockk<NavigationViewContext> {
-        every { uiBinders } returns mockk {
-            every { speedLimit } returns speedLimitBinderFlow
-        }
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
+
+    private lateinit var mapboxNavigation: MapboxNavigation
+    private lateinit var store: TestStore
+    private lateinit var context: NavigationViewContext
+    private lateinit var coordinator: SpeedLimitCoordinator
+
+    @Before
+    fun setUp() {
+        val ctx: Context = ApplicationProvider.getApplicationContext()
+        store = TestStore()
+        context = NavigationViewContext(
+            context = ctx,
+            lifecycleOwner = TestLifecycleOwner(),
+            viewModel = NavigationViewModel(),
+            storeProvider = { store }
+        )
+        mapboxNavigation = mockk(relaxed = true)
+
+        coordinator = SpeedLimitCoordinator(context, FrameLayout(ctx))
     }
-    private val coordinator = SpeedLimitCoordinator(context, mockk())
 
     @Test
     fun `should return default binder`() = runBlockingTest {
@@ -42,47 +66,27 @@ class SpeedLimitCoordinatorTest {
     @Test
     fun `should return custom binder`() = runBlockingTest {
         val customBinder = mockk<UIBinder>()
+        context.applyBinderCustomization {
+            speedLimitBinder = customBinder
+        }
         coordinator.apply {
-            speedLimitBinderFlow.value = customBinder
             val binders = mapboxNavigation.flowViewBinders().take(1).toList()
             assertTrue(binders.first() === customBinder)
         }
     }
 
     @Test
-    fun `should reload binder when speedLimit changes`() = runBlockingTest {
-        val customBinder1 = mockk<UIBinder>()
-        val customBinder2 = mockk<UIBinder>()
-        val collectedBinders = mutableListOf<Binder<ViewGroup>>()
-        coordinator.apply {
-            val job = launch {
-                mapboxNavigation.flowViewBinders().take(4).toList(collectedBinders)
+    fun `should return EmptyBinder when ViewOptionsCustomization showSpeedLimit is FALSE`() =
+        runBlockingTest {
+            context.applyOptionsCustomization {
+                showSpeedLimit = false
             }
-            speedLimitBinderFlow.value = customBinder1
-            speedLimitBinderFlow.value = null
-            speedLimitBinderFlow.value = customBinder2
-            job.join()
-            assertEquals(4, collectedBinders.size)
-            assertTrue(collectedBinders[0] is SpeedLimitViewBinder)
-            assertTrue(collectedBinders[1] === customBinder1)
-            assertTrue(collectedBinders[2] is SpeedLimitViewBinder)
-            assertTrue(collectedBinders[3] === customBinder2)
-        }
-    }
 
-    @Test
-    fun `should use different default binder instances`() = runBlockingTest {
-        val collectedBinders = mutableListOf<Binder<ViewGroup>>()
-        coordinator.apply {
-            val job = launch {
-                mapboxNavigation.flowViewBinders().take(3).toList(collectedBinders)
+            val binders = coordinator.run {
+                val mapboxNavigation = mockk<MapboxNavigation>()
+                mapboxNavigation.flowViewBinders().take(1).toList()
             }
-            speedLimitBinderFlow.value = mockk()
-            speedLimitBinderFlow.value = null
-            job.join()
-            assertTrue(collectedBinders[0] is SpeedLimitViewBinder)
-            assertTrue(collectedBinders[2] is SpeedLimitViewBinder)
-            Assert.assertFalse(collectedBinders[0] === collectedBinders[2])
+
+            assertTrue(binders.first() is EmptyBinder)
         }
-    }
 }

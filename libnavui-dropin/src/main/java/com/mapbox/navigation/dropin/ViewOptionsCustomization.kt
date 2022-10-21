@@ -5,6 +5,8 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.dropin.infopanel.InfoPanelBinder
+import com.mapbox.navigation.ui.base.lifecycle.Binder
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
@@ -84,10 +86,76 @@ class ViewOptionsCustomization {
     var showCameraDebugInfo: Boolean? = null
 
     /**
+     * Sets whether the maneuver view should be visible.
+     * Set to `true` for the default behavior.
+     */
+    var showManeuver: Boolean? = null
+
+    /**
+     * Sets whether the speed limit view should be visible.
+     * Set to `true` for the default behavior.
+     */
+    var showSpeedLimit: Boolean? = null
+
+    /**
+     * Sets whether the road name view should be visible.
+     * Set to `true` for the default behavior.
+     */
+    var showRoadName: Boolean? = null
+
+    /**
+     * Sets whether action buttons should be visible.
+     * Set to `true` for the default behavior.
+     */
+    var showActionButtons: Boolean? = null
+
+    /**
      * Sets whether the compass action button should be visible.
      * Set to `false` for the default behavior.
      */
     var showCompassActionButton: Boolean? = null
+
+    /**
+     * Sets whether the camera mode button should be visible.
+     * Set to `true` for the default behavior.
+     */
+    var showCameraModeActionButton: Boolean? = null
+
+    /**
+     * Sets whether the toggle audio button should be visible.
+     * Set to `true` for the default behavior.
+     */
+    var showToggleAudioActionButton: Boolean? = null
+
+    /**
+     * Sets whether the recenter camera button should be visible.
+     * Set to `true` for the default behavior.
+     */
+    var showRecenterActionButton: Boolean? = null
+
+    /**
+     * Sets whether the trip progress view should be visible.
+     * Set to `true` for the default behavior.
+     */
+    var showTripProgress: Boolean? = null
+
+    /**
+     * Sets whether the route preview button should be visible.
+     * Set to `true` for the default behavior.
+     */
+    var showRoutePreviewButton: Boolean? = null
+
+    /**
+     * Sets whether the end navigation button should be visible.
+     * Set to `true` for the default behavior.
+     */
+    var showEndNavigationButton: Boolean? = null
+
+    /**
+     * Sets whether the start navigation button should be visible.
+     * Set to `true` for the default behavior.
+     */
+    var showStartNavigationButton: Boolean? = null
 
     companion object {
         /**

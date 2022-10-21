@@ -8,10 +8,8 @@ import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.base.lifecycle.UICoordinator
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 
 /**
  * Coordinator for navigation guidance.
@@ -25,17 +23,17 @@ internal class ManeuverCoordinator(
 
     private val store = context.store
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
-        return store.select { it.navigation }
-            .flatMapLatest { navigationState ->
-                context.uiBinders.maneuver.map {
-                    if (navigationState == NavigationState.ActiveNavigation) {
-                        it ?: ManeuverViewBinder(context)
-                    } else {
-                        EmptyBinder()
-                    }
-                }
+        return combine(
+            context.options.showManeuver,
+            context.uiBinders.maneuver,
+            store.select { it.navigation }
+        ) { show, binder, navigationState ->
+            if (show && navigationState == NavigationState.ActiveNavigation) {
+                binder ?: ManeuverViewBinder(context)
+            } else {
+                EmptyBinder()
             }
+        }
     }
 }

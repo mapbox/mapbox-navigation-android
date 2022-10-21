@@ -139,21 +139,7 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
 
     override fun onResume() {
         super.onResume()
-
-        bindSwitch(
-            menuBinding.toggleReplay,
-            getValue = binding.navigationView.api::isReplayEnabled,
-            setValue = { isChecked ->
-                binding.navigationView.api.routeReplayEnabled(isChecked)
-            }
-        )
-        menuBinding.buttonVoiceInstruction.setOnClickListener {
-            binding.navigationView.api.getCurrentVoiceInstructionsPlayer()?.play(
-                SpeechAnnouncement.Builder("This is a test voice instruction").build()
-            ) {
-                // no op
-            }
-        }
+        initDebugOptions()
         initActivityOptions()
         initGeneralOptions()
         initMapOptions()
@@ -170,6 +156,40 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             WindowCompat.setDecorFitsSystemWindows(window, true)
         }
     }
+
+    //region Debug Options
+
+    private fun initDebugOptions() {
+        bindSwitch(
+            menuBinding.toggleReplay,
+            getValue = binding.navigationView.api::isReplayEnabled,
+            setValue = { isChecked ->
+                binding.navigationView.api.routeReplayEnabled(isChecked)
+            }
+        )
+        bindSwitch(
+            menuBinding.showCameraDebugInfo,
+            viewModel.showCameraDebugInfo,
+            ::toggleShowCameraDebugInfo
+        )
+        menuBinding.buttonVoiceInstruction.setOnClickListener {
+            binding.navigationView.api.getCurrentVoiceInstructionsPlayer()?.play(
+                SpeechAnnouncement.Builder("This is a test voice instruction").build()
+            ) {
+                // no op
+            }
+        }
+    }
+
+    private fun toggleShowCameraDebugInfo(enabled: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            showCameraDebugInfo = enabled
+        }
+    }
+
+    //endregion
+
+    //region Activity Options
 
     private fun initActivityOptions() {
         bindSwitch(
@@ -196,9 +216,31 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         )
     }
 
+    //endregion
+
     //region General Options
 
     private fun initGeneralOptions() {
+        bindSwitch(
+            menuBinding.toggleShowManeuver,
+            viewModel.showManeuver,
+            ::toggleShowManeuver
+        )
+        bindSwitch(
+            menuBinding.toggleShowSpeedLimit,
+            viewModel.showSpeedLimit,
+            ::toggleShowSpeedLimit
+        )
+        bindSwitch(
+            menuBinding.toggleShowRoadName,
+            viewModel.showRoadName,
+            ::toggleShowRoadName
+        )
+        bindSwitch(
+            menuBinding.toggleShowActionButtons,
+            viewModel.showActionButtons,
+            ::toggleActionButtons
+        )
         bindSpinner(
             menuBinding.spinnerProfile,
             viewModel.routingProfile,
@@ -219,11 +261,30 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             viewModel.distanceFormatterMetric,
             ::toggleUseMetric
         )
-        bindSwitch(
-            menuBinding.showCameraDebugInfo,
-            viewModel.showCameraDebugInfo,
-            ::toggleShowCameraDebugInfo
-        )
+    }
+
+    private fun toggleShowManeuver(enabled: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            showManeuver = enabled
+        }
+    }
+
+    private fun toggleShowSpeedLimit(enabled: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            showSpeedLimit = enabled
+        }
+    }
+
+    private fun toggleShowRoadName(enabled: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            showRoadName = enabled
+        }
+    }
+
+    private fun toggleActionButtons(enabled: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            showActionButtons = enabled
+        }
     }
 
     private fun toggleCustomStyles(enabled: Boolean) {
@@ -342,12 +403,6 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         }
     }
 
-    private fun toggleShowCameraDebugInfo(enabled: Boolean) {
-        binding.navigationView.customizeViewOptions {
-            showCameraDebugInfo = enabled
-        }
-    }
-
     //endregion
 
     //region Map Options
@@ -399,6 +454,21 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             ::toggleShowCompassButton
         )
         bindSwitch(
+            menuBinding.toggleShowCameraButton,
+            viewModel.actionsShowCameraButton,
+            ::toggleShowCameraModeButton
+        )
+        bindSwitch(
+            menuBinding.toggleShowAudioButton,
+            viewModel.actionsShowAudioButton,
+            ::toggleShowAudioButton
+        )
+        bindSwitch(
+            menuBinding.toggleShowRecenterButton,
+            viewModel.actionsShowRecenterButton,
+            ::toggleShowRecenterButton
+        )
+        bindSwitch(
             menuBinding.toggleAdditionalActionButtons,
             viewModel.actionsAdditionalButtons,
             ::toggleAdditionalActionButtons
@@ -433,6 +503,24 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
     private fun toggleShowCompassButton(enabled: Boolean) {
         binding.navigationView.customizeViewOptions {
             showCompassActionButton = enabled
+        }
+    }
+
+    private fun toggleShowCameraModeButton(enabled: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            showCameraModeActionButton = enabled
+        }
+    }
+
+    private fun toggleShowAudioButton(enabled: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            showToggleAudioActionButton = enabled
+        }
+    }
+
+    private fun toggleShowRecenterButton(enabled: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            showRecenterActionButton = enabled
         }
     }
 
@@ -538,6 +626,26 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
     //region Info Panel Options
 
     private fun initInfoPanelOptions() {
+        bindSwitch(
+            menuBinding.toggleShowTripProgress,
+            viewModel.infoPanelShowTripProgress,
+            ::toggleShowTripProgress
+        )
+        bindSwitch(
+            menuBinding.toggleShowRoutePreviewButton,
+            viewModel.infoPanelShowRoutePreviewButton,
+            ::toggleShowRoutePreviewButton
+        )
+        bindSwitch(
+            menuBinding.toggleShowStartNavButton,
+            viewModel.infoPanelShowStartNavigationButton,
+            ::toggleShowStartNavButton
+        )
+        bindSwitch(
+            menuBinding.toggleShowEndNavButton,
+            viewModel.infoPanelShowEndNavigationButton,
+            ::toggleShowEndNavButton
+        )
         bindSpinner(
             menuBinding.spinnerCustomInfoPanelContent,
             viewModel.customInfoPanelContent,
@@ -587,6 +695,30 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             viewModel.infoPanelStateOverride,
             ::toggleInfoPanelState
         )
+    }
+
+    private fun toggleShowTripProgress(enabled: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            showTripProgress = enabled
+        }
+    }
+
+    private fun toggleShowRoutePreviewButton(enabled: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            showRoutePreviewButton = enabled
+        }
+    }
+
+    private fun toggleShowStartNavButton(enabled: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            showStartNavigationButton = enabled
+        }
+    }
+
+    private fun toggleShowEndNavButton(enabled: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            showEndNavigationButton = enabled
+        }
     }
 
     private fun toggleInfoPanelState(state: String) {
