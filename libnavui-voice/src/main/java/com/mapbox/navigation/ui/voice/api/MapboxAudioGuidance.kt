@@ -52,7 +52,7 @@ internal constructor(
     /**
      * Current instance of a [VoiceInstructionsPlayer].
      */
-    val currentVoiceInstructionsPlayer get() = audioGuidanceServices.voiceInstructionsPlayer
+    fun getCurrentVoiceInstructionsPlayer() = audioGuidanceServices.voiceInstructionsPlayer
 
     /**
      * @see [MapboxNavigationApp]

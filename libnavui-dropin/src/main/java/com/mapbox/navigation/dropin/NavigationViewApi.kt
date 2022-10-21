@@ -115,7 +115,7 @@ abstract class NavigationViewApi {
     abstract fun routeReplayEnabled(enabled: Boolean)
 
     /**
-     * Current instance of a voice instructions player.
+     * Access the current instance of [MapboxVoiceInstructionsPlayer] created by [NavigationView].
      */
-    abstract val currentVoiceInstructionsPlayer: MapboxVoiceInstructionsPlayer?
+    abstract fun getCurrentVoiceInstructionsPlayer(): MapboxVoiceInstructionsPlayer?
 }
