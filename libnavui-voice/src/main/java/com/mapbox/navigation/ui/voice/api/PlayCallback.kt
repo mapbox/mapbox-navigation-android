@@ -5,5 +5,6 @@ import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 
 internal data class PlayCallback(
     val announcement: SpeechAnnouncement,
-    val consumer: MapboxNavigationConsumer<SpeechAnnouncement>
+    val consumer: MapboxNavigationConsumer<SpeechAnnouncement>,
+    val expirationMillis: Long?,
 )

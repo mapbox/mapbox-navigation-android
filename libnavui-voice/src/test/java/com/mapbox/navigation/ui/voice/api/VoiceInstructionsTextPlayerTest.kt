@@ -16,6 +16,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import io.mockk.verifyOrder
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -30,6 +31,7 @@ class VoiceInstructionsTextPlayerTest {
 
     private val mockedBundle: Bundle = mockk(relaxUnitFun = true)
     private val mockedTextToSpeech = mockk<TextToSpeech>(relaxed = true)
+    private val initListener = mockk<() -> Unit>(relaxed = true)
 
     @Before
     fun setUp() {
@@ -51,7 +53,7 @@ class VoiceInstructionsTextPlayerTest {
         val language = "en"
         val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
         val anyAnnouncement = mockk<SpeechAnnouncement>(relaxed = true)
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
@@ -67,7 +69,7 @@ class VoiceInstructionsTextPlayerTest {
         val language = "en"
         val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
         val anyAnnouncement = mockedAnnouncement()
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
@@ -88,7 +90,7 @@ class VoiceInstructionsTextPlayerTest {
             .build()
 
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, locale, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, locale, anyPlayerAttributes, initListener)
 
         val anyAnnouncement = mockk<SpeechAnnouncement>(relaxed = true)
 
@@ -119,7 +121,7 @@ class VoiceInstructionsTextPlayerTest {
         val language = "en"
         val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
         val anyAnnouncement = mockedAnnouncement()
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
@@ -138,7 +140,7 @@ class VoiceInstructionsTextPlayerTest {
         val language = "en"
         val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
         val blankAnnouncement = mockk<SpeechAnnouncement>()
         every { blankAnnouncement.announcement } returns "   "
         val anyVoiceInstructionsPlayerCallback =
@@ -156,7 +158,7 @@ class VoiceInstructionsTextPlayerTest {
         val language = "en"
         val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
         val blankAnnouncement = mockk<SpeechAnnouncement>()
         every { blankAnnouncement.announcement } returns "   "
         val anyVoiceInstructionsPlayerCallback =
@@ -176,7 +178,7 @@ class VoiceInstructionsTextPlayerTest {
         val language = "en"
         val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
         val anyNonBlankAnnouncement = mockk<SpeechAnnouncement>()
         every { anyNonBlankAnnouncement.announcement } returns "Turn right."
         val anyVoiceInstructionsPlayerCallback =
@@ -194,7 +196,7 @@ class VoiceInstructionsTextPlayerTest {
         val language = "en"
         val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
         val anyNonBlankAnnouncement = mockk<SpeechAnnouncement>()
         every { anyNonBlankAnnouncement.announcement } returns "Turn right."
         val anyVoiceInstructionsPlayerCallback =
@@ -212,7 +214,7 @@ class VoiceInstructionsTextPlayerTest {
         val language = "en"
         val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
         val turnRightAnnouncement = "Turn right."
         val anyNonBlankAnnouncement = mockk<SpeechAnnouncement>()
         every { anyNonBlankAnnouncement.announcement } returns turnRightAnnouncement
@@ -238,7 +240,7 @@ class VoiceInstructionsTextPlayerTest {
         val language = "en"
         val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
         val aSpeechVolume = SpeechVolume(0.5f)
 
         textPlayer.volume(aSpeechVolume)
@@ -253,7 +255,7 @@ class VoiceInstructionsTextPlayerTest {
         val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
         every { mockedTextToSpeech.isSpeaking } returns true
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
         val mute = SpeechVolume(0.0f)
 
         textPlayer.volume(mute)
@@ -267,7 +269,7 @@ class VoiceInstructionsTextPlayerTest {
         val language = "en"
         val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
 
         textPlayer.clear()
 
@@ -282,7 +284,7 @@ class VoiceInstructionsTextPlayerTest {
         val language = "en"
         val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
 
         textPlayer.clear()
 
@@ -295,7 +297,7 @@ class VoiceInstructionsTextPlayerTest {
         val language = "en"
         val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
 
         textPlayer.shutdown()
 
@@ -310,7 +312,7 @@ class VoiceInstructionsTextPlayerTest {
         val language = "en"
         val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
 
         textPlayer.shutdown()
 
@@ -325,7 +327,7 @@ class VoiceInstructionsTextPlayerTest {
         val language = "en"
         val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
 
         textPlayer.shutdown()
 
@@ -338,7 +340,7 @@ class VoiceInstructionsTextPlayerTest {
         val language = "en"
         val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
         textPlayer.volumeLevel = 0.5f
 
         textPlayer.shutdown()
@@ -360,7 +362,7 @@ class VoiceInstructionsTextPlayerTest {
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
         clearMocks(mockedTextToSpeech, answers = false)
 
         textPlayer.updateLanguage(newLanguage)
@@ -390,7 +392,7 @@ class VoiceInstructionsTextPlayerTest {
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
         every { mockedTextToSpeech.isLanguageAvailable(Locale(newLanguage)) } returns LANG_AVAILABLE
         invokeOnInitListener(TextToSpeech.SUCCESS)
         clearMocks(mockedTextToSpeech, answers = false)
@@ -423,7 +425,7 @@ class VoiceInstructionsTextPlayerTest {
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
         every {
             mockedTextToSpeech.isLanguageAvailable(Locale(newLanguage))
         } returns LANG_NOT_SUPPORTED
@@ -457,7 +459,7 @@ class VoiceInstructionsTextPlayerTest {
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
         every { mockedTextToSpeech.isLanguageAvailable(Locale(newLanguage)) } returns LANG_AVAILABLE
         invokeOnInitListener(TextToSpeech.ERROR)
         clearMocks(mockedTextToSpeech, answers = false)
@@ -489,7 +491,7 @@ class VoiceInstructionsTextPlayerTest {
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
         val textPlayer =
-            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes)
+            VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
         every { mockedTextToSpeech.isLanguageAvailable(Locale(newLanguage)) } returns LANG_AVAILABLE
         textPlayer.updateLanguage(newLanguage)
         clearMocks(mockedTextToSpeech, answers = false)
@@ -504,6 +506,51 @@ class VoiceInstructionsTextPlayerTest {
         textPlayer.play(anyAnnouncement, anyVoiceInstructionsPlayerCallback)
 
         verify(exactly = 1) { mockedTextToSpeech.speak(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `initListener is invoked on success`() {
+        val anyContext = mockk<Context>(relaxed = true)
+        val language = "en"
+        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxed = true) {
+            every { options } returns mockk(relaxed = true) {
+                every { checkIsLanguageAvailable } returns true
+            }
+        }
+        VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
+
+        verify(exactly = 0) {
+            initListener.invoke()
+        }
+
+        invokeOnInitListener(TextToSpeech.SUCCESS)
+
+        verifyOrder {
+            mockedTextToSpeech.language = Locale(language)
+            initListener.invoke()
+        }
+    }
+
+    @Test
+    fun `initListener is invoked on error`() {
+        val anyContext = mockk<Context>(relaxed = true)
+        val language = "en"
+        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxed = true) {
+            every { options } returns mockk(relaxed = true) {
+                every { checkIsLanguageAvailable } returns true
+            }
+        }
+        VoiceInstructionsTextPlayer(anyContext, language, anyPlayerAttributes, initListener)
+
+        verify(exactly = 0) {
+            initListener.invoke()
+        }
+
+        invokeOnInitListener(TextToSpeech.ERROR)
+
+        verify {
+            initListener.invoke()
+        }
     }
 
     private fun invokeOnInitListener(status: Int) {

@@ -17,6 +17,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue with `NavigationView` that caused unexpected camera movements when switching between navigation states. [#6487](https://github.com/mapbox/mapbox-navigation-android/pull/6487)
 - Supported changing `MapboxVoiceInstructionsPlayer` language in runtime via `updateLanguage` method. [#6491](https://github.com/mapbox/mapbox-navigation-android/pull/6491)
 - Deprecated `MapboxVoiceInstructionsPlayer` constructors that accept access token and introduced the ones without it. [#6491](https://github.com/mapbox/mapbox-navigation-android/pull/6491)
+- Fixed an issue with first voice instruction not being provided in offline mode. [#6500](https://github.com/mapbox/mapbox-navigation-android/pull/6500)
+- Exposed a way to cancel playing a voice instruction in case its playing is delayed for too long via `MapboxVoiceInstructionsPlayer#play(SpeechAnnouncement, MapboxNavigationConsumer<SpeechAnnouncement>, Long?)` or/and `MapboxVoiceInstructionsPlayer#cancel(SpeechAnnouncement)`. [#6500](https://github.com/mapbox/mapbox-navigation-android/pull/6500) 
 
 ## Mapbox Navigation SDK 2.9.0-beta.2 - 14 October, 2022
 ### Changelog

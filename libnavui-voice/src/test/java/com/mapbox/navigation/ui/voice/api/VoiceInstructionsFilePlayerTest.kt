@@ -5,6 +5,7 @@ import android.media.MediaPlayer
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -454,5 +455,92 @@ class VoiceInstructionsFilePlayerTest {
         filePlayer.shutdown()
 
         assertEquals(1.0f, filePlayer.volumeLevel)
+    }
+
+    @Test
+    fun `cancel if instruction is already played`() {
+        val anyContext = mockk<Context>()
+        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
+        val filePlayer =
+            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
+        val announcementWithAnyFile = mockk<SpeechAnnouncement>(relaxed = true)
+        val mockedFile = mockk<File>(relaxed = true)
+        every { mockedFile.canRead() } returns true
+        every { announcementWithAnyFile.file } returns mockedFile
+        val anyVoiceInstructionsPlayerCallback =
+            mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
+        val mockedFileDescriptor = mockk<FileDescriptor>()
+        every { mockedFileInputStream.fd } returns mockedFileDescriptor
+        filePlayer.play(announcementWithAnyFile, anyVoiceInstructionsPlayerCallback)
+        finishPlaying()
+        clearMocks(mockedMediaPlayer, anyVoiceInstructionsPlayerCallback, answers = false)
+
+        filePlayer.cancel(announcementWithAnyFile)
+
+        verify(exactly = 0) {
+            mockedMediaPlayer.release()
+            anyVoiceInstructionsPlayerCallback.onDone(any())
+        }
+    }
+
+    @Test
+    fun `cancel if instruction is currently being played`() {
+        val anyContext = mockk<Context>()
+        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
+        val filePlayer =
+            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
+        val announcementWithAnyFile = mockk<SpeechAnnouncement>(relaxed = true)
+        val mockedFile = mockk<File>(relaxed = true)
+        every { mockedFile.canRead() } returns true
+        every { announcementWithAnyFile.file } returns mockedFile
+        val anyVoiceInstructionsPlayerCallback =
+            mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
+        val mockedFileDescriptor = mockk<FileDescriptor>()
+        every { mockedFileInputStream.fd } returns mockedFileDescriptor
+        filePlayer.play(announcementWithAnyFile, anyVoiceInstructionsPlayerCallback)
+        clearMocks(mockedMediaPlayer, anyVoiceInstructionsPlayerCallback, answers = false)
+
+        filePlayer.cancel(announcementWithAnyFile)
+
+        verify(exactly = 1) {
+            mockedMediaPlayer.release()
+            anyVoiceInstructionsPlayerCallback.onDone(announcementWithAnyFile)
+        }
+    }
+
+    @Test
+    fun `cancel if instruction has never been played`() {
+        val anyContext = mockk<Context>()
+        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
+        val filePlayer =
+            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
+        val announcementWithAnyFile = mockk<SpeechAnnouncement>(relaxed = true)
+        val mockedFile = mockk<File>(relaxed = true)
+        every { mockedFile.canRead() } returns true
+        every { announcementWithAnyFile.file } returns mockedFile
+        val newAnnouncementWithAnyFile = mockk<SpeechAnnouncement>(relaxed = true)
+        val newMockedFile = mockk<File>(relaxed = true)
+        every { newMockedFile.canRead() } returns true
+        every { newAnnouncementWithAnyFile.file } returns newMockedFile
+        val anyVoiceInstructionsPlayerCallback =
+            mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
+        val mockedFileDescriptor = mockk<FileDescriptor>()
+        every { mockedFileInputStream.fd } returns mockedFileDescriptor
+        filePlayer.play(announcementWithAnyFile, anyVoiceInstructionsPlayerCallback)
+        finishPlaying()
+        clearMocks(mockedMediaPlayer, anyVoiceInstructionsPlayerCallback, answers = false)
+
+        filePlayer.cancel(newAnnouncementWithAnyFile)
+
+        verify(exactly = 0) {
+            mockedMediaPlayer.release()
+            anyVoiceInstructionsPlayerCallback.onDone(any())
+        }
+    }
+
+    private fun finishPlaying() {
+        val listeners = mutableListOf<MediaPlayer.OnCompletionListener>()
+        verify { mockedMediaPlayer.setOnCompletionListener(capture(listeners)) }
+        listeners.last().onCompletion(mockedMediaPlayer)
     }
 }

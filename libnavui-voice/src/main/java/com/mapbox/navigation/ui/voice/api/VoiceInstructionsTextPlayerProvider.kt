@@ -8,9 +8,11 @@ internal object VoiceInstructionsTextPlayerProvider {
         context: Context,
         language: String,
         playerAttributes: VoiceInstructionsPlayerAttributes,
+        initListener: () -> Unit,
     ): VoiceInstructionsTextPlayer = VoiceInstructionsTextPlayer(
         context,
         language,
         playerAttributes,
+        initListener
     )
 }

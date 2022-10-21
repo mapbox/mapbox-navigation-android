@@ -60,6 +60,14 @@ internal class VoiceInstructionsFilePlayer(
         }
     }
 
+    override fun cancel(announcement: SpeechAnnouncement) {
+        // Announcement is either already played, being played now or is not added yet.
+        // We should only cancel if it's being played now.
+        if (currentPlay == announcement) {
+            donePlaying(mediaPlayer)
+        }
+    }
+
     /**
      * The method will set the volume to the specified level from [SpeechVolume].
      * @param state SpeechState Volume level.
@@ -94,8 +102,8 @@ internal class VoiceInstructionsFilePlayer(
             )
             currentFileInputStream.use { fis ->
                 val currentMediaPlayer = MediaPlayerProvider.retrieveMediaPlayer()
-                mediaPlayer = currentMediaPlayer!!.apply {
-                    setDataSource(fis!!.fd)
+                mediaPlayer = currentMediaPlayer.apply {
+                    setDataSource(fis.fd)
                     playerAttributes.applyOn(this)
                     prepareAsync()
                 }

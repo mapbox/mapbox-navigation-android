@@ -30,7 +30,7 @@ class MapboxAudioGuidanceServicesTest {
         mockkObject(VoiceInstructionsTextPlayerProvider)
         every {
             VoiceInstructionsTextPlayerProvider
-                .retrieveVoiceInstructionsTextPlayer(any(), any(), any())
+                .retrieveVoiceInstructionsTextPlayer(any(), any(), any(), any())
         } returns textPlayer
     }
 

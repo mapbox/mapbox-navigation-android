@@ -19,6 +19,7 @@ internal class VoiceInstructionsTextPlayer(
     private val context: Context,
     private var language: String,
     private val playerAttributes: VoiceInstructionsPlayerAttributes,
+    private val initListener: () -> Unit
 ) : VoiceInstructionsPlayer {
 
     @VisibleForTesting
@@ -36,6 +37,7 @@ internal class VoiceInstructionsTextPlayer(
                     setUpUtteranceProgressListener()
                 }
             }
+            initListener()
         }
 
     @VisibleForTesting
@@ -68,10 +70,10 @@ internal class VoiceInstructionsTextPlayer(
         check(currentPlay == null) {
             "Only one announcement can be played at a time."
         }
+        val stringAnnouncement = announcement.announcement
         currentPlay = announcement
-        val announcement = announcement.announcement
-        if (isLanguageSupported && announcement.isNotBlank()) {
-            play(announcement)
+        if (isLanguageSupported && stringAnnouncement.isNotBlank()) {
+            play(stringAnnouncement)
         } else {
             logE(
                 "$LANGUAGE_NOT_SUPPORTED or announcement from state is blank",
@@ -79,6 +81,10 @@ internal class VoiceInstructionsTextPlayer(
             )
             donePlaying()
         }
+    }
+
+    override fun cancel(announcement: SpeechAnnouncement) {
+        // no potential delays here - the announcement is either already played or is being played
     }
 
     /**

@@ -19,6 +19,13 @@ internal interface VoiceInstructionsPlayer {
     fun play(announcement: SpeechAnnouncement, callback: VoiceInstructionsPlayerCallback)
 
     /**
+     * Cancels playing the provided [SpeechAnnouncement].
+     * It may be useful for cases when playing the instruction is useless after some time.
+     * @param announcement the instruction to be cancelled
+     */
+    fun cancel(announcement: SpeechAnnouncement)
+
+    /**
      * The method will set the volume to the specified level from [SpeechVolume].
      * @param state volume level.
      */

@@ -9,6 +9,10 @@ import com.mapbox.navigation.ui.voice.model.AudioFocusOwner
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Locale
 import java.util.Queue
 import java.util.Timer
@@ -33,6 +37,8 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
         defaultAudioFocusDelegate(context, options),
     private var timerFactory: Provider<Timer> = defaultTimerFactory()
 ) {
+
+    private val scope = InternalJobControlFactory.createMainScopeJobControl().scope
 
     @JvmOverloads
     @Deprecated("Access token is unused. Use the constructor that does not require it.")
@@ -70,12 +76,16 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
             context,
             attributes,
         )
+    private var initialized = false
     private val textPlayer: VoiceInstructionsTextPlayer =
         VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
             context,
             language,
             attributes,
-        )
+        ) {
+            initialized = true
+            play()
+        }
 
     private var abandonFocusTimer: Timer? = null
 
@@ -105,6 +115,11 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
      * Given [SpeechAnnouncement] the method will play the voice instruction.
      * If a voice instruction is already playing or other announcement are already queued,
      * the given voice instruction will be queued to play after.
+     * If 500 ms pass between the moment the instruction was removed from the queue to be played
+     * and the moment the playing actually starts, it will be cancelled.
+     * As an alternative, you may manually invoke the [cancel] method as soon as playing is
+     * no longer required.
+     *
      * @param announcement object including the announcement text
      * and optionally a synthesized speech mp3.
      * @param consumer represents that the speech player is done playing
@@ -113,9 +128,49 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
         announcement: SpeechAnnouncement,
         consumer: MapboxNavigationConsumer<SpeechAnnouncement>
     ) {
-        playCallbackQueue.add(PlayCallback(announcement, consumer))
+        play(announcement, consumer, 500)
+    }
+
+    /**
+     * Given [SpeechAnnouncement] the method will play the voice instruction.
+     * If a voice instruction is already playing or other announcement are already queued,
+     * the given voice instruction will be queued to play after.
+     * @param announcement object including the announcement text
+     * and optionally a synthesized speech mp3.
+     * @param consumer represents that the speech player is done playing
+     * @param expirationMillis if the specified timeout passes between the moment the instruction
+     *  was removed from the queue to be played and the moment the playing actually starts,
+     *  it will be cancelled. As an alternative, you may manually invoke the [cancel] method
+     *  as soon as playing is no longer required. If null is provided, it will never be cancelled.
+     */
+    fun play(
+        announcement: SpeechAnnouncement,
+        consumer: MapboxNavigationConsumer<SpeechAnnouncement>,
+        expirationMillis: Long?
+    ) {
+        playCallbackQueue.add(PlayCallback(announcement, consumer, expirationMillis))
         if (playCallbackQueue.size == 1) {
             play()
+        }
+    }
+
+    /**
+     * Cancels playing the given announcement. Use in cases when playing the instruction
+     * after some time or after a certain event becomes useless.
+     * As an alternative, you may pass `expirationMillis` parameter to [play] method.
+     * It will cancel the playing automatically after the specified timeout.
+     *
+     * @param announcement the instruction to be cancelled
+     */
+    fun cancel(announcement: SpeechAnnouncement) {
+        filePlayer.cancel(announcement)
+        textPlayer.cancel(announcement)
+        playCallbackQueue.removeIf {
+            (it.announcement == announcement).also { result ->
+                if (result) {
+                    it.consumer.accept(it.announcement)
+                }
+            }
         }
     }
 
@@ -157,6 +212,16 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
 
     private fun play() {
         val currentPlayCallback = playCallbackQueue.peek() ?: return
+        if (!initialized) {
+            currentPlayCallback.expirationMillis?.let {
+                scope.launch {
+                    delay(it)
+                    // cancel is harmless if instruction is already played
+                    cancel(currentPlayCallback.announcement)
+                }
+            }
+            return
+        }
 
         val currentPlay = currentPlayCallback.announcement
         val owner = when (currentPlay.file) {
@@ -166,10 +231,11 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
 
         requestFocus(owner) { isGranted ->
             if (isGranted) {
-                when (owner) {
-                    AudioFocusOwner.MediaPlayer -> filePlayer.play(currentPlay, doneCallback)
-                    AudioFocusOwner.TextToSpeech -> textPlayer.play(currentPlay, doneCallback)
+                val player = when (owner) {
+                    AudioFocusOwner.MediaPlayer -> filePlayer
+                    AudioFocusOwner.TextToSpeech -> textPlayer
                 }
+                player.play(currentPlay, doneCallback)
             } else {
                 doneCallback.onDone(currentPlay)
             }
@@ -178,6 +244,7 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
 
     private fun finalize() {
         playCallbackQueue.clear()
+        scope.cancel()
         abandonFocus(true)
     }
 
