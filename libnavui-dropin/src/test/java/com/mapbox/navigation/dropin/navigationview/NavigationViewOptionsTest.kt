@@ -47,6 +47,18 @@ internal class NavigationViewOptionsTest {
         assertEquals(c.isInfoPanelHideable, sut.isInfoPanelHideable.value)
         assertEquals(c.infoPanelForcedState, sut.infoPanelForcedState.value)
         assertEquals(c.distanceFormatterOptions, sut.distanceFormatterOptions.value)
+        assertEquals(c.showManeuver, sut.showManeuver.value)
+        assertEquals(c.showSpeedLimit, sut.showSpeedLimit.value)
+        assertEquals(c.showRoadName, sut.showRoadName.value)
+        assertEquals(c.showActionButtons, sut.showActionButtons.value)
+        assertEquals(c.showCompassActionButton, sut.showCompassActionButton.value)
+        assertEquals(c.showCameraModeActionButton, sut.showCameraModeActionButton.value)
+        assertEquals(c.showToggleAudioActionButton, sut.showToggleAudioActionButton.value)
+        assertEquals(c.showRecenterActionButton, sut.showRecenterActionButton.value)
+        assertEquals(c.showTripProgress, sut.showTripProgress.value)
+        assertEquals(c.showRoutePreviewButton, sut.showRoutePreviewButton.value)
+        assertEquals(c.showStartNavigationButton, sut.showStartNavigationButton.value)
+        assertEquals(c.showEndNavigationButton, sut.showEndNavigationButton.value)
     }
 
     private fun customization() =
@@ -71,5 +83,17 @@ internal class NavigationViewOptionsTest {
                 .Builder(ctx)
                 .unitType(UnitType.METRIC)
                 .build()
+            showManeuver = false
+            showSpeedLimit = false
+            showRoadName = false
+            showActionButtons = false
+            showCompassActionButton = true
+            showCameraModeActionButton = false
+            showToggleAudioActionButton = false
+            showRecenterActionButton = false
+            showTripProgress = false
+            showRoutePreviewButton = false
+            showStartNavigationButton = false
+            showEndNavigationButton = false
         }
 }

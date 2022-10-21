@@ -18,6 +18,7 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -72,10 +73,34 @@ class InfoPanelHeaderActiveGuidanceBinderTest {
     }
 
     @Test
+    @Suppress("MaxLineLength")
+    fun `bind should NOT bind TripProgressComponent when ViewOptionsCustomization showTripProgress is FALSE`() {
+        navContext.applyOptionsCustomization {
+            showTripProgress = false
+        }
+        val components = sut.bind(FrameLayout(ctx))
+        components.onAttached(mapboxNavigation)
+
+        assertNull(components.findComponent { it is TripProgressComponent })
+    }
+
+    @Test
     fun `bind should return and bind EndNavigationButtonComponent`() {
         val components = sut.bind(FrameLayout(ctx))
         components.onAttached(mapboxNavigation)
 
         assertNotNull(components.findComponent { it is EndNavigationButtonComponent })
+    }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `bind should NOT bind EndNavigationButtonComponent when ViewOptionsCustomization showEndNavigationButton is FALSE`() {
+        navContext.applyOptionsCustomization {
+            showEndNavigationButton = false
+        }
+        val components = sut.bind(FrameLayout(ctx))
+        components.onAttached(mapboxNavigation)
+
+        assertNull(components.findComponent { it is EndNavigationButtonComponent })
     }
 }

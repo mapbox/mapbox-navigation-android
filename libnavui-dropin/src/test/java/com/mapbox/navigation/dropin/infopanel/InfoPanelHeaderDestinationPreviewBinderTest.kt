@@ -85,11 +85,35 @@ class InfoPanelHeaderDestinationPreviewBinderTest {
     }
 
     @Test
+    @Suppress("MaxLineLength")
+    fun `bind should NOT bind RoutePreviewButtonComponent when ViewOptionsCustomization showRoutePreviewButton is FALSE`() {
+        navContext.applyOptionsCustomization {
+            showRoutePreviewButton = false
+        }
+        val components = sut.bind(FrameLayout(ctx))
+        components.onAttached(mapboxNavigation)
+
+        assertNull(components.findComponent { it is RoutePreviewButtonComponent })
+    }
+
+    @Test
     fun `bind should return and bind StartNavigationButtonComponent`() {
         val components = sut.bind(FrameLayout(ctx))
         components.onAttached(mapboxNavigation)
 
         assertNotNull(components.findComponent { it is StartNavigationButtonComponent })
+    }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `bind should NOT bind StartNavigationButtonComponent when ViewOptionsCustomization showStartNavigationButton is FALSE`() {
+        navContext.applyOptionsCustomization {
+            showStartNavigationButton = false
+        }
+        val components = sut.bind(FrameLayout(ctx))
+        components.onAttached(mapboxNavigation)
+
+        assertNull(components.findComponent { it is StartNavigationButtonComponent })
     }
 
     @Test

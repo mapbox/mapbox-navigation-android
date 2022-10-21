@@ -106,7 +106,8 @@ class ActionButtonsBinderTest {
     }
 
     @Test
-    fun `should bind CompassButtonComponent when option showCompassActionButton is TRUE`() {
+    @Suppress("MaxLineLength")
+    fun `should bind CompassButtonComponent when ViewOptionsCustomization showCompassActionButton is TRUE`() {
         navContext.applyOptionsCustomization {
             showCompassActionButton = true
         }
@@ -115,6 +116,45 @@ class ActionButtonsBinderTest {
 
         assertNotNull(components.findComponent { it is CompassButtonComponent })
         assertTrue(viewGroup.findViewById<ViewGroup>(R.id.buttonsContainerCompass).isNotEmpty())
+    }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `should NOT bind CameraModeButtonComponent when ViewOptionsCustomization showCameraModeActionButton is FALSE`() {
+        navContext.applyOptionsCustomization {
+            showCameraModeActionButton = false
+        }
+        val components = sut.bind(viewGroup)
+        components.onAttached(mapboxNavigation)
+
+        assertNull(components.findComponent { it is CameraModeButtonComponent })
+        assertTrue(viewGroup.findViewById<ViewGroup>(R.id.buttonsContainerCamera).isEmpty())
+    }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `should NOT bind AudioGuidanceButtonComponent when ViewOptionsCustomization showToggleAudioActionButton is FALSE`() {
+        navContext.applyOptionsCustomization {
+            showToggleAudioActionButton = false
+        }
+        val components = sut.bind(viewGroup)
+        components.onAttached(mapboxNavigation)
+
+        assertNull(components.findComponent { it is AudioGuidanceButtonComponent })
+        assertTrue(viewGroup.findViewById<ViewGroup>(R.id.buttonsContainerAudio).isEmpty())
+    }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `should NOT bind RecenterButtonComponent when ViewOptionsCustomization showCameraModeActionButton is FALSE`() {
+        navContext.applyOptionsCustomization {
+            showRecenterActionButton = false
+        }
+        val components = sut.bind(viewGroup)
+        components.onAttached(mapboxNavigation)
+
+        assertNull(components.findComponent { it is RecenterButtonComponent })
+        assertTrue(viewGroup.findViewById<ViewGroup>(R.id.buttonsContainerRecenter).isEmpty())
     }
 
     @Test

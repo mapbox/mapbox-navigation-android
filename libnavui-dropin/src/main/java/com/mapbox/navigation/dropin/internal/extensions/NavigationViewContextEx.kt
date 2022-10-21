@@ -20,7 +20,6 @@ import com.mapbox.navigation.dropin.map.geocoding.POINameComponent
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.dropin.tripprogress.TripProgressBinder
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.poiNameComponent(textView: AppCompatTextView) =
@@ -30,8 +29,15 @@ internal fun NavigationViewContext.poiNameComponent(textView: AppCompatTextView)
 internal fun NavigationViewContext.routePreviewButtonComponent(
     buttonContainer: ViewGroup
 ): MapboxNavigationObserver {
-    val binderFlow = uiBinders.infoPanelRoutePreviewButtonBinder.map {
-        it ?: InfoPanelRoutePreviewButtonBinder(this)
+    val binderFlow = combine(
+        options.showRoutePreviewButton,
+        uiBinders.infoPanelRoutePreviewButtonBinder
+    ) { show, binder ->
+        if (show) {
+            binder ?: InfoPanelRoutePreviewButtonBinder(this)
+        } else {
+            EmptyBinder()
+        }
     }
     return reloadOnChange(binderFlow) { it.bind(buttonContainer) }
 }
@@ -40,8 +46,15 @@ internal fun NavigationViewContext.routePreviewButtonComponent(
 internal fun NavigationViewContext.startNavigationButtonComponent(
     buttonContainer: ViewGroup
 ): MapboxNavigationObserver {
-    val binderFlow = uiBinders.infoPanelStartNavigationButtonBinder.map {
-        it ?: InfoPanelStartNavigationButtonBinder(this)
+    val binderFlow = combine(
+        options.showStartNavigationButton,
+        uiBinders.infoPanelStartNavigationButtonBinder
+    ) { show, binder ->
+        if (show) {
+            binder ?: InfoPanelStartNavigationButtonBinder(this)
+        } else {
+            EmptyBinder()
+        }
     }
     return reloadOnChange(binderFlow) { it.bind(buttonContainer) }
 }
@@ -50,8 +63,15 @@ internal fun NavigationViewContext.startNavigationButtonComponent(
 internal fun NavigationViewContext.endNavigationButtonComponent(
     endNavigationButtonLayout: ViewGroup
 ): MapboxNavigationObserver {
-    val binderFlow = uiBinders.infoPanelEndNavigationButtonBinder.map {
-        it ?: InfoPanelEndNavigationButtonBinder(this)
+    val binderFlow = combine(
+        options.showEndNavigationButton,
+        uiBinders.infoPanelEndNavigationButtonBinder
+    ) { show, binder ->
+        if (show) {
+            binder ?: InfoPanelEndNavigationButtonBinder(this)
+        } else {
+            EmptyBinder()
+        }
     }
     return reloadOnChange(binderFlow) { it.bind(endNavigationButtonLayout) }
 }
@@ -64,8 +84,15 @@ internal fun NavigationViewContext.arrivalTextComponent(textView: AppCompatTextV
 internal fun NavigationViewContext.tripProgressComponent(
     tripProgressLayout: ViewGroup
 ): MapboxNavigationObserver {
-    val binderFlow = uiBinders.infoPanelTripProgressBinder.map {
-        it ?: TripProgressBinder(this)
+    val binderFlow = combine(
+        options.showTripProgress,
+        uiBinders.infoPanelTripProgressBinder
+    ) { show, binder ->
+        if (show) {
+            binder ?: TripProgressBinder(this)
+        } else {
+            EmptyBinder()
+        }
     }
     return reloadOnChange(binderFlow) { it.bind(tripProgressLayout) }
 }
@@ -93,8 +120,15 @@ internal fun NavigationViewContext.cameraModeButtonComponent(
     buttonContainer: ViewGroup,
     @Px verticalSpacing: Int
 ): MapboxNavigationObserver {
-    val binderFlow = uiBinders.actionCameraModeButtonBinder.map {
-        it ?: CameraModeButtonBinder(this, verticalSpacing)
+    val binderFlow = combine(
+        options.showCameraModeActionButton,
+        uiBinders.actionCameraModeButtonBinder
+    ) { show, binder ->
+        if (show) {
+            binder ?: CameraModeButtonBinder(this, verticalSpacing)
+        } else {
+            EmptyBinder()
+        }
     }
     return reloadOnChange(binderFlow) { it.bind(buttonContainer) }
 }
@@ -104,8 +138,15 @@ internal fun NavigationViewContext.audioGuidanceButtonComponent(
     buttonContainer: ViewGroup,
     @Px verticalSpacing: Int
 ): MapboxNavigationObserver {
-    val binderFlow = uiBinders.actionToggleAudioButtonBinder.map {
-        it ?: AudioGuidanceButtonBinder(this, verticalSpacing)
+    val binderFlow = combine(
+        options.showToggleAudioActionButton,
+        uiBinders.actionToggleAudioButtonBinder
+    ) { show, binder ->
+        if (show) {
+            binder ?: AudioGuidanceButtonBinder(this, verticalSpacing)
+        } else {
+            EmptyBinder()
+        }
     }
     return reloadOnChange(binderFlow) { it.bind(buttonContainer) }
 }
@@ -115,8 +156,15 @@ internal fun NavigationViewContext.recenterButtonComponent(
     buttonContainer: ViewGroup,
     @Px verticalSpacing: Int
 ): MapboxNavigationObserver {
-    val binderFlow = uiBinders.actionRecenterButtonBinder.map {
-        it ?: RecenterButtonBinder(this, verticalSpacing)
+    val binderFlow = combine(
+        options.showRecenterActionButton,
+        uiBinders.actionRecenterButtonBinder
+    ) { show, binder ->
+        if (show) {
+            binder ?: RecenterButtonBinder(this, verticalSpacing)
+        } else {
+            EmptyBinder()
+        }
     }
     return reloadOnChange(binderFlow) { it.bind(buttonContainer) }
 }

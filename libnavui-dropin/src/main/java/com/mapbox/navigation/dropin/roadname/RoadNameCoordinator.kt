@@ -7,12 +7,14 @@ import androidx.core.view.updateLayoutParams
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.EmptyBinder
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.base.lifecycle.UICoordinator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -51,8 +53,15 @@ internal class RoadNameCoordinator(
         roadNameLayout.resources.configuration.orientation == ORIENTATION_LANDSCAPE
 
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
-        return context.uiBinders.roadName.map {
-            it ?: RoadNameViewBinder(context)
+        return combine(
+            context.options.showRoadName,
+            context.uiBinders.roadName
+        ) { show, binder ->
+            if (show) {
+                binder ?: RoadNameViewBinder(context)
+            } else {
+                EmptyBinder()
+            }
         }
     }
 }
