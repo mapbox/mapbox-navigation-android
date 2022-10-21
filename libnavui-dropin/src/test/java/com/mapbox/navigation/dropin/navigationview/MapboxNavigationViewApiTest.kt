@@ -14,12 +14,18 @@ import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
 import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterAction
+import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
+import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.spyk
+import io.mockk.unmockkObject
 import io.mockk.verify
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -30,6 +36,7 @@ class MapboxNavigationViewApiTest {
     private lateinit var sut: MapboxNavigationViewApi
 
     private lateinit var testStore: TestStore
+    private var audioGuidance: MapboxAudioGuidance = mockk(relaxed = true)
 
     @Before
     fun setUp() {
@@ -48,7 +55,16 @@ class MapboxNavigationViewApiTest {
                 }
             }
         )
+
+        mockkObject(MapboxAudioGuidance.Companion)
+        every { MapboxAudioGuidance.getRegisteredInstance() } returns audioGuidance
+
         sut = MapboxNavigationViewApi(testStore)
+    }
+
+    @After
+    fun cleanUp() {
+        unmockkObject(MapboxAudioGuidance.Companion)
     }
 
     @Test
@@ -332,6 +348,16 @@ class MapboxNavigationViewApiTest {
     fun `routeReplayEnabled should dispatch EnableTripSession`() {
         sut.routeReplayEnabled(false)
         verify { testStore.dispatch(TripSessionStarterAction.EnableTripSession) }
+    }
+
+    @Test
+    fun `getCurrentVoiceInstructionsPlayer returns valid player instance`() {
+        every { audioGuidance.getCurrentVoiceInstructionsPlayer() } returns null
+        assertNull(sut.getCurrentVoiceInstructionsPlayer())
+
+        val player: MapboxVoiceInstructionsPlayer = mockk()
+        every { audioGuidance.getCurrentVoiceInstructionsPlayer() } returns player
+        assertEquals(player, sut.getCurrentVoiceInstructionsPlayer())
     }
 
     private fun navigationRoute(vararg waypoints: Point): NavigationRoute {

@@ -85,6 +85,7 @@ import com.mapbox.navigation.qa_test_app.view.base.DrawerActivity
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.NavigationStyles
+import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.utils.internal.toPoint
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -147,6 +148,13 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 binding.navigationView.api.routeReplayEnabled(isChecked)
             }
         )
+        menuBinding.buttonVoiceInstruction.setOnClickListener {
+            binding.navigationView.api.getCurrentVoiceInstructionsPlayer()?.play(
+                SpeechAnnouncement.Builder("This is a test voice instruction").build()
+            ) {
+                // no op
+            }
+        }
         initActivityOptions()
         initGeneralOptions()
         initMapOptions()

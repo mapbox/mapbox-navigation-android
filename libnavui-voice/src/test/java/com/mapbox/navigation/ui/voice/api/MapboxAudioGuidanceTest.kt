@@ -211,4 +211,17 @@ class MapboxAudioGuidanceTest {
             }
             carAppAudioGuidance.onDetached(mapboxNavigation)
         }
+
+    @Test
+    fun `getCurrentVoiceInstructionsPlayer returns valid player instance`() {
+        val mapboxAudioGuidanceServices =
+            testMapboxAudioGuidanceServices.mapboxAudioGuidanceServices
+
+        every { mapboxAudioGuidanceServices.voiceInstructionsPlayer } returns null
+        assertNull(carAppAudioGuidance.getCurrentVoiceInstructionsPlayer())
+
+        val player: MapboxVoiceInstructionsPlayer = mockk()
+        every { mapboxAudioGuidanceServices.voiceInstructionsPlayer } returns player
+        assertEquals(player, carAppAudioGuidance.getCurrentVoiceInstructionsPlayer())
+    }
 }
