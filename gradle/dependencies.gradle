@@ -23,7 +23,7 @@ ext {
       mapboxCore                : '5.0.2',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
       mapboxCommonNative        : '23.1.0-rc.2',
-      mapboxSearchSdk           : '1.0.0-beta.37',
+      mapboxSearchSdk           : '1.0.0-beta.38.1',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxBaseAndroid         : '0.8.0',
