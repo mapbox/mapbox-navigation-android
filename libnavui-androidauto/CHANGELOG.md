@@ -4,6 +4,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## androidauto-v0.15.0 - October 21, 2022
+### Changelog
+[Changes between 0.14.0 and 0.15.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.14.0...androidauto-v0.15.0)
+
+#### Features
 - Added a new `MapboxCarOptions` that contains mutable options for `MapboxCarContext`. [#6478](https://github.com/mapbox/mapbox-navigation-android/pull/6478)
 - Added a new `MapboxCarOptionsCustomization` that allows you to change the `MapboxCarOptions`. [#6478](https://github.com/mapbox/mapbox-navigation-android/pull/6478)
 
@@ -14,6 +21,12 @@ Mapbox welcomes participation and contributions from everyone.
 - Deleted `ActionProvider` and `ScreenActionProvider` in favor of `MapboxActionProvider`. [#6494](https://github.com/mapbox/mapbox-navigation-android/pull/6494)
 - Renamed `CarAppLocation` to `CarLocationProvider` with a `getRegisteredInstance` accessor. [#6492](https://github.com/mapbox/mapbox-navigation-android/pull/6492)
 - Removed `MapboxCarApp` as it is no longer needed. Use `CarLocationProvider.getRegisteredInstance()` if needed. [#6492](https://github.com/mapbox/mapbox-navigation-android/pull/6492)
+
+### Mapbox dependencies
+This release defines minimum versions for the Mapbox dependencies.
+- Mapbox Maps Android Auto Extension `v0.3.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/extension-androidauto-v0.3.0))
+- Mapbox Navigation `v2.9.0-beta.3` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/v2.9.0-beta.3))
+- Mapbox Search `v1.0.0-beta.38.1` ([release notes](https://github.com/mapbox/mapbox-search-android/releases/tag/v1.0.0-beta.38.1))
 
 ## androidauto-v0.14.0 - October 13, 2022
 ### Changelog
