@@ -4,6 +4,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.9.0-beta.3 - 21 October, 2022
+### Changelog
+[Changes between v2.9.0-beta.2 and v2.9.0-beta.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0-beta.2...v2.9.0-beta.3)
+
+#### Features
 - Added `ViewBinderCustomization.infoPanelRoutePreviewButtonBinder` and `ViewBinderCustomization.infoPanelStartNavigationButtonBinder` that allows injection of custom Info Panel buttons for Route Preview and Start Navigation in `NavigationView`. [#6490](https://github.com/mapbox/mapbox-navigation-android/pull/6490)
 - Added `ViewBinderCustomization.actionCompassButtonBinder`, `ViewBinderCustomization.actionCameraModeButtonBinder`, `ViewBinderCustomization.actionToggleAudioButtonBinder` and `ViewBinderCustomization.actionRecenterButtonBinder` that allows injection of a custom Compass, Camera Mode, Toggle Voice Instructions and Camera Recenter Buttons in `NavigationView`. [#6490](https://github.com/mapbox/mapbox-navigation-android/pull/6490)
 - Introduced `ActionButtonsBinder` base `UIBinder` class, that allows use of a custom action buttons layout with default action buttons in `NavigationView`. [#6490](https://github.com/mapbox/mapbox-navigation-android/pull/6490)
@@ -18,6 +25,15 @@ Mapbox welcomes participation and contributions from everyone.
 - Supported changing `MapboxVoiceInstructionsPlayer` language in runtime via `updateLanguage` method. [#6491](https://github.com/mapbox/mapbox-navigation-android/pull/6491)
 - Deprecated `MapboxVoiceInstructionsPlayer` constructors that accept access token and introduced the ones without it. [#6491](https://github.com/mapbox/mapbox-navigation-android/pull/6491)
 - Introduced `NavigationViewApi.getCurrentVoiceInstructionsPlayer()` which can be used to play custom voice instructions. [#6475](https://github.com/mapbox/mapbox-navigation-android/pull/6475)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.9.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0-rc.1))
+- Mapbox Navigation Native `v118.0.0`
+- Mapbox Core Common `v23.1.0-rc.2`
+- Mapbox Java `v6.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
 
 ## Mapbox Navigation SDK 2.9.0-beta.2 - 14 October, 2022
 ### Changelog
