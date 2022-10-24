@@ -4,7 +4,7 @@ import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
-import com.mapbox.navigation.base.internal.route.updateDirectionsRouteOnly
+import com.mapbox.navigation.base.internal.route.update
 import com.mapbox.navigation.base.internal.time.parseISO8601DateToLocalTimeOrNull
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
@@ -180,18 +180,21 @@ internal class RouteRefreshController(
         currentLegIndex: Int,
     ): NavigationRoute {
         val routeLegs = route.directionsRoute.legs()
-        return route.updateDirectionsRouteOnly {
-            toBuilder().legs(
-                routeLegs?.mapIndexed { legIndex, leg ->
-                    val legHasAlreadyBeenPassed = legIndex < currentLegIndex
-                    if (legHasAlreadyBeenPassed) {
-                        leg
-                    } else {
-                        removeExpiredDataFromLeg(leg)
+        return route.update(
+            {
+                toBuilder().legs(
+                    routeLegs?.mapIndexed { legIndex, leg ->
+                        val legHasAlreadyBeenPassed = legIndex < currentLegIndex
+                        if (legHasAlreadyBeenPassed) {
+                            leg
+                        } else {
+                            removeExpiredDataFromLeg(leg)
+                        }
                     }
-                }
-            ).build()
-        }
+                ).build()
+            },
+            { this }
+        )
     }
 
     private fun removeExpiredDataFromLeg(leg: RouteLeg) =

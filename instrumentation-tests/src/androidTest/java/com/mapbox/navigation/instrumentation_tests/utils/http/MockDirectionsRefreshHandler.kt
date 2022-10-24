@@ -1,6 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.utils.http
 
-import com.mapbox.navigation.testing.ui.http.MockRequestHandler
+import com.mapbox.navigation.testing.ui.http.BaseMockRequestHandler
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
 
@@ -15,13 +15,11 @@ data class MockDirectionsRefreshHandler(
     val jsonResponse: String,
     val acceptedGeometryIndex: Int? = null,
     val routeIndex: Int? = null,
-) : MockRequestHandler {
+) : BaseMockRequestHandler() {
 
-    private val _handledRequests = mutableListOf<RecordedRequest>()
-    val handledRequests: List<RecordedRequest> = _handledRequests
     var jsonResponseModifier: ((String) -> String) = { it }
 
-    override fun handle(request: RecordedRequest): MockResponse? {
+    override fun handleInternal(request: RecordedRequest): MockResponse? {
         val prefix = """/directions-refresh/v1/mapbox/driving-traffic/$testUuid""" +
             if (routeIndex != null) { "/$routeIndex/" } else ""
         if (request.path!!.startsWith(prefix)) {
@@ -29,7 +27,6 @@ data class MockDirectionsRefreshHandler(
                 ?.queryParameter("current_route_geometry_index")
                 ?.toInt()
             if (acceptedGeometryIndex == null || acceptedGeometryIndex == currentGeometryIndex) {
-                _handledRequests.add(request)
                 return MockResponse().setBody(jsonResponseModifier(jsonResponse))
             }
         }

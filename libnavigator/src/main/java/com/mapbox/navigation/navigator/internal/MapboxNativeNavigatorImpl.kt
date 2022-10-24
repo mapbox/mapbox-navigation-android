@@ -1,5 +1,7 @@
 package com.mapbox.navigation.navigator.internal
 
+import com.google.gson.JsonArray
+import com.google.gson.JsonParser
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
 import com.mapbox.api.directionsrefresh.v1.models.RouteLegRefresh
@@ -8,6 +10,7 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.internal.route.nativeRoute
+import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -203,8 +206,20 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 .incidents(routeLeg.incidents())
                 .build()
         }
+        val refreshedWaypoints = route.directionsResponse.waypoints()
         val refreshRoute = DirectionsRouteRefresh.builder()
             .legs(refreshedLegs)
+            .unrecognizedJsonProperties(
+                refreshedWaypoints?.let { waypoints ->
+                    mapOf(
+                        Constants.KEY_WAYPOINTS to JsonArray().apply {
+                            waypoints.forEach { waypoint ->
+                                add(JsonParser.parseString(waypoint.toJson()))
+                            }
+                        }
+                    )
+                }
+            )
             .build()
         val refreshResponse = DirectionsRefreshResponse.builder()
             .code("200")
@@ -237,6 +252,10 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                                 .ifBlank { "[no alternatives]" },
                         LOG_CATEGORY
                     )
+                    var printed = 0
+                    while (printed < refreshResponseJson.length) {
+                        printed += 4000
+                    }
                     continuation.resume(
                         ExpectedFactory.createValue(refreshRouteResult.alternatives)
                     )

@@ -9,8 +9,8 @@ import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.NavigationRouterV2
+import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.route.InternalRouter
 import com.mapbox.navigation.base.internal.route.refreshRoute
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
@@ -250,7 +250,8 @@ class RouterWrapper(
                                 .mapValue { routeRefresh ->
                                     route.refreshRoute(
                                         initialLegIndex = refreshOptions.legIndex,
-                                        currentLegGeometryIndex = routeRefreshRequestData.legGeometryIndex,
+                                        currentLegGeometryIndex = routeRefreshRequestData
+                                            .legGeometryIndex,
                                         legAnnotations = routeRefresh.legs()?.map {
                                             it.annotation()
                                         },
@@ -258,6 +259,8 @@ class RouterWrapper(
                                             it.incidents()
                                         },
                                         closures = routeRefresh.legs()?.map { it.closures() },
+                                        unrecognizedProperties = routeRefresh
+                                            .unrecognizedJsonProperties
                                     )
                                 }
                         }.fold(

@@ -4,15 +4,18 @@ package com.mapbox.navigation.base.internal.route
 
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
+import com.google.gson.JsonElement
 import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.internal.SDKRouteParser
+import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
@@ -43,6 +46,7 @@ fun NavigationRoute.refreshRoute(
     legAnnotations: List<LegAnnotation?>?,
     incidents: List<List<Incident>?>?,
     closures: List<List<Closure>?>?,
+    unrecognizedProperties: Map<String, JsonElement>?,
 ): NavigationRoute {
     val updateLegs = directionsRoute.legs()?.mapIndexed { index, routeLeg ->
         if (index < initialLegIndex) {
@@ -91,11 +95,18 @@ fun NavigationRoute.refreshRoute(
                 .build()
         }
     }
-    return updateDirectionsRouteOnly {
-        toBuilder()
-            .legs(updateLegs)
-            .updateRouteDurationBasedOnLegsDuration(updateLegs)
-            .build()
+    return update(
+        {
+            toBuilder()
+                .legs(updateLegs)
+                .updateRouteDurationBasedOnLegsDuration(updateLegs)
+                .build()
+        }
+    ) {
+        updateWaypoints(
+            directionsResponse.waypoints(),
+            unrecognizedProperties
+        )
     }
 }
 
@@ -107,14 +118,16 @@ private fun adjustedIndex(offsetIndex: Int, originalIndex: Int?): Int {
  * Updates only java representation of route.
  * The native route should later be updated through [Navigator.refreshRoute].
  */
-fun NavigationRoute.updateDirectionsRouteOnly(
-    block: DirectionsRoute.() -> DirectionsRoute
+fun NavigationRoute.update(
+    directionsRouteBlock: DirectionsRoute.() -> DirectionsRoute,
+    directionsResponseBlock: DirectionsResponse.Builder.() -> DirectionsResponse.Builder,
 ): NavigationRoute {
-    val refreshedRoute = directionsRoute.block()
+    val refreshedRoute = directionsRoute.directionsRouteBlock()
     val refreshedRoutes = directionsResponse.routes().toMutableList()
     refreshedRoutes[routeIndex] = refreshedRoute
     val refreshedResponse = directionsResponse.toBuilder()
         .routes(refreshedRoutes)
+        .directionsResponseBlock()
         .build()
     return copy(directionsResponse = refreshedResponse)
 }
@@ -181,6 +194,32 @@ private fun List<LegStep>.updateSteps(
         previousStepsAnnotationsCount += stepAnnotationsCount
     }
     return result
+}
+
+private fun DirectionsResponse.Builder.updateWaypoints(
+    oldWaypoints: List<DirectionsWaypoint>?,
+    newUnrecognizedProperties: Map<String, JsonElement>?,
+): DirectionsResponse.Builder {
+    if (oldWaypoints == null) {
+        return this
+    }
+    val updatedWaypoints = WaypointsParser.parse(
+        newUnrecognizedProperties?.get(Constants.KEY_WAYPOINTS)
+    )
+    val newWaypoints = mutableListOf<DirectionsWaypoint>()
+    if (updatedWaypoints != null) {
+        oldWaypoints.forEachIndexed { index, oldWaypoint ->
+            if (index < updatedWaypoints.size) {
+                val updatedWaypoint = updatedWaypoints[index]
+                if (updatedWaypoint == null) {
+                    newWaypoints.add(oldWaypoint)
+                } else {
+                    newWaypoints.add(updatedWaypoint)
+                }
+            }
+        }
+    }
+    return waypoints(newWaypoints)
 }
 
 private fun DirectionsRoute.Builder.updateRouteDurationBasedOnLegsDuration(

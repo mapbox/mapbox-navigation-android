@@ -51,8 +51,10 @@ internal object AnnotationsRefresher {
         val unrecognizedProperties = oldAnnotation.unrecognizedPropertiesNames
             .union(newAnnotation?.unrecognizedPropertiesNames ?: emptySet())
             .associateNonNullValuesWith { propertyName ->
-                if (oldAnnotation.getUnrecognizedProperty(propertyName)?.isJsonArray == false ||
-                    newAnnotation?.getUnrecognizedProperty(propertyName)?.isJsonArray == false) {
+                if (
+                    oldAnnotation.getUnrecognizedProperty(propertyName)?.isJsonArray == false ||
+                    newAnnotation?.getUnrecognizedProperty(propertyName)?.isJsonArray == false
+                ) {
                     null
                 } else {
                     val extractor = { annotation: LegAnnotation ->

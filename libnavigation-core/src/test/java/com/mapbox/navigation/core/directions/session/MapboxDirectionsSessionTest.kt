@@ -130,7 +130,11 @@ class MapboxDirectionsSessionTest {
     fun `route refresh request returns id`() {
         assertEquals(
             2L,
-            session.requestRouteRefresh(route, routeRefreshRequestData, routesRefreshRequestCallback)
+            session.requestRouteRefresh(
+                route,
+                routeRefreshRequestData,
+                routesRefreshRequestCallback
+            )
         )
     }
 

@@ -1,9 +1,13 @@
 package com.mapbox.navigation.base.internal.route
 
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
@@ -16,7 +20,9 @@ import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.factories.TestSDKRouteParser
 import com.mapbox.navigation.testing.factories.createClosure
 import com.mapbox.navigation.testing.factories.createIncident
+import com.mapbox.navigation.testing.factories.createJsonWaypoint
 import com.mapbox.navigation.testing.factories.createRouteLegAnnotation
+import com.mapbox.navigation.testing.factories.createWaypoint
 import com.mapbox.navigator.RouterOrigin
 import io.mockk.every
 import io.mockk.mockk
@@ -31,11 +37,17 @@ class NavigationRouteExTest {
     @Test
     fun `update Navigation route`() {
         val navigationRoute = provideNavigationRoute(addLeg = true, distance = 88.0)
-        val updated = navigationRoute.updateDirectionsRouteOnly {
-            assertEquals(88.0, distance())
-            toBuilder().distance(73483.0).build()
-        }
+        val updated = navigationRoute.update(
+            {
+                assertEquals(88.0, distance())
+                toBuilder().distance(73483.0).build()
+            },
+            {
+                message("new message")
+            }
+        )
         assertEquals(73483.0, updated.directionsRoute.distance())
+        assertEquals("new message", updated.directionsResponse.message())
     }
 
     @Test
@@ -62,7 +74,8 @@ class NavigationRouteExTest {
                 )
             ),
             incidents = null,
-            closures = null
+            closures = null,
+            unrecognizedProperties = null
         )
 
         assertEquals(
@@ -100,7 +113,7 @@ class NavigationRouteExTest {
             "3-steps-route-directions-response.json",
             "3-steps-route-directions-request-url.txt"
         )
-            .updateDirectionsRouteOnly {
+            .update({
                 toBuilder()
                     .legs(
                         legs()?.map {
@@ -121,7 +134,7 @@ class NavigationRouteExTest {
                             ?.build()
                     )
                     .build()
-            }
+            }) { this }
 
         val refreshedRoute = sourceRoute.refreshRoute(
             initialLegIndex = 0,
@@ -132,7 +145,8 @@ class NavigationRouteExTest {
                 )
             ),
             incidents = null,
-            closures = null
+            closures = null,
+            unrecognizedProperties = null
         )
 
         // compare durations with original values from json file
@@ -183,7 +197,8 @@ class NavigationRouteExTest {
                 )
             ),
             incidents = null,
-            closures = null
+            closures = null,
+            unrecognizedProperties = null,
         )
 
         assertEquals(
@@ -221,11 +236,12 @@ class NavigationRouteExTest {
             TestData(
                 "update to null items",
                 provideNavigationRoute(addLeg = false),
-                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null),
+                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, null),
                 LegItemsResult(
                     listOf(null),
                     listOf(null),
                     listOf(null),
+                    null,
                     0,
                 )
             ),
@@ -237,12 +253,14 @@ class NavigationRouteExTest {
                     listOf(null, null),
                     listOf(null, null),
                     null,
+                    null,
                     null
                 ),
                 LegItemsResult(
                     listOf(null, null),
                     listOf(null, null),
                     listOf(null, null),
+                    null,
                     0
                 )
             ),
@@ -255,40 +273,288 @@ class NavigationRouteExTest {
                     listOf(null, null),
                     null,
                     null,
+                    null,
                 ),
                 LegItemsResult(
                     listOf(provideDefaultLegAnnotation(), null),
                     listOf(provideDefaultIncidents(), null),
                     listOf(provideDefaultClosures(), null),
+                    null,
                     0
                 ),
             ),
+            run {
+                val unrecognizedProperties = mapOf(
+                    "waypoints" to JsonArray().apply {
+                        add(createJsonWaypoint("name11"))
+                        add(createJsonWaypoint("name22"))
+                    }
+                )
+                TestData(
+                    "update waypoints from null to non-null",
+                    provideNavigationRoute(addLeg = true, waypoints = null),
+                    RefreshLegItemsWrapper(
+                        1,
+                        listOf(null, null),
+                        listOf(null, null),
+                        null,
+                        unrecognizedProperties,
+                        null,
+                    ),
+                    LegItemsResult(
+                        listOf(provideDefaultLegAnnotation(), null),
+                        listOf(provideDefaultIncidents(), null),
+                        listOf(provideDefaultClosures(), null),
+                        null,
+                        0
+                    ),
+                )
+            },
+            run {
+                val unrecognizedProperties = mapOf(
+                    "waypoints" to JsonArray().apply {
+                        add(createJsonWaypoint("name11"))
+                        add(createJsonWaypoint("name22"))
+                    }
+                )
+                TestData(
+                    "update waypoints from empty to non-empty",
+                    provideNavigationRoute(addLeg = true, waypoints = emptyList()),
+                    RefreshLegItemsWrapper(
+                        1,
+                        listOf(null, null),
+                        listOf(null, null),
+                        null,
+                        unrecognizedProperties,
+                        null,
+                    ),
+                    LegItemsResult(
+                        listOf(provideDefaultLegAnnotation(), null),
+                        listOf(provideDefaultIncidents(), null),
+                        listOf(provideDefaultClosures(), null),
+                        emptyList(),
+                        0
+                    ),
+                )
+            },
+            run {
+                val waypoints = listOf(
+                    createWaypoint("name1"),
+                    createWaypoint("name2")
+                )
+                TestData(
+                    "update waypoints from non-empty to null",
+                    provideNavigationRoute(addLeg = true, waypoints = waypoints),
+                    RefreshLegItemsWrapper(
+                        1,
+                        listOf(null, null),
+                        listOf(null, null),
+                        null,
+                        null,
+                        null,
+                    ),
+                    LegItemsResult(
+                        listOf(provideDefaultLegAnnotation(), null),
+                        listOf(provideDefaultIncidents(), null),
+                        listOf(provideDefaultClosures(), null),
+                        emptyList(),
+                        0
+                    ),
+                )
+            },
+            run {
+                val waypoints = listOf(
+                    createWaypoint("name1"),
+                    createWaypoint("name2")
+                )
+                TestData(
+                    "update waypoints from non-empty to empty",
+                    provideNavigationRoute(addLeg = true, waypoints = waypoints),
+                    RefreshLegItemsWrapper(
+                        1,
+                        listOf(null, null),
+                        listOf(null, null),
+                        null,
+                        emptyMap(),
+                        null,
+                    ),
+                    LegItemsResult(
+                        listOf(provideDefaultLegAnnotation(), null),
+                        listOf(provideDefaultIncidents(), null),
+                        listOf(provideDefaultClosures(), null),
+                        emptyList(),
+                        0
+                    ),
+                )
+            },
+            run {
+                val unrecognizedProperties = mapOf(
+                    "waypoints" to JsonArray().apply {
+                        add(createJsonWaypoint("name3"))
+                    }
+                )
+                val waypoints = listOf(
+                    createWaypoint("name1"),
+                    createWaypoint("name2")
+                )
+                TestData(
+                    "update waypoints from 2 to 1",
+                    provideNavigationRoute(addLeg = true, waypoints = waypoints),
+                    RefreshLegItemsWrapper(
+                        1,
+                        listOf(null, null),
+                        listOf(null, null),
+                        null,
+                        unrecognizedProperties,
+                        null,
+                    ),
+                    LegItemsResult(
+                        listOf(provideDefaultLegAnnotation(), null),
+                        listOf(provideDefaultIncidents(), null),
+                        listOf(provideDefaultClosures(), null),
+                        listOf(createWaypoint("name3")),
+                        0
+                    ),
+                )
+            },
+            run {
+                val unrecognizedProperties = mapOf(
+                    "waypoints" to JsonArray().apply {
+                        add(createJsonWaypoint("name3"))
+                        add(createJsonWaypoint("name4"))
+                    }
+                )
+                val waypoints = listOf(
+                    createWaypoint("name1"),
+                    createWaypoint("name2")
+                )
+                TestData(
+                    "update waypoints from 2 to 2",
+                    provideNavigationRoute(addLeg = true, waypoints = waypoints),
+                    RefreshLegItemsWrapper(
+                        1,
+                        listOf(null, null),
+                        listOf(null, null),
+                        null,
+                        unrecognizedProperties,
+                        null,
+                    ),
+                    LegItemsResult(
+                        listOf(provideDefaultLegAnnotation(), null),
+                        listOf(provideDefaultIncidents(), null),
+                        listOf(provideDefaultClosures(), null),
+                        listOf(createWaypoint("name3"), createWaypoint("name4")),
+                        0
+                    ),
+                )
+            },
+            run {
+                val unrecognizedProperties = mapOf(
+                    "waypoints" to JsonArray().apply {
+                        add(createJsonWaypoint("name3"))
+                        add(createJsonWaypoint("name4"))
+                        add(createJsonWaypoint("name5"))
+                    }
+                )
+                val waypoints = listOf(
+                    createWaypoint("name1"),
+                    createWaypoint("name2")
+                )
+                TestData(
+                    "update waypoints from 2 to 3",
+                    provideNavigationRoute(addLeg = true, waypoints = waypoints),
+                    RefreshLegItemsWrapper(
+                        1,
+                        listOf(null, null),
+                        listOf(null, null),
+                        null,
+                        unrecognizedProperties,
+                        null,
+                    ),
+                    LegItemsResult(
+                        listOf(provideDefaultLegAnnotation(), null),
+                        listOf(provideDefaultIncidents(), null),
+                        listOf(provideDefaultClosures(), null),
+                        listOf(createWaypoint("name3"), createWaypoint("name4")),
+                        0
+                    ),
+                )
+            },
+            run {
+                val unrecognizedProperties = mapOf(
+                    "waypoints" to JsonArray().apply {
+                        add(JsonObject())
+                        add(createJsonWaypoint("name3"))
+                    }
+                )
+                val waypoints = listOf(
+                    createWaypoint("name1"),
+                    createWaypoint("name2")
+                )
+                TestData(
+                    "update waypoints from 2 to null + 1",
+                    provideNavigationRoute(addLeg = true, waypoints = waypoints),
+                    RefreshLegItemsWrapper(
+                        1,
+                        listOf(null, null),
+                        listOf(null, null),
+                        null,
+                        unrecognizedProperties,
+                        null,
+                    ),
+                    LegItemsResult(
+                        listOf(provideDefaultLegAnnotation(), null),
+                        listOf(provideDefaultIncidents(), null),
+                        listOf(provideDefaultClosures(), null),
+                        listOf(createWaypoint("name1"), createWaypoint("name3")),
+                        0
+                    ),
+                )
+            },
 
             run {
+                val unrecognizedProperties = mapOf(
+                    "waypoints" to JsonArray().apply {
+                        add(createJsonWaypoint("name11"))
+                        add(createJsonWaypoint("name22"))
+                    }
+                )
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newIncidents = listOf(
                     createIncident(startGeometryIndex = 0, endGeometryIndex = 1)
                 )
                 val newClosures = listOf(createClosure(10, 15))
+                val newWaypoints = listOf(
+                    createWaypoint("name11"),
+                    createWaypoint("name22"),
+                )
                 return@run TestData(
                     "update items route",
-                    provideNavigationRoute(addLeg = false),
+                    provideNavigationRoute(addLeg = false, waypoints = provideWaypoints()),
                     RefreshLegItemsWrapper(
                         0,
                         listOf(newLegAnnotations),
                         listOf(newIncidents),
                         listOf(newClosures),
-                        null,
+                        unrecognizedProperties,
+                        legGeometryIndex = null,
                     ),
                     LegItemsResult(
                         listOf(newLegAnnotations),
                         listOf(newIncidents),
                         listOf(newClosures),
+                        newWaypoints,
                         0,
                     )
                 )
             },
             run {
+                val unrecognizedProperties = mapOf(
+                    "waypoints" to JsonArray().apply {
+                        add(createJsonWaypoint("name11"))
+                        add(createJsonWaypoint("name22"))
+                    }
+                )
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newLegAnnotations2 = createRouteLegAnnotation()
                 val newIncidents = listOf(
@@ -301,25 +567,37 @@ class NavigationRouteExTest {
                 )
                 val newClosures = listOf(createClosure(0, 3), createClosure(6, 7))
                 val newClosures2 = listOf(createClosure(4, 7), createClosure(14, 17))
+                val newWaypoints = listOf(
+                    createWaypoint("name11"),
+                    createWaypoint("name22"),
+                )
                 TestData(
                     "update items multi-leg route",
-                    provideNavigationRoute(addLeg = true),
+                    provideNavigationRoute(addLeg = true, waypoints = provideWaypoints()),
                     RefreshLegItemsWrapper(
                         0,
                         listOf(newLegAnnotations, newLegAnnotations2),
                         listOf(newIncidents, newIncidents2),
                         listOf(newClosures, newClosures2),
+                        unrecognizedProperties,
                         null,
                     ),
                     LegItemsResult(
                         listOf(newLegAnnotations, newLegAnnotations2),
                         listOf(newIncidents, newIncidents2),
                         listOf(newClosures, newClosures2),
+                        newWaypoints,
                         0,
                     )
                 )
             },
             run {
+                val unrecognizedProperties = mapOf(
+                    "waypoints" to JsonArray().apply {
+                        add(createJsonWaypoint("name11"))
+                        add(createJsonWaypoint("name22"))
+                    }
+                )
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newLegAnnotations2 = createRouteLegAnnotation()
                 val newInputIncidents = listOf(
@@ -338,25 +616,37 @@ class NavigationRouteExTest {
                 val newOutputClosures = listOf(createClosure(5, 6))
                 val newInputClosures2 = listOf(createClosure(1, 2))
                 val newOutputClosures2 = listOf(createClosure(1, 2))
+                val newWaypoints = listOf(
+                    createWaypoint("name11"),
+                    createWaypoint("name22"),
+                )
                 TestData(
                     "update items multi-leg route, geometryIndex is 2",
-                    provideNavigationRoute(addLeg = true),
+                    provideNavigationRoute(addLeg = true, waypoints = provideWaypoints()),
                     RefreshLegItemsWrapper(
                         0,
                         listOf(newLegAnnotations, newLegAnnotations2),
                         listOf(newInputIncidents, newInputIncidents2),
                         listOf(newInputClosures, newInputClosures2),
+                        unrecognizedProperties,
                         2,
                     ),
                     LegItemsResult(
                         listOf(newLegAnnotations, newLegAnnotations2),
                         listOf(newOutputIncidents, newOutputIncidents2),
                         listOf(newOutputClosures, newOutputClosures2),
+                        newWaypoints,
                         2,
                     )
                 )
             },
             run {
+                val unrecognizedProperties = mapOf(
+                    "waypoints" to JsonArray().apply {
+                        add(createJsonWaypoint("name11"))
+                        add(createJsonWaypoint("name22"))
+                    }
+                )
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newLegAnnotations2 = createRouteLegAnnotation()
                 val newIncidents = listOf(
@@ -367,25 +657,37 @@ class NavigationRouteExTest {
                 )
                 val newClosures = listOf(createClosure(13, 17))
                 val newClosures2 = listOf(createClosure(2, 6))
+                val newWaypoints = listOf(
+                    createWaypoint("name11"),
+                    createWaypoint("name22"),
+                )
                 TestData(
                     "update items multi-leg route starting with second leg",
-                    provideNavigationRoute(addLeg = true),
+                    provideNavigationRoute(addLeg = true, waypoints = provideWaypoints()),
                     RefreshLegItemsWrapper(
                         1,
                         listOf(newLegAnnotations, newLegAnnotations2),
                         listOf(newIncidents, newIncidents2),
                         listOf(newClosures, newClosures2),
+                        unrecognizedProperties,
                         null,
                     ),
                     LegItemsResult(
                         listOf(provideDefaultLegAnnotation(), newLegAnnotations2),
                         listOf(provideDefaultIncidents(), newIncidents2),
                         listOf(provideDefaultClosures(), newClosures2),
+                        newWaypoints,
                         0
                     )
                 )
             },
             run {
+                val unrecognizedProperties = mapOf(
+                    "waypoints" to JsonArray().apply {
+                        add(createJsonWaypoint("name11"))
+                        add(createJsonWaypoint("name22"))
+                    }
+                )
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newLegAnnotations2 = createRouteLegAnnotation()
                 val newIncidents = listOf(
@@ -400,20 +702,26 @@ class NavigationRouteExTest {
                 val newClosures = listOf(createClosure(13, 17))
                 val newInputClosures2 = listOf(createClosure(2, 6))
                 val newOutputClosures2 = listOf(createClosure(6, 10))
+                val newWaypoints = listOf(
+                    createWaypoint("name11"),
+                    createWaypoint("name22"),
+                )
                 TestData(
                     "update items multi-leg route starting with second leg, geometryIndex = 4",
-                    provideNavigationRoute(addLeg = true),
+                    provideNavigationRoute(addLeg = true, waypoints = provideWaypoints()),
                     RefreshLegItemsWrapper(
                         1,
                         listOf(newLegAnnotations, newLegAnnotations2),
                         listOf(newIncidents, newInputIncidents2),
                         listOf(newClosures, newInputClosures2),
+                        unrecognizedProperties,
                         4,
                     ),
                     LegItemsResult(
                         listOf(provideDefaultLegAnnotation(), newLegAnnotations2),
                         listOf(provideDefaultIncidents(), newOutputIncidents2),
                         listOf(provideDefaultClosures(), newOutputClosures2),
+                        newWaypoints,
                         4,
                     )
                 )
@@ -431,6 +739,7 @@ class NavigationRouteExTest {
                         refreshItems.legAnnotation,
                         refreshItems.incidents,
                         refreshItems.closures,
+                        refreshItems.unrecognizedProperties
                     )
                 } catch (t: Throwable) {
                     throw Throwable("unhandled exception in $description", t)
@@ -456,6 +765,11 @@ class NavigationRouteExTest {
                     updatedNavRoute.directionsRoute
                         .legs()
                         ?.map { it.closures() },
+                )
+                assertEquals(
+                    description,
+                    result.newWaypoints,
+                    updatedNavRoute.directionsResponse.waypoints()
                 )
 
                 val capturedOldAnnotations = mutableListOf<LegAnnotation?>()
@@ -494,6 +808,7 @@ class NavigationRouteExTest {
         annotations: LegAnnotation? = provideDefaultLegAnnotation(),
         incidents: List<Incident>? = provideDefaultIncidents(),
         closures: List<Closure>? = provideDefaultClosures(),
+        waypoints: List<DirectionsWaypoint>? = null,
         addLeg: Boolean,
         distance: Double = 10.0,
     ): NavigationRoute {
@@ -552,6 +867,7 @@ class NavigationRouteExTest {
                             .build()
                     )
                 )
+                .waypoints(waypoints)
                 .code("Ok")
                 .build(),
             0,
@@ -594,6 +910,20 @@ class NavigationRouteExTest {
             .build(),
     )
 
+    private fun provideWaypoints(): List<DirectionsWaypoint> = listOf(
+        DirectionsWaypoint.builder()
+            .name("name1")
+            .rawLocation(doubleArrayOf(1.2, 3.4))
+            .distance(1.3)
+            .unrecognizedJsonProperties(mapOf("metadata" to JsonObject()))
+            .build(),
+        DirectionsWaypoint.builder()
+            .name("name2")
+            .rawLocation(doubleArrayOf(4.5, 6.7))
+            .distance(7.8)
+            .build()
+    )
+
     /**
      * Wrapper of test case
      *
@@ -617,6 +947,7 @@ class NavigationRouteExTest {
         val legAnnotation: List<LegAnnotation?>?,
         val incidents: List<List<Incident>?>?,
         val closures: List<List<Closure>?>?,
+        val unrecognizedProperties: Map<String, JsonElement>?,
         val legGeometryIndex: Int?,
     )
 
@@ -627,6 +958,7 @@ class NavigationRouteExTest {
         val newLegAnnotation: List<LegAnnotation?>?,
         val newIncidents: List<List<Incident>?>?,
         val newClosures: List<List<Closure>?>?,
+        val newWaypoints: List<DirectionsWaypoint>?,
         val expectedLegGeometryIndex: Int,
     )
 }

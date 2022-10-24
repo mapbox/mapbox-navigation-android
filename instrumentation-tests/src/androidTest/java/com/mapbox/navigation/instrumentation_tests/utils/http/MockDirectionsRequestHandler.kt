@@ -1,7 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.utils.http
 
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.testing.ui.http.MockRequestHandler
+import com.mapbox.navigation.testing.ui.http.BaseMockRequestHandler
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
 
@@ -18,8 +18,8 @@ data class MockDirectionsRequestHandler(
     val jsonResponse: String,
     val expectedCoordinates: List<Point>?,
     val relaxedExpectedCoordinates: Boolean = false,
-) : MockRequestHandler {
-    override fun handle(request: RecordedRequest): MockResponse? {
+) : BaseMockRequestHandler() {
+    override fun handleInternal(request: RecordedRequest): MockResponse? {
         val prefix = if (relaxedExpectedCoordinates) {
             """/directions/v5/mapbox/$profile"""
         } else {

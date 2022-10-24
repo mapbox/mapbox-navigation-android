@@ -119,6 +119,7 @@ class RouterWrapperTests {
     private val nativeOriginOnboard: RouterOrigin = RouterOrigin.ONBOARD
     private val getRouteSlot = slot<com.mapbox.navigator.RouterCallback>()
     private val refreshRouteSlot = slot<RouterRefreshCallback>()
+    private val routeSlot = slot<NavigationRoute>()
 
     @Before
     fun setUp() {
@@ -345,9 +346,7 @@ class RouterWrapperTests {
                 DirectionsResponse.builder()
                     .code("200")
                     .uuid(UUID)
-                    .routes(listOf(createDirectionsRoute(
-                        routeIndex = "0"
-                    )))
+                    .routes(listOf(createDirectionsRoute(routeIndex = "0")))
                     .build(),
                 evRouterOptions,
                 Offboard
@@ -368,7 +367,10 @@ class RouterWrapperTests {
                 UUID,
                 0,
                 legIndex,
-                RoutingProfile(evRouterOptions.profile().mapToRoutingMode(), evRouterOptions.user()),
+                RoutingProfile(
+                    evRouterOptions.profile().mapToRoutingMode(),
+                    evRouterOptions.user()
+                ),
                 routeGeometryIndex,
                 hashMapOf<String, String>()
             )
@@ -382,7 +384,6 @@ class RouterWrapperTests {
         }
     }
 
-
     @Test
     fun `route refresh set right params for ev route`() {
         mockkStatic("com.mapbox.navigation.base.route.NavigationRouteEx") {
@@ -394,9 +395,7 @@ class RouterWrapperTests {
                 DirectionsResponse.builder()
                     .code("200")
                     .uuid(UUID)
-                    .routes(listOf(createDirectionsRoute(
-                        routeIndex = "0"
-                    )))
+                    .routes(listOf(createDirectionsRoute(routeIndex = "0")))
                     .build(),
                 evRouterOptions,
                 Offboard
@@ -417,7 +416,10 @@ class RouterWrapperTests {
                 UUID,
                 0,
                 legIndex,
-                RoutingProfile(evRouterOptions.profile().mapToRoutingMode(), evRouterOptions.user()),
+                RoutingProfile(
+                    evRouterOptions.profile().mapToRoutingMode(),
+                    evRouterOptions.user()
+                ),
                 routeGeometryIndex,
                 hashMapOf("engine" to "electric", "aaa" to "bbb")
             )
@@ -444,24 +446,29 @@ class RouterWrapperTests {
                 )
             )
             .build()
-        val route = createNavigationRoute(
+        val route = NavigationRoute.create(
             DirectionsResponse.fromJson(
                 testRouteFixtures.loadMultiLegRouteForRefresh(),
                 options
-            ).routes().first()
-        )
+            ),
+            options,
+            com.mapbox.navigation.base.route.RouterOrigin.Custom()
+        ).first()
 
         routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
         refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard)
 
-        val expected = createNavigationRoute(
+        val expected = NavigationRoute.create(
             DirectionsResponse.fromJson(
                 testRouteFixtures.loadRefreshedMultiLegRoute(),
                 options
-            ).routes().first()
-        )
+            ),
+            options,
+            com.mapbox.navigation.base.route.RouterOrigin.Custom()
+        ).first()
 
-        verify(exactly = 1) { routerRefreshCallback.onRefreshReady(expected) }
+        verify(exactly = 1) { routerRefreshCallback.onRefreshReady(capture(routeSlot)) }
+        checkRefreshedNavigationRouteWithWithWaypoints(expected, routeSlot.captured)
     }
 
     @Test
@@ -477,12 +484,14 @@ class RouterWrapperTests {
                 )
             )
             .build()
-        val route = createNavigationRoute(
+        val route = NavigationRoute.create(
             DirectionsResponse.fromJson(
                 testRouteFixtures.loadMultiLegRouteForRefresh(),
                 options
-            ).routes().first()
-        )
+            ),
+            options,
+            com.mapbox.navigation.base.route.RouterOrigin.Custom()
+        ).first()
 
         routerWrapper.getRouteRefresh(
             route,
@@ -496,14 +505,25 @@ class RouterWrapperTests {
         )
         refreshRouteSlot.captured.run(routerRefreshSuccessSecondLeg, nativeOriginOnboard)
 
-        val expected = createNavigationRoute(
+        val expected = NavigationRoute.create(
             DirectionsResponse.fromJson(
                 testRouteFixtures.loadRefreshedMultiLegRouteSecondLeg(),
                 options
-            ).routes().first()
-        )
+            ),
+            options,
+            com.mapbox.navigation.base.route.RouterOrigin.Custom()
+        ).first()
 
-        verify(exactly = 1) { routerRefreshCallback.onRefreshReady(expected) }
+        verify(exactly = 1) { routerRefreshCallback.onRefreshReady(capture(routeSlot)) }
+        checkRefreshedNavigationRouteWithWithWaypoints(expected, routeSlot.captured)
+    }
+
+    private fun checkRefreshedNavigationRouteWithWithWaypoints(
+        expected: NavigationRoute,
+        actual: NavigationRoute
+    ) {
+        assertEquals(expected, actual) // directions route equality
+        assertEquals(expected.directionsResponse.waypoints(), actual.directionsResponse.waypoints())
     }
 
     @Test
