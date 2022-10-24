@@ -223,5 +223,8 @@ class MapboxAudioGuidanceTest {
         val player: MapboxVoiceInstructionsPlayer = mockk()
         every { mapboxAudioGuidanceServices.voiceInstructionsPlayer } returns player
         assertEquals(player, carAppAudioGuidance.getCurrentVoiceInstructionsPlayer())
+
+        every { mapboxAudioGuidanceServices.voiceInstructionsPlayer } returns null
+        assertNull(carAppAudioGuidance.getCurrentVoiceInstructionsPlayer())
     }
 }

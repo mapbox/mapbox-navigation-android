@@ -358,6 +358,9 @@ class MapboxNavigationViewApiTest {
         val player: MapboxVoiceInstructionsPlayer = mockk()
         every { audioGuidance.getCurrentVoiceInstructionsPlayer() } returns player
         assertEquals(player, sut.getCurrentVoiceInstructionsPlayer())
+
+        every { audioGuidance.getCurrentVoiceInstructionsPlayer() } returns null
+        assertNull(sut.getCurrentVoiceInstructionsPlayer())
     }
 
     private fun navigationRoute(vararg waypoints: Point): NavigationRoute {
