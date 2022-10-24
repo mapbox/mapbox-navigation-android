@@ -18,12 +18,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 
-class FasterRoutesTest {
+class FasterRoutesTrackerTest {
 
     @Test
     fun `faster route found`() = runBlockingTest {
         val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val fasterRouteTrackerMock = mockk<FasterRouteTrackerCore>()
+        val fasterRouteTrackerMock = mockk<ComparisonFasterRouteTrackerCore>()
         val routeObserver = mapboxNavigation.recordRoutesObservers()
         val fasterRoutes = createFasterRoutes(
             mapboxNavigation = mapboxNavigation,
@@ -46,7 +46,7 @@ class FasterRoutesTest {
     @Test
     fun `no faster route found`() = runBlockingTest {
         val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val fasterRouteTrackerMock = mockk<FasterRouteTrackerCore>()
+        val fasterRouteTrackerMock = mockk<ComparisonFasterRouteTrackerCore>()
         val routeObserver = mapboxNavigation.recordRoutesObservers()
         val fasterRoutes = createFasterRoutes(
             mapboxNavigation = mapboxNavigation,
@@ -70,7 +70,7 @@ class FasterRoutesTest {
     fun `old results are ignored when routes are updated faster then processing not processed `() =
         runBlockingTest {
             val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-            val fasterRouteTrackerMock = mockk<FasterRouteTrackerCore>()
+            val fasterRouteTrackerMock = mockk<ComparisonFasterRouteTrackerCore>()
             val routeObserver = mapboxNavigation.recordRoutesObservers()
             val fasterRoutes = createFasterRoutes(
                 mapboxNavigation = mapboxNavigation,
@@ -107,7 +107,7 @@ class FasterRoutesTest {
     @Test
     fun `accept faster route`() = runBlockingTest {
         val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val fasterRouteTrackerMock = mockk<FasterRouteTrackerCore>()
+        val fasterRouteTrackerMock = mockk<ComparisonFasterRouteTrackerCore>()
         val routeObserver = mapboxNavigation.recordRoutesObservers()
         val fasterRoutes = createFasterRoutes(
             mapboxNavigation = mapboxNavigation,
@@ -142,7 +142,7 @@ class FasterRoutesTest {
 }
 
 private fun CoroutineScope.createFasterRoutes(
-    fasterRouteTrackerCore: FasterRouteTrackerCore = createFasterRoutesTracker(),
+    fasterRouteTrackerCore: ComparisonFasterRouteTrackerCore = createFasterRoutesTracker(),
     mapboxNavigation: MapboxNavigation = mockk(relaxed = true),
 ) = FasterRoutesTracker(
     mapboxNavigation = mapboxNavigation,

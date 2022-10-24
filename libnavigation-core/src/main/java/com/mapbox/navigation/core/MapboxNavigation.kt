@@ -53,7 +53,7 @@ import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.fasterroute.FasterRouteOptions
-import com.mapbox.navigation.core.fasterroute.FasterRouteTrackerCore
+import com.mapbox.navigation.core.fasterroute.ComparisonFasterRouteTrackerCore
 import com.mapbox.navigation.core.fasterroute.FasterRoutesTracker
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
@@ -1657,7 +1657,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             }
             val newInstance = FasterRoutesTracker(
                 this,
-                FasterRouteTrackerCore(fasterRouteOptions),
+                ComparisonFasterRouteTrackerCore(fasterRouteOptions),
                 threadController.getMainScopeAndRootJob().scope
             )
             fasterRoutesInstance = newInstance

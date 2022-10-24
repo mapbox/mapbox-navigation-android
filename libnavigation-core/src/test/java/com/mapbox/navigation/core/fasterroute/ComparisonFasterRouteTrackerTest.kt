@@ -11,7 +11,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
-class FasterRouteTrackerTest {
+class ComparisonFasterRouteTrackerTest {
 
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
@@ -87,6 +87,6 @@ class FasterRouteTrackerTest {
         }
 }
 
-internal fun createFasterRoutesTracker() = FasterRouteTrackerCore(
+internal fun createFasterRoutesTracker() = ComparisonFasterRouteTrackerCore(
     FasterRouteOptions.Builder().maxAcceptableGeometrySimilarityToRejectedAlternatives(0.51).build()
 )
