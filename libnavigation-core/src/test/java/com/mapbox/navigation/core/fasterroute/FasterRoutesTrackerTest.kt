@@ -142,7 +142,7 @@ class FasterRoutesTrackerTest {
 }
 
 private fun CoroutineScope.createFasterRoutes(
-    fasterRouteTrackerCore: ComparisonFasterRouteTrackerCore = createFasterRoutesTracker(),
+    fasterRouteTrackerCore: ComparisonFasterRouteTrackerCore = createComparisonFasterRoutesTracker(),
     mapboxNavigation: MapboxNavigation = mockk(relaxed = true),
 ) = FasterRoutesTracker(
     mapboxNavigation = mapboxNavigation,

@@ -11,7 +11,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
-class ComparisonFasterRouteTrackerTest {
+class PenaltyFasterRouteTrackerTest {
 
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
@@ -19,7 +19,7 @@ class ComparisonFasterRouteTrackerTest {
     @Test
     fun `no faster route is available from Munich to Nuremberg moving by the slowest road`() =
         runBlocking<Unit> {
-            val fasterRoutes = createComparisonFasterRoutesTracker()
+            val fasterRoutes = createPenaltyFasterRoutesTrackerCore()
             val recordedRoutesUpdates = readRouteObserverResults(MUNICH_NUREMBERG)
             for (recordedUpdate in recordedRoutesUpdates) {
                 val result = fasterRoutes.findFasterRouteInUpdate(
@@ -40,7 +40,7 @@ class ComparisonFasterRouteTrackerTest {
     @Test
     fun `faster route is available driving in Munich after picking the slowest road`() =
         runBlocking<Unit> {
-            val fasterRoutesTracker = createComparisonFasterRoutesTracker()
+            val fasterRoutesTracker = createPenaltyFasterRoutesTrackerCore()
             val routeUpdates = readRouteObserverResults(FASTER_ROUTE_IN_MUNICH)
             val fasterRoutesIds = mutableListOf<String>()
             for (recordedUpdate in routeUpdates) {
@@ -65,7 +65,7 @@ class ComparisonFasterRouteTrackerTest {
     @Test
     fun `rejecting first faster route driving in Munich filters other similar faster routes`() =
         runBlocking<Unit> {
-            val fasterRoutesTracker = createComparisonFasterRoutesTracker()
+            val fasterRoutesTracker = createPenaltyFasterRoutesTrackerCore()
             val routeUpdates = readRouteObserverResults(FASTER_ROUTE_IN_MUNICH)
             val fasterRoutesIds = mutableListOf<String>()
             for (recordedUpdate in routeUpdates) {
@@ -87,6 +87,4 @@ class ComparisonFasterRouteTrackerTest {
         }
 }
 
-internal fun createComparisonFasterRoutesTracker() = ComparisonFasterRouteTrackerCore(
-    FasterRouteOptions.Builder().maxAcceptableGeometrySimilarityToRejectedAlternatives(0.51).build()
-)
+internal fun createPenaltyFasterRoutesTrackerCore() = PenaltyFasterRouteTrackerCore()
