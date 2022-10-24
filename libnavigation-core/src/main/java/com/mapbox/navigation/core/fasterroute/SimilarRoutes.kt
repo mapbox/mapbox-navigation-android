@@ -65,7 +65,7 @@ fun streetNamesToDistances(route: NavigationRoute): Map<String, Double> {
     route.directionsRoute.legs().orEmpty()
         .flatMap { it.steps() ?: emptyList() }
         .forEach {
-            val name = it.name() ?: it.ref() ?: ""
+            val name = it.name().orEmpty()
             result[name] = (result[name] ?: 0.0) + it.distance()
         }
     return result
