@@ -60,12 +60,12 @@ private fun parseSummaries(route: NavigationRoute) =
         .flatten()
         .toSet()
 
-private fun streetNamesToDistances(route: NavigationRoute): Map<String, Double> {
+fun streetNamesToDistances(route: NavigationRoute): Map<String, Double> {
     val result = mutableMapOf<String, Double>()
     route.directionsRoute.legs().orEmpty()
         .flatMap { it.steps() ?: emptyList() }
         .forEach {
-            val name = it.name().orEmpty()
+            val name = it.name() ?: it.ref() ?: ""
             result[name] = (result[name] ?: 0.0) + it.distance()
         }
     return result
