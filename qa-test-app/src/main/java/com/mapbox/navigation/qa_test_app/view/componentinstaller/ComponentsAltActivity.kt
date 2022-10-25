@@ -1,4 +1,4 @@
-package com.mapbox.navigation.qa_test_app.view
+package com.mapbox.navigation.qa_test_app.view.componentinstaller
 
 import android.graphics.Color
 import android.os.Bundle
@@ -6,8 +6,6 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.commit
-import androidx.fragment.app.replace
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
@@ -19,9 +17,9 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.ComponentsActivityLayoutBinding
 import com.mapbox.navigation.qa_test_app.lifecycle.DropInStartReplayButton
-import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInLocationViewModel
 import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInNavigationViewModel
 import com.mapbox.navigation.qa_test_app.utils.Utils.getMapboxAccessToken
+import com.mapbox.navigation.qa_test_app.view.componentinstaller.components.FindRouteOnLongPress
 import com.mapbox.navigation.qa_test_app.view.customnavview.dp
 import com.mapbox.navigation.ui.base.installer.Installation
 import com.mapbox.navigation.ui.base.installer.installComponents
@@ -49,7 +47,6 @@ class ComponentsAltActivity : AppCompatActivity() {
     }
 
     private val viewModel: DropInNavigationViewModel by viewModels()
-    private val locationViewModel: DropInLocationViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,30 +62,10 @@ class ComponentsAltActivity : AppCompatActivity() {
                     .build()
             )
         }
-
-        // Add active guidance banner with maneuverView and trip progress in a Fragment.
-        // This example shows a retained fragment only because they are more complicated and
-        // we wanted to ensure our framework supports it.
-        val currentFragment = supportFragmentManager
-            .findFragmentById(R.id.activeGuidanceBannerFragment)
-        if (currentFragment !is RetainedActiveGuidanceFragment) {
-            supportFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace<RetainedActiveGuidanceFragment>(R.id.activeGuidanceBannerFragment)
-            }
-        }
     }
 
     override fun onStart() {
         super.onStart()
-
-        val dataSource = MapboxNavigationViewportDataSource(
-            mapboxMap = binding.mapView.getMapboxMap()
-        ).apply {
-            val insets = EdgeInsets(0.0, 0.0, 100.dp.toDouble(), 0.0)
-            overviewPadding = insets
-            followingPadding = insets
-        }
 
         //
         // Components installation via existing MapboxNavigation instance
@@ -118,12 +95,22 @@ class ComponentsAltActivity : AppCompatActivity() {
             cameraModeButton(binding.cameraModeButton)
             navigationCamera(binding.mapView) {
                 switchToIdleOnMapGesture = true
-                viewportDataSource = dataSource
+                viewportDataSource = cameraViewportDataSource()
             }
 
             // custom components
             component(FindRouteOnLongPress(binding.mapView))
             component(DropInStartReplayButton(binding.startNavigation))
+        }
+    }
+
+    private fun cameraViewportDataSource(): MapboxNavigationViewportDataSource {
+        return MapboxNavigationViewportDataSource(
+            mapboxMap = binding.mapView.getMapboxMap()
+        ).apply {
+            val insets = EdgeInsets(0.0, 0.0, 100.dp.toDouble(), 0.0)
+            overviewPadding = insets
+            followingPadding = insets
         }
     }
 
