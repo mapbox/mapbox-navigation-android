@@ -1,4 +1,4 @@
-package com.mapbox.navigation.qa_test_app.view
+package com.mapbox.navigation.qa_test_app.view.componentinstaller
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,19 +15,17 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.qa_test_app.databinding.FragmentActiveGuidanceBinding
-import com.mapbox.navigation.qa_test_app.lifecycle.bottomsheet.DropInTripProgress
 import com.mapbox.navigation.ui.base.installer.installComponents
 import com.mapbox.navigation.ui.maneuver.maneuver
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.speedlimit.speedLimit
+import com.mapbox.navigation.ui.tripprogress.installer.tripProgress
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.onStart
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RetainedActiveGuidanceFragment : Fragment() {
-
-    private var dropInTripProgress: DropInTripProgress? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,9 +68,8 @@ class RetainedActiveGuidanceFragment : Fragment() {
                     styleId = NavigationStyles.NAVIGATION_DAY_STYLE_ID
                 }
             )
-            speedLimit(
-                binding.speedLimitView
-            )
+            speedLimit(binding.speedLimitView)
+            tripProgress(binding.tripProgressView)
         }
 
         attachStarted(object : MapboxNavigationObserver {
@@ -89,20 +86,5 @@ class RetainedActiveGuidanceFragment : Fragment() {
                 // No op
             }
         })
-
-        // Notice, the this works the same if it is in a Fragment or an Activity.
-        dropInTripProgress = DropInTripProgress(
-            stopView = binding.stop,
-            tripProgressView = binding.tripProgressView
-        ).also { MapboxNavigationApp.registerObserver(it) }
-    }
-
-    override fun onDestroyView() {
-        // Null and remove. This is needed to avoid memory leaks because multiple views can
-        // be created within the Fragment lifecycle.
-        dropInTripProgress?.let { MapboxNavigationApp.unregisterObserver(it) }
-        dropInTripProgress = null
-
-        super.onDestroyView()
     }
 }

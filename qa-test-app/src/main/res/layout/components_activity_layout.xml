@@ -17,7 +17,9 @@
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/activeGuidanceBannerFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:name="com.mapbox.navigation.qa_test_app.view.componentinstaller.RetainedActiveGuidanceFragment"
+        tools:layout="@layout/fragment_active_guidance" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/startNavigation"

@@ -19,6 +19,7 @@ import com.mapbox.navigation.qa_test_app.lifecycle.DropInStartReplayButton
 import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInLocationViewModel
 import com.mapbox.navigation.qa_test_app.lifecycle.viewmodel.DropInNavigationViewModel
 import com.mapbox.navigation.qa_test_app.utils.Utils.getMapboxAccessToken
+import com.mapbox.navigation.qa_test_app.view.componentinstaller.RetainedActiveGuidanceFragment
 import com.mapbox.navigation.ui.maps.NavigationStyles
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
