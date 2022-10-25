@@ -109,13 +109,13 @@ internal open class MapboxNavigationBaseTest {
         every { packageManager } returns mockk(relaxed = true)
         every { packageName } returns "com.mapbox.navigation.core.MapboxNavigationTest"
         every { filesDir } returns File("some/path")
-        every { navigator.getHistoryRecorderHandle() } returns null
         every { navigator.experimental } returns mockk()
     }
 
     lateinit var mapboxNavigation: MapboxNavigation
 
     companion object {
+
         @BeforeClass
         @JvmStatic
         fun initialize() {
@@ -131,8 +131,16 @@ internal open class MapboxNavigationBaseTest {
         mockkObject(LoggerProvider)
         mockkObject(NavigatorLoader)
         every {
-            NavigatorLoader.createNativeRouterInterface(any(), any(), any(), any())
+            NavigatorLoader.createNativeRouterInterface(any(), any(), any())
         } returns mockk()
+        every { NavigatorLoader.createConfig(any(), any()) } returns mockk()
+        every {
+            NavigatorLoader.createHistoryRecorderHandles(
+                any(),
+                any(),
+                any(),
+            )
+        } returns mockk(relaxed = true)
 
         mockkObject(MapboxSDKCommon)
         every {
@@ -196,7 +204,15 @@ internal open class MapboxNavigationBaseTest {
             NavigationComponentProvider.createCurrentIndicesProvider()
         } returns currentIndicesProvider
 
-        every { navigator.create(any(), any(), any(), any(), any(), any()) } returns navigator
+        every {
+            navigator.create(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns navigator
         mockkObject(TelemetryUtilsDelegate)
         every { TelemetryUtilsDelegate.getEventsCollectionState() } returns true
 
@@ -254,7 +270,6 @@ internal open class MapboxNavigationBaseTest {
     private fun mockNativeNavigator() {
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(),
                 any(),
                 any(),
                 any(),
