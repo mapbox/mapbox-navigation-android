@@ -7,6 +7,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
+import com.mapbox.navigation.base.internal.InternalErrorsController
 import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -238,6 +239,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                             "Reason: $error",
                         LOG_CATEGORY
                     )
+                    InternalErrorsController.onInternalError("can't refresh route with id ${route.id}")
                     continuation.resume(ExpectedFactory.createError(error))
                 },
                 { refreshRouteResult ->
