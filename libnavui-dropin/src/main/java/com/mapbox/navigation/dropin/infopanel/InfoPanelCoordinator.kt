@@ -2,6 +2,7 @@ package com.mapbox.navigation.dropin.infopanel
 
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import androidx.constraintlayout.widget.Guideline
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
@@ -48,17 +49,17 @@ internal class InfoPanelCoordinator(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val infoPanelTop = callbackFlow {
-        val onLayoutChangeListener = View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+        val onGlobalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
             trySend(infoPanel.top)
         }
-        val parent = infoPanel.parent as View
-        parent.addOnLayoutChangeListener(onLayoutChangeListener)
-        awaitClose { parent.removeOnLayoutChangeListener(onLayoutChangeListener) }
+        val viewTreeObserver = infoPanel.viewTreeObserver
+        viewTreeObserver.addOnGlobalLayoutListener(onGlobalLayoutListener)
+        awaitClose { viewTreeObserver.removeOnGlobalLayoutListener(onGlobalLayoutListener) }
     }.distinctUntilChanged()
 
     init {
         infoPanel.addOnLayoutChangeListener(FixBottomSheetLayoutWhenHidden(infoPanel, behavior))
-        behavior.setPeekHeight(context.styles.infoPanelPeekHeight.value, true)
+        behavior.peekHeight = context.styles.infoPanelPeekHeight.value
         behavior.hide()
     }
 
@@ -94,7 +95,7 @@ internal class InfoPanelCoordinator(
             }
         }
         coroutineScope.launch {
-            bottomSheetPeekHeight().collect { behavior.setPeekHeight(it, true) }
+            bottomSheetPeekHeight().collect { behavior.peekHeight = it }
         }
         coroutineScope.launch {
             infoPanelTop.collect { updateGuidelinePosition() }

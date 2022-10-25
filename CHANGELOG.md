@@ -6,6 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 - Improved experience in tunnels and reduced the likelihood of losing road edge matching candidates. [#6510](https://github.com/mapbox/mapbox-navigation-android/pull/6510)
+- Fixed an issue with `NavigationView` that caused road label position to not update in some cases. [#6508](https://github.com/mapbox/mapbox-navigation-android/pull/6508)
 
 ## Mapbox Navigation SDK 2.9.0-beta.3 - 21 October, 2022
 ### Changelog
