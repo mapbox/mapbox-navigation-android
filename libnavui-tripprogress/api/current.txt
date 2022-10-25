@@ -12,6 +12,23 @@ package com.mapbox.navigation.ui.tripprogress.api {
 
 }
 
+package com.mapbox.navigation.ui.tripprogress.installer {
+
+  public final class ComponentInstallerKt {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation tripProgress(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView tripProgressView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.tripprogress.installer.TripProgressConfig,kotlin.Unit> config = {});
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class TripProgressConfig {
+    method public kotlinx.coroutines.flow.Flow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> getTripOverviewRoutes();
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter getTripProgressFormatter();
+    method public void setTripOverviewRoutes(kotlinx.coroutines.flow.Flow<? extends java.util.List<com.mapbox.navigation.base.route.NavigationRoute>>);
+    method public void setTripProgressFormatter(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter);
+    property public final kotlinx.coroutines.flow.Flow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> tripOverviewRoutes;
+    property public final com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter tripProgressFormatter;
+  }
+
+}
+
 package com.mapbox.navigation.ui.tripprogress.model {
 
   public final class DistanceRemainingFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<java.lang.Double,android.text.SpannableString> {

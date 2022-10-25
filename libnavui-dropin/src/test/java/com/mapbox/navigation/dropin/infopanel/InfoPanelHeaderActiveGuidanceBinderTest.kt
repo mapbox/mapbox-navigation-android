@@ -10,11 +10,11 @@ import com.mapbox.navigation.dropin.extendablebutton.EndNavigationButtonComponen
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.dropin.navigationview.NavigationViewModel
 import com.mapbox.navigation.dropin.testutil.TestLifecycleOwner
-import com.mapbox.navigation.dropin.tripprogress.TripProgressComponent
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.dropin.util.TestingUtil.findComponent
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.tripprogress.internal.ui.TripProgressComponent
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertNotNull

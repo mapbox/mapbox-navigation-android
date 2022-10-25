@@ -26,11 +26,11 @@
         </activity>
 
         <activity
-            android:name=".view.ComponentsActivity"
+            android:name=".view.componentinstaller.ComponentsActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             />
         <activity
-            android:name=".view.ComponentsAltActivity"
+            android:name=".view.componentinstaller.ComponentsAltActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             />
         <activity android:name=".view.AppLifecycleActivity" />

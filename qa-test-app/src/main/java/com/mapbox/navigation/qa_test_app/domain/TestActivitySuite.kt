@@ -6,8 +6,6 @@ import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.utils.startActivity
 import com.mapbox.navigation.qa_test_app.view.AlternativeRouteActivity
 import com.mapbox.navigation.qa_test_app.view.AppLifecycleActivity
-import com.mapbox.navigation.qa_test_app.view.ComponentsActivity
-import com.mapbox.navigation.qa_test_app.view.ComponentsAltActivity
 import com.mapbox.navigation.qa_test_app.view.CustomAlternativeRouteColoringActivity
 import com.mapbox.navigation.qa_test_app.view.DropInButtonsActivity
 import com.mapbox.navigation.qa_test_app.view.FeedbackActivity
@@ -26,6 +24,8 @@ import com.mapbox.navigation.qa_test_app.view.RouteTrafficUpdateActivity
 import com.mapbox.navigation.qa_test_app.view.StatusActivity
 import com.mapbox.navigation.qa_test_app.view.TrafficGradientActivity
 import com.mapbox.navigation.qa_test_app.view.TripOverviewActivity
+import com.mapbox.navigation.qa_test_app.view.componentinstaller.ComponentsActivity
+import com.mapbox.navigation.qa_test_app.view.componentinstaller.ComponentsAltActivity
 import com.mapbox.navigation.qa_test_app.view.customnavview.MapboxNavigationViewCustomizedActivity
 import com.mapbox.navigation.qa_test_app.view.util.RouteDrawingActivity
 
