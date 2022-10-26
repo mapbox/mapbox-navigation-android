@@ -46,14 +46,18 @@ object MapboxMetricsReporter : MetricsReporter {
     private val eventsServiceObserver =
         object : EventsServiceObserver {
             override fun didEncounterError(error: EventsServiceError, events: Value) {
-                logE(LOG_CATEGORY) {
-                    "EventsService failure: $error for events ${events.extractEventsNames()}"
+                ifTelemetryIsRunning {
+                    logE(LOG_CATEGORY) {
+                        "EventsService failure: $error for events ${events.extractEventsNames()}"
+                    }
                 }
             }
 
             override fun didSendEvents(events: Value) {
-                logD(LOG_CATEGORY) {
-                    "Events has been sent ${events.extractEventsNames()}"
+                ifTelemetryIsRunning {
+                    logD(LOG_CATEGORY) {
+                        "Events has been sent ${events.extractEventsNames()}"
+                    }
                 }
             }
         }
