@@ -201,6 +201,7 @@ class RouterWrapper(
             indicesSnapshot.legIndex,
             RoutingProfile(routeOptions.profile().mapToRoutingMode(), routeOptions.user()),
             indicesSnapshot.routeGeometryIndex,
+            hashMapOf(),
         )
 
         return router.getRouteRefresh(
