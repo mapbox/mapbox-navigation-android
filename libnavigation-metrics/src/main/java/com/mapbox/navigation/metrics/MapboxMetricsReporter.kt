@@ -17,6 +17,7 @@ import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.metrics.internal.EventsServiceProvider
 import com.mapbox.navigation.metrics.internal.TelemetryServiceProvider
+import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
@@ -150,10 +151,10 @@ object MapboxMetricsReporter : MetricsReporter {
     }
 
     private inline fun ifTelemetryIsRunning(func: () -> Unit) {
-        if (enableTelemetry) {
+        if (enableTelemetry && TelemetryUtilsDelegate.getEventsCollectionState()) {
             func.invoke()
         } else {
-            logW(
+            logD(
                 "Navigation Telemetry is disabled",
                 LOG_CATEGORY
             )
