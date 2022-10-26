@@ -359,6 +359,7 @@ class RouterWrapperTests {
                 legIndex,
                 RoutingProfile(routerOptions.profile().mapToRoutingMode(), routerOptions.user()),
                 routeGeometryIndex,
+                hashMapOf(),
             )
 
             verify(exactly = 1) {
