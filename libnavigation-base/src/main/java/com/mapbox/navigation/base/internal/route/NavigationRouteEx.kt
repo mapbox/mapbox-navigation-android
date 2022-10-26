@@ -4,7 +4,6 @@ package com.mapbox.navigation.base.internal.route
 
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
-import com.google.gson.JsonElement
 import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -15,7 +14,6 @@ import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.internal.SDKRouteParser
-import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
@@ -46,7 +44,7 @@ fun NavigationRoute.refreshRoute(
     legAnnotations: List<LegAnnotation?>?,
     incidents: List<List<Incident>?>?,
     closures: List<List<Closure>?>?,
-    unrecognizedProperties: Map<String, JsonElement>?,
+    waypoints: List<DirectionsWaypoint?>?,
 ): NavigationRoute {
     val updateLegs = directionsRoute.legs()?.mapIndexed { index, routeLeg ->
         if (index < initialLegIndex) {
@@ -95,19 +93,19 @@ fun NavigationRoute.refreshRoute(
                 .build()
         }
     }
-    return update(
-        {
-            toBuilder()
-                .legs(updateLegs)
-                .updateRouteDurationBasedOnLegsDuration(updateLegs)
-                .build()
-        }
-    ) {
+    val directionsRouteBlock: DirectionsRoute.() -> DirectionsRoute = {
+        toBuilder()
+            .legs(updateLegs)
+            .updateRouteDurationBasedOnLegsDuration(updateLegs)
+            .build()
+    }
+    val directionsResponseBlock: DirectionsResponse.Builder.() -> DirectionsResponse.Builder = {
         updateWaypoints(
             directionsResponse.waypoints(),
-            unrecognizedProperties
+            waypoints
         )
     }
+    return update(directionsRouteBlock, directionsResponseBlock)
 }
 
 private fun adjustedIndex(offsetIndex: Int, originalIndex: Int?): Int {
@@ -198,14 +196,11 @@ private fun List<LegStep>.updateSteps(
 
 private fun DirectionsResponse.Builder.updateWaypoints(
     oldWaypoints: List<DirectionsWaypoint>?,
-    newUnrecognizedProperties: Map<String, JsonElement>?,
+    updatedWaypoints: List<DirectionsWaypoint?>?,
 ): DirectionsResponse.Builder {
     if (oldWaypoints == null) {
         return this
     }
-    val updatedWaypoints = WaypointsParser.parse(
-        newUnrecognizedProperties?.get(Constants.KEY_WAYPOINTS)
-    )
     val newWaypoints = mutableListOf<DirectionsWaypoint>()
     if (updatedWaypoints != null) {
         oldWaypoints.forEachIndexed { index, oldWaypoint ->

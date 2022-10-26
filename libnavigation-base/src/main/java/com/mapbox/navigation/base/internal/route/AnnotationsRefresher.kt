@@ -108,7 +108,7 @@ internal object AnnotationsRefresher {
     }
 
     private fun List<JsonElement>.toJsonArray(): JsonArray {
-        return JsonArray().also { array ->
+        return JsonArray(this.size).also { array ->
             forEach { array.add(it) }
         }
     }

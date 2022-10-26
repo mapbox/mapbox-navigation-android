@@ -4,7 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
-- Supported EV route refresh. [#6511](https://github.com/mapbox/mapbox-navigation-android/pull/6511)
+- Added support for EV route refresh. [#6511](https://github.com/mapbox/mapbox-navigation-android/pull/6511)
 #### Bug fixes and improvements
 - Fixed an issue where re-routes could have failed for EV routes. [#6005](https://github.com/mapbox/mapbox-navigation-android/pull/6005)
 

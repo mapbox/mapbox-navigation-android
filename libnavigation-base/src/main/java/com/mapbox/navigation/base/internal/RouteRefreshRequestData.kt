@@ -10,13 +10,13 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
  * right in front of the user (see [DirectionsRoute.geometry]), null if unavailable.
  * @param legGeometryIndex leg-wise index representing the geometry point
  * right in front of the user (see [DirectionsRoute.geometry]), null if unavailable.
- * @param evData map containing EV related dynamic data.
+ * @param experimentalProperties map containing dynamic data.
  */
 class RouteRefreshRequestData(
     val legIndex: Int,
     val routeGeometryIndex: Int,
     val legGeometryIndex: Int?,
-    val evData: Map<String, String>,
+    val experimentalProperties: Map<String, String>,
 ) {
 
     /**
@@ -31,7 +31,7 @@ class RouteRefreshRequestData(
         if (legIndex != other.legIndex) return false
         if (routeGeometryIndex != other.routeGeometryIndex) return false
         if (legGeometryIndex != other.legGeometryIndex) return false
-        if (evData != other.evData) return false
+        if (experimentalProperties != other.experimentalProperties) return false
 
         return true
     }
@@ -43,7 +43,7 @@ class RouteRefreshRequestData(
         var result = legIndex
         result = 31 * result + routeGeometryIndex
         result = 31 * result + (legGeometryIndex ?: 0)
-        result = 31 * result + evData.hashCode()
+        result = 31 * result + experimentalProperties.hashCode()
         return result
     }
 
@@ -55,7 +55,7 @@ class RouteRefreshRequestData(
             "legIndex=$legIndex, " +
             "routeGeometryIndex=$routeGeometryIndex, " +
             "legGeometryIndex=$legGeometryIndex" +
-            "evData=$evData" +
+            "experimentalProperties=$experimentalProperties" +
             ")"
     }
 }

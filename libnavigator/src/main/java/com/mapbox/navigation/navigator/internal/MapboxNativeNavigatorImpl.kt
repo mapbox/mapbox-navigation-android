@@ -212,7 +212,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             .unrecognizedJsonProperties(
                 refreshedWaypoints?.let { waypoints ->
                     mapOf(
-                        Constants.KEY_WAYPOINTS to JsonArray().apply {
+                        Constants.RouteResponse.KEY_WAYPOINTS to JsonArray().apply {
                             waypoints.forEach { waypoint ->
                                 add(JsonParser.parseString(waypoint.toJson()))
                             }
@@ -252,10 +252,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                                 .ifBlank { "[no alternatives]" },
                         LOG_CATEGORY
                     )
-                    var printed = 0
-                    while (printed < refreshResponseJson.length) {
-                        printed += 4000
-                    }
                     continuation.resume(
                         ExpectedFactory.createValue(refreshRouteResult.alternatives)
                     )

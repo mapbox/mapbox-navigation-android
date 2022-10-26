@@ -1,8 +1,9 @@
-package com.mapbox.navigation.base.internal.route
+package com.mapbox.navigation.route.internal
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
+import com.mapbox.navigation.utils.internal.logE
 
 internal object WaypointsParser {
 
@@ -18,6 +19,7 @@ internal object WaypointsParser {
                 try {
                     DirectionsWaypoint.fromJson(waypointJson.toString())
                 } catch (ex: Throwable) {
+                    logE("Error while parsing waypoints: ${ex.localizedMessage}")
                     null
                 }
             }

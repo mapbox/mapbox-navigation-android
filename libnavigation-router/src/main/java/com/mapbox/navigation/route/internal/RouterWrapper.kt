@@ -13,6 +13,7 @@ import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.route.InternalRouter
 import com.mapbox.navigation.base.internal.route.refreshRoute
+import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -200,7 +201,8 @@ class RouterWrapper(
             routeRefreshRequestData.legIndex,
             RoutingProfile(routeOptions.profile().mapToRoutingMode(), routeOptions.user()),
             routeRefreshRequestData.routeGeometryIndex,
-            hashMapOf<String, String>().addEvData(routeOptions, routeRefreshRequestData.evData)
+            hashMapOf<String, String>()
+                .addEvData(routeOptions, routeRefreshRequestData.experimentalProperties)
         )
 
         return router.getRouteRefresh(
@@ -248,6 +250,10 @@ class RouterWrapper(
                                     )
                                 }
                                 .mapValue { routeRefresh ->
+                                    val updatedWaypoints = WaypointsParser.parse(
+                                        routeRefresh.unrecognizedJsonProperties
+                                            ?.get(Constants.RouteResponse.KEY_WAYPOINTS)
+                                    )
                                     route.refreshRoute(
                                         initialLegIndex = refreshOptions.legIndex,
                                         currentLegGeometryIndex = routeRefreshRequestData
@@ -259,8 +265,7 @@ class RouterWrapper(
                                             it.incidents()
                                         },
                                         closures = routeRefresh.legs()?.map { it.closures() },
-                                        unrecognizedProperties = routeRefresh
-                                            .unrecognizedJsonProperties
+                                        waypoints = updatedWaypoints
                                     )
                                 }
                         }.fold(
