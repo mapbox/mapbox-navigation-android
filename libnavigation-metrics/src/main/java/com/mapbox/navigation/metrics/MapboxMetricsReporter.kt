@@ -12,6 +12,7 @@ import com.mapbox.common.EventsServiceObserver
 import com.mapbox.common.TelemetryService
 import com.mapbox.common.TurnstileEvent
 import com.mapbox.navigation.base.internal.metric.MetricEventInternal
+import com.mapbox.navigation.base.internal.metric.extractEventsNames
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
@@ -45,11 +46,15 @@ object MapboxMetricsReporter : MetricsReporter {
     private val eventsServiceObserver =
         object : EventsServiceObserver {
             override fun didEncounterError(error: EventsServiceError, events: Value) {
-                logE("EventsService failure: $error for event $events", LOG_CATEGORY)
+                logE(LOG_CATEGORY) {
+                    "EventsService failure: $error for events ${events.extractEventsNames()}"
+                }
             }
 
             override fun didSendEvents(events: Value) {
-                logD("Event has been sent $events", LOG_CATEGORY)
+                logD(LOG_CATEGORY) {
+                    "Events has been sent ${events.extractEventsNames()}"
+                }
             }
         }
 
