@@ -11,10 +11,12 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteInterface
+import com.mapbox.navigator.Waypoint
 
 fun createNavigationRoute(
     directionsRoute: DirectionsRoute = createDirectionsRoute(),
-    routeInfo: RouteInfo = RouteInfo(emptyList())
+    routeInfo: RouteInfo = RouteInfo(emptyList()),
+    waypoints: List<Waypoint> = createWaypoints()
 ): NavigationRoute {
     return com.mapbox.navigation.base.internal.route.createNavigationRoute(
         directionsRoute,
@@ -33,7 +35,8 @@ fun createNavigationRoute(
                             routerOrigin = routerOrigin.mapToNativeRouteOrigin(),
                             requestURI = directionsRoute.routeOptions()!!.toUrl("pk.*test_token*")
                                 .toString(),
-                            routeInfo = routeInfo
+                            routeInfo = routeInfo,
+                            waypoints = waypoints,
                         ),
                     )
                 )
@@ -87,3 +90,4 @@ fun createRouteInterfacesFromDirectionRequestResponse(
             )
         }
 }
+

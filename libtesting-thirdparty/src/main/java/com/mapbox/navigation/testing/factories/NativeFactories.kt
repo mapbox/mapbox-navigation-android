@@ -17,6 +17,7 @@ import com.mapbox.navigator.SpeedLimit
 import com.mapbox.navigator.UpcomingRouteAlert
 import com.mapbox.navigator.VoiceInstruction
 import com.mapbox.navigator.Waypoint
+import com.mapbox.navigator.WaypointType
 import java.time.Instant
 import java.util.Date
 
@@ -135,6 +136,25 @@ fun createFixedLocation(
     null,
     HashMap(),
     true
+)
+
+fun createWaypoints(): List<Waypoint> = listOf(
+    Waypoint(
+        "name_1",
+        Point.fromLngLat(1.1, 1.2),
+        null,
+        null,
+        null,
+        WaypointType.REGULAR,
+    ),
+    Waypoint(
+        "name_2",
+        Point.fromLngLat(2.1, 2.2),
+        null,
+        null,
+        null,
+        WaypointType.REGULAR,
+    ),
 )
 
 // Add default parameters if you define properties

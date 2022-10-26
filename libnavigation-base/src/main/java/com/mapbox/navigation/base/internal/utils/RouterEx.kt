@@ -1,5 +1,7 @@
 package com.mapbox.navigation.base.internal.utils
 
+import com.mapbox.navigation.base.internal.route.Waypoint
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigator.RouterOrigin
 
 fun RouterOrigin.mapToSdkRouteOrigin(): com.mapbox.navigation.base.route.RouterOrigin =
@@ -15,3 +17,5 @@ fun com.mapbox.navigation.base.route.RouterOrigin.mapToNativeRouteOrigin(): Rout
         com.mapbox.navigation.base.route.RouterOrigin.Onboard -> RouterOrigin.ONBOARD
         is com.mapbox.navigation.base.route.RouterOrigin.Custom -> RouterOrigin.CUSTOM
     }
+
+fun NavigationRoute.internalWaypoints(): List<Waypoint> = waypoints

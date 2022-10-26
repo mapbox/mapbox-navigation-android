@@ -5,6 +5,9 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Fixed an issue where re-routes could have failed for EV routes. [#6005](https://github.com/mapbox/mapbox-navigation-android/pull/6005)
+
+:warning: `RouteProgress#remainingWaypoints` defines the amount of all remaining waypoints, including explicit (requested with `RouteOptions#coordinatesList`) and implicit (added on the fly, like Electric Vehicle waypoints - [see](https://docs.mapbox.com/api/navigation/directions/#electric-vehicle-routing)) ones.
 
 ## Mapbox Navigation SDK 2.9.0-rc.1 - 28 October, 2022
 ### Changelog
@@ -23,7 +26,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Core Common `v23.1.1`
 - Mapbox Java `v6.9.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.9.0-beta.1))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
-
 
 ## Mapbox Navigation SDK 2.9.0-beta.3 - 21 October, 2022
 ### Changelog

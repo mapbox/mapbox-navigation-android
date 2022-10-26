@@ -33,7 +33,9 @@ import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
  * @param durationRemaining [Double] seconds time remaining until the route destination is reached.
  * @param fractionTraveled [Float] fraction traveled along the current route. This value is
  * between 0 and 1 and isn't guaranteed to reach 1 before the user reaches the end of the route.
- * @param remainingWaypoints [Int] number of waypoints remaining on the current route.
+ * @param remainingWaypoints [Int] number of waypoints remaining on the current route. The waypoints number can be different
+ * with number of requested coordinates. For instance, [EV routing](https://docs.mapbox.com/api/navigation/directions/#electric-vehicle-routing)
+ * is adding additional waypoints, that are not requested explicitly.
  * @param upcomingRoadObjects list of upcoming road objects.
  * @param stale `true` if there were no location updates for a significant amount which causes
  * a lack of confidence in the progress updates being sent.

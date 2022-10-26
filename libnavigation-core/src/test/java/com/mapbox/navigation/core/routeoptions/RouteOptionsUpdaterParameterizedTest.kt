@@ -5,12 +5,15 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.extensions.indexOfNextRequestedCoordinate
+import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -22,7 +25,7 @@ import org.junit.runners.Parameterized
 class RouteOptionsUpdaterParameterizedTest(
     private val initWaypointNames: String,
     private val initWaypointIndices: String,
-    private val remainingWaypoints: Int,
+    private val nextCoordinateIndex: Int,
     private val expectedWaypointNames: String,
     private val expectedWaypointIndices: String
 ) {
@@ -32,30 +35,30 @@ class RouteOptionsUpdaterParameterizedTest(
         @JvmStatic
         @Parameterized.Parameters
         fun data() = listOf(
-            arrayOf("start;finish", "0;6", 6, "start;finish", "0;6"),
-            arrayOf("start;finish", "0;6", 4, "start;finish", "0;4"),
-            arrayOf("start;finish", "0;6", 1, "start;finish", "0;1"),
-            arrayOf("start;mid;finish", "0;2;6", 5, "start;mid;finish", "0;1;5"),
-            arrayOf("start;mid;finish", "0;2;6", 4, "mid;finish", "0;4"),
-            arrayOf("start;mid;finish", "0;2;6", 3, "mid;finish", "0;3"),
-            arrayOf("start;mid1;mid2;finish", "0;2;4;6", 5, "start;mid1;mid2;finish", "0;1;3;5"),
-            arrayOf("start;mid1;mid2;finish", "0;2;4;6", 4, "mid1;mid2;finish", "0;2;4"),
-            arrayOf("start;mid1;mid2;finish", "0;2;4;6", 3, "mid1;mid2;finish", "0;1;3"),
-            arrayOf("start;mid1;mid2;finish", "0;2;4;6", 2, "mid2;finish", "0;2"),
-            arrayOf("start;mid1;mid2;finish", "0;2;4;6", 1, "mid2;finish", "0;1"),
-            arrayOf("start;mid1;mid2;finish", "0;2;3;6", 4, "mid1;mid2;finish", "0;1;4"),
-            arrayOf("start;mid1;mid2;finish", "0;2;3;6", 3, "mid2;finish", "0;3"),
+            arrayOf("start;finish", "0;6", 1, "start;finish", "0;6"),
+            arrayOf("start;finish", "0;6", 3, "start;finish", "0;4"),
+            arrayOf("start;finish", "0;6", 6, "start;finish", "0;1"),
+            arrayOf("start;mid;finish", "0;2;6", 2, "start;mid;finish", "0;1;5"),
+            arrayOf("start;mid;finish", "0;2;6", 3, "mid;finish", "0;4"),
+            arrayOf("start;mid;finish", "0;2;6", 4, "mid;finish", "0;3"),
+            arrayOf("start;mid1;mid2;finish", "0;2;4;6", 2, "start;mid1;mid2;finish", "0;1;3;5"),
+            arrayOf("start;mid1;mid2;finish", "0;2;4;6", 3, "mid1;mid2;finish", "0;2;4"),
+            arrayOf("start;mid1;mid2;finish", "0;2;4;6", 4, "mid1;mid2;finish", "0;1;3"),
+            arrayOf("start;mid1;mid2;finish", "0;2;4;6", 5, "mid2;finish", "0;2"),
+            arrayOf("start;mid1;mid2;finish", "0;2;4;6", 6, "mid2;finish", "0;1"),
+            arrayOf("start;mid1;mid2;finish", "0;2;3;6", 3, "mid1;mid2;finish", "0;1;4"),
+            arrayOf("start;mid1;mid2;finish", "0;2;3;6", 4, "mid2;finish", "0;3"),
             arrayOf(
                 "start;mid1;mid2;mid3;mid4;mid5;finish",
                 "0;1;2;3;4;5;6",
-                6,
+                1,
                 "start;mid1;mid2;mid3;mid4;mid5;finish",
                 "0;1;2;3;4;5;6"
             ),
             arrayOf(
                 "start;mid1;mid2;mid3;mid4;mid5;finish",
                 "0;1;2;3;4;5;6",
-                2,
+                5,
                 "mid4;mid5;finish",
                 "0;1;2"
             )
@@ -75,29 +78,36 @@ class RouteOptionsUpdaterParameterizedTest(
 
     @Test
     fun new_options_return_with_all_silent_waypoints() {
-        val routeOptions = provideRouteOptionsWithCoordinates()
-            .toBuilder()
-            .waypointNames(initWaypointNames)
-            .waypointIndices(initWaypointIndices)
-            .build()
-        val routeProgress: RouteProgress = mockk(relaxed = true)
-        val currentLegProgress: RouteLegProgress = mockk(relaxed = true)
-        every { routeProgress.currentLegProgress } returns currentLegProgress
-        every { routeProgress.remainingWaypoints } returns remainingWaypoints
+        mockkStatic(::indexOfNextRequestedCoordinate) {
+            val routeOptions = provideRouteOptionsWithCoordinates()
+                .toBuilder()
+                .waypointNames(initWaypointNames)
+                .waypointIndices(initWaypointIndices)
+                .build()
+            val routeProgress: RouteProgress = mockk(relaxed = true)
+            val currentLegProgress: RouteLegProgress = mockk(relaxed = true)
+            every { routeProgress.currentLegProgress } returns currentLegProgress
+            every { indexOfNextRequestedCoordinate(any(), any()) } returns nextCoordinateIndex
+            every { routeProgress.remainingWaypoints } returns 0
+            every { routeProgress.navigationRoute.internalWaypoints() } returns listOf(mockk())
 
-        val updatedRouteOptions =
-            routeRefreshAdapter.update(routeOptions, routeProgress, locationMatcherResult)
-                .let {
-                    assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
-                    return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
-                }
-                .routeOptions
-        val updatedWaypointNames = updatedRouteOptions.waypointNames()
-        val updatedWaypointIndices = updatedRouteOptions.waypointIndices()
+            val updatedRouteOptions =
+                routeRefreshAdapter.update(routeOptions, routeProgress, locationMatcherResult)
+                    .let {
+                        assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
+                        return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
+                    }
+                    .routeOptions
+            val updatedWaypointNames = updatedRouteOptions.waypointNames()
+            val updatedWaypointIndices = updatedRouteOptions.waypointIndices()
 
-        assertEquals(expectedWaypointNames, updatedWaypointNames)
-        assertEquals(expectedWaypointIndices, updatedWaypointIndices)
-        MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(routeOptions, updatedRouteOptions)
+            assertEquals(expectedWaypointIndices, updatedWaypointIndices)
+            assertEquals(expectedWaypointNames, updatedWaypointNames)
+            MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(
+                routeOptions,
+                updatedRouteOptions
+            )
+        }
     }
 
     private fun mockLocation() {

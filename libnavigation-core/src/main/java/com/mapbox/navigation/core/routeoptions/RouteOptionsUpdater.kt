@@ -4,13 +4,14 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.extensions.indexOfNextRequestedCoordinate
+import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.utils.internal.logE
-import kotlin.math.min
 
 private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
 private const val LOG_CATEGORY = "RouteOptionsUpdater"
@@ -46,94 +47,106 @@ class RouteOptionsUpdater {
             return RouteOptionsResult.Error(Throwable(msg))
         }
 
-        val optionsBuilder = routeOptions.toBuilder()
         val coordinatesList = routeOptions.coordinatesList()
-        val remainingWaypoints = routeProgress.remainingWaypoints
 
-        if (remainingWaypoints == 0) {
-            val msg = """
-                Reroute failed. There are no remaining waypoints on the route.
-                routeOptions=$routeOptions
-                locationMatcherResult=$locationMatcherResult
-                routeProgress=$routeProgress
-            """.trimIndent()
-            logE(msg, LOG_CATEGORY)
-            return RouteOptionsResult.Error(Throwable(msg))
+        val (nextCoordinateIndex, remainingCoordinates) = indexOfNextRequestedCoordinate(
+            routeProgress.navigationRoute.internalWaypoints(),
+            routeProgress.remainingWaypoints,
+        ).let {
+            if (it == null) {
+                val msg = "Index of next coordinate is not defined"
+                logE(msg, LOG_CATEGORY)
+                return RouteOptionsResult.Error(Throwable(msg))
+            } else if (coordinatesList.lastIndex < it) {
+                val msg = "Index of next coordinate is out of range of coordinates"
+                logE(msg, LOG_CATEGORY)
+                return RouteOptionsResult.Error(Throwable(msg))
+            } else {
+                return@let it to coordinatesList.size - it
+            }
         }
 
+        val optionsBuilder = routeOptions.toBuilder()
+
         try {
-            routeProgress.currentLegProgress?.legIndex?.let { index ->
-                val location = locationMatcherResult.enhancedLocation
-                optionsBuilder
-                    .coordinatesList(
-                        coordinatesList
-                            .drop(coordinatesList.size - remainingWaypoints).toMutableList().apply {
-                                add(0, Point.fromLngLat(location.longitude, location.latitude))
-                            }
+            val location = locationMatcherResult.enhancedLocation
+            optionsBuilder
+                .coordinatesList(
+                    coordinatesList
+                        .subList(nextCoordinateIndex, coordinatesList.size)
+                        .toMutableList()
+                        .apply {
+                            add(0, Point.fromLngLat(location.longitude, location.latitude))
+                        }
+                )
+                .bearingsList(
+                    getUpdatedBearingList(
+                        remainingCoordinates,
+                        nextCoordinateIndex,
+                        location.bearing.toDouble(),
+                        routeOptions.bearingsList(),
                     )
-                    .bearingsList(
-                        getUpdatedBearingList(
-                            coordinatesList.size,
-                            location.bearing.toDouble(),
-                            routeOptions.bearingsList(),
-                            remainingWaypoints
+                )
+                .radiusesList(
+                    let radiusesList@{
+                        val radiusesList = routeOptions.radiusesList()
+                        if (radiusesList.isNullOrEmpty()) {
+                            return@radiusesList emptyList<Double?>()
+                        }
+                        radiusesList.subList(
+                            nextCoordinateIndex - 1,
+                            coordinatesList.size
                         )
-                    )
-                    .radiusesList(
-                        let radiusesList@{
-                            val radiusesList = routeOptions.radiusesList()
-                            if (radiusesList.isNullOrEmpty()) {
-                                return@radiusesList emptyList<Double>()
-                            }
-                            mutableListOf<Double>().also {
-                                it.addAll(radiusesList.subList(index, coordinatesList.size))
-                            }
+                    }
+                )
+                .approachesList(
+                    let approachesList@{
+                        val approachesList = routeOptions.approachesList()
+                        if (approachesList.isNullOrEmpty()) {
+                            return@approachesList emptyList<String>()
                         }
-                    )
-                    .approachesList(
-                        let approachesList@{
-                            val approachesList = routeOptions.approachesList()
-                            if (approachesList.isNullOrEmpty()) {
-                                return@approachesList emptyList<String>()
-                            }
-                            mutableListOf<String>().also {
-                                it.addAll(approachesList.subList(index, coordinatesList.size))
-                            }
-                        }
-                    )
-                    .apply {
-                        if (routeOptions.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC) {
-                            snappingIncludeClosuresList(
-                                routeOptions.snappingIncludeClosuresList()
-                                    .withFirstTrue(remainingWaypoints, index, coordinatesList.size)
-                            )
-                            snappingIncludeStaticClosuresList(
-                                routeOptions.snappingIncludeStaticClosuresList()
-                                    .withFirstTrue(remainingWaypoints, index, coordinatesList.size)
+                        mutableListOf<String>().also {
+                            it.addAll(
+                                approachesList.subList(
+                                    nextCoordinateIndex - 1,
+                                    coordinatesList.size
+                                )
                             )
                         }
                     }
-                    .waypointNamesList(
-                        getUpdatedWaypointsList(
-                            routeOptions.waypointNamesList(),
-                            routeOptions.waypointIndicesList(),
-                            coordinatesList.size - remainingWaypoints - 1
+                )
+                .apply {
+                    if (routeOptions.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC) {
+                        snappingIncludeClosuresList(
+                            routeOptions.snappingIncludeClosuresList()
+                                .withFirstTrue(remainingCoordinates)
                         )
-                    )
-                    .waypointTargetsList(
-                        getUpdatedWaypointsList(
-                            routeOptions.waypointTargetsList(),
-                            routeOptions.waypointIndicesList(),
-                            coordinatesList.size - remainingWaypoints - 1
+                        snappingIncludeStaticClosuresList(
+                            routeOptions.snappingIncludeStaticClosuresList()
+                                .withFirstTrue(remainingCoordinates)
                         )
+                    }
+                }
+                .waypointNamesList(
+                    getUpdatedWaypointsList(
+                        routeOptions.waypointNamesList(),
+                        routeOptions.waypointIndicesList(),
+                        nextCoordinateIndex
                     )
-                    .waypointIndicesList(
-                        getUpdatedWaypointIndicesList(
-                            routeOptions.waypointIndicesList(),
-                            coordinatesList.size - remainingWaypoints - 1
-                        )
+                )
+                .waypointTargetsList(
+                    getUpdatedWaypointsList(
+                        routeOptions.waypointTargetsList(),
+                        routeOptions.waypointIndicesList(),
+                        nextCoordinateIndex
                     )
-            }
+                )
+                .waypointIndicesList(
+                    getUpdatedWaypointIndicesList(
+                        routeOptions.waypointIndicesList(),
+                        nextCoordinateIndex
+                    )
+                )
 
             if (
                 routeOptions.profile() == DirectionsCriteria.PROFILE_DRIVING ||
@@ -143,9 +156,13 @@ class RouteOptionsUpdater {
                     mutableListOf(locationMatcherResult.zLevel).apply {
                         val legacyLayerList = routeOptions.layersList()
                         if (legacyLayerList != null) {
-                            addAll(legacyLayerList.takeLast(remainingWaypoints))
+                            addAll(
+                                legacyLayerList.subList(nextCoordinateIndex, coordinatesList.size)
+                            )
                         } else {
-                            repeat(remainingWaypoints) { add(null) }
+                            while (this.size < remainingCoordinates + 1) {
+                                add(null)
+                            }
                         }
                     }
                 )
@@ -164,10 +181,10 @@ class RouteOptionsUpdater {
     }
 
     private fun getUpdatedBearingList(
-        coordinates: Int,
+        remainingCoordinates: Int,
+        nextCoordinateIndex: Int,
         currentAngle: Double,
         legacyBearingList: List<Bearing?>?,
-        remainingWaypoints: Int
     ): MutableList<Bearing?> {
         return ArrayList<Bearing?>().also { newList ->
             val originTolerance = legacyBearingList?.getOrNull(0)
@@ -176,15 +193,12 @@ class RouteOptionsUpdater {
             newList.add(Bearing.builder().angle(currentAngle).degrees(originTolerance).build())
 
             if (legacyBearingList != null) {
-                newList.addAll(
-                    legacyBearingList.subList(
-                        coordinates - remainingWaypoints,
-                        min(legacyBearingList.size, coordinates)
-                    )
-                )
+                for (idx in nextCoordinateIndex..legacyBearingList.lastIndex) {
+                    newList.add(legacyBearingList[idx])
+                }
             }
 
-            while (newList.size < remainingWaypoints + 1) {
+            while (newList.size < remainingCoordinates + 1) {
                 newList.add(null)
             }
         }
@@ -192,30 +206,26 @@ class RouteOptionsUpdater {
 
     private fun getUpdatedWaypointIndicesList(
         waypointIndicesList: List<Int>?,
-        lastPassedWaypointIndex: Int
+        nextCoordinateIndex: Int
     ): MutableList<Int> {
         if (waypointIndicesList.isNullOrEmpty()) {
             return mutableListOf()
         }
-        return mutableListOf<Int>().also { updatedWaypointIndicesList ->
-            val updatedStartWaypointIndicesIndex = getUpdatedStartWaypointsListIndex(
-                waypointIndicesList,
-                lastPassedWaypointIndex
-            )
-            updatedWaypointIndicesList.add(0)
-            updatedWaypointIndicesList.addAll(
-                waypointIndicesList.subList(
-                    updatedStartWaypointIndicesIndex + 1,
-                    waypointIndicesList.size
-                ).map { it - lastPassedWaypointIndex }
-            )
+        return mutableListOf<Int>().apply {
+            add(0)
+            waypointIndicesList.forEach { value ->
+                val newVal = value - nextCoordinateIndex + 1
+                if (newVal > 0) {
+                    add(newVal)
+                }
+            }
         }
     }
 
     private fun <T> getUpdatedWaypointsList(
         waypointsList: List<T>?,
         waypointIndicesList: List<Int>?,
-        lastPassedWaypointIndex: Int
+        nextCoordinateIndex: Int
     ): MutableList<T> {
         if (waypointsList.isNullOrEmpty()) {
             return mutableListOf()
@@ -223,7 +233,7 @@ class RouteOptionsUpdater {
         return mutableListOf<T>().also { updatedWaypointsList ->
             val updatedStartWaypointsListIndex = getUpdatedStartWaypointsListIndex(
                 waypointIndicesList,
-                lastPassedWaypointIndex
+                nextCoordinateIndex
             )
             updatedWaypointsList.add(waypointsList[updatedStartWaypointsListIndex])
             updatedWaypointsList.addAll(
@@ -237,11 +247,11 @@ class RouteOptionsUpdater {
 
     private fun getUpdatedStartWaypointsListIndex(
         waypointIndicesList: List<Int>?,
-        lastPassedWaypointIndex: Int
+        nextCoordinateIndex: Int
     ): Int {
         var updatedStartWaypointIndicesIndex = 0
         waypointIndicesList?.forEachIndexed { indx, waypointIndex ->
-            if (waypointIndex <= lastPassedWaypointIndex) {
+            if (waypointIndex < nextCoordinateIndex) {
                 updatedStartWaypointIndicesIndex = indx
             }
         }
@@ -249,19 +259,17 @@ class RouteOptionsUpdater {
     }
 
     private fun List<Boolean>?.withFirstTrue(
-        remainingWaypoints: Int,
-        index: Int,
-        coordinatesListSize: Int,
+        remainingCoordinates: Int,
     ): List<Boolean?> {
         return mutableListOf<Boolean?>().also { newList ->
             // append true for the origin of the re-route request
             newList.add(true)
             if (isNullOrEmpty()) {
                 // create `null` value for each upcoming waypoint
-                newList.addAll(arrayOfNulls<Boolean>(remainingWaypoints))
+                newList.addAll(arrayOfNulls<Boolean>(remainingCoordinates))
             } else {
                 // get existing values for each upcoming waypoint
-                newList.addAll(subList(index + 1, coordinatesListSize))
+                newList.addAll(takeLast(remainingCoordinates))
             }
         }
     }

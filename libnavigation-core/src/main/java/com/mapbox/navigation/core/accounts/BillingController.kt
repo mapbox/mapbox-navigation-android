@@ -379,7 +379,7 @@ internal class BillingController(
 
     /**
      * Returns a list of remaining [Point]s that mark ends of legs on the route from the current [RouteProgress],
-     * ignoring origin and silent waypoints.
+     * ignoring origin.
      */
     private fun getRemainingWaypointsOnRoute(routeProgress: RouteProgress?): List<Point>? {
         return routeProgress?.navigationRoute?.let { route ->
@@ -394,7 +394,7 @@ internal class BillingController(
 
     /**
      * Returns a list of [Point]s that mark ends of legs on the route,
-     * ignoring origin and silent waypoints.
+     * ignoring origin.
      */
     private fun getWaypointsOnRoute(navigationRoute: NavigationRoute): List<Point>? {
         return navigationRoute.directionsResponse.waypoints()?.drop(1)?.map {

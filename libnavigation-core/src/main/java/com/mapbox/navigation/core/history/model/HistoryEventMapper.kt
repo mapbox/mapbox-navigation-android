@@ -6,6 +6,8 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.internal.route.Waypoint
+import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.toNavigationRoute
@@ -20,6 +22,13 @@ import kotlinx.coroutines.runBlocking
 import java.net.URL
 
 internal class HistoryEventMapper {
+
+    private companion object {
+        private const val LOG_CATEGORY = "HistoryEventMapper"
+        private const val NANOS_PER_SECOND = 1e-9
+        private const val WAYPOINTS_JSON_KEY = "waypoints"
+        private const val NAME_JSON_KEY = "name"
+    }
 
     fun map(historyRecord: HistoryRecord): HistoryEvent {
         val eventTimestamp = historyRecord.timestampNanoseconds * NANOS_PER_SECOND
@@ -71,7 +80,9 @@ internal class HistoryEventMapper {
             legIndex = setRoute.legIndex,
             profile = mapToProfile(navigationRoute?.routeOptions),
             geometries = mapToGeometry(navigationRoute?.routeOptions),
-            waypoints = mapToWaypoints(navigationRoute?.routeOptions)
+            waypoints = mapToHistoryWaypoints(
+                navigationRoute
+            )
         )
     }
 
@@ -148,16 +159,12 @@ internal class HistoryEventMapper {
         return jsonObject.toString()
     }
 
-    private fun mapToWaypoints(routeOptions: RouteOptions?): List<HistoryWaypoint> {
-        val coordinatesList = routeOptions?.coordinatesList()
-        val waypointIndices = routeOptions?.waypointIndicesList()
-        return coordinatesList?.mapIndexed { index, coordinate ->
-            HistoryWaypoint(
-                point = coordinate,
-                isSilent = waypointIndices?.contains(index)?.not() == true
-            )
-        } ?: emptyList()
-    }
+    private fun mapToHistoryWaypoints(
+        navigationRoute: NavigationRoute?,
+    ): List<HistoryWaypoint> =
+        navigationRoute?.internalWaypoints()
+            ?.map { HistoryWaypoint(it.location, it.type == Waypoint.SILENT) }
+            ?: emptyList()
 
     @DirectionsCriteria.ProfileCriteria
     private fun mapToProfile(routeOptions: RouteOptions?): String {
@@ -177,11 +184,4 @@ internal class HistoryEventMapper {
         pushHistoryRecord.type,
         pushHistoryRecord.properties
     )
-
-    private companion object {
-
-        private const val NANOS_PER_SECOND = 1e-9
-        private const val WAYPOINTS_JSON_KEY = "waypoints"
-        private const val NAME_JSON_KEY = "name"
-    }
 }
