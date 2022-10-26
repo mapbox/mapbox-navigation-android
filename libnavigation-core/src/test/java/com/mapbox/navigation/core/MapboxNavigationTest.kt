@@ -1703,25 +1703,14 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun setEVDataUpdater() {
-        val updater = mockk<EVDataUpdater>(relaxed = true)
+    fun onEVDataChanged() {
+        val data = mapOf("aaa" to "bbb")
         createMapboxNavigation()
 
-        mapboxNavigation.setEVDataUpdater(updater)
+        mapboxNavigation.onEVDataUpdated(data)
 
         verify(exactly = 1) {
-            routeRefreshRequestDataProvider.setEVDataUpdater(updater)
-        }
-    }
-
-    @Test
-    fun onDestroyDestroysRouteRefreshRequestDataProvider() {
-        createMapboxNavigation()
-
-        mapboxNavigation.onDestroy()
-
-        verify(exactly = 1) {
-            routeRefreshRequestDataProvider.destroy()
+            routeRefreshRequestDataProvider.onEVDataUpdated(data)
         }
     }
 }

@@ -1062,7 +1062,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             reachabilityObserverId = null
         }
         routeRefreshController.unregisterAllRouteRefreshStateObservers()
-        routeRefreshRequestDataProvider.destroy()
 
         isDestroyed = true
         hasInstance = false
@@ -1672,16 +1671,45 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     /**
-     * Provide a [EVDataUpdater] that will notify Nav SDK of EV data updates
-     * to be used in route refresh requests.
-     * Set to null to stop providing updates.
-     * NOTE: after setting the updater to null the last saved state will be used in refresh requests.
+     * Invoke when any component of EV data is changed so that it can be used in refresh requests.
+     * You can pass only changed components of EV data via [data], all the previous values
+     * that have not changed will be cached on the SDK side.
+     * Example:
+     * ```
+     *     mapOf(
+     *         "ev_initial_charge" to "90",
+     *         "energy_consumption_curve" to "0,300;20,120;40,150",
+     *         "auxiliary_consumption" to "300"
+     *     )
+     * ```
+     * If you previously invoked this function, and then the charge changes to 80,
+     * you can also invoke it again with only one parameter:
+     * ```
+     *     mapOf("ev_initial_charge" to "80")
+     * ```
+     * as an argument. This way "ev_initial_charge" will be updated and the following parameters
+     * will be used from the previous invocation.
+     * It would be equivalent to passing the following map:
+     * ```
+     *     mapOf(
+     *         "ev_initial_charge" to "80",
+     *         "energy_consumption_curve" to "0,300;20,120;40,150",
+     *         "auxiliary_consumption" to "300"
+     *     )
+     * ```
+     * If you want to remove a parameter, pass `null` for the corresponding key.
+     * Example: for the case above if you want to remove "auxiliary_consumption", invoke this method
+     * with
+     * ```
+     *     mapOf("auxiliary_consumption" to null)
+     * ```
+     * as an argument.
      *
-     * @param updater [EVDataUpdater] that will notify Nav SDK of EV data updates
+     * @param data Map describing the changed EV data
      */
     @ExperimentalPreviewMapboxNavigationAPI
-    fun setEVDataUpdater(updater: EVDataUpdater?) {
-        routeRefreshRequestDataProvider.setEVDataUpdater(updater)
+    fun onEVDataUpdated(data: Map<String, String?>) {
+        routeRefreshRequestDataProvider.onEVDataUpdated(data)
     }
 
     private fun createHistoryRecorderHandles(config: ConfigHandle) =

@@ -10,15 +10,6 @@ package com.mapbox.navigation.core {
     method public void onDeveloperMetadataChanged(com.mapbox.navigation.core.DeveloperMetadata metadata);
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface EVDataObserver {
-    method public void onEVDataUpdated(java.util.Map<java.lang.String,java.lang.String> data);
-  }
-
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface EVDataUpdater {
-    method public void registerEVDataObserver(com.mapbox.navigation.core.EVDataObserver observer);
-    method public void unregisterEVDataObserver(com.mapbox.navigation.core.EVDataObserver observer);
-  }
-
   @UiThread public final class MapboxNavigation {
     ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public void cancelRouteRequest(long requestId);
@@ -42,6 +33,7 @@ package com.mapbox.navigation.core {
     method public boolean isRunningForegroundService();
     method public void navigateNextRouteLeg(com.mapbox.navigation.core.trip.session.LegIndexUpdatedCallback callback);
     method public void onDestroy();
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void onEVDataUpdated(java.util.Map<java.lang.String,java.lang.String> data);
     method public void postUserFeedback(String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String screenshot, String![]? feedbackSubType = emptyArray());
     method public void postUserFeedback(String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String screenshot);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void postUserFeedback(String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String screenshot, String![]? feedbackSubType = emptyArray(), com.mapbox.navigation.core.telemetry.events.FeedbackMetadata feedbackMetadata);
@@ -72,7 +64,6 @@ package com.mapbox.navigation.core {
     method public void resetTripSession();
     method public void setArrivalController(com.mapbox.navigation.core.arrival.ArrivalController? arrivalController = com.mapbox.navigation.core.arrival.AutoArrivalController());
     method public void setArrivalController();
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setEVDataUpdater(com.mapbox.navigation.core.EVDataUpdater? updater);
     method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, int initialLegIndex = 0, com.mapbox.navigation.core.RoutesSetCallback? callback = null);
     method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, int initialLegIndex = 0);
     method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);

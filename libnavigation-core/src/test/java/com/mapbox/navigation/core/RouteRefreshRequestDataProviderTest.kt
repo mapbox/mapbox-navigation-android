@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.routerefresh.EVDataHolder
@@ -207,36 +206,11 @@ class RouteRefreshRequestDataProviderTest {
         assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
     }
 
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     @Test
-    fun setEVDataUpdater() {
-        val firstUpdater = mockk<EVDataUpdater>(relaxed = true)
-        val secondUpdater = mockk<EVDataUpdater>(relaxed = true)
-        provider.setEVDataUpdater(firstUpdater)
+    fun onEVDataUpdated() {
+        val data = mapOf("aaa" to "bbb")
+        provider.onEVDataUpdated(data)
 
-        verify(exactly = 1) { firstUpdater.registerEVDataObserver(evDataHolder) }
-
-        provider.setEVDataUpdater(secondUpdater)
-
-        verify(exactly = 1) {
-            firstUpdater.unregisterEVDataObserver(evDataHolder)
-            secondUpdater.registerEVDataObserver(evDataHolder)
-        }
-    }
-
-    @Test
-    fun destroyWithoutUpdater() {
-        provider.destroy()
-    }
-
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-    @Test
-    fun destroyWithUpdater() {
-        val updater = mockk<EVDataUpdater>(relaxed = true)
-        provider.setEVDataUpdater(updater)
-
-        provider.destroy()
-
-        verify { updater.unregisterEVDataObserver(evDataHolder) }
+        verify(exactly = 1) { evDataHolder.onEVDataUpdated(data) }
     }
 }

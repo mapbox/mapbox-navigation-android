@@ -5,7 +5,9 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import org.junit.Assert.assertEquals
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -110,6 +112,9 @@ class WaypointsParserTest(
             )
         }
     }
+
+    @get:Rule
+    val logRule = LoggingFrontendTestRule()
 
     @Test
     fun parse() {

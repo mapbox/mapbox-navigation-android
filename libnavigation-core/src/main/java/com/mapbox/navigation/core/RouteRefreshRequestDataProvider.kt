@@ -1,7 +1,6 @@
 package com.mapbox.navigation.core
 
 import androidx.annotation.MainThread
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.routerefresh.EVDataHolder
@@ -19,7 +18,6 @@ internal data class RouteProgressData(
 /**
  * Accumulates and provides route refresh model data from different sources.
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @MainThread
 internal class RouteRefreshRequestDataProvider(
     private val evDataHolder: EVDataHolder = EVDataHolder()
@@ -28,7 +26,6 @@ internal class RouteRefreshRequestDataProvider(
     private val defaultRouteProgressData = RouteProgressData(0, 0, null)
     private var routeProgressData: RouteProgressData? = null
     private var continuation: CancellableContinuation<RouteProgressData>? = null
-    private var evDataUpdater: EVDataUpdater? = null
 
     /**
      * Returns either last saved value (if has one) or waits for the next update.
@@ -51,14 +48,8 @@ internal class RouteRefreshRequestDataProvider(
         routeProgressData = null
     }
 
-    fun destroy() {
-        evDataUpdater?.unregisterEVDataObserver(evDataHolder)
-    }
-
-    fun setEVDataUpdater(updater: EVDataUpdater?) {
-        evDataUpdater?.unregisterEVDataObserver(evDataHolder)
-        evDataUpdater = updater
-        updater?.registerEVDataObserver(evDataHolder)
+    fun onEVDataUpdated(data: Map<String, String?>) {
+        evDataHolder.onEVDataUpdated(data)
     }
 
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
