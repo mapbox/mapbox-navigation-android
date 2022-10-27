@@ -60,6 +60,8 @@ internal class NavigationViewOptionsTest {
         assertEquals(c.showRoutePreviewButton, sut.showRoutePreviewButton.value)
         assertEquals(c.showStartNavigationButton, sut.showStartNavigationButton.value)
         assertEquals(c.showEndNavigationButton, sut.showEndNavigationButton.value)
+        assertEquals(c.showPoiName, sut.showPoiName.value)
+        assertEquals(c.showArrivalText, sut.showArrivalText.value)
     }
 
     private fun customization() =
@@ -84,6 +86,7 @@ internal class NavigationViewOptionsTest {
                 .Builder(ctx)
                 .unitType(UnitType.METRIC)
                 .build()
+
             showManeuver = false
             showSpeedLimit = false
             showRoadName = false
@@ -97,5 +100,7 @@ internal class NavigationViewOptionsTest {
             showRoutePreviewButton = false
             showStartNavigationButton = false
             showEndNavigationButton = false
+            showPoiName = false
+            showArrivalText = false
         }
 }

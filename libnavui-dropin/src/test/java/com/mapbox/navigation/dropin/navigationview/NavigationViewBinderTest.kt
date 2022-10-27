@@ -78,6 +78,8 @@ internal class NavigationViewBinderTest {
             c.infoPanelEndNavigationButtonBinder,
             sut.infoPanelEndNavigationButtonBinder.value
         )
+        assertEquals(c.infoPanelPoiNameBinder, sut.infoPanelPoiNameBinder.value)
+        assertEquals(c.infoPanelArrivalTextBinder, sut.infoPanelArrivalTextBinder.value)
         assertEquals(c.mapViewBinder, sut.mapViewBinder.value)
     }
 
@@ -108,6 +110,8 @@ internal class NavigationViewBinderTest {
                 infoPanelHeaderRoutesPreviewBinder = UIBinder.USE_DEFAULT
                 infoPanelHeaderActiveGuidanceBinder = UIBinder.USE_DEFAULT
                 infoPanelHeaderArrivalBinder = UIBinder.USE_DEFAULT
+                infoPanelPoiNameBinder = UIBinder.USE_DEFAULT
+                infoPanelArrivalTextBinder = UIBinder.USE_DEFAULT
 
                 infoPanelTripProgressBinder = UIBinder.USE_DEFAULT
                 infoPanelContentBinder = UIBinder.USE_DEFAULT
@@ -143,6 +147,8 @@ internal class NavigationViewBinderTest {
         assertTrue(sut.infoPanelRoutePreviewButtonBinder.value == null)
         assertTrue(sut.infoPanelStartNavigationButtonBinder.value == null)
         assertTrue(sut.infoPanelEndNavigationButtonBinder.value == null)
+        assertTrue(sut.infoPanelPoiNameBinder.value == null)
+        assertTrue(sut.infoPanelArrivalTextBinder.value == null)
 
         assertTrue(sut.infoPanelTripProgressBinder.value == null)
         assertTrue(sut.infoPanelContentBinder.value == null)
@@ -175,6 +181,8 @@ internal class NavigationViewBinderTest {
         infoPanelHeaderRoutesPreviewBinder = EmptyBinder()
         infoPanelHeaderActiveGuidanceBinder = EmptyBinder()
         infoPanelHeaderArrivalBinder = EmptyBinder()
+        infoPanelPoiNameBinder = EmptyBinder()
+        infoPanelArrivalTextBinder = EmptyBinder()
 
         infoPanelTripProgressBinder = EmptyBinder()
         infoPanelContentBinder = EmptyBinder()

@@ -696,6 +696,18 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             viewModel.infoPanelStateOverride,
             ::toggleInfoPanelState
         )
+
+        bindSwitch(
+            menuBinding.toggleShowPoiName,
+            viewModel.infoPanelShowPoiName,
+            ::toggleShowPoiName
+        )
+
+        bindSwitch(
+            menuBinding.toggleShowArrivalText,
+            viewModel.infoPanelShowArrivalText,
+            ::toggleShowArrivalText
+        )
     }
 
     private fun toggleShowTripProgress(enabled: Boolean) {
@@ -838,6 +850,18 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
     private fun toggleInfoPanelHiding(isHideable: Boolean) {
         binding.navigationView.customizeViewOptions {
             isInfoPanelHideable = isHideable
+        }
+    }
+
+    private fun toggleShowPoiName(enabled: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            showPoiName = enabled
+        }
+    }
+
+    private fun toggleShowArrivalText(enabled: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            showArrivalText = enabled
         }
     }
 

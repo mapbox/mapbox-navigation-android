@@ -163,6 +163,18 @@ class ViewOptionsCustomization {
      */
     var showStartNavigationButton: Boolean? = null
 
+    /**
+     * Sets whether the POI text view should be visible.
+     * Set to `true` for the default behavior.
+     */
+    var showPoiName: Boolean? = null
+
+    /**
+     * Sets whether the arrival text view should be visible.
+     * Set to `true` for the default behavior.
+     */
+    var showArrivalText: Boolean? = null
+
     companion object {
         /**
          * Default route line options.
