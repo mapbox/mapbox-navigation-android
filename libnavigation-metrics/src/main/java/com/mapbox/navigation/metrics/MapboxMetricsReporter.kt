@@ -37,7 +37,7 @@ object MapboxMetricsReporter : MetricsReporter {
     private lateinit var telemetryService: TelemetryService
 
     @Volatile
-    private var enableTelemetry = false
+    private var isTelemetryInitialized = false
 
     @Volatile
     private var metricsObserver: MetricsObserver? = null
@@ -76,7 +76,7 @@ object MapboxMetricsReporter : MetricsReporter {
         accessToken: String,
         userAgent: String
     ) {
-        enableTelemetry = true
+        isTelemetryInitialized = true
         val eventsServerOptions = EventsServerOptions(accessToken, userAgent, null)
         eventsService = EventsServiceProvider.provideEventsService(eventsServerOptions)
         telemetryService = TelemetryServiceProvider.provideTelemetryService(eventsServerOptions)
@@ -100,7 +100,7 @@ object MapboxMetricsReporter : MetricsReporter {
      */
     @JvmStatic
     fun disable() {
-        enableTelemetry = false
+        isTelemetryInitialized = false
         removeObserver()
         eventsService.unregisterObserver(eventsServiceObserver)
         ioJobController.job.cancelChildren()
@@ -160,7 +160,7 @@ object MapboxMetricsReporter : MetricsReporter {
     }
 
     private inline fun ifTelemetryIsRunning(func: () -> Unit) {
-        if (enableTelemetry && TelemetryUtilsDelegate.getEventsCollectionState()) {
+        if (isTelemetryInitialized && TelemetryUtilsDelegate.getEventsCollectionState()) {
             func.invoke()
         } else {
             logD(
