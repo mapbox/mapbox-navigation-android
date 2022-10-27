@@ -17,6 +17,8 @@ Mapbox welcomes participation and contributions from everyone.
   - `ViewOptionsCustomization.showRoutePreviewButton` can be used to show/hide info panel's show route preview button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
   - `ViewOptionsCustomization.showStartNavigationButton` can be used to show/hide info panel's start navigation button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
   - `ViewOptionsCustomization.showEndNavigationButton` can be used to show/hide info panel's end navigation button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+- Introduced `ViewOptionsCustomization.showPoiName` and `ViewOptionsCustomization.showArrivalText` that allows showing/hiding of the POI and arrival text view. [#6515](https://github.com/mapbox/mapbox-navigation-android/pull/6515)
+- Introduced `ViewBinderCustomization.infoPanelPoiNameBinder` and `ViewBinderCustomization.infoPanelArrivalTextBinder` that allows injection of custom Info Panel POI and arrival text view into `NavigationView`. [#6515](https://github.com/mapbox/mapbox-navigation-android/pull/6515)
 #### Bug fixes and improvements
 - :warning: Removed `MapboxMapScalebarParams` and replaced `ViewStyleCustomization.mapScalebarParams` by `ViewOptionsCustomization.showMapScalebar` [#6523](https://github.com/mapbox/mapbox-navigation-android/pull/6523)
 - Refactored `ScalebarComponent` to use `ViewOptionsCustomization.distanceFormatterOptions` to change between imperial and metric based unit. [#6523](https://github.com/mapbox/mapbox-navigation-android/pull/6523)

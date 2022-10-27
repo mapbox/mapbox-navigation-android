@@ -1,13 +1,16 @@
 package com.mapbox.navigation.dropin.infopanel
 
 import android.content.Context
+import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.core.view.isEmpty
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.arrival.ArrivalTextComponent
 import com.mapbox.navigation.dropin.extendablebutton.EndNavigationButtonComponent
+import com.mapbox.navigation.dropin.map.geocoding.POINameComponent
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.dropin.navigationview.NavigationViewModel
 import com.mapbox.navigation.dropin.testutil.TestLifecycleOwner
@@ -19,6 +22,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -60,7 +64,7 @@ class InfoPanelHeaderArrivalBinderTest {
 
         sut.bind(rootLayout)
 
-        assertNotNull(rootLayout.findViewById(R.id.arrivedText))
+        assertNotNull(rootLayout.findViewById(R.id.arrivedTextContainer))
         assertNotNull(rootLayout.findViewById(R.id.endNavigationButtonLayout))
     }
 
@@ -70,6 +74,20 @@ class InfoPanelHeaderArrivalBinderTest {
         components.onAttached(mapboxNavigation)
 
         assertNotNull(components.findComponent { it is ArrivalTextComponent })
+    }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `should NOT bind ArrivalTextComponent when ViewOptionsCustomization showArrivalText is FALSE`() {
+        navContext.applyOptionsCustomization {
+            showArrivalText = false
+        }
+        val rootLayout = FrameLayout(ctx)
+        val components = sut.bind(rootLayout)
+        components.onAttached(mapboxNavigation)
+
+        assertNull(components.findComponent { it is POINameComponent })
+        assertTrue((rootLayout.findViewById(R.id.arrivedTextContainer) as ViewGroup).isEmpty())
     }
 
     @Test

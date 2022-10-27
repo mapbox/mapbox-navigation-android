@@ -4,7 +4,6 @@ package com.mapbox.navigation.dropin.internal.extensions
 
 import android.view.ViewGroup
 import androidx.annotation.Px
-import androidx.appcompat.widget.AppCompatTextView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.EmptyBinder
@@ -12,18 +11,31 @@ import com.mapbox.navigation.dropin.actionbutton.AudioGuidanceButtonBinder
 import com.mapbox.navigation.dropin.actionbutton.CameraModeButtonBinder
 import com.mapbox.navigation.dropin.actionbutton.CompassButtonBinder
 import com.mapbox.navigation.dropin.actionbutton.RecenterButtonBinder
-import com.mapbox.navigation.dropin.arrival.ArrivalTextComponent
+import com.mapbox.navigation.dropin.infopanel.InfoPanelArrivalTextBinder
 import com.mapbox.navigation.dropin.infopanel.InfoPanelEndNavigationButtonBinder
+import com.mapbox.navigation.dropin.infopanel.InfoPanelPoiNameBinder
 import com.mapbox.navigation.dropin.infopanel.InfoPanelRoutePreviewButtonBinder
 import com.mapbox.navigation.dropin.infopanel.InfoPanelStartNavigationButtonBinder
-import com.mapbox.navigation.dropin.map.geocoding.POINameComponent
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.dropin.tripprogress.TripProgressBinder
 import kotlinx.coroutines.flow.combine
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal fun NavigationViewContext.poiNameComponent(textView: AppCompatTextView) =
-    POINameComponent(store, textView, styles.poiNameTextAppearance)
+internal fun NavigationViewContext.poiNameComponent(
+    viewGroup: ViewGroup
+): MapboxNavigationObserver {
+    val binderFlow = combine(
+        options.showPoiName,
+        uiBinders.infoPanelPoiNameBinder
+    ) { show, binder ->
+        if (show) {
+            binder ?: InfoPanelPoiNameBinder(this)
+        } else {
+            EmptyBinder()
+        }
+    }
+    return reloadOnChange(binderFlow) { it.bind(viewGroup) }
+}
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.routePreviewButtonComponent(
@@ -77,8 +89,21 @@ internal fun NavigationViewContext.endNavigationButtonComponent(
 }
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal fun NavigationViewContext.arrivalTextComponent(textView: AppCompatTextView) =
-    ArrivalTextComponent(textView, styles.arrivalTextAppearance)
+internal fun NavigationViewContext.arrivalTextComponent(
+    viewGroup: ViewGroup
+): MapboxNavigationObserver {
+    val binderFlow = combine(
+        options.showArrivalText,
+        uiBinders.infoPanelArrivalTextBinder
+    ) { show, binder ->
+        if (show) {
+            binder ?: InfoPanelArrivalTextBinder(this)
+        } else {
+            EmptyBinder()
+        }
+    }
+    return reloadOnChange(binderFlow) { it.bind(viewGroup) }
+}
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.tripProgressComponent(

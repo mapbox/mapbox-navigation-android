@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 internal class POINameComponent(
     private val store: Store,
     private val textView: AppCompatTextView,
-    private val textAppearance: StateFlow<Int>
+    private val textAppearance: StateFlow<Int>,
 ) : UIComponent() {
     private val resources get() = textView.resources
 

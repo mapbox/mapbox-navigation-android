@@ -50,4 +50,6 @@ class CustomizedViewModel : ViewModel() {
     val enableDestinationPreview = MutableLiveData(true)
     val isInfoPanelHideable = MutableLiveData(false)
     val infoPanelStateOverride = MutableLiveData("--")
+    val infoPanelShowPoiName = MutableLiveData(true)
+    val infoPanelShowArrivalText = MutableLiveData(true)
 }

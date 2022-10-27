@@ -96,6 +96,16 @@ internal class NavigationViewBinder {
     val infoPanelTripProgressBinder: StateFlow<UIBinder?>
         get() = _infoPanelTripProgressBinder.asStateFlow()
 
+    private val _infoPanelPoiNameBinder: MutableStateFlow<UIBinder?> =
+        MutableStateFlow(null)
+    val infoPanelPoiNameBinder: StateFlow<UIBinder?>
+        get() = _infoPanelPoiNameBinder.asStateFlow()
+
+    private val _infoPanelArrivalTextBinder: MutableStateFlow<UIBinder?> =
+        MutableStateFlow(null)
+    val infoPanelArrivalTextBinder: StateFlow<UIBinder?>
+        get() = _infoPanelArrivalTextBinder.asStateFlow()
+
     private val _infoPanelRoutePreviewButtonBinder: MutableStateFlow<UIBinder?> =
         MutableStateFlow(null)
     val infoPanelRoutePreviewButtonBinder: StateFlow<UIBinder?> =
@@ -160,6 +170,11 @@ internal class NavigationViewBinder {
         customization.infoPanelTripProgressBinder?.also {
             _infoPanelTripProgressBinder.emitOrNull(it)
         }
+        customization.infoPanelPoiNameBinder?.also { _infoPanelPoiNameBinder.emitOrNull(it) }
+        customization.infoPanelArrivalTextBinder?.also {
+            _infoPanelArrivalTextBinder.emitOrNull(it)
+        }
+
         customization.infoPanelContentBinder?.also { _infoPanelContentBinder.emitOrNull(it) }
 
         customization.infoPanelRoutePreviewButtonBinder?.also {
