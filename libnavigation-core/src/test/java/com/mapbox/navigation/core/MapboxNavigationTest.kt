@@ -339,6 +339,19 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         verify(exactly = 1) { navigationSession.unregisterAllNavigationSessionStateObservers() }
     }
 
+    @Test
+    fun telemetryIsDisabled() {
+        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
+
+        createMapboxNavigation()
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 0) {
+            MapboxNavigationTelemetry.initialize(any(), any(), any(), any())
+        }
+        verify(exactly = 0) { MapboxNavigationTelemetry.destroy(any()) }
+    }
+
     @ExperimentalPreviewMapboxNavigationAPI
     @Test(expected = IllegalStateException::class)
     fun telemetryIsDisabledTryToGetFeedbackMetadataWrapper() {
@@ -1615,6 +1628,18 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.postCustomEvent("", NavigationCustomEventType.ANALYTICS, "1.0")
 
         verify(exactly = 1) { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) }
+    }
+
+    @Test
+    fun `when telemetry is disabled custom event is not posted`() = coroutineRule.runBlockingTest {
+        createMapboxNavigation()
+        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
+        every { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) } just Runs
+        every { MapboxNavigationTelemetry.destroy(any()) } just Runs
+
+        mapboxNavigation.postCustomEvent("", NavigationCustomEventType.ANALYTICS, "1.0")
+
+        verify(exactly = 0) { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) }
     }
 
     @Test
