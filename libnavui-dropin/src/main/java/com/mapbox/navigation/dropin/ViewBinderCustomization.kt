@@ -47,6 +47,18 @@ class ViewBinderCustomization {
     var infoPanelTripProgressBinder: UIBinder? = null
 
     /**
+     * Customize the Info Panel Point Of Interest Name text view by providing your own [UIBinder].
+     * Use [UIBinder.USE_DEFAULT] to reset to default.
+     */
+    var infoPanelPoiNameBinder: UIBinder? = null
+
+    /**
+     * Customize the Info Panel Arrival text view by providing your own [UIBinder].
+     * Use [UIBinder.USE_DEFAULT] to reset to default.
+     */
+    var infoPanelArrivalTextBinder: UIBinder? = null
+
+    /**
      * Customize the Info Panel Header by providing your own [UIBinder].
      * Use [UIBinder.USE_DEFAULT] to reset to default.
      */

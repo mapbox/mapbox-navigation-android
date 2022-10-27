@@ -1,7 +1,9 @@
 package com.mapbox.navigation.dropin.infopanel
 
 import android.content.Context
+import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.core.view.isEmpty
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -22,6 +24,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -63,7 +66,7 @@ class InfoPanelHeaderDestinationPreviewBinderTest {
 
         sut.bind(rootLayout)
 
-        assertNotNull(rootLayout.findViewById(R.id.poiName))
+        assertNotNull(rootLayout.findViewById(R.id.poiNameContainer))
         assertNotNull(rootLayout.findViewById(R.id.routePreviewContainer))
         assertNotNull(rootLayout.findViewById(R.id.startNavigationContainer))
     }
@@ -74,6 +77,20 @@ class InfoPanelHeaderDestinationPreviewBinderTest {
         components.onAttached(mapboxNavigation)
 
         assertNotNull(components.findComponent { it is POINameComponent })
+    }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `should NOT bind POINameComponent when ViewOptionsCustomization showPoiName is FALSE`() {
+        navContext.applyOptionsCustomization {
+            showPoiName = false
+        }
+        val rootLayout = FrameLayout(ctx)
+        val components = sut.bind(rootLayout)
+        components.onAttached(mapboxNavigation)
+
+        assertNull(components.findComponent { it is POINameComponent })
+        assertTrue((rootLayout.findViewById(R.id.poiNameContainer) as ViewGroup).isEmpty())
     }
 
     @Test

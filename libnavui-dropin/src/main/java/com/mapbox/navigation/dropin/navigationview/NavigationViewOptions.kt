@@ -80,6 +80,12 @@ internal class NavigationViewOptions(context: Context) {
     val showEndNavigationButton: StateFlow<Boolean> = _showEndNavigationButton.asStateFlow()
     val showStartNavigationButton: StateFlow<Boolean> = _showStartNavigationButton.asStateFlow()
 
+    private var _showPoiName: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    val showPoiName: StateFlow<Boolean> = _showPoiName.asStateFlow()
+
+    private var _showArrivalText: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    val showArrivalText: StateFlow<Boolean> = _showArrivalText.asStateFlow()
+
     fun applyCustomization(customization: ViewOptionsCustomization) {
         customization.mapStyleUriDay?.also { _mapStyleUriDay.value = it }
         customization.mapStyleUriNight?.also { _mapStyleUriNight.value = it }
@@ -106,5 +112,8 @@ internal class NavigationViewOptions(context: Context) {
         customization.showRoutePreviewButton?.also { _showRoutePreviewButton.value = it }
         customization.showEndNavigationButton?.also { _showEndNavigationButton.value = it }
         customization.showStartNavigationButton?.also { _showStartNavigationButton.value = it }
+
+        customization.showPoiName?.also { _showPoiName.value = it }
+        customization.showArrivalText?.also { _showArrivalText.value = it }
     }
 }
