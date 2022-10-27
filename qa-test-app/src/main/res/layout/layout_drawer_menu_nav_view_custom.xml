@@ -377,6 +377,24 @@
                     android:text="Info Panel" />
 
                 <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleShowPoiName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Show POI Name"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleShowArrivalText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Show Arrival Text"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/toggleShowTripProgress"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

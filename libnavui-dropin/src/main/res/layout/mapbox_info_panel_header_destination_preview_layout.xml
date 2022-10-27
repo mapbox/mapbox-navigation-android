@@ -2,29 +2,24 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     tools:background="@drawable/mapbox_bg_info_panel"
-    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
     tools:layout_height="@dimen/mapbox_infoPanel_peekHeight">
 
-    <androidx.appcompat.widget.AppCompatTextView
-        tools:style="@style/DropInInfoPanelHeadlineTextAppearance"
-        android:id="@+id/poiName"
+    <FrameLayout
+        android:id="@+id/poiNameContainer"
         android:layout_width="0dp"
-        android:layout_height="70dp"
-        android:paddingEnd="8dp"
-        android:text=""
-        android:maxLines="2"
-        android:ellipsize="end"
-        android:gravity="center_vertical"
+        android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="@+id/routePreviewContainer"
         app:layout_constraintEnd_toStartOf="@+id/routePreviewContainer"
         app:layout_constraintTop_toTopOf="@+id/routePreviewContainer"
-        tools:text="POI Name" />
+        tools:layout_height="70dp"
+        tools:background="#ddd" />
 
     <FrameLayout
         android:id="@+id/routePreviewContainer"

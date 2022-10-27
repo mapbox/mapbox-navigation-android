@@ -30,7 +30,7 @@ internal class InfoPanelHeaderDestinationPreviewBinder(
 
         return context.run {
             navigationListOf(
-                poiNameComponent(binding.poiName),
+                poiNameComponent(binding.poiNameContainer),
                 routePreviewButtonComponent(binding.routePreviewContainer),
                 startNavigationButtonComponent(binding.startNavigationContainer)
             )
