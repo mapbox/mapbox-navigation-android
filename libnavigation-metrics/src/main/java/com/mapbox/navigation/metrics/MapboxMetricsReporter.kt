@@ -12,11 +12,13 @@ import com.mapbox.common.EventsServiceObserver
 import com.mapbox.common.TelemetryService
 import com.mapbox.common.TurnstileEvent
 import com.mapbox.navigation.base.internal.metric.MetricEventInternal
+import com.mapbox.navigation.base.internal.metric.extractEventsNames
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.metrics.internal.EventsServiceProvider
 import com.mapbox.navigation.metrics.internal.TelemetryServiceProvider
+import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
@@ -35,7 +37,7 @@ object MapboxMetricsReporter : MetricsReporter {
     private lateinit var telemetryService: TelemetryService
 
     @Volatile
-    private var enableTelemetry = false
+    private var isTelemetryInitialized = false
 
     @Volatile
     private var metricsObserver: MetricsObserver? = null
@@ -44,11 +46,19 @@ object MapboxMetricsReporter : MetricsReporter {
     private val eventsServiceObserver =
         object : EventsServiceObserver {
             override fun didEncounterError(error: EventsServiceError, events: Value) {
-                logE("EventsService failure: $error for event $events", LOG_CATEGORY)
+                ifTelemetryIsRunning {
+                    logE(LOG_CATEGORY) {
+                        "EventsService failure: $error for events ${events.extractEventsNames()}"
+                    }
+                }
             }
 
             override fun didSendEvents(events: Value) {
-                logD("Event has been sent $events", LOG_CATEGORY)
+                ifTelemetryIsRunning {
+                    logD(LOG_CATEGORY) {
+                        "Events has been sent ${events.extractEventsNames()}"
+                    }
+                }
             }
         }
 
@@ -66,7 +76,7 @@ object MapboxMetricsReporter : MetricsReporter {
         accessToken: String,
         userAgent: String
     ) {
-        enableTelemetry = true
+        isTelemetryInitialized = true
         val eventsServerOptions = EventsServerOptions(accessToken, userAgent, null)
         eventsService = EventsServiceProvider.provideEventsService(eventsServerOptions)
         telemetryService = TelemetryServiceProvider.provideTelemetryService(eventsServerOptions)
@@ -90,7 +100,7 @@ object MapboxMetricsReporter : MetricsReporter {
      */
     @JvmStatic
     fun disable() {
-        enableTelemetry = false
+        isTelemetryInitialized = false
         removeObserver()
         eventsService.unregisterObserver(eventsServiceObserver)
         ioJobController.job.cancelChildren()
@@ -150,10 +160,10 @@ object MapboxMetricsReporter : MetricsReporter {
     }
 
     private inline fun ifTelemetryIsRunning(func: () -> Unit) {
-        if (enableTelemetry) {
+        if (isTelemetryInitialized && TelemetryUtilsDelegate.getEventsCollectionState()) {
             func.invoke()
         } else {
-            logW(
+            logD(
                 "Navigation Telemetry is disabled",
                 LOG_CATEGORY
             )

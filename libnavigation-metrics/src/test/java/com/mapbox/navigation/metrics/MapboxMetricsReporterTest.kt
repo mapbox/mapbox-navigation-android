@@ -15,7 +15,6 @@ import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.LoggerFrontend
-import com.mapbox.navigation.utils.internal.logW
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -53,7 +52,7 @@ class MapboxMetricsReporterTest {
         mockkObject(TelemetryServiceProvider)
 
         every { TelemetryUtilsDelegate.setEventsCollectionState(any()) } just runs
-        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
+        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns true
     }
 
     @After
@@ -76,7 +75,7 @@ class MapboxMetricsReporterTest {
         MapboxMetricsReporter.addEvent(mockk())
 
         verify(exactly = 2) {
-            logger.logW(
+            logger.logD(
                 "Navigation Telemetry is disabled",
                 "MapboxMetricsReporter"
             )
@@ -92,6 +91,18 @@ class MapboxMetricsReporterTest {
         MapboxMetricsReporter.addEvent(mockk())
 
         verify(exactly = 1) { eventService.unregisterObserver(any()) }
+        verify(exactly = 0) { eventService.sendTurnstileEvent(any(), any()) }
+        verify(exactly = 0) { eventService.sendEvent(any(), any()) }
+    }
+
+    @Test
+    fun `events aren't sent if telemetry is disabled globally`() {
+        val eventService = initMetricsReporterWithTelemetry()
+
+        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
+        MapboxMetricsReporter.sendTurnstileEvent(mockk())
+        MapboxMetricsReporter.addEvent(mockk())
+
         verify(exactly = 0) { eventService.sendTurnstileEvent(any(), any()) }
         verify(exactly = 0) { eventService.sendEvent(any(), any()) }
     }
