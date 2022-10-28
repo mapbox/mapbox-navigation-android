@@ -102,8 +102,9 @@ abstract class MapViewBinder : UIBinder {
             },
             ScalebarComponent(
                 mapView,
-                context.styles.mapScalebarParams,
-                context.systemBarsInsets
+                context.options.showMapScalebar,
+                context.systemBarsInsets,
+                context.options.distanceFormatterOptions,
             )
         )
     }

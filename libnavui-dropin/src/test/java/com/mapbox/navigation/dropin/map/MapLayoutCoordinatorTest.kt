@@ -50,9 +50,7 @@ class MapLayoutCoordinatorTest {
         every { uiBinders } returns mockk(relaxed = true) {
             every { mapViewBinder } returns mapViewBinderFlow
         }
-        every { styles } returns mockk(relaxed = true) {
-            every { mapScalebarParams } returns MutableStateFlow(mockk(relaxed = true))
-        }
+        every { styles } returns mockk(relaxed = true)
     }
     private lateinit var binding: MapboxNavigationViewLayoutBinding
     private lateinit var coordinator: MapLayoutCoordinator

@@ -1,8 +1,6 @@
 package com.mapbox.navigation.dropin.map.scalebar
 
-import android.content.Context
 import android.view.View
-import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -23,16 +21,13 @@ class ScalebarPlaceholderComponentTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
-    private val context = ApplicationProvider.getApplicationContext<Context>()
     private val mapboxNavigation = mockk<MapboxNavigation>()
     private val scalebarPlaceholderView = mockk<View>(relaxed = true)
     private val visibilityFlow = MutableStateFlow(false)
-    private val mapScalebarParams = MutableStateFlow(
-        MapboxMapScalebarParams.Builder(context).build()
-    )
+    private val isEnabledFlow = MutableStateFlow(false)
     private val component = ScalebarPlaceholderComponent(
         scalebarPlaceholderView,
-        mapScalebarParams,
+        isEnabledFlow,
         visibilityFlow
     )
 
@@ -51,7 +46,7 @@ class ScalebarPlaceholderComponentTest {
 
     @Test
     fun mapScalebarParamsChangeBeforeOnAttached() {
-        mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
+        isEnabledFlow.tryEmit(true)
         verify(exactly = 0) { scalebarPlaceholderView.visibility = any() }
     }
 
@@ -66,7 +61,7 @@ class ScalebarPlaceholderComponentTest {
         visibilityFlow.tryEmit(true)
         component.onAttached(mapboxNavigation)
         clearMocks(scalebarPlaceholderView)
-        mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
+        isEnabledFlow.tryEmit(true)
         verify { scalebarPlaceholderView.visibility = View.GONE }
     }
 
@@ -74,13 +69,13 @@ class ScalebarPlaceholderComponentTest {
     fun mapScalebarParamsChangeAfterOnAttachedNotVisible() {
         component.onAttached(mapboxNavigation)
         clearMocks(scalebarPlaceholderView)
-        mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
+        isEnabledFlow.tryEmit(true)
         verify { scalebarPlaceholderView.visibility = View.VISIBLE }
     }
 
     @Test
     fun maneuverVisibilityChangeAfterOnAttachedVisible() {
-        mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
+        isEnabledFlow.tryEmit(true)
         component.onAttached(mapboxNavigation)
         clearMocks(scalebarPlaceholderView)
         visibilityFlow.tryEmit(true)
@@ -91,7 +86,7 @@ class ScalebarPlaceholderComponentTest {
     fun maneuverVisibilityChangeAfterOnAttachedNotVisible() {
         // so that it will <i>change</i> to false later
         visibilityFlow.tryEmit(true)
-        mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
+        isEnabledFlow.tryEmit(true)
         component.onAttached(mapboxNavigation)
         clearMocks(scalebarPlaceholderView)
         visibilityFlow.tryEmit(false)
@@ -103,13 +98,13 @@ class ScalebarPlaceholderComponentTest {
         component.onAttached(mapboxNavigation)
         clearMocks(scalebarPlaceholderView)
         component.onDetached(mapboxNavigation)
-        mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
+        isEnabledFlow.tryEmit(true)
         verify(exactly = 0) { scalebarPlaceholderView.visibility = any() }
     }
 
     @Test
     fun maneuverVisibilityChangeAfterOnDetached() {
-        mapScalebarParams.tryEmit(MapboxMapScalebarParams.Builder(context).enabled(true).build())
+        isEnabledFlow.tryEmit(true)
         component.onAttached(mapboxNavigation)
         clearMocks(scalebarPlaceholderView)
         component.onDetached(mapboxNavigation)
