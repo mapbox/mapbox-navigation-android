@@ -7,6 +7,7 @@ import androidx.annotation.WorkerThread
 import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
@@ -43,6 +44,7 @@ fun NavigationRoute.refreshRoute(
     legAnnotations: List<LegAnnotation?>?,
     incidents: List<List<Incident>?>?,
     closures: List<List<Closure>?>?,
+    waypoints: List<DirectionsWaypoint?>?,
 ): NavigationRoute {
     val updateLegs = directionsRoute.legs()?.mapIndexed { index, routeLeg ->
         if (index < initialLegIndex) {
@@ -91,12 +93,19 @@ fun NavigationRoute.refreshRoute(
                 .build()
         }
     }
-    return updateDirectionsRouteOnly {
+    val directionsRouteBlock: DirectionsRoute.() -> DirectionsRoute = {
         toBuilder()
             .legs(updateLegs)
             .updateRouteDurationBasedOnLegsDuration(updateLegs)
             .build()
     }
+    val directionsResponseBlock: DirectionsResponse.Builder.() -> DirectionsResponse.Builder = {
+        updateWaypoints(
+            directionsResponse.waypoints(),
+            waypoints
+        )
+    }
+    return update(directionsRouteBlock, directionsResponseBlock)
 }
 
 private fun adjustedIndex(offsetIndex: Int, originalIndex: Int?): Int {
@@ -107,14 +116,16 @@ private fun adjustedIndex(offsetIndex: Int, originalIndex: Int?): Int {
  * Updates only java representation of route.
  * The native route should later be updated through [Navigator.refreshRoute].
  */
-fun NavigationRoute.updateDirectionsRouteOnly(
-    block: DirectionsRoute.() -> DirectionsRoute
+fun NavigationRoute.update(
+    directionsRouteBlock: DirectionsRoute.() -> DirectionsRoute,
+    directionsResponseBlock: DirectionsResponse.Builder.() -> DirectionsResponse.Builder,
 ): NavigationRoute {
-    val refreshedRoute = directionsRoute.block()
+    val refreshedRoute = directionsRoute.directionsRouteBlock()
     val refreshedRoutes = directionsResponse.routes().toMutableList()
     refreshedRoutes[routeIndex] = refreshedRoute
     val refreshedResponse = directionsResponse.toBuilder()
         .routes(refreshedRoutes)
+        .directionsResponseBlock()
         .build()
     return copy(directionsResponse = refreshedResponse)
 }
@@ -181,6 +192,29 @@ private fun List<LegStep>.updateSteps(
         previousStepsAnnotationsCount += stepAnnotationsCount
     }
     return result
+}
+
+private fun DirectionsResponse.Builder.updateWaypoints(
+    oldWaypoints: List<DirectionsWaypoint>?,
+    updatedWaypoints: List<DirectionsWaypoint?>?,
+): DirectionsResponse.Builder {
+    if (oldWaypoints == null) {
+        return this
+    }
+    val newWaypoints = mutableListOf<DirectionsWaypoint>()
+    if (updatedWaypoints != null) {
+        oldWaypoints.forEachIndexed { index, oldWaypoint ->
+            if (index < updatedWaypoints.size) {
+                val updatedWaypoint = updatedWaypoints[index]
+                if (updatedWaypoint == null) {
+                    newWaypoints.add(oldWaypoint)
+                } else {
+                    newWaypoints.add(updatedWaypoint)
+                }
+            }
+        }
+    }
+    return waypoints(newWaypoints)
 }
 
 private fun DirectionsRoute.Builder.updateRouteDurationBasedOnLegsDuration(

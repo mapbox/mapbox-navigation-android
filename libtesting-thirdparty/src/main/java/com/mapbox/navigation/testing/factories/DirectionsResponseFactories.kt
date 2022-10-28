@@ -1,5 +1,9 @@
 package com.mapbox.navigation.testing.factories
 
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.BannerComponents
@@ -8,6 +12,7 @@ import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.api.directions.v5.models.BannerView
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
@@ -178,6 +183,32 @@ fun createClosure(
 ): Closure = Closure.builder()
     .geometryIndexStart(geometryIndexStart)
     .geometryIndexEnd(geometryIndexEnd)
+    .build()
+
+fun createJsonWaypoint(
+    name: String = "name",
+    distance: Double? = null,
+    location: DoubleArray = doubleArrayOf(1.3, 5.7),
+    metadata: JsonObject? = null
+): JsonElement = JsonObject().apply {
+    add("name", JsonPrimitive(name))
+    distance?.let { add("distance", JsonPrimitive(it)) }
+    add("location", JsonArray().apply {
+        location.forEach { coord -> add(JsonPrimitive(coord)) }
+    })
+    metadata?.let { add("metadata", it) }
+}
+
+fun createWaypoint(
+    name: String = "name",
+    distance: Double? = null,
+    location: DoubleArray = doubleArrayOf(1.3, 5.7),
+    unrecognizedProperties: Map<String, JsonElement>? = null
+): DirectionsWaypoint = DirectionsWaypoint.builder()
+    .name(name)
+    .distance(distance)
+    .rawLocation(location)
+    .unrecognizedJsonProperties(unrecognizedProperties)
     .build()
 
 fun createRouteOptions(

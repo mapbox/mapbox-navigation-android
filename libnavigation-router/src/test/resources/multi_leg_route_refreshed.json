@@ -6421,31 +6421,34 @@
   "waypoints": [
     {
       "name": "",
-      "location": [
-        17.035996,
-        51.123076
-      ]
+      "location": [11.23, 45.67],
+      "distance": 23.45
     },
     {
       "name": "",
-      "location": [
-        17.033323,
-        51.116123
-      ]
+      "location": [21.32, 34.43],
+      "distance": 56.66,
+      "metadata": {
+        "type": "charging-station",
+        "name": "",
+        "charge_time": 111,
+        "charge_to": 1111,
+        "charge_at_arrival": 1111,
+        "plug_type": "tesla",
+        "current_type": "dc",
+        "power_kw": 111,
+        "station_id": ""
+      }
     },
     {
-      "name": "",
-      "location": [
-        17.030376,
-        51.113071
-      ]
+      "name": "some name",
+      "location": [1.345, 9.809],
+      "distance": 34.567
     },
     {
-      "name": "",
-      "location": [
-        17.032184,
-        51.107224
-      ]
+      "name": "another name",
+      "location": [55.009, 33.445],
+      "distance": 98.001
     }
   ]
 }

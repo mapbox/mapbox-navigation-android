@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.directions
 
-import com.mapbox.navigation.base.internal.CurrentIndicesFactory
+import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouter
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
@@ -24,7 +24,7 @@ class LegacyNavigationRouterAdapterTest {
             result,
             adapter.getRouteRefresh(
                 route,
-                CurrentIndicesFactory.createIndices(5, 6, 7),
+                RouteRefreshRequestData(5, 6, 7, emptyMap()),
                 callback
             )
         )

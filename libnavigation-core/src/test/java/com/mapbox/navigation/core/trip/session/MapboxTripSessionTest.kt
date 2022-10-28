@@ -6,7 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.navigation.base.internal.CurrentIndicesFactory
+import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
 import com.mapbox.navigation.base.internal.route.refreshNativePeer
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -110,10 +110,11 @@ class MapboxTripSessionTest {
     )
     private val legIndex = 2
     private val geometryIndex = 23
-    private val indicesSnapshot = CurrentIndicesFactory.createIndices(
+    private val routeRefreshRequestData = RouteRefreshRequestData(
         legIndex,
         geometryIndex,
-        66
+        66,
+        emptyMap()
     )
     private val setRoutesInfo = BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, legIndex)
 
@@ -631,7 +632,7 @@ class MapboxTripSessionTest {
 
             tripSession.setRoutes(
                 refreshedRoutes,
-                SetRefreshedRoutesInfo(CurrentIndicesFactory.createIndices(0, 0, null))
+                SetRefreshedRoutesInfo(RouteRefreshRequestData(0, 0, null, emptyMap()))
             )
 
             refreshedRoutes.forEach {
@@ -767,7 +768,7 @@ class MapboxTripSessionTest {
             tripSession.start(true)
             val result = tripSession.setRoutes(
                 refreshedRoutes,
-                SetRefreshedRoutesInfo(indicesSnapshot),
+                SetRefreshedRoutesInfo(routeRefreshRequestData),
             )
 
             assertEquals(
@@ -808,7 +809,7 @@ class MapboxTripSessionTest {
             tripSession.start(true)
             val result = tripSession.setRoutes(
                 refreshedRoutes,
-                SetRefreshedRoutesInfo(indicesSnapshot),
+                SetRefreshedRoutesInfo(routeRefreshRequestData),
             )
 
             assertEquals(
@@ -833,7 +834,7 @@ class MapboxTripSessionTest {
             tripSession.start(true)
             val result = tripSession.setRoutes(
                 routes,
-                SetRefreshedRoutesInfo(indicesSnapshot),
+                SetRefreshedRoutesInfo(routeRefreshRequestData),
             )
 
             assertEquals(error, (result as NativeSetRouteError).error)
@@ -1039,7 +1040,7 @@ class MapboxTripSessionTest {
             )
             tripSession.setRoutes(
                 listOf(refreshedRoute),
-                SetRefreshedRoutesInfo(CurrentIndicesFactory.createIndices(0, 0, null)),
+                SetRefreshedRoutesInfo(RouteRefreshRequestData(0, 0, null, emptyMap())),
             )
 
             verifyOrder {
@@ -1437,7 +1438,7 @@ class MapboxTripSessionTest {
         tripSession.start(withTripService = true)
 
         pauseDispatcher {
-            val setRoutesInfo = SetRefreshedRoutesInfo(indicesSnapshot)
+            val setRoutesInfo = SetRefreshedRoutesInfo(routeRefreshRequestData)
             launch { tripSession.setRoutes(listOf(primary, alternative), setRoutesInfo) }
             runCurrent()
             advanceTimeBy(delayTimeMillis = 50)

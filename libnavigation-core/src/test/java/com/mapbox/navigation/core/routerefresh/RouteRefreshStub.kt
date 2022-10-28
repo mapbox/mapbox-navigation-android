@@ -1,8 +1,7 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.CurrentIndices
-import com.mapbox.navigation.base.internal.CurrentIndicesFactory
+import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.RouterFactory.buildNavigationRouterRefreshError
@@ -21,13 +20,13 @@ class RouteRefreshStub : RouteRefresh {
 
     override fun requestRouteRefresh(
         route: NavigationRoute,
-        currentIndices: CurrentIndices,
+        routeRefreshRequestData: RouteRefreshRequestData,
         callback: NavigationRouterRefreshCallback
     ): Long {
         val currentRequestId = requestId++
         val handler = handlers[route.id]
         if (handler != null) {
-            handler(route, currentIndices, callback)
+            handler(route, routeRefreshRequestData, callback)
         } else {
             callback.onFailure(buildNavigationRouterRefreshError("handle isn't configured yet"))
         }
@@ -68,7 +67,7 @@ class RouteRefreshStub : RouteRefresh {
 
 private typealias RouteRefreshHandler = (
     route: NavigationRoute,
-    currentIndices: CurrentIndices,
+    routeRefreshRequestData: RouteRefreshRequestData,
     callback: NavigationRouterRefreshCallback
 ) -> Unit
 
@@ -81,7 +80,7 @@ class RouteRefreshStubTest {
 
         stub.requestRouteRefresh(
             createNavigationRoute(),
-            CurrentIndicesFactory.createIndices(0, 0, null),
+            RouteRefreshRequestData(0, 0, null, emptyMap()),
             callback
         )
 
@@ -109,7 +108,7 @@ class RouteRefreshStubTest {
         val callback = mockk<NavigationRouterRefreshCallback>(relaxed = true)
         stub.requestRouteRefresh(
             originalRoute,
-            CurrentIndicesFactory.createIndices(0, 0, null),
+            RouteRefreshRequestData(0, 0, null, emptyMap()),
             callback
         )
 
@@ -130,7 +129,7 @@ class RouteRefreshStubTest {
 
         stub.requestRouteRefresh(
             testRoute,
-            CurrentIndicesFactory.createIndices(0, 0, null),
+            RouteRefreshRequestData(0, 0, null, emptyMap()),
             callback
         )
 
@@ -151,7 +150,7 @@ class RouteRefreshStubTest {
 
         stub.requestRouteRefresh(
             testRoute,
-            CurrentIndicesFactory.createIndices(0, 0, null),
+            RouteRefreshRequestData(0, 0, null, emptyMap()),
             callback
         )
 

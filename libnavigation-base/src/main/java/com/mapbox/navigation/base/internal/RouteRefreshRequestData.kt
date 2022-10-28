@@ -3,19 +3,20 @@ package com.mapbox.navigation.base.internal
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 
 /**
- * Class holding information about a snapshot of current indices.
- * All the indices are consistent (taken from the same RouteProgress instance).
+ * Class holding information about dynamic data used for refresh requests.
  *
  * @param legIndex index of a leg the user is currently on.
  * @param routeGeometryIndex route-wise index representing the geometry point
  * right in front of the user (see [DirectionsRoute.geometry]), null if unavailable.
  * @param legGeometryIndex leg-wise index representing the geometry point
  * right in front of the user (see [DirectionsRoute.geometry]), null if unavailable.
+ * @param experimentalProperties map containing dynamic data.
  */
-class CurrentIndices internal constructor(
+class RouteRefreshRequestData(
     val legIndex: Int,
     val routeGeometryIndex: Int,
     val legGeometryIndex: Int?,
+    val experimentalProperties: Map<String, String>,
 ) {
 
     /**
@@ -25,11 +26,12 @@ class CurrentIndices internal constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as CurrentIndices
+        other as RouteRefreshRequestData
 
         if (legIndex != other.legIndex) return false
         if (routeGeometryIndex != other.routeGeometryIndex) return false
         if (legGeometryIndex != other.legGeometryIndex) return false
+        if (experimentalProperties != other.experimentalProperties) return false
 
         return true
     }
@@ -41,6 +43,7 @@ class CurrentIndices internal constructor(
         var result = legIndex
         result = 31 * result + routeGeometryIndex
         result = 31 * result + (legGeometryIndex ?: 0)
+        result = 31 * result + experimentalProperties.hashCode()
         return result
     }
 
@@ -48,10 +51,11 @@ class CurrentIndices internal constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "CurrentIndices(" +
+        return "RouteRefreshRequestData(" +
             "legIndex=$legIndex, " +
             "routeGeometryIndex=$routeGeometryIndex, " +
             "legGeometryIndex=$legGeometryIndex" +
+            "experimentalProperties=$experimentalProperties" +
             ")"
     }
 }

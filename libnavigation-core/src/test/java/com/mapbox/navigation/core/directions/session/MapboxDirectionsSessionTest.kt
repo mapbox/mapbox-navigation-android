@@ -2,8 +2,8 @@ package com.mapbox.navigation.core.directions.session
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.internal.CurrentIndicesFactory
 import com.mapbox.navigation.base.internal.NavigationRouterV2
+import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -41,7 +41,7 @@ class MapboxDirectionsSessionTest {
     private val observer: RoutesObserver = mockk(relaxUnitFun = true)
     private val route: NavigationRoute = mockk(relaxUnitFun = true)
     private val routes: List<NavigationRoute> = listOf(route)
-    private val currentIndices = CurrentIndicesFactory.createIndices(1, 2, 3)
+    private val routeRefreshRequestData = RouteRefreshRequestData(1, 2, 3, emptyMap())
     private lateinit var routeCallback: NavigationRouterCallback
     private lateinit var refreshCallback: NavigationRouterRefreshCallback
 
@@ -60,7 +60,7 @@ class MapboxDirectionsSessionTest {
             routeRequestId
         }
         every {
-            router.getRouteRefresh(route, currentIndices, capture(refreshListener))
+            router.getRouteRefresh(route, routeRefreshRequestData, capture(refreshListener))
         } answers {
             refreshCallback = refreshListener.captured
             routeRefreshRequestId
@@ -120,7 +120,7 @@ class MapboxDirectionsSessionTest {
 
     @Test
     fun `route refresh response - success`() {
-        session.requestRouteRefresh(route, currentIndices, routesRefreshRequestCallback)
+        session.requestRouteRefresh(route, routeRefreshRequestData, routesRefreshRequestCallback)
         refreshCallback.onRefreshReady(route)
 
         verify(exactly = 1) { routesRefreshRequestCallback.onRefreshReady(route) }
@@ -130,14 +130,18 @@ class MapboxDirectionsSessionTest {
     fun `route refresh request returns id`() {
         assertEquals(
             2L,
-            session.requestRouteRefresh(route, currentIndices, routesRefreshRequestCallback)
+            session.requestRouteRefresh(
+                route,
+                routeRefreshRequestData,
+                routesRefreshRequestCallback
+            )
         )
     }
 
     @Test
     fun `route refresh response - failure`() {
         val error: NavigationRouterRefreshError = mockk()
-        session.requestRouteRefresh(route, currentIndices, routesRefreshRequestCallback)
+        session.requestRouteRefresh(route, routeRefreshRequestData, routesRefreshRequestCallback)
         refreshCallback.onFailure(error)
 
         verify(exactly = 1) {

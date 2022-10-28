@@ -98,7 +98,7 @@ internal open class MapboxNavigationBaseTest {
     val historyRecordingStateHandler: HistoryRecordingStateHandler = mockk(relaxed = true)
     val developerMetadataAggregator: DeveloperMetadataAggregator = mockk(relaxUnitFun = true)
     val threadController = mockk<ThreadController>(relaxed = true)
-    val currentIndicesProvider = mockk<CurrentIndicesProvider>(relaxed = true)
+    val routeRefreshRequestDataProvider = mockk<RouteRefreshRequestDataProvider>(relaxed = true)
 
     val applicationContext: Context = mockk(relaxed = true) {
         every { inferDeviceLocale() } returns Locale.US
@@ -201,8 +201,8 @@ internal open class MapboxNavigationBaseTest {
             NavigationComponentProvider.createDeveloperMetadataAggregator(any())
         } returns developerMetadataAggregator
         every {
-            NavigationComponentProvider.createCurrentIndicesProvider()
-        } returns currentIndicesProvider
+            NavigationComponentProvider.createRouteRefreshRequestDataProvider()
+        } returns routeRefreshRequestDataProvider
 
         every {
             navigator.create(

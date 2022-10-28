@@ -1247,6 +1247,39 @@
           ]
         }
       }
+    ],
+    "waypoints": [
+      {
+        "name": "second leg name",
+        "location": [77.34, 99.08],
+        "distance": 55.11
+      },
+      {
+        "name": "Charging Stop",
+        "location": [88.12, 30.08],
+        "distance": 119.12,
+        "metadata": {
+          "type": "charging-station",
+          "name": "",
+          "charge_time": 222,
+          "charge_to": 2222,
+          "charge_at_arrival": 2222,
+          "plug_type": "tesla",
+          "current_type": "dc",
+          "power_kw": 222,
+          "station_id": ""
+        }
+      },
+      {
+        "name": "some name2",
+        "location": [3.212, 8.789],
+        "distance": 44.089
+      },
+      {
+        "name": "another name2",
+        "location": [39.8608],
+        "distance": 73.0568
+      }
     ]
   }
 }

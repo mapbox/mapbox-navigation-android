@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core
 
-import com.mapbox.navigation.base.internal.CurrentIndices
+import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 
 internal sealed class SetRoutesInfo(
@@ -63,8 +63,8 @@ internal class SetAlternativeRoutesInfo(legIndex: Int) : SetRoutesInfo(
 }
 
 internal class SetRefreshedRoutesInfo(
-    val currentIndices: CurrentIndices
-) : SetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_REFRESH, currentIndices.legIndex) {
+    val routeRefreshRequestData: RouteRefreshRequestData
+) : SetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_REFRESH, routeRefreshRequestData.legIndex) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -73,20 +73,20 @@ internal class SetRefreshedRoutesInfo(
 
         other as SetRefreshedRoutesInfo
 
-        if (currentIndices != other.currentIndices) return false
+        if (routeRefreshRequestData != other.routeRefreshRequestData) return false
 
         return true
     }
 
     override fun hashCode(): Int {
         var result = super.hashCode()
-        result = 31 * result + currentIndices.hashCode()
+        result = 31 * result + routeRefreshRequestData.hashCode()
         return result
     }
 
     override fun toString(): String {
         return "SetRefreshedRoutesInfo(" +
-            "currentIndices=$currentIndices) " +
+            "routeRefreshRequestData=$routeRefreshRequestData) " +
             super.toString() +
             ""
     }

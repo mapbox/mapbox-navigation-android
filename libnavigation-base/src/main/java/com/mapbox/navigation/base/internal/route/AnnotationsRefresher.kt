@@ -1,5 +1,7 @@
 package com.mapbox.navigation.base.internal.route
 
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.navigation.utils.internal.logE
 import kotlin.math.min
@@ -46,8 +48,28 @@ internal object AnnotationsRefresher {
             newAnnotation,
             startingLegGeometryIndex,
         ) { maxspeed() }
-        // unrecognized properties migrate from new annotation
-        return (newAnnotation?.toBuilder() ?: LegAnnotation.builder())
+        val unrecognizedProperties = oldAnnotation.unrecognizedPropertiesNames
+            .union(newAnnotation?.unrecognizedPropertiesNames ?: emptySet())
+            .associateNonNullValuesWith { propertyName ->
+                if (
+                    oldAnnotation.getUnrecognizedProperty(propertyName)?.isJsonArray == false ||
+                    newAnnotation?.getUnrecognizedProperty(propertyName)?.isJsonArray == false
+                ) {
+                    null
+                } else {
+                    val extractor = { annotation: LegAnnotation ->
+                        annotation.getUnrecognizedProperty(propertyName)?.asJsonArray?.toList()
+                    }
+                    mergeAnnotationProperty(
+                        oldAnnotation,
+                        newAnnotation,
+                        startingLegGeometryIndex,
+                        extractor
+                    )?.toJsonArray()
+                }
+            }.ifEmpty { null }
+        return LegAnnotation.builder()
+            .unrecognizedJsonProperties(unrecognizedProperties)
             .congestion(congestion)
             .congestionNumeric(congestionNumeric)
             .maxspeed(maxSpeed)
@@ -83,5 +105,22 @@ internal object AnnotationsRefresher {
         repeat(expectedSize - filledSize) { result.add(oldProperty[it + filledSize]) }
 
         return result
+    }
+
+    private fun List<JsonElement>.toJsonArray(): JsonArray {
+        return JsonArray(this.size).also { array ->
+            forEach { array.add(it) }
+        }
+    }
+
+    private fun <T, R> Iterable<T>.associateNonNullValuesWith(block: (T) -> R?): Map<T, R> {
+        val map = hashMapOf<T, R>()
+        forEach { key ->
+            val value = block(key)
+            if (value != null) {
+                map[key] = value
+            }
+        }
+        return map
     }
 }

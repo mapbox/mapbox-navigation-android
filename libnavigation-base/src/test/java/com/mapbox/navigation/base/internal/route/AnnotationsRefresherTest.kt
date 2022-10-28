@@ -1,5 +1,8 @@
 package com.mapbox.navigation.base.internal.route
 
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
+import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.MaxSpeed
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -203,6 +206,14 @@ class AnnotationsRefresherTest(
                 ),
                 arrayOf(
                     LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to listOf(79, 78, 77, 76, 75)
+                                    .toJsonArray(::JsonPrimitive),
+                                "custom_annotation" to listOf("a", "b", "c", "d", "e")
+                                    .toJsonArray(::JsonPrimitive),
+                            )
+                        )
                         .congestionNumeric(listOf(1, 2, 3, 4, 5))
                         .congestion(listOf("c1", "c2", "c3", "c4", "c5"))
                         .distance(listOf(1.2, 3.4, 5.6, 7.8, 9.0))
@@ -211,6 +222,14 @@ class AnnotationsRefresherTest(
                         .maxspeed(List(5) { MaxSpeed.builder().speed(it * 10).unit("mph").build() })
                         .build(),
                     LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to listOf(70, 69, 68, 67, 66)
+                                    .toJsonArray(::JsonPrimitive),
+                                "custom_annotation" to listOf("f", "g", "h", "i", "j")
+                                    .toJsonArray(::JsonPrimitive),
+                            )
+                        )
                         .congestionNumeric(listOf(6, 7, 8, 9, 10))
                         .congestion(listOf("c6", "c7", "c8", "c9", "c10"))
                         .distance(listOf(2.1, 4.3, 6.5, 8.7, 0.9))
@@ -224,6 +243,14 @@ class AnnotationsRefresherTest(
                         .build(),
                     0,
                     LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to listOf(70, 69, 68, 67, 66)
+                                    .toJsonArray(::JsonPrimitive),
+                                "custom_annotation" to listOf("f", "g", "h", "i", "j")
+                                    .toJsonArray(::JsonPrimitive),
+                            )
+                        )
                         .congestionNumeric(listOf(6, 7, 8, 9, 10))
                         .congestion(listOf("c6", "c7", "c8", "c9", "c10"))
                         .distance(listOf(2.1, 4.3, 6.5, 8.7, 0.9))
@@ -239,6 +266,14 @@ class AnnotationsRefresherTest(
                 ),
                 arrayOf(
                     LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to listOf(79, 78, 77, 76, 75)
+                                    .toJsonArray(::JsonPrimitive),
+                                "custom_annotation" to listOf("a", "b", "c", "d", "e")
+                                    .toJsonArray(::JsonPrimitive),
+                            )
+                        )
                         .congestionNumeric(listOf(1, 2, 3, 4, 5))
                         .congestion(listOf("c1", "c2", "c3", "c4", "c5"))
                         .distance(listOf(1.2, 3.4, 5.6, 7.8, 9.0))
@@ -251,6 +286,14 @@ class AnnotationsRefresherTest(
                         )
                         .build(),
                     LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to listOf(67, 66)
+                                    .toJsonArray(::JsonPrimitive),
+                                "custom_annotation" to listOf("i", "j")
+                                    .toJsonArray(::JsonPrimitive),
+                            )
+                        )
                         .congestionNumeric(listOf(9, 10))
                         .congestion(listOf("c9", "c10"))
                         .distance(listOf(8.7, 0.9))
@@ -264,6 +307,14 @@ class AnnotationsRefresherTest(
                         .build(),
                     3,
                     LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to listOf(79, 78, 77, 67, 66)
+                                    .toJsonArray(::JsonPrimitive),
+                                "custom_annotation" to listOf("a", "b", "c", "i", "j")
+                                    .toJsonArray(::JsonPrimitive),
+                            )
+                        )
                         .congestionNumeric(listOf(1, 2, 3, 9, 10))
                         .congestion(listOf("c1", "c2", "c3", "c9", "c10"))
                         .distance(listOf(1.2, 3.4, 5.6, 8.7, 0.9))
@@ -283,6 +334,14 @@ class AnnotationsRefresherTest(
                 ),
                 arrayOf(
                     LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to listOf(79, 78, 77, 76, 75)
+                                    .toJsonArray(::JsonPrimitive),
+                                "custom_annotation" to listOf("a", "b", "c", "d", "e")
+                                    .toJsonArray(::JsonPrimitive),
+                            )
+                        )
                         .congestionNumeric(listOf(1, 2, 3, 4, 5))
                         .congestion(listOf("c1", "c2", "c3", "c4", "c5"))
                         .distance(listOf(1.2, 3.4, 5.6, 7.8, 9.0))
@@ -295,6 +354,7 @@ class AnnotationsRefresherTest(
                         )
                         .build(),
                     LegAnnotation.builder()
+                        .unrecognizedJsonProperties(emptyMap())
                         .congestionNumeric(emptyList())
                         .congestion(emptyList())
                         .distance(emptyList())
@@ -304,6 +364,14 @@ class AnnotationsRefresherTest(
                         .build(),
                     5,
                     LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to listOf(79, 78, 77, 76, 75)
+                                    .toJsonArray(::JsonPrimitive),
+                                "custom_annotation" to listOf("a", "b", "c", "d", "e")
+                                    .toJsonArray(::JsonPrimitive),
+                            )
+                        )
                         .congestionNumeric(listOf(1, 2, 3, 4, 5))
                         .congestion(listOf("c1", "c2", "c3", "c4", "c5"))
                         .distance(listOf(1.2, 3.4, 5.6, 7.8, 9.0))
@@ -320,6 +388,14 @@ class AnnotationsRefresherTest(
                 ),
                 arrayOf(
                     LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to listOf(79, 78, 77, 76, 75)
+                                    .toJsonArray(::JsonPrimitive),
+                                "custom_annotation" to listOf("a", "b", "c", "d", "e")
+                                    .toJsonArray(::JsonPrimitive),
+                            )
+                        )
                         .congestionNumeric(listOf(1, 2, 3, 4, 5))
                         .congestion(listOf("c1", "c2", "c3", "c4", "c5"))
                         .distance(listOf(1.2, 3.4, 5.6, 7.8, 9.0))
@@ -334,6 +410,14 @@ class AnnotationsRefresherTest(
                     defaultAnnotation,
                     5,
                     LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to listOf(79, 78, 77, 76, 75)
+                                    .toJsonArray(::JsonPrimitive),
+                                "custom_annotation" to listOf("a", "b", "c", "d", "e")
+                                    .toJsonArray(::JsonPrimitive),
+                            )
+                        )
                         .congestionNumeric(listOf(1, 2, 3, 4, 5))
                         .congestion(listOf("c1", "c2", "c3", "c4", "c5"))
                         .distance(listOf(1.2, 3.4, 5.6, 7.8, 9.0))
@@ -349,50 +433,109 @@ class AnnotationsRefresherTest(
                         "Old annotation properties are used before current index."
                 ),
                 arrayOf(
-                    LegAnnotation.fromJson("{ \"my_key1\": \"my_value1\" }"),
-                    LegAnnotation.fromJson("{ \"my_key2\": \"my_value2\" }"),
-                    3,
-                    LegAnnotation.fromJson("{ \"my_key2\": \"my_value2\" }"),
-                    "Unrecognized properties migrate from new annotation."
-                ),
-                arrayOf(
-                    LegAnnotation.fromJson("{ \"my_key1\": \"my_value1\" }"),
-                    LegAnnotation.fromJson(
-                        "{ \"my_key2\": \"my_value2\", " +
-                            "\"my_key3\": \"my_value3\" }"
-                    ),
-                    3,
-                    LegAnnotation.fromJson(
-                        "{ \"my_key2\": \"my_value2\", " +
-                            "\"my_key3\": \"my_value3\" }"
-                    ),
-                    "Old annotation has less unrecognized properties. " +
-                        "Unrecognized properties migrate from new annotation."
-                ),
-                arrayOf(
+                    LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to JsonPrimitive("aaa"),
+                                "custom_annotation" to JsonPrimitive("bbb"),
+                            )
+                        )
+                        .build(),
+                    LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to listOf(79, 78, 77, 76, 75)
+                                    .toJsonArray(::JsonPrimitive),
+                                "custom_annotation" to listOf("a", "b", "c", "d", "e")
+                                    .toJsonArray(::JsonPrimitive),
+                            )
+                        )
+                        .build(),
+                    0,
                     LegAnnotation.builder().build(),
-                    LegAnnotation.fromJson(
-                        "{ \"my_key2\": \"my_value2\", " +
-                            "\"my_key3\": \"my_value3\" }"
-                    ),
-                    3,
-                    LegAnnotation.fromJson(
-                        "{ \"my_key2\": \"my_value2\", " +
-                            "\"my_key3\": \"my_value3\" }"
-                    ),
-                    "Old annotation has no unrecognized properties. " +
-                        "Unrecognized properties migrate from new annotation."
+                    "Non list old annotation unrecognized properties are ignored."
                 ),
                 arrayOf(
-                    LegAnnotation.fromJson(
-                        "{ \"my_key2\": \"my_value2\", " +
-                            "\"my_key3\": \"my_value3\" }"
-                    ),
-                    LegAnnotation.fromJson("{ \"my_key1\": \"my_value1\" }"),
+                    LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to listOf(79, 78, 77, 76, 75)
+                                    .toJsonArray(::JsonPrimitive),
+                                "custom_annotation" to listOf("a", "b", "c", "d", "e")
+                                    .toJsonArray(::JsonPrimitive),
+                            )
+                        )
+                        .build(),
+                    LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to JsonPrimitive("aaa"),
+                                "custom_annotation" to JsonPrimitive("bbb"),
+                            )
+                        )
+                        .build(),
+                    5,
+                    LegAnnotation.builder().build(),
+                    "Non list new annotation unrecognized properties are ignored."
+                ),
+                arrayOf(
+                    LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to listOf(10, 11, 12, 13, 14)
+                                    .toJsonArray(::JsonPrimitive),
+                                "custom_annotation" to listOf("z", "y", "x", "w", "v")
+                                    .toJsonArray(::JsonPrimitive),
+                            )
+                        )
+                        .build(),
+                    LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge2" to listOf(79, 78, 77, 76, 75)
+                                    .toJsonArray(::JsonPrimitive),
+                                "custom_annotation2" to listOf("a", "b", "c", "d", "e")
+                                    .toJsonArray(::JsonPrimitive),
+                            )
+                        )
+                        .build(),
                     3,
-                    LegAnnotation.fromJson("{ \"my_key1\": \"my_value1\" }"),
-                    "Old annotation has more unrecognized properties. " +
-                        "Unrecognized properties migrate from new annotation."
+                    LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to listOf(10, 11, 12, 13, 14)
+                                    .toJsonArray(::JsonPrimitive),
+                                "custom_annotation" to listOf("z", "y", "x", "w", "v")
+                                    .toJsonArray(::JsonPrimitive),
+                            )
+                        )
+                        .build(),
+                    "Unrecognized properties keys don't match: old values are used."
+                ),
+                arrayOf(
+                    LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to listOf(10, 11, 12, 13, 14)
+                                    .toJsonArray(::JsonPrimitive),
+                                "custom_annotation" to listOf("z", "y", "x", "w", "v")
+                                    .toJsonArray(::JsonPrimitive),
+                            )
+                        )
+                        .build(),
+                    null,
+                    3,
+                    LegAnnotation.builder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "state_of_charge" to listOf(10, 11, 12, 13, 14)
+                                    .toJsonArray(::JsonPrimitive),
+                                "custom_annotation" to listOf("z", "y", "x", "w", "v")
+                                    .toJsonArray(::JsonPrimitive),
+                            )
+                        )
+                        .build(),
+                    "Unrecognized properties migrate from old annotation if new annotation is null"
                 ),
             )
         }
@@ -408,3 +551,6 @@ class AnnotationsRefresherTest(
         assertEquals(expectedMergedAnnotation, actual)
     }
 }
+
+private fun <T> List<T>.toJsonArray(toJsonElement: (T) -> JsonElement): JsonArray =
+    JsonArray().also { array -> forEach { array.add(toJsonElement(it)) } }
