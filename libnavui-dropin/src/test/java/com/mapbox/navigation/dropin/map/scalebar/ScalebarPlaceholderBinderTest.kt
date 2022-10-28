@@ -13,7 +13,6 @@ import com.mapbox.navigation.dropin.navigationview.NavigationViewStyles
 import com.mapbox.navigation.dropin.util.TestStore
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.MainScope
 import org.junit.Assert
 import org.junit.Before
@@ -21,7 +20,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @RunWith(RobolectricTestRunner::class)
 internal class ScalebarPlaceholderBinderTest {
 

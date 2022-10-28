@@ -9,6 +9,8 @@ import com.mapbox.maps.plugin.scalebar.ScaleBarPlugin
 import com.mapbox.maps.plugin.scalebar.generated.ScaleBarSettings
 import com.mapbox.maps.plugin.scalebar.scalebar
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.clearMocks
@@ -47,18 +49,30 @@ internal class ScalebarComponentTest {
     private val mapView = mockk<MapView>(relaxed = true) {
         every { scalebar } returns scalebarMock
     }
-    private val scalebarParamsFlow = MutableStateFlow(
-        MapboxMapScalebarParams.Builder(context)
-            .isMetricsUnits(false)
-            .build()
+    private val isEnabledFlow = MutableStateFlow(false)
+    private val distanceFormatterFlow = MutableStateFlow(
+        DistanceFormatterOptions.Builder(context).build()
     )
+    private val metric = DistanceFormatterOptions
+        .Builder(context)
+        .unitType(UnitType.METRIC)
+        .build()
+    private val imperial = DistanceFormatterOptions
+        .Builder(context)
+        .unitType(UnitType.IMPERIAL)
+        .build()
     private val initialInsetTop = 3
     private val initialInsetLeft = 5
     private val systemBarsFlow = MutableStateFlow(
         Insets.of(initialInsetLeft, initialInsetTop, 0, 0)
     )
     private val mapboxNavigation = mockk<MapboxNavigation>()
-    private val component = ScalebarComponent(mapView, scalebarParamsFlow, systemBarsFlow)
+    private val component = ScalebarComponent(
+        mapView,
+        isEnabledFlow,
+        systemBarsFlow,
+        distanceFormatterFlow
+    )
 
     @Test
     fun enableFlagIsSetOnInit() {
@@ -66,8 +80,9 @@ internal class ScalebarComponentTest {
         val enabled = Random.nextBoolean()
         ScalebarComponent(
             mapView,
-            MutableStateFlow(MapboxMapScalebarParams.Builder(context).enabled(enabled).build()),
-            MutableStateFlow(Insets.NONE)
+            MutableStateFlow(enabled),
+            MutableStateFlow(Insets.NONE),
+            distanceFormatterFlow
         )
         verify { settings.enabled = enabled }
     }
@@ -75,15 +90,13 @@ internal class ScalebarComponentTest {
     @Test
     fun isMetricsUnitIsSetOnInit() {
         clearMocks(settings)
-        val isMetricUnits = Random.nextBoolean()
         ScalebarComponent(
             mapView,
-            MutableStateFlow(
-                MapboxMapScalebarParams.Builder(context).isMetricsUnits(isMetricUnits).build()
-            ),
-            MutableStateFlow(Insets.NONE)
+            MutableStateFlow(false),
+            MutableStateFlow(Insets.NONE),
+            MutableStateFlow(metric)
         )
-        verify { settings.isMetricUnits = isMetricUnits }
+        verify { settings.isMetricUnits = metric.unitType == UnitType.METRIC }
     }
 
     @Test
@@ -91,8 +104,9 @@ internal class ScalebarComponentTest {
         clearMocks(settings)
         ScalebarComponent(
             mapView,
-            MutableStateFlow(MapboxMapScalebarParams.Builder(context).build()),
-            MutableStateFlow(Insets.NONE)
+            isEnabledFlow,
+            MutableStateFlow(Insets.NONE),
+            distanceFormatterFlow
         )
         verify { settings.textBorderWidth = 3f }
     }
@@ -105,12 +119,8 @@ internal class ScalebarComponentTest {
     @Test
     fun scalebarParamsChangedBeforeOnAttached() {
         clearMocks(settings)
-        scalebarParamsFlow.tryEmit(
-            MapboxMapScalebarParams.Builder(context)
-                .enabled(true)
-                .isMetricsUnits(false)
-                .build()
-        )
+        isEnabledFlow.tryEmit(true)
+        distanceFormatterFlow.tryEmit(imperial)
         verify(exactly = 0) { settings.enabled = any() }
         verify(exactly = 0) { settings.isMetricUnits = any() }
         verify(exactly = 0) { settings.marginTop = any() }
@@ -156,16 +166,22 @@ internal class ScalebarComponentTest {
     }
 
     @Test
-    fun scalebarParamsChangedAfterOnAttached() {
+    fun scalebarEnabledChangedAfterOnAttached() {
         component.onAttached(mapboxNavigation)
         clearMocks(settings)
-        scalebarParamsFlow.tryEmit(
-            MapboxMapScalebarParams.Builder(context)
-                .enabled(true)
-                .isMetricsUnits(true)
-                .build()
-        )
+        isEnabledFlow.tryEmit(true)
         verify(exactly = 1) { settings.enabled = true }
+        verify(exactly = 0) { settings.isMetricUnits = any() }
+        verify(exactly = 0) { settings.marginTop = any() }
+        verify(exactly = 0) { settings.marginLeft = any() }
+    }
+
+    @Test
+    fun scalebarUnitChangedAfterOnAttached() {
+        component.onAttached(mapboxNavigation)
+        clearMocks(settings)
+        distanceFormatterFlow.tryEmit(metric)
+        verify(exactly = 0) { settings.enabled = any() }
         verify(exactly = 1) { settings.isMetricUnits = true }
         verify(exactly = 0) { settings.marginTop = any() }
         verify(exactly = 0) { settings.marginLeft = any() }
@@ -187,12 +203,8 @@ internal class ScalebarComponentTest {
         component.onAttached(mapboxNavigation)
         clearMocks(settings)
         component.onDetached(mapboxNavigation)
-        scalebarParamsFlow.tryEmit(
-            MapboxMapScalebarParams.Builder(context)
-                .enabled(true)
-                .isMetricsUnits(true)
-                .build()
-        )
+        isEnabledFlow.tryEmit(true)
+        distanceFormatterFlow.tryEmit(metric)
         verify(exactly = 0) { settings.enabled = any() }
         verify(exactly = 0) { settings.isMetricUnits = any() }
         verify(exactly = 0) { settings.marginTop = any() }

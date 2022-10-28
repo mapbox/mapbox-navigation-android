@@ -140,6 +140,12 @@ class ViewOptionsCustomization {
     var showTripProgress: Boolean? = null
 
     /**
+     * Sets whether the map scalebar should be visible.
+     * Set to `false` for the default behavior.
+     */
+    var showMapScalebar: Boolean? = null
+
+    /**
      * Sets whether the route preview button should be visible.
      * Set to `true` for the default behavior.
      */

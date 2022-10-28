@@ -18,7 +18,7 @@ internal class ScalebarPlaceholderBinder(
         val binding = inflateLayout(viewGroup)
         return ScalebarPlaceholderComponent(
             binding.scalebarPlaceholder,
-            context.styles.mapScalebarParams,
+            context.options.showMapScalebar,
             context.maneuverBehavior.maneuverViewVisibility
         )
     }
