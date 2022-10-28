@@ -122,7 +122,7 @@
         <item name="android:textSize">@dimen/mapbox_infoPanel_text_headline</item>
     </style>
 
-    <!-- Start navigation button -->
+    <!-- Info Panel Button: Start navigation -->
     <style name="DropInStartButtonTextAppearance" parent="">
         <item name="android:textColor">@color/colorOnPrimary</item>
         <item name="android:textSize">@dimen/mapbox_button_text_regular</item>
@@ -135,24 +135,30 @@
         <item name="extendableButtonTextAppearance">@style/DropInStartButtonTextAppearance</item>
     </style>
 
-    <!-- Preview button -->
+    <!-- Info Panel Button: Route Preview -->
     <style name="DropInStylePreviewButton" parent="MapboxStyleExtendableButton">
         <item name="extendableButtonIcon">@drawable/mapbox_ic_route</item>
     </style>
 
-    <!-- Stop navigation button -->
+    <!-- Info Panel Button: Stop navigation -->
     <style name="DropInStyleExitButton" parent="MapboxStyleExtendableButton">
         <item name="extendableButtonIcon">@drawable/mapbox_ic_stop_navigation</item>
     </style>
 
-    <!-- Recenter button -->
-    <style name="DropInStyleRecenterButton" parent="MapboxStyleExtendableButton">
-        <item name="extendableButtonIcon">@drawable/mapbox_ic_camera_recenter</item>
-    </style>
-
-    <!-- Compass button -->
+    <!-- Action Button: Compass -->
     <style name="DropInStyleCompassButton" parent="MapboxStyleExtendableButton">
         <item name="extendableButtonIcon">@drawable/mapbox_ic_compass</item>
+    </style>
+
+    <!-- Action Button: Camera mode -->
+    <style name="DropInStyleCameraModeButton" parent="MapboxStyleCameraModeButton" />
+
+    <!-- Action Button: Audio guidance -->
+    <style name="DropInStyleAudioGuidanceButton" parent="MapboxStyleAudioGuidanceButton" />
+
+    <!-- Action Button: Recenter camera -->
+    <style name="DropInStyleRecenterButton" parent="MapboxStyleExtendableButton">
+        <item name="extendableButtonIcon">@drawable/mapbox_ic_camera_recenter</item>
     </style>
 
 </resources>

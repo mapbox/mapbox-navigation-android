@@ -8,7 +8,6 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.widget.LinearLayout.LayoutParams
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.viewModels
@@ -45,26 +44,26 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
-import com.mapbox.navigation.dropin.MapboxExtendableButtonParams
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteArrowOptions
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization
-import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultAudioGuidanceButtonParams
-import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultCameraModeButtonParams
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultAudioGuidanceButtonStyle
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultCameraModeButtonStyle
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultCompassButtonStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultDestinationMarkerAnnotationOptions
-import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultEndNavigationButtonParams
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultEndNavigationButtonStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelBackground
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelMarginEnd
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelMarginStart
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultLocationPuck
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultManeuverViewOptions
-import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRecenterButtonParams
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRecenterButtonStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoadNameBackground
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoadNameTextAppearance
-import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoutePreviewButtonParams
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoutePreviewButtonStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultSpeedLimitStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultSpeedLimitTextAppearance
-import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultStartNavigationButtonParams
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultStartNavigationButtonStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultTripProgressStyle
 import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription
 import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position.END
@@ -230,6 +229,7 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
     private fun toggleCustomStyles(enabled: Boolean) {
         if (enabled) {
             binding.navigationView.customizeViewStyles {
+                maneuverViewOptions = customManeuverOptions()
                 tripProgressStyle = R.style.MyCustomTripProgressStyle
                 speedLimitStyle = R.style.MyCustomSpeedLimitStyle
                 speedLimitTextAppearance = R.style.MyCustomSpeedLimitTextAppearance
@@ -245,62 +245,35 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 roadNameBackground = R.drawable.mapbox_bg_road_name
                 roadNameTextAppearance = R.style.MyCustomRoadNameViewTextAppearance
 
-                val layoutParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
-                audioGuidanceButtonParams = MapboxExtendableButtonParams(
-                    R.style.MyCustomAudioGuidanceButton,
-                    LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                        topMargin = 20
-                        bottomMargin = 20
-                        gravity = Gravity.CENTER
-                    },
-                )
-                recenterButtonParams = MapboxExtendableButtonParams(
-                    R.style.MyCustomRecenterButton,
-                    LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                        topMargin = 20
-                        bottomMargin = 20
-                        gravity = Gravity.CENTER
-                    },
-                )
-                cameraModeButtonParams = MapboxExtendableButtonParams(
-                    R.style.MyCustomCameraModeButton,
-                    LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                        topMargin = 20
-                        bottomMargin = 20
-                        gravity = Gravity.CENTER
-                    },
-                )
-                routePreviewButtonParams = MapboxExtendableButtonParams(
-                    R.style.MyCustomRoutePreviewButton,
-                    layoutParams,
-                )
-                endNavigationButtonParams = MapboxExtendableButtonParams(
-                    R.style.MyCustomEndNavigationButton,
-                    layoutParams,
-                )
-                startNavigationButtonParams = MapboxExtendableButtonParams(
-                    R.style.MyCustomStartNavigationButton,
-                    layoutParams,
-                )
-                maneuverViewOptions = customManeuverOptions()
+                compassButtonStyle = R.style.MyCustomCompassButton
+                cameraModeButtonStyle = R.style.MyCustomCameraModeButton
+                audioGuidanceButtonStyle = R.style.MyCustomAudioGuidanceButton
+                recenterButtonStyle = R.style.MyCustomRecenterButton
+
+                routePreviewButtonStyle = R.style.MyCustomRoutePreviewButton
+                startNavigationButtonStyle = R.style.MyCustomStartNavigationButton
+                endNavigationButtonStyle = R.style.MyCustomEndNavigationButton
             }
         } else {
             binding.navigationView.customizeViewStyles {
                 val context = this@MapboxNavigationViewCustomizedActivity
+                maneuverViewOptions = defaultManeuverViewOptions()
                 tripProgressStyle = defaultTripProgressStyle()
                 speedLimitStyle = defaultSpeedLimitStyle()
                 speedLimitTextAppearance = defaultSpeedLimitTextAppearance()
-                maneuverViewOptions = defaultManeuverViewOptions()
                 destinationMarkerAnnotationOptions =
                     defaultDestinationMarkerAnnotationOptions(context)
                 roadNameBackground = defaultRoadNameBackground()
                 roadNameTextAppearance = defaultRoadNameTextAppearance()
-                audioGuidanceButtonParams = defaultAudioGuidanceButtonParams(context)
-                recenterButtonParams = defaultRecenterButtonParams(context)
-                cameraModeButtonParams = defaultCameraModeButtonParams(context)
-                routePreviewButtonParams = defaultRoutePreviewButtonParams(context)
-                endNavigationButtonParams = defaultEndNavigationButtonParams(context)
-                startNavigationButtonParams = defaultStartNavigationButtonParams(context)
+
+                compassButtonStyle = defaultCompassButtonStyle()
+                cameraModeButtonStyle = defaultCameraModeButtonStyle()
+                audioGuidanceButtonStyle = defaultAudioGuidanceButtonStyle()
+                recenterButtonStyle = defaultRecenterButtonStyle()
+
+                routePreviewButtonStyle = defaultRoutePreviewButtonStyle()
+                endNavigationButtonStyle = defaultEndNavigationButtonStyle()
+                startNavigationButtonStyle = defaultStartNavigationButtonStyle()
             }
         }
     }
@@ -391,12 +364,6 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             viewModel.enableScalebar,
             ::toggleEnableScalebar
         )
-
-        bindSwitch(
-            menuBinding.toggleEnableCompass,
-            viewModel.enableCompass,
-            ::toggleEnableCompass
-        )
     }
 
     private fun toggleCustomMap(enabled: Boolean) {
@@ -421,25 +388,21 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         }
     }
 
-    private fun toggleEnableCompass(enabled: Boolean) {
-        binding.navigationView.customizeViewStyles {
-            compassButtonParams = ViewStyleCustomization.defaultCompassButtonParams(
-                this@MapboxNavigationViewCustomizedActivity
-            ).let {
-                MapboxExtendableButtonParams(
-                    it.style,
-                    it.layoutParams,
-                    enabled
-                )
-            }
-        }
-    }
-
     //endregion
 
     //region Actions Options
 
     private fun initActionsOptions() {
+        bindSwitch(
+            menuBinding.toggleShowCompassButton,
+            viewModel.actionsShowCompassButton,
+            ::toggleShowCompassButton
+        )
+        bindSwitch(
+            menuBinding.toggleAdditionalActionButtons,
+            viewModel.actionsAdditionalButtons,
+            ::toggleAdditionalActionButtons
+        )
         bindSwitch(
             menuBinding.toggleCustomCompassButton,
             viewModel.actionsCustomCompassButton,
@@ -461,15 +424,31 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             ::toggleCustomRecenterButton
         )
         bindSwitch(
-            menuBinding.toggleAdditionalActionButtons,
-            viewModel.actionsAdditionalButtons,
-            ::toggleAdditionalActionButtons
-        )
-        bindSwitch(
             menuBinding.toggleCustomActionsLayout,
             viewModel.actionsCustomLayout,
             ::toggleCustomActionsLayout
         )
+    }
+
+    private fun toggleShowCompassButton(enabled: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            showCompassActionButton = enabled
+        }
+    }
+
+    private fun toggleAdditionalActionButtons(enabled: Boolean) {
+        binding.navigationView.customizeViewBinders {
+            customActionButtons = if (enabled) {
+                listOf(
+                    ActionButtonDescription(customActionButton("button 1"), START),
+                    ActionButtonDescription(customActionButton("button 2"), START),
+                    ActionButtonDescription(customActionButton("button 3"), END),
+                    ActionButtonDescription(customActionButton("button 4"), END)
+                )
+            } else {
+                emptyList()
+            }
+        }
     }
 
     private fun toggleCustomCompassButton(enabled: Boolean) {
@@ -540,21 +519,6 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 }
             } else {
                 UIBinder.USE_DEFAULT
-            }
-        }
-    }
-
-    private fun toggleAdditionalActionButtons(enabled: Boolean) {
-        binding.navigationView.customizeViewBinders {
-            customActionButtons = if (enabled) {
-                listOf(
-                    ActionButtonDescription(customActionButton("button 1"), START),
-                    ActionButtonDescription(customActionButton("button 2"), START),
-                    ActionButtonDescription(customActionButton("button 3"), END),
-                    ActionButtonDescription(customActionButton("button 4"), END)
-                )
-            } else {
-                emptyList()
             }
         }
     }

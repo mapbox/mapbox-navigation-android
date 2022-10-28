@@ -193,15 +193,6 @@
                     android:text="Enable scalebar"
                     android:textAllCaps="true" />
 
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/toggleEnableCompass"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingVertical="10dp"
-                    android:text="Enable compass"
-                    android:textAllCaps="true" />
-
             </androidx.appcompat.widget.LinearLayoutCompat>
 
             <!-- Actions Customization -->
@@ -218,6 +209,24 @@
                     android:gravity="center"
                     android:paddingVertical="10dp"
                     android:text="Action Buttons" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleShowCompassButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Show Compass Button"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleAdditionalActionButtons"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Show Additional Buttons"
+                    android:textAllCaps="true" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/toggleCustomCompassButton"
@@ -253,15 +262,6 @@
                     android:layout_weight="1"
                     android:paddingVertical="10dp"
                     android:text="Custom Recenter Button"
-                    android:textAllCaps="true" />
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/toggleAdditionalActionButtons"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingVertical="10dp"
-                    android:text="Additional Button"
                     android:textAllCaps="true" />
 
                 <androidx.appcompat.widget.SwitchCompat

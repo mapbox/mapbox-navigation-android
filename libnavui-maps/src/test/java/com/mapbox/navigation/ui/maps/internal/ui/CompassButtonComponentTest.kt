@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.maps.internal.ui
 
 import android.view.View
 import androidx.appcompat.widget.AppCompatImageView
-import androidx.core.view.isVisible
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
@@ -47,62 +46,29 @@ class CompassButtonComponentTest {
     }
 
     @Test
-    fun `onAttached when compass is disabled`() {
-        component = CompassButtonComponent(compassButton, mapView, false)
+    fun `onAttached when mapView is null`() {
+        component = CompassButtonComponent(compassButton, null)
 
         component.onAttached(mapboxNavigation)
 
-        verify(exactly = 1) { compassButton.isVisible = false }
         verify(exactly = 0) { compassButton.setOnClickListener(any()) }
         verify(exactly = 0) { mapboxMap.addOnCameraChangeListener(any()) }
     }
 
     @Test
-    fun `onDetached when compass is disabled`() {
-        component = CompassButtonComponent(compassButton, mapView, false)
-
-        component.onAttached(mapboxNavigation)
-        component.onDetached(mapboxNavigation)
-
-        verify(exactly = 1) { compassButton.setOnClickListener(null) }
-    }
-
-    @Test
-    fun `onAttached when compass is enabled but mapView is null`() {
-        component = CompassButtonComponent(compassButton, null, true)
+    fun `onAttached when mapView is NOT null`() {
+        component = CompassButtonComponent(compassButton, mapView)
 
         component.onAttached(mapboxNavigation)
 
-        verify(exactly = 1) { compassButton.isVisible = true }
-        verify(exactly = 0) { compassButton.setOnClickListener(any()) }
-        verify(exactly = 0) { mapboxMap.addOnCameraChangeListener(any()) }
-    }
-
-    @Test
-    fun `onDetached when compass is enabled but mapView is null`() {
-        component = CompassButtonComponent(compassButton, null, true)
-
-        component.onAttached(mapboxNavigation)
-        component.onDetached(mapboxNavigation)
-
-        verify(exactly = 1) { compassButton.setOnClickListener(null) }
-    }
-
-    @Test
-    fun `onAttached when compass is enabled and has mapView`() {
-        component = CompassButtonComponent(compassButton, mapView, true)
-
-        component.onAttached(mapboxNavigation)
-
-        verify(exactly = 1) { compassButton.isVisible = true }
         verify(exactly = 1) { compassButton.setOnClickListener(any()) }
         verify(exactly = 1) { mapboxMap.addOnCameraChangeListener(any()) }
     }
 
     @Test
-    fun `onDetached when compass is enabled and has mapView`() {
+    fun `onDetached`() {
         val cameraListeners = mutableListOf<OnCameraChangeListener>()
-        component = CompassButtonComponent(compassButton, mapView, true)
+        component = CompassButtonComponent(compassButton, mapView)
         component.onAttached(mapboxNavigation)
         verify(exactly = 1) { mapboxMap.addOnCameraChangeListener(capture(cameraListeners)) }
 
@@ -116,7 +82,7 @@ class CompassButtonComponentTest {
     fun `compass button click returns to north position`() {
         val cameraOptions = mutableListOf<CameraOptions>()
         val btnOnClickListeners = mutableListOf<View.OnClickListener>()
-        component = CompassButtonComponent(compassButton, mapView, true)
+        component = CompassButtonComponent(compassButton, mapView)
 
         component.onAttached(mapboxNavigation)
 
@@ -129,7 +95,7 @@ class CompassButtonComponentTest {
     @Test
     fun `camera state change rotates the image accordingly`() {
         val cameraChangeListeners = mutableListOf<OnCameraChangeListener>()
-        component = CompassButtonComponent(compassButton, mapView, true)
+        component = CompassButtonComponent(compassButton, mapView)
 
         component.onAttached(mapboxNavigation)
 

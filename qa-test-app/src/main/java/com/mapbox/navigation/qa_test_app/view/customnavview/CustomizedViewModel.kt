@@ -21,12 +21,12 @@ class CustomizedViewModel : ViewModel() {
     val showCameraDebugInfo = MutableLiveData(false)
     val enableScalebar = MutableLiveData(false)
     val routingProfile = MutableLiveData("--")
-    val enableCompass = MutableLiveData(false)
 
+    val actionsShowCompassButton = MutableLiveData(false)
+    val actionsAdditionalButtons = MutableLiveData(false)
     val actionsCustomCompassButton = MutableLiveData(false)
     val actionsCustomCameraButton = MutableLiveData(false)
     val actionsCustomAudioButton = MutableLiveData(false)
     val actionsCustomRecenterButton = MutableLiveData(false)
-    val actionsAdditionalButtons = MutableLiveData(false)
     val actionsCustomLayout = MutableLiveData(false)
 }
