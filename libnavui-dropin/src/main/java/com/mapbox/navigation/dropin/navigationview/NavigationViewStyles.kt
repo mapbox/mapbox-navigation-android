@@ -4,7 +4,6 @@ import android.content.Context
 import com.mapbox.maps.plugin.LocationPuck
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.MapboxExtendableButtonParams
 import com.mapbox.navigation.dropin.ViewStyleCustomization
 import com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
@@ -27,18 +26,22 @@ internal class NavigationViewStyles(context: Context) {
         MutableStateFlow(ViewStyleCustomization.defaultPoiNameTextAppearance())
     private val _tripProgressStyle: MutableStateFlow<Int> =
         MutableStateFlow(ViewStyleCustomization.defaultTripProgressStyle())
-    private val _audioGuidanceButtonParams: MutableStateFlow<MapboxExtendableButtonParams> =
-        MutableStateFlow(ViewStyleCustomization.defaultAudioGuidanceButtonParams(context))
-    private val _recenterButtonParams: MutableStateFlow<MapboxExtendableButtonParams> =
-        MutableStateFlow(ViewStyleCustomization.defaultRecenterButtonParams(context))
-    private val _cameraModeButtonParams: MutableStateFlow<MapboxExtendableButtonParams> =
-        MutableStateFlow(ViewStyleCustomization.defaultCameraModeButtonParams(context))
-    private val _routePreviewButtonParams: MutableStateFlow<MapboxExtendableButtonParams> =
-        MutableStateFlow(ViewStyleCustomization.defaultRoutePreviewButtonParams(context))
-    private val _endNavigationButtonParams: MutableStateFlow<MapboxExtendableButtonParams> =
-        MutableStateFlow(ViewStyleCustomization.defaultEndNavigationButtonParams(context))
-    private val _startNavigationButtonParams: MutableStateFlow<MapboxExtendableButtonParams> =
-        MutableStateFlow(ViewStyleCustomization.defaultStartNavigationButtonParams(context))
+
+    private var _compassButtonStyle: MutableStateFlow<Int> =
+        MutableStateFlow(ViewStyleCustomization.defaultCompassButtonStyle())
+    private var _audioGuidanceButtonStyle: MutableStateFlow<Int> =
+        MutableStateFlow(ViewStyleCustomization.defaultAudioGuidanceButtonStyle())
+    private var _recenterButtonStyle: MutableStateFlow<Int> =
+        MutableStateFlow(ViewStyleCustomization.defaultRecenterButtonStyle())
+    private var _cameraModeButtonStyle: MutableStateFlow<Int> =
+        MutableStateFlow(ViewStyleCustomization.defaultCameraModeButtonStyle())
+    private var _routePreviewButtonStyle: MutableStateFlow<Int> =
+        MutableStateFlow(ViewStyleCustomization.defaultRoutePreviewButtonStyle())
+    private var _endNavigationButtonStyle: MutableStateFlow<Int> =
+        MutableStateFlow(ViewStyleCustomization.defaultEndNavigationButtonStyle())
+    private var _startNavigationButtonStyle: MutableStateFlow<Int> =
+        MutableStateFlow(ViewStyleCustomization.defaultStartNavigationButtonStyle())
+
     private val _speedLimitStyle: MutableStateFlow<Int> =
         MutableStateFlow(ViewStyleCustomization.defaultSpeedLimitStyle())
     private val _speedLimitTextAppearance: MutableStateFlow<Int> =
@@ -58,8 +61,6 @@ internal class NavigationViewStyles(context: Context) {
     private val _mapScalebarParams: MutableStateFlow<MapboxMapScalebarParams> = MutableStateFlow(
         ViewStyleCustomization.defaultMapScalebarParams(context)
     )
-    private val _compassButtonParams: MutableStateFlow<MapboxExtendableButtonParams> =
-        MutableStateFlow(ViewStyleCustomization.defaultCompassButtonParams(context))
 
     val infoPanelPeekHeight: StateFlow<Int> = _infoPanelPeekHeight.asStateFlow()
     val infoPanelMarginStart: StateFlow<Int> = _infoPanelMarginStart.asStateFlow()
@@ -67,18 +68,15 @@ internal class NavigationViewStyles(context: Context) {
     val infoPanelBackground: StateFlow<Int> = _infoPanelBackground.asStateFlow()
     val poiNameTextAppearance: StateFlow<Int> = _poiNameTextAppearance.asStateFlow()
     val tripProgressStyle: StateFlow<Int> = _tripProgressStyle.asStateFlow()
-    val recenterButtonParams: StateFlow<MapboxExtendableButtonParams> =
-        _recenterButtonParams.asStateFlow()
-    val audioGuidanceButtonParams: StateFlow<MapboxExtendableButtonParams> =
-        _audioGuidanceButtonParams.asStateFlow()
-    val cameraModeButtonParams: StateFlow<MapboxExtendableButtonParams> =
-        _cameraModeButtonParams.asStateFlow()
-    val routePreviewButtonParams: StateFlow<MapboxExtendableButtonParams> =
-        _routePreviewButtonParams.asStateFlow()
-    val endNavigationButtonParams: StateFlow<MapboxExtendableButtonParams> =
-        _endNavigationButtonParams.asStateFlow()
-    val startNavigationButtonParams: StateFlow<MapboxExtendableButtonParams> =
-        _startNavigationButtonParams.asStateFlow()
+
+    val compassButtonStyle: StateFlow<Int> = _compassButtonStyle.asStateFlow()
+    val recenterButtonStyle: StateFlow<Int> = _recenterButtonStyle.asStateFlow()
+    val audioGuidanceButtonStyle: StateFlow<Int> = _audioGuidanceButtonStyle.asStateFlow()
+    val cameraModeButtonStyle: StateFlow<Int> = _cameraModeButtonStyle.asStateFlow()
+    val routePreviewButtonStyle: StateFlow<Int> = _routePreviewButtonStyle.asStateFlow()
+    val endNavigationButtonStyle: StateFlow<Int> = _endNavigationButtonStyle.asStateFlow()
+    val startNavigationButtonStyle: StateFlow<Int> = _startNavigationButtonStyle.asStateFlow()
+
     val speedLimitStyle: StateFlow<Int> = _speedLimitStyle.asStateFlow()
     val speedLimitTextAppearance: StateFlow<Int> = _speedLimitTextAppearance.asStateFlow()
     val destinationMarkerAnnotationOptions: StateFlow<PointAnnotationOptions> =
@@ -89,8 +87,6 @@ internal class NavigationViewStyles(context: Context) {
     val arrivalTextAppearance: StateFlow<Int> = _arrivalTextAppearance.asStateFlow()
     val locationPuck: StateFlow<LocationPuck> = _locationPuck.asStateFlow()
     val mapScalebarParams: StateFlow<MapboxMapScalebarParams> = _mapScalebarParams.asStateFlow()
-    val compassButtonParams: StateFlow<MapboxExtendableButtonParams> =
-        _compassButtonParams.asStateFlow()
 
     fun applyCustomization(customization: ViewStyleCustomization) {
         customization.infoPanelPeekHeight?.also { _infoPanelPeekHeight.value = it }
@@ -99,12 +95,15 @@ internal class NavigationViewStyles(context: Context) {
         customization.infoPanelBackground?.also { _infoPanelBackground.value = it }
         customization.poiNameTextAppearance?.also { _poiNameTextAppearance.value = it }
         customization.tripProgressStyle?.also { _tripProgressStyle.value = it }
-        customization.recenterButtonParams?.also { _recenterButtonParams.value = it }
-        customization.cameraModeButtonParams?.also { _cameraModeButtonParams.value = it }
-        customization.routePreviewButtonParams?.also { _routePreviewButtonParams.value = it }
-        customization.audioGuidanceButtonParams?.also { _audioGuidanceButtonParams.value = it }
-        customization.endNavigationButtonParams?.also { _endNavigationButtonParams.value = it }
-        customization.startNavigationButtonParams?.also { _startNavigationButtonParams.value = it }
+
+        customization.compassButtonStyle?.also { _compassButtonStyle.value = it }
+        customization.recenterButtonStyle?.also { _recenterButtonStyle.value = it }
+        customization.audioGuidanceButtonStyle?.also { _audioGuidanceButtonStyle.value = it }
+        customization.cameraModeButtonStyle?.also { _cameraModeButtonStyle.value = it }
+        customization.routePreviewButtonStyle?.also { _routePreviewButtonStyle.value = it }
+        customization.endNavigationButtonStyle?.also { _endNavigationButtonStyle.value = it }
+        customization.startNavigationButtonStyle?.also { _startNavigationButtonStyle.value = it }
+
         customization.speedLimitStyle?.also { _speedLimitStyle.value = it }
         customization.maneuverViewOptions?.also { _maneuverViewOptions.value = it }
         customization.speedLimitTextAppearance?.also { _speedLimitTextAppearance.value = it }
@@ -116,6 +115,5 @@ internal class NavigationViewStyles(context: Context) {
         customization.arrivalTextAppearance?.also { _arrivalTextAppearance.value = it }
         customization.locationPuck?.also { _locationPuck.value = it }
         customization.mapScalebarParams?.also { _mapScalebarParams.value = it }
-        customization.compassButtonParams?.also { _compassButtonParams.value = it }
     }
 }
