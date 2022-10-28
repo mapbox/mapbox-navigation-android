@@ -4,6 +4,7 @@ package com.mapbox.navigation.core.internal.extensions
 
 import androidx.annotation.UiThread
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
 
 /**
@@ -35,3 +36,6 @@ fun MapboxNavigation.unregisterHistoryRecordingStateChangeObserver(
 ) {
     historyRecordingStateHandler.unregisterStateChangeObserver(observer)
 }
+
+fun MapboxNavigation.retrieveCopilotHistoryRecorder(): MapboxHistoryRecorder =
+    copilotHistoryRecorder
