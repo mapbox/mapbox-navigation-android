@@ -5,9 +5,25 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.9.0-rc.1 - 28 October, 2022
+### Changelog
+[Changes between v2.9.0-beta.3 and v2.9.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0-beta.3...v2.9.0-rc.1)
+
+#### Features
+#### Bug fixes and improvements
 - Improved experience in tunnels and reduced the likelihood of losing road edge matching candidates. [#6510](https://github.com/mapbox/mapbox-navigation-android/pull/6510)
 - Fixed an issue with `NavigationView` that caused road label position to not update in some cases. [#6508](https://github.com/mapbox/mapbox-navigation-android/pull/6508)
 - Fixed an issue where the SDK was trying to send telemetry events when telemetry is switched off globally. [#6512](https://github.com/mapbox/mapbox-navigation-android/pull/6512)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.9.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0))
+- Mapbox Navigation Native `v119.0.0`
+- Mapbox Core Common `v23.1.1`
+- Mapbox Java `v6.9.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.9.0-beta.1))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
 
 ## Mapbox Navigation SDK 2.9.0-beta.3 - 21 October, 2022
 ### Changelog
