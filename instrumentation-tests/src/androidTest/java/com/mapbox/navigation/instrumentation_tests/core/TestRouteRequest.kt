@@ -4,8 +4,12 @@ import android.location.Location
 import android.os.Build
 import android.os.Environment
 import android.util.Log
-import androidx.test.platform.app.InstrumentationRegistry
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.DownloadOptions
+import com.mapbox.common.HttpRequest
+import com.mapbox.common.HttpResponse
+import com.mapbox.common.HttpServiceFactory
+import com.mapbox.common.HttpServiceInterceptorInterface
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
@@ -22,6 +26,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.io.File
+import java.util.Date
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
@@ -57,6 +62,31 @@ class TestRouteRequest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             "2.078786,48.88777;2.03899,49.10212"
         ).forEach { coordinates ->
             var response: RouteRequestResult.Success
+            var requestTime: Long? = null
+            var responseTime: Long? = null
+            var responseSize: Int? = null
+            HttpServiceFactory.getInstance()
+                .setInterceptor(object : HttpServiceInterceptorInterface {
+                    override fun onRequest(request: HttpRequest): HttpRequest {
+                        if (request.url.contains(coordinates)) {
+                            requestTime = Date().time
+                        }
+                        return request
+                    }
+
+                    override fun onDownload(download: DownloadOptions): DownloadOptions {
+                        return download
+                    }
+
+                    override fun onResponse(response: HttpResponse): HttpResponse {
+                        if (response.request.url.contains(coordinates)) {
+                            responseTime = Date().time
+                            responseSize = response.result.value!!.data.size
+                        }
+                        return response
+                    }
+
+                })
             val time = measureTime {
                 val routeOptions = RouteOptions.builder()
                     .applyDefaultNavigationOptions()
@@ -69,7 +99,9 @@ class TestRouteRequest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             writeResults(
                 coordinates = coordinates,
                 distance = response.routes.first().directionsRoute.distance(),
-                timeFromRequestToResponseInMilliseconds = time.inWholeMilliseconds
+                sdkResponseTime = time.inWholeMilliseconds,
+                networkResponseTime = responseTime!! - requestTime!!,
+                responseSize = responseSize!!
             )
         }
     }
@@ -77,16 +109,18 @@ class TestRouteRequest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     private fun writeResults(
         coordinates: String,
         distance: Double,
-        timeFromRequestToResponseInMilliseconds: Long
+        sdkResponseTime: Long,
+        networkResponseTime: Long,
+        responseSize: Int
     ) {
         val file = File(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
             "route-request-time-test-results.csv"
         )
         val header = if (file.createNewFile()) {
-            "coordinates,distance,time from request to parsed response in milliseconds,device\n"
+            "coordinates,distance,time from request to parsed response in milliseconds,network request time,response size bytes,device\n"
         } else ""
-        val result = "$coordinates,$distance,$timeFromRequestToResponseInMilliseconds,${Build.MODEL}\n"
+        val result = "$coordinates,$distance,$sdkResponseTime,$networkResponseTime,${responseSize},${Build.MODEL}\n"
         file.appendText(header + result)
         Log.d("time-test", result + "(written to ${file.absolutePath})")
     }
