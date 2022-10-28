@@ -2,9 +2,10 @@ package com.mapbox.navigation.ui.maps.building
 
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.maps.RenderedQueryOptions
+import com.mapbox.navigation.base.internal.extensions.isLegWaypoint
+import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.ui.maps.building.model.BuildingError
 import com.mapbox.navigation.ui.maps.building.model.BuildingValue
-import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -47,25 +48,18 @@ internal object BuildingProcessor {
     fun queryBuildingOnWaypoint(
         action: BuildingAction.QueryBuildingOnWaypoint
     ): BuildingResult.GetDestination {
-        val routeOptions = action.progress.route.routeOptions()
-        val coordinatesList = routeOptions?.coordinatesList()
-        val waypointTargets = routeOptions?.waypointTargetsList()
-        val coordinateIndex = action.progress.currentLegProgress?.legIndex!! + 1
-        val routablePoint = coordinatesList?.getOrNull(coordinateIndex)
-        val locationPoint = waypointTargets?.getOrNull(coordinateIndex)
-        return ifNonNull(locationPoint) { point ->
-            BuildingResult.GetDestination(point)
-        } ?: BuildingResult.GetDestination(routablePoint)
+        val waypoints = action.progress.navigationRoute.internalWaypoints()
+        val waypointIndex = action.progress.currentLegProgress?.legIndex!! + 1
+        val waypoint = waypoints.filter { it.isLegWaypoint() }.getOrNull(waypointIndex)
+        return BuildingResult.GetDestination(waypoint?.target ?: waypoint?.location)
     }
 
     fun queryBuildingOnFinalDestination(
         action: BuildingAction.QueryBuildingOnFinalDestination
     ): BuildingResult.GetDestination {
-        val routeOptions = action.progress.route.routeOptions()
-        val lastCoordinate = routeOptions?.coordinatesList()?.lastOrNull()
-        val lastWaypointTarget = routeOptions?.waypointTargetsList()?.lastOrNull()
-        return ifNonNull(lastWaypointTarget) { point ->
-            BuildingResult.GetDestination(point)
-        } ?: BuildingResult.GetDestination(lastCoordinate)
+        val lastWaypoint = action.progress.navigationRoute
+            .internalWaypoints()
+            .lastOrNull()
+        return BuildingResult.GetDestination(lastWaypoint?.target ?: lastWaypoint?.location)
     }
 }

@@ -30,7 +30,7 @@ import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
-import com.mapbox.navigation.navigator.internal.TripStatus
+import com.mapbox.navigation.navigator.internal.utils.calculateRemainingWaypoints
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -47,7 +47,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
-import kotlin.math.max
 
 /**
  * Default implementation of [TripSession]
@@ -74,7 +73,6 @@ internal class MapboxTripSession(
 
     private companion object {
         private const val LOG_CATEGORY = "MapboxTripSession"
-        private const val INDEX_OF_INITIAL_LEG_TARGET = 1
     }
 
     override suspend fun setRoutes(
@@ -355,7 +353,7 @@ internal class MapboxTripSession(
                     nativeBannerInstruction?.index
                 )
             }
-            val remainingWaypoints = calculateRemainingWaypoints(tripStatus)
+            val remainingWaypoints = tripStatus.calculateRemainingWaypoints()
             val routeProgress = getRouteProgressFrom(
                 tripStatus.route,
                 tripStatus.navigationStatus,
@@ -377,33 +375,6 @@ internal class MapboxTripSession(
             triggerVoiceInstructionEvent(routeProgress, status)
             isOffRoute = tripStatus.navigationStatus.routeState == RouteState.OFF_ROUTE
         }
-
-        private fun calculateRemainingWaypoints(tripStatus: TripStatus): Int {
-            val routeCoordinates = tripStatus.route?.routeOptions?.coordinatesList()
-            return if (routeCoordinates != null) {
-                val waypointsCount = routeCoordinates.size
-                val nextWaypointIndex = normalizeNextWaypointIndex(
-                    tripStatus.navigationStatus.nextWaypointIndex
-                )
-                return waypointsCount - nextWaypointIndex
-            } else {
-                0
-            }
-        }
-
-        /**
-         * On the Android side, we always start navigation from the current position.
-         * So we expect that the next waypoint index will not be less than 1.
-         * But the native part considers the origin as a usual waypoint.
-         * It can return the next waypoint index 0. Be careful, this case isn't easy to reproduce.
-         *
-         * For example, nextWaypointIndex=0 leads to an incorrect rerouting.
-         * We don't want to get to an initial position even it hasn't been reached yet.
-         */
-        private fun normalizeNextWaypointIndex(nextWaypointIndex: Int) = max(
-            INDEX_OF_INITIAL_LEG_TARGET,
-            nextWaypointIndex
-        )
     }
 
     /**
