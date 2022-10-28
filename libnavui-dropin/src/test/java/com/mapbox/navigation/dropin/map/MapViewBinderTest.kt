@@ -51,7 +51,6 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
@@ -65,8 +64,7 @@ import org.robolectric.RobolectricTestRunner
 
 @OptIn(
     ExperimentalPreviewMapboxNavigationAPI::class,
-    ExperimentalCoroutinesApi::class,
-    FlowPreview::class
+    ExperimentalCoroutinesApi::class
 )
 @RunWith(RobolectricTestRunner::class)
 class MapViewBinderTest {

@@ -15,7 +15,6 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.arrival.ArrivalTextComponent
 import com.mapbox.navigation.dropin.map.geocoding.POINameComponent
-import com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams
 import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
 import com.mapbox.navigation.ui.maneuver.model.ManeuverExitOptions
 import com.mapbox.navigation.ui.maneuver.model.ManeuverPrimaryOptions
@@ -180,16 +179,6 @@ class ViewStyleCustomization {
      * Use [defaultLocationPuck] to reset to default.
      */
     var locationPuck: LocationPuck? = null
-
-    /**
-     * Map scalebar params.
-     * Use [defaultMapScalebarParams] to reset to default.
-     * NOTE: When `enabled`, the `scalebar` will always be added to the top start corner
-     * of the screen. Position of the `scalebar` using `NavigationView` cannot be changed at any
-     * given time. However, if you change the position using `MapView`, the behavior is undefined
-     * and you will be responsible to ensure the correct positioning based on other view overlays.
-     */
-    var mapScalebarParams: MapboxMapScalebarParams? = null
 
     companion object {
         /**
@@ -379,12 +368,6 @@ class ViewStyleCustomization {
                 R.drawable.mapbox_navigation_puck_icon,
             )
         )
-
-        /**
-         * Default map scalebar parameters.
-         */
-        fun defaultMapScalebarParams(context: Context): MapboxMapScalebarParams =
-            MapboxMapScalebarParams.Builder(context).build()
 
         private fun defaultMutcdProperties() = MapboxExitProperties.PropertiesMutcd(
             exitBackground = R.drawable.mapbox_dropin_exit_board_background,

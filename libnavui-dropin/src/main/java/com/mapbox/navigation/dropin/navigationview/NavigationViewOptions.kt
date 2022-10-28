@@ -48,6 +48,7 @@ internal class NavigationViewOptions(context: Context) {
     private var _showCameraModeActionButton: MutableStateFlow<Boolean> = MutableStateFlow(true)
     private var _showToggleAudioActionButton: MutableStateFlow<Boolean> = MutableStateFlow(true)
     private var _showRecenterActionButton: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private var _showMapScalebar: MutableStateFlow<Boolean> = MutableStateFlow(false)
     private var _showTripProgress: MutableStateFlow<Boolean> = MutableStateFlow(true)
     private var _showRoutePreviewButton: MutableStateFlow<Boolean> = MutableStateFlow(true)
     private var _showEndNavigationButton: MutableStateFlow<Boolean> = MutableStateFlow(true)
@@ -73,6 +74,7 @@ internal class NavigationViewOptions(context: Context) {
     val showCameraModeActionButton: StateFlow<Boolean> = _showCameraModeActionButton.asStateFlow()
     val showToggleAudioActionButton: StateFlow<Boolean> = _showToggleAudioActionButton.asStateFlow()
     val showRecenterActionButton: StateFlow<Boolean> = _showRecenterActionButton.asStateFlow()
+    val showMapScalebar: StateFlow<Boolean> = _showMapScalebar.asStateFlow()
     val showTripProgress: StateFlow<Boolean> = _showTripProgress.asStateFlow()
     val showRoutePreviewButton: StateFlow<Boolean> = _showRoutePreviewButton.asStateFlow()
     val showEndNavigationButton: StateFlow<Boolean> = _showEndNavigationButton.asStateFlow()
@@ -100,6 +102,7 @@ internal class NavigationViewOptions(context: Context) {
         }
         customization.showRecenterActionButton?.also { _showRecenterActionButton.value = it }
         customization.showTripProgress?.also { _showTripProgress.value = it }
+        customization.showMapScalebar?.also { _showMapScalebar.value = it }
         customization.showRoutePreviewButton?.also { _showRoutePreviewButton.value = it }
         customization.showEndNavigationButton?.also { _showEndNavigationButton.value = it }
         customization.showStartNavigationButton?.also { _showStartNavigationButton.value = it }

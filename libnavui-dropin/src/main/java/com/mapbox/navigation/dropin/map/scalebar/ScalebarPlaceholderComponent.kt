@@ -12,16 +12,16 @@ import kotlinx.coroutines.launch
 @ExperimentalPreviewMapboxNavigationAPI
 internal class ScalebarPlaceholderComponent(
     private val scalebarPlaceholder: View,
-    private val scalebarParams: StateFlow<MapboxMapScalebarParams>,
+    private val isEnabled: StateFlow<Boolean>,
     private val maneuverViewVisible: StateFlow<Boolean>,
 ) : UIComponent() {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
         coroutineScope.launch {
-            combine(scalebarParams, maneuverViewVisible) { params, maneuverViewVisible ->
+            combine(isEnabled, maneuverViewVisible) { enabled, maneuverViewVisible ->
                 scalebarPlaceholder.visibility =
-                    if (params.enabled && !maneuverViewVisible) {
+                    if (enabled && !maneuverViewVisible) {
                         View.VISIBLE
                     } else {
                         View.GONE

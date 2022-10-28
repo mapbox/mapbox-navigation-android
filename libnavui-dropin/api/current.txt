@@ -152,6 +152,7 @@ package com.mapbox.navigation.dropin {
     method public Boolean? getShowEndNavigationButton();
     method public Boolean? getShowInfoPanelInFreeDrive();
     method public Boolean? getShowManeuver();
+    method public Boolean? getShowMapScalebar();
     method public Boolean? getShowRecenterActionButton();
     method public Boolean? getShowRoadName();
     method public Boolean? getShowRoutePreviewButton();
@@ -175,6 +176,7 @@ package com.mapbox.navigation.dropin {
     method public void setShowEndNavigationButton(Boolean?);
     method public void setShowInfoPanelInFreeDrive(Boolean?);
     method public void setShowManeuver(Boolean?);
+    method public void setShowMapScalebar(Boolean?);
     method public void setShowRecenterActionButton(Boolean?);
     method public void setShowRoadName(Boolean?);
     method public void setShowRoutePreviewButton(Boolean?);
@@ -197,6 +199,7 @@ package com.mapbox.navigation.dropin {
     property public final Boolean? showEndNavigationButton;
     property public final Boolean? showInfoPanelInFreeDrive;
     property public final Boolean? showManeuver;
+    property public final Boolean? showMapScalebar;
     property public final Boolean? showRecenterActionButton;
     property public final Boolean? showRoadName;
     property public final Boolean? showRoutePreviewButton;
@@ -226,7 +229,6 @@ package com.mapbox.navigation.dropin {
     method public Integer? getInfoPanelPeekHeight();
     method public com.mapbox.maps.plugin.LocationPuck? getLocationPuck();
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? getManeuverViewOptions();
-    method public com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams? getMapScalebarParams();
     method public Integer? getPoiNameTextAppearance();
     method public Integer? getRecenterButtonStyle();
     method public Integer? getRoadNameBackground();
@@ -248,7 +250,6 @@ package com.mapbox.navigation.dropin {
     method public void setInfoPanelPeekHeight(Integer?);
     method public void setLocationPuck(com.mapbox.maps.plugin.LocationPuck?);
     method public void setManeuverViewOptions(com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions?);
-    method public void setMapScalebarParams(com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams?);
     method public void setPoiNameTextAppearance(Integer?);
     method public void setRecenterButtonStyle(Integer?);
     method public void setRoadNameBackground(Integer?);
@@ -270,7 +271,6 @@ package com.mapbox.navigation.dropin {
     property public final Integer? infoPanelPeekHeight;
     property public final com.mapbox.maps.plugin.LocationPuck? locationPuck;
     property public final com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? maneuverViewOptions;
-    property public final com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams? mapScalebarParams;
     property public final Integer? poiNameTextAppearance;
     property public final Integer? recenterButtonStyle;
     property public final Integer? roadNameBackground;
@@ -296,7 +296,6 @@ package com.mapbox.navigation.dropin {
     method @Px public int defaultInfoPanelPeekHeight(android.content.Context context);
     method public com.mapbox.maps.plugin.LocationPuck defaultLocationPuck(android.content.Context context);
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions defaultManeuverViewOptions();
-    method public com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams defaultMapScalebarParams(android.content.Context context);
     method @StyleRes public int defaultPoiNameTextAppearance();
     method @StyleRes public int defaultRecenterButtonStyle();
     method @DrawableRes public int defaultRoadNameBackground();
