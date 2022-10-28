@@ -167,7 +167,7 @@ class TestRouteRequest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             "coordinates,distance,time from request to parsed response in milliseconds,network request time,response size bytes,device\n"
         } else ""
         val result =
-            "$coordinates,$distance,$sdkResponseTime,$networkResponseTime,${responseSize},${Build.MODEL}\n"
+            "\"$coordinates\",$distance,$sdkResponseTime,$networkResponseTime,${responseSize},${Build.MODEL}\n"
         file.appendText(header + result)
         Log.d("time-test", result + "(written to ${file.absolutePath})")
     }
