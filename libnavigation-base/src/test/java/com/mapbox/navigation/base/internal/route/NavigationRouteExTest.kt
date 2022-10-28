@@ -287,7 +287,7 @@ class NavigationRouteExTest {
                 )
                 TestData(
                     "update waypoints from null to non-null",
-                    provideNavigationRoute(addLeg = true, waypoints = null),
+                    provideNavigationRoute(addLeg = true, dirWaypoints = null),
                     RefreshLegItemsWrapper(
                         1,
                         listOf(null, null),
@@ -312,7 +312,7 @@ class NavigationRouteExTest {
                 )
                 TestData(
                     "update waypoints from empty to non-empty",
-                    provideNavigationRoute(addLeg = true, waypoints = emptyList()),
+                    provideNavigationRoute(addLeg = true, dirWaypoints = emptyList()),
                     RefreshLegItemsWrapper(
                         1,
                         listOf(null, null),
@@ -337,7 +337,7 @@ class NavigationRouteExTest {
                 )
                 TestData(
                     "update waypoints from non-empty to null",
-                    provideNavigationRoute(addLeg = true, waypoints = waypoints),
+                    provideNavigationRoute(addLeg = true, dirWaypoints = waypoints),
                     RefreshLegItemsWrapper(
                         1,
                         listOf(null, null),
@@ -362,7 +362,7 @@ class NavigationRouteExTest {
                 )
                 TestData(
                     "update waypoints from non-empty to empty",
-                    provideNavigationRoute(addLeg = true, waypoints = waypoints),
+                    provideNavigationRoute(addLeg = true, dirWaypoints = waypoints),
                     RefreshLegItemsWrapper(
                         1,
                         listOf(null, null),
@@ -391,7 +391,7 @@ class NavigationRouteExTest {
                 )
                 TestData(
                     "update waypoints from 2 to 1",
-                    provideNavigationRoute(addLeg = true, waypoints = inputWaypoints),
+                    provideNavigationRoute(addLeg = true, dirWaypoints = inputWaypoints),
                     RefreshLegItemsWrapper(
                         1,
                         listOf(null, null),
@@ -421,7 +421,7 @@ class NavigationRouteExTest {
                 )
                 TestData(
                     "update waypoints from 2 to 2",
-                    provideNavigationRoute(addLeg = true, waypoints = inputWaypoints),
+                    provideNavigationRoute(addLeg = true, dirWaypoints = inputWaypoints),
                     RefreshLegItemsWrapper(
                         1,
                         listOf(null, null),
@@ -452,7 +452,7 @@ class NavigationRouteExTest {
                 )
                 TestData(
                     "update waypoints from 2 to 3",
-                    provideNavigationRoute(addLeg = true, waypoints = inputWaypoints),
+                    provideNavigationRoute(addLeg = true, dirWaypoints = inputWaypoints),
                     RefreshLegItemsWrapper(
                         1,
                         listOf(null, null),
@@ -482,7 +482,7 @@ class NavigationRouteExTest {
                 )
                 TestData(
                     "update waypoints from 2 to null + 1",
-                    provideNavigationRoute(addLeg = true, waypoints = inputWaypoints),
+                    provideNavigationRoute(addLeg = true, dirWaypoints = inputWaypoints),
                     RefreshLegItemsWrapper(
                         1,
                         listOf(null, null),
@@ -517,7 +517,7 @@ class NavigationRouteExTest {
                 )
                 return@run TestData(
                     "update items route",
-                    provideNavigationRoute(addLeg = false, waypoints = provideWaypoints()),
+                    provideNavigationRoute(addLeg = false, dirWaypoints = provideWaypoints()),
                     RefreshLegItemsWrapper(
                         0,
                         listOf(newLegAnnotations),
@@ -559,7 +559,7 @@ class NavigationRouteExTest {
                 )
                 TestData(
                     "update items multi-leg route",
-                    provideNavigationRoute(addLeg = true, waypoints = provideWaypoints()),
+                    provideNavigationRoute(addLeg = true, dirWaypoints = provideWaypoints()),
                     RefreshLegItemsWrapper(
                         0,
                         listOf(newLegAnnotations, newLegAnnotations2),
@@ -606,7 +606,7 @@ class NavigationRouteExTest {
                 )
                 TestData(
                     "update items multi-leg route, geometryIndex is 2",
-                    provideNavigationRoute(addLeg = true, waypoints = provideWaypoints()),
+                    provideNavigationRoute(addLeg = true, dirWaypoints = provideWaypoints()),
                     RefreshLegItemsWrapper(
                         0,
                         listOf(newLegAnnotations, newLegAnnotations2),
@@ -645,7 +645,7 @@ class NavigationRouteExTest {
                 )
                 TestData(
                     "update items multi-leg route starting with second leg",
-                    provideNavigationRoute(addLeg = true, waypoints = provideWaypoints()),
+                    provideNavigationRoute(addLeg = true, dirWaypoints = provideWaypoints()),
                     RefreshLegItemsWrapper(
                         1,
                         listOf(newLegAnnotations, newLegAnnotations2),
@@ -688,7 +688,7 @@ class NavigationRouteExTest {
                 )
                 TestData(
                     "update items multi-leg route starting with second leg, geometryIndex = 4",
-                    provideNavigationRoute(addLeg = true, waypoints = provideWaypoints()),
+                    provideNavigationRoute(addLeg = true, dirWaypoints = provideWaypoints()),
                     RefreshLegItemsWrapper(
                         1,
                         listOf(newLegAnnotations, newLegAnnotations2),
@@ -788,7 +788,7 @@ class NavigationRouteExTest {
         annotations: LegAnnotation? = provideDefaultLegAnnotation(),
         incidents: List<Incident>? = provideDefaultIncidents(),
         closures: List<Closure>? = provideDefaultClosures(),
-        waypoints: List<DirectionsWaypoint>? = null,
+        dirWaypoints: List<DirectionsWaypoint>? = null,
         addLeg: Boolean,
         distance: Double = 10.0,
     ): NavigationRoute {
@@ -847,7 +847,7 @@ class NavigationRouteExTest {
                             .build()
                     )
                 )
-                .waypoints(waypoints)
+                .waypoints(dirWaypoints)
                 .code("Ok")
                 .build(),
             0,
