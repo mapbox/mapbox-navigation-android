@@ -40,6 +40,9 @@ internal class NavigationViewOptions(context: Context) {
     private var _showCameraDebugInfo: MutableStateFlow<Boolean> =
         MutableStateFlow(false)
 
+    private var _showCompassActionButton: MutableStateFlow<Boolean> =
+        MutableStateFlow(false)
+
     var mapStyleUriDay: StateFlow<String> = _mapStyleUriDay.asStateFlow()
     var mapStyleUriNight: StateFlow<String> = _mapStyleUriNight.asStateFlow()
     val routeLineOptions: StateFlow<MapboxRouteLineOptions> = _routeLineOptions.asStateFlow()
@@ -52,6 +55,8 @@ internal class NavigationViewOptions(context: Context) {
         _distanceFormatterOptions.asStateFlow()
     val showCameraDebugInfo: StateFlow<Boolean> = _showCameraDebugInfo.asStateFlow()
 
+    val showCompassActionButton: StateFlow<Boolean> = _showCompassActionButton.asStateFlow()
+
     fun applyCustomization(customization: ViewOptionsCustomization) {
         customization.mapStyleUriDay?.also { _mapStyleUriDay.tryEmit(it) }
         customization.mapStyleUriNight?.also { _mapStyleUriNight.tryEmit(it) }
@@ -63,5 +68,7 @@ internal class NavigationViewOptions(context: Context) {
         customization.infoPanelForcedState?.also { _infoPanelForcedState.tryEmit(it) }
         customization.distanceFormatterOptions?.also { _distanceFormatterOptions.tryEmit(it) }
         customization.showCameraDebugInfo?.also { _showCameraDebugInfo.tryEmit(it) }
+
+        customization.showCompassActionButton?.also { _showCompassActionButton.tryEmit(it) }
     }
 }

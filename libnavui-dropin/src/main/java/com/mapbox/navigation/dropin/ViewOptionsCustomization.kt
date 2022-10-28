@@ -83,6 +83,12 @@ class ViewOptionsCustomization {
      */
     var showCameraDebugInfo: Boolean? = null
 
+    /**
+     * Sets whether the compass action button should be visible.
+     * Set to `false` for the default behavior.
+     */
+    var showCompassActionButton: Boolean? = null
+
     companion object {
         /**
          * Default route line options.

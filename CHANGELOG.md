@@ -5,6 +5,15 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- :warning: Updated `NavigationView` buttons customization to allow styling via XML styles: [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
+  - `ViewStyleCustomization.compassButtonParams` option has been replaced by `ViewStyleCustomization.compassButtonStyle`. The default style can be accessed via `ViewStyleCustomization.defaultCompassButtonStyle()` [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
+  - `ViewStyleCustomization.cameraModeButtonParams` option has been replaced by `ViewStyleCustomization.cameraModeButtonStyle`. The default style can be accessed via `ViewStyleCustomization.defaultCameraModeButtonStyle()` [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
+  - `ViewStyleCustomization.audioGuidanceButtonParams` option has been replaced by `ViewStyleCustomization.audioGuidanceButtonStyle`. The default style can be accessed via `ViewStyleCustomization.defaultAudioGuidanceButtonStyle()` [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
+  - `ViewStyleCustomization.recenterButtonParams` option has been replaced by `ViewStyleCustomization.recenterButtonStyle`. The default style can be accessed via `ViewStyleCustomization.defaultRecenterButtonStyle()` [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
+  - `ViewStyleCustomization.routePreviewButtonParams` option has been replaced by `ViewStyleCustomization.routePreviewButtonStyle`. The default style can be accessed via `ViewStyleCustomization.defaultRoutePreviewButtonStyle()` [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
+  - `ViewStyleCustomization.startNavigationButtonParams` option has been replaced by `ViewStyleCustomization.startNavigationButtonStyle`. The default style can be accessed via `ViewStyleCustomization.defaultStartNavigationButtonStyle()` [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
+  - `ViewStyleCustomization.endNavigationButtonParams` option has been replaced by `ViewStyleCustomization.endNavigationButtonStyle`. The default style can be accessed via `ViewStyleCustomization.defaultEndNavigationButtonStyle()` [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
+  - The `MapboxExtendableButtonParams` class has been removed. Any action button placement adjustments must be done via custom `ActionButtonsBinder` implementation. [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
 
 ## Mapbox Navigation SDK 2.9.0-rc.1 - 28 October, 2022
 ### Changelog

@@ -3,12 +3,10 @@ package com.mapbox.navigation.dropin.actionbutton
 import android.content.Context
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.LinearLayout
 import androidx.core.view.children
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.MapboxExtendableButtonParams
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.dropin.navigationview.NavigationViewModel
@@ -48,11 +46,6 @@ class CameraModeButtonBinderTest {
     private lateinit var navContext: NavigationViewContext
     private lateinit var sut: CameraModeButtonBinder
 
-    private val buttonParams = MapboxExtendableButtonParams(
-        R.style.Widget_AppCompat_Button,
-        LinearLayout.LayoutParams(20, 20)
-    )
-
     @Before
     fun setUp() {
         ctx = ApplicationProvider.getApplicationContext()
@@ -77,14 +70,14 @@ class CameraModeButtonBinderTest {
 
     @Test
     @Suppress("MaxLineLength")
-    fun `bind should reload CameraModeButtonComponent when style cameraModeButtonParams changes`() =
+    fun `bind should reload CameraModeButtonComponent when cameraModeButtonStyle changes`() =
         runBlockingTest {
             val components = sut.bind(viewGroup)
             components.onAttached(mapboxNavigation)
 
             val firstComponent = components.findComponent { it is CameraModeButtonComponent }
             navContext.applyStyleCustomization {
-                cameraModeButtonParams = buttonParams
+                cameraModeButtonStyle = R.style.Widget_AppCompat_Button
             }
             val secondComponent = components.findComponent { it is CameraModeButtonComponent }
             assertNotNull(secondComponent)
@@ -93,14 +86,14 @@ class CameraModeButtonBinderTest {
 
     @Test
     @Suppress("MaxLineLength")
-    fun `bind should re-create MapboxCameraModeButton when style cameraModeButtonParams changes`() =
+    fun `bind should re-create MapboxCameraModeButton when cameraModeButtonStyle changes`() =
         runBlockingTest {
             val components = sut.bind(viewGroup)
             components.onAttached(mapboxNavigation)
 
             val firstButton = viewGroup.children.first()
             navContext.applyStyleCustomization {
-                cameraModeButtonParams = buttonParams
+                cameraModeButtonStyle = R.style.Widget_AppCompat_Button
             }
             val secondButton = viewGroup.children.first()
 

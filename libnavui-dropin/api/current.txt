@@ -6,17 +6,6 @@ package com.mapbox.navigation.dropin {
     method public com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver bind(android.view.ViewGroup viewGroup);
   }
 
-  public final class MapboxExtendableButtonParams {
-    ctor public MapboxExtendableButtonParams(@StyleRes int style, android.widget.LinearLayout.LayoutParams layoutParams, boolean enabled = true);
-    ctor public MapboxExtendableButtonParams(@StyleRes int style, android.widget.LinearLayout.LayoutParams layoutParams);
-    method public boolean getEnabled();
-    method public android.widget.LinearLayout.LayoutParams getLayoutParams();
-    method public int getStyle();
-    property public final boolean enabled;
-    property public final android.widget.LinearLayout.LayoutParams layoutParams;
-    property public final int style;
-  }
-
   @UiThread @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NavigationView extends android.widget.FrameLayout implements androidx.lifecycle.LifecycleOwner {
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null, String accessToken = attrs.navigationViewAccessToken(context), androidx.lifecycle.ViewModelStoreOwner viewModelStoreOwner = context.toViewModelStoreOwner());
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null, String accessToken = attrs.navigationViewAccessToken(context));
@@ -157,6 +146,7 @@ package com.mapbox.navigation.dropin {
     method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions? getRouteArrowOptions();
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions? getRouteLineOptions();
     method public Boolean? getShowCameraDebugInfo();
+    method public Boolean? getShowCompassActionButton();
     method public Boolean? getShowInfoPanelInFreeDrive();
     method public Boolean? isInfoPanelHideable();
     method public void setDistanceFormatterOptions(com.mapbox.navigation.base.formatter.DistanceFormatterOptions?);
@@ -168,6 +158,7 @@ package com.mapbox.navigation.dropin {
     method public void setRouteArrowOptions(com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions?);
     method public void setRouteLineOptions(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions?);
     method public void setShowCameraDebugInfo(Boolean?);
+    method public void setShowCompassActionButton(Boolean?);
     method public void setShowInfoPanelInFreeDrive(Boolean?);
     property public final com.mapbox.navigation.base.formatter.DistanceFormatterOptions? distanceFormatterOptions;
     property public final Boolean? enableMapLongClickIntercept;
@@ -178,6 +169,7 @@ package com.mapbox.navigation.dropin {
     property public final com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions? routeArrowOptions;
     property public final com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions? routeLineOptions;
     property public final Boolean? showCameraDebugInfo;
+    property public final Boolean? showCompassActionButton;
     property public final Boolean? showInfoPanelInFreeDrive;
     field public static final com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion Companion;
   }
@@ -190,11 +182,11 @@ package com.mapbox.navigation.dropin {
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ViewStyleCustomization {
     ctor public ViewStyleCustomization();
     method public Integer? getArrivalTextAppearance();
-    method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams? getAudioGuidanceButtonParams();
-    method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams? getCameraModeButtonParams();
-    method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams? getCompassButtonParams();
+    method public Integer? getAudioGuidanceButtonStyle();
+    method public Integer? getCameraModeButtonStyle();
+    method public Integer? getCompassButtonStyle();
     method public com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions? getDestinationMarkerAnnotationOptions();
-    method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams? getEndNavigationButtonParams();
+    method public Integer? getEndNavigationButtonStyle();
     method public Integer? getInfoPanelBackground();
     method public Integer? getInfoPanelMarginEnd();
     method public Integer? getInfoPanelMarginStart();
@@ -203,20 +195,20 @@ package com.mapbox.navigation.dropin {
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? getManeuverViewOptions();
     method public com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams? getMapScalebarParams();
     method public Integer? getPoiNameTextAppearance();
-    method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams? getRecenterButtonParams();
+    method public Integer? getRecenterButtonStyle();
     method public Integer? getRoadNameBackground();
     method public Integer? getRoadNameTextAppearance();
-    method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams? getRoutePreviewButtonParams();
+    method public Integer? getRoutePreviewButtonStyle();
     method public Integer? getSpeedLimitStyle();
     method public Integer? getSpeedLimitTextAppearance();
-    method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams? getStartNavigationButtonParams();
+    method public Integer? getStartNavigationButtonStyle();
     method public Integer? getTripProgressStyle();
     method public void setArrivalTextAppearance(Integer?);
-    method public void setAudioGuidanceButtonParams(com.mapbox.navigation.dropin.MapboxExtendableButtonParams?);
-    method public void setCameraModeButtonParams(com.mapbox.navigation.dropin.MapboxExtendableButtonParams?);
-    method public void setCompassButtonParams(com.mapbox.navigation.dropin.MapboxExtendableButtonParams?);
+    method public void setAudioGuidanceButtonStyle(Integer?);
+    method public void setCameraModeButtonStyle(Integer?);
+    method public void setCompassButtonStyle(Integer?);
     method public void setDestinationMarkerAnnotationOptions(com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions?);
-    method public void setEndNavigationButtonParams(com.mapbox.navigation.dropin.MapboxExtendableButtonParams?);
+    method public void setEndNavigationButtonStyle(Integer?);
     method public void setInfoPanelBackground(Integer?);
     method public void setInfoPanelMarginEnd(Integer?);
     method public void setInfoPanelMarginStart(Integer?);
@@ -225,20 +217,20 @@ package com.mapbox.navigation.dropin {
     method public void setManeuverViewOptions(com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions?);
     method public void setMapScalebarParams(com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams?);
     method public void setPoiNameTextAppearance(Integer?);
-    method public void setRecenterButtonParams(com.mapbox.navigation.dropin.MapboxExtendableButtonParams?);
+    method public void setRecenterButtonStyle(Integer?);
     method public void setRoadNameBackground(Integer?);
     method public void setRoadNameTextAppearance(Integer?);
-    method public void setRoutePreviewButtonParams(com.mapbox.navigation.dropin.MapboxExtendableButtonParams?);
+    method public void setRoutePreviewButtonStyle(Integer?);
     method public void setSpeedLimitStyle(Integer?);
     method public void setSpeedLimitTextAppearance(Integer?);
-    method public void setStartNavigationButtonParams(com.mapbox.navigation.dropin.MapboxExtendableButtonParams?);
+    method public void setStartNavigationButtonStyle(Integer?);
     method public void setTripProgressStyle(Integer?);
     property public final Integer? arrivalTextAppearance;
-    property public final com.mapbox.navigation.dropin.MapboxExtendableButtonParams? audioGuidanceButtonParams;
-    property public final com.mapbox.navigation.dropin.MapboxExtendableButtonParams? cameraModeButtonParams;
-    property public final com.mapbox.navigation.dropin.MapboxExtendableButtonParams? compassButtonParams;
+    property public final Integer? audioGuidanceButtonStyle;
+    property public final Integer? cameraModeButtonStyle;
+    property public final Integer? compassButtonStyle;
     property public final com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions? destinationMarkerAnnotationOptions;
-    property public final com.mapbox.navigation.dropin.MapboxExtendableButtonParams? endNavigationButtonParams;
+    property public final Integer? endNavigationButtonStyle;
     property public final Integer? infoPanelBackground;
     property public final Integer? infoPanelMarginEnd;
     property public final Integer? infoPanelMarginStart;
@@ -247,24 +239,24 @@ package com.mapbox.navigation.dropin {
     property public final com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? maneuverViewOptions;
     property public final com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams? mapScalebarParams;
     property public final Integer? poiNameTextAppearance;
-    property public final com.mapbox.navigation.dropin.MapboxExtendableButtonParams? recenterButtonParams;
+    property public final Integer? recenterButtonStyle;
     property public final Integer? roadNameBackground;
     property public final Integer? roadNameTextAppearance;
-    property public final com.mapbox.navigation.dropin.MapboxExtendableButtonParams? routePreviewButtonParams;
+    property public final Integer? routePreviewButtonStyle;
     property public final Integer? speedLimitStyle;
     property public final Integer? speedLimitTextAppearance;
-    property public final com.mapbox.navigation.dropin.MapboxExtendableButtonParams? startNavigationButtonParams;
+    property public final Integer? startNavigationButtonStyle;
     property public final Integer? tripProgressStyle;
     field public static final com.mapbox.navigation.dropin.ViewStyleCustomization.Companion Companion;
   }
 
   public static final class ViewStyleCustomization.Companion {
     method @StyleRes public int defaultArrivalTextAppearance();
-    method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams defaultAudioGuidanceButtonParams(android.content.Context context);
-    method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams defaultCameraModeButtonParams(android.content.Context context);
-    method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams defaultCompassButtonParams(android.content.Context context);
+    method @StyleRes public int defaultAudioGuidanceButtonStyle();
+    method @StyleRes public int defaultCameraModeButtonStyle();
+    method @StyleRes public int defaultCompassButtonStyle();
     method public com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions defaultDestinationMarkerAnnotationOptions(android.content.Context context);
-    method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams defaultEndNavigationButtonParams(android.content.Context context);
+    method @StyleRes public int defaultEndNavigationButtonStyle();
     method @DrawableRes public int defaultInfoPanelBackground();
     method @Px public int defaultInfoPanelMarginEnd();
     method @Px public int defaultInfoPanelMarginStart();
@@ -273,13 +265,13 @@ package com.mapbox.navigation.dropin {
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions defaultManeuverViewOptions();
     method public com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams defaultMapScalebarParams(android.content.Context context);
     method @StyleRes public int defaultPoiNameTextAppearance();
-    method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams defaultRecenterButtonParams(android.content.Context context);
+    method @StyleRes public int defaultRecenterButtonStyle();
     method @DrawableRes public int defaultRoadNameBackground();
     method @StyleRes public int defaultRoadNameTextAppearance();
-    method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams defaultRoutePreviewButtonParams(android.content.Context context);
+    method @StyleRes public int defaultRoutePreviewButtonStyle();
     method @StyleRes public int defaultSpeedLimitStyle();
     method @StyleRes public int defaultSpeedLimitTextAppearance();
-    method public com.mapbox.navigation.dropin.MapboxExtendableButtonParams defaultStartNavigationButtonParams(android.content.Context context);
+    method @StyleRes public int defaultStartNavigationButtonStyle();
     method @StyleRes public int defaultTripProgressStyle();
   }
 

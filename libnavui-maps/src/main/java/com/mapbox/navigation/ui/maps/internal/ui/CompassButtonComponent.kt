@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.maps.internal.ui
 
-import androidx.core.view.isVisible
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
@@ -15,7 +14,6 @@ import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
 class CompassButtonComponent(
     private val compassButton: MapboxExtendableButton,
     mapView: MapView?,
-    private val enabled: Boolean
 ) : UIComponent() {
 
     private val mapboxMap: MapboxMap? = mapView?.getMapboxMap()
@@ -24,8 +22,7 @@ class CompassButtonComponent(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        compassButton.isVisible = enabled
-        if (mapboxMap != null && enabled) {
+        if (mapboxMap != null) {
             compassButton.setOnClickListener {
                 mapboxMap.flyTo(CameraOptions.Builder().bearing(.0).build())
             }

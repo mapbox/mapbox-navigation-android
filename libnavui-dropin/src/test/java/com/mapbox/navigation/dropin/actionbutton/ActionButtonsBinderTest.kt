@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.view.children
+import androidx.core.view.isEmpty
 import androidx.core.view.isNotEmpty
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -93,7 +94,22 @@ class ActionButtonsBinderTest {
     }
 
     @Test
-    fun `should bind CompassButtonComponent`() {
+    fun `should NOT bind CompassButtonComponent when option showCompassActionButton is FALSE`() {
+        navContext.applyOptionsCustomization {
+            showCompassActionButton = false
+        }
+        val components = sut.bind(viewGroup)
+        components.onAttached(mapboxNavigation)
+
+        assertNull(components.findComponent { it is CompassButtonComponent })
+        assertTrue(viewGroup.findViewById<ViewGroup>(R.id.buttonsContainerCompass).isEmpty())
+    }
+
+    @Test
+    fun `should bind CompassButtonComponent when option showCompassActionButton is TRUE`() {
+        navContext.applyOptionsCustomization {
+            showCompassActionButton = true
+        }
         val components = sut.bind(viewGroup)
         components.onAttached(mapboxNavigation)
 
@@ -131,9 +147,14 @@ class ActionButtonsBinderTest {
     @Test
     fun `should use custom binder for Compass Button`() {
         class MyCompassButtonComponent : UIComponent()
-        navContext.applyBinderCustomization {
-            actionCompassButtonBinder = UIBinder {
-                MyCompassButtonComponent()
+        navContext.apply {
+            applyBinderCustomization {
+                actionCompassButtonBinder = UIBinder {
+                    MyCompassButtonComponent()
+                }
+            }
+            applyOptionsCustomization {
+                showCompassActionButton = true
             }
         }
 
