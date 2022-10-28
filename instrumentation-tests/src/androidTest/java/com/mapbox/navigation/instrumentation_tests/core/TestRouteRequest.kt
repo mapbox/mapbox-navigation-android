@@ -1,6 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
+import android.os.Build
 import android.os.Environment
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
@@ -72,21 +73,21 @@ class TestRouteRequest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             )
         }
     }
-}
 
-private fun writeResults(
-    coordinates: String,
-    distance: Double,
-    timeFromRequestToResponseInMilliseconds: Long
-) {
-    val file = File(
-        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-        "results.csv"
-    )
-    val header = if (file.createNewFile()) {
-        "coordinates,distance,time from request to parsed response in milliseconds\n"
-    } else ""
-    val result = "$coordinates,$distance,$timeFromRequestToResponseInMilliseconds\n"
-    file.appendText(header + result)
-    Log.d("time-test", result + "(written to ${file.absolutePath})")
+    private fun writeResults(
+        coordinates: String,
+        distance: Double,
+        timeFromRequestToResponseInMilliseconds: Long
+    ) {
+        val file = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            "route-request-time-test-results.csv"
+        )
+        val header = if (file.createNewFile()) {
+            "coordinates,distance,time from request to parsed response in milliseconds,device\n"
+        } else ""
+        val result = "$coordinates,$distance,$timeFromRequestToResponseInMilliseconds,${Build.MODEL}\n"
+        file.appendText(header + result)
+        Log.d("time-test", result + "(written to ${file.absolutePath})")
+    }
 }
