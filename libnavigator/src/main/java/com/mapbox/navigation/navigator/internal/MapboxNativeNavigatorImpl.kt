@@ -8,7 +8,6 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.internal.route.nativeRoute
-import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -18,6 +17,7 @@ import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.CacheHandle
+import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.Experimental
 import com.mapbox.navigator.FallbackVersionsObserver
@@ -26,7 +26,6 @@ import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
-import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.PredictiveCacheController
 import com.mapbox.navigator.PredictiveCacheControllerOptions
@@ -57,7 +56,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private const val MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS = 2
 
     private var navigator: Navigator? = null
-    private var historyRecorderHandle: HistoryRecorderHandle? = null
     override var graphAccessor: GraphAccessor? = null
     override var roadObjectMatcher: RoadObjectMatcher? = null
     override var roadObjectsStore: RoadObjectsStore? = null
@@ -76,24 +74,21 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * functions within [MapboxNativeNavigatorImpl]
      */
     override fun create(
-        deviceProfile: DeviceProfile,
-        navigatorConfig: NavigatorConfig,
+        config: ConfigHandle,
+        historyRecorderComposite: HistoryRecorderHandle?,
         tilesConfig: TilesConfig,
-        historyDir: String?,
         accessToken: String,
         router: RouterInterface,
     ): MapboxNativeNavigator {
         navigator?.shutdown()
 
         val nativeComponents = NavigatorLoader.createNavigator(
-            deviceProfile,
-            navigatorConfig,
+            config,
+            historyRecorderComposite,
             tilesConfig,
-            historyDir,
             router,
         )
         navigator = nativeComponents.navigator
-        historyRecorderHandle = nativeComponents.historyRecorderHandle
         graphAccessor = nativeComponents.graphAccessor
         roadObjectMatcher = nativeComponents.roadObjectMatcher
         roadObjectsStore = nativeComponents.navigator.roadObjectStore()
@@ -109,21 +104,13 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * Recreate native objects and notify listeners.
      */
     override fun recreate(
-        deviceProfile: DeviceProfile,
-        navigatorConfig: NavigatorConfig,
+        config: ConfigHandle,
+        historyRecorderComposite: HistoryRecorderHandle?,
         tilesConfig: TilesConfig,
-        historyDir: String?,
         accessToken: String,
         router: RouterInterface,
     ) {
-        create(
-            deviceProfile,
-            navigatorConfig,
-            tilesConfig,
-            historyDir,
-            accessToken,
-            router,
-        )
+        create(config, historyRecorderComposite, tilesConfig, accessToken, router)
         nativeNavigatorRecreationObservers.forEach {
             it.onNativeNavigatorRecreated()
         }
@@ -294,12 +281,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 continuation.resume(expected)
             }
         }
-
-    // History traces
-
-    override fun getHistoryRecorderHandle(): HistoryRecorderHandle? {
-        return historyRecorderHandle
-    }
 
     // EH
 
