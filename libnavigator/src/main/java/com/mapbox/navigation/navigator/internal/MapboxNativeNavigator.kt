@@ -4,12 +4,12 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
-import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigator.CacheHandle
+import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.Experimental
 import com.mapbox.navigator.FallbackVersionsObserver
@@ -39,10 +39,9 @@ interface MapboxNativeNavigator {
      * Initialize the navigator with a device profile
      */
     fun create(
-        deviceProfile: DeviceProfile,
-        navigatorConfig: NavigatorConfig,
+        config: ConfigHandle,
+        historyRecorderComposite: HistoryRecorderHandle?,
         tilesConfig: TilesConfig,
-        historyDir: String?,
         accessToken: String,
         router: RouterInterface,
     ): MapboxNativeNavigator
@@ -51,10 +50,9 @@ interface MapboxNativeNavigator {
      * Reinitialize the navigator with a device profile
      */
     fun recreate(
-        deviceProfile: DeviceProfile,
-        navigatorConfig: NavigatorConfig,
+        config: ConfigHandle,
+        historyRecorderComposite: HistoryRecorderHandle?,
         tilesConfig: TilesConfig,
-        historyDir: String?,
         accessToken: String,
         router: RouterInterface,
     )
@@ -120,16 +118,6 @@ interface MapboxNativeNavigator {
      * @return a JSON route object or [RouterError]
      */
     suspend fun getRoute(url: String): Expected<RouterError, String>
-
-    // History traces
-
-    /**
-     * Returns the native class that allows the sdk to record native history files.
-     *
-     * @return null when there is no directory to write files,
-     *     or when the handle did not [HistoryRecorderHandle.build]
-     */
-    fun getHistoryRecorderHandle(): HistoryRecorderHandle?
 
     // EH
 

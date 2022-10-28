@@ -126,6 +126,7 @@ import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import com.mapbox.navigator.AlertsServiceOptions
+import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonOptions
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.IncidentsOptions
@@ -244,6 +245,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val mainJobController = threadController.getMainScopeAndRootJob()
     private val directionsSession: DirectionsSession
     private var navigator: MapboxNativeNavigator
+    private var historyRecorderHandles: NavigatorLoader.HistoryRecorderHandles
     private val tripService: TripService
     private val tripSession: TripSession
     private val navigationSession: NavigationSession
@@ -272,45 +274,19 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigationOptions.eHorizonOptions.alertServiceOptions.collectTunnels,
             navigationOptions.eHorizonOptions.alertServiceOptions.collectBridges,
             navigationOptions.eHorizonOptions.alertServiceOptions.collectRestrictedAreas
-        )
+        ),
     )
 
     private val routeUpdateMutex = Mutex()
 
     // native Router Interface
-    private val nativeRouter: RouterInterface by lazy {
-        NavigatorLoader.createNativeRouterInterface(
-            navigationOptions.deviceProfile,
-            navigatorConfig,
-            createTilesConfig(
-                isFallback = false,
-                tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
-            ),
-            historyRecorder.historyRecorderHandle,
-        )
-    }
+    private val nativeRouter: RouterInterface
 
     private val currentIndicesProvider =
         NavigationComponentProvider.createCurrentIndicesProvider()
 
     // Router provided via @Modules, might be outer
-    private val moduleRouter: NavigationRouterV2 by lazy {
-        val result = MapboxModuleProvider.createModule<Router>(MapboxModuleType.NavigationRouter) {
-            paramsProvider(
-                ModuleParams.NavigationRouter(
-                    accessToken
-                        ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER),
-                    nativeRouter,
-                    threadController
-                )
-            )
-        }
-        when (result) {
-            is NavigationRouterV2 -> result
-            is NavigationRouter -> LegacyNavigationRouterAdapter(result)
-            else -> LegacyNavigationRouterAdapter(LegacyRouterAdapter(result))
-        }
-    }
+    private val moduleRouter: NavigationRouterV2
 
     private val incidentsOptions: IncidentsOptions? = navigationOptions.incidentsOptions.run {
         if (graph.isNotEmpty() || apiUrl.isNotEmpty()) {
@@ -323,7 +299,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val pollingConfig = PollingConfig(
         navigationOptions.navigatorPredictionMillis / ONE_SECOND_IN_MILLIS,
         InternalUtils.UNCONDITIONAL_POLLING_PATIENCE_MILLISECONDS / ONE_SECOND_IN_MILLIS,
-        InternalUtils.UNCONDITIONAL_POLLING_INTERVAL_MILLISECONDS / ONE_SECOND_IN_MILLIS
+        InternalUtils.UNCONDITIONAL_POLLING_INTERVAL_MILLISECONDS / ONE_SECOND_IN_MILLIS,
     )
 
     private val navigatorConfig = NavigatorConfig(
@@ -390,6 +366,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     val historyRecorder = MapboxHistoryRecorder(navigationOptions)
 
+    internal val copilotHistoryRecorder = MapboxHistoryRecorder(navigationOptions)
+
     /**
      * **THIS IS AN EXPERIMENTAL API, DO NOT USE IN A PRODUCTION ENVIRONMENT.**
      *
@@ -429,14 +407,41 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         }
         hasInstance = true
 
-        navigator = NavigationComponentProvider.createNativeNavigator(
+        val config = NavigatorLoader.createConfig(
             navigationOptions.deviceProfile,
             navigatorConfig,
+        )
+        historyRecorderHandles = createHistoryRecorderHandles(config)
+        nativeRouter = NavigatorLoader.createNativeRouterInterface(
+            NavigatorLoader.createConfig(navigationOptions.deviceProfile, navigatorConfig),
             createTilesConfig(
                 isFallback = false,
                 tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
             ),
-            historyRecorder.fileDirectory(),
+            historyRecorderHandles.composite,
+        )
+        val result = MapboxModuleProvider.createModule<Router>(MapboxModuleType.NavigationRouter) {
+            paramsProvider(
+                ModuleParams.NavigationRouter(
+                    accessToken
+                        ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER),
+                    nativeRouter,
+                    threadController
+                )
+            )
+        }
+        moduleRouter = when (result) {
+            is NavigationRouterV2 -> result
+            is NavigationRouter -> LegacyNavigationRouterAdapter(result)
+            else -> LegacyNavigationRouterAdapter(LegacyRouterAdapter(result))
+        }
+        navigator = NavigationComponentProvider.createNativeNavigator(
+            config,
+            historyRecorderHandles.composite,
+            createTilesConfig(
+                isFallback = false,
+                tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
+            ),
             navigationOptions.accessToken ?: "",
             if (moduleRouter.isInternalImplementation()) {
                 nativeRouter
@@ -444,7 +449,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 RouterInterfaceAdapter(moduleRouter, ::getNavigationRoutes)
             },
         )
-        historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
+        assignHistoryRecorders()
         navigationSession = NavigationComponentProvider.createNavigationSession()
         historyRecordingStateHandler = NavigationComponentProvider
             .createHistoryRecordingStateHandler()
@@ -1662,6 +1667,18 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         developerMetadataAggregator.unregisterObserver(developerMetadataObserver)
     }
 
+    private fun createHistoryRecorderHandles(config: ConfigHandle) =
+        NavigatorLoader.createHistoryRecorderHandles(
+            config,
+            historyRecorder.fileDirectory(),
+            copilotHistoryRecorder.copilotFileDirectory(),
+        )
+
+    private fun assignHistoryRecorders() {
+        historyRecorder.historyRecorderHandle = historyRecorderHandles.general
+        copilotHistoryRecorder.historyRecorderHandle = historyRecorderHandles.copilot
+    }
+
     private fun startSession(withTripService: Boolean, withReplayEnabled: Boolean) {
         runIfNotDestroyed {
             tripSession.start(
@@ -1735,12 +1752,16 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             LOG_CATEGORY
         )
 
+        val config = NavigatorLoader.createConfig(
+            navigationOptions.deviceProfile,
+            navigatorConfig,
+        )
+        historyRecorderHandles = createHistoryRecorderHandles(config)
         mainJobController.scope.launch {
             navigator.recreate(
-                navigationOptions.deviceProfile,
-                navigatorConfig,
+                config,
+                historyRecorderHandles.composite,
                 createTilesConfig(isFallback, tilesVersion),
-                historyRecorder.fileDirectory(),
                 navigationOptions.accessToken ?: "",
                 if (moduleRouter.isInternalImplementation()) {
                     nativeRouter
@@ -1748,7 +1769,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                     RouterInterfaceAdapter(moduleRouter, ::getNavigationRoutes)
                 },
             )
-            historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
+            assignHistoryRecorders()
 
             val routes = directionsSession.routes
             if (routes.isNotEmpty()) {
@@ -1850,6 +1871,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     private companion object {
+
         @Volatile
         private var hasInstance = false
 
