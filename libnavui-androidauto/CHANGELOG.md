@@ -5,6 +5,9 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Moved `surfacelayer` package into an internal package because it will be replaced by `BitmapWidget`. [#6527](https://github.com/mapbox/mapbox-navigation-android/pull/6527)
+- Flattened the `car` package because it is adding an unnecessary and confusing layer. [#6527](https://github.com/mapbox/mapbox-navigation-android/pull/6527)
+- Removed `Fragment.attachAudioGuidance` extension function because it will be replaced by `ComponentInstaller`. [#6527](https://github.com/mapbox/mapbox-navigation-android/pull/6527)
 
 ## androidauto-v0.15.0 - October 21, 2022
 ### Changelog

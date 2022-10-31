@@ -1,7 +1,7 @@
 package com.mapbox.androidauto.deeplink
 
 import android.location.Location
-import com.mapbox.androidauto.car.location.CarLocationProvider
+import com.mapbox.androidauto.location.CarLocationProvider
 import com.mapbox.api.geocoding.v5.models.CarmenFeature
 import com.mapbox.api.geocoding.v5.models.GeocodingResponse
 import com.mapbox.geojson.Point

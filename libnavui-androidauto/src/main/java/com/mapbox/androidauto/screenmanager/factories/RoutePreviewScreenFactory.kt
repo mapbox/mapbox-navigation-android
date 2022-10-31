@@ -2,10 +2,10 @@ package com.mapbox.androidauto.screenmanager.factories
 
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
-import com.mapbox.androidauto.car.FreeDriveCarScreen
-import com.mapbox.androidauto.car.MapboxCarContext
-import com.mapbox.androidauto.car.preview.CarRoutePreviewScreen
+import com.mapbox.androidauto.MapboxCarContext
+import com.mapbox.androidauto.freedrive.FreeDriveCarScreen
 import com.mapbox.androidauto.internal.logAndroidAuto
+import com.mapbox.androidauto.preview.CarRoutePreviewScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenFactory
 

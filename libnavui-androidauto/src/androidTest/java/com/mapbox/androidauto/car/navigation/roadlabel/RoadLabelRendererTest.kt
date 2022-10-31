@@ -6,6 +6,8 @@ import androidx.test.filters.SmallTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
+import com.mapbox.androidauto.navigation.roadlabel.RoadLabelOptions
+import com.mapbox.androidauto.navigation.roadlabel.RoadLabelRenderer
 import com.mapbox.androidauto.testing.BitmapTestUtil
 import com.mapbox.api.directions.v5.models.MapboxShield
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI

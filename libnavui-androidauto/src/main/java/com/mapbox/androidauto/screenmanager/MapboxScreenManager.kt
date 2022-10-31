@@ -9,7 +9,7 @@ import androidx.car.app.model.Template
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.mapbox.androidauto.internal.car.context.MapboxCarContextOwner
+import com.mapbox.androidauto.internal.context.MapboxCarContextOwner
 import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow

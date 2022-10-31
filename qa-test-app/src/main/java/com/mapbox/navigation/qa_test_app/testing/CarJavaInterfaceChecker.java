@@ -8,11 +8,10 @@ import androidx.car.app.CarContext;
 import androidx.car.app.model.Distance;
 import androidx.lifecycle.LifecycleOwner;
 
-import com.mapbox.androidauto.MapboxCarNavigationManager;
-import com.mapbox.androidauto.car.navigation.CarDistanceFormatter;
-import com.mapbox.androidauto.internal.car.search.CarPlaceSearch;
+import com.mapbox.androidauto.navigation.MapboxCarNavigationManager;
+import com.mapbox.androidauto.navigation.CarDistanceFormatter;
+import com.mapbox.androidauto.internal.search.CarPlaceSearch;
 import com.mapbox.maps.extension.androidauto.MapboxCarMap;
-import com.mapbox.navigation.base.formatter.Rounding;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp;

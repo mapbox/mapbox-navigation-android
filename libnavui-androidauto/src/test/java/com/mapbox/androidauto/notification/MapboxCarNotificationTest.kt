@@ -8,8 +8,8 @@ import androidx.car.app.model.CarColor
 import androidx.car.app.notification.CarAppExtender
 import androidx.car.app.validation.HostValidator
 import androidx.core.app.NotificationCompat
+import com.mapbox.androidauto.MapboxCarOptions
 import com.mapbox.androidauto.R
-import com.mapbox.androidauto.car.MapboxCarOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions

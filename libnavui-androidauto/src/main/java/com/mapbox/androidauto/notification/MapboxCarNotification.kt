@@ -4,8 +4,8 @@ import androidx.car.app.CarContext
 import androidx.car.app.model.CarColor
 import androidx.car.app.notification.CarAppExtender
 import androidx.core.app.NotificationCompat
+import com.mapbox.androidauto.MapboxCarOptions
 import com.mapbox.androidauto.R
-import com.mapbox.androidauto.car.MapboxCarOptions
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.trip.model.RouteProgress

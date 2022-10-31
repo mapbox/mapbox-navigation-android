@@ -1,10 +1,10 @@
 package com.mapbox.androidauto.deeplink
 
-import com.mapbox.androidauto.car.location.CarLocationProvider
-import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapProvider
-import com.mapbox.androidauto.car.search.GetPlacesError
-import com.mapbox.androidauto.car.search.PlaceRecord
-import com.mapbox.androidauto.car.search.PlaceRecordMapper
+import com.mapbox.androidauto.location.CarLocationProvider
+import com.mapbox.androidauto.placeslistonmap.PlacesListOnMapProvider
+import com.mapbox.androidauto.search.GetPlacesError
+import com.mapbox.androidauto.search.PlaceRecord
+import com.mapbox.androidauto.search.PlaceRecordMapper
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point

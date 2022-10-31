@@ -1,6 +1,8 @@
 package com.mapbox.androidauto.internal.car.search
 
-import com.mapbox.androidauto.car.MapboxCarOptions
+import com.mapbox.androidauto.MapboxCarOptions
+import com.mapbox.androidauto.internal.search.CarPlaceSearchImpl
+import com.mapbox.androidauto.internal.search.CarSearchLocationProvider
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule

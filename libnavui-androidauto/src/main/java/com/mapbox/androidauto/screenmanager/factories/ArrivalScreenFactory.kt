@@ -1,9 +1,9 @@
 package com.mapbox.androidauto.screenmanager.factories
 
 import androidx.car.app.CarContext
-import com.mapbox.androidauto.car.MapboxCarContext
-import com.mapbox.androidauto.car.feedback.core.CarFeedbackScreenFactory
-import com.mapbox.androidauto.car.feedback.ui.CarFeedbackPoll
+import com.mapbox.androidauto.MapboxCarContext
+import com.mapbox.androidauto.feedback.core.CarFeedbackScreenFactory
+import com.mapbox.androidauto.feedback.ui.CarFeedbackPoll
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
