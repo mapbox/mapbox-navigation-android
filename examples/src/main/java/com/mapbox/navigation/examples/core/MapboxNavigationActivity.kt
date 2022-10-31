@@ -20,6 +20,7 @@ import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
@@ -140,6 +141,13 @@ class MapboxNavigationActivity : AppCompatActivity() {
     private lateinit var routeLineView: MapboxRouteLineView
     private lateinit var routeArrowView: MapboxRouteArrowView
     private val routeArrowAPI: MapboxRouteArrowApi = MapboxRouteArrowApi()
+
+    private val locationComponent by lazy {
+        binding.mapView.location.apply {
+            setLocationProvider(navigationLocationProvider)
+            enabled = true
+        }
+    }
 
     /* ----- Voice instruction callbacks ----- */
     private val voiceInstructionsObserver =
@@ -388,6 +396,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         // initialize route line
         val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(this)
             .withRouteLineBelowLayerId("road-label")
+            .withVanishingRouteLineEnabled(true)
             .build()
         routeLineAPI = MapboxRouteLineApi(mapboxRouteLineOptions)
         routeLineView = MapboxRouteLineView(mapboxRouteLineOptions)
@@ -434,6 +443,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        locationComponent.addOnIndicatorPositionChangedListener(onPositionChangedListener)
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerNavigationSessionStateObserver(navigationSessionStateObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
@@ -443,6 +453,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
+        locationComponent.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
@@ -469,7 +480,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
             RouteOptions.builder()
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
-                .coordinatesList(listOf(origin, destination))
+                .coordinatesList(listOf(Point.fromLngLat(-122.37033971197376, 45.5794559098664), Point.fromLngLat(-122.37006184362927, 45.57944922334681))) // fixme
                 .layersList(listOf(mapboxNavigation.getZLevel(), null))
                 .build(),
             object : NavigationRouterCallback {
@@ -526,5 +537,13 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     private companion object {
         private const val LOG_CATEGORY = "MapboxNavigationActivity"
+    }
+
+    private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
+        val result = routeLineAPI.updateTraveledRouteLine(point)
+        mapboxMap.getStyle()?.apply {
+            // Render the result to update the map.
+            routeLineView.renderRouteLineUpdate(this, result)
+        }
     }
 }

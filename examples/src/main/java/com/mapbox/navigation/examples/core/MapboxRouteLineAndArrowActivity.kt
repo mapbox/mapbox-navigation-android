@@ -364,6 +364,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
     }
 
     override fun onMapLongClick(point: Point): Boolean {
+        Log.e("foobar", "point $point")
         vibrate()
         viewBinding.startNavigation.visibility = View.GONE
         viewBinding.optionTrafficGradient.visibility = View.GONE
@@ -378,12 +379,13 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
         }
         return false
     }
-
+    //-122.36898496055935, 45.57909397202329
+//-122.37006184362927, 45.57944922334681
     fun findRoute(origin: Point?, destination: Point?) {
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
-            .coordinatesList(listOf(origin, destination))
+            .coordinatesList(listOf(Point.fromLngLat(-122.37033971197376, 45.5794559098664), Point.fromLngLat(-122.37006184362927, 45.57944922334681))) //fixme
             .layersList(listOf(mapboxNavigation.getZLevel(), null))
             .alternatives(false)
             .build()
