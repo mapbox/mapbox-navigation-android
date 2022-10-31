@@ -19,10 +19,12 @@ import com.mapbox.androidauto.map.logo.CarLogoSurfaceRenderer
 import com.mapbox.androidauto.notification.MapboxCarNotificationOptions
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
+import com.mapbox.androidauto.screenmanager.prepareExperimentalScreens
 import com.mapbox.androidauto.screenmanager.prepareScreens
 import com.mapbox.maps.MapInitOptions
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -30,14 +32,16 @@ import com.mapbox.navigation.qa_test_app.utils.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@OptIn(MapboxExperimental::class)
+@OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)
 class MainCarSession : Session() {
 
     private val carMapLoader = MainCarMapLoader()
     private val mapboxCarMap = MapboxCarMap()
         .registerObserver(carMapLoader)
+
     private val mapboxCarContext = MapboxCarContext(lifecycle, mapboxCarMap)
         .prepareScreens()
+        .prepareExperimentalScreens()
         .customize {
             notificationOptions = MapboxCarNotificationOptions.Builder()
                 .startAppService(MainCarAppService::class.java)

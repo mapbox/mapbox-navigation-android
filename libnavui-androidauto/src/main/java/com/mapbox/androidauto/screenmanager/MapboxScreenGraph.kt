@@ -3,6 +3,7 @@
 package com.mapbox.androidauto.screenmanager
 
 import com.mapbox.androidauto.MapboxCarContext
+import com.mapbox.androidauto.preview.RoutePreviewScreenFactory2
 import com.mapbox.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE
 import com.mapbox.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE_FEEDBACK
 import com.mapbox.androidauto.screenmanager.MapboxScreen.ARRIVAL
@@ -31,6 +32,7 @@ import com.mapbox.androidauto.screenmanager.factories.RoutePreviewScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.SearchPlacesFeedbackScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.SearchPlacesScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.SettingsScreenFactory
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
 /**
  * This is a predefined application that is designed to collect feedback from drivers.
@@ -69,4 +71,9 @@ fun MapboxCarContext.prepareScreens() = apply {
         ARRIVAL
             to ArrivalScreenFactory(mapboxCarContext)
     )
+}
+
+@ExperimentalPreviewMapboxNavigationAPI
+fun MapboxCarContext.prepareExperimentalScreens() = apply {
+    mapboxScreenManager[ROUTE_PREVIEW] = RoutePreviewScreenFactory2(this)
 }
