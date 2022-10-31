@@ -13,6 +13,10 @@ import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
+import com.mapbox.navigation.base.internal.route.Waypoint
+import com.mapbox.navigation.base.internal.utils.WaypointFactory
+import com.mapbox.navigation.base.internal.utils.internalWaypoints
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
@@ -1219,45 +1223,120 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun buildWayPointFeatureCollection() {
-        mockkObject(NativeRouteParserWrapper)
-        every {
-            NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
-        } answers {
-            val routesCount =
-                JSONObject(this.firstArg<String>())
-                    .getJSONArray("routes")
-                    .length()
-            val nativeRoutes = mutableListOf<RouteInterface>().apply {
-                repeat(routesCount) {
-                    add(
-                        mockk {
-                            every { routeInfo } returns mockk(relaxed = true)
-                            every { routeId } returns "$it"
-                            every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
-                        }
-                    )
-                }
-            }
-            ExpectedFactory.createValue(nativeRoutes)
+        val route = mockk<NavigationRoute>()
+        mockkStatic(route::internalWaypoints) {
+            every { route.internalWaypoints() } returns listOf(
+                WaypointFactory.provideWaypoint(
+                    name = "w1",
+                    location = Point.fromLngLat(-77.157347, 38.783004),
+                    type = Waypoint.REGULAR,
+                    target = null
+                ),
+                WaypointFactory.provideWaypoint(
+                    name = "w2",
+                    location = Point.fromLngLat(-77.167276, 38.775717),
+                    type = Waypoint.REGULAR,
+                    target = null
+                ),
+                WaypointFactory.provideWaypoint(
+                    name = "w3",
+                    location = Point.fromLngLat(-77.153468, 38.77091),
+                    type = Waypoint.REGULAR,
+                    target = null
+                ),
+            )
+            val result = MapboxRouteLineUtils.buildWayPointFeatureCollection(route)
+
+            assertEquals(3, result.features()!!.size)
+            assertEquals(
+                Point.fromLngLat(-77.157347, 38.783004),
+                result.features()!![0].geometry() as Point
+            )
+            assertEquals(
+                Point.fromLngLat(-77.167276, 38.775717),
+                result.features()!![1].geometry() as Point
+            )
+            assertEquals(
+                Point.fromLngLat(-77.153468, 38.77091),
+                result.features()!![2].geometry() as Point
+            )
         }
+    }
 
-        val route = loadNavigationRoute("multileg_route.json")
+    @Test
+    fun `build waypoint FeatureCollection with silent waypoints`() {
+        val route = mockk<NavigationRoute>()
+        mockkStatic(route::internalWaypoints) {
+            every { route.internalWaypoints() } returns listOf(
+                WaypointFactory.provideWaypoint(
+                    name = "w1",
+                    location = Point.fromLngLat(-77.157347, 38.783004),
+                    type = Waypoint.REGULAR,
+                    target = null
+                ),
+                WaypointFactory.provideWaypoint(
+                    name = "w2",
+                    location = Point.fromLngLat(-77.167276, 38.775717),
+                    type = Waypoint.SILENT,
+                    target = null
+                ),
+                WaypointFactory.provideWaypoint(
+                    name = "w3",
+                    location = Point.fromLngLat(-77.153468, 38.77091),
+                    type = Waypoint.REGULAR,
+                    target = null
+                ),
+            )
+            val result = MapboxRouteLineUtils.buildWayPointFeatureCollection(route)
 
-        val result = MapboxRouteLineUtils.buildWayPointFeatureCollection(route)
+            assertEquals(2, result.features()!!.size)
+            assertEquals(
+                Point.fromLngLat(-77.157347, 38.783004),
+                result.features()!![0].geometry() as Point
+            )
+            assertEquals(
+                Point.fromLngLat(-77.153468, 38.77091),
+                result.features()!![1].geometry() as Point
+            )
+        }
+    }
 
-        assertEquals(3, result.features()!!.size)
-        assertEquals(
-            Point.fromLngLat(-77.157347, 38.783004),
-            result.features()!![0].geometry() as Point
-        )
-        assertEquals(
-            Point.fromLngLat(-77.167276, 38.775717),
-            result.features()!![1].geometry() as Point
-        )
-        assertEquals(
-            Point.fromLngLat(-77.153468, 38.77091),
-            result.features()!![2].geometry() as Point
-        )
+    @Test
+    fun `build waypoint FeatureCollection with EV waypoints`() {
+        val route = mockk<NavigationRoute>()
+        mockkStatic(route::internalWaypoints) {
+            every { route.internalWaypoints() } returns listOf(
+                WaypointFactory.provideWaypoint(
+                    name = "w1",
+                    location = Point.fromLngLat(-77.157347, 38.783004),
+                    type = Waypoint.EV_CHARGING,
+                    target = null
+                ),
+                WaypointFactory.provideWaypoint(
+                    name = "w2",
+                    location = Point.fromLngLat(-77.167276, 38.775717),
+                    type = Waypoint.SILENT,
+                    target = null
+                ),
+                WaypointFactory.provideWaypoint(
+                    name = "w3",
+                    location = Point.fromLngLat(-77.153468, 38.77091),
+                    type = Waypoint.REGULAR,
+                    target = null
+                ),
+            )
+            val result = MapboxRouteLineUtils.buildWayPointFeatureCollection(route)
+
+            assertEquals(2, result.features()!!.size)
+            assertEquals(
+                Point.fromLngLat(-77.157347, 38.783004),
+                result.features()!![0].geometry() as Point
+            )
+            assertEquals(
+                Point.fromLngLat(-77.153468, 38.77091),
+                result.features()!![1].geometry() as Point
+            )
+        }
     }
 
     @Test

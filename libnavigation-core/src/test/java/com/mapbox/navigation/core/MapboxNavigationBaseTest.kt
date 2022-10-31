@@ -6,12 +6,10 @@ import android.content.Context
 import android.net.ConnectivityManager
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.annotation.module.MapboxModuleType
-import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.MapboxSDKCommon
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
-import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -43,11 +41,11 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.CacheHandle
-import com.mapbox.navigator.RouteInterface
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
@@ -57,14 +55,12 @@ import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.unmockkObject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.json.JSONObject
 import org.junit.After
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
 import java.io.File
 import java.util.Locale
-import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal open class MapboxNavigationBaseTest {
@@ -74,6 +70,9 @@ internal open class MapboxNavigationBaseTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
+
+    @get:Rule
+    val nativeRouteParserRule = NativeRouteParserRule()
 
     val accessToken = "pk.1234"
     val directionsSession: DirectionsSession = mockk(relaxUnitFun = true)
@@ -215,31 +214,6 @@ internal open class MapboxNavigationBaseTest {
         } returns navigator
         mockkObject(TelemetryUtilsDelegate)
         every { TelemetryUtilsDelegate.getEventsCollectionState() } returns true
-
-        mockkObject(NativeRouteParserWrapper)
-        every {
-            NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
-        } answers {
-            val response = JSONObject(this.firstArg<String>())
-            val routesCount = response.getJSONArray("routes").length()
-            val idBase = if (response.has("uuid")) {
-                response.getString("uuid")
-            } else {
-                "local@${UUID.randomUUID()}"
-            }
-            val nativeRoutes = mutableListOf<RouteInterface>().apply {
-                repeat(routesCount) {
-                    add(
-                        mockk {
-                            every { routeInfo } returns mockk(relaxed = true)
-                            every { routeId } returns "$idBase#$it"
-                            every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
-                        }
-                    )
-                }
-            }
-            ExpectedFactory.createValue(nativeRoutes)
-        }
     }
 
     @After
@@ -260,7 +234,6 @@ internal open class MapboxNavigationBaseTest {
         unmockkObject(EventsServiceProvider)
         unmockkObject(TelemetryServiceProvider)
         unmockkObject(TelemetryUtilsDelegate)
-        unmockkObject(NativeRouteParserWrapper)
     }
 
     fun createMapboxNavigation() {
