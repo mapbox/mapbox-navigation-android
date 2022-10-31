@@ -15,18 +15,12 @@ internal tailrec fun Context.recursiveUnwrap(): Context =
         this
     }
 
-internal fun Context.toViewModelStoreOwner(): ViewModelStoreOwner {
-    val viewModelStoreOwner = this.recursiveUnwrap() as? ViewModelStoreOwner
-    checkNotNull(viewModelStoreOwner) {
+internal fun Context.toViewModelStoreOwner(): ViewModelStoreOwner =
+    checkNotNull(this.recursiveUnwrap() as? ViewModelStoreOwner) {
         "Please ensure that the hosting Context is a valid ViewModelStoreOwner"
     }
-    return viewModelStoreOwner
-}
 
-internal fun Context.toComponentActivity(): ComponentActivity {
-    val componentActivity = this.recursiveUnwrap() as? ComponentActivity
-    checkNotNull(componentActivity) {
+internal fun Context.toComponentActivity(): ComponentActivity =
+    checkNotNull(this.recursiveUnwrap() as? ComponentActivity) {
         "Please ensure that the hosting Context is a valid ComponentActivity"
     }
-    return componentActivity
-}

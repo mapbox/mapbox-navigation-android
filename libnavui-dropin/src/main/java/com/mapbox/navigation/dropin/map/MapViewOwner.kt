@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.map
 
+import androidx.annotation.VisibleForTesting
 import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,12 +15,12 @@ internal class MapViewOwner {
             field = value
             _mapViews.value = value
         }
-    private val listeners = CopyOnWriteArraySet<MapViewObserver>()
+    private val observers = CopyOnWriteArraySet<MapViewObserver>()
     private val _mapViews = MutableStateFlow(mapView)
     val mapViews = _mapViews.asStateFlow()
 
     fun registerObserver(observer: MapViewObserver) {
-        if (listeners.add(observer)) {
+        if (observers.add(observer)) {
             mapView?.let {
                 observer.onAttached(it)
             }
@@ -27,7 +28,7 @@ internal class MapViewOwner {
     }
 
     fun unregisterObserver(observer: MapViewObserver) {
-        if (listeners.remove(observer)) {
+        if (observers.remove(observer)) {
             mapView?.let {
                 observer.onDetached(it)
             }
@@ -36,15 +37,18 @@ internal class MapViewOwner {
 
     fun updateMapView(mapView: MapView?) {
         this.mapView?.let {
-            listeners.forEach { listener ->
+            observers.forEach { listener ->
                 listener.onDetached(it)
             }
         }
         this.mapView = mapView
         mapView?.let {
-            listeners.forEach { listener ->
+            observers.forEach { listener ->
                 listener.onAttached(it)
             }
         }
     }
+
+    @VisibleForTesting
+    internal fun getRegisteredObservers() = observers.toSet()
 }
