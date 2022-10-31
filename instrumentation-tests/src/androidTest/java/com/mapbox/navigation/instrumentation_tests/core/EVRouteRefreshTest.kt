@@ -17,6 +17,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
@@ -75,6 +76,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         Point.fromLngLat(11.5852259, 48.1760993),
         Point.fromLngLat(10.3406374, 49.16479)
     )
+    private lateinit var routeHandler: MockDirectionsRequestHandler
 
     override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
         latitude = twoCoordinates[0].latitude()
@@ -105,7 +107,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
                     .build()
             )
             mockWebServerRule.requestHandlers.clear()
-            val routeHandler = MockDirectionsRequestHandler(
+            routeHandler = MockDirectionsRequestHandler(
                 "driving-traffic",
                 readRawFileText(activity, R.raw.ev_route_response_for_refresh),
                 twoCoordinates,
@@ -131,9 +133,9 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
                 KEY_AUXILIARY_CONSUMPTION to "300"
             )
         )
-        mapboxNavigation.setNavigationRoutes(requestedRoutes)
         mapboxNavigation.startTripSession()
         stayOnInitialPosition()
+        mapboxNavigation.setNavigationRoutes(requestedRoutes)
         waitUntilRefresh()
 
         checkDoesNotHaveParameters(
@@ -150,9 +152,9 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         )
         val requestedRoutes = requestRoutes(twoCoordinates, electric = true)
 
-        mapboxNavigation.setNavigationRoutes(requestedRoutes)
         mapboxNavigation.startTripSession()
         stayOnInitialPosition()
+        mapboxNavigation.setNavigationRoutes(requestedRoutes)
         waitUntilRefresh()
 
         checkDoesNotHaveParameters(
@@ -185,9 +187,9 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         )
         mapboxNavigation.onEVDataUpdated(evData)
 
-        mapboxNavigation.setNavigationRoutes(requestedRoutes)
         mapboxNavigation.startTripSession()
         stayOnInitialPosition()
+        mapboxNavigation.setNavigationRoutes(requestedRoutes)
         waitUntilRefresh()
 
         checkHasParameters(
@@ -205,9 +207,9 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         refreshHandler.jsonResponseModifier = DynamicResponseModifier()
         val requestedRoutes = requestRoutes(twoCoordinates, electric = true)
 
-        mapboxNavigation.setNavigationRoutes(requestedRoutes)
         mapboxNavigation.startTripSession()
         stayOnInitialPosition()
+        mapboxNavigation.setNavigationRoutes(requestedRoutes)
         waitUntilRefresh()
 
         val noUpdaterRefreshUrl = refreshHandler.handledRequests.first().requestUrl!!
@@ -284,9 +286,9 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         )
         mapboxNavigation.onEVDataUpdated(evData)
 
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
         mapboxNavigation.startTripSession()
         stayOnInitialPosition()
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
         val updatedRoutes = waitUntilRefresh().navigationRoutes
 
         assertEquals(
@@ -332,10 +334,10 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
                 KEY_AUXILIARY_CONSUMPTION to "300"
             )
             mapboxNavigation.onEVDataUpdated(evData)
-            mapboxNavigation.setNavigationRoutes(requestedRoutes)
-            // corresponds to currentRouteGeometryIndex = 384
-            stayOnPosition(48.209765, 11.478632)
             mapboxNavigation.startTripSession()
+            // corresponds to currentRouteGeometryIndex = 384
+            waitUntilStayingOnPosition(48.209765, 11.478632)
+            mapboxNavigation.setNavigationRoutes(requestedRoutes)
             mapboxNavigation.routeProgressUpdates().filter { progress ->
                 progress.currentRouteGeometryIndex == geometryIndex
             }.first()
@@ -383,9 +385,9 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
             KEY_AUXILIARY_CONSUMPTION to "300"
         )
         mapboxNavigation.onEVDataUpdated(evData)
-        mapboxNavigation.setNavigationRoutes(requestedRoutes)
-        stayOnInitialPosition()
         mapboxNavigation.startTripSession()
+        stayOnInitialPosition()
+        mapboxNavigation.setNavigationRoutes(requestedRoutes)
 
         val updatedRoutes = waitUntilRefresh().navigationRoutes
 
@@ -438,13 +440,21 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
             KEY_AUXILIARY_CONSUMPTION to "300"
         )
         mapboxNavigation.onEVDataUpdated(evData)
-        mapboxNavigation.setNavigationRoutes(requestedRoutes, initialLegIndex = 1)
-        // corresponds to currentRouteGeometryIndex = 774
-        stayOnPosition(48.391238, 11.064252, 90f)
         mapboxNavigation.startTripSession()
-        mapboxNavigation.routeProgressUpdates().filter { progress ->
-            progress.currentRouteGeometryIndex == routeGeometryIndex
-        }.first()
+        // corresponds to currentRouteGeometryIndex = 774
+        val geometryIndexLocation = Point.fromLngLat(11.064252, 48.391238)
+        waitUntilStayingOnPosition(
+            geometryIndexLocation.latitude(),
+            geometryIndexLocation.longitude(),
+            90f
+        )
+        mapboxNavigation.setNavigationRoutes(requestedRoutes, initialLegIndex = 1)
+
+        mapboxNavigation
+            .routeProgressUpdates()
+            .filter { progress ->
+                progress.currentRouteGeometryIndex == routeGeometryIndex
+            }.first()
 
         val updatedRoutes = waitUntilRefresh().navigationRoutes
 
@@ -475,11 +485,15 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         )
     }
 
-    private fun stayOnInitialPosition() {
-        stayOnPosition(twoCoordinates[0].latitude(), twoCoordinates[0].longitude())
+    private suspend fun stayOnInitialPosition() {
+        waitUntilStayingOnPosition(twoCoordinates[0].latitude(), twoCoordinates[0].longitude())
     }
 
-    private fun stayOnPosition(latitude: Double, longitude: Double, bearing: Float = 190f) {
+    private suspend fun waitUntilStayingOnPosition(
+        latitude: Double,
+        longitude: Double,
+        bearing: Float = 190f
+    ) {
         mockLocationReplayerRule.loopUpdate(
             mockLocationUpdatesRule.generateLocationUpdate {
                 this.latitude = latitude
@@ -488,6 +502,10 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
             },
             times = 120
         )
+        mapboxNavigation.flowLocationMatcherResult().filter {
+            it.enhancedLocation.latitude == latitude &&
+                it.enhancedLocation.longitude == longitude
+        }.first()
     }
 
     private fun generateRouteOptions(
@@ -608,6 +626,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
             twoCoordinates,
             relaxedExpectedCoordinates = true
         )
+        mockWebServerRule.requestHandlers.remove(this.routeHandler)
         mockWebServerRule.requestHandlers.add(0, routeHandler)
     }
 }
