@@ -15,6 +15,7 @@ import com.mapbox.navigation.core.history.model.HistoryEvent
 import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
 import com.mapbox.navigation.core.internal.HistoryRecordingSessionState
 import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
+import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.internal.extensions.registerHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.unregisterHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.instrumentation_tests.R
@@ -37,6 +38,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
+import com.mapbox.navigation.utils.internal.toPoint
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.filter
@@ -303,6 +305,11 @@ class HistoryRecordingStateChangeObserverTest :
         observeHistoryRecordingEvents(eventsChannel)
 
         mapboxNavigation.startTripSession()
+        stayOnPosition(offRouteLocationUpdate.toPoint())
+        mapboxNavigation.flowLocationMatcherResult().filter {
+            it.enhancedLocation.latitude == offRouteLocationUpdate.latitude &&
+                it.enhancedLocation.longitude == offRouteLocationUpdate.longitude
+        }.first()
         mapboxNavigation.setNavigationRoutes(routes)
         assertEquals(
             listOf(
@@ -321,7 +328,6 @@ class HistoryRecordingStateChangeObserverTest :
             ),
             eventsChannel.receive(3)
         )
-        mockLocationReplayerRule.loopUpdate(offRouteLocationUpdate, times = 5)
         mapboxNavigation.routesUpdates()
             .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
             .first()
@@ -366,6 +372,7 @@ class HistoryRecordingStateChangeObserverTest :
     }
 
     private fun setUpMockRequestHandlersForRefresh(mockRoute: MockRoute) {
+        mockWebServerRule.requestHandlers.clear()
         val failByRequestRouteRefreshResponse = FailByRequestMockRequestHandler(
             MockDirectionsRefreshHandler(
                 mockRoute.routeResponse.uuid()!!,
@@ -382,6 +389,7 @@ class HistoryRecordingStateChangeObserverTest :
         mockRoute: MockRoute,
         offRouteLocationUpdate: Location
     ) {
+        mockWebServerRule.requestHandlers.clear()
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRequestHandler(
@@ -409,6 +417,16 @@ class HistoryRecordingStateChangeObserverTest :
             NavigationOptions.Builder(activity)
                 .accessToken(getMapboxAccessTokenFromResources(activity))
                 .build()
+        )
+    }
+
+    private fun stayOnPosition(position: Point) {
+        mockLocationReplayerRule.loopUpdate(
+            mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = position.latitude()
+                longitude = position.longitude()
+            },
+            times = 120
         )
     }
 
