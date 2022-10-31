@@ -1,12 +1,11 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
-import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
@@ -15,7 +14,6 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimExpressionPro
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
-import com.mapbox.navigator.RouteInterface
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -23,7 +21,6 @@ import io.mockk.unmockkObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
-import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -32,7 +29,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.UUID
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -40,6 +36,10 @@ class VanishingRouteLineRoboTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
+
+    @get:Rule
+    val nativeRouteParserRule = NativeRouteParserRule()
+
     private val parentJob = SupervisorJob()
     private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
     private lateinit var testJobControl: JobControl
@@ -51,37 +51,11 @@ class VanishingRouteLineRoboTest {
             InternalJobControlFactory.createDefaultScopeJobControl()
         } returns JobControl(parentJob, testScope)
         testJobControl = InternalJobControlFactory.createDefaultScopeJobControl()
-
-        mockkObject(NativeRouteParserWrapper)
-        every {
-            NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
-        } answers {
-            val response = JSONObject(this.firstArg<String>())
-            val routesCount = response.getJSONArray("routes").length()
-            val idBase = if (response.has("uuid")) {
-                response.getString("uuid")
-            } else {
-                "local@${UUID.randomUUID()}"
-            }
-            val nativeRoutes = mutableListOf<RouteInterface>().apply {
-                repeat(routesCount) {
-                    add(
-                        mockk {
-                            every { routeInfo } returns mockk(relaxed = true)
-                            every { routeId } returns "$idBase#$it"
-                            every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
-                        }
-                    )
-                }
-            }
-            ExpectedFactory.createValue(nativeRoutes)
-        }
     }
 
     @After
     fun cleanUp() {
         unmockkObject(InternalJobControlFactory)
-        unmockkObject(NativeRouteParserWrapper)
     }
 
     @Test

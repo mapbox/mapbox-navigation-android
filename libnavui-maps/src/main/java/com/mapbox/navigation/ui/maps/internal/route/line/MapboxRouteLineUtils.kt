@@ -29,6 +29,8 @@ import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
 import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
+import com.mapbox.navigation.base.internal.extensions.isLegWaypoint
+import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToLineString
 import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
@@ -984,8 +986,9 @@ internal object MapboxRouteLineUtils {
      * @return a [FeatureCollection] representing the waypoints derived from the [NavigationRoute]
      */
     internal fun buildWayPointFeatureCollection(route: NavigationRoute): FeatureCollection {
-        val waypointFeatures = route.directionsResponse.waypoints()?.mapIndexed { index, waypoint ->
-            waypoint.location().let {
+        val legWaypoints = route.internalWaypoints().filter { it.isLegWaypoint() }
+        val waypointFeatures = legWaypoints.mapIndexed { index, waypoint ->
+            waypoint.location.let {
                 Feature.fromGeometry(it).apply {
                     val propValue = if (index == 0) {
                         RouteLayerConstants.WAYPOINT_ORIGIN_VALUE
@@ -995,7 +998,7 @@ internal object MapboxRouteLineUtils {
                     addStringProperty(RouteLayerConstants.WAYPOINT_PROPERTY_KEY, propValue)
                 }
             }
-        } ?: emptyList()
+        }
         return FeatureCollection.fromFeatures(waypointFeatures)
     }
 

@@ -3,7 +3,6 @@ package com.mapbox.navigation.core.routealternatives
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -13,10 +12,10 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteAlternativesControllerInterface
-import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteIntersection
 import io.mockk.every
 import io.mockk.just
@@ -29,7 +28,6 @@ import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -51,6 +49,9 @@ class RouteAlternativesControllerTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
+
+    @get:Rule
+    val nativeRouteParserRule = NativeRouteParserRule()
 
     private val genericURL = URL("https://mock_request_url")
 
@@ -74,37 +75,11 @@ class RouteAlternativesControllerTest {
         mockkObject(ThreadController)
         every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
         every { ThreadController.DefaultDispatcher } returns coroutineRule.testDispatcher
-
-        mockkObject(NativeRouteParserWrapper)
-        every {
-            NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
-        } answers {
-            val response = JSONObject(this.firstArg<String>())
-            val routesCount = response.getJSONArray("routes").length()
-            val idBase = if (response.has("uuid")) {
-                response.getString("uuid")
-            } else {
-                "local@${UUID.randomUUID()}"
-            }
-            val nativeRoutes = mutableListOf<RouteInterface>().apply {
-                repeat(routesCount) {
-                    add(
-                        mockk {
-                            every { routeInfo } returns mockk(relaxed = true)
-                            every { routeId } returns "$idBase#$it"
-                            every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
-                        }
-                    )
-                }
-            }
-            ExpectedFactory.createValue(nativeRoutes)
-        }
     }
 
     @After
     fun tearDown() {
         unmockkObject(ThreadController)
-        unmockkObject(NativeRouteParserWrapper)
     }
 
     @Test

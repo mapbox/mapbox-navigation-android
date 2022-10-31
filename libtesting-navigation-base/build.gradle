@@ -20,4 +20,6 @@ android {
 dependencies {
     api project(':libtesting-thirdparty')
     implementation(project(':libnavigation-base'))
+    implementation dependenciesList.junit
+    implementation dependenciesList.mockk
 }
