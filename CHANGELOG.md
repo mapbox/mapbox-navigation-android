@@ -18,6 +18,8 @@ Mapbox welcomes participation and contributions from everyone.
   - `ViewOptionsCustomization.showStartNavigationButton` can be used to show/hide info panel's start navigation button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
   - `ViewOptionsCustomization.showEndNavigationButton` can be used to show/hide info panel's end navigation button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
 #### Bug fixes and improvements
+- :warning: Removed `MapboxMapScalebarParams` and replaced `ViewStyleCustomization.mapScalebarParams` by `ViewOptionsCustomization.showMapScalebar` [#6523](https://github.com/mapbox/mapbox-navigation-android/pull/6523)
+- Refactored `ScalebarComponent` to use `ViewOptionsCustomization.distanceFormatterOptions` to change between imperial and metric based unit. [#6523](https://github.com/mapbox/mapbox-navigation-android/pull/6523)
 - :warning: Updated `NavigationView` buttons customization to allow styling via XML styles: [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
   - `ViewStyleCustomization.compassButtonParams` option has been replaced by `ViewStyleCustomization.compassButtonStyle`. The default style can be accessed via `ViewStyleCustomization.defaultCompassButtonStyle()` [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
   - `ViewStyleCustomization.cameraModeButtonParams` option has been replaced by `ViewStyleCustomization.cameraModeButtonStyle`. The default style can be accessed via `ViewStyleCustomization.defaultCameraModeButtonStyle()` [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)

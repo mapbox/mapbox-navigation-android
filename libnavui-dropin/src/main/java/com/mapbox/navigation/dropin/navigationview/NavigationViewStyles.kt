@@ -5,7 +5,6 @@ import com.mapbox.maps.plugin.LocationPuck
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.ViewStyleCustomization
-import com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,9 +57,6 @@ internal class NavigationViewStyles(context: Context) {
         MutableStateFlow(ViewStyleCustomization.defaultArrivalTextAppearance())
     private val _locationPuck: MutableStateFlow<LocationPuck> =
         MutableStateFlow(ViewStyleCustomization.defaultLocationPuck(context))
-    private val _mapScalebarParams: MutableStateFlow<MapboxMapScalebarParams> = MutableStateFlow(
-        ViewStyleCustomization.defaultMapScalebarParams(context)
-    )
 
     val infoPanelPeekHeight: StateFlow<Int> = _infoPanelPeekHeight.asStateFlow()
     val infoPanelMarginStart: StateFlow<Int> = _infoPanelMarginStart.asStateFlow()
@@ -86,7 +82,6 @@ internal class NavigationViewStyles(context: Context) {
     val maneuverViewOptions: StateFlow<ManeuverViewOptions> = _maneuverViewOptions.asStateFlow()
     val arrivalTextAppearance: StateFlow<Int> = _arrivalTextAppearance.asStateFlow()
     val locationPuck: StateFlow<LocationPuck> = _locationPuck.asStateFlow()
-    val mapScalebarParams: StateFlow<MapboxMapScalebarParams> = _mapScalebarParams.asStateFlow()
 
     fun applyCustomization(customization: ViewStyleCustomization) {
         customization.infoPanelPeekHeight?.also { _infoPanelPeekHeight.value = it }
@@ -114,6 +109,5 @@ internal class NavigationViewStyles(context: Context) {
         customization.roadNameTextAppearance?.also { _roadNameTextAppearance.value = it }
         customization.arrivalTextAppearance?.also { _arrivalTextAppearance.value = it }
         customization.locationPuck?.also { _locationPuck.value = it }
-        customization.mapScalebarParams?.also { _mapScalebarParams.value = it }
     }
 }

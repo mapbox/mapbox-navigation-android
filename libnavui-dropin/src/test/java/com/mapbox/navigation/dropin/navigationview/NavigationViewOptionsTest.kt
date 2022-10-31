@@ -55,6 +55,7 @@ internal class NavigationViewOptionsTest {
         assertEquals(c.showCameraModeActionButton, sut.showCameraModeActionButton.value)
         assertEquals(c.showToggleAudioActionButton, sut.showToggleAudioActionButton.value)
         assertEquals(c.showRecenterActionButton, sut.showRecenterActionButton.value)
+        assertEquals(c.showMapScalebar, sut.showMapScalebar.value)
         assertEquals(c.showTripProgress, sut.showTripProgress.value)
         assertEquals(c.showRoutePreviewButton, sut.showRoutePreviewButton.value)
         assertEquals(c.showStartNavigationButton, sut.showStartNavigationButton.value)
@@ -91,6 +92,7 @@ internal class NavigationViewOptionsTest {
             showCameraModeActionButton = false
             showToggleAudioActionButton = false
             showRecenterActionButton = false
+            showMapScalebar = true
             showTripProgress = false
             showRoutePreviewButton = false
             showStartNavigationButton = false

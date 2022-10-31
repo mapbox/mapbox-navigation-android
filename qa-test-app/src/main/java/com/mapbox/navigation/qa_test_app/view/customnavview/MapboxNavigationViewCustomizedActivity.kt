@@ -72,7 +72,6 @@ import com.mapbox.navigation.dropin.infopanel.InfoPanelBinder
 import com.mapbox.navigation.dropin.internal.extensions.updateMargins
 import com.mapbox.navigation.dropin.map.MapViewBinder
 import com.mapbox.navigation.dropin.map.MapViewObserver
-import com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams
 import com.mapbox.navigation.dropin.navigationview.NavigationViewListener
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.LayoutActivityNavigationViewBinding
@@ -353,7 +352,12 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 mapStyleUriNight = Style.DARK
             }
             binding.navigationView.customizeViewStyles {
-                locationPuck = LocationPuck2D(bearingImage = getDrawable(R.drawable.ic_sv_puck))
+                locationPuck = LocationPuck2D(
+                    bearingImage = ContextCompat.getDrawable(
+                        this@MapboxNavigationViewCustomizedActivity,
+                        R.drawable.ic_sv_puck
+                    )
+                )
             }
         } else {
             // Reset defaults
@@ -435,11 +439,8 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
     }
 
     private fun toggleEnableScalebar(enabled: Boolean) {
-        binding.navigationView.customizeViewStyles {
-            mapScalebarParams = MapboxMapScalebarParams
-                .Builder(this@MapboxNavigationViewCustomizedActivity)
-                .enabled(enabled)
-                .build()
+        binding.navigationView.customizeViewOptions {
+            showMapScalebar = enabled
         }
     }
 
