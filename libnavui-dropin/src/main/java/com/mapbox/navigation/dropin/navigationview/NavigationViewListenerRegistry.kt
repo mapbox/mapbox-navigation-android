@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.navigationview
 
+import androidx.annotation.VisibleForTesting
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.infopanel.InfoPanelBehavior
@@ -148,4 +149,7 @@ internal class NavigationViewListenerRegistry(
             is TargetCameraMode.Following -> onFollowingCameraMode()
         }
     }
+
+    @VisibleForTesting
+    internal fun getRegisteredListeners() = listeners.keys
 }

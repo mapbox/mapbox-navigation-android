@@ -3,22 +3,42 @@
 package com.mapbox.navigation.dropin.internal.extensions
 
 import android.view.ViewGroup
+import androidx.activity.ComponentActivity
 import androidx.annotation.Px
+import androidx.constraintlayout.widget.Guideline
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.EmptyBinder
+import com.mapbox.navigation.dropin.LeftFrameCoordinator
+import com.mapbox.navigation.dropin.RightFrameCoordinator
+import com.mapbox.navigation.dropin.actionbutton.ActionButtonsCoordinator
 import com.mapbox.navigation.dropin.actionbutton.AudioGuidanceButtonBinder
 import com.mapbox.navigation.dropin.actionbutton.CameraModeButtonBinder
 import com.mapbox.navigation.dropin.actionbutton.CompassButtonBinder
 import com.mapbox.navigation.dropin.actionbutton.RecenterButtonBinder
+import com.mapbox.navigation.dropin.analytics.AnalyticsComponent
+import com.mapbox.navigation.dropin.backpress.BackPressedComponent
+import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.infopanel.InfoPanelArrivalTextBinder
+import com.mapbox.navigation.dropin.infopanel.InfoPanelCoordinator
 import com.mapbox.navigation.dropin.infopanel.InfoPanelEndNavigationButtonBinder
 import com.mapbox.navigation.dropin.infopanel.InfoPanelPoiNameBinder
 import com.mapbox.navigation.dropin.infopanel.InfoPanelRoutePreviewButtonBinder
 import com.mapbox.navigation.dropin.infopanel.InfoPanelStartNavigationButtonBinder
+import com.mapbox.navigation.dropin.maneuver.ManeuverCoordinator
+import com.mapbox.navigation.dropin.map.MapLayoutCoordinator
+import com.mapbox.navigation.dropin.map.scalebar.ScalebarPlaceholderCoordinator
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
+import com.mapbox.navigation.dropin.permission.LocationPermissionComponent
+import com.mapbox.navigation.dropin.roadname.RoadNameCoordinator
+import com.mapbox.navigation.dropin.speedlimit.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.tripprogress.TripProgressBinder
+import com.mapbox.navigation.dropin.tripsession.TripSessionComponent
 import kotlinx.coroutines.flow.combine
+
+//
+// Components
+//
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal fun NavigationViewContext.poiNameComponent(
@@ -193,3 +213,62 @@ internal fun NavigationViewContext.recenterButtonComponent(
     }
     return reloadOnChange(binderFlow) { it.bind(buttonContainer) }
 }
+
+@ExperimentalPreviewMapboxNavigationAPI
+internal fun NavigationViewContext.analyticsComponent() =
+    AnalyticsComponent()
+
+@ExperimentalPreviewMapboxNavigationAPI
+internal fun NavigationViewContext.locationPermissionComponent(activity: ComponentActivity) =
+    LocationPermissionComponent(activity, store)
+
+@ExperimentalPreviewMapboxNavigationAPI
+internal fun NavigationViewContext.tripSessionComponent() =
+    TripSessionComponent(lifecycleOwner.lifecycle, store)
+
+@ExperimentalPreviewMapboxNavigationAPI
+internal fun NavigationViewContext.backPressedComponent(activity: ComponentActivity) =
+    BackPressedComponent(activity.onBackPressedDispatcher, store, lifecycleOwner)
+
+//
+// Coordinators
+//
+
+@ExperimentalPreviewMapboxNavigationAPI
+internal fun NavigationViewContext.mapLayoutCoordinator(
+    binding: MapboxNavigationViewLayoutBinding
+) = MapLayoutCoordinator(this, binding)
+
+@ExperimentalPreviewMapboxNavigationAPI
+internal fun NavigationViewContext.scalebarPlaceholderCoordinator(scalebarLayout: ViewGroup) =
+    ScalebarPlaceholderCoordinator(this, scalebarLayout)
+
+@ExperimentalPreviewMapboxNavigationAPI
+internal fun NavigationViewContext.maneuverCoordinator(guidanceLayout: ViewGroup) =
+    ManeuverCoordinator(this, guidanceLayout)
+
+@ExperimentalPreviewMapboxNavigationAPI
+internal fun NavigationViewContext.infoPanelCoordinator(
+    infoPanelLayout: ViewGroup,
+    guidelineBottom: Guideline
+) = InfoPanelCoordinator(this, infoPanelLayout, guidelineBottom)
+
+@ExperimentalPreviewMapboxNavigationAPI
+internal fun NavigationViewContext.actionButtonsCoordinator(actionListLayout: ViewGroup) =
+    ActionButtonsCoordinator(this, actionListLayout)
+
+@ExperimentalPreviewMapboxNavigationAPI
+internal fun NavigationViewContext.speedLimitCoordinator(speedLimitLayout: ViewGroup) =
+    SpeedLimitCoordinator(this, speedLimitLayout)
+
+@ExperimentalPreviewMapboxNavigationAPI
+internal fun NavigationViewContext.roadNameCoordinator(roadNameLayout: ViewGroup) =
+    RoadNameCoordinator(this, roadNameLayout)
+
+@ExperimentalPreviewMapboxNavigationAPI
+internal fun NavigationViewContext.leftFrameCoordinator(emptyLeftContainer: ViewGroup) =
+    LeftFrameCoordinator(this, emptyLeftContainer)
+
+@ExperimentalPreviewMapboxNavigationAPI
+internal fun NavigationViewContext.rightFrameCoordinator(emptyRightContainer: ViewGroup) =
+    RightFrameCoordinator(this, emptyRightContainer)
