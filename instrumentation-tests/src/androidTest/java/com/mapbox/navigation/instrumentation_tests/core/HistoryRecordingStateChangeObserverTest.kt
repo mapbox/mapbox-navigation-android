@@ -349,8 +349,8 @@ class HistoryRecordingStateChangeObserverTest :
         while (reader.hasNext()) {
             historyEvents.add(reader.next())
         }
-        val setRouteEvent = historyEvents.filterIsInstance<HistoryEventSetRoute>().first()
-        assertEquals(routes[0].id, setRouteEvent.navigationRoute!!.id)
+        val setRouteEvents = historyEvents.filterIsInstance<HistoryEventSetRoute>()
+        assertEquals(routes[0].id, setRouteEvents.firstNotNullOf { it.navigationRoute }.id)
     }
 
     private fun generateRouteRefreshOptions(): RouteRefreshOptions {
