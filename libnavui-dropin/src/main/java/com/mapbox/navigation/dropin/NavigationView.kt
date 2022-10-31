@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.UiThread
+import androidx.annotation.VisibleForTesting
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -22,26 +23,28 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.internal.extensions.attachCreated
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.replay.MapboxReplayer
-import com.mapbox.navigation.dropin.actionbutton.ActionButtonsCoordinator
-import com.mapbox.navigation.dropin.analytics.AnalyticsComponent
-import com.mapbox.navigation.dropin.backpress.BackPressedComponent
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
-import com.mapbox.navigation.dropin.infopanel.InfoPanelCoordinator
+import com.mapbox.navigation.dropin.internal.extensions.actionButtonsCoordinator
+import com.mapbox.navigation.dropin.internal.extensions.analyticsComponent
+import com.mapbox.navigation.dropin.internal.extensions.backPressedComponent
+import com.mapbox.navigation.dropin.internal.extensions.infoPanelCoordinator
+import com.mapbox.navigation.dropin.internal.extensions.leftFrameCoordinator
+import com.mapbox.navigation.dropin.internal.extensions.locationPermissionComponent
+import com.mapbox.navigation.dropin.internal.extensions.maneuverCoordinator
+import com.mapbox.navigation.dropin.internal.extensions.mapLayoutCoordinator
 import com.mapbox.navigation.dropin.internal.extensions.navigationViewAccessToken
+import com.mapbox.navigation.dropin.internal.extensions.rightFrameCoordinator
+import com.mapbox.navigation.dropin.internal.extensions.roadNameCoordinator
+import com.mapbox.navigation.dropin.internal.extensions.scalebarPlaceholderCoordinator
+import com.mapbox.navigation.dropin.internal.extensions.speedLimitCoordinator
 import com.mapbox.navigation.dropin.internal.extensions.toComponentActivity
 import com.mapbox.navigation.dropin.internal.extensions.toViewModelStoreOwner
-import com.mapbox.navigation.dropin.maneuver.ManeuverCoordinator
-import com.mapbox.navigation.dropin.map.MapLayoutCoordinator
+import com.mapbox.navigation.dropin.internal.extensions.tripSessionComponent
 import com.mapbox.navigation.dropin.map.MapViewObserver
-import com.mapbox.navigation.dropin.map.scalebar.ScalebarPlaceholderCoordinator
 import com.mapbox.navigation.dropin.navigationview.MapboxNavigationViewApi
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.dropin.navigationview.NavigationViewListener
 import com.mapbox.navigation.dropin.navigationview.NavigationViewModel
-import com.mapbox.navigation.dropin.permission.LocationPermissionComponent
-import com.mapbox.navigation.dropin.roadname.RoadNameCoordinator
-import com.mapbox.navigation.dropin.speedlimit.SpeedLimitCoordinator
-import com.mapbox.navigation.dropin.tripsession.TripSessionComponent
 import com.mapbox.navigation.ui.app.internal.SharedApp
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.utils.internal.lifecycle.ViewLifecycleRegistry
@@ -103,7 +106,8 @@ class NavigationView @JvmOverloads constructor(
 
     private val viewModel: NavigationViewModel by lazyViewModel()
 
-    private val navigationContext = NavigationViewContext(
+    @VisibleForTesting
+    internal val navigationContext = NavigationViewContext(
         context = context,
         lifecycleOwner = this,
         viewModel = viewModel,
@@ -124,30 +128,24 @@ class NavigationView @JvmOverloads constructor(
 
         MapboxNavigationApp.attach(this)
 
-        val componentActivity = context.toComponentActivity()
-        attachCreated(
-            AnalyticsComponent(),
-            LocationPermissionComponent(componentActivity, navigationContext.store),
-            TripSessionComponent(lifecycle, navigationContext.store),
-            MapLayoutCoordinator(navigationContext, binding),
-            BackPressedComponent(
-                componentActivity.onBackPressedDispatcher,
-                navigationContext.store,
-                lifecycleOwner = this,
-            ),
-            ScalebarPlaceholderCoordinator(navigationContext, binding.scalebarLayout),
-            ManeuverCoordinator(navigationContext, binding.guidanceLayout),
-            InfoPanelCoordinator(
-                navigationContext,
-                binding.infoPanelLayout,
-                binding.guidelineBottom
-            ),
-            ActionButtonsCoordinator(navigationContext, binding.actionListLayout),
-            SpeedLimitCoordinator(navigationContext, binding.speedLimitLayout),
-            RoadNameCoordinator(navigationContext, binding.roadNameLayout),
-            LeftFrameCoordinator(navigationContext, binding.emptyLeftContainer),
-            RightFrameCoordinator(navigationContext, binding.emptyRightContainer)
-        )
+        val activity = context.toComponentActivity()
+        navigationContext.apply {
+            attachCreated(
+                analyticsComponent(),
+                locationPermissionComponent(activity),
+                tripSessionComponent(),
+                mapLayoutCoordinator(binding),
+                backPressedComponent(activity),
+                scalebarPlaceholderCoordinator(binding.scalebarLayout),
+                maneuverCoordinator(binding.guidanceLayout),
+                infoPanelCoordinator(binding.infoPanelLayout, binding.guidelineBottom),
+                actionButtonsCoordinator(binding.actionListLayout),
+                speedLimitCoordinator(binding.speedLimitLayout),
+                roadNameCoordinator(binding.roadNameLayout),
+                leftFrameCoordinator(binding.emptyLeftContainer),
+                rightFrameCoordinator(binding.emptyRightContainer)
+            )
+        }
     }
 
     private fun captureSystemBarsInsets() {
