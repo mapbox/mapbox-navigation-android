@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core
 
 import androidx.annotation.MainThread
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.routerefresh.EVDataHolder
@@ -30,26 +31,25 @@ internal class RouteRefreshRequestDataProvider(
     /**
      * Returns either last saved value (if has one) or waits for the next update.
      */
-    suspend fun getRouteRefreshRequestDataOrWait(): RouteRefreshRequestData {
+    suspend fun getRouteRefreshRequestDataOrWait(
+        routeOptions: RouteOptions
+    ): RouteRefreshRequestData {
         return (routeProgressData ?: suspendCancellableCoroutine { continuation = it }).let {
             RouteRefreshRequestData(
                 it.legIndex,
                 it.routeGeometryIndex,
                 it.legGeometryIndex,
-                evDataHolder.currentData()
+                evDataHolder.currentData(routeOptions.unrecognizedJsonProperties)
             )
         }
     }
 
-    /**
-     * Resets saved route data info to null.
-     */
-    fun onNewRoute() {
+    fun onNewRoutes() {
         routeProgressData = null
     }
 
-    fun onEVDataUpdated(data: Map<String, String?>) {
-        evDataHolder.onEVDataUpdated(data)
+    fun onEVDataUpdated(data: Map<String, String>) {
+        evDataHolder.updateData(data)
     }
 
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {

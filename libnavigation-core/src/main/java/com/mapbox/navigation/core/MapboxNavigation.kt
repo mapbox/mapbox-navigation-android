@@ -1697,18 +1697,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *         "auxiliary_consumption" to "300"
      *     )
      * ```
-     * If you want to remove a parameter, pass `null` for the corresponding key.
-     * Example: for the case above if you want to remove "auxiliary_consumption", invoke this method
-     * with
-     * ```
-     *     mapOf("auxiliary_consumption" to null)
-     * ```
-     * as an argument.
      *
      * @param data Map describing the changed EV data
      */
     @ExperimentalPreviewMapboxNavigationAPI
-    fun onEVDataUpdated(data: Map<String, String?>) {
+    fun onEVDataUpdated(data: Map<String, String>) {
         routeRefreshRequestDataProvider.onEVDataUpdated(data)
     }
 
@@ -1739,7 +1732,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
-        routeRefreshRequestDataProvider.onNewRoute()
+        routeRefreshRequestDataProvider.onNewRoutes()
         if (result.navigationRoutes.isNotEmpty()) {
             routeScope.launch {
                 val refreshed = routeRefreshController.refresh(
