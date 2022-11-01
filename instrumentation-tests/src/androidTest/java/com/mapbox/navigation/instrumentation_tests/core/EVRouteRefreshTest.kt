@@ -77,6 +77,10 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         Point.fromLngLat(10.3406374, 49.16479)
     )
     private lateinit var routeHandler: MockDirectionsRequestHandler
+    private val initialEnergyConsumptionCurve = "0,300;20,160;80,140;120,180"
+    private val initialInitialCharge = "18000"
+    private val initialAuxiliaryConsumption = "300"
+    private val initialEvPreconditioningTime = "10"
 
     override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
         latitude = twoCoordinates[0].latitude()
@@ -150,6 +154,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
             R.raw.ev_route_refresh_response,
             acceptedGeometryIndex = 0
         )
+        refreshHandler.jsonResponseModifier = DynamicResponseModifier()
         val requestedRoutes = requestRoutes(twoCoordinates, electric = true)
 
         mapboxNavigation.startTripSession()
@@ -157,13 +162,34 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         mapboxNavigation.setNavigationRoutes(requestedRoutes)
         waitUntilRefresh()
 
-        checkDoesNotHaveParameters(
-            refreshHandler.handledRequests.first().requestUrl!!,
-            evDataKeys
-        )
         checkHasParameters(
             refreshHandler.handledRequests.first().requestUrl!!,
-            mapOf(KEY_ENGINE to VALUE_ELECTRIC)
+            mapOf(
+                KEY_ENGINE to VALUE_ELECTRIC,
+                KEY_ENERGY_CONSUMPTION_CURVE to initialEnergyConsumptionCurve,
+                KEY_EV_INITIAL_CHARGE to initialInitialCharge,
+                KEY_AUXILIARY_CONSUMPTION to initialAuxiliaryConsumption,
+                KEY_EV_PRECONDITIONING_TIME to initialEvPreconditioningTime,
+            )
+        )
+
+        val newInitialCharge = "17900"
+        val newRequestedRoutes = requestRoutes(
+            twoCoordinates,
+            electric = true,
+            initialCharge = newInitialCharge
+        )
+        mapboxNavigation.setNavigationRoutes(newRequestedRoutes)
+        waitUntilNewRefresh()
+        checkHasParameters(
+            refreshHandler.handledRequests.last().requestUrl!!,
+            mapOf(
+                KEY_ENGINE to VALUE_ELECTRIC,
+                KEY_ENERGY_CONSUMPTION_CURVE to initialEnergyConsumptionCurve,
+                KEY_EV_INITIAL_CHARGE to newInitialCharge,
+                KEY_AUXILIARY_CONSUMPTION to initialAuxiliaryConsumption,
+                KEY_EV_PRECONDITIONING_TIME to initialEvPreconditioningTime,
+            )
         )
     }
 
@@ -212,14 +238,22 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         mapboxNavigation.setNavigationRoutes(requestedRoutes)
         waitUntilRefresh()
 
-        val noUpdaterRefreshUrl = refreshHandler.handledRequests.first().requestUrl!!
-        checkDoesNotHaveParameters(noUpdaterRefreshUrl, evDataKeys)
-        checkHasParameters(noUpdaterRefreshUrl, mapOf(KEY_ENGINE to VALUE_ELECTRIC))
+        val noDataRefreshUrl = refreshHandler.handledRequests.first().requestUrl!!
+        checkHasParameters(
+            noDataRefreshUrl,
+            mapOf(
+                KEY_ENGINE to VALUE_ELECTRIC,
+                KEY_ENERGY_CONSUMPTION_CURVE to initialEnergyConsumptionCurve,
+                KEY_EV_PRECONDITIONING_TIME to initialEvPreconditioningTime,
+                KEY_EV_INITIAL_CHARGE to initialInitialCharge,
+                KEY_EV_INITIAL_CHARGE to initialInitialCharge,
+            )
+        )
 
-        val consumptionCurve = "0,300;20,120;40,150"
+        val consumptionCurve = "0,301;20,121;40,151"
         val initialCharge = "80"
-        val preconditioningTime = "10"
-        val auxiliaryConsumption = "300"
+        val preconditioningTime = "11"
+        val auxiliaryConsumption = "299"
         val firstEvData = mapOf(
             KEY_ENERGY_CONSUMPTION_CURVE to consumptionCurve,
             KEY_EV_INITIAL_CHARGE to initialCharge,
@@ -236,10 +270,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
 
         val newInitialCharge = "60"
         mapboxNavigation.onEVDataUpdated(
-            mapOf(
-                KEY_EV_INITIAL_CHARGE to newInitialCharge,
-                KEY_EV_PRECONDITIONING_TIME to null,
-            )
+            mapOf(KEY_EV_INITIAL_CHARGE to newInitialCharge)
         )
         waitUntilNewRefresh()
 
@@ -250,10 +281,10 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
                 KEY_ENGINE to VALUE_ELECTRIC,
                 KEY_ENERGY_CONSUMPTION_CURVE to consumptionCurve,
                 KEY_EV_INITIAL_CHARGE to newInitialCharge,
-                KEY_AUXILIARY_CONSUMPTION to auxiliaryConsumption
+                KEY_AUXILIARY_CONSUMPTION to auxiliaryConsumption,
+                KEY_EV_PRECONDITIONING_TIME to preconditioningTime,
             )
         )
-        checkDoesNotHaveParameters(urlWithTwiceUpdatedData, setOf(KEY_EV_PRECONDITIONING_TIME))
 
         mapboxNavigation.onEVDataUpdated(emptyMap())
         waitUntilNewRefresh()
@@ -265,10 +296,10 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
                 KEY_ENGINE to VALUE_ELECTRIC,
                 KEY_ENERGY_CONSUMPTION_CURVE to consumptionCurve,
                 KEY_EV_INITIAL_CHARGE to newInitialCharge,
-                KEY_AUXILIARY_CONSUMPTION to auxiliaryConsumption
+                KEY_AUXILIARY_CONSUMPTION to auxiliaryConsumption,
+                KEY_EV_PRECONDITIONING_TIME to preconditioningTime,
             )
         )
-        checkDoesNotHaveParameters(urlAfterEmptyUpdate, setOf(KEY_EV_PRECONDITIONING_TIME))
     }
 
     @Test
@@ -279,7 +310,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         )
         val requestedRoutes = requestRoutes(twoCoordinates, electric = true)
         val evData = mapOf(
-            KEY_ENERGY_CONSUMPTION_CURVE to "0,300;20,160;80,140;120,180",
+            KEY_ENERGY_CONSUMPTION_CURVE to initialEnergyConsumptionCurve,
             KEY_EV_INITIAL_CHARGE to "17000",
             KEY_EV_PRECONDITIONING_TIME to "10",
             KEY_AUXILIARY_CONSUMPTION to "300"
@@ -328,7 +359,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
             )
             val requestedRoutes = requestRoutes(twoCoordinates, electric = true)
             val evData = mapOf(
-                KEY_ENERGY_CONSUMPTION_CURVE to "0,300;20,160;80,140;120,180",
+                KEY_ENERGY_CONSUMPTION_CURVE to initialEnergyConsumptionCurve,
                 KEY_EV_INITIAL_CHARGE to "17000",
                 KEY_EV_PRECONDITIONING_TIME to "10",
                 KEY_AUXILIARY_CONSUMPTION to "300"
@@ -379,7 +410,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         )
         val requestedRoutes = requestRoutes(twoCoordinates, electric = true)
         val evData = mapOf(
-            KEY_ENERGY_CONSUMPTION_CURVE to "0,300;20,160;80,140;120,180",
+            KEY_ENERGY_CONSUMPTION_CURVE to initialEnergyConsumptionCurve,
             KEY_EV_INITIAL_CHARGE to "17000",
             KEY_EV_PRECONDITIONING_TIME to "10",
             KEY_AUXILIARY_CONSUMPTION to "300"
@@ -434,7 +465,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
             minChargeAtDestination = 35000
         )
         val evData = mapOf(
-            KEY_ENERGY_CONSUMPTION_CURVE to "0,300;20,160;80,140;120,180",
+            KEY_ENERGY_CONSUMPTION_CURVE to initialEnergyConsumptionCurve,
             KEY_EV_INITIAL_CHARGE to "30000",
             KEY_EV_PRECONDITIONING_TIME to "10",
             KEY_AUXILIARY_CONSUMPTION to "300"
@@ -512,6 +543,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         coordinates: List<Point>,
         electric: Boolean,
         minChargeAtDestination: Int,
+        initialCharge: String,
     ): RouteOptions {
         return RouteOptions.builder().applyDefaultNavigationOptions()
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
@@ -525,19 +557,18 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
                     unrecognizedProperties(
                         mapOf(
                             KEY_ENGINE to VALUE_ELECTRIC,
-                            KEY_EV_INITIAL_CHARGE to "18000",
-                            KEY_ENERGY_CONSUMPTION_CURVE to "0,300;20,160;80,140;120,180",
-                            KEY_EV_PRECONDITIONING_TIME to "10",
+                            KEY_EV_INITIAL_CHARGE to initialCharge,
+                            KEY_ENERGY_CONSUMPTION_CURVE to initialEnergyConsumptionCurve,
+                            KEY_EV_PRECONDITIONING_TIME to initialEvPreconditioningTime,
+                            KEY_AUXILIARY_CONSUMPTION to initialAuxiliaryConsumption,
                             "ev_min_charge_at_charging_station" to "6000",
                             "ev_min_charge_at_destination" to "$minChargeAtDestination",
                             "ev_max_charge" to "60000",
                             "ev_connector_types" to "ccs_combo_type1,ccs_combo_type2",
-                            "energy_consumption_curve" to "0,300;20,160;80,140;120,180",
                             "ev_charging_curve" to "0,100000;40000,70000;60000,30000;80000,10000",
                             "ev_max_ac_charging_power" to "14400",
                             "ev_unconditioned_charging_curve" to
                                 "0,50000;42000,35000;60000,15000;80000,5000",
-                            "auxiliary_consumption" to "300",
                         )
                     )
                 }
@@ -562,10 +593,11 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
     private suspend fun requestRoutes(
         coordinates: List<Point>,
         electric: Boolean,
-        minChargeAtDestination: Int = 6000
+        minChargeAtDestination: Int = 6000,
+        initialCharge: String = initialInitialCharge
     ): List<NavigationRoute> {
         return mapboxNavigation.requestRoutes(
-            generateRouteOptions(coordinates, electric, minChargeAtDestination)
+            generateRouteOptions(coordinates, electric, minChargeAtDestination, initialCharge)
         )
             .getSuccessfulResultOrThrowException()
             .routes

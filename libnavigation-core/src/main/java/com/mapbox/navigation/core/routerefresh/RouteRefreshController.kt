@@ -142,7 +142,7 @@ internal class RouteRefreshController(
     }
 
     private suspend fun refreshRoutesWithRetry(
-        routes: List<NavigationRoute>
+        routes: List<NavigationRoute> // non-empty
     ): RefreshedRouteInfo = coroutineScope {
         var timeUntilNextAttempt = async { delay(routeRefreshOptions.intervalMillis) }
         try {
@@ -153,7 +153,7 @@ internal class RouteRefreshController(
                 }
                 timeUntilNextAttempt = async { delay(routeRefreshOptions.intervalMillis) }
                 val routeRefreshRequestData = routeRefreshRequestDataProvider
-                    .getRouteRefreshRequestDataOrWait()
+                    .getRouteRefreshRequestDataOrWait(routes.first().routeOptions)
                 val refreshedRoutes = refreshRoutesOrNull(routes, routeRefreshRequestData)
                 if (refreshedRoutes.any { it != null }) {
                     onNewState(RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS)
@@ -169,7 +169,8 @@ internal class RouteRefreshController(
             timeUntilNextAttempt.cancel() // otherwise current coroutine will wait for its child
         }
         onNewState(RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED)
-        val requestData = routeRefreshRequestDataProvider.getRouteRefreshRequestDataOrWait()
+        val requestData = routeRefreshRequestDataProvider
+            .getRouteRefreshRequestDataOrWait(routes.first().routeOptions)
         RefreshedRouteInfo(
             routes.map { removeExpiringDataFromRoute(it, requestData.legIndex) },
             requestData

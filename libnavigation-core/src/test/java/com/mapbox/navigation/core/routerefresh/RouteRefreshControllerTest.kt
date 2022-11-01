@@ -28,6 +28,7 @@ import com.mapbox.navigation.testing.factories.createRouteOptions
 import com.mapbox.navigation.testing.utcToLocalTime
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -61,7 +62,7 @@ class RouteRefreshControllerTest {
     private val routeRefreshRequestData = RouteRefreshRequestData(0, 1, 2, emptyMap())
     private val routeRefreshRequestDataProvider =
         mockk<RouteRefreshRequestDataProvider>(relaxed = true) {
-            coEvery { getRouteRefreshRequestDataOrWait() } returns routeRefreshRequestData
+            coEvery { getRouteRefreshRequestDataOrWait(any()) } returns routeRefreshRequestData
         }
     private val mockStatesObserver = mockk<RouteRefreshStatesObserver>(relaxUnitFun = true)
 
@@ -335,6 +336,63 @@ class RouteRefreshControllerTest {
 
         assertTrue("route refresh has finished $result", result.isActive)
         result.cancel()
+    }
+
+    @Test
+    fun `refresh several routes uses first route's options`() = runBlockingTest {
+        val initialRoutes = createNavigationRoutes(
+            createDirectionsResponse(
+                routes = listOf(
+                    createTestTwoLegRoute(
+                        firstLegAnnotations = createRouteLegAnnotation(
+                            congestion = listOf("severe", "moderate"),
+                        )
+                    ),
+                    createTestTwoLegRoute(
+                        firstLegAnnotations = createRouteLegAnnotation(
+                            congestion = listOf("severe", "moderate"),
+                        )
+                    )
+                )
+            )
+        )
+        val refreshedRoutes = createNavigationRoutes(
+            createDirectionsResponse(
+                routes = listOf(
+                    createTestTwoLegRoute(
+                        firstLegAnnotations = createRouteLegAnnotation(
+                            congestion = listOf("severe", "severe"),
+                        )
+                    ),
+                    createTestTwoLegRoute(
+                        firstLegAnnotations = createRouteLegAnnotation(
+                            congestion = listOf("severe", "severe"),
+                        )
+                    )
+                )
+            )
+        )
+        val routeRefreshStub = RouteRefreshStub().apply {
+            setRefreshedRoute(refreshedRoutes[0])
+            setRefreshedRoute(refreshedRoutes[1])
+        }
+        val refreshOptions = RouteRefreshOptions.Builder().build()
+        val routeRefreshController = createRouteRefreshController(
+            routeRefresh = routeRefreshStub,
+            routeRefreshOptions = refreshOptions
+        )
+
+        val refreshedRoutesDeferred = async {
+            routeRefreshController.refresh(initialRoutes)
+        }
+        advanceTimeBy(refreshOptions.intervalMillis)
+
+        refreshedRoutesDeferred.getCompletedTest()
+
+        coVerify {
+            routeRefreshRequestDataProvider
+                .getRouteRefreshRequestDataOrWait(initialRoutes.first().routeOptions)
+        }
     }
 
     @Test
@@ -718,7 +776,7 @@ class RouteRefreshControllerTest {
                 .intervalMillis(30_000L)
                 .build()
             coEvery {
-                routeRefreshRequestDataProvider.getRouteRefreshRequestDataOrWait()
+                routeRefreshRequestDataProvider.getRouteRefreshRequestDataOrWait(any())
             } returns RouteRefreshRequestData(1, 0, null, emptyMap())
             val routeRefreshController = createRouteRefreshController(
                 routeRefreshOptions = routeRefreshOptions,
@@ -1190,7 +1248,7 @@ class RouteRefreshControllerTest {
             }
             val routeRefreshOptions = RouteRefreshOptions.Builder().build()
             coEvery {
-                routeRefreshRequestDataProvider.getRouteRefreshRequestDataOrWait()
+                routeRefreshRequestDataProvider.getRouteRefreshRequestDataOrWait(any())
             } returns RouteRefreshRequestData(1, 0, null, emptyMap())
             val routeRefreshController = createRouteRefreshController(
                 routeRefreshOptions = routeRefreshOptions,
@@ -1276,7 +1334,7 @@ class RouteRefreshControllerTest {
             routeRefreshStub.doNotRespondForRouteRefresh(refreshedRoutes[1].id)
             val refreshOptions = RouteRefreshOptions.Builder().build()
             coEvery {
-                routeRefreshRequestDataProvider.getRouteRefreshRequestDataOrWait()
+                routeRefreshRequestDataProvider.getRouteRefreshRequestDataOrWait(any())
             } returns RouteRefreshRequestData(1, 0, null, emptyMap())
             val routeRefreshController = createRouteRefreshController(
                 routeRefresh = routeRefreshStub,

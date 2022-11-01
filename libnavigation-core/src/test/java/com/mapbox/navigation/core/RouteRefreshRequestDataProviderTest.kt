@@ -1,5 +1,9 @@
 package com.mapbox.navigation.core
 
+import com.google.gson.JsonPrimitive
+import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.routerefresh.EVDataHolder
@@ -22,8 +26,17 @@ class RouteRefreshRequestDataProviderTest {
     @get:Rule
     val coroutineRule = MainCoroutineRule()
     private val evData = mapOf("aaa" to "bbb")
+    private val fallbackEvData = mapOf(
+        "ccc" to JsonPrimitive("ddd"),
+        "eee" to JsonPrimitive("fff"),
+    )
+    private val routeOptions = RouteOptions.builder()
+        .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+        .coordinatesList(listOf(Point.fromLngLat(1.1, 2.2), Point.fromLngLat(3.3, 4.4)))
+        .unrecognizedJsonProperties(fallbackEvData)
+        .build()
     private val evDataHolder = mockk<EVDataHolder>(relaxed = true) {
-        every { currentData() } returns evData
+        every { currentData(fallbackEvData) } returns evData
     }
     private val provider = RouteRefreshRequestDataProvider(evDataHolder)
     private val currentLegIndex = 9
@@ -47,7 +60,7 @@ class RouteRefreshRequestDataProviderTest {
     fun stateAfterUpdate() = runBlocking {
         provider.onRouteProgressChanged(routeProgress)
 
-        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait(routeOptions))
     }
 
     @Test
@@ -57,7 +70,7 @@ class RouteRefreshRequestDataProviderTest {
             provider.onRouteProgressChanged(routeProgress)
         }
 
-        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait(routeOptions))
     }
 
     @Test
@@ -69,14 +82,14 @@ class RouteRefreshRequestDataProviderTest {
             }
             var value: RouteRefreshRequestData? = null
             val update = launch {
-                value = provider.getRouteRefreshRequestDataOrWait()
+                value = provider.getRouteRefreshRequestDataOrWait(routeOptions)
                 throw AssertionError()
             }
             advanceTimeBy(50)
             update.cancel()
             advanceTimeBy(50)
             assertNull(value)
-            assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
+            assertEquals(expected, provider.getRouteRefreshRequestDataOrWait(routeOptions))
         }
     }
 
@@ -91,7 +104,7 @@ class RouteRefreshRequestDataProviderTest {
 
         provider.onRouteProgressChanged(routeProgress)
 
-        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait(routeOptions))
     }
 
     @Test
@@ -126,7 +139,7 @@ class RouteRefreshRequestDataProviderTest {
         provider.onRouteProgressChanged(routeProgress1)
         provider.onRouteProgressChanged(routeProgress2)
 
-        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait(routeOptions))
     }
 
     @Test
@@ -164,7 +177,7 @@ class RouteRefreshRequestDataProviderTest {
             provider.onRouteProgressChanged(routeProgress2)
         }
 
-        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait(routeOptions))
     }
 
     @Test
@@ -197,13 +210,13 @@ class RouteRefreshRequestDataProviderTest {
         )
         provider.onRouteProgressChanged(routeProgress1)
 
-        provider.onNewRoute()
+        provider.onNewRoutes()
         launch {
             delay(100)
             provider.onRouteProgressChanged(routeProgress2)
         }
 
-        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait(routeOptions))
     }
 
     @Test
@@ -211,6 +224,6 @@ class RouteRefreshRequestDataProviderTest {
         val data = mapOf("aaa" to "bbb")
         provider.onEVDataUpdated(data)
 
-        verify(exactly = 1) { evDataHolder.onEVDataUpdated(data) }
+        verify(exactly = 1) { evDataHolder.updateData(data) }
     }
 }

@@ -647,7 +647,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
 
         coVerifyOrder {
-            routeRefreshRequestDataProvider.onNewRoute()
+            routeRefreshRequestDataProvider.onNewRoutes()
             routeRefreshController.refresh(routes)
         }
     }
@@ -666,7 +666,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
 
         coVerify(exactly = 1) {
-            routeRefreshRequestDataProvider.onNewRoute()
+            routeRefreshRequestDataProvider.onNewRoutes()
         }
         coVerify(exactly = 0) { routeRefreshController.refresh(any()) }
     }
@@ -1389,7 +1389,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             val routeObserversSlot = mutableListOf<RoutesObserver>()
             every { tripSession.getState() } returns TripSessionState.STARTED
             coEvery {
-                routeRefreshRequestDataProvider.getRouteRefreshRequestDataOrWait()
+                routeRefreshRequestDataProvider.getRouteRefreshRequestDataOrWait(any())
             } returns requestData
 
             val refreshedRoutes = listOf(mockk<NavigationRoute>(relaxed = true))
