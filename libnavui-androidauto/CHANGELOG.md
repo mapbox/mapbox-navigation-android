@@ -4,6 +4,8 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added `MapboxCarMapLoader` to handle dark and light map style configuration changes. [#6530](https://github.com/mapbox/mapbox-navigation-android/pull/6530)
+
 #### Bug fixes and improvements
 - Moved `surfacelayer` package into an internal package because it will be replaced by `BitmapWidget`. [#6527](https://github.com/mapbox/mapbox-navigation-android/pull/6527)
 - Flattened the `car` package because it is adding an unnecessary and confusing layer. [#6527](https://github.com/mapbox/mapbox-navigation-android/pull/6527)

@@ -14,6 +14,7 @@ import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.androidauto.MapboxCarContext
 import com.mapbox.androidauto.deeplink.GeoDeeplinkNavigateAction
 import com.mapbox.androidauto.internal.logAndroidAuto
+import com.mapbox.androidauto.map.MapboxCarMapLoader
 import com.mapbox.androidauto.map.compass.CarCompassSurfaceRenderer
 import com.mapbox.androidauto.map.logo.CarLogoSurfaceRenderer
 import com.mapbox.androidauto.notification.MapboxCarNotificationOptions
@@ -33,7 +34,7 @@ import kotlinx.coroutines.launch
 @OptIn(MapboxExperimental::class)
 class MainCarSession : Session() {
 
-    private val carMapLoader = MainCarMapLoader()
+    private val carMapLoader = MapboxCarMapLoader()
     private val mapboxCarMap = MapboxCarMap()
         .registerObserver(carMapLoader)
     private val mapboxCarContext = MapboxCarContext(lifecycle, mapboxCarMap)
@@ -116,7 +117,7 @@ class MainCarSession : Session() {
     override fun onCarConfigurationChanged(newConfiguration: Configuration) {
         logAndroidAuto("onCarConfigurationChanged ${carContext.isDarkMode}")
 
-        carMapLoader.updateMapStyle(carContext.isDarkMode)
+        carMapLoader.onCarConfigurationChanged(carContext)
     }
 
     override fun onNewIntent(intent: Intent) {
