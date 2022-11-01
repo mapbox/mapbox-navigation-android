@@ -1,6 +1,5 @@
 package com.mapbox.androidauto.navigation
 
-import com.mapbox.androidauto.car.navigation.CarLocationsOverviewCamera
 import com.mapbox.androidauto.testing.CarAppTestRule
 import com.mapbox.androidauto.testing.MapboxRobolectricTestRunner
 import com.mapbox.maps.CameraOptions

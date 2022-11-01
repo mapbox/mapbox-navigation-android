@@ -2,7 +2,7 @@
 
 package com.mapbox.androidauto.screenmanager
 
-import com.mapbox.androidauto.car.MapboxCarContext
+import com.mapbox.androidauto.MapboxCarContext
 import com.mapbox.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE
 import com.mapbox.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE_FEEDBACK
 import com.mapbox.androidauto.screenmanager.MapboxScreen.ARRIVAL

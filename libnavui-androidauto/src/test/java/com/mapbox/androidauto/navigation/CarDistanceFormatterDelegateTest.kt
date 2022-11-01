@@ -1,7 +1,6 @@
 package com.mapbox.androidauto.navigation
 
 import androidx.car.app.model.Distance
-import com.mapbox.androidauto.car.navigation.CarDistanceFormatterDelegate
 import com.mapbox.navigation.base.formatter.Rounding
 import com.mapbox.navigation.base.formatter.UnitType
 import org.junit.Assert.assertEquals

@@ -1,7 +1,7 @@
 package com.mapbox.androidauto.deeplink
 
 import android.content.Intent
-import com.mapbox.androidauto.car.MapboxCarContext
+import com.mapbox.androidauto.MapboxCarContext
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager

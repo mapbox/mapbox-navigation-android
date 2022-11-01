@@ -5,6 +5,7 @@ import android.graphics.Color
 import androidx.test.filters.SmallTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.GrantPermissionRule
+import com.mapbox.androidauto.navigation.lanes.CarLanesImageRenderer
 import com.mapbox.androidauto.testing.BitmapTestUtil
 import io.mockk.every
 import io.mockk.mockk

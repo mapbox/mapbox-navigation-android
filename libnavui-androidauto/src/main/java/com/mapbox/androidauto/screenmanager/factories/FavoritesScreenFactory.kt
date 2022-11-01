@@ -2,13 +2,13 @@ package com.mapbox.androidauto.screenmanager.factories
 
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
-import com.mapbox.androidauto.car.MapboxCarContext
-import com.mapbox.androidauto.car.feedback.ui.CarFeedbackAction
-import com.mapbox.androidauto.car.placeslistonmap.PlacesListOnMapScreen
-import com.mapbox.androidauto.car.search.SearchCarContext
-import com.mapbox.androidauto.internal.car.search.FavoritesApi
+import com.mapbox.androidauto.MapboxCarContext
+import com.mapbox.androidauto.feedback.ui.CarFeedbackAction
+import com.mapbox.androidauto.internal.search.FavoritesApi
+import com.mapbox.androidauto.placeslistonmap.PlacesListOnMapScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenFactory
+import com.mapbox.androidauto.search.SearchCarContext
 import com.mapbox.search.ServiceProvider
 
 /**

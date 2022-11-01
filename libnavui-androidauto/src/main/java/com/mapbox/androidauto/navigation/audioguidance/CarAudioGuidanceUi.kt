@@ -9,7 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.androidauto.R
-import com.mapbox.androidauto.car.action.MapboxActionProvider
+import com.mapbox.androidauto.action.MapboxActionProvider
 import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged

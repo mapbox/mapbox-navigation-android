@@ -1,8 +1,6 @@
 package com.mapbox.androidauto.navigation
 
 import android.os.Build
-import com.mapbox.androidauto.car.navigation.CarDistanceFormatter
-import com.mapbox.androidauto.car.navigation.CarNavigationEtaMapper
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue

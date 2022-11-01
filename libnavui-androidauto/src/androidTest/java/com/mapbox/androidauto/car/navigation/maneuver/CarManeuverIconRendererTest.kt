@@ -5,6 +5,8 @@ import android.graphics.Color
 import androidx.test.filters.SmallTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.GrantPermissionRule
+import com.mapbox.androidauto.navigation.maneuver.CarManeuverIconOptions
+import com.mapbox.androidauto.navigation.maneuver.CarManeuverIconRenderer
 import com.mapbox.androidauto.testing.BitmapTestUtil
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver

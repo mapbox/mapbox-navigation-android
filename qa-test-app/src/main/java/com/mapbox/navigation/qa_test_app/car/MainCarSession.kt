@@ -11,11 +11,11 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.android.core.permissions.PermissionsManager
-import com.mapbox.androidauto.car.MapboxCarContext
-import com.mapbox.androidauto.car.map.widgets.compass.CarCompassSurfaceRenderer
-import com.mapbox.androidauto.car.map.widgets.logo.CarLogoSurfaceRenderer
+import com.mapbox.androidauto.MapboxCarContext
 import com.mapbox.androidauto.deeplink.GeoDeeplinkNavigateAction
 import com.mapbox.androidauto.internal.logAndroidAuto
+import com.mapbox.androidauto.map.compass.CarCompassSurfaceRenderer
+import com.mapbox.androidauto.map.logo.CarLogoSurfaceRenderer
 import com.mapbox.androidauto.notification.MapboxCarNotificationOptions
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager

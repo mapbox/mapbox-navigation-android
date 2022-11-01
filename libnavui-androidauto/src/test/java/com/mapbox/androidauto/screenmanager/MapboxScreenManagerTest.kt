@@ -5,7 +5,7 @@ import androidx.car.app.Screen
 import androidx.car.app.ScreenManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
-import com.mapbox.androidauto.internal.car.context.MapboxCarContextOwner
+import com.mapbox.androidauto.internal.context.MapboxCarContextOwner
 import com.mapbox.androidauto.testing.MapboxRobolectricTestRunner
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule

@@ -4,6 +4,7 @@ import android.Manifest
 import androidx.test.filters.SmallTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.GrantPermissionRule
+import com.mapbox.androidauto.navigation.speedlimit.SpeedLimitWidget
 import com.mapbox.androidauto.testing.BitmapTestUtil
 import org.junit.Rule
 import org.junit.Test

@@ -3,9 +3,9 @@ package com.mapbox.androidauto.internal.car.search
 import android.text.SpannableString
 import androidx.car.app.model.Row
 import com.mapbox.androidauto.R
-import com.mapbox.androidauto.car.navigation.CarDistanceFormatter
-import com.mapbox.androidauto.car.search.PlaceSearchScreen
-import com.mapbox.androidauto.car.search.SearchCarContext
+import com.mapbox.androidauto.navigation.CarDistanceFormatter
+import com.mapbox.androidauto.search.PlaceSearchScreen
+import com.mapbox.androidauto.search.SearchCarContext
 import com.mapbox.androidauto.testing.MapboxRobolectricTestRunner
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.coEvery

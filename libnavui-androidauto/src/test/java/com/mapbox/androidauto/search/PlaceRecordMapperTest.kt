@@ -1,6 +1,5 @@
 package com.mapbox.androidauto.search
 
-import com.mapbox.androidauto.car.search.PlaceRecordMapper
 import com.mapbox.androidauto.testing.FileUtils
 import com.mapbox.api.geocoding.v5.models.CarmenFeature
 import com.mapbox.geojson.Point
