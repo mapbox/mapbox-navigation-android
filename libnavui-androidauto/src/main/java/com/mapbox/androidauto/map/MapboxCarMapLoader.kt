@@ -2,8 +2,10 @@ package com.mapbox.androidauto.map
 
 import androidx.car.app.CarContext
 import androidx.car.app.Session
+import com.mapbox.androidauto.internal.extensions.getStyle
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.internal.logAndroidAutoFailure
+import com.mapbox.androidauto.internal.surfacelayer.EmptyLayerHost
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
@@ -30,6 +32,7 @@ class MapboxCarMapLoader : MapboxCarMapObserver {
     private var mapboxMap: MapboxMap? = null
     private var lightStyleOverride: StyleContract.StyleExtension? = null
     private var darkStyleOverride: StyleContract.StyleExtension? = null
+    private val emptyLayerHost = EmptyLayerHost()
 
     private val logMapError = object : OnMapLoadErrorListener {
         override fun onMapLoadError(eventData: MapLoadingErrorEventData) {
@@ -44,8 +47,13 @@ class MapboxCarMapLoader : MapboxCarMapObserver {
             logAndroidAuto("onAttached load style")
             mapSurface.getMapboxMap().loadStyle(
                 mapStyle(carContext.isDarkMode),
-                onStyleLoaded = {
+                onStyleLoaded = { style ->
                     logAndroidAuto("onAttached style loaded")
+                    style.addPersistentStyleCustomLayer(
+                        EMPTY_LAYER_ID,
+                        emptyLayerHost,
+                        layerPosition = null,
+                    ).onError { logAndroidAutoFailure("Add custom layer exception $it") }
                 },
                 onMapLoadErrorListener = logMapError
             )
@@ -53,6 +61,7 @@ class MapboxCarMapLoader : MapboxCarMapObserver {
     }
 
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
+        mapboxCarMapSurface.getStyle()?.removeStyleLayer(EMPTY_LAYER_ID)
         mapboxMap = null
     }
 
@@ -108,5 +117,6 @@ class MapboxCarMapLoader : MapboxCarMapObserver {
     private companion object {
         private val DEFAULT_DAY_STYLE = style(NavigationStyles.NAVIGATION_DAY_STYLE) { }
         private val DEFAULT_NIGHT_STYLE = style(NavigationStyles.NAVIGATION_NIGHT_STYLE) { }
+        private const val EMPTY_LAYER_ID = "empty_layer_id"
     }
 }

@@ -100,7 +100,7 @@ class MapboxCarMapLoaderTest {
                             any()
                         )
                     } answers {
-                        secondArg<Style.OnStyleLoaded>().onStyleLoaded(mockk())
+                        secondArg<Style.OnStyleLoaded>().onStyleLoaded(mockk(relaxed = true))
                     }
                 }
             }
