@@ -10,6 +10,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Moved `surfacelayer` package into an internal package because it will be replaced by `BitmapWidget`. [#6527](https://github.com/mapbox/mapbox-navigation-android/pull/6527)
 - Flattened the `car` package because it is adding an unnecessary and confusing layer. [#6527](https://github.com/mapbox/mapbox-navigation-android/pull/6527)
 - Removed `Fragment.attachAudioGuidance` extension function because it will be replaced by `ComponentInstaller`. [#6527](https://github.com/mapbox/mapbox-navigation-android/pull/6527)
+- Fixed an issue with compass, logo and speed limit widgets that caused them to disappear if road label widget was not added to the same screen. [#6541](https://github.com/mapbox/mapbox-navigation-android/pull/6541)
 
 ## androidauto-v0.15.0 - October 21, 2022
 ### Changelog
