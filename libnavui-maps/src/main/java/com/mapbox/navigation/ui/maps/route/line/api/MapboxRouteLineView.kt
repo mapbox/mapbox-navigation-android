@@ -8,7 +8,6 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.Layer
-import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
@@ -592,11 +591,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         expressionProvider: RouteLineExpressionProvider?
     ): (Style) -> Unit = { style: Style ->
         ifNonNull(expressionProvider) { provider ->
-            if (style.styleLayerExists(layerId)) {
-                style.getLayer(layerId)?.let {
-                    (it as LineLayer).lineTrimOffset(provider.generateExpression())
-                }
-            }
+            style.setStyleLayerProperty(layerId, "line-trim-offset", provider.generateExpression())
         }
     }
 
@@ -611,11 +606,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
 
     private fun updateLineGradient(style: Style, expression: Expression, vararg layerIds: String) {
         layerIds.forEach { layerId ->
-            if (style.styleLayerExists(layerId)) {
-                style.getLayer(layerId)?.let {
-                    (it as LineLayer).lineGradient(expression)
-                }
-            }
+            style.setStyleLayerProperty(layerId, "line-gradient", expression)
         }
     }
 
