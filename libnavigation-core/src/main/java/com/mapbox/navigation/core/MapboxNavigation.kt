@@ -283,6 +283,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val routeRefreshRequestDataProvider =
         NavigationComponentProvider.createRouteRefreshRequestDataProvider()
 
+    private val evDataHolder = NavigationComponentProvider.createEVDataHolder()
+
     // Router provided via @Modules, might be outer
     private val moduleRouter: NavigationRouterV2
 
@@ -542,6 +544,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigationOptions.routeRefreshOptions,
             directionsSession,
             routeRefreshRequestDataProvider,
+            evDataHolder
         )
 
         defaultRerouteController = MapboxRerouteController(
@@ -1702,7 +1705,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     @ExperimentalPreviewMapboxNavigationAPI
     fun onEVDataUpdated(data: Map<String, String>) {
-        routeRefreshRequestDataProvider.onEVDataUpdated(data)
+        evDataHolder.updateData(data)
     }
 
     private fun createHistoryRecorderHandles(config: ConfigHandle) =
@@ -1740,7 +1743,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 )
                 internalSetNavigationRoutes(
                     refreshed.routes,
-                    SetRefreshedRoutesInfo(refreshed.requestData),
+                    SetRefreshedRoutesInfo(refreshed.routeProgressData),
                 )
             }
         }

@@ -11,7 +11,8 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshError
 import com.mapbox.navigation.base.route.RouteRefreshOptions
-import com.mapbox.navigation.core.RouteRefreshRequestDataProvider
+import com.mapbox.navigation.core.RouteProgressData
+import com.mapbox.navigation.core.RouteProgressDataProvider
 import com.mapbox.navigation.core.directions.session.RouteRefresh
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
@@ -35,7 +36,8 @@ import kotlin.coroutines.resume
 internal class RouteRefreshController(
     private val routeRefreshOptions: RouteRefreshOptions,
     private val routeRefresh: RouteRefresh,
-    private val routeRefreshRequestDataProvider: RouteRefreshRequestDataProvider,
+    private val routeProgressDataProvider: RouteProgressDataProvider,
+    private val evDataHolder: EVDataHolder,
     private val routeDiffProvider: DirectionsRouteDiffProvider = DirectionsRouteDiffProvider(),
     private val localDateProvider: () -> Date,
 ) {
@@ -152,16 +154,16 @@ internal class RouteRefreshController(
                     onNewState(RouteRefreshExtra.REFRESH_STATE_STARTED)
                 }
                 timeUntilNextAttempt = async { delay(routeRefreshOptions.intervalMillis) }
-                val routeRefreshRequestData = routeRefreshRequestDataProvider
-                    .getRouteRefreshRequestDataOrWait(routes.first().routeOptions)
-                val refreshedRoutes = refreshRoutesOrNull(routes, routeRefreshRequestData)
+                val routeProgressData = routeProgressDataProvider
+                    .getRouteRefreshRequestDataOrWait()
+                val refreshedRoutes = refreshRoutesOrNull(routes, routeProgressData)
                 if (refreshedRoutes.any { it != null }) {
                     onNewState(RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS)
                     return@coroutineScope RefreshedRouteInfo(
                         refreshedRoutes.mapIndexed { index, navigationRoute ->
                             navigationRoute ?: routes[index]
                         },
-                        routeRefreshRequestData
+                        routeProgressData
                     )
                 }
             }
@@ -169,11 +171,11 @@ internal class RouteRefreshController(
             timeUntilNextAttempt.cancel() // otherwise current coroutine will wait for its child
         }
         onNewState(RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED)
-        val requestData = routeRefreshRequestDataProvider
-            .getRouteRefreshRequestDataOrWait(routes.first().routeOptions)
+        val routeProgressData = routeProgressDataProvider
+            .getRouteRefreshRequestDataOrWait()
         RefreshedRouteInfo(
-            routes.map { removeExpiringDataFromRoute(it, requestData.legIndex) },
-            requestData
+            routes.map { removeExpiringDataFromRoute(it, routeProgressData.legIndex) },
+            routeProgressData
         )
     }
 
@@ -222,13 +224,19 @@ internal class RouteRefreshController(
 
     private suspend fun refreshRouteOrNull(
         route: NavigationRoute,
-        routeRefreshRequestData: RouteRefreshRequestData,
+        routeProgressData: RouteProgressData,
     ): NavigationRoute? {
         val validationResult = validateRoute(route)
         if (validationResult is RouteValidationResult.Invalid) {
             logI("route ${route.id} can't be refreshed because ${validationResult.reason}")
             return null
         }
+        val routeRefreshRequestData = RouteRefreshRequestData(
+            routeProgressData.legIndex,
+            routeProgressData.routeGeometryIndex,
+            routeProgressData.legGeometryIndex,
+            evDataHolder.currentData(route.routeOptions.unrecognizedJsonProperties)
+        )
         return when (val result = requestRouteRefresh(route, routeRefreshRequestData)) {
             is RouteRefreshResult.Fail -> {
                 logE(
@@ -252,13 +260,13 @@ internal class RouteRefreshController(
 
     private suspend fun refreshRoutesOrNull(
         routes: List<NavigationRoute>,
-        routeRefreshRequestData: RouteRefreshRequestData,
+        routeProgressData: RouteProgressData,
     ): List<NavigationRoute?> {
         return coroutineScope {
             routes.map { route ->
                 async {
                     withTimeoutOrNull(routeRefreshOptions.intervalMillis) {
-                        refreshRouteOrNull(route, routeRefreshRequestData)
+                        refreshRouteOrNull(route, routeProgressData)
                     }
                 }
             }.awaitAll()

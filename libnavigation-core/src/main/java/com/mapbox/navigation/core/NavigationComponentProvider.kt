@@ -8,6 +8,7 @@ import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
+import com.mapbox.navigation.core.routerefresh.EVDataHolder
 import com.mapbox.navigation.core.trip.service.MapboxTripService
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.MapboxTripSession
@@ -99,6 +100,8 @@ internal object NavigationComponentProvider {
         historyRecordingStateHandler.registerCopilotSessionObserver(it)
     }
 
-    fun createRouteRefreshRequestDataProvider(): RouteRefreshRequestDataProvider =
-        RouteRefreshRequestDataProvider()
+    fun createRouteRefreshRequestDataProvider(): RouteProgressDataProvider =
+        RouteProgressDataProvider()
+
+    fun createEVDataHolder(): EVDataHolder = EVDataHolder()
 }
