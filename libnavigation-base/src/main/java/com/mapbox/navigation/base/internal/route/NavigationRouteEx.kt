@@ -198,21 +198,11 @@ private fun DirectionsResponse.Builder.updateWaypoints(
     oldWaypoints: List<DirectionsWaypoint>?,
     updatedWaypoints: List<DirectionsWaypoint?>?,
 ): DirectionsResponse.Builder {
-    if (oldWaypoints == null) {
+    if (oldWaypoints == null || updatedWaypoints == null) {
         return this
     }
-    val newWaypoints = mutableListOf<DirectionsWaypoint>()
-    if (updatedWaypoints != null) {
-        oldWaypoints.forEachIndexed { index, oldWaypoint ->
-            if (index < updatedWaypoints.size) {
-                val updatedWaypoint = updatedWaypoints[index]
-                if (updatedWaypoint == null) {
-                    newWaypoints.add(oldWaypoint)
-                } else {
-                    newWaypoints.add(updatedWaypoint)
-                }
-            }
-        }
+    val newWaypoints = oldWaypoints.mapIndexed { index, oldWaypoint ->
+        updatedWaypoints.getOrNull(index) ?: oldWaypoint
     }
     return waypoints(newWaypoints)
 }

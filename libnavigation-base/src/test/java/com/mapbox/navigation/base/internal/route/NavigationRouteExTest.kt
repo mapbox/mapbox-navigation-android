@@ -350,7 +350,7 @@ class NavigationRouteExTest {
                         listOf(provideDefaultLegAnnotation(), null),
                         listOf(provideDefaultIncidents(), null),
                         listOf(provideDefaultClosures(), null),
-                        emptyList(),
+                        waypoints,
                         0
                     ),
                 )
@@ -375,7 +375,7 @@ class NavigationRouteExTest {
                         listOf(provideDefaultLegAnnotation(), null),
                         listOf(provideDefaultIncidents(), null),
                         listOf(provideDefaultClosures(), null),
-                        emptyList(),
+                        waypoints,
                         0
                     ),
                 )
@@ -404,7 +404,7 @@ class NavigationRouteExTest {
                         listOf(provideDefaultLegAnnotation(), null),
                         listOf(provideDefaultIncidents(), null),
                         listOf(provideDefaultClosures(), null),
-                        listOf(createWaypoint("name3")),
+                        listOf(createWaypoint("name3"), createWaypoint("name2")),
                         0
                     ),
                 )
@@ -500,7 +500,6 @@ class NavigationRouteExTest {
                     ),
                 )
             },
-
             run {
                 val refreshedWaypoints = listOf(
                     createWaypoint("name11"),
@@ -750,6 +749,11 @@ class NavigationRouteExTest {
                     description,
                     result.newWaypoints,
                     updatedNavRoute.directionsResponse.waypoints()
+                )
+                assertEquals(
+                    description,
+                    navRoute.directionsResponse.waypoints()?.size,
+                    updatedNavRoute.directionsResponse.waypoints()?.size
                 )
 
                 val capturedOldAnnotations = mutableListOf<LegAnnotation?>()
