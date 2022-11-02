@@ -403,6 +403,10 @@ class MapboxNavigationActivity : AppCompatActivity() {
             }
         }
 
+        binding.attachment.setOnClickListener {
+            dummyWorkManagerRequest()
+        }
+
         // initialize view interactions
         binding.stop.setOnClickListener {
             clearRouteAndStopNavigation()
@@ -429,6 +433,23 @@ class MapboxNavigationActivity : AppCompatActivity() {
         // start the trip session to being receiving location updates in free drive
         // and later when a route is set, also receiving route progress updates
         mapboxNavigation.startTripSession()
+    }
+
+    private fun dummyWorkManagerRequest() {
+        val drive = Drive(
+            sessionId = "3e48fd7a-fc82-42a8-9bae-baeb724f92ce",
+            startedAt = "2022-05-12T17:47:42.353Z",
+            userId = "wBzYwfK0oCYMTNYPIFHhYuYOLLs1",
+            endedAt = "2022-05-12T17:48:12.504Z",
+            historyStoragePath = "mbx_nav/history/",
+            driveMode = "free-drive",
+            appVersion = "v0.108.0-9-g0527ee4",
+            appMode = "mbx-debug",
+            navSdkVersion = "2.7.0-beta.1",
+            navNativeSdkVersion = "108.0.1",
+            appSessionId = "3e48fd7b-ac82-42a8-9abe-aaeb724f92ce",
+        )
+        HistoryUploadWorker.uploadHistory(this, drive)
     }
 
     override fun onStart() {

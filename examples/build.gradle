@@ -96,6 +96,8 @@ dependencies {
     // Mapbox Navigation SDK
     implementation project(':libnavigation-android')
 
+    implementation("androidx.work:work-runtime-ktx:2.7.1")
+
     // test
     androidTestImplementation project(':libtesting-ui')
     androidTestImplementation dependenciesList.testRunner
