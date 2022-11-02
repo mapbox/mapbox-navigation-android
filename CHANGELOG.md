@@ -34,6 +34,7 @@ Mapbox welcomes participation and contributions from everyone.
   - The `MapboxExtendableButtonParams` class has been removed. Any action button placement adjustments must be done via custom `ActionButtonsBinder` implementation. [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
 - Fixed an issue where "silent waypoints" (not regular waypoints that define legs) had markers added on the map when route line was drawn with `MapboxRouteLineApi` and `MapboxRouteLineView`. [#6526](https://github.com/mapbox/mapbox-navigation-android/pull/6526)
 - Slightly improved performance of updates to the traveled portion of the route in MapboxRouteLineView. [#6528](https://github.com/mapbox/mapbox-navigation-android/pull/6528)
+- Fixed an issue with `NavigationView` that caused road label position to not update in some cases. [#6531](https://github.com/mapbox/mapbox-navigation-android/pull/6531)
 
 ## Mapbox Navigation SDK 2.10.0-alpha.1 - 28 October, 2022
 ### Changelog
