@@ -1,16 +1,9 @@
 package com.mapbox.navigation.core
 
-import com.google.gson.JsonPrimitive
-import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.core.routerefresh.EVDataHolder
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -21,24 +14,11 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class RouteRefreshRequestDataProviderTest {
+class RouteProgressDataProviderTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
-    private val evData = mapOf("aaa" to "bbb")
-    private val fallbackEvData = mapOf(
-        "ccc" to JsonPrimitive("ddd"),
-        "eee" to JsonPrimitive("fff"),
-    )
-    private val routeOptions = RouteOptions.builder()
-        .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-        .coordinatesList(listOf(Point.fromLngLat(1.1, 2.2), Point.fromLngLat(3.3, 4.4)))
-        .unrecognizedJsonProperties(fallbackEvData)
-        .build()
-    private val evDataHolder = mockk<EVDataHolder>(relaxed = true) {
-        every { currentData(fallbackEvData) } returns evData
-    }
-    private val provider = RouteRefreshRequestDataProvider(evDataHolder)
+    private val provider = RouteProgressDataProvider()
     private val currentLegIndex = 9
     private val routeGeometryIndex = 44
     private val legGeometryIndex = 33
@@ -49,18 +29,17 @@ class RouteRefreshRequestDataProviderTest {
             every { geometryIndex } returns legGeometryIndex
         }
     }
-    private val expected = RouteRefreshRequestData(
+    private val expected = RouteProgressData(
         currentLegIndex,
         routeGeometryIndex,
-        legGeometryIndex,
-        evData
+        legGeometryIndex
     )
 
     @Test
     fun stateAfterUpdate() = runBlocking {
         provider.onRouteProgressChanged(routeProgress)
 
-        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait(routeOptions))
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
     }
 
     @Test
@@ -70,7 +49,7 @@ class RouteRefreshRequestDataProviderTest {
             provider.onRouteProgressChanged(routeProgress)
         }
 
-        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait(routeOptions))
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
     }
 
     @Test
@@ -80,16 +59,16 @@ class RouteRefreshRequestDataProviderTest {
                 delay(100)
                 provider.onRouteProgressChanged(routeProgress)
             }
-            var value: RouteRefreshRequestData? = null
+            var value: RouteProgressData? = null
             val update = launch {
-                value = provider.getRouteRefreshRequestDataOrWait(routeOptions)
+                value = provider.getRouteRefreshRequestDataOrWait()
                 throw AssertionError()
             }
             advanceTimeBy(50)
             update.cancel()
             advanceTimeBy(50)
             assertNull(value)
-            assertEquals(expected, provider.getRouteRefreshRequestDataOrWait(routeOptions))
+            assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
         }
     }
 
@@ -100,11 +79,11 @@ class RouteRefreshRequestDataProviderTest {
             every { currentRouteGeometryIndex } returns routeIndex
             every { currentLegProgress } returns null
         }
-        val expected = RouteRefreshRequestData(0, routeIndex, null, evData)
+        val expected = RouteProgressData(0, routeIndex, null)
 
         provider.onRouteProgressChanged(routeProgress)
 
-        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait(routeOptions))
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
     }
 
     @Test
@@ -129,17 +108,16 @@ class RouteRefreshRequestDataProviderTest {
                 every { geometryIndex } returns legGeometryIndex2
             }
         }
-        val expected = RouteRefreshRequestData(
+        val expected = RouteProgressData(
             legIndex2,
             routeGeometryIndex2,
             legGeometryIndex2,
-            evData
         )
 
         provider.onRouteProgressChanged(routeProgress1)
         provider.onRouteProgressChanged(routeProgress2)
 
-        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait(routeOptions))
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
     }
 
     @Test
@@ -164,11 +142,10 @@ class RouteRefreshRequestDataProviderTest {
                 every { geometryIndex } returns legGeometryIndex2
             }
         }
-        val expected = RouteRefreshRequestData(
+        val expected = RouteProgressData(
             legIndex1,
             routeGeometryIndex1,
             legGeometryIndex1,
-            evData
         )
         provider.onRouteProgressChanged(routeProgress1)
 
@@ -177,7 +154,7 @@ class RouteRefreshRequestDataProviderTest {
             provider.onRouteProgressChanged(routeProgress2)
         }
 
-        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait(routeOptions))
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
     }
 
     @Test
@@ -202,11 +179,10 @@ class RouteRefreshRequestDataProviderTest {
                 every { geometryIndex } returns legGeometryIndex2
             }
         }
-        val expected = RouteRefreshRequestData(
+        val expected = RouteProgressData(
             legIndex2,
             routeGeometryIndex2,
             legGeometryIndex2,
-            evData
         )
         provider.onRouteProgressChanged(routeProgress1)
 
@@ -216,14 +192,6 @@ class RouteRefreshRequestDataProviderTest {
             provider.onRouteProgressChanged(routeProgress2)
         }
 
-        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait(routeOptions))
-    }
-
-    @Test
-    fun onEVDataUpdated() {
-        val data = mapOf("aaa" to "bbb")
-        provider.onEVDataUpdated(data)
-
-        verify(exactly = 1) { evDataHolder.updateData(data) }
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
     }
 }

@@ -24,6 +24,7 @@ import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
+import com.mapbox.navigation.core.routerefresh.EVDataHolder
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
@@ -84,6 +85,7 @@ internal open class MapboxNavigationBaseTest {
     val distanceFormatterOptions: DistanceFormatterOptions = mockk(relaxed = true)
     val routingTilesOptions: RoutingTilesOptions = mockk(relaxed = true)
     val routeRefreshController: RouteRefreshController = mockk(relaxed = true)
+    val evDataHolder: EVDataHolder = mockk(relaxed = true)
     val routeAlternativesController: RouteAlternativesController = mockk(relaxed = true)
     val routeProgress: RouteProgress = mockk(relaxed = true)
     val navigationSession: NavigationSession = mockk(relaxed = true)
@@ -97,7 +99,7 @@ internal open class MapboxNavigationBaseTest {
     val historyRecordingStateHandler: HistoryRecordingStateHandler = mockk(relaxed = true)
     val developerMetadataAggregator: DeveloperMetadataAggregator = mockk(relaxUnitFun = true)
     val threadController = mockk<ThreadController>(relaxed = true)
-    val routeRefreshRequestDataProvider = mockk<RouteRefreshRequestDataProvider>(relaxed = true)
+    val routeProgressDataProvider = mockk<RouteProgressDataProvider>(relaxed = true)
 
     val applicationContext: Context = mockk(relaxed = true) {
         every { inferDeviceLocale() } returns Locale.US
@@ -169,9 +171,11 @@ internal open class MapboxNavigationBaseTest {
             RouteRefreshControllerProvider.createRouteRefreshController(
                 any(),
                 any(),
+                any(),
                 any()
             )
         } returns routeRefreshController
+        every { NavigationComponentProvider.createEVDataHolder() } returns evDataHolder
         mockkObject(RouteAlternativesControllerProvider)
         every {
             RouteAlternativesControllerProvider.create(any(), any(), any(), any())
@@ -201,7 +205,7 @@ internal open class MapboxNavigationBaseTest {
         } returns developerMetadataAggregator
         every {
             NavigationComponentProvider.createRouteRefreshRequestDataProvider()
-        } returns routeRefreshRequestDataProvider
+        } returns routeProgressDataProvider
 
         every {
             navigator.create(

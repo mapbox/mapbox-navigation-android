@@ -54,7 +54,7 @@ class RouteRefreshRequestData(
         return "RouteRefreshRequestData(" +
             "legIndex=$legIndex, " +
             "routeGeometryIndex=$routeGeometryIndex, " +
-            "legGeometryIndex=$legGeometryIndex" +
+            "legGeometryIndex=$legGeometryIndex, " +
             "experimentalProperties=$experimentalProperties" +
             ")"
     }

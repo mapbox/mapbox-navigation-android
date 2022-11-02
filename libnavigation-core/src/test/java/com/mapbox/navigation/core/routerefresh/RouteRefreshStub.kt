@@ -40,10 +40,22 @@ class RouteRefreshStub : RouteRefresh {
     /***
      * Tne next route refresh requests will return the actual routes
      */
-    fun setRefreshedRoute(refreshedRoute: NavigationRoute) {
-        handlers[refreshedRoute.id] = { _, _, callback ->
-            // TODO: refresh legs only from the passed index
-            callback.onRefreshReady(refreshedRoute)
+    fun setRefreshedRoute(
+        refreshedRoute: NavigationRoute,
+        expectedRefreshRequestData: RouteRefreshRequestData? = null
+    ) {
+        handlers[refreshedRoute.id] = { _, refreshRequestData, callback ->
+            if (expectedRefreshRequestData == null ||
+                refreshRequestData == expectedRefreshRequestData
+            ) {
+                // TODO: refresh legs only from the passed index
+                callback.onRefreshReady(refreshedRoute)
+            } else {
+                throw IllegalArgumentException(
+                    "Expected refresh data to be $expectedRefreshRequestData " +
+                        "but was $refreshRequestData"
+                )
+            }
         }
     }
 
@@ -113,6 +125,64 @@ class RouteRefreshStubTest {
         )
 
         verify(exactly = 1) { callback.onRefreshReady(refreshed) }
+        verify(exactly = 0) { callback.onFailure(any()) }
+    }
+
+    @Test
+    fun `route successfully refreshed for expected request data`() {
+        val requestData = RouteRefreshRequestData(0, 1, 2, emptyMap())
+        val stub = RouteRefreshStub()
+        val originalRoute = createNavigationRoute(
+            createDirectionsRoute(
+                duration = 1.0,
+                requestUuid = "test"
+            )
+        )
+        val refreshed = createNavigationRoute(
+            createDirectionsRoute(
+                duration = 2.0,
+                requestUuid = "test"
+            )
+        )
+        stub.setRefreshedRoute(refreshed, requestData)
+
+        val callback = mockk<NavigationRouterRefreshCallback>(relaxed = true)
+        stub.requestRouteRefresh(
+            originalRoute,
+            requestData,
+            callback
+        )
+
+        verify(exactly = 1) { callback.onRefreshReady(refreshed) }
+        verify(exactly = 0) { callback.onFailure(any()) }
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `route refresh throws for unexpected request data`() {
+        val expectedRequestData = RouteRefreshRequestData(0, 1, 2, emptyMap())
+        val stub = RouteRefreshStub()
+        val originalRoute = createNavigationRoute(
+            createDirectionsRoute(
+                duration = 1.0,
+                requestUuid = "test"
+            )
+        )
+        val refreshed = createNavigationRoute(
+            createDirectionsRoute(
+                duration = 2.0,
+                requestUuid = "test"
+            )
+        )
+        stub.setRefreshedRoute(refreshed, expectedRequestData)
+
+        val callback = mockk<NavigationRouterRefreshCallback>(relaxed = true)
+        stub.requestRouteRefresh(
+            originalRoute,
+            RouteRefreshRequestData(1, 2, 3, emptyMap()),
+            callback
+        )
+
+        verify(exactly = 0) { callback.onRefreshReady(refreshed) }
         verify(exactly = 0) { callback.onFailure(any()) }
     }
 
