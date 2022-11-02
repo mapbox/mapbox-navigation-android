@@ -18,6 +18,7 @@ import com.mapbox.navigation.qa_test_app.view.MapboxRouteLineActivity
 import com.mapbox.navigation.qa_test_app.view.NavigationViewFragmentLifecycleActivity
 import com.mapbox.navigation.qa_test_app.view.RoadObjectsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteLineFeaturesActivity
+import com.mapbox.navigation.qa_test_app.view.RouteLineScalingActivity
 import com.mapbox.navigation.qa_test_app.view.RouteNumericTrafficUpdateActivity
 import com.mapbox.navigation.qa_test_app.view.RouteRestrictionsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteTrafficUpdateActivity
@@ -118,6 +119,12 @@ object TestActivitySuite {
             R.string.basic_route_line_features_description
         ) { activity ->
             activity.startActivity<RouteLineFeaturesActivity>()
+        },
+        TestActivityDescription(
+            "Custom Scaling Applied",
+            R.string.route_line_scaling_description
+        ) { activity ->
+            activity.startActivity<RouteLineScalingActivity>()
         },
         TestActivityDescription(
             "Feedback test activity",
