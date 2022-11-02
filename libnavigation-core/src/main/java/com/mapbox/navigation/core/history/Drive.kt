@@ -1,5 +1,20 @@
-package com.mapbox.navigation.examples.core
+package com.mapbox.navigation.core.history
 
+/**
+ * Drive
+ *
+ * @property sessionId
+ * @property startedAt
+ * @property userId
+ * @property endedAt
+ * @property historyStoragePath
+ * @property driveMode
+ * @property appVersion
+ * @property appMode
+ * @property navSdkVersion
+ * @property navNativeSdkVersion
+ * @property appSessionId
+ */
 data class Drive(
     val sessionId: String,
     val startedAt: String,

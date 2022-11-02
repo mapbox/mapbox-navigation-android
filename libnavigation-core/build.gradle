@@ -51,6 +51,8 @@ dependencies {
     implementation project(':libnavigation-metrics')
     implementation dependenciesList.mapboxSdkTurf
 
+    implementation("androidx.work:work-runtime-ktx:2.7.1")
+
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
     implementation dependenciesList.androidStartup

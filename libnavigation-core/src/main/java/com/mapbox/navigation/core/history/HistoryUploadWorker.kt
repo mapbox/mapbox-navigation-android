@@ -1,4 +1,4 @@
-package com.mapbox.navigation.examples.core
+package com.mapbox.navigation.core.history
 
 import android.content.Context
 import androidx.work.Constraints
@@ -13,11 +13,19 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 
+/**
+ * HistoryUploadWorker
+ *
+ * @param context
+ */
 class HistoryUploadWorker(
     context: Context,
     private val workerParams: WorkerParameters,
 ) : CoroutineWorker(context, workerParams) {
 
+    /**
+     * doWork
+     */
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val filePath = workerParams.inputData.getString(HISTORY_FILE_PATH)!!
         val sessionId = workerParams.inputData.getString(SESSION_ID)!!
@@ -86,6 +94,12 @@ class HistoryUploadWorker(
         private const val APP_SESSION_ID: String = "app_session_id"
         private const val MAX_RUN_ATTEMPT_COUNT = 3
 
+        /**
+         * uploadHistory
+         *
+         * @param context
+         * @param drive [Drive]
+         */
         fun uploadHistory(context: Context, drive: Drive) {
             val inputData = Data.Builder()
                 .putString(HISTORY_FILE_PATH, drive.historyStoragePath)
