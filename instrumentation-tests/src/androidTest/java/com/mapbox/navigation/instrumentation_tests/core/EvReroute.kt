@@ -207,7 +207,13 @@ class EvReroute : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
                 "Expected 2 waypoints in the route after reroute but was ${newWaypoints.size}"
             }
             check(newWaypoints[1] == mockRoute.routeWaypoints.last())
-            check(routeOptions.unrecognizedJsonProperties!!["engine"]!!.asString == "electric")
+            with(routeOptions.unrecognizedJsonProperties!!){
+                check(get("engine")!!.asString == "electric")
+                check(get("ev_max_charge")!!.asString == "8000")
+                check(get("ev_connector_types")!!.asString == "tesla")
+                check(get("energy_consumption_curve")!!.asString == "0,300;20,160;80,140;120,180")
+                check(get("ev_charging_curve")!!.asString == "40000,70000")
+            }
         }
     }
 }
