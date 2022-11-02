@@ -144,6 +144,28 @@ object RoutesProvider {
         )
     }
 
+    fun california_ev_route(context: Context) : MockRoute {
+        val jsonResponse = readRawFileText(context, R.raw.ev_route_response_ca_2_ev_waypoints)
+
+        val coordinates = listOf(
+            Point.fromLngLat( -122.071353, 37.904528),
+            Point.fromLngLat(-121.680304, 37.927557),
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates
+                )
+            ),
+            coordinates,
+            emptyList(),
+        )
+    }
+
     fun MockRoute.toNavigationRoutes(
         routeOptionsBlock: RouteOptions.Builder.() -> RouteOptions.Builder = { this }
     ) : List<NavigationRoute> {

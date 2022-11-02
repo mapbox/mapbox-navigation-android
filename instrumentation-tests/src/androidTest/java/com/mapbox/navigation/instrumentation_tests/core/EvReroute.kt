@@ -3,14 +3,14 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -20,7 +20,6 @@ import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.RouteProgressStateTransitionAssertion
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.requestRoutes
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
@@ -36,7 +35,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
 
-class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
+class EvReroute : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
@@ -76,7 +75,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
     }
 
     override fun setupMockLocation(): Location {
-        val mockRoute = RoutesProvider.dc_very_short(activity)
+        val mockRoute = RoutesProvider.california_ev_route(activity)
         return mockLocationUpdatesRule.generateLocationUpdate {
             latitude = mockRoute.routeWaypoints.first().latitude()
             longitude = mockRoute.routeWaypoints.first().longitude()
@@ -84,12 +83,11 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
     }
 
     @Test
-    fun reroute_completes() {
-        // prepare
-        val mockRoute = RoutesProvider.dc_very_short(activity)
+    fun ev_reroute() {
+        val mockRoute = RoutesProvider.california_ev_route(activity)
         val originLocation = mockRoute.routeWaypoints.first()
         val offRouteLocationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
-            latitude = originLocation.latitude() + 0.002
+            latitude = originLocation.latitude() + 0.005
             longitude = originLocation.longitude()
         }
 
@@ -97,7 +95,10 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRequestHandler(
                 profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
-                jsonResponse = readRawFileText(activity, R.raw.reroute_response_dc_very_short),
+                jsonResponse = readRawFileText(
+                    activity,
+                    R.raw.ev_route_response_reroute_ca_2_ev_waypoints
+                ),
                 expectedCoordinates = listOf(
                     Point.fromLngLat(
                         offRouteLocationUpdate.longitude,
@@ -126,13 +127,23 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
                     .applyDefaultNavigationOptions()
                     .applyLanguageAndVoiceUnitOptions(activity)
                     .baseUrl(mockWebServerRule.baseUrl)
-                    .coordinatesList(mockRoute.routeWaypoints).build(),
-                object : RouterCallback {
+                    .coordinatesList(mockRoute.routeWaypoints)
+                    .unrecognizedProperties(
+                        mapOf(
+                            "engine" to "electric",
+                            "ev_max_charge" to "8000",
+                            "ev_connector_types" to "tesla",
+                            "energy_consumption_curve" to "0,300;20,160;80,140;120,180",
+                            "ev_charging_curve" to "40000,70000",
+                        )
+                    )
+                    .build(),
+                object : NavigationRouterCallback {
                     override fun onRoutesReady(
-                        routes: List<DirectionsRoute>,
+                        routes: List<NavigationRoute>,
                         routerOrigin: RouterOrigin
                     ) {
-                        mapboxNavigation.setRoutes(routes)
+                        mapboxNavigation.setNavigationRoutes(routes)
                     }
 
                     override fun onFailure(
@@ -171,7 +182,6 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
 
         // wait for tracking to start again
         locationTrackingIdlingResource.register()
-
         mapboxHistoryTestRule.stopRecordingOnCrash("no tracking") {
             Espresso.onIdle()
         }
@@ -190,12 +200,14 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         expectedStates.assert()
 
         runOnMainSync {
-            val newWaypoints =
-                mapboxNavigation.getRoutes().first().routeOptions()!!.coordinatesList()
+            val routeOptions = mapboxNavigation.getNavigationRoutes().first().routeOptions
+            val newWaypoints = routeOptions.coordinatesList()
+
             check(newWaypoints.size == 2) {
                 "Expected 2 waypoints in the route after reroute but was ${newWaypoints.size}"
             }
             check(newWaypoints[1] == mockRoute.routeWaypoints.last())
+            check(routeOptions.unrecognizedJsonProperties!!["engine"]!!.asString == "electric")
         }
     }
 }
