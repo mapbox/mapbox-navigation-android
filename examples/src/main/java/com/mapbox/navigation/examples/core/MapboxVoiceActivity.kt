@@ -103,17 +103,13 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
     /**
      * The [MapboxVoiceInstructionsPlayer] consumes the voice instructions data
      * and plays them using the appropriate TTS player.
+     * NOTE: do not use lazy initialization for this class since it takes some time to initialize
+     * the system services required for on-device speech synthesis. With lazy initialization
+     * there is a high risk that said services will not be available when the first instruction
+     * has to be played. [MapboxVoiceInstructionsPlayer] should be instantiated in
+     * `Activity#onCreate`.
      */
-    private val voiceInstructionsPlayer: MapboxVoiceInstructionsPlayer by lazy {
-        val options = VoiceInstructionsPlayerOptions.Builder()
-            .abandonFocusDelay(PLAYER_ABANDON_FOCUS_DELAY)
-            .build()
-        MapboxVoiceInstructionsPlayer(
-            this,
-            Locale.US.toLanguageTag(),
-            options
-        )
-    }
+    private lateinit var voiceInstructionsPlayer: MapboxVoiceInstructionsPlayer
 
     private val routeLineResources: RouteLineResources by lazy {
         RouteLineResources.Builder().build()
@@ -378,6 +374,13 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }
+        voiceInstructionsPlayer = MapboxVoiceInstructionsPlayer(
+            this,
+            Locale.US.toLanguageTag(),
+            VoiceInstructionsPlayerOptions.Builder()
+                .abandonFocusDelay(PLAYER_ABANDON_FOCUS_DELAY)
+                .build()
+        )
         init()
     }
 
