@@ -18,6 +18,12 @@ import kotlin.concurrent.schedule
 /**
  * Hybrid implementation of [MapboxVoiceInstructionsPlayer] combining [VoiceInstructionsTextPlayer] and
  * [VoiceInstructionsFilePlayer] speech players.
+ * NOTE: do not use lazy initialization for this class since it takes some time to initialize
+ * the system services required for on-device speech synthesis. With lazy initialization
+ * there is a high risk that said services will not be available when the first instruction
+ * has to be played. [MapboxVoiceInstructionsPlayer] should be instantiated in
+ * `Activity#onCreate`.
+ *
  * @param context Context
  * @param language [Locale] language (in a format acceptable by [Locale])
  * @param options [VoiceInstructionsPlayerOptions] (optional)
