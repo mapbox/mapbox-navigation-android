@@ -54,6 +54,7 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
+import com.mapbox.navigation.core.internal.LegacyMapboxNavigationInstanceHolder
 import com.mapbox.navigation.core.internal.ReachabilityService
 import com.mapbox.navigation.core.internal.telemetry.CustomEvent
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
@@ -405,7 +406,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         private set
 
     init {
-        if (hasInstance) {
+        if (LegacyMapboxNavigationInstanceHolder.peek() != null) {
             throw IllegalStateException(
                 """
                     A different MapboxNavigation instance already exists.
@@ -414,7 +415,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 """.trimIndent()
             )
         }
-        hasInstance = true
 
         val config = NavigatorLoader.createConfig(
             navigationOptions.deviceProfile,
@@ -583,6 +583,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigator.cache
         )
         roadObjectMatcher = RoadObjectMatcher(navigator)
+        LegacyMapboxNavigationInstanceHolder.onCreated(this)
     }
 
     /**
@@ -1212,7 +1213,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routesPreviewController.unregisterAllRoutesPreviewObservers()
 
         isDestroyed = true
-        hasInstance = false
+        LegacyMapboxNavigationInstanceHolder.onDestroyed()
     }
 
     /**
@@ -2071,9 +2072,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     private companion object {
-
-        @Volatile
-        private var hasInstance = false
 
         private const val LOG_CATEGORY = "MapboxNavigation"
         private const val USER_AGENT: String = "MapboxNavigationNative"

@@ -75,6 +75,13 @@ class MapboxAudioGuidanceVoiceTest {
         }
     }
 
+    @Test
+    fun destroy() {
+        carAppAudioGuidanceVoice.destroy()
+
+        verify { speechApi.destroy() }
+    }
+
     private fun mockSuccessfulSpeechApi() {
         every { speechApi.generate(any(), any()) } answers {
             val announcementArg = firstArg<VoiceInstructions>().announcement()

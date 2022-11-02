@@ -456,6 +456,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         mapboxNavigation.onDestroy()
         maneuverApi.cancel()
         speechAPI.cancel()
+        speechAPI.destroy()
         voiceInstructionsPlayer.shutdown()
     }
 

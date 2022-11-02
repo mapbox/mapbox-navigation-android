@@ -12,9 +12,13 @@ import java.io.File
  * Implementation of [VoiceApi] allowing you to retrieve voice instructions.
  */
 internal class MapboxVoiceApi(
-    private val speechProvider: MapboxSpeechProvider,
+    private val speechLoader: MapboxSpeechLoader,
     private val speechFileProvider: MapboxSpeechFileProvider
 ) : VoiceApi {
+
+    init {
+        VoiceInstructionsPredownloadHub.register(speechLoader)
+    }
 
     /**
      * Given [VoiceInstructions] the method returns a [File] wrapped inside [VoiceState]
@@ -22,8 +26,7 @@ internal class MapboxVoiceApi(
      */
     override suspend fun retrieveVoiceFile(voiceInstruction: VoiceInstructions): VoiceState {
         return runCatching {
-            val typeAndAnnouncement = VoiceInstructionsParser.parse(voiceInstruction).getOrThrow()
-            val blob = speechProvider.load(typeAndAnnouncement).getOrThrow()
+            val blob = speechLoader.load(voiceInstruction).getOrThrow()
             val file = speechFileProvider.generateVoiceFileFrom(blob.inputStream())
             VoiceFile(file)
         }.getOrElse {
@@ -46,6 +49,11 @@ internal class MapboxVoiceApi(
      */
     fun cancel() {
         speechFileProvider.cancel()
+    }
+
+    fun destroy() {
+        VoiceInstructionsPredownloadHub.unregister(speechLoader)
+        speechLoader.cancel()
     }
 
     private fun genericError(voiceInstruction: VoiceInstructions) =

@@ -2,6 +2,7 @@ package com.mapbox.navigation.core
 
 import androidx.annotation.UiThread
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.core.internal.LegacyMapboxNavigationInstanceHolder
 
 /**
  * Singleton responsible for ensuring there is only one MapboxNavigation instance.
@@ -11,8 +12,6 @@ import com.mapbox.navigation.base.options.NavigationOptions
     message = "Use MapboxNavigationApp to attach MapboxNavigation to lifecycles."
 )
 object MapboxNavigationProvider {
-    @Volatile
-    private var mapboxNavigation: MapboxNavigation? = null
 
     /**
      * Create MapboxNavigation with provided options.
@@ -25,12 +24,8 @@ object MapboxNavigationProvider {
         message = "Set the navigation options with MapboxNavigationApp.setup"
     )
     fun create(navigationOptions: NavigationOptions): MapboxNavigation {
-        mapboxNavigation?.onDestroy()
-        mapboxNavigation = MapboxNavigation(
-            navigationOptions
-        )
-
-        return mapboxNavigation!!
+        LegacyMapboxNavigationInstanceHolder.peek()?.onDestroy()
+        return MapboxNavigation(navigationOptions)
     }
 
     /**
@@ -48,7 +43,7 @@ object MapboxNavigationProvider {
             throw RuntimeException("Need to create MapboxNavigation before using it.")
         }
 
-        return mapboxNavigation!!
+        return LegacyMapboxNavigationInstanceHolder.peek()!!
     }
 
     /**
@@ -59,8 +54,7 @@ object MapboxNavigationProvider {
         message = "MapboxNavigationApp will determine when to destroy MapboxNavigation instances"
     )
     fun destroy() {
-        mapboxNavigation?.onDestroy()
-        mapboxNavigation = null
+        LegacyMapboxNavigationInstanceHolder.peek()?.onDestroy()
     }
 
     /**
@@ -68,6 +62,6 @@ object MapboxNavigationProvider {
      */
     @JvmStatic
     fun isCreated(): Boolean {
-        return mapboxNavigation?.isDestroyed == false
+        return LegacyMapboxNavigationInstanceHolder.peek()?.isDestroyed == false
     }
 }

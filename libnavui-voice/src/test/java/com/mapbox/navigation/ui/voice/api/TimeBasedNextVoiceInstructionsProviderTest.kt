@@ -4,14 +4,15 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
-import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class TimeBasedNextVoiceInstructionsProviderTest {
 
     @get:Rule
@@ -57,60 +58,42 @@ class TimeBasedNextVoiceInstructionsProviderTest {
     fun `getNextVoiceInstructions with null legs`() {
         every { currentRoute.legs() } returns null
 
-        assertEquals(
-            emptyList<VoiceInstructions>(),
-            sut.getNextVoiceInstructions(routeProgressData())
-        )
+        assertEquals(emptyList<VoiceInstructions>(), sut.getNextVoiceInstructions(routeProgressData()))
     }
 
     @Test
     fun `getNextVoiceInstructions with empty legs`() {
         every { currentRoute.legs() } returns emptyList()
 
-        assertEquals(
-            emptyList<VoiceInstructions>(),
-            sut.getNextVoiceInstructions(routeProgressData())
-        )
+        assertEquals(emptyList<VoiceInstructions>(), sut.getNextVoiceInstructions(routeProgressData()))
     }
 
     @Test
     fun `getNextVoiceInstructions with too large led index`() {
         every { currentRoute.legs() } returns listOf(mockk(), mockk())
 
-        assertEquals(
-            emptyList<VoiceInstructions>(),
-            sut.getNextVoiceInstructions(routeProgressData(legIndex = 2))
-        )
+        assertEquals(emptyList<VoiceInstructions>(), sut.getNextVoiceInstructions(routeProgressData(legIndex = 2)))
     }
 
     @Test
     fun `getNextVoiceInstructions with null steps`() {
         every { currentLeg.steps() } returns null
 
-        assertEquals(
-            emptyList<VoiceInstructions>(),
-            sut.getNextVoiceInstructions(routeProgressData())
-        )
+        assertEquals(emptyList<VoiceInstructions>(), sut.getNextVoiceInstructions(routeProgressData()))
     }
 
     @Test
     fun `getNextVoiceInstructions with empty steps`() {
         every { currentLeg.steps() } returns emptyList()
 
-        assertEquals(
-            emptyList<VoiceInstructions>(),
-            sut.getNextVoiceInstructions(routeProgressData())
-        )
+        assertEquals(emptyList<VoiceInstructions>(), sut.getNextVoiceInstructions(routeProgressData()))
     }
 
     @Test
     fun `getNextVoiceInstructions with too large step index`() {
         every { currentLeg.steps() } returns listOf(mockk(), mockk())
 
-        assertEquals(
-            emptyList<VoiceInstructions>(),
-            sut.getNextVoiceInstructions(routeProgressData(stepIndex = 2))
-        )
+        assertEquals(emptyList<VoiceInstructions>(), sut.getNextVoiceInstructions(routeProgressData(stepIndex = 2)))
     }
 
     @Test
@@ -187,9 +170,7 @@ class TimeBasedNextVoiceInstructionsProviderTest {
 
         assertEquals(
             listOf(currentStepInstruction),
-            sut.getNextVoiceInstructions(
-                routeProgressData(stepIndex = 1, stepDurationRemaining = observableTime.toDouble())
-            )
+            sut.getNextVoiceInstructions(routeProgressData(stepIndex = 1, stepDurationRemaining = observableTime.toDouble()))
         )
     }
 
@@ -200,9 +181,7 @@ class TimeBasedNextVoiceInstructionsProviderTest {
 
         assertEquals(
             listOf(currentStepInstruction),
-            sut.getNextVoiceInstructions(
-                routeProgressData(stepIndex = 1, stepDurationRemaining = 0.0)
-            )
+            sut.getNextVoiceInstructions(routeProgressData(stepIndex = 1, stepDurationRemaining = 0.0))
         )
     }
 
@@ -212,9 +191,7 @@ class TimeBasedNextVoiceInstructionsProviderTest {
 
         assertEquals(
             listOf(currentStepInstruction),
-            sut.getNextVoiceInstructions(
-                routeProgressData(stepIndex = 1, stepDurationRemaining = observableTime + 50.0)
-            )
+            sut.getNextVoiceInstructions(routeProgressData(stepIndex = 1, stepDurationRemaining = observableTime + 50.0))
         )
     }
 
@@ -281,9 +258,7 @@ class TimeBasedNextVoiceInstructionsProviderTest {
 
         assertEquals(
             listOf(currentStepInstruction),
-            sut.getNextVoiceInstructions(
-                routeProgressData(stepIndex = 1, stepDurationRemaining = currentDurationRemaining)
-            )
+            sut.getNextVoiceInstructions(routeProgressData(stepIndex = 1, stepDurationRemaining = currentDurationRemaining))
         )
     }
 
@@ -348,9 +323,7 @@ class TimeBasedNextVoiceInstructionsProviderTest {
 
         assertEquals(
             listOf(currentStepInstruction),
-            sut.getNextVoiceInstructions(
-                routeProgressData(stepIndex = 1, stepDurationRemaining = currentDurationRemaining)
-            )
+            sut.getNextVoiceInstructions(routeProgressData(stepIndex = 1, stepDurationRemaining = currentDurationRemaining))
         )
     }
 
@@ -428,9 +401,7 @@ class TimeBasedNextVoiceInstructionsProviderTest {
 
         assertEquals(
             listOf(currentStepInstruction),
-            sut.getNextVoiceInstructions(
-                routeProgressData(legIndex = 1, stepDurationRemaining = currentDurationRemaining)
-            )
+            sut.getNextVoiceInstructions(routeProgressData(legIndex = 1, stepDurationRemaining = currentDurationRemaining))
         )
     }
 
@@ -483,9 +454,7 @@ class TimeBasedNextVoiceInstructionsProviderTest {
 
         assertEquals(
             listOf(currentStepInstruction),
-            sut.getNextVoiceInstructions(
-                routeProgressData(legIndex = 1, stepDurationRemaining = currentDurationRemaining)
-            )
+            sut.getNextVoiceInstructions(routeProgressData(legIndex = 1, stepDurationRemaining = currentDurationRemaining))
         )
     }
 
@@ -505,9 +474,7 @@ class TimeBasedNextVoiceInstructionsProviderTest {
 
         assertEquals(
             listOf(currentStepInstruction, instruction1),
-            sut.getNextVoiceInstructions(
-                routeProgressData(legIndex = 1, stepDurationRemaining = currentDurationRemaining)
-            )
+            sut.getNextVoiceInstructions(routeProgressData(legIndex = 1, stepDurationRemaining = currentDurationRemaining))
         )
     }
 
@@ -556,9 +523,7 @@ class TimeBasedNextVoiceInstructionsProviderTest {
 
         assertEquals(
             listOf(currentStepInstruction),
-            sut.getNextVoiceInstructions(
-                routeProgressData(legIndex = 1, stepDurationRemaining = currentDurationRemaining)
-            )
+            sut.getNextVoiceInstructions(routeProgressData(legIndex = 1, stepDurationRemaining = currentDurationRemaining))
         )
     }
 
@@ -716,27 +681,6 @@ class TimeBasedNextVoiceInstructionsProviderTest {
         assertEquals(
             listOf(currentStepInstruction, nextStepInstruction, legAfterNextStepInstruction),
             sut.getNextVoiceInstructions(routeProgressData(legIndex = 1))
-        )
-    }
-
-    @Test
-    fun `real data`() {
-        val route = DirectionsRoute.fromJson(loadJsonFixture("multileg_route.json"))
-        val nextInstructions = sut.getNextVoiceInstructions(
-            RouteProgressData(route, 0, 4, 18.0, 80.0)
-        )
-        assertEquals(
-            listOf(
-                "Turn left onto Summerton Way",
-                "In 500 feet, turn right onto Forsythia Street",
-                "Turn right onto Forsythia Street, then you will arrive at your 1st destination",
-                "You have arrived at your 1st destination, on the left",
-                "Head northeast on Forsythia Street, then turn left onto Summerton Way",
-                "Turn left onto Summerton Way",
-                "In 500 feet, turn right onto Elder Avenue",
-                "Turn right onto Elder Avenue, then turn right onto Franconia Road (SR 644)",
-            ),
-            nextInstructions.map { it.announcement() }
         )
     }
 

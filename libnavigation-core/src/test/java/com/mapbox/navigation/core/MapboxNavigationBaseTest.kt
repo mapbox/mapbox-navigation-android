@@ -20,6 +20,7 @@ import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
+import com.mapbox.navigation.core.internal.LegacyMapboxNavigationInstanceHolder
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.preview.RoutesPreviewController
 import com.mapbox.navigation.core.reroute.RerouteController
@@ -129,6 +130,7 @@ internal open class MapboxNavigationBaseTest {
 
     @Before
     open fun setUp() {
+        LegacyMapboxNavigationInstanceHolder.onDestroyed()
         every { threadController.getMainScopeAndRootJob() } answers {
             JobControl(mockk(), coroutineRule.createTestScope())
         }
@@ -247,6 +249,7 @@ internal open class MapboxNavigationBaseTest {
         unmockkObject(EventsServiceProvider)
         unmockkObject(TelemetryServiceProvider)
         unmockkObject(TelemetryUtilsDelegate)
+        LegacyMapboxNavigationInstanceHolder.onDestroyed()
     }
 
     fun createMapboxNavigation() {

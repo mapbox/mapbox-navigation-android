@@ -413,6 +413,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxReplayer.finish()
         mapboxNavigation.onDestroy()
         speechApi.cancel()
+        speechApi.destroy()
         voiceInstructionsPlayer.shutdown()
     }
 

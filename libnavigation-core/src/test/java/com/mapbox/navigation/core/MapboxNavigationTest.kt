@@ -17,6 +17,7 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
+import com.mapbox.navigation.core.internal.LegacyMapboxNavigationInstanceHolder
 import com.mapbox.navigation.core.internal.extensions.registerHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.unregisterHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.telemetry.NavigationCustomEventType
@@ -56,6 +57,7 @@ import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.verify
 import io.mockk.verifyOrder
@@ -1896,6 +1898,34 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         coVerifyOrder {
             tripSession.setRoutes(routes, any())
             routesPreviewController.previewNavigationRoutes(emptyList())
+        }
+    }
+
+    @Test
+    fun mapboxNavigationCreationSetsInstanceToHolder() {
+        mockkObject(LegacyMapboxNavigationInstanceHolder) {
+            createMapboxNavigation()
+            verify { LegacyMapboxNavigationInstanceHolder.onCreated(mapboxNavigation) }
+        }
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun mapboxNavigationIsNotCreatedIfHolderHasInstance() {
+        mockkObject(LegacyMapboxNavigationInstanceHolder) {
+            every { LegacyMapboxNavigationInstanceHolder.peek() } returns mockk(relaxed = true)
+            createMapboxNavigation()
+            verify(exactly = 0) {
+                LegacyMapboxNavigationInstanceHolder.onCreated(any())
+            }
+        }
+    }
+
+    @Test
+    fun mapboxNavigationDestructionRemovesInstanceFromHolder() {
+        mockkObject(LegacyMapboxNavigationInstanceHolder) {
+            createMapboxNavigation()
+            mapboxNavigation.onDestroy()
+            verify { LegacyMapboxNavigationInstanceHolder.onDestroyed() }
         }
     }
 }

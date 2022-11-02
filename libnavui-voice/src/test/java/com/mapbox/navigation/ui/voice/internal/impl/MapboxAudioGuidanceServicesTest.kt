@@ -3,6 +3,8 @@ package com.mapbox.navigation.ui.voice.internal.impl
 import android.content.Context
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.voice.api.AudioFocusDelegateProvider
+import com.mapbox.navigation.ui.voice.api.MapboxVoiceApi
+import com.mapbox.navigation.ui.voice.api.VoiceApiProvider
 import com.mapbox.navigation.ui.voice.api.VoiceInstructionsTextPlayer
 import com.mapbox.navigation.ui.voice.api.VoiceInstructionsTextPlayerProvider
 import io.mockk.every
@@ -52,5 +54,33 @@ class MapboxAudioGuidanceServicesTest {
 
         assertEquals(firstInstance, secondInstance)
         verify { textPlayer.updateLanguage(newLanguage) }
+    }
+
+    @Test
+    fun `get mapboxAudioGuidanceVoice twice`() {
+        val context = mockk<Context>(relaxed = true)
+        val token = "pk"
+        val voiceAPIEn = mockk<MapboxVoiceApi>(relaxed = true)
+        val voiceAPIIt = mockk<MapboxVoiceApi>(relaxed = true)
+        every { mapboxNavigation.navigationOptions } returns mockk(relaxed = true) {
+            every { accessToken } returns token
+            every { applicationContext } returns context
+        }
+        mockkObject(VoiceApiProvider) {
+            every {
+                VoiceApiProvider.retrieveMapboxVoiceApi(any(), any(), "en", any())
+            } returns voiceAPIEn
+            every {
+                VoiceApiProvider.retrieveMapboxVoiceApi(any(), any(), "it", any())
+            } returns voiceAPIIt
+            sut.mapboxAudioGuidanceVoice(mapboxNavigation, "en")
+
+            verify(exactly = 0) { voiceAPIEn.destroy() }
+
+            sut.mapboxAudioGuidanceVoice(mapboxNavigation, "it")
+
+            verify(exactly = 1) { voiceAPIEn.destroy() }
+            verify(exactly = 0) { voiceAPIIt.destroy() }
+        }
     }
 }

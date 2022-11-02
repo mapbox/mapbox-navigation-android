@@ -191,4 +191,17 @@ class MapboxSpeechApiTest {
             mockedVoiceApi.clean(anyAnnouncement)
         }
     }
+
+    @Test
+    fun destroy() {
+        val mockedVoiceApi = mockk<MapboxVoiceApi>(relaxed = true)
+        every {
+            VoiceApiProvider.retrieveMapboxVoiceApi(any(), any(), any(), any())
+        } returns mockedVoiceApi
+
+        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        sut.destroy()
+
+        verify { mockedVoiceApi.destroy() }
+    }
 }

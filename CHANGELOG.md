@@ -23,6 +23,8 @@ Mapbox welcomes participation and contributions from everyone.
           .build()
   }
   ```
+- Optimized voice instructions downloading. [#6547](https://github.com/mapbox/mapbox-navigation-android/pull/6547)
+- Fixed an issue where voice instruction was being played too late with low connectivity. [#6547](https://github.com/mapbox/mapbox-navigation-android/pull/6547)
 
 ## Mapbox Navigation SDK 2.10.0-rc.1 - 16 December, 2022
 ### Changelog
@@ -500,6 +502,10 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Core Common `v23.1.1`
 - Mapbox Java `v6.9.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.9.0-beta.2))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
+- Fixed an issue with `NavigationView` that caused road label position to not update in some cases. [#6531](https://github.com/mapbox/mapbox-navigation-android/pull/6531)
+- Fixed an issue where `DirectionsResponse#waypoints` list was cleared after a successful non-EV route refresh. [#6539](https://github.com/mapbox/mapbox-navigation-android/pull/6539)
+- Fixed an issue with EV route refresh failing in cases where EV data updates are not provided. Now, the initial parameters from a route request will be used as a fallback. [#6534](https://github.com/mapbox/mapbox-navigation-android/pull/6534)
 
 ## Mapbox Navigation SDK 2.10.0-alpha.1 - 28 October, 2022
 ### Changelog

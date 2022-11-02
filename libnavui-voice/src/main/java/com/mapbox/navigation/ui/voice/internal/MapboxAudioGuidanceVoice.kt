@@ -36,6 +36,10 @@ class MapboxAudioGuidanceVoice(
         }
     }
 
+    fun destroy() {
+        mapboxSpeechApi.destroy()
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun speechFlow(voiceInstructions: VoiceInstructions): Flow<SpeechAnnouncement> =
         callbackFlow {

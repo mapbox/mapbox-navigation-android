@@ -75,6 +75,14 @@ class MapboxSpeechApi @JvmOverloads constructor(
         voiceAPI.clean(announcement)
     }
 
+    /**
+     * The method stops all work related to pre-downloading voice instructions and unregisters
+     * all related callbacks. It should be invoked from `Activity#onDestroy`.
+     */
+    fun destroy() {
+        voiceAPI.destroy()
+    }
+
     @Throws(IllegalStateException::class)
     private suspend fun retrieveVoiceFile(
         voiceInstruction: VoiceInstructions,

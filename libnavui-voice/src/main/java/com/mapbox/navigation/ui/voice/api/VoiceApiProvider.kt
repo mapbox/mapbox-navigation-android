@@ -14,9 +14,9 @@ internal object VoiceApiProvider {
         context: Context,
         accessToken: String,
         language: String,
-        options: MapboxSpeechApiOptions
+        options: MapboxSpeechApiOptions,
     ): MapboxVoiceApi = MapboxVoiceApi(
-        MapboxSpeechProvider(
+        MapboxSpeechLoader(
             accessToken,
             language,
             MapboxNavigationAccounts,
