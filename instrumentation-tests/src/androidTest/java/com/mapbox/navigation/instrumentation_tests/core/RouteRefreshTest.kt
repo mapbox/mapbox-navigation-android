@@ -265,6 +265,14 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 refreshedRoutes[1].directionsRoute.legs()!!.first().duration()!!,
                 0.0001
             )
+            assertEquals(
+                requestedRoutes[0].directionsResponse.waypoints(),
+                refreshedRoutes[0].directionsResponse.waypoints()
+            )
+            assertEquals(
+                requestedRoutes[1].directionsResponse.waypoints(),
+                refreshedRoutes[1].directionsResponse.waypoints()
+            )
         }
 
     @Test
@@ -508,6 +516,16 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 ),
                 refreshedRoutes[0].directionsRoute.legs()!![1].closures()
             )
+
+            // waypoints
+            assertEquals(
+                requestedRoutes[0].directionsResponse.waypoints(),
+                refreshedRoutes[0].directionsResponse.waypoints()
+            )
+            assertEquals(
+                requestedRoutes[1].directionsResponse.waypoints(),
+                refreshedRoutes[1].directionsResponse.waypoints()
+            )
         }
 
     @Test
@@ -583,6 +601,12 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                         .build()
                 ),
                 refreshedRoutes[0].directionsRoute.legs()!![1].closures()
+            )
+
+            // waypoints
+            assertEquals(
+                requestedRoutes[0].directionsResponse.waypoints(),
+                refreshedRoutes[0].directionsResponse.waypoints()
             )
         }
 
