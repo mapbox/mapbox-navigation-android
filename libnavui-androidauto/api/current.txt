@@ -505,12 +505,6 @@ package com.mapbox.androidauto.navigation.roadlabel {
 
   public final class RoadLabelSurfaceLayer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
     ctor public RoadLabelSurfaceLayer(androidx.car.app.CarContext carContext);
-    method public java.util.List<com.mapbox.maps.extension.androidauto.MapboxCarMapObserver> children();
-    method public androidx.car.app.CarContext getCarContext();
-    method public final com.mapbox.maps.EdgeInsets? getEdgeInsets();
-    method public final android.graphics.Rect? getVisibleArea();
-    method public final kotlin.Pair<java.lang.Integer,java.lang.Integer>? surfaceDimensions();
-    property public final androidx.car.app.CarContext carContext;
   }
 
   public abstract class RoadNameObserver implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
