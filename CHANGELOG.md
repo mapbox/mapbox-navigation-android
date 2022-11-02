@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Fixed approaches list update in `RouteOptionsUpdater`(uses for reroute). It was putting to the origin approach corresponding approach from legacy approach list. [#6540](https://github.com/mapbox/mapbox-navigation-android/pull/6540)
 
 ## Mapbox Navigation SDK 2.10.0-beta.3 - 08 December, 2022
 ### Changelog
@@ -400,7 +401,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Core Common `v23.1.1`
 - Mapbox Java `v6.9.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.9.0-beta.2))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
-
 
 ## Mapbox Navigation SDK 2.10.0-alpha.1 - 28 October, 2022
 ### Changelog

@@ -105,14 +105,9 @@ class RouteOptionsUpdater {
                         if (approachesList.isNullOrEmpty()) {
                             return@approachesList emptyList<String>()
                         }
-                        mutableListOf<String>().also {
-                            it.addAll(
-                                approachesList.subList(
-                                    nextCoordinateIndex - 1,
-                                    coordinatesList.size
-                                )
-                            )
-                        }
+                        mutableListOf<String?>() +
+                            null +
+                            approachesList.takeLast(remainingCoordinates - 1)
                     }
                 )
                 .apply {
