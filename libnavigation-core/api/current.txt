@@ -13,6 +13,7 @@ package com.mapbox.navigation.core {
   @UiThread public final class MapboxNavigation {
     ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public void cancelRouteRequest(long requestId);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI @kotlin.jvm.Throws(exceptionClasses=IllegalArgumentException::class) public void changeRoutesPreviewPrimaryRoute(com.mapbox.navigation.base.route.NavigationRoute newPrimaryRoute) throws java.lang.IllegalArgumentException;
     method public com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata? getAlternativeMetadataFor(com.mapbox.navigation.base.route.NavigationRoute navigationRoute);
     method public java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> getAlternativeMetadataFor(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> navigationRoutes);
     method public com.mapbox.navigator.Experimental getExperimental();
@@ -26,6 +27,7 @@ package com.mapbox.navigation.core {
     method public com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcher getRoadObjectMatcher();
     method public com.mapbox.navigation.core.trip.session.eh.RoadObjectsStore getRoadObjectsStore();
     method @Deprecated public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.core.preview.RoutesPreview? getRoutesPreview();
     method public com.mapbox.navigation.core.navigator.TilesetDescriptorFactory getTilesetDescriptorFactory();
     method public com.mapbox.navigation.core.trip.session.TripSessionState getTripSessionState();
     method public Integer? getZLevel();
@@ -53,6 +55,7 @@ package com.mapbox.navigation.core {
     method public void registerRouteProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver routeProgressObserver);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void registerRouteRefreshStateObserver(com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver routeRefreshStatesObserver);
     method public void registerRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void registerRoutesPreviewObserver(com.mapbox.navigation.core.preview.RoutesPreviewObserver observer);
     method public void registerTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
     method public void registerVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
     method public void requestAlternativeRoutes();
@@ -73,6 +76,8 @@ package com.mapbox.navigation.core {
     method public void setRerouteOptionsAdapter(com.mapbox.navigation.core.reroute.RerouteOptionsAdapter? rerouteOptionsAdapter);
     method @Deprecated public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes, int initialLegIndex = 0);
     method @Deprecated public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setRoutesPreview(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, int primaryRouteIndex = 0);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setRoutesPreview(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
     method public void setTripNotificationInterceptor(com.mapbox.navigation.base.trip.notification.TripNotificationInterceptor? interceptor);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void startReplayTripSession(boolean withForegroundService = true);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession(boolean withForegroundService = true);
@@ -92,6 +97,7 @@ package com.mapbox.navigation.core {
     method public void unregisterRouteProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver routeProgressObserver);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void unregisterRouteRefreshStateObserver(com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver routeRefreshStatesObserver);
     method public void unregisterRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void unregisterRoutesPreviewObserver(com.mapbox.navigation.core.preview.RoutesPreviewObserver observer);
     method public void unregisterTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
     method public void unregisterVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
     property public final com.mapbox.navigator.Experimental experimental;
@@ -380,6 +386,43 @@ package com.mapbox.navigation.core.navigator {
   }
 
   public final class TilesetDescriptorFactoryKt {
+  }
+
+}
+
+package com.mapbox.navigation.core.preview {
+
+  @StringDef({com.mapbox.navigation.core.preview.RoutesPreviewUpdateReasons.PREVIEW_NEW, com.mapbox.navigation.core.preview.RoutesPreviewUpdateReasons.PREVIEW_CLEAN_UP}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public @interface RoutePreviewUpdateReason {
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RoutesPreview {
+    method public java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> getAlternativesMetadata();
+    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> getOriginalRoutesList();
+    method public com.mapbox.navigation.base.route.NavigationRoute getPrimaryRoute();
+    method public int getPrimaryRouteIndex();
+    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> getRoutesList();
+    property public final java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> alternativesMetadata;
+    property public final java.util.List<com.mapbox.navigation.base.route.NavigationRoute> originalRoutesList;
+    property public final com.mapbox.navigation.base.route.NavigationRoute primaryRoute;
+    property public final int primaryRouteIndex;
+    property public final java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routesList;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface RoutesPreviewObserver {
+    method public void routesPreviewUpdated(com.mapbox.navigation.core.preview.RoutesPreviewUpdate update);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RoutesPreviewUpdate {
+    method public String getReason();
+    method public com.mapbox.navigation.core.preview.RoutesPreview? getRoutesPreview();
+    property public final String reason;
+    property public final com.mapbox.navigation.core.preview.RoutesPreview? routesPreview;
+  }
+
+  public final class RoutesPreviewUpdateReasons {
+    field public static final com.mapbox.navigation.core.preview.RoutesPreviewUpdateReasons INSTANCE;
+    field public static final String PREVIEW_CLEAN_UP = "PREVIEW_CLEAN_UP";
+    field public static final String PREVIEW_NEW = "PREVIEW_SET";
   }
 
 }

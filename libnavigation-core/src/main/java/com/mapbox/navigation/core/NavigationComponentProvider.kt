@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core
 
 import android.content.Context
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.notification.TripNotification
@@ -8,6 +9,8 @@ import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
+import com.mapbox.navigation.core.preview.NativeRoutesDataParser
+import com.mapbox.navigation.core.preview.RoutesPreviewController
 import com.mapbox.navigation.core.trip.service.MapboxTripService
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.MapboxTripSession
@@ -22,6 +25,7 @@ import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.TilesConfig
+import kotlinx.coroutines.CoroutineScope
 
 internal object NavigationComponentProvider {
 
@@ -101,4 +105,12 @@ internal object NavigationComponentProvider {
 
     fun createRouteRefreshRequestDataProvider(): RouteRefreshRequestDataProvider =
         RouteRefreshRequestDataProvider()
+
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun createRoutesPreviewController(
+        scope: CoroutineScope
+    ) = RoutesPreviewController(
+        routesDataParser = NativeRoutesDataParser(),
+        scope = scope
+    )
 }
