@@ -81,7 +81,7 @@ internal class InfoPanelCoordinator(
             }
         }
         coroutineScope.launch {
-            context.systemBarsInsets.collect(this@InfoPanelCoordinator::updateGuidelinePosition)
+            context.systemBarsInsets.collect { updateGuidelinePosition(systemBarsInsets = it) }
         }
         coroutineScope.launch {
             context.options.isInfoPanelHideable.collect { hideable ->
@@ -98,7 +98,7 @@ internal class InfoPanelCoordinator(
             bottomSheetPeekHeight().collect { behavior.peekHeight = it }
         }
         coroutineScope.launch {
-            infoPanelTop.collect { updateGuidelinePosition() }
+            infoPanelTop.collect { updateGuidelinePosition(infoPanelTop = it) }
         }
     }
 
@@ -157,10 +157,13 @@ internal class InfoPanelCoordinator(
         state = BottomSheetBehavior.STATE_HIDDEN
     }
 
-    private fun updateGuidelinePosition(systemBarsInsets: Insets = context.systemBarsInsets.value) {
+    private fun updateGuidelinePosition(
+        systemBarsInsets: Insets = context.systemBarsInsets.value,
+        infoPanelTop: Int = infoPanel.top,
+    ) {
         val parentHeight = (infoPanel.parent as ViewGroup).height
         val maxPos = (parentHeight * GUIDELINE_MAX_POSITION_PERCENT).toInt()
-        val pos = parentHeight - infoPanel.top - systemBarsInsets.bottom
+        val pos = parentHeight - infoPanelTop - systemBarsInsets.bottom
         guidelineBottom.setGuidelineEnd(pos.coerceIn(0, maxPos))
     }
 
