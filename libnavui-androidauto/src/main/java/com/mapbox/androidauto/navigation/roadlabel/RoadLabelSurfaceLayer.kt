@@ -1,6 +1,7 @@
 package com.mapbox.androidauto.navigation.roadlabel
 
 import android.graphics.Color
+import android.graphics.Rect
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import com.mapbox.androidauto.internal.extensions.getStyleAsync
@@ -11,6 +12,7 @@ import com.mapbox.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.androidauto.internal.surfacelayer.CarSurfaceLayer
 import com.mapbox.androidauto.internal.surfacelayer.textview.CarTextLayerHost
 import com.mapbox.androidauto.navigation.MapUserStyleObserver
+import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
@@ -31,8 +33,32 @@ import com.mapbox.navigation.ui.shield.model.RouteShield
  * removing the listener with [MapboxCarMap.unregisterObserver].
  */
 @OptIn(MapboxExperimental::class)
-class RoadLabelSurfaceLayer(
-    val carContext: CarContext,
+class RoadLabelSurfaceLayer internal constructor(
+    private val delegate: RoadLabelSurfaceLayerDelegate,
+) : MapboxCarMapObserver {
+
+    constructor(carContext: CarContext) : this(RoadLabelSurfaceLayerDelegate(carContext))
+
+    override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
+        delegate.onAttached(mapboxCarMapSurface)
+    }
+
+    override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
+        delegate.onDetached(mapboxCarMapSurface)
+    }
+
+    override fun onVisibleAreaChanged(visibleArea: Rect, edgeInsets: EdgeInsets) {
+        delegate.onVisibleAreaChanged(visibleArea, edgeInsets)
+    }
+
+    override fun onStableAreaChanged(stableArea: Rect, edgeInsets: EdgeInsets) {
+        delegate.onStableAreaChanged(stableArea, edgeInsets)
+    }
+}
+
+@OptIn(MapboxExperimental::class)
+internal class RoadLabelSurfaceLayerDelegate(
+    private val carContext: CarContext,
 ) : CarSurfaceLayer() {
 
     private val roadLabelRenderer = RoadLabelRenderer(carContext.resources)
