@@ -79,8 +79,8 @@ class RoutesPreviewTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         mapboxNavigation.setRoutesPreview(emptyList())
         mapboxNavigation.routesUpdates()
             .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW }
-        mapboxNavigation.routeProgressUpdates().
-            first { it.currentState == RouteProgressState.TRACKING }
+        mapboxNavigation.routeProgressUpdates()
+            .first { it.currentState == RouteProgressState.TRACKING }
         assertEquals(RoutesPreviewUpdateReasons.PREVIEW_CLEAN_UP, currentRoutesPreview?.reason)
         assertNull(currentRoutesPreview!!.routesPreview)
         assertEquals(RoutesExtra.ROUTES_UPDATE_REASON_NEW, currentRoutes!!.reason)
