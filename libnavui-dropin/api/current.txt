@@ -400,24 +400,6 @@ package com.mapbox.navigation.dropin.map {
 
 }
 
-package com.mapbox.navigation.dropin.map.scalebar {
-
-  public final class MapboxMapScalebarParams {
-    method public boolean getEnabled();
-    method public boolean isMetricUnits();
-    property public final boolean enabled;
-    property public final boolean isMetricUnits;
-  }
-
-  public static final class MapboxMapScalebarParams.Builder {
-    ctor public MapboxMapScalebarParams.Builder(android.content.Context context);
-    method public com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams build();
-    method public com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams.Builder enabled(boolean enabled);
-    method public com.mapbox.navigation.dropin.map.scalebar.MapboxMapScalebarParams.Builder isMetricsUnits(Boolean? isMetricUnits);
-  }
-
-}
-
 package com.mapbox.navigation.dropin.navigationview {
 
   public final class MapboxNavigationViewApiKt {
