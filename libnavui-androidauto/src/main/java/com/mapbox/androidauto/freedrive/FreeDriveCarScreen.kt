@@ -33,7 +33,7 @@ class FreeDriveCarScreen @UiThread constructor(
         initialCarCameraMode = CarCameraMode.FOLLOWING,
         alternativeCarCameraMode = null,
     )
-    private val roadLabelSurfaceLayer = RoadLabelSurfaceLayer(carContext)
+    private val roadLabelSurfaceLayer = RoadLabelSurfaceLayer()
     private val mapActionStripBuilder = MapboxMapActionStrip(this, carNavigationCamera)
 
     init {
