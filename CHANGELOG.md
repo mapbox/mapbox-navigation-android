@@ -19,6 +19,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed a rare issue where the offset marking the traveled portion of the route would be ahead of the user location puck, especially around sharp maneuvers. [#6648](https://github.com/mapbox/mapbox-navigation-android/pull/6648)
 - Supported applying latest EV data provided via `MapboxNavigation#onEVDataUpdated` to EV reroute requests. [#6650](https://github.com/mapbox/mapbox-navigation-android/pull/6650)
 - Fixed an issue where reroute requests where not applying the latest EV data provided via `MapboxNavigation#onEVDataUpdated`. [#6650](https://github.com/mapbox/mapbox-navigation-android/pull/6650)
+- Added `NavigationRoute#waypoints` as the source of truth for `DirectionsWaypoint`s which can be common for all routes or route specific depending on `RouteOptions#waypointsPerRoute()` parameter. [#6555](https://github.com/mapbox/mapbox-navigation-android/pull/6555)
 
 ## Mapbox Navigation SDK 2.9.2 - 18 November, 2022
 ### Changelog
@@ -36,7 +37,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Core Common `v23.1.1`
 - Mapbox Java `v6.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.9.0))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
-
 
 ## Mapbox Navigation SDK 2.10.0-beta.1 - 18 November, 2022
 ### Changelog

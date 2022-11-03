@@ -24,7 +24,8 @@ import com.mapbox.geojson.Point
 
 fun createDirectionsResponse(
     uuid: String = "testUUID",
-    routes: List<DirectionsRoute> = listOf(createDirectionsRoute())
+    routes: List<DirectionsRoute> = listOf(createDirectionsRoute()),
+    unrecognizedProperties: Map<String, JsonElement>? = null,
 ): DirectionsResponse {
     val processedRoutes = routes.map {
         it.toBuilder().requestUuid(uuid).build()
@@ -33,6 +34,7 @@ fun createDirectionsResponse(
         .uuid(uuid)
         .code("Ok")
         .routes(processedRoutes)
+        .unrecognizedJsonProperties(unrecognizedProperties)
         .build()
 }
 
@@ -42,7 +44,8 @@ fun createDirectionsRoute(
     distance: Double = 5.0,
     duration: Double = 9.0,
     routeIndex: String = "0",
-    requestUuid: String? = "testUUID"
+    requestUuid: String? = "testUUID",
+    waypoints: List<DirectionsWaypoint>? = null
 ): DirectionsRoute = DirectionsRoute.builder()
     .distance(distance)
     .duration(duration)
@@ -50,6 +53,7 @@ fun createDirectionsRoute(
     .routeOptions(routeOptions)
     .routeIndex(routeIndex)
     .requestUuid(requestUuid)
+    .waypoints(waypoints)
     .build()
 
 fun createRouteLeg(
@@ -227,12 +231,14 @@ fun createRouteOptions(
     profile: String = DirectionsCriteria.PROFILE_DRIVING,
     unrecognizedProperties: Map<String, JsonElement>? = null,
     enableRefresh: Boolean = false,
+    waypointsPerRoute: Boolean? = null,
 ): RouteOptions {
     return RouteOptions
         .builder()
         .coordinatesList(coordinatesList)
         .profile(profile)
         .enableRefresh(enableRefresh)
+        .waypointsPerRoute(waypointsPerRoute)
         .unrecognizedJsonProperties(unrecognizedProperties)
         .build()
 }

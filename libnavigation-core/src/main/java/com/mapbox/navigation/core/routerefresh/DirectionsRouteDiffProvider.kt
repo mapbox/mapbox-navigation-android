@@ -13,21 +13,23 @@ internal class DirectionsRouteDiffProvider {
         newRoute: NavigationRoute,
         currentLegIndex: Int,
     ): List<String> {
-        val oldRouteLegs = oldRoute.directionsRoute.legs() ?: return emptyList()
-        val newRouteLegs = newRoute.directionsRoute.legs() ?: return emptyList()
         val routeDiffs = arrayListOf<String>()
-        for (legIndex in currentLegIndex until min(oldRouteLegs.size, newRouteLegs.size)) {
-            val oldLeg = oldRouteLegs[legIndex]
-            val newLeg = newRouteLegs[legIndex]
-            val updatedAnnotations = getUpdatedData(oldLeg, newLeg)
-            if (updatedAnnotations.isNotEmpty()) {
-                routeDiffs.add(
-                    "Updated ${updatedAnnotations.joinToString()} at " +
-                        "route ${newRoute.id} leg $legIndex"
-                )
+        val oldRouteLegs = oldRoute.directionsRoute.legs()
+        val newRouteLegs = newRoute.directionsRoute.legs()
+        if (oldRouteLegs != null && newRouteLegs != null) {
+            for (legIndex in currentLegIndex until min(oldRouteLegs.size, newRouteLegs.size)) {
+                val oldLeg = oldRouteLegs[legIndex]
+                val newLeg = newRouteLegs[legIndex]
+                val updatedAnnotations = getUpdatedData(oldLeg, newLeg)
+                if (updatedAnnotations.isNotEmpty()) {
+                    routeDiffs.add(
+                        "Updated ${updatedAnnotations.joinToString()} at " +
+                            "route ${newRoute.id} leg $legIndex"
+                    )
+                }
             }
         }
-        if (oldRoute.directionsResponse.waypoints() != newRoute.directionsResponse.waypoints()) {
+        if (oldRoute.waypoints != newRoute.waypoints) {
             routeDiffs.add("Updated waypoints at route ${newRoute.id}")
         }
         return routeDiffs

@@ -96,14 +96,12 @@ fun NavigationRoute.refreshRoute(
     val directionsRouteBlock: DirectionsRoute.() -> DirectionsRoute = {
         toBuilder()
             .legs(updateLegs)
+            .waypoints(buildNewWaypoints(this.waypoints(), waypoints))
             .updateRouteDurationBasedOnLegsDuration(updateLegs)
             .build()
     }
     val directionsResponseBlock: DirectionsResponse.Builder.() -> DirectionsResponse.Builder = {
-        updateWaypoints(
-            directionsResponse.waypoints(),
-            waypoints
-        )
+        waypoints(buildNewWaypoints(directionsResponse.waypoints(), waypoints))
     }
     return update(directionsRouteBlock, directionsResponseBlock)
 }
@@ -194,17 +192,16 @@ private fun List<LegStep>.updateSteps(
     return result
 }
 
-private fun DirectionsResponse.Builder.updateWaypoints(
+private fun buildNewWaypoints(
     oldWaypoints: List<DirectionsWaypoint>?,
     updatedWaypoints: List<DirectionsWaypoint?>?,
-): DirectionsResponse.Builder {
+): List<DirectionsWaypoint>? {
     if (oldWaypoints == null || updatedWaypoints == null) {
-        return this
+        return oldWaypoints
     }
-    val newWaypoints = oldWaypoints.mapIndexed { index, oldWaypoint ->
+    return oldWaypoints.mapIndexed { index, oldWaypoint ->
         updatedWaypoints.getOrNull(index) ?: oldWaypoint
     }
-    return waypoints(newWaypoints)
 }
 
 private fun DirectionsRoute.Builder.updateRouteDurationBasedOnLegsDuration(
