@@ -7,7 +7,6 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
-import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -35,7 +34,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
 
-class EvReroute : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
+class EvRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
@@ -59,7 +58,6 @@ class EvReroute : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
             mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(activity)
                     .accessToken(getMapboxAccessTokenFromResources(activity))
-                    .historyRecorderOptions(HistoryRecorderOptions.Builder().build())
                     .build()
             )
             mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder
@@ -207,7 +205,7 @@ class EvReroute : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
                 "Expected 2 waypoints in the route after reroute but was ${newWaypoints.size}"
             }
             check(newWaypoints[1] == mockRoute.routeWaypoints.last())
-            with(routeOptions.unrecognizedJsonProperties!!){
+            with(routeOptions.unrecognizedJsonProperties!!) {
                 check(get("engine")!!.asString == "electric")
                 check(get("ev_max_charge")!!.asString == "8000")
                 check(get("ev_connector_types")!!.asString == "tesla")
