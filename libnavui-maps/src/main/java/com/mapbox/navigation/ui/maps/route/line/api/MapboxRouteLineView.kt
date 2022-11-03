@@ -232,6 +232,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                 }
 
                 primaryRouteLineLayerGroup = getLayerIdsForPrimaryRoute(style, sourceLayerMap)
+                updateLayerScaling(style)
 
                 // Any layer group can host the primary route.  If a call was made to
                 // hide the primary our alternative routes, that state needs to be maintained
@@ -791,5 +792,64 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
             mutableList.add(it)
         }
         return mutableList
+    }
+
+    /**
+     * The route line layer scaling can be customized differently for various route lines.
+     * Since there are no specific layers for the primary route line vs alternatives it's important
+     * to adjust the scaling to the layers as different layer groups host the primary route line
+     * and alternative routes.
+     */
+    private fun updateLayerScaling(style: Style) {
+        trailCasingLayerIds
+            .union(trailLayerIds)
+            .union(casingLayerIds)
+            .union(mainLayerIds)
+            .union(trafficLayerIds)
+            .forEach {
+                when (it) {
+                    in primaryRouteLineLayerGroup -> {
+                        when (it) {
+                            in casingLayerIds -> {
+                                options.resourceProvider.routeCasingLineScaleExpression
+                            }
+                            in trailCasingLayerIds -> {
+                                options.resourceProvider.routeCasingLineScaleExpression
+                            }
+                            in mainLayerIds -> {
+                                options.resourceProvider.routeLineScaleExpression
+                            }
+                            in trailLayerIds -> {
+                                options.resourceProvider.routeLineScaleExpression
+                            }
+                            in trafficLayerIds -> {
+                                options.resourceProvider.routeTrafficLineScaleExpression
+                            }
+                            else -> null
+                        }
+                    } else -> {
+                        when (it) {
+                            in casingLayerIds -> {
+                                options.resourceProvider.alternativeRouteCasingLineScaleExpression
+                            }
+                            in trailCasingLayerIds -> {
+                                options.resourceProvider.alternativeRouteCasingLineScaleExpression
+                            }
+                            in mainLayerIds -> {
+                                options.resourceProvider.alternativeRouteLineScaleExpression
+                            }
+                            in trailLayerIds -> {
+                                options.resourceProvider.alternativeRouteLineScaleExpression
+                            }
+                            in trafficLayerIds -> {
+                                options.resourceProvider.alternativeRouteTrafficLineScaleExpression
+                            }
+                            else -> null
+                        }
+                    }
+                }?.apply {
+                    style.setStyleLayerProperty(it, "line-width", this)
+                }
+            }
     }
 }

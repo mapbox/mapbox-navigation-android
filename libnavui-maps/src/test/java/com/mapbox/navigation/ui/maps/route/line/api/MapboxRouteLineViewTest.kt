@@ -831,6 +831,112 @@ class MapboxRouteLineViewTest {
         verify(exactly = 0) { style.moveStyleLayer(LAYER_GROUP_3_TRAFFIC, any()) }
         verify(exactly = 0) { style.moveStyleLayer(LAYER_GROUP_3_RESTRICTED, any()) }
 
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_TRAIL_CASING,
+                "line-width",
+                options.resourceProvider.routeCasingLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_TRAIL,
+                "line-width",
+                options.resourceProvider.routeLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_CASING,
+                "line-width",
+                options.resourceProvider.routeCasingLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_MAIN,
+                "line-width",
+                options.resourceProvider.routeLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_TRAFFIC,
+                "line-width",
+                options.resourceProvider.routeTrafficLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_2_TRAIL_CASING,
+                "line-width",
+                options.resourceProvider.alternativeRouteCasingLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_2_TRAIL,
+                "line-width",
+                options.resourceProvider.alternativeRouteLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_2_CASING,
+                "line-width",
+                options.resourceProvider.alternativeRouteCasingLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_2_MAIN,
+                "line-width",
+                options.resourceProvider.alternativeRouteLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_2_TRAFFIC,
+                "line-width",
+                options.resourceProvider.alternativeRouteTrafficLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_3_TRAIL_CASING,
+                "line-width",
+                options.resourceProvider.alternativeRouteCasingLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_3_TRAIL,
+                "line-width",
+                options.resourceProvider.alternativeRouteLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_3_CASING,
+                "line-width",
+                options.resourceProvider.alternativeRouteCasingLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_3_MAIN,
+                "line-width",
+                options.resourceProvider.alternativeRouteLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_3_TRAFFIC,
+                "line-width",
+                options.resourceProvider.alternativeRouteTrafficLineScaleExpression
+            )
+        }
+
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
