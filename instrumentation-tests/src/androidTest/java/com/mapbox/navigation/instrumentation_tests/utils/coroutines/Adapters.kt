@@ -19,6 +19,7 @@ import com.mapbox.navigation.core.RoutesSetError
 import com.mapbox.navigation.core.RoutesSetSuccess
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.core.preview.RoutesPreviewUpdate
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
@@ -178,5 +179,11 @@ suspend fun MapboxNavigation.voiceInstructions(): Flow<VoiceInstructions> {
         awaitClose {
             navigation.unregisterVoiceInstructionsObserver(observer)
         }
+    }
+}
+
+suspend fun MapboxHistoryRecorder.stopRecording(): String? = suspendCoroutine { cont ->
+    stopRecording { path ->
+        cont.resume(path)
     }
 }

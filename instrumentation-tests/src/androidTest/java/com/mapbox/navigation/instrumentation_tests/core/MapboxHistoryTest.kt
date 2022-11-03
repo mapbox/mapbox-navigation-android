@@ -23,6 +23,8 @@ import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
 import com.mapbox.navigation.core.history.model.HistoryEventUpdateLocation
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.stopRecording
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoute
@@ -33,6 +35,7 @@ import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -41,7 +44,6 @@ import org.junit.Rule
 import org.junit.Test
 import java.io.File
 import java.io.InputStream
-import java.util.concurrent.CountDownLatch
 
 class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
@@ -143,13 +145,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         Espresso.onIdle()
         routeCompleteIdlingResource.unregister()
 
-        var filePath: String? = null
-        val countDownLatch = CountDownLatch(1)
-        mapboxNavigation.historyRecorder.stopRecording { filePathFromNative ->
-            filePath = filePathFromNative
-            countDownLatch.countDown()
-        }
-        countDownLatch.await()
+        val filePath = runBlocking { mapboxNavigation.historyRecorder.stopRecording() }
 
         assertNotNull(filePath)
         verifyHistoryEvents(filePath!!, mockRoute, routeOptions)
@@ -208,13 +204,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         Espresso.onIdle()
         routeCompleteIdlingResource.unregister()
 
-        var filePath: String? = null
-        val countDownLatch = CountDownLatch(1)
-        mapboxNavigation.historyRecorder.stopRecording { filePathFromNative ->
-            filePath = filePathFromNative
-            countDownLatch.countDown()
-        }
-        countDownLatch.await()
+        val filePath = runBlocking { mapboxNavigation.historyRecorder.stopRecording() }
 
         assertNotNull(filePath)
         verifyHistoryEvents(filePath!!, mockRoute, routeOptions)
@@ -336,7 +326,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     }
 
     @Test
-    fun verify_identifying_events_can_be_found() {
+    fun verify_identifying_events_can_be_found() = sdkTest {
         mapboxNavigation.startTripSession()
         val firstJson = """{"identifier":"first"}"""
         val secondJson = """{"identifier":"second"}"""
@@ -354,17 +344,10 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         assertEquals(thirdJson, thirdFile.findCustomEvent().properties)
     }
 
-    private fun startAndStopRecording(eventJson: String): String {
+    private suspend fun startAndStopRecording(eventJson: String): String {
         mapboxNavigation.historyRecorder.startRecording()
         mapboxNavigation.historyRecorder.pushHistory(CUSTOM_EVENT_TYPE, eventJson)
-        var filePath: String? = null
-        val countDownLatch = CountDownLatch(1)
-        mapboxNavigation.historyRecorder.stopRecording { filePathFromNative ->
-            filePath = filePathFromNative
-            countDownLatch.countDown()
-        }
-        countDownLatch.await()
-        return filePath!!
+        return mapboxNavigation.historyRecorder.stopRecording()!!
     }
 
     private fun historyReaderFromAssetFile(

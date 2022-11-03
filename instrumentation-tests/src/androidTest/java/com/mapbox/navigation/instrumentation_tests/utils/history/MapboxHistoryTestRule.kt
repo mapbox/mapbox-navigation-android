@@ -8,12 +8,13 @@ import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
-import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.stopRecording
 import com.mapbox.navigation.utils.internal.logE
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import java.io.File
-import java.util.concurrent.CountDownLatch
 
 /**
  * Add this TestRule to your test and the directory will be saved
@@ -70,14 +71,10 @@ class MapboxHistoryTestRule : TestWatcher() {
         try {
             runner()
         } catch (t: Throwable) {
-            val countDownLatch = CountDownLatch(1)
-            runOnMainSync {
-                historyRecorder.stopRecording {
-                    logE("$message history path=$it", "DEBUG")
-                    countDownLatch.countDown()
-                }
+            runBlocking(Dispatchers.Main) {
+                val path = historyRecorder.stopRecording()
+                logE("$message history path=$path", "DEBUG")
             }
-            countDownLatch.await()
             throw t
         }
     }

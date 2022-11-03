@@ -20,6 +20,7 @@ import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.stopRecording
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.idling.FirstLocationIdlingResource
@@ -31,6 +32,8 @@ import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.utils.internal.logE
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
@@ -39,7 +42,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 /**
@@ -117,14 +119,10 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         firstAlternative.unregister()
         assertTrue(firstAlternative.calledOnMainThread)
 
-        val countDownLatch = CountDownLatch(1)
-        runOnMainSync {
-            mapboxNavigation.historyRecorder.stopRecording {
-                logE("history path=$it", LOG_CATEGORY)
-                countDownLatch.countDown()
-            }
+        runBlocking(Dispatchers.Main) {
+            val historyPath = mapboxNavigation.historyRecorder.stopRecording()
+            logE("history path=$historyPath", LOG_CATEGORY)
         }
-        countDownLatch.await()
 
         // Verify alternative routes events were triggered.
         assertEquals(2, routes.size)
@@ -171,14 +169,10 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
 
         assertTrue(firstAlternative.calledOnMainThread)
 
-        val countDownLatch = CountDownLatch(1)
-        runOnMainSync {
-            mapboxNavigation.historyRecorder.stopRecording {
-                logE("history path=$it", LOG_CATEGORY)
-                countDownLatch.countDown()
-            }
+        runBlocking(Dispatchers.Main) {
+            val historyPath = mapboxNavigation.historyRecorder.stopRecording()
+            logE("history path=$historyPath", LOG_CATEGORY)
         }
-        countDownLatch.await()
 
         // Verify alternative routes events were triggered.
         assertEquals(2, routes.size)
@@ -278,14 +272,11 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
             }
             nextAlternativeObserver.unregister()
 
-            val countDownLatch = CountDownLatch(1)
-            runOnMainSync {
+            runBlocking(Dispatchers.Main) {
                 mapboxNavigation.historyRecorder.stopRecording {
                     logE("history path=$it", LOG_CATEGORY)
-                    countDownLatch.countDown()
                 }
             }
-            countDownLatch.await()
 
             // Verify alternative routes events were triggered.
             firstAlternative.verifyOnRouteAlternativesAndProgressReceived()

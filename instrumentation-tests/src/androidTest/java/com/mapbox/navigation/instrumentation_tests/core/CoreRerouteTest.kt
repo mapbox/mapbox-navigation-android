@@ -39,6 +39,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routesUpdate
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.setNavigationRoutesAndWaitForAlternativesUpdate
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.setNavigationRoutesAndWaitForUpdate
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.stopRecording
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
@@ -53,16 +54,17 @@ import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.net.URI
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
@@ -192,14 +194,10 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         }
         locationTrackingIdlingResource.unregister()
 
-        val countDownLatch = CountDownLatch(1)
-        runOnMainSync {
-            mapboxNavigation.historyRecorder.stopRecording {
-                logE("history path=$it", "DEBUG")
-                countDownLatch.countDown()
-            }
+        runBlocking(Dispatchers.Main) {
+            val historyPath = mapboxNavigation.historyRecorder.stopRecording()
+            logE("history path=$historyPath", "DEBUG")
         }
-        countDownLatch.await()
 
         // assert results
         expectedStates.assert()
