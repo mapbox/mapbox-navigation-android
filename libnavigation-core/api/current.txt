@@ -925,6 +925,7 @@ package com.mapbox.navigation.core.trip.session {
 
   public final class LocationMatcherResult {
     method public android.location.Location getEnhancedLocation();
+    method public boolean getInTunnel();
     method public java.util.List<android.location.Location> getKeyPoints();
     method public float getOffRoadProbability();
     method public com.mapbox.navigation.base.road.model.Road getRoad();
@@ -935,6 +936,7 @@ package com.mapbox.navigation.core.trip.session {
     method public boolean isOffRoad();
     method public boolean isTeleport();
     property public final android.location.Location enhancedLocation;
+    property public final boolean inTunnel;
     property public final boolean isDegradedMapMatching;
     property public final boolean isOffRoad;
     property public final boolean isTeleport;

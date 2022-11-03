@@ -264,7 +264,8 @@ internal fun TripStatus.getLocationMatcherResult(
         navigationStatus.mapMatcherOutput.matches.firstOrNull()?.proba ?: 0f,
         navigationStatus.layer,
         road,
-        navigationStatus.isFallback
+        navigationStatus.isFallback,
+        navigationStatus.inTunnel,
     )
 }
 
