@@ -4,6 +4,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.9.0-rc.2 - 03 November, 2022
+### Changelog
+[Changes between v2.9.0-rc.1 and v2.9.0-rc.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0-rc.1...v2.9.0-rc.2)
+
+#### Features
 - Added `ComponentInstaller` for the `TripProgressComponent` that offers simplified integration of the `MapboxTripProgressView` and `MapboxTripProgressApi`. [#6513](https://github.com/mapbox/mapbox-navigation-android/pull/6513)
 - Introduced new `ViewOptionsCustomization` options that allows showing/hiding of various `NavigationView` subviews. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
   - `ViewOptionsCustomization.showManeuver` can be used to show/hide the maneuver view. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
@@ -36,6 +43,15 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue with `NavigationView` that caused road label position to not update in some cases. [#6538](https://github.com/mapbox/mapbox-navigation-android/pull/6538)
 - Slightly improved performance of updates to the traveled portion of the route in MapboxRouteLineView. [#6528](https://github.com/mapbox/mapbox-navigation-android/pull/6528)
 - Fixed a problem with custom route line layer scaling not getting applied to the correct layer(s) when switching between routes. [#6544](https://github.com/mapbox/mapbox-navigation-android/pull/6544)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.9.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0))
+- Mapbox Navigation Native `v119.0.0`
+- Mapbox Core Common `v23.1.1`
+- Mapbox Java `v6.9.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.9.0-beta.2))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
 
 ## Mapbox Navigation SDK 2.9.0-rc.1 - 28 October, 2022
 ### Changelog
