@@ -34,6 +34,7 @@ Mapbox welcomes participation and contributions from everyone.
   - The `MapboxExtendableButtonParams` class has been removed. Any action button placement adjustments must be done via custom `ActionButtonsBinder` implementation. [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
 - Fixed an issue with `NavigationView` that caused road label position to not update in some cases. [#6538](https://github.com/mapbox/mapbox-navigation-android/pull/6538)
 - Slightly improved performance of updates to the traveled portion of the route in MapboxRouteLineView. [#6528](https://github.com/mapbox/mapbox-navigation-android/pull/6528)
+- Fixed a problem with custom route line layer scaling not getting applied to the correct layer(s) when switching between routes. [#6544](https://github.com/mapbox/mapbox-navigation-android/pull/6544)
 
 ## Mapbox Navigation SDK 2.9.0-rc.1 - 28 October, 2022
 ### Changelog
