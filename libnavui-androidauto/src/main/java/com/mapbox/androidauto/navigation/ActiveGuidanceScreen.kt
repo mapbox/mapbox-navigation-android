@@ -37,7 +37,7 @@ internal class ActiveGuidanceScreen constructor(
         initialCarCameraMode = CarCameraMode.FOLLOWING,
         alternativeCarCameraMode = CarCameraMode.OVERVIEW,
     )
-    private val roadLabelSurfaceLayer = RoadLabelSurfaceLayer(carContext)
+    private val roadLabelSurfaceLayer = RoadLabelSurfaceLayer()
     private val navigationInfoProvider = CarNavigationInfoProvider()
         .invalidateOnChange(this)
     private val carActiveGuidanceMarkers = CarActiveGuidanceMarkers()

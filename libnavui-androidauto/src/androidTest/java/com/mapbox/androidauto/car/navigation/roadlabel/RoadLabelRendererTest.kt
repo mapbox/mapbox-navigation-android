@@ -40,12 +40,13 @@ class RoadLabelRendererTest {
         "test_road_label_images"
     )
 
-    private val roadLabelBitmapRenderer =
-        RoadLabelRenderer(InstrumentationRegistry.getInstrumentation().context.resources)
+    private val roadLabelBitmapRenderer = RoadLabelRenderer()
+    private val resources = InstrumentationRegistry.getInstrumentation().context.resources
 
     @Test
     fun street_with_name() {
         val bitmap = roadLabelBitmapRenderer.render(
+            resources,
             createRoad("Pennsylvania Avenue"),
             emptyList(),
             RoadLabelOptions.Builder()
@@ -59,6 +60,7 @@ class RoadLabelRendererTest {
     @Test
     fun street_with_numbers() {
         val bitmap = roadLabelBitmapRenderer.render(
+            resources,
             createRoad("11th Street"),
             emptyList(),
             RoadLabelOptions.Builder()
@@ -72,6 +74,7 @@ class RoadLabelRendererTest {
     @Test
     fun very_long_street_name() {
         val bitmap = roadLabelBitmapRenderer.render(
+            resources,
             createRoad(
                 "Taumatawhakatangihangakoauauotamateaturipukakapikimaungahoronukupokaiwhen" +
                     "uakitanatahu"
@@ -88,6 +91,7 @@ class RoadLabelRendererTest {
     @Test
     fun blue_label_without_shadow() {
         val bitmap = roadLabelBitmapRenderer.render(
+            resources,
             createRoad("Eu Tong Sen Street"),
             emptyList(),
             RoadLabelOptions.Builder()
@@ -106,6 +110,7 @@ class RoadLabelRendererTest {
         val byteArray = context.assets.open("shield.svg").use { it.readBytes() }
         val mapboxShield = mockk<MapboxShield>()
         val bitmap = roadLabelBitmapRenderer.render(
+            resources,
             listOf(
                 createComponent("Clarksburg Road"),
                 createComponent("/"),

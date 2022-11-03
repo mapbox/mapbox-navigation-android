@@ -488,12 +488,12 @@ package com.mapbox.androidauto.navigation.roadlabel {
   }
 
   public final class RoadLabelRenderer {
-    ctor public RoadLabelRenderer(android.content.res.Resources resources);
-    method public android.graphics.Bitmap? render(java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> road, java.util.List<? extends com.mapbox.navigation.ui.shield.model.RouteShield> shields, com.mapbox.androidauto.navigation.roadlabel.RoadLabelOptions options = RoadLabelOptions.default);
+    ctor public RoadLabelRenderer();
+    method public android.graphics.Bitmap? render(android.content.res.Resources resources, java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> road, java.util.List<? extends com.mapbox.navigation.ui.shield.model.RouteShield> shields, com.mapbox.androidauto.navigation.roadlabel.RoadLabelOptions options = RoadLabelOptions.default);
   }
 
   public final class RoadLabelSurfaceLayer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
-    ctor public RoadLabelSurfaceLayer(androidx.car.app.CarContext carContext);
+    ctor public RoadLabelSurfaceLayer();
   }
 
   public abstract class RoadNameObserver implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {

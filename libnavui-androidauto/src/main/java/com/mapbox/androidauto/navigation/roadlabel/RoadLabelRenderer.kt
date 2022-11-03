@@ -12,19 +12,20 @@ import kotlin.math.roundToInt
 /**
  * This class will a road name and create a bitmap that fits the text.
  */
-class RoadLabelRenderer(private val resources: Resources) {
+class RoadLabelRenderer {
 
     /**
      * Render [road] and [shields] to a [Bitmap]
      */
     fun render(
+        resources: Resources,
         road: List<RoadComponent>,
         shields: List<RouteShield>,
         options: RoadLabelOptions = RoadLabelOptions.default
     ): Bitmap? {
         if (road.isEmpty()) return null
         textPaint.color = options.textColor
-        val components = measureRoadLabel(road, shields)
+        val components = measureRoadLabel(resources, road, shields)
         val spaceWidth = textPaint.measureText(" ").roundToInt()
         val width = components.sumOf { component ->
             when (component) {
@@ -54,17 +55,22 @@ class RoadLabelRenderer(private val resources: Resources) {
     }
 
     private fun measureRoadLabel(
+        resources: Resources,
         road: List<RoadComponent>,
         shields: List<RouteShield>
     ): List<Component> {
         return road.map { component ->
-            getShieldBitmap(component, shields)
+            getShieldBitmap(resources, component, shields)
                 ?.let { Component.Shield(it) }
                 ?: Component.Text(component.text, getTextBounds(component.text))
         }
     }
 
-    private fun getShieldBitmap(component: RoadComponent, shields: List<RouteShield>): Bitmap? {
+    private fun getShieldBitmap(
+        resources: Resources,
+        component: RoadComponent,
+        shields: List<RouteShield>,
+    ): Bitmap? {
         val shield = component.shield?.let { shield ->
             shields.find { it is RouteShield.MapboxDesignedShield && it.compareWith(shield) }
         } ?: component.imageBaseUrl?.let { baseUrl ->
